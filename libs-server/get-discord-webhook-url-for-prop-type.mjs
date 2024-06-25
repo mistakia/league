@@ -1,57 +1,57 @@
 import config from '#config'
-import { constants } from '#libs-shared'
+import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 
 export default function (prop_type) {
   switch (prop_type) {
-    case constants.player_prop_types.GAME_PASSING_YARDS:
+    case player_prop_types.GAME_PASSING_YARDS:
       return config.discord_props_open_passing_yards_channel_webhook_url
 
-    case constants.player_prop_types.GAME_RECEIVING_YARDS:
+    case player_prop_types.GAME_RECEIVING_YARDS:
       return config.discord_props_open_receiving_yards_channel_webhook_url
 
-    case constants.player_prop_types.GAME_RUSHING_YARDS:
+    case player_prop_types.GAME_RUSHING_YARDS:
       return config.discord_props_open_rushing_yards_channel_webhook_url
 
-    case constants.player_prop_types.GAME_PASSING_COMPLETIONS:
+    case player_prop_types.GAME_PASSING_COMPLETIONS:
       return config.discord_props_open_passing_completions_channel_webhook_url
 
-    case constants.player_prop_types.GAME_PASSING_TOUCHDOWNS:
+    case player_prop_types.GAME_PASSING_TOUCHDOWNS:
       return config.discord_props_open_passing_touchdowns_channel_webhook_url
 
-    case constants.player_prop_types.GAME_RECEPTIONS:
+    case player_prop_types.GAME_RECEPTIONS:
       return config.discord_props_open_receptions_channel_webhook_url
 
-    case constants.player_prop_types.GAME_PASSING_INTERCEPTIONS:
+    case player_prop_types.GAME_PASSING_INTERCEPTIONS:
       return config.discord_props_open_passing_interceptions_channel_webhook_url
 
-    case constants.player_prop_types.GAME_RUSHING_ATTEMPTS:
+    case player_prop_types.GAME_RUSHING_ATTEMPTS:
       return config.discord_props_open_rushing_attempts_channel_webhook_url
 
-    case constants.player_prop_types.GAME_RUSHING_RECEIVING_YARDS:
+    case player_prop_types.GAME_RUSHING_RECEIVING_YARDS:
       return config.discord_props_open_rushing_receiving_yards_channel_webhook_url
 
-    case constants.player_prop_types.GAME_RECEIVING_TOUCHDOWNS:
+    case player_prop_types.GAME_RECEIVING_TOUCHDOWNS:
       return config.discord_props_open_receiving_touchdowns_channel_webhook_url
 
-    case constants.player_prop_types.GAME_RUSHING_TOUCHDOWNS:
+    case player_prop_types.GAME_RUSHING_TOUCHDOWNS:
       return config.discord_props_open_rushing_touchdowns_channel_webhook_url
 
-    case constants.player_prop_types.GAME_PASSING_ATTEMPTS:
+    case player_prop_types.GAME_PASSING_ATTEMPTS:
       return config.discord_props_open_passing_attempts_channel_webhook_url
 
-    case constants.player_prop_types.GAME_PASSING_LONGEST_COMPLETION:
+    case player_prop_types.GAME_PASSING_LONGEST_COMPLETION:
       return config.discord_props_open_longest_completion_channel_webhook_url
 
-    case constants.player_prop_types.GAME_LONGEST_RECEPTION:
+    case player_prop_types.GAME_LONGEST_RECEPTION:
       return config.discord_props_open_longest_reception_channel_webhook_url
 
-    case constants.player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS:
+    case player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS:
       return config.discord_props_open_rushing_receiving_touchdowns_channel_webhook_url
 
-    case constants.player_prop_types.GAME_LONGEST_RUSH:
+    case player_prop_types.GAME_LONGEST_RUSH:
       return config.discord_props_open_longest_rush_channel_webhook_url
 
-    case constants.player_prop_types.GAME_TACKLES_ASSISTS:
+    case player_prop_types.GAME_TACKLES_ASSISTS:
       return config.discord_props_open_tackles_assists_channel_webhook_url
 
     default:

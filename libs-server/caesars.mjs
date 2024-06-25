@@ -2,27 +2,25 @@ import fetch from 'node-fetch'
 import debug from 'debug'
 
 import config from '#config'
-import { constants } from '#libs-shared'
+import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 
 const log = debug('caesars')
 debug.enable('caesars')
 
 export const markets = {
-  PASSING_TOUCHDOWNS: constants.player_prop_types.GAME_PASSING_TOUCHDOWNS,
-  PASSING_YARDS: constants.player_prop_types.GAME_PASSING_YARDS,
-  INTERCEPTIONS: constants.player_prop_types.GAME_PASSING_INTERCEPTIONS,
-  PASSING_COMPLETIONS: constants.player_prop_types.GAME_PASSING_COMPLETIONS,
-  PASSING_ATTEMPTS: constants.player_prop_types.GAME_PASSING_ATTEMPTS,
-  LONGEST_PASSING_COMPLETION:
-    constants.player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
-  RUSHING_YARDS: constants.player_prop_types.GAME_RUSHING_YARDS,
-  RUSHING_ATTEMPTS: constants.player_prop_types.GAME_RUSHING_ATTEMPTS,
-  RUSHING_RECEIVING_YARDS:
-    constants.player_prop_types.GAME_RUSHING_RECEIVING_YARDS,
-  RECEPTIONS: constants.player_prop_types.GAME_RECEPTIONS,
-  RECEIVING_YARDS: constants.player_prop_types.GAME_RECEIVING_YARDS,
-  LONGEST_RECEPTION: constants.player_prop_types.GAME_LONGEST_RECEPTION,
-  TACKLES_ASSISTS: constants.player_prop_types.GAME_TACKLES_ASSISTS
+  PASSING_TOUCHDOWNS: player_prop_types.GAME_PASSING_TOUCHDOWNS,
+  PASSING_YARDS: player_prop_types.GAME_PASSING_YARDS,
+  INTERCEPTIONS: player_prop_types.GAME_PASSING_INTERCEPTIONS,
+  PASSING_COMPLETIONS: player_prop_types.GAME_PASSING_COMPLETIONS,
+  PASSING_ATTEMPTS: player_prop_types.GAME_PASSING_ATTEMPTS,
+  LONGEST_PASSING_COMPLETION: player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
+  RUSHING_YARDS: player_prop_types.GAME_RUSHING_YARDS,
+  RUSHING_ATTEMPTS: player_prop_types.GAME_RUSHING_ATTEMPTS,
+  RUSHING_RECEIVING_YARDS: player_prop_types.GAME_RUSHING_RECEIVING_YARDS,
+  RECEPTIONS: player_prop_types.GAME_RECEPTIONS,
+  RECEIVING_YARDS: player_prop_types.GAME_RECEIVING_YARDS,
+  LONGEST_RECEPTION: player_prop_types.GAME_LONGEST_RECEPTION,
+  TACKLES_ASSISTS: player_prop_types.GAME_TACKLES_ASSISTS
 }
 
 // TODO - FIND MISSING

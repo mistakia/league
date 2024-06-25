@@ -4,7 +4,8 @@ import dayjs from 'dayjs'
 import debug from 'debug'
 
 import config from '#config'
-import { constants, fixTeam } from '#libs-shared'
+import { fixTeam } from '#libs-shared'
+import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 import { wait } from './wait.mjs'
 
 const log = debug('fanduel')
@@ -21,257 +22,203 @@ export const tabs = [
 ]
 
 export const leader_market_names = {
-  'Most Passing Yards of Game':
-    constants.player_prop_types.GAME_LEADER_PASSING_YARDS,
-  'Most Receiving Yards of Game':
-    constants.player_prop_types.GAME_LEADER_RECEIVING_YARDS,
-  'Most Rushing Yards of Game':
-    constants.player_prop_types.GAME_LEADER_RUSHING_YARDS,
+  'Most Passing Yards of Game': player_prop_types.GAME_LEADER_PASSING_YARDS,
+  'Most Receiving Yards of Game': player_prop_types.GAME_LEADER_RECEIVING_YARDS,
+  'Most Rushing Yards of Game': player_prop_types.GAME_LEADER_RUSHING_YARDS,
 
   'Most Passing Yards - Sunday Only':
-    constants.player_prop_types.SUNDAY_LEADER_PASSING_YARDS,
+    player_prop_types.SUNDAY_LEADER_PASSING_YARDS,
   'Most Receiving Yards - Sunday Only':
-    constants.player_prop_types.SUNDAY_LEADER_RECEIVING_YARDS,
+    player_prop_types.SUNDAY_LEADER_RECEIVING_YARDS,
   'Most Rushing Yards - Sunday Only':
-    constants.player_prop_types.SUNDAY_LEADER_RUSHING_YARDS
+    player_prop_types.SUNDAY_LEADER_RUSHING_YARDS
 }
 
 export const alt_line_markets = {
-  'PLAYER_A_-_ALT_PASSING_YARDS':
-    constants.player_prop_types.GAME_ALT_PASSING_YARDS,
-  'PLAYER_B_-_ALT_PASSING_YARDS':
-    constants.player_prop_types.GAME_ALT_PASSING_YARDS,
-  'PLAYER_C_-_ALT_PASSING_YARDS':
-    constants.player_prop_types.GAME_ALT_PASSING_YARDS,
-  'PLAYER_D_-_ALT_PASSING_YARDS':
-    constants.player_prop_types.GAME_ALT_PASSING_YARDS,
+  'PLAYER_A_-_ALT_PASSING_YARDS': player_prop_types.GAME_ALT_PASSING_YARDS,
+  'PLAYER_B_-_ALT_PASSING_YARDS': player_prop_types.GAME_ALT_PASSING_YARDS,
+  'PLAYER_C_-_ALT_PASSING_YARDS': player_prop_types.GAME_ALT_PASSING_YARDS,
+  'PLAYER_D_-_ALT_PASSING_YARDS': player_prop_types.GAME_ALT_PASSING_YARDS,
 
-  'PLAYER_A_-_ALT_RUSH_YARDS':
-    constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
-  'PLAYER_B_-_ALT_RUSH_YARDS':
-    constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
-  'PLAYER_C_-_ALT_RUSH_YARDS':
-    constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
-  'PLAYER_D_-_ALT_RUSH_YARDS':
-    constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
-  'PLAYER_E_-_ALT_RUSH_YARDS':
-    constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
-  'PLAYER_F_-_ALT_RUSH_YARDS':
-    constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
-  'PLAYER_G_-_ALT_RUSH_YARDS':
-    constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
-  'PLAYER_H_-_ALT_RUSH_YARDS':
-    constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
-  'PLAYER_I_-_ALT_RUSH_YARDS':
-    constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
-  'PLAYER_J_-_ALT_RUSH_YARDS':
-    constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
-  'PLAYER_K_-_ALT_RUSH_YARDS':
-    constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
-  'PLAYER_L_-_ALT_RUSH_YARDS':
-    constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
-  'PLAYER_M_-_ALT_RUSH_YARDS':
-    constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
+  'PLAYER_A_-_ALT_RUSH_YARDS': player_prop_types.GAME_ALT_RUSHING_YARDS,
+  'PLAYER_B_-_ALT_RUSH_YARDS': player_prop_types.GAME_ALT_RUSHING_YARDS,
+  'PLAYER_C_-_ALT_RUSH_YARDS': player_prop_types.GAME_ALT_RUSHING_YARDS,
+  'PLAYER_D_-_ALT_RUSH_YARDS': player_prop_types.GAME_ALT_RUSHING_YARDS,
+  'PLAYER_E_-_ALT_RUSH_YARDS': player_prop_types.GAME_ALT_RUSHING_YARDS,
+  'PLAYER_F_-_ALT_RUSH_YARDS': player_prop_types.GAME_ALT_RUSHING_YARDS,
+  'PLAYER_G_-_ALT_RUSH_YARDS': player_prop_types.GAME_ALT_RUSHING_YARDS,
+  'PLAYER_H_-_ALT_RUSH_YARDS': player_prop_types.GAME_ALT_RUSHING_YARDS,
+  'PLAYER_I_-_ALT_RUSH_YARDS': player_prop_types.GAME_ALT_RUSHING_YARDS,
+  'PLAYER_J_-_ALT_RUSH_YARDS': player_prop_types.GAME_ALT_RUSHING_YARDS,
+  'PLAYER_K_-_ALT_RUSH_YARDS': player_prop_types.GAME_ALT_RUSHING_YARDS,
+  'PLAYER_L_-_ALT_RUSH_YARDS': player_prop_types.GAME_ALT_RUSHING_YARDS,
+  'PLAYER_M_-_ALT_RUSH_YARDS': player_prop_types.GAME_ALT_RUSHING_YARDS,
 
-  'PLAYER_A_-_ALT_RECEIVING_YARDS':
-    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
-  'PLAYER_B_-_ALT_RECEIVING_YARDS':
-    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
-  'PLAYER_C_-_ALT_RECEIVING_YARDS':
-    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
-  'PLAYER_D_-_ALT_RECEIVING_YARDS':
-    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
-  'PLAYER_E_-_ALT_RECEIVING_YARDS':
-    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
-  'PLAYER_F_-_ALT_RECEIVING_YARDS':
-    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
-  'PLAYER_G_-_ALT_RECEIVING_YARDS':
-    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
-  'PLAYER_H_-_ALT_RECEIVING_YARDS':
-    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
-  'PLAYER_I_-_ALT_RECEIVING_YARDS':
-    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
-  'PLAYER_J_-_ALT_RECEIVING_YARDS':
-    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
-  'PLAYER_K_-_ALT_RECEIVING_YARDS':
-    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
-  'PLAYER_L_-_ALT_RECEIVING_YARDS':
-    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
-  'PLAYER_M_-_ALT_RECEIVING_YARDS':
-    constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
+  'PLAYER_A_-_ALT_RECEIVING_YARDS': player_prop_types.GAME_ALT_RECEIVING_YARDS,
+  'PLAYER_B_-_ALT_RECEIVING_YARDS': player_prop_types.GAME_ALT_RECEIVING_YARDS,
+  'PLAYER_C_-_ALT_RECEIVING_YARDS': player_prop_types.GAME_ALT_RECEIVING_YARDS,
+  'PLAYER_D_-_ALT_RECEIVING_YARDS': player_prop_types.GAME_ALT_RECEIVING_YARDS,
+  'PLAYER_E_-_ALT_RECEIVING_YARDS': player_prop_types.GAME_ALT_RECEIVING_YARDS,
+  'PLAYER_F_-_ALT_RECEIVING_YARDS': player_prop_types.GAME_ALT_RECEIVING_YARDS,
+  'PLAYER_G_-_ALT_RECEIVING_YARDS': player_prop_types.GAME_ALT_RECEIVING_YARDS,
+  'PLAYER_H_-_ALT_RECEIVING_YARDS': player_prop_types.GAME_ALT_RECEIVING_YARDS,
+  'PLAYER_I_-_ALT_RECEIVING_YARDS': player_prop_types.GAME_ALT_RECEIVING_YARDS,
+  'PLAYER_J_-_ALT_RECEIVING_YARDS': player_prop_types.GAME_ALT_RECEIVING_YARDS,
+  'PLAYER_K_-_ALT_RECEIVING_YARDS': player_prop_types.GAME_ALT_RECEIVING_YARDS,
+  'PLAYER_L_-_ALT_RECEIVING_YARDS': player_prop_types.GAME_ALT_RECEIVING_YARDS,
+  'PLAYER_M_-_ALT_RECEIVING_YARDS': player_prop_types.GAME_ALT_RECEIVING_YARDS,
 
-  'PLAYER_A_-_ALT_RECEPTIONS': constants.player_prop_types.GAME_ALT_RECEPTIONS,
-  'PLAYER_B_-_ALT_RECEPTIONS': constants.player_prop_types.GAME_ALT_RECEPTIONS,
-  'PLAYER_C_-_ALT_RECEPTIONS': constants.player_prop_types.GAME_ALT_RECEPTIONS,
-  'PLAYER_D_-_ALT_RECEPTIONS': constants.player_prop_types.GAME_ALT_RECEPTIONS,
-  'PLAYER_E_-_ALT_RECEPTIONS': constants.player_prop_types.GAME_ALT_RECEPTIONS,
-  'PLAYER_F_-_ALT_RECEPTIONS': constants.player_prop_types.GAME_ALT_RECEPTIONS,
-  'PLAYER_G_-_ALT_RECEPTIONS': constants.player_prop_types.GAME_ALT_RECEPTIONS,
-  'PLAYER_H_-_ALT_RECEPTIONS': constants.player_prop_types.GAME_ALT_RECEPTIONS,
-  'PLAYER_I_-_ALT_RECEPTIONS': constants.player_prop_types.GAME_ALT_RECEPTIONS,
-  'PLAYER_J_-_ALT_RECEPTIONS': constants.player_prop_types.GAME_ALT_RECEPTIONS,
-  'PLAYER_K_-_ALT_RECEPTIONS': constants.player_prop_types.GAME_ALT_RECEPTIONS,
-  'PLAYER_L_-_ALT_RECEPTIONS': constants.player_prop_types.GAME_ALT_RECEPTIONS,
-  'PLAYER_M_-_ALT_RECEPTIONS': constants.player_prop_types.GAME_ALT_RECEPTIONS
+  'PLAYER_A_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS,
+  'PLAYER_B_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS,
+  'PLAYER_C_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS,
+  'PLAYER_D_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS,
+  'PLAYER_E_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS,
+  'PLAYER_F_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS,
+  'PLAYER_G_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS,
+  'PLAYER_H_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS,
+  'PLAYER_I_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS,
+  'PLAYER_J_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS,
+  'PLAYER_K_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS,
+  'PLAYER_L_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS,
+  'PLAYER_M_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS
 }
 
 export const leader_markets = {
-  MOST_PASSING_YARDS: constants.player_prop_types.GAME_LEADER_PASSING_YARDS,
-  MOST_RECEIVING_YARDS: constants.player_prop_types.GAME_LEADER_RECEIVING_YARDS,
-  MOST_RUSHING_YARDS: constants.player_prop_types.GAME_LEADER_RUSHING_YARDS
+  MOST_PASSING_YARDS: player_prop_types.GAME_LEADER_PASSING_YARDS,
+  MOST_RECEIVING_YARDS: player_prop_types.GAME_LEADER_RECEIVING_YARDS,
+  MOST_RUSHING_YARDS: player_prop_types.GAME_LEADER_RUSHING_YARDS
 }
 
 export const markets = {
-  PLAYER_A_TOTAL_PASSING_YARDS: constants.player_prop_types.GAME_PASSING_YARDS,
-  PLAYER_B_TOTAL_PASSING_YARDS: constants.player_prop_types.GAME_PASSING_YARDS,
+  PLAYER_A_TOTAL_PASSING_YARDS: player_prop_types.GAME_PASSING_YARDS,
+  PLAYER_B_TOTAL_PASSING_YARDS: player_prop_types.GAME_PASSING_YARDS,
 
   PLAYER_A_LONGEST_PASS_COMPLETION:
-    constants.player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
+    player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
   PLAYER_B_LONGEST_PASS_COMPLETION:
-    constants.player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
+    player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
   PLAYER_C_LONGEST_PASS_COMPLETION:
-    constants.player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
+    player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
 
-  PLAYER_A_PASS_ATTEMPTS: constants.player_prop_types.GAME_PASSING_ATTEMPTS,
-  PLAYER_B_PASS_ATTEMPTS: constants.player_prop_types.GAME_PASSING_ATTEMPTS,
-  PLAYER_C_PASS_ATTEMPTS: constants.player_prop_types.GAME_PASSING_ATTEMPTS,
+  PLAYER_A_PASS_ATTEMPTS: player_prop_types.GAME_PASSING_ATTEMPTS,
+  PLAYER_B_PASS_ATTEMPTS: player_prop_types.GAME_PASSING_ATTEMPTS,
+  PLAYER_C_PASS_ATTEMPTS: player_prop_types.GAME_PASSING_ATTEMPTS,
 
-  PLAYER_A_TOTAL_PASSING_TOUCHDOWNS:
-    constants.player_prop_types.GAME_PASSING_TOUCHDOWNS,
-  PLAYER_B_TOTAL_PASSING_TOUCHDOWNS:
-    constants.player_prop_types.GAME_PASSING_TOUCHDOWNS,
+  PLAYER_A_TOTAL_PASSING_TOUCHDOWNS: player_prop_types.GAME_PASSING_TOUCHDOWNS,
+  PLAYER_B_TOTAL_PASSING_TOUCHDOWNS: player_prop_types.GAME_PASSING_TOUCHDOWNS,
 
-  PLAYER_A_TOTAL_RECEIVING_YARDS:
-    constants.player_prop_types.GAME_RECEIVING_YARDS,
-  PLAYER_B_TOTAL_RECEIVING_YARDS:
-    constants.player_prop_types.GAME_RECEIVING_YARDS,
-  PLAYER_C_TOTAL_RECEIVING_YARDS:
-    constants.player_prop_types.GAME_RECEIVING_YARDS,
-  PLAYER_D_TOTAL_RECEIVING_YARDS:
-    constants.player_prop_types.GAME_RECEIVING_YARDS,
-  PLAYER_E_TOTAL_RECEIVING_YARDS:
-    constants.player_prop_types.GAME_RECEIVING_YARDS,
-  PLAYER_F_TOTAL_RECEIVING_YARDS:
-    constants.player_prop_types.GAME_RECEIVING_YARDS,
-  PLAYER_G_TOTAL_RECEIVING_YARDS:
-    constants.player_prop_types.GAME_RECEIVING_YARDS,
-  PLAYER_H_TOTAL_RECEIVING_YARDS:
-    constants.player_prop_types.GAME_RECEIVING_YARDS,
-  PLAYER_I_TOTAL_RECEIVING_YARDS:
-    constants.player_prop_types.GAME_RECEIVING_YARDS,
-  PLAYER_J_TOTAL_RECEIVING_YARDS:
-    constants.player_prop_types.GAME_RECEIVING_YARDS,
-  PLAYER_K_TOTAL_RECEIVING_YARDS:
-    constants.player_prop_types.GAME_RECEIVING_YARDS,
-  PLAYER_L_TOTAL_RECEIVING_YARDS:
-    constants.player_prop_types.GAME_RECEIVING_YARDS,
-  PLAYER_M_TOTAL_RECEIVING_YARDS:
-    constants.player_prop_types.GAME_RECEIVING_YARDS,
+  PLAYER_A_TOTAL_RECEIVING_YARDS: player_prop_types.GAME_RECEIVING_YARDS,
+  PLAYER_B_TOTAL_RECEIVING_YARDS: player_prop_types.GAME_RECEIVING_YARDS,
+  PLAYER_C_TOTAL_RECEIVING_YARDS: player_prop_types.GAME_RECEIVING_YARDS,
+  PLAYER_D_TOTAL_RECEIVING_YARDS: player_prop_types.GAME_RECEIVING_YARDS,
+  PLAYER_E_TOTAL_RECEIVING_YARDS: player_prop_types.GAME_RECEIVING_YARDS,
+  PLAYER_F_TOTAL_RECEIVING_YARDS: player_prop_types.GAME_RECEIVING_YARDS,
+  PLAYER_G_TOTAL_RECEIVING_YARDS: player_prop_types.GAME_RECEIVING_YARDS,
+  PLAYER_H_TOTAL_RECEIVING_YARDS: player_prop_types.GAME_RECEIVING_YARDS,
+  PLAYER_I_TOTAL_RECEIVING_YARDS: player_prop_types.GAME_RECEIVING_YARDS,
+  PLAYER_J_TOTAL_RECEIVING_YARDS: player_prop_types.GAME_RECEIVING_YARDS,
+  PLAYER_K_TOTAL_RECEIVING_YARDS: player_prop_types.GAME_RECEIVING_YARDS,
+  PLAYER_L_TOTAL_RECEIVING_YARDS: player_prop_types.GAME_RECEIVING_YARDS,
+  PLAYER_M_TOTAL_RECEIVING_YARDS: player_prop_types.GAME_RECEIVING_YARDS,
 
-  PLAYER_A_TOTAL_RECEPTIONS: constants.player_prop_types.GAME_RECEPTIONS,
-  PLAYER_B_TOTAL_RECEPTIONS: constants.player_prop_types.GAME_RECEPTIONS,
-  PLAYER_C_TOTAL_RECEPTIONS: constants.player_prop_types.GAME_RECEPTIONS,
-  PLAYER_D_TOTAL_RECEPTIONS: constants.player_prop_types.GAME_RECEPTIONS,
-  PLAYER_E_TOTAL_RECEPTIONS: constants.player_prop_types.GAME_RECEPTIONS,
-  PLAYER_F_TOTAL_RECEPTIONS: constants.player_prop_types.GAME_RECEPTIONS,
-  PLAYER_G_TOTAL_RECEPTIONS: constants.player_prop_types.GAME_RECEPTIONS,
-  PLAYER_H_TOTAL_RECEPTIONS: constants.player_prop_types.GAME_RECEPTIONS,
-  PLAYER_I_TOTAL_RECEPTIONS: constants.player_prop_types.GAME_RECEPTIONS,
-  PLAYER_J_TOTAL_RECEPTIONS: constants.player_prop_types.GAME_RECEPTIONS,
-  PLAYER_K_TOTAL_RECEPTIONS: constants.player_prop_types.GAME_RECEPTIONS,
-  PLAYER_L_TOTAL_RECEPTIONS: constants.player_prop_types.GAME_RECEPTIONS,
-  PLAYER_M_TOTAL_RECEPTIONS: constants.player_prop_types.GAME_RECEPTIONS,
+  PLAYER_A_TOTAL_RECEPTIONS: player_prop_types.GAME_RECEPTIONS,
+  PLAYER_B_TOTAL_RECEPTIONS: player_prop_types.GAME_RECEPTIONS,
+  PLAYER_C_TOTAL_RECEPTIONS: player_prop_types.GAME_RECEPTIONS,
+  PLAYER_D_TOTAL_RECEPTIONS: player_prop_types.GAME_RECEPTIONS,
+  PLAYER_E_TOTAL_RECEPTIONS: player_prop_types.GAME_RECEPTIONS,
+  PLAYER_F_TOTAL_RECEPTIONS: player_prop_types.GAME_RECEPTIONS,
+  PLAYER_G_TOTAL_RECEPTIONS: player_prop_types.GAME_RECEPTIONS,
+  PLAYER_H_TOTAL_RECEPTIONS: player_prop_types.GAME_RECEPTIONS,
+  PLAYER_I_TOTAL_RECEPTIONS: player_prop_types.GAME_RECEPTIONS,
+  PLAYER_J_TOTAL_RECEPTIONS: player_prop_types.GAME_RECEPTIONS,
+  PLAYER_K_TOTAL_RECEPTIONS: player_prop_types.GAME_RECEPTIONS,
+  PLAYER_L_TOTAL_RECEPTIONS: player_prop_types.GAME_RECEPTIONS,
+  PLAYER_M_TOTAL_RECEPTIONS: player_prop_types.GAME_RECEPTIONS,
 
-  PLAYER_A_LONGEST_RECEPTION:
-    constants.player_prop_types.GAME_LONGEST_RECEPTION,
-  PLAYER_B_LONGEST_RECEPTION:
-    constants.player_prop_types.GAME_LONGEST_RECEPTION,
-  PLAYER_C_LONGEST_RECEPTION:
-    constants.player_prop_types.GAME_LONGEST_RECEPTION,
-  PLAYER_D_LONGEST_RECEPTION:
-    constants.player_prop_types.GAME_LONGEST_RECEPTION,
-  PLAYER_E_LONGEST_RECEPTION:
-    constants.player_prop_types.GAME_LONGEST_RECEPTION,
-  PLAYER_F_LONGEST_RECEPTION:
-    constants.player_prop_types.GAME_LONGEST_RECEPTION,
-  PLAYER_G_LONGEST_RECEPTION:
-    constants.player_prop_types.GAME_LONGEST_RECEPTION,
-  PLAYER_H_LONGEST_RECEPTION:
-    constants.player_prop_types.GAME_LONGEST_RECEPTION,
-  PLAYER_I_LONGEST_RECEPTION:
-    constants.player_prop_types.GAME_LONGEST_RECEPTION,
-  PLAYER_J_LONGEST_RECEPTION:
-    constants.player_prop_types.GAME_LONGEST_RECEPTION,
-  PLAYER_K_LONGEST_RECEPTION:
-    constants.player_prop_types.GAME_LONGEST_RECEPTION,
-  PLAYER_L_LONGEST_RECEPTION:
-    constants.player_prop_types.GAME_LONGEST_RECEPTION,
-  PLAYER_M_LONGEST_RECEPTION:
-    constants.player_prop_types.GAME_LONGEST_RECEPTION,
+  PLAYER_A_LONGEST_RECEPTION: player_prop_types.GAME_LONGEST_RECEPTION,
+  PLAYER_B_LONGEST_RECEPTION: player_prop_types.GAME_LONGEST_RECEPTION,
+  PLAYER_C_LONGEST_RECEPTION: player_prop_types.GAME_LONGEST_RECEPTION,
+  PLAYER_D_LONGEST_RECEPTION: player_prop_types.GAME_LONGEST_RECEPTION,
+  PLAYER_E_LONGEST_RECEPTION: player_prop_types.GAME_LONGEST_RECEPTION,
+  PLAYER_F_LONGEST_RECEPTION: player_prop_types.GAME_LONGEST_RECEPTION,
+  PLAYER_G_LONGEST_RECEPTION: player_prop_types.GAME_LONGEST_RECEPTION,
+  PLAYER_H_LONGEST_RECEPTION: player_prop_types.GAME_LONGEST_RECEPTION,
+  PLAYER_I_LONGEST_RECEPTION: player_prop_types.GAME_LONGEST_RECEPTION,
+  PLAYER_J_LONGEST_RECEPTION: player_prop_types.GAME_LONGEST_RECEPTION,
+  PLAYER_K_LONGEST_RECEPTION: player_prop_types.GAME_LONGEST_RECEPTION,
+  PLAYER_L_LONGEST_RECEPTION: player_prop_types.GAME_LONGEST_RECEPTION,
+  PLAYER_M_LONGEST_RECEPTION: player_prop_types.GAME_LONGEST_RECEPTION,
 
-  PLAYER_A_TOTAL_RUSHING_YARDS: constants.player_prop_types.GAME_RUSHING_YARDS,
-  PLAYER_B_TOTAL_RUSHING_YARDS: constants.player_prop_types.GAME_RUSHING_YARDS,
-  PLAYER_C_TOTAL_RUSHING_YARDS: constants.player_prop_types.GAME_RUSHING_YARDS,
-  PLAYER_D_TOTAL_RUSHING_YARDS: constants.player_prop_types.GAME_RUSHING_YARDS,
-  PLAYER_E_TOTAL_RUSHING_YARDS: constants.player_prop_types.GAME_RUSHING_YARDS,
-  PLAYER_F_TOTAL_RUSHING_YARDS: constants.player_prop_types.GAME_RUSHING_YARDS,
+  PLAYER_A_TOTAL_RUSHING_YARDS: player_prop_types.GAME_RUSHING_YARDS,
+  PLAYER_B_TOTAL_RUSHING_YARDS: player_prop_types.GAME_RUSHING_YARDS,
+  PLAYER_C_TOTAL_RUSHING_YARDS: player_prop_types.GAME_RUSHING_YARDS,
+  PLAYER_D_TOTAL_RUSHING_YARDS: player_prop_types.GAME_RUSHING_YARDS,
+  PLAYER_E_TOTAL_RUSHING_YARDS: player_prop_types.GAME_RUSHING_YARDS,
+  PLAYER_F_TOTAL_RUSHING_YARDS: player_prop_types.GAME_RUSHING_YARDS,
 
-  PLAYER_A_TOTAL_RUSH_ATTEMPTS:
-    constants.player_prop_types.GAME_RUSHING_ATTEMPTS,
-  PLAYER_B_TOTAL_RUSH_ATTEMPTS:
-    constants.player_prop_types.GAME_RUSHING_ATTEMPTS,
-  PLAYER_C_TOTAL_RUSH_ATTEMPTS:
-    constants.player_prop_types.GAME_RUSHING_ATTEMPTS,
-  PLAYER_D_TOTAL_RUSH_ATTEMPTS:
-    constants.player_prop_types.GAME_RUSHING_ATTEMPTS,
-  PLAYER_E_TOTAL_RUSH_ATTEMPTS:
-    constants.player_prop_types.GAME_RUSHING_ATTEMPTS,
-  PLAYER_F_TOTAL_RUSH_ATTEMPTS:
-    constants.player_prop_types.GAME_RUSHING_ATTEMPTS,
+  PLAYER_A_TOTAL_RUSH_ATTEMPTS: player_prop_types.GAME_RUSHING_ATTEMPTS,
+  PLAYER_B_TOTAL_RUSH_ATTEMPTS: player_prop_types.GAME_RUSHING_ATTEMPTS,
+  PLAYER_C_TOTAL_RUSH_ATTEMPTS: player_prop_types.GAME_RUSHING_ATTEMPTS,
+  PLAYER_D_TOTAL_RUSH_ATTEMPTS: player_prop_types.GAME_RUSHING_ATTEMPTS,
+  PLAYER_E_TOTAL_RUSH_ATTEMPTS: player_prop_types.GAME_RUSHING_ATTEMPTS,
+  PLAYER_F_TOTAL_RUSH_ATTEMPTS: player_prop_types.GAME_RUSHING_ATTEMPTS,
 
-  PLAYER_A_LONGEST_RUSH: constants.player_prop_types.GAME_LONGEST_RUSH,
-  PLAYER_B_LONGEST_RUSH: constants.player_prop_types.GAME_LONGEST_RUSH,
-  PLAYER_C_LONGEST_RUSH: constants.player_prop_types.GAME_LONGEST_RUSH,
-  PLAYER_D_LONGEST_RUSH: constants.player_prop_types.GAME_LONGEST_RUSH,
+  PLAYER_A_LONGEST_RUSH: player_prop_types.GAME_LONGEST_RUSH,
+  PLAYER_B_LONGEST_RUSH: player_prop_types.GAME_LONGEST_RUSH,
+  PLAYER_C_LONGEST_RUSH: player_prop_types.GAME_LONGEST_RUSH,
+  PLAYER_D_LONGEST_RUSH: player_prop_types.GAME_LONGEST_RUSH,
 
-  'PLAYER_A_TOTAL_TACKLES_+_ASSISTS':
-    constants.player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_B_TOTAL_TACKLES_+_ASSISTS':
-    constants.player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_C_TOTAL_TACKLES_+_ASSISTS':
-    constants.player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_D_TOTAL_TACKLES_+_ASSISTS':
-    constants.player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_E_TOTAL_TACKLES_+_ASSISTS':
-    constants.player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_F_TOTAL_TACKLES_+_ASSISTS':
-    constants.player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_G_TOTAL_TACKLES_+_ASSISTS':
-    constants.player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_H_TOTAL_TACKLES_+_ASSISTS':
-    constants.player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_I_TOTAL_TACKLES_+_ASSISTS':
-    constants.player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_J_TOTAL_TACKLES_+_ASSISTS':
-    constants.player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_K_TOTAL_TACKLES_+_ASSISTS':
-    constants.player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_L_TOTAL_TACKLES_+_ASSISTS':
-    constants.player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_M_TOTAL_TACKLES_+_ASSISTS':
-    constants.player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_N_TOTAL_TACKLES_+_ASSISTS':
-    constants.player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_O_TOTAL_TACKLES_+_ASSISTS':
-    constants.player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_P_TOTAL_TACKLES_+_ASSISTS':
-    constants.player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_A_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_B_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_C_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_D_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_E_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_F_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_G_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_H_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_I_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_J_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_K_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_L_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_M_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_N_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_O_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
+  'PLAYER_P_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
 
   ...leader_markets,
   ...alt_line_markets,
 
-  ANY_TIME_TOUCHDOWN_SCORER:
-    constants.player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
+  ANY_TIME_TOUCHDOWN_SCORER: player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
+}
+
+export const get_market_type_for_quarterback_season_props = ({
+  marketName
+}) => {
+  if (marketName.toLowerCase().includes('passing tds')) {
+  }
+}
+
+export const get_market_type = ({ marketName, marketType }) => {
+  const market_type_match = markets[marketType]
+  if (market_type_match) {
+    return market_type_match
+  }
+
+  switch (marketType) {
+    case 'REGULAR_SEASON_PROPS_-_QUARTERBACKS':
+    case 'QUARTERBACK_REGULAR_SEASON_PROPS':
+      return get_market_type_for_quarterback_season_props({ marketName })
+
+    case 'REGULAR_SEASON_PROPS_-_WIDE_RECEIVERS':
+    case 'WIDE_RECEIVER_REGULAR_SEASON_PROPS':
+      return get_market_type_for_wide_receiver_season_props({ marketName })
+
+    case 'REGULAR_SEASON_PROPS_-_RUNNING_BACKS':
+    case 'RUNNING_BACK_REGULAR_SEASON_PROPS':
+      return get_market_type_for_running_back_season_props({ marketName })
+  }
+
+  return null
 }
 
 export const get_market_details_from_wager = (wager_leg) => {

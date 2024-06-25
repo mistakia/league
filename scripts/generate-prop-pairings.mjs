@@ -4,6 +4,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants, groupBy } from '#libs-shared'
+import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 import { isMain } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -39,7 +40,7 @@ const get_prop_pairing_id = (props) =>
  *     for (const line of PASS_ALT_LINES) {
  *       prop_rows.push({
  *         ln: line,
- *         prop_type: constants.player_prop_types.GAME_ALT_PASSING_YARDS,
+ *         prop_type: player_prop_types.GAME_ALT_PASSING_YARDS,
  *         ...base
  *       })
  *     }
@@ -49,7 +50,7 @@ const get_prop_pairing_id = (props) =>
  *     for (const line of RUSH_RECV_ALT_LINES) {
  *       prop_rows.push({
  *         ln: line,
- *         prop_type: constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
+ *         prop_type: player_prop_types.GAME_ALT_RUSHING_YARDS,
  *         ...base
  *       })
  *     }
@@ -59,7 +60,7 @@ const get_prop_pairing_id = (props) =>
  *     for (const line of RUSH_RECV_ALT_LINES) {
  *       prop_rows.push({
  *         ln: line,
- *         prop_type: constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
+ *         prop_type: player_prop_types.GAME_ALT_RECEIVING_YARDS,
  *         ...base
  *       })
  *     }
@@ -218,31 +219,31 @@ const generate_prop_pairings = async ({
     .where('o_am', '<', 1000)
     .where('o_am', '>', -350)
     .whereIn('prop_type', [
-      constants.player_prop_types.GAME_ALT_PASSING_YARDS,
-      constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
-      constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
+      player_prop_types.GAME_ALT_PASSING_YARDS,
+      player_prop_types.GAME_ALT_RECEIVING_YARDS,
+      player_prop_types.GAME_ALT_RUSHING_YARDS,
 
-      constants.player_prop_types.GAME_PASSING_YARDS,
-      constants.player_prop_types.GAME_RECEIVING_YARDS,
-      constants.player_prop_types.GAME_RUSHING_YARDS,
-      constants.player_prop_types.GAME_PASSING_COMPLETIONS,
-      constants.player_prop_types.GAME_PASSING_TOUCHDOWNS,
-      constants.player_prop_types.GAME_RECEPTIONS,
-      constants.player_prop_types.GAME_PASSING_INTERCEPTIONS,
-      constants.player_prop_types.GAME_RUSHING_ATTEMPTS,
-      constants.player_prop_types.GAME_RUSHING_RECEIVING_YARDS,
-      // constants.player_prop_types.GAME_RECEIVING_TOUCHDOWNS,
-      // constants.player_prop_types.GAME_RUSHING_TOUCHDOWNS,
-      constants.player_prop_types.GAME_PASSING_ATTEMPTS,
-      // constants.player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
-      // constants.player_prop_types.GAME_LONGEST_RECEPTION,
-      // constants.player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS,
-      // constants.player_prop_types.GAME_LONGEST_RUSH,
-      constants.player_prop_types.GAME_PASSING_RUSHING_YARDS,
-      constants.player_prop_types.GAME_ALT_PASSING_TOUCHDOWNS,
-      constants.player_prop_types.GAME_ALT_PASSING_COMPLETIONS,
-      constants.player_prop_types.GAME_ALT_RUSHING_ATTEMPTS,
-      constants.player_prop_types.GAME_ALT_RECEPTIONS
+      player_prop_types.GAME_PASSING_YARDS,
+      player_prop_types.GAME_RECEIVING_YARDS,
+      player_prop_types.GAME_RUSHING_YARDS,
+      player_prop_types.GAME_PASSING_COMPLETIONS,
+      player_prop_types.GAME_PASSING_TOUCHDOWNS,
+      player_prop_types.GAME_RECEPTIONS,
+      player_prop_types.GAME_PASSING_INTERCEPTIONS,
+      player_prop_types.GAME_RUSHING_ATTEMPTS,
+      player_prop_types.GAME_RUSHING_RECEIVING_YARDS,
+      // player_prop_types.GAME_RECEIVING_TOUCHDOWNS,
+      // player_prop_types.GAME_RUSHING_TOUCHDOWNS,
+      player_prop_types.GAME_PASSING_ATTEMPTS,
+      // player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
+      // player_prop_types.GAME_LONGEST_RECEPTION,
+      // player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS,
+      // player_prop_types.GAME_LONGEST_RUSH,
+      player_prop_types.GAME_PASSING_RUSHING_YARDS,
+      player_prop_types.GAME_ALT_PASSING_TOUCHDOWNS,
+      player_prop_types.GAME_ALT_PASSING_COMPLETIONS,
+      player_prop_types.GAME_ALT_RUSHING_ATTEMPTS,
+      player_prop_types.GAME_ALT_RECEPTIONS
     ])
     .where('time_type', 'CLOSE')
     .where('source_id', source)

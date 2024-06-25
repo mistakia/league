@@ -5,6 +5,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#libs-shared'
+import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 import { isMain } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -12,31 +13,31 @@ const log = debug('process-props-index')
 debug.enable('process-props-index')
 
 const prop_desc = {
-  [constants.player_prop_types.GAME_ALT_PASSING_YARDS]: 'pass',
-  [constants.player_prop_types.GAME_ALT_RUSHING_YARDS]: 'rush',
-  [constants.player_prop_types.GAME_ALT_RECEIVING_YARDS]: 'recv',
+  [player_prop_types.GAME_ALT_PASSING_YARDS]: 'pass',
+  [player_prop_types.GAME_ALT_RUSHING_YARDS]: 'rush',
+  [player_prop_types.GAME_ALT_RECEIVING_YARDS]: 'recv',
 
-  [constants.player_prop_types.GAME_PASSING_YARDS]: 'pass',
-  [constants.player_prop_types.GAME_RECEIVING_YARDS]: 'recv',
-  [constants.player_prop_types.GAME_RUSHING_YARDS]: 'rush',
-  [constants.player_prop_types.GAME_PASSING_COMPLETIONS]: 'comps',
-  [constants.player_prop_types.GAME_PASSING_TOUCHDOWNS]: 'pass tds',
-  [constants.player_prop_types.GAME_RECEPTIONS]: 'recs',
-  [constants.player_prop_types.GAME_PASSING_INTERCEPTIONS]: 'ints',
-  [constants.player_prop_types.GAME_RUSHING_ATTEMPTS]: 'rush atts',
-  [constants.player_prop_types.GAME_RUSHING_RECEIVING_YARDS]: 'rush + recv',
-  [constants.player_prop_types.GAME_RECEIVING_TOUCHDOWNS]: 'tds',
-  [constants.player_prop_types.GAME_RUSHING_TOUCHDOWNS]: 'tds',
-  [constants.player_prop_types.GAME_PASSING_ATTEMPTS]: 'pass atts',
-  // constants.player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
-  // constants.player_prop_types.GAME_LONGEST_RECEPTION,
-  [constants.player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS]: 'tds',
-  // constants.player_prop_types.GAME_LONGEST_RUSH,
-  [constants.player_prop_types.GAME_PASSING_RUSHING_YARDS]: 'pass + rush',
-  [constants.player_prop_types.GAME_ALT_PASSING_COMPLETIONS]: 'comps',
-  [constants.player_prop_types.GAME_ALT_PASSING_TOUCHDOWNS]: 'pass tds',
-  [constants.player_prop_types.GAME_ALT_RECEPTIONS]: 'recs',
-  [constants.player_prop_types.GAME_ALT_RUSHING_ATTEMPTS]: 'rush atts'
+  [player_prop_types.GAME_PASSING_YARDS]: 'pass',
+  [player_prop_types.GAME_RECEIVING_YARDS]: 'recv',
+  [player_prop_types.GAME_RUSHING_YARDS]: 'rush',
+  [player_prop_types.GAME_PASSING_COMPLETIONS]: 'comps',
+  [player_prop_types.GAME_PASSING_TOUCHDOWNS]: 'pass tds',
+  [player_prop_types.GAME_RECEPTIONS]: 'recs',
+  [player_prop_types.GAME_PASSING_INTERCEPTIONS]: 'ints',
+  [player_prop_types.GAME_RUSHING_ATTEMPTS]: 'rush atts',
+  [player_prop_types.GAME_RUSHING_RECEIVING_YARDS]: 'rush + recv',
+  [player_prop_types.GAME_RECEIVING_TOUCHDOWNS]: 'tds',
+  [player_prop_types.GAME_RUSHING_TOUCHDOWNS]: 'tds',
+  [player_prop_types.GAME_PASSING_ATTEMPTS]: 'pass atts',
+  // player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
+  // player_prop_types.GAME_LONGEST_RECEPTION,
+  [player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS]: 'tds',
+  // player_prop_types.GAME_LONGEST_RUSH,
+  [player_prop_types.GAME_PASSING_RUSHING_YARDS]: 'pass + rush',
+  [player_prop_types.GAME_ALT_PASSING_COMPLETIONS]: 'comps',
+  [player_prop_types.GAME_ALT_PASSING_TOUCHDOWNS]: 'pass tds',
+  [player_prop_types.GAME_ALT_RECEPTIONS]: 'recs',
+  [player_prop_types.GAME_ALT_RUSHING_ATTEMPTS]: 'rush atts'
 }
 
 const get_hits = ({ line, prop_type, player_gamelogs, strict }) =>
@@ -46,8 +47,8 @@ const get_hits = ({ line, prop_type, player_gamelogs, strict }) =>
 
 const is_hit = ({ line, prop_type, player_gamelog, strict = false }) => {
   switch (prop_type) {
-    case constants.player_prop_types.GAME_PASSING_YARDS:
-    case constants.player_prop_types.GAME_ALT_PASSING_YARDS:
+    case player_prop_types.GAME_PASSING_YARDS:
+    case player_prop_types.GAME_ALT_PASSING_YARDS:
       if (strict) {
         return player_gamelog.py >= line
       } else {
@@ -55,8 +56,8 @@ const is_hit = ({ line, prop_type, player_gamelog, strict = false }) => {
         return player_gamelog.py >= line - cushion
       }
 
-    case constants.player_prop_types.GAME_RUSHING_YARDS:
-    case constants.player_prop_types.GAME_ALT_RUSHING_YARDS: {
+    case player_prop_types.GAME_RUSHING_YARDS:
+    case player_prop_types.GAME_ALT_RUSHING_YARDS: {
       if (strict) {
         return player_gamelog.ry >= line
       } else {
@@ -65,8 +66,8 @@ const is_hit = ({ line, prop_type, player_gamelog, strict = false }) => {
       }
     }
 
-    case constants.player_prop_types.GAME_RECEIVING_YARDS:
-    case constants.player_prop_types.GAME_ALT_RECEIVING_YARDS:
+    case player_prop_types.GAME_RECEIVING_YARDS:
+    case player_prop_types.GAME_ALT_RECEIVING_YARDS:
       if (strict) {
         return player_gamelog.recy >= line
       } else {
@@ -74,16 +75,16 @@ const is_hit = ({ line, prop_type, player_gamelog, strict = false }) => {
         return player_gamelog.recy >= line - cushion
       }
 
-    case constants.player_prop_types.GAME_ALT_PASSING_COMPLETIONS:
-    case constants.player_prop_types.GAME_PASSING_COMPLETIONS:
+    case player_prop_types.GAME_ALT_PASSING_COMPLETIONS:
+    case player_prop_types.GAME_PASSING_COMPLETIONS:
       return player_gamelog.pc >= (strict ? line : line - 1)
 
-    case constants.player_prop_types.GAME_ALT_PASSING_TOUCHDOWNS:
-    case constants.player_prop_types.GAME_PASSING_TOUCHDOWNS:
+    case player_prop_types.GAME_ALT_PASSING_TOUCHDOWNS:
+    case player_prop_types.GAME_PASSING_TOUCHDOWNS:
       return player_gamelog.tdp >= (strict ? line : line)
 
-    case constants.player_prop_types.GAME_ALT_RECEPTIONS:
-    case constants.player_prop_types.GAME_RECEPTIONS: {
+    case player_prop_types.GAME_ALT_RECEPTIONS:
+    case player_prop_types.GAME_RECEPTIONS: {
       if (strict) {
         return player_gamelog.rec >= line
       } else {
@@ -92,36 +93,36 @@ const is_hit = ({ line, prop_type, player_gamelog, strict = false }) => {
       }
     }
 
-    case constants.player_prop_types.GAME_PASSING_INTERCEPTIONS:
+    case player_prop_types.GAME_PASSING_INTERCEPTIONS:
       return player_gamelog.ints >= (strict ? line : line)
 
-    case constants.player_prop_types.GAME_ALT_RUSHING_ATTEMPTS:
-    case constants.player_prop_types.GAME_RUSHING_ATTEMPTS:
+    case player_prop_types.GAME_ALT_RUSHING_ATTEMPTS:
+    case player_prop_types.GAME_RUSHING_ATTEMPTS:
       return player_gamelog.ra >= (strict ? line : line - 1)
 
-    case constants.player_prop_types.GAME_RUSHING_RECEIVING_YARDS:
+    case player_prop_types.GAME_RUSHING_RECEIVING_YARDS:
       return (
         player_gamelog.ry + player_gamelog.recy >= (strict ? line : line - 14)
       )
 
-    case constants.player_prop_types.GAME_RECEIVING_TOUCHDOWNS:
+    case player_prop_types.GAME_RECEIVING_TOUCHDOWNS:
       return player_gamelog.tdrec >= (strict ? line : line)
 
-    case constants.player_prop_types.GAME_RUSHING_TOUCHDOWNS:
+    case player_prop_types.GAME_RUSHING_TOUCHDOWNS:
       return player_gamelog.tdr >= (strict ? line : line)
 
-    case constants.player_prop_types.GAME_PASSING_ATTEMPTS:
+    case player_prop_types.GAME_PASSING_ATTEMPTS:
       return player_gamelog.pa >= (strict ? line : line - 2)
 
-    // constants.player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
-    // constants.player_prop_types.GAME_LONGEST_RECEPTION,
+    // player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
+    // player_prop_types.GAME_LONGEST_RECEPTION,
 
-    case constants.player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS:
+    case player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS:
       return player_gamelog.tdr + player_gamelog.tdrec >= (strict ? line : line)
 
-    // constants.player_prop_types.GAME_LONGEST_RUSH,
+    // player_prop_types.GAME_LONGEST_RUSH,
 
-    case constants.player_prop_types.GAME_PASSING_RUSHING_YARDS: {
+    case player_prop_types.GAME_PASSING_RUSHING_YARDS: {
       if (strict) {
         return player_gamelog.py + player_gamelog.ry >= line
       } else {
@@ -433,31 +434,31 @@ const main = async () => {
         )
       })
       .whereIn('market_type', [
-        constants.player_prop_types.GAME_ALT_PASSING_YARDS,
-        constants.player_prop_types.GAME_ALT_RECEIVING_YARDS,
-        constants.player_prop_types.GAME_ALT_RUSHING_YARDS,
+        player_prop_types.GAME_ALT_PASSING_YARDS,
+        player_prop_types.GAME_ALT_RECEIVING_YARDS,
+        player_prop_types.GAME_ALT_RUSHING_YARDS,
 
-        constants.player_prop_types.GAME_PASSING_YARDS,
-        constants.player_prop_types.GAME_RECEIVING_YARDS,
-        constants.player_prop_types.GAME_RUSHING_YARDS,
-        constants.player_prop_types.GAME_PASSING_COMPLETIONS,
-        constants.player_prop_types.GAME_PASSING_TOUCHDOWNS,
-        constants.player_prop_types.GAME_RECEPTIONS,
-        constants.player_prop_types.GAME_PASSING_INTERCEPTIONS,
-        constants.player_prop_types.GAME_RUSHING_ATTEMPTS,
-        constants.player_prop_types.GAME_RUSHING_RECEIVING_YARDS,
-        constants.player_prop_types.GAME_RECEIVING_TOUCHDOWNS,
-        constants.player_prop_types.GAME_RUSHING_TOUCHDOWNS,
-        constants.player_prop_types.GAME_PASSING_ATTEMPTS,
-        // constants.player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
-        // constants.player_prop_types.GAME_LONGEST_RECEPTION,
-        constants.player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS,
-        // constants.player_prop_types.GAME_LONGEST_RUSH,
-        constants.player_prop_types.GAME_PASSING_RUSHING_YARDS,
-        constants.player_prop_types.GAME_ALT_PASSING_TOUCHDOWNS,
-        constants.player_prop_types.GAME_ALT_PASSING_COMPLETIONS,
-        constants.player_prop_types.GAME_ALT_RUSHING_ATTEMPTS,
-        constants.player_prop_types.GAME_ALT_RECEPTIONS
+        player_prop_types.GAME_PASSING_YARDS,
+        player_prop_types.GAME_RECEIVING_YARDS,
+        player_prop_types.GAME_RUSHING_YARDS,
+        player_prop_types.GAME_PASSING_COMPLETIONS,
+        player_prop_types.GAME_PASSING_TOUCHDOWNS,
+        player_prop_types.GAME_RECEPTIONS,
+        player_prop_types.GAME_PASSING_INTERCEPTIONS,
+        player_prop_types.GAME_RUSHING_ATTEMPTS,
+        player_prop_types.GAME_RUSHING_RECEIVING_YARDS,
+        player_prop_types.GAME_RECEIVING_TOUCHDOWNS,
+        player_prop_types.GAME_RUSHING_TOUCHDOWNS,
+        player_prop_types.GAME_PASSING_ATTEMPTS,
+        // player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
+        // player_prop_types.GAME_LONGEST_RECEPTION,
+        player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS,
+        // player_prop_types.GAME_LONGEST_RUSH,
+        player_prop_types.GAME_PASSING_RUSHING_YARDS,
+        player_prop_types.GAME_ALT_PASSING_TOUCHDOWNS,
+        player_prop_types.GAME_ALT_PASSING_COMPLETIONS,
+        player_prop_types.GAME_ALT_RUSHING_ATTEMPTS,
+        player_prop_types.GAME_ALT_RECEPTIONS
       ])
       .where('prop_markets_index.time_type', 'CLOSE')
       .where('prop_markets_index.source_id', source)

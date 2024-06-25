@@ -1,31 +1,31 @@
 import debug from 'debug'
 
 import config from '#config'
-import { constants } from '#libs-shared'
+import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 import { puppeteer } from '#libs-server'
 
 const log = debug('betmgm')
 debug.enable('betmgm')
 
 export const markets = {
-  12203: constants.player_prop_types.GAME_PASSING_COMPLETIONS,
-  12205: constants.player_prop_types.GAME_RECEPTIONS,
-  12280: constants.player_prop_types.GAME_PASSING_ATTEMPTS,
-  14923: constants.player_prop_types.GAME_RUSHING_ATTEMPTS,
-  14925: constants.player_prop_types.GAME_LONGEST_RECEPTION,
-  23262: constants.player_prop_types.GAME_TACKLES_ASSISTS,
-  27589: constants.player_prop_types.GAME_PASSING_YARDS,
-  27590: constants.player_prop_types.GAME_RECEIVING_YARDS,
-  27591: constants.player_prop_types.GAME_RUSHING_YARDS,
-  31919: constants.player_prop_types.GAME_PASSING_INTERCEPTIONS,
-  33712: constants.player_prop_types.GAME_PASSING_TOUCHDOWNS,
-  33715: constants.player_prop_types.GAME_RUSHING_RECEIVING_YARDS,
-  33743: constants.player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
+  12203: player_prop_types.GAME_PASSING_COMPLETIONS,
+  12205: player_prop_types.GAME_RECEPTIONS,
+  12280: player_prop_types.GAME_PASSING_ATTEMPTS,
+  14923: player_prop_types.GAME_RUSHING_ATTEMPTS,
+  14925: player_prop_types.GAME_LONGEST_RECEPTION,
+  23262: player_prop_types.GAME_TACKLES_ASSISTS,
+  27589: player_prop_types.GAME_PASSING_YARDS,
+  27590: player_prop_types.GAME_RECEIVING_YARDS,
+  27591: player_prop_types.GAME_RUSHING_YARDS,
+  31919: player_prop_types.GAME_PASSING_INTERCEPTIONS,
+  33712: player_prop_types.GAME_PASSING_TOUCHDOWNS,
+  33715: player_prop_types.GAME_RUSHING_RECEIVING_YARDS,
+  33743: player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
   // 33744: kicker points
   // 33745: extra points
   // 33746: field goals
   // 34345: passing and rushing yards
-  34346: constants.player_prop_types.GAME_LONGEST_RUSH
+  34346: player_prop_types.GAME_LONGEST_RUSH
 }
 
 export const get_markets = async () => {
