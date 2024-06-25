@@ -778,7 +778,7 @@ export function PlayerTableFields({
         COLUMN_GROUPS.WEEK_PROJECTION,
         COLUMN_GROUPS.RECEIVING
       ],
-      header_label: 'TAR',
+      header_label: 'TGT',
       player_value_path: stat_in_year_week('proj_trg')({ params: { week } }),
       fixed: 1,
       size: 70,
@@ -834,7 +834,7 @@ export function PlayerTableFields({
         COLUMN_GROUPS.SEASON_PROJECTION,
         COLUMN_GROUPS.RECEIVING
       ],
-      header_label: 'TAR',
+      header_label: 'TGT',
       player_value_path: stat_in_year_week('proj_trg')(),
       fixed: 1,
       size: 70,
@@ -886,7 +886,7 @@ export function PlayerTableFields({
         COLUMN_GROUPS.REST_OF_SEASON_PROJECTION,
         COLUMN_GROUPS.RECEIVING
       ],
-      header_label: 'TAR',
+      header_label: 'TGT',
       player_value_path: stat_in_year_week('proj_trg')({
         params: { week: 'ros' }
       }),
@@ -1254,28 +1254,26 @@ export function PlayerTableFields({
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: nfl_plays_column_params
     },
-    // TODO
-    // player_team_rush_attempts_percentage_from_plays: {
-    //   column_title: 'Share of Team Rushing Attempts (By Play)',
-    //   column_groups: [COLUMN_GROUPS.RUSHING],
-    //   header_label: 'ATT%',
-    //   player_value_path: 'team_rush_atts_pct_from_plays',
-    //   fixed: 1,
-    //   size: 70,
-    //   data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
-    //   column_params: nfl_plays_column_params
-    // },
-    // TODO
-    // player_team_rush_yards_percentage_from_plays: {
-    //   column_title: 'Share of Team Rushing Yardage (By Play)',
-    //   column_groups: [COLUMN_GROUPS.RUSHING],
-    //   header_label: 'YDS%',
-    //   player_value_path: 'team_rush_yds_pct_from_plays',
-    //   fixed: 1,
-    //   size: 70,
-    //   data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
-    //   column_params: nfl_plays_column_params
-    // },
+    player_rush_attempts_share_from_plays: {
+      column_title: 'Share of Team Rushing Attempts (By Play)',
+      column_groups: [COLUMN_GROUPS.RUSHING],
+      header_label: 'ATT%',
+      player_value_path: 'rush_att_share_from_plays',
+      fixed: 1,
+      size: 70,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      column_params: nfl_plays_column_params
+    },
+    player_rush_yards_share_from_plays: {
+      column_title: 'Share of Team Rushing Yardage (By Play)',
+      column_groups: [COLUMN_GROUPS.RUSHING],
+      header_label: 'YDS%',
+      player_value_path: 'rush_yds_share_from_plays',
+      fixed: 1,
+      size: 70,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      column_params: nfl_plays_column_params
+    },
     player_fumble_percentage_from_plays: {
       column_title: 'Fumble Percentage (By Play)',
       column_groups: [COLUMN_GROUPS.RUSHING],
@@ -1374,7 +1372,7 @@ export function PlayerTableFields({
     player_targets_from_plays: {
       column_title: 'Targets (By Play)',
       column_groups: [COLUMN_GROUPS.RECEIVING],
-      header_label: 'TAR',
+      header_label: 'TGT',
       player_value_path: 'trg_from_plays',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -1418,39 +1416,36 @@ export function PlayerTableFields({
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: nfl_plays_column_params
     },
-    // TODO
-    // player_team_air_yards_percentage_from_plays: {
-    //   column_title: 'Share of Team Air Yards (By Play)',
-    //   column_groups: [COLUMN_GROUPS.RECEIVING],
-    //   header_label: 'AY%',
-    //   player_value_path: 'team_air_yds_pct_from_plays',
-    //   fixed: 1,
-    //   size: 70,
-    //   data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
-    //   column_params: nfl_plays_column_params
-    // },
-    // TODO
-    // player_team_target_percentage_from_plays: {
-    //   column_title: 'Share of Team Targets (By Play)',
-    //   column_groups: [COLUMN_GROUPS.RECEIVING],
-    //   header_label: 'TAR%',
-    //   player_value_path: 'team_trg_pct_from_plays',
-    //   fixed: 1,
-    //   size: 70,
-    //   data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
-    //   column_params: nfl_plays_column_params
-    // },
-    // TODO
-    // player_weighted_opportunity_rating_from_plays: {
-    //   column_title: 'Weighted Opportunity Rating (By Play)',
-    //   column_groups: [COLUMN_GROUPS.RECEIVING],
-    //   header_label: 'WOPR',
-    //   player_value_path: 'wopr_from_plays',
-    //   fixed: 1,
-    //   size: 70,
-    //   data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
-    //   column_params: nfl_plays_column_params
-    // },
+    player_air_yards_share_from_plays: {
+      column_title: 'Share of Team Air Yards (By Play)',
+      column_groups: [COLUMN_GROUPS.RECEIVING],
+      header_label: 'AY%',
+      player_value_path: 'air_yds_share_from_plays',
+      fixed: 1,
+      size: 70,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      column_params: nfl_plays_column_params
+    },
+    player_target_share_from_plays: {
+      column_title: 'Share of Team Targets (By Play)',
+      column_groups: [COLUMN_GROUPS.RECEIVING],
+      header_label: 'TGT%',
+      player_value_path: 'trg_share_from_plays',
+      fixed: 1,
+      size: 70,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      column_params: nfl_plays_column_params
+    },
+    player_weighted_opportunity_rating_from_plays: {
+      column_title: 'Weighted Opportunity Rating (By Play)',
+      column_groups: [COLUMN_GROUPS.RECEIVING],
+      header_label: 'WOPR',
+      player_value_path: 'weighted_opp_rating_from_plays',
+      fixed: 1,
+      size: 70,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      column_params: nfl_plays_column_params
+    },
     player_receiver_air_conversion_ratio_from_plays: {
       column_title: 'Receiver Air Conversion Ratio (By Play)',
       column_groups: [COLUMN_GROUPS.RECEIVING],
