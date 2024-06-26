@@ -2,11 +2,14 @@ import debug from 'debug'
 import diff from 'deep-diff'
 import path from 'path'
 import { fileURLToPath } from 'url'
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { isMain, mergePlayer, readCSV } from '#libs-server'
 import { formatPlayerName } from '#libs-shared'
 
+const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process-duplicate-players')
 debug.enable('process-duplicate-players,update-player,merge-player')
 
@@ -204,8 +207,8 @@ const unresolvable_differences = (a, b) => {
   return filtered_differences
 }
 
-const processDuplicatePlayers = async () => {
-  const duplicates = await db('player')
+const processDuplicatePlayers = async ({ formatted = null } = {}) => {
+  const query = db('player')
     .select('player.*', db.raw('CONCAT(dob, "__", start) as "group_id"'))
     .whereNot('dob', '0000-00-00')
     .whereNot('start', '0000')
@@ -213,6 +216,12 @@ const processDuplicatePlayers = async () => {
     .groupBy('group_id')
     .having('count', '>', 1)
     .orderBy('count', 'desc')
+
+  if (formatted) {
+    query.where('formatted', formatted)
+  }
+
+  const duplicates = await query
 
   log(`${duplicates.length} players matched on dob and start year`)
 
@@ -292,7 +301,7 @@ const main = async () => {
       nickname_sets.push(nickname_set)
     }
     log(`loaded ${nickname_sets.length} nickname sets`)
-    await processDuplicatePlayers()
+    await processDuplicatePlayers({ formatted: argv.formatted })
   } catch (err) {
     error = err
     log(error)
