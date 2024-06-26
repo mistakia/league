@@ -253,4 +253,49 @@ describe('LIBS SERVER get_players_table_view_results', () => {
       "with `c5442931a55d383a8f71861ed6d6d533f67cf2141870db429f258afa8609085e` as (select `pg`.`pid`, ROUND((1.5 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / COUNT(*)) + (0.7 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / SUM(nfl_plays.dot)), 2) AS weighted_opp_rating_from_plays from `nfl_plays` inner join `player_gamelogs` as `pg` on `nfl_plays`.`esbid` = `pg`.`esbid` and `nfl_plays`.`off` = `pg`.`tm` where not `play_type` = 'NOPL' and `seas_type` = 'REG' and `trg_pid` is not null and `year` in (2023) group by `pg`.`pid`) select `player`.`pid`, player.fname, player.lname, `player`.`bench` as `bench_0`, `player`.`pos` as `pos_0`, `c5442931a55d383a8f71861ed6d6d533f67cf2141870db429f258afa8609085e`.`weighted_opp_rating_from_plays` as `weighted_opp_rating_from_plays_0` from `player` left join `c5442931a55d383a8f71861ed6d6d533f67cf2141870db429f258afa8609085e` on `c5442931a55d383a8f71861ed6d6d533f67cf2141870db429f258afa8609085e`.`pid` = `player`.`pid` where player.pos IN ('WR') group by `player`.`pid`, `player`.`lname`, `player`.`fname` order by `weighted_opp_rating_from_plays_0` IS NULL, `weighted_opp_rating_from_plays_0` desc limit 500"
     expect(query.toString()).to.equal(expected_query)
   })
+
+  it('should handle empty query that shares a column_id with a column', () => {
+    const query = get_players_table_view_results({
+      prefix_columns: ['player_name'],
+      columns: [
+        {
+          column_id: 'player_rush_yards_from_plays',
+          params: {
+            year: [2023],
+            xpass_prob: [0, 0.4]
+          }
+        },
+        {
+          column_id: 'player_rush_yds_per_attempt_from_plays',
+          params: {
+            year: [2023],
+            xpass_prob: [0, 0.4]
+          }
+        },
+        {
+          column_id: 'player_rush_first_downs_from_plays',
+          params: {
+            year: [2023],
+            xpass_prob: [0, 0.4]
+          }
+        }
+      ],
+      sort: [
+        {
+          column_id: 'player_rush_yards_from_plays',
+          desc: true
+        }
+      ],
+      where: [
+        {
+          column_id: 'player_rush_yards_from_plays',
+          operator: '=',
+          value: ''
+        }
+      ]
+    })
+    const expected_query =
+      "with `5bafb007211603b8b6af50010c754d15cf65ff27fd9227479cf153c659878fac` as (select `bc_pid`, SUM(rush_yds) AS rush_yds_from_plays_0, CASE WHEN COUNT(*) > 0 THEN ROUND(SUM(rush_yds) / COUNT(*), 2) ELSE 0 END AS rush_yds_per_att_from_plays_0, SUM(CASE WHEN fd = 1 THEN 1 ELSE 0 END) AS rush_first_downs_from_plays_0 from `nfl_plays` where not `play_type` = 'NOPL' and `seas_type` = 'REG' and `year` in (2023) and `xpass_prob` between 0 and 0.4 group by `bc_pid`) select `player`.`pid`, player.fname, player.lname, `5bafb007211603b8b6af50010c754d15cf65ff27fd9227479cf153c659878fac`.`rush_yds_from_plays_0` as `rush_yds_from_plays_0`, `5bafb007211603b8b6af50010c754d15cf65ff27fd9227479cf153c659878fac`.`rush_yds_per_att_from_plays_0` as `rush_yds_per_att_from_plays_0`, `5bafb007211603b8b6af50010c754d15cf65ff27fd9227479cf153c659878fac`.`rush_first_downs_from_plays_0` as `rush_first_downs_from_plays_0` from `player` left join `5bafb007211603b8b6af50010c754d15cf65ff27fd9227479cf153c659878fac` on `5bafb007211603b8b6af50010c754d15cf65ff27fd9227479cf153c659878fac`.`bc_pid` = `player`.`pid` group by `player`.`pid`, `player`.`lname`, `player`.`fname` order by `5bafb007211603b8b6af50010c754d15cf65ff27fd9227479cf153c659878fac`.`rush_yds_from_plays_0` IS NULL, `5bafb007211603b8b6af50010c754d15cf65ff27fd9227479cf153c659878fac`.`rush_yds_from_plays_0` desc limit 500"
+    expect(query.toString()).to.equal(expected_query)
+  })
 })
