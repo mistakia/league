@@ -21,6 +21,32 @@ export const tabs = [
   'td-scorer-props'
 ]
 
+const format_selection_player_name = (str = '') => {
+  str = str.split(' - ')[0].replace('Over', '').replace('Under', '')
+  str = str.split('(')[0] // remove anything in paranthesis
+  return str.trim()
+}
+
+const format_market_name_player_name = (str = '') => {
+  // Check if the string contains a date or "Regular Season"
+  if (str.match(/\d{4}-\d{2}/) || str.includes('Regular Season')) {
+    // Match the player name at the start of the string
+    const match = str.match(
+      /^((?:[A-Z]\.?'?){1,2}\s?(?:[A-Za-z]+[-'.]?\w*\s?){1,3}(?:Jr\.)?)(?=\s(?:\d{4}-\d{2}|Regular Season))/
+    )
+
+    // If a match is found, return it trimmed, otherwise return an empty string
+    return match ? match[1].trim() : ''
+  }
+
+  if (str.includes('-')) {
+    str = str.split(' - ')[0]
+    return str.trim()
+  }
+
+  return ''
+}
+
 export const leader_market_names = {
   'Most Passing Yards of Game': player_prop_types.GAME_LEADER_PASSING_YARDS,
   'Most Receiving Yards of Game': player_prop_types.GAME_LEADER_RECEIVING_YARDS,
@@ -81,12 +107,6 @@ export const alt_line_markets = {
   'PLAYER_K_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS,
   'PLAYER_L_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS,
   'PLAYER_M_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS
-}
-
-export const leader_markets = {
-  MOST_PASSING_YARDS: player_prop_types.GAME_LEADER_PASSING_YARDS,
-  MOST_RECEIVING_YARDS: player_prop_types.GAME_LEADER_RECEIVING_YARDS,
-  MOST_RUSHING_YARDS: player_prop_types.GAME_LEADER_RUSHING_YARDS
 }
 
 export const markets = {
@@ -185,7 +205,6 @@ export const markets = {
   'PLAYER_O_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
   'PLAYER_P_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
 
-  ...leader_markets,
   ...alt_line_markets,
 
   ANY_TIME_TOUCHDOWN_SCORER: player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
@@ -194,14 +213,16 @@ export const markets = {
 export const get_market_type_for_quarterback_season_props = ({
   marketName
 }) => {
+  const market_name_lower = marketName.toLowerCase()
+
   if (
-    marketName.toLowerCase().includes('passing tds') ||
-    marketName.toLowerCase().includes('passing touchdowns')
+    market_name_lower.includes('passing tds') ||
+    market_name_lower.includes('passing touchdowns')
   ) {
     return player_prop_types.SEASON_PASSING_TOUCHDOWNS
   }
 
-  if (marketName.toLowerCase().includes('passing yards')) {
+  if (market_name_lower.includes('passing yards')) {
     return player_prop_types.SEASON_PASSING_YARDS
   }
 
@@ -211,18 +232,20 @@ export const get_market_type_for_quarterback_season_props = ({
 export const get_market_type_for_wide_receiver_season_props = ({
   marketName
 }) => {
-  if (marketName.toLowerCase().includes('receiving yards')) {
+  const market_name_lower = marketName.toLowerCase()
+
+  if (market_name_lower.includes('receiving yards')) {
     return player_prop_types.SEASON_RECEIVING_YARDS
   }
 
   if (
-    marketName.toLowerCase().includes('receiving tds') ||
-    marketName.toLowerCase().includes('receiving touchdowns')
+    market_name_lower.includes('receiving tds') ||
+    market_name_lower.includes('receiving touchdowns')
   ) {
     return player_prop_types.SEASON_RECEIVING_TOUCHDOWNS
   }
 
-  if (marketName.toLowerCase().includes('receptions')) {
+  if (market_name_lower.includes('receptions')) {
     return player_prop_types.SEASON_RECEPTIONS
   }
 
@@ -232,15 +255,31 @@ export const get_market_type_for_wide_receiver_season_props = ({
 export const get_market_type_for_running_back_season_props = ({
   marketName
 }) => {
-  if (marketName.toLowerCase().includes('rushing yards')) {
+  const market_name_lower = marketName.toLowerCase()
+
+  if (market_name_lower.includes('rushing yards')) {
     return player_prop_types.SEASON_RUSHING_YARDS
   }
 
   if (
-    marketName.toLowerCase().includes('rushing tds') ||
-    marketName.toLowerCase().includes('rushing touchdowns')
+    market_name_lower.includes('rushing tds') ||
+    market_name_lower.includes('rushing touchdowns')
   ) {
     return player_prop_types.SEASON_RUSHING_TOUCHDOWNS
+  }
+
+  return null
+}
+
+export const get_market_type_for_most_rushing_yards = ({ marketName }) => {
+  const market_name_lower = marketName.toLowerCase()
+
+  if (market_name_lower.includes('afc') || market_name_lower.includes('nfc')) {
+    return null
+  }
+
+  if (market_name_lower.includes('regular season')) {
+    return player_prop_types.SEASON_LEADER_RUSHING_YARDS
   }
 
   return null
@@ -264,6 +303,45 @@ export const get_market_type = ({ marketName, marketType }) => {
     case 'REGULAR_SEASON_PROPS_-_RUNNING_BACKS':
     case 'RUNNING_BACK_REGULAR_SEASON_PROPS':
       return get_market_type_for_running_back_season_props({ marketName })
+
+    case 'MOST_RUSHING_YARDS':
+      return get_market_type_for_most_rushing_yards({ marketName })
+  }
+
+  return null
+}
+
+const market_name_market_types = [
+  'REGULAR_SEASON_PROPS_-_QUARTERBACKS',
+  'QUARTERBACK_REGULAR_SEASON_PROPS',
+  'REGULAR_SEASON_PROPS_-_WIDE_RECEIVERS',
+  'WIDE_RECEIVER_REGULAR_SEASON_PROPS',
+  'REGULAR_SEASON_PROPS_-_RUNNING_BACKS',
+  'RUNNING_BACK_REGULAR_SEASON_PROPS'
+]
+
+export const get_player_string = ({ marketName, marketType, runnerName }) => {
+  let use_market_name = false
+
+  if (marketType.startsWith('PLAYER_')) {
+    use_market_name = true
+  }
+
+  if (market_name_market_types.includes(marketType)) {
+    use_market_name = true
+  }
+
+  if (use_market_name) {
+    return format_market_name_player_name(marketName)
+  }
+
+  return format_selection_player_name(runnerName)
+}
+
+export const get_selection_metric_from_selection_name = (selection_name) => {
+  const metric_line = selection_name.match(/(\d+(?:\.5+)?)\+?/)
+  if (metric_line) {
+    return Number(metric_line[1])
   }
 
   return null

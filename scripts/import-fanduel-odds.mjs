@@ -18,12 +18,6 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-fanduel')
 debug.enable('import-fanduel,get-player,fanduel,insert-prop-market')
 
-const format_player_name = (str = '') => {
-  str = str.split(' - ')[0].replace('Over', '').replace('Under', '')
-  str = str.split('(')[0] // remove anything in paranthesis
-  return str.trim()
-}
-
 const get_player_ignore_markets = [
   'COACH_OF_THE_YEAR',
   'REGULAR_SEASON_WIN_TOTALS',
@@ -76,19 +70,19 @@ const format_market = async ({
     fanduel_market.marketType
   )
 
-  const use_market_name = fanduel_market.marketType.startsWith('PLAYER_')
-
   for (const runner of fanduel_market.runners) {
     let player_row
 
     if (!skip_get_player && runner.runnerName) {
-      const name = use_market_name
-        ? format_player_name(fanduel_market.marketName)
-        : format_player_name(runner.runnerName)
+      const name_string = fanduel.get_player_string({
+        marketName: fanduel_market.marketName,
+        marketType: fanduel_market.marketType,
+        runnerName: runner.runnerName
+      })
 
-      if (name) {
+      if (name_string) {
         const params = {
-          name,
+          name: name_string,
           teams,
           ignore_free_agent: true,
           ignore_retired: true
@@ -112,11 +106,9 @@ const format_market = async ({
     let selection_metric_line = Number(runner.handicap) || null
 
     if (!selection_metric_line) {
-      // extract metric line from selection name
-      const metric_line = runner.runnerName.match(/(\d+)\+/)
-      if (metric_line) {
-        selection_metric_line = Number(metric_line[1])
-      }
+      selection_metric_line = fanduel.get_selection_metric_from_selection_name(
+        runner.runnerName
+      )
     }
 
     selections.push({
