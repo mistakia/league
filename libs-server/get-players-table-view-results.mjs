@@ -324,7 +324,13 @@ const add_clauses_for_table = ({
       params: column_params,
       join_type: where_clauses.length ? 'INNER' : 'LEFT'
     })
-  } else if (table_name !== 'player' && table_name !== 'nfl_plays') {
+  } else if (
+    table_name !== 'player' &&
+    table_name !== 'nfl_plays' &&
+    (select_strings.length ||
+      where_clause_strings.length ||
+      having_clause_strings.length)
+  ) {
     players_query.leftJoin(table_name, `${table_name}.pid`, 'player.pid')
   }
 }
