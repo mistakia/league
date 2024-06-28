@@ -2,13 +2,16 @@ import db from '#db'
 import players_table_column_definitions from './players-table-column-definitions.mjs'
 import apply_play_by_play_column_params_to_query from './apply-play-by-play-column-params-to-query.mjs'
 
+const split_params = ['year']
+
 const add_play_by_play_with_statement = ({
   query,
   params = {},
   with_table_name,
   having_clauses = [],
   select_strings = [],
-  pid_column
+  pid_column,
+  splits = []
 }) => {
   if (!with_table_name) {
     throw new Error('with_table_name is required')
@@ -19,6 +22,13 @@ const add_play_by_play_with_statement = ({
     .whereNot('play_type', 'NOPL')
     .where('seas_type', 'REG')
     .groupBy(pid_column)
+
+  for (const split of splits) {
+    if (split_params.includes(split)) {
+      with_query.select(split)
+      with_query.groupBy(split)
+    }
+  }
 
   const unique_select_strings = new Set(select_strings)
 
@@ -178,7 +188,9 @@ const add_clauses_for_table = ({
   select_columns = [],
   where_clauses = [],
   table_name,
-  column_params = {}
+  column_params = {},
+  splits = [],
+  previous_table_name
 }) => {
   const column_ids = []
   const select_strings = []
@@ -283,7 +295,8 @@ const add_clauses_for_table = ({
       with_table_name: table_name,
       having_clauses: having_clause_strings,
       select_strings,
-      pid_column
+      pid_column,
+      splits
     })
 
     // add select to players_query for each select_column in the with statement
@@ -298,7 +311,8 @@ const add_clauses_for_table = ({
       query: players_query,
       params: column_params,
       with_table_name: table_name,
-      having_clauses: having_clause_strings
+      having_clauses: having_clause_strings,
+      splits
     })
 
     for (const select_string of select_strings) {
@@ -322,7 +336,9 @@ const add_clauses_for_table = ({
       query: players_query,
       table_name,
       params: column_params,
-      join_type: where_clauses.length ? 'INNER' : 'LEFT'
+      join_type: where_clauses.length ? 'INNER' : 'LEFT',
+      splits,
+      previous_table_name
     })
   } else if (
     table_name !== 'player' &&
@@ -358,7 +374,8 @@ const get_grouped_clauses_by_table = ({
       grouped_clauses_by_table[table_name] = {
         column_params,
         where_clauses: [],
-        select_columns: []
+        select_columns: [],
+        supported_splits: column_definition.supported_splits || []
       }
     }
     grouped_clauses_by_table[table_name].where_clauses.push(where_clause)
@@ -385,7 +402,8 @@ const get_grouped_clauses_by_table = ({
       grouped_clauses_by_table[table_name] = {
         column_params,
         where_clauses: [],
-        select_columns: []
+        select_columns: [],
+        supported_splits: column_definition.supported_splits || []
       }
     }
 
@@ -398,7 +416,29 @@ const get_grouped_clauses_by_table = ({
   return grouped_clauses_by_table
 }
 
+const group_tables_by_supported_splits = (grouped_clauses_by_table, splits) => {
+  const grouped_by_splits = {}
+
+  for (const [table_name, table_info] of Object.entries(
+    grouped_clauses_by_table
+  )) {
+    const supported_splits_key = table_info.supported_splits
+      .filter((split) => splits.includes(split))
+      .sort()
+      .join('_')
+
+    if (!grouped_by_splits[supported_splits_key]) {
+      grouped_by_splits[supported_splits_key] = {}
+    }
+
+    grouped_by_splits[supported_splits_key][table_name] = table_info
+  }
+
+  return grouped_by_splits
+}
+
 export default function ({
+  splits = [],
   where = [],
   columns = [],
   prefix_columns = [],
@@ -423,20 +463,51 @@ export default function ({
     players_table_column_definitions
   })
 
+  const grouped_by_splits = group_tables_by_supported_splits(
+    grouped_clauses_by_table,
+    splits
+  )
+
   // call joins for where/having first so they are inner joins
-  for (const [
-    table_name,
-    { column_params, where_clauses, select_columns }
-  ] of Object.entries(grouped_clauses_by_table)) {
-    add_clauses_for_table({
-      players_query,
-      select_columns,
-      where_clauses,
+  for (const [supported_splits_key, tables] of Object.entries(
+    grouped_by_splits
+  )) {
+    let previous_table_name = null
+    const available_splits = supported_splits_key.split('_').filter(Boolean)
+
+    for (const [
       table_name,
-      column_params,
-      joined_table_index,
-      with_statement_index
-    })
+      { column_params, where_clauses, select_columns }
+    ] of Object.entries(tables)) {
+      add_clauses_for_table({
+        players_query,
+        select_columns,
+        where_clauses,
+        table_name,
+        column_params,
+        joined_table_index,
+        with_statement_index,
+        splits: available_splits,
+        previous_table_name
+      })
+      previous_table_name = table_name
+    }
+  }
+
+  // Add a coalesce select for each split
+  for (const split of splits) {
+    const coalesce_args = Object.entries(grouped_clauses_by_table)
+      .filter(
+        ([_, table_info]) =>
+          table_info.supported_splits &&
+          table_info.supported_splits.includes(split)
+      )
+      .map(([table_alias, _]) => `${table_alias}.${split}`)
+      .join(', ')
+
+    if (coalesce_args) {
+      players_query.select(db.raw(`COALESCE(${coalesce_args}) AS ${split}`))
+    }
   }
 
   for (const sort_clause of sort) {
@@ -471,6 +542,10 @@ export default function ({
 
   players_query.groupBy('player.pid', 'player.lname', 'player.fname')
   players_query.limit(limit)
+
+  for (const split of splits) {
+    players_query.groupBy(split)
+  }
 
   console.log(players_query.toString())
 
