@@ -8,6 +8,8 @@ import {
 import apply_play_by_play_column_params_to_query from './apply-play-by-play-column-params-to-query.mjs'
 import db from '#db'
 
+export const split_params = ['year']
+
 const generate_table_alias = ({ type, params = {} } = {}) => {
   if (!type) {
     throw new Error('type is required')
@@ -363,7 +365,7 @@ const create_team_share_stat = ({
   column_name,
   where_column: () => column_name,
   use_having: true,
-  with: ({ query, with_table_name, params, having_clauses = [] }) => {
+  with: ({ query, with_table_name, params, having_clauses = [], splits = [] }) => {
     const with_query = db('nfl_plays')
       .select('pg.pid')
       .select(db.raw(select_string))
@@ -378,6 +380,13 @@ const create_team_share_stat = ({
       .where('seas_type', 'REG')
       .whereNotNull(pid_column)
       .groupBy('pg.pid')
+
+      for (const split of splits) {
+        if (split_params.includes(split)) {
+          with_query.select(split)
+          with_query.groupBy(split)
+        }
+      }
 
     apply_play_by_play_column_params_to_query({
       query: with_query,
@@ -408,7 +417,8 @@ const create_team_share_stat = ({
       splits,
       previous_table_name
     })
-  }
+  },
+  supported_splits: ['year']
 })
 
 export default {
@@ -953,14 +963,14 @@ export default {
     column_name: 'weighted_opp_rating_from_plays',
     pid_column: 'trg_pid',
     select_string:
-      'ROUND((1.5 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / COUNT(*)) + (0.7 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / SUM(nfl_plays.dot)), 2) AS weighted_opp_rating_from_plays'
+      'ROUND((1.5 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / COUNT(*)) + (0.7 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / SUM(nfl_plays.dot)), 4) AS weighted_opp_rating_from_plays'
   }),
 
   // receiving yards / air yards
   player_receiver_air_conversion_ratio_from_plays: player_stat_from_plays({
     pid_column: 'trg_pid',
     select_string: ({ stat_name }) =>
-      `CASE WHEN SUM(CASE WHEN comp = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN comp = 1 THEN recv_yds ELSE 0 END) / SUM(CASE WHEN comp = 1 THEN 1 ELSE 0 END), 2) ELSE 0 END AS ${stat_name}_0`,
+      `CASE WHEN SUM(CASE WHEN comp = 1 THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN comp = 1 THEN recv_yds ELSE 0 END) / SUM(CASE WHEN comp = 1 THEN 1 ELSE 0 END), 4) ELSE 0 END AS ${stat_name}_0`,
     stat_name: 'rec_air_conv_ratio_from_plays'
   }),
   player_receiving_yards_per_reception_from_plays: player_stat_from_plays({

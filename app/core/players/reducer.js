@@ -461,6 +461,29 @@ export function playersReducer(state = initialState, { payload, type }) {
     case playerActions.RESET_PLAYER_FILTER_OPTIONS:
       return state.merge({ ...default_player_filter_options })
 
+    case playerActions.POST_PLAYERS_TABLE_VIEW_SEARCH_FULFILLED:
+      return state.withMutations((players) => {
+        payload.data.forEach((row) => {
+          const formatted_player_data = {
+            pid: row.pid,
+            fname: row.fname,
+            lname: row.lname
+          }
+          if (players.hasIn(['items', row.pid])) {
+            const data = players.getIn(['items', row.pid])
+            players.setIn(
+              ['items', row.pid],
+              createPlayer({
+                ...data.toJS(),
+                ...formatted_player_data
+              })
+            )
+          } else {
+            players.setIn(['items', row.pid], createPlayer(formatted_player_data))
+          }
+        })
+      })
+
     default:
       return state
   }
