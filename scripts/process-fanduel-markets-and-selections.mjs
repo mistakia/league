@@ -13,7 +13,7 @@ const log = debug('process-fanduel-markets-and-selections')
 debug.enable('process-fanduel-markets-and-selections,get-player')
 
 const process_fanduel_markets_and_selections = async ({
-  missing_type_only = false,
+  missing_only = false,
   since_date = null
 } = {}) => {
   const query = db('prop_market_selections_index')
@@ -38,8 +38,12 @@ const process_fanduel_markets_and_selections = async ({
     query.where('prop_markets_index.timestamp', '>=', since_timestamp)
   }
 
-  if (missing_type_only) {
-    query.whereNull('prop_markets_index.market_type')
+  if (missing_only) {
+    query.where(function () {
+      this.whereNull('prop_markets_index.market_type').orWhereNull(
+        'prop_market_selections_index.selection_pid'
+      )
+    })
   }
 
   const market_selection_rows = await query
@@ -169,6 +173,7 @@ const process_fanduel_markets_and_selections = async ({
             await db('prop_market_selections_index')
               .where({
                 source_market_id: source_market.source_market_id,
+                source_id: source_market.source_id,
                 selection_id: selection.selection_id
               })
               .update({
@@ -207,7 +212,7 @@ async function main() {
   let error
   try {
     await process_fanduel_markets_and_selections({
-      missing_type_only: argv.missing_type_only,
+      missing_only: argv.missing_only,
       since_date: argv.since_date
     })
   } catch (err) {
