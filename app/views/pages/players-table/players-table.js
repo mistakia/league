@@ -39,6 +39,7 @@ export default function PlayersTablePage({
     const where = JSON.parse(search_params.get('where') || 'null') || []
     const prefix_columns =
       JSON.parse(search_params.get('prefix_columns') || 'null') || []
+    const splits = JSON.parse(search_params.get('splits') || 'null') || []
     const view_id = search_params.get('view_id') || ''
     const view_name = search_params.get('view_name') || ''
     const view_search_column_id =
@@ -59,13 +60,15 @@ export default function PlayersTablePage({
             columns,
             sort,
             where,
-            prefix_columns
+            prefix_columns,
+            splits
           },
           saved_table_state: {
             columns,
             sort,
             where,
-            prefix_columns
+            prefix_columns,
+            splits
           }
         },
         {
