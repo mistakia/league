@@ -298,4 +298,59 @@ describe('LIBS SERVER get_players_table_view_results', () => {
       "with `5bafb007211603b8b6af50010c754d15cf65ff27fd9227479cf153c659878fac` as (select `bc_pid`, SUM(rush_yds) AS rush_yds_from_plays_0, CASE WHEN COUNT(*) > 0 THEN ROUND(SUM(rush_yds) / COUNT(*), 2) ELSE 0 END AS rush_yds_per_att_from_plays_0, SUM(CASE WHEN fd = 1 THEN 1 ELSE 0 END) AS rush_first_downs_from_plays_0 from `nfl_plays` where not `play_type` = 'NOPL' and `seas_type` = 'REG' and `year` in (2023) and `xpass_prob` between 0 and 0.4 group by `bc_pid`) select `player`.`pid`, player.fname, player.lname, `5bafb007211603b8b6af50010c754d15cf65ff27fd9227479cf153c659878fac`.`rush_yds_from_plays_0` as `rush_yds_from_plays_0`, `5bafb007211603b8b6af50010c754d15cf65ff27fd9227479cf153c659878fac`.`rush_yds_per_att_from_plays_0` as `rush_yds_per_att_from_plays_0`, `5bafb007211603b8b6af50010c754d15cf65ff27fd9227479cf153c659878fac`.`rush_first_downs_from_plays_0` as `rush_first_downs_from_plays_0` from `player` left join `5bafb007211603b8b6af50010c754d15cf65ff27fd9227479cf153c659878fac` on `5bafb007211603b8b6af50010c754d15cf65ff27fd9227479cf153c659878fac`.`bc_pid` = `player`.`pid` group by `player`.`pid`, `player`.`lname`, `player`.`fname` order by `5bafb007211603b8b6af50010c754d15cf65ff27fd9227479cf153c659878fac`.`rush_yds_from_plays_0` IS NULL, `5bafb007211603b8b6af50010c754d15cf65ff27fd9227479cf153c659878fac`.`rush_yds_from_plays_0` desc limit 500"
     expect(query.toString()).to.equal(expected_query)
   })
+
+  it('should create a split query — year', () => {
+    const query = get_players_table_view_results({
+      splits: ['year'],
+      prefix_columns: ['player_name'],
+      columns: [
+        {
+          column_id: 'player_rush_yards_from_plays',
+          params: { year: [2020, 2021, 2022, 2023] }
+        }
+      ],
+      sort: [
+        {
+          column_id: 'player_rush_yards_from_plays',
+          desc: true
+        }
+      ]
+    })
+    const expected_query =
+      "with `834f8f3dfc9d4af03bd79aa22167876c1a7a4ab19cde7eddb0a7de696b3d6a14` as (select `bc_pid`, `year`, SUM(rush_yds) AS rush_yds_from_plays_0 from `nfl_plays` where not `play_type` = 'NOPL' and `seas_type` = 'REG' and `year` in (2020, 2021, 2022, 2023) group by `bc_pid`, `year`) select `player`.`pid`, player.fname, player.lname, `834f8f3dfc9d4af03bd79aa22167876c1a7a4ab19cde7eddb0a7de696b3d6a14`.`rush_yds_from_plays_0` as `rush_yds_from_plays_0`, COALESCE(834f8f3dfc9d4af03bd79aa22167876c1a7a4ab19cde7eddb0a7de696b3d6a14.year) AS year from `player` left join `834f8f3dfc9d4af03bd79aa22167876c1a7a4ab19cde7eddb0a7de696b3d6a14` on `834f8f3dfc9d4af03bd79aa22167876c1a7a4ab19cde7eddb0a7de696b3d6a14`.`bc_pid` = `player`.`pid` group by `player`.`pid`, `player`.`lname`, `player`.`fname`, `year` order by `834f8f3dfc9d4af03bd79aa22167876c1a7a4ab19cde7eddb0a7de696b3d6a14`.`rush_yds_from_plays_0` IS NULL, `834f8f3dfc9d4af03bd79aa22167876c1a7a4ab19cde7eddb0a7de696b3d6a14`.`rush_yds_from_plays_0` desc limit 500"
+    expect(query.toString()).to.equal(expected_query)
+  })
+
+  it('should create a split query — year', () => {
+    const query = get_players_table_view_results({
+      splits: ['year'],
+      prefix_columns: ['player_name'],
+      columns: [
+        {
+          column_id: 'player_rush_yards_from_plays',
+          params: { year: [2020, 2021, 2022, 2023] }
+        },
+        {
+          column_id: 'player_rush_yds_per_attempt_from_plays',
+          params: {
+            year: [2023],
+            xpass_prob: [0, 0.4]
+          }
+        },
+        {
+          column_id: 'player_rush_yards_from_plays',
+          params: { dwn: [1, 2], year: [2020, 2021, 2022, 2023] }
+        }
+      ],
+      sort: [
+        {
+          column_id: 'player_rush_yards_from_plays',
+          desc: true
+        }
+      ]
+    })
+    const expected_query =
+      "with `834f8f3dfc9d4af03bd79aa22167876c1a7a4ab19cde7eddb0a7de696b3d6a14` as (select `bc_pid`, `year`, SUM(rush_yds) AS rush_yds_from_plays_0 from `nfl_plays` where not `play_type` = 'NOPL' and `seas_type` = 'REG' and `year` in (2020, 2021, 2022, 2023) group by `bc_pid`, `year`), `5bafb007211603b8b6af50010c754d15cf65ff27fd9227479cf153c659878fac` as (select `bc_pid`, `year`, CASE WHEN COUNT(*) > 0 THEN ROUND(SUM(rush_yds) / COUNT(*), 2) ELSE 0 END AS rush_yds_per_att_from_plays_0 from `nfl_plays` where not `play_type` = 'NOPL' and `seas_type` = 'REG' and `year` in (2023) and `xpass_prob` between 0 and 0.4 group by `bc_pid`, `year`), `64bd3d86ddd97e7480d784ae2a40abff00a268f3c8ec78faf5d10b9381c9702b` as (select `bc_pid`, `year`, SUM(rush_yds) AS rush_yds_from_plays_0 from `nfl_plays` where not `play_type` = 'NOPL' and `seas_type` = 'REG' and `dwn` in (1, 2) and `year` in (2020, 2021, 2022, 2023) group by `bc_pid`, `year`) select `player`.`pid`, player.fname, player.lname, `834f8f3dfc9d4af03bd79aa22167876c1a7a4ab19cde7eddb0a7de696b3d6a14`.`rush_yds_from_plays_0` as `rush_yds_from_plays_0`, `5bafb007211603b8b6af50010c754d15cf65ff27fd9227479cf153c659878fac`.`rush_yds_per_att_from_plays_0` as `rush_yds_per_att_from_plays_0`, `64bd3d86ddd97e7480d784ae2a40abff00a268f3c8ec78faf5d10b9381c9702b`.`rush_yds_from_plays_0` as `rush_yds_from_plays_1`, COALESCE(834f8f3dfc9d4af03bd79aa22167876c1a7a4ab19cde7eddb0a7de696b3d6a14.year, 5bafb007211603b8b6af50010c754d15cf65ff27fd9227479cf153c659878fac.year, 64bd3d86ddd97e7480d784ae2a40abff00a268f3c8ec78faf5d10b9381c9702b.year) AS year from `player` left join `834f8f3dfc9d4af03bd79aa22167876c1a7a4ab19cde7eddb0a7de696b3d6a14` on `834f8f3dfc9d4af03bd79aa22167876c1a7a4ab19cde7eddb0a7de696b3d6a14`.`bc_pid` = `player`.`pid` left join `5bafb007211603b8b6af50010c754d15cf65ff27fd9227479cf153c659878fac` on `5bafb007211603b8b6af50010c754d15cf65ff27fd9227479cf153c659878fac`.`bc_pid` = `player`.`pid` and `5bafb007211603b8b6af50010c754d15cf65ff27fd9227479cf153c659878fac`.`year` = `834f8f3dfc9d4af03bd79aa22167876c1a7a4ab19cde7eddb0a7de696b3d6a14`.`year` left join `64bd3d86ddd97e7480d784ae2a40abff00a268f3c8ec78faf5d10b9381c9702b` on `64bd3d86ddd97e7480d784ae2a40abff00a268f3c8ec78faf5d10b9381c9702b`.`bc_pid` = `player`.`pid` and `64bd3d86ddd97e7480d784ae2a40abff00a268f3c8ec78faf5d10b9381c9702b`.`year` = `5bafb007211603b8b6af50010c754d15cf65ff27fd9227479cf153c659878fac`.`year` group by `player`.`pid`, `player`.`lname`, `player`.`fname`, `year` order by `834f8f3dfc9d4af03bd79aa22167876c1a7a4ab19cde7eddb0a7de696b3d6a14`.`rush_yds_from_plays_0` IS NULL, `834f8f3dfc9d4af03bd79aa22167876c1a7a4ab19cde7eddb0a7de696b3d6a14`.`rush_yds_from_plays_0` desc limit 500"
+    expect(query.toString()).to.equal(expected_query)
+  })
 })

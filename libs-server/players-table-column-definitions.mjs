@@ -28,6 +28,7 @@ const generate_table_alias = ({ type, params = {} } = {}) => {
   return hash
 }
 
+// TODO splits
 const projections_index_join = ({ query, params = {} }) => {
   const table_alias = projections_index_table_alias({ params })
   const { year = constants.season.year, week = 0 } = params
@@ -54,10 +55,25 @@ const join_filtered_plays_table = ({
   query,
   table_name,
   pid_column,
-  join_type = 'LEFT'
+  join_type = 'LEFT',
+  splits = [],
+  previous_table_name = null
 }) => {
   const join_func = get_join_func(join_type)
-  query[join_func](table_name, `${table_name}.${pid_column}`, 'player.pid')
+  if (previous_table_name) {
+    query[join_func](table_name, function () {
+      this.on(`${table_name}.${pid_column}`, '=', 'player.pid')
+      for (const split of splits) {
+        this.andOn(
+          `${table_name}.${split}`,
+          '=',
+          `${previous_table_name}.${split}`
+        )
+      }
+    })
+  } else {
+    query[join_func](table_name, `${table_name}.${pid_column}`, 'player.pid')
+  }
 }
 
 const player_stat_from_plays = ({ pid_column, select_string, stat_name }) => ({
@@ -70,16 +86,21 @@ const player_stat_from_plays = ({ pid_column, select_string, stat_name }) => ({
   join: ({
     query,
     table_name = `filtered_plays_${stat_name}`,
-    join_type = 'LEFT'
+    join_type = 'LEFT',
+    splits = [],
+    previous_table_name = null
   }) => {
     join_filtered_plays_table({
       query,
       table_name,
       pid_column,
-      join_type
+      join_type,
+      splits,
+      previous_table_name
     })
   },
-  use_having: true
+  use_having: true,
+  supported_splits: ['year']
 })
 
 const projections_index_table_alias = ({ params = {} }) => {
@@ -87,6 +108,7 @@ const projections_index_table_alias = ({ params = {} }) => {
   return `projections_index_${year}_week_${week}`
 }
 
+// TODO splits
 const league_format_player_projection_values_join = ({
   query,
   params = {}
@@ -123,6 +145,7 @@ const league_format_player_projection_values_table_alias = ({
   return `league_format_player_projection_values_${year}_week_${week}_${league_format_hash}`
 }
 
+// TODO splits
 const scoring_format_player_projection_points_join = ({
   query,
   params = {}
@@ -159,6 +182,7 @@ const scoring_format_player_projection_points_table_alias = ({
   return `scoring_format_player_projection_points_${year}_week_${week}_${scoring_format_hash}`
 }
 
+// TODO splits
 const league_player_projection_values_join = ({ query, params = {} }) => {
   const { year = constants.season.year, week = 0, league_id = 1 } = params
   const table_alias = league_player_projection_values_table_alias({ params })
@@ -324,6 +348,7 @@ const create_espn_score_columns = (column_name) => ({
       year = 2023
     }
 
+    // TODO handle splits
     query.joinRaw(
       `LEFT JOIN ${table_name} ON \`player_seasonlogs\`.\`pid\` = \`player\`.\`pid\` AND \`player_seasonlogs\`.\`year\` = ${year}`
     )
@@ -368,12 +393,20 @@ const create_team_share_stat = ({
   },
   table_alias: ({ params }) =>
     generate_table_alias({ type: column_name, params }),
-  join: ({ query, table_name, join_type }) => {
+  join: ({
+    query,
+    table_name,
+    join_type,
+    splits = [],
+    previous_table_name = null
+  }) => {
     join_filtered_plays_table({
       query,
       table_name,
       pid_column: 'pid',
-      join_type
+      join_type,
+      splits,
+      previous_table_name
     })
   }
 })
