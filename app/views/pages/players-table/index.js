@@ -19,20 +19,10 @@ const get_players_table_views = createSelector(
 )
 
 const get_players_percentiles = createSelector(
-  (state) => state.getIn(['players', 'items']),
-  (state) => state.getIn(['players', 'players_table_view_result_pids']),
+  (state) => state.getIn(['players_table']),
   get_selected_players_table_view,
   getPlayerTableFields,
-  (
-    player_maps,
-    players_table_view_result_pids,
-    selected_players_table_view,
-    player_fields
-  ) => {
-    const players = players_table_view_result_pids
-      .map((pid) => player_maps.get(pid))
-      .toJS()
-
+  (players_table_data, selected_players_table_view, player_fields) => {
     const percentile_stat_keys = []
     const table_state_columns = []
     for (const [
@@ -62,7 +52,7 @@ const get_players_percentiles = createSelector(
     }
 
     const percentiles = calculatePercentiles({
-      items: players,
+      items: players_table_data.toJS(),
       stats: percentile_stat_keys
     })
 
@@ -71,8 +61,7 @@ const get_players_percentiles = createSelector(
 )
 
 const mapStateToProps = createSelector(
-  (state) => state.getIn(['players', 'items']),
-  (state) => state.getIn(['players', 'players_table_view_result_pids']),
+  (state) => state.getIn(['players_table']),
   (state) => state.getIn(['players', 'allPlayersPending']),
   (state) => state.getIn(['app', 'userId']),
   getStats,
@@ -85,8 +74,7 @@ const mapStateToProps = createSelector(
   getTeams,
   get_players_percentiles,
   (
-    player_maps,
-    players_table_view_result_pids,
+    players_table_data,
     allPlayersPending,
     userId,
     stats,
@@ -99,9 +87,7 @@ const mapStateToProps = createSelector(
     teams,
     players_percentiles
   ) => ({
-    players: players_table_view_result_pids
-      .map((pid) => player_maps.get(pid))
-      .toJS(),
+    players: players_table_data.toJS(),
     isLoggedIn: Boolean(userId),
     isPending:
       allPlayersPending ||

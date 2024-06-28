@@ -41,7 +41,6 @@ const initialState = new Map({
   cutlist: new List(),
   baselines: new Map(),
   selected: null,
-  players_table_view_result_pids: new List(),
   ...default_player_filter_options
 })
 
@@ -461,32 +460,6 @@ export function playersReducer(state = initialState, { payload, type }) {
 
     case playerActions.RESET_PLAYER_FILTER_OPTIONS:
       return state.merge({ ...default_player_filter_options })
-
-    case playerActions.POST_PLAYERS_TABLE_VIEW_SEARCH_FULFILLED:
-      return state.withMutations((players) => {
-        payload.data.forEach((playerData) => {
-          if (players.hasIn(['items', playerData.pid])) {
-            const data = players.getIn(['items', playerData.pid])
-            players.setIn(
-              ['items', playerData.pid],
-              createPlayer({
-                ...data.toJS(),
-                ...playerData
-              })
-            )
-          } else {
-            players.setIn(['items', playerData.pid], createPlayer(playerData))
-          }
-        })
-
-        const players_table_view_result_pids = payload.data.map(
-          (playerData) => playerData.pid
-        )
-        players.set(
-          'players_table_view_result_pids',
-          new List(players_table_view_result_pids)
-        )
-      })
 
     default:
       return state
