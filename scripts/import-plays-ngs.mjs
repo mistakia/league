@@ -198,7 +198,10 @@ const importPlaysForWeek = async ({
       if (snap_inserts.length) {
         try {
           await db('nfl_snaps').where({ esbid }).del()
-          await db('nfl_snaps').insert(snap_inserts).onConflict().merge()
+          await db('nfl_snaps')
+            .insert(snap_inserts)
+            .onConflict(['esbid', 'playId', 'nflId'])
+            .merge()
         } catch (err) {
           log(`Error on inserting snaps for esbid: ${game.esbid}`)
           log(err)
@@ -209,9 +212,12 @@ const importPlaysForWeek = async ({
         try {
           await db('nfl_play_stats')
             .insert(play_stat_inserts)
-            .onConflict()
+            .onConflict(['esbid', 'playId', 'statId', 'playerName'])
             .merge()
-          await db('nfl_plays').insert(play_inserts).onConflict().merge()
+          await db('nfl_plays')
+            .insert(play_inserts)
+            .onConflict(['esbid', 'playId'])
+            .merge()
           log(
             `inserted ${play_inserts.length} play stats for esbid: ${game.esbid}`
           )
@@ -230,7 +236,7 @@ const importPlaysForWeek = async ({
           await db('nfl_snaps_current_week').where({ esbid }).del()
           await db('nfl_snaps_current_week')
             .insert(snap_inserts)
-            .onConflict()
+            .onConflict(['esbid', 'playId', 'nflId'])
             .merge()
         } catch (err) {
           log(`Error on inserting snaps for esbid: ${game.esbid}`)
@@ -248,7 +254,7 @@ const importPlaysForWeek = async ({
 
           await db('nfl_plays_current_week')
             .insert(play_inserts)
-            .onConflict()
+            .onConflict(['esbid', 'playId'])
             .merge()
         } catch (err) {
           log(

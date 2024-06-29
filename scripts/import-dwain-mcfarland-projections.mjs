@@ -96,7 +96,10 @@ const import_dwain_mcfarland_projections = async ({
 
   if (inserts.length) {
     log(`Inserting ${inserts.length} projections into database`)
-    await db('projections_index').insert(inserts).onConflict().merge()
+    await db('projections_index')
+      .insert(inserts)
+      .onConflict(['sourceid', 'pid', 'userid', 'week', 'year'])
+      .merge()
     await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
   }
 }

@@ -65,7 +65,7 @@ const update_play = async ({
           new: edit.rhs,
           timestamp: Math.round(Date.now() / 1000)
         })
-        .onConflict()
+        .onConflict(['esbid', 'playId', 'prop', 'timestamp'])
         .ignore()
     }
 

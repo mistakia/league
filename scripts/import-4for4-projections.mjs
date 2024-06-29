@@ -126,7 +126,10 @@ const run = async ({ url, is_regular_season_projection = false }) => {
     log(
       `Inserting ${inserts.length} projections for week ${week} into database`
     )
-    await db('projections_index').insert(inserts).onConflict().merge()
+    await db('projections_index')
+      .insert(inserts)
+      .onConflict(['sourceid', 'pid', 'userid', 'week', 'year'])
+      .merge()
     await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
   }
 }

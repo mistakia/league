@@ -10,7 +10,7 @@ export default async function ({
   const query = db('player')
     .whereNot('current_nfl_team', 'INA')
     .where('pos1', pos)
-    .orderByRaw('RAND()')
+    .orderByRaw('RANDOM()')
     .limit(1)
 
   if (exclude_pids.length) {

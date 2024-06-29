@@ -31,7 +31,7 @@ const update_player_id = async function ({ current_pid, new_pid }) {
   const tables = await db('information_schema.columns')
     .select('table_name', 'column_name')
     .where(function () {
-      this.where('column_name', 'like', '%_pid')
+      this.whereILike('column_name', '%_pid')
       this.orWhere('column_name', 'pid')
     })
     .groupBy('table_name', 'column_name')

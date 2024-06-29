@@ -75,7 +75,7 @@ const simulate_season = async (lid) => {
   if (forecastInserts.length) {
     await db('league_team_forecast')
       .insert(forecastInserts)
-      .onConflict()
+      .onConflict(['tid', 'year', 'week', 'day'])
       .merge()
     log(`saved ${forecastInserts.length} team forecasts`)
   }

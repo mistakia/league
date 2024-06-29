@@ -94,10 +94,13 @@ const process_average_projections = async ({ year }) => {
 
   if (projectionInserts.length) {
     const timestamp = 0 // must be set at zero for unique key
-    await db('projections_index').insert(projectionInserts).onConflict().merge()
+    await db('projections_index')
+      .insert(projectionInserts)
+      .onConflict(['sourceid', 'pid', 'userid', 'week', 'year'])
+      .merge()
     await db('projections')
       .insert(projectionInserts.map((i) => ({ ...i, timestamp })))
-      .onConflict()
+      .onConflict(['sourceid', 'pid', 'userid', 'timestamp', 'week', 'year'])
       .merge()
     log(`processed and saved ${projectionInserts.length} projections`)
   }
@@ -105,7 +108,7 @@ const process_average_projections = async ({ year }) => {
   if (rosProjectionInserts.length) {
     await db('ros_projections')
       .insert(rosProjectionInserts)
-      .onConflict()
+      .onConflict(['sourceid', 'pid', 'year'])
       .merge()
     log(`processed and saved ${rosProjectionInserts.length} ros projections`)
   }
@@ -397,7 +400,10 @@ const process_league = async ({ year, lid }) => {
   }
 
   if (baselineInserts.length) {
-    await db('league_baselines').insert(baselineInserts).onConflict().merge()
+    await db('league_baselines')
+      .insert(baselineInserts)
+      .onConflict(['lid', 'week', 'pos', 'type'])
+      .merge()
     log(`saved ${baselineInserts.length} baselines`)
   }
 
@@ -405,7 +411,7 @@ const process_league = async ({ year, lid }) => {
     await db('league_player_projection_values').del().where({ lid })
     await db('league_player_projection_values')
       .insert(valueInserts)
-      .onConflict()
+      .onConflict(['pid', 'lid', 'week', 'year'])
       .merge()
     log(`processed and saved ${valueInserts.length} player values`)
   }

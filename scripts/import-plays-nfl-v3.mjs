@@ -195,12 +195,15 @@ const importPlaysForWeek = async ({
         // save in final tables
         await db('nfl_play_stats')
           .insert(play_stat_inserts)
-          .onConflict()
+          .onConflict(['esbid', 'playId', 'statId', 'playerName'])
           .merge()
       }
 
       if (play_inserts.length) {
-        await db('nfl_plays').insert(play_inserts).onConflict().merge()
+        await db('nfl_plays')
+          .insert(play_inserts)
+          .onConflict(['esbid', 'playId'])
+          .merge()
       }
     }
 
@@ -209,14 +212,14 @@ const importPlaysForWeek = async ({
       if (play_stat_inserts.length) {
         await db('nfl_play_stats_current_week')
           .insert(play_stat_inserts)
-          .onConflict()
+          .onConflict(['esbid', 'playId', 'statId', 'playerName'])
           .merge()
       }
 
       if (play_inserts.length) {
         await db('nfl_plays_current_week')
           .insert(play_inserts)
-          .onConflict()
+          .onConflict(['esbid', 'playId'])
           .merge()
       }
     } catch (err) {

@@ -222,7 +222,7 @@ describe('API /waivers - free agency', function () {
       const players = await knex('player')
         .whereNot('current_nfl_team', 'INA')
         .where('pos1', 'RB')
-        .orderByRaw('RAND()')
+        .orderByRaw('RANDOM()')
         .limit(1)
 
       const player = players[0]

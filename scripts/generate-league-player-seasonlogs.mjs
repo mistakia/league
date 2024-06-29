@@ -121,7 +121,10 @@ const generate_league_player_seasonlogs = async ({
     log(`Deleted ${deleted_count} excess player seasonlogs`)
 
     log(`updated ${inserts.length} player regular seasons`)
-    await db('league_player_seasonlogs').insert(inserts).onConflict().merge()
+    await db('league_player_seasonlogs')
+      .insert(inserts)
+      .onConflict(['pid', 'year', 'lid'])
+      .merge()
   }
 }
 

@@ -2707,7 +2707,7 @@ CREATE TABLE `transition_bids` (
 -- --------------------------------------------------------
 
 --
--- Table structure for table `poach_releases`
+-- Table structure for table `transition_releases`
 --
 
 DROP TABLE IF EXISTS `transition_releases`;

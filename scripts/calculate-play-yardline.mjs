@@ -36,7 +36,10 @@ const calculate_play_yardline = async () => {
   }
 
   if (inserts.length) {
-    await db('nfl_plays').insert(inserts).onConflict().merge()
+    await db('nfl_plays')
+      .insert(inserts)
+      .onConflict(['esbid', 'playId'])
+      .merge()
     log(`Updated ${inserts.length} play yardlines`)
   }
 }

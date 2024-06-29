@@ -116,7 +116,8 @@ const run = async ({
   }
 
   if (inserts.length) {
-    await db('nfl_games').insert(inserts).onConflict().merge()
+    // TODO not sure which unique key should be used here
+    await db('nfl_games').insert(inserts).onConflict('esbid').merge()
     log(`saved data for ${inserts.length} games`)
   }
 }

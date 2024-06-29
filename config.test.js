@@ -1,23 +1,14 @@
-const path = require('path')
-
 module.exports = {
-  mysql: {
-    client: 'mysql2',
+  postgres: {
+    client: 'pg',
     connection: {
       host: '127.0.0.1',
-      user: 'root',
+      user: 'league_test',
       database: 'league_test',
+      password: 'league_test',
+      port: 5432,
       decimalNumbers: true,
       multipleStatements: true
-    },
-    migrations: {
-      directory: path.resolve(__dirname, './db/migrations'),
-      loadExtensions: ['.mjs'],
-      tableName: 'league_migrations'
-    },
-    seeds: {
-      directory: path.resolve(__dirname, './db/seeds/test'),
-      loadExtensions: ['.mjs']
     }
   },
   ssl: false,

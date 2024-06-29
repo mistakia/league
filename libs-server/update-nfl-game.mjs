@@ -56,16 +56,13 @@ const update_nfl_game = async ({
 
     const prev = edit.lhs
     if (prev) {
-      await db('nfl_games_changelog')
-        .insert({
-          esbid: game_row.esbid,
-          column_name,
-          prev,
-          new: edit.rhs,
-          timestamp: Math.round(Date.now() / 1000)
-        })
-        .onConflict()
-        .ignore()
+      await db('nfl_games_changelog').insert({
+        esbid: game_row.esbid,
+        column_name,
+        prev,
+        new: edit.rhs,
+        timestamp: Math.round(Date.now() / 1000)
+      })
     }
 
     await db('nfl_games')

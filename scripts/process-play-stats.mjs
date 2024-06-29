@@ -280,7 +280,7 @@ const run = async ({
   if (player_gamelog_inserts.length) {
     await db('player_gamelogs')
       .insert(player_gamelog_inserts)
-      .onConflict()
+      .onConflict(['esbid', 'tm', 'pid'])
       .merge()
     log(`Updated ${player_gamelog_inserts.length} gamelogs`)
   }

@@ -246,7 +246,10 @@ router.put('/:poachId', async (req, res) => {
         poachid: poachId,
         pid
       }))
-      await db('poach_releases').insert(releaseInserts).onConflict().merge()
+      await db('poach_releases')
+        .insert(releaseInserts)
+        .onConflict(['poachid', 'pid'])
+        .merge()
     }
     await db('poach_releases')
       .del()

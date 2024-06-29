@@ -133,7 +133,12 @@ const insert_market_selection = async ({
           odds_decimal,
           odds_american
         })
-        .onConflict()
+        .onConflict([
+          'source_id',
+          'source_market_id',
+          'source_selection_id',
+          'timestamp'
+        ])
         .merge()
 
       differences.forEach((difference) => {
@@ -155,7 +160,12 @@ const insert_market_selection = async ({
         timestamp,
         time_type: 'CLOSE'
       })
-      .onConflict()
+      .onConflict([
+        'source_id',
+        'source_market_id',
+        'source_selection_id',
+        'time_type'
+      ])
       .merge()
   }
 

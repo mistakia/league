@@ -54,7 +54,10 @@ const processPlayerSeasonlogs = async ({
     log(`Deleted ${deleted_count} excess player seasonlogs`)
 
     log(`updating ${inserts.length} player seasonlogs for ${year} ${seas_type}`)
-    await db('player_seasonlogs').insert(inserts).onConflict().merge()
+    await db('player_seasonlogs')
+      .insert(inserts)
+      .onConflict(['pid', 'year', 'seas_type'])
+      .merge()
   }
 }
 

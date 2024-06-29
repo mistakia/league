@@ -262,7 +262,7 @@ const generate_seasonlogs = async ({
     log(`inserting ${team_seasonlog_inserts.length} team stats`)
     await db('nfl_team_seasonlogs')
       .insert(team_seasonlog_inserts)
-      .onConflict()
+      .onConflict(['stat_key', 'year', 'tm'])
       .merge()
   }
 
@@ -327,13 +327,16 @@ const generate_seasonlogs = async ({
     )
     await db('league_nfl_team_seasonlogs')
       .insert(league_team_seasonlog_inserts)
-      .onConflict()
+      .onConflict(['lid', 'stat_key', 'year', 'tm'])
       .merge()
   }
 
   if (percentile_inserts.length) {
     log(`inserting ${percentile_inserts.length} percentiles`)
-    await db('percentiles').insert(percentile_inserts).onConflict().merge()
+    await db('percentiles')
+      .insert(percentile_inserts)
+      .onConflict(['percentile_key', 'field'])
+      .merge()
   }
 }
 

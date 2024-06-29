@@ -233,7 +233,7 @@ const run = async () => {
         year: constants.season.year,
         ...data
       })
-      .onConflict()
+      .onConflict(['team', 'week', 'year'])
       .merge()
   }
 }
