@@ -1,5 +1,7 @@
 import db from '#db'
-import players_table_column_definitions, { split_params } from './players-table-column-definitions.mjs'
+import players_table_column_definitions, {
+  split_params
+} from './players-table-column-definitions.mjs'
 import apply_play_by_play_column_params_to_query from './apply-play-by-play-column-params-to-query.mjs'
 
 const add_play_by_play_with_statement = ({
