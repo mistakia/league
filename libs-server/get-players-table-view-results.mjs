@@ -102,7 +102,7 @@ const get_where_string = ({
   } else if (where_clause.operator === 'NOT IN') {
     where_string = `${where_column} NOT IN ('${where_clause.value.join("', '")}')`
   } else if (where_clause.operator === 'ILIKE') {
-    where_string = `${where_column} LIKE '%${(where_clause.value || '').toUpperCase()}%'`
+    where_string = `${where_column} ILIKE '%${where_clause.value}%'`
   } else if (where_clause.operator === 'LIKE') {
     where_string = `${where_column} LIKE '%${where_clause.value}%'`
   } else if (where_clause.operator === 'NOT LIKE') {

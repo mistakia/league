@@ -550,7 +550,10 @@ router.put('/:waiverId', async (req, res) => {
         waiverid: waiverId,
         pid
       }))
-      await db('waiver_releases').insert(releaseInserts).onConflict().merge()
+      await db('waiver_releases')
+        .insert(releaseInserts)
+        .onConflict(['waiverid', 'pid'])
+        .merge()
     }
     await db('waiver_releases')
       .del()

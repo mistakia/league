@@ -176,7 +176,7 @@ const project_lineups = async (lid) => {
   if (team_lineup_inserts.length) {
     await db('league_team_lineups')
       .insert(team_lineup_inserts)
-      .onConflict()
+      .onConflict(['tid', 'year', 'week'])
       .merge()
     log(`saved ${team_lineup_inserts.length} team lineups`)
   }
@@ -185,7 +185,7 @@ const project_lineups = async (lid) => {
     await db('league_team_lineup_starters').del().where({ lid, year })
     await db('league_team_lineup_starters')
       .insert(team_lineup_starter_inserts)
-      .onConflict()
+      .onConflict(['lid', 'pid', 'year', 'week'])
       .merge()
     log(`saved ${team_lineup_starter_inserts.length} team lineup starters`)
   }
@@ -194,7 +194,7 @@ const project_lineups = async (lid) => {
     await db('league_team_lineup_contributions').del().where({ lid, year })
     await db('league_team_lineup_contributions')
       .insert(team_lineup_contribution_inserts)
-      .onConflict()
+      .onConflict(['lid', 'pid', 'year'])
       .merge()
     log(
       `saved ${team_lineup_contribution_inserts.length} team lineup contributions`
@@ -205,7 +205,7 @@ const project_lineups = async (lid) => {
     await db('league_team_lineup_contribution_weeks').del().where({ lid, year })
     await db('league_team_lineup_contribution_weeks')
       .insert(team_lineup_contribution_week_inserts)
-      .onConflict()
+      .onConflict(['lid', 'pid', 'year', 'week'])
       .merge()
     log(
       `saved ${team_lineup_contribution_week_inserts.length} team lineup contribution weeks`

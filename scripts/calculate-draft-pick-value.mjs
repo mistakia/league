@@ -49,7 +49,7 @@ const calculateDraftPickValue = async ({ league_format_hash } = {}) => {
     log(`updated ${inserts.length} draft pick values`)
     await db('league_format_draft_pick_value')
       .insert(inserts)
-      .onConflict()
+      .onConflict(['rank', 'league_format_hash'])
       .merge()
   }
 }

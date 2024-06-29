@@ -64,7 +64,7 @@ const generate_league_format_player_gamelogs = async ({
 
     await db('league_format_player_gamelogs')
       .insert(inserts)
-      .onConflict()
+      .onConflict(['pid', 'esbid', 'league_format_hash'])
       .merge()
     log(
       `Updated ${inserts.length} player gamelogs for league_format ${league_format_hash} in week ${week} ${year}`

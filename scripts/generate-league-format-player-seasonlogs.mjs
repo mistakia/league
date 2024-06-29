@@ -100,7 +100,7 @@ const generate_league_format_player_seasonlogs = async ({
     log(`updated ${inserts.length} player regular seasons`)
     await db('league_format_player_seasonlogs')
       .insert(inserts)
-      .onConflict()
+      .onConflict(['pid', 'year', 'league_format_hash'])
       .merge()
   }
 }

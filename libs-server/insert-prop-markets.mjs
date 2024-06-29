@@ -99,7 +99,7 @@ const insert_market = async ({ timestamp, selections, ...market }) => {
           live,
           selection_count
         })
-        .onConflict()
+        .onConflict(['source_id', 'source_market_id', 'timestamp'])
         .merge()
     } else {
       // format previous_market_row to convert `open` and `live` to booleans for comparison
@@ -143,7 +143,7 @@ const insert_market = async ({ timestamp, selections, ...market }) => {
               live,
               selection_count
             })
-            .onConflict()
+            .onConflict(['source_id', 'source_market_id', 'timestamp'])
             .merge()
         }
 
@@ -183,7 +183,7 @@ const insert_market = async ({ timestamp, selections, ...market }) => {
     if (!market.live && timestamp > existing_market.timestamp) {
       await db('prop_markets_index')
         .insert({ ...market, timestamp, time_type: 'CLOSE' })
-        .onConflict()
+        .onConflict(['source_id', 'source_market_id', 'time_type'])
         .merge()
     }
 

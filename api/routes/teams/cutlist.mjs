@@ -103,7 +103,10 @@ router.post('/?', async (req, res) => {
     }
 
     if (result.length) {
-      await db('league_cutlist').insert(result).onConflict().merge()
+      await db('league_cutlist')
+        .insert(result)
+        .onConflict(['tid', 'pid'])
+        .merge()
     }
 
     await db('league_cutlist').del().whereNotIn('pid', pids).where('tid', tid)

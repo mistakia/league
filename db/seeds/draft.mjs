@@ -4,7 +4,7 @@ import { getRoster, getLeague } from '#libs-server'
 export default async function (knex) {
   const lid = 1
   const league = await getLeague({ lid })
-  const players = await knex('player').orderByRaw('RAND()')
+  const players = await knex('player').orderByRaw('RANDOM()')
 
   await knex('rosters_players').del()
 

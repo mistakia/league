@@ -168,7 +168,10 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
       continue
     }
 
-    await db('keeptradecut_rankings').insert(inserts).onConflict().ignore()
+    await db('keeptradecut_rankings')
+      .insert(inserts)
+      .onConflict(['pid', 'd', 'qb', 'type'])
+      .ignore()
 
     if (full) await wait(4000)
   }

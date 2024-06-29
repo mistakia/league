@@ -51,16 +51,13 @@ const format_player_ids = async () => {
         await db('player').where({ pid: player.pid }).update({ pid })
         await update_player_id({ current_pid: player.pid, new_pid: pid })
 
-        await db('player_changelog')
-          .insert({
-            pid,
-            prop: 'pid',
-            prev: player.pid,
-            new: pid,
-            timestamp: Math.round(Date.now() / 1000)
-          })
-          .onConflict()
-          .ignore()
+        await db('player_changelog').insert({
+          pid,
+          prop: 'pid',
+          prev: player.pid,
+          new: pid,
+          timestamp: Math.round(Date.now() / 1000)
+        })
 
         log(
           `updated pid for ${player.fname} ${player.lname} from ${player.pid} to ${pid}`

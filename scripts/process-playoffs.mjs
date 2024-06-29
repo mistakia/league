@@ -38,7 +38,10 @@ const processPlayoffs = async ({ lid, year }) => {
       })
     }
 
-    await db('playoffs').insert(playoff_inserts).onConflict().merge()
+    await db('playoffs')
+      .insert(playoff_inserts)
+      .onConflict(['tid', 'uid', 'year'])
+      .merge()
     log(
       `inserted ${playoff_inserts.length} wildcard round matchups for lid ${lid}`
     )
@@ -89,7 +92,10 @@ const processPlayoffs = async ({ lid, year }) => {
     }
   }
 
-  await db('playoffs').insert(playoffs).onConflict().merge()
+  await db('playoffs')
+    .insert(playoffs)
+    .onConflict(['tid', 'uid', 'year'])
+    .merge()
   log(`updated ${playoffs.length} playoff results`)
 
   if (constants.season.year !== year || constants.season.week > 17) {
@@ -150,7 +156,10 @@ const processPlayoffs = async ({ lid, year }) => {
     }
 
     log(team_stat_inserts)
-    await db('team_stats').insert(team_stat_inserts).onConflict().merge()
+    await db('team_stats')
+      .insert(team_stat_inserts)
+      .onConflict(['tid', 'year'])
+      .merge()
     log(
       `updated ${team_stat_inserts.length} team stats for lid ${lid} year ${year}`
     )

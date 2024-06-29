@@ -389,7 +389,18 @@ const process_props_index = async ({
 
   if (props_index_inserts.length) {
     log(`saving ${props_index_inserts.length} prop rows`)
-    await db('props_index').insert(props_index_inserts).onConflict().merge()
+    await db('props_index')
+      .insert(props_index_inserts)
+      .onConflict([
+        'source_id',
+        'pid',
+        'week',
+        'year',
+        'prop_type',
+        'ln',
+        'time_type'
+      ])
+      .merge()
   }
 }
 

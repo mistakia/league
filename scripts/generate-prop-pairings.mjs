@@ -375,13 +375,16 @@ const generate_prop_pairings = async ({
     const chunk_size = 10000
     for (let i = 0; i < prop_pairing_inserts.length; i += chunk_size) {
       const chunk = prop_pairing_inserts.slice(i, i + chunk_size)
-      await db('prop_pairings').insert(chunk).onConflict().merge()
+      await db('prop_pairings').insert(chunk).onConflict('pairing_id').merge()
     }
 
     if (prop_pairing_props_inserts.length) {
       for (let i = 0; i < prop_pairing_props_inserts.length; i += chunk_size) {
         const chunk = prop_pairing_props_inserts.slice(i, i + chunk_size)
-        await db('prop_pairing_props').insert(chunk).onConflict().merge()
+        await db('prop_pairing_props')
+          .insert(chunk)
+          .onConflict(['pairing_id', 'prop_id'])
+          .merge()
       }
     }
 

@@ -7,14 +7,15 @@ jobs:
     runs-on: ${{ matrix.os }}
 
     services:
-      mysql:
-        image: mysql:8.0
+      postgres:
+        image: postgres:latest
         env:
-          MYSQL_ALLOW_EMPTY_PASSWORD: yes
-          MYSQL_DATABASE: league_test
+          POSTGRES_USER: league_test
+          POSTGRES_PASSWORD: league_test
+          POSTGRES_DB: league_test
         ports:
-          - 3306:3306
-        options: --health-cmd="mysqladmin ping" --health-interval=10s --health-timeout=5s --health-retries=3
+          - 5432:5432
+        options: --health-cmd="pg_isready" --health-interval=10s --health-timeout=5s --health-retries=5
 
     strategy:
       matrix:

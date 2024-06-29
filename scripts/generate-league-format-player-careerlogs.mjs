@@ -107,7 +107,7 @@ const generate_league_format_player_careerlogs = async ({
     )
     await db('league_format_player_careerlogs')
       .insert(inserts)
-      .onConflict()
+      .onConflict(['pid', 'league_format_hash'])
       .merge()
   }
 }

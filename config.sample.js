@@ -1,5 +1,3 @@
-const path = require('path')
-
 module.exports = {
   user_agent: '',
   ssl: true,
@@ -108,8 +106,8 @@ module.exports = {
     algorithms: ['HS256'],
     credentialsRequired: false
   },
-  mysql: {
-    client: 'mysql2',
+  postgres: {
+    client: 'pg',
     connection: {
       host: 'localhost',
       user: 'root',
@@ -120,14 +118,6 @@ module.exports = {
     pool: {
       min: 2,
       max: 10
-    },
-    migrations: {
-      directory: path.resolve(__dirname, './db/migrations'),
-      loadExtensions: ['.mjs'],
-      tableName: 'league_migrations'
-    },
-    seeds: {
-      directory: path.resolve(__dirname, './db/seeds/production')
     }
   }
 }

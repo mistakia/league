@@ -107,16 +107,13 @@ const updatePlayer = async ({ player_row, pid, update }) => {
 
     const prev = edit.lhs
     if (prev) {
-      await db('player_changelog')
-        .insert({
-          pid: player_row.pid,
-          prop,
-          prev,
-          new: edit.rhs,
-          timestamp: Math.round(Date.now() / 1000)
-        })
-        .onConflict()
-        .ignore()
+      await db('player_changelog').insert({
+        pid: player_row.pid,
+        prop,
+        prev,
+        new: edit.rhs,
+        timestamp: Math.round(Date.now() / 1000)
+      })
     }
 
     await db('player')

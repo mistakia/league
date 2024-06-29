@@ -58,7 +58,7 @@ const processNflGames = async () => {
 
   if (updates.length) {
     log(`updating ${updates.length} nfl games`)
-    await db('nfl_games').insert(updates).onConflict().merge()
+    await db('nfl_games').insert(updates).onConflict('esbid').merge()
   } else {
     log('No games to update')
   }

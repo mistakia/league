@@ -547,7 +547,7 @@ router.put('/?', async (req, res) => {
       }))
       await db('transition_releases')
         .insert(releaseInserts)
-        .onConflict()
+        .onConflict(['transitionid', 'pid'])
         .merge()
     }
 

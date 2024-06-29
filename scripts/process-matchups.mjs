@@ -87,12 +87,12 @@ const run = async ({ lid = 1, year = constants.season.year }) => {
   }
 
   if (teamStats.length) {
-    await db('team_stats').insert(teamStats).onConflict().merge()
+    await db('team_stats').insert(teamStats).onConflict(['tid', 'year']).merge()
     log(`saved team stats for ${teamStats.length} teams`)
   }
 
   if (matchups.length) {
-    await db('matchups').insert(matchups).onConflict().merge()
+    await db('matchups').insert(matchups).onConflict('uid').merge()
     log(`saved ${matchups.length} matchups`)
   }
 }
