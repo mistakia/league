@@ -479,7 +479,10 @@ export function playersReducer(state = initialState, { payload, type }) {
               })
             )
           } else {
-            players.setIn(['items', row.pid], createPlayer(formatted_player_data))
+            players.setIn(
+              ['items', row.pid],
+              createPlayer(formatted_player_data)
+            )
           }
         })
       })

@@ -365,7 +365,13 @@ const create_team_share_stat = ({
   column_name,
   where_column: () => column_name,
   use_having: true,
-  with: ({ query, with_table_name, params, having_clauses = [], splits = [] }) => {
+  with: ({
+    query,
+    with_table_name,
+    params,
+    having_clauses = [],
+    splits = []
+  }) => {
     const with_query = db('nfl_plays')
       .select('pg.pid')
       .select(db.raw(select_string))
@@ -381,12 +387,12 @@ const create_team_share_stat = ({
       .whereNotNull(pid_column)
       .groupBy('pg.pid')
 
-      for (const split of splits) {
-        if (split_params.includes(split)) {
-          with_query.select(split)
-          with_query.groupBy(split)
-        }
+    for (const split of splits) {
+      if (split_params.includes(split)) {
+        with_query.select(split)
+        with_query.groupBy(split)
       }
+    }
 
     apply_play_by_play_column_params_to_query({
       query: with_query,
