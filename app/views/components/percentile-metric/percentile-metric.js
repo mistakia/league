@@ -35,20 +35,26 @@ export default function PercentileMetric({
     color = `rgba(46, 163, 221, ${maxPercent}`
   }
 
-  const formatValue = (value) => {
+  const format_value = (value) => {
     if (!value) {
       return '-'
     }
 
-    const is_negative = value < 0
+    const numeric_value = Number(value)
+
+    if (isNaN(numeric_value)) {
+      return '-'
+    }
+
+    const is_negative = numeric_value < 0
     const sign_str = is_negative ? '-' : show_positivity ? '+' : ''
-    const val = value.toFixed(fixed)
+    const val = numeric_value.toFixed(fixed)
     const abs_value = Math.abs(val)
 
     return `${sign_str}${prefix}${abs_value}`
   }
 
-  const body = children || formatValue(value)
+  const body = children || format_value(value)
 
   const classNames = ['table__cell', 'metric']
   if (className) classNames.push(className)
