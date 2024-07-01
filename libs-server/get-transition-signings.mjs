@@ -3,10 +3,11 @@ import db from '#db'
 export default async function ({ lid, year = null }) {
   const transition_bids_query = db('transition_bids')
     .select(
-      db.raw('*, DATE_FORMAT(FROM_UNIXTIME(processed), "%Y-%m-%d") AS date')
+      '*',
+      db.raw("TO_CHAR(TO_TIMESTAMP(processed), 'YYYY-MM-DD') AS date")
     )
     .where({
-      succ: 1,
+      succ: true,
       lid
     })
 

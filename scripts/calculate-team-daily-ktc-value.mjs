@@ -48,7 +48,7 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
   log('building keeptradecut index')
   const keeptradecut_index = {}
   const ktc_values = await db('keeptradecut_rankings')
-    .select(db.raw('pid, DATE_FORMAT(FROM_UNIXTIME(d), "%Y-%m-%d") AS date, v'))
+    .select(db.raw("pid, TO_CHAR(TO_TIMESTAMP(d), 'YYYY-MM-DD') AS date, v"))
     .whereIn('pid', transaction_pids)
     .where('qb', 2) // choose based on league settings
     .where('type', constants.KEEPTRADECUT.VALUE)
@@ -329,9 +329,18 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
   log(`ignored ${ignored_tran_types.size} transaction types`)
   log(ignored_tran_types)
 
-  if (team_daily_value_inserts.length) {
+  const unique_team_daily_value_inserts = Array.from(
+    new Map(
+      team_daily_value_inserts.map((item) => [
+        `${item.lid}_${item.tid}_${item.date}`,
+        item
+      ])
+    ).values()
+  )
+
+  if (unique_team_daily_value_inserts.length) {
     await batch_insert({
-      items: team_daily_value_inserts,
+      items: unique_team_daily_value_inserts,
       save: (items) =>
         db('league_team_daily_values')
           .insert(items)
@@ -339,9 +348,8 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
           .merge(),
       batch_size: 5000
     })
-
-    log(`inserted ${team_daily_value_inserts.length} team daily values`)
   }
+  log(`inserted ${unique_team_daily_value_inserts.length} team daily values`)
 }
 
 const main = async () => {
