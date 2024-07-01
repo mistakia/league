@@ -149,7 +149,7 @@
     "react-redux": "^8.1.3",
     "react-router": "^6.23.0",
     "react-router-dom": "^6.23.0",
-    "react-table": "mistakia/react-table#419f8e83961c3648a5d33c829e85428c2a8c7449",
+    "react-table": "mistakia/react-table#5aa3a724e4fbc7c6cb4319279321ad0ab5ef9de5",
     "react-virtualized": "^9.22.5",
     "redux": "^4.2.1",
     "redux-first-history": "^5.2.0",
@@ -175,7 +175,8 @@
     "yargs": "17.7.2"
   },
   "resolutions": {
-    "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest"
+    "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest",
+    "react-table": "portal:/Users/trashman/Projects/react-table"
   },
   "packageManager": "yarn@3.2.0"
 }
