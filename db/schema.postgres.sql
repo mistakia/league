@@ -5607,6 +5607,11 @@ CREATE UNIQUE INDEX "idx_24725_gamePlay" ON public.nfl_plays USING btree (esbid,
 
 CREATE INDEX idx_24725_idx_nfl_plays_target ON public.nfl_plays USING btree (play_type, seas_type, trg_pid, off, esbid);
 
+--
+-- Name: idx_24725_idx_nfl_plays_year_target; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_24725_idx_nfl_plays_year_target ON public.nfl_plays USING btree (year, play_type, seas_type, trg_pid, off, esbid);
 
 --
 -- Name: idx_24725_idx_nfl_plays_year_esbid; Type: INDEX; Schema: public; Owner: -
