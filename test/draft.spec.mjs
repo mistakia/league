@@ -29,9 +29,6 @@ describe('API /draft', function () {
 
     MockDate.set(start.subtract('1', 'month').toISOString())
 
-    await knex.migrate.forceFreeMigrationsLock()
-    await knex.migrate.rollback()
-    await knex.migrate.latest()
     await knex.seed.run()
 
     await league(knex)

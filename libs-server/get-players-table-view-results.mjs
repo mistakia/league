@@ -3,6 +3,7 @@ import players_table_column_definitions, {
   split_params
 } from './players-table-column-definitions.mjs'
 import apply_play_by_play_column_params_to_query from './apply-play-by-play-column-params-to-query.mjs'
+import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
 
 const add_play_by_play_with_statement = ({
   query,
@@ -25,8 +26,11 @@ const add_play_by_play_with_statement = ({
 
   for (const split of splits) {
     if (split_params.includes(split)) {
-      with_query.select(split)
-      with_query.groupBy(split)
+      const column_param_definition = nfl_plays_column_params[split]
+      const table_name = column_param_definition.table || 'nfl_plays'
+      const split_statement = `${table_name}.${split}`
+      with_query.select(split_statement)
+      with_query.groupBy(split_statement)
     }
   }
 
@@ -121,66 +125,49 @@ const get_select_string = ({
   table_name
 }) => {
   if (column_definition.select) {
-    return column_definition.select({
-      table_name,
-      params: column_params,
-      column_index
-    })
+    return {
+      select: column_definition.select({
+        table_name,
+        params: column_params,
+        column_index
+      }),
+      group_by: column_definition.group_by
+        ? column_definition.group_by({
+            table_name,
+            params: column_params,
+            column_index
+          })
+        : []
+    }
   } else if (column_definition.select_as) {
     const select_as = column_definition.select_as(column_params)
-    return [
-      `\`${table_name}\`.\`${column_definition.column_name}\` AS \`${select_as}_${column_index}\``
-    ]
+    return {
+      select: [
+        `"${table_name}"."${column_definition.column_name}" AS "${select_as}_${column_index}"`
+      ],
+      group_by: [`"${table_name}"."${column_definition.column_name}"`]
+    }
   } else {
-    return [
-      `\`${table_name}\`.\`${column_definition.column_name}\` as \`${column_definition.column_name}_${column_index}\``
-    ]
+    return {
+      select: [
+        `"${table_name}"."${column_definition.column_name}" AS "${column_definition.column_name}_${column_index}"`
+      ],
+      group_by: [`"${table_name}"."${column_definition.column_name}"`]
+    }
   }
 }
 
 const add_sort_clause = ({
-  table_name,
   players_query,
   sort_clause,
   column_definition,
   column_params,
-  column_index = 0
+  column_index = 0,
+  select_position
 }) => {
-  sort_clause.desc = sort_clause.desc === true || sort_clause.desc === 'true'
-  if (column_definition.select_as) {
-    const select_as = column_definition.select_as(column_params)
-    players_query.orderByRaw(`${select_as}_${column_index} IS NULL`)
-    players_query.orderByRaw(
-      `${select_as}_${column_index} ${sort_clause.desc ? 'desc' : 'asc'}`
-    )
-  } else if (column_index) {
-    // TODO temp fix to not break the query when there are multiple of the same column_ids
-    players_query.orderByRaw(
-      `\`${column_definition.column_name}_${column_index}\` IS NULL`
-    )
-    players_query.orderByRaw(
-      `\`${column_definition.column_name}_${column_index}\` ${
-        sort_clause.desc ? 'desc' : 'asc'
-      }`
-    )
-  } else if (column_definition.use_play_by_play_with) {
-    // TODO temp fix to not break the query when there are multiple 0 index columns across different with tables
-    players_query.orderByRaw(
-      `\`${table_name}\`.\`${column_definition.column_name}_0\` IS NULL`
-    )
-    players_query.orderByRaw(
-      `\`${table_name}\`.\`${column_definition.column_name}_0\` ${
-        sort_clause.desc ? 'desc' : 'asc'
-      }`
-    )
-  } else {
-    players_query.orderByRaw(`\`${column_definition.column_name}_0\` IS NULL`)
-    players_query.orderByRaw(
-      `\`${column_definition.column_name}_0\` ${
-        sort_clause.desc ? 'desc' : 'asc'
-      }`
-    )
-  }
+  const sort_direction =
+    sort_clause.desc === true || sort_clause.desc === 'true' ? 'DESC' : 'ASC'
+  players_query.orderByRaw(`${select_position} ${sort_direction} NULLS LAST`)
 }
 
 const add_clauses_for_table = ({
@@ -194,6 +181,7 @@ const add_clauses_for_table = ({
 }) => {
   const column_ids = []
   const select_strings = []
+  const group_by_strings = []
   let use_play_by_play_with = false
 
   // the pid column and join_func should be the same among column definitions with the same table name/alias
@@ -203,15 +191,15 @@ const add_clauses_for_table = ({
 
   for (const { column_id, column_index } of select_columns) {
     const column_definition = players_table_column_definitions[column_id]
-    const select_string = get_select_string({
+    const select_result = get_select_string({
       column_params,
       column_index,
       column_definition,
       table_name
     })
-    for (const s of select_string) {
-      select_strings.push(s)
-    }
+
+    select_strings.push(...select_result.select)
+    group_by_strings.push(...select_result.group_by)
 
     if (column_definition.join) {
       join_func = column_definition.join
@@ -266,25 +254,25 @@ const add_clauses_for_table = ({
       use_play_by_play_with = true
       pid_column = column_definition.pid_column
       join_func = column_definition.join
-      const select_string = get_select_string({
+      const select_result = get_select_string({
         column_params,
         column_index: 0,
         column_definition,
         table_name
       })
-      for (const s of select_string) {
-        select_strings.push(s)
-      }
+
+      select_strings.push(...select_result.select)
+      group_by_strings.push(...select_result.group_by)
     } else if (!unique_column_ids.has(where_clause.column_id)) {
-      const select_string = get_select_string({
+      const select_result = get_select_string({
         column_params,
         column_index: 0,
         column_definition,
         table_name
       })
-      for (const s of select_string) {
-        select_strings.push(s)
-      }
+
+      select_strings.push(...select_result.select)
+      group_by_strings.push(...select_result.group_by)
     }
   }
 
@@ -305,6 +293,7 @@ const add_clauses_for_table = ({
       players_query.select(
         `${table_name}.${column_definition.column_name}_0 as ${column_definition.column_name}_${column_index}`
       )
+      players_query.groupBy(`${table_name}.${column_definition.column_name}_0`)
     }
   } else if (with_func) {
     with_func({
@@ -314,9 +303,11 @@ const add_clauses_for_table = ({
       having_clauses: having_clause_strings,
       splits
     })
-
     for (const select_string of select_strings) {
       players_query.select(db.raw(select_string))
+    }
+    for (const group_by_string of group_by_strings) {
+      players_query.groupBy(db.raw(group_by_string))
     }
   } else {
     if (where_clause_strings.length) {
@@ -327,6 +318,9 @@ const add_clauses_for_table = ({
     }
     for (const select_string of select_strings) {
       players_query.select(db.raw(select_string))
+    }
+    for (const group_by_string of group_by_strings) {
+      players_query.groupBy(db.raw(group_by_string))
     }
   }
 
@@ -507,6 +501,7 @@ export default function ({
 
     if (coalesce_args) {
       players_query.select(db.raw(`COALESCE(${coalesce_args}) AS ${split}`))
+      players_query.groupBy(db.raw(`COALESCE(${coalesce_args})`))
     }
   }
 
@@ -526,14 +521,33 @@ export default function ({
 
     const table_name = get_table_name({ column_definition, column_params })
 
-    add_sort_clause({
-      players_query,
-      sort_clause,
-      column_definition,
-      column_params,
-      table_name,
-      column_index: sort_clause.column_index
-    })
+    // Find the select position for the sort column
+    const column_name = column_definition.select_as
+      ? column_definition.select_as(column_params)
+      : column_definition.column_name
+
+    const column_name_with_index = `${column_name}_${sort_clause.column_index || 0}`
+
+    // Find the select position for the sort column
+    const select_position =
+      players_query._statements
+        .filter((statement) => statement.grouping === 'columns')
+        .findIndex((statement) => {
+          const statement_string = statement.value.toString()
+          return statement_string.includes(column_name_with_index)
+        }) + 1 // Add 1 because SQL positions are 1-indexed
+
+    if (select_position > 0) {
+      add_sort_clause({
+        players_query,
+        sort_clause,
+        column_definition,
+        column_params,
+        table_name,
+        column_index: sort_clause.column_index,
+        select_position
+      })
+    }
   }
 
   if (offset) {
@@ -542,10 +556,6 @@ export default function ({
 
   players_query.groupBy('player.pid', 'player.lname', 'player.fname')
   players_query.limit(limit)
-
-  for (const split of splits) {
-    players_query.groupBy(split)
-  }
 
   console.log(players_query.toString())
 

@@ -257,13 +257,15 @@ export default class Auction {
       year,
       timestamp: Math.round(Date.now() / 1000)
     }
-    const uid = await db('transactions').insert(transaction)
+    const insert_query = await db('transactions')
+      .insert(transaction)
+      .returning('uid')
     this.broadcast({
       type: 'AUCTION_PROCESSED',
       payload: {
         rid: r.uid,
         pos: playerInfo.pos,
-        uid,
+        uid: insert_query[0].uid,
         ...transaction
       }
     })
@@ -334,10 +336,10 @@ export default class Auction {
       year: constants.season.year,
       timestamp: Math.round(Date.now() / 1000)
     }
-    const uid = await db('transactions').insert(bid)
+    const insert_query = await db('transactions').insert(bid).returning('uid')
     this.broadcast({
       type: 'AUCTION_BID',
-      payload: { ...bid, uid }
+      payload: { ...bid, uid: insert_query[0].uid }
     })
     this._transactions.unshift(bid)
     this._startBidTimer()
@@ -422,10 +424,10 @@ export default class Auction {
       year: constants.season.year,
       timestamp: Math.round(Date.now() / 1000)
     }
-    const uid = await db('transactions').insert(bid)
+    const insert_query = await db('transactions').insert(bid).returning('uid')
     this.broadcast({
       type: 'AUCTION_BID',
-      payload: { ...bid, uid }
+      payload: { ...bid, uid: insert_query[0].uid }
     })
     this._transactions.unshift(bid)
     this._locked = false

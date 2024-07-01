@@ -29,9 +29,6 @@ const { start } = constants.season
 describe('API /teams - deactivate', function () {
   before(async function () {
     this.timeout(60 * 1000)
-    await knex.migrate.forceFreeMigrationsLock()
-    await knex.migrate.rollback()
-    await knex.migrate.latest()
     await knex.seed.run()
   })
 
@@ -334,7 +331,7 @@ describe('API /teams - deactivate', function () {
       const player = await selectPlayer()
 
       await knex('transactions').insert({
-        userId,
+        userid: userId,
         tid: teamId,
         lid: leagueId,
         pid: player.pid,
@@ -380,16 +377,18 @@ describe('API /teams - deactivate', function () {
       const player = await selectPlayer()
       const timestamp = Math.round(Date.now() / 1000)
 
-      const result = await knex('waivers').insert({
-        tid: 1,
-        userid: 1,
-        lid: leagueId,
-        pid: player.pid,
-        po: 9999,
-        submitted: timestamp,
-        bid: 1,
-        type: constants.waivers.FREE_AGENCY
-      })
+      const result = await knex('waivers')
+        .insert({
+          tid: 1,
+          userid: 1,
+          lid: leagueId,
+          pid: player.pid,
+          po: 9999,
+          submitted: timestamp,
+          bid: 1,
+          type: constants.waivers.FREE_AGENCY
+        })
+        .returning('uid')
 
       await addPlayer({
         teamId: 1,
@@ -399,7 +398,7 @@ describe('API /teams - deactivate', function () {
         slot: constants.slots.BENCH,
         transaction: constants.transactions.ROSTER_ADD,
         value: 1,
-        waiverid: result[0]
+        waiverid: result[0].uid
       })
 
       await knex('waivers').insert({

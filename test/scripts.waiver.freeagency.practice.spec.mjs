@@ -22,9 +22,6 @@ const { start } = constants.season
 describe('SCRIPTS /waivers - free agency - practice', function () {
   before(async function () {
     this.timeout(60 * 1000)
-    await knex.migrate.forceFreeMigrationsLock()
-    await knex.migrate.rollback()
-    await knex.migrate.latest()
     await knex.seed.run()
   })
 
@@ -75,7 +72,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
       const waivers = await knex('waivers')
       expect(waivers.length).to.equal(1)
       expect(waivers[0].pid).to.equal(player.pid)
-      expect(waivers[0].succ).to.equal(1)
+      expect(waivers[0].succ).to.equal(true)
       expect(waivers[0].reason).to.equal(null)
       expect(waivers[0].processed).to.equal(Math.round(Date.now() / 1000))
       expect(waivers[0].cancelled).to.equal(null)

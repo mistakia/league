@@ -27,6 +27,7 @@ const run = async () => {
 
   // get leagueIds with pending practice squad waivers
   const results = await db('waivers')
+    .select('lid')
     .whereNull('processed')
     .whereNull('cancelled')
     .where('type', constants.waivers.FREE_AGENCY_PRACTICE)

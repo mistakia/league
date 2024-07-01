@@ -20,9 +20,6 @@ const { start } = constants.season
 describe('API /leagues/teams - delete', function () {
   before(async function () {
     this.timeout(60 * 1000)
-    await knex.migrate.forceFreeMigrationsLock()
-    await knex.migrate.rollback()
-    await knex.migrate.latest()
     await knex.seed.run()
   })
 
@@ -40,8 +37,8 @@ describe('API /leagues/teams - delete', function () {
         abbrv: 'TM1',
         lid: leagueId
       }
-      const rows = await knex('teams').insert(team)
-      team.uid = rows[0]
+      const insert_query = await knex('teams').insert(team).returning('uid')
+      team.uid = insert_query[0].uid
 
       const roster = {
         tid: team.uid,
@@ -140,18 +137,20 @@ describe('API /leagues/teams - delete', function () {
     })
 
     it('can not remove user team', async () => {
-      const rows = await knex('teams').insert({
-        lid: 1,
-        year: constants.season.year,
-        name: 'Team1',
-        abbrv: 'TM1',
-        cap: 200,
-        faab: 200
-      })
+      const rows = await knex('teams')
+        .insert({
+          lid: 1,
+          year: constants.season.year,
+          name: 'Team1',
+          abbrv: 'TM1',
+          cap: 200,
+          faab: 200
+        })
+        .returning('uid')
 
       await knex('users_teams').insert({
         userid: 1,
-        tid: rows[0]
+        tid: rows[0].uid
       })
 
       const request = chai

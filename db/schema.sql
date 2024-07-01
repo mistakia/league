@@ -34,15 +34,15 @@ CREATE TABLE `player` (
   `cone` decimal(3,2) DEFAULT NULL COMMENT '3-cone drill time',
   `arm` decimal(5,3) DEFAULT NULL COMMENT 'arm length',
   `hand` decimal(5,3) DEFAULT NULL COMMENT 'hand size',
-  `dpos` int(3) NOT NULL DEFAULT '0' COMMENT 'draft position',
-  `round` tinyint(1) NOT NULL DEFAULT '0' COMMENT 'draft round',
+  `dpos` int(3) DEFAULT NULL COMMENT 'draft position',
+  `round` tinyint(2) DEFAULT NULL COMMENT 'draft round',
   `col` varchar(255) DEFAULT NULL COMMENT 'college',
   `dv` varchar(35) DEFAULT NULL COMMENT 'college division',
   `start` int(4) NOT NULL COMMENT 'starting nfl year',
   `current_nfl_team` varchar(3) NOT NULL DEFAULT 'INA' COMMENT 'current nfl team',
-  `posd` varchar(8) NOT NULL DEFAULT 'INA' COMMENT 'position depth',
-  `jnum` tinyint(2) NOT NULL DEFAULT 0 COMMENT 'jersey number',
-  `dcp` tinyint(1) NOT NULL DEFAULT 0, -- TODO ??
+  `posd` varchar(8) DEFAULT NULL COMMENT 'position depth',
+  `jnum` tinyint(2) DEFAULT NULL COMMENT 'jersey number',
+  `dcp` tinyint(2) DEFAULT NULL, -- TODO ??
 
   `nflid` int(10) DEFAULT NULL,
   `esbid` varchar(10) DEFAULT NULL,
@@ -171,18 +171,18 @@ CREATE TABLE `seasons` (
   `league_format_hash` varchar(64) NOT NULL,
   `scoring_format_hash` varchar(64) NOT NULL,
 
-  `mqb` tinyint(1) NOT NULL,
-  `mrb` tinyint(1) NOT NULL,
-  `mwr` tinyint(1) NOT NULL,
-  `mte` tinyint(1) NOT NULL,
-  `mdst` tinyint(1) NOT NULL,
-  `mk` tinyint(1) NOT NULL,
+  `mqb` tinyint(2) NOT NULL,
+  `mrb` tinyint(2) NOT NULL,
+  `mwr` tinyint(2) NOT NULL,
+  `mte` tinyint(2) NOT NULL,
+  `mdst` tinyint(2) NOT NULL,
+  `mk` tinyint(2) NOT NULL,
 
   `faab` int(4) NOT NULL,
 
-  `tag2` tinyint(1) unsigned NOT NULL DEFAULT '1', -- franchise tag count
-  `tag3` tinyint(1) unsigned NOT NULL DEFAULT '1', -- rookie tag count
-  `tag4` tinyint(1) unsigned NOT NULL DEFAULT '2', -- transition tag count
+  `tag2` tinyint(2) unsigned NOT NULL DEFAULT '1', -- franchise tag count
+  `tag3` tinyint(2) unsigned NOT NULL DEFAULT '1', -- rookie tag count
+  `tag4` tinyint(2) unsigned NOT NULL DEFAULT '2', -- transition tag count
 
   `ext1` int(4) DEFAULT 5,
   `ext2` int(4) DEFAULT 10,
@@ -320,7 +320,7 @@ DROP TABLE IF EXISTS `draft`;
 CREATE TABLE `draft` (
   `uid` int(6) unsigned NOT NULL AUTO_INCREMENT,
   `pid` varchar(25) DEFAULT NULL,
-  `round` tinyint(1) NOT NULL,
+  `round` tinyint(2) NOT NULL,
   `comp` tinyint(1) DEFAULT 0,
   `pick` tinyint(2) DEFAULT NULL,
   `pick_str` varchar(4) DEFAULT NULL,
@@ -380,23 +380,23 @@ CREATE TABLE `league_formats` (
 
   `num_teams` tinyint(2) NOT NULL,
 
-  `sqb` tinyint(1) NOT NULL,
-  `srb` tinyint(1) NOT NULL,
-  `swr` tinyint(1) NOT NULL,
-  `ste` tinyint(1) NOT NULL,
-  `srbwr` tinyint(1) NOT NULL,
-  `srbwrte` tinyint(1) NOT NULL,
-  `sqbrbwrte` tinyint(1) NOT NULL,
-  `swrte` tinyint(1) NOT NULL,
-  `sdst` tinyint(1) NOT NULL,
-  `sk` tinyint(1) NOT NULL,
+  `sqb` tinyint(2) NOT NULL,
+  `srb` tinyint(2) NOT NULL,
+  `swr` tinyint(2) NOT NULL,
+  `ste` tinyint(2) NOT NULL,
+  `srbwr` tinyint(2) NOT NULL,
+  `srbwrte` tinyint(2) NOT NULL,
+  `sqbrbwrte` tinyint(2) NOT NULL,
+  `swrte` tinyint(2) NOT NULL,
+  `sdst` tinyint(2) NOT NULL,
+  `sk` tinyint(2) NOT NULL,
 
   `bench` tinyint(2) NOT NULL,
-  `ps` tinyint(1) NOT NULL,
-  `ir` tinyint(1) NOT NULL,
+  `ps` tinyint(2) NOT NULL,
+  `ir` tinyint(2) NOT NULL,
 
   `cap` int(4) NOT NULL,
-  `min_bid` tinyint(1) DEFAULT 0,
+  `min_bid` tinyint(2) DEFAULT 0,
 
   `pts_base_week_qb` decimal(3,1) unsigned DEFAULT NULL comment 'qb pts/game baseline',
   `pts_base_week_rb` decimal(3,1) unsigned DEFAULT NULL comment 'rb pts/game baseline',
@@ -429,21 +429,21 @@ CREATE TABLE `league_scoring_formats` (
   `pa` decimal(3,2) NOT NULL,
   `pc` decimal(3,2) NOT NULL,
   `py` decimal(3,2) NOT NULL,
-  `ints` tinyint(1) NOT NULL,
-  `tdp` tinyint(1) NOT NULL,
+  `ints` tinyint(2) NOT NULL,
+  `tdp` tinyint(2) NOT NULL,
   `ra` decimal(2,1) NOT NULL,
   `ry` decimal(2,1) NOT NULL,
-  `tdr` tinyint(1) NOT NULL,
+  `tdr` tinyint(2) NOT NULL,
   `rec` decimal(2,1) NOT NULL,
   `rbrec` decimal(2,1) NOT NULL,
   `wrrec` decimal(2,1) NOT NULL,
   `terec` decimal(2,1) NOT NULL,
   `recy` decimal(2,1) NOT NULL,
-  `twoptc` tinyint(1) NOT NULL,
-  `tdrec` tinyint(1) NOT NULL,
-  `fuml` tinyint(1) NOT NULL,
-  `prtd` tinyint(1) NOT NULL,
-  `krtd` tinyint(1) NOT NULL,
+  `twoptc` tinyint(2) NOT NULL,
+  `tdrec` tinyint(2) NOT NULL,
+  `fuml` tinyint(2) NOT NULL,
+  `prtd` tinyint(2) NOT NULL,
+  `krtd` tinyint(2) NOT NULL,
 
   UNIQUE KEY `scoring_format_hash` (`scoring_format_hash`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
@@ -861,8 +861,8 @@ CREATE TABLE `rosters_players` (
   `slot` int(11) NOT NULL,
   `pid` varchar(25) NOT NULL,
   `pos` varchar(3) NOT NULL,
-  `tag` tinyint(1) unsigned NOT NULL DEFAULT '1',
-  `extensions` tinyint(1) unsigned NOT NULL DEFAULT '0',
+  `tag` tinyint(2) unsigned NOT NULL DEFAULT '1',
+  `extensions` tinyint(2) unsigned NOT NULL DEFAULT '0',
   `tid` int(6) unsigned NOT NULL,
   `lid` int(6) unsigned NOT NULL,
   `week` tinyint(2) unsigned NOT NULL,
@@ -899,7 +899,7 @@ CREATE TABLE `teams` (
   `uid` int(11) unsigned NOT NULL AUTO_INCREMENT,
   `year` smallint(4) NOT NULL,
   `lid` int(6) NOT NULL,
-  `div` tinyint(1) DEFAULT NULL,
+  `div` tinyint(2) DEFAULT NULL,
   `name` varchar(50) NOT NULL,
   `abbrv` varchar(5) NOT NULL,
   `image` varchar(500) DEFAULT '',
@@ -924,7 +924,7 @@ DROP TABLE IF EXISTS `team_stats`;
 CREATE TABLE `team_stats` (
   `lid` int(6) NOT NULL,
   `tid` int(6) NOT NULL,
-  `div` tinyint(1) DEFAULT NULL,
+  `div` tinyint(2) DEFAULT NULL,
   `year` smallint(4) NOT NULL,
 
   `wins` tinyint(2) DEFAULT 0,
@@ -1187,7 +1187,7 @@ CREATE TABLE `waivers` (
   `submitted` int(11) NOT NULL,
   `bid` int(4) DEFAULT NULL,
   `po` int(4) DEFAULT 0, -- priority order
-  `type` tinyint(1) NOT NULL,
+  `type` tinyint(2) NOT NULL,
   `succ` tinyint(1) DEFAULT NULL,
   `reason` text DEFAULT NULL,
 
@@ -1224,7 +1224,7 @@ DROP TABLE IF EXISTS `jobs`;
 
 CREATE TABLE `jobs` (
   `uid` int(11) NOT NULL AUTO_INCREMENT,
-  `type` tinyint(1) NOT NULL,
+  `type` tinyint(2) NOT NULL,
   `succ` tinyint(1) NOT NULL,
   `reason` text DEFAULT NULL,
   `timestamp` int(11) NOT NULL,
@@ -1304,8 +1304,8 @@ CREATE TABLE `nfl_plays` (
   `drive_fds` int(2) DEFAULT NULL COMMENT 'Number of first downs in a given drive.',
   `drive_inside20` bit(1) DEFAULT NULL COMMENT 'Binary indicator if the offense was able to get inside the opponents 20 yard line.',
   `drive_score` bit(1) DEFAULT NULL COMMENT 'Binary indicator the drive ended with a score.',
-  `drive_start_qtr` tinyint(1) DEFAULT NULL COMMENT 'Numeric value indicating in which quarter the given drive has started.',
-  `drive_end_qtr` tinyint(1) DEFAULT NULL COMMENT 'Numeric value indicating in which quarter the given drive has ended.',
+  `drive_start_qtr` tinyint(2) DEFAULT NULL COMMENT 'Numeric value indicating in which quarter the given drive has started.',
+  `drive_end_qtr` tinyint(2) DEFAULT NULL COMMENT 'Numeric value indicating in which quarter the given drive has ended.',
   `drive_yds_penalized` int(3) DEFAULT NULL COMMENT 'Numeric value of how many yards the offense gained or lost through penalties in the given drive.',
   `drive_start_transition` varchar(30) DEFAULT NULL COMMENT 'String indicating how the offense got the ball.',
   `drive_end_transition` varchar(30) DEFAULT NULL COMMENT 'String indicating how the offense lost the ball.',
@@ -1399,7 +1399,7 @@ CREATE TABLE `nfl_plays` (
   `rush_yds` tinyint(3) DEFAULT NULL COMMENT 'Numeric yards by the rusher_player_name, excluding yards gained in rush plays with laterals. This should equal official rushing statistics but could miss yards gained in rush plays with laterals. Please see the description of lateral_rusher_player_name for further information.',
 
   `dot` int(3) DEFAULT NULL COMMENT 'depth of target',
-  `tay` tinyint(1) DEFAULT NULL COMMENT 'true air yards, Distance ball travels in the air from point of throw to a receivers hands; back of endzone or sideline.',
+  `tay` tinyint(2) DEFAULT NULL COMMENT 'true air yards, Distance ball travels in the air from point of throw to a receivers hands; back of endzone or sideline.',
   `yac` int(3) DEFAULT NULL COMMENT 'yard after catch',
   `yaco` int(3) DEFAULT NULL COMMENT 'yards after contact',
   `ret_yds` int(3) DEFAULT NULL COMMENT 'return yardage',
@@ -1431,8 +1431,8 @@ CREATE TABLE `nfl_plays` (
   `cnb` bit(1) DEFAULT NULL COMMENT 'contested ball, Passes into close coverage that involve a physical battle between receiver and defender for control of the ball.',
   `crr` bit(1) DEFAULT NULL COMMENT 'Created Reception, Difficult catches that require exceptional body control; hands; acrobatics, or any combination thereof.',
 
-  `mbt` tinyint(1) DEFAULT NULL COMMENT 'missed or broken tackles',
-  `avsk` tinyint(1) DEFAULT NULL COMMENT 'number of avoided sacks',
+  `mbt` tinyint(2) DEFAULT NULL COMMENT 'missed or broken tackles',
+  `avsk` tinyint(2) DEFAULT NULL COMMENT 'number of avoided sacks',
 
   `run_location` varchar(10) DEFAULT NULL COMMENT 'String indicator for location of run: left, middle, or right.',
   `run_gap` varchar(10) DEFAULT NULL COMMENT 'String indicator for line gap of run: end, guard, or tackle',
@@ -1467,15 +1467,15 @@ CREATE TABLE `nfl_plays` (
   `ttpr` decimal(3,1) DEFAULT NULL COMMENT 'time to pressure',
 
   `back` tinyint(2) DEFAULT NULL COMMENT 'number in backfield (wr, rb, te, fb)',
-  `xlm` tinyint(1) DEFAULT NULL COMMENT 'extra men on the line, Number of players lined up on either side of the Offensive Tackles - usually a Tight End.',
+  `xlm` tinyint(2) DEFAULT NULL COMMENT 'extra men on the line, Number of players lined up on either side of the Offensive Tackles - usually a Tight End.',
   `db` tinyint(2) DEFAULT NULL COMMENT 'number of defensive backs',
   `box` tinyint(2) DEFAULT NULL COMMENT 'number of defenders in the box',
   `boxdb` tinyint(2) DEFAULT NULL COMMENT 'number of dbs in the box',
-  `pru` tinyint(1) DEFAULT NULL COMMENT 'pass rushers',
-  `blz` tinyint(1) DEFAULT NULL COMMENT 'number of LBs and DBs blitzing',
-  `dblz` tinyint(1) DEFAULT NULL COMMENT 'Number of DBs blitzing',
+  `pru` tinyint(2) DEFAULT NULL COMMENT 'pass rushers',
+  `blz` tinyint(2) DEFAULT NULL COMMENT 'number of LBs and DBs blitzing',
+  `dblz` tinyint(2) DEFAULT NULL COMMENT 'Number of DBs blitzing',
   `oopd` varchar(2) DEFAULT NULL COMMENT 'out of pocket pass details, Clean [C], Pressure [P], Designed [D], Designed Rollout [DR]',
-  `cov` tinyint(1) DEFAULT NULL COMMENT 'coverage on target, Uncovered is 0, single coverage is 1, double is 2.',
+  `cov` tinyint(2) DEFAULT NULL COMMENT 'coverage on target, Uncovered is 0, single coverage is 1, double is 2.',
 
   `ep` decimal(16,12) DEFAULT NULL COMMENT 'Using the scoring event probabilities, the estimated expected points with respect to the possession team for the given play.',
   `epa` decimal(16,12) DEFAULT NULL COMMENT 'Expected points added (EPA) by the posteam for the given play.',
@@ -1547,10 +1547,10 @@ CREATE TABLE `nfl_plays` (
   `tp_result` varchar(10) DEFAULT NULL COMMENT 'String indicator for result of two point conversion attempt: success, failure, safety (touchback in defensive endzone is 1 point apparently), or return',
   `punt_blocked` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for if the punt was blocked',
 
-  `home_to_rem` tinyint(1) DEFAULT NULL COMMENT 'Numeric timeouts remaining in the half for the home team',
-  `away_to_rem` tinyint(1) DEFAULT NULL COMMENT 'Numeric timeouts remaining in the half for the away team',
-  `pos_to_rem` tinyint(1) DEFAULT NULL COMMENT 'Number of timeouts remaining for the possession team',
-  `def_to_rem` tinyint(1) DEFAULT NULL COMMENT 'Number of timeouts remaining for the team on defense',
+  `home_to_rem` tinyint(2) DEFAULT NULL COMMENT 'Numeric timeouts remaining in the half for the home team',
+  `away_to_rem` tinyint(2) DEFAULT NULL COMMENT 'Numeric timeouts remaining in the half for the away team',
+  `pos_to_rem` tinyint(2) DEFAULT NULL COMMENT 'Number of timeouts remaining for the possession team',
+  `def_to_rem` tinyint(2) DEFAULT NULL COMMENT 'Number of timeouts remaining for the team on defense',
   `to` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for whether or not a timeout was called by either team',
   `to_team` varchar(3) DEFAULT NULL COMMENT 'String abbreviation for which team called the timeout',
 
@@ -1683,8 +1683,8 @@ CREATE TABLE `nfl_plays_current_week` (
   `drive_fds` int(2) DEFAULT NULL COMMENT 'Number of first downs in a given drive.',
   `drive_inside20` bit(1) DEFAULT NULL COMMENT 'Binary indicator if the offense was able to get inside the opponents 20 yard line.',
   `drive_score` bit(1) DEFAULT NULL COMMENT 'Binary indicator the drive ended with a score.',
-  `drive_start_qtr` tinyint(1) DEFAULT NULL COMMENT 'Numeric value indicating in which quarter the given drive has started.',
-  `drive_end_qtr` tinyint(1) DEFAULT NULL COMMENT 'Numeric value indicating in which quarter the given drive has ended.',
+  `drive_start_qtr` tinyint(2) DEFAULT NULL COMMENT 'Numeric value indicating in which quarter the given drive has started.',
+  `drive_end_qtr` tinyint(2) DEFAULT NULL COMMENT 'Numeric value indicating in which quarter the given drive has ended.',
   `drive_yds_penalized` int(3) DEFAULT NULL COMMENT 'Numeric value of how many yards the offense gained or lost through penalties in the given drive.',
   `drive_start_transition` varchar(30) DEFAULT NULL COMMENT 'String indicating how the offense got the ball.',
   `drive_end_transition` varchar(30) DEFAULT NULL COMMENT 'String indicating how the offense lost the ball.',
@@ -1778,7 +1778,7 @@ CREATE TABLE `nfl_plays_current_week` (
   `rush_yds` tinyint(3) DEFAULT NULL COMMENT 'Numeric yards by the rusher_player_name, excluding yards gained in rush plays with laterals. This should equal official rushing statistics but could miss yards gained in rush plays with laterals. Please see the description of lateral_rusher_player_name for further information.',
 
   `dot` int(3) DEFAULT NULL COMMENT 'depth of target',
-  `tay` tinyint(1) DEFAULT NULL COMMENT 'true air yards, Distance ball travels in the air from point of throw to a receivers hands; back of endzone or sideline.',
+  `tay` tinyint(2) DEFAULT NULL COMMENT 'true air yards, Distance ball travels in the air from point of throw to a receivers hands; back of endzone or sideline.',
   `yac` int(3) DEFAULT NULL COMMENT 'yard after catch',
   `yaco` int(3) DEFAULT NULL COMMENT 'yards after contact',
   `ret_yds` int(3) DEFAULT NULL COMMENT 'return yardage',
@@ -1810,8 +1810,8 @@ CREATE TABLE `nfl_plays_current_week` (
   `cnb` bit(1) DEFAULT NULL COMMENT 'contested ball, Passes into close coverage that involve a physical battle between receiver and defender for control of the ball.',
   `crr` bit(1) DEFAULT NULL COMMENT 'Created Reception, Difficult catches that require exceptional body control; hands; acrobatics, or any combination thereof.',
 
-  `mbt` tinyint(1) DEFAULT NULL COMMENT 'missed or broken tackles',
-  `avsk` tinyint(1) DEFAULT NULL COMMENT 'number of avoided sacks',
+  `mbt` tinyint(2) DEFAULT NULL COMMENT 'missed or broken tackles',
+  `avsk` tinyint(2) DEFAULT NULL COMMENT 'number of avoided sacks',
 
   `run_location` varchar(10) DEFAULT NULL COMMENT 'String indicator for location of run: left, middle, or right.',
   `run_gap` varchar(10) DEFAULT NULL COMMENT 'String indicator for line gap of run: end, guard, or tackle',
@@ -1846,15 +1846,15 @@ CREATE TABLE `nfl_plays_current_week` (
   `ttpr` decimal(3,1) DEFAULT NULL COMMENT 'time to pressure',
 
   `back` tinyint(2) DEFAULT NULL COMMENT 'number in backfield (wr, rb, te, fb)',
-  `xlm` tinyint(1) DEFAULT NULL COMMENT 'extra men on the line, Number of players lined up on either side of the Offensive Tackles - usually a Tight End.',
+  `xlm` tinyint(2) DEFAULT NULL COMMENT 'extra men on the line, Number of players lined up on either side of the Offensive Tackles - usually a Tight End.',
   `db` tinyint(2) DEFAULT NULL COMMENT 'number of defensive backs',
   `box` tinyint(2) DEFAULT NULL COMMENT 'number of defenders in the box',
   `boxdb` tinyint(2) DEFAULT NULL COMMENT 'number of dbs in the box',
-  `pru` tinyint(1) DEFAULT NULL COMMENT 'pass rushers',
-  `blz` tinyint(1) DEFAULT NULL COMMENT 'number of LBs and DBs blitzing',
-  `dblz` tinyint(1) DEFAULT NULL COMMENT 'Number of DBs blitzing',
+  `pru` tinyint(2) DEFAULT NULL COMMENT 'pass rushers',
+  `blz` tinyint(2) DEFAULT NULL COMMENT 'number of LBs and DBs blitzing',
+  `dblz` tinyint(2) DEFAULT NULL COMMENT 'Number of DBs blitzing',
   `oopd` varchar(2) DEFAULT NULL COMMENT 'out of pocket pass details, Clean [C], Pressure [P], Designed [D], Designed Rollout [DR]',
-  `cov` tinyint(1) DEFAULT NULL COMMENT 'coverage on target, Uncovered is 0, single coverage is 1, double is 2.',
+  `cov` tinyint(2) DEFAULT NULL COMMENT 'coverage on target, Uncovered is 0, single coverage is 1, double is 2.',
 
   `ep` decimal(16,12) DEFAULT NULL COMMENT 'Using the scoring event probabilities, the estimated expected points with respect to the possession team for the given play.',
   `epa` decimal(16,12) DEFAULT NULL COMMENT 'Expected points added (EPA) by the posteam for the given play.',
@@ -1926,10 +1926,10 @@ CREATE TABLE `nfl_plays_current_week` (
   `tp_result` varchar(10) DEFAULT NULL COMMENT 'String indicator for result of two point conversion attempt: success, failure, safety (touchback in defensive endzone is 1 point apparently), or return',
   `punt_blocked` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for if the punt was blocked',
 
-  `home_to_rem` tinyint(1) DEFAULT NULL COMMENT 'Numeric timeouts remaining in the half for the home team',
-  `away_to_rem` tinyint(1) DEFAULT NULL COMMENT 'Numeric timeouts remaining in the half for the away team',
-  `pos_to_rem` tinyint(1) DEFAULT NULL COMMENT 'Number of timeouts remaining for the possession team',
-  `def_to_rem` tinyint(1) DEFAULT NULL COMMENT 'Number of timeouts remaining for the team on defense',
+  `home_to_rem` tinyint(2) DEFAULT NULL COMMENT 'Numeric timeouts remaining in the half for the home team',
+  `away_to_rem` tinyint(2) DEFAULT NULL COMMENT 'Numeric timeouts remaining in the half for the away team',
+  `pos_to_rem` tinyint(2) DEFAULT NULL COMMENT 'Number of timeouts remaining for the possession team',
+  `def_to_rem` tinyint(2) DEFAULT NULL COMMENT 'Number of timeouts remaining for the team on defense',
   `to` tinyint(1) DEFAULT NULL COMMENT 'Binary indicator for whether or not a timeout was called by either team',
   `to_team` varchar(3) DEFAULT NULL COMMENT 'String abbreviation for which team called the timeout',
 
@@ -2051,34 +2051,34 @@ CREATE TABLE `player_gamelogs` (
   `pa` tinyint(2) DEFAULT 0,
   `pc` tinyint(2) DEFAULT 0,
   `py` int(3) DEFAULT 0,
-  `ints` tinyint(1) DEFAULT 0,
-  `tdp` tinyint(1) DEFAULT 0,
+  `ints` tinyint(2) DEFAULT 0,
+  `tdp` tinyint(2) DEFAULT 0,
 
   `ra` tinyint(2) DEFAULT 0,
   `ry` int(3) DEFAULT 0,
-  `tdr` tinyint(1) DEFAULT 0,
-  `fuml` tinyint(1) DEFAULT 0,
+  `tdr` tinyint(2) DEFAULT 0,
+  `fuml` tinyint(2) DEFAULT 0,
 
   `trg` tinyint(2) DEFAULT 0,
   `rec` tinyint(2) DEFAULT 0,
   `recy` int(3) DEFAULT 0,
-  `tdrec` tinyint(1) DEFAULT 0,
+  `tdrec` tinyint(2) DEFAULT 0,
 
-  `twoptc` tinyint(1) DEFAULT 0,
+  `twoptc` tinyint(2) DEFAULT 0,
 
-  `prtd` tinyint(1) DEFAULT 0,
-  `krtd` tinyint(1) DEFAULT 0,
+  `prtd` tinyint(2) DEFAULT 0,
+  `krtd` tinyint(2) DEFAULT 0,
 
   `snp` tinyint(3) DEFAULT 0,
 
-  `fgm` tinyint(1) DEFAULT 0,
+  `fgm` tinyint(2) DEFAULT 0,
   `fgy` int(3) DEFAULT 0,
-  `fg19` tinyint(1) DEFAULT 0,
-  `fg29` tinyint(1) DEFAULT 0,
-  `fg39` tinyint(1) DEFAULT 0,
-  `fg49` tinyint(1) DEFAULT 0,
-  `fg50` tinyint(1) DEFAULT 0,
-  `xpm` tinyint(1) DEFAULT 0,
+  `fg19` tinyint(2) DEFAULT 0,
+  `fg29` tinyint(2) DEFAULT 0,
+  `fg39` tinyint(2) DEFAULT 0,
+  `fg49` tinyint(2) DEFAULT 0,
+  `fg50` tinyint(2) DEFAULT 0,
+  `xpm` tinyint(2) DEFAULT 0,
 
   `dsk` tinyint(2) DEFAULT 0,
   `dint` tinyint(2) DEFAULT 0,
@@ -2423,7 +2423,7 @@ CREATE TABLE `rankings` (
   `ornk` int(4) DEFAULT NULL,
   `prnk` int(4) DEFAULT NULL,
   `type` int(1) NOT NULL,
-  `adp` tinyint(1) NOT NULL,
+  `adp` tinyint(2) NOT NULL,
   `ppr` int(1) NOT NULL,
   `sf` tinyint(1) NOT NULL,
   `dynasty` tinyint(1) NOT NULL,
@@ -2627,7 +2627,7 @@ CREATE TABLE `prop_pairings` (
   `name` varchar(150) DEFAULT NULL,
   `team` varchar(3) DEFAULT NULL,
   `week` tinyint(2) NOT NULL,
-  `size` tinyint(1) NOT NULL,
+  `size` tinyint(2) NOT NULL,
   `market_prob` decimal(5,4) DEFAULT NULL,
   `risk_total` decimal(6,3) DEFAULT NULL,
   `payout_total` decimal(7,3) DEFAULT NULL,
@@ -2843,10 +2843,10 @@ DROP TABLE IF EXISTS `keeptradecut_rankings`;
 
 CREATE TABLE `keeptradecut_rankings` (
   `pid` varchar(25) NOT NULL,
-  `qb` tinyint(1) NOT NULL,
+  `qb` tinyint(2) NOT NULL,
   `d` int(11) NOT NULL,
   `v` int(5) NOT NULL,
-  `type` tinyint(1) NOT NULL,
+  `type` tinyint(2) NOT NULL,
   UNIQUE KEY `player_value` (`pid`,`d`,`qb`,`type`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;
 
@@ -2926,7 +2926,7 @@ CREATE TABLE `league_nfl_team_seasonlogs` (
   `lid` int(6) NOT NULL,
 
   `pts` decimal(5,1) DEFAULT NULL,
-  `rnk` tinyint(1) DEFAULT NULL,
+  `rnk` tinyint(2) DEFAULT NULL,
 
   UNIQUE KEY `league_stat` (`lid`, `stat_key`, `year`, `tm`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8;

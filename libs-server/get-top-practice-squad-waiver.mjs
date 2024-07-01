@@ -32,6 +32,7 @@ export default async function (lid) {
   }
 
   const active_waiver_rows = await db('waivers')
+    .select('pid')
     .whereNull('processed')
     .whereNull('cancelled')
     .where('lid', lid)

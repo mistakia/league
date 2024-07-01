@@ -128,8 +128,8 @@ export default async function ({
     pid,
     submitted
   }
-  const rows = await db('poaches').insert(data)
-  const poachid = rows[0]
+  const insert_query = await db('poaches').insert(data).returning('uid')
+  const poachid = insert_query[0].uid
   const releaseInserts = release.map((pid) => ({ poachid, pid }))
   if (releaseInserts.length) {
     await db('poach_releases').insert(releaseInserts)

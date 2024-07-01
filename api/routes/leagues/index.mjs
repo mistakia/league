@@ -299,10 +299,11 @@ router.get('/:leagueId/teams/?', async (req, res) => {
     })
     const picks = await db('draft').where({ lid: leagueId }).whereNull('pid')
 
-    const forecastSub = db('league_team_forecast')
+    const sub_query = db('league_team_forecast')
       .select(db.raw('max(timestamp) AS maxtime, tid AS teamid'))
       .groupBy('teamid')
       .where('year', constants.season.year)
+      .as('sub_query')
     const forecasts = await db
       .select(
         'playoff_odds',
@@ -311,7 +312,7 @@ router.get('/:leagueId/teams/?', async (req, res) => {
         'championship_odds',
         'tid'
       )
-      .from(db.raw('(' + forecastSub.toString() + ') AS X'))
+      .from(sub_query)
       .innerJoin('league_team_forecast', function () {
         this.on(function () {
           this.on('teamid', '=', 'tid')

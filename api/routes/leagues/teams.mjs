@@ -49,8 +49,8 @@ router.post('/?', async (req, res) => {
       lid: leagueId
     }
 
-    const rows = await db('teams').insert(team)
-    team.uid = rows[0]
+    const rows = await db('teams').insert(team).returning('uid')
+    team.uid = rows[0].uid
 
     const roster = {
       tid: team.uid,
@@ -59,8 +59,8 @@ router.post('/?', async (req, res) => {
       year: constants.season.year
     }
 
-    const rosterRows = await db('rosters').insert(roster)
-    roster.uid = rosterRows[0]
+    const rosterRows = await db('rosters').insert(roster).returning('uid')
+    roster.uid = rosterRows[0].uid
     res.send({ roster, team })
   } catch (error) {
     logger(error)

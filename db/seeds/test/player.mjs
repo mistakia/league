@@ -19,7 +19,9 @@ export async function seed(knex, Promise) {
     rookies.push({
       pid: `XR-${i * 5}`,
       pname: `TestRookie${i}`,
+      fname: `TestRookie${i}`,
       lname: `TestRookie${i}`,
+      formatted: `testrookie${i}`,
       pos,
       pos1: pos,
       current_nfl_team: constants.nflTeams[i % constants.nflTeams.length],
@@ -30,12 +32,14 @@ export async function seed(knex, Promise) {
 
   // insert test sophmores
   const sophmores = []
-  for (let i = 0; i < 10; i++) {
+  for (let i = 0; i < 50; i++) {
     const pos = constants.positions[i % constants.positions.length]
     sophmores.push({
       pid: `XS-${i * 5}`,
       pname: `TestSophmore${i}`,
+      fname: `TestSophmore${i}`,
       lname: `TestSophmore${i}`,
+      formatted: `testsophmore${i}`,
       pos,
       pos1: pos,
       current_nfl_team: constants.nflTeams[i % constants.nflTeams.length],

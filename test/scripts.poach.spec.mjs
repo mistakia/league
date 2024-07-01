@@ -20,9 +20,6 @@ const { start } = constants.season
 describe('SCRIPTS /waivers - poach', function () {
   before(async function () {
     this.timeout(60 * 1000)
-    await knex.migrate.forceFreeMigrationsLock()
-    await knex.migrate.rollback()
-    await knex.migrate.latest()
 
     MockDate.set(start.subtract('1', 'month').toISOString())
 
@@ -107,7 +104,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // check poaching claim
       const poaches = await knex('poaches')
       expect(poaches.length).to.equal(1)
-      expect(poaches[0].succ).to.equal(1)
+      expect(poaches[0].succ).to.equal(true)
       expect(poaches[0].processed).to.equal(Math.round(Date.now() / 1000))
       expect(poaches[0].reason).to.equal(null)
       expect(poaches[0].pid).to.equal(player.pid)
@@ -243,7 +240,7 @@ describe('SCRIPTS /waivers - poach', function () {
       const poach1 = poaches.find((p) => p.tid === 2)
       const poach2 = poaches.find((p) => p.tid === 4)
       expect(poaches.length).to.equal(2)
-      expect(poach1.succ).to.equal(1)
+      expect(poach1.succ).to.equal(true)
       expect(poach1.processed).to.equal(Math.round(Date.now() / 1000))
       expect(poach1.reason).to.equal(null)
       expect(poach1.pid).to.equal(player1.pid)
@@ -345,35 +342,39 @@ describe('SCRIPTS /waivers - poach', function () {
         value: 1
       })
 
-      const query1 = await knex('waivers').insert({
-        tid: 2,
-        userid: 2,
-        lid: 1,
-        pid: player.pid,
-        po: 9999,
-        submitted: Math.round(Date.now() / 1000),
-        bid: 0,
-        succ: 1,
-        processed: Math.round(Date.now() / 1000),
-        type: constants.waivers.POACH
-      })
+      const query1 = await knex('waivers')
+        .insert({
+          tid: 2,
+          userid: 2,
+          lid: 1,
+          pid: player.pid,
+          po: 9999,
+          submitted: Math.round(Date.now() / 1000),
+          bid: 0,
+          succ: 1,
+          processed: Math.round(Date.now() / 1000),
+          type: constants.waivers.POACH
+        })
+        .returning('uid')
 
       await knex('waiver_releases').insert({
-        waiverid: query1[0],
+        waiverid: query1[0].uid,
         pid: releasePlayer.pid
       })
 
-      const query2 = await knex('poaches').insert({
-        userid: 2,
-        tid: 2,
-        lid: 1,
-        pid: player.pid,
-        player_tid: 1,
-        submitted: Math.round(Date.now() / 1000)
-      })
+      const query2 = await knex('poaches')
+        .insert({
+          userid: 2,
+          tid: 2,
+          lid: 1,
+          pid: player.pid,
+          player_tid: 1,
+          submitted: Math.round(Date.now() / 1000)
+        })
+        .returning('uid')
 
       await knex('poach_releases').insert({
-        poachid: query2[0],
+        poachid: query2[0].uid,
         pid: releasePlayer.pid
       })
 
@@ -413,7 +414,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // check poaching claim
       const poaches = await knex('poaches')
       expect(poaches.length).to.equal(1)
-      expect(poaches[0].succ).to.equal(1)
+      expect(poaches[0].succ).to.equal(true)
       expect(poaches[0].processed).to.equal(Math.round(Date.now() / 1000))
       expect(poaches[0].reason).to.equal(null)
       expect(poaches[0].pid).to.equal(player.pid)
@@ -514,7 +515,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // check poaching claim
       const poaches = await knex('poaches')
       expect(poaches.length).to.equal(1)
-      expect(poaches[0].succ).to.equal(0)
+      expect(poaches[0].succ).to.equal(false)
       expect(poaches[0].processed).to.equal(Math.round(Date.now() / 1000))
       expect(poaches[0].reason).to.equal('player is not on a practice squad')
       expect(poaches[0].pid).to.equal(player.pid)

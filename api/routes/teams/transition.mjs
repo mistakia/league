@@ -274,12 +274,13 @@ router.post('/?', async (req, res) => {
       player_tid: playerTid
     }
 
-    const query = await db('transition_bids').insert(data)
-    data.uid = query[0]
+    const query = await db('transition_bids').insert(data).returning('uid')
+    const transition_id = query[0].uid
+    data.uid = transition_id
 
     if (release.length) {
       const releaseInserts = release.map((pid) => ({
-        transitionid: query[0],
+        transitionid: transition_id,
         pid
       }))
       await db('transition_releases').insert(releaseInserts)

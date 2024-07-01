@@ -25,9 +25,6 @@ const expect = chai.expect
 describe('API /trades', function () {
   before(async function () {
     this.timeout(60 * 1000)
-    await knex.migrate.forceFreeMigrationsLock()
-    await knex.migrate.rollback()
-    await knex.migrate.latest()
     await knex.seed.run()
   })
 
@@ -279,7 +276,7 @@ describe('API /trades', function () {
       expect(poaches.length).to.equal(1)
       // eslint-disable-next-line
       expect(poaches[0].processed).to.exist
-      expect(poaches[0].succ).to.equal(0)
+      expect(poaches[0].succ).to.equal(false)
       expect(poaches[0].reason).to.equal('Player traded')
 
       const rosterRows = await knex('rosters_players')

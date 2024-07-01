@@ -17,9 +17,6 @@ chai.use(chaiHTTP)
 describe('API /waivers -report', function () {
   before(async function () {
     this.timeout(60 * 1000)
-    await knex.migrate.forceFreeMigrationsLock()
-    await knex.migrate.rollback()
-    await knex.migrate.latest()
     await knex.seed.run()
   })
 

@@ -209,11 +209,15 @@ const unresolvable_differences = (a, b) => {
 
 const processDuplicatePlayers = async ({ formatted = null } = {}) => {
   const query = db('player')
-    .select('player.*', db.raw('CONCAT(dob, "__", start) as "group_id"'))
+    .select(
+      'player.dob',
+      'player.start',
+      db.raw("(dob || '_' || start) as group_id")
+    )
     .whereNot('dob', '0000-00-00')
     .whereNot('start', '0000')
     .count('* as count')
-    .groupBy('group_id')
+    .groupBy('group_id', 'player.dob', 'player.start')
     .having('count', '>', 1)
     .orderBy('count', 'desc')
 

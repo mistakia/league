@@ -29,9 +29,6 @@ const { start } = constants.season
 describe('API /teams - release', function () {
   before(async function () {
     this.timeout(60 * 1000)
-    await knex.migrate.forceFreeMigrationsLock()
-    await knex.migrate.rollback()
-    await knex.migrate.latest()
     await knex.seed.run()
   })
 
@@ -492,7 +489,8 @@ describe('API /teams - release', function () {
         userid: 2,
         tid: 2,
         lid: leagueId,
-        submitted: Math.round(Date.now() / 1000)
+        submitted: Math.round(Date.now() / 1000),
+        player_tid: teamId
       })
 
       const request = chai
