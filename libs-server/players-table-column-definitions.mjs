@@ -694,12 +694,12 @@ export default {
 
   player_pass_yards_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
-    select_string: ({ stat_name }) => `SUM(pass_yds) AS ${stat_name}_0`,
+    select_string: `SUM(pass_yds)`,
     stat_name: 'pass_yds_from_plays'
   }),
   player_pass_attempts_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
-    select_string: ({ stat_name }) => `COUNT(*) AS ${stat_name}_0`,
+    select_string: `COUNT(*)`,
     stat_name: 'pass_atts_from_plays'
   }),
   player_pass_touchdowns_from_plays: player_stat_from_plays({
