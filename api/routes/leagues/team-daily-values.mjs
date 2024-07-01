@@ -15,7 +15,9 @@ router.get('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
 
-    const data = await db('league_team_daily_values').where({ lid: leagueId })
+    const data = await db('league_team_daily_values')
+      .where({ lid: leagueId })
+      .orderBy('date', 'asc')
     res.send(data)
   } catch (err) {
     logger(err)
