@@ -1626,9 +1626,9 @@ CREATE TABLE public.nfl_plays (
     yac integer,
     yaco integer,
     ret_yds integer,
-    qb_pressure smallint,
-    qb_hit smallint,
-    qb_hurry smallint,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
     high boolean,
     int_worthy boolean,
     drp boolean,
@@ -1835,7 +1835,7 @@ CREATE TABLE public.nfl_plays (
     route_ngs character varying(100),
     man_zone_ngs character varying(100),
     cov_type_ngs character varying(100),
-    qb_pressure_ngs smallint
+    qb_pressure_ngs boolean
 );
 
 
@@ -2512,9 +2512,9 @@ CREATE TABLE public.nfl_plays_current_week (
     qbru boolean,
     sneak boolean,
     scrm boolean,
-    qb_pressure smallint,
-    qb_hit smallint,
-    qb_hurry smallint,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
     int_worthy boolean,
     cball boolean,
     qbta boolean,
@@ -2659,7 +2659,7 @@ CREATE TABLE public.nfl_plays_current_week (
     route_ngs character varying(100),
     man_zone_ngs character varying(100),
     cov_type_ngs character varying(100),
-    qb_pressure_ngs smallint
+    qb_pressure_ngs boolean
 );
 
 

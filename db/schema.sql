@@ -1415,10 +1415,10 @@ CREATE TABLE `nfl_plays` (
   `sneak` bit(1) DEFAULT NULL COMMENT 'QB sneak',
   `scrm` bit(1) DEFAULT NULL COMMENT 'QB scramble',
 
-  `qb_pressure` tinyint(2) DEFAULT NULL COMMENT 'QB pressure',
-  `qb_pressure_ngs` tinyint(2) DEFAULT NULL COMMENT 'QB pressure (NGS)',
-  `qb_hit` tinyint(2) DEFAULT NULL COMMENT 'QB hit',
-  `qb_hurry` tinyint(2) DEFAULT NULL COMMENT 'QB hurry',
+  `qb_pressure` tinyint(1) DEFAULT NULL COMMENT 'QB pressure',
+  `qb_pressure_ngs` tinyint(1) DEFAULT NULL COMMENT 'QB pressure (NGS)',
+  `qb_hit` tinyint(1) DEFAULT NULL COMMENT 'QB hit',
+  `qb_hurry` tinyint(1) DEFAULT NULL COMMENT 'QB hurry',
 
   `int_worthy` bit(1) DEFAULT NULL COMMENT 'interception worthy',
   `cball` bit(1) DEFAULT NULL COMMENT 'catchable ball, A pass in which an eligible receiver has the opportunity to get his hands on the football with reasonable movement, timing, and opportunity.',
@@ -1794,10 +1794,10 @@ CREATE TABLE `nfl_plays_current_week` (
   `sneak` bit(1) DEFAULT NULL COMMENT 'QB sneak',
   `scrm` bit(1) DEFAULT NULL COMMENT 'QB scramble',
 
-  `qb_pressure` tinyint(2) DEFAULT NULL COMMENT 'QB pressure',
-  `qb_pressure_ngs` tinyint(2) DEFAULT NULL COMMENT 'QB pressure (NGS)',
-  `qb_hit` tinyint(2) DEFAULT NULL COMMENT 'QB hit',
-  `qb_hurry` tinyint(2) DEFAULT NULL COMMENT 'QB hurry',
+  `qb_pressure` tinyint(1) DEFAULT NULL COMMENT 'QB pressure',
+  `qb_pressure_ngs` tinyint(1) DEFAULT NULL COMMENT 'QB pressure (NGS)',
+  `qb_hit` tinyint(1) DEFAULT NULL COMMENT 'QB hit',
+  `qb_hurry` tinyint(1) DEFAULT NULL COMMENT 'QB hurry',
 
   `int_worthy` bit(1) DEFAULT NULL COMMENT 'interception worthy',
   `cball` bit(1) DEFAULT NULL COMMENT 'catchable ball, A pass in which an eligible receiver has the opportunity to get his hands on the football with reasonable movement, timing, and opportunity.',
