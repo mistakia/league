@@ -709,7 +709,7 @@ export default {
   }),
   player_pass_interceptions_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
-    select_string: `SUM(CASE WHEN \`int\` = true THEN 1 ELSE 0 END)`,
+    select_string: `SUM(CASE WHEN int = true THEN 1 ELSE 0 END)`,
     stat_name: 'pass_ints_from_plays'
   }),
   player_dropped_passing_yards_from_plays: player_stat_from_plays({
@@ -729,7 +729,7 @@ export default {
   }),
   player_pass_interception_percentage_from_plays: player_stat_from_plays({
     pid_column: 'psr_pid',
-    select_string: `CASE WHEN SUM(CASE WHEN \`int\` = true THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN \`int\` = true THEN 1 ELSE 0 END) / SUM(CASE WHEN sk is null or sk = false THEN 1 ELSE 0 END), 2) ELSE 0 END`,
+    select_string: `CASE WHEN SUM(CASE WHEN int = true THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN int = true THEN 1 ELSE 0 END) / SUM(CASE WHEN sk is null or sk = false THEN 1 ELSE 0 END), 2) ELSE 0 END`,
     stat_name: 'pass_int_pct_from_plays'
   }),
   player_pass_interception_worthy_percentage_from_plays: player_stat_from_plays(
