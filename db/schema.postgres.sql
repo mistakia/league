@@ -17,347 +17,339 @@ SET client_min_messages = warning;
 SET row_security = off;
 SET search_path TO public;
 
-DROP INDEX IF EXISTS idx_23727_lid;
-DROP INDEX IF EXISTS idx_23723_waiverid_pid;
-DROP INDEX IF EXISTS idx_23723_waiverid;
-DROP INDEX IF EXISTS idx_23717_userid;
-DROP INDEX IF EXISTS idx_23714_userid;
-DROP INDEX IF EXISTS idx_23714_sourceid;
-DROP INDEX IF EXISTS idx_23703_email;
-DROP INDEX IF EXISTS idx_23694_table_view;
-DROP INDEX IF EXISTS idx_23690_transitionid;
-DROP INDEX IF EXISTS idx_23690_pid;
-DROP INDEX IF EXISTS idx_23684_lid;
-DROP INDEX IF EXISTS idx_23679_uid;
-DROP INDEX IF EXISTS idx_23679_teamid;
-DROP INDEX IF EXISTS idx_23679_pid;
-DROP INDEX IF EXISTS idx_23679_lid;
-DROP INDEX IF EXISTS idx_23675_transaction;
-DROP INDEX IF EXISTS idx_23672_tradeid;
-DROP INDEX IF EXISTS idx_23672_pid;
-DROP INDEX IF EXISTS idx_23669_tradeid;
-DROP INDEX IF EXISTS idx_23669_pick;
-DROP INDEX IF EXISTS idx_23665_uid;
-DROP INDEX IF EXISTS idx_23661_tradeid;
-DROP INDEX IF EXISTS idx_23661_pid;
-DROP INDEX IF EXISTS idx_23651_team_year;
-DROP INDEX IF EXISTS idx_23651_lid;
-DROP INDEX IF EXISTS idx_23605_team;
-DROP INDEX IF EXISTS idx_23588_season;
-DROP INDEX IF EXISTS idx_23585_player_league_points;
-DROP INDEX IF EXISTS idx_23585_pid;
-DROP INDEX IF EXISTS idx_23580_gid;
-DROP INDEX IF EXISTS idx_23575_rid;
-DROP INDEX IF EXISTS idx_23575_player_team;
-DROP INDEX IF EXISTS idx_23575_pid;
-DROP INDEX IF EXISTS idx_23571_tid;
-DROP INDEX IF EXISTS idx_23571_teamid;
-DROP INDEX IF EXISTS idx_23566_sourceid;
-DROP INDEX IF EXISTS idx_23566_pid;
-DROP INDEX IF EXISTS idx_23563_ranking;
-DROP INDEX IF EXISTS idx_23557_prop;
-DROP INDEX IF EXISTS idx_23557_hits_soft;
-DROP INDEX IF EXISTS idx_23550_prop;
-DROP INDEX IF EXISTS idx_23550_hits_soft;
-DROP INDEX IF EXISTS idx_23546_prop;
-DROP INDEX IF EXISTS idx_23543_week;
-DROP INDEX IF EXISTS idx_23543_total_games;
-DROP INDEX IF EXISTS idx_23543_team;
-DROP INDEX IF EXISTS idx_23543_source_id;
-DROP INDEX IF EXISTS idx_23543_size;
-DROP INDEX IF EXISTS idx_23543_risk_total;
-DROP INDEX IF EXISTS idx_23543_opp_allow_rate;
-DROP INDEX IF EXISTS idx_23543_market_prob;
-DROP INDEX IF EXISTS idx_23543_lowest_payout;
-DROP INDEX IF EXISTS idx_23543_joint_hist_rate;
-DROP INDEX IF EXISTS idx_23543_hist_rate_soft;
-DROP INDEX IF EXISTS idx_23543_hist_edge_soft;
-DROP INDEX IF EXISTS idx_23543_highest_payout;
-DROP INDEX IF EXISTS idx_23540_pairing_prop;
-DROP INDEX IF EXISTS idx_23535_market;
-DROP INDEX IF EXISTS idx_23530_market;
-DROP INDEX IF EXISTS idx_23525_market;
-DROP INDEX IF EXISTS idx_23520_market_selection;
-DROP INDEX IF EXISTS idx_23514_projection;
-DROP INDEX IF EXISTS idx_23514_pid;
-DROP INDEX IF EXISTS idx_23508_projection;
-DROP INDEX IF EXISTS idx_23508_pid;
-DROP INDEX IF EXISTS idx_23502_projection;
-DROP INDEX IF EXISTS idx_23502_pid;
-DROP INDEX IF EXISTS idx_23499_pid;
-DROP INDEX IF EXISTS idx_23493_lid;
-DROP INDEX IF EXISTS idx_23489_poachid;
-DROP INDEX IF EXISTS idx_23489_pid;
-DROP INDEX IF EXISTS idx_23486_tid;
-DROP INDEX IF EXISTS idx_23486_lid;
-DROP INDEX IF EXISTS idx_23481_status;
-DROP INDEX IF EXISTS idx_23481_pid;
-DROP INDEX IF EXISTS idx_23478_pid;
-DROP INDEX IF EXISTS idx_23431_pid;
-DROP INDEX IF EXISTS idx_23390_pid;
-DROP INDEX IF EXISTS idx_23390_idx_player_gamelogs_esbid_tm_pid;
-DROP INDEX IF EXISTS idx_23380_alias;
-DROP INDEX IF EXISTS idx_23374_yahoo_id;
-DROP INDEX IF EXISTS idx_23374_sportradar_id;
-DROP INDEX IF EXISTS idx_23374_sleeper_id;
-DROP INDEX IF EXISTS idx_23374_rotoworld_id;
-DROP INDEX IF EXISTS idx_23374_rotowire_id;
-DROP INDEX IF EXISTS idx_23374_pid;
-DROP INDEX IF EXISTS idx_23374_pfr_id;
-DROP INDEX IF EXISTS idx_23374_name;
-DROP INDEX IF EXISTS idx_23374_lname;
-DROP INDEX IF EXISTS idx_23374_keeptradecut_id;
-DROP INDEX IF EXISTS idx_23374_gsispid;
-DROP INDEX IF EXISTS idx_23374_gsisid;
-DROP INDEX IF EXISTS "idx_23374_gsisItId";
-DROP INDEX IF EXISTS idx_23374_fname;
-DROP INDEX IF EXISTS idx_23374_fantasy_data_id;
-DROP INDEX IF EXISTS idx_23374_espn_id;
-DROP INDEX IF EXISTS idx_23374_esbid;
-DROP INDEX IF EXISTS idx_23369_play;
-DROP INDEX IF EXISTS idx_23361_wager;
-DROP INDEX IF EXISTS idx_23361_userid;
-DROP INDEX IF EXISTS idx_23361_placed_at;
-DROP INDEX IF EXISTS idx_23357_percentile_key;
-DROP INDEX IF EXISTS idx_23317_stat;
-DROP INDEX IF EXISTS idx_23314_snap;
-DROP INDEX IF EXISTS "idx_23314_playId";
-DROP INDEX IF EXISTS idx_23311_snap;
-DROP INDEX IF EXISTS "idx_23311_playId";
-DROP INDEX IF EXISTS "idx_23306_playId";
-DROP INDEX IF EXISTS "idx_23306_gamePlay";
-DROP INDEX IF EXISTS idx_23306_esbid;
-DROP INDEX IF EXISTS idx_23301_trg_pid;
-DROP INDEX IF EXISTS idx_23301_psr_pid;
-DROP INDEX IF EXISTS "idx_23301_playId";
-DROP INDEX IF EXISTS idx_23301_idx_seas_type;
-DROP INDEX IF EXISTS idx_23301_idx_play_type;
-DROP INDEX IF EXISTS idx_23301_idx_off;
-DROP INDEX IF EXISTS idx_23301_idx_nfl_plays_year_esbid;
-DROP INDEX IF EXISTS idx_23301_idx_nfl_plays_target;
-DROP INDEX IF EXISTS "idx_23301_gamePlay";
-DROP INDEX IF EXISTS idx_23301_esbid;
-DROP INDEX IF EXISTS idx_23301_bc_pid;
-DROP INDEX IF EXISTS idx_23298_play_stat;
-DROP INDEX IF EXISTS "idx_23298_playId";
-DROP INDEX IF EXISTS idx_23295_play_stat;
-DROP INDEX IF EXISTS "idx_23295_playId";
-DROP INDEX IF EXISTS idx_23283_game;
-DROP INDEX IF EXISTS idx_23283_esbid;
-DROP INDEX IF EXISTS idx_23275_lid;
-DROP INDEX IF EXISTS idx_23275_aid;
-DROP INDEX IF EXISTS idx_23269_uid;
-DROP INDEX IF EXISTS idx_23269_commishid;
-DROP INDEX IF EXISTS idx_23265_lineup;
-DROP INDEX IF EXISTS idx_23262_starter;
-DROP INDEX IF EXISTS idx_23259_contribution;
-DROP INDEX IF EXISTS idx_23256_contribution;
-DROP INDEX IF EXISTS idx_23253_team_forecast_day;
-DROP INDEX IF EXISTS idx_23250_league_team;
-DROP INDEX IF EXISTS idx_23247_scoring_format_hash;
-DROP INDEX IF EXISTS idx_23244_pid;
-DROP INDEX IF EXISTS idx_23241_player_value;
-DROP INDEX IF EXISTS idx_23241_pid;
-DROP INDEX IF EXISTS idx_23238_league_stat;
-DROP INDEX IF EXISTS idx_23223_league_format_hash;
-DROP INDEX IF EXISTS idx_23220_pid;
-DROP INDEX IF EXISTS idx_23217_player_value;
-DROP INDEX IF EXISTS idx_23217_pid;
-DROP INDEX IF EXISTS idx_23214_pid;
-DROP INDEX IF EXISTS idx_23211_pid;
-DROP INDEX IF EXISTS idx_23208_pick;
-DROP INDEX IF EXISTS idx_23205_tid_pid;
-DROP INDEX IF EXISTS idx_23205_teamid;
-DROP INDEX IF EXISTS idx_23205_pid;
-DROP INDEX IF EXISTS idx_23202_baseline;
-DROP INDEX IF EXISTS idx_23199_player_value;
-DROP INDEX IF EXISTS idx_23189_team;
-DROP INDEX IF EXISTS idx_23184_tid;
-DROP INDEX IF EXISTS idx_23184_pick;
-DROP INDEX IF EXISTS idx_23184_lid;
-ALTER TABLE IF EXISTS ONLY waivers DROP CONSTRAINT IF EXISTS "idx_23727_PRIMARY";
-ALTER TABLE IF EXISTS ONLY users DROP CONSTRAINT IF EXISTS "idx_23703_PRIMARY";
-ALTER TABLE IF EXISTS ONLY user_table_views DROP CONSTRAINT IF EXISTS "idx_23694_PRIMARY";
-ALTER TABLE IF EXISTS ONLY transition_bids DROP CONSTRAINT IF EXISTS "idx_23684_PRIMARY";
-ALTER TABLE IF EXISTS ONLY sources DROP CONSTRAINT IF EXISTS "idx_23599_PRIMARY";
-ALTER TABLE IF EXISTS ONLY rosters DROP CONSTRAINT IF EXISTS "idx_23571_PRIMARY";
-ALTER TABLE IF EXISTS ONLY props_index_new DROP CONSTRAINT IF EXISTS "idx_23557_PRIMARY";
-ALTER TABLE IF EXISTS ONLY props_index DROP CONSTRAINT IF EXISTS "idx_23550_PRIMARY";
-ALTER TABLE IF EXISTS ONLY prop_pairings DROP CONSTRAINT IF EXISTS "idx_23543_PRIMARY";
-ALTER TABLE IF EXISTS ONLY poaches DROP CONSTRAINT IF EXISTS "idx_23493_PRIMARY";
-ALTER TABLE IF EXISTS ONLY player_changelog DROP CONSTRAINT IF EXISTS "idx_23384_PRIMARY";
-ALTER TABLE IF EXISTS ONLY placed_wagers DROP CONSTRAINT IF EXISTS "idx_23361_PRIMARY";
-ALTER TABLE IF EXISTS ONLY matchups DROP CONSTRAINT IF EXISTS "idx_23275_PRIMARY";
-ALTER TABLE IF EXISTS ONLY league_migrations_lock DROP CONSTRAINT IF EXISTS "idx_23234_PRIMARY";
-ALTER TABLE IF EXISTS ONLY league_migrations DROP CONSTRAINT IF EXISTS "idx_23228_PRIMARY";
-ALTER TABLE IF EXISTS ONLY draft DROP CONSTRAINT IF EXISTS "idx_23184_PRIMARY";
-ALTER TABLE IF EXISTS waivers ALTER COLUMN uid DROP DEFAULT;
-ALTER TABLE IF EXISTS users ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS user_table_views ALTER COLUMN view_id DROP DEFAULT;
-ALTER TABLE IF EXISTS transition_bids ALTER COLUMN uid DROP DEFAULT;
-ALTER TABLE IF EXISTS transactions ALTER COLUMN uid DROP DEFAULT;
-ALTER TABLE IF EXISTS trades ALTER COLUMN uid DROP DEFAULT;
-ALTER TABLE IF EXISTS teams ALTER COLUMN uid DROP DEFAULT;
-ALTER TABLE IF EXISTS sources ALTER COLUMN uid DROP DEFAULT;
-ALTER TABLE IF EXISTS rosters ALTER COLUMN uid DROP DEFAULT;
-ALTER TABLE IF EXISTS props_index_new ALTER COLUMN prop_id DROP DEFAULT;
-ALTER TABLE IF EXISTS props_index ALTER COLUMN prop_id DROP DEFAULT;
-ALTER TABLE IF EXISTS poaches ALTER COLUMN uid DROP DEFAULT;
-ALTER TABLE IF EXISTS player_changelog ALTER COLUMN uid DROP DEFAULT;
-ALTER TABLE IF EXISTS placed_wagers ALTER COLUMN wager_id DROP DEFAULT;
-ALTER TABLE IF EXISTS matchups ALTER COLUMN uid DROP DEFAULT;
-ALTER TABLE IF EXISTS leagues ALTER COLUMN uid DROP DEFAULT;
-ALTER TABLE IF EXISTS league_migrations_lock ALTER COLUMN index DROP DEFAULT;
-ALTER TABLE IF EXISTS league_migrations ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS jobs ALTER COLUMN uid DROP DEFAULT;
-ALTER TABLE IF EXISTS draft ALTER COLUMN uid DROP DEFAULT;
-DROP SEQUENCE IF EXISTS waivers_uid_seq;
-DROP TABLE IF EXISTS waivers;
-DROP TABLE IF EXISTS waiver_releases;
-DROP TABLE IF EXISTS users_teams;
-DROP TABLE IF EXISTS users_sources;
-DROP SEQUENCE IF EXISTS users_id_seq;
-DROP TABLE IF EXISTS users;
-DROP SEQUENCE IF EXISTS user_table_views_view_id_seq;
-DROP TABLE IF EXISTS user_table_views;
-DROP TABLE IF EXISTS transition_releases;
-DROP SEQUENCE IF EXISTS transition_bids_uid_seq;
-DROP TABLE IF EXISTS transition_bids;
-DROP SEQUENCE IF EXISTS transactions_uid_seq;
-DROP TABLE IF EXISTS transactions;
-DROP SEQUENCE IF EXISTS trades_uid_seq;
-DROP TABLE IF EXISTS trades_transactions;
-DROP TABLE IF EXISTS trades_players;
-DROP TABLE IF EXISTS trades_picks;
-DROP TABLE IF EXISTS trades;
-DROP TABLE IF EXISTS trade_releases;
-DROP SEQUENCE IF EXISTS teams_uid_seq;
-DROP TABLE IF EXISTS teams;
-DROP TABLE IF EXISTS team_stats;
-DROP SEQUENCE IF EXISTS sources_uid_seq;
-DROP TABLE IF EXISTS sources;
-DROP TABLE IF EXISTS seasons;
-DROP TABLE IF EXISTS scoring_format_player_projection_points;
-DROP TABLE IF EXISTS schedule;
-DROP SEQUENCE IF EXISTS rosters_uid_seq;
-DROP TABLE IF EXISTS rosters_players;
-DROP TABLE IF EXISTS rosters;
-DROP TABLE IF EXISTS ros_projections;
-DROP TABLE IF EXISTS rankings;
-DROP SEQUENCE IF EXISTS props_index_prop_id_seq;
-DROP SEQUENCE IF EXISTS props_index_new_prop_id_seq;
-DROP TABLE IF EXISTS props_index_new;
-DROP TABLE IF EXISTS props_index;
-DROP TABLE IF EXISTS props;
-DROP TABLE IF EXISTS prop_pairings;
-DROP TABLE IF EXISTS prop_pairing_props;
-DROP TABLE IF EXISTS prop_markets_index;
-DROP TABLE IF EXISTS prop_markets_history;
-DROP TABLE IF EXISTS prop_market_selections_index;
-DROP TABLE IF EXISTS prop_market_selections_history;
-DROP TABLE IF EXISTS projections_index;
-DROP TABLE IF EXISTS projections_archive;
-DROP TABLE IF EXISTS projections;
-DROP TABLE IF EXISTS practice;
-DROP SEQUENCE IF EXISTS poaches_uid_seq;
-DROP TABLE IF EXISTS poaches;
-DROP TABLE IF EXISTS poach_releases;
-DROP TABLE IF EXISTS playoffs;
-DROP TABLE IF EXISTS players_status;
-DROP TABLE IF EXISTS player_snaps_game;
-DROP TABLE IF EXISTS player_seasonlogs;
-DROP TABLE IF EXISTS player_gamelogs;
-DROP SEQUENCE IF EXISTS player_changelog_uid_seq;
-DROP TABLE IF EXISTS player_changelog;
-DROP TABLE IF EXISTS player_aliases;
-DROP TABLE IF EXISTS player;
-DROP TABLE IF EXISTS play_changelog;
-DROP SEQUENCE IF EXISTS placed_wagers_wager_id_seq;
-DROP TABLE IF EXISTS placed_wagers;
-DROP TABLE IF EXISTS percentiles;
-DROP TABLE IF EXISTS nfl_team_seasonlogs;
-DROP TABLE IF EXISTS nfl_snaps_current_week;
-DROP TABLE IF EXISTS nfl_snaps;
-DROP TABLE IF EXISTS nfl_plays_current_week;
-DROP TABLE IF EXISTS nfl_plays;
-DROP TABLE IF EXISTS nfl_play_stats_current_week;
-DROP TABLE IF EXISTS nfl_play_stats;
-DROP TABLE IF EXISTS nfl_games_changelog;
-DROP TABLE IF EXISTS nfl_games;
-DROP SEQUENCE IF EXISTS matchups_uid_seq;
-DROP TABLE IF EXISTS matchups;
-DROP SEQUENCE IF EXISTS leagues_uid_seq;
-DROP TABLE IF EXISTS leagues;
-DROP TABLE IF EXISTS league_team_lineups;
-DROP TABLE IF EXISTS league_team_lineup_starters;
-DROP TABLE IF EXISTS league_team_lineup_contributions;
-DROP TABLE IF EXISTS league_team_lineup_contribution_weeks;
-DROP TABLE IF EXISTS league_team_forecast;
-DROP TABLE IF EXISTS league_team_daily_values;
-DROP TABLE IF EXISTS league_scoring_formats;
-DROP TABLE IF EXISTS league_player_seasonlogs;
-DROP TABLE IF EXISTS league_player_projection_values;
-DROP TABLE IF EXISTS league_nfl_team_seasonlogs;
-DROP SEQUENCE IF EXISTS league_migrations_lock_index_seq;
-DROP TABLE IF EXISTS league_migrations_lock;
-DROP SEQUENCE IF EXISTS league_migrations_id_seq;
-DROP TABLE IF EXISTS league_migrations;
-DROP TABLE IF EXISTS league_formats;
-DROP TABLE IF EXISTS league_format_player_seasonlogs;
-DROP TABLE IF EXISTS league_format_player_projection_values;
-DROP TABLE IF EXISTS league_format_player_gamelogs;
-DROP TABLE IF EXISTS league_format_player_careerlogs;
-DROP TABLE IF EXISTS league_format_draft_pick_value;
-DROP TABLE IF EXISTS league_cutlist;
-DROP TABLE IF EXISTS league_baselines;
-DROP TABLE IF EXISTS keeptradecut_rankings;
-DROP SEQUENCE IF EXISTS jobs_uid_seq;
-DROP TABLE IF EXISTS jobs;
-DROP TABLE IF EXISTS footballoutsiders;
-DROP SEQUENCE IF EXISTS draft_uid_seq;
-DROP TABLE IF EXISTS draft;
-DROP TYPE IF EXISTS props_index_time_type;
-DROP TYPE IF EXISTS props_index_source_id;
-DROP TYPE IF EXISTS prop_pairings_source_id;
-DROP TYPE IF EXISTS prop_markets_index_time_type;
-DROP TYPE IF EXISTS prop_markets_index_source_id;
-DROP TYPE IF EXISTS prop_markets_history_source_id;
-DROP TYPE IF EXISTS prop_market_selections_index_time_type;
-DROP TYPE IF EXISTS prop_market_selections_index_source_id;
-DROP TYPE IF EXISTS prop_market_selections_index_result;
-DROP TYPE IF EXISTS prop_market_selections_history_source_id;
-DROP TYPE IF EXISTS placed_wagers_wager_type;
-DROP TYPE IF EXISTS placed_wagers_wager_status;
-DROP TYPE IF EXISTS placed_wagers_selection_9_status;
-DROP TYPE IF EXISTS placed_wagers_selection_8_status;
-DROP TYPE IF EXISTS placed_wagers_selection_7_status;
-DROP TYPE IF EXISTS placed_wagers_selection_6_status;
-DROP TYPE IF EXISTS placed_wagers_selection_5_status;
-DROP TYPE IF EXISTS placed_wagers_selection_4_status;
-DROP TYPE IF EXISTS placed_wagers_selection_3_status;
-DROP TYPE IF EXISTS placed_wagers_selection_2_status;
-DROP TYPE IF EXISTS placed_wagers_selection_1_status;
-DROP TYPE IF EXISTS placed_wagers_selection_12_status;
-DROP TYPE IF EXISTS placed_wagers_selection_11_status;
-DROP TYPE IF EXISTS placed_wagers_selection_10_status;
-DROP TYPE IF EXISTS placed_wagers_book_id;
-DROP TYPE IF EXISTS nfl_plays_play_type;
-DROP TYPE IF EXISTS nfl_plays_current_week_play_type;
-DROP TYPE IF EXISTS nfl_games_surf;
-DROP TYPE IF EXISTS nfl_games_roof;
--- DROP SCHEMA IF EXISTS league_production;
+DROP INDEX IF EXISTS public.idx_25151_lid;
+DROP INDEX IF EXISTS public.idx_25147_waiverid_pid;
+DROP INDEX IF EXISTS public.idx_25147_waiverid;
+DROP INDEX IF EXISTS public.idx_25141_userid;
+DROP INDEX IF EXISTS public.idx_25138_userid;
+DROP INDEX IF EXISTS public.idx_25138_sourceid;
+DROP INDEX IF EXISTS public.idx_25127_email;
+DROP INDEX IF EXISTS public.idx_25118_table_view;
+DROP INDEX IF EXISTS public.idx_25114_transitionid;
+DROP INDEX IF EXISTS public.idx_25114_pid;
+DROP INDEX IF EXISTS public.idx_25108_lid;
+DROP INDEX IF EXISTS public.idx_25103_uid;
+DROP INDEX IF EXISTS public.idx_25103_teamid;
+DROP INDEX IF EXISTS public.idx_25103_pid;
+DROP INDEX IF EXISTS public.idx_25103_lid;
+DROP INDEX IF EXISTS public.idx_25099_transaction;
+DROP INDEX IF EXISTS public.idx_25096_tradeid;
+DROP INDEX IF EXISTS public.idx_25096_pid;
+DROP INDEX IF EXISTS public.idx_25093_tradeid;
+DROP INDEX IF EXISTS public.idx_25093_pick;
+DROP INDEX IF EXISTS public.idx_25089_uid;
+DROP INDEX IF EXISTS public.idx_25085_tradeid;
+DROP INDEX IF EXISTS public.idx_25085_pid;
+DROP INDEX IF EXISTS public.idx_25075_team_year;
+DROP INDEX IF EXISTS public.idx_25075_lid;
+DROP INDEX IF EXISTS public.idx_25029_team;
+DROP INDEX IF EXISTS public.idx_25012_season;
+DROP INDEX IF EXISTS public.idx_25009_player_league_points;
+DROP INDEX IF EXISTS public.idx_25009_pid;
+DROP INDEX IF EXISTS public.idx_25004_gid;
+DROP INDEX IF EXISTS public.idx_24999_rid;
+DROP INDEX IF EXISTS public.idx_24999_player_team;
+DROP INDEX IF EXISTS public.idx_24999_pid;
+DROP INDEX IF EXISTS public.idx_24995_tid;
+DROP INDEX IF EXISTS public.idx_24995_teamid;
+DROP INDEX IF EXISTS public.idx_24990_sourceid;
+DROP INDEX IF EXISTS public.idx_24990_pid;
+DROP INDEX IF EXISTS public.idx_24987_ranking;
+DROP INDEX IF EXISTS public.idx_24981_prop;
+DROP INDEX IF EXISTS public.idx_24981_hits_soft;
+DROP INDEX IF EXISTS public.idx_24974_prop;
+DROP INDEX IF EXISTS public.idx_24974_hits_soft;
+DROP INDEX IF EXISTS public.idx_24970_prop;
+DROP INDEX IF EXISTS public.idx_24967_week;
+DROP INDEX IF EXISTS public.idx_24967_total_games;
+DROP INDEX IF EXISTS public.idx_24967_team;
+DROP INDEX IF EXISTS public.idx_24967_source_id;
+DROP INDEX IF EXISTS public.idx_24967_size;
+DROP INDEX IF EXISTS public.idx_24967_risk_total;
+DROP INDEX IF EXISTS public.idx_24967_opp_allow_rate;
+DROP INDEX IF EXISTS public.idx_24967_market_prob;
+DROP INDEX IF EXISTS public.idx_24967_lowest_payout;
+DROP INDEX IF EXISTS public.idx_24967_joint_hist_rate;
+DROP INDEX IF EXISTS public.idx_24967_hist_rate_soft;
+DROP INDEX IF EXISTS public.idx_24967_hist_edge_soft;
+DROP INDEX IF EXISTS public.idx_24967_highest_payout;
+DROP INDEX IF EXISTS public.idx_24964_pairing_prop;
+DROP INDEX IF EXISTS public.idx_24959_market;
+DROP INDEX IF EXISTS public.idx_24954_market;
+DROP INDEX IF EXISTS public.idx_24949_market;
+DROP INDEX IF EXISTS public.idx_24944_market_selection;
+DROP INDEX IF EXISTS public.idx_24938_projection;
+DROP INDEX IF EXISTS public.idx_24938_pid;
+DROP INDEX IF EXISTS public.idx_24932_projection;
+DROP INDEX IF EXISTS public.idx_24932_pid;
+DROP INDEX IF EXISTS public.idx_24926_projection;
+DROP INDEX IF EXISTS public.idx_24926_pid;
+DROP INDEX IF EXISTS public.idx_24923_pid;
+DROP INDEX IF EXISTS public.idx_24917_lid;
+DROP INDEX IF EXISTS public.idx_24913_poachid;
+DROP INDEX IF EXISTS public.idx_24913_pid;
+DROP INDEX IF EXISTS public.idx_24910_tid;
+DROP INDEX IF EXISTS public.idx_24910_lid;
+DROP INDEX IF EXISTS public.idx_24905_status;
+DROP INDEX IF EXISTS public.idx_24905_pid;
+DROP INDEX IF EXISTS public.idx_24902_pid;
+DROP INDEX IF EXISTS public.idx_24855_pid;
+DROP INDEX IF EXISTS public.idx_24814_pid;
+DROP INDEX IF EXISTS public.idx_24814_idx_player_gamelogs_esbid_tm_pid;
+DROP INDEX IF EXISTS public.idx_24804_alias;
+DROP INDEX IF EXISTS public.idx_24798_yahoo_id;
+DROP INDEX IF EXISTS public.idx_24798_sportradar_id;
+DROP INDEX IF EXISTS public.idx_24798_sleeper_id;
+DROP INDEX IF EXISTS public.idx_24798_rotoworld_id;
+DROP INDEX IF EXISTS public.idx_24798_rotowire_id;
+DROP INDEX IF EXISTS public.idx_24798_pid;
+DROP INDEX IF EXISTS public.idx_24798_pfr_id;
+DROP INDEX IF EXISTS public.idx_24798_name;
+DROP INDEX IF EXISTS public.idx_24798_lname;
+DROP INDEX IF EXISTS public.idx_24798_keeptradecut_id;
+DROP INDEX IF EXISTS public.idx_24798_gsispid;
+DROP INDEX IF EXISTS public.idx_24798_gsisid;
+DROP INDEX IF EXISTS public."idx_24798_gsisItId";
+DROP INDEX IF EXISTS public.idx_24798_fname;
+DROP INDEX IF EXISTS public.idx_24798_fantasy_data_id;
+DROP INDEX IF EXISTS public.idx_24798_espn_id;
+DROP INDEX IF EXISTS public.idx_24798_esbid;
+DROP INDEX IF EXISTS public.idx_24793_play;
+DROP INDEX IF EXISTS public.idx_24785_wager;
+DROP INDEX IF EXISTS public.idx_24785_userid;
+DROP INDEX IF EXISTS public.idx_24785_placed_at;
+DROP INDEX IF EXISTS public.idx_24781_percentile_key;
+DROP INDEX IF EXISTS public.idx_24741_stat;
+DROP INDEX IF EXISTS public.idx_24738_snap;
+DROP INDEX IF EXISTS public."idx_24738_playId";
+DROP INDEX IF EXISTS public.idx_24735_snap;
+DROP INDEX IF EXISTS public."idx_24735_playId";
+DROP INDEX IF EXISTS public."idx_24730_playId";
+DROP INDEX IF EXISTS public."idx_24730_gamePlay";
+DROP INDEX IF EXISTS public.idx_24730_esbid;
+DROP INDEX IF EXISTS public.idx_24725_trg_pid;
+DROP INDEX IF EXISTS public.idx_24725_psr_pid;
+DROP INDEX IF EXISTS public."idx_24725_playId";
+DROP INDEX IF EXISTS public.idx_24725_idx_seas_type;
+DROP INDEX IF EXISTS public.idx_24725_idx_play_type;
+DROP INDEX IF EXISTS public.idx_24725_idx_off;
+DROP INDEX IF EXISTS public.idx_24725_idx_nfl_plays_year_esbid;
+DROP INDEX IF EXISTS public.idx_24725_idx_nfl_plays_target;
+DROP INDEX IF EXISTS public."idx_24725_gamePlay";
+DROP INDEX IF EXISTS public.idx_24725_esbid;
+DROP INDEX IF EXISTS public.idx_24725_bc_pid;
+DROP INDEX IF EXISTS public.idx_24722_play_stat;
+DROP INDEX IF EXISTS public."idx_24722_playId";
+DROP INDEX IF EXISTS public.idx_24719_play_stat;
+DROP INDEX IF EXISTS public."idx_24719_playId";
+DROP INDEX IF EXISTS public.idx_24707_game;
+DROP INDEX IF EXISTS public.idx_24707_esbid;
+DROP INDEX IF EXISTS public.idx_24699_lid;
+DROP INDEX IF EXISTS public.idx_24699_aid;
+DROP INDEX IF EXISTS public.idx_24693_uid;
+DROP INDEX IF EXISTS public.idx_24693_commishid;
+DROP INDEX IF EXISTS public.idx_24689_lineup;
+DROP INDEX IF EXISTS public.idx_24686_starter;
+DROP INDEX IF EXISTS public.idx_24683_contribution;
+DROP INDEX IF EXISTS public.idx_24680_contribution;
+DROP INDEX IF EXISTS public.idx_24677_team_forecast_day;
+DROP INDEX IF EXISTS public.idx_24674_league_team;
+DROP INDEX IF EXISTS public.idx_24671_scoring_format_hash;
+DROP INDEX IF EXISTS public.idx_24668_pid;
+DROP INDEX IF EXISTS public.idx_24665_player_value;
+DROP INDEX IF EXISTS public.idx_24665_pid;
+DROP INDEX IF EXISTS public.idx_24662_league_stat;
+DROP INDEX IF EXISTS public.idx_24647_league_format_hash;
+DROP INDEX IF EXISTS public.idx_24644_pid;
+DROP INDEX IF EXISTS public.idx_24641_player_value;
+DROP INDEX IF EXISTS public.idx_24641_pid;
+DROP INDEX IF EXISTS public.idx_24638_pid;
+DROP INDEX IF EXISTS public.idx_24635_pid;
+DROP INDEX IF EXISTS public.idx_24632_pick;
+DROP INDEX IF EXISTS public.idx_24629_tid_pid;
+DROP INDEX IF EXISTS public.idx_24629_teamid;
+DROP INDEX IF EXISTS public.idx_24629_pid;
+DROP INDEX IF EXISTS public.idx_24626_baseline;
+DROP INDEX IF EXISTS public.idx_24623_player_value;
+DROP INDEX IF EXISTS public.idx_24613_team;
+DROP INDEX IF EXISTS public.idx_24608_tid;
+DROP INDEX IF EXISTS public.idx_24608_pick;
+DROP INDEX IF EXISTS public.idx_24608_lid;
+ALTER TABLE IF EXISTS ONLY public.waivers DROP CONSTRAINT IF EXISTS "idx_25151_PRIMARY";
+ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS "idx_25127_PRIMARY";
+ALTER TABLE IF EXISTS ONLY public.user_table_views DROP CONSTRAINT IF EXISTS "idx_25118_PRIMARY";
+ALTER TABLE IF EXISTS ONLY public.transition_bids DROP CONSTRAINT IF EXISTS "idx_25108_PRIMARY";
+ALTER TABLE IF EXISTS ONLY public.sources DROP CONSTRAINT IF EXISTS "idx_25023_PRIMARY";
+ALTER TABLE IF EXISTS ONLY public.rosters DROP CONSTRAINT IF EXISTS "idx_24995_PRIMARY";
+ALTER TABLE IF EXISTS ONLY public.props_index_new DROP CONSTRAINT IF EXISTS "idx_24981_PRIMARY";
+ALTER TABLE IF EXISTS ONLY public.props_index DROP CONSTRAINT IF EXISTS "idx_24974_PRIMARY";
+ALTER TABLE IF EXISTS ONLY public.prop_pairings DROP CONSTRAINT IF EXISTS "idx_24967_PRIMARY";
+ALTER TABLE IF EXISTS ONLY public.poaches DROP CONSTRAINT IF EXISTS "idx_24917_PRIMARY";
+ALTER TABLE IF EXISTS ONLY public.player_changelog DROP CONSTRAINT IF EXISTS "idx_24808_PRIMARY";
+ALTER TABLE IF EXISTS ONLY public.placed_wagers DROP CONSTRAINT IF EXISTS "idx_24785_PRIMARY";
+ALTER TABLE IF EXISTS ONLY public.matchups DROP CONSTRAINT IF EXISTS "idx_24699_PRIMARY";
+ALTER TABLE IF EXISTS ONLY public.league_migrations_lock DROP CONSTRAINT IF EXISTS "idx_24658_PRIMARY";
+ALTER TABLE IF EXISTS ONLY public.league_migrations DROP CONSTRAINT IF EXISTS "idx_24652_PRIMARY";
+ALTER TABLE IF EXISTS ONLY public.draft DROP CONSTRAINT IF EXISTS "idx_24608_PRIMARY";
+ALTER TABLE IF EXISTS public.waivers ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.users ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.user_table_views ALTER COLUMN view_id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.transition_bids ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.transactions ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.trades ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.teams ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.sources ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.rosters ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.props_index_new ALTER COLUMN prop_id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.props_index ALTER COLUMN prop_id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.poaches ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.player_changelog ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.placed_wagers ALTER COLUMN wager_id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.matchups ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.leagues ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.league_migrations_lock ALTER COLUMN index DROP DEFAULT;
+ALTER TABLE IF EXISTS public.league_migrations ALTER COLUMN id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.jobs ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.draft ALTER COLUMN uid DROP DEFAULT;
+DROP SEQUENCE IF EXISTS public.waivers_uid_seq;
+DROP TABLE IF EXISTS public.waivers;
+DROP TABLE IF EXISTS public.waiver_releases;
+DROP TABLE IF EXISTS public.users_teams;
+DROP TABLE IF EXISTS public.users_sources;
+DROP SEQUENCE IF EXISTS public.users_id_seq;
+DROP TABLE IF EXISTS public.users;
+DROP SEQUENCE IF EXISTS public.user_table_views_view_id_seq;
+DROP TABLE IF EXISTS public.user_table_views;
+DROP TABLE IF EXISTS public.transition_releases;
+DROP SEQUENCE IF EXISTS public.transition_bids_uid_seq;
+DROP TABLE IF EXISTS public.transition_bids;
+DROP SEQUENCE IF EXISTS public.transactions_uid_seq;
+DROP TABLE IF EXISTS public.transactions;
+DROP SEQUENCE IF EXISTS public.trades_uid_seq;
+DROP TABLE IF EXISTS public.trades_transactions;
+DROP TABLE IF EXISTS public.trades_players;
+DROP TABLE IF EXISTS public.trades_picks;
+DROP TABLE IF EXISTS public.trades;
+DROP TABLE IF EXISTS public.trade_releases;
+DROP SEQUENCE IF EXISTS public.teams_uid_seq;
+DROP TABLE IF EXISTS public.teams;
+DROP TABLE IF EXISTS public.team_stats;
+DROP SEQUENCE IF EXISTS public.sources_uid_seq;
+DROP TABLE IF EXISTS public.sources;
+DROP TABLE IF EXISTS public.seasons;
+DROP TABLE IF EXISTS public.scoring_format_player_projection_points;
+DROP TABLE IF EXISTS public.schedule;
+DROP SEQUENCE IF EXISTS public.rosters_uid_seq;
+DROP TABLE IF EXISTS public.rosters_players;
+DROP TABLE IF EXISTS public.rosters;
+DROP TABLE IF EXISTS public.ros_projections;
+DROP TABLE IF EXISTS public.rankings;
+DROP SEQUENCE IF EXISTS public.props_index_prop_id_seq;
+DROP SEQUENCE IF EXISTS public.props_index_new_prop_id_seq;
+DROP TABLE IF EXISTS public.props_index_new;
+DROP TABLE IF EXISTS public.props_index;
+DROP TABLE IF EXISTS public.props;
+DROP TABLE IF EXISTS public.prop_pairings;
+DROP TABLE IF EXISTS public.prop_pairing_props;
+DROP TABLE IF EXISTS public.prop_markets_index;
+DROP TABLE IF EXISTS public.prop_markets_history;
+DROP TABLE IF EXISTS public.prop_market_selections_index;
+DROP TABLE IF EXISTS public.prop_market_selections_history;
+DROP TABLE IF EXISTS public.projections_index;
+DROP TABLE IF EXISTS public.projections_archive;
+DROP TABLE IF EXISTS public.projections;
+DROP TABLE IF EXISTS public.practice;
+DROP SEQUENCE IF EXISTS public.poaches_uid_seq;
+DROP TABLE IF EXISTS public.poaches;
+DROP TABLE IF EXISTS public.poach_releases;
+DROP TABLE IF EXISTS public.playoffs;
+DROP TABLE IF EXISTS public.players_status;
+DROP TABLE IF EXISTS public.player_snaps_game;
+DROP TABLE IF EXISTS public.player_seasonlogs;
+DROP TABLE IF EXISTS public.player_gamelogs;
+DROP SEQUENCE IF EXISTS public.player_changelog_uid_seq;
+DROP TABLE IF EXISTS public.player_changelog;
+DROP TABLE IF EXISTS public.player_aliases;
+DROP TABLE IF EXISTS public.player;
+DROP TABLE IF EXISTS public.play_changelog;
+DROP SEQUENCE IF EXISTS public.placed_wagers_wager_id_seq;
+DROP TABLE IF EXISTS public.placed_wagers;
+DROP TABLE IF EXISTS public.percentiles;
+DROP TABLE IF EXISTS public.nfl_team_seasonlogs;
+DROP TABLE IF EXISTS public.nfl_snaps_current_week;
+DROP TABLE IF EXISTS public.nfl_snaps;
+DROP TABLE IF EXISTS public.nfl_plays_current_week;
+DROP TABLE IF EXISTS public.nfl_plays;
+DROP TABLE IF EXISTS public.nfl_play_stats_current_week;
+DROP TABLE IF EXISTS public.nfl_play_stats;
+DROP TABLE IF EXISTS public.nfl_games_changelog;
+DROP TABLE IF EXISTS public.nfl_games;
+DROP SEQUENCE IF EXISTS public.matchups_uid_seq;
+DROP TABLE IF EXISTS public.matchups;
+DROP SEQUENCE IF EXISTS public.leagues_uid_seq;
+DROP TABLE IF EXISTS public.leagues;
+DROP TABLE IF EXISTS public.league_team_lineups;
+DROP TABLE IF EXISTS public.league_team_lineup_starters;
+DROP TABLE IF EXISTS public.league_team_lineup_contributions;
+DROP TABLE IF EXISTS public.league_team_lineup_contribution_weeks;
+DROP TABLE IF EXISTS public.league_team_forecast;
+DROP TABLE IF EXISTS public.league_team_daily_values;
+DROP TABLE IF EXISTS public.league_scoring_formats;
+DROP TABLE IF EXISTS public.league_player_seasonlogs;
+DROP TABLE IF EXISTS public.league_player_projection_values;
+DROP TABLE IF EXISTS public.league_nfl_team_seasonlogs;
+DROP SEQUENCE IF EXISTS public.league_migrations_lock_index_seq;
+DROP TABLE IF EXISTS public.league_migrations_lock;
+DROP SEQUENCE IF EXISTS public.league_migrations_id_seq;
+DROP TABLE IF EXISTS public.league_migrations;
+DROP TABLE IF EXISTS public.league_formats;
+DROP TABLE IF EXISTS public.league_format_player_seasonlogs;
+DROP TABLE IF EXISTS public.league_format_player_projection_values;
+DROP TABLE IF EXISTS public.league_format_player_gamelogs;
+DROP TABLE IF EXISTS public.league_format_player_careerlogs;
+DROP TABLE IF EXISTS public.league_format_draft_pick_value;
+DROP TABLE IF EXISTS public.league_cutlist;
+DROP TABLE IF EXISTS public.league_baselines;
+DROP TABLE IF EXISTS public.keeptradecut_rankings;
+DROP SEQUENCE IF EXISTS public.jobs_uid_seq;
+DROP TABLE IF EXISTS public.jobs;
+DROP TABLE IF EXISTS public.footballoutsiders;
+DROP SEQUENCE IF EXISTS public.draft_uid_seq;
+DROP TABLE IF EXISTS public.draft;
+DROP TYPE IF EXISTS public.props_index_time_type;
+DROP TYPE IF EXISTS public.props_index_source_id;
+DROP TYPE IF EXISTS public.prop_pairings_source_id;
+DROP TYPE IF EXISTS public.prop_markets_index_time_type;
+DROP TYPE IF EXISTS public.prop_markets_index_source_id;
+DROP TYPE IF EXISTS public.prop_markets_history_source_id;
+DROP TYPE IF EXISTS public.prop_market_selections_index_time_type;
+DROP TYPE IF EXISTS public.prop_market_selections_index_source_id;
+DROP TYPE IF EXISTS public.prop_market_selections_index_result;
+DROP TYPE IF EXISTS public.prop_market_selections_history_source_id;
+DROP TYPE IF EXISTS public.placed_wagers_wager_type;
+DROP TYPE IF EXISTS public.placed_wagers_wager_status;
+DROP TYPE IF EXISTS public.placed_wagers_selection_9_status;
+DROP TYPE IF EXISTS public.placed_wagers_selection_8_status;
+DROP TYPE IF EXISTS public.placed_wagers_selection_7_status;
+DROP TYPE IF EXISTS public.placed_wagers_selection_6_status;
+DROP TYPE IF EXISTS public.placed_wagers_selection_5_status;
+DROP TYPE IF EXISTS public.placed_wagers_selection_4_status;
+DROP TYPE IF EXISTS public.placed_wagers_selection_3_status;
+DROP TYPE IF EXISTS public.placed_wagers_selection_2_status;
+DROP TYPE IF EXISTS public.placed_wagers_selection_1_status;
+DROP TYPE IF EXISTS public.placed_wagers_selection_12_status;
+DROP TYPE IF EXISTS public.placed_wagers_selection_11_status;
+DROP TYPE IF EXISTS public.placed_wagers_selection_10_status;
+DROP TYPE IF EXISTS public.placed_wagers_book_id;
+DROP TYPE IF EXISTS public.nfl_plays_play_type;
+DROP TYPE IF EXISTS public.nfl_plays_current_week_play_type;
+DROP TYPE IF EXISTS public.nfl_games_surf;
+DROP TYPE IF EXISTS public.nfl_games_roof;
 --
--- Name: league_production; Type: SCHEMA; Schema: -; Owner: -
---
-
--- CREATE SCHEMA league_production;
-
-
---
--- Name: nfl_games_roof; Type: TYPE; Schema: league_production; Owner: -
+-- Name: nfl_games_roof; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE nfl_games_roof AS ENUM (
+CREATE TYPE public.nfl_games_roof AS ENUM (
     'dome',
     'outdoors',
     'closed',
@@ -366,10 +358,10 @@ CREATE TYPE nfl_games_roof AS ENUM (
 
 
 --
--- Name: nfl_games_surf; Type: TYPE; Schema: league_production; Owner: -
+-- Name: nfl_games_surf; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE nfl_games_surf AS ENUM (
+CREATE TYPE public.nfl_games_surf AS ENUM (
     'grass',
     'astroturf',
     'fieldturf',
@@ -382,10 +374,10 @@ CREATE TYPE nfl_games_surf AS ENUM (
 
 
 --
--- Name: nfl_plays_current_week_play_type; Type: TYPE; Schema: league_production; Owner: -
+-- Name: nfl_plays_current_week_play_type; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE nfl_plays_current_week_play_type AS ENUM (
+CREATE TYPE public.nfl_plays_current_week_play_type AS ENUM (
     'CONV',
     'FGXP',
     'KOFF',
@@ -397,10 +389,10 @@ CREATE TYPE nfl_plays_current_week_play_type AS ENUM (
 
 
 --
--- Name: nfl_plays_play_type; Type: TYPE; Schema: league_production; Owner: -
+-- Name: nfl_plays_play_type; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE nfl_plays_play_type AS ENUM (
+CREATE TYPE public.nfl_plays_play_type AS ENUM (
     'CONV',
     'FGXP',
     'KOFF',
@@ -412,20 +404,20 @@ CREATE TYPE nfl_plays_play_type AS ENUM (
 
 
 --
--- Name: placed_wagers_book_id; Type: TYPE; Schema: league_production; Owner: -
+-- Name: placed_wagers_book_id; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE placed_wagers_book_id AS ENUM (
+CREATE TYPE public.placed_wagers_book_id AS ENUM (
     'DRAFTKINGS',
     'FANDUEL'
 );
 
 
 --
--- Name: placed_wagers_selection_10_status; Type: TYPE; Schema: league_production; Owner: -
+-- Name: placed_wagers_selection_10_status; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE placed_wagers_selection_10_status AS ENUM (
+CREATE TYPE public.placed_wagers_selection_10_status AS ENUM (
     'OPEN',
     'WON',
     'LOST',
@@ -435,10 +427,10 @@ CREATE TYPE placed_wagers_selection_10_status AS ENUM (
 
 
 --
--- Name: placed_wagers_selection_11_status; Type: TYPE; Schema: league_production; Owner: -
+-- Name: placed_wagers_selection_11_status; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE placed_wagers_selection_11_status AS ENUM (
+CREATE TYPE public.placed_wagers_selection_11_status AS ENUM (
     'OPEN',
     'WON',
     'LOST',
@@ -448,10 +440,10 @@ CREATE TYPE placed_wagers_selection_11_status AS ENUM (
 
 
 --
--- Name: placed_wagers_selection_12_status; Type: TYPE; Schema: league_production; Owner: -
+-- Name: placed_wagers_selection_12_status; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE placed_wagers_selection_12_status AS ENUM (
+CREATE TYPE public.placed_wagers_selection_12_status AS ENUM (
     'OPEN',
     'WON',
     'LOST',
@@ -461,10 +453,10 @@ CREATE TYPE placed_wagers_selection_12_status AS ENUM (
 
 
 --
--- Name: placed_wagers_selection_1_status; Type: TYPE; Schema: league_production; Owner: -
+-- Name: placed_wagers_selection_1_status; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE placed_wagers_selection_1_status AS ENUM (
+CREATE TYPE public.placed_wagers_selection_1_status AS ENUM (
     'OPEN',
     'WON',
     'LOST',
@@ -474,10 +466,10 @@ CREATE TYPE placed_wagers_selection_1_status AS ENUM (
 
 
 --
--- Name: placed_wagers_selection_2_status; Type: TYPE; Schema: league_production; Owner: -
+-- Name: placed_wagers_selection_2_status; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE placed_wagers_selection_2_status AS ENUM (
+CREATE TYPE public.placed_wagers_selection_2_status AS ENUM (
     'OPEN',
     'WON',
     'LOST',
@@ -487,10 +479,10 @@ CREATE TYPE placed_wagers_selection_2_status AS ENUM (
 
 
 --
--- Name: placed_wagers_selection_3_status; Type: TYPE; Schema: league_production; Owner: -
+-- Name: placed_wagers_selection_3_status; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE placed_wagers_selection_3_status AS ENUM (
+CREATE TYPE public.placed_wagers_selection_3_status AS ENUM (
     'OPEN',
     'WON',
     'LOST',
@@ -500,10 +492,10 @@ CREATE TYPE placed_wagers_selection_3_status AS ENUM (
 
 
 --
--- Name: placed_wagers_selection_4_status; Type: TYPE; Schema: league_production; Owner: -
+-- Name: placed_wagers_selection_4_status; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE placed_wagers_selection_4_status AS ENUM (
+CREATE TYPE public.placed_wagers_selection_4_status AS ENUM (
     'OPEN',
     'WON',
     'LOST',
@@ -513,10 +505,10 @@ CREATE TYPE placed_wagers_selection_4_status AS ENUM (
 
 
 --
--- Name: placed_wagers_selection_5_status; Type: TYPE; Schema: league_production; Owner: -
+-- Name: placed_wagers_selection_5_status; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE placed_wagers_selection_5_status AS ENUM (
+CREATE TYPE public.placed_wagers_selection_5_status AS ENUM (
     'OPEN',
     'WON',
     'LOST',
@@ -526,10 +518,10 @@ CREATE TYPE placed_wagers_selection_5_status AS ENUM (
 
 
 --
--- Name: placed_wagers_selection_6_status; Type: TYPE; Schema: league_production; Owner: -
+-- Name: placed_wagers_selection_6_status; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE placed_wagers_selection_6_status AS ENUM (
+CREATE TYPE public.placed_wagers_selection_6_status AS ENUM (
     'OPEN',
     'WON',
     'LOST',
@@ -539,10 +531,10 @@ CREATE TYPE placed_wagers_selection_6_status AS ENUM (
 
 
 --
--- Name: placed_wagers_selection_7_status; Type: TYPE; Schema: league_production; Owner: -
+-- Name: placed_wagers_selection_7_status; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE placed_wagers_selection_7_status AS ENUM (
+CREATE TYPE public.placed_wagers_selection_7_status AS ENUM (
     'OPEN',
     'WON',
     'LOST',
@@ -552,10 +544,10 @@ CREATE TYPE placed_wagers_selection_7_status AS ENUM (
 
 
 --
--- Name: placed_wagers_selection_8_status; Type: TYPE; Schema: league_production; Owner: -
+-- Name: placed_wagers_selection_8_status; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE placed_wagers_selection_8_status AS ENUM (
+CREATE TYPE public.placed_wagers_selection_8_status AS ENUM (
     'OPEN',
     'WON',
     'LOST',
@@ -565,10 +557,10 @@ CREATE TYPE placed_wagers_selection_8_status AS ENUM (
 
 
 --
--- Name: placed_wagers_selection_9_status; Type: TYPE; Schema: league_production; Owner: -
+-- Name: placed_wagers_selection_9_status; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE placed_wagers_selection_9_status AS ENUM (
+CREATE TYPE public.placed_wagers_selection_9_status AS ENUM (
     'OPEN',
     'WON',
     'LOST',
@@ -578,10 +570,10 @@ CREATE TYPE placed_wagers_selection_9_status AS ENUM (
 
 
 --
--- Name: placed_wagers_wager_status; Type: TYPE; Schema: league_production; Owner: -
+-- Name: placed_wagers_wager_status; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE placed_wagers_wager_status AS ENUM (
+CREATE TYPE public.placed_wagers_wager_status AS ENUM (
     'OPEN',
     'WON',
     'LOST',
@@ -591,10 +583,10 @@ CREATE TYPE placed_wagers_wager_status AS ENUM (
 
 
 --
--- Name: placed_wagers_wager_type; Type: TYPE; Schema: league_production; Owner: -
+-- Name: placed_wagers_wager_type; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE placed_wagers_wager_type AS ENUM (
+CREATE TYPE public.placed_wagers_wager_type AS ENUM (
     'SINGLE',
     'PARLAY',
     'ROUND_ROBIN'
@@ -602,10 +594,10 @@ CREATE TYPE placed_wagers_wager_type AS ENUM (
 
 
 --
--- Name: prop_market_selections_history_source_id; Type: TYPE; Schema: league_production; Owner: -
+-- Name: prop_market_selections_history_source_id; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE prop_market_selections_history_source_id AS ENUM (
+CREATE TYPE public.prop_market_selections_history_source_id AS ENUM (
     'BETONLINE',
     'BETMGM',
     'BETRIVERS',
@@ -619,10 +611,10 @@ CREATE TYPE prop_market_selections_history_source_id AS ENUM (
 
 
 --
--- Name: prop_market_selections_index_result; Type: TYPE; Schema: league_production; Owner: -
+-- Name: prop_market_selections_index_result; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE prop_market_selections_index_result AS ENUM (
+CREATE TYPE public.prop_market_selections_index_result AS ENUM (
     'PENDING',
     'WON',
     'LOST',
@@ -632,10 +624,10 @@ CREATE TYPE prop_market_selections_index_result AS ENUM (
 
 
 --
--- Name: prop_market_selections_index_source_id; Type: TYPE; Schema: league_production; Owner: -
+-- Name: prop_market_selections_index_source_id; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE prop_market_selections_index_source_id AS ENUM (
+CREATE TYPE public.prop_market_selections_index_source_id AS ENUM (
     'BETONLINE',
     'BETMGM',
     'BETRIVERS',
@@ -649,20 +641,20 @@ CREATE TYPE prop_market_selections_index_source_id AS ENUM (
 
 
 --
--- Name: prop_market_selections_index_time_type; Type: TYPE; Schema: league_production; Owner: -
+-- Name: prop_market_selections_index_time_type; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE prop_market_selections_index_time_type AS ENUM (
+CREATE TYPE public.prop_market_selections_index_time_type AS ENUM (
     'OPEN',
     'CLOSE'
 );
 
 
 --
--- Name: prop_markets_history_source_id; Type: TYPE; Schema: league_production; Owner: -
+-- Name: prop_markets_history_source_id; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE prop_markets_history_source_id AS ENUM (
+CREATE TYPE public.prop_markets_history_source_id AS ENUM (
     'BETONLINE',
     'BETMGM',
     'BETRIVERS',
@@ -676,10 +668,10 @@ CREATE TYPE prop_markets_history_source_id AS ENUM (
 
 
 --
--- Name: prop_markets_index_source_id; Type: TYPE; Schema: league_production; Owner: -
+-- Name: prop_markets_index_source_id; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE prop_markets_index_source_id AS ENUM (
+CREATE TYPE public.prop_markets_index_source_id AS ENUM (
     'BETONLINE',
     'BETMGM',
     'BETRIVERS',
@@ -693,20 +685,20 @@ CREATE TYPE prop_markets_index_source_id AS ENUM (
 
 
 --
--- Name: prop_markets_index_time_type; Type: TYPE; Schema: league_production; Owner: -
+-- Name: prop_markets_index_time_type; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE prop_markets_index_time_type AS ENUM (
+CREATE TYPE public.prop_markets_index_time_type AS ENUM (
     'OPEN',
     'CLOSE'
 );
 
 
 --
--- Name: prop_pairings_source_id; Type: TYPE; Schema: league_production; Owner: -
+-- Name: prop_pairings_source_id; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE prop_pairings_source_id AS ENUM (
+CREATE TYPE public.prop_pairings_source_id AS ENUM (
     'BETONLINE',
     'BETMGM',
     'BETRIVERS',
@@ -720,10 +712,10 @@ CREATE TYPE prop_pairings_source_id AS ENUM (
 
 
 --
--- Name: props_index_source_id; Type: TYPE; Schema: league_production; Owner: -
+-- Name: props_index_source_id; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE props_index_source_id AS ENUM (
+CREATE TYPE public.props_index_source_id AS ENUM (
     'BETONLINE',
     'BETMGM',
     'BETRIVERS',
@@ -737,10 +729,10 @@ CREATE TYPE props_index_source_id AS ENUM (
 
 
 --
--- Name: props_index_time_type; Type: TYPE; Schema: league_production; Owner: -
+-- Name: props_index_time_type; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE props_index_time_type AS ENUM (
+CREATE TYPE public.props_index_time_type AS ENUM (
     'OPEN',
     'CLOSE'
 );
@@ -749,10 +741,10 @@ CREATE TYPE props_index_time_type AS ENUM (
 SET default_table_access_method = heap;
 
 --
--- Name: draft; Type: TABLE; Schema: league_production; Owner: -
+-- Name: draft; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE draft (
+CREATE TABLE public.draft (
     uid bigint NOT NULL,
     pid character varying(25),
     round smallint NOT NULL,
@@ -768,10 +760,10 @@ CREATE TABLE draft (
 
 
 --
--- Name: draft_uid_seq; Type: SEQUENCE; Schema: league_production; Owner: -
+-- Name: draft_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE draft_uid_seq
+CREATE SEQUENCE public.draft_uid_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -780,17 +772,17 @@ CREATE SEQUENCE draft_uid_seq
 
 
 --
--- Name: draft_uid_seq; Type: SEQUENCE OWNED BY; Schema: league_production; Owner: -
+-- Name: draft_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE draft_uid_seq OWNED BY draft.uid;
+ALTER SEQUENCE public.draft_uid_seq OWNED BY public.draft.uid;
 
 
 --
--- Name: footballoutsiders; Type: TABLE; Schema: league_production; Owner: -
+-- Name: footballoutsiders; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE footballoutsiders (
+CREATE TABLE public.footballoutsiders (
     week smallint NOT NULL,
     year smallint,
     team character varying(3) NOT NULL,
@@ -876,10 +868,10 @@ CREATE TABLE footballoutsiders (
 
 
 --
--- Name: jobs; Type: TABLE; Schema: league_production; Owner: -
+-- Name: jobs; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE jobs (
+CREATE TABLE public.jobs (
     uid integer NOT NULL,
     type smallint NOT NULL,
     succ boolean NOT NULL,
@@ -889,10 +881,10 @@ CREATE TABLE jobs (
 
 
 --
--- Name: jobs_uid_seq; Type: SEQUENCE; Schema: league_production; Owner: -
+-- Name: jobs_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE jobs_uid_seq
+CREATE SEQUENCE public.jobs_uid_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -902,17 +894,17 @@ CREATE SEQUENCE jobs_uid_seq
 
 
 --
--- Name: jobs_uid_seq; Type: SEQUENCE OWNED BY; Schema: league_production; Owner: -
+-- Name: jobs_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE jobs_uid_seq OWNED BY jobs.uid;
+ALTER SEQUENCE public.jobs_uid_seq OWNED BY public.jobs.uid;
 
 
 --
--- Name: keeptradecut_rankings; Type: TABLE; Schema: league_production; Owner: -
+-- Name: keeptradecut_rankings; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE keeptradecut_rankings (
+CREATE TABLE public.keeptradecut_rankings (
     pid character varying(25),
     qb smallint NOT NULL,
     d integer NOT NULL,
@@ -922,10 +914,10 @@ CREATE TABLE keeptradecut_rankings (
 
 
 --
--- Name: league_baselines; Type: TABLE; Schema: league_production; Owner: -
+-- Name: league_baselines; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE league_baselines (
+CREATE TABLE public.league_baselines (
     lid integer NOT NULL,
     week character varying(3) NOT NULL,
     year smallint,
@@ -936,10 +928,10 @@ CREATE TABLE league_baselines (
 
 
 --
--- Name: league_cutlist; Type: TABLE; Schema: league_production; Owner: -
+-- Name: league_cutlist; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE league_cutlist (
+CREATE TABLE public.league_cutlist (
     pid character varying(25),
     tid integer NOT NULL,
     "order" smallint NOT NULL
@@ -947,10 +939,10 @@ CREATE TABLE league_cutlist (
 
 
 --
--- Name: league_format_draft_pick_value; Type: TABLE; Schema: league_production; Owner: -
+-- Name: league_format_draft_pick_value; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE league_format_draft_pick_value (
+CREATE TABLE public.league_format_draft_pick_value (
     league_format_hash character varying(64) NOT NULL,
     rank smallint NOT NULL,
     median_best_season_points_added_per_game numeric(3,1),
@@ -959,10 +951,10 @@ CREATE TABLE league_format_draft_pick_value (
 
 
 --
--- Name: league_format_player_careerlogs; Type: TABLE; Schema: league_production; Owner: -
+-- Name: league_format_player_careerlogs; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE league_format_player_careerlogs (
+CREATE TABLE public.league_format_player_careerlogs (
     pid character varying(25) NOT NULL,
     league_format_hash character varying(64) NOT NULL,
     draft_rank smallint,
@@ -988,10 +980,10 @@ CREATE TABLE league_format_player_careerlogs (
 
 
 --
--- Name: league_format_player_gamelogs; Type: TABLE; Schema: league_production; Owner: -
+-- Name: league_format_player_gamelogs; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE league_format_player_gamelogs (
+CREATE TABLE public.league_format_player_gamelogs (
     pid character varying(25) NOT NULL,
     esbid integer NOT NULL,
     league_format_hash character varying(64) NOT NULL,
@@ -1002,10 +994,10 @@ CREATE TABLE league_format_player_gamelogs (
 
 
 --
--- Name: league_format_player_projection_values; Type: TABLE; Schema: league_production; Owner: -
+-- Name: league_format_player_projection_values; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE league_format_player_projection_values (
+CREATE TABLE public.league_format_player_projection_values (
     pid character varying(25) NOT NULL,
     week character varying(3) NOT NULL,
     year smallint NOT NULL,
@@ -1016,10 +1008,10 @@ CREATE TABLE league_format_player_projection_values (
 
 
 --
--- Name: league_format_player_seasonlogs; Type: TABLE; Schema: league_production; Owner: -
+-- Name: league_format_player_seasonlogs; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE league_format_player_seasonlogs (
+CREATE TABLE public.league_format_player_seasonlogs (
     pid character varying(25) NOT NULL,
     year smallint NOT NULL,
     league_format_hash character varying(64) NOT NULL,
@@ -1037,10 +1029,10 @@ CREATE TABLE league_format_player_seasonlogs (
 
 
 --
--- Name: league_formats; Type: TABLE; Schema: league_production; Owner: -
+-- Name: league_formats; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE league_formats (
+CREATE TABLE public.league_formats (
     league_format_hash character varying(64) NOT NULL,
     scoring_format_hash character varying(64) NOT NULL,
     num_teams smallint NOT NULL,
@@ -1075,94 +1067,94 @@ CREATE TABLE league_formats (
 
 
 --
--- Name: COLUMN league_formats.pts_base_week_qb; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN league_formats.pts_base_week_qb; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN league_formats.pts_base_week_qb IS 'qb pts/game baseline';
-
-
---
--- Name: COLUMN league_formats.pts_base_week_rb; Type: COMMENT; Schema: league_production; Owner: -
---
-
-COMMENT ON COLUMN league_formats.pts_base_week_rb IS 'rb pts/game baseline';
+COMMENT ON COLUMN public.league_formats.pts_base_week_qb IS 'qb pts/game baseline';
 
 
 --
--- Name: COLUMN league_formats.pts_base_week_wr; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN league_formats.pts_base_week_rb; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN league_formats.pts_base_week_wr IS 'wr pts/game baseline';
-
-
---
--- Name: COLUMN league_formats.pts_base_week_te; Type: COMMENT; Schema: league_production; Owner: -
---
-
-COMMENT ON COLUMN league_formats.pts_base_week_te IS 'te pts/game baseline';
+COMMENT ON COLUMN public.league_formats.pts_base_week_rb IS 'rb pts/game baseline';
 
 
 --
--- Name: COLUMN league_formats.pts_base_week_k; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN league_formats.pts_base_week_wr; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN league_formats.pts_base_week_k IS 'k pts/game baseline';
-
-
---
--- Name: COLUMN league_formats.pts_base_week_dst; Type: COMMENT; Schema: league_production; Owner: -
---
-
-COMMENT ON COLUMN league_formats.pts_base_week_dst IS 'dst pts/game baseline';
+COMMENT ON COLUMN public.league_formats.pts_base_week_wr IS 'wr pts/game baseline';
 
 
 --
--- Name: COLUMN league_formats.pts_base_season_qb; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN league_formats.pts_base_week_te; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN league_formats.pts_base_season_qb IS 'qb pts/season baseline';
-
-
---
--- Name: COLUMN league_formats.pts_base_season_rb; Type: COMMENT; Schema: league_production; Owner: -
---
-
-COMMENT ON COLUMN league_formats.pts_base_season_rb IS 'rb pts/season baseline';
+COMMENT ON COLUMN public.league_formats.pts_base_week_te IS 'te pts/game baseline';
 
 
 --
--- Name: COLUMN league_formats.pts_base_season_wr; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN league_formats.pts_base_week_k; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN league_formats.pts_base_season_wr IS 'wr pts/season baseline';
-
-
---
--- Name: COLUMN league_formats.pts_base_season_te; Type: COMMENT; Schema: league_production; Owner: -
---
-
-COMMENT ON COLUMN league_formats.pts_base_season_te IS 'te pts/season baseline';
+COMMENT ON COLUMN public.league_formats.pts_base_week_k IS 'k pts/game baseline';
 
 
 --
--- Name: COLUMN league_formats.pts_base_season_k; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN league_formats.pts_base_week_dst; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN league_formats.pts_base_season_k IS 'k pts/season baseline';
-
-
---
--- Name: COLUMN league_formats.pts_base_season_dst; Type: COMMENT; Schema: league_production; Owner: -
---
-
-COMMENT ON COLUMN league_formats.pts_base_season_dst IS 'dst pts/season baseline';
+COMMENT ON COLUMN public.league_formats.pts_base_week_dst IS 'dst pts/game baseline';
 
 
 --
--- Name: league_migrations; Type: TABLE; Schema: league_production; Owner: -
+-- Name: COLUMN league_formats.pts_base_season_qb; Type: COMMENT; Schema: public; Owner: -
 --
 
-CREATE TABLE league_migrations (
+COMMENT ON COLUMN public.league_formats.pts_base_season_qb IS 'qb pts/season baseline';
+
+
+--
+-- Name: COLUMN league_formats.pts_base_season_rb; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.league_formats.pts_base_season_rb IS 'rb pts/season baseline';
+
+
+--
+-- Name: COLUMN league_formats.pts_base_season_wr; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.league_formats.pts_base_season_wr IS 'wr pts/season baseline';
+
+
+--
+-- Name: COLUMN league_formats.pts_base_season_te; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.league_formats.pts_base_season_te IS 'te pts/season baseline';
+
+
+--
+-- Name: COLUMN league_formats.pts_base_season_k; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.league_formats.pts_base_season_k IS 'k pts/season baseline';
+
+
+--
+-- Name: COLUMN league_formats.pts_base_season_dst; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.league_formats.pts_base_season_dst IS 'dst pts/season baseline';
+
+
+--
+-- Name: league_migrations; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.league_migrations (
     id bigint NOT NULL,
     name character varying(255),
     batch integer,
@@ -1171,10 +1163,10 @@ CREATE TABLE league_migrations (
 
 
 --
--- Name: league_migrations_id_seq; Type: SEQUENCE; Schema: league_production; Owner: -
+-- Name: league_migrations_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE league_migrations_id_seq
+CREATE SEQUENCE public.league_migrations_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1183,27 +1175,27 @@ CREATE SEQUENCE league_migrations_id_seq
 
 
 --
--- Name: league_migrations_id_seq; Type: SEQUENCE OWNED BY; Schema: league_production; Owner: -
+-- Name: league_migrations_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE league_migrations_id_seq OWNED BY league_migrations.id;
+ALTER SEQUENCE public.league_migrations_id_seq OWNED BY public.league_migrations.id;
 
 
 --
--- Name: league_migrations_lock; Type: TABLE; Schema: league_production; Owner: -
+-- Name: league_migrations_lock; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE league_migrations_lock (
+CREATE TABLE public.league_migrations_lock (
     index bigint NOT NULL,
     is_locked integer
 );
 
 
 --
--- Name: league_migrations_lock_index_seq; Type: SEQUENCE; Schema: league_production; Owner: -
+-- Name: league_migrations_lock_index_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE league_migrations_lock_index_seq
+CREATE SEQUENCE public.league_migrations_lock_index_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1212,17 +1204,17 @@ CREATE SEQUENCE league_migrations_lock_index_seq
 
 
 --
--- Name: league_migrations_lock_index_seq; Type: SEQUENCE OWNED BY; Schema: league_production; Owner: -
+-- Name: league_migrations_lock_index_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE league_migrations_lock_index_seq OWNED BY league_migrations_lock.index;
+ALTER SEQUENCE public.league_migrations_lock_index_seq OWNED BY public.league_migrations_lock.index;
 
 
 --
--- Name: league_nfl_team_seasonlogs; Type: TABLE; Schema: league_production; Owner: -
+-- Name: league_nfl_team_seasonlogs; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE league_nfl_team_seasonlogs (
+CREATE TABLE public.league_nfl_team_seasonlogs (
     tm character varying(7) NOT NULL,
     stat_key character varying(100) NOT NULL,
     year integer NOT NULL,
@@ -1233,10 +1225,10 @@ CREATE TABLE league_nfl_team_seasonlogs (
 
 
 --
--- Name: league_player_projection_values; Type: TABLE; Schema: league_production; Owner: -
+-- Name: league_player_projection_values; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE league_player_projection_values (
+CREATE TABLE public.league_player_projection_values (
     pid character varying(25),
     week character varying(3) NOT NULL,
     year smallint,
@@ -1247,10 +1239,10 @@ CREATE TABLE league_player_projection_values (
 
 
 --
--- Name: league_player_seasonlogs; Type: TABLE; Schema: league_production; Owner: -
+-- Name: league_player_seasonlogs; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE league_player_seasonlogs (
+CREATE TABLE public.league_player_seasonlogs (
     pid character varying(25) NOT NULL,
     year smallint NOT NULL,
     lid integer NOT NULL,
@@ -1263,10 +1255,10 @@ CREATE TABLE league_player_seasonlogs (
 
 
 --
--- Name: league_scoring_formats; Type: TABLE; Schema: league_production; Owner: -
+-- Name: league_scoring_formats; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE league_scoring_formats (
+CREATE TABLE public.league_scoring_formats (
     scoring_format_hash character varying(64) NOT NULL,
     pa numeric(3,2) NOT NULL,
     pc numeric(3,2) NOT NULL,
@@ -1290,10 +1282,10 @@ CREATE TABLE league_scoring_formats (
 
 
 --
--- Name: league_team_daily_values; Type: TABLE; Schema: league_production; Owner: -
+-- Name: league_team_daily_values; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE league_team_daily_values (
+CREATE TABLE public.league_team_daily_values (
     lid integer NOT NULL,
     tid integer NOT NULL,
     date date NOT NULL,
@@ -1304,10 +1296,10 @@ CREATE TABLE league_team_daily_values (
 
 
 --
--- Name: league_team_forecast; Type: TABLE; Schema: league_production; Owner: -
+-- Name: league_team_forecast; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE league_team_forecast (
+CREATE TABLE public.league_team_forecast (
     tid integer NOT NULL,
     lid integer NOT NULL,
     week character varying(3) NOT NULL,
@@ -1322,10 +1314,10 @@ CREATE TABLE league_team_forecast (
 
 
 --
--- Name: league_team_lineup_contribution_weeks; Type: TABLE; Schema: league_production; Owner: -
+-- Name: league_team_lineup_contribution_weeks; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE league_team_lineup_contribution_weeks (
+CREATE TABLE public.league_team_lineup_contribution_weeks (
     pid character varying(25),
     week character varying(3) NOT NULL,
     year smallint,
@@ -1338,10 +1330,10 @@ CREATE TABLE league_team_lineup_contribution_weeks (
 
 
 --
--- Name: league_team_lineup_contributions; Type: TABLE; Schema: league_production; Owner: -
+-- Name: league_team_lineup_contributions; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE league_team_lineup_contributions (
+CREATE TABLE public.league_team_lineup_contributions (
     pid character varying(25),
     year smallint,
     tid integer NOT NULL,
@@ -1353,10 +1345,10 @@ CREATE TABLE league_team_lineup_contributions (
 
 
 --
--- Name: league_team_lineup_starters; Type: TABLE; Schema: league_production; Owner: -
+-- Name: league_team_lineup_starters; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE league_team_lineup_starters (
+CREATE TABLE public.league_team_lineup_starters (
     pid character varying(25),
     week character varying(3) NOT NULL,
     year smallint,
@@ -1366,10 +1358,10 @@ CREATE TABLE league_team_lineup_starters (
 
 
 --
--- Name: league_team_lineups; Type: TABLE; Schema: league_production; Owner: -
+-- Name: league_team_lineups; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE league_team_lineups (
+CREATE TABLE public.league_team_lineups (
     week smallint NOT NULL,
     year smallint,
     tid integer NOT NULL,
@@ -1380,10 +1372,10 @@ CREATE TABLE league_team_lineups (
 
 
 --
--- Name: leagues; Type: TABLE; Schema: league_production; Owner: -
+-- Name: leagues; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE leagues (
+CREATE TABLE public.leagues (
     uid bigint NOT NULL,
     commishid integer NOT NULL,
     name character varying(50) NOT NULL,
@@ -1401,10 +1393,10 @@ CREATE TABLE leagues (
 
 
 --
--- Name: leagues_uid_seq; Type: SEQUENCE; Schema: league_production; Owner: -
+-- Name: leagues_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE leagues_uid_seq
+CREATE SEQUENCE public.leagues_uid_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1413,17 +1405,17 @@ CREATE SEQUENCE leagues_uid_seq
 
 
 --
--- Name: leagues_uid_seq; Type: SEQUENCE OWNED BY; Schema: league_production; Owner: -
+-- Name: leagues_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE leagues_uid_seq OWNED BY leagues.uid;
+ALTER SEQUENCE public.leagues_uid_seq OWNED BY public.leagues.uid;
 
 
 --
--- Name: matchups; Type: TABLE; Schema: league_production; Owner: -
+-- Name: matchups; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE matchups (
+CREATE TABLE public.matchups (
     uid bigint NOT NULL,
     aid integer NOT NULL,
     hid integer NOT NULL,
@@ -1440,10 +1432,10 @@ CREATE TABLE matchups (
 
 
 --
--- Name: matchups_uid_seq; Type: SEQUENCE; Schema: league_production; Owner: -
+-- Name: matchups_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE matchups_uid_seq
+CREATE SEQUENCE public.matchups_uid_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -1452,17 +1444,17 @@ CREATE SEQUENCE matchups_uid_seq
 
 
 --
--- Name: matchups_uid_seq; Type: SEQUENCE OWNED BY; Schema: league_production; Owner: -
+-- Name: matchups_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE matchups_uid_seq OWNED BY matchups.uid;
+ALTER SEQUENCE public.matchups_uid_seq OWNED BY public.matchups.uid;
 
 
 --
--- Name: nfl_games; Type: TABLE; Schema: league_production; Owner: -
+-- Name: nfl_games; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE nfl_games (
+CREATE TABLE public.nfl_games (
     esbid integer,
     gsisid integer,
     nflverse_game_id character varying(15),
@@ -1503,8 +1495,8 @@ CREATE TABLE nfl_games (
     away_moneyline integer,
     spread_line numeric(3,1),
     total_line numeric(3,1),
-    roof nfl_games_roof,
-    surf nfl_games_surf,
+    roof public.nfl_games_roof,
+    surf public.nfl_games_surf,
     temp integer,
     wind integer,
     away_coach character varying(36),
@@ -1519,10 +1511,10 @@ CREATE TABLE nfl_games (
 
 
 --
--- Name: nfl_games_changelog; Type: TABLE; Schema: league_production; Owner: -
+-- Name: nfl_games_changelog; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE nfl_games_changelog (
+CREATE TABLE public.nfl_games_changelog (
     esbid character varying(36) NOT NULL,
     column_name character varying(36) NOT NULL,
     prev character varying(400),
@@ -1532,10 +1524,10 @@ CREATE TABLE nfl_games_changelog (
 
 
 --
--- Name: nfl_play_stats; Type: TABLE; Schema: league_production; Owner: -
+-- Name: nfl_play_stats; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE nfl_play_stats (
+CREATE TABLE public.nfl_play_stats (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
     "clubCode" character varying(10),
@@ -1550,10 +1542,10 @@ CREATE TABLE nfl_play_stats (
 
 
 --
--- Name: nfl_play_stats_current_week; Type: TABLE; Schema: league_production; Owner: -
+-- Name: nfl_play_stats_current_week; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE nfl_play_stats_current_week (
+CREATE TABLE public.nfl_play_stats_current_week (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
     "clubCode" character varying(10),
@@ -1568,10 +1560,10 @@ CREATE TABLE nfl_play_stats_current_week (
 
 
 --
--- Name: nfl_plays; Type: TABLE; Schema: league_production; Owner: -
+-- Name: nfl_plays; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE nfl_plays (
+CREATE TABLE public.nfl_plays (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
     sequence integer,
@@ -1618,7 +1610,7 @@ CREATE TABLE nfl_plays (
     updated integer NOT NULL,
     off character varying(3),
     def character varying(3),
-    play_type nfl_plays_play_type,
+    play_type public.nfl_plays_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
     bc_pid character varying(25),
@@ -1848,556 +1840,556 @@ CREATE TABLE nfl_plays (
 
 
 --
--- Name: COLUMN nfl_plays.special; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.special; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.special IS 'special teams';
+COMMENT ON COLUMN public.nfl_plays.special IS 'special teams';
 
 
 --
--- Name: COLUMN nfl_plays.fd; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.fd; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.fd IS 'first down';
+COMMENT ON COLUMN public.nfl_plays.fd IS 'first down';
 
 
 --
--- Name: COLUMN nfl_plays.gtg; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.gtg; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.gtg IS 'Binary indicator for whether or not the posteam is in a goal down situation.';
+COMMENT ON COLUMN public.nfl_plays.gtg IS 'Binary indicator for whether or not the posteam is in a goal down situation.';
 
 
 --
--- Name: COLUMN nfl_plays.penalty; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.penalty; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.penalty IS 'penalty';
+COMMENT ON COLUMN public.nfl_plays.penalty IS 'penalty';
 
 
 --
--- Name: COLUMN nfl_plays.score; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.score; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.score IS 'Binary indicator for whether or not a score occurred on the play.';
+COMMENT ON COLUMN public.nfl_plays.score IS 'Binary indicator for whether or not a score occurred on the play.';
 
 
 --
--- Name: COLUMN nfl_plays.high; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.high; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.high IS 'Highlight pass, Perfect pass that only the receiver can reach. Features perfect placement in a tight window.';
+COMMENT ON COLUMN public.nfl_plays.high IS 'Highlight pass, Perfect pass that only the receiver can reach. Features perfect placement in a tight window.';
 
 
 --
--- Name: COLUMN nfl_plays.int_worthy; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.int_worthy; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.int_worthy IS 'interception worthy';
+COMMENT ON COLUMN public.nfl_plays.int_worthy IS 'interception worthy';
 
 
 --
--- Name: COLUMN nfl_plays.drp; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.drp; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.drp IS 'dropped pass';
+COMMENT ON COLUMN public.nfl_plays.drp IS 'dropped pass';
 
 
 --
--- Name: COLUMN nfl_plays.cnb; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.cnb; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.cnb IS 'contested ball, Passes into close coverage that involve a physical battle between receiver and defender for control of the ball.';
+COMMENT ON COLUMN public.nfl_plays.cnb IS 'contested ball, Passes into close coverage that involve a physical battle between receiver and defender for control of the ball.';
 
 
 --
--- Name: COLUMN nfl_plays.mbt; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.mbt; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.mbt IS 'missed or broken tackles';
+COMMENT ON COLUMN public.nfl_plays.mbt IS 'missed or broken tackles';
 
 
 --
--- Name: COLUMN nfl_plays.fuml; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.fuml; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.fuml IS 'fumble lost';
+COMMENT ON COLUMN public.nfl_plays.fuml IS 'fumble lost';
 
 
 --
--- Name: COLUMN nfl_plays."int"; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays."int"; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays."int" IS 'interception';
+COMMENT ON COLUMN public.nfl_plays."int" IS 'interception';
 
 
 --
--- Name: COLUMN nfl_plays.sk; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.sk; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.sk IS 'sack';
+COMMENT ON COLUMN public.nfl_plays.sk IS 'sack';
 
 
 --
--- Name: COLUMN nfl_plays.succ; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.succ; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.succ IS 'successful play';
+COMMENT ON COLUMN public.nfl_plays.succ IS 'successful play';
 
 
 --
--- Name: COLUMN nfl_plays.comp; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.comp; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.comp IS 'completion';
+COMMENT ON COLUMN public.nfl_plays.comp IS 'completion';
 
 
 --
--- Name: COLUMN nfl_plays.td; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.td; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.td IS 'touchdown';
+COMMENT ON COLUMN public.nfl_plays.td IS 'touchdown';
 
 
 --
--- Name: COLUMN nfl_plays.ret_td; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.ret_td; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.ret_td IS 'return touchdown';
+COMMENT ON COLUMN public.nfl_plays.ret_td IS 'return touchdown';
 
 
 --
--- Name: COLUMN nfl_plays.tay; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.tay; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.tay IS 'true air yards, Distance ball travels in the air from point of throw to a receivers hands; back of endzone or sideline.';
+COMMENT ON COLUMN public.nfl_plays.tay IS 'true air yards, Distance ball travels in the air from point of throw to a receivers hands; back of endzone or sideline.';
 
 
 --
--- Name: COLUMN nfl_plays.crr; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.crr; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.crr IS 'Created Reception, Difficult catches that require exceptional body control; hands; acrobatics, or any combination thereof.';
+COMMENT ON COLUMN public.nfl_plays.crr IS 'Created Reception, Difficult catches that require exceptional body control; hands; acrobatics, or any combination thereof.';
 
 
 --
--- Name: COLUMN nfl_plays.avsk; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.avsk; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.avsk IS 'number of avoided sacks';
+COMMENT ON COLUMN public.nfl_plays.avsk IS 'number of avoided sacks';
 
 
 --
--- Name: COLUMN nfl_plays.sg; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.sg; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.sg IS 'shotgun';
+COMMENT ON COLUMN public.nfl_plays.sg IS 'shotgun';
 
 
 --
--- Name: COLUMN nfl_plays.nh; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.nh; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.nh IS 'no huddle';
+COMMENT ON COLUMN public.nfl_plays.nh IS 'no huddle';
 
 
 --
--- Name: COLUMN nfl_plays.pap; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.pap; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.pap IS 'play action pass';
+COMMENT ON COLUMN public.nfl_plays.pap IS 'play action pass';
 
 
 --
--- Name: COLUMN nfl_plays.tlook; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.tlook; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.tlook IS 'trick look';
+COMMENT ON COLUMN public.nfl_plays.tlook IS 'trick look';
 
 
 --
--- Name: COLUMN nfl_plays.trick; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.trick; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.trick IS 'trick play';
+COMMENT ON COLUMN public.nfl_plays.trick IS 'trick play';
 
 
 --
--- Name: COLUMN nfl_plays.qbru; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.qbru; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.qbru IS 'QB run, a designed running play for the QB. These are only marked on runs by a natural QB where he lined up as a QB. Also, sneaks and kneel-downs are not counted.';
+COMMENT ON COLUMN public.nfl_plays.qbru IS 'QB run, a designed running play for the QB. These are only marked on runs by a natural QB where he lined up as a QB. Also, sneaks and kneel-downs are not counted.';
 
 
 --
--- Name: COLUMN nfl_plays.sneak; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.sneak; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.sneak IS 'QB sneak';
+COMMENT ON COLUMN public.nfl_plays.sneak IS 'QB sneak';
 
 
 --
--- Name: COLUMN nfl_plays.scrm; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.scrm; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.scrm IS 'QB scramble';
+COMMENT ON COLUMN public.nfl_plays.scrm IS 'QB scramble';
 
 
 --
--- Name: COLUMN nfl_plays.htm; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.htm; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.htm IS 'hindered throwing motion';
+COMMENT ON COLUMN public.nfl_plays.htm IS 'hindered throwing motion';
 
 
 --
--- Name: COLUMN nfl_plays.zblz; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.zblz; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.zblz IS 'zone blitz, at least one Off-Ball LB rushed the passer instead of a DL who dropped into coverage';
+COMMENT ON COLUMN public.nfl_plays.zblz IS 'zone blitz, at least one Off-Ball LB rushed the passer instead of a DL who dropped into coverage';
 
 
 --
--- Name: COLUMN nfl_plays.stnt; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.stnt; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.stnt IS 'stunt, when any two pass rushers cross, trading pass rush lanes on a passing down';
+COMMENT ON COLUMN public.nfl_plays.stnt IS 'stunt, when any two pass rushers cross, trading pass rush lanes on a passing down';
 
 
 --
--- Name: COLUMN nfl_plays.oop; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.oop; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.oop IS 'out of pocket pass';
+COMMENT ON COLUMN public.nfl_plays.oop IS 'out of pocket pass';
 
 
 --
--- Name: COLUMN nfl_plays.phyb; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.phyb; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.phyb IS 'physical ball, Pass target takes significant punishment whether the pass is caught or not. Most Contested Balls will also be a Physical Ball.';
+COMMENT ON COLUMN public.nfl_plays.phyb IS 'physical ball, Pass target takes significant punishment whether the pass is caught or not. Most Contested Balls will also be a Physical Ball.';
 
 
 --
--- Name: COLUMN nfl_plays.cball; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.cball; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.cball IS 'catchable ball, A pass in which an eligible receiver has the opportunity to get his hands on the football with reasonable movement, timing, and opportunity.';
+COMMENT ON COLUMN public.nfl_plays.cball IS 'catchable ball, A pass in which an eligible receiver has the opportunity to get his hands on the football with reasonable movement, timing, and opportunity.';
 
 
 --
--- Name: COLUMN nfl_plays.qbta; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.qbta; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.qbta IS 'QB Throw Away';
+COMMENT ON COLUMN public.nfl_plays.qbta IS 'QB Throw Away';
 
 
 --
--- Name: COLUMN nfl_plays.shov; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.shov; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.shov IS 'Shovel/Touch Pass';
+COMMENT ON COLUMN public.nfl_plays.shov IS 'Shovel/Touch Pass';
 
 
 --
--- Name: COLUMN nfl_plays.side; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.side; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.side IS 'Sideline pass, Balls outside of the field but catchable when the receiver extends body/arms.';
+COMMENT ON COLUMN public.nfl_plays.side IS 'Sideline pass, Balls outside of the field but catchable when the receiver extends body/arms.';
 
 
 --
--- Name: COLUMN nfl_plays.bap; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.bap; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.bap IS 'batted pass';
+COMMENT ON COLUMN public.nfl_plays.bap IS 'batted pass';
 
 
 --
--- Name: COLUMN nfl_plays.fread; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.fread; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.fread IS 'first read';
+COMMENT ON COLUMN public.nfl_plays.fread IS 'first read';
 
 
 --
--- Name: COLUMN nfl_plays.scre; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.scre; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.scre IS 'screen pass';
+COMMENT ON COLUMN public.nfl_plays.scre IS 'screen pass';
 
 
 --
--- Name: COLUMN nfl_plays.pfp; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.pfp; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.pfp IS 'pain free play, Ball carrier is only lightly touched by a defender on the field (ie QB slide) or runs out of bounds with little or no physical contact with the defender or sideline personnel/equipment. Includes TDs';
+COMMENT ON COLUMN public.nfl_plays.pfp IS 'pain free play, Ball carrier is only lightly touched by a defender on the field (ie QB slide) or runs out of bounds with little or no physical contact with the defender or sideline personnel/equipment. Includes TDs';
 
 
 --
--- Name: COLUMN nfl_plays.qbsk; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.qbsk; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.qbsk IS 'qb sack, QB was to blame for the sack: held ball too long; missed wide open receiver etc';
+COMMENT ON COLUMN public.nfl_plays.qbsk IS 'qb sack, QB was to blame for the sack: held ball too long; missed wide open receiver etc';
 
 
 --
--- Name: COLUMN nfl_plays.xlm; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.xlm; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.xlm IS 'extra men on the line, Number of players lined up on either side of the Offensive Tackles - usually a Tight End.';
+COMMENT ON COLUMN public.nfl_plays.xlm IS 'extra men on the line, Number of players lined up on either side of the Offensive Tackles - usually a Tight End.';
 
 
 --
--- Name: COLUMN nfl_plays.pru; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.pru; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.pru IS 'pass rushers';
+COMMENT ON COLUMN public.nfl_plays.pru IS 'pass rushers';
 
 
 --
--- Name: COLUMN nfl_plays.blz; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.blz; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.blz IS 'number of LBs and DBs blitzing';
+COMMENT ON COLUMN public.nfl_plays.blz IS 'number of LBs and DBs blitzing';
 
 
 --
--- Name: COLUMN nfl_plays.dblz; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.dblz; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.dblz IS 'Number of DBs blitzing';
+COMMENT ON COLUMN public.nfl_plays.dblz IS 'Number of DBs blitzing';
 
 
 --
--- Name: COLUMN nfl_plays.cov; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.cov; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.cov IS 'coverage on target, Uncovered is 0, single coverage is 1, double is 2.';
+COMMENT ON COLUMN public.nfl_plays.cov IS 'coverage on target, Uncovered is 0, single coverage is 1, double is 2.';
 
 
 --
--- Name: COLUMN nfl_plays.drive_inside20; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.drive_inside20; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.drive_inside20 IS 'Binary indicator if the offense was able to get inside the opponents 20 yard line.';
+COMMENT ON COLUMN public.nfl_plays.drive_inside20 IS 'Binary indicator if the offense was able to get inside the opponents 20 yard line.';
 
 
 --
--- Name: COLUMN nfl_plays.drive_score; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.drive_score; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.drive_score IS 'Binary indicator the drive ended with a score.';
+COMMENT ON COLUMN public.nfl_plays.drive_score IS 'Binary indicator the drive ended with a score.';
 
 
 --
--- Name: COLUMN nfl_plays.drive_start_qtr; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.drive_start_qtr; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.drive_start_qtr IS 'Numeric value indicating in which quarter the given drive has started.';
+COMMENT ON COLUMN public.nfl_plays.drive_start_qtr IS 'Numeric value indicating in which quarter the given drive has started.';
 
 
 --
--- Name: COLUMN nfl_plays.drive_end_qtr; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.drive_end_qtr; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.drive_end_qtr IS 'Numeric value indicating in which quarter the given drive has ended.';
+COMMENT ON COLUMN public.nfl_plays.drive_end_qtr IS 'Numeric value indicating in which quarter the given drive has ended.';
 
 
 --
--- Name: COLUMN nfl_plays.series_suc; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.series_suc; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.series_suc IS '1: scored touchdown, gained enough yards for first down.';
+COMMENT ON COLUMN public.nfl_plays.series_suc IS '1: scored touchdown, gained enough yards for first down.';
 
 
 --
--- Name: COLUMN nfl_plays.fum; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.fum; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.fum IS 'fumble occurred';
+COMMENT ON COLUMN public.nfl_plays.fum IS 'fumble occurred';
 
 
 --
--- Name: COLUMN nfl_plays.incomp; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.incomp; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.incomp IS 'incompletion';
+COMMENT ON COLUMN public.nfl_plays.incomp IS 'incompletion';
 
 
 --
--- Name: COLUMN nfl_plays.touchback; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.touchback; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.touchback IS 'touchback';
+COMMENT ON COLUMN public.nfl_plays.touchback IS 'touchback';
 
 
 --
--- Name: COLUMN nfl_plays.safety; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.safety; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.safety IS 'safety';
+COMMENT ON COLUMN public.nfl_plays.safety IS 'safety';
 
 
 --
--- Name: COLUMN nfl_plays.oob; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.oob; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.oob IS '1 if play description contains ran ob, pushed ob, or sacked ob; 0 otherwise.';
+COMMENT ON COLUMN public.nfl_plays.oob IS '1 if play description contains ran ob, pushed ob, or sacked ob; 0 otherwise.';
 
 
 --
--- Name: COLUMN nfl_plays.tfl; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.tfl; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.tfl IS 'Binary indicator for whether or not a tackle for loss on a run play occurred.';
+COMMENT ON COLUMN public.nfl_plays.tfl IS 'Binary indicator for whether or not a tackle for loss on a run play occurred.';
 
 
 --
--- Name: COLUMN nfl_plays.rush; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.rush; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.rush IS 'Binary indicator for if the play was a run.';
+COMMENT ON COLUMN public.nfl_plays.rush IS 'Binary indicator for if the play was a run.';
 
 
 --
--- Name: COLUMN nfl_plays.pass; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.pass; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.pass IS 'Binary indicator for if the play was a pass attempt (includes sacks).';
+COMMENT ON COLUMN public.nfl_plays.pass IS 'Binary indicator for if the play was a pass attempt (includes sacks).';
 
 
 --
--- Name: COLUMN nfl_plays.solo_tk; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.solo_tk; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.solo_tk IS 'Binary indicator if the play had a solo tackle (could be multiple due to fumbles).';
+COMMENT ON COLUMN public.nfl_plays.solo_tk IS 'Binary indicator if the play had a solo tackle (could be multiple due to fumbles).';
 
 
 --
--- Name: COLUMN nfl_plays.assist_tk; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.assist_tk; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.assist_tk IS 'Binary indicator for if an assist tackle occurred.';
+COMMENT ON COLUMN public.nfl_plays.assist_tk IS 'Binary indicator for if an assist tackle occurred.';
 
 
 --
--- Name: COLUMN nfl_plays.pass_td; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.pass_td; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.pass_td IS 'passing touchdown';
+COMMENT ON COLUMN public.nfl_plays.pass_td IS 'passing touchdown';
 
 
 --
--- Name: COLUMN nfl_plays.rush_td; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.rush_td; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.rush_td IS 'rushing touchdown';
+COMMENT ON COLUMN public.nfl_plays.rush_td IS 'rushing touchdown';
 
 
 --
--- Name: COLUMN nfl_plays.qbd; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.qbd; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.qbd IS 'QB dropped back on the play (pass attempt, sack, or scrambled).';
+COMMENT ON COLUMN public.nfl_plays.qbd IS 'QB dropped back on the play (pass attempt, sack, or scrambled).';
 
 
 --
--- Name: COLUMN nfl_plays.qbk; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.qbk; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.qbk IS 'QB took a knee.';
+COMMENT ON COLUMN public.nfl_plays.qbk IS 'QB took a knee.';
 
 
 --
--- Name: COLUMN nfl_plays.qbs; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.qbs; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.qbs IS 'QB spiked the ball.';
+COMMENT ON COLUMN public.nfl_plays.qbs IS 'QB spiked the ball.';
 
 
 --
--- Name: COLUMN nfl_plays.fd_rush; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.fd_rush; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.fd_rush IS 'Binary indicator for if a running play converted the first down.';
+COMMENT ON COLUMN public.nfl_plays.fd_rush IS 'Binary indicator for if a running play converted the first down.';
 
 
 --
--- Name: COLUMN nfl_plays.fd_pass; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.fd_pass; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.fd_pass IS 'Binary indicator for if a passing play converted the first down.';
+COMMENT ON COLUMN public.nfl_plays.fd_pass IS 'Binary indicator for if a passing play converted the first down.';
 
 
 --
--- Name: COLUMN nfl_plays.fd_penalty; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.fd_penalty; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.fd_penalty IS 'Binary indicator for if a penalty converted the first down.';
+COMMENT ON COLUMN public.nfl_plays.fd_penalty IS 'Binary indicator for if a penalty converted the first down.';
 
 
 --
--- Name: COLUMN nfl_plays.third_down_converted; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.third_down_converted; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.third_down_converted IS 'Binary indicator for if the first down was converted on third down.';
+COMMENT ON COLUMN public.nfl_plays.third_down_converted IS 'Binary indicator for if the first down was converted on third down.';
 
 
 --
--- Name: COLUMN nfl_plays.third_down_failed; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.third_down_failed; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.third_down_failed IS 'Binary indicator for if the posteam failed to convert first down on third down.';
+COMMENT ON COLUMN public.nfl_plays.third_down_failed IS 'Binary indicator for if the posteam failed to convert first down on third down.';
 
 
 --
--- Name: COLUMN nfl_plays.fourth_down_converted; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.fourth_down_converted; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.fourth_down_converted IS 'Binary indicator for if the first down was converted on fourth down.';
+COMMENT ON COLUMN public.nfl_plays.fourth_down_converted IS 'Binary indicator for if the first down was converted on fourth down.';
 
 
 --
--- Name: COLUMN nfl_plays.fourth_down_failed; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.fourth_down_failed; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.fourth_down_failed IS 'Binary indicator for if the posteam failed to convert first down on fourth down.';
+COMMENT ON COLUMN public.nfl_plays.fourth_down_failed IS 'Binary indicator for if the posteam failed to convert first down on fourth down.';
 
 
 --
--- Name: COLUMN nfl_plays.home_to_rem; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.home_to_rem; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.home_to_rem IS 'Numeric timeouts remaining in the half for the home team';
+COMMENT ON COLUMN public.nfl_plays.home_to_rem IS 'Numeric timeouts remaining in the half for the home team';
 
 
 --
--- Name: COLUMN nfl_plays.away_to_rem; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.away_to_rem; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.away_to_rem IS 'Numeric timeouts remaining in the half for the away team';
+COMMENT ON COLUMN public.nfl_plays.away_to_rem IS 'Numeric timeouts remaining in the half for the away team';
 
 
 --
--- Name: COLUMN nfl_plays.pos_to_rem; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.pos_to_rem; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.pos_to_rem IS 'Number of timeouts remaining for the possession team';
+COMMENT ON COLUMN public.nfl_plays.pos_to_rem IS 'Number of timeouts remaining for the possession team';
 
 
 --
--- Name: COLUMN nfl_plays.def_to_rem; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays.def_to_rem; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays.def_to_rem IS 'Number of timeouts remaining for the team on defense';
+COMMENT ON COLUMN public.nfl_plays.def_to_rem IS 'Number of timeouts remaining for the team on defense';
 
 
 --
--- Name: nfl_plays_current_week; Type: TABLE; Schema: league_production; Owner: -
+-- Name: nfl_plays_current_week; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE nfl_plays_current_week (
+CREATE TABLE public.nfl_plays_current_week (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
     sequence integer,
@@ -2461,7 +2453,7 @@ CREATE TABLE nfl_plays_current_week (
     def character varying(3),
     deleted boolean,
     review text,
-    play_type nfl_plays_current_week_play_type,
+    play_type public.nfl_plays_current_week_play_type,
     play_type_nfl character varying(36),
     play_type_ngs character varying(36),
     next_play_type character varying(36),
@@ -2672,556 +2664,556 @@ CREATE TABLE nfl_plays_current_week (
 
 
 --
--- Name: COLUMN nfl_plays_current_week.drive_inside20; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.drive_inside20; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.drive_inside20 IS 'Binary indicator if the offense was able to get inside the opponents 20 yard line.';
+COMMENT ON COLUMN public.nfl_plays_current_week.drive_inside20 IS 'Binary indicator if the offense was able to get inside the opponents 20 yard line.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.drive_score; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.drive_score; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.drive_score IS 'Binary indicator the drive ended with a score.';
+COMMENT ON COLUMN public.nfl_plays_current_week.drive_score IS 'Binary indicator the drive ended with a score.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.drive_start_qtr; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.drive_start_qtr; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.drive_start_qtr IS 'Numeric value indicating in which quarter the given drive has started.';
+COMMENT ON COLUMN public.nfl_plays_current_week.drive_start_qtr IS 'Numeric value indicating in which quarter the given drive has started.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.drive_end_qtr; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.drive_end_qtr; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.drive_end_qtr IS 'Numeric value indicating in which quarter the given drive has ended.';
+COMMENT ON COLUMN public.nfl_plays_current_week.drive_end_qtr IS 'Numeric value indicating in which quarter the given drive has ended.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.series_suc; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.series_suc; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.series_suc IS '1: scored touchdown, gained enough yards for first down.';
+COMMENT ON COLUMN public.nfl_plays_current_week.series_suc IS '1: scored touchdown, gained enough yards for first down.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.gtg; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.gtg; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.gtg IS 'Binary indicator for whether or not the posteam is in a goal down situation.';
+COMMENT ON COLUMN public.nfl_plays_current_week.gtg IS 'Binary indicator for whether or not the posteam is in a goal down situation.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.score; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.score; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.score IS 'Binary indicator for whether or not a score occurred on the play.';
+COMMENT ON COLUMN public.nfl_plays_current_week.score IS 'Binary indicator for whether or not a score occurred on the play.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.fum; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.fum; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.fum IS 'fumble occurred';
+COMMENT ON COLUMN public.nfl_plays_current_week.fum IS 'fumble occurred';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.fuml; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.fuml; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.fuml IS 'fumble lost';
+COMMENT ON COLUMN public.nfl_plays_current_week.fuml IS 'fumble lost';
 
 
 --
--- Name: COLUMN nfl_plays_current_week."int"; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week."int"; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week."int" IS 'interception';
+COMMENT ON COLUMN public.nfl_plays_current_week."int" IS 'interception';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.sk; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.sk; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.sk IS 'sack';
+COMMENT ON COLUMN public.nfl_plays_current_week.sk IS 'sack';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.succ; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.succ; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.succ IS 'successful play';
+COMMENT ON COLUMN public.nfl_plays_current_week.succ IS 'successful play';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.comp; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.comp; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.comp IS 'completion';
+COMMENT ON COLUMN public.nfl_plays_current_week.comp IS 'completion';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.incomp; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.incomp; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.incomp IS 'incompletion';
+COMMENT ON COLUMN public.nfl_plays_current_week.incomp IS 'incompletion';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.trick; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.trick; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.trick IS 'trick play';
+COMMENT ON COLUMN public.nfl_plays_current_week.trick IS 'trick play';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.touchback; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.touchback; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.touchback IS 'touchback';
+COMMENT ON COLUMN public.nfl_plays_current_week.touchback IS 'touchback';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.safety; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.safety; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.safety IS 'safety';
+COMMENT ON COLUMN public.nfl_plays_current_week.safety IS 'safety';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.penalty; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.penalty; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.penalty IS 'penalty';
+COMMENT ON COLUMN public.nfl_plays_current_week.penalty IS 'penalty';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.oob; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.oob; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.oob IS '1 if play description contains ran ob, pushed ob, or sacked ob; 0 otherwise.';
+COMMENT ON COLUMN public.nfl_plays_current_week.oob IS '1 if play description contains ran ob, pushed ob, or sacked ob; 0 otherwise.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.tfl; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.tfl; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.tfl IS 'Binary indicator for whether or not a tackle for loss on a run play occurred.';
+COMMENT ON COLUMN public.nfl_plays_current_week.tfl IS 'Binary indicator for whether or not a tackle for loss on a run play occurred.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.rush; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.rush; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.rush IS 'Binary indicator for if the play was a run.';
+COMMENT ON COLUMN public.nfl_plays_current_week.rush IS 'Binary indicator for if the play was a run.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.pass; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.pass; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.pass IS 'Binary indicator for if the play was a pass attempt (includes sacks).';
+COMMENT ON COLUMN public.nfl_plays_current_week.pass IS 'Binary indicator for if the play was a pass attempt (includes sacks).';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.solo_tk; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.solo_tk; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.solo_tk IS 'Binary indicator if the play had a solo tackle (could be multiple due to fumbles).';
+COMMENT ON COLUMN public.nfl_plays_current_week.solo_tk IS 'Binary indicator if the play had a solo tackle (could be multiple due to fumbles).';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.assist_tk; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.assist_tk; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.assist_tk IS 'Binary indicator for if an assist tackle occurred.';
+COMMENT ON COLUMN public.nfl_plays_current_week.assist_tk IS 'Binary indicator for if an assist tackle occurred.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.special; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.special; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.special IS 'special teams';
+COMMENT ON COLUMN public.nfl_plays_current_week.special IS 'special teams';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.td; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.td; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.td IS 'touchdown';
+COMMENT ON COLUMN public.nfl_plays_current_week.td IS 'touchdown';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.ret_td; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.ret_td; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.ret_td IS 'return touchdown';
+COMMENT ON COLUMN public.nfl_plays_current_week.ret_td IS 'return touchdown';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.pass_td; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.pass_td; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.pass_td IS 'passing touchdown';
+COMMENT ON COLUMN public.nfl_plays_current_week.pass_td IS 'passing touchdown';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.rush_td; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.rush_td; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.rush_td IS 'rushing touchdown';
+COMMENT ON COLUMN public.nfl_plays_current_week.rush_td IS 'rushing touchdown';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.tay; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.tay; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.tay IS 'true air yards, Distance ball travels in the air from point of throw to a receivers hands; back of endzone or sideline.';
+COMMENT ON COLUMN public.nfl_plays_current_week.tay IS 'true air yards, Distance ball travels in the air from point of throw to a receivers hands; back of endzone or sideline.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.sg; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.sg; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.sg IS 'shotgun';
+COMMENT ON COLUMN public.nfl_plays_current_week.sg IS 'shotgun';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.nh; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.nh; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.nh IS 'no huddle';
+COMMENT ON COLUMN public.nfl_plays_current_week.nh IS 'no huddle';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.pap; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.pap; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.pap IS 'play action pass';
+COMMENT ON COLUMN public.nfl_plays_current_week.pap IS 'play action pass';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.qbd; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.qbd; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.qbd IS 'QB dropped back on the play (pass attempt, sack, or scrambled).';
+COMMENT ON COLUMN public.nfl_plays_current_week.qbd IS 'QB dropped back on the play (pass attempt, sack, or scrambled).';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.qbk; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.qbk; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.qbk IS 'QB took a knee.';
+COMMENT ON COLUMN public.nfl_plays_current_week.qbk IS 'QB took a knee.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.qbs; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.qbs; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.qbs IS 'QB spiked the ball.';
+COMMENT ON COLUMN public.nfl_plays_current_week.qbs IS 'QB spiked the ball.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.qbru; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.qbru; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.qbru IS 'QB run, a designed running play for the QB. These are only marked on runs by a natural QB where he lined up as a QB. Also, sneaks and kneel-downs are not counted.';
+COMMENT ON COLUMN public.nfl_plays_current_week.qbru IS 'QB run, a designed running play for the QB. These are only marked on runs by a natural QB where he lined up as a QB. Also, sneaks and kneel-downs are not counted.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.sneak; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.sneak; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.sneak IS 'QB sneak';
+COMMENT ON COLUMN public.nfl_plays_current_week.sneak IS 'QB sneak';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.scrm; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.scrm; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.scrm IS 'QB scramble';
+COMMENT ON COLUMN public.nfl_plays_current_week.scrm IS 'QB scramble';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.int_worthy; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.int_worthy; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.int_worthy IS 'interception worthy';
+COMMENT ON COLUMN public.nfl_plays_current_week.int_worthy IS 'interception worthy';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.cball; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.cball; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.cball IS 'catchable ball, A pass in which an eligible receiver has the opportunity to get his hands on the football with reasonable movement, timing, and opportunity.';
+COMMENT ON COLUMN public.nfl_plays_current_week.cball IS 'catchable ball, A pass in which an eligible receiver has the opportunity to get his hands on the football with reasonable movement, timing, and opportunity.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.qbta; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.qbta; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.qbta IS 'QB Throw Away';
+COMMENT ON COLUMN public.nfl_plays_current_week.qbta IS 'QB Throw Away';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.shov; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.shov; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.shov IS 'Shovel/Touch Pass';
+COMMENT ON COLUMN public.nfl_plays_current_week.shov IS 'Shovel/Touch Pass';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.side; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.side; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.side IS 'Sideline pass, Balls outside of the field but catchable when the receiver extends body/arms.';
+COMMENT ON COLUMN public.nfl_plays_current_week.side IS 'Sideline pass, Balls outside of the field but catchable when the receiver extends body/arms.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.high; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.high; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.high IS 'Highlight pass, Perfect pass that only the receiver can reach. Features perfect placement in a tight window.';
+COMMENT ON COLUMN public.nfl_plays_current_week.high IS 'Highlight pass, Perfect pass that only the receiver can reach. Features perfect placement in a tight window.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.drp; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.drp; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.drp IS 'dropped pass';
+COMMENT ON COLUMN public.nfl_plays_current_week.drp IS 'dropped pass';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.cnb; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.cnb; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.cnb IS 'contested ball, Passes into close coverage that involve a physical battle between receiver and defender for control of the ball.';
+COMMENT ON COLUMN public.nfl_plays_current_week.cnb IS 'contested ball, Passes into close coverage that involve a physical battle between receiver and defender for control of the ball.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.crr; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.crr; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.crr IS 'Created Reception, Difficult catches that require exceptional body control; hands; acrobatics, or any combination thereof.';
+COMMENT ON COLUMN public.nfl_plays_current_week.crr IS 'Created Reception, Difficult catches that require exceptional body control; hands; acrobatics, or any combination thereof.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.mbt; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.mbt; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.mbt IS 'missed or broken tackles';
+COMMENT ON COLUMN public.nfl_plays_current_week.mbt IS 'missed or broken tackles';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.avsk; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.avsk; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.avsk IS 'number of avoided sacks';
+COMMENT ON COLUMN public.nfl_plays_current_week.avsk IS 'number of avoided sacks';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.tlook; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.tlook; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.tlook IS 'trick look';
+COMMENT ON COLUMN public.nfl_plays_current_week.tlook IS 'trick look';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.fd; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.fd; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.fd IS 'first down';
+COMMENT ON COLUMN public.nfl_plays_current_week.fd IS 'first down';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.fd_rush; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.fd_rush; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.fd_rush IS 'Binary indicator for if a running play converted the first down.';
+COMMENT ON COLUMN public.nfl_plays_current_week.fd_rush IS 'Binary indicator for if a running play converted the first down.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.fd_pass; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.fd_pass; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.fd_pass IS 'Binary indicator for if a passing play converted the first down.';
+COMMENT ON COLUMN public.nfl_plays_current_week.fd_pass IS 'Binary indicator for if a passing play converted the first down.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.fd_penalty; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.fd_penalty; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.fd_penalty IS 'Binary indicator for if a penalty converted the first down.';
+COMMENT ON COLUMN public.nfl_plays_current_week.fd_penalty IS 'Binary indicator for if a penalty converted the first down.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.third_down_converted; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.third_down_converted; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.third_down_converted IS 'Binary indicator for if the first down was converted on third down.';
+COMMENT ON COLUMN public.nfl_plays_current_week.third_down_converted IS 'Binary indicator for if the first down was converted on third down.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.third_down_failed; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.third_down_failed; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.third_down_failed IS 'Binary indicator for if the posteam failed to convert first down on third down.';
+COMMENT ON COLUMN public.nfl_plays_current_week.third_down_failed IS 'Binary indicator for if the posteam failed to convert first down on third down.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.fourth_down_converted; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.fourth_down_converted; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.fourth_down_converted IS 'Binary indicator for if the first down was converted on fourth down.';
+COMMENT ON COLUMN public.nfl_plays_current_week.fourth_down_converted IS 'Binary indicator for if the first down was converted on fourth down.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.fourth_down_failed; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.fourth_down_failed; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.fourth_down_failed IS 'Binary indicator for if the posteam failed to convert first down on fourth down.';
+COMMENT ON COLUMN public.nfl_plays_current_week.fourth_down_failed IS 'Binary indicator for if the posteam failed to convert first down on fourth down.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.htm; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.htm; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.htm IS 'hindered throwing motion';
+COMMENT ON COLUMN public.nfl_plays_current_week.htm IS 'hindered throwing motion';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.zblz; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.zblz; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.zblz IS 'zone blitz, at least one Off-Ball LB rushed the passer instead of a DL who dropped into coverage';
+COMMENT ON COLUMN public.nfl_plays_current_week.zblz IS 'zone blitz, at least one Off-Ball LB rushed the passer instead of a DL who dropped into coverage';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.stnt; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.stnt; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.stnt IS 'stunt, when any two pass rushers cross, trading pass rush lanes on a passing down';
+COMMENT ON COLUMN public.nfl_plays_current_week.stnt IS 'stunt, when any two pass rushers cross, trading pass rush lanes on a passing down';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.oop; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.oop; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.oop IS 'out of pocket pass';
+COMMENT ON COLUMN public.nfl_plays_current_week.oop IS 'out of pocket pass';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.phyb; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.phyb; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.phyb IS 'physical ball, Pass target takes significant punishment whether the pass is caught or not. Most Contested Balls will also be a Physical Ball.';
+COMMENT ON COLUMN public.nfl_plays_current_week.phyb IS 'physical ball, Pass target takes significant punishment whether the pass is caught or not. Most Contested Balls will also be a Physical Ball.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.bap; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.bap; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.bap IS 'batted pass';
+COMMENT ON COLUMN public.nfl_plays_current_week.bap IS 'batted pass';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.fread; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.fread; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.fread IS 'first read';
+COMMENT ON COLUMN public.nfl_plays_current_week.fread IS 'first read';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.scre; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.scre; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.scre IS 'screen pass';
+COMMENT ON COLUMN public.nfl_plays_current_week.scre IS 'screen pass';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.pfp; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.pfp; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.pfp IS 'pain free play, Ball carrier is only lightly touched by a defender on the field (ie QB slide) or runs out of bounds with little or no physical contact with the defender or sideline personnel/equipment. Includes TDs';
+COMMENT ON COLUMN public.nfl_plays_current_week.pfp IS 'pain free play, Ball carrier is only lightly touched by a defender on the field (ie QB slide) or runs out of bounds with little or no physical contact with the defender or sideline personnel/equipment. Includes TDs';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.qbsk; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.qbsk; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.qbsk IS 'qb sack, QB was to blame for the sack: held ball too long; missed wide open receiver etc';
+COMMENT ON COLUMN public.nfl_plays_current_week.qbsk IS 'qb sack, QB was to blame for the sack: held ball too long; missed wide open receiver etc';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.xlm; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.xlm; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.xlm IS 'extra men on the line, Number of players lined up on either side of the Offensive Tackles - usually a Tight End.';
+COMMENT ON COLUMN public.nfl_plays_current_week.xlm IS 'extra men on the line, Number of players lined up on either side of the Offensive Tackles - usually a Tight End.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.pru; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.pru; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.pru IS 'pass rushers';
+COMMENT ON COLUMN public.nfl_plays_current_week.pru IS 'pass rushers';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.blz; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.blz; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.blz IS 'number of LBs and DBs blitzing';
+COMMENT ON COLUMN public.nfl_plays_current_week.blz IS 'number of LBs and DBs blitzing';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.dblz; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.dblz; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.dblz IS 'Number of DBs blitzing';
+COMMENT ON COLUMN public.nfl_plays_current_week.dblz IS 'Number of DBs blitzing';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.cov; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.cov; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.cov IS 'coverage on target, Uncovered is 0, single coverage is 1, double is 2.';
+COMMENT ON COLUMN public.nfl_plays_current_week.cov IS 'coverage on target, Uncovered is 0, single coverage is 1, double is 2.';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.home_to_rem; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.home_to_rem; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.home_to_rem IS 'Numeric timeouts remaining in the half for the home team';
+COMMENT ON COLUMN public.nfl_plays_current_week.home_to_rem IS 'Numeric timeouts remaining in the half for the home team';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.away_to_rem; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.away_to_rem; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.away_to_rem IS 'Numeric timeouts remaining in the half for the away team';
+COMMENT ON COLUMN public.nfl_plays_current_week.away_to_rem IS 'Numeric timeouts remaining in the half for the away team';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.pos_to_rem; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.pos_to_rem; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.pos_to_rem IS 'Number of timeouts remaining for the possession team';
+COMMENT ON COLUMN public.nfl_plays_current_week.pos_to_rem IS 'Number of timeouts remaining for the possession team';
 
 
 --
--- Name: COLUMN nfl_plays_current_week.def_to_rem; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_plays_current_week.def_to_rem; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_plays_current_week.def_to_rem IS 'Number of timeouts remaining for the team on defense';
+COMMENT ON COLUMN public.nfl_plays_current_week.def_to_rem IS 'Number of timeouts remaining for the team on defense';
 
 
 --
--- Name: nfl_snaps; Type: TABLE; Schema: league_production; Owner: -
+-- Name: nfl_snaps; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE nfl_snaps (
+CREATE TABLE public.nfl_snaps (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
     "nflId" integer NOT NULL
@@ -3229,17 +3221,17 @@ CREATE TABLE nfl_snaps (
 
 
 --
--- Name: COLUMN nfl_snaps."nflId"; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN nfl_snaps."nflId"; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN nfl_snaps."nflId" IS 'ngs nflId/gsisItId';
+COMMENT ON COLUMN public.nfl_snaps."nflId" IS 'ngs nflId/gsisItId';
 
 
 --
--- Name: nfl_snaps_current_week; Type: TABLE; Schema: league_production; Owner: -
+-- Name: nfl_snaps_current_week; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE nfl_snaps_current_week (
+CREATE TABLE public.nfl_snaps_current_week (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
     "nflId" integer NOT NULL
@@ -3247,10 +3239,10 @@ CREATE TABLE nfl_snaps_current_week (
 
 
 --
--- Name: nfl_team_seasonlogs; Type: TABLE; Schema: league_production; Owner: -
+-- Name: nfl_team_seasonlogs; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE nfl_team_seasonlogs (
+CREATE TABLE public.nfl_team_seasonlogs (
     tm character varying(7) NOT NULL,
     stat_key character varying(100) NOT NULL,
     year integer NOT NULL,
@@ -3295,10 +3287,10 @@ CREATE TABLE nfl_team_seasonlogs (
 
 
 --
--- Name: percentiles; Type: TABLE; Schema: league_production; Owner: -
+-- Name: percentiles; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE percentiles (
+CREATE TABLE public.percentiles (
     percentile_key character varying(100) NOT NULL,
     field character varying(100) NOT NULL,
     p25 numeric(8,2) NOT NULL,
@@ -3314,38 +3306,38 @@ CREATE TABLE percentiles (
 
 
 --
--- Name: placed_wagers; Type: TABLE; Schema: league_production; Owner: -
+-- Name: placed_wagers; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE placed_wagers (
+CREATE TABLE public.placed_wagers (
     wager_id integer NOT NULL,
     userid integer NOT NULL,
     public smallint DEFAULT '0'::smallint,
-    wager_type placed_wagers_wager_type NOT NULL,
+    wager_type public.placed_wagers_wager_type NOT NULL,
     placed_at integer NOT NULL,
     bet_count smallint NOT NULL,
     selection_count smallint NOT NULL,
-    wager_status placed_wagers_wager_status NOT NULL,
+    wager_status public.placed_wagers_wager_status NOT NULL,
     bet_wager_amount numeric(7,2) NOT NULL,
     total_wager_amount numeric(7,2) NOT NULL,
     wager_returned_amount numeric(12,2) NOT NULL,
-    book_id placed_wagers_book_id NOT NULL,
+    book_id public.placed_wagers_book_id NOT NULL,
     book_wager_id character varying(255) NOT NULL,
     selection_1_id character varying(255),
     selection_1_odds integer,
-    selection_1_status placed_wagers_selection_1_status,
+    selection_1_status public.placed_wagers_selection_1_status,
     selection_2_id character varying(255),
     selection_2_odds integer,
-    selection_2_status placed_wagers_selection_2_status,
+    selection_2_status public.placed_wagers_selection_2_status,
     selection_3_id character varying(255),
     selection_3_odds integer,
-    selection_3_status placed_wagers_selection_3_status,
+    selection_3_status public.placed_wagers_selection_3_status,
     selection_4_id character varying(255),
     selection_4_odds integer,
-    selection_4_status placed_wagers_selection_4_status,
+    selection_4_status public.placed_wagers_selection_4_status,
     selection_5_id character varying(255),
     selection_5_odds integer,
-    selection_5_status placed_wagers_selection_5_status,
+    selection_5_status public.placed_wagers_selection_5_status,
     selection_6_id character varying(255),
     selection_6_odds integer,
     selection_7_id character varying(255),
@@ -3357,25 +3349,25 @@ CREATE TABLE placed_wagers (
     selection_10_id character varying(255),
     selection_10_odds integer,
     selection_lost smallint DEFAULT '0'::smallint,
-    selection_6_status placed_wagers_selection_6_status,
-    selection_7_status placed_wagers_selection_7_status,
-    selection_8_status placed_wagers_selection_8_status,
-    selection_9_status placed_wagers_selection_9_status,
-    selection_10_status placed_wagers_selection_10_status,
+    selection_6_status public.placed_wagers_selection_6_status,
+    selection_7_status public.placed_wagers_selection_7_status,
+    selection_8_status public.placed_wagers_selection_8_status,
+    selection_9_status public.placed_wagers_selection_9_status,
+    selection_10_status public.placed_wagers_selection_10_status,
     selection_11_id character varying(255),
-    selection_11_status placed_wagers_selection_11_status,
+    selection_11_status public.placed_wagers_selection_11_status,
     selection_11_odds integer,
     selection_12_id character varying(255),
-    selection_12_status placed_wagers_selection_12_status,
+    selection_12_status public.placed_wagers_selection_12_status,
     selection_12_odds integer
 );
 
 
 --
--- Name: placed_wagers_wager_id_seq; Type: SEQUENCE; Schema: league_production; Owner: -
+-- Name: placed_wagers_wager_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE placed_wagers_wager_id_seq
+CREATE SEQUENCE public.placed_wagers_wager_id_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -3385,17 +3377,17 @@ CREATE SEQUENCE placed_wagers_wager_id_seq
 
 
 --
--- Name: placed_wagers_wager_id_seq; Type: SEQUENCE OWNED BY; Schema: league_production; Owner: -
+-- Name: placed_wagers_wager_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE placed_wagers_wager_id_seq OWNED BY placed_wagers.wager_id;
+ALTER SEQUENCE public.placed_wagers_wager_id_seq OWNED BY public.placed_wagers.wager_id;
 
 
 --
--- Name: play_changelog; Type: TABLE; Schema: league_production; Owner: -
+-- Name: play_changelog; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE play_changelog (
+CREATE TABLE public.play_changelog (
     esbid bigint NOT NULL,
     "playId" bigint NOT NULL,
     prop character varying(100) NOT NULL,
@@ -3406,10 +3398,10 @@ CREATE TABLE play_changelog (
 
 
 --
--- Name: player; Type: TABLE; Schema: league_production; Owner: -
+-- Name: player; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE player (
+CREATE TABLE public.player (
     pid character varying(25) NOT NULL,
     fname character varying(20) NOT NULL,
     lname character varying(25) NOT NULL,
@@ -3418,9 +3410,9 @@ CREATE TABLE player (
     pos character varying(4) NOT NULL,
     pos1 character varying(4) NOT NULL,
     pos2 character varying(4),
-    height smallint DEFAULT NULL,
-    weight bigint DEFAULT NULL,
-    dob character varying(10) DEFAULT NULL,
+    height smallint NOT NULL,
+    weight bigint NOT NULL,
+    dob character varying(10) NOT NULL,
     forty numeric(3,2),
     bench smallint,
     vertical numeric(3,1),
@@ -3460,209 +3452,209 @@ CREATE TABLE player (
 
 
 --
--- Name: COLUMN player.pid; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN player.pid; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN player.pid IS 'player id';
-
-
---
--- Name: COLUMN player.fname; Type: COMMENT; Schema: league_production; Owner: -
---
-
-COMMENT ON COLUMN player.fname IS 'first name';
+COMMENT ON COLUMN public.player.pid IS 'player id';
 
 
 --
--- Name: COLUMN player.lname; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN player.fname; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN player.lname IS 'last name';
-
-
---
--- Name: COLUMN player.pname; Type: COMMENT; Schema: league_production; Owner: -
---
-
-COMMENT ON COLUMN player.pname IS 'f.last name';
+COMMENT ON COLUMN public.player.fname IS 'first name';
 
 
 --
--- Name: COLUMN player.formatted; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN player.lname; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN player.formatted IS 'formatted name';
-
-
---
--- Name: COLUMN player.pos; Type: COMMENT; Schema: league_production; Owner: -
---
-
-COMMENT ON COLUMN player.pos IS 'primary position';
+COMMENT ON COLUMN public.player.lname IS 'last name';
 
 
 --
--- Name: COLUMN player.pos1; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN player.pname; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN player.pos1 IS 'secondary position';
-
-
---
--- Name: COLUMN player.pos2; Type: COMMENT; Schema: league_production; Owner: -
---
-
-COMMENT ON COLUMN player.pos2 IS 'tertiary position';
+COMMENT ON COLUMN public.player.pname IS 'f.last name';
 
 
 --
--- Name: COLUMN player.height; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN player.formatted; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN player.height IS 'height in inches';
-
-
---
--- Name: COLUMN player.weight; Type: COMMENT; Schema: league_production; Owner: -
---
-
-COMMENT ON COLUMN player.weight IS 'weight in pounds';
+COMMENT ON COLUMN public.player.formatted IS 'formatted name';
 
 
 --
--- Name: COLUMN player.dob; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN player.pos; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN player.dob IS 'date of birth';
-
-
---
--- Name: COLUMN player.forty; Type: COMMENT; Schema: league_production; Owner: -
---
-
-COMMENT ON COLUMN player.forty IS '40-yard dash time';
+COMMENT ON COLUMN public.player.pos IS 'primary position';
 
 
 --
--- Name: COLUMN player.bench; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN player.pos1; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN player.bench IS 'bench press reps';
-
-
---
--- Name: COLUMN player.vertical; Type: COMMENT; Schema: league_production; Owner: -
---
-
-COMMENT ON COLUMN player.vertical IS 'vertical jump height';
+COMMENT ON COLUMN public.player.pos1 IS 'secondary position';
 
 
 --
--- Name: COLUMN player.broad; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN player.pos2; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN player.broad IS 'broad jump distance';
-
-
---
--- Name: COLUMN player.shuttle; Type: COMMENT; Schema: league_production; Owner: -
---
-
-COMMENT ON COLUMN player.shuttle IS 'shuttle run time';
+COMMENT ON COLUMN public.player.pos2 IS 'tertiary position';
 
 
 --
--- Name: COLUMN player.cone; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN player.height; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN player.cone IS '3-cone drill time';
-
-
---
--- Name: COLUMN player.arm; Type: COMMENT; Schema: league_production; Owner: -
---
-
-COMMENT ON COLUMN player.arm IS 'arm length';
+COMMENT ON COLUMN public.player.height IS 'height in inches';
 
 
 --
--- Name: COLUMN player.hand; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN player.weight; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN player.hand IS 'hand size';
-
-
---
--- Name: COLUMN player.dpos; Type: COMMENT; Schema: league_production; Owner: -
---
-
-COMMENT ON COLUMN player.dpos IS 'draft position';
+COMMENT ON COLUMN public.player.weight IS 'weight in pounds';
 
 
 --
--- Name: COLUMN player.round; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN player.dob; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN player.round IS 'draft round';
-
-
---
--- Name: COLUMN player.col; Type: COMMENT; Schema: league_production; Owner: -
---
-
-COMMENT ON COLUMN player.col IS 'college';
+COMMENT ON COLUMN public.player.dob IS 'date of birth';
 
 
 --
--- Name: COLUMN player.dv; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN player.forty; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN player.dv IS 'college division';
-
-
---
--- Name: COLUMN player.start; Type: COMMENT; Schema: league_production; Owner: -
---
-
-COMMENT ON COLUMN player.start IS 'starting nfl year';
+COMMENT ON COLUMN public.player.forty IS '40-yard dash time';
 
 
 --
--- Name: COLUMN player.current_nfl_team; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN player.bench; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN player.current_nfl_team IS 'current nfl team';
-
-
---
--- Name: COLUMN player.posd; Type: COMMENT; Schema: league_production; Owner: -
---
-
-COMMENT ON COLUMN player.posd IS 'position depth';
+COMMENT ON COLUMN public.player.bench IS 'bench press reps';
 
 
 --
--- Name: COLUMN player.jnum; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN player.vertical; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN player.jnum IS 'jersey number';
+COMMENT ON COLUMN public.player.vertical IS 'vertical jump height';
 
 
 --
--- Name: player_aliases; Type: TABLE; Schema: league_production; Owner: -
+-- Name: COLUMN player.broad; Type: COMMENT; Schema: public; Owner: -
 --
 
-CREATE TABLE player_aliases (
+COMMENT ON COLUMN public.player.broad IS 'broad jump distance';
+
+
+--
+-- Name: COLUMN player.shuttle; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player.shuttle IS 'shuttle run time';
+
+
+--
+-- Name: COLUMN player.cone; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player.cone IS '3-cone drill time';
+
+
+--
+-- Name: COLUMN player.arm; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player.arm IS 'arm length';
+
+
+--
+-- Name: COLUMN player.hand; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player.hand IS 'hand size';
+
+
+--
+-- Name: COLUMN player.dpos; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player.dpos IS 'draft position';
+
+
+--
+-- Name: COLUMN player.round; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player.round IS 'draft round';
+
+
+--
+-- Name: COLUMN player.col; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player.col IS 'college';
+
+
+--
+-- Name: COLUMN player.dv; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player.dv IS 'college division';
+
+
+--
+-- Name: COLUMN player.start; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player.start IS 'starting nfl year';
+
+
+--
+-- Name: COLUMN player.current_nfl_team; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player.current_nfl_team IS 'current nfl team';
+
+
+--
+-- Name: COLUMN player.posd; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player.posd IS 'position depth';
+
+
+--
+-- Name: COLUMN player.jnum; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player.jnum IS 'jersey number';
+
+
+--
+-- Name: player_aliases; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_aliases (
     pid character varying(25) NOT NULL,
     formatted_alias character varying(100) NOT NULL
 );
 
 
 --
--- Name: player_changelog; Type: TABLE; Schema: league_production; Owner: -
+-- Name: player_changelog; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE player_changelog (
+CREATE TABLE public.player_changelog (
     uid integer NOT NULL,
     pid character varying(25),
     prop character varying(100) NOT NULL,
@@ -3673,10 +3665,10 @@ CREATE TABLE player_changelog (
 
 
 --
--- Name: player_changelog_uid_seq; Type: SEQUENCE; Schema: league_production; Owner: -
+-- Name: player_changelog_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE player_changelog_uid_seq
+CREATE SEQUENCE public.player_changelog_uid_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -3686,17 +3678,17 @@ CREATE SEQUENCE player_changelog_uid_seq
 
 
 --
--- Name: player_changelog_uid_seq; Type: SEQUENCE OWNED BY; Schema: league_production; Owner: -
+-- Name: player_changelog_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE player_changelog_uid_seq OWNED BY player_changelog.uid;
+ALTER SEQUENCE public.player_changelog_uid_seq OWNED BY public.player_changelog.uid;
 
 
 --
--- Name: player_gamelogs; Type: TABLE; Schema: league_production; Owner: -
+-- Name: player_gamelogs; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE player_gamelogs (
+CREATE TABLE public.player_gamelogs (
     esbid integer NOT NULL,
     pid character varying(25),
     opp character varying(3) NOT NULL,
@@ -3746,10 +3738,10 @@ CREATE TABLE player_gamelogs (
 
 
 --
--- Name: player_seasonlogs; Type: TABLE; Schema: league_production; Owner: -
+-- Name: player_seasonlogs; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE player_seasonlogs (
+CREATE TABLE public.player_seasonlogs (
     pid character varying(25) NOT NULL,
     year smallint NOT NULL,
     seas_type character varying(10) NOT NULL,
@@ -3802,10 +3794,10 @@ CREATE TABLE player_seasonlogs (
 
 
 --
--- Name: player_snaps_game; Type: TABLE; Schema: league_production; Owner: -
+-- Name: player_snaps_game; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE player_snaps_game (
+CREATE TABLE public.player_snaps_game (
     esbid integer NOT NULL,
     pid character varying(25) NOT NULL,
     snaps_off smallint,
@@ -3817,45 +3809,45 @@ CREATE TABLE player_snaps_game (
 
 
 --
--- Name: COLUMN player_snaps_game.snaps_off; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN player_snaps_game.snaps_off; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN player_snaps_game.snaps_off IS 'Offensive snaps';
-
-
---
--- Name: COLUMN player_snaps_game.snaps_def; Type: COMMENT; Schema: league_production; Owner: -
---
-
-COMMENT ON COLUMN player_snaps_game.snaps_def IS 'Defensive snaps';
+COMMENT ON COLUMN public.player_snaps_game.snaps_off IS 'Offensive snaps';
 
 
 --
--- Name: COLUMN player_snaps_game.snaps_st; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN player_snaps_game.snaps_def; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN player_snaps_game.snaps_st IS 'Special teams snaps';
-
-
---
--- Name: COLUMN player_snaps_game.snaps_pass; Type: COMMENT; Schema: league_production; Owner: -
---
-
-COMMENT ON COLUMN player_snaps_game.snaps_pass IS 'Passing snaps (Pass attempts, sacks, scrambles)';
+COMMENT ON COLUMN public.player_snaps_game.snaps_def IS 'Defensive snaps';
 
 
 --
--- Name: COLUMN player_snaps_game.snaps_run; Type: COMMENT; Schema: league_production; Owner: -
+-- Name: COLUMN player_snaps_game.snaps_st; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN player_snaps_game.snaps_run IS 'Rushing snaps';
+COMMENT ON COLUMN public.player_snaps_game.snaps_st IS 'Special teams snaps';
 
 
 --
--- Name: players_status; Type: TABLE; Schema: league_production; Owner: -
+-- Name: COLUMN player_snaps_game.snaps_pass; Type: COMMENT; Schema: public; Owner: -
 --
 
-CREATE TABLE players_status (
+COMMENT ON COLUMN public.player_snaps_game.snaps_pass IS 'Passing snaps (Pass attempts, sacks, scrambles)';
+
+
+--
+-- Name: COLUMN player_snaps_game.snaps_run; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_snaps_game.snaps_run IS 'Rushing snaps';
+
+
+--
+-- Name: players_status; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.players_status (
     pid character varying(25),
     mfl_id character varying(11),
     sleeper_id character varying(11),
@@ -3878,10 +3870,10 @@ CREATE TABLE players_status (
 
 
 --
--- Name: playoffs; Type: TABLE; Schema: league_production; Owner: -
+-- Name: playoffs; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE playoffs (
+CREATE TABLE public.playoffs (
     uid integer NOT NULL,
     tid integer NOT NULL,
     lid integer NOT NULL,
@@ -3894,20 +3886,20 @@ CREATE TABLE playoffs (
 
 
 --
--- Name: poach_releases; Type: TABLE; Schema: league_production; Owner: -
+-- Name: poach_releases; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE poach_releases (
+CREATE TABLE public.poach_releases (
     poachid integer NOT NULL,
     pid character varying(25)
 );
 
 
 --
--- Name: poaches; Type: TABLE; Schema: league_production; Owner: -
+-- Name: poaches; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE poaches (
+CREATE TABLE public.poaches (
     uid bigint NOT NULL,
     pid character varying(25),
     userid integer NOT NULL,
@@ -3922,10 +3914,10 @@ CREATE TABLE poaches (
 
 
 --
--- Name: poaches_uid_seq; Type: SEQUENCE; Schema: league_production; Owner: -
+-- Name: poaches_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE poaches_uid_seq
+CREATE SEQUENCE public.poaches_uid_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -3934,17 +3926,17 @@ CREATE SEQUENCE poaches_uid_seq
 
 
 --
--- Name: poaches_uid_seq; Type: SEQUENCE OWNED BY; Schema: league_production; Owner: -
+-- Name: poaches_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE poaches_uid_seq OWNED BY poaches.uid;
+ALTER SEQUENCE public.poaches_uid_seq OWNED BY public.poaches.uid;
 
 
 --
--- Name: practice; Type: TABLE; Schema: league_production; Owner: -
+-- Name: practice; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE practice (
+CREATE TABLE public.practice (
     pid character varying(25),
     week smallint NOT NULL,
     year smallint,
@@ -3962,10 +3954,10 @@ CREATE TABLE practice (
 
 
 --
--- Name: projections; Type: TABLE; Schema: league_production; Owner: -
+-- Name: projections; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE projections (
+CREATE TABLE public.projections (
     pid character varying(25),
     sourceid integer DEFAULT 0 NOT NULL,
     userid integer DEFAULT 0 NOT NULL,
@@ -4013,10 +4005,10 @@ CREATE TABLE projections (
 
 
 --
--- Name: projections_archive; Type: TABLE; Schema: league_production; Owner: -
+-- Name: projections_archive; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE projections_archive (
+CREATE TABLE public.projections_archive (
     pid character varying(25),
     sourceid integer DEFAULT 0 NOT NULL,
     userid integer DEFAULT 0 NOT NULL,
@@ -4064,10 +4056,10 @@ CREATE TABLE projections_archive (
 
 
 --
--- Name: projections_index; Type: TABLE; Schema: league_production; Owner: -
+-- Name: projections_index; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE projections_index (
+CREATE TABLE public.projections_index (
     pid character varying(25) NOT NULL,
     sourceid integer DEFAULT 0 NOT NULL,
     userid integer DEFAULT 0 NOT NULL,
@@ -4114,11 +4106,11 @@ CREATE TABLE projections_index (
 
 
 --
--- Name: prop_market_selections_history; Type: TABLE; Schema: league_production; Owner: -
+-- Name: prop_market_selections_history; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE prop_market_selections_history (
-    source_id prop_market_selections_history_source_id NOT NULL,
+CREATE TABLE public.prop_market_selections_history (
+    source_id public.prop_market_selections_history_source_id NOT NULL,
     source_market_id character varying(255) NOT NULL,
     source_selection_id character varying(255) NOT NULL,
     selection_name character varying(255),
@@ -4130,11 +4122,11 @@ CREATE TABLE prop_market_selections_history (
 
 
 --
--- Name: prop_market_selections_index; Type: TABLE; Schema: league_production; Owner: -
+-- Name: prop_market_selections_index; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE prop_market_selections_index (
-    source_id prop_market_selections_index_source_id NOT NULL,
+CREATE TABLE public.prop_market_selections_index (
+    source_id public.prop_market_selections_index_source_id NOT NULL,
     source_market_id character varying(255) NOT NULL,
     source_selection_id character varying(255) NOT NULL,
     selection_pid character varying(25),
@@ -4142,18 +4134,18 @@ CREATE TABLE prop_market_selections_index (
     selection_metric_line numeric(6,1),
     odds_decimal numeric(15,3),
     odds_american integer,
-    result prop_market_selections_index_result,
+    result public.prop_market_selections_index_result,
     "timestamp" integer NOT NULL,
-    time_type prop_market_selections_index_time_type NOT NULL
+    time_type public.prop_market_selections_index_time_type NOT NULL
 );
 
 
 --
--- Name: prop_markets_history; Type: TABLE; Schema: league_production; Owner: -
+-- Name: prop_markets_history; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE prop_markets_history (
-    source_id prop_markets_history_source_id NOT NULL,
+CREATE TABLE public.prop_markets_history (
+    source_id public.prop_markets_history_source_id NOT NULL,
     source_market_id character varying(255) NOT NULL,
     source_market_name character varying(500),
     open boolean,
@@ -4164,12 +4156,12 @@ CREATE TABLE prop_markets_history (
 
 
 --
--- Name: prop_markets_index; Type: TABLE; Schema: league_production; Owner: -
+-- Name: prop_markets_index; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE prop_markets_index (
+CREATE TABLE public.prop_markets_index (
     market_type character varying(50),
-    source_id prop_markets_index_source_id NOT NULL,
+    source_id public.prop_markets_index_source_id NOT NULL,
     source_market_id character varying(255) NOT NULL,
     source_market_name character varying(500),
     esbid bigint,
@@ -4181,28 +4173,28 @@ CREATE TABLE prop_markets_index (
     settled boolean,
     winning_selection_id character varying(255),
     metric_result_value numeric(6,1),
-    time_type prop_markets_index_time_type NOT NULL,
+    time_type public.prop_markets_index_time_type NOT NULL,
     "timestamp" integer NOT NULL
 );
 
 
 --
--- Name: prop_pairing_props; Type: TABLE; Schema: league_production; Owner: -
+-- Name: prop_pairing_props; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE prop_pairing_props (
+CREATE TABLE public.prop_pairing_props (
     pairing_id character varying(30) NOT NULL,
     prop_id bigint NOT NULL
 );
 
 
 --
--- Name: prop_pairings; Type: TABLE; Schema: league_production; Owner: -
+-- Name: prop_pairings; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE prop_pairings (
+CREATE TABLE public.prop_pairings (
     pairing_id character varying(30) NOT NULL,
-    source_id prop_pairings_source_id NOT NULL,
+    source_id public.prop_pairings_source_id NOT NULL,
     name character varying(150),
     team character varying(3),
     week smallint NOT NULL,
@@ -4231,10 +4223,10 @@ CREATE TABLE prop_pairings (
 
 
 --
--- Name: props; Type: TABLE; Schema: league_production; Owner: -
+-- Name: props; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE props (
+CREATE TABLE public.props (
     pid character varying(25),
     esbid bigint,
     week smallint NOT NULL,
@@ -4254,10 +4246,10 @@ CREATE TABLE props (
 
 
 --
--- Name: props_index; Type: TABLE; Schema: league_production; Owner: -
+-- Name: props_index; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE props_index (
+CREATE TABLE public.props_index (
     pid character varying(25),
     esbid bigint,
     week smallint NOT NULL,
@@ -4268,9 +4260,9 @@ CREATE TABLE props_index (
     u numeric(5,2),
     o_am integer,
     u_am integer,
-    source_id props_index_source_id NOT NULL,
+    source_id public.props_index_source_id NOT NULL,
     "timestamp" integer NOT NULL,
-    time_type props_index_time_type NOT NULL,
+    time_type public.props_index_time_type NOT NULL,
     name character varying(50),
     team character varying(3),
     opp character varying(3),
@@ -4298,10 +4290,10 @@ CREATE TABLE props_index (
 
 
 --
--- Name: props_index_new; Type: TABLE; Schema: league_production; Owner: -
+-- Name: props_index_new; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE props_index_new (
+CREATE TABLE public.props_index_new (
     prop_id bigint NOT NULL,
     pid character varying(25) NOT NULL,
     prop_type character varying(50),
@@ -4340,10 +4332,10 @@ CREATE TABLE props_index_new (
 
 
 --
--- Name: props_index_new_prop_id_seq; Type: SEQUENCE; Schema: league_production; Owner: -
+-- Name: props_index_new_prop_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE props_index_new_prop_id_seq
+CREATE SEQUENCE public.props_index_new_prop_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -4352,17 +4344,17 @@ CREATE SEQUENCE props_index_new_prop_id_seq
 
 
 --
--- Name: props_index_new_prop_id_seq; Type: SEQUENCE OWNED BY; Schema: league_production; Owner: -
+-- Name: props_index_new_prop_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE props_index_new_prop_id_seq OWNED BY props_index_new.prop_id;
+ALTER SEQUENCE public.props_index_new_prop_id_seq OWNED BY public.props_index_new.prop_id;
 
 
 --
--- Name: props_index_prop_id_seq; Type: SEQUENCE; Schema: league_production; Owner: -
+-- Name: props_index_prop_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE props_index_prop_id_seq
+CREATE SEQUENCE public.props_index_prop_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -4371,17 +4363,17 @@ CREATE SEQUENCE props_index_prop_id_seq
 
 
 --
--- Name: props_index_prop_id_seq; Type: SEQUENCE OWNED BY; Schema: league_production; Owner: -
+-- Name: props_index_prop_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE props_index_prop_id_seq OWNED BY props_index.prop_id;
+ALTER SEQUENCE public.props_index_prop_id_seq OWNED BY public.props_index.prop_id;
 
 
 --
--- Name: rankings; Type: TABLE; Schema: league_production; Owner: -
+-- Name: rankings; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE rankings (
+CREATE TABLE public.rankings (
     pid character varying(25),
     pos character varying(3) NOT NULL,
     week smallint NOT NULL,
@@ -4404,10 +4396,10 @@ CREATE TABLE rankings (
 
 
 --
--- Name: ros_projections; Type: TABLE; Schema: league_production; Owner: -
+-- Name: ros_projections; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE ros_projections (
+CREATE TABLE public.ros_projections (
     pid character varying(25),
     sourceid integer NOT NULL,
     pa numeric(5,1),
@@ -4453,10 +4445,10 @@ CREATE TABLE ros_projections (
 
 
 --
--- Name: rosters; Type: TABLE; Schema: league_production; Owner: -
+-- Name: rosters; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE rosters (
+CREATE TABLE public.rosters (
     uid bigint NOT NULL,
     tid integer NOT NULL,
     lid integer NOT NULL,
@@ -4467,10 +4459,10 @@ CREATE TABLE rosters (
 
 
 --
--- Name: rosters_players; Type: TABLE; Schema: league_production; Owner: -
+-- Name: rosters_players; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE rosters_players (
+CREATE TABLE public.rosters_players (
     rid integer NOT NULL,
     slot integer NOT NULL,
     pid character varying(25) NOT NULL,
@@ -4485,10 +4477,10 @@ CREATE TABLE rosters_players (
 
 
 --
--- Name: rosters_uid_seq; Type: SEQUENCE; Schema: league_production; Owner: -
+-- Name: rosters_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE rosters_uid_seq
+CREATE SEQUENCE public.rosters_uid_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -4497,17 +4489,17 @@ CREATE SEQUENCE rosters_uid_seq
 
 
 --
--- Name: rosters_uid_seq; Type: SEQUENCE OWNED BY; Schema: league_production; Owner: -
+-- Name: rosters_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE rosters_uid_seq OWNED BY rosters.uid;
+ALTER SEQUENCE public.rosters_uid_seq OWNED BY public.rosters.uid;
 
 
 --
--- Name: schedule; Type: TABLE; Schema: league_production; Owner: -
+-- Name: schedule; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE schedule (
+CREATE TABLE public.schedule (
     gid integer NOT NULL,
     seas integer NOT NULL,
     wk smallint NOT NULL,
@@ -4521,10 +4513,10 @@ CREATE TABLE schedule (
 
 
 --
--- Name: scoring_format_player_projection_points; Type: TABLE; Schema: league_production; Owner: -
+-- Name: scoring_format_player_projection_points; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE scoring_format_player_projection_points (
+CREATE TABLE public.scoring_format_player_projection_points (
     pid character varying(25) NOT NULL,
     week character varying(3) NOT NULL,
     year smallint NOT NULL,
@@ -4570,10 +4562,10 @@ CREATE TABLE scoring_format_player_projection_points (
 
 
 --
--- Name: seasons; Type: TABLE; Schema: league_production; Owner: -
+-- Name: seasons; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE seasons (
+CREATE TABLE public.seasons (
     lid integer NOT NULL,
     year smallint,
     season_started_at bigint,
@@ -4613,10 +4605,10 @@ CREATE TABLE seasons (
 
 
 --
--- Name: sources; Type: TABLE; Schema: league_production; Owner: -
+-- Name: sources; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE sources (
+CREATE TABLE public.sources (
     uid integer NOT NULL,
     name character varying(50) DEFAULT ''::character varying NOT NULL,
     url character varying(60) DEFAULT ''::character varying NOT NULL
@@ -4624,10 +4616,10 @@ CREATE TABLE sources (
 
 
 --
--- Name: sources_uid_seq; Type: SEQUENCE; Schema: league_production; Owner: -
+-- Name: sources_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE sources_uid_seq
+CREATE SEQUENCE public.sources_uid_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -4637,17 +4629,17 @@ CREATE SEQUENCE sources_uid_seq
 
 
 --
--- Name: sources_uid_seq; Type: SEQUENCE OWNED BY; Schema: league_production; Owner: -
+-- Name: sources_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE sources_uid_seq OWNED BY sources.uid;
+ALTER SEQUENCE public.sources_uid_seq OWNED BY public.sources.uid;
 
 
 --
--- Name: team_stats; Type: TABLE; Schema: league_production; Owner: -
+-- Name: team_stats; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE team_stats (
+CREATE TABLE public.team_stats (
     lid integer NOT NULL,
     tid integer NOT NULL,
     div smallint,
@@ -4700,10 +4692,10 @@ CREATE TABLE team_stats (
 
 
 --
--- Name: teams; Type: TABLE; Schema: league_production; Owner: -
+-- Name: teams; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE teams (
+CREATE TABLE public.teams (
     uid integer NOT NULL,
     year smallint NOT NULL,
     lid integer NOT NULL,
@@ -4721,10 +4713,10 @@ CREATE TABLE teams (
 
 
 --
--- Name: teams_uid_seq; Type: SEQUENCE; Schema: league_production; Owner: -
+-- Name: teams_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE teams_uid_seq
+CREATE SEQUENCE public.teams_uid_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -4734,17 +4726,17 @@ CREATE SEQUENCE teams_uid_seq
 
 
 --
--- Name: teams_uid_seq; Type: SEQUENCE OWNED BY; Schema: league_production; Owner: -
+-- Name: teams_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE teams_uid_seq OWNED BY teams.uid;
+ALTER SEQUENCE public.teams_uid_seq OWNED BY public.teams.uid;
 
 
 --
--- Name: trade_releases; Type: TABLE; Schema: league_production; Owner: -
+-- Name: trade_releases; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE trade_releases (
+CREATE TABLE public.trade_releases (
     tradeid integer NOT NULL,
     tid integer NOT NULL,
     pid character varying(25)
@@ -4752,10 +4744,10 @@ CREATE TABLE trade_releases (
 
 
 --
--- Name: trades; Type: TABLE; Schema: league_production; Owner: -
+-- Name: trades; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE trades (
+CREATE TABLE public.trades (
     uid bigint NOT NULL,
     propose_tid integer NOT NULL,
     accept_tid integer NOT NULL,
@@ -4771,10 +4763,10 @@ CREATE TABLE trades (
 
 
 --
--- Name: trades_picks; Type: TABLE; Schema: league_production; Owner: -
+-- Name: trades_picks; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE trades_picks (
+CREATE TABLE public.trades_picks (
     tradeid integer NOT NULL,
     tid integer NOT NULL,
     pickid integer NOT NULL
@@ -4782,10 +4774,10 @@ CREATE TABLE trades_picks (
 
 
 --
--- Name: trades_players; Type: TABLE; Schema: league_production; Owner: -
+-- Name: trades_players; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE trades_players (
+CREATE TABLE public.trades_players (
     tradeid integer NOT NULL,
     tid integer NOT NULL,
     pid character varying(25)
@@ -4793,20 +4785,20 @@ CREATE TABLE trades_players (
 
 
 --
--- Name: trades_transactions; Type: TABLE; Schema: league_production; Owner: -
+-- Name: trades_transactions; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE trades_transactions (
+CREATE TABLE public.trades_transactions (
     tradeid integer NOT NULL,
     transactionid integer NOT NULL
 );
 
 
 --
--- Name: trades_uid_seq; Type: SEQUENCE; Schema: league_production; Owner: -
+-- Name: trades_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE trades_uid_seq
+CREATE SEQUENCE public.trades_uid_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -4815,17 +4807,17 @@ CREATE SEQUENCE trades_uid_seq
 
 
 --
--- Name: trades_uid_seq; Type: SEQUENCE OWNED BY; Schema: league_production; Owner: -
+-- Name: trades_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE trades_uid_seq OWNED BY trades.uid;
+ALTER SEQUENCE public.trades_uid_seq OWNED BY public.trades.uid;
 
 
 --
--- Name: transactions; Type: TABLE; Schema: league_production; Owner: -
+-- Name: transactions; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE transactions (
+CREATE TABLE public.transactions (
     uid bigint NOT NULL,
     userid integer NOT NULL,
     tid integer NOT NULL,
@@ -4841,10 +4833,10 @@ CREATE TABLE transactions (
 
 
 --
--- Name: transactions_uid_seq; Type: SEQUENCE; Schema: league_production; Owner: -
+-- Name: transactions_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE transactions_uid_seq
+CREATE SEQUENCE public.transactions_uid_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -4853,17 +4845,17 @@ CREATE SEQUENCE transactions_uid_seq
 
 
 --
--- Name: transactions_uid_seq; Type: SEQUENCE OWNED BY; Schema: league_production; Owner: -
+-- Name: transactions_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE transactions_uid_seq OWNED BY transactions.uid;
+ALTER SEQUENCE public.transactions_uid_seq OWNED BY public.transactions.uid;
 
 
 --
--- Name: transition_bids; Type: TABLE; Schema: league_production; Owner: -
+-- Name: transition_bids; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE transition_bids (
+CREATE TABLE public.transition_bids (
     uid integer NOT NULL,
     pid character varying(25),
     userid integer NOT NULL,
@@ -4881,10 +4873,10 @@ CREATE TABLE transition_bids (
 
 
 --
--- Name: transition_bids_uid_seq; Type: SEQUENCE; Schema: league_production; Owner: -
+-- Name: transition_bids_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE transition_bids_uid_seq
+CREATE SEQUENCE public.transition_bids_uid_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -4894,27 +4886,27 @@ CREATE SEQUENCE transition_bids_uid_seq
 
 
 --
--- Name: transition_bids_uid_seq; Type: SEQUENCE OWNED BY; Schema: league_production; Owner: -
+-- Name: transition_bids_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE transition_bids_uid_seq OWNED BY transition_bids.uid;
+ALTER SEQUENCE public.transition_bids_uid_seq OWNED BY public.transition_bids.uid;
 
 
 --
--- Name: transition_releases; Type: TABLE; Schema: league_production; Owner: -
+-- Name: transition_releases; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE transition_releases (
+CREATE TABLE public.transition_releases (
     transitionid integer NOT NULL,
     pid character varying(25)
 );
 
 
 --
--- Name: user_table_views; Type: TABLE; Schema: league_production; Owner: -
+-- Name: user_table_views; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE user_table_views (
+CREATE TABLE public.user_table_views (
     view_id bigint NOT NULL,
     view_name character varying(30) NOT NULL,
     view_description text,
@@ -4927,10 +4919,10 @@ CREATE TABLE user_table_views (
 
 
 --
--- Name: user_table_views_view_id_seq; Type: SEQUENCE; Schema: league_production; Owner: -
+-- Name: user_table_views_view_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE user_table_views_view_id_seq
+CREATE SEQUENCE public.user_table_views_view_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -4939,17 +4931,17 @@ CREATE SEQUENCE user_table_views_view_id_seq
 
 
 --
--- Name: user_table_views_view_id_seq; Type: SEQUENCE OWNED BY; Schema: league_production; Owner: -
+-- Name: user_table_views_view_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE user_table_views_view_id_seq OWNED BY user_table_views.view_id;
+ALTER SEQUENCE public.user_table_views_view_id_seq OWNED BY public.user_table_views.view_id;
 
 
 --
--- Name: users; Type: TABLE; Schema: league_production; Owner: -
+-- Name: users; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE users (
+CREATE TABLE public.users (
     id bigint NOT NULL,
     username character varying(50) NOT NULL,
     email character varying(50) DEFAULT ''::character varying NOT NULL,
@@ -4968,10 +4960,10 @@ CREATE TABLE users (
 
 
 --
--- Name: users_id_seq; Type: SEQUENCE; Schema: league_production; Owner: -
+-- Name: users_id_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE users_id_seq
+CREATE SEQUENCE public.users_id_seq
     START WITH 1
     INCREMENT BY 1
     NO MINVALUE
@@ -4980,17 +4972,17 @@ CREATE SEQUENCE users_id_seq
 
 
 --
--- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: league_production; Owner: -
+-- Name: users_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE users_id_seq OWNED BY users.id;
+ALTER SEQUENCE public.users_id_seq OWNED BY public.users.id;
 
 
 --
--- Name: users_sources; Type: TABLE; Schema: league_production; Owner: -
+-- Name: users_sources; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE users_sources (
+CREATE TABLE public.users_sources (
     userid integer NOT NULL,
     sourceid integer NOT NULL,
     weight numeric(2,2) NOT NULL
@@ -4998,10 +4990,10 @@ CREATE TABLE users_sources (
 
 
 --
--- Name: users_teams; Type: TABLE; Schema: league_production; Owner: -
+-- Name: users_teams; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE users_teams (
+CREATE TABLE public.users_teams (
     userid integer NOT NULL,
     tid integer NOT NULL,
     teamtext boolean DEFAULT true NOT NULL,
@@ -5011,20 +5003,20 @@ CREATE TABLE users_teams (
 
 
 --
--- Name: waiver_releases; Type: TABLE; Schema: league_production; Owner: -
+-- Name: waiver_releases; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE waiver_releases (
+CREATE TABLE public.waiver_releases (
     waiverid integer NOT NULL,
     pid character varying(25)
 );
 
 
 --
--- Name: waivers; Type: TABLE; Schema: league_production; Owner: -
+-- Name: waivers; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE waivers (
+CREATE TABLE public.waivers (
     uid integer NOT NULL,
     userid integer NOT NULL,
     pid character varying(25),
@@ -5042,10 +5034,10 @@ CREATE TABLE waivers (
 
 
 --
--- Name: waivers_uid_seq; Type: SEQUENCE; Schema: league_production; Owner: -
+-- Name: waivers_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
 --
 
-CREATE SEQUENCE waivers_uid_seq
+CREATE SEQUENCE public.waivers_uid_seq
     AS integer
     START WITH 1
     INCREMENT BY 1
@@ -5055,1384 +5047,1384 @@ CREATE SEQUENCE waivers_uid_seq
 
 
 --
--- Name: waivers_uid_seq; Type: SEQUENCE OWNED BY; Schema: league_production; Owner: -
+-- Name: waivers_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE waivers_uid_seq OWNED BY waivers.uid;
+ALTER SEQUENCE public.waivers_uid_seq OWNED BY public.waivers.uid;
 
 
 --
--- Name: draft uid; Type: DEFAULT; Schema: league_production; Owner: -
+-- Name: draft uid; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY draft ALTER COLUMN uid SET DEFAULT nextval('draft_uid_seq'::regclass);
+ALTER TABLE ONLY public.draft ALTER COLUMN uid SET DEFAULT nextval('public.draft_uid_seq'::regclass);
 
 
 --
--- Name: jobs uid; Type: DEFAULT; Schema: league_production; Owner: -
+-- Name: jobs uid; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY jobs ALTER COLUMN uid SET DEFAULT nextval('jobs_uid_seq'::regclass);
+ALTER TABLE ONLY public.jobs ALTER COLUMN uid SET DEFAULT nextval('public.jobs_uid_seq'::regclass);
 
 
 --
--- Name: league_migrations id; Type: DEFAULT; Schema: league_production; Owner: -
+-- Name: league_migrations id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY league_migrations ALTER COLUMN id SET DEFAULT nextval('league_migrations_id_seq'::regclass);
+ALTER TABLE ONLY public.league_migrations ALTER COLUMN id SET DEFAULT nextval('public.league_migrations_id_seq'::regclass);
 
 
 --
--- Name: league_migrations_lock index; Type: DEFAULT; Schema: league_production; Owner: -
+-- Name: league_migrations_lock index; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY league_migrations_lock ALTER COLUMN index SET DEFAULT nextval('league_migrations_lock_index_seq'::regclass);
+ALTER TABLE ONLY public.league_migrations_lock ALTER COLUMN index SET DEFAULT nextval('public.league_migrations_lock_index_seq'::regclass);
 
 
 --
--- Name: leagues uid; Type: DEFAULT; Schema: league_production; Owner: -
+-- Name: leagues uid; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY leagues ALTER COLUMN uid SET DEFAULT nextval('leagues_uid_seq'::regclass);
+ALTER TABLE ONLY public.leagues ALTER COLUMN uid SET DEFAULT nextval('public.leagues_uid_seq'::regclass);
 
 
 --
--- Name: matchups uid; Type: DEFAULT; Schema: league_production; Owner: -
+-- Name: matchups uid; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY matchups ALTER COLUMN uid SET DEFAULT nextval('matchups_uid_seq'::regclass);
+ALTER TABLE ONLY public.matchups ALTER COLUMN uid SET DEFAULT nextval('public.matchups_uid_seq'::regclass);
 
 
 --
--- Name: placed_wagers wager_id; Type: DEFAULT; Schema: league_production; Owner: -
+-- Name: placed_wagers wager_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY placed_wagers ALTER COLUMN wager_id SET DEFAULT nextval('placed_wagers_wager_id_seq'::regclass);
+ALTER TABLE ONLY public.placed_wagers ALTER COLUMN wager_id SET DEFAULT nextval('public.placed_wagers_wager_id_seq'::regclass);
 
 
 --
--- Name: player_changelog uid; Type: DEFAULT; Schema: league_production; Owner: -
+-- Name: player_changelog uid; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY player_changelog ALTER COLUMN uid SET DEFAULT nextval('player_changelog_uid_seq'::regclass);
+ALTER TABLE ONLY public.player_changelog ALTER COLUMN uid SET DEFAULT nextval('public.player_changelog_uid_seq'::regclass);
 
 
 --
--- Name: poaches uid; Type: DEFAULT; Schema: league_production; Owner: -
+-- Name: poaches uid; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY poaches ALTER COLUMN uid SET DEFAULT nextval('poaches_uid_seq'::regclass);
+ALTER TABLE ONLY public.poaches ALTER COLUMN uid SET DEFAULT nextval('public.poaches_uid_seq'::regclass);
 
 
 --
--- Name: props_index prop_id; Type: DEFAULT; Schema: league_production; Owner: -
+-- Name: props_index prop_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY props_index ALTER COLUMN prop_id SET DEFAULT nextval('props_index_prop_id_seq'::regclass);
+ALTER TABLE ONLY public.props_index ALTER COLUMN prop_id SET DEFAULT nextval('public.props_index_prop_id_seq'::regclass);
 
 
 --
--- Name: props_index_new prop_id; Type: DEFAULT; Schema: league_production; Owner: -
+-- Name: props_index_new prop_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY props_index_new ALTER COLUMN prop_id SET DEFAULT nextval('props_index_new_prop_id_seq'::regclass);
+ALTER TABLE ONLY public.props_index_new ALTER COLUMN prop_id SET DEFAULT nextval('public.props_index_new_prop_id_seq'::regclass);
 
 
 --
--- Name: rosters uid; Type: DEFAULT; Schema: league_production; Owner: -
+-- Name: rosters uid; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY rosters ALTER COLUMN uid SET DEFAULT nextval('rosters_uid_seq'::regclass);
+ALTER TABLE ONLY public.rosters ALTER COLUMN uid SET DEFAULT nextval('public.rosters_uid_seq'::regclass);
 
 
 --
--- Name: sources uid; Type: DEFAULT; Schema: league_production; Owner: -
+-- Name: sources uid; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY sources ALTER COLUMN uid SET DEFAULT nextval('sources_uid_seq'::regclass);
+ALTER TABLE ONLY public.sources ALTER COLUMN uid SET DEFAULT nextval('public.sources_uid_seq'::regclass);
 
 
 --
--- Name: teams uid; Type: DEFAULT; Schema: league_production; Owner: -
+-- Name: teams uid; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY teams ALTER COLUMN uid SET DEFAULT nextval('teams_uid_seq'::regclass);
+ALTER TABLE ONLY public.teams ALTER COLUMN uid SET DEFAULT nextval('public.teams_uid_seq'::regclass);
 
 
 --
--- Name: trades uid; Type: DEFAULT; Schema: league_production; Owner: -
+-- Name: trades uid; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY trades ALTER COLUMN uid SET DEFAULT nextval('trades_uid_seq'::regclass);
+ALTER TABLE ONLY public.trades ALTER COLUMN uid SET DEFAULT nextval('public.trades_uid_seq'::regclass);
 
 
 --
--- Name: transactions uid; Type: DEFAULT; Schema: league_production; Owner: -
+-- Name: transactions uid; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY transactions ALTER COLUMN uid SET DEFAULT nextval('transactions_uid_seq'::regclass);
+ALTER TABLE ONLY public.transactions ALTER COLUMN uid SET DEFAULT nextval('public.transactions_uid_seq'::regclass);
 
 
 --
--- Name: transition_bids uid; Type: DEFAULT; Schema: league_production; Owner: -
+-- Name: transition_bids uid; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY transition_bids ALTER COLUMN uid SET DEFAULT nextval('transition_bids_uid_seq'::regclass);
+ALTER TABLE ONLY public.transition_bids ALTER COLUMN uid SET DEFAULT nextval('public.transition_bids_uid_seq'::regclass);
 
 
 --
--- Name: user_table_views view_id; Type: DEFAULT; Schema: league_production; Owner: -
+-- Name: user_table_views view_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY user_table_views ALTER COLUMN view_id SET DEFAULT nextval('user_table_views_view_id_seq'::regclass);
+ALTER TABLE ONLY public.user_table_views ALTER COLUMN view_id SET DEFAULT nextval('public.user_table_views_view_id_seq'::regclass);
 
 
 --
--- Name: users id; Type: DEFAULT; Schema: league_production; Owner: -
+-- Name: users id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY users ALTER COLUMN id SET DEFAULT nextval('users_id_seq'::regclass);
+ALTER TABLE ONLY public.users ALTER COLUMN id SET DEFAULT nextval('public.users_id_seq'::regclass);
 
 
 --
--- Name: waivers uid; Type: DEFAULT; Schema: league_production; Owner: -
+-- Name: waivers uid; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY waivers ALTER COLUMN uid SET DEFAULT nextval('waivers_uid_seq'::regclass);
+ALTER TABLE ONLY public.waivers ALTER COLUMN uid SET DEFAULT nextval('public.waivers_uid_seq'::regclass);
 
 
 --
--- Name: draft idx_23184_PRIMARY; Type: CONSTRAINT; Schema: league_production; Owner: -
+-- Name: draft idx_24608_PRIMARY; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY draft
-    ADD CONSTRAINT "idx_23184_PRIMARY" PRIMARY KEY (uid);
+ALTER TABLE ONLY public.draft
+    ADD CONSTRAINT "idx_24608_PRIMARY" PRIMARY KEY (uid);
 
 
 --
--- Name: league_migrations idx_23228_PRIMARY; Type: CONSTRAINT; Schema: league_production; Owner: -
+-- Name: league_migrations idx_24652_PRIMARY; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY league_migrations
-    ADD CONSTRAINT "idx_23228_PRIMARY" PRIMARY KEY (id);
+ALTER TABLE ONLY public.league_migrations
+    ADD CONSTRAINT "idx_24652_PRIMARY" PRIMARY KEY (id);
 
 
 --
--- Name: league_migrations_lock idx_23234_PRIMARY; Type: CONSTRAINT; Schema: league_production; Owner: -
+-- Name: league_migrations_lock idx_24658_PRIMARY; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY league_migrations_lock
-    ADD CONSTRAINT "idx_23234_PRIMARY" PRIMARY KEY (index);
+ALTER TABLE ONLY public.league_migrations_lock
+    ADD CONSTRAINT "idx_24658_PRIMARY" PRIMARY KEY (index);
 
 
 --
--- Name: matchups idx_23275_PRIMARY; Type: CONSTRAINT; Schema: league_production; Owner: -
+-- Name: matchups idx_24699_PRIMARY; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY matchups
-    ADD CONSTRAINT "idx_23275_PRIMARY" PRIMARY KEY (uid);
+ALTER TABLE ONLY public.matchups
+    ADD CONSTRAINT "idx_24699_PRIMARY" PRIMARY KEY (uid);
 
 
 --
--- Name: placed_wagers idx_23361_PRIMARY; Type: CONSTRAINT; Schema: league_production; Owner: -
+-- Name: placed_wagers idx_24785_PRIMARY; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY placed_wagers
-    ADD CONSTRAINT "idx_23361_PRIMARY" PRIMARY KEY (wager_id);
+ALTER TABLE ONLY public.placed_wagers
+    ADD CONSTRAINT "idx_24785_PRIMARY" PRIMARY KEY (wager_id);
 
 
 --
--- Name: player_changelog idx_23384_PRIMARY; Type: CONSTRAINT; Schema: league_production; Owner: -
+-- Name: player_changelog idx_24808_PRIMARY; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY player_changelog
-    ADD CONSTRAINT "idx_23384_PRIMARY" PRIMARY KEY (uid);
+ALTER TABLE ONLY public.player_changelog
+    ADD CONSTRAINT "idx_24808_PRIMARY" PRIMARY KEY (uid);
 
 
 --
--- Name: poaches idx_23493_PRIMARY; Type: CONSTRAINT; Schema: league_production; Owner: -
+-- Name: poaches idx_24917_PRIMARY; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY poaches
-    ADD CONSTRAINT "idx_23493_PRIMARY" PRIMARY KEY (uid);
+ALTER TABLE ONLY public.poaches
+    ADD CONSTRAINT "idx_24917_PRIMARY" PRIMARY KEY (uid);
 
 
 --
--- Name: prop_pairings idx_23543_PRIMARY; Type: CONSTRAINT; Schema: league_production; Owner: -
+-- Name: prop_pairings idx_24967_PRIMARY; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY prop_pairings
-    ADD CONSTRAINT "idx_23543_PRIMARY" PRIMARY KEY (pairing_id);
+ALTER TABLE ONLY public.prop_pairings
+    ADD CONSTRAINT "idx_24967_PRIMARY" PRIMARY KEY (pairing_id);
 
 
 --
--- Name: props_index idx_23550_PRIMARY; Type: CONSTRAINT; Schema: league_production; Owner: -
+-- Name: props_index idx_24974_PRIMARY; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY props_index
-    ADD CONSTRAINT "idx_23550_PRIMARY" PRIMARY KEY (prop_id);
+ALTER TABLE ONLY public.props_index
+    ADD CONSTRAINT "idx_24974_PRIMARY" PRIMARY KEY (prop_id);
 
 
 --
--- Name: props_index_new idx_23557_PRIMARY; Type: CONSTRAINT; Schema: league_production; Owner: -
+-- Name: props_index_new idx_24981_PRIMARY; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY props_index_new
-    ADD CONSTRAINT "idx_23557_PRIMARY" PRIMARY KEY (prop_id);
+ALTER TABLE ONLY public.props_index_new
+    ADD CONSTRAINT "idx_24981_PRIMARY" PRIMARY KEY (prop_id);
 
 
 --
--- Name: rosters idx_23571_PRIMARY; Type: CONSTRAINT; Schema: league_production; Owner: -
+-- Name: rosters idx_24995_PRIMARY; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY rosters
-    ADD CONSTRAINT "idx_23571_PRIMARY" PRIMARY KEY (uid);
+ALTER TABLE ONLY public.rosters
+    ADD CONSTRAINT "idx_24995_PRIMARY" PRIMARY KEY (uid);
 
 
 --
--- Name: sources idx_23599_PRIMARY; Type: CONSTRAINT; Schema: league_production; Owner: -
+-- Name: sources idx_25023_PRIMARY; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY sources
-    ADD CONSTRAINT "idx_23599_PRIMARY" PRIMARY KEY (uid);
+ALTER TABLE ONLY public.sources
+    ADD CONSTRAINT "idx_25023_PRIMARY" PRIMARY KEY (uid);
 
 
 --
--- Name: transition_bids idx_23684_PRIMARY; Type: CONSTRAINT; Schema: league_production; Owner: -
+-- Name: transition_bids idx_25108_PRIMARY; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY transition_bids
-    ADD CONSTRAINT "idx_23684_PRIMARY" PRIMARY KEY (uid);
+ALTER TABLE ONLY public.transition_bids
+    ADD CONSTRAINT "idx_25108_PRIMARY" PRIMARY KEY (uid);
 
 
 --
--- Name: user_table_views idx_23694_PRIMARY; Type: CONSTRAINT; Schema: league_production; Owner: -
+-- Name: user_table_views idx_25118_PRIMARY; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY user_table_views
-    ADD CONSTRAINT "idx_23694_PRIMARY" PRIMARY KEY (view_id);
+ALTER TABLE ONLY public.user_table_views
+    ADD CONSTRAINT "idx_25118_PRIMARY" PRIMARY KEY (view_id);
 
 
 --
--- Name: users idx_23703_PRIMARY; Type: CONSTRAINT; Schema: league_production; Owner: -
+-- Name: users idx_25127_PRIMARY; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY users
-    ADD CONSTRAINT "idx_23703_PRIMARY" PRIMARY KEY (id);
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT "idx_25127_PRIMARY" PRIMARY KEY (id);
 
 
 --
--- Name: waivers idx_23727_PRIMARY; Type: CONSTRAINT; Schema: league_production; Owner: -
+-- Name: waivers idx_25151_PRIMARY; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY waivers
-    ADD CONSTRAINT "idx_23727_PRIMARY" PRIMARY KEY (uid);
+ALTER TABLE ONLY public.waivers
+    ADD CONSTRAINT "idx_25151_PRIMARY" PRIMARY KEY (uid);
 
 
 --
--- Name: idx_23184_lid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24608_lid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23184_lid ON draft USING btree (lid);
+CREATE INDEX idx_24608_lid ON public.draft USING btree (lid);
 
 
 --
--- Name: idx_23184_pick; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24608_pick; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23184_pick ON draft USING btree (round, pick, lid, year);
+CREATE UNIQUE INDEX idx_24608_pick ON public.draft USING btree (round, pick, lid, year);
 
 
 --
--- Name: idx_23184_tid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24608_tid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23184_tid ON draft USING btree (tid);
+CREATE INDEX idx_24608_tid ON public.draft USING btree (tid);
 
 
 --
--- Name: idx_23189_team; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24613_team; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23189_team ON footballoutsiders USING btree (team, week, year);
+CREATE UNIQUE INDEX idx_24613_team ON public.footballoutsiders USING btree (team, week, year);
 
 
 --
--- Name: idx_23199_player_value; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24623_player_value; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23199_player_value ON keeptradecut_rankings USING btree (pid, d, qb, type);
+CREATE UNIQUE INDEX idx_24623_player_value ON public.keeptradecut_rankings USING btree (pid, d, qb, type);
 
 
 --
--- Name: idx_23202_baseline; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24626_baseline; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23202_baseline ON league_baselines USING btree (lid, week, pos, type);
+CREATE UNIQUE INDEX idx_24626_baseline ON public.league_baselines USING btree (lid, week, pos, type);
 
 
 --
--- Name: idx_23205_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24629_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23205_pid ON league_cutlist USING btree (pid);
+CREATE INDEX idx_24629_pid ON public.league_cutlist USING btree (pid);
 
 
 --
--- Name: idx_23205_teamid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24629_teamid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23205_teamid ON league_cutlist USING btree (tid);
+CREATE INDEX idx_24629_teamid ON public.league_cutlist USING btree (tid);
 
 
 --
--- Name: idx_23205_tid_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24629_tid_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23205_tid_pid ON league_cutlist USING btree (tid, pid);
+CREATE UNIQUE INDEX idx_24629_tid_pid ON public.league_cutlist USING btree (tid, pid);
 
 
 --
--- Name: idx_23208_pick; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24632_pick; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23208_pick ON league_format_draft_pick_value USING btree (rank, league_format_hash);
+CREATE UNIQUE INDEX idx_24632_pick ON public.league_format_draft_pick_value USING btree (rank, league_format_hash);
 
 
 --
--- Name: idx_23211_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24635_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23211_pid ON league_format_player_careerlogs USING btree (pid, league_format_hash);
+CREATE UNIQUE INDEX idx_24635_pid ON public.league_format_player_careerlogs USING btree (pid, league_format_hash);
 
 
 --
--- Name: idx_23214_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24638_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23214_pid ON league_format_player_gamelogs USING btree (pid, esbid, league_format_hash);
+CREATE UNIQUE INDEX idx_24638_pid ON public.league_format_player_gamelogs USING btree (pid, esbid, league_format_hash);
 
 
 --
--- Name: idx_23217_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24641_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23217_pid ON league_format_player_projection_values USING btree (pid);
+CREATE INDEX idx_24641_pid ON public.league_format_player_projection_values USING btree (pid);
 
 
 --
--- Name: idx_23217_player_value; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24641_player_value; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23217_player_value ON league_format_player_projection_values USING btree (pid, league_format_hash, week, year);
+CREATE UNIQUE INDEX idx_24641_player_value ON public.league_format_player_projection_values USING btree (pid, league_format_hash, week, year);
 
 
 --
--- Name: idx_23220_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24644_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23220_pid ON league_format_player_seasonlogs USING btree (pid, year, league_format_hash);
+CREATE UNIQUE INDEX idx_24644_pid ON public.league_format_player_seasonlogs USING btree (pid, year, league_format_hash);
 
 
 --
--- Name: idx_23223_league_format_hash; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24647_league_format_hash; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23223_league_format_hash ON league_formats USING btree (league_format_hash);
+CREATE UNIQUE INDEX idx_24647_league_format_hash ON public.league_formats USING btree (league_format_hash);
 
 
 --
--- Name: idx_23238_league_stat; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24662_league_stat; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23238_league_stat ON league_nfl_team_seasonlogs USING btree (lid, stat_key, year, tm);
+CREATE UNIQUE INDEX idx_24662_league_stat ON public.league_nfl_team_seasonlogs USING btree (lid, stat_key, year, tm);
 
 
 --
--- Name: idx_23241_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24665_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23241_pid ON league_player_projection_values USING btree (pid);
+CREATE INDEX idx_24665_pid ON public.league_player_projection_values USING btree (pid);
 
 
 --
--- Name: idx_23241_player_value; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24665_player_value; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23241_player_value ON league_player_projection_values USING btree (pid, lid, week, year);
+CREATE UNIQUE INDEX idx_24665_player_value ON public.league_player_projection_values USING btree (pid, lid, week, year);
 
 
 --
--- Name: idx_23244_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24668_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23244_pid ON league_player_seasonlogs USING btree (pid, year, lid);
+CREATE UNIQUE INDEX idx_24668_pid ON public.league_player_seasonlogs USING btree (pid, year, lid);
 
 
 --
--- Name: idx_23247_scoring_format_hash; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24671_scoring_format_hash; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23247_scoring_format_hash ON league_scoring_formats USING btree (scoring_format_hash);
+CREATE UNIQUE INDEX idx_24671_scoring_format_hash ON public.league_scoring_formats USING btree (scoring_format_hash);
 
 
 --
--- Name: idx_23250_league_team; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24674_league_team; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23250_league_team ON league_team_daily_values USING btree (lid, tid, date);
+CREATE UNIQUE INDEX idx_24674_league_team ON public.league_team_daily_values USING btree (lid, tid, date);
 
 
 --
--- Name: idx_23253_team_forecast_day; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24677_team_forecast_day; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23253_team_forecast_day ON league_team_forecast USING btree (tid, year, week, day);
+CREATE UNIQUE INDEX idx_24677_team_forecast_day ON public.league_team_forecast USING btree (tid, year, week, day);
 
 
 --
--- Name: idx_23256_contribution; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24680_contribution; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23256_contribution ON league_team_lineup_contribution_weeks USING btree (lid, pid, year, week);
+CREATE UNIQUE INDEX idx_24680_contribution ON public.league_team_lineup_contribution_weeks USING btree (lid, pid, year, week);
 
 
 --
--- Name: idx_23259_contribution; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24683_contribution; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23259_contribution ON league_team_lineup_contributions USING btree (lid, pid, year);
+CREATE UNIQUE INDEX idx_24683_contribution ON public.league_team_lineup_contributions USING btree (lid, pid, year);
 
 
 --
--- Name: idx_23262_starter; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24686_starter; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23262_starter ON league_team_lineup_starters USING btree (lid, pid, year, week);
+CREATE UNIQUE INDEX idx_24686_starter ON public.league_team_lineup_starters USING btree (lid, pid, year, week);
 
 
 --
--- Name: idx_23265_lineup; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24689_lineup; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23265_lineup ON league_team_lineups USING btree (tid, year, week);
+CREATE UNIQUE INDEX idx_24689_lineup ON public.league_team_lineups USING btree (tid, year, week);
 
 
 --
--- Name: idx_23269_commishid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24693_commishid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23269_commishid ON leagues USING btree (commishid);
+CREATE INDEX idx_24693_commishid ON public.leagues USING btree (commishid);
 
 
 --
--- Name: idx_23269_uid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24693_uid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23269_uid ON leagues USING btree (uid);
+CREATE UNIQUE INDEX idx_24693_uid ON public.leagues USING btree (uid);
 
 
 --
--- Name: idx_23275_aid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24699_aid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23275_aid ON matchups USING btree (aid, hid, year, week);
+CREATE UNIQUE INDEX idx_24699_aid ON public.matchups USING btree (aid, hid, year, week);
 
 
 --
--- Name: idx_23275_lid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24699_lid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23275_lid ON matchups USING btree (lid);
+CREATE INDEX idx_24699_lid ON public.matchups USING btree (lid);
 
 
 --
--- Name: idx_23283_esbid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24707_esbid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23283_esbid ON nfl_games USING btree (esbid);
+CREATE UNIQUE INDEX idx_24707_esbid ON public.nfl_games USING btree (esbid);
 
 
 --
--- Name: idx_23283_game; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24707_game; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23283_game ON nfl_games USING btree (v, h, week, year, seas_type);
+CREATE UNIQUE INDEX idx_24707_game ON public.nfl_games USING btree (v, h, week, year, seas_type);
 
 
 --
--- Name: idx_23295_playId; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24719_playId; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "idx_23295_playId" ON nfl_play_stats USING btree ("playId");
+CREATE INDEX "idx_24719_playId" ON public.nfl_play_stats USING btree ("playId");
 
 
 --
--- Name: idx_23295_play_stat; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24719_play_stat; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23295_play_stat ON nfl_play_stats USING btree (esbid, "playId", "statId", "playerName");
+CREATE UNIQUE INDEX idx_24719_play_stat ON public.nfl_play_stats USING btree (esbid, "playId", "statId", "playerName");
 
 
 --
--- Name: idx_23298_playId; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24722_playId; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "idx_23298_playId" ON nfl_play_stats_current_week USING btree ("playId");
+CREATE INDEX "idx_24722_playId" ON public.nfl_play_stats_current_week USING btree ("playId");
 
 
 --
--- Name: idx_23298_play_stat; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24722_play_stat; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23298_play_stat ON nfl_play_stats_current_week USING btree (esbid, "playId", "statId", "playerName");
+CREATE UNIQUE INDEX idx_24722_play_stat ON public.nfl_play_stats_current_week USING btree (esbid, "playId", "statId", "playerName");
 
 
 --
--- Name: idx_23301_bc_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24725_bc_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23301_bc_pid ON nfl_plays USING btree (bc_pid);
+CREATE INDEX idx_24725_bc_pid ON public.nfl_plays USING btree (bc_pid);
 
 
 --
--- Name: idx_23301_esbid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24725_esbid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23301_esbid ON nfl_plays USING btree (esbid);
+CREATE INDEX idx_24725_esbid ON public.nfl_plays USING btree (esbid);
 
 
 --
--- Name: idx_23301_gamePlay; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24725_gamePlay; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "idx_23301_gamePlay" ON nfl_plays USING btree (esbid, "playId");
+CREATE UNIQUE INDEX "idx_24725_gamePlay" ON public.nfl_plays USING btree (esbid, "playId");
 
 
 --
--- Name: idx_23301_idx_nfl_plays_target; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24725_idx_nfl_plays_target; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23301_idx_nfl_plays_target ON nfl_plays USING btree (play_type, seas_type, trg_pid, off, esbid);
+CREATE INDEX idx_24725_idx_nfl_plays_target ON public.nfl_plays USING btree (play_type, seas_type, trg_pid, off, esbid);
 
 
 --
--- Name: idx_23301_idx_nfl_plays_year_esbid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24725_idx_nfl_plays_year_esbid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23301_idx_nfl_plays_year_esbid ON nfl_plays USING btree (year, esbid);
+CREATE INDEX idx_24725_idx_nfl_plays_year_esbid ON public.nfl_plays USING btree (year, esbid);
 
 
 --
--- Name: idx_23301_idx_off; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24725_idx_off; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23301_idx_off ON nfl_plays USING btree (off);
+CREATE INDEX idx_24725_idx_off ON public.nfl_plays USING btree (off);
 
 
 --
--- Name: idx_23301_idx_play_type; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24725_idx_play_type; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23301_idx_play_type ON nfl_plays USING btree (play_type);
+CREATE INDEX idx_24725_idx_play_type ON public.nfl_plays USING btree (play_type);
 
 
 --
--- Name: idx_23301_idx_seas_type; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24725_idx_seas_type; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23301_idx_seas_type ON nfl_plays USING btree (seas_type);
+CREATE INDEX idx_24725_idx_seas_type ON public.nfl_plays USING btree (seas_type);
 
 
 --
--- Name: idx_23301_playId; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24725_playId; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "idx_23301_playId" ON nfl_plays USING btree ("playId");
+CREATE INDEX "idx_24725_playId" ON public.nfl_plays USING btree ("playId");
 
 
 --
--- Name: idx_23301_psr_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24725_psr_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23301_psr_pid ON nfl_plays USING btree (psr_pid);
+CREATE INDEX idx_24725_psr_pid ON public.nfl_plays USING btree (psr_pid);
 
 
 --
--- Name: idx_23301_trg_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24725_trg_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23301_trg_pid ON nfl_plays USING btree (trg_pid);
+CREATE INDEX idx_24725_trg_pid ON public.nfl_plays USING btree (trg_pid);
 
 
 --
--- Name: idx_23306_esbid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24730_esbid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23306_esbid ON nfl_plays_current_week USING btree (esbid);
+CREATE INDEX idx_24730_esbid ON public.nfl_plays_current_week USING btree (esbid);
 
 
 --
--- Name: idx_23306_gamePlay; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24730_gamePlay; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "idx_23306_gamePlay" ON nfl_plays_current_week USING btree (esbid, "playId");
+CREATE UNIQUE INDEX "idx_24730_gamePlay" ON public.nfl_plays_current_week USING btree (esbid, "playId");
 
 
 --
--- Name: idx_23306_playId; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24730_playId; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "idx_23306_playId" ON nfl_plays_current_week USING btree ("playId");
+CREATE INDEX "idx_24730_playId" ON public.nfl_plays_current_week USING btree ("playId");
 
 
 --
--- Name: idx_23311_playId; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24735_playId; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "idx_23311_playId" ON nfl_snaps USING btree ("playId");
+CREATE INDEX "idx_24735_playId" ON public.nfl_snaps USING btree ("playId");
 
 
 --
--- Name: idx_23311_snap; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24735_snap; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23311_snap ON nfl_snaps USING btree (esbid, "playId", "nflId");
+CREATE UNIQUE INDEX idx_24735_snap ON public.nfl_snaps USING btree (esbid, "playId", "nflId");
 
 
 --
--- Name: idx_23314_playId; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24738_playId; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX "idx_23314_playId" ON nfl_snaps_current_week USING btree ("playId");
+CREATE INDEX "idx_24738_playId" ON public.nfl_snaps_current_week USING btree ("playId");
 
 
 --
--- Name: idx_23314_snap; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24738_snap; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23314_snap ON nfl_snaps_current_week USING btree ("playId", "nflId", esbid);
+CREATE UNIQUE INDEX idx_24738_snap ON public.nfl_snaps_current_week USING btree ("playId", "nflId", esbid);
 
 
 --
--- Name: idx_23317_stat; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24741_stat; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23317_stat ON nfl_team_seasonlogs USING btree (stat_key, year, tm);
+CREATE UNIQUE INDEX idx_24741_stat ON public.nfl_team_seasonlogs USING btree (stat_key, year, tm);
 
 
 --
--- Name: idx_23357_percentile_key; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24781_percentile_key; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23357_percentile_key ON percentiles USING btree (percentile_key, field);
+CREATE UNIQUE INDEX idx_24781_percentile_key ON public.percentiles USING btree (percentile_key, field);
 
 
 --
--- Name: idx_23361_placed_at; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24785_placed_at; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23361_placed_at ON placed_wagers USING btree (placed_at);
+CREATE INDEX idx_24785_placed_at ON public.placed_wagers USING btree (placed_at);
 
 
 --
--- Name: idx_23361_userid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24785_userid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23361_userid ON placed_wagers USING btree (userid);
+CREATE INDEX idx_24785_userid ON public.placed_wagers USING btree (userid);
 
 
 --
--- Name: idx_23361_wager; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24785_wager; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23361_wager ON placed_wagers USING btree (book_wager_id);
+CREATE UNIQUE INDEX idx_24785_wager ON public.placed_wagers USING btree (book_wager_id);
 
 
 --
--- Name: idx_23369_play; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24793_play; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23369_play ON play_changelog USING btree (esbid, "playId", prop, "timestamp");
+CREATE UNIQUE INDEX idx_24793_play ON public.play_changelog USING btree (esbid, "playId", prop, "timestamp");
 
 
 --
--- Name: idx_23374_esbid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24798_esbid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23374_esbid ON player USING btree (esbid);
+CREATE UNIQUE INDEX idx_24798_esbid ON public.player USING btree (esbid);
 
 
 --
--- Name: idx_23374_espn_id; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24798_espn_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23374_espn_id ON player USING btree (espn_id);
+CREATE UNIQUE INDEX idx_24798_espn_id ON public.player USING btree (espn_id);
 
 
 --
--- Name: idx_23374_fantasy_data_id; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24798_fantasy_data_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23374_fantasy_data_id ON player USING btree (fantasy_data_id);
+CREATE UNIQUE INDEX idx_24798_fantasy_data_id ON public.player USING btree (fantasy_data_id);
 
 
 --
--- Name: idx_23374_fname; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24798_fname; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23374_fname ON player USING btree (fname);
+CREATE INDEX idx_24798_fname ON public.player USING btree (fname);
 
 
 --
--- Name: idx_23374_gsisItId; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24798_gsisItId; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "idx_23374_gsisItId" ON player USING btree ("gsisItId");
+CREATE UNIQUE INDEX "idx_24798_gsisItId" ON public.player USING btree ("gsisItId");
 
 
 --
--- Name: idx_23374_gsisid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24798_gsisid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23374_gsisid ON player USING btree (gsisid);
+CREATE UNIQUE INDEX idx_24798_gsisid ON public.player USING btree (gsisid);
 
 
 --
--- Name: idx_23374_gsispid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24798_gsispid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23374_gsispid ON player USING btree (gsispid);
+CREATE UNIQUE INDEX idx_24798_gsispid ON public.player USING btree (gsispid);
 
 
 --
--- Name: idx_23374_keeptradecut_id; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24798_keeptradecut_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23374_keeptradecut_id ON player USING btree (keeptradecut_id);
+CREATE UNIQUE INDEX idx_24798_keeptradecut_id ON public.player USING btree (keeptradecut_id);
 
 
 --
--- Name: idx_23374_lname; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24798_lname; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23374_lname ON player USING btree (lname);
+CREATE INDEX idx_24798_lname ON public.player USING btree (lname);
 
 
 --
--- Name: idx_23374_name; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24798_name; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23374_name ON player USING btree (fname, lname);
+CREATE INDEX idx_24798_name ON public.player USING btree (fname, lname);
 
 
 --
--- Name: idx_23374_pfr_id; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24798_pfr_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23374_pfr_id ON player USING btree (pfr_id);
+CREATE UNIQUE INDEX idx_24798_pfr_id ON public.player USING btree (pfr_id);
 
 
 --
--- Name: idx_23374_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24798_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23374_pid ON player USING btree (pid);
+CREATE UNIQUE INDEX idx_24798_pid ON public.player USING btree (pid);
 
 
 --
--- Name: idx_23374_rotowire_id; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24798_rotowire_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23374_rotowire_id ON player USING btree (rotowire_id);
+CREATE UNIQUE INDEX idx_24798_rotowire_id ON public.player USING btree (rotowire_id);
 
 
 --
--- Name: idx_23374_rotoworld_id; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24798_rotoworld_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23374_rotoworld_id ON player USING btree (rotoworld_id);
+CREATE UNIQUE INDEX idx_24798_rotoworld_id ON public.player USING btree (rotoworld_id);
 
 
 --
--- Name: idx_23374_sleeper_id; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24798_sleeper_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23374_sleeper_id ON player USING btree (sleeper_id);
+CREATE UNIQUE INDEX idx_24798_sleeper_id ON public.player USING btree (sleeper_id);
 
 
 --
--- Name: idx_23374_sportradar_id; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24798_sportradar_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23374_sportradar_id ON player USING btree (sportradar_id);
+CREATE UNIQUE INDEX idx_24798_sportradar_id ON public.player USING btree (sportradar_id);
 
 
 --
--- Name: idx_23374_yahoo_id; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24798_yahoo_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23374_yahoo_id ON player USING btree (yahoo_id);
+CREATE UNIQUE INDEX idx_24798_yahoo_id ON public.player USING btree (yahoo_id);
 
 
 --
--- Name: idx_23380_alias; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24804_alias; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23380_alias ON player_aliases USING btree (pid, formatted_alias);
+CREATE UNIQUE INDEX idx_24804_alias ON public.player_aliases USING btree (pid, formatted_alias);
 
 
 --
--- Name: idx_23390_idx_player_gamelogs_esbid_tm_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24814_idx_player_gamelogs_esbid_tm_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23390_idx_player_gamelogs_esbid_tm_pid ON player_gamelogs USING btree (esbid, tm, pid);
+CREATE INDEX idx_24814_idx_player_gamelogs_esbid_tm_pid ON public.player_gamelogs USING btree (esbid, tm, pid);
 
 
 --
--- Name: idx_23390_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24814_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23390_pid ON player_gamelogs USING btree (pid, esbid);
+CREATE UNIQUE INDEX idx_24814_pid ON public.player_gamelogs USING btree (pid, esbid);
 
 
 --
--- Name: idx_23431_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24855_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23431_pid ON player_seasonlogs USING btree (pid, year, seas_type);
+CREATE UNIQUE INDEX idx_24855_pid ON public.player_seasonlogs USING btree (pid, year, seas_type);
 
 
 --
--- Name: idx_23478_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24902_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23478_pid ON player_snaps_game USING btree (pid, esbid);
+CREATE UNIQUE INDEX idx_24902_pid ON public.player_snaps_game USING btree (pid, esbid);
 
 
 --
--- Name: idx_23481_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24905_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23481_pid ON players_status USING btree (pid);
+CREATE INDEX idx_24905_pid ON public.players_status USING btree (pid);
 
 
 --
--- Name: idx_23481_status; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24905_status; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23481_status ON players_status USING btree (pid, "timestamp");
+CREATE UNIQUE INDEX idx_24905_status ON public.players_status USING btree (pid, "timestamp");
 
 
 --
--- Name: idx_23486_lid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24910_lid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23486_lid ON playoffs USING btree (lid);
+CREATE INDEX idx_24910_lid ON public.playoffs USING btree (lid);
 
 
 --
--- Name: idx_23486_tid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24910_tid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23486_tid ON playoffs USING btree (tid, uid, year);
+CREATE UNIQUE INDEX idx_24910_tid ON public.playoffs USING btree (tid, uid, year);
 
 
 --
--- Name: idx_23489_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24913_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23489_pid ON poach_releases USING btree (poachid, pid);
+CREATE UNIQUE INDEX idx_24913_pid ON public.poach_releases USING btree (poachid, pid);
 
 
 --
--- Name: idx_23489_poachid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24913_poachid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23489_poachid ON poach_releases USING btree (poachid);
+CREATE INDEX idx_24913_poachid ON public.poach_releases USING btree (poachid);
 
 
 --
--- Name: idx_23493_lid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24917_lid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23493_lid ON poaches USING btree (lid);
+CREATE INDEX idx_24917_lid ON public.poaches USING btree (lid);
 
 
 --
--- Name: idx_23499_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24923_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23499_pid ON practice USING btree (pid, week, year);
+CREATE UNIQUE INDEX idx_24923_pid ON public.practice USING btree (pid, week, year);
 
 
 --
--- Name: idx_23502_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24926_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23502_pid ON projections USING btree (pid);
+CREATE INDEX idx_24926_pid ON public.projections USING btree (pid);
 
 
 --
--- Name: idx_23502_projection; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24926_projection; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23502_projection ON projections USING btree (sourceid, pid, userid, "timestamp", week, year);
+CREATE UNIQUE INDEX idx_24926_projection ON public.projections USING btree (sourceid, pid, userid, "timestamp", week, year);
 
 
 --
--- Name: idx_23508_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24932_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23508_pid ON projections_archive USING btree (pid);
+CREATE INDEX idx_24932_pid ON public.projections_archive USING btree (pid);
 
 
 --
--- Name: idx_23508_projection; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24932_projection; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23508_projection ON projections_archive USING btree (sourceid, pid, userid, week, year, "timestamp");
+CREATE UNIQUE INDEX idx_24932_projection ON public.projections_archive USING btree (sourceid, pid, userid, week, year, "timestamp");
 
 
 --
--- Name: idx_23514_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24938_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23514_pid ON projections_index USING btree (pid);
+CREATE INDEX idx_24938_pid ON public.projections_index USING btree (pid);
 
 
 --
--- Name: idx_23514_projection; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24938_projection; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23514_projection ON projections_index USING btree (sourceid, pid, userid, week, year);
+CREATE UNIQUE INDEX idx_24938_projection ON public.projections_index USING btree (sourceid, pid, userid, week, year);
 
 
 --
--- Name: idx_23520_market_selection; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24944_market_selection; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23520_market_selection ON prop_market_selections_history USING btree (source_id, source_market_id, source_selection_id, "timestamp");
+CREATE UNIQUE INDEX idx_24944_market_selection ON public.prop_market_selections_history USING btree (source_id, source_market_id, source_selection_id, "timestamp");
 
 
 --
--- Name: idx_23525_market; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24949_market; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23525_market ON prop_market_selections_index USING btree (source_id, source_market_id, source_selection_id, time_type);
+CREATE UNIQUE INDEX idx_24949_market ON public.prop_market_selections_index USING btree (source_id, source_market_id, source_selection_id, time_type);
 
 
 --
--- Name: idx_23530_market; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24954_market; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23530_market ON prop_markets_history USING btree (source_id, source_market_id, "timestamp");
+CREATE UNIQUE INDEX idx_24954_market ON public.prop_markets_history USING btree (source_id, source_market_id, "timestamp");
 
 
 --
--- Name: idx_23535_market; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24959_market; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23535_market ON prop_markets_index USING btree (source_id, source_market_id, time_type);
+CREATE UNIQUE INDEX idx_24959_market ON public.prop_markets_index USING btree (source_id, source_market_id, time_type);
 
 
 --
--- Name: idx_23540_pairing_prop; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24964_pairing_prop; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23540_pairing_prop ON prop_pairing_props USING btree (pairing_id, prop_id);
+CREATE UNIQUE INDEX idx_24964_pairing_prop ON public.prop_pairing_props USING btree (pairing_id, prop_id);
 
 
 --
--- Name: idx_23543_highest_payout; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24967_highest_payout; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23543_highest_payout ON prop_pairings USING btree (highest_payout);
+CREATE INDEX idx_24967_highest_payout ON public.prop_pairings USING btree (highest_payout);
 
 
 --
--- Name: idx_23543_hist_edge_soft; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24967_hist_edge_soft; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23543_hist_edge_soft ON prop_pairings USING btree (hist_edge_soft);
+CREATE INDEX idx_24967_hist_edge_soft ON public.prop_pairings USING btree (hist_edge_soft);
 
 
 --
--- Name: idx_23543_hist_rate_soft; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24967_hist_rate_soft; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23543_hist_rate_soft ON prop_pairings USING btree (hist_rate_soft);
+CREATE INDEX idx_24967_hist_rate_soft ON public.prop_pairings USING btree (hist_rate_soft);
 
 
 --
--- Name: idx_23543_joint_hist_rate; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24967_joint_hist_rate; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23543_joint_hist_rate ON prop_pairings USING btree (joint_hist_rate);
+CREATE INDEX idx_24967_joint_hist_rate ON public.prop_pairings USING btree (joint_hist_rate);
 
 
 --
--- Name: idx_23543_lowest_payout; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24967_lowest_payout; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23543_lowest_payout ON prop_pairings USING btree (lowest_payout);
+CREATE INDEX idx_24967_lowest_payout ON public.prop_pairings USING btree (lowest_payout);
 
 
 --
--- Name: idx_23543_market_prob; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24967_market_prob; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23543_market_prob ON prop_pairings USING btree (market_prob);
+CREATE INDEX idx_24967_market_prob ON public.prop_pairings USING btree (market_prob);
 
 
 --
--- Name: idx_23543_opp_allow_rate; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24967_opp_allow_rate; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23543_opp_allow_rate ON prop_pairings USING btree (opp_allow_rate);
+CREATE INDEX idx_24967_opp_allow_rate ON public.prop_pairings USING btree (opp_allow_rate);
 
 
 --
--- Name: idx_23543_risk_total; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24967_risk_total; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23543_risk_total ON prop_pairings USING btree (risk_total);
+CREATE INDEX idx_24967_risk_total ON public.prop_pairings USING btree (risk_total);
 
 
 --
--- Name: idx_23543_size; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24967_size; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23543_size ON prop_pairings USING btree (size);
+CREATE INDEX idx_24967_size ON public.prop_pairings USING btree (size);
 
 
 --
--- Name: idx_23543_source_id; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24967_source_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23543_source_id ON prop_pairings USING btree (source_id);
+CREATE INDEX idx_24967_source_id ON public.prop_pairings USING btree (source_id);
 
 
 --
--- Name: idx_23543_team; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24967_team; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23543_team ON prop_pairings USING btree (team);
+CREATE INDEX idx_24967_team ON public.prop_pairings USING btree (team);
 
 
 --
--- Name: idx_23543_total_games; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24967_total_games; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23543_total_games ON prop_pairings USING btree (total_games);
+CREATE INDEX idx_24967_total_games ON public.prop_pairings USING btree (total_games);
 
 
 --
--- Name: idx_23543_week; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24967_week; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23543_week ON prop_pairings USING btree (week);
+CREATE INDEX idx_24967_week ON public.prop_pairings USING btree (week);
 
 
 --
--- Name: idx_23546_prop; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24970_prop; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23546_prop ON props USING btree (sourceid, id, pid, week, year, ln, "timestamp");
+CREATE UNIQUE INDEX idx_24970_prop ON public.props USING btree (sourceid, id, pid, week, year, ln, "timestamp");
 
 
 --
--- Name: idx_23550_hits_soft; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24974_hits_soft; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23550_hits_soft ON props_index USING btree (hits_soft);
+CREATE INDEX idx_24974_hits_soft ON public.props_index USING btree (hits_soft);
 
 
 --
--- Name: idx_23550_prop; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24974_prop; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23550_prop ON props_index USING btree (source_id, pid, week, year, prop_type, ln, time_type);
+CREATE UNIQUE INDEX idx_24974_prop ON public.props_index USING btree (source_id, pid, week, year, prop_type, ln, time_type);
 
 
 --
--- Name: idx_23557_hits_soft; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24981_hits_soft; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23557_hits_soft ON props_index_new USING btree (hits_soft);
+CREATE INDEX idx_24981_hits_soft ON public.props_index_new USING btree (hits_soft);
 
 
 --
--- Name: idx_23557_prop; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24981_prop; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23557_prop ON props_index_new USING btree (sourceid, pid, esbid, prop_type, ln, time_type);
+CREATE UNIQUE INDEX idx_24981_prop ON public.props_index_new USING btree (sourceid, pid, esbid, prop_type, ln, time_type);
 
 
 --
--- Name: idx_23563_ranking; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24987_ranking; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23563_ranking ON rankings USING btree (pid, sourceid, type, adp, ppr, sf, dynasty, rookie, "timestamp", week, year);
+CREATE UNIQUE INDEX idx_24987_ranking ON public.rankings USING btree (pid, sourceid, type, adp, ppr, sf, dynasty, rookie, "timestamp", week, year);
 
 
 --
--- Name: idx_23566_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24990_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23566_pid ON ros_projections USING btree (pid);
+CREATE INDEX idx_24990_pid ON public.ros_projections USING btree (pid);
 
 
 --
--- Name: idx_23566_sourceid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24990_sourceid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23566_sourceid ON ros_projections USING btree (sourceid, pid, year);
+CREATE UNIQUE INDEX idx_24990_sourceid ON public.ros_projections USING btree (sourceid, pid, year);
 
 
 --
--- Name: idx_23571_teamid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24995_teamid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23571_teamid ON rosters USING btree (tid, week, year);
+CREATE INDEX idx_24995_teamid ON public.rosters USING btree (tid, week, year);
 
 
 --
--- Name: idx_23571_tid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24995_tid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23571_tid ON rosters USING btree (tid);
+CREATE INDEX idx_24995_tid ON public.rosters USING btree (tid);
 
 
 --
--- Name: idx_23575_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24999_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23575_pid ON rosters_players USING btree (rid, pid);
+CREATE UNIQUE INDEX idx_24999_pid ON public.rosters_players USING btree (rid, pid);
 
 
 --
--- Name: idx_23575_player_team; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24999_player_team; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23575_player_team ON rosters_players USING btree (pid, week, year, tid);
+CREATE UNIQUE INDEX idx_24999_player_team ON public.rosters_players USING btree (pid, week, year, tid);
 
 
 --
--- Name: idx_23575_rid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_24999_rid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23575_rid ON rosters_players USING btree (rid);
+CREATE INDEX idx_24999_rid ON public.rosters_players USING btree (rid);
 
 
 --
--- Name: idx_23580_gid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25004_gid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23580_gid ON schedule USING btree (gid);
+CREATE UNIQUE INDEX idx_25004_gid ON public.schedule USING btree (gid);
 
 
 --
--- Name: idx_23585_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25009_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23585_pid ON scoring_format_player_projection_points USING btree (pid);
+CREATE INDEX idx_25009_pid ON public.scoring_format_player_projection_points USING btree (pid);
 
 
 --
--- Name: idx_23585_player_league_points; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25009_player_league_points; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23585_player_league_points ON scoring_format_player_projection_points USING btree (pid, scoring_format_hash, week, year);
+CREATE UNIQUE INDEX idx_25009_player_league_points ON public.scoring_format_player_projection_points USING btree (pid, scoring_format_hash, week, year);
 
 
 --
--- Name: idx_23588_season; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25012_season; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23588_season ON seasons USING btree (lid, year);
+CREATE UNIQUE INDEX idx_25012_season ON public.seasons USING btree (lid, year);
 
 
 --
--- Name: idx_23605_team; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25029_team; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23605_team ON team_stats USING btree (tid, year);
+CREATE UNIQUE INDEX idx_25029_team ON public.team_stats USING btree (tid, year);
 
 
 --
--- Name: idx_23651_lid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25075_lid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23651_lid ON teams USING btree (lid);
+CREATE INDEX idx_25075_lid ON public.teams USING btree (lid);
 
 
 --
--- Name: idx_23651_team_year; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25075_team_year; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23651_team_year ON teams USING btree (uid, year);
+CREATE UNIQUE INDEX idx_25075_team_year ON public.teams USING btree (uid, year);
 
 
 --
--- Name: idx_23661_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25085_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23661_pid ON trade_releases USING btree (tradeid, pid);
+CREATE UNIQUE INDEX idx_25085_pid ON public.trade_releases USING btree (tradeid, pid);
 
 
 --
--- Name: idx_23661_tradeid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25085_tradeid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23661_tradeid ON trade_releases USING btree (tradeid);
+CREATE INDEX idx_25085_tradeid ON public.trade_releases USING btree (tradeid);
 
 
 --
--- Name: idx_23665_uid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25089_uid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23665_uid ON trades USING btree (uid);
+CREATE UNIQUE INDEX idx_25089_uid ON public.trades USING btree (uid);
 
 
 --
--- Name: idx_23669_pick; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25093_pick; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23669_pick ON trades_picks USING btree (tradeid, pickid);
+CREATE UNIQUE INDEX idx_25093_pick ON public.trades_picks USING btree (tradeid, pickid);
 
 
 --
--- Name: idx_23669_tradeid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25093_tradeid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23669_tradeid ON trades_picks USING btree (tradeid);
+CREATE INDEX idx_25093_tradeid ON public.trades_picks USING btree (tradeid);
 
 
 --
--- Name: idx_23672_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25096_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23672_pid ON trades_players USING btree (tradeid, pid);
+CREATE UNIQUE INDEX idx_25096_pid ON public.trades_players USING btree (tradeid, pid);
 
 
 --
--- Name: idx_23672_tradeid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25096_tradeid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23672_tradeid ON trades_players USING btree (tradeid);
+CREATE INDEX idx_25096_tradeid ON public.trades_players USING btree (tradeid);
 
 
 --
--- Name: idx_23675_transaction; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25099_transaction; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23675_transaction ON trades_transactions USING btree (tradeid, transactionid);
+CREATE UNIQUE INDEX idx_25099_transaction ON public.trades_transactions USING btree (tradeid, transactionid);
 
 
 --
--- Name: idx_23679_lid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25103_lid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23679_lid ON transactions USING btree (lid);
+CREATE INDEX idx_25103_lid ON public.transactions USING btree (lid);
 
 
 --
--- Name: idx_23679_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25103_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23679_pid ON transactions USING btree (pid);
+CREATE INDEX idx_25103_pid ON public.transactions USING btree (pid);
 
 
 --
--- Name: idx_23679_teamid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25103_teamid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23679_teamid ON transactions USING btree (tid);
+CREATE INDEX idx_25103_teamid ON public.transactions USING btree (tid);
 
 
 --
--- Name: idx_23679_uid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25103_uid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23679_uid ON transactions USING btree (uid);
+CREATE UNIQUE INDEX idx_25103_uid ON public.transactions USING btree (uid);
 
 
 --
--- Name: idx_23684_lid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25108_lid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23684_lid ON transition_bids USING btree (lid);
+CREATE INDEX idx_25108_lid ON public.transition_bids USING btree (lid);
 
 
 --
--- Name: idx_23690_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25114_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23690_pid ON transition_releases USING btree (transitionid, pid);
+CREATE UNIQUE INDEX idx_25114_pid ON public.transition_releases USING btree (transitionid, pid);
 
 
 --
--- Name: idx_23690_transitionid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25114_transitionid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23690_transitionid ON transition_releases USING btree (transitionid);
+CREATE INDEX idx_25114_transitionid ON public.transition_releases USING btree (transitionid);
 
 
 --
--- Name: idx_23694_table_view; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25118_table_view; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23694_table_view ON user_table_views USING btree (view_name, user_id);
+CREATE UNIQUE INDEX idx_25118_table_view ON public.user_table_views USING btree (view_name, user_id);
 
 
 --
--- Name: idx_23703_email; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25127_email; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23703_email ON users USING btree (email);
+CREATE UNIQUE INDEX idx_25127_email ON public.users USING btree (email);
 
 
 --
--- Name: idx_23714_sourceid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25138_sourceid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23714_sourceid ON users_sources USING btree (userid, sourceid);
+CREATE UNIQUE INDEX idx_25138_sourceid ON public.users_sources USING btree (userid, sourceid);
 
 
 --
--- Name: idx_23714_userid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25138_userid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23714_userid ON users_sources USING btree (userid);
+CREATE INDEX idx_25138_userid ON public.users_sources USING btree (userid);
 
 
 --
--- Name: idx_23717_userid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25141_userid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23717_userid ON users_teams USING btree (userid, tid);
+CREATE UNIQUE INDEX idx_25141_userid ON public.users_teams USING btree (userid, tid);
 
 
 --
--- Name: idx_23723_waiverid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25147_waiverid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23723_waiverid ON waiver_releases USING btree (waiverid);
+CREATE INDEX idx_25147_waiverid ON public.waiver_releases USING btree (waiverid);
 
 
 --
--- Name: idx_23723_waiverid_pid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25147_waiverid_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_23723_waiverid_pid ON waiver_releases USING btree (waiverid, pid);
+CREATE UNIQUE INDEX idx_25147_waiverid_pid ON public.waiver_releases USING btree (waiverid, pid);
 
 
 --
--- Name: idx_23727_lid; Type: INDEX; Schema: league_production; Owner: -
+-- Name: idx_25151_lid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_23727_lid ON waivers USING btree (lid);
+CREATE INDEX idx_25151_lid ON public.waivers USING btree (lid);
 
 
 --
