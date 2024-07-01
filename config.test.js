@@ -1,6 +1,9 @@
+const path = require('path')
+
 module.exports = {
   postgres: {
     client: 'pg',
+    searchPath: ['league_production'],
     connection: {
       host: '127.0.0.1',
       user: 'league_test',
@@ -9,6 +12,10 @@ module.exports = {
       port: 5432,
       decimalNumbers: true,
       multipleStatements: true
+    },
+    seeds: {
+      directory: path.resolve(__dirname, './db/seeds/test'),
+      loadExtensions: ['.mjs']
     }
   },
   ssl: false,

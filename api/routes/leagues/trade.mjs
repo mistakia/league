@@ -171,11 +171,12 @@ router.post(
         .whereIn('pid', all_pids)
         .where('lid', leagueId)
         .groupBy('pid')
+        .as('sub_query')
 
       const player_rows = await db
         .select('player.*', 'transactions.value')
-        .from(db.raw('(' + sub.toString() + ') AS X'))
-        .join('transactions', 'X.uid', 'transactions.uid')
+        .from(sub)
+        .join('transactions', 'sub_query.uid', 'transactions.uid')
         .join('player', 'transactions.pid', 'player.pid')
         .whereIn('player.pid', all_pids)
 
@@ -322,20 +323,26 @@ router.post(
         .where({ uid: tradeId })
         .update({ accepted: Math.round(Date.now() / 1000) })
 
-      const subQuery = db('transactions')
-        .select(db.raw('max(uid) AS maxuid, CONCAT(pid, "_", lid) AS Group1'))
-        .groupBy('Group1')
+      const sub_query = db('transactions')
+        .select(
+          db.raw('max(uid) AS maxuid'),
+          db.raw("pid || '_' || lid AS group1")
+        )
+        .groupBy('group1')
         .whereIn('pid', tradedPlayers)
         .where({ lid: leagueId })
+        .as('sub_query')
 
-      const transactionHistory = await db
-        .select('*')
-        .from(db.raw('(' + subQuery.toString() + ') AS X'))
-        .join('transactions', function () {
-          this.on(function () {
-            this.on(db.raw('CONCAT(pid, "_", lid) = X.Group1'))
-            this.andOn('uid', '=', 'maxuid')
-          })
+      const transaction_history = await db
+        .select('transactions.*')
+        .from('transactions')
+        .join(sub_query, function () {
+          this.on('transactions.uid', '=', 'sub_query.maxuid')
+          this.andOn(
+            db.raw("transactions.pid || '_' || transactions.lid"),
+            '=',
+            'sub_query.group1'
+          )
         })
 
       // insert transactions
@@ -347,7 +354,7 @@ router.post(
           lid: leagueId,
           pid,
           type: constants.transactions.TRADE,
-          value: transactionHistory.find((t) => t.pid === pid).value,
+          value: transaction_history.find((t) => t.pid === pid).value,
           week: constants.season.week,
           year: constants.season.year,
           timestamp: Math.round(Date.now() / 1000)
@@ -360,7 +367,7 @@ router.post(
           lid: leagueId,
           pid,
           type: constants.transactions.TRADE,
-          value: transactionHistory.find((t) => t.pid === pid).value,
+          value: transaction_history.find((t) => t.pid === pid).value,
           week: constants.season.week,
           year: constants.season.year,
           timestamp: Math.round(Date.now() / 1000)
@@ -369,9 +376,11 @@ router.post(
 
       // insert trade transactions
       if (insertTransactions.length) {
-        const tranIds = await db('transactions').insert(insertTransactions)
+        const tranIds = await db('transactions')
+          .insert(insertTransactions)
+          .returning('uid')
         await db('trades_transactions').insert(
-          tranIds.map((t) => ({ transactionid: t, tradeid: trade.uid }))
+          tranIds.map((t) => ({ transactionid: t.uid, tradeid: trade.uid }))
         )
       }
 

@@ -19,9 +19,6 @@ const { start } = constants.season
 describe('SCRIPTS /waivers - poach', function () {
   before(async function () {
     this.timeout(60 * 1000)
-    await knex.migrate.forceFreeMigrationsLock()
-    await knex.migrate.rollback()
-    await knex.migrate.latest()
   })
 
   describe('process', function () {
@@ -198,7 +195,7 @@ describe('SCRIPTS /waivers - poach', function () {
       const waivers = await knex('waivers')
       expect(waivers.length).to.equal(1)
       expect(waivers[0].pid).to.equal(player.pid)
-      expect(waivers[0].succ).to.equal(1)
+      expect(waivers[0].succ).to.equal(true)
       expect(waivers[0].reason).to.equal(null)
       expect(waivers[0].processed).to.equal(Math.round(Date.now() / 1000))
       expect(waivers[0].cancelled).to.equal(null)
@@ -273,7 +270,7 @@ describe('SCRIPTS /waivers - poach', function () {
       const waivers = await knex('waivers')
       expect(waivers.length).to.equal(1)
       expect(waivers[0].pid).to.equal(player.pid)
-      expect(waivers[0].succ).to.equal(1)
+      expect(waivers[0].succ).to.equal(true)
       expect(waivers[0].reason).to.equal(null)
       expect(waivers[0].processed).to.equal(Math.round(Date.now() / 1000))
       expect(waivers[0].cancelled).to.equal(null)
@@ -363,13 +360,13 @@ describe('SCRIPTS /waivers - poach', function () {
       const waiver2 = waivers.find((w) => w.tid === 4)
       expect(waivers.length).to.equal(2)
       expect(waiver1.pid).to.equal(player.pid)
-      expect(waiver1.succ).to.equal(1)
+      expect(waiver1.succ).to.equal(true)
       expect(waiver1.reason).to.equal(null)
       expect(waiver1.processed).to.equal(Math.round(Date.now() / 1000))
       expect(waiver1.cancelled).to.equal(null)
 
       expect(waiver2.pid).to.equal(player.pid)
-      expect(waiver2.succ).to.equal(0)
+      expect(waiver2.succ).to.equal(false)
       expect(waiver2.reason).to.equal('player has existing poaching claim')
       expect(waiver2.processed).to.equal(Math.round(Date.now() / 1000))
       expect(waiver2.cancelled).to.equal(null)
@@ -473,14 +470,14 @@ describe('SCRIPTS /waivers - poach', function () {
       const waiver2 = waivers.find((w) => w.tid === 4)
       expect(waivers.length).to.equal(2)
       expect(waiver1.pid).to.equal(player1.pid)
-      expect(waiver1.succ).to.equal(1)
+      expect(waiver1.succ).to.equal(true)
       expect(waiver1.reason).to.equal(null)
       expect(waiver1.processed).to.equal(Math.round(Date.now() / 1000))
       expect(waiver1.cancelled).to.equal(null)
 
       expect(waiver2.pid).to.equal(player2.pid)
       expect(waiver2.reason).to.equal(null)
-      expect(waiver2.succ).to.equal(1)
+      expect(waiver2.succ).to.equal(true)
       expect(waiver2.processed).to.equal(Math.round(Date.now() / 1000))
       expect(waiver2.cancelled).to.equal(null)
 
@@ -608,19 +605,19 @@ describe('SCRIPTS /waivers - poach', function () {
       const waiver3 = waivers.find((w) => w.tid === 6)
       expect(waivers.length).to.equal(3)
       expect(waiver1.pid).to.equal(player1.pid)
-      expect(waiver1.succ).to.equal(1)
+      expect(waiver1.succ).to.equal(true)
       expect(waiver1.reason).to.equal(null)
       expect(waiver1.processed).to.equal(Math.round(Date.now() / 1000))
       expect(waiver1.cancelled).to.equal(null)
 
       expect(waiver2.pid).to.equal(player2.pid)
-      expect(waiver2.succ).to.equal(1)
+      expect(waiver2.succ).to.equal(true)
       expect(waiver2.reason).to.equal(null)
       expect(waiver2.processed).to.equal(Math.round(Date.now() / 1000))
       expect(waiver2.cancelled).to.equal(null)
 
       expect(waiver3.pid).to.equal(player1.pid)
-      expect(waiver3.succ).to.equal(0)
+      expect(waiver3.succ).to.equal(false)
       expect(waiver3.reason).to.equal('player has existing poaching claim')
       expect(waiver3.processed).to.equal(Math.round(Date.now() / 1000))
       expect(waiver3.cancelled).to.equal(null)
@@ -733,7 +730,7 @@ describe('SCRIPTS /waivers - poach', function () {
       const waivers = await knex('waivers')
       expect(waivers.length).to.equal(1)
       expect(waivers[0].pid).to.equal(player.pid)
-      expect(waivers[0].succ).to.equal(0)
+      expect(waivers[0].succ).to.equal(false)
       expect(waivers[0].reason).to.equal(
         'player is not in an unprotected practice squad slot'
       )

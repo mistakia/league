@@ -21,6 +21,7 @@ const run = async () => {
 
   // get leagueIds with pending waivers
   const results = await db('waivers')
+    .select('lid')
     .whereNull('processed')
     .whereNull('cancelled')
     .where('type', constants.waivers.POACH)

@@ -22,7 +22,13 @@ const updatePlayerGsispid = async ({ dry = false } = {}) => {
     .leftJoin('player', 'player.gsisid', 'nfl_play_stats.gsisId')
     .whereNotNull('nfl_play_stats.playerName')
     .whereNotNull('nfl_play_stats.gsisId')
-    .groupBy('nfl_play_stats.gsispid')
+    .groupBy(
+      'nfl_play_stats.gsispid',
+      'player.pid',
+      'nfl_play_stats.gsisId',
+      'player.gsispid',
+      'player.gsisid'
+    )
 
   log(query.toString())
 
@@ -114,7 +120,13 @@ const updatePlayerGsispid = async ({ dry = false } = {}) => {
       .whereNotNull('nfl_play_stats.playerName')
       .whereNotNull('nfl_play_stats.gsispid')
       .whereIn('nfl_play_stats.gsisId', gsisids)
-      .groupBy('nfl_play_stats.gsisId')
+      .groupBy(
+        'nfl_play_stats.gsisId',
+        'player.pid',
+        'nfl_play_stats.gsispid',
+        'player.gsispid',
+        'player.gsisid'
+      )
 
     for (const play_stat of missing_play_stats) {
       if (play_stat.pid) {

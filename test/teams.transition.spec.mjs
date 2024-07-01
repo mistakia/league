@@ -29,9 +29,6 @@ const { start } = constants.season
 describe('API /teams - transition', function () {
   before(async function () {
     this.timeout(60 * 1000)
-    await knex.migrate.forceFreeMigrationsLock()
-    await knex.migrate.rollback()
-    await knex.migrate.latest()
 
     MockDate.set(start.subtract('1', 'month').toISOString())
 

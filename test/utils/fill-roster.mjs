@@ -8,7 +8,8 @@ export default async function ({
   leagueId,
   teamId,
   excludeIR = false,
-  exclude_pids = []
+  exclude_pids = [],
+  userId = 0
 }) {
   const league = await getLeague({ lid: leagueId })
   const rosterRow = await getRoster({ tid: teamId })
@@ -29,7 +30,8 @@ export default async function ({
       await addPlayer({
         leagueId,
         teamId,
-        player
+        player,
+        userId
       })
     }
 
@@ -52,7 +54,8 @@ export default async function ({
       leagueId,
       teamId,
       player,
-      slot: constants.slots.PS
+      slot: constants.slots.PS,
+      userId
     })
 
     const rosterRow = await getRoster({ tid: teamId })
@@ -77,7 +80,8 @@ export default async function ({
       leagueId,
       teamId,
       player,
-      slot: constants.slots.IR
+      slot: constants.slots.IR,
+      userId
     })
 
     const rosterRow = await getRoster({ tid: teamId })

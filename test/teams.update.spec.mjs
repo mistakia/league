@@ -18,9 +18,6 @@ const expect = chai.expect
 describe('API /teams - update', function () {
   before(async function () {
     this.timeout(60 * 1000)
-    await knex.migrate.forceFreeMigrationsLock()
-    await knex.migrate.rollback()
-    await knex.migrate.latest()
     await knex.seed.run()
 
     await league(knex)
@@ -28,7 +25,7 @@ describe('API /teams - update', function () {
 
   describe('put', function () {
     it('teamtext', async () => {
-      const value = 0
+      const value = false
       const res = await chai
         .request(server)
         .put('/api/teams/1')
@@ -53,7 +50,7 @@ describe('API /teams - update', function () {
     })
 
     it('teamvoice', async () => {
-      const value = 0
+      const value = false
       const res = await chai
         .request(server)
         .put('/api/teams/1')

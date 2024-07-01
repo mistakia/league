@@ -257,11 +257,12 @@ router.post(
         .whereIn('pid', acceptingTeamPlayers)
         .where('lid', leagueId)
         .groupBy('pid')
+        .as('sub_query')
 
       const players = await db
         .select('player.*', 'transactions.value')
-        .from(db.raw('(' + sub.toString() + ') AS X'))
-        .join('transactions', 'X.uid', 'transactions.uid')
+        .from(sub)
+        .join('transactions', 'sub_query.uid', 'transactions.uid')
         .join('player', 'transactions.pid', 'player.pid')
         .whereIn('player.pid', acceptingTeamPlayers)
 
@@ -282,15 +283,17 @@ router.post(
       }
 
       // insert trade
-      const result = await db('trades').insert({
-        propose_tid,
-        accept_tid,
-        userid: req.auth.userId,
-        year: constants.season.year,
-        lid: leagueId,
-        offered: Math.round(Date.now() / 1000)
-      })
-      const tradeid = result[0]
+      const result = await db('trades')
+        .insert({
+          propose_tid,
+          accept_tid,
+          userid: req.auth.userId,
+          year: constants.season.year,
+          lid: leagueId,
+          offered: Math.round(Date.now() / 1000)
+        })
+        .returning('uid')
+      const tradeid = result[0].uid
 
       // insert join entries
       const insertPlayers = []

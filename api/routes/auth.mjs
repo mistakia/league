@@ -111,23 +111,27 @@ router.post('/register', async (req, res) => {
 
     const salt = await bcrypt.genSalt(10)
     const hashedPassword = await bcrypt.hash(password, salt)
-    const users = await db('users').insert({
-      email,
-      password: hashedPassword,
-      username
-    })
-    const userId = users[0]
+    const users = await db('users')
+      .insert({
+        email,
+        password: hashedPassword,
+        username
+      })
+      .returning('uid')
+    const userId = users[0].id
 
     if (!leagueId) {
       leagueId = await createLeague({ commishid: userId })
 
-      const teams = await db('teams').insert({
-        lid: leagueId,
-        name: 'Team Name',
-        abbrv: 'TM',
-        year: constants.season.year
-      })
-      teamId = teams[0]
+      const teams = await db('teams')
+        .insert({
+          lid: leagueId,
+          name: 'Team Name',
+          abbrv: 'TM',
+          year: constants.season.year
+        })
+        .returning('uid')
+      teamId = teams[0].uid
     }
 
     if (!req.body.teamId) {

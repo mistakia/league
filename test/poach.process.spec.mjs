@@ -21,9 +21,6 @@ const { start } = constants.season
 describe('API /poaches - process', function () {
   before(async function () {
     this.timeout(60 * 1000)
-    await knex.migrate.forceFreeMigrationsLock()
-    await knex.migrate.rollback()
-    await knex.migrate.latest()
     await knex.seed.run()
   })
 
@@ -76,7 +73,7 @@ describe('API /poaches - process', function () {
 
       // Check poaches table
       const updatedPoach = await knex('poaches').where('uid', poach.uid).first()
-      updatedPoach.should.have.property('succ', 1)
+      updatedPoach.should.have.property('succ', true)
       updatedPoach.should.have.property('processed').not.null()
 
       // Check rosters

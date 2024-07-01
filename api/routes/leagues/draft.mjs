@@ -170,7 +170,7 @@ router.post('/?', async (req, res) => {
         ? league.num_teams - pick.pick + 1
         : 1
 
-    const insertRoster = db('rosters_players').insert({
+    await db('rosters_players').insert({
       rid: roster.uid,
       pid,
       pos: player_row.pos,
@@ -182,7 +182,7 @@ router.post('/?', async (req, res) => {
       week: 0
     })
 
-    const insertTransaction = db('transactions').insert({
+    await db('transactions').insert({
       userid: req.auth.userId,
       tid: teamId,
       lid,
@@ -194,7 +194,7 @@ router.post('/?', async (req, res) => {
       value
     })
 
-    const updateDraft = db('draft').where({ uid: pickId }).update({ pid })
+    await db('draft').where({ uid: pickId }).update({ pid })
 
     const trades = await db('trades')
       .innerJoin('trades_picks', 'trades.uid', 'trades_picks.tradeid')
@@ -212,8 +212,6 @@ router.post('/?', async (req, res) => {
         .whereIn('uid', tradeids)
         .update({ cancelled: Math.round(Date.now() / 1000) })
     }
-
-    await Promise.all([insertRoster, insertTransaction, updateDraft])
 
     const data = { uid: pickId, pid, lid, tid: teamId }
     broadcast(lid, {

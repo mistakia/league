@@ -1,3 +1,5 @@
+const path = require('path')
+
 module.exports = {
   user_agent: '',
   ssl: true,
@@ -108,12 +110,12 @@ module.exports = {
   },
   postgres: {
     client: 'pg',
+    searchPath: ['league_production'],
     connection: {
       host: 'localhost',
       user: 'root',
       password: 'xxxxx',
-      database: 'league_production',
-      decimalNumbers: true
+      database: 'league_production'
     },
     pool: {
       min: 2,

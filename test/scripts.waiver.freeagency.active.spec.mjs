@@ -21,9 +21,6 @@ const { start } = constants.season
 describe('SCRIPTS /waivers - free agency - active roster', function () {
   before(async function () {
     this.timeout(60 * 1000)
-    await knex.migrate.forceFreeMigrationsLock()
-    await knex.migrate.rollback()
-    await knex.migrate.latest()
     await knex.seed.run()
   })
 
@@ -64,7 +61,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       const waivers = await knex('waivers')
       expect(waivers.length).to.equal(1)
       expect(waivers[0].pid).to.equal(player.pid)
-      expect(waivers[0].succ).to.equal(1)
+      expect(waivers[0].succ).to.equal(true)
       expect(waivers[0].reason).to.equal(null)
       expect(waivers[0].processed).to.equal(Math.round(Date.now() / 1000))
       expect(waivers[0].cancelled).to.equal(null)
@@ -208,34 +205,34 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       const waivers = await knex('waivers').orderBy('uid')
       expect(waivers.length).to.equal(7)
       expect(waivers[0].pid).to.equal(player1.pid)
-      expect(waivers[0].succ).to.equal(1)
+      expect(waivers[0].succ).to.equal(true)
       expect(waivers[0].reason).to.equal(null)
       expect(waivers[0].processed).to.equal(Math.round(Date.now() / 1000))
       expect(waivers[0].cancelled).to.equal(null)
 
-      expect(waivers[1].succ).to.equal(0)
+      expect(waivers[1].succ).to.equal(false)
       expect(waivers[1].reason).to.equal('player is not a free agent')
       expect(waivers[1].pid).to.equal(player1.pid)
 
-      expect(waivers[2].succ).to.equal(1)
+      expect(waivers[2].succ).to.equal(true)
       expect(waivers[2].reason).to.equal(null)
       expect(waivers[2].pid).to.equal(player2.pid)
 
-      expect(waivers[3].succ).to.equal(0)
+      expect(waivers[3].succ).to.equal(false)
       expect(waivers[3].reason).to.equal(
         'exceeds available free agent auction budget'
       )
       expect(waivers[3].pid).to.equal(player3.pid)
 
-      expect(waivers[4].succ).to.equal(1)
+      expect(waivers[4].succ).to.equal(true)
       expect(waivers[4].reason).to.equal(null)
       expect(waivers[4].pid).to.equal(player3.pid)
 
-      expect(waivers[5].succ).to.equal(1)
+      expect(waivers[5].succ).to.equal(true)
       expect(waivers[5].reason).to.equal(null)
       expect(waivers[5].pid).to.equal(player4.pid)
 
-      expect(waivers[6].succ).to.equal(0)
+      expect(waivers[6].succ).to.equal(false)
       expect(waivers[6].reason).to.equal('player is not a free agent')
       expect(waivers[6].pid).to.equal(player4.pid)
 

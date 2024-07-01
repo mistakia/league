@@ -35,7 +35,18 @@ export default async function ({
   if (teamId) {
     const query = db('rosters_players')
       .where({ tid: teamId, year: constants.season.year })
-      .groupBy('rosters_players.pid')
+      .groupBy(
+        'rosters_players.pid',
+        'rosters_players.rid',
+        'rosters_players.tid',
+        'rosters_players.lid',
+        'rosters_players.week',
+        'rosters_players.year',
+        'rosters_players.slot',
+        'rosters_players.pos',
+        'rosters_players.tag',
+        'rosters_players.extensions'
+      )
 
     if (pids.length) {
       query.whereIn('rosters_players.pid', pids)
@@ -46,7 +57,18 @@ export default async function ({
   } else if (leagueId) {
     const query = db('rosters_players')
       .where({ lid: leagueId, year: constants.season.year })
-      .groupBy('rosters_players.pid')
+      .groupBy(
+        'rosters_players.pid',
+        'rosters_players.rid',
+        'rosters_players.tid',
+        'rosters_players.lid',
+        'rosters_players.week',
+        'rosters_players.year',
+        'rosters_players.slot',
+        'rosters_players.pos',
+        'rosters_players.tag',
+        'rosters_players.extensions'
+      )
 
     if (pids.length) {
       query.whereIn('rosters_players.pid', pids)
@@ -64,6 +86,12 @@ export default async function ({
     baselines.forEach((b) => baseline_player_ids.push(b.pid))
   }
 
+  const query = db('player').leftJoin('practice', function () {
+    this.on('player.pid', '=', 'practice.pid')
+      .andOn('practice.week', '=', constants.season.week)
+      .andOn('practice.year', '=', constants.season.year)
+  })
+
   const selects = ['player.pid']
 
   if (columns.length) {
@@ -71,6 +99,9 @@ export default async function ({
       // TODO check if table needs to be joined
       selects.push(`${column.table_name}.${column.column_name}`)
     }
+
+    query.select(db.raw(selects.join(',')))
+    query.groupBy(db.raw(selects.join(',')))
   } else {
     const default_columns = [
       'player.fname',
@@ -86,21 +117,17 @@ export default async function ({
       'player.gsispid',
       'player.espn_id',
       'player.nfl_status',
-      'player.injury_status',
-      'practice.formatted_status as game_status'
+      'player.injury_status'
     ]
 
     selects.push(...default_columns)
-  }
 
-  const query = db('player')
-    .select(db.raw(selects.join(',')))
-    .leftJoin('practice', function () {
-      this.on('player.pid', '=', 'practice.pid')
-        .andOn('practice.week', '=', constants.season.week)
-        .andOn('practice.year', '=', constants.season.year)
-    })
-    .groupBy('player.pid')
+    query.select(db.raw(selects.join(',')))
+    query.groupBy(db.raw(selects.join(',')))
+
+    query.select('practice.formatted_status as game_status')
+    query.groupBy('game_status')
+  }
 
   if (textSearch) {
     query
@@ -159,6 +186,7 @@ export default async function ({
         )
       })
       .select(db.raw(league_format_player_seasonlogs_selects.join(',')))
+      .groupBy(db.raw(league_format_player_seasonlogs_selects.join(',')))
   }
 
   if (baseline_player_ids.length) {

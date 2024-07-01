@@ -16,6 +16,7 @@ const run = async () => {
 
   // get leagues past tran date cutoff with bids pending processing
   const leagues = await db('transition_bids')
+    .select('transition_bids.lid')
     .join('seasons', function () {
       this.on('transition_bids.lid', 'seasons.lid').on(
         'transition_bids.year',

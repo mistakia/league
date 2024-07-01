@@ -383,11 +383,13 @@ router.post('/?', async (req, res) => {
       bid,
       type
     }
-    const ids = await db('waivers').insert(data)
-    data.uid = ids[0]
+    const ids = await db('waivers').insert(data).returning('uid')
+    const waiverId = ids[0].uid
+    data.uid = waiverId
+
     if (release.length) {
       const releaseInserts = release.map((pid) => ({
-        waiverid: ids[0],
+        waiverid: waiverId,
         pid
       }))
       await db('waiver_releases').insert(releaseInserts)

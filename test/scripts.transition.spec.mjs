@@ -26,9 +26,6 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
 
   before(async function () {
     this.timeout(60 * 1000)
-    await knex.migrate.forceFreeMigrationsLock()
-    await knex.migrate.rollback()
-    await knex.migrate.latest()
 
     MockDate.set(start.subtract('1', 'month').toISOString())
     await knex.seed.run()
@@ -90,7 +87,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
       // check transition bid
       const transitionBids = await knex('transition_bids')
       expect(transitionBids.length).to.equal(1)
-      expect(transitionBids[0].succ).to.equal(1)
+      expect(transitionBids[0].succ).to.equal(true)
       expect(transitionBids[0].processed).to.equal(timestamp)
       expect(transitionBids[0].reason).to.equal(null)
 
@@ -160,19 +157,21 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
       await fillRoster({ leagueId, teamId, excludeIR: true, exclude_pids })
 
       const timestamp = Math.round(Date.now() / 1000)
-      const query1 = await knex('transition_bids').insert({
-        pid: player1.pid,
-        userid: userId,
-        bid,
-        tid: teamId,
-        year: constants.season.year,
-        player_tid: teamId,
-        lid: leagueId,
-        submitted: timestamp
-      })
+      const query1 = await knex('transition_bids')
+        .insert({
+          pid: player1.pid,
+          userid: userId,
+          bid,
+          tid: teamId,
+          year: constants.season.year,
+          player_tid: teamId,
+          lid: leagueId,
+          submitted: timestamp
+        })
+        .returning('uid')
 
       await knex('transition_releases').insert({
-        transitionid: query1[0],
+        transitionid: query1[0].uid,
         pid: player4.pid
       })
 
@@ -195,7 +194,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
       // check transition bid
       const transitionBids = await knex('transition_bids')
       expect(transitionBids.length).to.equal(1)
-      expect(transitionBids[0].succ).to.equal(1)
+      expect(transitionBids[0].succ).to.equal(true)
       expect(transitionBids[0].processed).to.equal(timestamp)
       expect(transitionBids[0].reason).to.equal(null)
 

@@ -1,6 +1,7 @@
 /* global describe before it */
 import chai from 'chai'
 import chaiHTTP from 'chai-http'
+import MockDate from 'mockdate'
 
 import server from '#api'
 import knex from '#db'
@@ -25,10 +26,9 @@ chai.use(chaiHTTP)
 describe('API /teams - protect', function () {
   before(async function () {
     this.timeout(60 * 1000)
-    await knex.migrate.forceFreeMigrationsLock()
-    await knex.migrate.rollback()
-    await knex.migrate.latest()
     await knex.seed.run()
+
+    MockDate.set(constants.season.start.add('1', 'month').toISOString())
   })
 
   describe('post', function () {

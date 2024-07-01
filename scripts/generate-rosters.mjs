@@ -57,8 +57,10 @@ const run = async () => {
       const rosterRows = await db('rosters').where(rosterData)
       let rid = rosterRows.length ? rosterRows[0].uid : null
       if (!rid) {
-        const inserted_rows = await db('rosters').insert(rosterData)
-        rid = inserted_rows[0]
+        const insert_query = await db('rosters')
+          .insert(rosterData)
+          .returning('uid')
+        rid = insert_query[0].uid
       }
 
       // insert any missing players & remove excess players
