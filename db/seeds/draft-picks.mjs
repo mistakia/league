@@ -2,6 +2,7 @@ import { constants } from '#libs-shared'
 import { getLeague } from '#libs-server'
 
 export default async function (knex) {
+  await knex.raw('ALTER SEQUENCE draft_uid_seq RESTART WITH 1')
   const lid = 1
   const teams = await knex('teams').where({ lid, year: constants.season.year })
   const league = await getLeague({ lid })
