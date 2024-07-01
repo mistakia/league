@@ -110,7 +110,6 @@ module.exports = {
   },
   postgres: {
     client: 'pg',
-    searchPath: ['league_production'],
     connection: {
       host: 'localhost',
       user: 'root',

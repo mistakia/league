@@ -3,7 +3,6 @@ const path = require('path')
 module.exports = {
   postgres: {
     client: 'pg',
-    searchPath: ['league_production'],
     connection: {
       host: '127.0.0.1',
       user: 'league_test',
