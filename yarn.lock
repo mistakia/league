@@ -12771,9 +12771,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-table@portal:/Users/trashman/Projects/react-table::locator=root-workspace-0b6124%40workspace%3A.":
-  version: 0.0.0-use.local
-  resolution: "react-table@portal:/Users/trashman/Projects/react-table::locator=root-workspace-0b6124%40workspace%3A."
+"react-table@mistakia/react-table#5aa3a724e4fbc7c6cb4319279321ad0ab5ef9de5":
+  version: 0.0.1
+  resolution: "react-table@https://github.com/mistakia/react-table.git#commit=5aa3a724e4fbc7c6cb4319279321ad0ab5ef9de5"
   dependencies:
     "@dnd-kit/core": ^6.0.8
     "@dnd-kit/modifiers": ^6.0.1
@@ -12790,8 +12790,9 @@ __metadata:
     prop-types: ^15.8.1
     react: ^18.2.0
     react-dom: ^18.2.0
+  checksum: 4a686d1cfc7fa8f863f94717d60ca398730ee97c6b3ddb800cd663e00d3c28ea8510ecaa372737981729d1f03b556b6c041b099296205f0ecb0953d06aaa3a1d
   languageName: node
-  linkType: soft
+  linkType: hard
 
 "react-transition-group@npm:^4.4.5":
   version: 4.4.5
