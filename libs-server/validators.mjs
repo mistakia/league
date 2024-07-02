@@ -66,13 +66,18 @@ export const sort_validator = v.compile(sort_schema)
 
 const columns_schema = {
   type: 'array',
-  items: {
-    type: 'object',
-    props: {
-      column_id: { type: 'string' },
-      params: { type: 'object', optional: true }
+  items: [
+    {
+      type: 'object',
+      props: {
+        column_id: { type: 'string' },
+        params: { type: 'object', optional: true }
+      }
+    },
+    {
+      type: 'string'
     }
-  }
+  ]
 }
 export const columns_validator = v.compile(columns_schema)
 
