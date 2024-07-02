@@ -196,7 +196,7 @@ export function PlayerTableFields({
       player_value_path: 'dob'
     },
     player_age: {
-      column_title: 'Age',
+      column_title: 'Current Age',
       header_label: 'Age',
       player_value_path: 'age',
       size: 60,
