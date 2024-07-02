@@ -163,12 +163,8 @@ export default async function ({
   if (league_format_hash) {
     const league_format_player_seasonlogs_selects = [
       'league_format_player_seasonlogs.startable_games',
-      'league_format_player_seasonlogs.points',
-      'league_format_player_seasonlogs.points_per_game',
       'league_format_player_seasonlogs.points_added',
       'league_format_player_seasonlogs.points_added_per_game',
-      'league_format_player_seasonlogs.points_rnk',
-      'league_format_player_seasonlogs.points_pos_rnk',
       'league_format_player_seasonlogs.points_added_rnk',
       'league_format_player_seasonlogs.points_added_pos_rnk'
     ]
@@ -187,6 +183,31 @@ export default async function ({
       })
       .select(db.raw(league_format_player_seasonlogs_selects.join(',')))
       .groupBy(db.raw(league_format_player_seasonlogs_selects.join(',')))
+  }
+
+  if (scoring_format_hash) {
+    const scoring_format_player_seasonlogs_selects = [
+      'scoring_format_player_seasonlogs.points',
+      'scoring_format_player_seasonlogs.points_per_game',
+      'scoring_format_player_seasonlogs.points_rnk',
+      'scoring_format_player_seasonlogs.points_pos_rnk'
+    ]
+
+    query
+      .leftJoin('scoring_format_player_seasonlogs', function () {
+        this.on('scoring_format_player_seasonlogs.pid', 'player.pid')
+        this.andOn(
+          'scoring_format_player_seasonlogs.year',
+          constants.season.year
+        )
+        this.andOn(
+          db.raw(
+            `scoring_format_player_seasonlogs.scoring_format_hash = '${scoring_format_hash}'`
+          )
+        )
+      })
+      .select(db.raw(scoring_format_player_seasonlogs_selects.join(',')))
+      .groupBy(db.raw(scoring_format_player_seasonlogs_selects.join(',')))
   }
 
   if (baseline_player_ids.length) {

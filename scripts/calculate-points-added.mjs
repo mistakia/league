@@ -11,7 +11,6 @@ import {
   constants,
   groupBy,
   getRosterSize,
-  calculatePoints,
   calculateValues,
   calculatePrices,
   calculateBaselines
@@ -37,29 +36,49 @@ const calculate_points_added = async ({
 
   log(`calculating Points Added for ${year}`)
 
-  // get player stats for year
-  const query = db('player_gamelogs')
+  const query = db('scoring_format_player_gamelogs')
     .select(
-      'player_gamelogs.*',
+      'scoring_format_player_gamelogs.pid',
+      'scoring_format_player_gamelogs.points',
       'player.pname',
       'player.pos',
       'player.start',
-      'player_gamelogs.pid',
       'nfl_games.week',
-      'nfl_games.year'
+      'nfl_games.year',
+      'nfl_games.esbid'
     )
-    .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
+    .join(
+      'nfl_games',
+      'nfl_games.esbid',
+      'scoring_format_player_gamelogs.esbid'
+    )
+    .join('player', 'scoring_format_player_gamelogs.pid', 'player.pid')
     .where('nfl_games.year', year)
     .where('nfl_games.seas_type', 'REG')
     .whereIn('player.pos', constants.positions) // TODO - filter using player_gamelogs.pos
-
-    .join('player', 'player_gamelogs.pid', 'player.pid')
+    .where(
+      'scoring_format_player_gamelogs.scoring_format_hash',
+      league.scoring_format_hash
+    )
 
   if (week !== 'ALL') {
     query.where('nfl_games.week', week)
   }
 
   const rows = await query
+
+  // Fetch pos_rnk from player_seasonlogs in a separate query
+  const pos_rnk_query = db('scoring_format_player_seasonlogs')
+    .select('pid', 'points_pos_rnk')
+    .where('year', year)
+    .where('scoring_format_hash', league.scoring_format_hash)
+
+  const pos_rnk_rows = await pos_rnk_query
+  const pos_rnk_map = pos_rnk_rows.reduce((acc, row) => {
+    acc[row.pid] = row.points_pos_rnk
+    return acc
+  }, {})
+
   const weeks = [...new Set(rows.map((r) => r.week))]
   const grouped_by_pid = groupBy(rows, 'pid')
 
@@ -82,18 +101,14 @@ const calculate_points_added = async ({
       item.market_salary[week] = 0
     }
 
-    // calculate fantasy points
+    // get fantasy points from query results
     for (const game of games) {
-      const points = calculatePoints({
-        stats: game,
-        position: game.pos,
-        league
-      })
-      item.points[game.week] = points
+      item.points[game.week] = { total: game.points }
     }
 
     const { pname, pos, start } = games[0]
-    players.push({ pid, pname, pos, start, ...item })
+    const pos_rnk = pos_rnk_map[pid] || null
+    players.push({ pid, pname, pos, start, pos_rnk, ...item })
   }
 
   log(`calculating Points Added for ${rows.length} players`)
@@ -143,14 +158,6 @@ const calculate_points_added = async ({
     }
 
     points_by_position[player.pos].push(player.points)
-  }
-
-  for (const pos of constants.positions) {
-    points_by_position[pos] = points_by_position[pos].sort((a, b) => b - a)
-  }
-
-  for (const player of players) {
-    player.pos_rnk = points_by_position[player.pos].indexOf(player.points) + 1
   }
 
   calculatePrices({

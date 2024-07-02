@@ -4,42 +4,44 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#libs-shared'
-import { isMain, getLeague, get_league_format } from '#libs-server'
-import calculate_points_added from './calculate-points-added.mjs'
+import { isMain, getLeague } from '#libs-server'
+import calculate_points from './calculate-points.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
-const log = debug('generate-league-format-player-gamelogs')
-debug.enable('generate-league-format-player-gamelogs')
+const log = debug('generate-scoring-format-player-gamelogs')
+debug.enable('generate-scoring-format-player-gamelogs')
 
-const generate_league_format_player_gamelogs = async ({
-  league_format_hash,
+const generate_scoring_format_player_gamelogs = async ({
+  scoring_format_hash,
   year = constants.season.year,
   week = constants.season.week,
   dry = false
 } = {}) => {
-  if (!league_format_hash) {
-    throw new Error('league_format_hash is required')
+  if (!scoring_format_hash) {
+    throw new Error('scoring_format_hash is required')
   }
 
-  const league_format = await get_league_format({ league_format_hash })
-
-  const result = await calculate_points_added({
-    league: league_format,
+  const result = await calculate_points({
     year,
-    week
+    week,
+    scoring_format_hash
   })
+
   const inserts = []
   for (const pid in result.players) {
-    const item = result.players[pid]
-
-    inserts.push({
-      pid,
-      esbid: item.games[0].esbid,
-      league_format_hash,
-      points_added: item.pts_added
-    })
+    const player = result.players[pid]
+    for (const game of player.games) {
+      inserts.push({
+        pid,
+        esbid: game.esbid,
+        scoring_format_hash,
+        points: player.points,
+        pos_rnk: player.pos_rnk
+      })
+    }
   }
 
+  // Select 10 random inserts to display
   if (dry) {
     // Shuffle the inserts array to get random elements
     const shuffled_inserts = inserts.sort(() => 0.5 - Math.random())
@@ -55,32 +57,31 @@ const generate_league_format_player_gamelogs = async ({
   }
 
   if (inserts.length) {
-    const pids = inserts.map((p) => p.pid)
-    const deleted_count = await db('league_format_player_gamelogs')
+    const pids = [...new Set(inserts.map((p) => p.pid))]
+    const deleted_count = await db('scoring_format_player_gamelogs')
       .leftJoin(
         'nfl_games',
-        'league_format_player_gamelogs.esbid',
+        'scoring_format_player_gamelogs.esbid',
         'nfl_games.esbid'
       )
       .where('nfl_games.week', week)
       .where('nfl_games.year', year)
       .where('nfl_games.seas_type', 'REG')
       .where(
-        'league_format_player_gamelogs.league_format_hash',
-        league_format_hash
+        'scoring_format_player_gamelogs.scoring_format_hash',
+        scoring_format_hash
       )
-      .whereNotIn('league_format_player_gamelogs.pid', pids)
+      .whereNotIn('scoring_format_player_gamelogs.pid', pids)
       .del()
     log(
-      `Deleted ${deleted_count} excess player gamelogs for league_format ${league_format_hash} in week ${week} ${year}`
+      `Deleted ${deleted_count} excess player gamelogs for scoring_format ${scoring_format_hash} in week ${week} ${year}`
     )
-
-    await db('league_format_player_gamelogs')
+    await db('scoring_format_player_gamelogs')
       .insert(inserts)
-      .onConflict(['pid', 'esbid', 'league_format_hash'])
+      .onConflict(['pid', 'esbid', 'scoring_format_hash'])
       .merge()
     log(
-      `Updated ${inserts.length} player gamelogs for league_format ${league_format_hash} in week ${week} ${year}`
+      `Updated ${inserts.length} player gamelogs for scoring_format ${scoring_format_hash} in week ${week} ${year}`
     )
   }
 }
@@ -88,9 +89,17 @@ const generate_league_format_player_gamelogs = async ({
 const main = async () => {
   let error
   try {
-    const lid = 1
-    const league = await getLeague({ lid })
-    const { league_format_hash } = league
+    let scoring_format_hash = argv.scoring_format_hash
+
+    if (!scoring_format_hash) {
+      const lid = 1
+      const league = await getLeague({ lid })
+      scoring_format_hash = league.scoring_format_hash
+    }
+
+    if (!scoring_format_hash) {
+      throw new Error('scoring_format_hash is required')
+    }
 
     if (argv.all) {
       const results = await db('player_gamelogs')
@@ -114,16 +123,16 @@ const main = async () => {
           .groupBy('nfl_games.week')
           .orderBy('nfl_games.week', 'asc')
         for (const { week } of weeks) {
-          await generate_league_format_player_gamelogs({
-            league_format_hash,
+          await generate_scoring_format_player_gamelogs({
+            scoring_format_hash,
             year,
             week
           })
         }
       }
     } else {
-      await generate_league_format_player_gamelogs({
-        league_format_hash,
+      await generate_scoring_format_player_gamelogs({
+        scoring_format_hash,
         year: argv.year,
         week: argv.week,
         dry: argv.dry
@@ -148,4 +157,4 @@ if (isMain(import.meta.url)) {
   main()
 }
 
-export default generate_league_format_player_gamelogs
+export default generate_scoring_format_player_gamelogs
