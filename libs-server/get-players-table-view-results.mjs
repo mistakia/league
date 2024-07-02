@@ -79,6 +79,7 @@ const get_table_name = ({ column_definition, column_params }) => {
     : column_definition.table_name
 }
 
+// TODO update to return an object containing the where_string and values for parameterized query
 const get_where_string = ({
   where_clause,
   column_definition,
@@ -454,8 +455,7 @@ export default function ({
     const error_messages = validator_result.map((error) => {
       if (error.field && error.field.startsWith('where[')) {
         const index = error.field.match(/\d+/)[0]
-        const column_id = where[index]?.column_id
-        return `${error.message} ('${column_id}')`
+        return `${error.message} (${where[index]?.column_id}, ${where[index]?.operator}, ${where[index]?.value})`
       }
       return error.message
     })

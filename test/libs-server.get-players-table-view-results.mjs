@@ -211,87 +211,6 @@ describe('LIBS SERVER get_players_table_view_results', () => {
     expect(query.toString()).to.equal(expected_query)
   })
 
-  it('should handle value not set for where query', () => {
-    const query = get_players_table_view_results({
-      prefix_columns: ['player_name'],
-      columns: [
-        {
-          column_id: 'player_weighted_opportunity_rating_from_plays',
-          params: {
-            year: [2023]
-          }
-        },
-        {
-          column_id: 'player_bench_press'
-        }
-      ],
-      where: [
-        {
-          column_id: 'player_position',
-          operator: 'IN',
-          value: ['WR']
-        },
-        {
-          column_id: 'player_draft_position',
-          operator: '=',
-          value: ''
-        }
-      ],
-      sort: [
-        {
-          column_id: 'player_weighted_opportunity_rating_from_plays',
-          desc: true
-        }
-      ]
-    })
-    const expected_query = `with "t1e75b7cb94f04d91e1c332ccb081876d" as (select "pg"."pid", ROUND((1.5 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(COUNT(*), 0)) + (0.7 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0)), 4) as weighted_opp_rating_from_plays from "nfl_plays" inner join "player_gamelogs" as "pg" on "nfl_plays"."esbid" = "pg"."esbid" and "nfl_plays"."off" = "pg"."tm" where not "play_type" = 'NOPL' and "seas_type" = 'REG' and "trg_pid" is not null and "nfl_plays"."year" in (2023) group by "pg"."pid") select "player"."pid", player.fname, player.lname, "player"."bench" AS "bench_0", "player"."pos" AS "pos_0", "t1e75b7cb94f04d91e1c332ccb081876d"."weighted_opp_rating_from_plays" AS "weighted_opp_rating_from_plays_0" from "player" left join "t1e75b7cb94f04d91e1c332ccb081876d" on "t1e75b7cb94f04d91e1c332ccb081876d"."pid" = "player"."pid" where player.pos IN ('WR') group by player.fname, player.lname, "player"."bench", "player"."pos", "t1e75b7cb94f04d91e1c332ccb081876d"."weighted_opp_rating_from_plays", "player"."pid", "player"."lname", "player"."fname" order by 6 DESC NULLS LAST limit 500`
-    expect(query.toString()).to.equal(expected_query)
-  })
-
-  it('should handle empty query that shares a column_id with a column', () => {
-    const query = get_players_table_view_results({
-      prefix_columns: ['player_name'],
-      columns: [
-        {
-          column_id: 'player_rush_yards_from_plays',
-          params: {
-            year: [2023],
-            xpass_prob: [0, 0.4]
-          }
-        },
-        {
-          column_id: 'player_rush_yds_per_attempt_from_plays',
-          params: {
-            year: [2023],
-            xpass_prob: [0, 0.4]
-          }
-        },
-        {
-          column_id: 'player_rush_first_downs_from_plays',
-          params: {
-            year: [2023],
-            xpass_prob: [0, 0.4]
-          }
-        }
-      ],
-      sort: [
-        {
-          column_id: 'player_rush_yards_from_plays',
-          desc: true
-        }
-      ],
-      where: [
-        {
-          column_id: 'player_rush_yards_from_plays',
-          operator: '=',
-          value: ''
-        }
-      ]
-    })
-    const expected_query = `with "t4380251a297ab24514bc69b66795912d" as (select "bc_pid", SUM(rush_yds) as rush_yds_from_plays_0, CASE WHEN COUNT(*) > 0 THEN ROUND(SUM(rush_yds) / COUNT(*), 2) ELSE 0 END as rush_yds_per_att_from_plays_0, SUM(CASE WHEN fd = true THEN 1 ELSE 0 END) as rush_first_downs_from_plays_0 from "nfl_plays" where not "play_type" = 'NOPL' and "seas_type" = 'REG' and "nfl_plays"."year" in (2023) and "nfl_plays"."xpass_prob" between 0 and 0.4 group by "bc_pid") select "player"."pid", player.fname, player.lname, "t4380251a297ab24514bc69b66795912d"."rush_yds_from_plays_0" as "rush_yds_from_plays_0", "t4380251a297ab24514bc69b66795912d"."rush_yds_per_att_from_plays_0" as "rush_yds_per_att_from_plays_0", "t4380251a297ab24514bc69b66795912d"."rush_first_downs_from_plays_0" as "rush_first_downs_from_plays_0" from "player" left join "t4380251a297ab24514bc69b66795912d" on "t4380251a297ab24514bc69b66795912d"."bc_pid" = "player"."pid" group by player.fname, player.lname, "t4380251a297ab24514bc69b66795912d"."rush_yds_from_plays_0", "t4380251a297ab24514bc69b66795912d"."rush_yds_per_att_from_plays_0", "t4380251a297ab24514bc69b66795912d"."rush_first_downs_from_plays_0", "player"."pid", "player"."lname", "player"."fname" order by 4 DESC NULLS LAST limit 500`
-    expect(query.toString()).to.equal(expected_query)
-  })
-
   it('should create a split query — year', () => {
     const query = get_players_table_view_results({
       splits: ['year'],
@@ -404,5 +323,48 @@ describe('LIBS SERVER get_players_table_view_results', () => {
     })
     const expected_query = `with "t45a638cf2fdc84646b5009d57980678a" as (select "pg"."pid", ROUND((1.5 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(COUNT(*), 0)) + (0.7 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0)), 4) as weighted_opp_rating_from_plays, "nfl_plays"."year" from "nfl_plays" inner join "player_gamelogs" as "pg" on "nfl_plays"."esbid" = "pg"."esbid" and "nfl_plays"."off" = "pg"."tm" where not "play_type" = 'NOPL' and "seas_type" = 'REG' and "trg_pid" is not null group by "pg"."pid", "nfl_plays"."year") select "player"."pid", player.fname, player.lname, "player_seasonlogs"."espn_open_score" AS "espn_open_score_0", "t45a638cf2fdc84646b5009d57980678a"."weighted_opp_rating_from_plays" AS "weighted_opp_rating_from_plays_0", COALESCE(player_seasonlogs.year, t45a638cf2fdc84646b5009d57980678a.year) AS year from "player" left join "player_seasonlogs" on "player_seasonlogs"."pid" = "player"."pid" left join "t45a638cf2fdc84646b5009d57980678a" on "t45a638cf2fdc84646b5009d57980678a"."pid" = "player"."pid" and "t45a638cf2fdc84646b5009d57980678a"."year" = "player_seasonlogs"."year" group by player.fname, player.lname, "player_seasonlogs"."espn_open_score", "t45a638cf2fdc84646b5009d57980678a"."weighted_opp_rating_from_plays", COALESCE(player_seasonlogs.year, t45a638cf2fdc84646b5009d57980678a.year), "player"."pid", "player"."lname", "player"."fname" order by 4 DESC NULLS LAST limit 500`
     expect(query.toString()).to.equal(expected_query)
+  })
+
+  describe('errors', () => {
+    it('should throw an error if where value is missing', () => {
+      try {
+        get_players_table_view_results({
+          prefix_columns: ['player_name'],
+          columns: [
+            {
+              column_id: 'player_weighted_opportunity_rating_from_plays',
+              params: {
+                year: [2023]
+              }
+            },
+            {
+              column_id: 'player_bench_press'
+            }
+          ],
+          where: [
+            {
+              column_id: 'player_position',
+              operator: 'IN',
+              value: ['WR']
+            },
+            {
+              column_id: 'player_draft_position',
+              operator: '=',
+              value: ''
+            }
+          ],
+          sort: [
+            {
+              column_id: 'player_weighted_opportunity_rating_from_plays',
+              desc: true
+            }
+          ]
+        })
+      } catch (error) {
+        expect(error.message).to.equal(
+          "The 'where[1].value' field must be an alphanumeric string. (player_draft_position, =, )\nThe 'where[1].value' field must be a number. (player_draft_position, =, )\nThe 'where[1].value' field must be an array. (player_draft_position, =, )\nThe 'where[1].value' field must be an array. (player_draft_position, =, )"
+        )
+      }
+    })
   })
 })
