@@ -352,22 +352,45 @@ const player_projected_rec_tds = {
 const create_espn_score_columns = (column_name) => ({
   table_name: 'player_seasonlogs',
   column_name,
-  join: ({ query, table_name, params } = {}) => {
-    let year = Number(params.year) || 2023
+  join: ({
+    query,
+    params,
+    join_type = 'LEFT',
+    splits,
+    previous_table_name = null
+  } = {}) => {
+    const join_func = get_join_func(join_type)
 
-    if (Number.isNaN(year) || year < 2017 || year > 2023) {
-      year = 2023
+    if (previous_table_name) {
+      query[join_func]('player_seasonlogs', function () {
+        this.on(`player_seasonlogs.pid`, '=', 'player.pid')
+        for (const split of splits) {
+          this.andOn(
+            `player_seasonlogs.${split}`,
+            '=',
+            `${previous_table_name}.${split}`
+          )
+        }
+      })
+    } else {
+      query[join_func]('player_seasonlogs', function () {
+        this.on(`player_seasonlogs.pid`, '=', 'player.pid')
+        if (splits.includes('year')) {
+          // TODO limit to years in params.year but allowing multiple years needs to be enabled on the UX first
+          // this.andOn(db.raw(`player_seasonlogs.year IN (${params.year.join(',')})`))
+        } else {
+          let year = Number(params.year) || 2023
+
+          if (Number.isNaN(year) || year < 2017 || year > 2023) {
+            year = 2023
+          }
+
+          this.andOn(`player_seasonlogs.year`, '=', year)
+        }
+      })
     }
-
-    // TODO handle splits
-    query.leftJoin(table_name, function () {
-      this.on('player_seasonlogs.pid', '=', 'player.pid').andOn(
-        'player_seasonlogs.year',
-        '=',
-        year
-      )
-    })
-  }
+  },
+  supported_splits: ['year']
 })
 
 const create_team_share_stat = ({
