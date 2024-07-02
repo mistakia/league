@@ -4,6 +4,7 @@ import players_table_column_definitions, {
 } from './players-table-column-definitions.mjs'
 import apply_play_by_play_column_params_to_query from './apply-play-by-play-column-params-to-query.mjs'
 import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
+import * as validators from './validators.mjs'
 
 const add_play_by_play_with_statement = ({
   query,
@@ -440,6 +441,27 @@ export default function ({
   offset = 0,
   limit = 500
 } = {}) {
+  const validator_result = validators.table_state_validator({
+    splits,
+    where,
+    columns,
+    prefix_columns,
+    sort,
+    offset,
+    limit
+  })
+  if (validator_result !== true) {
+    const error_messages = validator_result.map((error) => {
+      if (error.field && error.field.startsWith('where[')) {
+        const index = error.field.match(/\d+/)[0]
+        const column_id = where[index]?.column_id
+        return `${error.message} ('${column_id}')`
+      }
+      return error.message
+    })
+    throw new Error(error_messages.join('\n'))
+  }
+
   const joined_table_index = {}
   const with_statement_index = {}
   const players_query = db('player').select('player.pid')

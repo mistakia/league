@@ -55,10 +55,12 @@ const sort_schema = {
   items: {
     type: 'object',
     props: {
-      id: { type: 'string' },
+      column_id: { type: 'string' },
       desc: { type: 'boolean' }
     }
-  }
+  },
+  $$root: true,
+  optional: true
 }
 export const sort_validator = v.compile(sort_schema)
 
@@ -67,8 +69,8 @@ const columns_schema = {
   items: {
     type: 'object',
     props: {
-      column_name: { type: 'string' },
-      table_name: { type: 'string' }
+      column_id: { type: 'string' },
+      params: { type: 'object', optional: true }
     }
   }
 }
@@ -97,27 +99,46 @@ const where_schema = {
   items: {
     type: 'object',
     props: {
-      column_name: { type: 'string' },
+      column_id: { type: 'string' },
       operator: where_operator_schema,
-      value: { type: 'string' }
+      value: [
+        { type: 'string' },
+        { type: 'number' },
+        { type: 'array', items: { type: 'string' } },
+        { type: 'array', items: { type: 'number' } }
+      ],
+      params: { type: 'object', optional: true }
     }
-  }
+  },
+  $$root: true,
+  optional: true
 }
 
 export const where_validator = v.compile(where_schema)
 
 const offset_schema = {
   type: 'number',
-  positive: true,
+  min: 0,
+  optional: true,
   integer: true,
   $$root: true
 }
 export const offset_validator = v.compile(offset_schema)
 
+const splits_schema = {
+  type: 'array',
+  items: {
+    type: 'string'
+  },
+  $$root: true,
+  optional: true
+}
+
 const table_state_schema = {
   offset: offset_schema,
   sort: sort_schema,
   columns: columns_schema,
-  where: where_schema
+  where: where_schema,
+  splits: splits_schema
 }
 export const table_state_validator = v.compile(table_state_schema)
