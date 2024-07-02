@@ -10,17 +10,17 @@ router.get('/props', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const week = Number(req.query.week) || constants.season.week
-    if (!validators.week_validator({ week })) {
+    if (validators.week_validator({ week }) !== true) {
       return res.status(400).send({ error: 'invalid week' })
     }
 
     const year = Number(req.query.year) || constants.season.year
-    if (!validators.year_validator({ year })) {
+    if (validators.year_validator({ year }) !== true) {
       return res.status(400).send({ error: 'invalid year' })
     }
 
     const seas_type = req.query.seas_type || constants.season.nfl_seas_type
-    if (!validators.seas_type_validator({ seas_type })) {
+    if (validators.seas_type_validator({ seas_type }) !== true) {
       return res.status(400).send({ error: 'invalid seas_type' })
     }
 

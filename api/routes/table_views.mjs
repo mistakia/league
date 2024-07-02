@@ -26,15 +26,15 @@ router.post('/?', async (req, res) => {
 
     const user_id = req.auth ? req.auth.userId : null
 
-    if (!validators.view_name_validator(view_name)) {
+    if (validators.view_name_validator(view_name) !== true) {
       return res.status(400).send({ error: 'invalid view_name' })
     }
 
-    if (!validators.view_description_validator(view_description)) {
+    if (validators.view_description_validator(view_description) !== true) {
       return res.status(400).send({ error: 'invalid view_description' })
     }
 
-    if (!validators.table_state_validator(table_state)) {
+    if (validators.table_state_validator(table_state) !== true) {
       return res.status(400).send({ error: 'invalid table_state' })
     }
 
