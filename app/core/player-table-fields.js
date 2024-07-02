@@ -45,6 +45,7 @@ function create_espn_score_field({ score_type, label }) {
     size: 70,
     data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
     column_params: {
+      // TODO this is overridden when year splits are used — make user aware
       year: {
         values: [2023, 2022, 2021, 2020, 2019, 2018, 2017],
         data_type: table_constants.TABLE_DATA_TYPES.SELECT,

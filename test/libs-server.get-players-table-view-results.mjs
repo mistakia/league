@@ -382,4 +382,27 @@ describe('LIBS SERVER get_players_table_view_results', () => {
     const expected_query = `with "t01b11e3dd6711866524242f4de796cda" as (select "pg"."pid", ROUND((1.5 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(COUNT(*), 0)) + (0.7 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0)), 4) as weighted_opp_rating_from_plays, "nfl_plays"."year" from "nfl_plays" inner join "player_gamelogs" as "pg" on "nfl_plays"."esbid" = "pg"."esbid" and "nfl_plays"."off" = "pg"."tm" where not "play_type" = 'NOPL' and "seas_type" = 'REG' and "trg_pid" is not null and "nfl_plays"."year" in (2022, 2023) and "nfl_plays"."xpass_prob" between 0.7 and 1 group by "pg"."pid", "nfl_plays"."year"), "t573a9a4e9f61686cedc1b37cf2cfc62a" as (select "trg_pid", "nfl_plays"."year", COUNT(*) as trg_from_plays_0 from "nfl_plays" where not "play_type" = 'NOPL' and "seas_type" = 'REG' and "nfl_plays"."year" in (2022, 2023) and "nfl_plays"."xpass_prob" between 0.7 and 1 group by "trg_pid", "nfl_plays"."year") select "player"."pid", player.fname, player.lname, "player"."pos" AS "pos_0", "t01b11e3dd6711866524242f4de796cda"."weighted_opp_rating_from_plays" AS "weighted_opp_rating_from_plays_0", "t573a9a4e9f61686cedc1b37cf2cfc62a"."trg_from_plays_0" as "trg_from_plays_0", COALESCE(t01b11e3dd6711866524242f4de796cda.year, t573a9a4e9f61686cedc1b37cf2cfc62a.year) AS year from "player" left join "t01b11e3dd6711866524242f4de796cda" on "t01b11e3dd6711866524242f4de796cda"."pid" = "player"."pid" left join "t573a9a4e9f61686cedc1b37cf2cfc62a" on "t573a9a4e9f61686cedc1b37cf2cfc62a"."trg_pid" = "player"."pid" and "t573a9a4e9f61686cedc1b37cf2cfc62a"."year" = "t01b11e3dd6711866524242f4de796cda"."year" where player.pos IN ('WR') group by player.fname, player.lname, "player"."pos", "t01b11e3dd6711866524242f4de796cda"."weighted_opp_rating_from_plays", "t573a9a4e9f61686cedc1b37cf2cfc62a"."trg_from_plays_0", COALESCE(t01b11e3dd6711866524242f4de796cda.year, t573a9a4e9f61686cedc1b37cf2cfc62a.year), "player"."pid", "player"."lname", "player"."fname" order by 5 DESC NULLS LAST limit 500`
     expect(query.toString()).to.equal(expected_query)
   })
+
+  it('should create a splits query with espn open scores', () => {
+    const query = get_players_table_view_results({
+      splits: ['year'],
+      prefix_columns: ['player_name'],
+      columns: [
+        {
+          column_id: 'player_espn_open_score'
+        },
+        {
+          column_id: 'player_weighted_opportunity_rating_from_plays'
+        }
+      ],
+      sort: [
+        {
+          column_id: 'player_espn_open_score',
+          desc: true
+        }
+      ]
+    })
+    const expected_query = `with "t45a638cf2fdc84646b5009d57980678a" as (select "pg"."pid", ROUND((1.5 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(COUNT(*), 0)) + (0.7 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0)), 4) as weighted_opp_rating_from_plays, "nfl_plays"."year" from "nfl_plays" inner join "player_gamelogs" as "pg" on "nfl_plays"."esbid" = "pg"."esbid" and "nfl_plays"."off" = "pg"."tm" where not "play_type" = 'NOPL' and "seas_type" = 'REG' and "trg_pid" is not null group by "pg"."pid", "nfl_plays"."year") select "player"."pid", player.fname, player.lname, "player_seasonlogs"."espn_open_score" AS "espn_open_score_0", "t45a638cf2fdc84646b5009d57980678a"."weighted_opp_rating_from_plays" AS "weighted_opp_rating_from_plays_0", COALESCE(player_seasonlogs.year, t45a638cf2fdc84646b5009d57980678a.year) AS year from "player" left join "player_seasonlogs" on "player_seasonlogs"."pid" = "player"."pid" left join "t45a638cf2fdc84646b5009d57980678a" on "t45a638cf2fdc84646b5009d57980678a"."pid" = "player"."pid" and "t45a638cf2fdc84646b5009d57980678a"."year" = "player_seasonlogs"."year" group by player.fname, player.lname, "player_seasonlogs"."espn_open_score", "t45a638cf2fdc84646b5009d57980678a"."weighted_opp_rating_from_plays", COALESCE(player_seasonlogs.year, t45a638cf2fdc84646b5009d57980678a.year), "player"."pid", "player"."lname", "player"."fname" order by 4 DESC NULLS LAST limit 500`
+    expect(query.toString()).to.equal(expected_query)
+  })
 })
