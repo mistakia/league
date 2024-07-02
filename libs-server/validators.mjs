@@ -102,9 +102,26 @@ const where_schema = {
       column_id: { type: 'string' },
       operator: where_operator_schema,
       value: [
-        { type: 'string' },
+        {
+          type: 'string',
+          pattern:
+            '^(?!.*(?:DELETE|DROP|TRUNCATE|ALTER|UPDATE|INSERT|MERGE|EXEC|;|--|\'|"|=|<|>)).*$',
+          min: 0,
+          max: 50,
+          alphanum: true
+        },
         { type: 'number' },
-        { type: 'array', items: { type: 'string' } },
+        {
+          type: 'array',
+          items: {
+            type: 'string',
+            pattern:
+              '^(?!.*(?:DELETE|DROP|TRUNCATE|ALTER|UPDATE|INSERT|MERGE|EXEC|;|--|\'|"|=|<|>)).*$',
+            min: 0,
+            max: 50,
+            alphanum: true
+          }
+        },
         { type: 'array', items: { type: 'number' } }
       ],
       params: { type: 'object', optional: true }
