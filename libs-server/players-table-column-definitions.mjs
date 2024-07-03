@@ -310,6 +310,7 @@ const scoring_format_player_careerlogs_join = ({
 
 const create_field_from_scoring_format_player_seasonlogs = (column_name) => ({
   column_name,
+  select_as: () => `${column_name}_from_seasonlogs`,
   table_name: 'scoring_format_player_seasonlogs',
   table_alias: scoring_format_player_seasonlogs_table_alias,
   join: scoring_format_player_seasonlogs_join,
@@ -318,6 +319,7 @@ const create_field_from_scoring_format_player_seasonlogs = (column_name) => ({
 
 const create_field_from_scoring_format_player_careerlogs = (column_name) => ({
   column_name,
+  select_as: () => `${column_name}_from_careerlogs`,
   table_name: 'scoring_format_player_careerlogs',
   table_alias: scoring_format_player_careerlogs_table_alias,
   join: scoring_format_player_careerlogs_join
