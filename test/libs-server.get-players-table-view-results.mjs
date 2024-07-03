@@ -325,6 +325,50 @@ describe('LIBS SERVER get_players_table_view_results', () => {
     expect(query.toString()).to.equal(expected_query)
   })
 
+  it('should create a query with fantasy points from seasonlogs', () => {
+    const query = get_players_table_view_results({
+      prefix_columns: ['player_name'],
+      columns: [
+        'player_fantasy_points_from_seasonlogs',
+        'player_fantasy_points_per_game_from_seasonlogs',
+        'player_fantasy_points_rank_from_seasonlogs',
+        'player_fantasy_points_position_rank_from_seasonlogs'
+      ],
+      sort: [
+        {
+          column_id: 'player_fantasy_points_from_seasonlogs',
+          desc: true
+        }
+      ]
+    })
+    const expected_query = `select "player"."pid", player.fname, player.lname, "t11b6b132b846955bec14bad1bf028f8b"."points" AS "points_0", "t11b6b132b846955bec14bad1bf028f8b"."points_per_game" AS "points_per_game_0", "t11b6b132b846955bec14bad1bf028f8b"."points_rnk" AS "points_rnk_0", "t11b6b132b846955bec14bad1bf028f8b"."points_pos_rnk" AS "points_pos_rnk_0" from "player" left join "scoring_format_player_seasonlogs" as "t11b6b132b846955bec14bad1bf028f8b" on "t11b6b132b846955bec14bad1bf028f8b"."pid" = "player"."pid" and "t11b6b132b846955bec14bad1bf028f8b"."year" = 2023 and t11b6b132b846955bec14bad1bf028f8b.scoring_format_hash = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d' group by player.fname, player.lname, "t11b6b132b846955bec14bad1bf028f8b"."points", "t11b6b132b846955bec14bad1bf028f8b"."points_per_game", "t11b6b132b846955bec14bad1bf028f8b"."points_rnk", "t11b6b132b846955bec14bad1bf028f8b"."points_pos_rnk", "player"."pid", "player"."lname", "player"."fname" order by 4 DESC NULLS LAST limit 500`
+    expect(query.toString()).to.equal(expected_query)
+  })
+
+  it('should create a query with fantasy points from careerlogs', () => {
+    const query = get_players_table_view_results({
+      prefix_columns: ['player_name'],
+      columns: [
+        'player_fantasy_points_from_careerlogs',
+        'player_fantasy_points_per_game_from_careerlogs',
+        'player_fantasy_games_played_from_careerlogs',
+        'player_fantasy_top_3_seasons_from_careerlogs',
+        'player_fantasy_top_6_seasons_from_careerlogs',
+        'player_fantasy_top_12_seasons_from_careerlogs',
+        'player_fantasy_top_24_seasons_from_careerlogs',
+        'player_fantasy_top_36_seasons_from_careerlogs'
+      ],
+      sort: [
+        {
+          column_id: 'player_fantasy_points_from_careerlogs',
+          desc: true
+        }
+      ]
+    })
+    const expected_query = `select "player"."pid", player.fname, player.lname, "t0984699909800a4c1372fbe19abf07af"."points" AS "points_0", "t0984699909800a4c1372fbe19abf07af"."points_per_game" AS "points_per_game_0", "t0984699909800a4c1372fbe19abf07af"."games" AS "games_0", "t0984699909800a4c1372fbe19abf07af"."top_3" AS "top_3_0", "t0984699909800a4c1372fbe19abf07af"."top_6" AS "top_6_0", "t0984699909800a4c1372fbe19abf07af"."top_12" AS "top_12_0", "t0984699909800a4c1372fbe19abf07af"."top_24" AS "top_24_0", "t0984699909800a4c1372fbe19abf07af"."top_36" AS "top_36_0" from "player" left join "scoring_format_player_careerlogs" as "t0984699909800a4c1372fbe19abf07af" on "t0984699909800a4c1372fbe19abf07af"."pid" = "player"."pid" and t0984699909800a4c1372fbe19abf07af.scoring_format_hash = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d' group by player.fname, player.lname, "t0984699909800a4c1372fbe19abf07af"."points", "t0984699909800a4c1372fbe19abf07af"."points_per_game", "t0984699909800a4c1372fbe19abf07af"."games", "t0984699909800a4c1372fbe19abf07af"."top_3", "t0984699909800a4c1372fbe19abf07af"."top_6", "t0984699909800a4c1372fbe19abf07af"."top_12", "t0984699909800a4c1372fbe19abf07af"."top_24", "t0984699909800a4c1372fbe19abf07af"."top_36", "player"."pid", "player"."lname", "player"."fname" order by 4 DESC NULLS LAST limit 500`
+    expect(query.toString()).to.equal(expected_query)
+  })
+
   describe('errors', () => {
     it('should throw an error if where value is missing', () => {
       try {

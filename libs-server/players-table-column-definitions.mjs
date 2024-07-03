@@ -10,6 +10,14 @@ import db from '#db'
 
 export const split_params = ['year']
 
+const active_year =
+  constants.season.week > 0 ? constants.season.year : constants.season.year - 1
+
+const get_valid_year = (year) => {
+  const parsed_year = Number(year)
+  return parsed_year >= 2017 && parsed_year <= 2023 ? parsed_year : 2023
+}
+
 const generate_table_alias = ({ type, params = {} } = {}) => {
   if (!type) {
     throw new Error('type is required')
@@ -213,6 +221,108 @@ const league_player_projection_values_table_alias = ({ params = {} }) => {
   return `league_player_projection_values_${year}_week_${week}_league_${league_id}`
 }
 
+const scoring_format_player_seasonlogs_table_alias = ({ params = {} }) => {
+  const {
+    year = active_year,
+    scoring_format_hash = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
+  } = params
+  const key = `scoring_format_player_seasonlogs_${year}_${scoring_format_hash}`
+  const hash = Array.from(blake2b(key, null, 16))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+  return `t${hash}`
+}
+
+const scoring_format_player_seasonlogs_join = ({
+  query,
+  table_name,
+  join_type = 'LEFT',
+  splits = [],
+  previous_table_name = null,
+  params = {}
+}) => {
+  const join_func = get_join_func(join_type)
+  const {
+    year = active_year,
+    scoring_format_hash = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
+  } = params
+
+  const join_conditions = function () {
+    this.on(`${table_name}.pid`, '=', 'player.pid')
+    this.andOn(`${table_name}.year`, '=', year)
+    this.andOn(
+      db.raw(`${table_name}.scoring_format_hash = '${scoring_format_hash}'`)
+    )
+
+    if (previous_table_name) {
+      for (const split of splits) {
+        this.andOn(
+          `${table_name}.${split}`,
+          '=',
+          `${previous_table_name}.${split}`
+        )
+      }
+    }
+  }
+
+  query[join_func](
+    `scoring_format_player_seasonlogs as ${table_name}`,
+    join_conditions
+  )
+}
+
+const scoring_format_player_careerlogs_table_alias = ({ params = {} }) => {
+  const {
+    scoring_format_hash = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
+  } = params
+  const key = `scoring_format_player_careerlogs_${scoring_format_hash}`
+  const hash = Array.from(blake2b(key, null, 16))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+  return `t${hash}`
+}
+
+const scoring_format_player_careerlogs_join = ({
+  query,
+  table_name,
+  join_type = 'LEFT',
+  splits = [],
+  previous_table_name = null,
+  params = {}
+}) => {
+  const join_func = get_join_func(join_type)
+  const {
+    scoring_format_hash = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
+  } = params
+
+  const join_conditions = function () {
+    this.on(`${table_name}.pid`, '=', 'player.pid')
+    this.andOn(
+      db.raw(`${table_name}.scoring_format_hash = '${scoring_format_hash}'`)
+    )
+  }
+
+  query[join_func](
+    `scoring_format_player_careerlogs as ${table_name}`,
+    join_conditions
+  )
+}
+
+const create_field_from_scoring_format_player_seasonlogs = (column_name) => ({
+  column_name,
+  table_name: 'scoring_format_player_seasonlogs',
+  table_alias: scoring_format_player_seasonlogs_table_alias,
+  join: scoring_format_player_seasonlogs_join,
+  supported_splits: ['year']
+})
+
+const create_field_from_scoring_format_player_careerlogs = (column_name) => ({
+  column_name,
+  table_name: 'scoring_format_player_careerlogs',
+  table_alias: scoring_format_player_careerlogs_table_alias,
+  join: scoring_format_player_careerlogs_join
+})
+
 const player_projected_points_added = {
   column_name: 'pts_added',
   table_name: 'league_format_player_projection_values',
@@ -360,35 +470,27 @@ const create_espn_score_columns = (column_name) => ({
     previous_table_name = null
   } = {}) => {
     const join_func = get_join_func(join_type)
+    const join_conditions = function () {
+      this.on('player_seasonlogs.pid', '=', 'player.pid')
 
-    if (previous_table_name) {
-      query[join_func]('player_seasonlogs', function () {
-        this.on(`player_seasonlogs.pid`, '=', 'player.pid')
-        for (const split of splits) {
+      if (previous_table_name) {
+        splits.forEach((split) => {
           this.andOn(
             `player_seasonlogs.${split}`,
             '=',
             `${previous_table_name}.${split}`
           )
-        }
-      })
-    } else {
-      query[join_func]('player_seasonlogs', function () {
-        this.on(`player_seasonlogs.pid`, '=', 'player.pid')
-        if (splits.includes('year')) {
-          // TODO limit to years in params.year but allowing multiple years needs to be enabled on the UX first
-          // this.andOn(db.raw(`player_seasonlogs.year IN (${params.year.join(',')})`))
-        } else {
-          let year = Number(params.year) || 2023
-
-          if (Number.isNaN(year) || year < 2017 || year > 2023) {
-            year = 2023
-          }
-
-          this.andOn(`player_seasonlogs.year`, '=', year)
-        }
-      })
+        })
+      } else if (splits.includes('year')) {
+        // TODO: Enable multiple year selection in UX before implementing this
+        // this.andOn(db.raw(`player_seasonlogs.year IN (${params.year.join(',')})`))
+      } else {
+        const year = get_valid_year(params.year)
+        this.andOn('player_seasonlogs.year', '=', year)
+      }
     }
+
+    query[join_func]('player_seasonlogs', join_conditions)
   },
   supported_splits: ['year']
 })
@@ -1017,5 +1119,33 @@ export default {
   player_espn_open_score: create_espn_score_columns('espn_open_score'),
   player_espn_catch_score: create_espn_score_columns('espn_catch_score'),
   player_espn_overall_score: create_espn_score_columns('espn_overall_score'),
-  player_espn_yac_score: create_espn_score_columns('espn_yac_score')
+  player_espn_yac_score: create_espn_score_columns('espn_yac_score'),
+
+  player_fantasy_points_from_seasonlogs:
+    create_field_from_scoring_format_player_seasonlogs('points'),
+  player_fantasy_points_per_game_from_seasonlogs:
+    create_field_from_scoring_format_player_seasonlogs('points_per_game'),
+  player_fantasy_games_played_from_seasonlogs:
+    create_field_from_scoring_format_player_seasonlogs('games'),
+  player_fantasy_points_rank_from_seasonlogs:
+    create_field_from_scoring_format_player_seasonlogs('points_rnk'),
+  player_fantasy_points_position_rank_from_seasonlogs:
+    create_field_from_scoring_format_player_seasonlogs('points_pos_rnk'),
+
+  player_fantasy_points_from_careerlogs:
+    create_field_from_scoring_format_player_careerlogs('points'),
+  player_fantasy_points_per_game_from_careerlogs:
+    create_field_from_scoring_format_player_careerlogs('points_per_game'),
+  player_fantasy_games_played_from_careerlogs:
+    create_field_from_scoring_format_player_careerlogs('games'),
+  player_fantasy_top_3_seasons_from_careerlogs:
+    create_field_from_scoring_format_player_careerlogs('top_3'),
+  player_fantasy_top_6_seasons_from_careerlogs:
+    create_field_from_scoring_format_player_careerlogs('top_6'),
+  player_fantasy_top_12_seasons_from_careerlogs:
+    create_field_from_scoring_format_player_careerlogs('top_12'),
+  player_fantasy_top_24_seasons_from_careerlogs:
+    create_field_from_scoring_format_player_careerlogs('top_24'),
+  player_fantasy_top_36_seasons_from_careerlogs:
+    create_field_from_scoring_format_player_careerlogs('top_36')
 }

@@ -15,8 +15,14 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
-SET search_path TO public;
 
+DROP INDEX IF EXISTS public.idx_scoring_format_player_seasonlogs_pid_year_hash;
+DROP INDEX IF EXISTS public.idx_scoring_format_player_gamelogs_pid_esbid_hash;
+DROP INDEX IF EXISTS public.idx_scoring_format_player_careerlogs_pid_hash;
+DROP INDEX IF EXISTS public.idx_nfl_plays_ydl_100;
+DROP INDEX IF EXISTS public.idx_nfl_plays_series_seq;
+DROP INDEX IF EXISTS public.idx_nfl_plays_qtr;
+DROP INDEX IF EXISTS public.idx_nfl_plays_dwn;
 DROP INDEX IF EXISTS public.idx_25151_lid;
 DROP INDEX IF EXISTS public.idx_25147_waiverid_pid;
 DROP INDEX IF EXISTS public.idx_25147_waiverid;
@@ -130,6 +136,7 @@ DROP INDEX IF EXISTS public.idx_24730_esbid;
 DROP INDEX IF EXISTS public.idx_24725_trg_pid;
 DROP INDEX IF EXISTS public.idx_24725_psr_pid;
 DROP INDEX IF EXISTS public."idx_24725_playId";
+DROP INDEX IF EXISTS public.idx_24725_nfl_plays_year_target;
 DROP INDEX IF EXISTS public.idx_24725_idx_seas_type;
 DROP INDEX IF EXISTS public.idx_24725_idx_play_type;
 DROP INDEX IF EXISTS public.idx_24725_idx_off;
@@ -237,7 +244,10 @@ DROP TABLE IF EXISTS public.team_stats;
 DROP SEQUENCE IF EXISTS public.sources_uid_seq;
 DROP TABLE IF EXISTS public.sources;
 DROP TABLE IF EXISTS public.seasons;
+DROP TABLE IF EXISTS public.scoring_format_player_seasonlogs;
 DROP TABLE IF EXISTS public.scoring_format_player_projection_points;
+DROP TABLE IF EXISTS public.scoring_format_player_gamelogs;
+DROP TABLE IF EXISTS public.scoring_format_player_careerlogs;
 DROP TABLE IF EXISTS public.schedule;
 DROP SEQUENCE IF EXISTS public.rosters_uid_seq;
 DROP TABLE IF EXISTS public.rosters_players;
@@ -959,8 +969,6 @@ CREATE TABLE public.league_format_player_careerlogs (
     league_format_hash character varying(64) NOT NULL,
     draft_rank smallint,
     startable_games smallint,
-    points numeric(6,1),
-    points_per_game numeric(3,1),
     points_added numeric(6,1),
     points_added_per_game numeric(3,1),
     best_season_points_added_per_game numeric(3,1),
@@ -969,13 +977,7 @@ CREATE TABLE public.league_format_player_careerlogs (
     points_added_first_five_seas numeric(6,1),
     points_added_first_seas numeric(6,1),
     points_added_second_seas numeric(6,1),
-    points_added_third_seas numeric(6,1),
-    games smallint,
-    top_3 smallint,
-    top_6 smallint,
-    top_12 smallint,
-    top_24 smallint,
-    top_36 smallint
+    points_added_third_seas numeric(6,1)
 );
 
 
@@ -988,7 +990,6 @@ CREATE TABLE public.league_format_player_gamelogs (
     esbid integer NOT NULL,
     league_format_hash character varying(64) NOT NULL,
     points numeric(6,3),
-    points_added numeric(4,1),
     pos_rnk smallint
 );
 
@@ -1016,13 +1017,8 @@ CREATE TABLE public.league_format_player_seasonlogs (
     year smallint NOT NULL,
     league_format_hash character varying(64) NOT NULL,
     startable_games smallint,
-    points numeric(4,1),
-    points_per_game numeric(3,1),
     points_added numeric(4,1),
     points_added_per_game numeric(3,1),
-    games smallint,
-    points_rnk smallint,
-    points_pos_rnk smallint,
     points_added_rnk smallint,
     points_added_pos_rnk smallint
 );
@@ -3410,8 +3406,8 @@ CREATE TABLE public.player (
     pos character varying(4) NOT NULL,
     pos1 character varying(4) NOT NULL,
     pos2 character varying(4),
-    height smallint DEFAULT NULL,
-    weight smallint DEFAULT NULL,
+    height smallint,
+    weight smallint,
     dob character varying(10) NOT NULL,
     forty numeric(3,2),
     bench smallint,
@@ -4513,6 +4509,38 @@ CREATE TABLE public.schedule (
 
 
 --
+-- Name: scoring_format_player_careerlogs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.scoring_format_player_careerlogs (
+    pid character varying(25) NOT NULL,
+    scoring_format_hash character varying(64) NOT NULL,
+    draft_rank smallint,
+    points numeric(6,1),
+    points_per_game numeric(3,1),
+    games smallint,
+    top_3 smallint,
+    top_6 smallint,
+    top_12 smallint,
+    top_24 smallint,
+    top_36 smallint
+);
+
+
+--
+-- Name: scoring_format_player_gamelogs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.scoring_format_player_gamelogs (
+    pid character varying(25) NOT NULL,
+    esbid integer NOT NULL,
+    scoring_format_hash character varying(64) NOT NULL,
+    points numeric(6,3),
+    pos_rnk smallint
+);
+
+
+--
 -- Name: scoring_format_player_projection_points; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -4558,6 +4586,22 @@ CREATE TABLE public.scoring_format_player_projection_points (
     dtd numeric(4,1),
     krtd numeric(4,1),
     prtd numeric(4,1)
+);
+
+
+--
+-- Name: scoring_format_player_seasonlogs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.scoring_format_player_seasonlogs (
+    pid character varying(25) NOT NULL,
+    year smallint NOT NULL,
+    scoring_format_hash character varying(64) NOT NULL,
+    points numeric(4,1),
+    points_per_game numeric(3,1),
+    games smallint,
+    points_rnk smallint,
+    points_pos_rnk smallint
 );
 
 
@@ -5607,11 +5651,6 @@ CREATE UNIQUE INDEX "idx_24725_gamePlay" ON public.nfl_plays USING btree (esbid,
 
 CREATE INDEX idx_24725_idx_nfl_plays_target ON public.nfl_plays USING btree (play_type, seas_type, trg_pid, off, esbid);
 
---
--- Name: idx_24725_idx_nfl_plays_year_target; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_24725_idx_nfl_plays_year_target ON public.nfl_plays USING btree (year, play_type, seas_type, trg_pid, off, esbid);
 
 --
 -- Name: idx_24725_idx_nfl_plays_year_esbid; Type: INDEX; Schema: public; Owner: -
@@ -5639,6 +5678,13 @@ CREATE INDEX idx_24725_idx_play_type ON public.nfl_plays USING btree (play_type)
 --
 
 CREATE INDEX idx_24725_idx_seas_type ON public.nfl_plays USING btree (seas_type);
+
+
+--
+-- Name: idx_24725_nfl_plays_year_target; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_24725_nfl_plays_year_target ON public.nfl_plays USING btree (year, play_type, seas_type, trg_pid, off, esbid);
 
 
 --
@@ -6430,6 +6476,55 @@ CREATE UNIQUE INDEX idx_25147_waiverid_pid ON public.waiver_releases USING btree
 --
 
 CREATE INDEX idx_25151_lid ON public.waivers USING btree (lid);
+
+
+--
+-- Name: idx_nfl_plays_dwn; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_dwn ON public.nfl_plays USING btree (dwn);
+
+
+--
+-- Name: idx_nfl_plays_qtr; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_qtr ON public.nfl_plays USING btree (qtr);
+
+
+--
+-- Name: idx_nfl_plays_series_seq; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_series_seq ON public.nfl_plays USING btree (series_seq);
+
+
+--
+-- Name: idx_nfl_plays_ydl_100; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_ydl_100 ON public.nfl_plays USING btree (ydl_100);
+
+
+--
+-- Name: idx_scoring_format_player_careerlogs_pid_hash; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_scoring_format_player_careerlogs_pid_hash ON public.scoring_format_player_careerlogs USING btree (pid, scoring_format_hash);
+
+
+--
+-- Name: idx_scoring_format_player_gamelogs_pid_esbid_hash; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_scoring_format_player_gamelogs_pid_esbid_hash ON public.scoring_format_player_gamelogs USING btree (pid, esbid, scoring_format_hash);
+
+
+--
+-- Name: idx_scoring_format_player_seasonlogs_pid_year_hash; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_scoring_format_player_seasonlogs_pid_year_hash ON public.scoring_format_player_seasonlogs USING btree (pid, year, scoring_format_hash);
 
 
 --
