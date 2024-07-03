@@ -243,13 +243,17 @@ const scoring_format_player_seasonlogs_join = ({
 }) => {
   const join_func = get_join_func(join_type)
   const {
-    year = active_year,
     scoring_format_hash = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
   } = params
 
+  let year = params.year || [active_year]
+  if (!Array.isArray(year)) {
+    year = [year]
+  }
+
   const join_conditions = function () {
     this.on(`${table_name}.pid`, '=', 'player.pid')
-    this.andOn(`${table_name}.year`, '=', year)
+    this.andOn(db.raw(`${table_name}.year IN (${year.join(',')})`))
     this.andOn(
       db.raw(`${table_name}.scoring_format_hash = '${scoring_format_hash}'`)
     )
