@@ -329,10 +329,30 @@ describe('LIBS SERVER get_players_table_view_results', () => {
     const query = get_players_table_view_results({
       prefix_columns: ['player_name'],
       columns: [
-        'player_fantasy_points_from_seasonlogs',
-        'player_fantasy_points_per_game_from_seasonlogs',
-        'player_fantasy_points_rank_from_seasonlogs',
-        'player_fantasy_points_position_rank_from_seasonlogs'
+        {
+          column_id: 'player_fantasy_points_from_seasonlogs',
+          params: {
+            year: 2022
+          }
+        },
+        {
+          column_id: 'player_fantasy_points_per_game_from_seasonlogs',
+          params: {
+            year: 2022
+          }
+        },
+        {
+          column_id: 'player_fantasy_points_rank_from_seasonlogs',
+          params: {
+            year: 2022
+          }
+        },
+        {
+          column_id: 'player_fantasy_points_position_rank_from_seasonlogs',
+          params: {
+            year: 2022
+          }
+        }
       ],
       sort: [
         {
@@ -341,7 +361,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
         }
       ]
     })
-    const expected_query = `select "player"."pid", player.fname, player.lname, "t11b6b132b846955bec14bad1bf028f8b"."points" AS "points_from_seasonlogs_0", "t11b6b132b846955bec14bad1bf028f8b"."points_per_game" AS "points_per_game_from_seasonlogs_0", "t11b6b132b846955bec14bad1bf028f8b"."points_rnk" AS "points_rnk_from_seasonlogs_0", "t11b6b132b846955bec14bad1bf028f8b"."points_pos_rnk" AS "points_pos_rnk_from_seasonlogs_0" from "player" left join "scoring_format_player_seasonlogs" as "t11b6b132b846955bec14bad1bf028f8b" on "t11b6b132b846955bec14bad1bf028f8b"."pid" = "player"."pid" and "t11b6b132b846955bec14bad1bf028f8b"."year" = 2023 and t11b6b132b846955bec14bad1bf028f8b.scoring_format_hash = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d' group by player.fname, player.lname, "t11b6b132b846955bec14bad1bf028f8b"."points", "t11b6b132b846955bec14bad1bf028f8b"."points_per_game", "t11b6b132b846955bec14bad1bf028f8b"."points_rnk", "t11b6b132b846955bec14bad1bf028f8b"."points_pos_rnk", "player"."pid", "player"."lname", "player"."fname" order by 4 DESC NULLS LAST limit 500`
+    const expected_query = `select "player"."pid", player.fname, player.lname, "t626199f46d9de1cc8bf280d9b15d6c9b"."points" AS "points_from_seasonlogs_0", "t626199f46d9de1cc8bf280d9b15d6c9b"."points_per_game" AS "points_per_game_from_seasonlogs_0", "t626199f46d9de1cc8bf280d9b15d6c9b"."points_rnk" AS "points_rnk_from_seasonlogs_0", "t626199f46d9de1cc8bf280d9b15d6c9b"."points_pos_rnk" AS "points_pos_rnk_from_seasonlogs_0" from "player" left join "scoring_format_player_seasonlogs" as "t626199f46d9de1cc8bf280d9b15d6c9b" on "t626199f46d9de1cc8bf280d9b15d6c9b"."pid" = "player"."pid" and t626199f46d9de1cc8bf280d9b15d6c9b.year IN (2022) and t626199f46d9de1cc8bf280d9b15d6c9b.scoring_format_hash = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d' group by player.fname, player.lname, "t626199f46d9de1cc8bf280d9b15d6c9b"."points", "t626199f46d9de1cc8bf280d9b15d6c9b"."points_per_game", "t626199f46d9de1cc8bf280d9b15d6c9b"."points_rnk", "t626199f46d9de1cc8bf280d9b15d6c9b"."points_pos_rnk", "player"."pid", "player"."lname", "player"."fname" order by 4 DESC NULLS LAST limit 500`
     expect(query.toString()).to.equal(expected_query)
   })
 
