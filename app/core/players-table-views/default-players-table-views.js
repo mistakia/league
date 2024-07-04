@@ -21,7 +21,7 @@ export const default_players_table_views = {
           desc: true
         }
       ],
-      prefix_columns: ['player_name', 'player_position'],
+      prefix_columns: ['player_name'],
       columns: [
         constants.season.isOffseason
           ? 'player_season_projected_points_added'
@@ -111,7 +111,7 @@ export const default_players_table_views = {
           desc: true
         }
       ],
-      prefix_columns: ['player_name', 'player_position'],
+      prefix_columns: ['player_name'],
       columns: [
         'player_pass_yards_from_plays',
         'player_pass_touchdowns_from_plays',
@@ -150,7 +150,7 @@ export const default_players_table_views = {
           desc: true
         }
       ],
-      prefix_columns: ['player_name', 'player_position'],
+      prefix_columns: ['player_name'],
       columns: [
         // fantasy_points
         'player_rush_yards_from_plays',
@@ -184,7 +184,7 @@ export const default_players_table_views = {
           desc: true
         }
       ],
-      prefix_columns: ['player_name', 'player_position'],
+      prefix_columns: ['player_name'],
       columns: [
         // fantasy points
         'player_receiving_yards_from_plays',
