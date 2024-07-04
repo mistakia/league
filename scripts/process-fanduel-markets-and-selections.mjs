@@ -17,6 +17,11 @@ const process_fanduel_markets_and_selections = async ({
   since_date = null
 } = {}) => {
   const query = db('prop_market_selections_index')
+    .select(
+      'prop_market_selections_index.*',
+      'prop_markets_index.*',
+      'nfl_games.year as nfl_games_year'
+    )
     .leftJoin('prop_markets_index', function () {
       this.on(
         'prop_market_selections_index.source_market_id',
@@ -31,6 +36,7 @@ const process_fanduel_markets_and_selections = async ({
         'prop_markets_index.time_type'
       )
     })
+    .leftJoin('nfl_games', 'nfl_games.esbid', 'prop_markets_index.esbid')
     .where('prop_markets_index.source_id', 'FANDUEL')
 
   if (since_date) {
@@ -59,6 +65,10 @@ const process_fanduel_markets_and_selections = async ({
       source_market_index[market_selection_row.source_market_id] = {
         source_market_id: market_selection_row.source_market_id,
         source_id: market_selection_row.source_id,
+        esbid: market_selection_row.esbid,
+        year: market_selection_row.year,
+        nfl_games_year: market_selection_row.nfl_games_year,
+        source_event_name: market_selection_row.source_event_name,
         market_name,
         market_type,
         selections: []
@@ -105,6 +115,23 @@ const process_fanduel_markets_and_selections = async ({
       .update({
         market_type
       })
+
+    if (!source_market.year) {
+      let year = source_market.nfl_games_year
+      if (!year) {
+        year = fanduel.get_market_year({
+          marketName: source_market.market_name,
+          source_event_name: source_market.source_event_name
+        })
+      }
+
+      await db('prop_markets_index')
+        .where({
+          source_market_id: source_market.source_market_id,
+          source_id: source_market.source_id
+        })
+        .update({ year })
+    }
 
     for (const selection of source_market.selections) {
       if (!selection.selection_metric_line) {
