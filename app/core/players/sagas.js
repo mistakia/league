@@ -79,9 +79,10 @@ export function* search() {
 
 export function* initLeaguePlayers() {
   const league = yield select(getCurrentLeague)
-  if (!league.processed_at) {
-    yield call(calculateValues)
-  }
+  // TODO disable this for now — do not need this on load
+  // if (!league.processed_at) {
+  //   yield call(calculateValues)
+  // }
 }
 
 export function* calculateValues() {
