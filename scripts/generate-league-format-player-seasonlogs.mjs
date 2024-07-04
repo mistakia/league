@@ -21,6 +21,13 @@ const generate_league_format_player_seasonlogs = async ({
   log(
     `generating player seasonlogs for league_format ${league_format_hash} in ${year}`
   )
+  const league_format = await db('league_formats')
+    .where({ league_format_hash })
+    .first()
+
+  if (!league_format) {
+    throw new Error(`league_format ${league_format_hash} not found`)
+  }
 
   // get league player gamelogs for season
   const gamelogs = await db('league_format_player_gamelogs')
@@ -66,11 +73,23 @@ const generate_league_format_player_seasonlogs = async ({
     .map((i) => i.points_added)
     .sort((a, b) => b - a)
 
+  // Calculate total points added for the season
+  const total_points_added = sum(inserts.map((i) => i.points_added))
+
+  // Calculate the rate of $ per points added
+  const total_league_salary = league_format.cap * league_format.num_teams
+  const rate_per_point = total_league_salary / total_points_added
+
   for (const insert of inserts) {
     insert.points_added_rnk =
       sorted_by_points_added.indexOf(insert.points_added) + 1
     insert.points_added_pos_rnk =
       sorted_by_points_added_by_pos[insert.pos].indexOf(insert.points_added) + 1
+
+    // Calculate earned salary
+    insert.earned_salary = Number(
+      (insert.points_added * rate_per_point).toFixed(2)
+    )
 
     delete insert.pos
   }

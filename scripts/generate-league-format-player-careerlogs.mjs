@@ -73,6 +73,9 @@ const generate_league_format_player_careerlogs = async ({
       best_season_points_added_per_game: Math.max(
         ...seasons.map((s) => s.points_added_per_game)
       ),
+      best_season_earned_salary: Math.max(
+        ...seasons.map((s) => s.earned_salary)
+      ),
       points_added_first_three_seas: sum(
         first_three_seasons.map((s) => s.points_added)
       ),
