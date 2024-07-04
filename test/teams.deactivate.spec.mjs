@@ -377,6 +377,9 @@ describe('API /teams - deactivate', function () {
       const player = await selectPlayer()
       const timestamp = Math.round(Date.now() / 1000)
 
+      // reset to prevent duplicate key collison
+      await knex('rosters_players').del()
+
       const result = await knex('waivers')
         .insert({
           tid: 1,

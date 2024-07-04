@@ -15,6 +15,7 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
+SET search_path = public;
 
 DROP INDEX IF EXISTS public.idx_scoring_format_player_seasonlogs_pid_year_hash;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_gamelogs_pid_esbid_hash;
@@ -326,25 +327,11 @@ DROP TABLE IF EXISTS public.jobs;
 DROP TABLE IF EXISTS public.footballoutsiders;
 DROP SEQUENCE IF EXISTS public.draft_uid_seq;
 DROP TABLE IF EXISTS public.draft;
+DROP TYPE IF EXISTS public.wager_status;
 DROP TYPE IF EXISTS public.time_type;
-DROP TYPE IF EXISTS public.prop_market_selections_index_result;
 DROP TYPE IF EXISTS public.placed_wagers_wager_type;
-DROP TYPE IF EXISTS public.placed_wagers_wager_status;
-DROP TYPE IF EXISTS public.placed_wagers_selection_9_status;
-DROP TYPE IF EXISTS public.placed_wagers_selection_8_status;
-DROP TYPE IF EXISTS public.placed_wagers_selection_7_status;
-DROP TYPE IF EXISTS public.placed_wagers_selection_6_status;
-DROP TYPE IF EXISTS public.placed_wagers_selection_5_status;
-DROP TYPE IF EXISTS public.placed_wagers_selection_4_status;
-DROP TYPE IF EXISTS public.placed_wagers_selection_3_status;
-DROP TYPE IF EXISTS public.placed_wagers_selection_2_status;
-DROP TYPE IF EXISTS public.placed_wagers_selection_1_status;
-DROP TYPE IF EXISTS public.placed_wagers_selection_12_status;
-DROP TYPE IF EXISTS public.placed_wagers_selection_11_status;
-DROP TYPE IF EXISTS public.placed_wagers_selection_10_status;
 DROP TYPE IF EXISTS public.placed_wagers_book_id;
-DROP TYPE IF EXISTS public.nfl_plays_play_type;
-DROP TYPE IF EXISTS public.nfl_plays_current_week_play_type;
+DROP TYPE IF EXISTS public.nfl_play_type;
 DROP TYPE IF EXISTS public.nfl_games_surf;
 DROP TYPE IF EXISTS public.nfl_games_roof;
 DROP TYPE IF EXISTS public.market_source_id;
@@ -394,25 +381,10 @@ CREATE TYPE public.nfl_games_surf AS ENUM (
 
 
 --
--- Name: nfl_plays_current_week_play_type; Type: TYPE; Schema: public; Owner: -
+-- Name: nfl_play_type; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE public.nfl_plays_current_week_play_type AS ENUM (
-    'CONV',
-    'FGXP',
-    'KOFF',
-    'NOPL',
-    'PASS',
-    'PUNT',
-    'RUSH'
-);
-
-
---
--- Name: nfl_plays_play_type; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.nfl_plays_play_type AS ENUM (
+CREATE TYPE public.nfl_play_type AS ENUM (
     'CONV',
     'FGXP',
     'KOFF',
@@ -434,175 +406,6 @@ CREATE TYPE public.placed_wagers_book_id AS ENUM (
 
 
 --
--- Name: placed_wagers_selection_10_status; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.placed_wagers_selection_10_status AS ENUM (
-    'OPEN',
-    'WON',
-    'LOST',
-    'PUSH',
-    'CANCELLED'
-);
-
-
---
--- Name: placed_wagers_selection_11_status; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.placed_wagers_selection_11_status AS ENUM (
-    'OPEN',
-    'WON',
-    'LOST',
-    'PUSH',
-    'CANCELLED'
-);
-
-
---
--- Name: placed_wagers_selection_12_status; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.placed_wagers_selection_12_status AS ENUM (
-    'OPEN',
-    'WON',
-    'LOST',
-    'PUSH',
-    'CANCELLED'
-);
-
-
---
--- Name: placed_wagers_selection_1_status; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.placed_wagers_selection_1_status AS ENUM (
-    'OPEN',
-    'WON',
-    'LOST',
-    'PUSH',
-    'CANCELLED'
-);
-
-
---
--- Name: placed_wagers_selection_2_status; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.placed_wagers_selection_2_status AS ENUM (
-    'OPEN',
-    'WON',
-    'LOST',
-    'PUSH',
-    'CANCELLED'
-);
-
-
---
--- Name: placed_wagers_selection_3_status; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.placed_wagers_selection_3_status AS ENUM (
-    'OPEN',
-    'WON',
-    'LOST',
-    'PUSH',
-    'CANCELLED'
-);
-
-
---
--- Name: placed_wagers_selection_4_status; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.placed_wagers_selection_4_status AS ENUM (
-    'OPEN',
-    'WON',
-    'LOST',
-    'PUSH',
-    'CANCELLED'
-);
-
-
---
--- Name: placed_wagers_selection_5_status; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.placed_wagers_selection_5_status AS ENUM (
-    'OPEN',
-    'WON',
-    'LOST',
-    'PUSH',
-    'CANCELLED'
-);
-
-
---
--- Name: placed_wagers_selection_6_status; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.placed_wagers_selection_6_status AS ENUM (
-    'OPEN',
-    'WON',
-    'LOST',
-    'PUSH',
-    'CANCELLED'
-);
-
-
---
--- Name: placed_wagers_selection_7_status; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.placed_wagers_selection_7_status AS ENUM (
-    'OPEN',
-    'WON',
-    'LOST',
-    'PUSH',
-    'CANCELLED'
-);
-
-
---
--- Name: placed_wagers_selection_8_status; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.placed_wagers_selection_8_status AS ENUM (
-    'OPEN',
-    'WON',
-    'LOST',
-    'PUSH',
-    'CANCELLED'
-);
-
-
---
--- Name: placed_wagers_selection_9_status; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.placed_wagers_selection_9_status AS ENUM (
-    'OPEN',
-    'WON',
-    'LOST',
-    'PUSH',
-    'CANCELLED'
-);
-
-
---
--- Name: placed_wagers_wager_status; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.placed_wagers_wager_status AS ENUM (
-    'OPEN',
-    'WON',
-    'LOST',
-    'PUSH',
-    'CANCELLED'
-);
-
-
---
 -- Name: placed_wagers_wager_type; Type: TYPE; Schema: public; Owner: -
 --
 
@@ -610,19 +413,6 @@ CREATE TYPE public.placed_wagers_wager_type AS ENUM (
     'SINGLE',
     'PARLAY',
     'ROUND_ROBIN'
-);
-
-
---
--- Name: prop_market_selections_index_result; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.prop_market_selections_index_result AS ENUM (
-    'PENDING',
-    'WON',
-    'LOST',
-    'PUSH',
-    'CANCELLED'
 );
 
 
@@ -641,6 +431,19 @@ CREATE TYPE public.time_type AS ENUM (
 --
 
 COMMENT ON TYPE public.time_type IS 'Shared enum for open/close time types, used by prop_markets_index, prop_market_selections_index, and props_index tables';
+
+
+--
+-- Name: wager_status; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.wager_status AS ENUM (
+    'OPEN',
+    'WON',
+    'LOST',
+    'PUSH',
+    'CANCELLED'
+);
 
 
 SET default_table_access_method = heap;
@@ -1504,7 +1307,7 @@ CREATE TABLE public.nfl_plays (
     updated integer NOT NULL,
     off character varying(3),
     def character varying(3),
-    play_type public.nfl_plays_play_type,
+    play_type public.nfl_play_type,
     player_fuml_pid character varying(25),
     player_fuml_gsis character varying(36),
     bc_pid character varying(25),
@@ -2347,7 +2150,7 @@ CREATE TABLE public.nfl_plays_current_week (
     def character varying(3),
     deleted boolean,
     review text,
-    play_type public.nfl_plays_current_week_play_type,
+    play_type public.nfl_play_type,
     play_type_nfl character varying(36),
     play_type_ngs character varying(36),
     next_play_type character varying(36),
@@ -3211,7 +3014,7 @@ CREATE TABLE public.placed_wagers (
     placed_at integer NOT NULL,
     bet_count smallint NOT NULL,
     selection_count smallint NOT NULL,
-    wager_status public.placed_wagers_wager_status NOT NULL,
+    wager_status public.wager_status NOT NULL,
     bet_wager_amount numeric(7,2) NOT NULL,
     total_wager_amount numeric(7,2) NOT NULL,
     wager_returned_amount numeric(12,2) NOT NULL,
@@ -3219,19 +3022,19 @@ CREATE TABLE public.placed_wagers (
     book_wager_id character varying(255) NOT NULL,
     selection_1_id character varying(255),
     selection_1_odds integer,
-    selection_1_status public.placed_wagers_selection_1_status,
+    selection_1_status public.wager_status,
     selection_2_id character varying(255),
     selection_2_odds integer,
-    selection_2_status public.placed_wagers_selection_2_status,
+    selection_2_status public.wager_status,
     selection_3_id character varying(255),
     selection_3_odds integer,
-    selection_3_status public.placed_wagers_selection_3_status,
+    selection_3_status public.wager_status,
     selection_4_id character varying(255),
     selection_4_odds integer,
-    selection_4_status public.placed_wagers_selection_4_status,
+    selection_4_status public.wager_status,
     selection_5_id character varying(255),
     selection_5_odds integer,
-    selection_5_status public.placed_wagers_selection_5_status,
+    selection_5_status public.wager_status,
     selection_6_id character varying(255),
     selection_6_odds integer,
     selection_7_id character varying(255),
@@ -3243,16 +3046,16 @@ CREATE TABLE public.placed_wagers (
     selection_10_id character varying(255),
     selection_10_odds integer,
     selection_lost smallint DEFAULT '0'::smallint,
-    selection_6_status public.placed_wagers_selection_6_status,
-    selection_7_status public.placed_wagers_selection_7_status,
-    selection_8_status public.placed_wagers_selection_8_status,
-    selection_9_status public.placed_wagers_selection_9_status,
-    selection_10_status public.placed_wagers_selection_10_status,
+    selection_6_status public.wager_status,
+    selection_7_status public.wager_status,
+    selection_8_status public.wager_status,
+    selection_9_status public.wager_status,
+    selection_10_status public.wager_status,
     selection_11_id character varying(255),
-    selection_11_status public.placed_wagers_selection_11_status,
+    selection_11_status public.wager_status,
     selection_11_odds integer,
     selection_12_id character varying(255),
-    selection_12_status public.placed_wagers_selection_12_status,
+    selection_12_status public.wager_status,
     selection_12_odds integer
 );
 
@@ -4028,7 +3831,7 @@ CREATE TABLE public.prop_market_selections_index (
     selection_metric_line numeric(6,1),
     odds_decimal numeric(15,3),
     odds_american integer,
-    result public.prop_market_selections_index_result,
+    result public.wager_status,
     "timestamp" integer NOT NULL,
     time_type public.time_type NOT NULL
 );
