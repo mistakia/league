@@ -4522,6 +4522,7 @@ CREATE TABLE public.scoring_format_player_careerlogs (
     points numeric(6,1),
     points_per_game numeric(3,1),
     games smallint,
+    top_1 smallint,
     top_3 smallint,
     top_6 smallint,
     top_12 smallint,
