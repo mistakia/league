@@ -469,6 +469,11 @@ export function playersReducer(state = initialState, { payload, type }) {
             fname: row.fname,
             lname: row.lname
           }
+
+          if (row.pos_0) {
+            formatted_player_data.pos = row.pos_0
+          }
+
           if (players.hasIn(['items', row.pid])) {
             const data = players.getIn(['items', row.pid])
             players.setIn(

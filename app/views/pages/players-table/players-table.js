@@ -112,7 +112,7 @@ export default function PlayersTablePage({
     player.className = get_string_from_object(class_params)
   }
 
-  const new_prefix_columns = ['player_name']
+  const new_prefix_columns = ['player_name', 'player_position']
   if (isLoggedIn) {
     new_prefix_columns.push('player_league_roster_status')
   }
