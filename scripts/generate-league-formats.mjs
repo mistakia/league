@@ -15,6 +15,42 @@ debug.enable(
   'generate-league-formats,generate-league-format-hash,generate-scoring-format-hash'
 )
 
+const generate_scoring_format_title = (scoring_format) => {
+  const parts = []
+
+  // Reception points
+  if (scoring_format.rec === 1) {
+    parts.push('PPR')
+  } else if (scoring_format.rec === 0.5) {
+    parts.push('0.5PPR')
+  } else if (scoring_format.rec === 0) {
+    parts.push('Standard')
+  }
+
+  // Tight End Premium
+  if (scoring_format.terec > scoring_format.rec) {
+    parts.push(`TE+${scoring_format.terec - scoring_format.rec}`)
+  }
+
+  // Passing TD points
+  parts.push(`${scoring_format.tdp}PTD`)
+
+  // Interception points
+  parts.push(`${scoring_format.ints}INT`)
+
+  // Passing yards (if different from standard)
+  if (scoring_format.py !== 0.04) {
+    parts.push(`${scoring_format.py}PY`)
+  }
+
+  // Fumbles lost (if different from standard -2)
+  if (scoring_format.fuml !== -2) {
+    parts.push(`${scoring_format.fuml}FUM`)
+  }
+
+  return parts.join(' / ')
+}
+
 const generate_league_formats = async () => {
   const options = {
     num_teams: [10, 12],
@@ -51,7 +87,7 @@ const generate_league_formats = async () => {
   }
 
   const league_formats = []
-  const scoring_formats = []
+  const scoring_formats_map = new Map()
 
   const keys = Object.keys(options)
   const combinations = keys.reduce(
@@ -103,7 +139,12 @@ const generate_league_formats = async () => {
     }
 
     const { scoring_format_hash } = generate_scoring_format_hash(scoring_format)
-    scoring_formats.push({ scoring_format_hash, ...scoring_format })
+    const scoring_format_title = generate_scoring_format_title(scoring_format)
+    scoring_formats_map.set(scoring_format_hash, {
+      scoring_format_hash,
+      scoring_format_title,
+      ...scoring_format
+    })
 
     const league_format = {
       scoring_format_hash,
@@ -134,7 +175,13 @@ const generate_league_formats = async () => {
   })
 
   const default_league = await getLeague({ lid: 0 })
-  scoring_formats.push(generate_scoring_format_hash(default_league))
+  const default_league_scoring_format =
+    generate_scoring_format_hash(default_league)
+  scoring_formats_map.set(default_league_scoring_format.scoring_format_hash, {
+    scoring_format_hash: default_league_scoring_format.scoring_format_hash,
+    scoring_format_title: generate_scoring_format_title(default_league),
+    ...default_league_scoring_format
+  })
   league_formats.push(generate_league_format_hash(default_league))
 
   // delete league formats not in `league_formats` array or in `seasons` table
@@ -159,10 +206,11 @@ const generate_league_formats = async () => {
     .ignore()
   log(`Inserted ${league_formats.length} league formats`)
 
+  const scoring_formats = Array.from(scoring_formats_map.values())
   await db('league_scoring_formats')
     .insert(scoring_formats)
     .onConflict('scoring_format_hash')
-    .ignore()
+    .merge() // update title
   log(`Inserted ${scoring_formats.length} scoring formats`)
 }
 
