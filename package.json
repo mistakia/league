@@ -17,7 +17,8 @@
     "count:lines": "git ls-files -- ':!:yarn.lock' ':!:./data' | xargs wc -l | tail -n 1",
     "load:main": "ssh league 'export NVM_DIR=\"$HOME/.nvm\" && [ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\" && cd /root/league && git pull && yarn install'",
     "load:crontab:main": "ssh league 'export NVM_DIR=\"$HOME/.nvm\" && [ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\" && cd /root/league && git pull && crontab /root/league/server/crontab-main'",
-    "load:logrotate:main": "ssh league 'cd /root/league && git pull && cp /root/league/server/logrotate-main /etc/logrotate.d/league-main'"
+    "load:logrotate:main": "ssh league 'cd /root/league && git pull && cp /root/league/server/logrotate-main /etc/logrotate.d/league-main'",
+    "export:schema": "ssh league 'pg_dump -U league_user -h localhost --dbname=league_production --schema-only --clean --no-owner --if-exists --file=/root/schema.postgres.sql --no-tablespaces' && scp league:/root/schema.postgres.sql ./db/"
   },
   "imports": {
     "#config": "./config.js",
