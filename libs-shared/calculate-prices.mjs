@@ -13,7 +13,7 @@ const calculatePrices = ({ total_pts_added, cap, players, week }) => {
     const pts_added_salary_adjusted =
       player.pts_added[week] + pts_added_from_salary_savings || 0
 
-      if (!player.salary_adj_pts_added) {
+    if (!player.salary_adj_pts_added) {
       player.salary_adj_pts_added = {}
     }
     player.salary_adj_pts_added[week] = Math.max(pts_added_salary_adjusted, 0)
