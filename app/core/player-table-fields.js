@@ -1725,8 +1725,8 @@ export function PlayerTableFields({
         player_value_path: 'points_added_third_seas_from_careerlogs'
       }),
     player_draft_rank_from_careerlogs: from_league_format_careerlogs({
-      column_title: 'Points Added Draft Class Rank',
-      header_label: 'Pts Draft Rnk',
+      column_title: 'Draft Class Rank',
+      header_label: 'Draft Rnk',
       player_value_path: 'draft_rank_from_careerlogs'
     })
   }
