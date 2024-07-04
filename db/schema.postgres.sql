@@ -1256,6 +1256,7 @@ CREATE TABLE public.league_player_seasonlogs (
 
 CREATE TABLE public.league_scoring_formats (
     scoring_format_hash character varying(64) NOT NULL,
+    scoring_format_title character varying(255),
     pa numeric(3,2) NOT NULL,
     pc numeric(3,2) NOT NULL,
     py numeric(3,2) NOT NULL,
