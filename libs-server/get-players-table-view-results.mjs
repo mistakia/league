@@ -576,7 +576,14 @@ export default function ({
     players_query.offset(offset)
   }
 
-  players_query.groupBy('player.pid', 'player.lname', 'player.fname')
+  players_query.select('player.pos')
+
+  players_query.groupBy(
+    'player.pid',
+    'player.lname',
+    'player.fname',
+    'player.pos'
+  )
   players_query.limit(limit)
 
   console.log(players_query.toString())
