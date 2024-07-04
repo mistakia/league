@@ -20,7 +20,8 @@ import {
   getRoster,
   getLeague,
   getPlayerTransactions,
-  isMain
+  isMain,
+  batch_insert
 } from '#libs-server'
 import project_lineups from './project-lineups.mjs'
 import simulate_season from './simulate-season.mjs'
@@ -94,22 +95,37 @@ const process_average_projections = async ({ year }) => {
 
   if (projectionInserts.length) {
     const timestamp = 0 // must be set at zero for unique key
-    await db('projections_index')
-      .insert(projectionInserts)
-      .onConflict(['sourceid', 'pid', 'userid', 'week', 'year'])
-      .merge()
-    await db('projections')
-      .insert(projectionInserts.map((i) => ({ ...i, timestamp })))
-      .onConflict(['sourceid', 'pid', 'userid', 'timestamp', 'week', 'year'])
-      .merge()
+    await batch_insert({
+      items: projectionInserts,
+      save: (items) =>
+        db('projections_index')
+          .insert(items)
+          .onConflict(['sourceid', 'pid', 'userid', 'week', 'year'])
+          .merge(),
+      batch_size: 100
+    })
+    await batch_insert({
+      items: projectionInserts.map((i) => ({ ...i, timestamp })),
+      save: (items) =>
+        db('projections')
+          .insert(items)
+          .onConflict(['sourceid', 'pid', 'userid', 'timestamp', 'week', 'year'])
+          .merge(),
+      batch_size: 100
+    })
     log(`processed and saved ${projectionInserts.length} projections`)
   }
 
   if (rosProjectionInserts.length) {
-    await db('ros_projections')
-      .insert(rosProjectionInserts)
-      .onConflict(['sourceid', 'pid', 'year'])
-      .merge()
+    await batch_insert({
+      items: rosProjectionInserts,
+      save: (items) =>
+        db('ros_projections')
+          .insert(items)
+          .onConflict(['sourceid', 'pid', 'year'])
+          .merge(),
+      batch_size: 100
+    })
     log(`processed and saved ${rosProjectionInserts.length} ros projections`)
   }
 
@@ -162,7 +178,12 @@ const process_scoring_format = async ({
     await db('scoring_format_player_projection_points')
       .del()
       .where({ scoring_format_hash })
-    await db('scoring_format_player_projection_points').insert(pointsInserts)
+    await batch_insert({
+      items: pointsInserts,
+      save: (items) =>
+        db('scoring_format_player_projection_points').insert(items),
+      batch_size: 100
+    })
     log(`processed and saved ${pointsInserts.length} player points`)
   }
 }
@@ -240,7 +261,12 @@ const process_league_format = async ({
     await db('league_format_player_projection_values')
       .del()
       .where({ league_format_hash })
-    await db('league_format_player_projection_values').insert(valueInserts)
+    await batch_insert({
+      items: valueInserts,
+      save: (items) =>
+        db('league_format_player_projection_values').insert(items),
+      batch_size: 100
+    })
     log(`processed and saved ${valueInserts.length} player values`)
   }
 }
@@ -400,19 +426,29 @@ const process_league = async ({ year, lid }) => {
   }
 
   if (baselineInserts.length) {
-    await db('league_baselines')
-      .insert(baselineInserts)
-      .onConflict(['lid', 'week', 'pos', 'type'])
-      .merge()
+    await batch_insert({
+      items: baselineInserts,
+      save: (items) =>
+        db('league_baselines')
+          .insert(items)
+          .onConflict(['lid', 'week', 'pos', 'type'])
+          .merge(),
+      batch_size: 100
+    })
     log(`saved ${baselineInserts.length} baselines`)
   }
 
   if (valueInserts.length) {
     await db('league_player_projection_values').del().where({ lid })
-    await db('league_player_projection_values')
-      .insert(valueInserts)
-      .onConflict(['pid', 'lid', 'week', 'year'])
-      .merge()
+    await batch_insert({
+      items: valueInserts,
+      save: (items) =>
+        db('league_player_projection_values')
+          .insert(items)
+          .onConflict(['pid', 'lid', 'week', 'year'])
+          .merge(),
+      batch_size: 100
+    })
     log(`processed and saved ${valueInserts.length} player values`)
   }
 

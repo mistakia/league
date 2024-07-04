@@ -3975,7 +3975,7 @@ CREATE TABLE public.projections (
     twoptc numeric(3,1),
     week smallint,
     year smallint,
-    "timestamp" timestamp with time zone NOT NULL,
+    "timestamp" bigint NOT NULL,
     fgm numeric(4,1),
     fgy integer DEFAULT 0,
     fg19 numeric(3,1),
@@ -4437,7 +4437,7 @@ CREATE TABLE public.ros_projections (
     krtd numeric(4,1),
     prtd numeric(4,1),
     year smallint,
-    "timestamp" timestamp with time zone NOT NULL
+    "timestamp" bigint NOT NULL
 );
 
 
