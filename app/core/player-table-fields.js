@@ -23,10 +23,13 @@ const COLUMN_GROUPS = {
   WEEK_PROJECTION: { priority: 2 },
   SEASON_PROJECTION: { priority: 2 },
   REST_OF_SEASON_PROJECTION: { priority: 2 },
-  FANTASY: { priority: 3 },
+  FANTASY_POINTS: { priority: 3 },
+  FANTASY_LEAGUE: { priority: 3 },
   PASSING: { priority: 3 },
   RUSHING: { priority: 3 },
   RECEIVING: { priority: 3 },
+  SEASON: { priority: 4 },
+  CAREER: { priority: 4 },
   TOTALS: { priority: 4 },
   EFFICIENCY: { priority: 4 },
   AFTER_CATCH: { priority: 5 }
@@ -143,6 +146,58 @@ export function PlayerTableFields({
     size: 70,
     splits: ['year'],
     ...field
+  })
+
+  const from_scoring_format_logs = (field) => ({
+    data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+    size: 70,
+    splits: ['year'],
+    ...field
+  })
+
+  const scoring_format_hash_param = {
+    label: 'Scoring Format',
+    values: [
+      {
+        value:
+          '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d',
+        label: '0.5PPR / 4PTD / -1INT / 0.05PY / -1FUM (GENESIS LEAGUE)'
+      },
+      {
+        value:
+          'ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e',
+        label: 'PPR / 4PTD / -1INT / -1FUM'
+      }
+    ],
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    default_value:
+      '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d',
+    single: true
+  }
+
+  const from_scoring_format_seasonlogs = (field) => ({
+    ...from_scoring_format_logs(field),
+    column_groups: [COLUMN_GROUPS.FANTASY_POINTS, COLUMN_GROUPS.SEASON],
+    column_params: {
+      year: {
+        values: constants.years,
+        data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+        default_value:
+          constants.season.week > 0
+            ? constants.season.year
+            : constants.season.year - 1,
+        single: true
+      },
+      scoring_format_hash: scoring_format_hash_param
+    }
+  })
+
+  const from_scoring_format_careerlogs = (field) => ({
+    ...from_scoring_format_logs(field),
+    column_groups: [COLUMN_GROUPS.FANTASY_POINTS, COLUMN_GROUPS.CAREER],
+    column_params: {
+      scoring_format_hash: scoring_format_hash_param
+    }
   })
 
   const fields = {
@@ -401,7 +456,7 @@ export function PlayerTableFields({
       column_groups: [
         COLUMN_GROUPS.PROJECTION,
         COLUMN_GROUPS.REST_OF_SEASON_PROJECTION,
-        COLUMN_GROUPS.FANTASY
+        COLUMN_GROUPS.FANTASY_LEAGUE
       ],
       header_label: 'Pts+',
       player_value_path: stat_in_year_week('points_added')({
@@ -416,7 +471,7 @@ export function PlayerTableFields({
       column_groups: [
         COLUMN_GROUPS.PROJECTION,
         COLUMN_GROUPS.SEASON_PROJECTION,
-        COLUMN_GROUPS.FANTASY
+        COLUMN_GROUPS.FANTASY_LEAGUE
       ],
       header_label: 'Pts+',
       player_value_path: stat_in_year_week('points_added')(),
@@ -428,7 +483,7 @@ export function PlayerTableFields({
       column_groups: [
         COLUMN_GROUPS.PROJECTION,
         COLUMN_GROUPS.WEEK_PROJECTION,
-        COLUMN_GROUPS.FANTASY
+        COLUMN_GROUPS.FANTASY_LEAGUE
       ],
       header_label: 'Pts+',
       player_value_path: stat_in_year_week('points_added')({
@@ -444,7 +499,7 @@ export function PlayerTableFields({
       column_groups: [
         COLUMN_GROUPS.PROJECTION,
         COLUMN_GROUPS.WEEK_PROJECTION,
-        COLUMN_GROUPS.FANTASY
+        COLUMN_GROUPS.FANTASY_POINTS
       ],
       header_label: 'Pts',
       player_value_path: stat_in_year_week('proj_fan_pts')({
@@ -459,7 +514,7 @@ export function PlayerTableFields({
       column_groups: [
         COLUMN_GROUPS.PROJECTION,
         COLUMN_GROUPS.REST_OF_SEASON_PROJECTION,
-        COLUMN_GROUPS.FANTASY
+        COLUMN_GROUPS.FANTASY_POINTS
       ],
       header_label: 'Pts',
       player_value_path: stat_in_year_week('proj_fan_pts')({
@@ -474,7 +529,7 @@ export function PlayerTableFields({
       column_groups: [
         COLUMN_GROUPS.PROJECTION,
         COLUMN_GROUPS.SEASON_PROJECTION,
-        COLUMN_GROUPS.FANTASY
+        COLUMN_GROUPS.FANTASY_POINTS
       ],
       header_label: 'Pts',
       player_value_path: stat_in_year_week('proj_fan_pts')(),
@@ -951,7 +1006,7 @@ export function PlayerTableFields({
 
     // 'stats.pts': {
     //   column_title: 'Fantasy Points',
-    //   column_groups: [COLUMN_GROUPS.FANTASY],
+    //   column_groups: [COLUMN_GROUPS.FANTASY_POINTS],
     //   header_label: 'PTS',
     //   player_value_path: 'stats.pts',
     //   fixed: 1,
@@ -1457,6 +1512,85 @@ export function PlayerTableFields({
         header_label: 'YAC/R',
         player_value_path: 'rec_yds_after_catch_per_rec_from_plays',
         fixed: 1
+      }),
+
+    player_fantasy_points_from_seasonlogs: from_scoring_format_seasonlogs({
+      column_title: 'Fantasy Points (By Season)',
+      header_label: 'PTS',
+      player_value_path: 'points_from_seasonlogs'
+    }),
+    player_fantasy_points_per_game_from_seasonlogs:
+      from_scoring_format_seasonlogs({
+        column_title: 'Fantasy Points Per Game (By Season)',
+        header_label: 'PTS/G',
+        player_value_path: 'points_per_game_from_seasonlogs'
+      }),
+    player_fantasy_games_played_from_seasonlogs: from_scoring_format_seasonlogs(
+      {
+        column_title: 'Games Played (By Season)',
+        header_label: 'GP',
+        player_value_path: 'games_from_seasonlogs'
+      }
+    ),
+    player_fantasy_points_rank_from_seasonlogs: from_scoring_format_seasonlogs({
+      column_title: 'Fantasy Points Rank (By Season)',
+      header_label: 'RNK',
+      player_value_path: 'points_rnk_from_seasonlogs'
+    }),
+    player_fantasy_points_position_rank_from_seasonlogs:
+      from_scoring_format_seasonlogs({
+        column_title: 'Fantasy Points Position Rank (By Season)',
+        header_label: 'POS RNK',
+        player_value_path: 'points_pos_rnk_from_seasonlogs'
+      }),
+
+    player_fantasy_points_from_careerlogs: from_scoring_format_careerlogs({
+      column_title: 'Fantasy Points (Career)',
+      header_label: 'PTS',
+      player_value_path: 'points_from_careerlogs'
+    }),
+    player_fantasy_points_per_game_from_careerlogs:
+      from_scoring_format_careerlogs({
+        column_title: 'Fantasy Points Per Game (Career)',
+        header_label: 'PTS/G',
+        player_value_path: 'points_per_game_from_careerlogs'
+      }),
+    player_fantasy_games_played_from_careerlogs: from_scoring_format_careerlogs(
+      {
+        column_title: 'Games Played (Career)',
+        header_label: 'GP',
+        player_value_path: 'games_from_careerlogs'
+      }
+    ),
+    player_fantasy_top_3_seasons_from_careerlogs:
+      from_scoring_format_careerlogs({
+        column_title: 'Top 3 Seasons (Career)',
+        header_label: 'TOP 3',
+        player_value_path: 'top_3_from_careerlogs'
+      }),
+    player_fantasy_top_6_seasons_from_careerlogs:
+      from_scoring_format_careerlogs({
+        column_title: 'Top 6 Seasons (Career)',
+        header_label: 'TOP 6',
+        player_value_path: 'top_6_from_careerlogs'
+      }),
+    player_fantasy_top_12_seasons_from_careerlogs:
+      from_scoring_format_careerlogs({
+        column_title: 'Top 12 Seasons (Career)',
+        header_label: 'TOP 12',
+        player_value_path: 'top_12_from_careerlogs'
+      }),
+    player_fantasy_top_24_seasons_from_careerlogs:
+      from_scoring_format_careerlogs({
+        column_title: 'Top 24 Seasons (Career)',
+        header_label: 'TOP 24',
+        player_value_path: 'top_24_from_careerlogs'
+      }),
+    player_fantasy_top_36_seasons_from_careerlogs:
+      from_scoring_format_careerlogs({
+        column_title: 'Top 36 Seasons (Career)',
+        header_label: 'TOP 36',
+        player_value_path: 'top_36_from_careerlogs'
       })
   }
 
