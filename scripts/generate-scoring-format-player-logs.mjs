@@ -51,11 +51,15 @@ const main = async () => {
           .orderBy('nfl_games.week', 'asc')
         for (const { week } of weeks) {
           await generate_scoring_format_player_gamelogs({
+            year,
             week,
             scoring_format_hash
           })
         }
-        await generate_scoring_format_player_seasonlogs({ scoring_format_hash })
+        await generate_scoring_format_player_seasonlogs({
+          year,
+          scoring_format_hash
+        })
       }
 
       await generate_scoring_format_player_careerlogs({ scoring_format_hash })
@@ -72,18 +76,26 @@ const main = async () => {
         .orderBy('nfl_games.week', 'asc')
       for (const { week } of weeks) {
         await generate_scoring_format_player_gamelogs({
+          year: argv.year,
           week,
           scoring_format_hash
         })
       }
-      await generate_scoring_format_player_seasonlogs({ scoring_format_hash })
+      await generate_scoring_format_player_seasonlogs({
+        year: argv.year,
+        scoring_format_hash
+      })
       await generate_scoring_format_player_careerlogs({ scoring_format_hash })
     } else if (argv.week) {
       await generate_scoring_format_player_gamelogs({
+        year: argv.year,
         week: argv.week,
         scoring_format_hash
       })
-      await generate_scoring_format_player_seasonlogs({ scoring_format_hash })
+      await generate_scoring_format_player_seasonlogs({
+        year: argv.year,
+        scoring_format_hash
+      })
       await generate_scoring_format_player_careerlogs({ scoring_format_hash })
     } else {
       throw new Error('Missing one of --all, --year, or --week')
