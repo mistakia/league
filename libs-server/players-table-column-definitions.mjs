@@ -1249,6 +1249,8 @@ export default {
     create_field_from_scoring_format_player_careerlogs('points_per_game'),
   player_fantasy_games_played_from_careerlogs:
     create_field_from_scoring_format_player_careerlogs('games'),
+  player_fantasy_top_1_seasons_from_careerlogs:
+    create_field_from_scoring_format_player_careerlogs('top_1'),
   player_fantasy_top_3_seasons_from_careerlogs:
     create_field_from_scoring_format_player_careerlogs('top_3'),
   player_fantasy_top_6_seasons_from_careerlogs:

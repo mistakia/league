@@ -1605,6 +1605,12 @@ export function PlayerTableFields({
         player_value_path: 'games_from_careerlogs'
       }
     ),
+    player_fantasy_top_1_seasons_from_careerlogs:
+      from_scoring_format_careerlogs({
+        column_title: 'Top 1 Season (Career)',
+        header_label: 'TOP 1',
+        player_value_path: 'top_1_from_careerlogs'
+      }),
     player_fantasy_top_3_seasons_from_careerlogs:
       from_scoring_format_careerlogs({
         column_title: 'Top 3 Seasons (Career)',
