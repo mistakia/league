@@ -25,7 +25,7 @@ const positions = {
   40: 'TE'
 }
 
-const run = async () => {
+const run = async ({ dry = false } = {}) => {
   // do not pull in any projections after the season has ended
   if (constants.season.week > constants.season.nflFinalWeek) {
     return
@@ -63,7 +63,7 @@ const run = async () => {
               Number($(el).find('td').eq(10).text().replace(',', '').trim()) ||
               null
             data.tdr = Number($(el).find('td').eq(11).text().trim()) || null
-          } else if (['RB', 'WR', 'TE'].includes(pos)) {
+          } else if (pos === 'RB') {
             data.ra = Number($(el).find('td').eq(4).text().trim()) || null
             data.ry =
               Number($(el).find('td').eq(5).text().replace(',', '').trim()) ||
@@ -75,6 +75,24 @@ const run = async () => {
               Number($(el).find('td').eq(8).text().replace(',', '').trim()) ||
               null
             data.tdrec = Number($(el).find('td').eq(9).text().trim()) || null
+          } else if (pos === 'WR') {
+            data.rec = Number($(el).find('td').eq(4).text().trim()) || null
+            data.recy =
+              Number($(el).find('td').eq(5).text().replace(',', '').trim()) ||
+              null
+            data.tdrec = Number($(el).find('td').eq(6).text().trim()) || null
+
+            data.ra = Number($(el).find('td').eq(7).text().trim()) || null
+            data.ry =
+              Number($(el).find('td').eq(8).text().replace(',', '').trim()) ||
+              null
+            data.tdr = Number($(el).find('td').eq(9).text().trim()) || null
+          } else if (pos === 'TE') {
+            data.rec = Number($(el).find('td').eq(4).text().trim()) || null
+            data.recy =
+              Number($(el).find('td').eq(5).text().replace(',', '').trim()) ||
+              null
+            data.tdrec = Number($(el).find('td').eq(6).text().trim()) || null
           }
 
           items.push({ params, data })
@@ -115,11 +133,19 @@ const run = async () => {
     log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`)
   )
 
-  if (argv.dry) {
-    log(inserts[0])
+  if (dry) {
+    // Shuffle the inserts array to get random elements
+    const shuffled_inserts = inserts.sort(() => 0.5 - Math.random())
+
+    // Select 10 random inserts or all if less than 10
+    const random_inserts = shuffled_inserts.slice(0, 10)
+
+    log('10 Random Inserts:')
+    for (const insert of random_inserts) {
+      log(insert)
+    }
     return
   }
-
   if (inserts.length) {
     // remove any existing projections in index not included in this set
     await db('projections_index')
@@ -142,7 +168,7 @@ const run = async () => {
 const main = async () => {
   let error
   try {
-    await run()
+    await run({ dry: argv.dry })
   } catch (err) {
     error = err
     console.log(error)
