@@ -389,6 +389,36 @@ describe('LIBS SERVER get_players_table_view_results', () => {
     expect(query.toString()).to.equal(expected_query)
   })
 
+  it('should create a query with fields from league format seasonlogs and careerlogs', () => {
+    const query = get_players_table_view_results({
+      prefix_columns: ['player_name'],
+      columns: [
+        'player_startable_games_from_seasonlogs',
+        'player_points_added_from_seasonlogs',
+        'player_points_added_per_game_from_seasonlogs',
+        'player_points_added_rank_from_seasonlogs',
+        'player_points_added_position_rank_from_seasonlogs',
+        'player_startable_games_from_careerlogs',
+        'player_points_added_from_careerlogs',
+        'player_points_added_per_game_from_careerlogs',
+        'player_best_season_points_added_per_game_from_careerlogs',
+        'player_points_added_first_three_seasons_from_careerlogs',
+        'player_points_added_first_four_seasons_from_careerlogs',
+        'player_points_added_first_five_seasons_from_careerlogs',
+        'player_points_added_first_season_from_careerlogs',
+        'player_points_added_second_season_from_careerlogs',
+        'player_points_added_third_season_from_careerlogs',
+        'player_draft_rank_from_careerlogs'
+      ],
+      sort: [
+        {
+          column_id: 'player_points_added_per_game_from_careerlogs',
+          desc: true
+        }
+      ]
+    })
+  })
+
   describe('errors', () => {
     it('should throw an error if where value is missing', () => {
       try {
