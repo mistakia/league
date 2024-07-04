@@ -1254,6 +1254,8 @@ export default {
 
   player_startable_games_from_seasonlogs:
     create_field_from_league_format_player_seasonlogs('startable_games'),
+  player_earned_salary_from_seasonlogs:
+    create_field_from_league_format_player_seasonlogs('earned_salary'),
   player_points_added_from_seasonlogs:
     create_field_from_league_format_player_seasonlogs('points_added'),
   player_points_added_per_game_from_seasonlogs:
@@ -1272,6 +1274,10 @@ export default {
   player_best_season_points_added_per_game_from_careerlogs:
     create_field_from_league_format_player_careerlogs(
       'best_season_points_added_per_game'
+    ),
+  player_best_season_earned_salary_from_careerlogs:
+    create_field_from_league_format_player_careerlogs(
+      'best_season_earned_salary'
     ),
   player_points_added_first_three_seasons_from_careerlogs:
     create_field_from_league_format_player_careerlogs(
