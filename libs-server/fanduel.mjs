@@ -311,6 +311,21 @@ export const get_market_type = ({ marketName, marketType }) => {
   return null
 }
 
+export const get_market_year = ({ marketName, source_event_name }) => {
+  if (!source_event_name) {
+    // likely not a game, check marketName for year
+    const match = marketName.match(/(\d{4})/)
+    if (match) {
+      return Number(match[1])
+    }
+    // No year found in marketName
+    return null
+  }
+
+  // TODO use source_event_name and event start date to match a game
+  return null
+}
+
 const market_name_market_types = [
   'REGULAR_SEASON_PROPS_-_QUARTERBACKS',
   'QUARTERBACK_REGULAR_SEASON_PROPS',

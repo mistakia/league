@@ -327,13 +327,7 @@ DROP TABLE IF EXISTS public.footballoutsiders;
 DROP SEQUENCE IF EXISTS public.draft_uid_seq;
 DROP TABLE IF EXISTS public.draft;
 DROP TYPE IF EXISTS public.time_type;
-DROP TYPE IF EXISTS public.props_index_source_id;
-DROP TYPE IF EXISTS public.prop_pairings_source_id;
-DROP TYPE IF EXISTS public.prop_markets_index_source_id;
-DROP TYPE IF EXISTS public.prop_markets_history_source_id;
-DROP TYPE IF EXISTS public.prop_market_selections_index_source_id;
 DROP TYPE IF EXISTS public.prop_market_selections_index_result;
-DROP TYPE IF EXISTS public.prop_market_selections_history_source_id;
 DROP TYPE IF EXISTS public.placed_wagers_wager_type;
 DROP TYPE IF EXISTS public.placed_wagers_wager_status;
 DROP TYPE IF EXISTS public.placed_wagers_selection_9_status;
@@ -353,6 +347,24 @@ DROP TYPE IF EXISTS public.nfl_plays_play_type;
 DROP TYPE IF EXISTS public.nfl_plays_current_week_play_type;
 DROP TYPE IF EXISTS public.nfl_games_surf;
 DROP TYPE IF EXISTS public.nfl_games_roof;
+DROP TYPE IF EXISTS public.market_source_id;
+--
+-- Name: market_source_id; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.market_source_id AS ENUM (
+    'BETONLINE',
+    'BETMGM',
+    'BETRIVERS',
+    'BOVADA',
+    'CAESARS',
+    'DRAFTKINGS',
+    'FANDUEL',
+    'GAMBET',
+    'PRIZEPICKS'
+);
+
+
 --
 -- Name: nfl_games_roof; Type: TYPE; Schema: public; Owner: -
 --
@@ -602,23 +614,6 @@ CREATE TYPE public.placed_wagers_wager_type AS ENUM (
 
 
 --
--- Name: prop_market_selections_history_source_id; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.prop_market_selections_history_source_id AS ENUM (
-    'BETONLINE',
-    'BETMGM',
-    'BETRIVERS',
-    'BOVADA',
-    'CAESARS',
-    'DRAFTKINGS',
-    'FANDUEL',
-    'GAMBET',
-    'PRIZEPICKS'
-);
-
-
---
 -- Name: prop_market_selections_index_result; Type: TYPE; Schema: public; Owner: -
 --
 
@@ -628,91 +623,6 @@ CREATE TYPE public.prop_market_selections_index_result AS ENUM (
     'LOST',
     'PUSH',
     'CANCELLED'
-);
-
-
---
--- Name: prop_market_selections_index_source_id; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.prop_market_selections_index_source_id AS ENUM (
-    'BETONLINE',
-    'BETMGM',
-    'BETRIVERS',
-    'BOVADA',
-    'CAESARS',
-    'DRAFTKINGS',
-    'FANDUEL',
-    'GAMBET',
-    'PRIZEPICKS'
-);
-
-
---
--- Name: prop_markets_history_source_id; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.prop_markets_history_source_id AS ENUM (
-    'BETONLINE',
-    'BETMGM',
-    'BETRIVERS',
-    'BOVADA',
-    'CAESARS',
-    'DRAFTKINGS',
-    'FANDUEL',
-    'GAMBET',
-    'PRIZEPICKS'
-);
-
-
---
--- Name: prop_markets_index_source_id; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.prop_markets_index_source_id AS ENUM (
-    'BETONLINE',
-    'BETMGM',
-    'BETRIVERS',
-    'BOVADA',
-    'CAESARS',
-    'DRAFTKINGS',
-    'FANDUEL',
-    'GAMBET',
-    'PRIZEPICKS'
-);
-
-
---
--- Name: prop_pairings_source_id; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.prop_pairings_source_id AS ENUM (
-    'BETONLINE',
-    'BETMGM',
-    'BETRIVERS',
-    'BOVADA',
-    'CAESARS',
-    'DRAFTKINGS',
-    'FANDUEL',
-    'GAMBET',
-    'PRIZEPICKS'
-);
-
-
---
--- Name: props_index_source_id; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.props_index_source_id AS ENUM (
-    'BETONLINE',
-    'BETMGM',
-    'BETRIVERS',
-    'BOVADA',
-    'CAESARS',
-    'DRAFTKINGS',
-    'FANDUEL',
-    'GAMBET',
-    'PRIZEPICKS'
 );
 
 
@@ -976,9 +886,7 @@ CREATE TABLE public.league_format_player_gamelogs (
     pid character varying(25) NOT NULL,
     esbid integer NOT NULL,
     league_format_hash character varying(64) NOT NULL,
-    points numeric(6,3),
-    points_added numeric(4,1),
-    pos_rnk smallint
+    points_added numeric(4,1)
 );
 
 
@@ -4096,7 +4004,7 @@ CREATE TABLE public.projections_index (
 --
 
 CREATE TABLE public.prop_market_selections_history (
-    source_id public.prop_market_selections_history_source_id NOT NULL,
+    source_id public.market_source_id NOT NULL,
     source_market_id character varying(255) NOT NULL,
     source_selection_id character varying(255) NOT NULL,
     selection_name character varying(255),
@@ -4112,7 +4020,7 @@ CREATE TABLE public.prop_market_selections_history (
 --
 
 CREATE TABLE public.prop_market_selections_index (
-    source_id public.prop_market_selections_index_source_id NOT NULL,
+    source_id public.market_source_id NOT NULL,
     source_market_id character varying(255) NOT NULL,
     source_selection_id character varying(255) NOT NULL,
     selection_pid character varying(25),
@@ -4131,7 +4039,7 @@ CREATE TABLE public.prop_market_selections_index (
 --
 
 CREATE TABLE public.prop_markets_history (
-    source_id public.prop_markets_history_source_id NOT NULL,
+    source_id public.market_source_id NOT NULL,
     source_market_id character varying(255) NOT NULL,
     source_market_name character varying(500),
     open boolean,
@@ -4147,7 +4055,7 @@ CREATE TABLE public.prop_markets_history (
 
 CREATE TABLE public.prop_markets_index (
     market_type character varying(50),
-    source_id public.prop_markets_index_source_id NOT NULL,
+    source_id public.market_source_id NOT NULL,
     source_market_id character varying(255) NOT NULL,
     source_market_name character varying(500),
     esbid bigint,
@@ -4160,7 +4068,8 @@ CREATE TABLE public.prop_markets_index (
     winning_selection_id character varying(255),
     metric_result_value numeric(6,1),
     time_type public.time_type NOT NULL,
-    "timestamp" integer NOT NULL
+    "timestamp" integer NOT NULL,
+    year smallint
 );
 
 
@@ -4180,7 +4089,7 @@ CREATE TABLE public.prop_pairing_props (
 
 CREATE TABLE public.prop_pairings (
     pairing_id character varying(30) NOT NULL,
-    source_id public.prop_pairings_source_id NOT NULL,
+    source_id public.market_source_id NOT NULL,
     name character varying(150),
     team character varying(3),
     week smallint NOT NULL,
@@ -4246,7 +4155,7 @@ CREATE TABLE public.props_index (
     u numeric(5,2),
     o_am integer,
     u_am integer,
-    source_id public.props_index_source_id NOT NULL,
+    source_id public.market_source_id NOT NULL,
     "timestamp" integer NOT NULL,
     time_type public.time_type NOT NULL,
     name character varying(50),
