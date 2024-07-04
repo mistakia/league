@@ -56,6 +56,17 @@ router.get('/gamelogs/players', async (req, res) => {
       }
 
       query
+        .leftJoin('scoring_format_player_gamelogs', function () {
+          this.on(
+            'scoring_format_player_gamelogs.pid',
+            '=',
+            'player_gamelogs.pid'
+          ).andOn(
+            'scoring_format_player_gamelogs.esbid',
+            '=',
+            'player_gamelogs.esbid'
+          )
+        })
         .leftJoin('league_format_player_gamelogs', function () {
           this.on(
             'league_format_player_gamelogs.pid',
@@ -68,10 +79,16 @@ router.get('/gamelogs/players', async (req, res) => {
           )
         })
         .select(
-          'league_format_player_gamelogs.points',
-          'league_format_player_gamelogs.points_added',
-          'league_format_player_gamelogs.pos_rnk'
+          'scoring_format_player_gamelogs.points',
+          'scoring_format_player_gamelogs.pos_rnk',
+          'league_format_player_gamelogs.points_added'
         )
+        .where(function () {
+          this.where(
+            'scoring_format_player_gamelogs.scoring_format_hash',
+            league.scoring_format_hash
+          ).orWhereNull('scoring_format_player_gamelogs.scoring_format_hash')
+        })
         .where(function () {
           this.where(
             'league_format_player_gamelogs.league_format_hash',
