@@ -59,7 +59,15 @@ export function calculatePlayerValues(payload) {
       } else {
         player.points[week] = player.points[week] || { total: 0 }
       }
+
+      if (!player.pts_added) {
+        player.pts_added = {}
+      }
       player.pts_added[week] = {}
+
+      if (!player.market_salary) {
+        player.market_salary = {}
+      }
       player.market_salary[week] = {}
     }
 
