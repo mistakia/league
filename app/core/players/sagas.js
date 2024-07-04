@@ -77,13 +77,13 @@ export function* search() {
   yield call(searchPlayers, { q, leagueId })
 }
 
-export function* initLeaguePlayers() {
-  const league = yield select(getCurrentLeague)
-  // TODO disable this for now — do not need this on load
-  // if (!league.processed_at) {
-  //   yield call(calculateValues)
-  // }
-}
+// TODO disable this for now — do not need this on load
+// export function* initLeaguePlayers() {
+//   const league = yield select(getCurrentLeague)
+//   if (!league.processed_at) {
+//     yield call(calculateValues)
+//   }
+// }
 
 export function* calculateValues() {
   yield put(
@@ -409,9 +409,9 @@ export function* watchLoadTeamPlayers() {
   yield takeLatest(playerActions.LOAD_TEAM_PLAYERS, loadTeamPlayers)
 }
 
-export function* watchFetchAllPlayersFulfilled() {
-  yield takeLatest(playerActions.FETCH_ALL_PLAYERS_FULFILLED, initLeaguePlayers)
-}
+// export function* watchFetchAllPlayersFulfilled() {
+//   yield takeLatest(playerActions.FETCH_ALL_PLAYERS_FULFILLED, initLeaguePlayers)
+// }
 
 export function* watch_get_rosters_fulfilled() {
   yield takeLatest(
@@ -458,7 +458,7 @@ export const playerSagas = [
   fork(watchLoadLeaguePlayers),
   fork(watchLoadTeamPlayers),
   fork(watchAuctionSelectPlayer),
-  fork(watchFetchAllPlayersFulfilled),
+  // fork(watchFetchAllPlayersFulfilled),
 
   fork(watch_get_rosters_fulfilled)
 ]
