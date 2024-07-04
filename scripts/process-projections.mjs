@@ -109,7 +109,14 @@ const process_average_projections = async ({ year }) => {
       save: (items) =>
         db('projections')
           .insert(items)
-          .onConflict(['sourceid', 'pid', 'userid', 'timestamp', 'week', 'year'])
+          .onConflict([
+            'sourceid',
+            'pid',
+            'userid',
+            'timestamp',
+            'week',
+            'year'
+          ])
           .merge(),
       batch_size: 100
     })
