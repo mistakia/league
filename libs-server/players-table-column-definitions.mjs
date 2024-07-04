@@ -251,7 +251,6 @@ const scoring_format_player_seasonlogs_join = ({
 
   const join_conditions = function () {
     this.on(`${table_name}.pid`, '=', 'player.pid')
-    this.andOn(db.raw(`${table_name}.year IN (${year.join(',')})`))
     this.andOn(
       db.raw(`${table_name}.scoring_format_hash = '${scoring_format_hash}'`)
     )
@@ -264,6 +263,11 @@ const scoring_format_player_seasonlogs_join = ({
           `${previous_table_name}.${split}`
         )
       }
+    } else if (splits.includes('year')) {
+      // TODO: Enable multiple year selection in UX before implementing this
+      // this.andOn(db.raw(`${table_name}.year IN (${year.join(',')})`))
+    } else {
+      this.andOn(db.raw(`${table_name}.year IN (${year.join(',')})`))
     }
   }
 
@@ -354,7 +358,6 @@ const league_format_player_seasonlogs_join = ({
 
   const join_conditions = function () {
     this.on(`${table_name}.pid`, '=', 'player.pid')
-    this.andOn(db.raw(`${table_name}.year IN (${year.join(',')})`))
     this.andOn(
       db.raw(`${table_name}.league_format_hash = '${league_format_hash}'`)
     )
@@ -367,6 +370,11 @@ const league_format_player_seasonlogs_join = ({
           `${previous_table_name}.${split}`
         )
       }
+   } else if (splits.includes('year')) {
+      // TODO: Enable multiple year selection in UX before implementing this
+      // this.andOn(db.raw(`${table_name}.year IN (${year.join(',')})`))
+    } else {
+      this.andOn(db.raw(`${table_name}.year IN (${year.join(',')})`))
     }
   }
 
