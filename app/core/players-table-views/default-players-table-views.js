@@ -21,7 +21,7 @@ export const default_players_table_views = {
           desc: true
         }
       ],
-      prefix_columns: ['player_name'],
+      prefix_columns: ['player_name', 'player_position'],
       columns: [
         constants.season.isOffseason
           ? 'player_season_projected_points_added'
@@ -111,7 +111,7 @@ export const default_players_table_views = {
           desc: true
         }
       ],
-      prefix_columns: ['player_name'],
+      prefix_columns: ['player_name', 'player_position'],
       columns: [
         'player_pass_yards_from_plays',
         'player_pass_touchdowns_from_plays',
@@ -150,7 +150,7 @@ export const default_players_table_views = {
           desc: true
         }
       ],
-      prefix_columns: ['player_name'],
+      prefix_columns: ['player_name', 'player_position'],
       columns: [
         // fantasy_points
         'player_rush_yards_from_plays',
@@ -161,8 +161,8 @@ export const default_players_table_views = {
         'player_positive_rush_attempts_from_plays',
         'player_rush_yards_after_contact_from_plays',
         'player_rush_yards_after_contact_per_attempt_from_plays',
-        // share of team rushes
-        // share of team rushing yards
+        'player_rush_attempts_share_from_plays',
+        'player_rush_yards_share_from_plays',
         'player_fumble_percentage_from_plays',
         'player_positive_rush_percentage_from_plays',
         'player_successful_rush_percentage_from_plays',
@@ -184,7 +184,7 @@ export const default_players_table_views = {
           desc: true
         }
       ],
-      prefix_columns: ['player_name'],
+      prefix_columns: ['player_name', 'player_position'],
       columns: [
         // fantasy points
         'player_receiving_yards_from_plays',
@@ -196,9 +196,9 @@ export const default_players_table_views = {
         'player_deep_targets_percentage_from_plays',
         'player_air_yards_per_target_from_plays',
         'player_air_yards_from_plays',
-        // share of team air yards
-        // share of team targets
-        // wopr
+        'player_air_yards_share_from_plays',
+        'player_target_share_from_plays',
+        'player_weighted_opportunity_rating_from_plays',
         'player_receiver_air_conversion_ratio_from_plays',
         'player_receiving_yards_per_reception_from_plays',
         'player_receiving_yards_per_target_from_plays',
