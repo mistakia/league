@@ -189,12 +189,13 @@ const generate_league_formats = async () => {
     ({ league_format_hash }) => league_format_hash
   )
   const delete_query = await db('league_formats')
-    .leftJoin(
-      'seasons',
-      'league_formats.league_format_hash',
-      'seasons.league_format_hash'
-    )
-    .whereNull('seasons.league_format_hash')
+    .whereNotExists(function () {
+      this.select('*')
+        .from('seasons')
+        .whereRaw(
+          'seasons.league_format_hash = league_formats.league_format_hash'
+        )
+    })
     .whereNotIn('league_formats.league_format_hash', league_format_hashes)
     .del()
 
