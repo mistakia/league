@@ -148,9 +148,11 @@ describe('API /leagues/teams - delete', function () {
         })
         .returning('uid')
 
+      const tid = rows[0].uid
+
       await knex('users_teams').insert({
         userid: 1,
-        tid: rows[0].uid
+        tid
       })
 
       const request = chai
@@ -158,7 +160,7 @@ describe('API /leagues/teams - delete', function () {
         .delete('/api/leagues/1/teams')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          teamId: 2,
+          teamId: tid,
           leagueId: 1
         })
 
