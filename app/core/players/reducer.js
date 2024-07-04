@@ -470,8 +470,8 @@ export function playersReducer(state = initialState, { payload, type }) {
             lname: row.lname
           }
 
-          if (row.pos_0) {
-            formatted_player_data.pos = row.pos_0
+          if (row.pos) {
+            formatted_player_data.pos = row.pos
           }
 
           if (players.hasIn(['items', row.pid])) {
