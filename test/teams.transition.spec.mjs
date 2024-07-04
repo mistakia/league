@@ -88,14 +88,17 @@ describe('API /teams - transition', function () {
       res.body.bid.should.equal(bid)
       res.body.year.should.equal(constants.season.year)
       res.body.player_tid.should.equal(teamId)
-      res.body.uid.should.equal(1)
+      res.body.uid.should.be.a('number')
+      res.body.uid.should.be.above(0)
+      res.body.release.should.be.an('array')
       res.body.release.length.should.equal(1)
       res.body.release[0].should.equal(releasePlayer.pid)
 
       const query1 = await knex('transition_bids').select()
 
       query1.length.should.equal(1)
-      query1[0].uid.should.equal(1)
+      query1[0].uid.should.be.a('number')
+      query1[0].uid.should.be.above(0)
       query1[0].pid.should.equal(player.pid)
       query1[0].userid.should.equal(userId)
       query1[0].bid.should.equal(bid)
@@ -112,8 +115,12 @@ describe('API /teams - transition', function () {
       const query2 = await knex('transition_releases').select()
 
       query2.length.should.equal(1)
-      query2[0].transitionid.should.equal(1)
+      query2[0].transitionid.should.be.a('number')
+      query2[0].transitionid.should.be.above(0)
       query2[0].pid.should.equal(releasePlayer.pid)
+
+      res.body.uid.should.equal(query1[0].uid)
+      query1[0].uid.should.equal(query2[0].transitionid)
 
       const roster = await getRoster({ tid: teamId })
 
