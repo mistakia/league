@@ -326,13 +326,11 @@ DROP TABLE IF EXISTS public.jobs;
 DROP TABLE IF EXISTS public.footballoutsiders;
 DROP SEQUENCE IF EXISTS public.draft_uid_seq;
 DROP TABLE IF EXISTS public.draft;
-DROP TYPE IF EXISTS public.props_index_time_type;
+DROP TYPE IF EXISTS public.time_type;
 DROP TYPE IF EXISTS public.props_index_source_id;
 DROP TYPE IF EXISTS public.prop_pairings_source_id;
-DROP TYPE IF EXISTS public.prop_markets_index_time_type;
 DROP TYPE IF EXISTS public.prop_markets_index_source_id;
 DROP TYPE IF EXISTS public.prop_markets_history_source_id;
-DROP TYPE IF EXISTS public.prop_market_selections_index_time_type;
 DROP TYPE IF EXISTS public.prop_market_selections_index_source_id;
 DROP TYPE IF EXISTS public.prop_market_selections_index_result;
 DROP TYPE IF EXISTS public.prop_market_selections_history_source_id;
@@ -651,16 +649,6 @@ CREATE TYPE public.prop_market_selections_index_source_id AS ENUM (
 
 
 --
--- Name: prop_market_selections_index_time_type; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.prop_market_selections_index_time_type AS ENUM (
-    'OPEN',
-    'CLOSE'
-);
-
-
---
 -- Name: prop_markets_history_source_id; Type: TYPE; Schema: public; Owner: -
 --
 
@@ -691,16 +679,6 @@ CREATE TYPE public.prop_markets_index_source_id AS ENUM (
     'FANDUEL',
     'GAMBET',
     'PRIZEPICKS'
-);
-
-
---
--- Name: prop_markets_index_time_type; Type: TYPE; Schema: public; Owner: -
---
-
-CREATE TYPE public.prop_markets_index_time_type AS ENUM (
-    'OPEN',
-    'CLOSE'
 );
 
 
@@ -739,13 +717,20 @@ CREATE TYPE public.props_index_source_id AS ENUM (
 
 
 --
--- Name: props_index_time_type; Type: TYPE; Schema: public; Owner: -
+-- Name: time_type; Type: TYPE; Schema: public; Owner: -
 --
 
-CREATE TYPE public.props_index_time_type AS ENUM (
+CREATE TYPE public.time_type AS ENUM (
     'OPEN',
     'CLOSE'
 );
+
+
+--
+-- Name: TYPE time_type; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TYPE public.time_type IS 'Shared enum for open/close time types, used by prop_markets_index, prop_market_selections_index, and props_index tables';
 
 
 SET default_table_access_method = heap;
@@ -972,13 +957,14 @@ CREATE TABLE public.league_format_player_careerlogs (
     points_added numeric(6,1),
     points_added_per_game numeric(3,1),
     best_season_points_added_per_game numeric(3,1),
-    best_season_earned_salary numeric(6,2),
     points_added_first_three_seas numeric(6,1),
     points_added_first_four_seas numeric(6,1),
     points_added_first_five_seas numeric(6,1),
     points_added_first_seas numeric(6,1),
     points_added_second_seas numeric(6,1),
-    points_added_third_seas numeric(6,1)
+    points_added_third_seas numeric(6,1),
+    earned_salary numeric(6,2),
+    best_season_earned_salary numeric(6,2)
 );
 
 
@@ -991,6 +977,7 @@ CREATE TABLE public.league_format_player_gamelogs (
     esbid integer NOT NULL,
     league_format_hash character varying(64) NOT NULL,
     points numeric(6,3),
+    points_added numeric(4,1),
     pos_rnk smallint
 );
 
@@ -1018,11 +1005,11 @@ CREATE TABLE public.league_format_player_seasonlogs (
     year smallint NOT NULL,
     league_format_hash character varying(64) NOT NULL,
     startable_games smallint,
-    earned_salary numeric(6,2),
     points_added numeric(4,1),
     points_added_per_game numeric(3,1),
     points_added_rnk smallint,
-    points_added_pos_rnk smallint
+    points_added_pos_rnk smallint,
+    earned_salary numeric(6,2)
 );
 
 
@@ -1258,7 +1245,6 @@ CREATE TABLE public.league_player_seasonlogs (
 
 CREATE TABLE public.league_scoring_formats (
     scoring_format_hash character varying(64) NOT NULL,
-    scoring_format_title character varying(255),
     pa numeric(3,2) NOT NULL,
     pc numeric(3,2) NOT NULL,
     py numeric(3,2) NOT NULL,
@@ -1276,7 +1262,8 @@ CREATE TABLE public.league_scoring_formats (
     tdrec smallint NOT NULL,
     fuml smallint NOT NULL,
     prtd smallint NOT NULL,
-    krtd smallint NOT NULL
+    krtd smallint NOT NULL,
+    scoring_format_title character varying(255)
 );
 
 
@@ -4135,7 +4122,7 @@ CREATE TABLE public.prop_market_selections_index (
     odds_american integer,
     result public.prop_market_selections_index_result,
     "timestamp" integer NOT NULL,
-    time_type public.prop_market_selections_index_time_type NOT NULL
+    time_type public.time_type NOT NULL
 );
 
 
@@ -4172,7 +4159,7 @@ CREATE TABLE public.prop_markets_index (
     settled boolean,
     winning_selection_id character varying(255),
     metric_result_value numeric(6,1),
-    time_type public.prop_markets_index_time_type NOT NULL,
+    time_type public.time_type NOT NULL,
     "timestamp" integer NOT NULL
 );
 
@@ -4261,7 +4248,7 @@ CREATE TABLE public.props_index (
     u_am integer,
     source_id public.props_index_source_id NOT NULL,
     "timestamp" integer NOT NULL,
-    time_type public.props_index_time_type NOT NULL,
+    time_type public.time_type NOT NULL,
     name character varying(50),
     team character varying(3),
     opp character varying(3),
@@ -4522,12 +4509,12 @@ CREATE TABLE public.scoring_format_player_careerlogs (
     points numeric(6,1),
     points_per_game numeric(3,1),
     games smallint,
-    top_1 smallint,
     top_3 smallint,
     top_6 smallint,
     top_12 smallint,
     top_24 smallint,
-    top_36 smallint
+    top_36 smallint,
+    top_1 smallint
 );
 
 
