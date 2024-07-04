@@ -44,6 +44,7 @@ describe('API /trades', function () {
           year: constants.season.year,
           week: constants.season.week
         })
+        .whereNot('pos', 'K')
         .limit(1)
 
       const acceptingTeamPlayerRows = await knex('rosters_players')
@@ -53,6 +54,7 @@ describe('API /trades', function () {
           year: constants.season.year,
           week: constants.season.week
         })
+        .whereNot('pos', 'K')
         .limit(1)
 
       const proposingTeamPlayers = proposingTeamPlayerRows.map((p) => p.pid)

@@ -661,7 +661,9 @@ describe('API /teams - transition', function () {
      *   const userId = 1
      *   const bid = 10
      *   const player = await selectPlayer()
-     *   const reservePlayer = await selectPlayer()
+     *   const reservePlayer = await selectPlayer({
+     *     nfl_status: constants.player_nfl_status.ACTIVE
+     *   })
 
      *   await addPlayer({
      *     leagueId,

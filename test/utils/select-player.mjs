@@ -5,7 +5,8 @@ export default async function ({
   pos = 'RB',
   rookie = false,
   exclude_pids = [],
-  excludePS = false
+  excludePS = false,
+  nfl_status = null
 } = {}) {
   const query = db('player')
     .whereNot('current_nfl_team', 'INA')
@@ -25,6 +26,10 @@ export default async function ({
 
   if (excludePS) {
     query.whereNot('posd', 'PS')
+  }
+
+  if (nfl_status) {
+    query.where('nfl_status', nfl_status)
   }
 
   const players = await query
