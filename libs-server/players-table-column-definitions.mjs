@@ -370,7 +370,7 @@ const league_format_player_seasonlogs_join = ({
           `${previous_table_name}.${split}`
         )
       }
-   } else if (splits.includes('year')) {
+    } else if (splits.includes('year')) {
       // TODO: Enable multiple year selection in UX before implementing this
       // this.andOn(db.raw(`${table_name}.year IN (${year.join(',')})`))
     } else {

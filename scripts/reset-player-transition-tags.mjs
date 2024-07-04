@@ -7,7 +7,7 @@ import db from '#db'
 import { constants } from '#libs-shared'
 import { getLeague, isMain } from '#libs-server'
 
-const log = debug('reset-player-tags')
+const log = debug('reset-player-transition-tags')
 const argv = yargs(hideBin(process.argv)).argv
 
 const run = async ({ force = false } = {}) => {
@@ -42,6 +42,7 @@ const run = async ({ force = false } = {}) => {
   const rowCount = await db('rosters_players')
     .update({ tag: constants.tags.REGULAR })
     .where({
+      tag: constants.tags.TRANSITION,
       week: 0,
       year: constants.season.year
     })
@@ -50,7 +51,7 @@ const run = async ({ force = false } = {}) => {
 }
 
 const main = async () => {
-  debug.enable('reset-player-tags')
+  debug.enable('reset-player-transition-tags')
 
   let error
   try {
