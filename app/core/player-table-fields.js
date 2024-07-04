@@ -1641,6 +1641,11 @@ export function PlayerTableFields({
       header_label: 'SG',
       player_value_path: 'startable_games_from_seasonlogs'
     }),
+    player_earned_salary_from_seasonlogs: from_league_format_seasonlogs({
+      column_title: 'Earned Salary (Season)',
+      header_label: 'Earned Salary',
+      player_value_path: 'earned_salary_from_seasonlogs'
+    }),
     player_points_added_from_seasonlogs: from_league_format_seasonlogs({
       column_title: 'Points Added (Season)',
       header_label: 'Pts+',
@@ -1687,6 +1692,12 @@ export function PlayerTableFields({
         column_title: 'Best Season Points Added Per Game (Career)',
         header_label: 'Best Pts+/G',
         player_value_path: 'best_season_points_added_per_game_from_careerlogs'
+      }),
+    player_best_season_earned_salary_from_careerlogs:
+      from_league_format_careerlogs({
+        column_title: 'Best Season Earned Salary (Career)',
+        header_label: 'Earned Salary',
+        player_value_path: 'best_season_earned_salary_from_careerlogs'
       }),
     player_points_added_first_three_seasons_from_careerlogs:
       from_league_format_careerlogs({
