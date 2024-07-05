@@ -733,7 +733,7 @@ const create_team_share_stat = ({
         )
       })
       .whereNot('play_type', 'NOPL')
-      .where('seas_type', 'REG')
+      .where('nfl_plays.seas_type', 'REG')
       .whereNotNull(pid_column)
       .groupBy('pg.pid')
 
