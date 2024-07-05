@@ -41,9 +41,41 @@ const add_play_by_play_with_statement = ({
     with_query.select(db.raw(select_string))
   }
 
+  // Handle career_year and career_game separately
+  if (params.career_year) {
+    with_query.join('player_seasonlogs', function () {
+      this.on(`nfl_plays.${pid_column}`, '=', 'player_seasonlogs.pid')
+        .andOn('nfl_plays.year', '=', 'player_seasonlogs.year')
+        .andOn('nfl_plays.seas_type', '=', 'player_seasonlogs.seas_type')
+    })
+    with_query.whereBetween('player_seasonlogs.career_year', [
+      Math.min(params.career_year[0], params.career_year[1]),
+      Math.max(params.career_year[0], params.career_year[1])
+    ])
+  }
+
+  if (params.career_game) {
+    with_query.join('player_gamelogs', function () {
+      this.on(`nfl_plays.${pid_column}`, '=', 'player_gamelogs.pid').andOn(
+        'nfl_plays.esbid',
+        '=',
+        'player_gamelogs.esbid'
+      )
+    })
+    with_query.whereBetween('player_gamelogs.career_game', [
+      Math.min(params.career_game[0], params.career_game[1]),
+      Math.max(params.career_game[0], params.career_game[1])
+    ])
+  }
+
+  // Remove career_year and career_game from params before applying other filters
+  const filtered_params = { ...params }
+  delete filtered_params.career_year
+  delete filtered_params.career_game
+
   apply_play_by_play_column_params_to_query({
     query: with_query,
-    params
+    params: filtered_params
   })
 
   // where_clauses to filter stats/metrics

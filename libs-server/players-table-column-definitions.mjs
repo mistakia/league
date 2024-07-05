@@ -747,9 +747,35 @@ const create_team_share_stat = ({
       }
     }
 
+    // Handle career_year
+    if (params.career_year) {
+      with_query.join('player_seasonlogs', function () {
+        this.on('nfl_plays.year', '=', 'player_seasonlogs.year')
+          .andOn('nfl_plays.seas_type', '=', 'player_seasonlogs.seas_type')
+          .andOn('pg.pid', '=', 'player_seasonlogs.pid')
+      })
+      with_query.whereBetween('player_seasonlogs.career_year', [
+        Math.min(params.career_year[0], params.career_year[1]),
+        Math.max(params.career_year[0], params.career_year[1])
+      ])
+    }
+
+    // Handle career_game
+    if (params.career_game) {
+      with_query.whereBetween('pg.career_game', [
+        Math.min(params.career_game[0], params.career_game[1]),
+        Math.max(params.career_game[0], params.career_game[1])
+      ])
+    }
+
+    // Remove career_year and career_game from params before applying other filters
+    const filtered_params = { ...params }
+    delete filtered_params.career_year
+    delete filtered_params.career_game
+
     apply_play_by_play_column_params_to_query({
       query: with_query,
-      params
+      params: filtered_params
     })
 
     const unique_having_clauses = new Set(having_clauses)
