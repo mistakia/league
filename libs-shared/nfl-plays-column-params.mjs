@@ -2,6 +2,16 @@ import * as table_constants from 'react-table/src/constants.mjs'
 import * as constants from './constants.mjs'
 
 export default {
+  career_year: {
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    min: 1,
+    max: 25
+  },
+  career_game: {
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    min: 1,
+    max: 500
+  },
   week: {
     values: constants.nflWeeks,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT
