@@ -27,11 +27,22 @@ const get_table_hash = (key) => {
 }
 
 const betting_markets_table_alias = ({ params = {} }) => {
-  const year = Array.isArray(params.year) ? params.year[0] : params.year || constants.season.year
-  const week = Array.isArray(params.week) ? params.week[0] : params.week || constants.season.week
-  const source_id = Array.isArray(params.source_id) ? params.source_id[0] : params.source_id || bookmaker_constants.bookmakers.FANDUEL
-  const time_type = Array.isArray(params.time_type) ? params.time_type[0] : params.time_type || bookmaker_constants.time_type.CLOSE
-  const market_type = Array.isArray(params.market_type) ? params.market_type[0] : params.market_type || bookmaker_constants.player_prop_types.SEASON_PASSING_YARDS
+  const year = Array.isArray(params.year)
+    ? params.year[0]
+    : params.year || constants.season.year
+  const week = Array.isArray(params.week)
+    ? params.week[0]
+    : params.week || constants.season.week
+  const source_id = Array.isArray(params.source_id)
+    ? params.source_id[0]
+    : params.source_id || bookmaker_constants.bookmakers.FANDUEL
+  const time_type = Array.isArray(params.time_type)
+    ? params.time_type[0]
+    : params.time_type || bookmaker_constants.time_type.CLOSE
+  const market_type = Array.isArray(params.market_type)
+    ? params.market_type[0]
+    : params.market_type ||
+      bookmaker_constants.player_prop_types.SEASON_PASSING_YARDS
 
   return get_table_hash(
     `betting_markets_${year}_week_${week}_source_id_${source_id}_market_type_${market_type}_time_type_${time_type}`
@@ -50,7 +61,8 @@ const betting_markets_with = ({
     : params.time_type || bookmaker_constants.time_type.CLOSE
   const market_type = Array.isArray(params.market_type)
     ? params.market_type[0]
-    : params.market_type || bookmaker_constants.player_prop_types.SEASON_PASSING_YARDS
+    : params.market_type ||
+      bookmaker_constants.player_prop_types.SEASON_PASSING_YARDS
   const source_id = Array.isArray(params.source_id)
     ? params.source_id[0]
     : params.source_id || bookmaker_constants.bookmakers.FANDUEL

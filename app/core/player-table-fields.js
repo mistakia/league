@@ -11,15 +11,18 @@ import {
 import PlayerRowNameColumn from '@components/player-row-name-column'
 import PlayerRowStatusColumn from '@components/player-row-status-column'
 import PlayerRowNFLTeam from '@components/player-row-nfl-team'
+import { bookmaker_constants } from '#libs-shared'
 
 const COLUMN_GROUPS = {
   MEASURABLES: { priority: 1 },
   COLLEGE: { priority: 1 },
   NFL_TEAM: { priority: 1 },
   DRAFT: { priority: 1 },
-  MANAGEMENT: { priority: 1 },
+  BETTING_MARKETS: { priority: 1 },
   PROJECTION: { priority: 1 },
   ESPN: { priority: 1 },
+  SEASON_PROPS: { priority: 2 },
+  GAME_PROPS: { priority: 2 },
   WEEK_PROJECTION: { priority: 2 },
   SEASON_PROJECTION: { priority: 2 },
   REST_OF_SEASON_PROJECTION: { priority: 2 },
@@ -152,6 +155,12 @@ export function PlayerTableFields({
   })
 
   const from_format_player_logs = (field) => ({
+    data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+    size: 70,
+    ...field
+  })
+
+  const from_betting_market = (field) => ({
     data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
     size: 70,
     ...field
@@ -1745,6 +1754,75 @@ export function PlayerTableFields({
       column_title: 'Draft Class Rank',
       header_label: 'Draft Rnk',
       player_value_path: 'draft_rank_from_careerlogs'
+    }),
+
+    player_season_prop_line_from_betting_markets: from_betting_market({
+      column_title: 'Season Prop Line',
+      header_label: 'LINE',
+      player_value_path: 'season_prop_line_betting_market',
+      column_groups: [
+        COLUMN_GROUPS.BETTING_MARKETS,
+        COLUMN_GROUPS.SEASON_PROPS
+      ],
+      column_params: {
+        market_type: {
+          label: 'Market',
+          data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+          values: Object.values(bookmaker_constants.player_season_prop_types),
+          default_value:
+            bookmaker_constants.player_season_prop_types.SEASON_PASSING_YARDS,
+          single: true
+        },
+        source_id: {
+          label: 'Bookmaker',
+          data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+          values: [bookmaker_constants.bookmakers.FANDUEL],
+          default_value: bookmaker_constants.bookmakers.FANDUEL,
+          single: true
+        },
+        year: {
+          data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+          values: [2023, 2024],
+          default_value: 2024,
+          single: true
+        }
+      }
+    }),
+
+    player_game_prop_line_from_betting_markets: from_betting_market({
+      column_title: 'Game Prop Line',
+      header_label: 'LINE',
+      player_value_path: 'game_prop_line_betting_market',
+      column_groups: [COLUMN_GROUPS.BETTING_MARKETS, COLUMN_GROUPS.GAME_PROPS],
+      column_params: {
+        market_type: {
+          label: 'Market',
+          data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+          values: Object.values(bookmaker_constants.player_game_prop_types),
+          default_value:
+            bookmaker_constants.player_game_prop_types.GAME_PASSING_YARDS,
+          single: true
+        },
+        source_id: {
+          label: 'Bookmaker',
+          data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+          values: [bookmaker_constants.bookmakers.FANDUEL],
+          default_value: bookmaker_constants.bookmakers.FANDUEL,
+          single: true
+        },
+        year: {
+          data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+          values: [2023, 2024],
+          default_value: 2024,
+          single: true
+        },
+        week: {
+          data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+          values: constants.nflWeeks,
+          default_value: 1,
+          single: true
+        }
+      }
     })
   }
 
@@ -1766,7 +1844,7 @@ export function PlayerTableFields({
 
     fields.player_league_salary = {
       column_title: 'Player Salary',
-      column_groups: [COLUMN_GROUPS.MANAGEMENT],
+      column_groups: [COLUMN_GROUPS.FANTASY_LEAGUE],
       header_label: 'Salary',
       player_value_path: 'player_salary',
       size: 70,
@@ -1778,7 +1856,7 @@ export function PlayerTableFields({
       column_groups: [
         COLUMN_GROUPS.PROJECTION,
         COLUMN_GROUPS.WEEK_PROJECTION,
-        COLUMN_GROUPS.MANAGEMENT
+        COLUMN_GROUPS.FANTASY_LEAGUE
       ],
       header_label: 'Market',
       player_value_path: stat_in_year_week('market_salary')({
@@ -1793,7 +1871,7 @@ export function PlayerTableFields({
       column_groups: [
         COLUMN_GROUPS.PROJECTION,
         COLUMN_GROUPS.SEASON_PROJECTION,
-        COLUMN_GROUPS.MANAGEMENT
+        COLUMN_GROUPS.FANTASY_LEAGUE
       ],
       header_label: 'Adjusted',
       player_value_path: stat_in_year_week('inflation_adjusted_market_salary')({
@@ -1808,7 +1886,7 @@ export function PlayerTableFields({
       column_groups: [
         COLUMN_GROUPS.PROJECTION,
         COLUMN_GROUPS.WEEK_PROJECTION,
-        COLUMN_GROUPS.MANAGEMENT
+        COLUMN_GROUPS.FANTASY_LEAGUE
       ],
       header_label: 'Value',
       player_value_path: stat_in_year_week('salary_adjusted_points_added')({
@@ -1823,7 +1901,7 @@ export function PlayerTableFields({
       column_groups: [
         COLUMN_GROUPS.PROJECTION,
         COLUMN_GROUPS.SEASON_PROJECTION,
-        COLUMN_GROUPS.MANAGEMENT
+        COLUMN_GROUPS.FANTASY_LEAGUE
       ],
       header_label: 'Value',
       player_value_path: stat_in_year_week('salary_adjusted_points_added')({
@@ -1838,7 +1916,7 @@ export function PlayerTableFields({
       column_groups: [
         COLUMN_GROUPS.PROJECTION,
         COLUMN_GROUPS.REST_OF_SEASON_PROJECTION,
-        COLUMN_GROUPS.MANAGEMENT
+        COLUMN_GROUPS.FANTASY_LEAGUE
       ],
       header_label: 'Value',
       player_value_path: stat_in_year_week('salary_adjusted_points_added')({
