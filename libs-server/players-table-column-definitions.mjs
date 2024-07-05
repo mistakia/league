@@ -40,71 +40,38 @@ const betting_markets_table_alias =
     )
   }
 
+const betting_markets_with = (market_type = bookmaker_constants.player_prop_types.SEASON_PASSING_YARDS) => ({ query, params, with_table_name, having_clauses, splits }) => {
+  const {
+    year = constants.season.year,
+    time_type = bookmaker_constants.time_type.CLOSE
+  } = params
+
+  const markets_cte = `${with_table_name}_markets`
+
+  query.with(markets_cte, (qb) => {
+    qb.select('source_id', 'source_market_id', 'time_type')
+      .from('prop_markets_index')
+      .where('market_type', market_type)
+      .andWhere('time_type', time_type)
+      .andWhere('year', year)
+  })
+
+  query.with(with_table_name, (qb) => {
+    qb.select('pms.selection_pid', 'pms.selection_metric_line')
+      .from(`${markets_cte} as m`)
+      .join('prop_market_selections_index as pms', function() {
+        this.on('pms.source_id', '=', 'm.source_id')
+          .andOn('pms.source_market_id', '=', 'm.source_market_id')
+          .andOn('pms.time_type', '=', 'm.time_type')
+      })
+  })
+}
+
 const betting_markets_join =
-  (market_type = bookmaker_constants.player_prop_types.SEASON_PASSING_YARDS) =>
   ({ query, table_name, join_type = 'LEFT', params = {} }) => {
     const join_func = get_join_func(join_type)
-    const {
-      time_type = bookmaker_constants.time_type.CLOSE,
-      year = constants.season.year,
-      week
-    } = params
 
-    const markets_index_alias = `${table_name}_markets_index`
-
-    query[join_func](
-      `prop_markets_index AS ${markets_index_alias}`,
-      function () {
-        this.on(
-          `${markets_index_alias}.market_type`,
-          '=',
-          db.raw('?', [market_type])
-        )
-        this.andOn(
-          `${markets_index_alias}.time_type`,
-          '=',
-          db.raw('?', [time_type])
-        )
-        if (year) {
-          this.andOn(`${markets_index_alias}.year`, '=', db.raw('?', [year]))
-        }
-      }
-    )
-
-    query[join_func](
-      `prop_market_selections_index AS ${table_name}`,
-      function () {
-        this.on(
-          `${table_name}.source_market_id`,
-          '=',
-          `${markets_index_alias}.source_market_id`
-        )
-        this.andOn(
-          `${table_name}.source_id`,
-          '=',
-          `${markets_index_alias}.source_id`
-        )
-        this.andOn(
-          `${table_name}.time_type`,
-          '=',
-          `${markets_index_alias}.time_type`
-        )
-        this.andOn(`${table_name}.selection_pid`, '=', 'player.pid')
-      }
-    )
-
-    if (week) {
-      const nfl_games_alias = `${table_name}_nfl_games`
-      query[join_func](`nfl_games AS ${nfl_games_alias}`, function () {
-        this.on(`${nfl_games_alias}.esbid`, '=', `${markets_index_alias}.esbid`)
-        this.andOn(
-          `${nfl_games_alias}.year`,
-          '=',
-          `${markets_index_alias}.year`
-        )
-        this.andOn(`${nfl_games_alias}.week`, '=', db.raw('?', [week]))
-      })
-    }
+    query[join_func](table_name, `${table_name}.selection_pid`, 'player.pid')
   }
 
 const create_betting_market_field = ({
@@ -116,7 +83,8 @@ const create_betting_market_field = ({
   select_as: () => `${column_alias}_betting_market`,
   where_column: () => column_name,
   table_alias: betting_markets_table_alias(market_type),
-  join: betting_markets_join(market_type)
+  join: betting_markets_join,
+  with: betting_markets_with(market_type)
 })
 
 const generate_table_alias = ({ type, params = {} } = {}) => {
