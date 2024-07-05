@@ -3,7 +3,8 @@ import { blake2b } from 'blakejs'
 import {
   constants,
   stat_in_year_week,
-  nfl_plays_column_params
+  nfl_plays_column_params,
+  bookmaker_constants
 } from '#libs-shared'
 import apply_play_by_play_column_params_to_query from './apply-play-by-play-column-params-to-query.mjs'
 import db from '#db'
@@ -24,6 +25,99 @@ const get_table_hash = (key) => {
     .join('')
   return `t${hash}`
 }
+
+const betting_markets_table_alias =
+  (market_type = bookmaker_constants.player_prop_types.SEASON_PASSING_YARDS) =>
+  ({ params = {} }) => {
+    const {
+      year = constants.season.year,
+      week = constants.season.week,
+      source_id = bookmaker_constants.bookmakers.FANDUEL,
+      time_type = bookmaker_constants.time_type.CLOSE
+    } = params
+    return get_table_hash(
+      `betting_markets_${year}_week_${week}_source_id_${source_id}_market_type_${market_type}_time_type_${time_type}`
+    )
+  }
+
+const betting_markets_join =
+  (market_type = bookmaker_constants.player_prop_types.SEASON_PASSING_YARDS) =>
+  ({ query, table_name, join_type = 'LEFT', params = {} }) => {
+    const join_func = get_join_func(join_type)
+    const {
+      time_type = bookmaker_constants.time_type.CLOSE,
+      year = constants.season.year,
+      week
+    } = params
+
+    const markets_index_alias = `${table_name}_markets_index`
+
+    query[join_func](
+      `prop_markets_index AS ${markets_index_alias}`,
+      function () {
+        this.on(
+          `${markets_index_alias}.market_type`,
+          '=',
+          db.raw('?', [market_type])
+        )
+        this.andOn(
+          `${markets_index_alias}.time_type`,
+          '=',
+          db.raw('?', [time_type])
+        )
+        if (year) {
+          this.andOn(`${markets_index_alias}.year`, '=', db.raw('?', [year]))
+        }
+      }
+    )
+
+    query[join_func](
+      `prop_market_selections_index AS ${table_name}`,
+      function () {
+        this.on(
+          `${table_name}.source_market_id`,
+          '=',
+          `${markets_index_alias}.source_market_id`
+        )
+        this.andOn(
+          `${table_name}.source_id`,
+          '=',
+          `${markets_index_alias}.source_id`
+        )
+        this.andOn(
+          `${table_name}.time_type`,
+          '=',
+          `${markets_index_alias}.time_type`
+        )
+        this.andOn(`${table_name}.selection_pid`, '=', 'player.pid')
+      }
+    )
+
+    if (week) {
+      const nfl_games_alias = `${table_name}_nfl_games`
+      query[join_func](`nfl_games AS ${nfl_games_alias}`, function () {
+        this.on(`${nfl_games_alias}.esbid`, '=', `${markets_index_alias}.esbid`)
+        this.andOn(
+          `${nfl_games_alias}.year`,
+          '=',
+          `${markets_index_alias}.year`
+        )
+        this.andOn(`${nfl_games_alias}.week`, '=', db.raw('?', [week]))
+      })
+    }
+  }
+
+const create_betting_market_field = ({
+  column_name,
+  column_alias,
+  market_type
+}) => ({
+  column_name,
+  select_as: () => `${column_alias}_betting_market`,
+  where_column: () => column_name,
+  table_alias: betting_markets_table_alias(market_type),
+  join: betting_markets_join(market_type)
+})
 
 const generate_table_alias = ({ type, params = {} } = {}) => {
   if (!type) {
@@ -1314,5 +1408,24 @@ export default {
       'points_added_third_seas'
     ),
   player_draft_rank_from_careerlogs:
-    create_field_from_league_format_player_careerlogs('draft_rank')
+    create_field_from_league_format_player_careerlogs('draft_rank'),
+
+  player_season_passing_yards_line_from_betting_markets:
+    create_betting_market_field({
+      column_name: 'selection_metric_line',
+      column_alias: 'season_passing_yards_line',
+      market_type: bookmaker_constants.player_prop_types.SEASON_PASSING_YARDS
+    }),
+  player_season_receiving_yards_line_from_betting_markets:
+    create_betting_market_field({
+      column_name: 'selection_metric_line',
+      column_alias: 'season_receiving_yards_line',
+      market_type: bookmaker_constants.player_prop_types.SEASON_RECEIVING_YARDS
+    }),
+  player_season_rushing_yards_line_from_betting_markets:
+    create_betting_market_field({
+      column_name: 'selection_metric_line',
+      column_alias: 'season_rushing_yards_line',
+      market_type: bookmaker_constants.player_prop_types.SEASON_RUSHING_YARDS
+    })
 }
