@@ -113,7 +113,7 @@ const where_schema = {
             '^(?!.*(?:DELETE|DROP|TRUNCATE|ALTER|UPDATE|INSERT|MERGE|EXEC|;|--|\'|"|=|<|>)).*$',
           min: 0,
           max: 50,
-          alphanum: true
+          match: /^[a-zA-Z0-9.]+$/
         },
         { type: 'number' },
         {
@@ -124,7 +124,7 @@ const where_schema = {
               '^(?!.*(?:DELETE|DROP|TRUNCATE|ALTER|UPDATE|INSERT|MERGE|EXEC|;|--|\'|"|=|<|>)).*$',
             min: 0,
             max: 50,
-            alphanum: true
+            match: /^[a-zA-Z0-9.]+$/
           }
         },
         { type: 'array', items: { type: 'number' } }
