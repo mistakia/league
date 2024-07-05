@@ -224,11 +224,15 @@ export const get_market_type_for_quarterback_season_props = ({
     market_name_lower.includes('passing tds') ||
     market_name_lower.includes('passing touchdowns')
   ) {
-    return is_playoffs ? player_prop_types.PLAYOFF_PASSING_TOUCHDOWNS : player_prop_types.SEASON_PASSING_TOUCHDOWNS
+    return is_playoffs
+      ? player_prop_types.PLAYOFF_PASSING_TOUCHDOWNS
+      : player_prop_types.SEASON_PASSING_TOUCHDOWNS
   }
 
   if (market_name_lower.includes('passing yards')) {
-    return is_playoffs ? player_prop_types.PLAYOFF_PASSING_YARDS : player_prop_types.SEASON_PASSING_YARDS
+    return is_playoffs
+      ? player_prop_types.PLAYOFF_PASSING_YARDS
+      : player_prop_types.SEASON_PASSING_YARDS
   }
 
   return null
@@ -238,20 +242,31 @@ export const get_market_type_for_wide_receiver_season_props = ({
   marketName
 }) => {
   const market_name_lower = marketName.toLowerCase()
+  let is_playoffs = false
+
+  if (market_name_lower.includes('playoff')) {
+    is_playoffs = true
+  }
 
   if (market_name_lower.includes('receiving yards')) {
-    return player_prop_types.SEASON_RECEIVING_YARDS
+    return is_playoffs
+      ? player_prop_types.PLAYOFF_RECEIVING_YARDS
+      : player_prop_types.SEASON_RECEIVING_YARDS
   }
 
   if (
     market_name_lower.includes('receiving tds') ||
     market_name_lower.includes('receiving touchdowns')
   ) {
-    return player_prop_types.SEASON_RECEIVING_TOUCHDOWNS
+    return is_playoffs
+      ? player_prop_types.PLAYOFF_RECEIVING_TOUCHDOWNS
+      : player_prop_types.SEASON_RECEIVING_TOUCHDOWNS
   }
 
   if (market_name_lower.includes('receptions')) {
-    return player_prop_types.SEASON_RECEPTIONS
+    return is_playoffs
+      ? player_prop_types.PLAYOFF_RECEPTIONS
+      : player_prop_types.SEASON_RECEPTIONS
   }
 
   return null
@@ -261,16 +276,25 @@ export const get_market_type_for_running_back_season_props = ({
   marketName
 }) => {
   const market_name_lower = marketName.toLowerCase()
+  let is_playoffs = false
+
+  if (market_name_lower.includes('playoff')) {
+    is_playoffs = true
+  }
 
   if (market_name_lower.includes('rushing yards')) {
-    return player_prop_types.SEASON_RUSHING_YARDS
+    return is_playoffs
+      ? player_prop_types.PLAYOFF_RUSHING_YARDS
+      : player_prop_types.SEASON_RUSHING_YARDS
   }
 
   if (
     market_name_lower.includes('rushing tds') ||
     market_name_lower.includes('rushing touchdowns')
   ) {
-    return player_prop_types.SEASON_RUSHING_TOUCHDOWNS
+    return is_playoffs
+      ? player_prop_types.PLAYOFF_RUSHING_TOUCHDOWNS
+      : player_prop_types.SEASON_RUSHING_TOUCHDOWNS
   }
 
   return null
