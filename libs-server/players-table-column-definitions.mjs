@@ -47,12 +47,19 @@ const betting_markets_with = ({
   splits
 }) => {
   const {
-    year = constants.season.year,
     time_type = bookmaker_constants.time_type.CLOSE,
     market_type = bookmaker_constants.player_prop_types.SEASON_PASSING_YARDS,
-    source_id = bookmaker_constants.bookmakers.FANDUEL,
-    week = null
+    source_id = bookmaker_constants.bookmakers.FANDUEL
   } = params
+
+  const year = Array.isArray(params.year)
+    ? params.year[0]
+    : params.year || constants.season.year
+  let week = Array.isArray(params.week) ? params.week[0] : params.week
+
+  if (bookmaker_constants.player_game_prop_types[market_type] && !week) {
+    week = Math.max(1, constants.season.week)
+  }
 
   const markets_cte = `${with_table_name}_markets`
 
