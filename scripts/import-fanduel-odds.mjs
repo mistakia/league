@@ -137,6 +137,13 @@ const format_market = async ({
     source_market_name: `${fanduel_market.marketName} (${fanduel_market.marketType})`,
 
     esbid: nfl_game?.esbid || null,
+    year:
+      nfl_game?.year ||
+      fanduel.get_market_year({
+        marketName: fanduel_market.marketName,
+        source_event_name: event.name
+      }) ||
+      null,
     source_event_id: String(fanduel_market.eventId),
     source_event_name: event.name || null,
 

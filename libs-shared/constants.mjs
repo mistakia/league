@@ -1475,18 +1475,6 @@ export const sources = {
   FANTASYLIFE: 27
 }
 
-export const bookmakers = [
-  'BETONLINE',
-  'BETMGM',
-  'BETRIVERS',
-  'BOVADA',
-  'CAESARS',
-  'DRAFTKINGS',
-  'FANDUEL',
-  'GAMBET',
-  'PRIZEPICKS'
-]
-
 export const source_keys = {}
 for (const key in sources) {
   const value = sources[key]

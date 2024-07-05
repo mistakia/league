@@ -214,16 +214,21 @@ export const get_market_type_for_quarterback_season_props = ({
   marketName
 }) => {
   const market_name_lower = marketName.toLowerCase()
+  let is_playoffs = false
+
+  if (market_name_lower.includes('playoff')) {
+    is_playoffs = true
+  }
 
   if (
     market_name_lower.includes('passing tds') ||
     market_name_lower.includes('passing touchdowns')
   ) {
-    return player_prop_types.SEASON_PASSING_TOUCHDOWNS
+    return is_playoffs ? player_prop_types.PLAYOFF_PASSING_TOUCHDOWNS : player_prop_types.SEASON_PASSING_TOUCHDOWNS
   }
 
   if (market_name_lower.includes('passing yards')) {
-    return player_prop_types.SEASON_PASSING_YARDS
+    return is_playoffs ? player_prop_types.PLAYOFF_PASSING_YARDS : player_prop_types.SEASON_PASSING_YARDS
   }
 
   return null
