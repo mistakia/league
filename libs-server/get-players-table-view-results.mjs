@@ -22,7 +22,7 @@ const add_play_by_play_with_statement = ({
   const with_query = db('nfl_plays')
     .select(pid_column)
     .whereNot('play_type', 'NOPL')
-    .where('seas_type', 'REG')
+    .where('nfl_plays.seas_type', 'REG')
     .groupBy(pid_column)
 
   for (const split of splits) {
