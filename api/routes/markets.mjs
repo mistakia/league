@@ -1,7 +1,7 @@
 import express from 'express'
 import Validator from 'fastest-validator'
 
-import { constants } from '#libs-shared'
+import { constants, bookmaker_constants } from '#libs-shared'
 import cache from '#api/cache.mjs'
 import { validators } from '#libs-server'
 
@@ -10,7 +10,7 @@ const v = new Validator({ haltOnFirstError: true })
 
 const bookmaker_schema = {
   type: 'enum',
-  values: constants.bookmakers,
+  values: Object.values(bookmaker_constants.bookmakers),
   $$root: true
 }
 
