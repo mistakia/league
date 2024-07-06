@@ -38,9 +38,6 @@ const COLUMN_GROUPS = {
   AFTER_CATCH: { priority: 5 }
 }
 
-const active_year =
-  constants.season.week > 0 ? constants.season.year : constants.season.year - 1
-
 for (const [key, value] of Object.entries(COLUMN_GROUPS)) {
   value.column_group_id = key
 }
@@ -219,7 +216,7 @@ export function PlayerTableFields({
       year: {
         values: constants.years,
         data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-        default_value: active_year,
+        default_value: constants.season.stats_season_year,
         single: true,
         enable_multi_on_split: ['year']
       },
@@ -243,7 +240,7 @@ export function PlayerTableFields({
       year: {
         values: constants.years,
         data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-        default_value: active_year,
+        default_value: constants.season.stats_season_year,
         single: true,
         enable_multi_on_split: ['year']
       },

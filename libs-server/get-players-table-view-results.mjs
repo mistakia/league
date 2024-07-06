@@ -1,7 +1,6 @@
 import db from '#db'
-import players_table_column_definitions, {
-  split_params
-} from './players-table-column-definitions.mjs'
+import { players_table_constants } from '#libs-shared'
+import players_table_column_definitions from './players-table-column-definitions/index.mjs'
 import apply_play_by_play_column_params_to_query from './apply-play-by-play-column-params-to-query.mjs'
 import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
 import * as validators from './validators.mjs'
@@ -26,7 +25,7 @@ const add_play_by_play_with_statement = ({
     .groupBy(pid_column)
 
   for (const split of splits) {
-    if (split_params.includes(split)) {
+    if (players_table_constants.split_params.includes(split)) {
       const column_param_definition = nfl_plays_column_params[split]
       const table_name = column_param_definition.table || 'nfl_plays'
       const split_statement = `${table_name}.${split}`
