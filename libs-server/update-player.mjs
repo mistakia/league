@@ -130,6 +130,13 @@ const updatePlayer = async ({ player_row, pid, update }) => {
 
 export default updatePlayer
 
+/**
+ * Example CLI usage:
+ * node update-player.mjs --pid 1234 --fname "John" --lname "Doe" --pos "QB"
+ *
+ * This command will update the player with ID 1234, setting their first name to "John",
+ * last name to "Doe", and position to "QB".
+ */
 const main = async () => {
   let error
   try {
