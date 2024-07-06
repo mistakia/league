@@ -1,14 +1,17 @@
-import { call, takeLatest, fork, select } from 'redux-saga/effects'
+import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
 import { get_app } from '@core/selectors'
 import { appActions } from './actions'
 import { postRegister, postLogin, fetchAuth } from '@core/api'
 import { localStorageAdapter } from '@core/utils'
+import { leagueActions } from '@core/leagues/actions'
 
 export function* init() {
   const { token } = yield select(get_app)
   if (token) {
     yield call(fetchAuth)
+  } else {
+    yield put(leagueActions.load_league())
   }
 }
 
