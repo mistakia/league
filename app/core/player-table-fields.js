@@ -59,9 +59,11 @@ function create_espn_score_field({ score_type, label }) {
         values: [2023, 2022, 2021, 2020, 2019, 2018, 2017],
         data_type: table_constants.TABLE_DATA_TYPES.SELECT,
         single: true,
-        default_value: 2023
+        default_value: 2023,
+        enable_multi_on_split: ['year']
       }
-    }
+    },
+    splits: ['year']
   }
 }
 
@@ -214,7 +216,8 @@ export function PlayerTableFields({
         values: constants.years,
         data_type: table_constants.TABLE_DATA_TYPES.SELECT,
         default_value: active_year,
-        single: true
+        single: true,
+        enable_multi_on_split: ['year']
       },
       scoring_format_hash: scoring_format_hash_param
     },
@@ -237,7 +240,8 @@ export function PlayerTableFields({
         values: constants.years,
         data_type: table_constants.TABLE_DATA_TYPES.SELECT,
         default_value: active_year,
-        single: true
+        single: true,
+        enable_multi_on_split: ['year']
       },
       league_format_hash: league_format_hash_param
     },
@@ -1781,6 +1785,7 @@ export function PlayerTableFields({
           single: true
         },
         year: {
+          // TODO should enable spliting and multi select on split enabled
           data_type: table_constants.TABLE_DATA_TYPES.SELECT,
           values: [2023, 2024],
           default_value: 2024,
