@@ -56,6 +56,7 @@ const getPlayer = async ({
   gsisid,
   pname,
   start,
+  gsisItId,
 
   ignore_retired = false,
   ignore_free_agent = false
@@ -79,6 +80,8 @@ const getPlayer = async ({
     query.where({ esbid })
   } else if (gsisid) {
     query.where({ gsisid })
+  } else if (gsisItId) {
+    query.where({ gsisItId })
   } else {
     if (name) {
       const formatted = formatPlayerName(name)
