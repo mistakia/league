@@ -3,8 +3,36 @@ import debug from 'debug'
 
 import config from '#config'
 import * as cache from './cache.mjs'
+import { constants } from '#libs-shared'
 
 const log = debug('ngs')
+
+export const getCurrentPlayers = async ({
+  ignore_cache = false,
+  season = constants.season.year
+}) => {
+  const cache_key = `/ngs/current_players/${season}.json`
+  if (!ignore_cache) {
+    const cache_value = await cache.get({ key: cache_key })
+    if (cache_value) {
+      log(`cache hit for ngs current players for season: ${season}`)
+      return cache_value
+    }
+  }
+
+  const url = `${config.ngs_api_url}/league/roster/current?teamId=ALL`
+  log(`fetching ngs current players for season: ${season}`)
+  const res = await fetch(url, {
+    headers: { referer: 'https://nextgenstats.nfl.com/' }
+  })
+  const data = await res.json()
+
+  if (data && data.teamPlayers.length) {
+    await cache.set({ key: cache_key, value: data })
+  }
+
+  return data
+}
 
 export const getPlayer = async ({ ignore_cache = false, nflId } = {}) => {
   if (!nflId) {

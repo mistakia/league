@@ -176,7 +176,9 @@ const main = async () => {
         ignore_cache: true
       })
 
-      await setInactive(pids)
+      log(`processed ${pids.length} players from nfl`)
+
+      // await setInactive(pids)
     }
   } catch (err) {
     error = err

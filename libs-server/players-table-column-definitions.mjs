@@ -366,7 +366,9 @@ const scoring_format_player_seasonlogs_join = ({
       }
     } else if (splits.includes('year')) {
       if (params.year) {
-        const year_array = Array.isArray(params.year) ? params.year : [params.year]
+        const year_array = Array.isArray(params.year)
+          ? params.year
+          : [params.year]
         this.andOn(db.raw(`${table_name}.year IN (${year_array.join(',')})`))
       }
     } else {
@@ -475,7 +477,9 @@ const league_format_player_seasonlogs_join = ({
       }
     } else if (splits.includes('year')) {
       if (params.year) {
-        const year_array = Array.isArray(params.year) ? params.year : [params.year]
+        const year_array = Array.isArray(params.year)
+          ? params.year
+          : [params.year]
         this.andOn(db.raw(`${table_name}.year IN (${year_array.join(',')})`))
       }
     } else {
@@ -699,8 +703,12 @@ const create_espn_score_columns = (column_name) => ({
         })
       } else if (splits.includes('year')) {
         if (params.year) {
-          const year_array = Array.isArray(params.year) ? params.year : [params.year]
-          this.andOn(db.raw(`player_seasonlogs.year IN (${year_array.join(',')})`))
+          const year_array = Array.isArray(params.year)
+            ? params.year
+            : [params.year]
+          this.andOn(
+            db.raw(`player_seasonlogs.year IN (${year_array.join(',')})`)
+          )
         }
       } else {
         const year = get_valid_year(params.year)
@@ -708,8 +716,15 @@ const create_espn_score_columns = (column_name) => ({
       }
 
       if (params.career_year) {
-        this.andOn('player_seasonlogs.career_year', '>=', Math.min(params.career_year[0], params.career_year[1]))
-          .andOn('player_seasonlogs.career_year', '<=', Math.max(params.career_year[0], params.career_year[1]))
+        this.andOn(
+          'player_seasonlogs.career_year',
+          '>=',
+          Math.min(params.career_year[0], params.career_year[1])
+        ).andOn(
+          'player_seasonlogs.career_year',
+          '<=',
+          Math.max(params.career_year[0], params.career_year[1])
+        )
       }
     }
 
