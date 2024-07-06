@@ -108,4 +108,9 @@ export const uuidv4 = () =>
     ).toString(16)
   )
 
-export { constants, getDraftWindow, bookmaker_constants, players_table_constants }
+export {
+  constants,
+  getDraftWindow,
+  bookmaker_constants,
+  players_table_constants
+}

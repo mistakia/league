@@ -4,10 +4,15 @@ import get_table_hash from '#libs-server/get-table-hash.mjs'
 import get_join_func from '#libs-server/get-join-func.mjs'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 
-const generate_table_alias = ({ type, params = {} } = {}) => {
+const generate_table_alias = ({ type, params = {}, pid_column } = {}) => {
   if (!type) {
     throw new Error('type is required')
   }
+
+  if (!pid_column) {
+    throw new Error('pid_column is required')
+  }
+
   const column_param_keys = Object.keys(nfl_plays_column_params).sort()
   const key = column_param_keys
     .map((key) => {
@@ -18,7 +23,7 @@ const generate_table_alias = ({ type, params = {} } = {}) => {
     })
     .join('')
 
-  return get_table_hash(`${type}_${key}`)
+  return get_table_hash(`${type}_${pid_column}_${key}`)
 }
 
 const join_filtered_plays_table = ({
@@ -48,7 +53,7 @@ const join_filtered_plays_table = ({
 
 const player_stat_from_plays = ({ pid_column, select_string, stat_name }) => ({
   table_alias: ({ params }) =>
-    generate_table_alias({ type: 'play_by_play', params }),
+    generate_table_alias({ type: 'play_by_play', params, pid_column }),
   column_name: stat_name,
   select: () => [`${select_string} as ${stat_name}_0`],
   where_column: () => select_string,
@@ -153,7 +158,7 @@ const create_team_share_stat = ({
     query.with(with_table_name, with_query)
   },
   table_alias: ({ params }) =>
-    generate_table_alias({ type: column_name, params }),
+    generate_table_alias({ type: column_name, params, pid_column }),
   join: ({
     query,
     table_name,
