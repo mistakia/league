@@ -708,10 +708,8 @@ const create_espn_score_columns = (column_name) => ({
       }
 
       if (params.career_year) {
-        this.andWhereBetween('player_seasonlogs.career_year', [
-          Math.min(params.career_year[0], params.career_year[1]),
-          Math.max(params.career_year[0], params.career_year[1])
-        ])
+        this.andOn('player_seasonlogs.career_year', '>=', Math.min(params.career_year[0], params.career_year[1]))
+          .andOn('player_seasonlogs.career_year', '<=', Math.max(params.career_year[0], params.career_year[1]))
       }
     }
 
