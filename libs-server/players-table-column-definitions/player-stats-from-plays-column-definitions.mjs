@@ -314,7 +314,7 @@ export default {
   }),
   player_rush_yds_per_attempt_from_plays: player_stat_from_plays({
     pid_column: 'bc_pid',
-    select_string: `CASE WHEN COUNT(*) > 0 THEN ROUND(SUM(rush_yds) / COUNT(*), 2) ELSE 0 END`,
+    select_string: `CASE WHEN COUNT(*) > 0 THEN CAST(ROUND(SUM(rush_yds)::decimal / COUNT(*), 2) AS decimal) ELSE 0 END`,
     stat_name: 'rush_yds_per_att_from_plays'
   }),
   player_rush_attempts_from_plays: player_stat_from_plays({
