@@ -27,6 +27,7 @@
     "#api": "./api/index.mjs",
     "#api/*": "./api/*",
     "#libs-server": "./libs-server/index.mjs",
+    "#libs-server/*": "./libs-server/*",
     "#libs-shared": "./libs-shared/index.mjs",
     "#libs-shared/*": "./libs-shared/*",
     "#scripts/*": "./scripts/*",

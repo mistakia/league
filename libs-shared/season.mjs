@@ -75,6 +75,10 @@ export default class Season {
     return week > 0 && week <= this.finalWeek
   }
 
+  get stats_season_year() {
+    return this.week === 0 ? this.year - 1 : this.year
+  }
+
   get isWaiverPeriod() {
     if (!this.isRegularSeason) {
       return true

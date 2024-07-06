@@ -1,5 +1,6 @@
 import * as constants from './constants.mjs'
 import * as bookmaker_constants from './bookmaker-constants.mjs'
+import * as players_table_constants from './players-table-constants.mjs'
 import getDraftWindow from './get-draft-window.mjs'
 
 export { default as weightProjections } from './weight-projections.mjs'
@@ -107,4 +108,4 @@ export const uuidv4 = () =>
     ).toString(16)
   )
 
-export { constants, getDraftWindow, bookmaker_constants }
+export { constants, getDraftWindow, bookmaker_constants, players_table_constants }
