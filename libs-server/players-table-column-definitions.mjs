@@ -120,7 +120,7 @@ const betting_markets_join = ({
 const create_betting_market_field = ({ column_name, column_alias }) => ({
   column_name,
   select_as: () => `${column_alias}_betting_market`,
-  where_column: () => column_name,
+  where_column: ({ table_name }) => `${table_name}.${column_name}`,
   table_alias: betting_markets_table_alias,
   join: betting_markets_join,
   with: betting_markets_with
@@ -365,8 +365,10 @@ const scoring_format_player_seasonlogs_join = ({
         )
       }
     } else if (splits.includes('year')) {
-      // TODO: Enable multiple year selection in UX before implementing this
-      // this.andOn(db.raw(`${table_name}.year IN (${year.join(',')})`))
+      if (params.year) {
+        const year_array = Array.isArray(params.year) ? params.year : [params.year]
+        this.andOn(db.raw(`${table_name}.year IN (${year_array.join(',')})`))
+      }
     } else {
       this.andOn(db.raw(`${table_name}.year IN (${year.join(',')})`))
     }
@@ -416,7 +418,7 @@ const scoring_format_player_careerlogs_join = ({
 const create_field_from_scoring_format_player_seasonlogs = (column_name) => ({
   column_name,
   select_as: () => `${column_name}_from_seasonlogs`,
-  where_column: () => column_name,
+  where_column: ({ table_name }) => `${table_name}.${column_name}`,
   table_name: 'scoring_format_player_seasonlogs',
   table_alias: scoring_format_player_seasonlogs_table_alias,
   join: scoring_format_player_seasonlogs_join,
@@ -426,7 +428,7 @@ const create_field_from_scoring_format_player_seasonlogs = (column_name) => ({
 const create_field_from_scoring_format_player_careerlogs = (column_name) => ({
   column_name,
   select_as: () => `${column_name}_from_careerlogs`,
-  where_column: () => column_name,
+  where_column: ({ table_name }) => `${table_name}.${column_name}`,
   table_name: 'scoring_format_player_careerlogs',
   table_alias: scoring_format_player_careerlogs_table_alias,
   join: scoring_format_player_careerlogs_join
@@ -472,8 +474,10 @@ const league_format_player_seasonlogs_join = ({
         )
       }
     } else if (splits.includes('year')) {
-      // TODO: Enable multiple year selection in UX before implementing this
-      // this.andOn(db.raw(`${table_name}.year IN (${year.join(',')})`))
+      if (params.year) {
+        const year_array = Array.isArray(params.year) ? params.year : [params.year]
+        this.andOn(db.raw(`${table_name}.year IN (${year_array.join(',')})`))
+      }
     } else {
       this.andOn(db.raw(`${table_name}.year IN (${year.join(',')})`))
     }
@@ -488,7 +492,7 @@ const league_format_player_seasonlogs_join = ({
 const create_field_from_league_format_player_seasonlogs = (column_name) => ({
   column_name,
   select_as: () => `${column_name}_from_seasonlogs`,
-  where_column: () => column_name,
+  where_column: ({ table_name }) => `${table_name}.${column_name}`,
   table_name: 'league_format_player_seasonlogs',
   table_alias: league_format_player_seasonlogs_table_alias,
   join: league_format_player_seasonlogs_join,
@@ -529,7 +533,7 @@ const league_format_player_careerlogs_join = ({
 const create_field_from_league_format_player_careerlogs = (column_name) => ({
   column_name,
   select_as: () => `${column_name}_from_careerlogs`,
-  where_column: () => column_name,
+  where_column: ({ table_name }) => `${table_name}.${column_name}`,
   table_name: 'league_format_player_careerlogs',
   table_alias: league_format_player_careerlogs_table_alias,
   join: league_format_player_careerlogs_join
@@ -694,11 +698,20 @@ const create_espn_score_columns = (column_name) => ({
           )
         })
       } else if (splits.includes('year')) {
-        // TODO: Enable multiple year selection in UX before implementing this
-        // this.andOn(db.raw(`player_seasonlogs.year IN (${params.year.join(',')})`))
+        if (params.year) {
+          const year_array = Array.isArray(params.year) ? params.year : [params.year]
+          this.andOn(db.raw(`player_seasonlogs.year IN (${year_array.join(',')})`))
+        }
       } else {
         const year = get_valid_year(params.year)
         this.andOn('player_seasonlogs.year', '=', year)
+      }
+
+      if (params.career_year) {
+        this.andWhereBetween('player_seasonlogs.career_year', [
+          Math.min(params.career_year[0], params.career_year[1]),
+          Math.max(params.career_year[0], params.career_year[1])
+        ])
       }
     }
 
@@ -706,7 +719,6 @@ const create_espn_score_columns = (column_name) => ({
   },
   supported_splits: ['year']
 })
-
 const create_team_share_stat = ({
   column_name,
   pid_column,

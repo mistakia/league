@@ -123,6 +123,7 @@ const get_where_string = ({
     : column_definition.column_name
   const where_column = column_definition.where_column
     ? column_definition.where_column({
+        table_name,
         case_insensitive: where_clause.operator === 'ILIKE'
       })
     : column_definition.use_having
