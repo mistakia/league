@@ -90,6 +90,8 @@ const where_operator_schema = {
     '>=',
     '<',
     '<=',
+    'ILIKE',
+    'NOT ILIKE',
     'LIKE',
     'NOT LIKE',
     'IS NULL',
