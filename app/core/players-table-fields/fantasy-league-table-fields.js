@@ -3,7 +3,6 @@ import React from 'react'
 import PlayerRowStatusColumn from '@components/player-row-status-column'
 import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
-import { stat_in_year_week } from '@libs-shared'
 
 export default function ({ week }) {
   return {
@@ -39,9 +38,7 @@ export default function ({ week }) {
         COLUMN_GROUPS.FANTASY_LEAGUE
       ],
       header_label: 'Market',
-      player_value_path: stat_in_year_week('market_salary')({
-        params: { week }
-      }),
+      player_value_path: 'week_projected_market_salary',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER
     },
@@ -54,9 +51,7 @@ export default function ({ week }) {
         COLUMN_GROUPS.FANTASY_LEAGUE
       ],
       header_label: 'Adjusted',
-      player_value_path: stat_in_year_week('inflation_adjusted_market_salary')({
-        params: { week: 0 }
-      }),
+      player_value_path: 'season_projected_inflation_adjusted_market_salary',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER
     },
@@ -69,9 +64,7 @@ export default function ({ week }) {
         COLUMN_GROUPS.FANTASY_LEAGUE
       ],
       header_label: 'Value',
-      player_value_path: stat_in_year_week('salary_adjusted_points_added')({
-        params: { week }
-      }),
+      player_value_path: 'week_projected_salary_adjusted_points_added',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER
     },
@@ -84,9 +77,7 @@ export default function ({ week }) {
         COLUMN_GROUPS.FANTASY_LEAGUE
       ],
       header_label: 'Value',
-      player_value_path: stat_in_year_week('salary_adjusted_points_added')({
-        params: { week: 0 }
-      }),
+      player_value_path: 'season_projected_salary_adjusted_points_added',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER
     },
@@ -99,9 +90,8 @@ export default function ({ week }) {
         COLUMN_GROUPS.FANTASY_LEAGUE
       ],
       header_label: 'Value',
-      player_value_path: stat_in_year_week('salary_adjusted_points_added')({
-        params: { week: 'ros' }
-      }),
+      player_value_path:
+        'rest_of_season_projected_salary_adjusted_points_added',
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER
     }
