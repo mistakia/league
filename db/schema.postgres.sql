@@ -17,9 +17,13 @@ SET client_min_messages = warning;
 SET row_security = off;
 SET search_path = public;
 
+DROP TRIGGER IF EXISTS player_name_search_vector_update ON public.player;
+DROP INDEX IF EXISTS public.player_name_search_idx;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_seasonlogs_pid_year_hash;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_gamelogs_pid_esbid_hash;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_careerlogs_pid_hash;
+DROP INDEX IF EXISTS public.idx_prop_markets_index_market_time_year;
+DROP INDEX IF EXISTS public.idx_prop_market_selections_index_composite;
 DROP INDEX IF EXISTS public.idx_nfl_plays_ydl_100;
 DROP INDEX IF EXISTS public.idx_nfl_plays_series_seq;
 DROP INDEX IF EXISTS public.idx_nfl_plays_qtr;
@@ -327,6 +331,7 @@ DROP TABLE IF EXISTS public.jobs;
 DROP TABLE IF EXISTS public.footballoutsiders;
 DROP SEQUENCE IF EXISTS public.draft_uid_seq;
 DROP TABLE IF EXISTS public.draft;
+DROP FUNCTION IF EXISTS public.player_name_search_vector_update();
 DROP TYPE IF EXISTS public.wager_status;
 DROP TYPE IF EXISTS public.time_type;
 DROP TYPE IF EXISTS public.placed_wagers_wager_type;
@@ -444,6 +449,22 @@ CREATE TYPE public.wager_status AS ENUM (
     'PUSH',
     'CANCELLED'
 );
+
+
+--
+-- Name: player_name_search_vector_update(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.player_name_search_vector_update() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  NEW.name_search_vector :=
+    setweight(to_tsvector('english', coalesce(NEW.fname,'')), 'A') ||
+    setweight(to_tsvector('english', coalesce(NEW.lname,'')), 'A');
+  RETURN NEW;
+END
+$$;
 
 
 SET default_table_access_method = heap;
@@ -3144,7 +3165,8 @@ CREATE TABLE public.player (
     fantasy_data_id integer,
     yahoo_id integer,
     keeptradecut_id integer,
-    pfr_id character varying(10)
+    pfr_id character varying(10),
+    name_search_vector tsvector
 );
 
 
@@ -6212,6 +6234,20 @@ CREATE INDEX idx_nfl_plays_ydl_100 ON public.nfl_plays USING btree (ydl_100);
 
 
 --
+-- Name: idx_prop_market_selections_index_composite; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_prop_market_selections_index_composite ON public.prop_market_selections_index USING btree (selection_pid, source_market_id, source_id, time_type);
+
+
+--
+-- Name: idx_prop_markets_index_market_time_year; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_prop_markets_index_market_time_year ON public.prop_markets_index USING btree (market_type, time_type, year);
+
+
+--
 -- Name: idx_scoring_format_player_careerlogs_pid_hash; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -6230,6 +6266,20 @@ CREATE UNIQUE INDEX idx_scoring_format_player_gamelogs_pid_esbid_hash ON public.
 --
 
 CREATE UNIQUE INDEX idx_scoring_format_player_seasonlogs_pid_year_hash ON public.scoring_format_player_seasonlogs USING btree (pid, year, scoring_format_hash);
+
+
+--
+-- Name: player_name_search_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_name_search_idx ON public.player USING gin (name_search_vector);
+
+
+--
+-- Name: player player_name_search_vector_update; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER player_name_search_vector_update BEFORE INSERT OR UPDATE ON public.player FOR EACH ROW EXECUTE FUNCTION public.player_name_search_vector_update();
 
 
 --
