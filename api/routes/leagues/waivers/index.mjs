@@ -41,7 +41,7 @@ router.get('/?', async (req, res) => {
       .where('lid', leagueId)
       .where('type', type)
       .whereNotNull('processed')
-      .groupBy('processed')
+      .groupBy('processed', 'uid')
       .orderBy('processed', 'desc')
     const waiverIds = waivers.map((p) => p.uid)
     const waiverReleases = await db('waiver_releases').whereIn(
