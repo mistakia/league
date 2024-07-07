@@ -10,7 +10,7 @@ const initialState = new Record({
   teamStats: new List(),
   qualifiers: new Map(constants.qualifiers),
   years: new List([constants.week ? constants.year : constants.year - 1]),
-  weeks: new List(constants.nflWeeks),
+  weeks: new List(constants.nfl_weeks),
   days: new List(constants.days),
   quarters: new List(constants.quarters),
   downs: new List(constants.downs),

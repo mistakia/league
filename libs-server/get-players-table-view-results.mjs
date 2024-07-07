@@ -118,7 +118,7 @@ const get_where_string = ({
   column_index = 0
 }) => {
   const column_name = column_definition.select_as
-    ? column_definition.select_as(where_clause.params)
+    ? column_definition.select_as({ params: where_clause.params })
     : column_definition.column_name
   const where_column = column_definition.where_column
     ? column_definition.where_column({
@@ -174,7 +174,7 @@ const get_select_string = ({
         : []
     }
   } else if (column_definition.select_as) {
-    const select_as = column_definition.select_as(column_params)
+    const select_as = column_definition.select_as({ params: column_params })
     return {
       select: [
         `"${table_name}"."${column_definition.column_name}" AS "${select_as}_${column_index}"`
@@ -577,7 +577,7 @@ export default function ({
 
     // Find the select position for the sort column
     const column_name = column_definition.select_as
-      ? column_definition.select_as(column_params)
+      ? column_definition.select_as({ params: column_params })
       : column_definition.column_name
 
     const column_name_with_index = `${column_name}_${sort_clause.column_index || 0}`

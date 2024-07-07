@@ -1,119 +1,96 @@
 import { constants, stat_in_year_week } from '#libs-shared'
+
 import db from '#db'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
 
 const projections_index_table_alias = ({ params = {} }) => {
-  const { year = constants.season.year, week = 0 } = params
-  return `projections_index_${year}_week_${week}`
+  const year = Array.isArray(params.year) ? params.year[0] : (params.year || constants.season.year)
+  const week = Array.isArray(params.week) ? params.week[0] : (params.week || 0)
+  return get_table_hash(`projections_index_${year}_week_${week}`)
 }
 
 const scoring_format_player_projection_points_table_alias = ({
   params = {}
 }) => {
-  const {
-    year = constants.season.year,
-    week = 0,
-    scoring_format_hash = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
-  } = params
+  const year = Array.isArray(params.year) ? params.year[0] : (params.year || constants.season.year)
+  const week = Array.isArray(params.week) ? params.week[0] : (params.week || 0)
+  const scoring_format_hash = params.scoring_format_hash || '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
   return get_table_hash(
     `scoring_format_player_projection_points_${year}_week_${week}_${scoring_format_hash}`
   )
 }
 
 const league_player_projection_values_table_alias = ({ params = {} }) => {
-  const { year = constants.season.year, week = 0, league_id = 1 } = params
-  return `league_player_projection_values_${year}_week_${week}_league_${league_id}`
+  const year = Array.isArray(params.year) ? params.year[0] : (params.year || constants.season.year)
+  const week = Array.isArray(params.week) ? params.week[0] : (params.week || 0)
+  const league_id = params.league_id || 1
+  return get_table_hash(
+    `league_player_projection_values_${year}_week_${week}_league_${league_id}`
+  )
 }
 
 // TODO splits
-const league_player_projection_values_join = ({ query, params = {} }) => {
-  const { year = constants.season.year, week = 0, league_id = 1 } = params
-  const table_alias = league_player_projection_values_table_alias({ params })
-  query.leftJoin(
-    `league_player_projection_values as ${table_alias}`,
-    function () {
-      this.on(`${table_alias}.pid`, '=', 'player.pid')
-      this.andOn(`${table_alias}.year`, '=', year)
-      this.andOn(db.raw(`${table_alias}.week = '${week}'`))
-      this.andOn(`${table_alias}.lid`, '=', league_id)
-    }
-  )
+const league_player_projection_values_join = ({ query, params = {}, table_name }) => {
+  const year = Array.isArray(params.year) ? params.year[0] : (params.year || constants.season.year)
+  const week = Array.isArray(params.week) ? params.week[0] : (params.week || 0)
+  const league_id = params.league_id || 1
+
+  query.leftJoin(`league_player_projection_values as ${table_name}`, function () {
+    this.on(`${table_name}.pid`, '=', 'player.pid')
+    this.andOn(`${table_name}.year`, '=', db.raw('?', [year]))
+    this.andOn(`${table_name}.week`, '=', db.raw('?', [week]))
+    this.andOn(`${table_name}.lid`, '=', db.raw('?', [league_id]))
+  })
 }
 
 const league_format_player_projection_values_table_alias = ({
   params = {}
 }) => {
-  const {
-    year = constants.season.year,
-    week = 0,
-    league_format_hash = '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b'
-  } = params
+  const year = Array.isArray(params.year) ? params.year[0] : (params.year || constants.season.year)
+  const week = Array.isArray(params.week) ? params.week[0] : (params.week || 0)
+  const league_format_hash = params.league_format_hash || '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b'
   return get_table_hash(
     `league_format_player_projection_values_${year}_week_${week}_${league_format_hash}`
   )
 }
 
 // TODO splits
-const scoring_format_player_projection_points_join = ({
-  query,
-  params = {}
-}) => {
-  const {
-    year = constants.season.year,
-    week = 0,
-    scoring_format_hash = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
-  } = params
-  const table_alias = scoring_format_player_projection_points_table_alias({
-    params
+const scoring_format_player_projection_points_join = ({ query, params = {}, table_name }) => {
+  const year = Array.isArray(params.year) ? params.year[0] : (params.year || constants.season.year)
+  const week = Array.isArray(params.week) ? params.week[0] : (params.week || 0)
+  const scoring_format_hash = params.scoring_format_hash || '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
+
+  query.leftJoin(`scoring_format_player_projection_points as ${table_name}`, function () {
+    this.on(`${table_name}.pid`, '=', 'player.pid')
+    this.andOn(`${table_name}.year`, '=', db.raw('?', [year]))
+    this.andOn(`${table_name}.week`, '=', db.raw('?', [week.toString()]))
+    this.andOn(`${table_name}.scoring_format_hash`, '=', db.raw('?', [scoring_format_hash]))
   })
-  query.leftJoin(
-    `scoring_format_player_projection_points as ${table_alias}`,
-    function () {
-      this.on(`${table_alias}.pid`, '=', 'player.pid')
-      this.andOn(`${table_alias}.year`, '=', year)
-      this.andOn(db.raw(`${table_alias}.week = '${week}'`))
-      this.andOn(
-        db.raw(`${table_alias}.scoring_format_hash = '${scoring_format_hash}'`)
-      )
-    }
-  )
 }
 
 // TODO splits
-const league_format_player_projection_values_join = ({
-  query,
-  params = {}
-}) => {
-  const {
-    year = constants.season.year,
-    week = 0,
-    league_format_hash = '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b'
-  } = params
-  const table_alias = league_format_player_projection_values_table_alias({
-    params
+const league_format_player_projection_values_join = ({ query, params = {}, table_name }) => {
+  const year = Array.isArray(params.year) ? params.year[0] : (params.year || constants.season.year)
+  const week = Array.isArray(params.week) ? params.week[0] : (params.week || 0)
+  const league_format_hash = params.league_format_hash || '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b'
+
+  query.leftJoin(`league_format_player_projection_values as ${table_name}`, function () {
+    this.on(`${table_name}.pid`, '=', 'player.pid')
+    this.andOn(`${table_name}.year`, '=', db.raw('?', [year]))
+    this.andOn(`${table_name}.week`, '=', db.raw('?', [week.toString()]))
+    this.andOn(`${table_name}.league_format_hash`, '=', db.raw('?', [league_format_hash]))
   })
-  query.leftJoin(
-    `league_format_player_projection_values as ${table_alias}`,
-    function () {
-      this.on(`${table_alias}.pid`, '=', 'player.pid')
-      this.andOn(`${table_alias}.year`, '=', year)
-      this.andOn(db.raw(`${table_alias}.week = '${week}'`))
-      this.andOn(
-        db.raw(`${table_alias}.league_format_hash = '${league_format_hash}'`)
-      )
-    }
-  )
 }
 
 // TODO splits
-const projections_index_join = ({ query, params = {} }) => {
-  const table_alias = projections_index_table_alias({ params })
-  const { year = constants.season.year, week = 0 } = params
-  query.leftJoin(`projections_index as ${table_alias}`, function () {
-    this.on(`${table_alias}.pid`, '=', 'player.pid')
-    this.andOn(`${table_alias}.year`, '=', year)
-    this.andOn(`${table_alias}.week`, '=', week)
-    this.andOn(`${table_alias}.sourceid`, '=', constants.sources.AVERAGE)
+const projections_index_join = ({ query, params = {}, table_name }) => {
+  const year = Array.isArray(params.year) ? params.year[0] : (params.year || constants.season.year)
+  const week = Array.isArray(params.week) ? params.week[0] : (params.week || 0)
+  query.leftJoin(`projections_index as ${table_name}`, function () {
+    this.on(`${table_name}.pid`, '=', 'player.pid')
+    this.andOn(`${table_name}.year`, '=', db.raw('?', [year]))
+    this.andOn(`${table_name}.week`, '=', db.raw('?', [week]))
+    this.andOn(`${table_name}.sourceid`, '=', constants.sources.AVERAGE)
   })
 }
 
