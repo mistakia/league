@@ -71,7 +71,7 @@ export default {
       },
       week: {
         data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-        values: constants.nflWeeks,
+        values: constants.nfl_weeks,
         default_value: 1,
         single: true
       }

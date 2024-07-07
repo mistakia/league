@@ -12,7 +12,7 @@ export default class StatWeeksFilter extends React.Component {
       values: []
     }
 
-    for (const week of constants.nflWeeks) {
+    for (const week of constants.nfl_weeks) {
       state.values.push({
         label: week,
         value: week,

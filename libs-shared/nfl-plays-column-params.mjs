@@ -13,7 +13,7 @@ export default {
     max: 500
   },
   week: {
-    values: constants.nflWeeks,
+    values: constants.nfl_weeks,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT
   },
   dwn: {
