@@ -271,7 +271,7 @@ const create_projected_stat = (base_object, stat_name) => {
   return prefixes.reduce((acc, prefix) => {
     acc[`player_${prefix}_projected_${stat_name}`] = {
       ...base_object,
-      select_as: `${prefix}_projected_${stat_name}`
+      select_as: () => `${prefix}_projected_${stat_name}`
     }
     return acc
   }, {})
@@ -305,7 +305,7 @@ export default {
     column_name: 'market_salary_adj',
     table_name: 'league_player_projection_values',
     table_alias: league_player_projection_values_table_alias,
-    select_as: 'player_season_projected_inflation_adjusted_market_salary',
+    select_as: () => 'player_season_projected_inflation_adjusted_market_salary',
     join: league_player_projection_values_join
   },
 
