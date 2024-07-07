@@ -7,7 +7,7 @@ import {
   getTeams
 } from '@core/selectors'
 import { players_table_views_actions } from '@core/players-table-views'
-import { getPlayerTableFields } from '@core/player-table-fields'
+import { getPlayerTableFields } from '@core/players-table-fields'
 import { calculatePercentiles } from '@libs-shared'
 import * as table_constants from 'react-table/src/constants.mjs'
 
