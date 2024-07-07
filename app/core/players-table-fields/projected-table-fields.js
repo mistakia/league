@@ -1,24 +1,17 @@
 import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
-import { constants, stat_in_year_week } from '@libs-shared'
+import { constants } from '@libs-shared'
 
 const projection_years = [2020, 2021, 2022, 2023, 2024]
 
 export default function ({ week }) {
-  const create_field = ({
-    base_name,
-    title,
-    groups,
-    label,
-    stat,
-    options = {}
-  }) => ({
+  const create_field = ({ base_name, title, groups, label, options = {} }) => ({
     [`player_week_projected_${base_name}`]: create_projection_field({
       title,
       period: 'Week',
       groups,
       label,
-      stat,
+      base_name,
       options: { week, ...options }
     }),
     [`player_season_projected_${base_name}`]: create_projection_field({
@@ -26,7 +19,7 @@ export default function ({ week }) {
       period: 'Season',
       groups,
       label,
-      stat,
+      base_name,
       options
     }),
     [`player_rest_of_season_projected_${base_name}`]: create_projection_field({
@@ -34,7 +27,7 @@ export default function ({ week }) {
       period: 'Rest-Of-Season',
       groups,
       label,
-      stat,
+      base_name,
       options: { week: 'ros', ...options }
     })
   })
@@ -44,7 +37,7 @@ export default function ({ week }) {
     period,
     groups,
     label,
-    stat,
+    base_name,
     options = {}
   }) => ({
     column_title: `Projected ${title} (${period})`,
@@ -54,9 +47,7 @@ export default function ({ week }) {
       ...groups
     ],
     header_label: label,
-    player_value_path: stat_in_year_week(stat)(
-      options.week ? { params: { week: options.week } } : {}
-    ),
+    player_value_path: `${period.toLowerCase().replaceAll('-', '_')}_projected_${base_name}`,
     ...(options.fixed && { fixed: options.fixed }),
     size: 70,
     data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -94,7 +85,6 @@ export default function ({ week }) {
       title: 'Points Added',
       groups: [COLUMN_GROUPS.FANTASY_LEAGUE],
       label: 'Pts+',
-      stat: 'points_added',
       options: { fixed: 1 }
     }),
     ...create_field({
@@ -102,22 +92,19 @@ export default function ({ week }) {
       title: 'Points',
       groups: [COLUMN_GROUPS.FANTASY_POINTS],
       label: 'Pts',
-      stat: 'proj_fan_pts',
       options: { fixed: 1 }
     }),
     ...create_field({
       base_name: 'pass_yds',
       title: 'Passing Yards',
       groups: [COLUMN_GROUPS.PASSING],
-      label: 'YDS',
-      stat: 'proj_pass_yds'
+      label: 'YDS'
     }),
     ...create_field({
       base_name: 'pass_tds',
       title: 'Passing Touchdowns',
       groups: [COLUMN_GROUPS.PASSING],
       label: 'TD',
-      stat: 'proj_pass_tds',
       options: { fixed: 1 }
     }),
     ...create_field({
@@ -125,29 +112,25 @@ export default function ({ week }) {
       title: 'Interceptions',
       groups: [COLUMN_GROUPS.PASSING],
       label: 'INT',
-      stat: 'proj_pass_ints',
       options: { fixed: 1 }
     }),
     ...create_field({
       base_name: 'rush_atts',
       title: 'Rushing Attempts',
       groups: [COLUMN_GROUPS.RUSHING],
-      label: 'ATT',
-      stat: 'proj_rush_atts'
+      label: 'ATT'
     }),
     ...create_field({
       base_name: 'rush_yds',
       title: 'Rushing Yards',
       groups: [COLUMN_GROUPS.RUSHING],
-      label: 'YDS',
-      stat: 'proj_rush_yds'
+      label: 'YDS'
     }),
     ...create_field({
       base_name: 'rush_tds',
       title: 'Rushing Touchdowns',
       groups: [COLUMN_GROUPS.RUSHING],
       label: 'TD',
-      stat: 'proj_rush_tds',
       options: { fixed: 1 }
     }),
     ...create_field({
@@ -155,7 +138,6 @@ export default function ({ week }) {
       title: 'Fumbles',
       groups: [COLUMN_GROUPS.RUSHING],
       label: 'FUM',
-      stat: 'proj_fum_lost',
       options: { fixed: 1 }
     }),
     ...create_field({
@@ -163,7 +145,6 @@ export default function ({ week }) {
       title: 'Targets',
       groups: [COLUMN_GROUPS.RECEIVING],
       label: 'TGT',
-      stat: 'proj_trg',
       options: { fixed: 1 }
     }),
     ...create_field({
@@ -171,22 +152,19 @@ export default function ({ week }) {
       title: 'Receptions',
       groups: [COLUMN_GROUPS.RECEIVING],
       label: 'REC',
-      stat: 'proj_recs',
       options: { fixed: 1 }
     }),
     ...create_field({
       base_name: 'rec_yds',
       title: 'Receiving Yards',
       groups: [COLUMN_GROUPS.RECEIVING],
-      label: 'YDS',
-      stat: 'proj_rec_yds'
+      label: 'YDS'
     }),
     ...create_field({
       base_name: 'rec_tds',
       title: 'Receiving Touchdowns',
       groups: [COLUMN_GROUPS.RECEIVING],
       label: 'TD',
-      stat: 'proj_rec_tds',
       options: { fixed: 1 }
     })
   }
