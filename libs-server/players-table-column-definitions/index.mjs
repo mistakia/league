@@ -22,12 +22,7 @@ export default {
     // TODO should be removed, do not use `where_column` with `use_having`
     where_column: () => 'player_league_roster_status',
     select: () => [
-      `CASE
-          WHEN rosters_players.slot = ${constants.slots.IR} THEN 'injured_reserve'
-          WHEN rosters_players.slot = ${constants.slots.PS} THEN 'practice_squad'
-          WHEN rosters_players.slot IS NULL THEN 'free_agent'
-          ELSE 'active_roster'
-        END AS player_league_roster_status`,
+      `CASE WHEN rosters_players.slot = ${constants.slots.IR} THEN 'injured_reserve' WHEN rosters_players.slot = ${constants.slots.PS} THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status`,
       'rosters_players.slot',
       'rosters_players.tid',
       'rosters_players.tag'
