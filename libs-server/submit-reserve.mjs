@@ -216,7 +216,7 @@ export default async function ({
   let message = `${team.name} (${team.abbrv}) has placed ${player_row.fname} ${player_row.lname} (${player_row.pos}) on ${constants.transactionsDetail[type]}.`
 
   if (activate_player_row) {
-    message += ` ${activate_player_row.fname} ${activate_player_row.lname} (${player_row.pos}) has been activated`
+    message += ` ${activate_player_row.fname} ${activate_player_row.lname} (${activate_player_row.pos}) has been activated`
   }
 
   await sendNotifications({
