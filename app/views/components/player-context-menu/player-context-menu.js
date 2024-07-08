@@ -282,21 +282,21 @@ export default function PlayerContextMenu({
       add({
         key: 'transition',
         onClick: handleTransitionTag,
-        label: `${status.tagged.transition ? 'Update' : 'Apply'} Transition Tag`
+        label: `${status.tagged.transition ? 'Update' : 'Apply'} Restricted Free Agent Tag`
       })
 
       if (status.tagged.transition) {
         add({
           key: 'transition-remove',
           onClick: handleRemoveTransitionTag,
-          label: 'Remove Transition Tag'
+          label: 'Remove Restricted Free Agent Tag'
         })
       }
     } else if (status.eligible.transitionBid) {
       add({
         key: 'transition',
         onClick: handleTransitionTag,
-        label: 'Update Transition Tag'
+        label: 'Update Restricted Free Agent Tag'
       })
     }
 
@@ -351,14 +351,14 @@ export default function PlayerContextMenu({
       add({
         key: 'transition',
         onClick: handleTransitionTag,
-        label: `${status.bid ? 'Update' : 'Place'} Transition Bid`
+        label: `${status.bid ? 'Update' : 'Place'} Restricted Free Agent Bid`
       })
 
       if (status.bid) {
         add({
           key: 'transition-remove',
           onClick: handleRemoveTransitionTag,
-          label: 'Remove Transition Bid'
+          label: 'Remove Restricted Free Agent Bid'
         })
       }
     }

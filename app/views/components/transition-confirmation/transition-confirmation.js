@@ -227,10 +227,10 @@ export default class TransitionConfirmation extends React.Component {
 
     return (
       <Dialog open onClose={this.props.onClose}>
-        <DialogTitle>Transition Tag</DialogTitle>
+        <DialogTitle>Restricted Free Agent Tag</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {`Place Transition bid on ${playerMap.get('name')} (${playerMap.get(
+            {`Place Restricted Free Agent bid on ${playerMap.get('name')} (${playerMap.get(
               'pos'
             )})`}
           </DialogContentText>
