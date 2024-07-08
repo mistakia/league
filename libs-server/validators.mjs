@@ -166,3 +166,13 @@ const table_state_schema = {
   splits: splits_schema
 }
 export const table_state_validator = v.compile(table_state_schema)
+
+const short_url_schema = {
+  type: 'string',
+  format: 'url',
+  minLength: 1,
+  maxLength: 40480,
+  $$root: true
+}
+
+export const short_url_validator = v.compile(short_url_schema)
