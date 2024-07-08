@@ -9,6 +9,7 @@ import PageLayout from '@layouts/page'
 import Loading from '@components/loading'
 import { Team } from '@core/teams'
 import { get_string_from_object } from '@libs-shared'
+import { shorten_url } from '@core/utils'
 
 import './players-table.styl'
 
@@ -149,6 +150,7 @@ export default function PlayersTablePage({
         disable_edit_view
         enable_duplicate_column_ids
         new_view_prefix_columns={new_prefix_columns}
+        shorten_url={shorten_url}
       />
     </div>
   )

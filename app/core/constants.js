@@ -5,8 +5,10 @@
 // other devices on the same network (i.e. testing on a mobile phone)
 
 export const BASE_URL = IS_DEV
-  ? 'http://' + MACHINE_IP + ':8082/api'
-  : 'https://xo.football/api'
+  ? 'http://' + MACHINE_IP + ':8082'
+  : 'https://xo.football'
+
+export const API_URL = `${BASE_URL}/api`
 export const WS_URL = IS_DEV
   ? 'ws://' + MACHINE_IP + ':8082'
   : 'wss://xo.football'
