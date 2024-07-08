@@ -38,7 +38,15 @@ const from_league_format_seasonlogs = (field) => ({
       single: true,
       enable_multi_on_split: ['year']
     },
-    league_format_hash: league_format_hash_param
+    league_format_hash: league_format_hash_param,
+    year_offset: {
+      data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+      label: 'Year + N',
+      min: -30,
+      max: 30,
+      default_value: 0,
+      is_single: true
+    }
   },
   splits: ['year']
 })

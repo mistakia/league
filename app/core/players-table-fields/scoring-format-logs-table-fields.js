@@ -33,6 +33,14 @@ const from_scoring_format_seasonlogs = (field) => ({
       single: true,
       enable_multi_on_split: ['year']
     },
+    year_offset: {
+      data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+      label: 'Year + N',
+      min: -30,
+      max: 30,
+      default_value: 0,
+      is_single: true
+    },
     scoring_format_hash: scoring_format_hash_param
   },
   splits: ['year']
