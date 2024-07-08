@@ -141,8 +141,12 @@ class PlayerNameExpanded extends Player {
             <NFLTeam team={playerMap.get('team')} />
             <GameStatus status={status} playerMap={playerMap} />
             {Boolean(
-              constants.nfl_player_status_abbreviations[player_nfl_status] ||
-                constants.nfl_player_status_abbreviations[player_game_status]
+              (constants.nfl_player_status_abbreviations[player_nfl_status] &&
+                player_nfl_status !== constants.player_nfl_status.ACTIVE) ||
+                (constants.nfl_player_status_abbreviations[
+                  player_game_status
+                ] &&
+                  player_game_status !== constants.player_nfl_status.ACTIVE)
             ) && (
               <PlayerLabel
                 type='game'

@@ -74,32 +74,53 @@ const league_player_projection_values_join = ({
       if (splits.includes('year')) {
         this.andOn(`${table_name}.year`, '=', `${previous_table_name}.year`)
       } else {
-        this.andOn(`${table_name}.year`, '=', db.raw('?', [Array.isArray(year) ? year[0] : year]))
+        this.andOn(
+          `${table_name}.year`,
+          '=',
+          db.raw('?', [Array.isArray(year) ? year[0] : year])
+        )
       }
 
       if (splits.includes('week')) {
         this.andOn(`${table_name}.week`, '=', `${previous_table_name}.week`)
       } else {
-        this.andOn(`${table_name}.week`, '=', db.raw('?', [String(Array.isArray(week) ? week[0] : week)]))
+        this.andOn(
+          `${table_name}.week`,
+          '=',
+          db.raw('?', [String(Array.isArray(week) ? week[0] : week)])
+        )
       }
     } else {
       if (splits.includes('year')) {
         const year_array = Array.isArray(year) ? year : [year]
         this.andOn(db.raw(`${table_name}.year IN (${year_array.join(',')})`))
       } else {
-        this.andOn(`${table_name}.year`, '=', db.raw('?', [Array.isArray(year) ? year[0] : year]))
+        this.andOn(
+          `${table_name}.year`,
+          '=',
+          db.raw('?', [Array.isArray(year) ? year[0] : year])
+        )
       }
 
       if (splits.includes('week')) {
-        const week_array = Array.isArray(week) ? week.map(String) : [String(week)]
+        const week_array = Array.isArray(week)
+          ? week.map(String)
+          : [String(week)]
         this.andOn(db.raw(`${table_name}.week IN (${week_array.join(',')})`))
       } else {
-        this.andOn(`${table_name}.week`, '=', db.raw('?', [String(Array.isArray(week) ? week[0] : week)]))
+        this.andOn(
+          `${table_name}.week`,
+          '=',
+          db.raw('?', [String(Array.isArray(week) ? week[0] : week)])
+        )
       }
     }
   }
 
-  query[join_func](`league_player_projection_values as ${table_name}`, join_conditions)
+  query[join_func](
+    `league_player_projection_values as ${table_name}`,
+    join_conditions
+  )
 }
 
 const scoring_format_player_projection_points_join = ({
@@ -113,42 +134,69 @@ const scoring_format_player_projection_points_join = ({
   const join_func = get_join_func(join_type)
   const year = params.year || constants.season.year
   const week = params.week || 0
-  const scoring_format_hash = params.scoring_format_hash || '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
+  const scoring_format_hash =
+    params.scoring_format_hash ||
+    '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
 
   const join_conditions = function () {
     this.on(`${table_name}.pid`, '=', 'player.pid')
-    this.andOn(`${table_name}.scoring_format_hash`, '=', db.raw('?', [scoring_format_hash]))
+    this.andOn(
+      `${table_name}.scoring_format_hash`,
+      '=',
+      db.raw('?', [scoring_format_hash])
+    )
 
     if (previous_table_name) {
       if (splits.includes('year')) {
         this.andOn(`${table_name}.year`, '=', `${previous_table_name}.year`)
       } else {
-        this.andOn(`${table_name}.year`, '=', db.raw('?', [Array.isArray(year) ? year[0] : year]))
+        this.andOn(
+          `${table_name}.year`,
+          '=',
+          db.raw('?', [Array.isArray(year) ? year[0] : year])
+        )
       }
 
       if (splits.includes('week')) {
         this.andOn(`${table_name}.week`, '=', `${previous_table_name}.week`)
       } else {
-        this.andOn(`${table_name}.week`, '=', db.raw('?', [String(Array.isArray(week) ? week[0] : week)]))
+        this.andOn(
+          `${table_name}.week`,
+          '=',
+          db.raw('?', [String(Array.isArray(week) ? week[0] : week)])
+        )
       }
     } else {
       if (splits.includes('year')) {
         const year_array = Array.isArray(year) ? year : [year]
         this.andOn(db.raw(`${table_name}.year IN (${year_array.join(',')})`))
       } else {
-        this.andOn(`${table_name}.year`, '=', db.raw('?', [Array.isArray(year) ? year[0] : year]))
+        this.andOn(
+          `${table_name}.year`,
+          '=',
+          db.raw('?', [Array.isArray(year) ? year[0] : year])
+        )
       }
 
       if (splits.includes('week')) {
-        const week_array = Array.isArray(week) ? week.map(String) : [String(week)]
+        const week_array = Array.isArray(week)
+          ? week.map(String)
+          : [String(week)]
         this.andOn(db.raw(`${table_name}.week IN (${week_array.join(',')})`))
       } else {
-        this.andOn(`${table_name}.week`, '=', db.raw('?', [String(Array.isArray(week) ? week[0] : week)]))
+        this.andOn(
+          `${table_name}.week`,
+          '=',
+          db.raw('?', [String(Array.isArray(week) ? week[0] : week)])
+        )
       }
     }
   }
 
-  query[join_func](`scoring_format_player_projection_points as ${table_name}`, join_conditions)
+  query[join_func](
+    `scoring_format_player_projection_points as ${table_name}`,
+    join_conditions
+  )
 }
 
 const league_format_player_projection_values_join = ({
@@ -162,42 +210,69 @@ const league_format_player_projection_values_join = ({
   const join_func = get_join_func(join_type)
   const year = params.year || constants.season.year
   const week = params.week || 0
-  const league_format_hash = params.league_format_hash || '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b'
+  const league_format_hash =
+    params.league_format_hash ||
+    '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b'
 
   const join_conditions = function () {
     this.on(`${table_name}.pid`, '=', 'player.pid')
-    this.andOn(`${table_name}.league_format_hash`, '=', db.raw('?', [league_format_hash]))
+    this.andOn(
+      `${table_name}.league_format_hash`,
+      '=',
+      db.raw('?', [league_format_hash])
+    )
 
     if (previous_table_name) {
       if (splits.includes('year')) {
         this.andOn(`${table_name}.year`, '=', `${previous_table_name}.year`)
       } else {
-        this.andOn(`${table_name}.year`, '=', db.raw('?', [Array.isArray(year) ? year[0] : year]))
+        this.andOn(
+          `${table_name}.year`,
+          '=',
+          db.raw('?', [Array.isArray(year) ? year[0] : year])
+        )
       }
 
       if (splits.includes('week')) {
         this.andOn(`${table_name}.week`, '=', `${previous_table_name}.week`)
       } else {
-        this.andOn(`${table_name}.week`, '=', db.raw('?', [String(Array.isArray(week) ? week[0] : week)]))
+        this.andOn(
+          `${table_name}.week`,
+          '=',
+          db.raw('?', [String(Array.isArray(week) ? week[0] : week)])
+        )
       }
     } else {
       if (splits.includes('year')) {
         const year_array = Array.isArray(year) ? year : [year]
         this.andOn(db.raw(`${table_name}.year IN (${year_array.join(',')})`))
       } else {
-        this.andOn(`${table_name}.year`, '=', db.raw('?', [Array.isArray(year) ? year[0] : year]))
+        this.andOn(
+          `${table_name}.year`,
+          '=',
+          db.raw('?', [Array.isArray(year) ? year[0] : year])
+        )
       }
 
       if (splits.includes('week')) {
-        const week_array = Array.isArray(week) ? week.map(String) : [String(week)]
+        const week_array = Array.isArray(week)
+          ? week.map(String)
+          : [String(week)]
         this.andOn(db.raw(`${table_name}.week IN (${week_array.join(',')})`))
       } else {
-        this.andOn(`${table_name}.week`, '=', db.raw('?', [String(Array.isArray(week) ? week[0] : week)]))
+        this.andOn(
+          `${table_name}.week`,
+          '=',
+          db.raw('?', [String(Array.isArray(week) ? week[0] : week)])
+        )
       }
     }
   }
 
-  query[join_func](`league_format_player_projection_values as ${table_name}`, join_conditions)
+  query[join_func](
+    `league_format_player_projection_values as ${table_name}`,
+    join_conditions
+  )
 }
 
 const projections_index_join = ({
@@ -220,27 +295,43 @@ const projections_index_join = ({
       if (splits.includes('year')) {
         this.andOn(`${table_name}.year`, '=', `${previous_table_name}.year`)
       } else {
-        this.andOn(`${table_name}.year`, '=', db.raw('?', [Array.isArray(year) ? year[0] : year]))
+        this.andOn(
+          `${table_name}.year`,
+          '=',
+          db.raw('?', [Array.isArray(year) ? year[0] : year])
+        )
       }
 
       if (splits.includes('week')) {
         this.andOn(`${table_name}.week`, '=', `${previous_table_name}.week`)
       } else {
-        this.andOn(`${table_name}.week`, '=', db.raw('?', [Array.isArray(week) ? week[0] : week]))
+        this.andOn(
+          `${table_name}.week`,
+          '=',
+          db.raw('?', [Array.isArray(week) ? week[0] : week])
+        )
       }
     } else {
       if (splits.includes('year')) {
         const year_array = Array.isArray(year) ? year : [year]
         this.andOn(db.raw(`${table_name}.year IN (${year_array.join(',')})`))
       } else {
-        this.andOn(`${table_name}.year`, '=', db.raw('?', [Array.isArray(year) ? year[0] : year]))
+        this.andOn(
+          `${table_name}.year`,
+          '=',
+          db.raw('?', [Array.isArray(year) ? year[0] : year])
+        )
       }
 
       if (splits.includes('week')) {
         const week_array = Array.isArray(week) ? week : [week]
         this.andOn(db.raw(`${table_name}.week IN (${week_array.join(',')})`))
       } else {
-        this.andOn(`${table_name}.week`, '=', db.raw('?', [Array.isArray(week) ? week[0] : week]))
+        this.andOn(
+          `${table_name}.week`,
+          '=',
+          db.raw('?', [Array.isArray(week) ? week[0] : week])
+        )
       }
     }
   }

@@ -641,9 +641,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
         {
           column_id: 'player_season_projected_rush_atts',
           params: {
-            year: [
-              2023, 2022, 2021, 2020
-            ]
+            year: [2023, 2022, 2021, 2020]
           }
         },
         'player_season_projected_rush_yds',
@@ -659,17 +657,11 @@ describe('LIBS SERVER get_players_table_view_results', () => {
         {
           column_id: 'player_position',
           operator: 'IN',
-          value: [
-            'RB'
-          ]
+          value: ['RB']
         }
       ],
-      prefix_columns: [
-        'player_name'
-      ],
-      splits: [
-        'year'
-      ]
+      prefix_columns: ['player_name'],
+      splits: ['year']
     })
     const expected_query = `with "tc20e537e9f5c1e2b620a9a893f4363c5" as (select "bc_pid", "nfl_plays"."year", COUNT(*) as rush_atts_from_plays_0 from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' group by "bc_pid", "nfl_plays"."year") select "player"."pid", player.fname, player.lname, "player"."pos" AS "pos_0", "t06adaa2b44f8b40e476affee9748a3c5"."ra" AS "season_projected_rush_atts_0", "t6f54c05eac6ba296f8748f9026c2d01f"."ry" AS "season_projected_rush_yds_0", "tc20e537e9f5c1e2b620a9a893f4363c5"."rush_atts_from_plays_0" as "rush_atts_from_plays_0", COALESCE(t06adaa2b44f8b40e476affee9748a3c5.year, t6f54c05eac6ba296f8748f9026c2d01f.year, tc20e537e9f5c1e2b620a9a893f4363c5.year) AS year, "player"."pos" from "player" left join "projections_index" as "t06adaa2b44f8b40e476affee9748a3c5" on "t06adaa2b44f8b40e476affee9748a3c5"."pid" = "player"."pid" and "t06adaa2b44f8b40e476affee9748a3c5"."sourceid" = 18 and t06adaa2b44f8b40e476affee9748a3c5.year IN (2023,2022,2021,2020) and "t06adaa2b44f8b40e476affee9748a3c5"."week" = 0 left join "projections_index" as "t6f54c05eac6ba296f8748f9026c2d01f" on "t6f54c05eac6ba296f8748f9026c2d01f"."pid" = "player"."pid" and "t6f54c05eac6ba296f8748f9026c2d01f"."sourceid" = 18 and "t6f54c05eac6ba296f8748f9026c2d01f"."year" = "t06adaa2b44f8b40e476affee9748a3c5"."year" and "t6f54c05eac6ba296f8748f9026c2d01f"."week" = 0 left join "tc20e537e9f5c1e2b620a9a893f4363c5" on "tc20e537e9f5c1e2b620a9a893f4363c5"."bc_pid" = "player"."pid" and "tc20e537e9f5c1e2b620a9a893f4363c5"."year" = "t6f54c05eac6ba296f8748f9026c2d01f"."year" where player.pos IN ('RB') group by player.fname, player.lname, "player"."pos", "t06adaa2b44f8b40e476affee9748a3c5"."ra", "t6f54c05eac6ba296f8748f9026c2d01f"."ry", "tc20e537e9f5c1e2b620a9a893f4363c5"."rush_atts_from_plays_0", COALESCE(t06adaa2b44f8b40e476affee9748a3c5.year, t6f54c05eac6ba296f8748f9026c2d01f.year, tc20e537e9f5c1e2b620a9a893f4363c5.year), "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 5 DESC NULLS LAST limit 500`
     expect(query.toString()).to.equal(expected_query)
