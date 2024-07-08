@@ -1,7 +1,7 @@
 import express from 'express'
 import { blake2b } from 'blakejs'
 
-import { validators } from '@libs-server'
+import { validators } from '#libs-server'
 import db from '#db'
 
 const router = express.Router()
