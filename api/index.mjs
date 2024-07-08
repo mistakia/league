@@ -74,6 +74,9 @@ const speed_limiter = slowDown({
   maxDelayMs: 10000
 })
 
+// TODO require token
+api.use('/u', routes.shorten_url)
+
 // disable caching for all api routes
 api.use('/api/*', (req, res, next) => {
   res.set('Cache-Control', 'no-cache, must-revalidate, proxy-revalidate')
@@ -145,7 +148,6 @@ api.use(
     }
   }
 )
-api.use('/u', routes.shorten_url)
 api.use('/*', (req, res, next) => {
   res.sendFile(path.join(__dirname, '../', 'dist', 'index.html'), (err) => {
     if (err) {
