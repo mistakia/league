@@ -343,6 +343,11 @@ export default {
       select_string: `CASE WHEN COUNT(*) > 0 THEN CAST(ROUND(SUM(yaco)::decimal / COUNT(*), 2) AS decimal) ELSE 0 END`,
       stat_name: 'rush_yds_after_contact_per_att_from_plays'
     }),
+  player_rush_first_down_percentage_from_plays: player_stat_from_plays({
+    pid_column: 'bc_pid',
+    select_string: `CASE WHEN COUNT(*) > 0 THEN ROUND(100.0 * SUM(CASE WHEN fd = true THEN 1 ELSE 0 END) / COUNT(*), 2) ELSE 0 END`,
+    stat_name: 'rush_first_down_pct_from_plays'
+  }),
 
   player_rush_attempts_share_from_plays: create_team_share_stat({
     column_name: 'rush_att_share_from_plays',
@@ -355,6 +360,12 @@ export default {
     pid_column: 'bc_pid',
     select_string:
       'ROUND(100.0 * SUM(CASE WHEN nfl_plays.bc_pid = pg.pid THEN nfl_plays.rush_yds ELSE 0 END) / SUM(nfl_plays.rush_yds), 2)'
+  }),
+  player_rush_first_down_share_from_plays: create_team_share_stat({
+    column_name: 'rush_first_down_share_from_plays',
+    pid_column: 'bc_pid',
+    select_string:
+      'ROUND(100.0 * SUM(CASE WHEN nfl_plays.bc_pid = pg.pid THEN nfl_plays.fd ELSE 0 END) / SUM(nfl_plays.fd), 2)'
   }),
 
   player_fumble_percentage_from_plays: player_stat_from_plays({
@@ -432,6 +443,16 @@ export default {
     select_string: `SUM(dot)`,
     stat_name: 'air_yds_from_plays'
   }),
+  player_receiving_first_down_from_plays: player_stat_from_plays({
+    pid_column: 'trg_pid',
+    select_string: `SUM(CASE WHEN fd = true THEN 1 ELSE 0 END)`,
+    stat_name: 'recv_first_down_from_plays'
+  }),
+  player_receiving_first_down_percentage_from_plays: player_stat_from_plays({
+    pid_column: 'trg_pid',
+    select_string: `CASE WHEN COUNT(*) > 0 THEN ROUND(100.0 * SUM(CASE WHEN fd = true THEN 1 ELSE 0 END) / COUNT(*), 2) ELSE 0 END`,
+    stat_name: 'recv_first_down_pct_from_plays'
+  }),
 
   player_air_yards_share_from_plays: create_team_share_stat({
     column_name: 'air_yds_share_from_plays',
@@ -450,6 +471,12 @@ export default {
     pid_column: 'trg_pid',
     select_string:
       'ROUND((1.5 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(COUNT(*), 0)) + (0.7 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0)), 4)'
+  }),
+  player_receiving_first_down_share_from_plays: create_team_share_stat({
+    column_name: 'recv_first_down_share_from_plays',
+    pid_column: 'trg_pid',
+    select_string:
+      'ROUND(100.0 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.fd ELSE 0 END) / SUM(nfl_plays.fd), 2)'
   }),
 
   // receiving yards / air yards

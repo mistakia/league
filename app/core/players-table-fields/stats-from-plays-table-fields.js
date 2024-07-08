@@ -221,6 +221,13 @@ export default {
     player_value_path: 'rush_yds_after_contact_per_att_from_plays',
     fixed: 1
   }),
+  player_rush_first_down_percentage_from_plays: from_play_field({
+    column_title: 'Rushing First Down Percentage (By Play)',
+    column_groups: [COLUMN_GROUPS.RUSHING],
+    header_label: 'FD%',
+    player_value_path: 'rush_first_down_pct_from_plays',
+    fixed: 1
+  }),
   player_rush_attempts_share_from_plays: from_play_field({
     column_title: 'Share of Team Rushing Attempts (By Play)',
     column_groups: [COLUMN_GROUPS.RUSHING],
@@ -233,6 +240,13 @@ export default {
     column_groups: [COLUMN_GROUPS.RUSHING],
     header_label: 'YDS%',
     player_value_path: 'rush_yds_share_from_plays',
+    fixed: 1
+  }),
+  player_rush_first_down_share_from_plays: from_play_field({
+    column_title: 'Share of Team Rushing First Downs (By Play)',
+    column_groups: [COLUMN_GROUPS.RUSHING],
+    header_label: 'TM FD%',
+    player_value_path: 'rush_first_down_share_from_plays',
     fixed: 1
   }),
   player_fumble_percentage_from_plays: from_play_field({
@@ -331,6 +345,19 @@ export default {
     header_label: 'AY',
     player_value_path: 'air_yds_from_plays'
   }),
+  player_receiving_first_down_from_plays: from_play_field({
+    column_title: 'Receiving First Downs (By Play)',
+    column_groups: [COLUMN_GROUPS.RECEIVING],
+    header_label: 'FD',
+    player_value_path: 'recv_first_down_from_plays'
+  }),
+  player_receiving_first_down_percentage_from_plays: from_play_field({
+    column_title: 'Receiving First Down Percentage (By Play)',
+    column_groups: [COLUMN_GROUPS.RECEIVING],
+    header_label: 'FD%',
+    player_value_path: 'recv_first_down_pct_from_plays',
+    fixed: 1
+  }),
   player_air_yards_share_from_plays: from_play_field({
     column_title: 'Share of Team Air Yards (By Play)',
     column_groups: [COLUMN_GROUPS.RECEIVING],
@@ -350,6 +377,13 @@ export default {
     column_groups: [COLUMN_GROUPS.RECEIVING],
     header_label: 'WOPR',
     player_value_path: 'weighted_opp_rating_from_plays',
+    fixed: 1
+  }),
+  player_receiving_first_down_share_from_plays: from_play_field({
+    column_title: 'Share of Team Receiving First Downs (By Play)',
+    column_groups: [COLUMN_GROUPS.RECEIVING],
+    header_label: 'TM FD%',
+    player_value_path: 'recv_first_down_share_from_plays',
     fixed: 1
   }),
   player_receiver_air_conversion_ratio_from_plays: from_play_field({
