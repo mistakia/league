@@ -10,7 +10,7 @@ import { isMain, getPlayer } from '#libs-server'
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import:projections')
 debug.enable('import:projections,get-player')
-const timestamp = new Date()
+const timestamp = Math.round(Date.now() / 1000)
 const year = constants.season.year
 const week = argv.season ? 0 : Math.max(constants.season.week, 1)
 const getURL = ({ position, page }) =>

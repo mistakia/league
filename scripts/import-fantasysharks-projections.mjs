@@ -16,7 +16,7 @@ const URL = argv.season
   : 'https://www.fantasysharks.com/apps/Projections/WeeklyProjections.php?pos=ALL&format=json'
 const week = argv.season ? 0 : Math.max(constants.season.week, 1)
 const year = new Date().getFullYear()
-const timestamp = new Date()
+const timestamp = Math.round(Date.now() / 1000)
 
 const run = async () => {
   // do not pull in any projections after the season has ended
