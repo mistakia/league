@@ -50,6 +50,7 @@ export default function ({ week }) {
     player_value_path: `${period.toLowerCase().replaceAll('-', '_')}_projected_${base_name}`,
     ...(options.fixed && { fixed: options.fixed }),
     size: 70,
+    splits: period === 'Season' || period === 'Week' ? ['year'] : undefined,
     data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
     column_params:
       period === 'Season'
