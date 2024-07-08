@@ -131,7 +131,10 @@ export default async function ({
 
   if (textSearch) {
     query
-      .whereRaw("name_search_vector @@ plainto_tsquery('english', ?)", textSearch)
+      .whereRaw(
+        "name_search_vector @@ plainto_tsquery('english', ?)",
+        textSearch
+      )
       .whereIn('player.pos', constants.positions)
   } else if (pids.length) {
     query.whereIn('player.pid', pids)
