@@ -93,7 +93,7 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid bid' })
     }
 
-    const tid = parseInt(teamId, 10)
+    const tid = Number(teamId)
 
     // verify teamId, leagueId belongs to user
     try {
