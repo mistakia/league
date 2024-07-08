@@ -4,13 +4,18 @@ import * as table_constants from 'react-table/src/constants.mjs'
 export default function ({ query, params }) {
   const column_param_keys = Object.keys(nfl_plays_column_params)
   for (const column_param_key of column_param_keys) {
+    if (column_param_key === 'year_offset') {
+      continue
+    }
+
     const param_value = params[column_param_key]
     if (typeof param_value !== 'undefined' && param_value !== null) {
       const column_param_definition = nfl_plays_column_params[column_param_key]
       const param_table = column_param_definition.table || 'nfl_plays'
+      const is_range = column_param_definition.data_type === table_constants.TABLE_DATA_TYPES.RANGE
+      const is_single = column_param_definition.is_single
       if (
-        column_param_definition.data_type ===
-        table_constants.TABLE_DATA_TYPES.RANGE
+        is_range && !is_single
       ) {
         const param_value_0 = Number(param_value[0])
         const param_value_1 = Number(param_value[1])
@@ -25,7 +30,8 @@ export default function ({ query, params }) {
         ])
       } else if (
         column_param_definition.data_type ===
-        table_constants.TABLE_DATA_TYPES.SELECT
+        table_constants.TABLE_DATA_TYPES.SELECT ||
+        (is_range && is_single)
       ) {
         const column_values = Array.isArray(param_value)
           ? param_value
