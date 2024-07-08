@@ -145,6 +145,7 @@ api.use(
     }
   }
 )
+api.use('/u', routes.shorten_url)
 api.use('/*', (req, res, next) => {
   res.sendFile(path.join(__dirname, '../', 'dist', 'index.html'), (err) => {
     if (err) {
