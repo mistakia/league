@@ -19,6 +19,7 @@ import cache from './cache.mjs'
 import table_views from './table_views.mjs'
 import wagers from './wagers.mjs'
 import markets from './markets.mjs'
+import shorten_url from './shorten_url.mjs'
 
 export default {
   auth,
@@ -41,5 +42,6 @@ export default {
   cache,
   table_views,
   wagers,
-  markets
+  markets,
+  shorten_url
 }
