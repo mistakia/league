@@ -362,7 +362,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
         }
       ]
     })
-    const expected_query = `select "player"."pid", player.fname, player.lname, "t626199f46d9de1cc8bf280d9b15d6c9b"."points" AS "points_from_seasonlogs_0", "t626199f46d9de1cc8bf280d9b15d6c9b"."points_per_game" AS "points_per_game_from_seasonlogs_0", "t626199f46d9de1cc8bf280d9b15d6c9b"."points_rnk" AS "points_rnk_from_seasonlogs_0", "t626199f46d9de1cc8bf280d9b15d6c9b"."points_pos_rnk" AS "points_pos_rnk_from_seasonlogs_0", "player"."pos" from "player" left join "scoring_format_player_seasonlogs" as "t626199f46d9de1cc8bf280d9b15d6c9b" on "t626199f46d9de1cc8bf280d9b15d6c9b"."pid" = "player"."pid" and t626199f46d9de1cc8bf280d9b15d6c9b.scoring_format_hash = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d' group by player.fname, player.lname, "t626199f46d9de1cc8bf280d9b15d6c9b"."points", "t626199f46d9de1cc8bf280d9b15d6c9b"."points_per_game", "t626199f46d9de1cc8bf280d9b15d6c9b"."points_rnk", "t626199f46d9de1cc8bf280d9b15d6c9b"."points_pos_rnk", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 4 DESC NULLS LAST limit 500`
+    const expected_query = `select "player"."pid", player.fname, player.lname, "t2dc419c5ac00a6f3a1433df75f943988"."points" AS "points_from_seasonlogs_0", "t2dc419c5ac00a6f3a1433df75f943988"."points_per_game" AS "points_per_game_from_seasonlogs_0", "t2dc419c5ac00a6f3a1433df75f943988"."points_rnk" AS "points_rnk_from_seasonlogs_0", "t2dc419c5ac00a6f3a1433df75f943988"."points_pos_rnk" AS "points_pos_rnk_from_seasonlogs_0", "player"."pos" from "player" left join "scoring_format_player_seasonlogs" as "t2dc419c5ac00a6f3a1433df75f943988" on "t2dc419c5ac00a6f3a1433df75f943988"."pid" = "player"."pid" and t2dc419c5ac00a6f3a1433df75f943988.scoring_format_hash = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d' group by player.fname, player.lname, "t2dc419c5ac00a6f3a1433df75f943988"."points", "t2dc419c5ac00a6f3a1433df75f943988"."points_per_game", "t2dc419c5ac00a6f3a1433df75f943988"."points_rnk", "t2dc419c5ac00a6f3a1433df75f943988"."points_pos_rnk", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 4 DESC NULLS LAST limit 500`
     expect(query.toString()).to.equal(expected_query)
   })
 
@@ -418,7 +418,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
         }
       ]
     })
-    const expected_query = `select "player"."pid", player.fname, player.lname, "tcb53652543034aeb03043f1af2cac9a3"."startable_games" AS "startable_games_from_seasonlogs_0", "tcb53652543034aeb03043f1af2cac9a3"."points_added" AS "points_added_from_seasonlogs_0", "tcb53652543034aeb03043f1af2cac9a3"."points_added_per_game" AS "points_added_per_game_from_seasonlogs_0", "tcb53652543034aeb03043f1af2cac9a3"."points_added_rnk" AS "points_added_rnk_from_seasonlogs_0", "tcb53652543034aeb03043f1af2cac9a3"."points_added_pos_rnk" AS "points_added_pos_rnk_from_seasonlogs_0", "t2c88ab25d4acbc66daf6137b64987326"."startable_games" AS "startable_games_from_careerlogs_0", "t2c88ab25d4acbc66daf6137b64987326"."points_added" AS "points_added_from_careerlogs_0", "t2c88ab25d4acbc66daf6137b64987326"."points_added_per_game" AS "points_added_per_game_from_careerlogs_0", "t2c88ab25d4acbc66daf6137b64987326"."best_season_points_added_per_game" AS "best_season_points_added_per_game_from_careerlogs_0", "t2c88ab25d4acbc66daf6137b64987326"."points_added_first_three_seas" AS "points_added_first_three_seas_from_careerlogs_0", "t2c88ab25d4acbc66daf6137b64987326"."points_added_first_four_seas" AS "points_added_first_four_seas_from_careerlogs_0", "t2c88ab25d4acbc66daf6137b64987326"."points_added_first_five_seas" AS "points_added_first_five_seas_from_careerlogs_0", "t2c88ab25d4acbc66daf6137b64987326"."points_added_first_seas" AS "points_added_first_seas_from_careerlogs_0", "t2c88ab25d4acbc66daf6137b64987326"."points_added_second_seas" AS "points_added_second_seas_from_careerlogs_0", "t2c88ab25d4acbc66daf6137b64987326"."points_added_third_seas" AS "points_added_third_seas_from_careerlogs_0", "t2c88ab25d4acbc66daf6137b64987326"."draft_rank" AS "draft_rank_from_careerlogs_0", "player"."pos" from "player" left join "league_format_player_seasonlogs" as "tcb53652543034aeb03043f1af2cac9a3" on "tcb53652543034aeb03043f1af2cac9a3"."pid" = "player"."pid" and tcb53652543034aeb03043f1af2cac9a3.league_format_hash = '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b' left join "league_format_player_careerlogs" as "t2c88ab25d4acbc66daf6137b64987326" on "t2c88ab25d4acbc66daf6137b64987326"."pid" = "player"."pid" and t2c88ab25d4acbc66daf6137b64987326.league_format_hash = '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b' group by player.fname, player.lname, "tcb53652543034aeb03043f1af2cac9a3"."startable_games", "tcb53652543034aeb03043f1af2cac9a3"."points_added", "tcb53652543034aeb03043f1af2cac9a3"."points_added_per_game", "tcb53652543034aeb03043f1af2cac9a3"."points_added_rnk", "tcb53652543034aeb03043f1af2cac9a3"."points_added_pos_rnk", "t2c88ab25d4acbc66daf6137b64987326"."startable_games", "t2c88ab25d4acbc66daf6137b64987326"."points_added", "t2c88ab25d4acbc66daf6137b64987326"."points_added_per_game", "t2c88ab25d4acbc66daf6137b64987326"."best_season_points_added_per_game", "t2c88ab25d4acbc66daf6137b64987326"."points_added_first_three_seas", "t2c88ab25d4acbc66daf6137b64987326"."points_added_first_four_seas", "t2c88ab25d4acbc66daf6137b64987326"."points_added_first_five_seas", "t2c88ab25d4acbc66daf6137b64987326"."points_added_first_seas", "t2c88ab25d4acbc66daf6137b64987326"."points_added_second_seas", "t2c88ab25d4acbc66daf6137b64987326"."points_added_third_seas", "t2c88ab25d4acbc66daf6137b64987326"."draft_rank", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 11 DESC NULLS LAST limit 500`
+    const expected_query = `select "player"."pid", player.fname, player.lname, "tbf494cbb4bcb89adaa6d672c8bfb17c2"."startable_games" AS "startable_games_from_seasonlogs_0", "tbf494cbb4bcb89adaa6d672c8bfb17c2"."points_added" AS "points_added_from_seasonlogs_0", "tbf494cbb4bcb89adaa6d672c8bfb17c2"."points_added_per_game" AS "points_added_per_game_from_seasonlogs_0", "tbf494cbb4bcb89adaa6d672c8bfb17c2"."points_added_rnk" AS "points_added_rnk_from_seasonlogs_0", "tbf494cbb4bcb89adaa6d672c8bfb17c2"."points_added_pos_rnk" AS "points_added_pos_rnk_from_seasonlogs_0", "t2c88ab25d4acbc66daf6137b64987326"."startable_games" AS "startable_games_from_careerlogs_0", "t2c88ab25d4acbc66daf6137b64987326"."points_added" AS "points_added_from_careerlogs_0", "t2c88ab25d4acbc66daf6137b64987326"."points_added_per_game" AS "points_added_per_game_from_careerlogs_0", "t2c88ab25d4acbc66daf6137b64987326"."best_season_points_added_per_game" AS "best_season_points_added_per_game_from_careerlogs_0", "t2c88ab25d4acbc66daf6137b64987326"."points_added_first_three_seas" AS "points_added_first_three_seas_from_careerlogs_0", "t2c88ab25d4acbc66daf6137b64987326"."points_added_first_four_seas" AS "points_added_first_four_seas_from_careerlogs_0", "t2c88ab25d4acbc66daf6137b64987326"."points_added_first_five_seas" AS "points_added_first_five_seas_from_careerlogs_0", "t2c88ab25d4acbc66daf6137b64987326"."points_added_first_seas" AS "points_added_first_seas_from_careerlogs_0", "t2c88ab25d4acbc66daf6137b64987326"."points_added_second_seas" AS "points_added_second_seas_from_careerlogs_0", "t2c88ab25d4acbc66daf6137b64987326"."points_added_third_seas" AS "points_added_third_seas_from_careerlogs_0", "t2c88ab25d4acbc66daf6137b64987326"."draft_rank" AS "draft_rank_from_careerlogs_0", "player"."pos" from "player" left join "league_format_player_seasonlogs" as "tbf494cbb4bcb89adaa6d672c8bfb17c2" on "tbf494cbb4bcb89adaa6d672c8bfb17c2"."pid" = "player"."pid" and tbf494cbb4bcb89adaa6d672c8bfb17c2.league_format_hash = '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b' left join "league_format_player_careerlogs" as "t2c88ab25d4acbc66daf6137b64987326" on "t2c88ab25d4acbc66daf6137b64987326"."pid" = "player"."pid" and t2c88ab25d4acbc66daf6137b64987326.league_format_hash = '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b' group by player.fname, player.lname, "tbf494cbb4bcb89adaa6d672c8bfb17c2"."startable_games", "tbf494cbb4bcb89adaa6d672c8bfb17c2"."points_added", "tbf494cbb4bcb89adaa6d672c8bfb17c2"."points_added_per_game", "tbf494cbb4bcb89adaa6d672c8bfb17c2"."points_added_rnk", "tbf494cbb4bcb89adaa6d672c8bfb17c2"."points_added_pos_rnk", "t2c88ab25d4acbc66daf6137b64987326"."startable_games", "t2c88ab25d4acbc66daf6137b64987326"."points_added", "t2c88ab25d4acbc66daf6137b64987326"."points_added_per_game", "t2c88ab25d4acbc66daf6137b64987326"."best_season_points_added_per_game", "t2c88ab25d4acbc66daf6137b64987326"."points_added_first_three_seas", "t2c88ab25d4acbc66daf6137b64987326"."points_added_first_four_seas", "t2c88ab25d4acbc66daf6137b64987326"."points_added_first_five_seas", "t2c88ab25d4acbc66daf6137b64987326"."points_added_first_seas", "t2c88ab25d4acbc66daf6137b64987326"."points_added_second_seas", "t2c88ab25d4acbc66daf6137b64987326"."points_added_third_seas", "t2c88ab25d4acbc66daf6137b64987326"."draft_rank", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 11 DESC NULLS LAST limit 500`
     expect(query.toString()).to.equal(expected_query)
   })
 
@@ -664,6 +664,70 @@ describe('LIBS SERVER get_players_table_view_results', () => {
       splits: ['year']
     })
     const expected_query = `with "tc20e537e9f5c1e2b620a9a893f4363c5" as (select "bc_pid", "nfl_plays"."year", COUNT(*) as rush_atts_from_plays_0 from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' group by "bc_pid", "nfl_plays"."year") select "player"."pid", player.fname, player.lname, "player"."pos" AS "pos_0", "t06adaa2b44f8b40e476affee9748a3c5"."ra" AS "season_projected_rush_atts_0", "t6f54c05eac6ba296f8748f9026c2d01f"."ry" AS "season_projected_rush_yds_0", "tc20e537e9f5c1e2b620a9a893f4363c5"."rush_atts_from_plays_0" as "rush_atts_from_plays_0", COALESCE(t06adaa2b44f8b40e476affee9748a3c5.year, t6f54c05eac6ba296f8748f9026c2d01f.year, tc20e537e9f5c1e2b620a9a893f4363c5.year) AS year, "player"."pos" from "player" left join "projections_index" as "t06adaa2b44f8b40e476affee9748a3c5" on "t06adaa2b44f8b40e476affee9748a3c5"."pid" = "player"."pid" and "t06adaa2b44f8b40e476affee9748a3c5"."sourceid" = 18 and t06adaa2b44f8b40e476affee9748a3c5.year IN (2023,2022,2021,2020) and "t06adaa2b44f8b40e476affee9748a3c5"."week" = 0 left join "projections_index" as "t6f54c05eac6ba296f8748f9026c2d01f" on "t6f54c05eac6ba296f8748f9026c2d01f"."pid" = "player"."pid" and "t6f54c05eac6ba296f8748f9026c2d01f"."sourceid" = 18 and "t6f54c05eac6ba296f8748f9026c2d01f"."year" = "t06adaa2b44f8b40e476affee9748a3c5"."year" and "t6f54c05eac6ba296f8748f9026c2d01f"."week" = 0 left join "tc20e537e9f5c1e2b620a9a893f4363c5" on "tc20e537e9f5c1e2b620a9a893f4363c5"."bc_pid" = "player"."pid" and "tc20e537e9f5c1e2b620a9a893f4363c5"."year" = "t6f54c05eac6ba296f8748f9026c2d01f"."year" where player.pos IN ('RB') group by player.fname, player.lname, "player"."pos", "t06adaa2b44f8b40e476affee9748a3c5"."ra", "t6f54c05eac6ba296f8748f9026c2d01f"."ry", "tc20e537e9f5c1e2b620a9a893f4363c5"."rush_atts_from_plays_0", COALESCE(t06adaa2b44f8b40e476affee9748a3c5.year, t6f54c05eac6ba296f8748f9026c2d01f.year, tc20e537e9f5c1e2b620a9a893f4363c5.year), "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 5 DESC NULLS LAST limit 500`
+    expect(query.toString()).to.equal(expected_query)
+  })
+
+  it('should create a query with an N+1 column', () => {
+    const query = get_players_table_view_results({
+      columns: [
+        {
+          column_id: 'player_receiving_first_down_share_from_plays',
+          params: {
+            year: [2023, 2022, 2021, 2020, 2019, 2018, 2017]
+          }
+        },
+        {
+          column_id: 'player_fantasy_points_per_game_from_seasonlogs',
+          params: {
+            year: [2023, 2022, 2021, 2020, 2019, 2018, 2017]
+          }
+        },
+        {
+          column_id: 'player_espn_overall_score',
+          params: {
+            year: [2023, 2022, 2021, 2020, 2019, 2018, 2017]
+          }
+        },
+        {
+          column_id: 'player_fantasy_points_per_game_from_seasonlogs',
+          params: {
+            year_offset: [-3]
+          }
+        }
+      ],
+      sort: [
+        {
+          column_id: 'player_fantasy_points_per_game_from_seasonlogs',
+          desc: true,
+          column_index: 0
+        }
+      ],
+      where: [
+        {
+          column_id: 'player_position',
+          operator: 'IN',
+          value: ['WR']
+        },
+        {
+          column_id: 'player_targets_from_plays',
+          operator: '>=',
+          value: '55'
+        },
+        {
+          column_id: 'player_fantasy_games_played_from_seasonlogs',
+          operator: '>=',
+          value: '6'
+        },
+        {
+          column_id: 'player_espn_overall_score',
+          operator: '>',
+          value: '0'
+        }
+      ],
+      prefix_columns: ['player_name'],
+      splits: ['year']
+    })
+    const expected_query = `with "ta63d8ed2b36aa7991f012f824b1ea3c7" as (select "trg_pid", "nfl_plays"."year", COUNT(*) as trg_from_plays_0 from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' group by "trg_pid", "nfl_plays"."year" having COUNT(*) >= '55'), "t143e1334643ade4e0ed9c4eb25ce3272" as (select "pg"."pid", ROUND(100.0 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN CASE WHEN nfl_plays.fd THEN 1 ELSE 0 END ELSE 0 END) / NULLIF(SUM(CASE WHEN nfl_plays.fd THEN 1 ELSE 0 END), 0), 2) as recv_first_down_share_from_plays, "nfl_plays"."year" from "nfl_plays" inner join "player_gamelogs" as "pg" on "nfl_plays"."esbid" = "pg"."esbid" and "nfl_plays"."off" = "pg"."tm" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "trg_pid" is not null and "nfl_plays"."year" in (2017, 2018, 2019, 2020, 2021, 2022, 2023) group by "pg"."pid", "nfl_plays"."year") select "player"."pid", player.fname, player.lname, "player"."pos" AS "pos_0", "t154eac9f9dbf17872b2f79e5a75b67cc"."games" AS "games_from_seasonlogs_0", "player_seasonlogs"."espn_overall_score" AS "espn_overall_score_0", "t143e1334643ade4e0ed9c4eb25ce3272"."recv_first_down_share_from_plays" AS "recv_first_down_share_from_plays_0", "t8a4a84e735183537b2ba13726efd3e32"."points_per_game" AS "points_per_game_from_seasonlogs_0", "t43dad6b6c946e7f3d08b4cb24334c705"."points_per_game" AS "points_per_game_from_seasonlogs_1", COALESCE(ta63d8ed2b36aa7991f012f824b1ea3c7.year, t154eac9f9dbf17872b2f79e5a75b67cc.year, player_seasonlogs.year, t143e1334643ade4e0ed9c4eb25ce3272.year, t8a4a84e735183537b2ba13726efd3e32.year, t43dad6b6c946e7f3d08b4cb24334c705.year) AS year, "player"."pos" from "player" inner join "ta63d8ed2b36aa7991f012f824b1ea3c7" on "ta63d8ed2b36aa7991f012f824b1ea3c7"."trg_pid" = "player"."pid" inner join "scoring_format_player_seasonlogs" as "t154eac9f9dbf17872b2f79e5a75b67cc" on "t154eac9f9dbf17872b2f79e5a75b67cc"."pid" = "player"."pid" and t154eac9f9dbf17872b2f79e5a75b67cc.scoring_format_hash = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d' and "t154eac9f9dbf17872b2f79e5a75b67cc"."year" = "ta63d8ed2b36aa7991f012f824b1ea3c7"."year" inner join "player_seasonlogs" on "player_seasonlogs"."pid" = "player"."pid" and "player_seasonlogs"."year" = "t154eac9f9dbf17872b2f79e5a75b67cc"."year" left join "t143e1334643ade4e0ed9c4eb25ce3272" on "t143e1334643ade4e0ed9c4eb25ce3272"."pid" = "player"."pid" and "t143e1334643ade4e0ed9c4eb25ce3272"."year" = "player_seasonlogs"."year" left join "scoring_format_player_seasonlogs" as "t8a4a84e735183537b2ba13726efd3e32" on "t8a4a84e735183537b2ba13726efd3e32"."pid" = "player"."pid" and t8a4a84e735183537b2ba13726efd3e32.scoring_format_hash = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d' and "t8a4a84e735183537b2ba13726efd3e32"."year" = "t143e1334643ade4e0ed9c4eb25ce3272"."year" left join "scoring_format_player_seasonlogs" as "t43dad6b6c946e7f3d08b4cb24334c705" on "t43dad6b6c946e7f3d08b4cb24334c705"."pid" = "player"."pid" and t43dad6b6c946e7f3d08b4cb24334c705.scoring_format_hash = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d' and t43dad6b6c946e7f3d08b4cb24334c705.year = t8a4a84e735183537b2ba13726efd3e32.year + -3 where player.pos IN ('WR') and t154eac9f9dbf17872b2f79e5a75b67cc.games >= '6' and player_seasonlogs.espn_overall_score > '0' group by player.fname, player.lname, "player"."pos", "t154eac9f9dbf17872b2f79e5a75b67cc"."games", "player_seasonlogs"."espn_overall_score", "t143e1334643ade4e0ed9c4eb25ce3272"."recv_first_down_share_from_plays", "t8a4a84e735183537b2ba13726efd3e32"."points_per_game", "t43dad6b6c946e7f3d08b4cb24334c705"."points_per_game", COALESCE(ta63d8ed2b36aa7991f012f824b1ea3c7.year, t154eac9f9dbf17872b2f79e5a75b67cc.year, player_seasonlogs.year, t143e1334643ade4e0ed9c4eb25ce3272.year, t8a4a84e735183537b2ba13726efd3e32.year, t43dad6b6c946e7f3d08b4cb24334c705.year), "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 8 DESC NULLS LAST limit 500`
     expect(query.toString()).to.equal(expected_query)
   })
 

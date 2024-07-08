@@ -7,7 +7,19 @@ const league_format_player_seasonlogs_table_alias = ({ params = {} }) => {
   const {
     league_format_hash = '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b'
   } = params
-  return get_table_hash(`league_format_player_seasonlogs_${league_format_hash}`)
+  let year = params.year || [constants.season.stats_season_year]
+  if (!Array.isArray(year)) {
+    year = [year]
+  }
+
+  let year_offset = params.year_offset || 0
+  if (Array.isArray(year_offset)) {
+    year_offset = year_offset[0]
+  }
+
+  return get_table_hash(
+    `league_format_player_seasonlogs_${year.join('_')}_${league_format_hash}_year_offset_${year_offset}`
+  )
 }
 
 const league_format_player_seasonlogs_join = ({
@@ -28,6 +40,14 @@ const league_format_player_seasonlogs_join = ({
     year = [year]
   }
 
+  let year_offset = params.year_offset || 0
+  if (Array.isArray(year_offset)) {
+    year_offset = year_offset[0]
+  }
+
+  // Apply the year_offset
+  year = year.map((y) => y + year_offset)
+
   const join_conditions = function () {
     this.on(`${table_name}.pid`, '=', 'player.pid')
     this.andOn(
@@ -36,18 +56,30 @@ const league_format_player_seasonlogs_join = ({
 
     if (previous_table_name) {
       for (const split of splits) {
-        this.andOn(
-          `${table_name}.${split}`,
-          '=',
-          `${previous_table_name}.${split}`
-        )
+        if (split === 'year' && year_offset !== 0) {
+          this.andOn(
+            db.raw(
+              `${table_name}.${split} = ${previous_table_name}.${split} + ${year_offset}`
+            )
+          )
+        } else {
+          this.andOn(
+            `${table_name}.${split}`,
+            '=',
+            `${previous_table_name}.${split}`
+          )
+        }
       }
     } else if (splits.includes('year')) {
       if (params.year) {
         const year_array = Array.isArray(params.year)
           ? params.year
           : [params.year]
-        this.andOn(db.raw(`${table_name}.year IN (${year_array.join(',')})`))
+        this.andOn(
+          db.raw(
+            `${table_name}.year IN (${year_array.map((y) => y + year_offset).join(',')})`
+          )
+        )
       }
     } else {
       this.andOn(db.raw(`${table_name}.year IN (${year.join(',')})`))
