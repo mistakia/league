@@ -365,7 +365,7 @@ export default {
     column_name: 'rush_first_down_share_from_plays',
     pid_column: 'bc_pid',
     select_string:
-      'ROUND(100.0 * SUM(CASE WHEN nfl_plays.bc_pid = pg.pid THEN nfl_plays.fd ELSE 0 END) / SUM(nfl_plays.fd), 2)'
+      'ROUND(100.0 * SUM(CASE WHEN nfl_plays.bc_pid = pg.pid THEN CASE WHEN nfl_plays.fd THEN 1 ELSE 0 END ELSE 0 END) / NULLIF(SUM(CASE WHEN nfl_plays.fd THEN 1 ELSE 0 END), 0), 2)'
   }),
 
   player_fumble_percentage_from_plays: player_stat_from_plays({
@@ -476,7 +476,7 @@ export default {
     column_name: 'recv_first_down_share_from_plays',
     pid_column: 'trg_pid',
     select_string:
-      'ROUND(100.0 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.fd ELSE 0 END) / SUM(nfl_plays.fd), 2)'
+      'ROUND(100.0 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN CASE WHEN nfl_plays.fd THEN 1 ELSE 0 END ELSE 0 END) / NULLIF(SUM(CASE WHEN nfl_plays.fd THEN 1 ELSE 0 END), 0), 2)'
   }),
 
   // receiving yards / air yards
