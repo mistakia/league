@@ -23,6 +23,44 @@ import PageLayout from '@layouts/page'
 
 import './status.styl'
 
+const StatusItem = ({ status_item, index }) => {
+  const [expanded, set_expanded] = React.useState(false)
+  const is_operational = Boolean(status_item.succ)
+  const icon = is_operational ? (
+    <CheckCircleOutlineIcon style={{ color: green[500] }} />
+  ) : (
+    <ErrorIcon style={{ color: red[500] }} />
+  )
+
+  const time = dayjs.unix(status_item.timestamp)
+  const max_message_length = 150
+  const message = status_item.reason || 'Operational'
+  const truncated_message =
+    message.length > max_message_length
+      ? message.slice(0, max_message_length) + '...'
+      : message
+  const secondary = `${time.fromNow()} - ${truncated_message}`
+
+  const handle_click = () => {
+    set_expanded(!expanded)
+  }
+
+  return (
+    <ListItem key={index} button onClick={handle_click}>
+      <ListItemText
+        primary={constants.jobDetails[status_item.type]}
+        secondary={expanded ? message : secondary}
+      />
+      <ListItemSecondaryAction>{icon}</ListItemSecondaryAction>
+    </ListItem>
+  )
+}
+
+StatusItem.propTypes = {
+  status_item: PropTypes.object.isRequired,
+  index: PropTypes.number.isRequired
+}
+
 export default function StatusPage({ load, status }) {
   useEffect(() => {
     load()
@@ -36,31 +74,13 @@ export default function StatusPage({ load, status }) {
   const error_items = []
 
   status.get('jobs').forEach((status_item, index) => {
-    const is_operational = Boolean(status_item.succ)
-    const icon = is_operational ? (
-      <CheckCircleOutlineIcon style={{ color: green[500] }} />
-    ) : (
-      <ErrorIcon style={{ color: red[500] }} />
+    const item = (
+      <StatusItem key={index} status_item={status_item} index={index} />
     )
-
-    const time = dayjs.unix(status_item.timestamp)
-    const secondary =
-      `${time.fromNow()} - ` + (status_item.reason || 'Operational')
-
-    const list_item = (
-      <ListItem key={index}>
-        <ListItemText
-          primary={constants.jobDetails[status_item.type]}
-          secondary={secondary}
-        />
-        <ListItemSecondaryAction>{icon}</ListItemSecondaryAction>
-      </ListItem>
-    )
-
-    if (is_operational) {
-      success_items.push(list_item)
+    if (status_item.succ) {
+      success_items.push(item)
     } else {
-      error_items.push(list_item)
+      error_items.push(item)
     }
   })
 
