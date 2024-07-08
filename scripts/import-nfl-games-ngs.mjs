@@ -106,7 +106,7 @@ const run = async ({ year = constants.season.year }) => {
   }
 
   if (inserts.length) {
-    await db('nfl_games').insert(inserts).onConflict('esbid').merge()
+    await db('nfl_games').insert(inserts).onConflict(['v', 'h', 'week', 'year', 'seas_type']).merge()
     log(`saved data for ${inserts.length} games`)
   }
 }
