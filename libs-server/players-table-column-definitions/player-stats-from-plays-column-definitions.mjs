@@ -32,22 +32,45 @@ const join_filtered_plays_table = ({
   pid_column,
   join_type = 'LEFT',
   splits = [],
-  previous_table_name = null
+  previous_table_name = null,
+  params = {}
 }) => {
   const join_func = get_join_func(join_type)
+  let year_offset = params.year_offset || 0
+  if (Array.isArray(year_offset)) {
+    year_offset = year_offset[0]
+  }
+
   if (previous_table_name) {
     query[join_func](table_name, function () {
       this.on(`${table_name}.${pid_column}`, '=', 'player.pid')
       for (const split of splits) {
-        this.andOn(
-          `${table_name}.${split}`,
-          '=',
-          `${previous_table_name}.${split}`
-        )
+        if (split === 'year' && year_offset !== 0) {
+          this.andOn(
+            db.raw(
+              `${table_name}.${split} = ${previous_table_name}.${split} + ${year_offset}`
+            )
+          )
+        } else {
+          this.andOn(
+            `${table_name}.${split}`,
+            '=',
+            `${previous_table_name}.${split}`
+          )
+        }
       }
     })
   } else {
     query[join_func](table_name, `${table_name}.${pid_column}`, 'player.pid')
+    if (splits.includes('year') && params.year) {
+      const year_array = Array.isArray(params.year)
+        ? params.year
+        : [params.year]
+      query.whereIn(
+        `${table_name}.year`,
+        year_array.map((y) => y + year_offset)
+      )
+    }
   }
 }
 

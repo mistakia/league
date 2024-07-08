@@ -28,6 +28,14 @@ export default {
     values: constants.years,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT
   },
+  year_offset: {
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    label: 'Year + N',
+    min: -30,
+    max: 30,
+    default_value: 0,
+    is_single: true
+  },
   // TODO
   // seas_type: {
   //   values: constants.seas_types,
