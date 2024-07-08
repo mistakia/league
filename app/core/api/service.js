@@ -3,7 +3,7 @@
 import queryString from 'query-string'
 import merge from 'deepmerge'
 
-import { BASE_URL } from '@core/constants'
+import { API_URL } from '@core/constants'
 
 const POST = (data) => ({
   method: 'POST',
@@ -31,334 +31,334 @@ const DELETE = (data) => ({
 
 export const api = {
   postRegister(data) {
-    const url = `${BASE_URL}/auth/register`
+    const url = `${API_URL}/auth/register`
     return { url, ...POST(data) }
   },
   postLogin(data) {
-    const url = `${BASE_URL}/auth/login`
+    const url = `${API_URL}/auth/login`
     return { url, ...POST(data) }
   },
   fetchAuth() {
-    const url = `${BASE_URL}/me`
+    const url = `${API_URL}/me`
     return { url }
   },
   fetchPlayers(params) {
-    const url = `${BASE_URL}/players`
+    const url = `${API_URL}/players`
     return { url, ...POST(params) }
   },
   getLeaguePlayers({ leagueId }) {
-    const url = `${BASE_URL}/leagues/${leagueId}/players`
+    const url = `${API_URL}/leagues/${leagueId}/players`
     return { url }
   },
   getTeamPlayers({ teamId, leagueId }) {
-    const url = `${BASE_URL}/teams/${teamId}/players?leagueId=${leagueId}`
+    const url = `${API_URL}/teams/${teamId}/players?leagueId=${leagueId}`
     return { url }
   },
   getPlayer({ pid }) {
-    const url = `${BASE_URL}/players/${pid}`
+    const url = `${API_URL}/players/${pid}`
     return { url }
   },
   putRoster(data) {
-    const url = `${BASE_URL}/teams/${data.teamId}/lineups`
+    const url = `${API_URL}/teams/${data.teamId}/lineups`
     return { url, ...PUT(data) }
   },
   getRosters(params) {
-    const url = `${BASE_URL}/leagues/${
+    const url = `${API_URL}/leagues/${
       params.leagueId
     }/rosters?${queryString.stringify(params)}`
     return { url }
   },
   postRosters(data) {
-    const url = `${BASE_URL}/leagues/${data.leagueId}/rosters`
+    const url = `${API_URL}/leagues/${data.leagueId}/rosters`
     return { url, ...POST(data) }
   },
   deleteRosters(data) {
-    const url = `${BASE_URL}/leagues/${data.leagueId}/rosters`
+    const url = `${API_URL}/leagues/${data.leagueId}/rosters`
     return { url, ...DELETE(data) }
   },
   putRosters(data) {
-    const url = `${BASE_URL}/leagues/${data.leagueId}/rosters`
+    const url = `${API_URL}/leagues/${data.leagueId}/rosters`
     return { url, ...PUT(data) }
   },
   postAddFreeAgent(data) {
-    const url = `${BASE_URL}/teams/${data.teamId}/add`
+    const url = `${API_URL}/teams/${data.teamId}/add`
     return { url, ...POST(data) }
   },
   postRelease(data) {
-    const url = `${BASE_URL}/teams/${data.teamId}/release`
+    const url = `${API_URL}/teams/${data.teamId}/release`
     return { url, ...POST(data) }
   },
   postActivate(data) {
-    const url = `${BASE_URL}/teams/${data.teamId}/activate`
+    const url = `${API_URL}/teams/${data.teamId}/activate`
     return { url, ...POST(data) }
   },
   postDeactivate(data) {
-    const url = `${BASE_URL}/teams/${data.teamId}/deactivate`
+    const url = `${API_URL}/teams/${data.teamId}/deactivate`
     return { url, ...POST(data) }
   },
   postProtect(data) {
-    const url = `${BASE_URL}/teams/${data.teamId}/protect`
+    const url = `${API_URL}/teams/${data.teamId}/protect`
     return { url, ...POST(data) }
   },
   postTag(data) {
-    const url = `${BASE_URL}/teams/${data.teamId}/tag`
+    const url = `${API_URL}/teams/${data.teamId}/tag`
     return { url, ...POST(data) }
   },
   deleteTag(data) {
-    const url = `${BASE_URL}/teams/${data.teamId}/tag`
+    const url = `${API_URL}/teams/${data.teamId}/tag`
     return { url, ...DELETE(data) }
   },
   postReserve(data) {
-    const url = `${BASE_URL}/teams/${data.teamId}/reserve`
+    const url = `${API_URL}/teams/${data.teamId}/reserve`
     return { url, ...POST(data) }
   },
   getDraft({ leagueId }) {
-    const url = `${BASE_URL}/leagues/${leagueId}/draft`
+    const url = `${API_URL}/leagues/${leagueId}/draft`
     return { url }
   },
   postDraft(data) {
-    const url = `${BASE_URL}/leagues/${data.leagueId}/draft`
+    const url = `${API_URL}/leagues/${data.leagueId}/draft`
     return { url, ...POST(data) }
   },
   getTeams({ leagueId }) {
-    const url = `${BASE_URL}/leagues/${leagueId}/teams`
+    const url = `${API_URL}/leagues/${leagueId}/teams`
     return { url }
   },
   getMatchups({ leagueId, ...params }) {
-    const url = `${BASE_URL}/leagues/${leagueId}/matchups?${queryString.stringify(
+    const url = `${API_URL}/leagues/${leagueId}/matchups?${queryString.stringify(
       params
     )}`
     return { url }
   },
   postMatchups({ leagueId }) {
-    const url = `${BASE_URL}/leagues/${leagueId}/matchups`
+    const url = `${API_URL}/leagues/${leagueId}/matchups`
     return { url, ...POST() }
   },
   getTransactions(params) {
-    const url = `${BASE_URL}/leagues/${
+    const url = `${API_URL}/leagues/${
       params.leagueId
     }/transactions?${queryString.stringify(params)}`
     return { url }
   },
   getReleaseTransactions(params) {
-    const url = `${BASE_URL}/leagues/${params.leagueId}/transactions/release`
+    const url = `${API_URL}/leagues/${params.leagueId}/transactions/release`
     return { url }
   },
   getReserveTransactions({ teamId, leagueId }) {
-    const url = `${BASE_URL}/teams/${teamId}/transactions/reserve?leagueId=${leagueId}`
+    const url = `${API_URL}/teams/${teamId}/transactions/reserve?leagueId=${leagueId}`
     return { url }
   },
   getTrades(params) {
-    const url = `${BASE_URL}/leagues/${
+    const url = `${API_URL}/leagues/${
       params.leagueId
     }/trades?${queryString.stringify(params)}`
     return { url }
   },
   postProposeTrade(data) {
-    const url = `${BASE_URL}/leagues/${data.leagueId}/trades`
+    const url = `${API_URL}/leagues/${data.leagueId}/trades`
     return { url, ...POST(data) }
   },
   postCancelTrade(data) {
-    const url = `${BASE_URL}/leagues/${data.leagueId}/trades/${data.tradeId}/cancel`
+    const url = `${API_URL}/leagues/${data.leagueId}/trades/${data.tradeId}/cancel`
     return { url, ...POST(data) }
   },
   postAcceptTrade(data) {
-    const url = `${BASE_URL}/leagues/${data.leagueId}/trades/${data.tradeId}/accept`
+    const url = `${API_URL}/leagues/${data.leagueId}/trades/${data.tradeId}/accept`
     return { url, ...POST(data) }
   },
   postRejectTrade(data) {
-    const url = `${BASE_URL}/leagues/${data.leagueId}/trades/${data.tradeId}/reject`
+    const url = `${API_URL}/leagues/${data.leagueId}/trades/${data.tradeId}/reject`
     return { url, ...POST(data) }
   },
   getLeague({ leagueId }) {
-    const url = `${BASE_URL}/leagues/${leagueId}`
+    const url = `${API_URL}/leagues/${leagueId}`
     return { url }
   },
   putLeague(data) {
-    const url = `${BASE_URL}/leagues/${data.leagueId}`
+    const url = `${API_URL}/leagues/${data.leagueId}`
     return { url, ...PUT(data) }
   },
   putTeam(data) {
-    const url = `${BASE_URL}/teams/${data.teamId}`
+    const url = `${API_URL}/teams/${data.teamId}`
     return { url, ...PUT(data) }
   },
   postTeams(data) {
-    const url = `${BASE_URL}/leagues/${data.leagueId}/teams`
+    const url = `${API_URL}/leagues/${data.leagueId}/teams`
     return { url, ...POST(data) }
   },
   deleteTeams(data) {
-    const url = `${BASE_URL}/leagues/${data.leagueId}/teams`
+    const url = `${API_URL}/leagues/${data.leagueId}/teams`
     return { url, ...DELETE(data) }
   },
   getSources() {
-    const url = `${BASE_URL}/sources`
+    const url = `${API_URL}/sources`
     return { url }
   },
   putSource(data) {
-    const url = `${BASE_URL}/sources/${data.sourceId}`
+    const url = `${API_URL}/sources/${data.sourceId}`
     return { url, ...PUT(data) }
   },
   getPlayersGamelogs(params) {
-    const url = `${BASE_URL}/stats/gamelogs/players?${queryString.stringify(
+    const url = `${API_URL}/stats/gamelogs/players?${queryString.stringify(
       params
     )}`
     return { url }
   },
   putProjection(data) {
-    const url = `${BASE_URL}/projections/${data.pid}`
+    const url = `${API_URL}/projections/${data.pid}`
     return { url, ...PUT(data) }
   },
   delProjection(data) {
-    const url = `${BASE_URL}/projections/${data.pid}`
+    const url = `${API_URL}/projections/${data.pid}`
     return { url, ...DELETE(data) }
   },
   putSetting(data) {
-    const url = `${BASE_URL}/me`
+    const url = `${API_URL}/me`
     return { url, ...PUT(data) }
   },
   getChartedPlays(params) {
-    const url = `${BASE_URL}/plays/charted?${queryString.stringify(params)}`
+    const url = `${API_URL}/plays/charted?${queryString.stringify(params)}`
     return { url }
   },
   getPlays(params) {
-    const url = `${BASE_URL}/plays?${queryString.stringify(params)}`
+    const url = `${API_URL}/plays?${queryString.stringify(params)}`
     return { url }
   },
   getPlayStats(params) {
-    const url = `${BASE_URL}/plays/stats?${queryString.stringify(params)}`
+    const url = `${API_URL}/plays/stats?${queryString.stringify(params)}`
     return { url }
   },
   getLeagueTeamStats(params) {
-    const url = `${BASE_URL}/leagues/${
+    const url = `${API_URL}/leagues/${
       params.leagueId
     }/team-stats?${queryString.stringify(params)}`
     return { url }
   },
   postWaiver(data) {
-    const url = `${BASE_URL}/leagues/${data.leagueId}/waivers`
+    const url = `${API_URL}/leagues/${data.leagueId}/waivers`
     return { url, ...POST(data) }
   },
   postWaiverOrder(data) {
-    const url = `${BASE_URL}/leagues/${data.leagueId}/waivers/order`
+    const url = `${API_URL}/leagues/${data.leagueId}/waivers/order`
     return { url, ...PUT(data) }
   },
   putWaiver(data) {
-    const url = `${BASE_URL}/leagues/${data.leagueId}/waivers/${data.waiverId}`
+    const url = `${API_URL}/leagues/${data.leagueId}/waivers/${data.waiverId}`
     return { url, ...PUT(data) }
   },
   postCancelWaiver(data) {
-    const url = `${BASE_URL}/leagues/${data.leagueId}/waivers/${data.waiverId}/cancel`
+    const url = `${API_URL}/leagues/${data.leagueId}/waivers/${data.waiverId}/cancel`
     return { url, ...POST(data) }
   },
   getWaivers(params) {
-    const url = `${BASE_URL}/leagues/${
+    const url = `${API_URL}/leagues/${
       params.leagueId
     }/waivers?${queryString.stringify(params)}`
     return { url }
   },
   getWaiverReport(params) {
-    const url = `${BASE_URL}/leagues/${
+    const url = `${API_URL}/leagues/${
       params.leagueId
     }/waivers/report?${queryString.stringify(params)}`
     return { url }
   },
   postPoach(data) {
-    const url = `${BASE_URL}/leagues/${data.leagueId}/poaches`
+    const url = `${API_URL}/leagues/${data.leagueId}/poaches`
     return { url, ...POST(data) }
   },
   putPoach(data) {
-    const url = `${BASE_URL}/leagues/${data.leagueId}/poaches/${data.poachId}`
+    const url = `${API_URL}/leagues/${data.leagueId}/poaches/${data.poachId}`
     return { url, ...PUT(data) }
   },
   post_process_poach(data) {
-    const url = `${BASE_URL}/leagues/${data.leagueId}/poaches/${data.poachId}/process`
+    const url = `${API_URL}/leagues/${data.leagueId}/poaches/${data.poachId}/process`
     return { url, ...POST(data) }
   },
   postError(data) {
-    const url = `${BASE_URL}/errors`
+    const url = `${API_URL}/errors`
     return { url, ...POST(data) }
   },
   getSchedule() {
-    const url = `${BASE_URL}/schedule`
+    const url = `${API_URL}/schedule`
     return { url }
   },
   getStatus() {
-    const url = `${BASE_URL}/status`
+    const url = `${API_URL}/status`
     return { url }
   },
   getScoreboard(params) {
-    const url = `${BASE_URL}/scoreboard?${queryString.stringify(params)}`
+    const url = `${API_URL}/scoreboard?${queryString.stringify(params)}`
     return { url }
   },
   getProps() {
-    const url = `${BASE_URL}/odds/props`
+    const url = `${API_URL}/odds/props`
     return { url }
   },
   getCutlist({ teamId }) {
-    const url = `${BASE_URL}/teams/${teamId}/cutlist`
+    const url = `${API_URL}/teams/${teamId}/cutlist`
     return { url }
   },
   postCutlist({ teamId, ...data }) {
-    const url = `${BASE_URL}/teams/${teamId}/cutlist`
+    const url = `${API_URL}/teams/${teamId}/cutlist`
     return { url, ...POST(data) }
   },
   postTransitionTag({ teamId, ...data }) {
-    const url = `${BASE_URL}/teams/${teamId}/tag/transition`
+    const url = `${API_URL}/teams/${teamId}/tag/transition`
     return { url, ...POST(data) }
   },
   deleteTransitionTag({ teamId, ...data }) {
-    const url = `${BASE_URL}/teams/${teamId}/tag/transition`
+    const url = `${API_URL}/teams/${teamId}/tag/transition`
     return { url, ...DELETE(data) }
   },
   putTransitionTag({ teamId, ...data }) {
-    const url = `${BASE_URL}/teams/${teamId}/tag/transition`
+    const url = `${API_URL}/teams/${teamId}/tag/transition`
     return { url, ...PUT(data) }
   },
   getBaselines({ leagueId }) {
-    const url = `${BASE_URL}/leagues/${leagueId}/baselines`
+    const url = `${API_URL}/leagues/${leagueId}/baselines`
     return { url }
   },
   getPlayerProjections({ pid }) {
-    const url = `${BASE_URL}/projections/${pid}`
+    const url = `${API_URL}/projections/${pid}`
     return { url }
   },
   getPlayerGamelogs({ pid, leagueId }) {
-    const url = `${BASE_URL}/players/${pid}/gamelogs?leagueId=${leagueId}`
+    const url = `${API_URL}/players/${pid}/gamelogs?leagueId=${leagueId}`
     return { url }
   },
   getPlayerPractices({ pid }) {
-    const url = `${BASE_URL}/players/${pid}/practices`
+    const url = `${API_URL}/players/${pid}/practices`
     return { url }
   },
   getDraftPickValue({ leagueId }) {
-    const url = `${BASE_URL}/leagues/${leagueId}/draft-pick-value`
+    const url = `${API_URL}/leagues/${leagueId}/draft-pick-value`
     return { url }
   },
   getPercentiles({ percentile_key }) {
-    const url = `${BASE_URL}/percentiles/${percentile_key}`
+    const url = `${API_URL}/percentiles/${percentile_key}`
     return { url }
   },
   getNflTeamSeasonlogs({ leagueId }) {
     const url =
       leagueId !== null && leagueId !== undefined
-        ? `${BASE_URL}/seasonlogs/teams?leagueId=${leagueId}`
-        : `${BASE_URL}/seasonlogs/teams`
+        ? `${API_URL}/seasonlogs/teams?leagueId=${leagueId}`
+        : `${API_URL}/seasonlogs/teams`
     return { url }
   },
   get_league_team_daily_values({ leagueId }) {
-    const url = `${BASE_URL}/leagues/${leagueId}/team-daily-values`
+    const url = `${API_URL}/leagues/${leagueId}/team-daily-values`
     return { url }
   },
   post_players_table_view_search(data) {
-    const url = `${BASE_URL}/players/search`
+    const url = `${API_URL}/players/search`
     return { url, ...POST(data) }
   },
   post_players_table_view(data) {
-    const url = `${BASE_URL}/players/table-views`
+    const url = `${API_URL}/players/table-views`
     return { url, ...POST(data) }
   },
   delete_players_table_view({ view_id }) {
-    const url = `${BASE_URL}/players/table-views/${view_id}`
+    const url = `${API_URL}/players/table-views/${view_id}`
     return { url, method: 'DELETE' }
   }
 }
