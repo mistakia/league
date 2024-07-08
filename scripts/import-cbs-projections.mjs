@@ -14,7 +14,7 @@ debug.enable('import:projections,get-player')
 const week = argv.season ? 0 : Math.max(constants.season.week, 1)
 const type = argv.season ? 'season' : week
 const year = new Date().getFullYear()
-const timestamp = new Date()
+const timestamp = Math.round(Date.now() / 1000)
 const getUrl = (pos) =>
   `https://www.cbssports.com/fantasy/football/stats/${pos}/${year}/${type}/projections/ppr/`
 

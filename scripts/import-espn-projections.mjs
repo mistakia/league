@@ -11,7 +11,7 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import:projections')
 debug.enable('import:projections,get-player')
 
-const timestamp = new Date()
+const timestamp = Math.round(Date.now() / 1000)
 
 const run = async ({
   week,
