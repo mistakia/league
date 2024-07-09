@@ -61,16 +61,20 @@ const join_filtered_plays_table = ({
       }
     })
   } else {
-    query[join_func](table_name, `${table_name}.${pid_column}`, 'player.pid')
-    if (splits.includes('year') && params.year) {
-      const year_array = Array.isArray(params.year)
-        ? params.year
-        : [params.year]
-      query.whereIn(
-        `${table_name}.year`,
-        year_array.map((y) => y + year_offset)
-      )
-    }
+    query[join_func](table_name, function () {
+      this.on(`${table_name}.${pid_column}`, '=', 'player.pid')
+      if (splits.includes('year') && params.year) {
+        const year_array = Array.isArray(params.year)
+          ? params.year
+          : [params.year]
+        // TODO — i dont think this is needed
+        this.andOn(
+          db.raw(
+            `${table_name}.year IN (${year_array.map((y) => y + year_offset).join(',')})`
+          )
+        )
+      }
+    })
   }
 }
 
@@ -87,7 +91,8 @@ const player_stat_from_plays = ({ pid_column, select_string, stat_name }) => ({
     table_name = `filtered_plays_${stat_name}`,
     join_type = 'LEFT',
     splits = [],
-    previous_table_name = null
+    previous_table_name = null,
+    params
   }) => {
     join_filtered_plays_table({
       query,
@@ -95,7 +100,8 @@ const player_stat_from_plays = ({ pid_column, select_string, stat_name }) => ({
       pid_column,
       join_type,
       splits,
-      previous_table_name
+      previous_table_name,
+      params
     })
   },
   use_having: true,
