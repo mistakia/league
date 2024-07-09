@@ -187,6 +187,8 @@ DROP INDEX IF EXISTS public.idx_24613_team;
 DROP INDEX IF EXISTS public.idx_24608_tid;
 DROP INDEX IF EXISTS public.idx_24608_pick;
 DROP INDEX IF EXISTS public.idx_24608_lid;
+ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_key;
+ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_hash_key;
 ALTER TABLE IF EXISTS ONLY public.waivers DROP CONSTRAINT IF EXISTS "idx_25151_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS "idx_25127_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.user_table_views DROP CONSTRAINT IF EXISTS "idx_25118_PRIMARY";
@@ -232,6 +234,7 @@ DROP SEQUENCE IF EXISTS public.users_id_seq;
 DROP TABLE IF EXISTS public.users;
 DROP SEQUENCE IF EXISTS public.user_table_views_view_id_seq;
 DROP TABLE IF EXISTS public.user_table_views;
+DROP TABLE IF EXISTS public.urls;
 DROP TABLE IF EXISTS public.transition_releases;
 DROP SEQUENCE IF EXISTS public.transition_bids_uid_seq;
 DROP TABLE IF EXISTS public.transition_bids;
@@ -3166,7 +3169,12 @@ CREATE TABLE public.player (
     yahoo_id integer,
     keeptradecut_id integer,
     pfr_id character varying(10),
-    name_search_vector tsvector
+    name_search_vector tsvector,
+    ngs_athleticism_score numeric(5,2),
+    ngs_draft_grade numeric(5,2),
+    nfl_grade numeric(4,2),
+    ngs_production_score numeric(5,2),
+    ngs_size_score numeric(5,2)
 );
 
 
@@ -3357,6 +3365,41 @@ COMMENT ON COLUMN public.player.posd IS 'position depth';
 --
 
 COMMENT ON COLUMN public.player.jnum IS 'jersey number';
+
+
+--
+-- Name: COLUMN player.ngs_athleticism_score; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player.ngs_athleticism_score IS 'NGS Prospect athleticism score';
+
+
+--
+-- Name: COLUMN player.ngs_draft_grade; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player.ngs_draft_grade IS 'NGS Prospect draft grade';
+
+
+--
+-- Name: COLUMN player.nfl_grade; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player.nfl_grade IS 'NFL Prospect grade';
+
+
+--
+-- Name: COLUMN player.ngs_production_score; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player.ngs_production_score IS 'NGS Prospect production score';
+
+
+--
+-- Name: COLUMN player.ngs_size_score; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player.ngs_size_score IS 'NGS Prospect size score';
 
 
 --
@@ -4674,6 +4717,17 @@ CREATE TABLE public.transition_releases (
 
 
 --
+-- Name: urls; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.urls (
+    url text NOT NULL,
+    url_hash bytea NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+--
 -- Name: user_table_views; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -5090,6 +5144,22 @@ ALTER TABLE ONLY public.users
 
 ALTER TABLE ONLY public.waivers
     ADD CONSTRAINT "idx_25151_PRIMARY" PRIMARY KEY (uid);
+
+
+--
+-- Name: urls urls_url_hash_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.urls
+    ADD CONSTRAINT urls_url_hash_key UNIQUE (url_hash);
+
+
+--
+-- Name: urls urls_url_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.urls
+    ADD CONSTRAINT urls_url_key UNIQUE (url);
 
 
 --
