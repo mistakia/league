@@ -599,8 +599,19 @@ export default function ({
       players_query._statements
         .filter((statement) => statement.grouping === 'columns')
         .findIndex((statement) => {
-          const statement_string = statement.value.toString()
-          return statement_string.includes(column_name_with_index)
+          if (Array.isArray(statement.value)) {
+            return statement.value.some((value) => {
+              const is_string =
+                typeof value.sql === 'string' || typeof value === 'string'
+              const query_string = is_string
+                ? value.toString()
+                : value?.sql?.sql
+                  ? value.sql.sql
+                  : ''
+              return query_string.includes(column_name_with_index)
+            })
+          }
+          return false
         }) + 1 // Add 1 because SQL positions are 1-indexed
 
     if (select_position > 0) {

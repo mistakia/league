@@ -28,14 +28,15 @@ export default {
   },
   player_body_mass_index: {
     table_name: 'player',
+    column_name: 'bmi',
     select: ({ column_index }) => [
       db.raw(
-        `ROUND(CAST((player.weight::float / (player.height::float * player.height::float)) * 703 AS NUMERIC), 2) as bmi_${column_index}`
+        `CASE WHEN player.height > 0 THEN ROUND(CAST((player.weight::float / NULLIF(player.height::float * player.height::float, 0)) * 703 AS NUMERIC), 2) ELSE NULL END as bmi_${column_index}`
       )
     ],
     where_column: () =>
       db.raw(
-        'ROUND(CAST((player.weight::float / (player.height::float * player.height::float)) * 703 AS NUMERIC), 2)'
+        `CASE WHEN player.height > 0 THEN ROUND(CAST((player.weight::float / NULLIF(player.height::float * player.height::float, 0)) * 703 AS NUMERIC), 2) ELSE NULL END`
       ),
     group_by: () => ['player.weight', 'player.height'],
     use_having: true
@@ -44,11 +45,13 @@ export default {
     table_name: 'player',
     select: ({ column_index }) => [
       db.raw(
-        `ROUND((player.weight * 200.0) / POWER(player.forty, 4), 2) as speed_score_${column_index}`
+        `CASE WHEN player.forty > 0 THEN ROUND((player.weight * 200.0) / NULLIF(POWER(player.forty, 4), 0), 2) ELSE NULL END as speed_score_${column_index}`
       )
     ],
     where_column: () =>
-      db.raw('ROUND((player.weight * 200.0) / POWER(player.forty, 4), 2)'),
+      db.raw(
+        `CASE WHEN player.forty > 0 THEN ROUND((player.weight * 200.0) / NULLIF(POWER(player.forty, 4), 0), 2) ELSE NULL END`
+      ),
     group_by: () => ['player.weight', 'player.forty'],
     use_having: true
   },
@@ -56,14 +59,19 @@ export default {
     table_name: 'player',
     select: ({ column_index }) => [
       db.raw(
-        `CASE WHEN player.pos IN ('WR', 'TE') THEN ROUND(((player.weight * 200.0) / POWER(player.forty, 4)) * (player.height / CASE WHEN player.pos = 'TE' THEN 76.4 ELSE 73.0 END), 2) ELSE NULL END as height_adjusted_speed_score_${column_index}`
+        `CASE WHEN player.pos IN ('WR', 'TE') AND player.forty > 0 THEN ROUND(((player.weight * 200.0) / NULLIF(POWER(player.forty, 4), 0)) * (player.height / CASE WHEN player.pos = 'TE' THEN 76.4 ELSE 73.0 END), 2) ELSE NULL END as height_adjusted_speed_score_${column_index}`
       )
     ],
     where_column: () =>
       db.raw(
-        `CASE WHEN player.pos IN ('WR', 'TE') THEN ROUND(((player.weight * 200.0) / POWER(player.forty, 4)) * (player.height / CASE WHEN player.pos = 'TE' THEN 76.4 ELSE 73.0 END), 2) ELSE NULL END`
+        `CASE WHEN player.pos IN ('WR', 'TE') AND player.forty > 0 THEN ROUND(((player.weight * 200.0) / NULLIF(POWER(player.forty, 4), 0)) * (player.height / CASE WHEN player.pos = 'TE' THEN 76.4 ELSE 73.0 END), 2) ELSE NULL END`
       ),
-    group_by: () => ['player.weight', 'player.forty', 'player.height'],
+    group_by: () => [
+      'player.weight',
+      'player.forty',
+      'player.height',
+      'player.pos'
+    ],
     use_having: true
   },
   player_agility_score: {
