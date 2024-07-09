@@ -198,6 +198,46 @@ export default function ({ is_logged_in }) {
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       player_value_path: 'jnum',
       column_groups: [COLUMN_GROUPS.NFL_TEAM]
+    },
+    player_ngs_athleticism_score: {
+      column_title: 'NGS Prospect Athleticism Score',
+      header_label: 'Ath',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      player_value_path: 'ngs_athleticism_score',
+      column_groups: [COLUMN_GROUPS.PROSPECT, COLUMN_GROUPS.NGS]
+    },
+    player_ngs_draft_grade: {
+      column_title: 'NGS Prospect Draft Grade',
+      header_label: 'Grade',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      player_value_path: 'ngs_draft_grade',
+      column_groups: [COLUMN_GROUPS.PROSPECT, COLUMN_GROUPS.NGS]
+    },
+    player_nfl_grade: {
+      column_title: 'NFL Prospect Grade',
+      header_label: 'Grade',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      player_value_path: 'nfl_grade',
+      column_groups: [COLUMN_GROUPS.PROSPECT, COLUMN_GROUPS.NFL]
+    },
+    player_ngs_production_score: {
+      column_title: 'NGS Prospect Production Score',
+      header_label: 'Prod',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      player_value_path: 'ngs_production_score',
+      column_groups: [COLUMN_GROUPS.PROSPECT, COLUMN_GROUPS.NGS]
+    },
+    player_ngs_size_score: {
+      column_title: 'NGS Prospect Size Score',
+      header_label: 'Size',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      player_value_path: 'ngs_size_score',
+      column_groups: [COLUMN_GROUPS.PROSPECT, COLUMN_GROUPS.NGS]
     }
   }
 }

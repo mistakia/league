@@ -98,10 +98,7 @@ const import_players_from_combine_profiles_for_year = async ({
   log(`created ${createCount} players`)
 }
 
-const import_all_players_from_combine_profiles = async ({
-  start,
-  end
-}) => {
+const import_all_players_from_combine_profiles = async ({ start, end }) => {
   const token = await nfl.getToken()
   const min_year = 2006
   const max_year = constants.season.year
