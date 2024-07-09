@@ -108,6 +108,26 @@ export default {
   player_jersey_number: {
     table_name: 'player',
     column_name: 'jnum'
+  },
+  player_ngs_athleticism_score: {
+    table_name: 'player',
+    column_name: 'ngs_athleticism_score'
+  },
+  player_ngs_draft_grade: {
+    table_name: 'player',
+    column_name: 'ngs_draft_grade'
+  },
+  player_nfl_grade: {
+    table_name: 'player',
+    column_name: 'nfl_grade'
+  },
+  player_ngs_production_score: {
+    table_name: 'player',
+    column_name: 'ngs_production_score'
+  },
+  player_ngs_size_score: {
+    table_name: 'player',
+    column_name: 'ngs_size_score'
   }
 
   // TODO player.dcp ??
