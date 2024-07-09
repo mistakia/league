@@ -55,11 +55,11 @@ const import_players_from_combine_profiles_for_year = async ({
       cone: profile.threeConeDrill ? profile.threeConeDrill.seconds : null,
       arm: profile.armLength || null,
       hand: profile.handSize || null,
-      ngs_athleticism_score: profile.athleticism_score || null,
-      ngs_draft_grade: profile.draft_grade || null,
+      ngs_athleticism_score: profile.athleticismScore || null,
+      ngs_draft_grade: profile.draftGrade || null,
       nfl_grade: profile.grade || null,
-      ngs_production_score: profile.production_score || null,
-      ngs_size_score: profile.size_score || null
+      ngs_production_score: profile.productionScore || null,
+      ngs_size_score: profile.sizeScore || null
     }
 
     if (!player_row) {
@@ -99,12 +99,15 @@ const import_players_from_combine_profiles_for_year = async ({
 }
 
 const import_all_players_from_combine_profiles = async ({
-  start = constants.season.year,
-  end = constants.season.year
+  start,
+  end
 }) => {
   const token = await nfl.getToken()
-  start = Math.max(start, 2006)
-  end = Math.min(end, constants.season.year)
+  const min_year = 2006
+  const max_year = constants.season.year
+
+  start = start ? Math.max(start, min_year) : min_year
+  end = end ? Math.min(end, max_year) : max_year
 
   for (let year = start; year <= end; year++) {
     await import_players_from_combine_profiles_for_year({
