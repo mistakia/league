@@ -40,6 +40,7 @@ export default function ({ is_logged_in }) {
       header_label: 'IN"',
       size: 50,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      column_groups: [COLUMN_GROUPS.MEASURABLES],
       player_value_path: 'height'
     },
     player_weight: {
@@ -47,7 +48,48 @@ export default function ({ is_logged_in }) {
       header_label: 'Lbs',
       size: 50,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      column_groups: [COLUMN_GROUPS.MEASURABLES],
       player_value_path: 'weight'
+    },
+    player_body_mass_index: {
+      column_title: 'Body Mass Index',
+      header_label: 'BMI',
+      size: 60,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      column_groups: [COLUMN_GROUPS.MEASURABLES],
+      player_value_path: 'bmi'
+    },
+    player_speed_score: {
+      column_title: 'Speed Score',
+      header_label: 'Speed Score',
+      size: 60,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      column_groups: [COLUMN_GROUPS.MEASURABLES],
+      player_value_path: 'speed_score'
+    },
+    player_height_adjusted_speed_score: {
+      column_title: 'Height Adjusted Speed Score',
+      header_label: 'Adj Speed Score',
+      size: 60,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      column_groups: [COLUMN_GROUPS.MEASURABLES],
+      player_value_path: 'height_adjusted_speed_score'
+    },
+    player_agility_score: {
+      column_title: 'Agility Score',
+      header_label: 'Agility Score',
+      size: 60,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      column_groups: [COLUMN_GROUPS.MEASURABLES],
+      player_value_path: 'agility_score'
+    },
+    player_burst_score: {
+      column_title: 'Burst Score',
+      header_label: 'Burst Score',
+      size: 60,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      column_groups: [COLUMN_GROUPS.MEASURABLES],
+      player_value_path: 'burst_score'
     },
     player_date_of_birth: {
       column_title: 'Date of Birth',

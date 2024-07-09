@@ -228,6 +228,13 @@ export default {
     player_value_path: 'rush_first_down_pct_from_plays',
     fixed: 1
   }),
+  player_weighted_opportunity_from_plays: from_play_field({
+    column_title: 'Weighted Opportunity (By Play)',
+    column_groups: [COLUMN_GROUPS.OPPURTUNITY],
+    header_label: 'WO',
+    player_value_path: 'weighted_opportunity_from_plays',
+    fixed: 2
+  }),
   player_rush_attempts_share_from_plays: from_play_field({
     column_title: 'Share of Team Rushing Attempts (By Play)',
     column_groups: [COLUMN_GROUPS.RUSHING],
@@ -247,6 +254,13 @@ export default {
     column_groups: [COLUMN_GROUPS.RUSHING],
     header_label: 'TM FD%',
     player_value_path: 'rush_first_down_share_from_plays',
+    fixed: 1
+  }),
+  player_opportunity_share_from_plays: from_play_field({
+    column_title: 'Share of Team Opportunities (By Play)',
+    column_groups: [COLUMN_GROUPS.OPPURTUNITY],
+    header_label: 'OPP%',
+    player_value_path: 'opportunity_share_from_plays',
     fixed: 1
   }),
   player_fumble_percentage_from_plays: from_play_field({
