@@ -54,7 +54,12 @@ const import_players_from_combine_profiles_for_year = async ({
         : null,
       cone: profile.threeConeDrill ? profile.threeConeDrill.seconds : null,
       arm: profile.armLength || null,
-      hand: profile.handSize || null
+      hand: profile.handSize || null,
+      ngs_athleticism_score: profile.athleticism_score || null,
+      ngs_draft_grade: profile.draft_grade || null,
+      nfl_grade: profile.grade || null,
+      ngs_production_score: profile.production_score || null,
+      ngs_size_score: profile.size_score || null
     }
 
     if (!player_row) {
