@@ -11,7 +11,7 @@ const add_play_by_play_with_statement = ({
   with_table_name,
   having_clauses = [],
   select_strings = [],
-  pid_column,
+  pid_columns,
   splits = []
 }) => {
   if (!with_table_name) {
@@ -19,10 +19,15 @@ const add_play_by_play_with_statement = ({
   }
 
   const with_query = db('nfl_plays')
-    .select(pid_column)
+    .select(db.raw(`COALESCE(${pid_columns.join(', ')}) as pid`))
     .whereNot('play_type', 'NOPL')
     .where('nfl_plays.seas_type', 'REG')
-    .groupBy(pid_column)
+  // TODO this should probably not be used as some plays may not have a ball carrier or targeted player but may be need for some stats like sacks
+  // .where(function () {
+  //   for (const pid_column of pid_columns) {
+  //     this.orWhereNotNull(pid_column)
+  //   }
+  // })
 
   for (const split of splits) {
     if (players_table_constants.split_params.includes(split)) {
@@ -43,7 +48,11 @@ const add_play_by_play_with_statement = ({
   // Handle career_year and career_game separately
   if (params.career_year) {
     with_query.join('player_seasonlogs', function () {
-      this.on(`nfl_plays.${pid_column}`, '=', 'player_seasonlogs.pid')
+      this.on(function () {
+        for (const pid_column of pid_columns) {
+          this.orOn(`nfl_plays.${pid_column}`, '=', 'player_seasonlogs.pid')
+        }
+      })
         .andOn('nfl_plays.year', '=', 'player_seasonlogs.year')
         .andOn('nfl_plays.seas_type', '=', 'player_seasonlogs.seas_type')
     })
@@ -55,11 +64,11 @@ const add_play_by_play_with_statement = ({
 
   if (params.career_game) {
     with_query.join('player_gamelogs', function () {
-      this.on(`nfl_plays.${pid_column}`, '=', 'player_gamelogs.pid').andOn(
-        'nfl_plays.esbid',
-        '=',
-        'player_gamelogs.esbid'
-      )
+      this.on(function () {
+        for (const pid_column of pid_columns) {
+          this.orOn(`nfl_plays.${pid_column}`, '=', 'player_gamelogs.pid')
+        }
+      }).andOn('nfl_plays.esbid', '=', 'player_gamelogs.esbid')
     })
     with_query.whereBetween('player_gamelogs.career_game', [
       Math.min(params.career_game[0], params.career_game[1]),
@@ -76,6 +85,9 @@ const add_play_by_play_with_statement = ({
     query: with_query,
     params: filtered_params
   })
+
+  // Add groupBy clause before having
+  with_query.groupBy(db.raw(`COALESCE(${pid_columns.join(', ')})`))
 
   // where_clauses to filter stats/metrics
   for (const having_clause of having_clauses) {
@@ -219,7 +231,7 @@ const add_clauses_for_table = ({
   let use_play_by_play_with = false
 
   // the pid column and join_func should be the same among column definitions with the same table name/alias
-  let pid_column = null
+  let pid_columns = null
   let join_func = null
   let with_func = null
 
@@ -241,7 +253,7 @@ const add_clauses_for_table = ({
 
     if (column_definition.use_play_by_play_with) {
       use_play_by_play_with = true
-      pid_column = column_definition.pid_column
+      pid_columns = column_definition.pid_columns
       join_func = column_definition.join
     } else if (column_definition.with) {
       with_func = column_definition.with
@@ -286,7 +298,7 @@ const add_clauses_for_table = ({
       !unique_column_ids.has(where_clause.column_id)
     ) {
       use_play_by_play_with = true
-      pid_column = column_definition.pid_column
+      pid_columns = column_definition.pid_columns
       join_func = column_definition.join
       const select_result = get_select_string({
         column_params,
@@ -317,7 +329,7 @@ const add_clauses_for_table = ({
       with_table_name: table_name,
       having_clauses: having_clause_strings,
       select_strings,
-      pid_column,
+      pid_columns,
       splits
     })
 

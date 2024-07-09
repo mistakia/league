@@ -26,6 +26,74 @@ export default {
     table_name: 'player',
     column_name: 'weight'
   },
+  player_body_mass_index: {
+    table_name: 'player',
+    select: ({ column_index }) => [
+      db.raw(
+        `ROUND(CAST((player.weight::float / (player.height::float * player.height::float)) * 703 AS NUMERIC), 2) as bmi_${column_index}`
+      )
+    ],
+    where_column: () =>
+      db.raw(
+        'ROUND(CAST((player.weight::float / (player.height::float * player.height::float)) * 703 AS NUMERIC), 2)'
+      ),
+    group_by: () => ['player.weight', 'player.height'],
+    use_having: true
+  },
+  player_speed_score: {
+    table_name: 'player',
+    select: ({ column_index }) => [
+      db.raw(
+        `ROUND((player.weight * 200.0) / POWER(player.forty, 4), 2) as speed_score_${column_index}`
+      )
+    ],
+    where_column: () =>
+      db.raw('ROUND((player.weight * 200.0) / POWER(player.forty, 4), 2)'),
+    group_by: () => ['player.weight', 'player.forty'],
+    use_having: true
+  },
+  player_height_adjusted_speed_score: {
+    table_name: 'player',
+    select: ({ column_index }) => [
+      db.raw(
+        `CASE WHEN player.pos IN ('WR', 'TE') THEN ROUND(((player.weight * 200.0) / POWER(player.forty, 4)) * (player.height / CASE WHEN player.pos = 'TE' THEN 76.4 ELSE 73.0 END), 2) ELSE NULL END as height_adjusted_speed_score_${column_index}`
+      )
+    ],
+    where_column: () =>
+      db.raw(
+        `CASE WHEN player.pos IN ('WR', 'TE') THEN ROUND(((player.weight * 200.0) / POWER(player.forty, 4)) * (player.height / CASE WHEN player.pos = 'TE' THEN 76.4 ELSE 73.0 END), 2) ELSE NULL END`
+      ),
+    group_by: () => ['player.weight', 'player.forty', 'player.height'],
+    use_having: true
+  },
+  player_agility_score: {
+    table_name: 'player',
+    select: ({ column_index }) => [
+      db.raw(
+        `ROUND(COALESCE(player.shuttle, 0) + COALESCE(player.cone, 0), 2) as agility_score_${column_index}`
+      )
+    ],
+    where_column: () =>
+      db.raw(
+        'ROUND(COALESCE(player.shuttle, 0) + COALESCE(player.cone, 0), 2)'
+      ),
+    group_by: () => ['player.shuttle', 'player.cone'],
+    use_having: true
+  },
+  player_burst_score: {
+    table_name: 'player',
+    select: ({ column_index }) => [
+      db.raw(
+        `ROUND(COALESCE(player.vertical, 0) + (COALESCE(player.broad, 0) / 12.0), 2) as burst_score_${column_index}`
+      )
+    ],
+    where_column: () =>
+      db.raw(
+        `ROUND(COALESCE(player.vertical, 0) + (COALESCE(player.broad, 0) / 12.0), 2)`
+      ),
+    group_by: () => ['player.vertical', 'player.broad'],
+    use_having: true
+  },
   player_age: {
     table_name: 'player',
     column_name: 'age',
