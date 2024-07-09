@@ -12,11 +12,10 @@ export default function ({ query, params }) {
     if (typeof param_value !== 'undefined' && param_value !== null) {
       const column_param_definition = nfl_plays_column_params[column_param_key]
       const param_table = column_param_definition.table || 'nfl_plays'
-      const is_range = column_param_definition.data_type === table_constants.TABLE_DATA_TYPES.RANGE
-      const is_single = column_param_definition.is_single
-      if (
-        is_range && !is_single
-      ) {
+      const is_range =
+        column_param_definition.data_type ===
+        table_constants.TABLE_DATA_TYPES.RANGE
+      if (is_range) {
         const param_value_0 = Number(param_value[0])
         const param_value_1 = Number(param_value[1])
 
@@ -30,8 +29,7 @@ export default function ({ query, params }) {
         ])
       } else if (
         column_param_definition.data_type ===
-        table_constants.TABLE_DATA_TYPES.SELECT ||
-        (is_range && is_single)
+        table_constants.TABLE_DATA_TYPES.SELECT
       ) {
         const column_values = Array.isArray(param_value)
           ? param_value
