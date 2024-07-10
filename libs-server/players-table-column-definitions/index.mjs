@@ -8,6 +8,7 @@ import player_table_column_definitions from './player-table-column-definitions.m
 import player_league_format_logs_column_definitions from './player-league-format-logs-column-definitions.mjs'
 import player_scoring_format_logs_column_definitions from './player-scoring-format-logs-column-definitions.mjs'
 import player_stats_from_plays_column_definitions from './player-stats-from-plays-column-definitions.mjs'
+import player_fantasy_points_from_plays_column_definitions from './player-fantasy-points-from-plays-column-definitions.mjs'
 
 export default {
   ...player_projected_column_definitions,
@@ -17,6 +18,7 @@ export default {
   ...player_league_format_logs_column_definitions,
   ...player_scoring_format_logs_column_definitions,
   ...player_stats_from_plays_column_definitions,
+  ...player_fantasy_points_from_plays_column_definitions,
 
   player_league_roster_status: {
     table_name: 'rosters_players',

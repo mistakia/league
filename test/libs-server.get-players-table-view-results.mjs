@@ -806,6 +806,36 @@ describe('LIBS SERVER get_players_table_view_results', () => {
     expect(query.toString()).to.equal(expected_query)
   })
 
+  it('should generate query for fantasy points by plays — split by year 2022 to 2023', () => {
+    const query = get_players_table_view_results({
+      columns: [
+        {
+          column_id: 'player_fantasy_points_from_plays',
+          params: {
+            year: [2022, 2023]
+          }
+        },
+        {
+          column_id: 'player_fantasy_points_from_seasonlogs',
+          params: {
+            year: [2022, 2023],
+            scoring_format_hash:
+              'ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e'
+          }
+        }
+      ],
+      sort: [
+        {
+          column_id: 'player_fantasy_points_from_plays',
+          desc: true
+        }
+      ],
+      splits: ['year']
+    })
+    const expected_query = `with "t143e7a3c94f8c5d6e3c57a118bfc4a36" as (select pid, ROUND(SUM(CASE WHEN pid_type = 'trg' AND comp = true THEN 1 ELSE 0 END + CASE WHEN pid_type IN ('bc', 'trg') THEN COALESCE(rush_yds, 0) + COALESCE(recv_yds, 0) ELSE 0 END * 0.1 + CASE WHEN pid_type = 'psr' THEN COALESCE(pass_yds, 0) ELSE 0 END * 0.04 + CASE WHEN pid_type = 'bc' AND rush_td = true THEN 6 WHEN pid_type = 'trg' AND pass_td = true THEN 6 WHEN pid_type = 'psr' AND pass_td = true THEN 4 ELSE 0 END + CASE WHEN pid_type = 'psr' AND int = true THEN -1 ELSE 0 END + CASE WHEN pid_type = 'fuml' THEN -1 ELSE 0 END), 2) as fantasy_points_from_plays, "fantasy_points_plays"."year" from (select bc_pid as pid, 'bc' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "bc_pid" is not null union all select psr_pid as pid, 'psr' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "psr_pid" is not null union all select trg_pid as pid, 'trg' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "trg_pid" is not null union all select player_fuml_pid as pid, 'fuml' as pid_type, NULL as rush_yds, NULL as recv_yds, NULL as rush_td, NULL as td, NULL as comp, NULL as int, NULL as pass_yds, NULL as pass_td, play_type, seas_type, year from "nfl_plays" where "player_fuml_pid" is not null) as "fantasy_points_plays" where not "play_type" = 'NOPL' and "seas_type" = 'REG' and "fantasy_points_plays"."year" in (2022, 2023) group by "fantasy_points_plays"."year", "pid") select "player"."pid", "t143e7a3c94f8c5d6e3c57a118bfc4a36"."fantasy_points_from_plays" AS "fantasy_points_from_plays_0", "t7f074a6a223c6b25aa0ab11ab5c40539"."points" AS "points_from_seasonlogs_0", COALESCE(t143e7a3c94f8c5d6e3c57a118bfc4a36.year, t7f074a6a223c6b25aa0ab11ab5c40539.year) AS year, "player"."pos" from "player" left join "t143e7a3c94f8c5d6e3c57a118bfc4a36" on "t143e7a3c94f8c5d6e3c57a118bfc4a36"."pid" = "player"."pid" and t143e7a3c94f8c5d6e3c57a118bfc4a36.year IN (2022,2023) left join "scoring_format_player_seasonlogs" as "t7f074a6a223c6b25aa0ab11ab5c40539" on "t7f074a6a223c6b25aa0ab11ab5c40539"."pid" = "player"."pid" and t7f074a6a223c6b25aa0ab11ab5c40539.scoring_format_hash = 'ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e' and "t7f074a6a223c6b25aa0ab11ab5c40539"."year" = "t143e7a3c94f8c5d6e3c57a118bfc4a36"."year" group by "t143e7a3c94f8c5d6e3c57a118bfc4a36"."fantasy_points_from_plays", "t7f074a6a223c6b25aa0ab11ab5c40539"."points", COALESCE(t143e7a3c94f8c5d6e3c57a118bfc4a36.year, t7f074a6a223c6b25aa0ab11ab5c40539.year), "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 2 DESC NULLS LAST limit 500`
+    expect(query.toString()).to.equal(expected_query)
+  })
+
   describe('errors', () => {
     it('should throw an error if where value is missing', () => {
       try {
