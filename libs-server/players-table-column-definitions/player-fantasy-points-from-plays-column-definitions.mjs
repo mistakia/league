@@ -4,7 +4,7 @@ import get_table_hash from '#libs-server/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '../apply-play-by-play-column-params-to-query.mjs'
 import get_join_func from '#libs-server/get-join-func.mjs'
 
-const generate_fantasy_points_table_alias = ({ params }) => {
+const generate_fantasy_points_table_alias = ({ params = {} } = {}) => {
   const column_param_keys = Object.keys(nfl_plays_column_params).sort()
   const key = column_param_keys
     .map((key) => {
@@ -18,21 +18,31 @@ const generate_fantasy_points_table_alias = ({ params }) => {
   return get_table_hash(`fantasy_points_from_plays_${key}`)
 }
 
+const select_string = `ROUND(SUM(CASE WHEN pid_type = 'trg' AND comp = true THEN 1 ELSE 0 END + CASE WHEN pid_type IN ('bc', 'trg') THEN COALESCE(rush_yds, 0) + COALESCE(recv_yds, 0) ELSE 0 END * 0.1 + CASE WHEN pid_type = 'psr' THEN COALESCE(pass_yds, 0) ELSE 0 END * 0.04 + CASE WHEN pid_type = 'bc' AND rush_td = true THEN 6 WHEN pid_type = 'trg' AND pass_td = true THEN 6 WHEN pid_type = 'psr' AND pass_td = true THEN 4 ELSE 0 END + CASE WHEN pid_type = 'psr' AND int = true THEN -1 ELSE 0 END + CASE WHEN pid_type = 'fuml' THEN -1 ELSE 0 END), 2)`
+
 // TODO add two points conversion
 // TODO add special teams touchdowns
 // TODO use scoring_format_hash in params to get scoring format from the database
 const fantasy_points_from_plays_with = ({
   query,
-  params,
+  params = {},
   with_table_name,
-  having_clauses,
-  splits
+  having_clauses = [],
+  splits = []
 }) => {
   const pid_columns = ['bc_pid', 'trg_pid', 'psr_pid', 'player_fuml_pid']
-  const select_string = `ROUND(SUM(CASE WHEN pid_type = 'trg' AND comp = true THEN 1 ELSE 0 END + CASE WHEN pid_type IN ('bc', 'trg') THEN COALESCE(rush_yds, 0) + COALESCE(recv_yds, 0) ELSE 0 END * 0.1 + CASE WHEN pid_type = 'psr' THEN COALESCE(pass_yds, 0) ELSE 0 END * 0.04 + CASE WHEN pid_type = 'bc' AND rush_td = true THEN 6 WHEN pid_type = 'trg' AND pass_td = true THEN 6 WHEN pid_type = 'psr' AND pass_td = true THEN 4 ELSE 0 END + CASE WHEN pid_type = 'psr' AND int = true THEN -1 ELSE 0 END + CASE WHEN pid_type = 'fuml' THEN -1 ELSE 0 END), 2) as fantasy_points_from_plays`
 
-  const base_columns = new Set(['play_type', 'seas_type'])
-  const stat_columns = new Set(['rush_yds', 'recv_yds', 'rush_td', 'td', 'comp', 'int', 'pass_yds', 'pass_td'])
+  const base_columns = new Set(['play_type', 'seas_type', 'year'])
+  const stat_columns = new Set([
+    'rush_yds',
+    'recv_yds',
+    'rush_td',
+    'td',
+    'comp',
+    'int',
+    'pass_yds',
+    'pass_td'
+  ])
 
   for (const param_name of Object.keys(params)) {
     if (param_name === 'career_year') {
@@ -49,27 +59,45 @@ const fantasy_points_from_plays_with = ({
   const with_query = db
     .queryBuilder()
     .select(db.raw('pid'))
-    .select(db.raw(select_string))
+    .select(db.raw(`${select_string} as fantasy_points_from_plays`))
     .from(function () {
       const select_columns_array = Array.from(select_columns)
 
-      this.select(db.raw(`bc_pid as pid, 'bc' as pid_type, ${select_columns_array.join(', ')}`))
+      this.select(
+        db.raw(
+          `bc_pid as pid, 'bc' as pid_type, ${select_columns_array.join(', ')}`
+        )
+      )
         .from('nfl_plays')
         .whereNotNull('bc_pid')
         .unionAll(function () {
-          this.select(db.raw(`psr_pid as pid, 'psr' as pid_type, ${select_columns_array.join(', ')}`))
+          this.select(
+            db.raw(
+              `psr_pid as pid, 'psr' as pid_type, ${select_columns_array.join(', ')}`
+            )
+          )
             .from('nfl_plays')
             .whereNotNull('psr_pid')
         })
         .unionAll(function () {
-          this.select(db.raw(`trg_pid as pid, 'trg' as pid_type, ${select_columns_array.join(', ')}`))
+          this.select(
+            db.raw(
+              `trg_pid as pid, 'trg' as pid_type, ${select_columns_array.join(', ')}`
+            )
+          )
             .from('nfl_plays')
             .whereNotNull('trg_pid')
         })
         .unionAll(function () {
-          const null_stat_columns = Array.from(stat_columns).map(col => `NULL as ${col}`).join(', ')
+          const null_stat_columns = Array.from(stat_columns)
+            .map((col) => `NULL as ${col}`)
+            .join(', ')
           const base_columns_array = Array.from(base_columns)
-          this.select(db.raw(`player_fuml_pid as pid, 'fuml' as pid_type, ${null_stat_columns}, ${base_columns_array.join(', ')}`))
+          this.select(
+            db.raw(
+              `player_fuml_pid as pid, 'fuml' as pid_type, ${null_stat_columns}, ${base_columns_array.join(', ')}`
+            )
+          )
             .from('nfl_plays')
             .whereNotNull('player_fuml_pid')
         })
@@ -206,10 +234,12 @@ const fantasy_points_from_plays_join = ({
 
 export default {
   player_fantasy_points_from_plays: {
+    where_column: () => select_string,
     table_alias: generate_fantasy_points_table_alias,
     column_name: 'fantasy_points_from_plays',
     with: fantasy_points_from_plays_with,
     join: fantasy_points_from_plays_join,
-    supported_splits: ['year']
+    supported_splits: ['year'],
+    use_having: true
   }
 }
