@@ -54,7 +54,7 @@ const scoring_format_player_seasonlogs_join = ({
       db.raw(`${table_name}.scoring_format_hash = '${scoring_format_hash}'`)
     )
 
-    if (previous_table_name) {
+    if (splits.length && previous_table_name) {
       for (const split of splits) {
         if (split === 'year' && year_offset !== 0) {
           this.andOn(

@@ -70,7 +70,7 @@ const league_player_projection_values_join = ({
     this.on(`${table_name}.pid`, '=', 'player.pid')
     this.andOn(`${table_name}.lid`, '=', db.raw('?', [league_id]))
 
-    if (previous_table_name) {
+    if (splits.length && previous_table_name) {
       if (splits.includes('year')) {
         this.andOn(`${table_name}.year`, '=', `${previous_table_name}.year`)
       } else {
@@ -146,7 +146,7 @@ const scoring_format_player_projection_points_join = ({
       db.raw('?', [scoring_format_hash])
     )
 
-    if (previous_table_name) {
+    if (splits.length && previous_table_name) {
       if (splits.includes('year')) {
         this.andOn(`${table_name}.year`, '=', `${previous_table_name}.year`)
       } else {
@@ -222,7 +222,7 @@ const league_format_player_projection_values_join = ({
       db.raw('?', [league_format_hash])
     )
 
-    if (previous_table_name) {
+    if (splits.length && previous_table_name) {
       if (splits.includes('year')) {
         this.andOn(`${table_name}.year`, '=', `${previous_table_name}.year`)
       } else {
@@ -291,7 +291,7 @@ const projections_index_join = ({
     this.on(`${table_name}.pid`, '=', 'player.pid')
     this.andOn(`${table_name}.sourceid`, '=', constants.sources.AVERAGE)
 
-    if (previous_table_name) {
+    if (splits.length && previous_table_name) {
       if (splits.includes('year')) {
         this.andOn(`${table_name}.year`, '=', `${previous_table_name}.year`)
       } else {

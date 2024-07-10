@@ -293,6 +293,7 @@ const add_clauses_for_table = ({
     }
 
     // if use_play_by_play_with (play by play) a select string should be added to the with statement as its needed for the having clause (avoid duplicates for the same column)
+    // TODO fix name collision with selects produced from table_state.columns or prefix_columns
     if (
       column_definition.use_play_by_play_with &&
       !unique_column_ids.has(where_clause.column_id)
@@ -532,7 +533,7 @@ export default function ({
   for (const [supported_splits_key, tables] of Object.entries(
     grouped_by_splits
   )) {
-    let previous_table_name = null
+    let previous_table_name = undefined
     const available_splits = supported_splits_key.split('_').filter(Boolean)
 
     for (const [

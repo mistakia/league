@@ -13,14 +13,14 @@ const create_espn_score_columns = (column_name) => ({
     query,
     params,
     join_type = 'LEFT',
-    splits,
+    splits = [],
     previous_table_name = null
   } = {}) => {
     const join_func = get_join_func(join_type)
     const join_conditions = function () {
       this.on('player_seasonlogs.pid', '=', 'player.pid')
 
-      if (previous_table_name) {
+      if (splits.length && previous_table_name) {
         splits.forEach((split) => {
           this.andOn(
             `player_seasonlogs.${split}`,
