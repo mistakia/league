@@ -41,7 +41,7 @@ const join_filtered_plays_table = ({
     year_offset = year_offset[0]
   }
 
-  if (previous_table_name) {
+  if (splits.length && previous_table_name) {
     query[join_func](table_name, function () {
       this.on(`${table_name}.pid`, '=', 'player.pid')
       for (const split of splits) {

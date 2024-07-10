@@ -19,6 +19,7 @@ export default {
   ...player_stats_from_plays_column_definitions,
 
   player_league_roster_status: {
+    table_name: 'rosters_players',
     // TODO should be removed, do not use `where_column` with `use_having`
     where_column: () => 'player_league_roster_status',
     select: () => [
