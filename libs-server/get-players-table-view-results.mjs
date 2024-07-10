@@ -533,7 +533,7 @@ export default function ({
   for (const [supported_splits_key, tables] of Object.entries(
     grouped_by_splits
   )) {
-    let previous_table_name = undefined
+    let previous_table_name
     const available_splits = supported_splits_key.split('_').filter(Boolean)
 
     for (const [
