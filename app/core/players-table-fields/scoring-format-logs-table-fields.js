@@ -39,7 +39,8 @@ const from_scoring_format_seasonlogs = (field) => ({
       min: -30,
       max: 30,
       default_value: 0,
-      is_single: true
+      is_single: true,
+      enable_on_splits: ['year']
     },
     scoring_format_hash: scoring_format_hash_param
   },
