@@ -743,48 +743,6 @@ describe('LIBS SERVER get_players_table_view_results', () => {
     expect(query.toString()).to.equal(expected_query)
   })
 
-  it('should create a query with an N+1 range column', () => {
-    const query = get_players_table_view_results({
-      columns: [
-        {
-          column_id: 'player_fantasy_points_per_game_from_seasonlogs',
-          params: {
-            year: [2023, 2022, 2021, 2020, 2019, 2018, 2017]
-          }
-        },
-        {
-          column_id: 'player_receiving_yards_from_plays',
-          params: {
-            year_offset: [1, 7]
-          }
-        },
-        {
-          column_id: 'player_rush_yards_from_plays',
-          params: {
-            year_offset: [1, 7]
-          }
-        }
-      ],
-      sort: [
-        {
-          column_id: 'player_fantasy_points_per_game_from_seasonlogs',
-          desc: true,
-          column_index: 0
-        }
-      ],
-      where: [
-        {
-          column_id: 'player_position',
-          operator: 'IN',
-          value: ['WR']
-        }
-      ],
-      prefix_columns: ['player_name'],
-      splits: ['year']
-    })
-    // TODO
-  })
-
   it('should create a query with prospect columns, weighted oppurtunity, and oppurtunity share', () => {
     const query = get_players_table_view_results({
       columns: [
