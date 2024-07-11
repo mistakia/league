@@ -16,20 +16,26 @@ debug.enable('update-glossary-from-coverage-report')
 const update_glossary_from_coverage_report = async () => {
   const __dirname = dirname(fileURLToPath(import.meta.url))
   const data_path = path.join(__dirname, '../data')
-  const json_file_path = `${data_path}/nfl/plays/coverage-report.json`
+  const plays_json_file_path = `${data_path}/nfl/plays/coverage-report.json`
+  const players_json_file_path = `${data_path}/nfl/players-coverage-report.json`
   const markdown_path = path.join(__dirname, '../docs/glossary.md')
 
-  const coverage_data = await fs.readJSON(json_file_path)
+  const plays_coverage_data = await fs.readJSON(plays_json_file_path)
+  const players_coverage_data = await fs.readJSON(players_json_file_path)
 
-  log(`Loaded coverage data from ${json_file_path}`)
+  log(`Loaded plays coverage data from ${plays_json_file_path}`)
+  log(`Loaded players coverage data from ${players_json_file_path}`)
 
   // Read Markdown file
   let markdown_content = await fs.readFile(markdown_path, 'utf8')
 
   // Update Markdown tables
-  const not_found_columns = []
+  const not_found_columns = {
+    plays: [],
+    players: []
+  }
 
-  Object.entries(coverage_data).forEach(([key, value]) => {
+  Object.entries(plays_coverage_data).forEach(([key, value]) => {
     const regex = new RegExp(
       `(\\|\\s*${value.column}\\s*\\|[^\\|]*\\|[^\\|]*\\|)[^\\|]*\\|[^\\|]*\\|`,
       'g'
@@ -47,14 +53,40 @@ const update_glossary_from_coverage_report = async () => {
     )
 
     if (markdown_content === original_markdown_content) {
-      not_found_columns.push(value.column)
+      not_found_columns.plays.push(value.column)
     }
   })
 
-  if (not_found_columns.length > 0) {
+  // Update Markdown tables for players
+  Object.entries(players_coverage_data).forEach(([key, value]) => {
+    const regex = new RegExp(
+      `(\\|\\s*${value.column}\\s*\\|[^\\|]*\\|[^\\|]*\\|)[^\\|]*\\|`,
+      'g'
+    )
+    const original_markdown_content = markdown_content
+    const coverage_display =
+      value.coverage !== null ? `${value.coverage.toFixed(2)}%` : '-'
+    markdown_content = markdown_content.replace(
+      regex,
+      `$1 ${coverage_display} |`
+    )
+
+    if (markdown_content === original_markdown_content) {
+      not_found_columns.players.push(value.column)
+    }
+  })
+
+  if (not_found_columns.plays.length > 0) {
     console.log(
-      'Columns not found in the glossary:',
-      not_found_columns.join(', ')
+      'Plays columns not found in the glossary:',
+      not_found_columns.plays.join(', ')
+    )
+  }
+
+  if (not_found_columns.players.length > 0) {
+    console.log(
+      'Players columns not found in the glossary:',
+      not_found_columns.players.join(', ')
     )
   }
 

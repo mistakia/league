@@ -30,14 +30,21 @@ const nfl_plays_coverage_report = async () => {
       coverage_since: null
     }
     available_selects.push(
-      `MIN(CASE WHEN \`nfl_plays\`.\`${column}\` IS NOT NULL THEN \`nfl_games\`.\`date\` END) AS \`${column}_available_since\``
+      db.raw(
+        `MIN(CASE WHEN "nfl_plays"."${column}" IS NOT NULL THEN "nfl_games"."date" END) AS "${column}_available_since"`
+      )
     )
   }
 
-  const available_since_query = await db('nfl_plays')
-    .select(available_selects.map((select) => db.raw(select)))
-    .join('nfl_games', 'nfl_plays.esbid', 'nfl_games.esbid')
-    .first()
+  const available_since_query = await db.transaction(async (trx) => {
+    await trx.raw('SET statement_timeout TO 0')
+    const result = await trx('nfl_plays')
+      .select(available_selects)
+      .join('nfl_games', 'nfl_plays.esbid', 'nfl_games.esbid')
+      .first()
+    await trx.raw('SET statement_timeout TO DEFAULT')
+    return result
+  })
 
   for (const column of column_keys) {
     results_index[column].available_since =
@@ -50,14 +57,21 @@ const nfl_plays_coverage_report = async () => {
   for (const column of column_keys) {
     const available_since = results_index[column].available_since
     coverage_selects.push(
-      `100 * COUNT(DISTINCT CASE WHEN \`nfl_plays\`.\`${column}\` IS NOT NULL AND \`nfl_games\`.\`date\` >= ${available_since} THEN \`nfl_plays\`.\`esbid\` END) / COUNT(DISTINCT CASE WHEN \`nfl_games\`.\`date\` >= ${available_since} THEN \`nfl_plays\`.\`esbid\` END) AS \`${column}_coverage_since\``
+      db.raw(
+        `100.0 * COUNT(DISTINCT CASE WHEN "nfl_plays"."${column}" IS NOT NULL AND "nfl_games"."date" >= '${available_since}' THEN "nfl_plays"."esbid" END)::float / NULLIF(COUNT(DISTINCT CASE WHEN "nfl_games"."date" >= '${available_since}' THEN "nfl_plays"."esbid" END), 0)::float AS "${column}_coverage_since"`
+      )
     )
   }
 
-  const coverage_query = await db('nfl_plays')
-    .select(coverage_selects.map((select) => db.raw(select)))
-    .join('nfl_games', 'nfl_plays.esbid', 'nfl_games.esbid')
-    .first()
+  const coverage_query = await db.transaction(async (trx) => {
+    await trx.raw('SET statement_timeout TO 0')
+    const result = await trx('nfl_plays')
+      .select(coverage_selects)
+      .join('nfl_games', 'nfl_plays.esbid', 'nfl_games.esbid')
+      .first()
+    await trx.raw('SET statement_timeout TO DEFAULT')
+    return result
+  })
 
   for (const column of column_keys) {
     results_index[column].coverage_since =
