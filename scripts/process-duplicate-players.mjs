@@ -212,14 +212,15 @@ const processDuplicatePlayers = async ({ formatted = null } = {}) => {
     .select(
       'player.dob',
       'player.start',
-      db.raw("(dob || '_' || start) as group_id")
+      'player.formatted',
+      db.raw("CONCAT(dob, '_', start) as group_id")
     )
     .whereNot('dob', '0000-00-00')
     .whereNot('start', '0000')
-    .count('* as count')
-    .groupBy('group_id', 'player.dob', 'player.start')
-    .having('count', '>', 1)
-    .orderBy('count', 'desc')
+    .groupBy('player.dob', 'player.start', 'player.formatted')
+    .having(db.raw('COUNT(*) > 1'))
+    .orderBy(db.raw('COUNT(*)'), 'desc')
+    .select(db.raw('COUNT(*) as count'))
 
   if (formatted) {
     query.where('formatted', formatted)
