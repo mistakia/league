@@ -22,7 +22,7 @@ const update_player_id = async function ({ current_pid, new_pid }) {
   const player_row = player_rows[0]
 
   if (!player_row) {
-    log(`pid ${current_pid} not found`)
+    log(`pid ${new_pid} not found`)
     return
   }
 
