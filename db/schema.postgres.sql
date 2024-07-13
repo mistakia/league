@@ -1342,7 +1342,7 @@ CREATE TABLE public.nfl_plays (
     week smallint NOT NULL,
     ydl_num integer,
     ydl_side character varying(10),
-    ytg integer,
+    yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
     box_ngs integer,
@@ -1352,8 +1352,8 @@ CREATE TABLE public.nfl_plays (
     drive_seq integer,
     ydl_end character varying(10),
     ydl_start character varying(10),
-    fd boolean,
-    gtg boolean,
+    first_down boolean,
+    goal_to_go boolean,
     next_play_type character varying(36),
     penalty boolean,
     drive_yds integer,
@@ -1383,13 +1383,13 @@ CREATE TABLE public.nfl_plays (
     intp_gsis character varying(36),
     yds_gained smallint,
     dot integer,
-    yac integer,
-    yaco integer,
+    yards_after_catch integer,
+    yards_after_any_contact integer,
     ret_yds integer,
     qb_pressure boolean,
     qb_hit boolean,
     qb_hurry boolean,
-    high boolean,
+    highlight_pass boolean,
     int_worthy boolean,
     dropped_pass boolean,
     contested_ball boolean,
@@ -1406,35 +1406,33 @@ CREATE TABLE public.nfl_plays (
     charted boolean,
     motion character varying(2),
     yfog integer,
-    tay smallint,
+    true_air_yards smallint,
     created_reception boolean,
     avsk smallint,
-    sg boolean,
     no_huddle boolean,
     play_action boolean,
-    tlook boolean,
+    trick_look boolean,
     trick_play boolean,
-    qbru boolean,
+    qb_rush boolean,
     qb_sneak boolean,
-    scrm boolean,
-    htm boolean,
-    zblz boolean,
-    stnt boolean,
+    qb_scramble boolean,
+    hindered_pass boolean,
+    zero_blitz boolean,
+    stunt boolean,
     out_of_pocket_pass boolean,
     phyb boolean,
     catchable_ball boolean,
     throw_away boolean,
-    shov boolean,
-    side boolean,
-    bap boolean,
-    fread boolean,
+    shovel_pass boolean,
+    sideline_pass boolean,
+    batted_pass boolean,
     screen_pass boolean,
-    pfp boolean,
+    pain_free_play boolean,
     qb_fault_sack boolean,
     ttscrm numeric(16,12),
-    ttp numeric(16,12),
+    time_to_pass numeric(16,12),
     ttsk numeric(16,12),
-    ttpr numeric(16,12),
+    time_to_pressure numeric(16,12),
     back smallint,
     xlm smallint,
     db smallint,
@@ -1442,7 +1440,7 @@ CREATE TABLE public.nfl_plays (
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
-    dblz smallint,
+    db_blitzers smallint,
     oopd character varying(2),
     cov smallint,
     cov_type_charted character varying(3),
@@ -1488,14 +1486,14 @@ CREATE TABLE public.nfl_plays (
     pass_yds smallint,
     recv_yds smallint,
     rush_yds integer,
-    qbd boolean,
-    qbk boolean,
-    qbs boolean,
+    qb_dropback boolean,
+    qb_kneel boolean,
+    qb_spike boolean,
     run_location character varying(10),
     run_gap character varying(10),
-    fd_rush boolean,
-    fd_pass boolean,
-    fd_penalty boolean,
+    first_down_rush boolean,
+    first_down_pass boolean,
+    first_down_penalty boolean,
     third_down_converted boolean,
     third_down_failed boolean,
     fourth_down_converted boolean,
@@ -1611,17 +1609,17 @@ COMMENT ON COLUMN public.nfl_plays.special IS 'special teams';
 
 
 --
--- Name: COLUMN nfl_plays.fd; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.first_down; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.fd IS 'first down';
+COMMENT ON COLUMN public.nfl_plays.first_down IS 'first down';
 
 
 --
--- Name: COLUMN nfl_plays.gtg; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.goal_to_go; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.gtg IS 'Binary indicator for whether or not the posteam is in a goal down situation.';
+COMMENT ON COLUMN public.nfl_plays.goal_to_go IS 'Binary indicator for whether or not the posteam is in a goal down situation.';
 
 
 --
@@ -1639,10 +1637,10 @@ COMMENT ON COLUMN public.nfl_plays.score IS 'Binary indicator for whether or not
 
 
 --
--- Name: COLUMN nfl_plays.high; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.highlight_pass; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.high IS 'Highlight pass, Perfect pass that only the receiver can reach. Features perfect placement in a tight window.';
+COMMENT ON COLUMN public.nfl_plays.highlight_pass IS 'Highlight pass, Perfect pass that only the receiver can reach. Features perfect placement in a tight window.';
 
 
 --
@@ -1723,10 +1721,10 @@ COMMENT ON COLUMN public.nfl_plays.ret_td IS 'return touchdown';
 
 
 --
--- Name: COLUMN nfl_plays.tay; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.true_air_yards; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.tay IS 'true air yards, Distance ball travels in the air from point of throw to a receivers hands; back of endzone or sideline.';
+COMMENT ON COLUMN public.nfl_plays.true_air_yards IS 'true air yards, Distance ball travels in the air from point of throw to a receivers hands; back of endzone or sideline.';
 
 
 --
@@ -1744,13 +1742,6 @@ COMMENT ON COLUMN public.nfl_plays.avsk IS 'number of avoided sacks';
 
 
 --
--- Name: COLUMN nfl_plays.sg; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.sg IS 'shotgun';
-
-
---
 -- Name: COLUMN nfl_plays.no_huddle; Type: COMMENT; Schema: public; Owner: -
 --
 
@@ -1765,10 +1756,10 @@ COMMENT ON COLUMN public.nfl_plays.play_action IS 'play action pass';
 
 
 --
--- Name: COLUMN nfl_plays.tlook; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.trick_look; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.tlook IS 'trick look';
+COMMENT ON COLUMN public.nfl_plays.trick_look IS 'trick look';
 
 
 --
@@ -1779,10 +1770,10 @@ COMMENT ON COLUMN public.nfl_plays.trick_play IS 'trick play';
 
 
 --
--- Name: COLUMN nfl_plays.qbru; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.qb_rush; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.qbru IS 'QB run, a designed running play for the QB. These are only marked on runs by a natural QB where he lined up as a QB. Also, sneaks and kneel-downs are not counted.';
+COMMENT ON COLUMN public.nfl_plays.qb_rush IS 'QB run, a designed running play for the QB. These are only marked on runs by a natural QB where he lined up as a QB. Also, sneaks and kneel-downs are not counted.';
 
 
 --
@@ -1793,31 +1784,31 @@ COMMENT ON COLUMN public.nfl_plays.qb_sneak IS 'QB sneak';
 
 
 --
--- Name: COLUMN nfl_plays.scrm; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.qb_scramble; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.scrm IS 'QB scramble';
-
-
---
--- Name: COLUMN nfl_plays.htm; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.htm IS 'hindered throwing motion';
+COMMENT ON COLUMN public.nfl_plays.qb_scramble IS 'QB scramble';
 
 
 --
--- Name: COLUMN nfl_plays.zblz; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.hindered_pass; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.zblz IS 'zone blitz, at least one Off-Ball LB rushed the passer instead of a DL who dropped into coverage';
+COMMENT ON COLUMN public.nfl_plays.hindered_pass IS 'hindered throwing motion';
 
 
 --
--- Name: COLUMN nfl_plays.stnt; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.zero_blitz; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.stnt IS 'stunt, when any two pass rushers cross, trading pass rush lanes on a passing down';
+COMMENT ON COLUMN public.nfl_plays.zero_blitz IS 'zone blitz, at least one Off-Ball LB rushed the passer instead of a DL who dropped into coverage';
+
+
+--
+-- Name: COLUMN nfl_plays.stunt; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.stunt IS 'stunt, when any two pass rushers cross, trading pass rush lanes on a passing down';
 
 
 --
@@ -1849,31 +1840,24 @@ COMMENT ON COLUMN public.nfl_plays.throw_away IS 'QB Throw Away';
 
 
 --
--- Name: COLUMN nfl_plays.shov; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.shovel_pass; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.shov IS 'Shovel/Touch Pass';
-
-
---
--- Name: COLUMN nfl_plays.side; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.side IS 'Sideline pass, Balls outside of the field but catchable when the receiver extends body/arms.';
+COMMENT ON COLUMN public.nfl_plays.shovel_pass IS 'Shovel/Touch Pass';
 
 
 --
--- Name: COLUMN nfl_plays.bap; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.sideline_pass; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.bap IS 'batted pass';
+COMMENT ON COLUMN public.nfl_plays.sideline_pass IS 'Sideline pass, Balls outside of the field but catchable when the receiver extends body/arms.';
 
 
 --
--- Name: COLUMN nfl_plays.fread; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.batted_pass; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.fread IS 'first read';
+COMMENT ON COLUMN public.nfl_plays.batted_pass IS 'batted pass';
 
 
 --
@@ -1884,10 +1868,10 @@ COMMENT ON COLUMN public.nfl_plays.screen_pass IS 'screen pass';
 
 
 --
--- Name: COLUMN nfl_plays.pfp; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.pain_free_play; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.pfp IS 'pain free play, Ball carrier is only lightly touched by a defender on the field (ie QB slide) or runs out of bounds with little or no physical contact with the defender or sideline personnel/equipment. Includes TDs';
+COMMENT ON COLUMN public.nfl_plays.pain_free_play IS 'pain free play, Ball carrier is only lightly touched by a defender on the field (ie QB slide) or runs out of bounds with little or no physical contact with the defender or sideline personnel/equipment. Includes TDs';
 
 
 --
@@ -1919,10 +1903,10 @@ COMMENT ON COLUMN public.nfl_plays.blitzers IS 'number of LBs and DBs blitzing';
 
 
 --
--- Name: COLUMN nfl_plays.dblz; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.db_blitzers; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.dblz IS 'Number of DBs blitzing';
+COMMENT ON COLUMN public.nfl_plays.db_blitzers IS 'Number of DBs blitzing';
 
 
 --
@@ -2052,45 +2036,45 @@ COMMENT ON COLUMN public.nfl_plays.rush_td IS 'rushing touchdown';
 
 
 --
--- Name: COLUMN nfl_plays.qbd; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.qb_dropback; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.qbd IS 'QB dropped back on the play (pass attempt, sack, or scrambled).';
-
-
---
--- Name: COLUMN nfl_plays.qbk; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.qbk IS 'QB took a knee.';
+COMMENT ON COLUMN public.nfl_plays.qb_dropback IS 'QB dropped back on the play (pass attempt, sack, or scrambled).';
 
 
 --
--- Name: COLUMN nfl_plays.qbs; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.qb_kneel; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.qbs IS 'QB spiked the ball.';
-
-
---
--- Name: COLUMN nfl_plays.fd_rush; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays.fd_rush IS 'Binary indicator for if a running play converted the first down.';
+COMMENT ON COLUMN public.nfl_plays.qb_kneel IS 'QB took a knee.';
 
 
 --
--- Name: COLUMN nfl_plays.fd_pass; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.qb_spike; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.fd_pass IS 'Binary indicator for if a passing play converted the first down.';
+COMMENT ON COLUMN public.nfl_plays.qb_spike IS 'QB spiked the ball.';
 
 
 --
--- Name: COLUMN nfl_plays.fd_penalty; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.first_down_rush; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.fd_penalty IS 'Binary indicator for if a penalty converted the first down.';
+COMMENT ON COLUMN public.nfl_plays.first_down_rush IS 'Binary indicator for if a running play converted the first down.';
+
+
+--
+-- Name: COLUMN nfl_plays.first_down_pass; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.first_down_pass IS 'Binary indicator for if a passing play converted the first down.';
+
+
+--
+-- Name: COLUMN nfl_plays.first_down_penalty; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.first_down_penalty IS 'Binary indicator for if a penalty converted the first down.';
 
 
 --
