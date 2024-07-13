@@ -1405,7 +1405,7 @@ export default {
     max: 11,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE
   },
-  n_blitzers: {
+  blitzers: {
     min: 0,
     max: 11,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE

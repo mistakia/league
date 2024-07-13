@@ -338,6 +338,7 @@ DROP TABLE IF EXISTS public.draft;
 DROP FUNCTION IF EXISTS public.player_name_search_vector_update();
 DROP TYPE IF EXISTS public.wager_status;
 DROP TYPE IF EXISTS public.time_type;
+DROP TYPE IF EXISTS public.read_thrown_type;
 DROP TYPE IF EXISTS public.qb_position;
 DROP TYPE IF EXISTS public.placed_wagers_wager_type;
 DROP TYPE IF EXISTS public.placed_wagers_book_id;
@@ -446,6 +447,19 @@ CREATE TYPE public.qb_position AS ENUM (
     'UNDER_CENTER',
     'SHOTGUN',
     'PISTOL'
+);
+
+
+--
+-- Name: read_thrown_type; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.read_thrown_type AS ENUM (
+    'FIRST',
+    'SECOND',
+    'DESIGNED',
+    'CHECKDOWN',
+    'SCRAMBLE_DRILL'
 );
 
 
@@ -1427,7 +1441,7 @@ CREATE TABLE public.nfl_plays (
     box smallint,
     boxdb smallint,
     pass_rushers smallint,
-    n_blitzers smallint,
+    blitzers smallint,
     dblz smallint,
     oopd character varying(2),
     cov smallint,
@@ -1585,7 +1599,7 @@ CREATE TABLE public.nfl_plays (
     qb_position public.qb_position,
     n_offense_backfield numeric,
     run_play_option boolean,
-    read_thrown character varying(10)
+    read_thrown public.read_thrown_type
 );
 
 
@@ -1898,10 +1912,10 @@ COMMENT ON COLUMN public.nfl_plays.pass_rushers IS 'pass rushers';
 
 
 --
--- Name: COLUMN nfl_plays.n_blitzers; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.blitzers; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.n_blitzers IS 'number of LBs and DBs blitzing';
+COMMENT ON COLUMN public.nfl_plays.blitzers IS 'number of LBs and DBs blitzing';
 
 
 --
@@ -2136,6 +2150,13 @@ COMMENT ON COLUMN public.nfl_plays.def_to_rem IS 'Number of timeouts remaining f
 
 
 --
+-- Name: COLUMN nfl_plays.read_thrown; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.read_thrown IS 'The type of read thrown by the quarterback';
+
+
+--
 -- Name: nfl_plays_current_week; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -2155,6 +2176,7 @@ CREATE TABLE public.nfl_plays_current_week (
     ydl_start character varying(10),
     ydl_end character varying(10),
     ydl_100 integer,
+    hash character varying(1),
     mot character varying(2),
     ytg integer,
     yfog integer,
