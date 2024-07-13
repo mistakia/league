@@ -342,7 +342,7 @@
 | ydl_start             | Yard Line Start               | Starting yard line for the play                                              | 99.11%   | 2001/01/06 |
 | ydl_end               | Yard Line End                 | Ending yard line after the play                                              | 99.10%   | 2001/01/06 |
 | ydl_100               | Yard Line 100                 | Numeric distance in yards from the opponent's endzone for the posteam        | 99.07%   | 2001/01/06 |
-| hash                  | Hash Location                 | Hash location (L)eft, (R)ight, or in-between (M)                             | 23.42%   | 2021/09/10 |
+| starting_hash         | Starting Hash                 | Starting hash location LEFT, RIGHT, or MIDDLE (in-between)                   | 23.42%   | 2021/09/10 |
 | ytg                   | Yards to Go                   | Yards remaining to achieve a first down                                      | 100.00%  | 2001/01/06 |
 | yfog                  | Yards from Own Goal           | Yards from the team's own goal line                                          | -        | -          |
 | gtg                   | Goal to Go                    | Indicator if the team is in a goal-to-go situation                           | 99.11%   | 2001/01/06 |
