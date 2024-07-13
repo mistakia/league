@@ -272,6 +272,178 @@ describe('API /teams - transition', function () {
     })
   })
 
+  describe('put', function () {
+    beforeEach(async function () {
+      await league(knex)
+    })
+
+    it('update bid amount', async () => {
+      MockDate.set(start.subtract('2', 'month').toISOString())
+
+      const player = await selectPlayer()
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const initialBid = 1
+      const updatedBid = 5
+
+      await addPlayer({
+        leagueId,
+        player,
+        teamId,
+        userId
+      })
+
+      // Create initial transition bid
+      const res1 = await chai
+        .request(server)
+        .post('/api/teams/1/tag/transition')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId,
+          bid: initialBid,
+          playerTid: teamId,
+          pid: player.pid
+        })
+
+      res1.should.have.status(200)
+
+      // Update the bid
+      const res2 = await chai
+        .request(server)
+        .put('/api/teams/1/tag/transition')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId,
+          bid: updatedBid,
+          pid: player.pid
+        })
+
+      res2.should.have.status(200)
+      res2.body.bid.should.equal(updatedBid)
+
+      const query = await knex('transition_bids')
+        .where({ pid: player.pid })
+        .first()
+      query.bid.should.equal(updatedBid)
+    })
+
+    it('update release players', async () => {
+      MockDate.set(start.subtract('2', 'month').toISOString())
+
+      const player = await selectPlayer()
+      const releasePlayer1 = await selectPlayer({ exclude_pids: [player.pid] })
+      const releasePlayer2 = await selectPlayer({
+        exclude_pids: [player.pid, releasePlayer1.pid]
+      })
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const bid = 1
+
+      await addPlayer({ leagueId, player, teamId, userId })
+      await addPlayer({ leagueId, player: releasePlayer1, teamId, userId })
+      await addPlayer({ leagueId, player: releasePlayer2, teamId, userId })
+
+      // Create initial transition bid with one release player
+      const res1 = await chai
+        .request(server)
+        .post('/api/teams/1/tag/transition')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId,
+          bid,
+          playerTid: teamId,
+          pid: player.pid,
+          release: [releasePlayer1.pid]
+        })
+
+      res1.should.have.status(200)
+
+      // Update the release players
+      const res2 = await chai
+        .request(server)
+        .put('/api/teams/1/tag/transition')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId,
+          bid,
+          pid: player.pid,
+          release: [releasePlayer2.pid]
+        })
+
+      res2.should.have.status(200)
+      res2.body.release.should.deep.equal([releasePlayer2.pid])
+
+      const query = await knex('transition_releases').where({
+        transitionid: res2.body.uid
+      })
+      query.should.have.lengthOf(1)
+      query[0].pid.should.equal(releasePlayer2.pid)
+    })
+
+    it('error - invalid player', async () => {
+      const invalidPid = 'invalid_pid'
+      const request = chai
+        .request(server)
+        .put('/api/teams/1/tag/transition')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId: 1,
+          bid: 1,
+          pid: invalidPid
+        })
+
+      await invalid(request, 'player')
+    })
+
+    it('error - transition deadline passed', async () => {
+      // Set up a league with a passed transition deadline
+      const leagueId = 1
+      await knex('seasons')
+        .where({ lid: leagueId, year: constants.season.year })
+        .update({
+          tran_end: Math.floor(Date.now() / 1000) - 86400 // 1 day ago
+        })
+
+      const player = await selectPlayer()
+      const teamId = 1
+      const userId = 1
+      const bid = 1
+
+      await addPlayer({ leagueId, player, teamId, userId })
+
+      // Create initial transition bid
+      const res1 = await chai
+        .request(server)
+        .post('/api/teams/1/tag/transition')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId,
+          bid,
+          playerTid: teamId,
+          pid: player.pid
+        })
+
+      res1.should.have.status(200)
+
+      // Attempt to update after deadline
+      MockDate.set(start.add('1', 'day').toISOString())
+
+      const request = chai
+        .request(server)
+        .put('/api/teams/1/tag/transition')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId,
+          bid: bid + 1,
+          pid: player.pid
+        })
+
+      await error(request, 'transition deadline has passed')
+    })
+  })
+
   describe('errors', function () {
     beforeEach(async function () {
       await league(knex)
