@@ -221,7 +221,7 @@ const nfl_play_fields = [
   'box',
   'boxdb',
   'pass_rushers',
-  'n_blitzers',
+  'blitzers',
   'dblz',
   // 'oopd',
   // 'cov_charted',

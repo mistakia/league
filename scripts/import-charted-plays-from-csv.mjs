@@ -6,7 +6,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { getYardlineInfoFromString } from '#libs-shared'
-import { isMain, readCSV, getPlay } from '#libs-server'
+import { isMain, readCSV, getPlay, format_starting_hash } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 dayjs.extend(duration)
@@ -19,21 +19,6 @@ const formatGame = (game) => ({
   week: parseInt(game.wk, 10)
 })
 
-const format_hash = (hash) => {
-  if (!hash) return null
-  const uppercase_hash = hash.toUpperCase()
-  switch (uppercase_hash) {
-    case 'L':
-      return 'LEFT'
-    case 'M':
-      return 'MIDDLE'
-    case 'R':
-      return 'RIGHT'
-    default:
-      return null
-  }
-}
-
 const formatPlay = (play) => ({
   dropped_pass: Boolean(parseInt(play.drp, 10)),
   qb_pressure: Boolean(parseInt(play.qb_pressure, 10)),
@@ -44,7 +29,7 @@ const formatPlay = (play) => ({
   yaco: parseInt(play.yaco, 10) || null,
   sg: Boolean(parseInt(play.sg, 10)),
   no_huddle: Boolean(parseInt(play.nh, 10)),
-  starting_hash: format_hash(play.hash),
+  starting_hash: format_starting_hash(play.hash),
 
   // TODO - unexpected values
   // mot: play.mot || null,
@@ -90,7 +75,7 @@ const formatPlay = (play) => ({
   box: parseInt(play.box, 10) || null,
   boxdb: parseInt(play.boxdb, 10) || null,
   pass_rushers: parseInt(play.pru, 10) || null,
-  n_blitzers: parseInt(play.blz, 10) || null,
+  blitzers: parseInt(play.blz, 10) || null,
   dblz: parseInt(play.dblz, 10) || null,
   oopd: play.oopd || null,
   cov: play.cov || null,

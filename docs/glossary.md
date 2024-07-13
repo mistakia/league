@@ -384,7 +384,7 @@
 | box              | Defenders in the Box  | Number of defenders in the box                                                           | 23.42%   | 2021/09/10 |
 | boxdb            | DBs in the Box        | Number of defensive backs in the box                                                     | -        | -          |
 | pass_rushers     | Pass Rushers          | Number of pass rushers involved in the play                                              | 23.42%   | 2021/09/10 |
-| n_blitzers       | Blitzers              | Number of linebackers and defensive backs blitzing                                       | 23.42%   | 2021/09/10 |
+| blitzers         | Blitzers              | Number of linebackers and defensive backs blitzing                                       | 23.42%   | 2021/09/10 |
 | dblz             | DB Blitzers           | Number of defensive backs blitzing                                                       | -        | -          |
 | back             | Number in Backfield   | Number of players in the backfield                                                       | -        | -          |
 | no_huddle        | No Huddle             | Indicator if the huddle was not used                                                     | 23.42%   | 2021/09/10 |
