@@ -32,7 +32,7 @@ const nfl_play_fields = [
   'ydl_end',
   'ydl_100',
 
-  'hash',
+  'starting_hash',
   // 'mot',
 
   'ytg',

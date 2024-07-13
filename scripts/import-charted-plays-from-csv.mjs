@@ -19,6 +19,21 @@ const formatGame = (game) => ({
   week: parseInt(game.wk, 10)
 })
 
+const format_hash = (hash) => {
+  if (!hash) return null
+  const uppercase_hash = hash.toUpperCase()
+  switch (uppercase_hash) {
+    case 'L':
+      return 'LEFT'
+    case 'M':
+      return 'MIDDLE'
+    case 'R':
+      return 'RIGHT'
+    default:
+      return null
+  }
+}
+
 const formatPlay = (play) => ({
   drp: Boolean(parseInt(play.drp, 10)),
   qb_pressure: Boolean(parseInt(play.qb_pressure, 10)),
@@ -29,7 +44,7 @@ const formatPlay = (play) => ({
   yaco: parseInt(play.yaco, 10) || null,
   sg: Boolean(parseInt(play.sg, 10)),
   nh: Boolean(parseInt(play.nh, 10)),
-  hash: play.hash || null,
+  starting_hash: format_hash(play.hash),
 
   // TODO - unexpected values
   // mot: play.mot || null,

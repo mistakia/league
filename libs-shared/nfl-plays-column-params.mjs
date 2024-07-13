@@ -66,8 +66,8 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE
   },
 
-  hash: {
-    values: ['R', 'M', 'L'],
+  starting_hash: {
+    values: ['RIGHT', 'MIDDLE', 'LEFT'],
     data_type: table_constants.TABLE_DATA_TYPES.SELECT
   },
   // TODO: data missing

@@ -189,6 +189,7 @@ DROP INDEX IF EXISTS public.idx_24608_pick;
 DROP INDEX IF EXISTS public.idx_24608_lid;
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_key;
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_hash_key;
+ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pkey;
 ALTER TABLE IF EXISTS ONLY public.waivers DROP CONSTRAINT IF EXISTS "idx_25151_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS "idx_25127_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.user_table_views DROP CONSTRAINT IF EXISTS "idx_25118_PRIMARY";
@@ -343,6 +344,18 @@ DROP TYPE IF EXISTS public.nfl_play_type;
 DROP TYPE IF EXISTS public.nfl_games_surf;
 DROP TYPE IF EXISTS public.nfl_games_roof;
 DROP TYPE IF EXISTS public.market_source_id;
+DROP TYPE IF EXISTS public.hash_position;
+--
+-- Name: hash_position; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.hash_position AS ENUM (
+    'LEFT',
+    'MIDDLE',
+    'RIGHT'
+);
+
+
 --
 -- Name: market_source_id; Type: TYPE; Schema: public; Owner: -
 --
@@ -1365,7 +1378,6 @@ CREATE TABLE public.nfl_plays (
     td_tm character varying(5),
     ret_tm character varying(5),
     charted boolean,
-    hash character varying(1),
     mot character varying(2),
     yfog integer,
     tay smallint,
@@ -1556,7 +1568,8 @@ CREATE TABLE public.nfl_plays (
     route_ngs character varying(100),
     man_zone_ngs character varying(100),
     cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean
+    qb_pressure_ngs boolean,
+    starting_hash public.hash_position
 );
 
 
@@ -2126,7 +2139,6 @@ CREATE TABLE public.nfl_plays_current_week (
     ydl_start character varying(10),
     ydl_end character varying(10),
     ydl_100 integer,
-    hash character varying(1),
     mot character varying(2),
     ytg integer,
     yfog integer,
@@ -5144,6 +5156,14 @@ ALTER TABLE ONLY public.users
 
 ALTER TABLE ONLY public.waivers
     ADD CONSTRAINT "idx_25151_PRIMARY" PRIMARY KEY (uid);
+
+
+--
+-- Name: player player_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player
+    ADD CONSTRAINT player_pkey PRIMARY KEY (pid);
 
 
 --
