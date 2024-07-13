@@ -234,7 +234,7 @@ export default {
   }),
   player_dropped_passing_yards_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    select_string: `SUM(CASE WHEN drp = true THEN dot ELSE 0 END)`,
+    select_string: `SUM(CASE WHEN dropped_pass = true THEN dot ELSE 0 END)`,
     stat_name: 'drop_pass_yds_from_plays'
   }),
   player_pass_completion_percentage_from_plays: player_stat_from_plays({
@@ -454,12 +454,12 @@ export default {
   }),
   player_drops_from_plays: player_stat_from_plays({
     pid_columns: ['trg_pid'],
-    select_string: `SUM(CASE WHEN drp = true THEN 1 ELSE 0 END)`,
+    select_string: `SUM(CASE WHEN dropped_pass = true THEN 1 ELSE 0 END)`,
     stat_name: 'drops_from_plays'
   }),
   player_dropped_receiving_yards_from_plays: player_stat_from_plays({
     pid_columns: ['trg_pid'],
-    select_string: `SUM(CASE WHEN drp = true THEN dot ELSE 0 END)`,
+    select_string: `SUM(CASE WHEN dropped_pass = true THEN dot ELSE 0 END)`,
     stat_name: 'drop_rec_yds_from_plays'
   }),
   player_targets_from_plays: player_stat_from_plays({

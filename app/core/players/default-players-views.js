@@ -127,7 +127,7 @@ const views = {
       'stats.rec',
       'stats.recy',
       'stats.tdrec',
-      'stats.drp',
+      'stats.drops',
       'stats.dryprecy',
       'stats.trg',
       'stats.dptrg_pct',

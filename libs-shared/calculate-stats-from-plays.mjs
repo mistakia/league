@@ -79,7 +79,7 @@ const calculateStatsFromPlays = (plays) => {
         if (play.qb_hurry) addStat(play.psr_pid, 'qb_hurry', 1)
         if (play.high) addStat(play.psr_pid, 'high', 1)
         if (play.int_worthy) addStat(play.psr_pid, 'int_worthy', 1)
-        if (play.drp) {
+        if (play.dropped_pass) {
           addStat(play.psr_pid, 'drpp', 1)
           addStat(play.psr_pid, 'drppy', play.dot)
         }
@@ -91,9 +91,9 @@ const calculateStatsFromPlays = (plays) => {
           addStat(play.trg_pid, 'trg', 1)
           addStat(play.trg_pid, 'rdot', play.dot)
           if (play.dot >= 20) addStat(play.trg_pid, 'dptrg', 1)
-          if (play.cnb) addStat(play.trg_pid, 'cnb', 1)
-          if (play.drp) {
-            addStat(play.trg_pid, 'drp', 1)
+          if (play.contested_ball) addStat(play.trg_pid, 'contested_ball', 1)
+          if (play.dropped_pass) {
+            addStat(play.trg_pid, 'drops', 1)
             addStat(play.trg_pid, 'drprecy', play.dot)
           }
         }

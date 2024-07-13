@@ -403,10 +403,10 @@ export const fullStats = [
   'drprecy',
 
   // dropped passes
-  'drp',
+  'drops',
 
   // contested targets
-  'cnb',
+  'contested_ball',
 
   // share of team total air yards
   '_stray',
@@ -656,7 +656,7 @@ export const teamStats = [
   'qb_hurry_yds', // qb hurry yards
   'scrm', // scrambles
   'scrmy', // scramble yards
-  'drp' // drops
+  'drops' // drops
 ]
 
 export const slots = {
