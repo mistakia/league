@@ -47,9 +47,10 @@ const calculateStatsFromPlays = (plays) => {
         addTeamStat(play.off, 'ry', play.yds_gained)
         addStat(play.bc_pid, 'ra', 1)
         addStat(play.bc_pid, 'ry', play.rush_yds)
-        if (play.yaco) addStat(play.bc_pid, 'ryaco', play.yaco)
-        if (play.fd) {
-          addStat(play.bc_pid, 'fd', 1)
+        if (play.yards_after_any_contact)
+          addStat(play.bc_pid, 'ryaco', play.yards_after_any_contact)
+        if (play.first_down) {
+          addStat(play.bc_pid, 'first_down', 1)
           addStat(play.bc_pid, 'rfd', 1)
         }
         if (play.succ) {
@@ -58,7 +59,7 @@ const calculateStatsFromPlays = (plays) => {
         }
         if (play.mbt) addStat(play.bc_pid, 'mbt', play.mbt)
         if (play.rush_yds > 0) addStat(play.bc_pid, 'posra', 1)
-        if (play.fd) addStat(play.bc_pid, 'rfd', 1)
+        if (play.first_down) addStat(play.bc_pid, 'rfd', 1)
         if (play.td) addStat(play.bc_pid, 'tdr', 1)
         break
       }
@@ -77,7 +78,7 @@ const calculateStatsFromPlays = (plays) => {
         if (play.qb_pressure) addStat(play.psr_pid, 'qb_pressure', 1)
         if (play.qb_hit) addStat(play.psr_pid, 'qb_hit', 1)
         if (play.qb_hurry) addStat(play.psr_pid, 'qb_hurry', 1)
-        if (play.high) addStat(play.psr_pid, 'high', 1)
+        if (play.highlight_pass) addStat(play.psr_pid, 'highlight_pass', 1)
         if (play.int_worthy) addStat(play.psr_pid, 'int_worthy', 1)
         if (play.dropped_pass) {
           addStat(play.psr_pid, 'drpp', 1)
@@ -105,7 +106,7 @@ const calculateStatsFromPlays = (plays) => {
           // receiver
           addStat(play.trg_pid, 'rec', 1)
           addStat(play.trg_pid, 'recy', play.recv_yds)
-          addStat(play.trg_pid, 'ryac', play.yac)
+          addStat(play.trg_pid, 'ryac', play.yards_after_catch)
           addStat(play.trg_pid, 'rcay', play.dot)
           if (play.mbt) addStat(play.trg_pid, 'mbt', play.mbt)
 
@@ -114,12 +115,13 @@ const calculateStatsFromPlays = (plays) => {
           addStat(play.psr_pid, 'py', play.pass_yds)
           addStat(play.psr_pid, 'pc', 1)
           addStat(play.psr_pid, 'pcay', play.dot)
-          if (play.yac) addStat(play.psr_pid, 'pyac', play.yac)
+          if (play.yards_after_catch)
+            addStat(play.psr_pid, 'pyac', play.yards_after_catch)
 
           if (play.succ) addStat(play.trg_pid, 'succ', 1)
-          if (play.fd) {
-            addStat(play.psr_pid, 'fd', 1)
-            addStat(play.trg_pid, 'fd', 1)
+          if (play.first_down) {
+            addStat(play.psr_pid, 'first_down', 1)
+            addStat(play.trg_pid, 'first_down', 1)
           }
 
           if (play.td) {

@@ -13,17 +13,17 @@ export default function getPlayFromPlayStats(play) {
 
       // 1st Down Rushing
       case 3:
-        playRow.fd = 1
+        playRow.first_down = 1
         break
 
       // 1st Down Passing
       case 4:
-        playRow.fd = 1
+        playRow.first_down = 1
         break
 
       // 1st Down Penalty
       case 5:
-        playRow.fd = 1
+        playRow.first_down = 1
         break
 
       // 3rd Down Attempt Converted
@@ -51,7 +51,7 @@ export default function getPlayFromPlayStats(play) {
 
       // Rushing Yards, TD
       case 11:
-        playRow.fd = 1
+        playRow.first_down = 1
         playRow.td = 1
         playRow.rush_td = 1
         playRow.bc_gsis = playStat.gsisId
@@ -67,7 +67,7 @@ export default function getPlayFromPlayStats(play) {
 
       // Lateral Rushing Yards, TD
       case 13:
-        playRow.fd = 1
+        playRow.first_down = 1
         playRow.td = 1
         playRow.rush_td = 1
         playRow.yds_gained = playStat.yards + (playRow.yds_gained || 0)
@@ -91,7 +91,7 @@ export default function getPlayFromPlayStats(play) {
       // Passing Yards, TD
       case 16:
         playRow.comp = 1
-        playRow.fd = 1
+        playRow.first_down = 1
         playRow.td = 1
         playRow.pass_td = 1
         playRow.psr_gsis = playStat.gsisId
@@ -122,7 +122,7 @@ export default function getPlayFromPlayStats(play) {
       // Pass Reception Yards, TD
       case 22:
         playRow.comp = 1
-        playRow.fd = 1
+        playRow.first_down = 1
         playRow.td = 1
         playRow.pass_td = 1
         playRow.trg_gsis = playStat.gsisId
@@ -138,7 +138,7 @@ export default function getPlayFromPlayStats(play) {
       // Lateral Pass Reception Yards, TD
       case 24:
         playRow.comp = 1
-        playRow.fd = 1
+        playRow.first_down = 1
         playRow.td = 1
         playRow.pass_td = 1
         playRow.td_tm = playStat.teamAbbr
@@ -495,7 +495,7 @@ export default function getPlayFromPlayStats(play) {
       case 113:
         playRow.comp = 1
         playRow.trg_gsis = playStat.gsisId
-        playRow.yac = playStat.yards
+        playRow.yards_after_catch = playStat.yards
         break
 
       // Pass Target

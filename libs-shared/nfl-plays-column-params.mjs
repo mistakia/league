@@ -75,7 +75,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
 
-  ytg: {
+  yards_to_go: {
     min: 0,
     max: 99,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE
@@ -991,7 +991,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.SELECT
   },
 
-  gtg: {
+  goal_to_go: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
 
@@ -1184,17 +1184,17 @@ export default {
     max: 99,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE
   },
-  tay: {
+  true_air_yards: {
     min: -40,
     max: 99,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE
   },
-  yac: {
+  yards_after_catch: {
     min: -99,
     max: 99,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE
   },
-  yaco: {
+  yards_after_any_contact: {
     min: -99,
     max: 99,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE
@@ -1208,31 +1208,28 @@ export default {
   //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
   // },
 
-  sg: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
-  },
   no_huddle: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  pap: {
+  play_action: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  qbd: {
+  qb_dropback: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  qbk: {
+  qb_kneel: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  qbs: {
+  qb_spike: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  qbru: {
+  qb_rush: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
   qb_sneak: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  scrm: {
+  qb_scramble: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
 
@@ -1258,13 +1255,13 @@ export default {
   throw_away: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  shov: {
+  shovel_pass: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  side: {
+  sideline_pass: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  high: {
+  highlight_pass: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
 
@@ -1298,20 +1295,20 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.SELECT
   },
 
-  tlook: {
+  trick_look: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
 
-  fd: {
+  first_down: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  fd_rush: {
+  first_down_rush: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  fd_pass: {
+  first_down_pass: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  fd_penalty: {
+  first_down_penalty: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
 
@@ -1328,13 +1325,13 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
 
-  htm: {
+  hindered_pass: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  zblz: {
+  zero_blitz: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  stnt: {
+  stunt: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
   out_of_pocket_pass: {
@@ -1343,27 +1340,42 @@ export default {
   phyb: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  bap: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
-  },
-  fread: {
+  batted_pass: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
   screen_pass: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  pfp: {
+  pain_free_play: {
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+  },
+  run_play_option: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
   qb_fault_sack: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+  },
+  qb_position: {
+    values: ['UNDER_CENTER', 'SHOTGUN', 'PISTOL'],
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT
+  },
+
+  read_thrown: {
+    values: ['FIRST', 'SECOND', 'DESIGNED', 'CHECKDOWN', 'SCRAMBLE_DRILL'],
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT
+  },
+
+  n_offense_backfield: {
+    min: 0,
+    max: 11,
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE
   },
 
   // TODO
   // ttscrm: {
   //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
   // },
-  ttp: {
+  time_to_pass: {
     min: 0,
     max: 15,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE
@@ -1372,7 +1384,7 @@ export default {
   // ttsk: {
   //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
   // },
-  ttpr: {
+  time_to_pressure: {
     min: 0,
     max: 15,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE
@@ -1410,7 +1422,7 @@ export default {
     max: 11,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE
   },
-  dblz: {
+  db_blitzers: {
     min: 0,
     max: 11,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE

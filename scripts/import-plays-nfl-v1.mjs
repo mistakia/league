@@ -22,8 +22,8 @@ const getPlayData = ({ play, year, week, seas_type }) => {
     drive_yds: play.driveNetYards,
     ydl_end: play.endYardLine,
     ydl_start: play.yardLine,
-    fd: play.firstDown,
-    gtg: play.goalToGo,
+    first_down: play.firstDown,
+    goal_to_go: play.goalToGo,
     year,
     seas_type,
     week,
@@ -37,7 +37,7 @@ const getPlayData = ({ play, year, week, seas_type }) => {
     score_type: play.scoringPlayType,
     special_play_type: play.stPlayType,
     timestamp: play.timeOfDay ? dayjs(play.timeOfDay).format('HH:mm:ss') : null,
-    ytg: play.yardsToGo,
+    yards_to_go: play.yardsToGo,
     qtr: play.quarter,
     play_type_nfl: play.playType
   }

@@ -28,7 +28,7 @@ const getPlayData = (play) => {
     away_score: play.visitorScore,
     week: play.week,
     ydl_num: play.yardlineNumber,
-    ytg: play.yardsToGo,
+    yards_to_go: play.yardsToGo,
     off_formation: play.offense ? play.offense.offenseFormation : null,
     off_personnel: play.offense ? play.offense.personnel : null,
     box_ngs: play.defense ? play.defense.defendersInTheBox : null,

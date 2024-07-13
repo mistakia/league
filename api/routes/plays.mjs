@@ -88,7 +88,7 @@ router.get('/charted', async (req, res) => {
     const { pid } = req.query
 
     // TODO filter by yfog range
-    // TODO filter by ytg range
+    // TODO filter by yards_to_go range
     // TODO filter by first drive
     // TODO filter by temperature
     // TODO filter by humidity
