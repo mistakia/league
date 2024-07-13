@@ -70,10 +70,10 @@ export default {
     values: ['RIGHT', 'MIDDLE', 'LEFT'],
     data_type: table_constants.TABLE_DATA_TYPES.SELECT
   },
-  // TODO: data missing
-  // mot: {
-  //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
-  // },
+
+  motion: {
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+  },
 
   ytg: {
     min: 0,
@@ -1097,7 +1097,7 @@ export default {
   incomp: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  trick: {
+  trick_play: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
   touchback: {
@@ -1211,7 +1211,7 @@ export default {
   sg: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  nh: {
+  no_huddle: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
   pap: {
@@ -1229,7 +1229,7 @@ export default {
   qbru: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  sneak: {
+  qb_sneak: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
   scrm: {
@@ -1252,10 +1252,10 @@ export default {
   int_worthy: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  cball: {
+  catchable_ball: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  qbta: {
+  throw_away: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
   shov: {
@@ -1268,13 +1268,13 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
 
-  drp: {
+  dropped_pass: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  cnb: {
+  contested_ball: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  crr: {
+  created_reception: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
 
@@ -1298,9 +1298,6 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.SELECT
   },
 
-  // option: {
-  //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
-  // },
   tlook: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
@@ -1340,7 +1337,7 @@ export default {
   stnt: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  oop: {
+  out_of_pocket_pass: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
   phyb: {
@@ -1352,13 +1349,13 @@ export default {
   fread: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  scre: {
+  screen_pass: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
   pfp: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
-  qbsk: {
+  qb_fault_sack: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
 
@@ -1403,12 +1400,12 @@ export default {
     max: 11,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE
   },
-  pru: {
+  pass_rushers: {
     min: 0,
     max: 11,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE
   },
-  blz: {
+  n_blitzers: {
     min: 0,
     max: 11,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE

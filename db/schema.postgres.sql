@@ -338,6 +338,7 @@ DROP TABLE IF EXISTS public.draft;
 DROP FUNCTION IF EXISTS public.player_name_search_vector_update();
 DROP TYPE IF EXISTS public.wager_status;
 DROP TYPE IF EXISTS public.time_type;
+DROP TYPE IF EXISTS public.qb_position;
 DROP TYPE IF EXISTS public.placed_wagers_wager_type;
 DROP TYPE IF EXISTS public.placed_wagers_book_id;
 DROP TYPE IF EXISTS public.nfl_play_type;
@@ -434,6 +435,17 @@ CREATE TYPE public.placed_wagers_wager_type AS ENUM (
     'SINGLE',
     'PARLAY',
     'ROUND_ROBIN'
+);
+
+
+--
+-- Name: qb_position; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.qb_position AS ENUM (
+    'UNDER_CENTER',
+    'SHOTGUN',
+    'PISTOL'
 );
 
 
@@ -1365,8 +1377,8 @@ CREATE TABLE public.nfl_plays (
     qb_hurry boolean,
     high boolean,
     int_worthy boolean,
-    drp boolean,
-    cnb boolean,
+    dropped_pass boolean,
+    contested_ball boolean,
     mbt smallint,
     fuml boolean,
     "int" boolean,
@@ -1378,34 +1390,33 @@ CREATE TABLE public.nfl_plays (
     td_tm character varying(5),
     ret_tm character varying(5),
     charted boolean,
-    mot character varying(2),
+    motion character varying(2),
     yfog integer,
     tay smallint,
-    crr boolean,
+    created_reception boolean,
     avsk smallint,
     sg boolean,
-    nh boolean,
-    pap boolean,
-    option character varying(3),
+    no_huddle boolean,
+    play_action boolean,
     tlook boolean,
-    trick boolean,
+    trick_play boolean,
     qbru boolean,
-    sneak boolean,
+    qb_sneak boolean,
     scrm boolean,
     htm boolean,
     zblz boolean,
     stnt boolean,
-    oop boolean,
+    out_of_pocket_pass boolean,
     phyb boolean,
-    cball boolean,
-    qbta boolean,
+    catchable_ball boolean,
+    throw_away boolean,
     shov boolean,
     side boolean,
     bap boolean,
     fread boolean,
-    scre boolean,
+    screen_pass boolean,
     pfp boolean,
-    qbsk boolean,
+    qb_fault_sack boolean,
     ttscrm numeric(16,12),
     ttp numeric(16,12),
     ttsk numeric(16,12),
@@ -1415,8 +1426,8 @@ CREATE TABLE public.nfl_plays (
     db smallint,
     box smallint,
     boxdb smallint,
-    pru smallint,
-    blz smallint,
+    pass_rushers smallint,
+    n_blitzers smallint,
     dblz smallint,
     oopd character varying(2),
     cov smallint,
@@ -1569,7 +1580,12 @@ CREATE TABLE public.nfl_plays (
     man_zone_ngs character varying(100),
     cov_type_ngs character varying(100),
     qb_pressure_ngs boolean,
-    starting_hash public.hash_position
+    starting_hash public.hash_position,
+    ftn_play_id numeric,
+    qb_position public.qb_position,
+    n_offense_backfield numeric,
+    run_play_option boolean,
+    read_thrown character varying(10)
 );
 
 
@@ -1623,17 +1639,17 @@ COMMENT ON COLUMN public.nfl_plays.int_worthy IS 'interception worthy';
 
 
 --
--- Name: COLUMN nfl_plays.drp; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.dropped_pass; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.drp IS 'dropped pass';
+COMMENT ON COLUMN public.nfl_plays.dropped_pass IS 'dropped pass';
 
 
 --
--- Name: COLUMN nfl_plays.cnb; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.contested_ball; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.cnb IS 'contested ball, Passes into close coverage that involve a physical battle between receiver and defender for control of the ball.';
+COMMENT ON COLUMN public.nfl_plays.contested_ball IS 'contested ball, Passes into close coverage that involve a physical battle between receiver and defender for control of the ball.';
 
 
 --
@@ -1700,10 +1716,10 @@ COMMENT ON COLUMN public.nfl_plays.tay IS 'true air yards, Distance ball travels
 
 
 --
--- Name: COLUMN nfl_plays.crr; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.created_reception; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.crr IS 'Created Reception, Difficult catches that require exceptional body control; hands; acrobatics, or any combination thereof.';
+COMMENT ON COLUMN public.nfl_plays.created_reception IS 'Created Reception, Difficult catches that require exceptional body control; hands; acrobatics, or any combination thereof.';
 
 
 --
@@ -1721,17 +1737,17 @@ COMMENT ON COLUMN public.nfl_plays.sg IS 'shotgun';
 
 
 --
--- Name: COLUMN nfl_plays.nh; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.no_huddle; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.nh IS 'no huddle';
+COMMENT ON COLUMN public.nfl_plays.no_huddle IS 'no huddle';
 
 
 --
--- Name: COLUMN nfl_plays.pap; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.play_action; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.pap IS 'play action pass';
+COMMENT ON COLUMN public.nfl_plays.play_action IS 'play action pass';
 
 
 --
@@ -1742,10 +1758,10 @@ COMMENT ON COLUMN public.nfl_plays.tlook IS 'trick look';
 
 
 --
--- Name: COLUMN nfl_plays.trick; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.trick_play; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.trick IS 'trick play';
+COMMENT ON COLUMN public.nfl_plays.trick_play IS 'trick play';
 
 
 --
@@ -1756,10 +1772,10 @@ COMMENT ON COLUMN public.nfl_plays.qbru IS 'QB run, a designed running play for 
 
 
 --
--- Name: COLUMN nfl_plays.sneak; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.qb_sneak; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.sneak IS 'QB sneak';
+COMMENT ON COLUMN public.nfl_plays.qb_sneak IS 'QB sneak';
 
 
 --
@@ -1791,10 +1807,10 @@ COMMENT ON COLUMN public.nfl_plays.stnt IS 'stunt, when any two pass rushers cro
 
 
 --
--- Name: COLUMN nfl_plays.oop; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.out_of_pocket_pass; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.oop IS 'out of pocket pass';
+COMMENT ON COLUMN public.nfl_plays.out_of_pocket_pass IS 'out of pocket pass';
 
 
 --
@@ -1805,17 +1821,17 @@ COMMENT ON COLUMN public.nfl_plays.phyb IS 'physical ball, Pass target takes sig
 
 
 --
--- Name: COLUMN nfl_plays.cball; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.catchable_ball; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.cball IS 'catchable ball, A pass in which an eligible receiver has the opportunity to get his hands on the football with reasonable movement, timing, and opportunity.';
+COMMENT ON COLUMN public.nfl_plays.catchable_ball IS 'catchable ball, A pass in which an eligible receiver has the opportunity to get his hands on the football with reasonable movement, timing, and opportunity.';
 
 
 --
--- Name: COLUMN nfl_plays.qbta; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.throw_away; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.qbta IS 'QB Throw Away';
+COMMENT ON COLUMN public.nfl_plays.throw_away IS 'QB Throw Away';
 
 
 --
@@ -1847,10 +1863,10 @@ COMMENT ON COLUMN public.nfl_plays.fread IS 'first read';
 
 
 --
--- Name: COLUMN nfl_plays.scre; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.screen_pass; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.scre IS 'screen pass';
+COMMENT ON COLUMN public.nfl_plays.screen_pass IS 'screen pass';
 
 
 --
@@ -1861,10 +1877,10 @@ COMMENT ON COLUMN public.nfl_plays.pfp IS 'pain free play, Ball carrier is only 
 
 
 --
--- Name: COLUMN nfl_plays.qbsk; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.qb_fault_sack; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.qbsk IS 'qb sack, QB was to blame for the sack: held ball too long; missed wide open receiver etc';
+COMMENT ON COLUMN public.nfl_plays.qb_fault_sack IS 'qb sack, QB was to blame for the sack: held ball too long; missed wide open receiver etc';
 
 
 --
@@ -1875,17 +1891,17 @@ COMMENT ON COLUMN public.nfl_plays.xlm IS 'extra men on the line, Number of play
 
 
 --
--- Name: COLUMN nfl_plays.pru; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.pass_rushers; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.pru IS 'pass rushers';
+COMMENT ON COLUMN public.nfl_plays.pass_rushers IS 'pass rushers';
 
 
 --
--- Name: COLUMN nfl_plays.blz; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.n_blitzers; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.blz IS 'number of LBs and DBs blitzing';
+COMMENT ON COLUMN public.nfl_plays.n_blitzers IS 'number of LBs and DBs blitzing';
 
 
 --

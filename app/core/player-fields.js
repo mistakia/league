@@ -777,13 +777,13 @@ function PlayerFields({ week, state }) {
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
       percentile_field: 'tdrec'
     },
-    'stats.drp': {
+    'stats.drops': {
       category: 'receiving',
       column_header: 'DRP',
       csv_header: 'Drops',
-      player_value_path: 'stats.drp',
+      player_value_path: 'stats.drops',
       percentile_key: 'PLAYER_PLAY_BY_PLAY_STATS',
-      percentile_field: 'drp'
+      percentile_field: 'drops'
     },
     'stats.dryprecy': {
       category: 'receiving',

@@ -33,7 +33,7 @@ const nfl_play_fields = [
   'ydl_100',
 
   'starting_hash',
-  // 'mot',
+  'motion',
 
   'ytg',
 
@@ -120,7 +120,7 @@ const nfl_play_fields = [
   'succ',
   'comp',
   'incomp',
-  // 'trick',
+  'trick_play',
   'touchback',
   'safety',
   'penalty',
@@ -156,13 +156,13 @@ const nfl_play_fields = [
   'ret_tm',
 
   'sg',
-  'nh',
-  'pap',
+  'no_huddle',
+  'play_action',
   'qbd',
   'qbk',
   'qbs',
   'qbru',
-  'sneak',
+  'qb_sneak',
   'scrm',
 
   'qb_pressure',
@@ -171,15 +171,15 @@ const nfl_play_fields = [
   'qb_hurry',
 
   'int_worthy',
-  // 'cball',
-  // 'qbta',
+  'catchable_ball',
+  'throw_away',
   // 'shov',
   // 'side',
   // 'high',
 
-  // 'drp',
-  // 'cnb',
-  // 'crr',
+  'dropped_pass',
+  'contested_ball',
+  'created_reception',
 
   'mbt',
   'avsk',
@@ -187,7 +187,6 @@ const nfl_play_fields = [
   'run_location',
   'run_gap',
 
-  'option',
   // 'tlook',
 
   'fd',
@@ -203,13 +202,13 @@ const nfl_play_fields = [
   // 'htm',
   // 'zblz',
   // 'stnt',
-  // 'oop',
+  'out_of_pocket_pass',
   // 'phyb',
   // 'bap',
   // 'fread',
   // 'scre',
   // 'pfp',
-  // 'qbsk',
+  'qb_fault_sack',
 
   // 'ttscrm',
   // 'ttp',
@@ -221,8 +220,8 @@ const nfl_play_fields = [
   'db',
   'box',
   'boxdb',
-  'pru',
-  'blz',
+  'pass_rushers',
+  'n_blitzers',
   'dblz',
   // 'oopd',
   // 'cov_charted',
