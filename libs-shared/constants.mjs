@@ -310,7 +310,7 @@ export const fullStats = [
   'drptdp',
 
   // highlight pass attempts
-  'high',
+  'highlight_pass',
 
   // dropped pass attempts
   'drpp',
@@ -503,7 +503,7 @@ export const fullStats = [
   '_tch',
 
   // first downs
-  'fd',
+  'first_down',
 
   // successful plays
   'succ',
@@ -654,7 +654,7 @@ export const teamStats = [
   'qb_hit_yds', // qb hit yards
   'qb_hurry', // qb hurry
   'qb_hurry_yds', // qb hurry yards
-  'scrm', // scrambles
+  'qb_scramble', // scrambles
   'scrmy', // scramble yards
   'drops' // drops
 ]

@@ -261,13 +261,13 @@ export default {
   ),
   player_pass_yards_after_catch_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    select_string: `SUM(yac)`,
+    select_string: `SUM(yards_after_catch)`,
     stat_name: 'pass_yds_after_catch_from_plays'
   }),
   player_pass_yards_after_catch_per_completion_from_plays:
     player_stat_from_plays({
       pid_columns: ['psr_pid'],
-      select_string: `CASE WHEN SUM(CASE WHEN comp = true THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(yac) / SUM(CASE WHEN comp = true THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END`,
+      select_string: `CASE WHEN SUM(CASE WHEN comp = true THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(yards_after_catch) / SUM(CASE WHEN comp = true THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END`,
       stat_name: 'pass_yds_after_catch_per_comp_from_plays'
     }),
   player_pass_yards_per_pass_attempt_from_plays: player_stat_from_plays({
@@ -357,7 +357,7 @@ export default {
   }),
   player_rush_first_downs_from_plays: player_stat_from_plays({
     pid_columns: ['bc_pid'],
-    select_string: `SUM(CASE WHEN fd = true THEN 1 ELSE 0 END)`,
+    select_string: `SUM(CASE WHEN first_down = true THEN 1 ELSE 0 END)`,
     stat_name: 'rush_first_downs_from_plays'
   }),
   player_positive_rush_attempts_from_plays: player_stat_from_plays({
@@ -367,18 +367,18 @@ export default {
   }),
   player_rush_yards_after_contact_from_plays: player_stat_from_plays({
     pid_columns: ['bc_pid'],
-    select_string: `SUM(yaco)`,
+    select_string: `SUM(yards_after_any_contact)`,
     stat_name: 'rush_yds_after_contact_from_plays'
   }),
   player_rush_yards_after_contact_per_attempt_from_plays:
     player_stat_from_plays({
       pid_columns: ['bc_pid'],
-      select_string: `CASE WHEN COUNT(*) > 0 THEN CAST(ROUND(SUM(yaco)::decimal / COUNT(*), 2) AS decimal) ELSE 0 END`,
+      select_string: `CASE WHEN COUNT(*) > 0 THEN CAST(ROUND(SUM(yards_after_any_contact)::decimal / COUNT(*), 2) AS decimal) ELSE 0 END`,
       stat_name: 'rush_yds_after_contact_per_att_from_plays'
     }),
   player_rush_first_down_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['bc_pid'],
-    select_string: `CASE WHEN COUNT(*) > 0 THEN ROUND(100.0 * SUM(CASE WHEN fd = true THEN 1 ELSE 0 END) / COUNT(*), 2) ELSE 0 END`,
+    select_string: `CASE WHEN COUNT(*) > 0 THEN ROUND(100.0 * SUM(CASE WHEN first_down = true THEN 1 ELSE 0 END) / COUNT(*), 2) ELSE 0 END`,
     stat_name: 'rush_first_down_pct_from_plays'
   }),
   player_weighted_opportunity_from_plays: player_stat_from_plays({
@@ -403,7 +403,7 @@ export default {
     column_name: 'rush_first_down_share_from_plays',
     pid_columns: ['bc_pid'],
     select_string:
-      'ROUND(100.0 * SUM(CASE WHEN nfl_plays.bc_pid = pg.pid THEN CASE WHEN nfl_plays.fd THEN 1 ELSE 0 END ELSE 0 END) / NULLIF(SUM(CASE WHEN nfl_plays.fd THEN 1 ELSE 0 END), 0), 2)'
+      'ROUND(100.0 * SUM(CASE WHEN nfl_plays.bc_pid = pg.pid THEN CASE WHEN nfl_plays.first_down THEN 1 ELSE 0 END ELSE 0 END) / NULLIF(SUM(CASE WHEN nfl_plays.first_down THEN 1 ELSE 0 END), 0), 2)'
   }),
 
   player_opportunity_share_from_plays: create_team_share_stat({
@@ -489,12 +489,12 @@ export default {
   }),
   player_receiving_first_down_from_plays: player_stat_from_plays({
     pid_columns: ['trg_pid'],
-    select_string: `SUM(CASE WHEN fd = true THEN 1 ELSE 0 END)`,
+    select_string: `SUM(CASE WHEN first_down = true THEN 1 ELSE 0 END)`,
     stat_name: 'recv_first_down_from_plays'
   }),
   player_receiving_first_down_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['trg_pid'],
-    select_string: `CASE WHEN COUNT(*) > 0 THEN ROUND(100.0 * SUM(CASE WHEN fd = true THEN 1 ELSE 0 END) / COUNT(*), 2) ELSE 0 END`,
+    select_string: `CASE WHEN COUNT(*) > 0 THEN ROUND(100.0 * SUM(CASE WHEN first_down = true THEN 1 ELSE 0 END) / COUNT(*), 2) ELSE 0 END`,
     stat_name: 'recv_first_down_pct_from_plays'
   }),
 
@@ -520,7 +520,7 @@ export default {
     column_name: 'recv_first_down_share_from_plays',
     pid_columns: ['trg_pid'],
     select_string:
-      'ROUND(100.0 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN CASE WHEN nfl_plays.fd THEN 1 ELSE 0 END ELSE 0 END) / NULLIF(SUM(CASE WHEN nfl_plays.fd THEN 1 ELSE 0 END), 0), 2)'
+      'ROUND(100.0 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN CASE WHEN nfl_plays.first_down THEN 1 ELSE 0 END ELSE 0 END) / NULLIF(SUM(CASE WHEN nfl_plays.first_down THEN 1 ELSE 0 END), 0), 2)'
   }),
 
   // receiving yards / air yards
@@ -542,7 +542,7 @@ export default {
   player_receiving_yards_after_catch_per_reception_from_plays:
     player_stat_from_plays({
       pid_columns: ['trg_pid'],
-      select_string: `CASE WHEN SUM(CASE WHEN comp = true THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(CASE WHEN comp = true THEN yac ELSE 0 END)::decimal / SUM(CASE WHEN comp = true THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END`,
+      select_string: `CASE WHEN SUM(CASE WHEN comp = true THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(CASE WHEN comp = true THEN yards_after_catch ELSE 0 END)::decimal / SUM(CASE WHEN comp = true THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END`,
       stat_name: 'rec_yds_after_catch_per_rec_from_plays'
     })
 }

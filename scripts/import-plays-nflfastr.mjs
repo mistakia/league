@@ -99,16 +99,16 @@ const format_play = (play) => ({
   recv_yds: format_number(play.receiving_yards),
   rush_yds: format_number(play.rushing_yards),
 
-  qbd: format_number(play.qb_dropback),
-  qbk: format_number(play.qb_kneel),
-  qbs: format_number(play.qb_spike),
+  qb_dropback: format_number(play.qb_dropback),
+  qb_kneel: format_number(play.qb_kneel),
+  qb_spike: format_number(play.qb_spike),
 
   run_location: play.run_location || null,
   run_gap: play.run_gap || null,
 
-  fd_rush: format_number(play.first_down_rush),
-  fd_pass: format_number(play.first_down_pass),
-  fd_penalty: format_number(play.first_down_penalty),
+  first_down_rush: format_number(play.first_down_rush),
+  first_down_pass: format_number(play.first_down_pass),
+  first_down_penalty: format_number(play.first_down_penalty),
 
   third_down_converted: format_number(play.third_down_converted),
   third_down_failed: format_number(play.third_down_failed),
