@@ -3,7 +3,7 @@ import db from '#db'
 
 export default async function ({
   year = constants.season.year,
-  week,
+  week = constants.season.week,
   pids = []
 } = {}) {
   if (!pids.length) {
@@ -22,12 +22,7 @@ export default async function ({
       userid: 0
     })
     .whereNot('sourceid', constants.sources.AVERAGE)
-
-  if (typeof week !== 'undefined') {
-    query.where('week', week)
-  } else {
-    query.where('week', '>=', constants.season.week)
-  }
+    .where('week', '>=', week)
 
   return query
 }
