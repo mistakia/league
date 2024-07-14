@@ -1,4 +1,4 @@
-import { default_points_added, season } from './constants.mjs'
+import { default_points_added, season, positions } from './constants.mjs'
 
 const calculateValues = ({ players, baselines, week, league = {} }) => {
   let total_pts_added = 0
@@ -12,6 +12,10 @@ const calculateValues = ({ players, baselines, week, league = {} }) => {
     player.pts_added[week] = default_points_added
 
     if (pos === 'K') {
+      continue
+    }
+
+    if (!positions.includes(pos)) {
       continue
     }
 
