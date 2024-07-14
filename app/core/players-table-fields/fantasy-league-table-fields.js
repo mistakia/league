@@ -3,6 +3,7 @@ import React from 'react'
 import PlayerRowStatusColumn from '@components/player-row-status-column'
 import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
+import { constants } from '@libs-shared'
 
 export default function ({ week }) {
   return {
@@ -40,7 +41,21 @@ export default function ({ week }) {
       header_label: 'Market',
       player_value_path: 'week_projected_market_salary',
       size: 70,
-      data_type: table_constants.TABLE_DATA_TYPES.NUMBER
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      column_params: {
+        year: {
+          values: constants.years,
+          data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+          default_value: constants.season.stats_season_year,
+          single: true
+        },
+        week: {
+          values: constants.nfl_weeks,
+          data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+          default_value: constants.season.week,
+          single: true
+        }
+      }
     },
 
     player_season_projected_inflation_adjusted_market_salary: {
