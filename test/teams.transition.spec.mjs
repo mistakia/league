@@ -26,7 +26,7 @@ chai.use(chaiHTTP)
 const expect = chai.expect
 const { start } = constants.season
 
-describe('API /teams - transition', function () {
+describe('API /teams - restricted free agency', function () {
   before(async function () {
     this.timeout(60 * 1000)
 
@@ -270,6 +270,101 @@ describe('API /teams - transition', function () {
     it('tag player on cutlist', async () => {
       // TODO
     })
+
+    it('should not allow restricted free agent tag after RFA period deadline', async () => {
+      const player = await selectPlayer()
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const bid = 1
+
+      await addPlayer({
+        leagueId,
+        player,
+        teamId,
+        userId
+      })
+
+      // Set league tran_end to a past date
+      await knex('seasons')
+        .where({ lid: leagueId, year: constants.season.year })
+        .update({ tran_end: Math.floor(Date.now() / 1000) - 86400 }) // 1 day ago
+
+      const res = await chai
+        .request(server)
+        .post('/api/teams/1/tag/transition')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId,
+          bid,
+          playerTid: teamId,
+          pid: player.pid
+        })
+
+      res.should.have.status(400)
+      res.body.error.should.equal('restricted free agency deadline has passed')
+
+      // Reset the league tran_end
+      await knex('seasons')
+        .where({ lid: leagueId, year: constants.season.year })
+        .update({ tran_end: null })
+    })
+
+    it('should not allow competing RFA bid for a player whose bid has already been processed', async () => {
+      const player = await selectPlayer()
+      const original_team_id = 1
+      const competing_team_id = 2
+      const league_id = 1
+      const user_id = 1
+      const bid = 1
+
+      // Add player to the original team
+      await addPlayer({
+        leagueId: league_id,
+        player,
+        teamId: original_team_id,
+        userId: user_id
+      })
+
+      // Create initial RFA bid
+      const initial_bid_res = await chai
+        .request(server)
+        .post(`/api/teams/${original_team_id}/tag/transition`)
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId: league_id,
+          bid,
+          playerTid: original_team_id,
+          pid: player.pid
+        })
+
+      initial_bid_res.should.have.status(200)
+
+      // Process the initial bid
+      await knex('transition_bids')
+        .where({
+          pid: player.pid,
+          tid: original_team_id,
+          lid: league_id,
+          year: constants.season.year
+        })
+        .update({ processed: Math.round(Date.now() / 1000) })
+
+      // Attempt to create a competing bid
+      const competing_bid_res = await chai
+        .request(server)
+        .post(`/api/teams/${competing_team_id}/tag/transition`)
+        .set('Authorization', `Bearer ${user2}`)
+        .send({
+          leagueId: league_id,
+          bid: bid + 1,
+          playerTid: original_team_id,
+          pid: player.pid
+        })
+
+      competing_bid_res.should.have.status(400)
+      competing_bid_res.body.error.should.equal('invalid player')
+    })
   })
 
   describe('put', function () {
@@ -294,7 +389,7 @@ describe('API /teams - transition', function () {
         userId
       })
 
-      // Create initial transition bid
+      // Create initial RFA bid
       const res1 = await chai
         .request(server)
         .post('/api/teams/1/tag/transition')
@@ -345,7 +440,7 @@ describe('API /teams - transition', function () {
       await addPlayer({ leagueId, player: releasePlayer1, teamId, userId })
       await addPlayer({ leagueId, player: releasePlayer2, teamId, userId })
 
-      // Create initial transition bid with one release player
+      // Create initial RFA bid with one release player
       const res1 = await chai
         .request(server)
         .post('/api/teams/1/tag/transition')
@@ -396,22 +491,28 @@ describe('API /teams - transition', function () {
 
       await invalid(request, 'player')
     })
+  })
 
-    it('error - transition deadline passed', async () => {
-      // Set up a league with a passed transition deadline
-      const leagueId = 1
-      await knex('seasons')
-        .where({ lid: leagueId, year: constants.season.year })
-        .update({
-          tran_end: Math.floor(Date.now() / 1000) - 86400 // 1 day ago
-        })
+  describe('nominate', function () {
+    beforeEach(async function () {
+      await league(knex)
+    })
+
+    it('set RFA player as nominated', async () => {
+      MockDate.set(start.subtract('2', 'month').toISOString())
 
       const player = await selectPlayer()
       const teamId = 1
+      const leagueId = 1
       const userId = 1
       const bid = 1
 
-      await addPlayer({ leagueId, player, teamId, userId })
+      await addPlayer({
+        leagueId,
+        player,
+        teamId,
+        userId
+      })
 
       // Create initial transition bid
       const res1 = await chai
@@ -427,20 +528,211 @@ describe('API /teams - transition', function () {
 
       res1.should.have.status(200)
 
-      // Attempt to update after deadline
-      MockDate.set(start.add('1', 'day').toISOString())
-
-      const request = chai
+      // Nominate the player
+      const res2 = await chai
         .request(server)
-        .put('/api/teams/1/tag/transition')
+        .post('/api/teams/1/tag/transition/nominate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId,
-          bid: bid + 1,
           pid: player.pid
         })
 
-      await error(request, 'transition deadline has passed')
+      res2.should.have.status(200)
+      res2.body.message.should.equal(
+        'Restricted free agent nomination designated'
+      )
+
+      const query = await knex('transition_bids')
+        .where({ pid: player.pid })
+        .first()
+
+      query.nominated.should.be.a('number')
+      query.nominated.should.be.closeTo(Math.round(Date.now() / 1000), 5)
+    })
+
+    it('remove a nomination', async () => {
+      MockDate.set(start.subtract('2', 'month').toISOString())
+
+      const player = await selectPlayer()
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const bid = 1
+
+      await addPlayer({
+        leagueId,
+        player,
+        teamId,
+        userId
+      })
+
+      // Create initial RFA bid
+      const res1 = await chai
+        .request(server)
+        .post('/api/teams/1/tag/transition')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId,
+          bid,
+          playerTid: teamId,
+          pid: player.pid
+        })
+
+      res1.should.have.status(200)
+
+      // Nominate the player
+      const res2 = await chai
+        .request(server)
+        .post('/api/teams/1/tag/transition/nominate')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId,
+          pid: player.pid
+        })
+
+      res2.should.have.status(200)
+
+      // Remove the nomination
+      const res3 = await chai
+        .request(server)
+        .delete('/api/teams/1/tag/transition/nominate')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId,
+          pid: player.pid
+        })
+
+      res3.should.have.status(200)
+      res3.body.message.should.equal(
+        'Restricted free agent nomination successfully cancelled'
+      )
+
+      const query = await knex('transition_bids')
+        .where({ pid: player.pid })
+        .first()
+
+      expect(query.nominated).to.equal(null)
+    })
+
+    it('error - nominate non-existent RFA bid', async () => {
+      const player = await selectPlayer()
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/tag/transition/nominate')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId: 1,
+          pid: player.pid
+        })
+
+      await invalid(request, 'restricted free agent bid')
+    })
+
+    it('error - nominate already processed bid', async () => {
+      const player = await selectPlayer()
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const bid = 1
+
+      await addPlayer({
+        leagueId,
+        player,
+        teamId,
+        userId
+      })
+
+      // Create initial RFA bid
+      const res1 = await chai
+        .request(server)
+        .post('/api/teams/1/tag/transition')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId,
+          bid,
+          playerTid: teamId,
+          pid: player.pid
+        })
+
+      res1.should.have.status(200)
+
+      // Simulate processing the bid
+      await knex('transition_bids')
+        .where({ pid: player.pid })
+        .update({ processed: Math.floor(Date.now() / 1000) })
+
+      // Attempt to nominate the processed bid
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/tag/transition/nominate')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId,
+          pid: player.pid
+        })
+
+      await error(request, 'bid has already been processed')
+    })
+
+    it('error - remove nomination for non-existent RFA bid', async () => {
+      const player = await selectPlayer()
+      const request = chai
+        .request(server)
+        .delete('/api/teams/1/tag/transition/nominate')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId: 1,
+          pid: player.pid
+        })
+
+      await invalid(request, 'restricted free agent bid')
+    })
+
+    it('error - remove nomination for already processed bid', async () => {
+      const player = await selectPlayer()
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const bid = 1
+
+      await addPlayer({
+        leagueId,
+        player,
+        teamId,
+        userId
+      })
+
+      // Create initial RFA bid
+      const res1 = await chai
+        .request(server)
+        .post('/api/teams/1/tag/transition')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId,
+          bid,
+          playerTid: teamId,
+          pid: player.pid
+        })
+
+      res1.should.have.status(200)
+
+      // Simulate processing the bid
+      await knex('transition_bids')
+        .where({ pid: player.pid })
+        .update({ processed: Math.floor(Date.now() / 1000) })
+
+      // Attempt to remove nomination for the processed bid
+      const request = chai
+        .request(server)
+        .delete('/api/teams/1/tag/transition/nominate')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId,
+          pid: player.pid
+        })
+
+      await error(request, 'bid has already been processed')
     })
   })
 
@@ -888,6 +1180,180 @@ describe('API /teams - transition', function () {
 
     it('invalid release - includes player', async () => {
       // TODO
+    })
+
+    it('creating a RFA bid for your own player after RFA period has ended', async () => {
+      const player = await selectPlayer()
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const bid = 1
+
+      await addPlayer({
+        leagueId,
+        player,
+        teamId,
+        userId
+      })
+
+      // Set RFA period end to yesterday
+      await knex('seasons')
+        .where({ lid: leagueId, year: constants.season.year })
+        .update({
+          tran_end: Math.floor(Date.now() / 1000) - 86400
+        })
+
+      const request = chai
+        .request(server)
+        .post('/api/teams/1/tag/transition')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId,
+          bid,
+          playerTid: teamId,
+          pid: player.pid
+        })
+
+      await error(request, 'restricted free agency deadline has passed')
+    })
+
+    it('deleting an RFA bid after its been processed', async () => {
+      const player = await selectPlayer()
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const bid = 1
+
+      await addPlayer({
+        leagueId,
+        player,
+        teamId,
+        userId
+      })
+
+      // Create initial RFA bid
+      const res1 = await chai
+        .request(server)
+        .post('/api/teams/1/tag/transition')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId,
+          bid,
+          playerTid: teamId,
+          pid: player.pid
+        })
+
+      res1.should.have.status(200)
+
+      // Simulate processing the bid
+      await knex('transition_bids')
+        .where({ pid: player.pid })
+        .update({ processed: Math.floor(Date.now() / 1000) })
+
+      // Attempt to delete the processed bid
+      const request = chai
+        .request(server)
+        .delete('/api/teams/1/tag/transition')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId,
+          pid: player.pid
+        })
+
+      await error(request, 'bid has already been processed')
+    })
+
+    it('deleting an RFA bid after its been announced', async () => {
+      const player = await selectPlayer()
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const bid = 1
+
+      await addPlayer({
+        leagueId,
+        player,
+        teamId,
+        userId
+      })
+
+      // Create initial RFA bid
+      const res1 = await chai
+        .request(server)
+        .post('/api/teams/1/tag/transition')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId,
+          bid,
+          playerTid: teamId,
+          pid: player.pid
+        })
+
+      res1.should.have.status(200)
+
+      // Simulate announcing the bid
+      await knex('transition_bids')
+        .where({ pid: player.pid })
+        .update({ announced: Math.floor(Date.now() / 1000) })
+
+      // Attempt to delete the announced bid
+      const request = chai
+        .request(server)
+        .delete('/api/teams/1/tag/transition')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId,
+          pid: player.pid
+        })
+
+      await error(request, 'restricted free agent has already been announced')
+    })
+
+    it('updating an RFA bid after its been processed', async () => {
+      const player = await selectPlayer()
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const bid = 1
+
+      await addPlayer({
+        leagueId,
+        player,
+        teamId,
+        userId
+      })
+
+      // Create initial RFA bid
+      const res1 = await chai
+        .request(server)
+        .post('/api/teams/1/tag/transition')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId,
+          bid,
+          playerTid: teamId,
+          pid: player.pid
+        })
+
+      res1.should.have.status(200)
+
+      // Simulate processing the bid
+      await knex('transition_bids')
+        .where({ pid: player.pid })
+        .update({ processed: Math.floor(Date.now() / 1000) })
+
+      // Attempt to update the processed bid
+      const request = chai
+        .request(server)
+        .put('/api/teams/1/tag/transition')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          leagueId,
+          bid: bid + 1,
+          pid: player.pid
+        })
+
+      await error(request, 'bid has already been processed')
     })
 
     // TODO - delete extension deadline passed

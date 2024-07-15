@@ -155,12 +155,14 @@ router.post('/?', async (req, res) => {
         return res.status(400).send({ error: 'invalid player' })
       }
 
-      // make sure extension has not passed
+      // make sure restricted free agency period has not passed
       if (
-        league.tran_start &&
-        constants.season.now.isAfter(dayjs.unix(league.tran_start))
+        league.tran_end &&
+        constants.season.now.isAfter(dayjs.unix(league.tran_end))
       ) {
-        return res.status(400).send({ error: 'extension deadline has passed' })
+        return res
+          .status(400)
+          .send({ error: 'restricted free agency deadline has passed' })
       }
 
       // update value to bid
@@ -178,7 +180,7 @@ router.post('/?', async (req, res) => {
       }
     } else {
       // check if transition bid exists
-      const transitionBids = await db('transition_bids')
+      const transition_bid = await db('transition_bids')
         .where({
           pid,
           tid: playerTid,
@@ -187,17 +189,10 @@ router.post('/?', async (req, res) => {
         })
         .whereNull('processed')
         .whereNull('cancelled')
+        .first()
 
-      if (!transitionBids.length) {
+      if (!transition_bid) {
         return res.status(400).send({ error: 'invalid player' })
-      }
-
-      // make sure transition has not passed
-      if (
-        league.tran_end &&
-        constants.season.now.isAfter(dayjs.unix(league.tran_end))
-      ) {
-        return res.status(400).send({ error: 'transition deadline has passed' })
       }
     }
 
@@ -342,7 +337,9 @@ router.delete('/?', async (req, res) => {
       league.tran_end &&
       constants.season.now.isAfter(dayjs.unix(league.tran_end))
     ) {
-      return res.status(400).send({ error: 'transition deadline has passed' })
+      return res
+        .status(400)
+        .send({ error: 'restricted free agency deadline has passed' })
     }
 
     // verify transition id exists
@@ -359,13 +356,17 @@ router.delete('/?', async (req, res) => {
     }
     const transitionBid = query1[0]
 
-    // if its after start of transition period, only competing bids can be cancelled
-    if (
-      league.tran_start &&
-      constants.season.now.isAfter(dayjs.unix(league.tran_start)) &&
+    // check if bid has already been processed
+    if (transitionBid.processed) {
+      return res.status(400).send({ error: 'bid has already been processed' })
+    }
+
+    const is_current_manager_bid =
       transitionBid.player_tid === transitionBid.tid
-    ) {
-      return res.status(400).send({ error: 'restricted free agency has begun' })
+    if (is_current_manager_bid && transitionBid.announced) {
+      return res
+        .status(400)
+        .send({ error: 'restricted free agent has already been announced' })
     }
 
     // cancel bid
@@ -492,12 +493,8 @@ router.put('/?', async (req, res) => {
       roster.removePlayer(row.pid)
     }
 
-    // make sure extension has not passed
-    if (
-      league.tran_end &&
-      constants.season.now.isAfter(dayjs.unix(league.tran_end))
-    ) {
-      return res.status(400).send({ error: 'transition deadline has passed' })
+    if (transitionBid.processed) {
+      return res.status(400).send({ error: 'bid has already been processed' })
     }
 
     // if competing bid, make sure there is roster space
@@ -562,6 +559,162 @@ router.put('/?', async (req, res) => {
       bid,
       userid: req.auth.userId,
       release
+    })
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
+router.post('/nominate/?', async (req, res) => {
+  const { db, logger } = req.app.locals
+  try {
+    const { teamId } = req.params
+    const { pid, leagueId } = req.body
+
+    if (!req.auth) {
+      return res.status(401).send({ error: 'invalid token' })
+    }
+
+    if (!pid) {
+      return res.status(400).send({ error: 'missing pid' })
+    }
+
+    if (!leagueId) {
+      return res.status(400).send({ error: 'missing leagueId' })
+    }
+
+    const tid = parseInt(teamId, 10)
+
+    // verify teamId, leagueId belongs to user
+    try {
+      await verifyUserTeam({
+        userId: req.auth.userId,
+        leagueId,
+        teamId,
+        requireLeague: true
+      })
+    } catch (error) {
+      return res.status(400).send({ error: error.message })
+    }
+
+    // Check if the transition bid exists and belongs to the original manager
+    const transition_bid = await db('transition_bids')
+      .where({
+        pid,
+        tid,
+        player_tid: tid,
+        year: constants.season.year
+      })
+      .whereNull('cancelled')
+      .first()
+
+    if (!transition_bid) {
+      return res
+        .status(400)
+        .send({ error: 'invalid restricted free agent bid' })
+    }
+
+    if (transition_bid.processed) {
+      return res.status(400).send({ error: 'bid has already been processed' })
+    }
+
+    if (transition_bid.announced) {
+      return res.status(400).send({ error: 'bid has already been announced' })
+    }
+
+    // clear any other unannounced nominations for this team
+    await db('transition_bids')
+      .where({
+        tid,
+        player_tid: tid
+      })
+      .whereNull('announced')
+      .whereNotNull('nominated')
+      .whereNull('processed')
+      .whereNull('cancelled')
+      .update({ nominated: null })
+
+    // Update the transition bid to mark it as announced
+    await db('transition_bids')
+      .where('uid', transition_bid.uid)
+      .update({ nominated: Math.round(Date.now() / 1000) })
+
+    res.send({ message: 'Restricted free agent nomination designated' })
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
+router.delete('/nominate/?', async (req, res) => {
+  const { db, logger } = req.app.locals
+  try {
+    const { teamId } = req.params
+    const { pid, leagueId } = req.body
+
+    if (!req.auth) {
+      return res.status(401).send({ error: 'invalid token' })
+    }
+
+    if (!pid) {
+      return res.status(400).send({ error: 'missing pid' })
+    }
+
+    if (!leagueId) {
+      return res.status(400).send({ error: 'missing leagueId' })
+    }
+
+    const tid = parseInt(teamId, 10)
+
+    // verify teamId, leagueId belongs to user
+    try {
+      await verifyUserTeam({
+        userId: req.auth.userId,
+        leagueId,
+        teamId,
+        requireLeague: true
+      })
+    } catch (error) {
+      return res.status(400).send({ error: error.message })
+    }
+
+    // Check if the transition bid exists and belongs to the original manager
+    const transition_bid = await db('transition_bids')
+      .where({
+        pid,
+        tid,
+        player_tid: tid,
+        year: constants.season.year
+      })
+      .whereNull('cancelled')
+      .first()
+
+    if (!transition_bid) {
+      return res
+        .status(400)
+        .send({ error: 'invalid restricted free agent bid' })
+    }
+
+    if (transition_bid.cancelled) {
+      return res.status(400).send({ error: 'bid has already been cancelled' })
+    }
+
+    if (transition_bid.processed) {
+      return res.status(400).send({ error: 'bid has already been processed' })
+    }
+
+    if (transition_bid.announced) {
+      return res.status(400).send({ error: 'bid has already been announced' })
+    }
+
+    // Cancel the nomination
+    await db('transition_bids')
+      .where('uid', transition_bid.uid)
+      .update({ nominated: null })
+
+    res.send({
+      message: 'Restricted free agent nomination successfully cancelled'
     })
   } catch (error) {
     logger(error)

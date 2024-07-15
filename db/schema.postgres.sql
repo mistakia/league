@@ -4716,7 +4716,9 @@ CREATE TABLE public.transition_bids (
     reason text,
     submitted integer NOT NULL,
     processed integer,
-    cancelled integer
+    cancelled integer,
+    nominated integer,
+    announced integer
 );
 
 
