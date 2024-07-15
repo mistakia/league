@@ -44,6 +44,33 @@ export default async function ({
         roster_player.bid = bid
       }
     }
+
+    // for RFA tagged players, get if their tag is processed, nominated, or announced
+    const transition_tagged_players = roster_row.players.filter(
+      (p) => p.tag === constants.tags.TRANSITION
+    )
+    if (transition_tagged_players.length) {
+      const transition_bids = await db('transition_bids')
+        .select('pid', 'processed', 'nominated', 'announced')
+        .where({
+          player_tid: tid,
+          year: constants.season.year
+        })
+        .whereIn(
+          'pid',
+          transition_tagged_players.map((p) => p.pid)
+        )
+        .whereNull('cancelled')
+
+      for (const roster_player of transition_tagged_players) {
+        const bid = transition_bids.find((b) => b.pid === roster_player.pid)
+        if (bid) {
+          roster_player.transition_tag_processed = bid.processed
+          roster_player.transition_tag_nominated = bid.nominated
+          roster_player.transition_tag_announced = bid.announced
+        }
+      }
+    }
   }
 
   return roster_row

@@ -104,5 +104,42 @@ export default async function ({
     }
   }
 
+  if (constants.season.week === 0) {
+    const transition_tagged_players = rosters
+      .filter((r) => r.week === 0)
+      .flatMap((r) =>
+        r.players.filter((p) => p.tag === constants.tags.TRANSITION)
+      )
+    if (transition_tagged_players.length) {
+      const transition_bids = await db('transition_bids')
+        .select('pid', 'processed', 'nominated', 'announced', 'player_tid')
+        .where({
+          year: constants.season.year
+        })
+        .whereIn(
+          'pid',
+          transition_tagged_players.map((p) => p.pid)
+        )
+        .whereNull('cancelled')
+
+      for (const roster of rosters) {
+        if (roster.week !== 0) continue
+
+        for (const player of roster.players) {
+          if (player.tag === constants.tags.TRANSITION) {
+            const bid = transition_bids.find(
+              (b) => b.pid === player.pid && b.player_tid === roster.tid
+            )
+            if (bid) {
+              player.transition_tag_processed = bid.processed
+              player.transition_tag_nominated = bid.nominated
+              player.transition_tag_announced = bid.announced
+            }
+          }
+        }
+      }
+    }
+  }
+
   return rosters
 }
