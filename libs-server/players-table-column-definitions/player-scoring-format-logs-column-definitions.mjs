@@ -12,6 +12,10 @@ const scoring_format_player_seasonlogs_table_alias = ({ params = {} }) => {
     year = [year]
   }
 
+  if (!year.length) {
+    year = [constants.season.stats_season_year]
+  }
+
   let year_offset = params.year_offset || 0
   if (Array.isArray(year_offset)) {
     year_offset = year_offset[0]
@@ -38,6 +42,10 @@ const scoring_format_player_seasonlogs_join = ({
   let year = params.year || [constants.season.stats_season_year]
   if (!Array.isArray(year)) {
     year = [year]
+  }
+
+  if (!year.length) {
+    year = [constants.season.stats_season_year]
   }
 
   let year_offset = params.year_offset || 0
