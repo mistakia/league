@@ -60,7 +60,7 @@ const script = async ({ tid, lid }) => {
       .where({ uid: transition_bid.uid })
       .update({ announced: Math.round(Date.now() / 1000) })
 
-    const message = `${team.name} has announced ${player_row.fname} ${player_row.lname} (${player_row.pos}) as a restricted free agent`
+    const message = `${team.name} (${team.abbrv}) has announced ${player_row.fname} ${player_row.lname} (${player_row.pos}) as a restricted free agent`
 
     await sendNotifications({
       league,
