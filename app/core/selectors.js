@@ -1075,7 +1075,9 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
     tagged: {
       rookie: false,
       transition: false,
-      franchise: false
+      franchise: false,
+      transition_nominated: false,
+      transition_announced: false
     },
     waiver: {
       active: false,
@@ -1156,11 +1158,20 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
     }
   } else {
     const roster = getCurrentTeamRoster(state)
-    const now = dayjs()
 
-    if (status.tagged.transition && now.isBefore(dayjs.unix(league.tran_end))) {
+    if (
+      status.tagged.transition &&
+      !playerMap.get('transition_tag_processed')
+    ) {
       status.eligible.transitionBid = true
     }
+
+    status.tagged.transition_nominated = playerMap.get(
+      'transition_tag_nominated'
+    )
+    status.tagged.transition_announced = playerMap.get(
+      'transition_tag_announced'
+    )
 
     if (roster.has(playerId)) {
       status.rostered = true
@@ -1169,7 +1180,6 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
       //     was player a rookie last year
       //     otherwise are they a rookie now
       const isBeforeExtension = isBeforeExtensionDeadline(state)
-      const isBeforeRestrictedFreeAgency = isBeforeTransitionStart(state)
       const draft_year = playerMap.get('start')
       if (isBeforeExtension && draft_year === constants.year - 1) {
         status.eligible.rookieTag = true
@@ -1181,7 +1191,10 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
         status.eligible.franchiseTag = true
       }
 
-      status.eligible.transitionTag = isBeforeRestrictedFreeAgency
+      const has_available_restricted_tag = roster.hasUnprocessedRestrictedTag()
+      const isBeforeRestrictedFreeAgency = isBeforeTransitionEnd(state)
+      status.eligible.transitionTag =
+        isBeforeRestrictedFreeAgency && has_available_restricted_tag
 
       const isActive = Boolean(
         roster.active.find(({ pid }) => pid === playerId)

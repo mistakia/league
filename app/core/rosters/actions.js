@@ -27,6 +27,9 @@ export const rosterActions = {
   ADD_TAG: 'ADD_TAG',
   REMOVE_TAG: 'REMOVE_TAG',
 
+  NOMINATE_RESTRICTED_FREE_AGENT: 'NOMINATE_RESTRICTED_FREE_AGENT',
+  UNNOMINATE_RESTRICTED_FREE_AGENT: 'UNNOMINATE_RESTRICTED_FREE_AGENT',
+
   ADD_TRANSITION_TAG: 'ADD_TRANSITION_TAG',
   REMOVE_TRANSITION_TAG: 'REMOVE_TRANSITION_TAG',
   UPDATE_TRANSITION_TAG: 'UPDATE_TRANSITION_TAG',
@@ -94,6 +97,20 @@ export const rosterActions = {
   POST_RELEASE_PENDING: 'POST_RELEASE_PENDING',
   POST_RELEASE_FAILED: 'POST_RELEASE_FAILED',
   POST_RELEASE_FULFILLED: 'POST_RELEASE_FULFILLED',
+
+  POST_RESTRICTED_FREE_AGENT_NOMINATION_PENDING:
+    'POST_RESTRICTED_FREE_AGENT_NOMINATION_PENDING',
+  POST_RESTRICTED_FREE_AGENT_NOMINATION_FAILED:
+    'POST_RESTRICTED_FREE_AGENT_NOMINATION_FAILED',
+  POST_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED:
+    'POST_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED',
+
+  DELETE_RESTRICTED_FREE_AGENT_NOMINATION_PENDING:
+    'DELETE_RESTRICTED_FREE_AGENT_NOMINATION_PENDING',
+  DELETE_RESTRICTED_FREE_AGENT_NOMINATION_FAILED:
+    'DELETE_RESTRICTED_FREE_AGENT_NOMINATION_FAILED',
+  DELETE_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED:
+    'DELETE_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED',
 
   loadRosters: (leagueId) => ({
     type: rosterActions.LOAD_ROSTERS,
@@ -206,6 +223,20 @@ export const rosterActions = {
     payload: {
       pid,
       teamId
+    }
+  }),
+
+  nominate_restricted_free_agent: (pid) => ({
+    type: rosterActions.NOMINATE_RESTRICTED_FREE_AGENT,
+    payload: {
+      pid
+    }
+  }),
+
+  unnominate_restricted_free_agent: (pid) => ({
+    type: rosterActions.UNNOMINATE_RESTRICTED_FREE_AGENT,
+    payload: {
+      pid
     }
   }),
 
@@ -616,6 +647,52 @@ export const rosterActions = {
       opts,
       error
     }
+  }),
+
+  post_restricted_free_agent_nomination_pending: (opts) => ({
+    type: rosterActions.POST_RESTRICTED_FREE_AGENT_NOMINATION_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  post_restricted_free_agent_nomination_failed: (opts, error) => ({
+    type: rosterActions.POST_RESTRICTED_FREE_AGENT_NOMINATION_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  post_restricted_free_agent_nomination_fulfilled: (opts, data) => ({
+    type: rosterActions.POST_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
+  }),
+
+  delete_restricted_free_agent_nomination_pending: (opts) => ({
+    type: rosterActions.DELETE_RESTRICTED_FREE_AGENT_NOMINATION_PENDING,
+    payload: {
+      opts
+    }
+  }),
+
+  delete_restricted_free_agent_nomination_failed: (opts, error) => ({
+    type: rosterActions.DELETE_RESTRICTED_FREE_AGENT_NOMINATION_FAILED,
+    payload: {
+      opts,
+      error
+    }
+  }),
+
+  delete_restricted_free_agent_nomination_fulfilled: (opts, data) => ({
+    type: rosterActions.DELETE_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED,
+    payload: {
+      opts,
+      data
+    }
   })
 }
 
@@ -713,4 +790,16 @@ export const deleteTransitionTagActions = {
   pending: rosterActions.deleteTransitionTagPending,
   fulfilled: rosterActions.deleteTransitionTagFulfilled,
   failed: rosterActions.deleteTransitionTagFailed
+}
+
+export const post_restricted_free_agent_nomination_actions = {
+  pending: rosterActions.post_restricted_free_agent_nomination_pending,
+  failed: rosterActions.post_restricted_free_agent_nomination_failed,
+  fulfilled: rosterActions.post_restricted_free_agent_nomination_fulfilled
+}
+
+export const delete_restricted_free_agent_nomination_actions = {
+  pending: rosterActions.delete_restricted_free_agent_nomination_pending,
+  failed: rosterActions.delete_restricted_free_agent_nomination_failed,
+  fulfilled: rosterActions.delete_restricted_free_agent_nomination_fulfilled
 }

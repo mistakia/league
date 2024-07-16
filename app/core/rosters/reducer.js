@@ -351,6 +351,44 @@ export function rostersReducer(state = new Map(), { payload, type }) {
       )
     }
 
+    case rosterActions.POST_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED:
+      return state
+        .updateIn(
+          [payload.opts.teamId, constants.year, constants.week, 'players'],
+          (players) =>
+            players.map((player) => ({
+              ...player,
+              transition_tag_nominated: null
+            }))
+        )
+        .updateIn(
+          [payload.opts.teamId, constants.year, constants.week, 'players'],
+          (players) =>
+            players.map((player) => {
+              if (player.pid === payload.opts.pid) {
+                return {
+                  ...player,
+                  transition_tag_nominated: payload.data.nominated
+                }
+              }
+              return player
+            })
+        )
+
+    case rosterActions.DELETE_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED:
+      return state.updateIn(
+        [payload.opts.team_id, constants.year, constants.week, 'players'],
+        (players) => {
+          if (!players) return players
+          return players.map((player) => {
+            if (player.pid === payload.opts.pid) {
+              return { ...player, transition_tag_nominated: null }
+            }
+            return player
+          })
+        }
+      )
+
     default:
       return state
   }

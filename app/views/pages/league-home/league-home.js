@@ -109,15 +109,42 @@ export default function LeagueHomePage({
   }
 
   const transitionItems = []
+  const active_free_agent_items = []
+  const nominated_free_agent_items = []
   transitionPlayers.forEach((playerMap, index) => {
-    transitionItems.push(
-      <PlayerRoster
-        key={index}
-        playerMap={playerMap}
-        isTransition
-        {...{ percentiles }}
-      />
-    )
+    const is_processed = playerMap.get('transition_tag_processed')
+    const is_announced = playerMap.get('transition_tag_announced')
+    const is_active = !is_processed && is_announced
+    const is_nominated = playerMap.get('transition_tag_nominated')
+
+    if (is_active) {
+      active_free_agent_items.push(
+        <PlayerRoster
+          key={index}
+          playerMap={playerMap}
+          isTransition
+          {...{ percentiles }}
+        />
+      )
+    } else if (is_nominated) {
+      nominated_free_agent_items.push(
+        <PlayerRoster
+          key={index}
+          playerMap={playerMap}
+          isTransition
+          {...{ percentiles }}
+        />
+      )
+    } else {
+      transitionItems.push(
+        <PlayerRoster
+          key={index}
+          playerMap={playerMap}
+          isTransition
+          {...{ percentiles }}
+        />
+      )
+    }
   })
 
   for (const playerMap of players.ir) {
@@ -215,6 +242,26 @@ export default function LeagueHomePage({
             {notices}
           </Grid>
         ) : null}
+        {active_free_agent_items.length > 0 && (
+          <Grid item xs={12}>
+            <DashboardPlayersTable
+              title='Announced Restricted Free Agent'
+              items={active_free_agent_items}
+              isTransition
+              {...{ percentiles }}
+            />
+          </Grid>
+        )}
+        {nominated_free_agent_items.length > 0 && (
+          <Grid item xs={12}>
+            <DashboardPlayersTable
+              title='Designated Next Restricted Free Agent Nominee'
+              items={nominated_free_agent_items}
+              isTransition
+              {...{ percentiles }}
+            />
+          </Grid>
+        )}
         {isBeforeTransitionEnd && Boolean(transitionPlayers.size) && (
           <Grid item xs={12}>
             <DashboardPlayersTable

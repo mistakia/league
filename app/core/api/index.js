@@ -80,5 +80,7 @@ export {
   post_process_poach,
   post_players_table_view_search,
   post_players_table_view,
-  delete_players_table_view
+  delete_players_table_view,
+  post_restricted_free_agent_nomination,
+  delete_restricted_free_agent_nomination
 } from './sagas'
