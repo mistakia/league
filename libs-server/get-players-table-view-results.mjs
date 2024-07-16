@@ -292,8 +292,6 @@ const add_clauses_for_table = ({
       with_func = column_definition.with
     }
 
-    // if use_play_by_play_with (play by play) a select string should be added to the with statement as its needed for the having clause (avoid duplicates for the same column)
-    // TODO fix name collision with selects produced from table_state.columns or prefix_columns
     if (
       column_definition.use_play_by_play_with &&
       !unique_column_ids.has(where_clause.column_id)
@@ -301,25 +299,6 @@ const add_clauses_for_table = ({
       use_play_by_play_with = true
       pid_columns = column_definition.pid_columns
       join_func = column_definition.join
-      const select_result = get_select_string({
-        column_params,
-        column_index: 0,
-        column_definition,
-        table_name
-      })
-
-      select_strings.push(...select_result.select)
-      group_by_strings.push(...select_result.group_by)
-    } else if (!unique_column_ids.has(where_clause.column_id)) {
-      const select_result = get_select_string({
-        column_params,
-        column_index: 0,
-        column_definition,
-        table_name
-      })
-
-      select_strings.push(...select_result.select)
-      group_by_strings.push(...select_result.group_by)
     }
   }
 
