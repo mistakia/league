@@ -118,6 +118,7 @@ export default async function ({
         .where({
           year: constants.season.year
         })
+        .whereRaw('player_tid = tid')
         .whereIn(
           'pid',
           transition_tagged_players.map((p) => p.pid)
