@@ -1,0 +1,160 @@
+#!/bin/sh
+set -e
+set -x
+
+full=false
+logs=false
+stats=false
+cache=false
+projections=false
+betting=false
+
+while getopts 'fclspb' opt; do
+    case $opt in
+        f) full=true ;;
+        c) cache=true ;;
+        l) logs=true ;;
+        s) stats=true ;;
+        p) projections=true ;;
+        b) betting=true ;;
+
+        *) echo 'Error in command line parsing' >&2
+    esac
+done
+
+dump_dir="/root/backups"
+db_name="league_production"
+db_user="league_user"
+db_host="localhost"
+
+db_user_tables="
+draft
+league_cutlist
+leagues
+matchups
+playoffs
+poach_releases
+poaches
+rosters
+rosters_players
+schedule
+seasons
+team_stats
+teams
+trade_releases
+trades
+trades_picks
+trades_players
+trades_transactions
+transactions
+transition_bids
+transition_releases
+users
+users_sources
+users_teams
+waiver_releases
+waivers
+placed_wagers"
+
+db_cache_tables="
+league_baselines
+league_formats
+league_scoring_formats
+league_format_player_careerlogs
+scoring_format_player_careerlogs
+league_format_player_gamelogs
+scoring_format_player_gamelogs
+league_format_player_seasonlogs
+scoring_format_player_seasonlogs
+league_player_seasonlogs
+scoring_format_player_projection_points
+league_format_player_projection_values
+league_format_draft_pick_value
+league_player_projection_values
+league_team_forecast
+league_team_lineup_contribution_weeks
+league_team_lineup_contributions
+league_team_lineup_starters
+league_team_lineups
+ros_projections"
+
+db_logs_tables="
+jobs
+player_changelog
+nfl_games_changelog
+play_changelog
+"
+
+db_stats_tables="
+footballoutsiders
+player_gamelogs
+keeptradecut_rankings
+nfl_games
+nfl_play_stats
+nfl_plays
+nfl_snaps
+player
+players_status
+practice
+rankings
+"
+
+db_betting_tables="
+props
+props_index
+prop_markets_history
+prop_markets_index
+prop_market_selections_history
+prop_market_selections_index
+"
+
+db_projections_tables="
+projections
+"
+
+date_format="%Y-%m-%d_%H-%M"
+
+file_name="$(date +$date_format)"
+if $full; then
+    backup_type="full"
+elif $logs; then
+    backup_type="logs"
+elif $stats; then
+    backup_type="stats"
+elif $betting; then
+    backup_type="betting"
+elif $cache; then
+    backup_type="cache"
+elif $projections; then
+    backup_type="projections"
+else
+    backup_type="user"
+fi
+sql_file="$file_name-$backup_type.sql"
+gz_file="$file_name-$backup_type.tar.gz"
+
+# make sure that the folder exists
+mkdir -p $dump_dir
+cd $dump_dir
+
+# run pg_dump, tar gz and delete sql file
+if $full; then
+    pg_dump -h $db_host -U $db_user -d $db_name -T prop_pairings -T prop_pairing_props > $sql_file
+elif $logs; then
+    pg_dump -h $db_host -U $db_user -d $db_name -t $(echo $db_logs_tables | tr ' ' ',') > $sql_file
+elif $stats; then
+    pg_dump -h $db_host -U $db_user -d $db_name -t $(echo $db_stats_tables | tr ' ' ',') > $sql_file
+elif $betting; then
+    pg_dump -h $db_host -U $db_user -d $db_name -t $(echo $db_betting_tables | tr ' ' ',') > $sql_file
+elif $cache; then
+    pg_dump -h $db_host -U $db_user -d $db_name -t $(echo $db_cache_tables | tr ' ' ',') > $sql_file
+elif $projections; then
+    pg_dump -h $db_host -U $db_user -d $db_name -t $(echo $db_projections_tables | tr ' ' ',') > $sql_file
+else
+    pg_dump -h $db_host -U $db_user -d $db_name -t $(echo $db_user_tables | tr ' ' ',') > $sql_file
+fi
+tar -vcf $gz_file $sql_file
+rm $sql_file
+
+/root/.google-drive-upload/bin/gupload $gz_file
+rm $gz_file
