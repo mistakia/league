@@ -59,7 +59,8 @@ export default function ({ week }) {
               values: projection_years,
               data_type: table_constants.TABLE_DATA_TYPES.SELECT,
               default_value: constants.season.year,
-              single: true
+              single: true,
+              enable_multi_on_split: ['year']
             }
           }
         : period === 'Week'
