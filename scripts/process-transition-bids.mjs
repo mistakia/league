@@ -5,11 +5,28 @@ import { constants } from '#libs-shared'
 import {
   getTopTransitionBids,
   processTransitionBid,
-  isMain
+  isMain,
+  resetWaiverOrder
 } from '#libs-server'
 
 const log = debug('process-transition-bids')
 debug.enable('process-transition-bids')
+
+async function sortBidsByWaiverOrder(bids) {
+  const teams = await db('teams').select('uid', 'waiver_order').where({
+    lid: bids[0].lid,
+    year: constants.season.year
+  })
+
+  const team_waiver_order = {}
+  for (const team of teams) {
+    team_waiver_order[team.uid] = team.waiver_order
+  }
+
+  return bids.sort(
+    (a, b) => team_waiver_order[a.tid] - team_waiver_order[b.tid]
+  )
+}
 
 const run = async () => {
   const timestamp = Math.round(Date.now() / 1000)
@@ -23,8 +40,8 @@ const run = async () => {
         'seasons.year'
       )
     })
-    .whereNotNull('tran_end')
-    .where('tran_end', '<=', timestamp)
+    .whereNotNull('tran_start')
+    .where('tran_start', '<=', timestamp)
     .where('transition_bids.year', constants.season.year)
     .groupBy('transition_bids.lid')
     .whereNull('processed')
@@ -42,14 +59,14 @@ const run = async () => {
     while (transitionBids.length) {
       let error
       const originalTeamBid = transitionBids.find((t) => t.player_tid === t.tid)
-      const transitionBid = originalTeamBid || transitionBids[0]
+      let winning_bid = originalTeamBid || transitionBids[0]
 
       try {
         if (originalTeamBid || transitionBids.length === 1) {
-          log('processing transition bid', transitionBid)
-          await processTransitionBid(transitionBid)
+          log('processing transition bid', winning_bid)
+          await processTransitionBid(winning_bid)
 
-          const { pid } = transitionBid
+          const { pid } = winning_bid
           await db('transition_bids')
             .update({
               succ: 0,
@@ -63,12 +80,37 @@ const run = async () => {
             })
             .whereNull('cancelled')
             .whereNull('processed')
-            .whereNot('uid', transitionBid.uid)
+            .whereNot('uid', winning_bid.uid)
         } else {
           // multiple bids tied with no original team
           log(`tied top bids for league ${lid}`)
           log(transitionBids)
-          break
+
+          // Sort bids by waiver order
+          const sorted_bids = await sortBidsByWaiverOrder(transitionBids)
+          winning_bid = sorted_bids[0]
+
+          log('processing winning transition bid', winning_bid)
+          await processTransitionBid(winning_bid)
+
+          // Reset waiver order for the winning team
+          await resetWaiverOrder({ leagueId: lid, teamId: winning_bid.tid })
+
+          // Update all other bids as unsuccessful
+          await db('transition_bids')
+            .update({
+              succ: 0,
+              reason: 'player no longer a restricted free agent',
+              processed: timestamp
+            })
+            .where({
+              pid: winning_bid.pid,
+              lid,
+              year: constants.season.year
+            })
+            .whereNull('cancelled')
+            .whereNull('processed')
+            .whereNot('uid', winning_bid.uid)
         }
       } catch (err) {
         error = err
@@ -82,7 +124,7 @@ const run = async () => {
           reason: error ? error.message : null, // TODO - use error codes
           processed: timestamp
         })
-        .where('uid', transitionBid.uid)
+        .where('uid', winning_bid.uid)
 
       transitionBids = await getTopTransitionBids(lid)
     }

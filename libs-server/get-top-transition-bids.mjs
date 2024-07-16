@@ -2,9 +2,19 @@ import db from '#db'
 import { constants } from '#libs-shared'
 
 export default async function (leagueId) {
+  const active_rfa_players = await db('transition_bids')
+    .where('lid', leagueId)
+    .where('year', constants.season.year)
+    .whereNull('cancelled')
+    .whereNull('processed')
+    .whereNotNull('announced')
+
+  const active_rfa_pids = active_rfa_players.map((p) => p.pid)
+
   const transition_bid_rows = await db('transition_bids')
     .where('lid', leagueId)
     .where('year', constants.season.year)
+    .whereIn('pid', active_rfa_pids)
     .whereNull('cancelled')
     .whereNull('processed')
 
