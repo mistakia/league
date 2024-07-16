@@ -137,22 +137,37 @@ gz_file="$file_name-$backup_type.tar.gz"
 mkdir -p $dump_dir
 cd $dump_dir
 
-# run pg_dump, tar gz and delete sql file
+dump_tables() {
+    tables=$1
+    echo "Dumping tables: $tables"
+    table_args=""
+    for table in $tables; do
+        table_args="$table_args -t $table"
+    done
+    pg_dump -h $db_host -U $db_user -d $db_name $table_args > $sql_file
+    if [ $? -ne 0 ]; then
+        echo "Error: pg_dump failed for tables: $tables"
+        exit 1
+    fi
+}
+
 if $full; then
-    pg_dump -h $db_host -U $db_user -d $db_name -T prop_pairings -T prop_pairing_props > $sql_file
+    echo "Performing full backup"
+    pg_dump -h $db_host -U $db_user -d $db_name > $sql_file
 elif $logs; then
-    pg_dump -h $db_host -U $db_user -d $db_name -t $(echo $db_logs_tables | tr ' ' ',') > $sql_file
+    dump_tables "$db_logs_tables"
 elif $stats; then
-    pg_dump -h $db_host -U $db_user -d $db_name -t $(echo $db_stats_tables | tr ' ' ',') > $sql_file
+    dump_tables "$db_stats_tables"
 elif $betting; then
-    pg_dump -h $db_host -U $db_user -d $db_name -t $(echo $db_betting_tables | tr ' ' ',') > $sql_file
+    dump_tables "$db_betting_tables"
 elif $cache; then
-    pg_dump -h $db_host -U $db_user -d $db_name -t $(echo $db_cache_tables | tr ' ' ',') > $sql_file
+    dump_tables "$db_cache_tables"
 elif $projections; then
-    pg_dump -h $db_host -U $db_user -d $db_name -t $(echo $db_projections_tables | tr ' ' ',') > $sql_file
+    dump_tables "$db_projections_tables"
 else
-    pg_dump -h $db_host -U $db_user -d $db_name -t $(echo $db_user_tables | tr ' ' ',') > $sql_file
+    dump_tables "$db_user_tables"
 fi
+
 tar -vcf $gz_file $sql_file
 rm $sql_file
 
