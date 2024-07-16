@@ -86,7 +86,7 @@ const format_play = (play) => ({
   qb_position: format_qb_position(play.qb_location) || null,
   n_offense_backfield: format_number(play.n_offense_backfield) || null,
   no_huddle: format_boolean(play.is_no_huddle) || null,
-  motion: format_boolean(play.is_motion) ? 'Y' : 'N',
+  motion: format_boolean(play.is_motion) || null,
   play_action: format_boolean(play.is_play_action) || null,
   screen_pass: format_boolean(play.is_screen_pass) || null,
   run_play_option: format_boolean(play.is_rpo) || null,

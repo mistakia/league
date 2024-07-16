@@ -1404,7 +1404,6 @@ CREATE TABLE public.nfl_plays (
     td_tm character varying(5),
     ret_tm character varying(5),
     charted boolean,
-    motion character varying(2),
     yfog integer,
     true_air_yards smallint,
     created_reception boolean,
@@ -1597,7 +1596,8 @@ CREATE TABLE public.nfl_plays (
     qb_position public.qb_position,
     n_offense_backfield numeric,
     run_play_option boolean,
-    read_thrown public.read_thrown_type
+    read_thrown public.read_thrown_type,
+    motion boolean
 );
 
 
