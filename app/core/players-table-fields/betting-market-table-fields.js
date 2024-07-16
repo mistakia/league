@@ -33,11 +33,11 @@ export default {
         single: true
       },
       year: {
-        // TODO should enable spliting and multi select on split enabled
         data_type: table_constants.TABLE_DATA_TYPES.SELECT,
         values: [2023, 2024],
         default_value: 2024,
-        single: true
+        single: true,
+        enable_multi_on_split: ['year']
       }
     }
   }),
@@ -67,7 +67,8 @@ export default {
         data_type: table_constants.TABLE_DATA_TYPES.SELECT,
         values: [2023, 2024],
         default_value: 2024,
-        single: true
+        single: true,
+        enable_multi_on_split: ['year']
       },
       week: {
         data_type: table_constants.TABLE_DATA_TYPES.SELECT,
