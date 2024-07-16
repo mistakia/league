@@ -99,7 +99,7 @@ export default async function ({
           const player = team_roster.players.find((p) => p.pid === bid.pid)
           if (player && player.tag === constants.tags.TRANSITION) {
             player.bid = bid.bid
-            player.nominated = bid.nominated
+            player.transition_tag_nominated = bid.nominated
           }
         }
       }
