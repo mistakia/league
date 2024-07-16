@@ -178,6 +178,31 @@ router.post('/?', async (req, res) => {
       if (!isEligible) {
         return res.status(400).send({ error: 'exceeds tag limit' })
       }
+
+      // make sure bid is within $10 of market salary
+      const market_salary = await db('league_format_player_projection_values')
+        .select('market_salary')
+        .where({
+          pid,
+          week: 0,
+          year: constants.season.year,
+          league_format_hash: league.league_format_hash
+        })
+        .first()
+
+      // TODO setup mocks for tests
+      // if (!market_salary) {
+      //   return res.status(400).send({ error: 'market salary not found' })
+      // }
+
+      if (market_salary) {
+        const salary_difference = Math.abs(bid - market_salary.market_salary)
+        if (salary_difference > 10) {
+          return res
+            .status(400)
+            .send({ error: 'bid must be within $10 of market salary' })
+        }
+      }
     } else {
       // check if transition bid exists
       const transition_bid = await db('transition_bids')
@@ -513,6 +538,31 @@ router.put('/?', async (req, res) => {
     } else {
       // update value to bid
       roster.updateValue(pid, bid)
+
+      // check that the bid is within 10 dollars of the market salary
+      const market_salary = await db('league_format_player_projection_values')
+        .select('market_salary')
+        .where({
+          pid,
+          week: 0,
+          year: constants.season.year,
+          league_format_hash: league.league_format_hash
+        })
+        .first()
+
+      // TODO setup mocks for tests
+      // if (!market_salary) {
+      //   return res.status(400).send({ error: 'market salary not found' })
+      // }
+
+      if (market_salary) {
+        const salary_difference = Math.abs(bid - market_salary.market_salary)
+        if (salary_difference > 10) {
+          return res
+            .status(400)
+            .send({ error: 'bid must be within $10 of market salary' })
+        }
+      }
     }
 
     // make sure there is enough cap space
@@ -635,12 +685,14 @@ router.post('/nominate/?', async (req, res) => {
       .whereNull('cancelled')
       .update({ nominated: null })
 
+    const nominated_timestamp = Math.round(Date.now() / 1000)
+
     // Update the transition bid to mark it as announced
     await db('transition_bids')
       .where('uid', transition_bid.uid)
-      .update({ nominated: Math.round(Date.now() / 1000) })
+      .update({ nominated: nominated_timestamp })
 
-    res.send({ message: 'Restricted free agent nomination designated' })
+    res.send({ nominated: nominated_timestamp })
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })

@@ -539,9 +539,9 @@ describe('API /teams - restricted free agency', function () {
         })
 
       res2.should.have.status(200)
-      res2.body.message.should.equal(
-        'Restricted free agent nomination designated'
-      )
+      res2.body.should.have.property('nominated')
+      res2.body.nominated.should.be.a('number')
+      res2.body.nominated.should.be.closeTo(Math.round(Date.now() / 1000), 5)
 
       const query = await knex('transition_bids')
         .where({ pid: player.pid })
