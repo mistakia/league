@@ -25,7 +25,9 @@ export default function PlayerContextMenu({
   hideDisabled,
   buttonGroup,
   isNominating,
-  nominate_pid
+  nominate_pid,
+  nominate_restricted_free_agent,
+  unnominate_restricted_free_agent
 }) {
   const handleDeactivate = () => {
     showConfirmation({
@@ -216,6 +218,16 @@ export default function PlayerContextMenu({
     hide()
   }
 
+  const handle_nominate_restricted_free_agent = () => {
+    nominate_restricted_free_agent(playerMap.get('pid'))
+    hide()
+  }
+
+  const handle_unnominate_restricted_free_agent = () => {
+    unnominate_restricted_free_agent(playerMap.get('pid'))
+    hide()
+  }
+
   const items = []
 
   const add = ({ disabled, label, ...params }) => {
@@ -285,12 +297,26 @@ export default function PlayerContextMenu({
         label: `${status.tagged.transition ? 'Update' : 'Apply'} Restricted Free Agent Tag`
       })
 
-      if (status.tagged.transition) {
+      if (status.tagged.transition && !status.tagged.transition_announced) {
         add({
           key: 'transition-remove',
           onClick: handleRemoveTransitionTag,
           label: 'Remove Restricted Free Agent Tag'
         })
+
+        if (status.tagged.transition_nominated) {
+          add({
+            key: 'transition-nomination',
+            onClick: handle_unnominate_restricted_free_agent,
+            label: 'Remove As Next Nominee'
+          })
+        } else {
+          add({
+            key: 'transition-nomination',
+            onClick: handle_nominate_restricted_free_agent,
+            label: 'Designate as Next Nominee'
+          })
+        }
       }
     } else if (status.eligible.transitionBid) {
       add({
@@ -438,5 +464,7 @@ PlayerContextMenu.propTypes = {
   hideDisabled: PropTypes.bool,
   buttonGroup: PropTypes.bool,
   isNominating: PropTypes.bool,
-  nominate_pid: PropTypes.func
+  nominate_pid: PropTypes.func,
+  nominate_restricted_free_agent: PropTypes.func,
+  unnominate_restricted_free_agent: PropTypes.func
 }

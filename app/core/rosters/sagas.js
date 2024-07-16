@@ -28,7 +28,9 @@ import {
   deleteTag,
   postTransitionTag,
   deleteTransitionTag,
-  putTransitionTag
+  putTransitionTag,
+  post_restricted_free_agent_nomination,
+  delete_restricted_free_agent_nomination
 } from '@core/api'
 import { appActions } from '@core/app'
 import {
@@ -415,6 +417,24 @@ export function* transitionRemovedNotification() {
   )
 }
 
+export function* post_restricted_free_agent_nomination_notification() {
+  yield put(
+    notificationActions.show({
+      message: 'Restricted Free Agent Nomination Designated',
+      severity: 'success'
+    })
+  )
+}
+
+export function* delete_restricted_free_agent_nomination_notification() {
+  yield put(
+    notificationActions.show({
+      message: 'Restricted Free Agent Nomination Cancelled',
+      severity: 'success'
+    })
+  )
+}
+
 export function* addTransitionTag({ payload }) {
   const { leagueId, teamId } = yield select(get_app)
   yield call(postTransitionTag, { leagueId, teamId, ...payload })
@@ -478,6 +498,18 @@ export function* exportRosters() {
     data,
     fileName: `${league.name}-LeagueRosters-${constants.year}-Week${constants.week}`
   })
+}
+
+export function* nominate_restricted_free_agent({ payload }) {
+  const { pid } = payload
+  const { teamId, leagueId } = yield select(get_app)
+  yield call(post_restricted_free_agent_nomination, { teamId, leagueId, pid })
+}
+
+export function* unnominate_restricted_free_agent({ payload }) {
+  const { pid } = payload
+  const { teamId, leagueId } = yield select(get_app)
+  yield call(delete_restricted_free_agent_nomination, { teamId, leagueId, pid })
 }
 
 //= ====================================
@@ -656,6 +688,33 @@ export function* watchPostProcessPoachFulfilled() {
   )
 }
 
+export function* watch_nominate_restricted_free_agent() {
+  yield takeLatest(
+    rosterActions.NOMINATE_RESTRICTED_FREE_AGENT,
+    nominate_restricted_free_agent
+  )
+}
+
+export function* watch_unnominate_restricted_free_agent() {
+  yield takeLatest(
+    rosterActions.UNNOMINATE_RESTRICTED_FREE_AGENT,
+    unnominate_restricted_free_agent
+  )
+}
+
+export function* watch_post_restricted_free_agent_nomination_fulfilled() {
+  yield takeLatest(
+    rosterActions.POST_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED,
+    post_restricted_free_agent_nomination_notification
+  )
+}
+
+export function* watch_delete_restricted_free_agent_nomination_fulfilled() {
+  yield takeLatest(
+    rosterActions.DELETE_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED,
+    delete_restricted_free_agent_nomination_notification
+  )
+}
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -709,5 +768,11 @@ export const rosterSagas = [
 
   fork(watchSelectYear),
 
-  fork(watchPostProcessPoachFulfilled)
+  fork(watchPostProcessPoachFulfilled),
+
+  fork(watch_nominate_restricted_free_agent),
+  fork(watch_unnominate_restricted_free_agent),
+
+  fork(watch_post_restricted_free_agent_nomination_fulfilled),
+  fork(watch_delete_restricted_free_agent_nomination_fulfilled)
 ]

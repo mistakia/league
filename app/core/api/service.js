@@ -360,6 +360,14 @@ export const api = {
   delete_players_table_view({ view_id }) {
     const url = `${API_URL}/players/table-views/${view_id}`
     return { url, method: 'DELETE' }
+  },
+  post_restricted_free_agent_nomination({ teamId, ...data }) {
+    const url = `${API_URL}/teams/${teamId}/tag/transition/nominate`
+    return { url, ...POST(data) }
+  },
+  delete_restricted_free_agent_nomination({ teamId, ...data }) {
+    const url = `${API_URL}/teams/${teamId}/tag/transition/nominate`
+    return { url, ...DELETE(data) }
   }
 }
 

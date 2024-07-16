@@ -290,14 +290,27 @@ export function playersReducer(state = initialState, { payload, type }) {
       return state.withMutations((state) => {
         rosters.forEach((roster) => {
           roster.players.forEach((rosterSlot) => {
-            const { pid, value, type, slot, tag, extensions } = rosterSlot
+            const {
+              pid,
+              value,
+              type,
+              slot,
+              tag,
+              extensions,
+              transition_tag_processed,
+              transition_tag_nominated,
+              transition_tag_announced
+            } = rosterSlot
             const params = {
               value,
               tag,
               type,
               tid: roster.tid,
               extensions,
-              slot
+              slot,
+              transition_tag_processed,
+              transition_tag_nominated,
+              transition_tag_announced
             }
             if (state.hasIn(['items', pid])) {
               state.mergeIn(['items', pid], params)
@@ -308,6 +321,28 @@ export function playersReducer(state = initialState, { payload, type }) {
         })
       })
     }
+
+    case rosterActions.POST_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED:
+      return state.withMutations((state) => {
+        // Clear transition_tag_nominated for all players
+        state.get('items').forEach((player, pid) => {
+          if (player.get('transition_tag_nominated')) {
+            state.setIn(['items', pid, 'transition_tag_nominated'], null)
+          }
+        })
+
+        // Set transition_tag_nominated for the nominated player
+        state.setIn(
+          ['items', payload.opts.pid, 'transition_tag_nominated'],
+          payload.data.nominated
+        )
+      })
+
+    case rosterActions.DELETE_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED:
+      return state.setIn(
+        ['items', payload.opts.pid, 'transition_tag_nominated'],
+        null
+      )
 
     case auctionActions.AUCTION_PROCESSED: {
       const { tid, pid, value, type } = payload

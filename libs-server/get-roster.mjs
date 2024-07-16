@@ -66,7 +66,6 @@ export default async function ({
         const bid = transition_bids.find((b) => b.pid === roster_player.pid)
         if (bid) {
           roster_player.transition_tag_processed = bid.processed
-          roster_player.transition_tag_nominated = bid.nominated
           roster_player.transition_tag_announced = bid.announced
         }
       }

@@ -46,6 +46,9 @@ export default class TransitionConfirmation extends React.Component {
       const playerMap = team.players.find(
         (playerMap) => playerMap.get('pid') === pid
       )
+      if (playerMap.get('transition_tag_processed')) {
+        continue
+      }
       this._untags.push(playerMap)
     }
 

@@ -94,11 +94,13 @@ export default async function ({
         .whereNull('processed')
 
       if (bids.length) {
-        const teamRoster = rosters.find((r) => r.tid === tid)
+        const team_roster = rosters.find((r) => r.tid === tid)
         for (const bid of bids) {
-          const player = teamRoster.players.find((p) => p.pid === bid.pid)
-          if (player && player.tag === constants.tags.TRANSITION)
+          const player = team_roster.players.find((p) => p.pid === bid.pid)
+          if (player && player.tag === constants.tags.TRANSITION) {
             player.bid = bid.bid
+            player.nominated = bid.nominated
+          }
         }
       }
     }
@@ -130,9 +132,9 @@ export default async function ({
             const bid = transition_bids.find(
               (b) => b.pid === player.pid && b.player_tid === roster.tid
             )
+
             if (bid) {
               player.transition_tag_processed = bid.processed
-              player.transition_tag_nominated = bid.nominated
               player.transition_tag_announced = bid.announced
             }
           }

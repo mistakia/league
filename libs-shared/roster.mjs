@@ -33,7 +33,10 @@ export default class Roster {
       value,
       tag,
       extensions,
-      bid
+      bid,
+      transition_tag_processed,
+      transition_tag_nominated,
+      transition_tag_announced
     } of roster.players) {
       const salary = isBeforeExtensionDeadline
         ? getExtensionAmount({
@@ -53,7 +56,10 @@ export default class Roster {
         rid: roster.uid,
         value: salary,
         extensions,
-        tag
+        tag,
+        transition_tag_processed,
+        transition_tag_nominated,
+        transition_tag_announced
       })
     }
   }
@@ -263,6 +269,16 @@ export default class Roster {
 
   hasOpenPracticeSquadSlot() {
     return this.practice_signed.length < this._league.ps
+  }
+
+  hasUnprocessedRestrictedTag() {
+    const processed_transition_tags = this.all.filter(
+      (player) => player.transition_tag_processed
+    ).length
+    return (
+      processed_transition_tags !==
+      this._league[`tag${constants.tags.TRANSITION}`]
+    )
   }
 
   hasOpenBenchSlot(pos) {
