@@ -607,6 +607,8 @@ export default function ({
     }
   }
 
+  players_query.orderBy('player.pid', 'asc')
+
   if (offset) {
     players_query.offset(offset)
   }
