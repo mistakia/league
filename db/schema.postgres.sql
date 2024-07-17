@@ -1637,6 +1637,27 @@ COMMENT ON COLUMN public.nfl_plays.score IS 'Binary indicator for whether or not
 
 
 --
+-- Name: COLUMN nfl_plays.qb_pressure; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.qb_pressure IS 'QB pressure';
+
+
+--
+-- Name: COLUMN nfl_plays.qb_hit; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.qb_hit IS 'QB hit';
+
+
+--
+-- Name: COLUMN nfl_plays.qb_hurry; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.qb_hurry IS 'QB hurry';
+
+
+--
 -- Name: COLUMN nfl_plays.highlight_pass; Type: COMMENT; Schema: public; Owner: -
 --
 
@@ -2131,6 +2152,13 @@ COMMENT ON COLUMN public.nfl_plays.pos_to_rem IS 'Number of timeouts remaining f
 --
 
 COMMENT ON COLUMN public.nfl_plays.def_to_rem IS 'Number of timeouts remaining for the team on defense';
+
+
+--
+-- Name: COLUMN nfl_plays.qb_pressure_ngs; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.qb_pressure_ngs IS 'QB pressure (NGS)';
 
 
 --
@@ -2692,6 +2720,27 @@ COMMENT ON COLUMN public.nfl_plays_current_week.scrm IS 'QB scramble';
 
 
 --
+-- Name: COLUMN nfl_plays_current_week.qb_pressure; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays_current_week.qb_pressure IS 'QB pressure';
+
+
+--
+-- Name: COLUMN nfl_plays_current_week.qb_hit; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays_current_week.qb_hit IS 'QB hit';
+
+
+--
+-- Name: COLUMN nfl_plays_current_week.qb_hurry; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays_current_week.qb_hurry IS 'QB hurry';
+
+
+--
 -- Name: COLUMN nfl_plays_current_week.int_worthy; Type: COMMENT; Schema: public; Owner: -
 --
 
@@ -2962,6 +3011,13 @@ COMMENT ON COLUMN public.nfl_plays_current_week.pos_to_rem IS 'Number of timeout
 --
 
 COMMENT ON COLUMN public.nfl_plays_current_week.def_to_rem IS 'Number of timeouts remaining for the team on defense';
+
+
+--
+-- Name: COLUMN nfl_plays_current_week.qb_pressure_ngs; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays_current_week.qb_pressure_ngs IS 'QB pressure (NGS)';
 
 
 --
