@@ -280,6 +280,119 @@ export default function ({ is_logged_in }) {
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       player_value_path: 'ngs_size_score',
       column_groups: [COLUMN_GROUPS.PROSPECT, COLUMN_GROUPS.NGS]
+    },
+
+    player_nflid: {
+      column_title: 'NFL Player ID',
+      header_label: 'NFL ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'nflid',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_esbid: {
+      column_title: 'Elias Sports Bureau Player ID',
+      header_label: 'ESB ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'esbid',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_gsisid: {
+      column_title: 'Game Statistics & Information System Player ID (gsis)',
+      header_label: 'GSIS ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'gsisid',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_gsispid: {
+      column_title: 'Game Statistics & Information System Player ID (gsispid)',
+      header_label: 'GSIS PID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'gsispid',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_gsis_it_id: {
+      column_title: 'Game Statistics & Information System Player ID (gsis_it)',
+      header_label: 'GSIS IT ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'gsis_it_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_sleeper_id: {
+      column_title: 'Sleeper Player ID',
+      header_label: 'Sleeper ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'sleeper_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_rotoworld_id: {
+      column_title: 'Rotoworld Player ID',
+      header_label: 'Rotoworld ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'rotoworld_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_rotowire_id: {
+      column_title: 'Rotowire Player ID',
+      header_label: 'Rotowire ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'rotowire_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_sportradar_id: {
+      column_title: 'Sportradar Player ID',
+      header_label: 'Sportradar ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'sportradar_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_espn_id: {
+      column_title: 'ESPN Player ID',
+      header_label: 'ESPN ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'espn_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_fantasy_data_id: {
+      column_title: 'Fantasy Data Player ID',
+      header_label: 'Fantasy Data ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'fantasy_data_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_yahoo_id: {
+      column_title: 'Yahoo Player ID',
+      header_label: 'Yahoo ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'yahoo_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_keeptradecut_id: {
+      column_title: 'KeepTradeCut Player ID',
+      header_label: 'KTC ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'keeptradecut_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_pfr_id: {
+      column_title: 'Pro Football Reference Player ID',
+      header_label: 'PFR ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'pfr_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     }
   }
 }

@@ -7,6 +7,7 @@ const COLUMN_GROUPS = {
   BETTING_MARKETS: { priority: 1 },
   PROJECTION: { priority: 1 },
   ESPN: { priority: 1 },
+  PLAYER_IDS: { priority: 1 },
   NFL: { priority: 2 },
   NGS: { priority: 2 },
   SEASON_PROPS: { priority: 2 },
