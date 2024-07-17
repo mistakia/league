@@ -113,6 +113,10 @@ export default function LeagueHomePage({
   const nominated_free_agent_items = []
   transitionPlayers.forEach((playerMap, index) => {
     const is_processed = playerMap.get('transition_tag_processed')
+    if (is_processed) {
+      return
+    }
+
     const is_announced = playerMap.get('transition_tag_announced')
     const is_active = !is_processed && is_announced
     const is_nominated = playerMap.get('transition_tag_nominated')
