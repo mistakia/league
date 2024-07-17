@@ -25,6 +25,8 @@ const askQuestion = (question) => {
   return new Promise((resolve) => rl.question(question, resolve))
 }
 
+const fantasy_data_id_blacklist = [17165]
+
 const audit_player_ids_dynastyprocess_repo = async ({
   force_download = false,
   update_player_conflicts = false
@@ -126,10 +128,14 @@ const audit_player_ids_dynastyprocess_repo = async ({
   const field_difference_count = {}
 
   for (const dp_player of dynastyprocess_data) {
+    if (fantasy_data_id_blacklist.includes(dp_player.fantasy_data_id)) {
+      continue
+    }
+
     const matching_player = player_data.find(
       (player) =>
-        (player.sportradar_id &&
-          player.sportradar_id === dp_player.sportradar_id) ||
+        // (player.sportradar_id &&
+        //   player.sportradar_id === dp_player.sportradar_id) ||
         (player.fantasy_data_id &&
           player.fantasy_data_id === dp_player.fantasy_data_id) ||
         (player.gsisid && player.gsisid === dp_player.gsisid) ||
@@ -183,6 +189,7 @@ const audit_player_ids_dynastyprocess_repo = async ({
           (key) =>
             dp_player[key] &&
             key.endsWith('id') &&
+            key !== 'sportradar_id' &&
             matching_player[key] === dp_player[key]
         )
         log(
@@ -194,9 +201,17 @@ const audit_player_ids_dynastyprocess_repo = async ({
         })
         log(filtered_diff_result)
 
-        const truthy_differences = filtered_diff_result.filter(
-          (change) => change.lhs && change.rhs
-        )
+        const truthy_differences = filtered_diff_result.filter((change) => {
+          if (change.path[0] === 'dob') {
+            return (
+              change.lhs !== '0000-00-00' &&
+              change.rhs !== '0000-00-00' &&
+              change.lhs &&
+              change.rhs
+            )
+          }
+          return change.lhs && change.rhs
+        })
 
         if (truthy_differences.length === 0) {
           const updates = filtered_diff_result.reduce((acc, change) => {
