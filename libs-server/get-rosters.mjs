@@ -130,9 +130,7 @@ export default async function ({
 
         for (const player of roster.players) {
           if (player.tag === constants.tags.TRANSITION) {
-            const bid = transition_bids.find(
-              (b) => b.pid === player.pid
-            )
+            const bid = transition_bids.find((b) => b.pid === player.pid)
 
             if (bid) {
               player.transition_tag_processed = bid.processed
