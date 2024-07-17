@@ -204,6 +204,63 @@ export default {
   player_ngs_size_score: {
     table_name: 'player',
     column_name: 'ngs_size_score'
+  },
+
+  player_nflid: {
+    table_name: 'player',
+    column_name: 'nflid'
+  },
+  player_esbid: {
+    table_name: 'player',
+    column_name: 'esbid'
+  },
+  player_gsisid: {
+    table_name: 'player',
+    column_name: 'gsisid'
+  },
+  player_gsispid: {
+    table_name: 'player',
+    column_name: 'gsispid'
+  },
+  player_gsis_it_id: {
+    table_name: 'player',
+    column_name: 'gsisItId'
+  },
+  player_sleeper_id: {
+    table_name: 'player',
+    column_name: 'sleeper_id'
+  },
+  player_rotoworld_id: {
+    table_name: 'player',
+    column_name: 'rotoworld_id'
+  },
+  player_rotowire_id: {
+    table_name: 'player',
+    column_name: 'rotowire_id'
+  },
+  player_sportradar_id: {
+    table_name: 'player',
+    column_name: 'sportradar_id'
+  },
+  player_espn_id: {
+    table_name: 'player',
+    column_name: 'espn_id'
+  },
+  player_fantasy_data_id: {
+    table_name: 'player',
+    column_name: 'fantasy_data_id'
+  },
+  player_yahoo_id: {
+    table_name: 'player',
+    column_name: 'yahoo_id'
+  },
+  player_keeptradecut_id: {
+    table_name: 'player',
+    column_name: 'keeptradecut_id'
+  },
+  player_pfr_id: {
+    table_name: 'player',
+    column_name: 'pfr_id'
   }
 
   // TODO player.dcp ??
