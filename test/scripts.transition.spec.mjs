@@ -40,6 +40,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
       await knex('seasons')
         .update({
           year: constants.season.year,
+          tran_start: tranDate,
           tran_end: tranDate,
           ext_date: extDate
         })
@@ -72,7 +73,8 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
         year: constants.season.year,
         player_tid: teamId,
         lid: leagueId,
-        submitted: timestamp
+        submitted: timestamp,
+        announced: timestamp - 1
       })
 
       let error
@@ -166,7 +168,8 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
           year: constants.season.year,
           player_tid: teamId,
           lid: leagueId,
-          submitted: timestamp
+          submitted: timestamp,
+          announced: timestamp - 1
         })
         .returning('uid')
 
