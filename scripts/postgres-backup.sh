@@ -54,7 +54,9 @@ users_sources
 users_teams
 waiver_releases
 waivers
-placed_wagers"
+placed_wagers
+urls
+user_table_views"
 
 db_cache_tables="
 league_baselines
@@ -76,7 +78,11 @@ league_team_lineup_contribution_weeks
 league_team_lineup_contributions
 league_team_lineup_starters
 league_team_lineups
-ros_projections"
+ros_projections
+league_nfl_team_seasonlogs
+league_team_daily_values
+nfl_team_seasonlogs
+percentiles"
 
 db_logs_tables="
 jobs
@@ -94,14 +100,18 @@ nfl_play_stats
 nfl_plays
 nfl_snaps
 player
+player_aliases
 players_status
 practice
 rankings
+player_seasonlogs
+player_snaps_game
 "
 
 db_betting_tables="
 props
 props_index
+props_index_new
 prop_markets_history
 prop_markets_index
 prop_market_selections_history
@@ -110,6 +120,7 @@ prop_market_selections_index
 
 db_projections_tables="
 projections
+projections_index
 "
 
 date_format="%Y-%m-%d_%H-%M"
