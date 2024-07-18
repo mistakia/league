@@ -132,19 +132,19 @@
 */15 * * 9-12 * /bin/bash /root/league/scripts/postgres-backup.sh -n checkpoint &>> /var/log/league/league-postgres-backup.log
 
 ## Backup Stat Data (Once a day) (Checkpoint)
-0 0 * 9-12 3 /bin/bash /root/league/scripts/postgres-backup.sh -s -n checkpoint &>> /var/log/league/league-postgres-backup-stats.log
+0 2 * 9-12 3 /bin/bash /root/league/scripts/postgres-backup.sh -s -n checkpoint &>> /var/log/league/league-postgres-backup-stats.log
 
 ## Backup Betting Data (Once a day) (Checkpoint)
-15 0 * 9-12 3 /bin/bash /root/league/scripts/postgres-backup.sh -b -n checkpoint &>> /var/log/league/league-postgres-backup-betting.log
+30 2 * 9-12 3 /bin/bash /root/league/scripts/postgres-backup.sh -b -n checkpoint &>> /var/log/league/league-postgres-backup-betting.log
 
 ## Backup Projections Data (Once a day) (Checkpoint)
-30 0 * 9-12 3 /bin/bash /root/league/scripts/postgres-backup.sh -p -n checkpoint &>> /var/log/league/league-postgres-backup-projections.log
+0 3 * 9-12 3 /bin/bash /root/league/scripts/postgres-backup.sh -p -n checkpoint &>> /var/log/league/league-postgres-backup-projections.log
 
 ## Backup Log Data (Once a day) (Checkpoint)
-45 0 * 9-12 3 /bin/bash /root/league/scripts/postgres-backup.sh -l -n checkpoint &>> /var/log/league/league-postgres-backup-log.log
+30 3 * 9-12 3 /bin/bash /root/league/scripts/postgres-backup.sh -l -n checkpoint &>> /var/log/league/league-postgres-backup-log.log
 
 ## Backup Cache Data (Once a day) (Checkpoint)
-0 1 * 9-12 3 /bin/bash /root/league/scripts/postgres-backup.sh -c -n checkpoint &>> /var/log/league/league-postgres-backup-cache.log
+0 4 * 9-12 3 /bin/bash /root/league/scripts/postgres-backup.sh -c -n checkpoint &>> /var/log/league/league-postgres-backup-cache.log
 
 ################################### Time-Series Backup ########################################
 
