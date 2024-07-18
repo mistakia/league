@@ -19,6 +19,7 @@ const create_espn_score_columns = (column_name) => ({
     const join_func = get_join_func(join_type)
     const join_conditions = function () {
       this.on('player_seasonlogs.pid', '=', 'player.pid')
+      this.andOn('player_seasonlogs.seas_type', '=', db.raw('?', ['REG']))
 
       if (splits.length && previous_table_name) {
         splits.forEach((split) => {
