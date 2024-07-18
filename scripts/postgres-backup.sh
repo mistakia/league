@@ -8,8 +8,9 @@ stats=false
 cache=false
 projections=false
 betting=false
+filename=""
 
-while getopts 'fclspb' opt; do
+while getopts 'fclspbn:' opt; do
     case $opt in
         f) full=true ;;
         c) cache=true ;;
@@ -17,7 +18,7 @@ while getopts 'fclspb' opt; do
         s) stats=true ;;
         p) projections=true ;;
         b) betting=true ;;
-
+        n) filename="$OPTARG" ;;
         *) echo 'Error in command line parsing' >&2
     esac
 done
@@ -125,7 +126,12 @@ projections_index
 
 date_format="%Y-%m-%d_%H-%M"
 
-file_name="$(date +$date_format)"
+if [ -z "$filename" ]; then  # Check if filename is provided
+    file_name="$(date +$date_format)"
+else
+    file_name="$filename"  # Use provided filename
+fi
+
 if $full; then
     backup_type="full"
 elif $logs; then
