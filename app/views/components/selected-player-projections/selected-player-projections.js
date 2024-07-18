@@ -18,10 +18,28 @@ export default class SelectedPlayerSeasonProjections extends React.Component {
 
     const pid = playerMap.get('pid')
     const pos = playerMap.get('pos')
+    const loading_projections = playerMap.get('loading_projections')
     const tables = []
     const projections = playerMap.get('projections', new List()).toJS()
-    if (!projections.length) {
+    if (loading_projections) {
       return <LinearProgress />
+    }
+
+    if (!projections.length) {
+      return (
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+            height: '100%',
+            textTransform: 'uppercase',
+            color: '#999'
+          }}
+        >
+          no projections found
+        </div>
+      )
     }
 
     const projections_by_week = groupBy(projections, 'week')

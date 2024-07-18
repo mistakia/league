@@ -487,11 +487,26 @@ export function playersReducer(state = initialState, { payload, type }) {
         }
       })
 
-    case playerActions.GET_PLAYER_PROJECTIONS_FULFILLED:
+    case playerActions.GET_PLAYER_PROJECTIONS_PENDING:
       return state.setIn(
-        ['items', payload.opts.pid, 'projections'],
-        new List(payload.data)
+        ['items', payload.opts.pid, 'loading_projections'],
+        true
       )
+
+    case playerActions.GET_PLAYER_PROJECTIONS_FAILED:
+      return state.setIn(
+        ['items', payload.opts.pid, 'loading_projections'],
+        false
+      )
+
+    case playerActions.GET_PLAYER_PROJECTIONS_FULFILLED:
+      return state.withMutations((state) => {
+        state.setIn(
+          ['items', payload.opts.pid, 'projections'],
+          new List(payload.data)
+        )
+        state.setIn(['items', payload.opts.pid, 'loading_projections'], false)
+      })
 
     case playerActions.RESET_PLAYER_FILTER_OPTIONS:
       return state.merge({ ...default_player_filter_options })
