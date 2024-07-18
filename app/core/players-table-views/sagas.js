@@ -17,6 +17,11 @@ export function* players_table_view_changed({ payload }) {
   }
 
   const players_table_view = yield select(get_selected_players_table_view)
+  const { columns } = players_table_view.table_state
+
+  if (!columns.length) {
+    return
+  }
 
   // const { userId } = yield select(get_app)
   // if (!userId || userId !== players_table_view.creator_user_id) {
