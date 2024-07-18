@@ -445,7 +445,7 @@ const run = async ({
         update: play_row,
         ignore_conflicts
       })
-      play_field_update_count += changes.length
+      play_field_update_count += changes
     }
   }
   log(
