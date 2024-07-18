@@ -327,12 +327,14 @@ const run = async ({
       play_row: {
         off: play.off,
         def: play.def,
-        play_type: play.play_type
+        play_type: play.play_type,
+        esbid: play.esbid,
+        playId: play.playId
       },
       update: {
         off,
         def,
-        play_type
+        play_type,
       },
       ignore_conflicts
     })
