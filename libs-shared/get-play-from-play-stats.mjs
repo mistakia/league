@@ -1,7 +1,12 @@
 // GSIS StatID Documentation: http://www.nflgsis.com/gsis/Documentation/Partners/StatIDs.html
 
 export default function getPlayFromPlayStats(play) {
-  const playRow = {}
+  const playRow = {
+    tacklers_solo: [],
+    tacklers_with_assisters: [],
+    tackle_assisters: []
+  }
+
   for (const playStat of play.playStats) {
     switch (playStat.statId) {
       // Punt Blocked (Offense)
@@ -377,18 +382,21 @@ export default function getPlayFromPlayStats(play) {
 
       // Solo Tackle
       case 79:
+        playRow.tacklers_solo.push(playStat.gsisId)
         break
 
-      // Assisted Tackle
+      // Tackle with one or more assists — you made the tackle and got assisted by one or more team mates (h/t seb)
       case 80:
+        playRow.tacklers_with_assisters.push(playStat.gsisId)
         break
 
       // 1/2 Tackle
       case 81:
         break
 
-      // Tackle Assist
+      // Assist to a tackle — your team mate made the tackle and you were among the players who assisted (h/t seb)
       case 82:
+        playRow.tackle_assisters.push(playStat.gsisId)
         break
 
       // Sack Yards (Defense) - unassisted sack

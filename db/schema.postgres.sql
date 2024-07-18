@@ -1597,7 +1597,25 @@ CREATE TABLE public.nfl_plays (
     n_offense_backfield numeric,
     run_play_option boolean,
     read_thrown public.read_thrown_type,
-    motion boolean
+    motion boolean,
+    solo_tackle_1_gsis character varying(36),
+    solo_tackle_1_pid character varying(25),
+    solo_tackle_2_gsis character varying(36),
+    solo_tackle_2_pid character varying(25),
+    solo_tackle_3_gsis character varying(36),
+    solo_tackle_3_pid character varying(25),
+    assisted_tackle_1_gsis character varying(36),
+    assisted_tackle_1_pid character varying(25),
+    assisted_tackle_2_gsis character varying(36),
+    assisted_tackle_2_pid character varying(25),
+    tackle_assist_1_gsis character varying(36),
+    tackle_assist_1_pid character varying(25),
+    tackle_assist_2_gsis character varying(36),
+    tackle_assist_2_pid character varying(25),
+    tackle_assist_3_gsis character varying(36),
+    tackle_assist_3_pid character varying(25),
+    tackle_assist_4_gsis character varying(36),
+    tackle_assist_4_pid character varying(25)
 );
 
 

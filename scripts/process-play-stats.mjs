@@ -3,7 +3,7 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { isMain } from '#libs-server'
+import { isMain, update_play } from '#libs-server'
 import db from '#db'
 import {
   constants,
@@ -118,7 +118,8 @@ const format_gamelog = ({ esbid, pid, stats, opp, pos, tm }) => {
 const run = async ({
   week = current_week,
   year = constants.season.year,
-  seas_type = constants.season.nfl_seas_type
+  seas_type = constants.season.nfl_seas_type,
+  ignore_conflicts = false
 } = {}) => {
   let play_update_count = 0
 
@@ -140,7 +141,7 @@ const run = async ({
     })
     .where('nfl_plays.year', year)
     .where('nfl_plays.week', week)
-    .where('nfl_play_stats.valid', 1)
+    .where('nfl_play_stats.valid', true)
     .where('nfl_plays.seas_type', seas_type)
 
   const unique_esbids = [...new Set(playStats.map((p) => p.esbid))]
@@ -291,6 +292,9 @@ const run = async ({
     .select(
       'nfl_games.h',
       'nfl_games.v',
+      'nfl_plays.off',
+      'nfl_plays.def',
+      'nfl_plays.play_type',
       'nfl_plays.esbid',
       'nfl_plays.playId',
       'nfl_plays.play_type_ngs',
@@ -314,22 +318,23 @@ const run = async ({
       continue
     }
 
-    const { esbid, playId } = play
-    await db('nfl_plays')
-      .update({
+    await update_play({
+      play_row: {
+        off: play.off,
+        def: play.def,
+        play_type: play.play_type
+      },
+      update: {
         off,
         def,
         play_type
-      })
-      .where({
-        esbid,
-        playId
-      })
+      },
+      ignore_conflicts
+    })
   }
 
   log('Updating play row pid columns')
   const playStatsByEsbid = groupBy(playStats, 'esbid')
-  const play_rows = []
   for (const [esbid, playStats] of Object.entries(playStatsByEsbid)) {
     const playStatsByPlay = groupBy(playStats, 'playId')
     for (const [playId, playStats] of Object.entries(playStatsByPlay)) {
@@ -339,7 +344,6 @@ const run = async ({
 
       const play_row = getPlayFromPlayStats({ playStats })
       if (Object.keys(play_row).length === 0) continue
-      play_rows.push(play_row)
 
       // TODO - succ
 
@@ -388,12 +392,51 @@ const run = async ({
         }
       }
 
+      // TODO should be ordered based on order of events in the play (use play description)
+
+      for (let i = 0; i < 3; i++) {
+        const gsis_id = play_row.tacklers_solo[i]
+        if (gsis_id) {
+          play_row[`solo_tackle_${i + 1}_gsis`] = gsis_id
+          const player = player_gsisid_rows.find((p) => p.gsisid === gsis_id)
+          if (player) {
+            play_row[`solo_tackle_${i + 1}_pid`] = player.pid
+          }
+        }
+      }
+
+      for (let i = 0; i < 2; i++) {
+        const gsis_id = play_row.tacklers_with_assisters[i]
+        if (gsis_id) {
+          play_row[`assisted_tackle_${i + 1}_gsis`] = gsis_id
+          const player = player_gsisid_rows.find((p) => p.gsisid === gsis_id)
+          if (player) {
+            play_row[`assisted_tackle_${i + 1}_pid`] = player.pid
+          }
+        }
+      }
+
+      for (let i = 0; i < 4; i++) {
+        const gsis_id = play_row.tackle_assisters[i]
+        if (gsis_id) {
+          play_row[`tackle_assist_${i + 1}_gsis`] = gsis_id
+          const player = player_gsisid_rows.find((p) => p.gsisid === gsis_id)
+          if (player) {
+            play_row[`tackle_assist_${i + 1}_pid`] = player.pid
+          }
+        }
+      }
+
       if (argv.dry) continue
 
       play_update_count += 1
-      await db('nfl_plays').update(play_row).where({
+
+      // TODO pull all plays in a single select instead of making a call for each play
+      await update_play({
         esbid,
-        playId
+        playId,
+        update: play_row,
+        ignore_conflicts
       })
     }
   }
