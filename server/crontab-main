@@ -123,25 +123,52 @@
 ## Process Poaching Claims Every Hour
 0 */1 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-poaching-claims.mjs &>> /var/log/league/league-process-poaching-claims.log
 
-################################### Backup ########################################
+################################### Checkpoint Backup ########################################
 
-## Backup User Data (At minute 0 in every month from June through August)
-0 * * 6-8 * /bin/bash /root/league/scripts/mysql-backup.sh &>> /var/log/league/league-mysql-backup.log
+## Backup User Data (At minute 0 in every month from June through August) (Checkpoint)
+0 * * 6-8 * /bin/bash /root/league/scripts/postgres-backup.sh -n checkpoint &>> /var/log/league/league-postgres-backup.log
 
-## Backup User Data (At every 15th minute in every month from September through December.)
-*/15 * * 9-12 * /bin/bash /root/league/scripts/mysql-backup.sh &>> /var/log/league/league-mysql-backup.log
+## Backup User Data (At every 15th minute in every month from September through December.) (Checkpoint)
+*/15 * * 9-12 * /bin/bash /root/league/scripts/postgres-backup.sh -n checkpoint &>> /var/log/league/league-postgres-backup.log
 
-## Backup Stat Data (At 00:00 on Wednesday in every month from September through December)
-0 0 * 9-12 3 /bin/bash /root/league/scripts/mysql-backup.sh -s &>> /var/log/league/league-mysql-backup.log
+## Backup Stat Data (Once a day) (Checkpoint)
+0 0 * 9-12 3 /bin/bash /root/league/scripts/postgres-backup.sh -s -n checkpoint &>> /var/log/league/league-postgres-backup-stats.log
 
-## Backup All Data (At 04:00 on Wednesday in every month from September through December)
-# 0 4 * 9-12 3 /bin/bash /root/league/scripts/mysql-backup.sh -f &>> /var/log/league/league-mysql-backup-full.log
+## Backup Betting Data (Once a day) (Checkpoint)
+15 0 * 9-12 3 /bin/bash /root/league/scripts/postgres-backup.sh -b -n checkpoint &>> /var/log/league/league-postgres-backup-betting.log
 
-## Backup All Betting Data (At 06:00 on Wednesday in every month from September through December)
-# 0 6 * 9-12 3 /bin/bash /root/league/scripts/mysql-backup.sh -b &>> /var/log/league/league-mysql-backup-betting.log
+## Backup Projections Data (Once a day) (Checkpoint)
+30 0 * 9-12 3 /bin/bash /root/league/scripts/postgres-backup.sh -p -n checkpoint &>> /var/log/league/league-postgres-backup-projections.log
 
-## Backup All Projections Data (At 08:00 on Wednesday in every month from September through December)
-# 0 8 * 9-12 3 /bin/bash /root/league/scripts/mysql-backup.sh -p &>> /var/log/league/league-mysql-backup-projections.log
+## Backup Log Data (Once a day) (Checkpoint)
+45 0 * 9-12 3 /bin/bash /root/league/scripts/postgres-backup.sh -l -n checkpoint &>> /var/log/league/league-postgres-backup-log.log
+
+## Backup Cache Data (Once a day) (Checkpoint)
+0 1 * 9-12 3 /bin/bash /root/league/scripts/postgres-backup.sh -c -n checkpoint &>> /var/log/league/league-postgres-backup-cache.log
+
+################################### Time-Series Backup ########################################
+
+## Backup User Data (Once a day) (Time-Series)
+0 0 * * * /bin/bash /root/league/scripts/postgres-backup.sh &>> /var/log/league/league-postgres-backup.log
+
+## Backup Stat Data (At 00:00 on Wednesday in every month from September through December) (Time-Series)
+0 0 * 9-12 3 /bin/bash /root/league/scripts/postgres-backup.sh -s &>> /var/log/league/league-postgres-backup-stats.log
+
+## Backup All Data (At 04:00 on Wednesday in every month from September through December) (Time-Series)
+# 0 4 * 9-12 3 /bin/bash /root/league/scripts/postgres-backup.sh -f &>> /var/log/league/league-postgres-backup-full.log
+
+## Backup All Betting Data (At 06:00 on Wednesday in every month from September through December) (Time-Series)
+0 6 * 9-12 3 /bin/bash /root/league/scripts/postgres-backup.sh -b &>> /var/log/league/league-postgres-backup-betting.log
+
+## Backup All Projections Data (At 08:00 on Wednesday in every month from September through December) (Time-Series)
+0 8 * 9-12 3 /bin/bash /root/league/scripts/postgres-backup.sh -p &>> /var/log/league/league-postgres-backup-projections.log
+
+## Backup All Cache Data (At 10:00 on Wednesday in every month from September through December) (Time-Series)
+0 10 * 9-12 3 /bin/bash /root/league/scripts/postgres-backup.sh -c &>> /var/log/league/league-postgres-backup-cache.log
+
+## Backup All Log Data (At 12:00 on Wednesday in every month from September through December) (Time-Series)
+0 12 * 9-12 3 /bin/bash /root/league/scripts/postgres-backup.sh -l &>> /var/log/league/league-postgres-backup-log.log
+
 
 ################################### nflfastR  ########################################
 
