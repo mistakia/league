@@ -122,6 +122,7 @@ const run = async ({
   ignore_conflicts = false
 } = {}) => {
   let play_update_count = 0
+  let play_field_update_count = 0
 
   const playStats = await db('nfl_play_stats')
     .select(
@@ -156,12 +157,16 @@ const run = async ({
   const player_gsispid_rows = await db('player').whereIn('gsispid', gsispids)
 
   log(
-    `loaded play stats for ${Object.keys(play_stats_by_gsispid).length} players`
+    `loaded play stats for ${Object.keys(play_stats_by_gsispid).length} gsispid players`
   )
 
   const play_stats_by_gsisid = groupBy(playStats, 'gsisId')
   const gsisids = Object.keys(play_stats_by_gsisid)
   const player_gsisid_rows = await db('player').whereIn('gsisid', gsisids)
+
+  log(
+    `loaded play stats for ${Object.keys(play_stats_by_gsisid).length} gsisid players`
+  )
 
   // track generated gamelogs by gsispids
   const gamelog_gsispids = []
@@ -432,15 +437,18 @@ const run = async ({
       play_update_count += 1
 
       // TODO pull all plays in a single select instead of making a call for each play
-      await update_play({
+      const changes = await update_play({
         esbid,
         playId,
         update: play_row,
         ignore_conflicts
       })
+      play_field_update_count += changes.length
     }
   }
-  log(`Updated ${play_update_count} plays`)
+  log(
+    `Updated ${play_field_update_count} play fields on ${play_update_count} plays`
+  )
 }
 
 const main = async () => {

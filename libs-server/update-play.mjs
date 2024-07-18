@@ -43,6 +43,11 @@ const update_play = async ({
   for (const edit of edits) {
     const prop = edit.path[0]
 
+    const is_null = !edit.rhs
+    if (is_null) {
+      continue
+    }
+
     if (excluded_props.includes(prop)) {
       log(`not allowed to update ${prop}`)
       continue
