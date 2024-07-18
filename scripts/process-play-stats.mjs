@@ -3,7 +3,7 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { isMain, update_play } from '#libs-server'
+import { isMain, update_play, batch_insert } from '#libs-server'
 import db from '#db'
 import {
   constants,
@@ -284,10 +284,15 @@ const run = async ({
   )
 
   if (player_gamelog_inserts.length) {
-    await db('player_gamelogs')
-      .insert(player_gamelog_inserts)
-      .onConflict(['esbid', 'pid'])
-      .merge()
+    await batch_insert({
+      items: player_gamelog_inserts,
+      save: (items) =>
+        db('player_gamelogs')
+          .insert(items)
+          .onConflict(['esbid', 'pid'])
+          .merge(),
+      batch_size: 500
+    })
     log(`Updated ${player_gamelog_inserts.length} gamelogs`)
   }
 
