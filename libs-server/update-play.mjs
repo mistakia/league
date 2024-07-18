@@ -30,6 +30,10 @@ const update_play = async ({
 
   const differences = diff(play_row, update)
 
+  if (!differences) {
+    return 0
+  }
+
   const edits = differences.filter((d) => d.kind === 'E')
   if (!edits.length) {
     return 0
