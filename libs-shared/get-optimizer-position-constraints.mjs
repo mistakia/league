@@ -19,12 +19,16 @@ export default function ({ positions, league }) {
 
   const positionCount = getPositionCount(positions)
   for (const [pos, min] of positionCount.entries()) {
-    const posMin = Math.min(min, rosterConstraints[pos].min)
-    constraints[pos] = Object.assign({}, rosterConstraints[pos])
-    constraints[pos].min = posMin
-    constraints.starter.max += posMin
-    constraints.starter.min += posMin
-    positionCount.set(pos, Math.max(min - rosterConstraints[pos].min, 0))
+    if (rosterConstraints[pos]) {
+      const posMin = Math.min(min, rosterConstraints[pos].min)
+      constraints[pos] = Object.assign({}, rosterConstraints[pos])
+      constraints[pos].min = posMin
+      constraints.starter.max += posMin
+      constraints.starter.min += posMin
+      positionCount.set(pos, Math.max(min - rosterConstraints[pos].min, 0))
+    } else {
+      constraints[pos] = { min: 0, max: 0, starter: { max: 0, min: 0 } }
+    }
   }
 
   const processFlex = (positions, flexCount) => {
