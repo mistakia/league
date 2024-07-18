@@ -414,7 +414,8 @@ CREATE TYPE public.nfl_play_type AS ENUM (
     'NOPL',
     'PASS',
     'PUNT',
-    'RUSH'
+    'RUSH',
+    'FREE'
 );
 
 
@@ -694,7 +695,7 @@ CREATE TABLE public.league_baselines (
     year smallint,
     pid character varying(25),
     type character varying(10) NOT NULL,
-    pos character varying(3) NOT NULL
+    pos character varying(4) NOT NULL
 );
 
 
@@ -3563,7 +3564,7 @@ CREATE TABLE public.player_gamelogs (
     pid character varying(25),
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
-    pos character varying(3) NOT NULL,
+    pos character varying(4) NOT NULL,
     jnum smallint,
     active boolean,
     started boolean,
@@ -3616,7 +3617,7 @@ CREATE TABLE public.player_seasonlogs (
     pid character varying(25) NOT NULL,
     year smallint NOT NULL,
     seas_type character varying(10) NOT NULL,
-    pos character varying(3) NOT NULL,
+    pos character varying(4) NOT NULL,
     pa smallint DEFAULT '0'::smallint,
     pc smallint DEFAULT '0'::smallint,
     py integer DEFAULT 0,
@@ -4139,7 +4140,7 @@ CREATE TABLE public.props_index (
     name character varying(50),
     team character varying(3),
     opp character varying(3),
-    pos character varying(3),
+    pos character varying(4),
     hits_soft smallint,
     hit_weeks_soft json,
     hits_hard smallint,
@@ -4182,7 +4183,7 @@ CREATE TABLE public.props_index_new (
     team character varying(3),
     opp character varying(3),
     esbid bigint,
-    pos character varying(3),
+    pos character varying(4),
     hits_soft smallint,
     hit_weeks_soft json,
     hits_hard smallint,
@@ -4248,7 +4249,7 @@ ALTER SEQUENCE public.props_index_prop_id_seq OWNED BY public.props_index.prop_i
 
 CREATE TABLE public.rankings (
     pid character varying(25),
-    pos character varying(3) NOT NULL,
+    pos character varying(4) NOT NULL,
     week smallint NOT NULL,
     year smallint,
     min integer,
@@ -4339,7 +4340,7 @@ CREATE TABLE public.rosters_players (
     rid integer NOT NULL,
     slot integer NOT NULL,
     pid character varying(25) NOT NULL,
-    pos character varying(3) NOT NULL,
+    pos character varying(4) NOT NULL,
     tag smallint DEFAULT '1'::smallint NOT NULL,
     extensions smallint DEFAULT '0'::smallint NOT NULL,
     tid bigint NOT NULL,
