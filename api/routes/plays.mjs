@@ -39,7 +39,7 @@ router.get('/stats', async (req, res) => {
       })
       .where('nfl_plays_current_week.year', constants.season.year)
       .where('nfl_plays_current_week.seas_type', 'REG')
-      .where('nfl_play_stats_current_week.valid', 1)
+      .where('nfl_play_stats_current_week.valid', true)
     res.send(data)
   } catch (error) {
     logger(error)
