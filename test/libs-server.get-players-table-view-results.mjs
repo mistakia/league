@@ -842,9 +842,9 @@ describe('LIBS SERVER get_players_table_view_results', () => {
         {
           column_id: 'player_fantasy_points_from_plays',
           params: {
+            rate_type: 'per_game',
             year: [2022, 2023]
-          },
-          rate_type: 'per_game'
+          }
         }
       ],
       sort: [
