@@ -339,7 +339,7 @@ const run = async ({
       update: {
         off,
         def,
-        play_type,
+        play_type
       },
       ignore_conflicts
     })

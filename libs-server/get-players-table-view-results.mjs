@@ -4,6 +4,10 @@ import players_table_column_definitions from './players-table-column-definitions
 import apply_play_by_play_column_params_to_query from './apply-play-by-play-column-params-to-query.mjs'
 import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
 import * as validators from './validators.mjs'
+import {
+  get_per_game_cte_table_name,
+  add_per_game_cte
+} from './players-table/rate-type-per-game.mjs'
 
 const add_play_by_play_with_statement = ({
   query,
@@ -165,41 +169,56 @@ const get_where_string = ({
 }
 
 const get_select_string = ({
+  column_id,
   column_params,
   column_index,
   column_definition,
-  table_name
+  table_name,
+  rate_type_column_mapping
 }) => {
+  const rate_type_table_name =
+    rate_type_column_mapping[`${column_id}_${column_index}`]
+  const column_value = `"${table_name}"."${column_definition.column_name}"`
+
+  const get_select_expression = () => {
+    if (rate_type_table_name) {
+      return `${column_value} / nullif(${rate_type_table_name}.rate_type_total_count, 0)`
+    }
+    return column_value
+  }
+
   if (column_definition.select) {
     return {
       select: column_definition.select({
         table_name,
         params: column_params,
-        column_index
+        column_index,
+        rate_type_table_name
       }),
       group_by: column_definition.group_by
         ? column_definition.group_by({
             table_name,
             params: column_params,
-            column_index
+            column_index,
+            rate_type_table_name
           })
         : []
     }
-  } else if (column_definition.select_as) {
-    const select_as = column_definition.select_as({ params: column_params })
-    return {
-      select: [
-        `"${table_name}"."${column_definition.column_name}" AS "${select_as}_${column_index}"`
-      ],
-      group_by: [`"${table_name}"."${column_definition.column_name}"`]
-    }
-  } else {
-    return {
-      select: [
-        `"${table_name}"."${column_definition.column_name}" AS "${column_definition.column_name}_${column_index}"`
-      ],
-      group_by: [`"${table_name}"."${column_definition.column_name}"`]
-    }
+  }
+
+  const select_expression = get_select_expression()
+  const select_as = column_definition.select_as
+    ? column_definition.select_as({ params: column_params })
+    : column_definition.column_name
+
+  return {
+    select: [`${select_expression} AS "${select_as}_${column_index}"`],
+    group_by: [
+      column_value,
+      rate_type_table_name
+        ? `${rate_type_table_name}.rate_type_total_count`
+        : null
+    ].filter(Boolean)
   }
 }
 
@@ -223,7 +242,8 @@ const add_clauses_for_table = ({
   table_name,
   column_params = {},
   splits = [],
-  previous_table_name
+  previous_table_name,
+  rate_type_column_mapping = {}
 }) => {
   const column_ids = []
   const select_strings = []
@@ -238,10 +258,12 @@ const add_clauses_for_table = ({
   for (const { column_id, column_index } of select_columns) {
     const column_definition = players_table_column_definitions[column_id]
     const select_result = get_select_string({
+      column_id,
       column_params,
       column_index,
       column_definition,
-      table_name
+      table_name,
+      rate_type_column_mapping
     })
 
     select_strings.push(...select_result.select)
@@ -316,10 +338,26 @@ const add_clauses_for_table = ({
     // add select to players_query for each select_column in the with statement
     for (const { column_id, column_index } of select_columns) {
       const column_definition = players_table_column_definitions[column_id]
-      players_query.select(
-        `${table_name}.${column_definition.column_name}_0 as ${column_definition.column_name}_${column_index}`
-      )
-      players_query.groupBy(`${table_name}.${column_definition.column_name}_0`)
+      const rate_type_table_name =
+        rate_type_column_mapping[`${column_id}_${column_index}`]
+      if (rate_type_table_name) {
+        players_query.select(
+          db.raw(
+            `${table_name}.${column_definition.column_name}_0 / nullif(${rate_type_table_name}.rate_type_total_count, 0) as ${column_definition.column_name}_${column_index}`
+          )
+        )
+        players_query.groupBy(
+          `${table_name}.${column_definition.column_name}_0`
+        )
+        players_query.groupBy(`${rate_type_table_name}.rate_type_total_count`)
+      } else {
+        players_query.select(
+          `${table_name}.${column_definition.column_name}_0 as ${column_definition.column_name}_${column_index}`
+        )
+        players_query.groupBy(
+          `${table_name}.${column_definition.column_name}_0`
+        )
+      }
     }
   } else if (with_func) {
     with_func({
@@ -490,11 +528,31 @@ export default function ({
   const with_statement_index = {}
   const players_query = db('player').select('player.pid')
   const table_columns = []
+  const rate_type_tables = {}
+  const rate_type_column_mapping = {}
+
   for (const [index, column] of [...prefix_columns, ...columns].entries()) {
-    table_columns.push({
-      column,
-      index
-    })
+    table_columns.push({ column, index })
+
+    if (typeof column === 'object' && column.rate_type === 'per_game') {
+      const rate_type_table_name = get_per_game_cte_table_name({
+        params: column.params
+      })
+      rate_type_tables[rate_type_table_name] = column.params
+      rate_type_column_mapping[`${column.column_id}_${index}`] =
+        rate_type_table_name
+    }
+  }
+
+  for (const [rate_type_table_name, params] of Object.entries(
+    rate_type_tables
+  )) {
+    add_per_game_cte({ players_query, params, rate_type_table_name })
+    players_query.leftJoin(
+      rate_type_table_name,
+      `${rate_type_table_name}.pid`,
+      'player.pid'
+    )
   }
 
   const grouped_clauses_by_table = get_grouped_clauses_by_table({
@@ -528,7 +586,8 @@ export default function ({
         joined_table_index,
         with_statement_index,
         splits: available_splits,
-        previous_table_name
+        previous_table_name,
+        rate_type_column_mapping
       })
       previous_table_name = table_name
     }
