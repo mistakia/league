@@ -533,7 +533,9 @@ export default function ({
 
   for (const [index, column] of [...prefix_columns, ...columns].entries()) {
     table_columns.push({ column, index })
+  }
 
+  for (const [index, column] of [...prefix_columns, ...columns].entries()) {
     if (
       typeof column === 'object' &&
       column.params &&
@@ -541,11 +543,16 @@ export default function ({
         ? column.params.rate_type[0] === 'per_game'
         : column.params.rate_type === 'per_game')
     ) {
+      const column_index = get_column_index({
+        column_id: column.column_id,
+        index,
+        columns: table_columns
+      })
       const rate_type_table_name = get_per_game_cte_table_name({
         params: column.params
       })
       rate_type_tables[rate_type_table_name] = column.params
-      rate_type_column_mapping[`${column.column_id}_${index}`] =
+      rate_type_column_mapping[`${column.column_id}_${column_index}`] =
         rate_type_table_name
     }
   }

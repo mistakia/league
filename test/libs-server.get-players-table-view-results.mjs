@@ -838,23 +838,25 @@ describe('LIBS SERVER get_players_table_view_results', () => {
 
   it('should generate a fantasy points by play rate query', () => {
     const query = get_players_table_view_results({
-      columns: [
-        {
-          column_id: 'player_fantasy_points_from_plays',
-          params: {
-            rate_type: 'per_game',
-            year: [2022, 2023]
-          }
-        }
-      ],
       sort: [
         {
           column_id: 'player_fantasy_points_from_plays',
           desc: true
         }
-      ]
+      ],
+      prefix_columns: ['player_name', 'player_league_roster_status'],
+      columns: [
+        {
+          column_id: 'player_fantasy_points_from_plays',
+          params: {
+            year: [2023],
+            rate_type: ['per_game']
+          }
+        }
+      ],
+      where: []
     })
-    const expected_query = `with "t90223ae0a429aa55987c27ce7da054de" as (select "pid", count(*) as "rate_type_total_count" from "player_gamelogs" left join "nfl_games" on "nfl_games"."esbid" = "player_gamelogs"."esbid" where "seas_type" = 'REG' and "year" in (2022, 2023) group by "pid"), "tf3b2f4f44c1977dac3344cf400954b61" as (select pid, ROUND(SUM(CASE WHEN pid_type = 'trg' AND comp = true THEN 1 ELSE 0 END + CASE WHEN pid_type IN ('bc', 'trg') THEN COALESCE(rush_yds, 0) + COALESCE(recv_yds, 0) ELSE 0 END * 0.1 + CASE WHEN pid_type = 'psr' THEN COALESCE(pass_yds, 0) ELSE 0 END * 0.04 + CASE WHEN pid_type = 'bc' AND rush_td = true THEN 6 WHEN pid_type = 'trg' AND pass_td = true THEN 6 WHEN pid_type = 'psr' AND pass_td = true THEN 4 ELSE 0 END + CASE WHEN pid_type = 'psr' AND int = true THEN -1 ELSE 0 END + CASE WHEN pid_type = 'fuml' THEN -1 ELSE 0 END), 2) as fantasy_points_from_plays from (select bc_pid as pid, 'bc' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "bc_pid" is not null union all select psr_pid as pid, 'psr' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "psr_pid" is not null union all select trg_pid as pid, 'trg' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "trg_pid" is not null union all select player_fuml_pid as pid, 'fuml' as pid_type, NULL as rush_yds, NULL as recv_yds, NULL as rush_td, NULL as td, NULL as comp, NULL as int, NULL as pass_yds, NULL as pass_td, play_type, seas_type, year from "nfl_plays" where "player_fuml_pid" is not null) as "fantasy_points_plays" where not "play_type" = 'NOPL' and "seas_type" = 'REG' and "fantasy_points_plays"."year" in (2022, 2023) group by "pid") select "player"."pid", "tf3b2f4f44c1977dac3344cf400954b61"."fantasy_points_from_plays" / nullif(t90223ae0a429aa55987c27ce7da054de.rate_type_total_count, 0) AS "fantasy_points_from_plays_0", "player"."pos" from "player" left join "t90223ae0a429aa55987c27ce7da054de" on "t90223ae0a429aa55987c27ce7da054de"."pid" = "player"."pid" left join "tf3b2f4f44c1977dac3344cf400954b61" on "tf3b2f4f44c1977dac3344cf400954b61"."pid" = "player"."pid" group by "tf3b2f4f44c1977dac3344cf400954b61"."fantasy_points_from_plays", t90223ae0a429aa55987c27ce7da054de.rate_type_total_count, "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 2 DESC NULLS LAST, "player"."pid" asc limit 500`
+    const expected_query = `with "tc3c8b905621f93bacf3ea27b25e97ce1" as (select "pid", count(*) as "rate_type_total_count" from "player_gamelogs" left join "nfl_games" on "nfl_games"."esbid" = "player_gamelogs"."esbid" where "seas_type" = 'REG' and "year" in (2023) group by "pid"), "tfa1ed5f59b01a5a7899a8e2b0b495d8c" as (select pid, ROUND(SUM(CASE WHEN pid_type = 'trg' AND comp = true THEN 1 ELSE 0 END + CASE WHEN pid_type IN ('bc', 'trg') THEN COALESCE(rush_yds, 0) + COALESCE(recv_yds, 0) ELSE 0 END * 0.1 + CASE WHEN pid_type = 'psr' THEN COALESCE(pass_yds, 0) ELSE 0 END * 0.04 + CASE WHEN pid_type = 'bc' AND rush_td = true THEN 6 WHEN pid_type = 'trg' AND pass_td = true THEN 6 WHEN pid_type = 'psr' AND pass_td = true THEN 4 ELSE 0 END + CASE WHEN pid_type = 'psr' AND int = true THEN -1 ELSE 0 END + CASE WHEN pid_type = 'fuml' THEN -1 ELSE 0 END), 2) as fantasy_points_from_plays from (select bc_pid as pid, 'bc' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "bc_pid" is not null union all select psr_pid as pid, 'psr' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "psr_pid" is not null union all select trg_pid as pid, 'trg' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "trg_pid" is not null union all select player_fuml_pid as pid, 'fuml' as pid_type, NULL as rush_yds, NULL as recv_yds, NULL as rush_td, NULL as td, NULL as comp, NULL as int, NULL as pass_yds, NULL as pass_td, play_type, seas_type, year from "nfl_plays" where "player_fuml_pid" is not null) as "fantasy_points_plays" where not "play_type" = 'NOPL' and "seas_type" = 'REG' and "fantasy_points_plays"."year" in (2023) group by "pid") select "player"."pid", player.fname, player.lname, CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, "tfa1ed5f59b01a5a7899a8e2b0b495d8c"."fantasy_points_from_plays" / nullif(tc3c8b905621f93bacf3ea27b25e97ce1.rate_type_total_count, 0) AS "fantasy_points_from_plays_0", "player"."pos" from "player" left join "tc3c8b905621f93bacf3ea27b25e97ce1" on "tc3c8b905621f93bacf3ea27b25e97ce1"."pid" = "player"."pid" left join "rosters_players" on "rosters_players"."pid" = "player"."pid" and "rosters_players"."year" = 2024 and "rosters_players"."week" = 0 and "rosters_players"."lid" = 1 left join "tfa1ed5f59b01a5a7899a8e2b0b495d8c" on "tfa1ed5f59b01a5a7899a8e2b0b495d8c"."pid" = "player"."pid" group by player.fname, player.lname, rosters_players.slot, rosters_players.tid, rosters_players.tag, "tfa1ed5f59b01a5a7899a8e2b0b495d8c"."fantasy_points_from_plays", tc3c8b905621f93bacf3ea27b25e97ce1.rate_type_total_count, "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 8 DESC NULLS LAST, "player"."pid" asc limit 500`
     expect(query.toString()).to.equal(expected_query)
   })
 
