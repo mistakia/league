@@ -240,6 +240,7 @@ export default {
     with: fantasy_points_from_plays_with,
     join: fantasy_points_from_plays_join,
     supported_splits: ['year'],
+    supported_rate_types: ['per_game'],
     use_having: true
   }
 }

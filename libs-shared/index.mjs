@@ -55,6 +55,7 @@ export { default as get_string_from_object } from './get-string-from-object.mjs'
 export { default as format_nfl_status } from './format-nfl-status.mjs'
 export { default as format_nfl_injury_status } from './format-nfl-injury-status.mjs'
 export { default as nfl_plays_column_params } from './nfl-plays-column-params.mjs'
+export { default as rate_type_column_param } from './rate-type-column-param.mjs'
 
 export const uniqBy = (a, key) => {
   const seen = new Set()

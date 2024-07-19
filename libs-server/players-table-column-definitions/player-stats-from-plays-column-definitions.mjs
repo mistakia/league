@@ -105,7 +105,8 @@ const player_stat_from_plays = ({ pid_columns, select_string, stat_name }) => ({
     })
   },
   use_having: true,
-  supported_splits: ['year']
+  supported_splits: ['year'],
+  supported_rate_types: ['per_game']
 })
 
 const create_team_share_stat = ({
