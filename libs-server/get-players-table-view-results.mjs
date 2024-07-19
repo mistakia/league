@@ -534,7 +534,13 @@ export default function ({
   for (const [index, column] of [...prefix_columns, ...columns].entries()) {
     table_columns.push({ column, index })
 
-    if (typeof column === 'object' && column.rate_type === 'per_game') {
+    if (
+      typeof column === 'object' &&
+      column.params &&
+      (Array.isArray(column.params.rate_type)
+        ? column.params.rate_type[0] === 'per_game'
+        : column.params.rate_type === 'per_game')
+    ) {
       const rate_type_table_name = get_per_game_cte_table_name({
         params: column.params
       })

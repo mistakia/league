@@ -49,7 +49,7 @@ const fantasy_points_from_plays_with = ({
       base_columns.add('year')
     } else if (param_name === 'career_game') {
       base_columns.add('esbid')
-    } else {
+    } else if (nfl_plays_column_params[param_name]) {
       base_columns.add(param_name)
     }
   }
