@@ -543,6 +543,16 @@ export default function ({
         ? column.params.rate_type[0] === 'per_game'
         : column.params.rate_type === 'per_game')
     ) {
+      const column_definition =
+        players_table_column_definitions[column.column_id]
+      if (
+        !column_definition ||
+        !column_definition.supported_rate_types ||
+        !column_definition.supported_rate_types.includes('per_game')
+      ) {
+        continue
+      }
+
       const column_index = get_column_index({
         column_id: column.column_id,
         index,

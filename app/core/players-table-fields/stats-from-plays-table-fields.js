@@ -1,9 +1,20 @@
 import * as table_constants from 'react-table/src/constants.mjs'
 
 import COLUMN_GROUPS from './column-groups'
-import { nfl_plays_column_params } from '@libs-shared'
+import { nfl_plays_column_params, rate_type_column_param } from '@libs-shared'
 
 const from_play_field = (field) => ({
+  data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+  column_params: {
+    rate_type: rate_type_column_param,
+    ...nfl_plays_column_params
+  },
+  size: 70,
+  splits: ['year'],
+  ...field
+})
+
+const from_share_field = (field) => ({
   data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
   column_params: nfl_plays_column_params,
   size: 70,
@@ -235,28 +246,28 @@ export default {
     player_value_path: 'weighted_opportunity_from_plays',
     fixed: 2
   }),
-  player_rush_attempts_share_from_plays: from_play_field({
+  player_rush_attempts_share_from_plays: from_share_field({
     column_title: 'Share of Team Rushing Attempts (By Play)',
     column_groups: [COLUMN_GROUPS.RUSHING],
     header_label: 'ATT%',
     player_value_path: 'rush_att_share_from_plays',
     fixed: 1
   }),
-  player_rush_yards_share_from_plays: from_play_field({
+  player_rush_yards_share_from_plays: from_share_field({
     column_title: 'Share of Team Rushing Yardage (By Play)',
     column_groups: [COLUMN_GROUPS.RUSHING],
     header_label: 'YDS%',
     player_value_path: 'rush_yds_share_from_plays',
     fixed: 1
   }),
-  player_rush_first_down_share_from_plays: from_play_field({
+  player_rush_first_down_share_from_plays: from_share_field({
     column_title: 'Share of Team Rushing First Downs (By Play)',
     column_groups: [COLUMN_GROUPS.RUSHING],
     header_label: 'TM FD%',
     player_value_path: 'rush_first_down_share_from_plays',
     fixed: 1
   }),
-  player_opportunity_share_from_plays: from_play_field({
+  player_opportunity_share_from_plays: from_share_field({
     column_title: 'Share of Team Opportunities (By Play)',
     column_groups: [COLUMN_GROUPS.OPPURTUNITY],
     header_label: 'OPP%',
@@ -372,28 +383,28 @@ export default {
     player_value_path: 'recv_first_down_pct_from_plays',
     fixed: 1
   }),
-  player_air_yards_share_from_plays: from_play_field({
+  player_air_yards_share_from_plays: from_share_field({
     column_title: 'Share of Team Air Yards (By Play)',
     column_groups: [COLUMN_GROUPS.RECEIVING],
     header_label: 'AY%',
     player_value_path: 'air_yds_share_from_plays',
     fixed: 1
   }),
-  player_target_share_from_plays: from_play_field({
+  player_target_share_from_plays: from_share_field({
     column_title: 'Share of Team Targets (By Play)',
     column_groups: [COLUMN_GROUPS.RECEIVING],
     header_label: 'TGT%',
     player_value_path: 'trg_share_from_plays',
     fixed: 1
   }),
-  player_weighted_opportunity_rating_from_plays: from_play_field({
+  player_weighted_opportunity_rating_from_plays: from_share_field({
     column_title: 'Weighted Opportunity Rating (By Play)',
     column_groups: [COLUMN_GROUPS.RECEIVING],
     header_label: 'WOPR',
     player_value_path: 'weighted_opp_rating_from_plays',
     fixed: 1
   }),
-  player_receiving_first_down_share_from_plays: from_play_field({
+  player_receiving_first_down_share_from_plays: from_share_field({
     column_title: 'Share of Team Receiving First Downs (By Play)',
     column_groups: [COLUMN_GROUPS.RECEIVING],
     header_label: 'TM FD%',
