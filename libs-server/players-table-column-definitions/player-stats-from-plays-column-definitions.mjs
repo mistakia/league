@@ -220,7 +220,7 @@ export default {
   }),
   player_pass_attempts_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    select_string: `COUNT(*)`,
+    select_string: `SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END)`,
     stat_name: 'pass_atts_from_plays'
   }),
   player_pass_touchdowns_from_plays: player_stat_from_plays({
@@ -273,12 +273,12 @@ export default {
     }),
   player_pass_yards_per_pass_attempt_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    select_string: `CASE WHEN SUM(CASE WHEN sk is null or sk = false THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(pass_yds) / SUM(CASE WHEN sk is null or sk = false THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END`,
+    select_string: `CASE WHEN SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(pass_yds) / SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END`,
     stat_name: 'pass_yds_per_att_from_plays'
   }),
   player_pass_depth_per_pass_attempt_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    select_string: `CASE WHEN SUM(CASE WHEN sk is null or sk = false THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(dot) / SUM(CASE WHEN sk is null or sk = false THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END`,
+    select_string: `CASE WHEN SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(dot) / SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END`,
     stat_name: 'pass_depth_per_att_from_plays'
   }),
   player_pass_air_yards_from_plays: player_stat_from_plays({
@@ -310,29 +310,30 @@ export default {
   }),
   player_sacked_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    select_string: `CASE WHEN SUM(CASE WHEN sk = true THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN sk = true THEN 1 ELSE 0 END) / SUM(CASE WHEN sk = true THEN 1 ELSE 0 END), 2) ELSE 0 END`,
+    select_string: `CASE WHEN SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN sk = true THEN 1 ELSE 0 END) / SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END`,
     stat_name: 'sacked_pct_from_plays'
   }),
   player_quarterback_hits_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    select_string: `CASE WHEN COUNT(*) > 0 THEN ROUND(100.0 * SUM(CASE WHEN qb_hit = true THEN 1 ELSE 0 END) / COUNT(*), 2) ELSE 0 END`,
+    select_string: `CASE WHEN SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN qb_hit = true AND psr_pid IS NOT NULL THEN 1 ELSE 0 END) / SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END`,
     stat_name: 'qb_hit_pct_from_plays'
   }),
   player_quarterback_pressures_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    select_string: `CASE WHEN COUNT(*) > 0 THEN ROUND(100.0 * SUM(CASE WHEN qb_pressure = true THEN 1 ELSE 0 END) / COUNT(*), 2) ELSE 0 END`,
+    select_string: `CASE WHEN SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN qb_pressure = true AND psr_pid IS NOT NULL THEN 1 ELSE 0 END) / SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END`,
     stat_name: 'qb_press_pct_from_plays'
   }),
   player_quarterback_hurries_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    select_string: `CASE WHEN COUNT(*) > 0 THEN ROUND(100.0 * SUM(CASE WHEN qb_hurry = true THEN 1 ELSE 0 END) / COUNT(*), 2) ELSE 0 END`,
+    select_string: `CASE WHEN SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN qb_hurry = true AND psr_pid IS NOT NULL THEN 1 ELSE 0 END) / SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END`,
     stat_name: 'qb_hurry_pct_from_plays'
   }),
 
   // net yards per passing attempt: (pass yards - sack yards)/(passing attempts + sacks).
+  // sacks included in calculation because psr_pid is set on all attempts or sacks
   player_pass_net_yards_per_attempt_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    select_string: `CASE WHEN COUNT(*) > 0 THEN CAST(ROUND((SUM(pass_yds) - SUM(CASE WHEN sk = true THEN yds_gained ELSE 0 END))::decimal / COUNT(*), 2) AS decimal) ELSE 0 END`,
+    select_string: `CASE WHEN SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND((SUM(pass_yds) - SUM(CASE WHEN sk = true THEN yds_gained ELSE 0 END))::decimal / SUM(CASE WHEN psr_pid IS NOT NULL THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END`,
     stat_name: 'pass_net_yds_per_att_from_plays'
   }),
 
@@ -348,12 +349,12 @@ export default {
   }),
   player_rush_yds_per_attempt_from_plays: player_stat_from_plays({
     pid_columns: ['bc_pid'],
-    select_string: `CASE WHEN COUNT(*) > 0 THEN CAST(ROUND(SUM(rush_yds)::decimal / COUNT(*), 2) AS decimal) ELSE 0 END`,
+    select_string: `CASE WHEN SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(rush_yds)::decimal / SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END`,
     stat_name: 'rush_yds_per_att_from_plays'
   }),
   player_rush_attempts_from_plays: player_stat_from_plays({
     pid_columns: ['bc_pid'],
-    select_string: `COUNT(*)`,
+    select_string: `COUNT(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE NULL END)`,
     stat_name: 'rush_atts_from_plays'
   }),
   player_rush_first_downs_from_plays: player_stat_from_plays({
@@ -374,12 +375,12 @@ export default {
   player_rush_yards_after_contact_per_attempt_from_plays:
     player_stat_from_plays({
       pid_columns: ['bc_pid'],
-      select_string: `CASE WHEN COUNT(*) > 0 THEN CAST(ROUND(SUM(yards_after_any_contact)::decimal / COUNT(*), 2) AS decimal) ELSE 0 END`,
+      select_string: `CASE WHEN SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(yards_after_any_contact)::decimal / SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END`,
       stat_name: 'rush_yds_after_contact_per_att_from_plays'
     }),
   player_rush_first_down_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['bc_pid'],
-    select_string: `CASE WHEN COUNT(*) > 0 THEN ROUND(100.0 * SUM(CASE WHEN first_down = true THEN 1 ELSE 0 END) / COUNT(*), 2) ELSE 0 END`,
+    select_string: `CASE WHEN SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN first_down = true THEN 1 ELSE 0 END) / SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END`,
     stat_name: 'rush_first_down_pct_from_plays'
   }),
   player_weighted_opportunity_from_plays: player_stat_from_plays({
@@ -392,7 +393,7 @@ export default {
     column_name: 'rush_att_share_from_plays',
     pid_columns: ['bc_pid'],
     select_string:
-      'ROUND(100.0 * COUNT(CASE WHEN nfl_plays.bc_pid = pg.pid THEN 1 ELSE NULL END) / COUNT(*), 2)'
+      'CASE WHEN SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) / NULLIF(SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) ELSE 0 END'
   }),
   player_rush_yards_share_from_plays: create_team_share_stat({
     column_name: 'rush_yds_share_from_plays',
@@ -415,17 +416,17 @@ export default {
 
   player_fumble_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['bc_pid'],
-    select_string: `CASE WHEN COUNT(*) > 0 THEN ROUND(100.0 * SUM(CASE WHEN player_fuml_pid = bc_pid THEN 1 ELSE 0 END) / COUNT(*), 2) ELSE 0 END`,
+    select_string: `CASE WHEN SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN player_fuml_pid = bc_pid THEN 1 ELSE 0 END) / SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END`,
     stat_name: 'fumble_pct_from_plays'
   }),
   player_positive_rush_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['bc_pid'],
-    select_string: `CASE WHEN COUNT(*) > 0 THEN ROUND(100.0 * SUM(CASE WHEN rush_yds > 0 THEN 1 ELSE 0 END) / COUNT(*), 2) ELSE 0 END`,
+    select_string: `CASE WHEN SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN rush_yds > 0 THEN 1 ELSE 0 END) / SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END`,
     stat_name: 'positive_rush_pct_from_plays'
   }),
   player_successful_rush_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['bc_pid'],
-    select_string: `CASE WHEN COUNT(*) > 0 THEN ROUND(100.0 * SUM(CASE WHEN succ = true THEN 1 ELSE 0 END) / COUNT(*), 2) ELSE 0 END`,
+    select_string: `CASE WHEN SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN succ = true THEN 1 ELSE 0 END) / SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END`,
     stat_name: 'succ_rush_pct_from_plays'
   }),
   player_broken_tackles_from_plays: player_stat_from_plays({
@@ -435,7 +436,7 @@ export default {
   }),
   player_broken_tackles_per_rush_attempt_from_plays: player_stat_from_plays({
     pid_columns: ['bc_pid'],
-    select_string: `CASE WHEN COUNT(*) > 0 THEN CAST(ROUND(SUM(mbt)::decimal / COUNT(*), 2) AS decimal) ELSE 0 END`,
+    select_string: `CASE WHEN SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(mbt)::decimal / SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END`,
     stat_name: 'broken_tackles_per_rush_att_from_plays'
   }),
   player_receptions_from_plays: player_stat_from_plays({
@@ -465,7 +466,7 @@ export default {
   }),
   player_targets_from_plays: player_stat_from_plays({
     pid_columns: ['trg_pid'],
-    select_string: `COUNT(*)`,
+    select_string: `SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     stat_name: 'trg_from_plays'
   }),
   player_deep_targets_from_plays: player_stat_from_plays({
@@ -475,12 +476,12 @@ export default {
   }),
   player_deep_targets_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['trg_pid'],
-    select_string: `CASE WHEN COUNT(*) > 0 THEN ROUND(100.0 * SUM(CASE WHEN dot >= 20 THEN 1 ELSE 0 END) / COUNT(*), 2) ELSE 0 END`,
+    select_string: `CASE WHEN SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN dot >= 20 THEN 1 ELSE 0 END) / SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END`,
     stat_name: 'deep_trg_pct_from_plays'
   }),
   player_air_yards_per_target_from_plays: player_stat_from_plays({
     pid_columns: ['trg_pid'],
-    select_string: `CASE WHEN COUNT(*) > 0 THEN CAST(ROUND(SUM(dot)::decimal / COUNT(*), 2) AS decimal) ELSE 0 END`,
+    select_string: `CASE WHEN SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(dot)::decimal / SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END`,
     stat_name: 'air_yds_per_trg_from_plays'
   }),
   player_air_yards_from_plays: player_stat_from_plays({
@@ -495,7 +496,7 @@ export default {
   }),
   player_receiving_first_down_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['trg_pid'],
-    select_string: `CASE WHEN COUNT(*) > 0 THEN ROUND(100.0 * SUM(CASE WHEN first_down = true THEN 1 ELSE 0 END) / COUNT(*), 2) ELSE 0 END`,
+    select_string: `CASE WHEN SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN first_down = true THEN 1 ELSE 0 END) / SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END`,
     stat_name: 'recv_first_down_pct_from_plays'
   }),
 
@@ -509,13 +510,13 @@ export default {
     column_name: 'trg_share_from_plays',
     pid_columns: ['trg_pid'],
     select_string:
-      'ROUND(100.0 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / COUNT(*), 2)'
+      'ROUND(100.0 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2)'
   }),
   player_weighted_opportunity_rating_from_plays: create_team_share_stat({
     column_name: 'weighted_opp_rating_from_plays',
     pid_columns: ['trg_pid'],
     select_string:
-      'ROUND((1.5 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(COUNT(*), 0)) + (0.7 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0)), 4)'
+      'ROUND((1.5 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0)) + (0.7 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0)), 4)'
   }),
   player_receiving_first_down_share_from_plays: create_team_share_stat({
     column_name: 'recv_first_down_share_from_plays',

@@ -26,12 +26,12 @@ const add_play_by_play_with_statement = ({
     .select(db.raw(`COALESCE(${pid_columns.join(', ')}) as pid`))
     .whereNot('play_type', 'NOPL')
     .where('nfl_plays.seas_type', 'REG')
-  // TODO this should probably not be used as some plays may not have a ball carrier or targeted player but may be need for some stats like sacks
-  // .where(function () {
-  //   for (const pid_column of pid_columns) {
-  //     this.orWhereNotNull(pid_column)
-  //   }
-  // })
+    // TODO this could be helpful for performance
+    // .where(function () {
+    //   for (const pid_column of pid_columns) {
+    //     this.orWhereNotNull(pid_column)
+    //   }
+    // })
 
   for (const split of splits) {
     if (players_table_constants.split_params.includes(split)) {
