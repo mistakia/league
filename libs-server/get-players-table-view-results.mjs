@@ -8,6 +8,7 @@ import {
   get_per_game_cte_table_name,
   add_per_game_cte
 } from './players-table/rate-type-per-game.mjs'
+import { add_defensive_play_by_play_with_statement } from './players-table/add-defensive-play-by-play-with-statement.mjs'
 
 const add_play_by_play_with_statement = ({
   query,
@@ -26,12 +27,12 @@ const add_play_by_play_with_statement = ({
     .select(db.raw(`COALESCE(${pid_columns.join(', ')}) as pid`))
     .whereNot('play_type', 'NOPL')
     .where('nfl_plays.seas_type', 'REG')
-    // TODO this could be helpful for performance
-    // .where(function () {
-    //   for (const pid_column of pid_columns) {
-    //     this.orWhereNotNull(pid_column)
-    //   }
-    // })
+  // TODO this could be helpful for performance
+  // .where(function () {
+  //   for (const pid_column of pid_columns) {
+  //     this.orWhereNotNull(pid_column)
+  //   }
+  // })
 
   for (const split of splits) {
     if (players_table_constants.split_params.includes(split)) {
@@ -249,6 +250,7 @@ const add_clauses_for_table = ({
   const select_strings = []
   const group_by_strings = []
   let use_play_by_play_with = false
+  let use_defensive_play_by_play_with = false
 
   // the pid column and join_func should be the same among column definitions with the same table name/alias
   let pid_columns = null
@@ -275,6 +277,10 @@ const add_clauses_for_table = ({
 
     if (column_definition.use_play_by_play_with) {
       use_play_by_play_with = true
+      pid_columns = column_definition.pid_columns
+      join_func = column_definition.join
+    } else if (column_definition.use_defensive_play_by_play_with) {
+      use_defensive_play_by_play_with = true
       pid_columns = column_definition.pid_columns
       join_func = column_definition.join
     } else if (column_definition.with) {
@@ -326,6 +332,41 @@ const add_clauses_for_table = ({
 
   if (use_play_by_play_with) {
     add_play_by_play_with_statement({
+      query: players_query,
+      params: column_params,
+      with_table_name: table_name,
+      having_clauses: having_clause_strings,
+      select_strings,
+      pid_columns,
+      splits
+    })
+
+    // add select to players_query for each select_column in the with statement
+    for (const { column_id, column_index } of select_columns) {
+      const column_definition = players_table_column_definitions[column_id]
+      const rate_type_table_name =
+        rate_type_column_mapping[`${column_id}_${column_index}`]
+      if (rate_type_table_name) {
+        players_query.select(
+          db.raw(
+            `${table_name}.${column_definition.column_name}_0 / nullif(${rate_type_table_name}.rate_type_total_count, 0) as ${column_definition.column_name}_${column_index}`
+          )
+        )
+        players_query.groupBy(
+          `${table_name}.${column_definition.column_name}_0`
+        )
+        players_query.groupBy(`${rate_type_table_name}.rate_type_total_count`)
+      } else {
+        players_query.select(
+          `${table_name}.${column_definition.column_name}_0 as ${column_definition.column_name}_${column_index}`
+        )
+        players_query.groupBy(
+          `${table_name}.${column_definition.column_name}_0`
+        )
+      }
+    }
+  } else if (use_defensive_play_by_play_with) {
+    add_defensive_play_by_play_with_statement({
       query: players_query,
       params: column_params,
       with_table_name: table_name,

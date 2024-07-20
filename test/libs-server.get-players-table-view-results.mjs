@@ -877,56 +877,15 @@ describe('LIBS SERVER get_players_table_view_results', () => {
         }
       ]
     })
+    const expected_query = `with "t89755c4c161289c0528388aab8875aa4" as (select pid, SUM(CASE WHEN pid_column = 'solo_tackle_1_pid' THEN 1 WHEN pid_column = 'solo_tackle_2_pid' THEN 1 WHEN pid_column = 'solo_tackle_3_pid' THEN 1 ELSE 0 END) AS solo_tackles_from_plays_0 from (select solo_tackle_1_pid as pid, 'solo_tackle_1_pid' as pid_column, play_type, seas_type, year from "nfl_plays" where "solo_tackle_1_pid" is not null union all select solo_tackle_2_pid as pid, 'solo_tackle_2_pid' as pid_column, play_type, seas_type, year from "nfl_plays" where "solo_tackle_2_pid" is not null union all select solo_tackle_3_pid as pid, 'solo_tackle_3_pid' as pid_column, play_type, seas_type, year from "nfl_plays" where "solo_tackle_3_pid" is not null) as "defensive_plays" where not "play_type" = 'NOPL' and "seas_type" = 'REG' and "defensive_plays"."year" in (2023) group by "pid") select "player"."pid", "t89755c4c161289c0528388aab8875aa4"."solo_tackles_from_plays_0" as "solo_tackles_from_plays_0", "player"."pos" from "player" left join "t89755c4c161289c0528388aab8875aa4" on "t89755c4c161289c0528388aab8875aa4"."pid" = "player"."pid" group by "t89755c4c161289c0528388aab8875aa4"."solo_tackles_from_plays_0", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 2 DESC NULLS LAST, "player"."pid" asc limit 500`
+    expect(query.toString()).to.equal(expected_query)
   })
 
-  it('test query', () => {
+  it('should generate a tackle assist columns query', () => {
     const query = get_players_table_view_results({
       columns: [
-        'player_pfr_id',
         {
-          column_id: 'player_pass_attempts_from_plays',
-          params: {
-            year: [2023, 2022, 2021, 2020, 2019],
-            year_offset: -1,
-            epa: [0, 14]
-          }
-        },
-        {
-          column_id: 'player_pass_attempts_from_plays',
-          params: {
-            year: [2023, 2022, 2021, 2020, 2019],
-            epa: [0, 14]
-          }
-        }
-      ],
-      sort: [
-        {
-          column_id: 'player_pass_attempts_from_plays',
-          desc: true
-        }
-      ],
-      where: [
-        {
-          column_id: 'player_position',
-          operator: 'IN',
-          value: ['QB']
-        },
-        {
-          column_id: 'player_fantasy_games_played_from_seasonlogs',
-          operator: '>=',
-          value: '8'
-        }
-      ],
-      prefix_columns: ['player_name'],
-      splits: ['year']
-    })
-  })
-
-  it('test pass attempts', () => {
-    const result = get_players_table_view_results({
-      columns: [
-        {
-          column_id: 'player_pass_attempts_from_plays',
+          column_id: 'player_combined_tackles_from_plays',
           params: {
             year: [2023]
           }
@@ -934,11 +893,13 @@ describe('LIBS SERVER get_players_table_view_results', () => {
       ],
       sort: [
         {
-          column_id: 'player_pass_attempts_from_plays',
+          column_id: 'player_combined_tackles_from_plays',
           desc: true
         }
       ]
     })
+    const expected_query = `with "t545d6f61e3f3d701d190cd7810893e81" as (select pid, SUM(CASE WHEN pid_column = 'solo_tackle_1_pid' THEN 1 WHEN pid_column = 'solo_tackle_2_pid' THEN 1 WHEN pid_column = 'solo_tackle_3_pid' THEN 1 WHEN pid_column = 'assisted_tackle_1_pid' THEN 1 WHEN pid_column = 'assisted_tackle_2_pid' THEN 1 WHEN pid_column = 'tackle_assist_1_pid' THEN 1 WHEN pid_column = 'tackle_assist_2_pid' THEN 1 WHEN pid_column = 'tackle_assist_3_pid' THEN 1 ELSE 0 END) AS combined_tackles_from_plays_0 from (select assisted_tackle_1_pid as pid, 'assisted_tackle_1_pid' as pid_column, play_type, seas_type, year from "nfl_plays" where "assisted_tackle_1_pid" is not null union all select assisted_tackle_2_pid as pid, 'assisted_tackle_2_pid' as pid_column, play_type, seas_type, year from "nfl_plays" where "assisted_tackle_2_pid" is not null union all select solo_tackle_1_pid as pid, 'solo_tackle_1_pid' as pid_column, play_type, seas_type, year from "nfl_plays" where "solo_tackle_1_pid" is not null union all select solo_tackle_2_pid as pid, 'solo_tackle_2_pid' as pid_column, play_type, seas_type, year from "nfl_plays" where "solo_tackle_2_pid" is not null union all select solo_tackle_3_pid as pid, 'solo_tackle_3_pid' as pid_column, play_type, seas_type, year from "nfl_plays" where "solo_tackle_3_pid" is not null union all select tackle_assist_1_pid as pid, 'tackle_assist_1_pid' as pid_column, play_type, seas_type, year from "nfl_plays" where "tackle_assist_1_pid" is not null union all select tackle_assist_2_pid as pid, 'tackle_assist_2_pid' as pid_column, play_type, seas_type, year from "nfl_plays" where "tackle_assist_2_pid" is not null union all select tackle_assist_3_pid as pid, 'tackle_assist_3_pid' as pid_column, play_type, seas_type, year from "nfl_plays" where "tackle_assist_3_pid" is not null) as "defensive_plays" where not "play_type" = 'NOPL' and "seas_type" = 'REG' and "defensive_plays"."year" in (2023) group by "pid") select "player"."pid", "t545d6f61e3f3d701d190cd7810893e81"."combined_tackles_from_plays_0" as "combined_tackles_from_plays_0", "player"."pos" from "player" left join "t545d6f61e3f3d701d190cd7810893e81" on "t545d6f61e3f3d701d190cd7810893e81"."pid" = "player"."pid" group by "t545d6f61e3f3d701d190cd7810893e81"."combined_tackles_from_plays_0", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 2 DESC NULLS LAST, "player"."pid" asc limit 500`
+    expect(query.toString()).to.equal(expected_query)
   })
 
   describe('errors', () => {
