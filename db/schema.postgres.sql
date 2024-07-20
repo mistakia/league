@@ -15,7 +15,6 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
-SET search_path = public;
 
 DROP TRIGGER IF EXISTS player_name_search_vector_update ON public.player;
 DROP INDEX IF EXISTS public.player_name_search_idx;
@@ -25,9 +24,18 @@ DROP INDEX IF EXISTS public.idx_scoring_format_player_careerlogs_pid_hash;
 DROP INDEX IF EXISTS public.idx_prop_markets_index_market_time_year;
 DROP INDEX IF EXISTS public.idx_prop_market_selections_index_composite;
 DROP INDEX IF EXISTS public.idx_nfl_plays_ydl_100;
+DROP INDEX IF EXISTS public.idx_nfl_plays_tackle_assist_4_pid;
+DROP INDEX IF EXISTS public.idx_nfl_plays_tackle_assist_3_pid;
+DROP INDEX IF EXISTS public.idx_nfl_plays_tackle_assist_2_pid;
+DROP INDEX IF EXISTS public.idx_nfl_plays_tackle_assist_1_pid;
+DROP INDEX IF EXISTS public.idx_nfl_plays_solo_tackle_3_pid;
+DROP INDEX IF EXISTS public.idx_nfl_plays_solo_tackle_2_pid;
+DROP INDEX IF EXISTS public.idx_nfl_plays_solo_tackle_1_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_series_seq;
 DROP INDEX IF EXISTS public.idx_nfl_plays_qtr;
 DROP INDEX IF EXISTS public.idx_nfl_plays_dwn;
+DROP INDEX IF EXISTS public.idx_nfl_plays_assisted_tackle_2_pid;
+DROP INDEX IF EXISTS public.idx_nfl_plays_assisted_tackle_1_pid;
 DROP INDEX IF EXISTS public.idx_25151_lid;
 DROP INDEX IF EXISTS public.idx_25147_waiverid_pid;
 DROP INDEX IF EXISTS public.idx_25147_waiverid;
@@ -6395,6 +6403,20 @@ CREATE INDEX idx_25151_lid ON public.waivers USING btree (lid);
 
 
 --
+-- Name: idx_nfl_plays_assisted_tackle_1_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_assisted_tackle_1_pid ON public.nfl_plays USING btree (assisted_tackle_1_pid);
+
+
+--
+-- Name: idx_nfl_plays_assisted_tackle_2_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_assisted_tackle_2_pid ON public.nfl_plays USING btree (assisted_tackle_2_pid);
+
+
+--
 -- Name: idx_nfl_plays_dwn; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -6413,6 +6435,55 @@ CREATE INDEX idx_nfl_plays_qtr ON public.nfl_plays USING btree (qtr);
 --
 
 CREATE INDEX idx_nfl_plays_series_seq ON public.nfl_plays USING btree (series_seq);
+
+
+--
+-- Name: idx_nfl_plays_solo_tackle_1_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_solo_tackle_1_pid ON public.nfl_plays USING btree (solo_tackle_1_pid);
+
+
+--
+-- Name: idx_nfl_plays_solo_tackle_2_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_solo_tackle_2_pid ON public.nfl_plays USING btree (solo_tackle_2_pid);
+
+
+--
+-- Name: idx_nfl_plays_solo_tackle_3_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_solo_tackle_3_pid ON public.nfl_plays USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: idx_nfl_plays_tackle_assist_1_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_tackle_assist_1_pid ON public.nfl_plays USING btree (tackle_assist_1_pid);
+
+
+--
+-- Name: idx_nfl_plays_tackle_assist_2_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_tackle_assist_2_pid ON public.nfl_plays USING btree (tackle_assist_2_pid);
+
+
+--
+-- Name: idx_nfl_plays_tackle_assist_3_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_tackle_assist_3_pid ON public.nfl_plays USING btree (tackle_assist_3_pid);
+
+
+--
+-- Name: idx_nfl_plays_tackle_assist_4_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_tackle_assist_4_pid ON public.nfl_plays USING btree (tackle_assist_4_pid);
 
 
 --
