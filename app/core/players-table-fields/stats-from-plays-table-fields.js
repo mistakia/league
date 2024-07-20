@@ -25,25 +25,25 @@ const from_share_field = (field) => ({
 export default {
   player_pass_yards_from_plays: from_play_field({
     column_title: 'Passing Yards (By Play)',
-    column_groups: [COLUMN_GROUPS.PASSING, COLUMN_GROUPS.TOTALS],
+    column_groups: [COLUMN_GROUPS.PASSING],
     header_label: 'YDS',
     player_value_path: 'pass_yds_from_plays'
   }),
   player_pass_attempts_from_plays: from_play_field({
     column_title: 'Passing Attempts (By Play)',
-    column_groups: [COLUMN_GROUPS.PASSING, COLUMN_GROUPS.TOTALS],
+    column_groups: [COLUMN_GROUPS.PASSING],
     header_label: 'ATT',
     player_value_path: 'pass_atts_from_plays'
   }),
   player_pass_touchdowns_from_plays: from_play_field({
     column_title: 'Passing Touchdowns (By Play)',
-    column_groups: [COLUMN_GROUPS.PASSING, COLUMN_GROUPS.TOTALS],
+    column_groups: [COLUMN_GROUPS.PASSING],
     header_label: 'TD',
     player_value_path: 'pass_tds_from_plays'
   }),
   player_pass_interceptions_from_plays: from_play_field({
     column_title: 'Passing Interceptions (By Play)',
-    column_groups: [COLUMN_GROUPS.PASSING, COLUMN_GROUPS.TOTALS],
+    column_groups: [COLUMN_GROUPS.PASSING],
     header_label: 'INT',
     player_value_path: 'pass_ints_from_plays'
   }),
@@ -438,5 +438,24 @@ export default {
     header_label: 'YAC/R',
     player_value_path: 'rec_yds_after_catch_per_rec_from_plays',
     fixed: 1
+  }),
+
+  player_solo_tackles_from_plays: from_play_field({
+    column_title: 'Solo Tackles (By Play)',
+    column_groups: [COLUMN_GROUPS.TACKLES],
+    header_label: 'SOLO',
+    player_value_path: 'solo_tackles_from_plays'
+  }),
+  player_tackle_assists_from_plays: from_play_field({
+    column_title: 'Tackle Assists (By Play)',
+    column_groups: [COLUMN_GROUPS.TACKLES],
+    header_label: 'AST',
+    player_value_path: 'tackle_assists_from_plays'
+  }),
+  player_combined_tackles_from_plays: from_play_field({
+    column_title: 'Combined Tackles (By Play)',
+    column_groups: [COLUMN_GROUPS.TACKLES],
+    header_label: 'COMB',
+    player_value_path: 'combined_tackles_from_plays'
   })
 }

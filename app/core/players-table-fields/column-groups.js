@@ -21,9 +21,9 @@ const COLUMN_GROUPS = {
   PASSING: { priority: 3 },
   RUSHING: { priority: 3 },
   RECEIVING: { priority: 3 },
+  TACKLES: { priority: 3 },
   SEASON: { priority: 4 },
   CAREER: { priority: 4 },
-  TOTALS: { priority: 4 },
   EFFICIENCY: { priority: 4 },
   AFTER_CATCH: { priority: 5 }
 }
