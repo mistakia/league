@@ -11,6 +11,8 @@ import player_stats_from_plays_column_definitions from './player-stats-from-play
 import player_fantasy_points_from_plays_column_definitions from './player-fantasy-points-from-plays-column-definitions.mjs'
 import defensive_player_stats_from_plays_column_definitions from './defensive-player-stats-from-plays-column-definitions.mjs'
 
+const player_league_roster_status_select = `CASE WHEN rosters_players.slot = ${constants.slots.IR} THEN 'injured_reserve' WHEN rosters_players.slot = ${constants.slots.PS} THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END`
+
 export default {
   ...player_projected_column_definitions,
   ...player_espn_score_column_definitions,
@@ -24,10 +26,9 @@ export default {
 
   player_league_roster_status: {
     table_name: 'rosters_players',
-    // TODO should be removed, do not use `where_column` with `use_having`
-    where_column: () => 'player_league_roster_status',
+    where_column: () => player_league_roster_status_select,
     select: () => [
-      `CASE WHEN rosters_players.slot = ${constants.slots.IR} THEN 'injured_reserve' WHEN rosters_players.slot = ${constants.slots.PS} THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status`,
+      `${player_league_roster_status_select} AS player_league_roster_status`,
       'rosters_players.slot',
       'rosters_players.tid',
       'rosters_players.tag'
@@ -45,8 +46,7 @@ export default {
         this.andOn('rosters_players.week', '=', week)
         this.andOn('rosters_players.lid', '=', lid)
       })
-    },
-    use_having: true
+    }
   },
   player_league_salary: {
     column_name: 'value',
