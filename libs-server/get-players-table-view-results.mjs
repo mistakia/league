@@ -608,15 +608,19 @@ export default function ({
     }
   }
 
+  let previous_table_name
+
   for (const [rate_type_table_name, params] of Object.entries(
     rate_type_tables
   )) {
-    add_per_game_cte({ players_query, params, rate_type_table_name })
+    add_per_game_cte({ players_query, params, rate_type_table_name, splits })
     players_query.leftJoin(
       rate_type_table_name,
       `${rate_type_table_name}.pid`,
       'player.pid'
     )
+
+    previous_table_name = rate_type_table_name
   }
 
   const grouped_clauses_by_table = get_grouped_clauses_by_table({
@@ -634,7 +638,6 @@ export default function ({
   for (const [supported_splits_key, tables] of Object.entries(
     grouped_by_splits
   )) {
-    let previous_table_name
     const available_splits = supported_splits_key.split('_').filter(Boolean)
 
     for (const [
@@ -653,7 +656,9 @@ export default function ({
         previous_table_name,
         rate_type_column_mapping
       })
-      previous_table_name = table_name
+      if (!previous_table_name && table_name !== 'player') {
+        previous_table_name = table_name
+      }
     }
   }
 
