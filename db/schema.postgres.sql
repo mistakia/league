@@ -15,6 +15,7 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
+SET search_path = public;
 
 DROP TRIGGER IF EXISTS player_name_search_vector_update ON public.player;
 DROP INDEX IF EXISTS public.player_name_search_idx;
