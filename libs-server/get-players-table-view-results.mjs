@@ -183,7 +183,7 @@ const get_select_string = ({
 
   const get_select_expression = () => {
     if (rate_type_table_name) {
-      return `${column_value} / nullif(${rate_type_table_name}.rate_type_total_count, 0)`
+      return `CAST(${column_value} AS DECIMAL) / NULLIF(CAST(${rate_type_table_name}.rate_type_total_count AS DECIMAL), 0)`
     }
     return column_value
   }
@@ -349,7 +349,7 @@ const add_clauses_for_table = ({
       if (rate_type_table_name) {
         players_query.select(
           db.raw(
-            `${table_name}.${column_definition.column_name}_0 / nullif(${rate_type_table_name}.rate_type_total_count, 0) as ${column_definition.column_name}_${column_index}`
+            `CAST(${table_name}.${column_definition.column_name}_0 AS DECIMAL) / nullif(CAST(${rate_type_table_name}.rate_type_total_count AS DECIMAL), 0) as ${column_definition.column_name}_${column_index}`
           )
         )
         players_query.groupBy(
@@ -384,7 +384,7 @@ const add_clauses_for_table = ({
       if (rate_type_table_name) {
         players_query.select(
           db.raw(
-            `${table_name}.${column_definition.column_name}_0 / nullif(${rate_type_table_name}.rate_type_total_count, 0) as ${column_definition.column_name}_${column_index}`
+            `CAST(${table_name}.${column_definition.column_name}_0 AS DECIMAL) / nullif(CAST(${rate_type_table_name}.rate_type_total_count AS DECIMAL), 0) as ${column_definition.column_name}_${column_index}`
           )
         )
         players_query.groupBy(
