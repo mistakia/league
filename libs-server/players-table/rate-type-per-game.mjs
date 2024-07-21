@@ -25,7 +25,8 @@ export const get_per_game_cte_table_name = ({ params = {} } = {}) => {
 export const add_per_game_cte = ({
   players_query,
   params,
-  rate_type_table_name
+  rate_type_table_name,
+  splits = []
 }) => {
   let year = params.year || [constants.season.stats_season_year]
   if (!Array.isArray(year)) {
@@ -52,6 +53,13 @@ export const add_per_game_cte = ({
   }
   if (week.length) {
     cte_query.whereIn('week', week)
+  }
+
+  for (const split of splits) {
+    if (split === 'year') {
+      cte_query.select('year')
+      cte_query.groupBy('year')
+    }
   }
 
   cte_query.groupBy('pid')
