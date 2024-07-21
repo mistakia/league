@@ -5,32 +5,36 @@ import Icon from '@components/icon'
 
 import './player-header.styl'
 
-export default class PlayerHeader extends React.Component {
-  handleClick = () => {
-    this.props.toggle(this.props.value)
+export default function PlayerHeader({
+  toggle_players_page_order,
+  value,
+  label,
+  className,
+  order,
+  orderBy
+}) {
+  const handleClick = () => {
+    toggle_players_page_order(value)
   }
 
-  render = () => {
-    const { label, className, order, orderBy, value } = this.props
-    const isSelected = orderBy === value
-    const classNames = ['player__header']
-    if (className) classNames.push(className)
-    if (isSelected) {
-      classNames.push('selected')
-      classNames.push(order)
-    }
-
-    return (
-      <div className={classNames.join(' ')} onClick={this.handleClick}>
-        <Icon name='down' />
-        {label}
-      </div>
-    )
+  const isSelected = orderBy === value
+  const classNames = ['player__header']
+  if (className) classNames.push(className)
+  if (isSelected) {
+    classNames.push('selected')
+    classNames.push(order)
   }
+
+  return (
+    <div className={classNames.join(' ')} onClick={handleClick}>
+      <Icon name='down' />
+      {label}
+    </div>
+  )
 }
 
 PlayerHeader.propTypes = {
-  toggle: PropTypes.func,
+  toggle_players_page_order: PropTypes.func,
   value: PropTypes.string,
   label: PropTypes.string,
   className: PropTypes.string,
