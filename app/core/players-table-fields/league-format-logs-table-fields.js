@@ -24,6 +24,7 @@ const league_format_hash_param = {
 const from_format_player_logs = (field) => ({
   data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
   size: 70,
+  fixed: 2,
   ...field
 })
 

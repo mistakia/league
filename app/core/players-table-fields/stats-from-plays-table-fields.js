@@ -10,6 +10,7 @@ const from_play_field = (field) => ({
     ...nfl_plays_column_params
   },
   size: 70,
+  fixed: 2,
   splits: ['year'],
   ...field
 })
