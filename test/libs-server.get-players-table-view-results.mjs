@@ -902,6 +902,43 @@ describe('LIBS SERVER get_players_table_view_results', () => {
     expect(query.toString()).to.equal(expected_query)
   })
 
+  it('should filter by active rosters', () => {
+    const query = get_players_table_view_results({
+      prefix_columns: ['player_name', 'player_league_roster_status'],
+      columns: [
+        'player_receptions_from_plays',
+        'player_receiving_yards_from_plays',
+        'player_receiving_touchdowns_from_plays',
+        'player_targets_from_plays',
+        'player_deep_targets_from_plays',
+        'player_deep_targets_percentage_from_plays',
+        'player_air_yards_per_target_from_plays',
+        'player_air_yards_from_plays',
+        'player_air_yards_share_from_plays'
+      ],
+      sort: [
+        {
+          column_id: 'player_deep_targets_from_plays',
+          desc: true
+        }
+      ],
+      where: [
+        {
+          column_id: 'player_position',
+          operator: 'IN',
+          value: ['WR']
+        },
+        {
+          column_id: 'player_league_roster_status',
+          operator: '=',
+          value: 'active_roster'
+        }
+      ]
+    })
+    const expected_query = `with "tcb3cea5c11f705e415f87574c59b9ac2" as (select COALESCE(trg_pid) as pid, SUM(CASE WHEN comp = true THEN 1 ELSE 0 END) as recs_from_plays_0, SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END) as rec_yds_from_plays_0, SUM(CASE WHEN comp = true AND td = true THEN 1 ELSE 0 END) as rec_tds_from_plays_0, SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) as trg_from_plays_0, SUM(CASE WHEN dot >= 20 THEN 1 ELSE 0 END) as deep_trg_from_plays_0, CASE WHEN SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN dot >= 20 THEN 1 ELSE 0 END) / SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END as deep_trg_pct_from_plays_0, CASE WHEN SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(dot)::decimal / SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as air_yds_per_trg_from_plays_0, SUM(dot) as air_yds_from_plays_0 from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' group by COALESCE(trg_pid)), "ta049e164079f927d8df1df89c78187e5" as (select "pg"."pid", ROUND(100.0 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / SUM(nfl_plays.dot), 2) as air_yds_share_from_plays from "nfl_plays" inner join "player_gamelogs" as "pg" on "nfl_plays"."esbid" = "pg"."esbid" and "nfl_plays"."off" = "pg"."tm" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and ("trg_pid" is not null) group by "pg"."pid") select "player"."pid", player.fname, player.lname, CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, "tcb3cea5c11f705e415f87574c59b9ac2"."recs_from_plays_0" as "recs_from_plays_0", "tcb3cea5c11f705e415f87574c59b9ac2"."rec_yds_from_plays_0" as "rec_yds_from_plays_0", "tcb3cea5c11f705e415f87574c59b9ac2"."rec_tds_from_plays_0" as "rec_tds_from_plays_0", "tcb3cea5c11f705e415f87574c59b9ac2"."trg_from_plays_0" as "trg_from_plays_0", "tcb3cea5c11f705e415f87574c59b9ac2"."deep_trg_from_plays_0" as "deep_trg_from_plays_0", "tcb3cea5c11f705e415f87574c59b9ac2"."deep_trg_pct_from_plays_0" as "deep_trg_pct_from_plays_0", "tcb3cea5c11f705e415f87574c59b9ac2"."air_yds_per_trg_from_plays_0" as "air_yds_per_trg_from_plays_0", "tcb3cea5c11f705e415f87574c59b9ac2"."air_yds_from_plays_0" as "air_yds_from_plays_0", "ta049e164079f927d8df1df89c78187e5"."air_yds_share_from_plays" AS "air_yds_share_from_plays_0", "player"."pos" from "player" left join "rosters_players" on "rosters_players"."pid" = "player"."pid" and "rosters_players"."year" = 2024 and "rosters_players"."week" = 0 and "rosters_players"."lid" = 1 left join "tcb3cea5c11f705e415f87574c59b9ac2" on "tcb3cea5c11f705e415f87574c59b9ac2"."pid" = "player"."pid" left join "ta049e164079f927d8df1df89c78187e5" on "ta049e164079f927d8df1df89c78187e5"."pid" = "player"."pid" where player.pos IN ('WR') and CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END = 'active_roster' group by player.fname, player.lname, rosters_players.slot, rosters_players.tid, rosters_players.tag, "tcb3cea5c11f705e415f87574c59b9ac2"."recs_from_plays_0", "tcb3cea5c11f705e415f87574c59b9ac2"."rec_yds_from_plays_0", "tcb3cea5c11f705e415f87574c59b9ac2"."rec_tds_from_plays_0", "tcb3cea5c11f705e415f87574c59b9ac2"."trg_from_plays_0", "tcb3cea5c11f705e415f87574c59b9ac2"."deep_trg_from_plays_0", "tcb3cea5c11f705e415f87574c59b9ac2"."deep_trg_pct_from_plays_0", "tcb3cea5c11f705e415f87574c59b9ac2"."air_yds_per_trg_from_plays_0", "tcb3cea5c11f705e415f87574c59b9ac2"."air_yds_from_plays_0", "ta049e164079f927d8df1df89c78187e5"."air_yds_share_from_plays", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 12 DESC NULLS LAST, "player"."pid" asc limit 500`
+    expect(query.toString()).to.equal(expected_query)
+  })
+
   describe('errors', () => {
     it('should throw an error if where value is missing', () => {
       try {
