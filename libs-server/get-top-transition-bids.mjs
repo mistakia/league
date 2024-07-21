@@ -11,6 +11,7 @@ export default async function (leagueId) {
         .from('transition_bids as successful_bids')
         .whereRaw('successful_bids.pid = transition_bids.pid')
         .where('successful_bids.succ', true)
+        .where('successful_bids.year', constants.season.year)
     })
 
   const active_rfa_pids = active_rfa_players.map((p) => p.pid)
