@@ -12,7 +12,7 @@ const mapStateToProps = createSelector(getPlayers, (players) => ({
 }))
 
 const mapDispatchToProps = {
-  toggle: playerActions.toggle
+  toggle_players_page_order: playerActions.toggle_players_page_order
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlayerHeader)
