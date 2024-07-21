@@ -5,9 +5,13 @@ export default async function (leagueId) {
   const active_rfa_players = await db('transition_bids')
     .where('lid', leagueId)
     .where('year', constants.season.year)
-    .whereNull('cancelled')
-    .whereNull('processed')
     .whereNotNull('announced')
+    .whereNotExists(function () {
+      this.select('*')
+        .from('transition_bids as successful_bids')
+        .whereRaw('successful_bids.pid = transition_bids.pid')
+        .where('successful_bids.succ', true)
+    })
 
   const active_rfa_pids = active_rfa_players.map((p) => p.pid)
 
