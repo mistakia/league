@@ -30,6 +30,7 @@ export default {
     column_title: 'Fantasy Points (By Play)',
     column_groups: [COLUMN_GROUPS.FANTASY_POINTS],
     header_label: 'FP',
-    player_value_path: 'fantasy_points_from_plays'
+    player_value_path: 'fantasy_points_from_plays',
+    fixed: 3
   }
 }
