@@ -31,7 +31,7 @@ const scoring_format_player_seasonlogs_join = ({
   table_name,
   join_type = 'LEFT',
   splits = [],
-  previous_table_name = null,
+  year_split_join_clause = null,
   params = {}
 }) => {
   const join_func = get_join_func(join_type)
@@ -62,20 +62,16 @@ const scoring_format_player_seasonlogs_join = ({
       db.raw(`${table_name}.scoring_format_hash = '${scoring_format_hash}'`)
     )
 
-    if (splits.length && previous_table_name) {
+    if (splits.length && year_split_join_clause) {
       for (const split of splits) {
         if (split === 'year' && year_offset !== 0) {
           this.andOn(
             db.raw(
-              `${table_name}.${split} = ${previous_table_name}.${split} + ${year_offset}`
+              `${table_name}.${split} = ${year_split_join_clause} + ${year_offset}`
             )
           )
-        } else {
-          this.andOn(
-            `${table_name}.${split}`,
-            '=',
-            `${previous_table_name}.${split}`
-          )
+        } else if (split === 'year') {
+          this.andOn(db.raw(`${table_name}.year = ${year_split_join_clause}`))
         }
       }
     } else if (splits.includes('year')) {
@@ -114,7 +110,7 @@ const scoring_format_player_careerlogs_join = ({
   table_name,
   join_type = 'LEFT',
   splits = [],
-  previous_table_name = null,
+  year_split_join_clause = null,
   params = {}
 }) => {
   const join_func = get_join_func(join_type)

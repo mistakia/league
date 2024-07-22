@@ -14,19 +14,19 @@ const create_espn_score_columns = (column_name) => ({
     params,
     join_type = 'LEFT',
     splits = [],
-    previous_table_name = null
+    year_split_join_clause = null
   } = {}) => {
     const join_func = get_join_func(join_type)
     const join_conditions = function () {
       this.on('player_seasonlogs.pid', '=', 'player.pid')
       this.andOn('player_seasonlogs.seas_type', '=', db.raw('?', ['REG']))
 
-      if (splits.length && previous_table_name) {
+      if (splits.includes('year') && year_split_join_clause) {
         splits.forEach((split) => {
           this.andOn(
-            `player_seasonlogs.${split}`,
+            'player_seasonlogs.year',
             '=',
-            `${previous_table_name}.${split}`
+            db.raw(`${year_split_join_clause}`)
           )
         })
       } else if (splits.includes('year')) {

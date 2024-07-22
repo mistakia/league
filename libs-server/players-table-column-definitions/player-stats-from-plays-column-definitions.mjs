@@ -32,7 +32,7 @@ const join_filtered_plays_table = ({
   table_name,
   join_type = 'LEFT',
   splits = [],
-  previous_table_name = null,
+  year_split_join_clause = null,
   params = {}
 }) => {
   const join_func = get_join_func(join_type)
@@ -41,22 +41,18 @@ const join_filtered_plays_table = ({
     year_offset = year_offset[0]
   }
 
-  if (splits.length && previous_table_name) {
+  if (splits.length && year_split_join_clause) {
     query[join_func](table_name, function () {
       this.on(`${table_name}.pid`, '=', 'player.pid')
       for (const split of splits) {
         if (split === 'year' && year_offset !== 0) {
           this.andOn(
             db.raw(
-              `${table_name}.${split} = ${previous_table_name}.${split} + ${year_offset}`
+              `${table_name}.${split} = ${year_split_join_clause} + ${year_offset}`
             )
           )
-        } else {
-          this.andOn(
-            `${table_name}.${split}`,
-            '=',
-            `${previous_table_name}.${split}`
-          )
+        } else if (split === 'year') {
+          this.andOn(db.raw(`${table_name}.year = ${year_split_join_clause}`))
         }
       }
     })
@@ -91,7 +87,7 @@ const player_stat_from_plays = ({ pid_columns, select_string, stat_name }) => ({
     table_name = `filtered_plays_${stat_name}`,
     join_type = 'LEFT',
     splits = [],
-    previous_table_name = null,
+    year_split_join_clause = null,
     params
   }) => {
     join_filtered_plays_table({
@@ -100,7 +96,7 @@ const player_stat_from_plays = ({ pid_columns, select_string, stat_name }) => ({
       pid_columns,
       join_type,
       splits,
-      previous_table_name,
+      year_split_join_clause,
       params
     })
   },
@@ -198,7 +194,7 @@ const create_team_share_stat = ({
     table_name,
     join_type,
     splits = [],
-    previous_table_name = null
+    year_split_join_clause = null
   }) => {
     join_filtered_plays_table({
       query,
@@ -206,7 +202,7 @@ const create_team_share_stat = ({
       pid_columns,
       join_type,
       splits,
-      previous_table_name
+      year_split_join_clause
     })
   },
   supported_splits: ['year']

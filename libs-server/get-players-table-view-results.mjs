@@ -150,7 +150,7 @@ const add_clauses_for_table = ({
   table_name,
   column_params = {},
   splits = [],
-  previous_table_name,
+  year_split_join_clause,
   rate_type_column_mapping = {}
 }) => {
   const column_ids = []
@@ -389,7 +389,7 @@ const add_clauses_for_table = ({
       params: column_params,
       join_type: where_clauses.length ? 'INNER' : 'LEFT',
       splits,
-      previous_table_name
+      year_split_join_clause
     })
   } else if (
     table_name !== 'player' &&
@@ -560,7 +560,7 @@ export default function ({
     }
   }
 
-  let previous_table_name
+  let year_split_join_clause
 
   for (const [rate_type_table_name, params] of Object.entries(
     rate_type_tables
@@ -572,7 +572,7 @@ export default function ({
       'player.pid'
     )
 
-    previous_table_name = rate_type_table_name
+    year_split_join_clause = `${rate_type_table_name}.year`
   }
 
   const grouped_clauses_by_table = get_grouped_clauses_by_table({
@@ -596,6 +596,9 @@ export default function ({
       table_name,
       { column_params, where_clauses, select_columns }
     ] of Object.entries(tables)) {
+      const year_select = select_columns.find(
+        (col) => players_table_column_definitions[col.column_id]?.year_select
+      )
       add_clauses_for_table({
         players_query,
         select_columns,
@@ -605,15 +608,19 @@ export default function ({
         joined_table_index,
         with_statement_index,
         splits: available_splits,
-        previous_table_name,
+        year_split_join_clause,
         rate_type_column_mapping
       })
       if (
-        !previous_table_name &&
+        !year_split_join_clause &&
         table_name !== 'player' &&
         table_name !== 'rosters_players'
       ) {
-        previous_table_name = table_name
+        year_split_join_clause = year_select
+          ? players_table_column_definitions[year_select.column_id].year_select(
+              table_name
+            )
+          : `${table_name}.year`
       }
     }
   }
