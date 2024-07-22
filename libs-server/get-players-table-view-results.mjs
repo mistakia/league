@@ -616,18 +616,51 @@ export default function ({
 
   // Add a coalesce select for each split
   for (const split of splits) {
-    const coalesce_args = Object.entries(grouped_clauses_by_table)
-      .filter(
-        ([_, table_info]) =>
-          table_info.supported_splits &&
-          table_info.supported_splits.includes(split)
-      )
-      .map(([table_alias, _]) => `${table_alias}.${split}`)
-      .join(', ')
+    if (split === 'year') {
+      const coalesce_args = Object.entries(grouped_clauses_by_table)
+        .filter(
+          ([_, table_info]) =>
+            table_info.supported_splits &&
+            table_info.supported_splits.includes(split)
+        )
+        .map(([table_alias, table_info]) => {
+          // Check if select_columns is not empty
+          if (
+            table_info.select_columns &&
+            table_info.select_columns.length > 0
+          ) {
+            const column_definition =
+              players_table_column_definitions[
+                table_info.select_columns[0].column_id
+              ]
+            if (column_definition && column_definition.year_select) {
+              return column_definition.year_select(table_alias)
+            }
+          }
+          // Default to standard year column if no custom year_select is available
+          return `${table_alias}.${split}`
+        })
+        .filter(Boolean) // Remove any undefined entries
+        .join(', ')
 
-    if (coalesce_args) {
-      players_query.select(db.raw(`COALESCE(${coalesce_args}) AS ${split}`))
-      players_query.groupBy(db.raw(`COALESCE(${coalesce_args})`))
+      if (coalesce_args) {
+        players_query.select(db.raw(`COALESCE(${coalesce_args}) AS year`))
+        players_query.groupBy(db.raw(`COALESCE(${coalesce_args})`))
+      }
+    } else {
+      const coalesce_args = Object.entries(grouped_clauses_by_table)
+        .filter(
+          ([_, table_info]) =>
+            table_info.supported_splits &&
+            table_info.supported_splits.includes(split)
+        )
+        .map(([table_alias, _]) => `${table_alias}.${split}`)
+        .join(', ')
+
+      if (coalesce_args) {
+        players_query.select(db.raw(`COALESCE(${coalesce_args}) AS ${split}`))
+        players_query.groupBy(db.raw(`COALESCE(${coalesce_args})`))
+      }
     }
   }
 
