@@ -4,8 +4,8 @@ import get_join_func from '#libs-server/get-join-func.mjs'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
 
 const generate_table_alias = ({ type, params = {} } = {}) => {
-  const { date, year } = params
-  const key = `keeptradecut_${type}_data_${date || ''}_year_${year || ''}`
+  const { date, year, year_offset } = params
+  const key = `keeptradecut_${type}_data_${date || ''}_year_${year || ''}_year_offset_${year_offset || ''}`
   return get_table_hash(key)
 }
 
@@ -29,7 +29,29 @@ const keeptradecut_join = ({
     this.andOn(`${table_name}.qb`, '=', db.raw('?', [params.qb || 2]))
     this.andOn(`${table_name}.type`, '=', db.raw('?', [type]))
 
-    if (splits.includes('year')) {
+    if (splits.includes('year') && year_split_join_clause) {
+      splits.forEach((split) => {
+        if (split === 'year') {
+          if (year_offset !== 0) {
+            this.andOn(
+              db.raw(
+                `EXTRACT(YEAR FROM (DATE_TRUNC('year', to_timestamp(${table_name}.d)::timestamp) + interval '${year_offset} year'))`
+              ),
+              '=',
+              db.raw(`(${year_split_join_clause})`)
+            )
+          } else {
+            this.andOn(
+              db.raw(
+                `EXTRACT(YEAR FROM to_timestamp(${table_name}.d)::timestamp)`
+              ),
+              '=',
+              db.raw(`(${year_split_join_clause})`)
+            )
+          }
+        }
+      })
+    } else if (splits.includes('year')) {
       if (params.year) {
         const year_array = Array.isArray(params.year)
           ? params.year
@@ -61,30 +83,6 @@ const keeptradecut_join = ({
           .where('pid', db.raw('player.pid'))
           .where('qb', db.raw('?', [params.qb || 2]))
           .where('type', db.raw('?', [type]))
-      })
-    }
-
-    if (splits.includes('year') && year_split_join_clause) {
-      splits.forEach((split) => {
-        if (split === 'year') {
-          if (year_offset !== 0) {
-            this.andOn(
-              db.raw(
-                `DATE_TRUNC('year', to_timestamp(${table_name}.d)::timestamp) + interval '${year_offset} year'`
-              ),
-              '=',
-              db.raw(`${year_split_join_clause}`)
-            )
-          } else {
-            this.andOn(
-              db.raw(
-                `EXTRACT(YEAR FROM to_timestamp(${table_name}.d)::timestamp)`
-              ),
-              '=',
-              db.raw(`${year_split_join_clause}`)
-            )
-          }
-        }
       })
     }
   }
