@@ -9,7 +9,8 @@ export const add_team_stats_play_by_play_with_statement = ({
   with_table_name,
   having_clauses = [],
   select_strings = [],
-  splits = []
+  splits = [],
+  select_column_names = []
 }) => {
   if (!with_table_name) {
     throw new Error('with_table_name is required')
@@ -66,6 +67,15 @@ export const add_team_stats_play_by_play_with_statement = ({
       this.andOn('nfl_games.week', '=', `${with_table_name}.week`)
     })
 
+  const unique_select_column_names = new Set(select_column_names)
+  for (const select_column_name of unique_select_column_names) {
+    player_team_stats_query.select(
+      db.raw(
+        `sum(${with_table_name}.${select_column_name}_0) as ${select_column_name}_0`
+      )
+    )
+  }
+
   if (splits.includes('year')) {
     player_team_stats_query.select('nfl_games.year')
     player_team_stats_query.groupBy('player_gamelogs.pid', 'nfl_games.year')
@@ -73,16 +83,10 @@ export const add_team_stats_play_by_play_with_statement = ({
     player_team_stats_query.groupBy('player_gamelogs.pid')
   }
 
-  player_team_stats_query.select(
-    db.raw(
-      `SUM(${with_table_name}.team_pass_yds_from_plays_0) as team_pass_yds_from_plays_0`
-    )
-  )
-
   if (params.year) {
     const year_array = Array.isArray(params.year) ? params.year : [params.year]
     player_team_stats_query.whereIn('nfl_games.year', year_array)
   }
 
-  query.with('player_team_stats', player_team_stats_query)
+  query.with(`${with_table_name}_player_team_stats`, player_team_stats_query)
 }
