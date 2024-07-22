@@ -939,6 +939,34 @@ describe('LIBS SERVER get_players_table_view_results', () => {
     expect(query.toString()).to.equal(expected_query)
   })
 
+  it('should generate a query with a team stat column', () => {
+    const query = get_players_table_view_results({
+      prefix_columns: ['player_name'],
+      columns: [
+        {
+          column_id: 'player_target_share_from_plays',
+          params: {
+            year: [2023]
+          }
+        },
+        {
+          column_id: 'team_pass_yards_from_plays',
+          params: {
+            year: [2023]
+          }
+        }
+      ],
+      sort: [
+        {
+          column_id: 'player_target_share_from_plays',
+          desc: true
+        }
+      ]
+    })
+    const expected_query = `with "t7ce618d9efd1bad910446e01527397b9" as (select "pg"."pid", ROUND(100.0 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as trg_share_from_plays from "nfl_plays" inner join "player_gamelogs" as "pg" on "nfl_plays"."esbid" = "pg"."esbid" and "nfl_plays"."off" = "pg"."tm" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and ("trg_pid" is not null) and "nfl_plays"."year" in (2023) group by "pg"."pid"), "team_stats_from_plays" as (select "nfl_plays"."off" as "nfl_team", "nfl_plays"."year", "nfl_plays"."week", SUM(pass_yds) AS team_pass_yds_from_plays_0 from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2023) group by "nfl_plays"."off", "nfl_plays"."year", "nfl_plays"."week"), "player_team_stats" as (select "player_gamelogs"."pid", SUM(team_stats_from_plays.team_pass_yds_from_plays_0) as team_pass_yds_from_plays_0 from "player_gamelogs" inner join "nfl_games" on "player_gamelogs"."esbid" = "nfl_games"."esbid" inner join "team_stats_from_plays" on "player_gamelogs"."tm" = "team_stats_from_plays"."nfl_team" and "nfl_games"."year" = "team_stats_from_plays"."year" and "nfl_games"."week" = "team_stats_from_plays"."week" where "nfl_games"."year" in (2023) group by "player_gamelogs"."pid") select "player"."pid", player.fname, player.lname, "t7ce618d9efd1bad910446e01527397b9"."trg_share_from_plays" AS "trg_share_from_plays_0", "player_team_stats"."team_pass_yds_from_plays_0" as "team_pass_yds_from_plays_0", "player"."pos" from "player" left join "t7ce618d9efd1bad910446e01527397b9" on "t7ce618d9efd1bad910446e01527397b9"."pid" = "player"."pid" left join "player_team_stats" on "player"."pid" = "player_team_stats"."pid" group by player.fname, player.lname, "t7ce618d9efd1bad910446e01527397b9"."trg_share_from_plays", "player_team_stats"."team_pass_yds_from_plays_0", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 4 DESC NULLS LAST, "player"."pid" asc limit 500`
+    expect(query.toString()).to.equal(expected_query)
+  })
+
   describe('errors', () => {
     it('should throw an error if where value is missing', () => {
       try {
