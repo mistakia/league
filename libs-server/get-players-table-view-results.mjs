@@ -1,106 +1,13 @@
 import db from '#db'
-import { players_table_constants } from '#libs-shared'
-import players_table_column_definitions from './players-table-column-definitions/index.mjs'
-import apply_play_by_play_column_params_to_query from './apply-play-by-play-column-params-to-query.mjs'
-import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
-import * as validators from './validators.mjs'
+import players_table_column_definitions from '#libs-server/players-table-column-definitions/index.mjs'
+import * as validators from '#libs-server/validators.mjs'
 import {
   get_per_game_cte_table_name,
   add_per_game_cte
-} from './players-table/rate-type-per-game.mjs'
-import { add_defensive_play_by_play_with_statement } from './players-table/add-defensive-play-by-play-with-statement.mjs'
-
-const add_play_by_play_with_statement = ({
-  query,
-  params = {},
-  with_table_name,
-  having_clauses = [],
-  select_strings = [],
-  pid_columns,
-  splits = []
-}) => {
-  if (!with_table_name) {
-    throw new Error('with_table_name is required')
-  }
-
-  const with_query = db('nfl_plays')
-    .select(db.raw(`COALESCE(${pid_columns.join(', ')}) as pid`))
-    .whereNot('play_type', 'NOPL')
-    .where('nfl_plays.seas_type', 'REG')
-  // TODO this could be helpful for performance
-  // .where(function () {
-  //   for (const pid_column of pid_columns) {
-  //     this.orWhereNotNull(pid_column)
-  //   }
-  // })
-
-  for (const split of splits) {
-    if (players_table_constants.split_params.includes(split)) {
-      const column_param_definition = nfl_plays_column_params[split]
-      const table_name = column_param_definition.table || 'nfl_plays'
-      const split_statement = `${table_name}.${split}`
-      with_query.select(split_statement)
-      with_query.groupBy(split_statement)
-    }
-  }
-
-  const unique_select_strings = new Set(select_strings)
-
-  for (const select_string of unique_select_strings) {
-    with_query.select(db.raw(select_string))
-  }
-
-  // Handle career_year and career_game separately
-  if (params.career_year) {
-    with_query.join('player_seasonlogs', function () {
-      this.on(function () {
-        for (const pid_column of pid_columns) {
-          this.orOn(`nfl_plays.${pid_column}`, '=', 'player_seasonlogs.pid')
-        }
-      })
-        .andOn('nfl_plays.year', '=', 'player_seasonlogs.year')
-        .andOn('nfl_plays.seas_type', '=', 'player_seasonlogs.seas_type')
-    })
-    with_query.whereBetween('player_seasonlogs.career_year', [
-      Math.min(params.career_year[0], params.career_year[1]),
-      Math.max(params.career_year[0], params.career_year[1])
-    ])
-  }
-
-  if (params.career_game) {
-    with_query.join('player_gamelogs', function () {
-      this.on(function () {
-        for (const pid_column of pid_columns) {
-          this.orOn(`nfl_plays.${pid_column}`, '=', 'player_gamelogs.pid')
-        }
-      }).andOn('nfl_plays.esbid', '=', 'player_gamelogs.esbid')
-    })
-    with_query.whereBetween('player_gamelogs.career_game', [
-      Math.min(params.career_game[0], params.career_game[1]),
-      Math.max(params.career_game[0], params.career_game[1])
-    ])
-  }
-
-  // Remove career_year and career_game from params before applying other filters
-  const filtered_params = { ...params }
-  delete filtered_params.career_year
-  delete filtered_params.career_game
-
-  apply_play_by_play_column_params_to_query({
-    query: with_query,
-    params: filtered_params
-  })
-
-  // Add groupBy clause before having
-  with_query.groupBy(db.raw(`COALESCE(${pid_columns.join(', ')})`))
-
-  // where_clauses to filter stats/metrics
-  for (const having_clause of having_clauses) {
-    with_query.havingRaw(having_clause)
-  }
-
-  query.with(with_table_name, with_query)
-}
+} from '#libs-server/players-table/rate-type-per-game.mjs'
+import { add_defensive_play_by_play_with_statement } from '#libs-server/players-table/add-defensive-play-by-play-with-statement.mjs'
+import { add_player_stats_play_by_play_with_statement } from '#libs-server/players-table/add-player-stats-play-by-play-with-statement.mjs'
+import { add_team_stats_play_by_play_with_statement } from '#libs-server/players-table/add-team-stats-play-by-play-with-statement.mjs'
 
 const get_column_index = ({ column_id, index, columns }) => {
   const columns_with_same_id = columns.filter(
@@ -249,8 +156,9 @@ const add_clauses_for_table = ({
   const column_ids = []
   const select_strings = []
   const group_by_strings = []
-  let use_play_by_play_with = false
+  let use_player_stats_play_by_play_with = false
   let use_defensive_play_by_play_with = false
+  let use_team_stats_play_by_play_with = false
 
   // the pid column and join_func should be the same among column definitions with the same table name/alias
   let pid_columns = null
@@ -275,13 +183,16 @@ const add_clauses_for_table = ({
       join_func = column_definition.join
     }
 
-    if (column_definition.use_play_by_play_with) {
-      use_play_by_play_with = true
+    if (column_definition.use_player_stats_play_by_play_with) {
+      use_player_stats_play_by_play_with = true
       pid_columns = column_definition.pid_columns
       join_func = column_definition.join
     } else if (column_definition.use_defensive_play_by_play_with) {
       use_defensive_play_by_play_with = true
       pid_columns = column_definition.pid_columns
+      join_func = column_definition.join
+    } else if (column_definition.use_team_stats_play_by_play_with) {
+      use_team_stats_play_by_play_with = true
       join_func = column_definition.join
     } else if (column_definition.with) {
       with_func = column_definition.with
@@ -321,17 +232,17 @@ const add_clauses_for_table = ({
     }
 
     if (
-      column_definition.use_play_by_play_with &&
+      column_definition.use_player_stats_play_by_play_with &&
       !unique_column_ids.has(where_clause.column_id)
     ) {
-      use_play_by_play_with = true
+      use_player_stats_play_by_play_with = true
       pid_columns = column_definition.pid_columns
       join_func = column_definition.join
     }
   }
 
-  if (use_play_by_play_with) {
-    add_play_by_play_with_statement({
+  if (use_player_stats_play_by_play_with) {
+    add_player_stats_play_by_play_with_statement({
       query: players_query,
       params: column_params,
       with_table_name: table_name,
@@ -362,6 +273,40 @@ const add_clauses_for_table = ({
         )
         players_query.groupBy(
           `${table_name}.${column_definition.column_name}_0`
+        )
+      }
+    }
+  } else if (use_team_stats_play_by_play_with) {
+    add_team_stats_play_by_play_with_statement({
+      query: players_query,
+      params: column_params,
+      with_table_name: table_name,
+      having_clauses: having_clause_strings,
+      select_strings,
+      splits
+    })
+
+    // add select to players_query for each select_column in the with statement
+    for (const { column_id, column_index } of select_columns) {
+      const column_definition = players_table_column_definitions[column_id]
+      const rate_type_table_name =
+        rate_type_column_mapping[`${column_id}_${column_index}`]
+      if (rate_type_table_name) {
+        players_query.select(
+          db.raw(
+            `CAST(player_team_stats.${column_definition.column_name}_0 AS DECIMAL) / nullif(CAST(${rate_type_table_name}.rate_type_total_count AS DECIMAL), 0) as ${column_definition.column_name}_${column_index}`
+          )
+        )
+        players_query.groupBy(
+          `player_team_stats.${column_definition.column_name}_0`
+        )
+        players_query.groupBy(`${rate_type_table_name}.rate_type_total_count`)
+      } else {
+        players_query.select(
+          `player_team_stats.${column_definition.column_name}_0 as ${column_definition.column_name}_${column_index}`
+        )
+        players_query.groupBy(
+          `player_team_stats.${column_definition.column_name}_0`
         )
       }
     }

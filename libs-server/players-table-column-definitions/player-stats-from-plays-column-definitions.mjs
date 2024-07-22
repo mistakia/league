@@ -85,7 +85,7 @@ const player_stat_from_plays = ({ pid_columns, select_string, stat_name }) => ({
   select: () => [`${select_string} as ${stat_name}_0`],
   where_column: () => select_string,
   pid_columns,
-  use_play_by_play_with: true,
+  use_player_stats_play_by_play_with: true,
   join: ({
     query,
     table_name = `filtered_plays_${stat_name}`,
