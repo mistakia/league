@@ -967,6 +967,78 @@ describe('LIBS SERVER get_players_table_view_results', () => {
     expect(query.toString()).to.equal(expected_query)
   })
 
+  it('should create a keeptradecut query', () => {
+    const query = get_players_table_view_results({
+      prefix_columns: ['player_name'],
+      columns: [
+        {
+          column_id: 'player_keeptradecut_value'
+        },
+        {
+          column_id: 'player_keeptradecut_value',
+          params: {
+            date: '2022-01-01'
+          }
+        },
+        {
+          column_id: 'player_keeptradecut_overall_rank'
+        },
+        {
+          column_id: 'player_keeptradecut_position_rank'
+        },
+        {
+          column_id: 'player_receiving_yards_from_plays',
+          params: {
+            career_year: [1, 1]
+          }
+        }
+      ],
+      sort: [
+        {
+          column_id: 'player_keeptradecut_overall_rank',
+          desc: true
+        }
+      ],
+      where: [
+        {
+          column_id: 'player_position',
+          operator: 'IN',
+          value: ['WR']
+        },
+        {
+          column_id: 'player_keeptradecut_value',
+          operator: '>=',
+          value: '5000'
+        }
+      ]
+    })
+    const expected_query = `with "t47cdb58d80197cc3a9c8099d943ac1d4" as (select COALESCE(trg_pid) as pid, SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END) as rec_yds_from_plays_0 from "nfl_plays" inner join "player_seasonlogs" on ("nfl_plays"."trg_pid" = "player_seasonlogs"."pid") and "nfl_plays"."year" = "player_seasonlogs"."year" and "nfl_plays"."seas_type" = "player_seasonlogs"."seas_type" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "player_seasonlogs"."career_year" between 1 and 1 group by COALESCE(trg_pid)) select "player"."pid", player.fname, player.lname, "t8983d30ddbc408733a3c1351449390ff"."v" AS "player_keeptradecut_value_0", "tbb16cf24a58b6a19f3687c8e145df64f"."v" AS "player_keeptradecut_value_1", "tb543395325830bbf836f1686aa72b21f"."v" AS "player_keeptradecut_overall_rank_0", "tbd38da51ae270f21c22c877b1d1e28e5"."v" AS "player_keeptradecut_position_rank_0", "t47cdb58d80197cc3a9c8099d943ac1d4"."rec_yds_from_plays_0" as "rec_yds_from_plays_0", "player"."pos" from "player" inner join "keeptradecut_rankings" as "t8983d30ddbc408733a3c1351449390ff" on "t8983d30ddbc408733a3c1351449390ff"."pid" = "player"."pid" and "t8983d30ddbc408733a3c1351449390ff"."qb" = 2 and "t8983d30ddbc408733a3c1351449390ff"."type" = 1 and "t8983d30ddbc408733a3c1351449390ff"."d" = (select MAX(d) from "keeptradecut_rankings" where "pid" = player.pid and "qb" = 2 and "type" = 1) left join "keeptradecut_rankings" as "tbb16cf24a58b6a19f3687c8e145df64f" on "tbb16cf24a58b6a19f3687c8e145df64f"."pid" = "player"."pid" and "tbb16cf24a58b6a19f3687c8e145df64f"."qb" = 2 and "tbb16cf24a58b6a19f3687c8e145df64f"."type" = 1 and "tbb16cf24a58b6a19f3687c8e145df64f"."d" = EXTRACT(EPOCH FROM to_timestamp('2022-01-01', 'YYYY-MM-DD') AT TIME ZONE 'UTC')::integer left join "keeptradecut_rankings" as "tb543395325830bbf836f1686aa72b21f" on "tb543395325830bbf836f1686aa72b21f"."pid" = "player"."pid" and "tb543395325830bbf836f1686aa72b21f"."qb" = 2 and "tb543395325830bbf836f1686aa72b21f"."type" = 3 and "tb543395325830bbf836f1686aa72b21f"."d" = (select MAX(d) from "keeptradecut_rankings" where "pid" = player.pid and "qb" = 2 and "type" = 3) left join "keeptradecut_rankings" as "tbd38da51ae270f21c22c877b1d1e28e5" on "tbd38da51ae270f21c22c877b1d1e28e5"."pid" = "player"."pid" and "tbd38da51ae270f21c22c877b1d1e28e5"."qb" = 2 and "tbd38da51ae270f21c22c877b1d1e28e5"."type" = 2 and "tbd38da51ae270f21c22c877b1d1e28e5"."d" = (select MAX(d) from "keeptradecut_rankings" where "pid" = player.pid and "qb" = 2 and "type" = 2) left join "t47cdb58d80197cc3a9c8099d943ac1d4" on "t47cdb58d80197cc3a9c8099d943ac1d4"."pid" = "player"."pid" where player.pos IN ('WR') and t8983d30ddbc408733a3c1351449390ff.v >= '5000' group by player.fname, player.lname, "t8983d30ddbc408733a3c1351449390ff"."v", "tbb16cf24a58b6a19f3687c8e145df64f"."v", "tb543395325830bbf836f1686aa72b21f"."v", "tbd38da51ae270f21c22c877b1d1e28e5"."v", "t47cdb58d80197cc3a9c8099d943ac1d4"."rec_yds_from_plays_0", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 6 DESC NULLS LAST, "player"."pid" asc limit 500`
+    expect(query.toString()).to.equal(expected_query)
+  })
+
+  it('should create a keeptradecut query with splits', () => {
+    const query = get_players_table_view_results({
+      prefix_columns: ['player_name'],
+      columns: [
+        {
+          column_id: 'player_keeptradecut_value',
+          params: {
+            year: [2021, 2022, 2023, 2024]
+          }
+        }
+      ],
+      sort: [
+        {
+          column_id: 'player_keeptradecut_value',
+          desc: true
+        }
+      ],
+      splits: ['year']
+    })
+    const expected_query = `select "player"."pid", player.fname, player.lname, "t7e8abea33bd2185de78e7968ea8c78fc"."v" AS "player_keeptradecut_value_0", COALESCE(EXTRACT(YEAR FROM TO_TIMESTAMP(t7e8abea33bd2185de78e7968ea8c78fc.d))) AS year, "player"."pos" from "player" left join "keeptradecut_rankings" as "t7e8abea33bd2185de78e7968ea8c78fc" on "t7e8abea33bd2185de78e7968ea8c78fc"."pid" = "player"."pid" and "t7e8abea33bd2185de78e7968ea8c78fc"."qb" = 2 and "t7e8abea33bd2185de78e7968ea8c78fc"."type" = 1 and t7e8abea33bd2185de78e7968ea8c78fc.d IN (EXTRACT(EPOCH FROM to_timestamp('2021-09-01', 'YYYY-MM-DD') AT TIME ZONE 'UTC')::integer, EXTRACT(EPOCH FROM to_timestamp('2022-09-01', 'YYYY-MM-DD') AT TIME ZONE 'UTC')::integer, EXTRACT(EPOCH FROM to_timestamp('2023-09-01', 'YYYY-MM-DD') AT TIME ZONE 'UTC')::integer, EXTRACT(EPOCH FROM to_timestamp('2024-09-01', 'YYYY-MM-DD') AT TIME ZONE 'UTC')::integer) group by player.fname, player.lname, "t7e8abea33bd2185de78e7968ea8c78fc"."v", COALESCE(EXTRACT(YEAR FROM TO_TIMESTAMP(t7e8abea33bd2185de78e7968ea8c78fc.d))), "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 4 DESC NULLS LAST, "player"."pid" asc limit 500`
+    expect(query.toString()).to.equal(expected_query)
+  })
+
   describe('errors', () => {
     it('should throw an error if where value is missing', () => {
       try {
