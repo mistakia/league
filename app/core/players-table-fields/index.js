@@ -12,6 +12,7 @@ import projected_table_fields from './projected-table-fields'
 import scoring_format_logs_table_fields from './scoring-format-logs-table-fields'
 import player_stats_from_plays_table_fields from './player-stats-from-plays-table-fields'
 import fantasy_points_from_plays_table_fields from './fantasy-points-from-plays-table-fields'
+import team_stats_from_plays_table_fields from './team-stats-from-plays-table-fields'
 
 // Player Column Fields
 // header_label - string, required
@@ -77,7 +78,8 @@ export function PlayerTableFields({
     ...player_stats_from_plays_table_fields,
     ...betting_market_table_fields,
     ...espn_table_fields,
-    ...fantasy_points_from_plays_table_fields
+    ...fantasy_points_from_plays_table_fields,
+    ...team_stats_from_plays_table_fields
   }
 
   for (const [key, value] of Object.entries(fields)) {
