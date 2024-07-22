@@ -9,6 +9,7 @@ const COLUMN_GROUPS = {
   ESPN: { priority: 1 },
   PLAYER_IDS: { priority: 1 },
   TEAM_STATS: { priority: 1 },
+  KEEPTRADECUT: { priority: 1 },
   NFL: { priority: 2 },
   NGS: { priority: 2 },
   SEASON_PROPS: { priority: 2 },
