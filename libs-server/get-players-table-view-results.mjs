@@ -608,7 +608,11 @@ export default function ({
         previous_table_name,
         rate_type_column_mapping
       })
-      if (!previous_table_name && table_name !== 'player') {
+      if (
+        !previous_table_name &&
+        table_name !== 'player' &&
+        table_name !== 'rosters_players'
+      ) {
         previous_table_name = table_name
       }
     }
