@@ -100,8 +100,13 @@ export default {
     extensions: ['.js', '.json'],
     modules: [path.join(__dirname, '..', 'app'), 'node_modules'],
     alias: {
+      dayjs: path.resolve(__dirname, '../node_modules/dayjs'),
       react: path.resolve(__dirname, '../node_modules/react'),
       'react-dom': path.resolve(__dirname, '../node_modules/react-dom'),
+      '@mui/x-date-pickers': path.resolve(
+        __dirname,
+        '../node_modules/@mui/x-date-pickers'
+      ),
       '@emotion/react': path.resolve(
         __dirname,
         '../node_modules/@emotion/react'

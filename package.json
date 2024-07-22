@@ -35,6 +35,7 @@
     "#league-import/*": "./league-import/*"
   },
   "dependencies": {
+    "@mui/x-date-pickers": "^7.11.0",
     "@sendgrid/mail": "^7.7.0",
     "@trashman/ed25519-blake2b": "^0.0.6",
     "bcrypt": "^5.1.1",
@@ -151,7 +152,7 @@
     "react-redux": "^8.1.3",
     "react-router": "^6.23.0",
     "react-router-dom": "^6.23.0",
-    "react-table": "mistakia/react-table#4296fde974511d77b1d6224469bb4ad7f6893f6f",
+    "react-table": "mistakia/react-table#c62a673eb22e40d752566f621ce09868daa276b4",
     "react-virtualized": "^9.22.5",
     "redux": "^4.2.1",
     "redux-first-history": "^5.2.0",
