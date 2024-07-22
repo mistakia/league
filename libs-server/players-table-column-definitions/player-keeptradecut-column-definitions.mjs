@@ -78,7 +78,7 @@ const keeptradecut_join = ({
           } else {
             this.andOn(
               db.raw(
-                `DATE_TRUNC('year', to_timestamp(${table_name}.d)::timestamp)`
+                `EXTRACT(YEAR FROM to_timestamp(${table_name}.d)::timestamp)`
               ),
               '=',
               db.raw(`${previous_table_name}.year`)
