@@ -173,6 +173,8 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
       .onConflict(['pid', 'd', 'qb', 'type'])
       .ignore()
 
+    log(`Inserted ${inserts.length} values for playerID ${item.playerID}`)
+
     if (full) await wait(4000)
   }
 }
