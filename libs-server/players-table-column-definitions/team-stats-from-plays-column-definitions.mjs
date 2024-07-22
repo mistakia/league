@@ -1,11 +1,29 @@
 import get_join_func from '#libs-server/get-join-func.mjs'
+import get_table_hash from '#libs-server/get-table-hash.mjs'
+import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
 
+const generate_table_alias = ({ params = {} } = {}) => {
+  const column_param_keys = Object.keys(nfl_plays_column_params).sort()
+  const key = column_param_keys
+    .map((key) => {
+      const value = params[key]
+      return Array.isArray(value)
+        ? `${key}${value.sort().join('')}`
+        : `${key}${value || ''}`
+    })
+    .join('')
+
+  return get_table_hash(`team_stats_from_plays__${key}`)
+}
+
+// TODO get table_name
 const join_filtered_plays_table = ({
   query,
   join_type = 'LEFT',
   splits = [],
   previous_table_name = null,
-  params = {}
+  params = {},
+  table_name
 }) => {
   const join_func = get_join_func(join_type)
   let year_offset = params.year_offset || 0
@@ -13,14 +31,14 @@ const join_filtered_plays_table = ({
     year_offset = year_offset[0]
   }
 
-  query[join_func]('player_team_stats', function () {
-    this.on('player.pid', '=', 'player_team_stats.pid')
+  query[join_func](`${table_name}_player_team_stats`, function () {
+    this.on('player.pid', '=', `${table_name}_player_team_stats.pid`)
 
     if (splits.includes('year')) {
       if (previous_table_name) {
         this.andOn(
           query.raw(
-            `player_team_stats.year = ${previous_table_name}.year + ?`,
+            `${table_name}_player_team_stats.year = ${previous_table_name}.year + ?`,
             [year_offset]
           )
         )
@@ -29,7 +47,7 @@ const join_filtered_plays_table = ({
           ? params.year
           : [params.year]
         this.whereIn(
-          'player_team_stats.year',
+          `${table_name}_player_team_stats.year`,
           year_array.map((y) => y + year_offset)
         )
       }
@@ -38,7 +56,7 @@ const join_filtered_plays_table = ({
     for (const split of splits) {
       if (split !== 'year' && previous_table_name) {
         this.andOn(
-          `player_team_stats.${split}`,
+          `${table_name}_player_team_stats.${split}`,
           '=',
           `${previous_table_name}.${split}`
         )
@@ -48,7 +66,7 @@ const join_filtered_plays_table = ({
 }
 
 const team_stat_from_plays = ({ select_string, stat_name }) => ({
-  table_alias: () => 'team_stats_from_plays',
+  table_alias: generate_table_alias,
   column_name: stat_name,
   select: () => [`${select_string} AS ${stat_name}_0`],
   where_column: () => select_string,

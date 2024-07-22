@@ -277,13 +277,20 @@ const add_clauses_for_table = ({
       }
     }
   } else if (use_team_stats_play_by_play_with) {
+    const select_column_names = []
+    for (const { column_id } of select_columns) {
+      const column_definition = players_table_column_definitions[column_id]
+      // TODO maybe use column_index here
+      select_column_names.push(column_definition.column_name)
+    }
     add_team_stats_play_by_play_with_statement({
       query: players_query,
       params: column_params,
       with_table_name: table_name,
       having_clauses: having_clause_strings,
       select_strings,
-      splits
+      splits,
+      select_column_names
     })
 
     // add select to players_query for each select_column in the with statement
@@ -294,19 +301,19 @@ const add_clauses_for_table = ({
       if (rate_type_table_name) {
         players_query.select(
           db.raw(
-            `CAST(player_team_stats.${column_definition.column_name}_0 AS DECIMAL) / nullif(CAST(${rate_type_table_name}.rate_type_total_count AS DECIMAL), 0) as ${column_definition.column_name}_${column_index}`
+            `CAST(${table_name}_player_team_stats.${column_definition.column_name}_0 AS DECIMAL) / nullif(CAST(${rate_type_table_name}.rate_type_total_count AS DECIMAL), 0) as ${column_definition.column_name}_${column_index}`
           )
         )
         players_query.groupBy(
-          `player_team_stats.${column_definition.column_name}_0`
+          `${table_name}_player_team_stats.${column_definition.column_name}_0`
         )
         players_query.groupBy(`${rate_type_table_name}.rate_type_total_count`)
       } else {
         players_query.select(
-          `player_team_stats.${column_definition.column_name}_0 as ${column_definition.column_name}_${column_index}`
+          `${table_name}_player_team_stats.${column_definition.column_name}_0 as ${column_definition.column_name}_${column_index}`
         )
         players_query.groupBy(
-          `player_team_stats.${column_definition.column_name}_0`
+          `${table_name}_player_team_stats.${column_definition.column_name}_0`
         )
       }
     }
