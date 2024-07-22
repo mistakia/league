@@ -187,7 +187,7 @@ const fantasy_points_from_plays_join = ({
   table_name,
   join_type = 'LEFT',
   splits = [],
-  previous_table_name = null,
+  year_split_join_clause = null,
   params = {}
 }) => {
   const join_func = get_join_func(join_type)
@@ -196,22 +196,18 @@ const fantasy_points_from_plays_join = ({
     year_offset = year_offset[0]
   }
 
-  if (splits.length && previous_table_name) {
+  if (splits.includes('year') && year_split_join_clause) {
     query[join_func](table_name, function () {
       this.on(`${table_name}.pid`, '=', 'player.pid')
       for (const split of splits) {
         if (split === 'year' && year_offset !== 0) {
           this.andOn(
             db.raw(
-              `${table_name}.${split} = ${previous_table_name}.${split} + ${year_offset}`
+              `${table_name}.year = ${year_split_join_clause} + ${year_offset}`
             )
           )
         } else {
-          this.andOn(
-            `${table_name}.${split}`,
-            '=',
-            `${previous_table_name}.${split}`
-          )
+          this.andOn(db.raw(`${table_name}.year = ${year_split_join_clause}`))
         }
       }
     })

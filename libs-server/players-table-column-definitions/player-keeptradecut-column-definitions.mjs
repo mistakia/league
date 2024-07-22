@@ -15,7 +15,7 @@ const keeptradecut_join = ({
   table_name,
   join_type = 'LEFT',
   splits = [],
-  previous_table_name = null,
+  year_split_join_clause = null,
   params = {}
 }) => {
   const join_func = get_join_func(join_type)
@@ -64,7 +64,7 @@ const keeptradecut_join = ({
       })
     }
 
-    if (splits.length && previous_table_name) {
+    if (splits.includes('year') && year_split_join_clause) {
       splits.forEach((split) => {
         if (split === 'year') {
           if (year_offset !== 0) {
@@ -73,7 +73,7 @@ const keeptradecut_join = ({
                 `DATE_TRUNC('year', to_timestamp(${table_name}.d)::timestamp) + interval '${year_offset} year'`
               ),
               '=',
-              db.raw(`${previous_table_name}.year`)
+              db.raw(`${year_split_join_clause}`)
             )
           } else {
             this.andOn(
@@ -81,7 +81,7 @@ const keeptradecut_join = ({
                 `EXTRACT(YEAR FROM to_timestamp(${table_name}.d)::timestamp)`
               ),
               '=',
-              db.raw(`${previous_table_name}.year`)
+              db.raw(`${year_split_join_clause}`)
             )
           }
         }

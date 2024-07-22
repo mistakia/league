@@ -21,7 +21,7 @@ const join_filtered_plays_table = ({
   query,
   join_type = 'LEFT',
   splits = [],
-  previous_table_name = null,
+  year_split_join_clause = null,
   params = {},
   table_name
 }) => {
@@ -35,10 +35,10 @@ const join_filtered_plays_table = ({
     this.on('player.pid', '=', `${table_name}_player_team_stats.pid`)
 
     if (splits.includes('year')) {
-      if (previous_table_name) {
+      if (year_split_join_clause) {
         this.andOn(
           query.raw(
-            `${table_name}_player_team_stats.year = ${previous_table_name}.year + ?`,
+            `${table_name}_player_team_stats.year = ${year_split_join_clause} + ?`,
             [year_offset]
           )
         )
@@ -53,15 +53,7 @@ const join_filtered_plays_table = ({
       }
     }
 
-    for (const split of splits) {
-      if (split !== 'year' && previous_table_name) {
-        this.andOn(
-          `${table_name}_player_team_stats.${split}`,
-          '=',
-          `${previous_table_name}.${split}`
-        )
-      }
-    }
+    // TODO support other splits
   })
 }
 
