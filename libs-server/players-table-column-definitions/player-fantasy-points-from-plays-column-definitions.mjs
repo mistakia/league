@@ -189,7 +189,7 @@ export default {
     column_name: 'fantasy_points_from_plays',
     with: fantasy_points_from_plays_with,
     join: players_table_join_function,
-    supported_splits: ['year'],
+    supported_splits: ['year', 'week'],
     supported_rate_types: ['per_game'],
     use_having: true
   }

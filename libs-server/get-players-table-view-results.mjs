@@ -151,6 +151,7 @@ const add_clauses_for_table = ({
   column_params = {},
   splits = [],
   year_split_join_clause,
+  week_split_join_clause,
   rate_type_column_mapping = {}
 }) => {
   const column_ids = []
@@ -389,7 +390,8 @@ const add_clauses_for_table = ({
       params: column_params,
       join_type: where_clauses.length ? 'INNER' : 'LEFT',
       splits,
-      year_split_join_clause
+      year_split_join_clause,
+      week_split_join_clause
     })
   } else if (
     table_name !== 'player' &&
@@ -561,6 +563,7 @@ export default function ({
   }
 
   let year_split_join_clause
+  let week_split_join_clause
 
   for (const [rate_type_table_name, params] of Object.entries(
     rate_type_tables
@@ -573,6 +576,7 @@ export default function ({
     )
 
     year_split_join_clause = `${rate_type_table_name}.year`
+    week_split_join_clause = `${rate_type_table_name}.week`
   }
 
   const grouped_clauses_by_table = get_grouped_clauses_by_table({
@@ -599,6 +603,9 @@ export default function ({
       const year_select = select_columns.find(
         (col) => players_table_column_definitions[col.column_id]?.year_select
       )
+      const week_select = select_columns.find(
+        (col) => players_table_column_definitions[col.column_id]?.week_select
+      )
 
       add_clauses_for_table({
         players_query,
@@ -610,6 +617,7 @@ export default function ({
         with_statement_index,
         splits: available_splits,
         year_split_join_clause,
+        week_split_join_clause,
         rate_type_column_mapping
       })
 
@@ -620,6 +628,14 @@ export default function ({
                 year_select.column_id
               ].year_select(table_name)
             : `${table_name}.year`
+        }
+
+        if (!week_split_join_clause) {
+          week_split_join_clause = week_select
+            ? players_table_column_definitions[
+                week_select.column_id
+              ].week_select(table_name)
+            : `${table_name}.week`
         }
       }
     }
@@ -658,18 +674,37 @@ export default function ({
         players_query.select(db.raw(`COALESCE(${coalesce_args}) AS year`))
         players_query.groupBy(db.raw(`COALESCE(${coalesce_args})`))
       }
-    } else {
+    }
+
+    if (split === 'week') {
       const coalesce_args = Object.entries(grouped_clauses_by_table)
         .filter(
           ([_, table_info]) =>
             table_info.supported_splits &&
             table_info.supported_splits.includes(split)
         )
-        .map(([table_alias, _]) => `${table_alias}.${split}`)
+        .map(([table_alias, table_info]) => {
+          // Check if select_columns is not empty and week_select is defined
+          if (
+            table_info.select_columns &&
+            table_info.select_columns.length > 0
+          ) {
+            const column_definition =
+              players_table_column_definitions[
+                table_info.select_columns[0].column_id
+              ]
+            if (column_definition && column_definition.week_select) {
+              return column_definition.week_select(table_alias)
+            }
+          }
+          // Default to standard week column if no custom week_select is available
+          return `${table_alias}.week`
+        })
+        .filter(Boolean) // Remove any undefined entries
         .join(', ')
 
       if (coalesce_args) {
-        players_query.select(db.raw(`COALESCE(${coalesce_args}) AS ${split}`))
+        players_query.select(db.raw(`COALESCE(${coalesce_args}) AS week`))
         players_query.groupBy(db.raw(`COALESCE(${coalesce_args})`))
       }
     }

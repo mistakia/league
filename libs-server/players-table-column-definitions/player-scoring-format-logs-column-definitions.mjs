@@ -57,8 +57,6 @@ const scoring_format_player_careerlogs_join = ({
   query,
   table_name,
   join_type = 'LEFT',
-  splits = [],
-  year_split_join_clause = null,
   params = {}
 }) => {
   const join_func = get_join_func(join_type)

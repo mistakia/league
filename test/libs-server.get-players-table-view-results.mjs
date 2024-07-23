@@ -1039,6 +1039,35 @@ describe('LIBS SERVER get_players_table_view_results', () => {
     expect(query.toString()).to.equal(expected_query)
   })
 
+  it('should create a rushing yards split by week', () => {
+    const query = get_players_table_view_results({
+      splits: ['year', 'week'],
+      prefix_columns: ['player_name'],
+      columns: [
+        {
+          column_id: 'player_rush_yards_from_plays',
+          params: { year: [2020, 2021, 2022, 2023] }
+        },
+        {
+          column_id: 'player_week_projected_rush_yds',
+          params: { year: [2020, 2021, 2022, 2023] }
+        },
+        {
+          column_id: 'team_rush_yards_from_plays',
+          params: { year: [2020, 2021, 2022, 2023] }
+        }
+      ],
+      sort: [
+        {
+          column_id: 'player_rush_yards_from_plays',
+          desc: true
+        }
+      ]
+    })
+    const expected_query = `with "t75ffb93b4d49b2fdda73e643ce2c32ed" as (select COALESCE(bc_pid) as pid, "nfl_plays"."week", "nfl_plays"."year", SUM(rush_yds) as rush_yds_from_plays_0 from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2020, 2021, 2022, 2023) group by "nfl_plays"."week", "nfl_plays"."year", COALESCE(bc_pid)), "teca77c6cb9296c54054e7693ab1fc574" as (select "nfl_plays"."off" as "nfl_team", "nfl_plays"."year", "nfl_plays"."week", SUM(rush_yds) AS team_rush_yds_from_plays_0 from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2020, 2021, 2022, 2023) group by "nfl_plays"."off", "nfl_plays"."year", "nfl_plays"."week"), "teca77c6cb9296c54054e7693ab1fc574_player_team_stats" as (select "player_gamelogs"."pid", sum(teca77c6cb9296c54054e7693ab1fc574.team_rush_yds_from_plays_0) as team_rush_yds_from_plays_0, "nfl_games"."year", "nfl_games"."week" from "player_gamelogs" inner join "nfl_games" on "player_gamelogs"."esbid" = "nfl_games"."esbid" inner join "teca77c6cb9296c54054e7693ab1fc574" on "player_gamelogs"."tm" = "teca77c6cb9296c54054e7693ab1fc574"."nfl_team" and "nfl_games"."year" = "teca77c6cb9296c54054e7693ab1fc574"."year" and "nfl_games"."week" = "teca77c6cb9296c54054e7693ab1fc574"."week" where "nfl_games"."year" in (2020, 2021, 2022, 2023) group by "player_gamelogs"."pid", "nfl_games"."year", "nfl_games"."week") select "player"."pid", player.fname, player.lname, "t75ffb93b4d49b2fdda73e643ce2c32ed"."rush_yds_from_plays_0" as "rush_yds_from_plays_0", "tf0b1e8f00d3f5ec618c9b50a239c6c22"."ry" AS "week_projected_rush_yds_0", "teca77c6cb9296c54054e7693ab1fc574_player_team_stats"."team_rush_yds_from_plays_0" as "team_rush_yds_from_plays_0", COALESCE(t75ffb93b4d49b2fdda73e643ce2c32ed.year, tf0b1e8f00d3f5ec618c9b50a239c6c22.year, teca77c6cb9296c54054e7693ab1fc574_player_team_stats.year) AS year, COALESCE(t75ffb93b4d49b2fdda73e643ce2c32ed.week, tf0b1e8f00d3f5ec618c9b50a239c6c22.week, teca77c6cb9296c54054e7693ab1fc574_player_team_stats.week) AS week, "player"."pos" from "player" left join "t75ffb93b4d49b2fdda73e643ce2c32ed" on "t75ffb93b4d49b2fdda73e643ce2c32ed"."pid" = "player"."pid" and t75ffb93b4d49b2fdda73e643ce2c32ed.year IN (2020,2021,2022,2023) left join "projections_index" as "tf0b1e8f00d3f5ec618c9b50a239c6c22" on "tf0b1e8f00d3f5ec618c9b50a239c6c22"."pid" = "player"."pid" and tf0b1e8f00d3f5ec618c9b50a239c6c22.year = t75ffb93b4d49b2fdda73e643ce2c32ed.year and tf0b1e8f00d3f5ec618c9b50a239c6c22.week = t75ffb93b4d49b2fdda73e643ce2c32ed.week and "tf0b1e8f00d3f5ec618c9b50a239c6c22"."sourceid" = 18 left join "teca77c6cb9296c54054e7693ab1fc574_player_team_stats" on "teca77c6cb9296c54054e7693ab1fc574_player_team_stats"."pid" = "player"."pid" and teca77c6cb9296c54054e7693ab1fc574_player_team_stats.year = t75ffb93b4d49b2fdda73e643ce2c32ed.year and teca77c6cb9296c54054e7693ab1fc574_player_team_stats.week = t75ffb93b4d49b2fdda73e643ce2c32ed.week group by player.fname, player.lname, "t75ffb93b4d49b2fdda73e643ce2c32ed"."rush_yds_from_plays_0", "tf0b1e8f00d3f5ec618c9b50a239c6c22"."ry", "teca77c6cb9296c54054e7693ab1fc574_player_team_stats"."team_rush_yds_from_plays_0", COALESCE(t75ffb93b4d49b2fdda73e643ce2c32ed.year, tf0b1e8f00d3f5ec618c9b50a239c6c22.year, teca77c6cb9296c54054e7693ab1fc574_player_team_stats.year), COALESCE(t75ffb93b4d49b2fdda73e643ce2c32ed.week, tf0b1e8f00d3f5ec618c9b50a239c6c22.week, teca77c6cb9296c54054e7693ab1fc574_player_team_stats.week), "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 4 DESC NULLS LAST, "player"."pid" asc limit 500`
+    expect(query.toString()).to.equal(expected_query)
+  })
+
   describe('errors', () => {
     it('should throw an error if where value is missing', () => {
       try {

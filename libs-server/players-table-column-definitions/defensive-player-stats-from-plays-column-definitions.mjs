@@ -49,7 +49,7 @@ const defensive_player_stat_from_plays = ({
   where_column: () => select_string,
   join: defensive_player_join,
   pid_columns,
-  supported_splits: ['year'],
+  supported_splits: ['year', 'week'],
   supported_rate_types: ['per_game'],
   use_having: true,
   use_defensive_play_by_play_with: true

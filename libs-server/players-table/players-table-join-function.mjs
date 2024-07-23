@@ -10,6 +10,7 @@ export default function players_table_join_function(join_arguments) {
     join_type = 'LEFT',
     splits = [],
     year_split_join_clause = null,
+    week_split_join_clause = null,
     params = {},
     additional_conditions = null,
     join_year = false,
@@ -46,11 +47,21 @@ export default function players_table_join_function(join_arguments) {
         )
       }
 
+      if (splits.includes('week')) {
+        this.andOn(db.raw(`${table_name}.week = ${week_split_join_clause}`))
+      }
+
       if (join_week) {
         if (splits.includes('week')) {
-          // TODO add week split
-          // const week_array = Array.isArray(week) ? week.map(String) : [String(week)]
-          // this.andOn(db.raw(`${table_name}.week IN (${week_array.join(',')})`))
+          // if week is specified, use it otherwise do not limit weeks
+          if (params.week) {
+            const week_array = Array.isArray(week)
+              ? week.map(String)
+              : [String(week)]
+            this.andOn(
+              db.raw(`${table_name}.week IN (${week_array.join(',')})`)
+            )
+          }
         } else {
           this.andOn(
             `${table_name}.week`,
@@ -89,8 +100,10 @@ export default function players_table_join_function(join_arguments) {
 
       if (join_week) {
         if (splits.includes('week')) {
-          // const week_array = Array.isArray(week) ? week.map(String) : [String(week)]
-          // this.andOn(db.raw(`${table_name}.week IN (${week_array.join(',')})`))
+          const week_array = Array.isArray(week)
+            ? week.map(String)
+            : [String(week)]
+          this.andOn(db.raw(`${table_name}.week IN (${week_array.join(',')})`))
         } else {
           this.andOn(
             `${table_name}.week`,
