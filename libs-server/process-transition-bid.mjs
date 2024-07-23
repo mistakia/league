@@ -4,7 +4,7 @@ import getRoster from './get-roster.mjs'
 import getLeague from './get-league.mjs'
 import processRelease from './process-release.mjs'
 import sendNotifications from './send-notifications.mjs'
-import createConditionalPick from './create-conditional-pick.mjs'
+import create_conditional_pick from './create-conditional-pick.mjs'
 import getTeam from './get-team.mjs'
 import debug from 'debug'
 
@@ -98,7 +98,7 @@ export default async function ({
     })
 
     // add conditional pick to original team
-    await createConditionalPick({
+    await create_conditional_pick({
       tid: player_tid,
       league
     })
