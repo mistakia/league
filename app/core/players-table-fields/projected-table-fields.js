@@ -50,7 +50,12 @@ export default function ({ week }) {
     player_value_path: `${period.toLowerCase().replaceAll('-', '_')}_projected_${base_name}`,
     ...(options.fixed && { fixed: options.fixed }),
     size: 70,
-    splits: period === 'Season' || period === 'Week' ? ['year'] : undefined,
+    splits:
+      period === 'Season'
+        ? ['year']
+        : period === 'Week'
+          ? ['year', 'week']
+          : undefined,
     data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
     column_params:
       period === 'Season'
@@ -69,13 +74,15 @@ export default function ({ week }) {
                 values: projection_years,
                 data_type: table_constants.TABLE_DATA_TYPES.SELECT,
                 default_value: constants.season.year,
-                single: true
+                single: true,
+                enable_multi_on_split: ['year']
               },
               week: {
                 values: constants.nfl_weeks,
                 data_type: table_constants.TABLE_DATA_TYPES.SELECT,
                 default_value: constants.season.week,
-                single: true
+                single: true,
+                enable_multi_on_split: ['week']
               }
             }
           : undefined
