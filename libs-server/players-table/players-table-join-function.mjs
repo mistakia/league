@@ -47,7 +47,7 @@ export default function players_table_join_function(join_arguments) {
         )
       }
 
-      if (splits.includes('week')) {
+      if (splits.includes('week') && week_split_join_clause) {
         this.andOn(db.raw(`${table_name}.week = ${week_split_join_clause}`))
       }
 

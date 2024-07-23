@@ -630,7 +630,7 @@ export default function ({
             : `${table_name}.year`
         }
 
-        if (!week_split_join_clause) {
+        if (!week_split_join_clause && available_splits.includes('week')) {
           week_split_join_clause = week_select
             ? players_table_column_definitions[
                 week_select.column_id
