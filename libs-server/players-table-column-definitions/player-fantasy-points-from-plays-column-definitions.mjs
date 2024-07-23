@@ -2,7 +2,7 @@ import db from '#db'
 import { nfl_plays_column_params, players_table_constants } from '#libs-shared'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '../apply-play-by-play-column-params-to-query.mjs'
-import get_join_func from '#libs-server/get-join-func.mjs'
+import players_table_join_function from '#libs-server/players-table/players-table-join-function.mjs'
 
 const generate_fantasy_points_table_alias = ({ params = {} } = {}) => {
   const column_param_keys = Object.keys(nfl_plays_column_params).sort()
@@ -182,59 +182,13 @@ const fantasy_points_from_plays_with = ({
   query.with(with_table_name, with_query)
 }
 
-const fantasy_points_from_plays_join = ({
-  query,
-  table_name,
-  join_type = 'LEFT',
-  splits = [],
-  year_split_join_clause = null,
-  params = {}
-}) => {
-  const join_func = get_join_func(join_type)
-  let year_offset = params.year_offset || 0
-  if (Array.isArray(year_offset)) {
-    year_offset = year_offset[0]
-  }
-
-  if (splits.includes('year') && year_split_join_clause) {
-    query[join_func](table_name, function () {
-      this.on(`${table_name}.pid`, '=', 'player.pid')
-      for (const split of splits) {
-        if (split === 'year' && year_offset !== 0) {
-          this.andOn(
-            db.raw(
-              `${table_name}.year = ${year_split_join_clause} + ${year_offset}`
-            )
-          )
-        } else {
-          this.andOn(db.raw(`${table_name}.year = ${year_split_join_clause}`))
-        }
-      }
-    })
-  } else {
-    query[join_func](table_name, function () {
-      this.on(`${table_name}.pid`, '=', 'player.pid')
-      if (splits.includes('year') && params.year) {
-        const year_array = Array.isArray(params.year)
-          ? params.year
-          : [params.year]
-        this.andOn(
-          db.raw(
-            `${table_name}.year IN (${year_array.map((y) => y + year_offset).join(',')})`
-          )
-        )
-      }
-    })
-  }
-}
-
 export default {
   player_fantasy_points_from_plays: {
     where_column: () => select_string,
     table_alias: generate_fantasy_points_table_alias,
     column_name: 'fantasy_points_from_plays',
     with: fantasy_points_from_plays_with,
-    join: fantasy_points_from_plays_join,
+    join: players_table_join_function,
     supported_splits: ['year'],
     supported_rate_types: ['per_game'],
     use_having: true
