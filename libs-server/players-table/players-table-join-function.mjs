@@ -71,7 +71,8 @@ export default function players_table_join_function(join_arguments) {
         }
       }
     } else {
-      if (join_year) {
+      // TODO check if params.year creates any edge case bugs when joining sesaonlogs
+      if (join_year && params.year) {
         if (splits.includes('year')) {
           const year_array = Array.isArray(year) ? year : [year]
           this.andOn(
