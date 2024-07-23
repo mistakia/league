@@ -255,7 +255,7 @@ const create_projected_stat = (base_object, stat_name) => {
     acc[`player_${prefix}_projected_${stat_name}`] = {
       ...base_object,
       select_as: () => `${prefix}_projected_${stat_name}`,
-      supported_splits: ['year']
+      supported_splits: prefix === 'week' ? ['year', 'week'] : ['year']
     }
     return acc
   }, {})

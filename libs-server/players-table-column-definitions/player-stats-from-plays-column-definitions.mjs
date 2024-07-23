@@ -38,7 +38,7 @@ const player_stat_from_plays = ({ pid_columns, select_string, stat_name }) => ({
   join: (args) =>
     players_table_join_function({ ...args, join_year_on_year_split: true }),
   use_having: true,
-  supported_splits: ['year'],
+  supported_splits: ['year', 'week'],
   supported_rate_types: ['per_game']
 })
 
@@ -128,7 +128,7 @@ const create_team_share_stat = ({
     generate_table_alias({ type: column_name, params, pid_columns }),
   join: (args) =>
     players_table_join_function({ ...args, join_year_on_year_split: true }),
-  supported_splits: ['year']
+  supported_splits: ['year', 'week']
 })
 
 export default {

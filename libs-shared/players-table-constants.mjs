@@ -1,1 +1,1 @@
-export const split_params = ['year']
+export const split_params = ['year', 'week']

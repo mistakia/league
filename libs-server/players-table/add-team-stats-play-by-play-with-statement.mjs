@@ -1,7 +1,5 @@
 import db from '#db'
-import { players_table_constants } from '#libs-shared'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
-import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
 
 export const add_team_stats_play_by_play_with_statement = ({
   query,
@@ -20,16 +18,6 @@ export const add_team_stats_play_by_play_with_statement = ({
     .select('nfl_plays.off as nfl_team', 'nfl_plays.year', 'nfl_plays.week')
     .whereNot('play_type', 'NOPL')
     .where('nfl_plays.seas_type', 'REG')
-
-  for (const split of splits) {
-    if (players_table_constants.split_params.includes(split)) {
-      const column_param_definition = nfl_plays_column_params[split]
-      const table_name = column_param_definition.table || 'nfl_plays'
-      const split_statement = `${table_name}.${split}`
-      with_query.select(split_statement)
-      with_query.groupBy(split_statement)
-    }
-  }
 
   const unique_select_strings = new Set(select_strings)
 
@@ -60,6 +48,7 @@ export const add_team_stats_play_by_play_with_statement = ({
   // Add the player_team_stats with table
   const player_team_stats_query = db('player_gamelogs')
     .select('player_gamelogs.pid')
+    .groupBy('player_gamelogs.pid')
     .join('nfl_games', 'player_gamelogs.esbid', 'nfl_games.esbid')
     .join(with_table_name, function () {
       this.on('player_gamelogs.tm', '=', `${with_table_name}.nfl_team`)
@@ -78,9 +67,12 @@ export const add_team_stats_play_by_play_with_statement = ({
 
   if (splits.includes('year')) {
     player_team_stats_query.select('nfl_games.year')
-    player_team_stats_query.groupBy('player_gamelogs.pid', 'nfl_games.year')
-  } else {
-    player_team_stats_query.groupBy('player_gamelogs.pid')
+    player_team_stats_query.groupBy('nfl_games.year')
+  }
+
+  if (splits.includes('week')) {
+    player_team_stats_query.select('nfl_games.week')
+    player_team_stats_query.groupBy('nfl_games.week')
   }
 
   if (params.year) {
