@@ -4,7 +4,7 @@ import sendNotifications from './send-notifications.mjs'
 import getRoster from './get-roster.mjs'
 import processRelease from './process-release.mjs'
 import getLeague from './get-league.mjs'
-import createConditionalPick from './create-conditional-pick.mjs'
+import create_conditional_pick from './create-conditional-pick.mjs'
 import getLastTransaction from './get-last-transaction.mjs'
 
 export default async function ({ pid, release = [], lid, tid, userid }) {
@@ -110,7 +110,7 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
   })
 
   // award conditional pick to poached team
-  await createConditionalPick({
+  await create_conditional_pick({
     tid: rosterSlot.tid,
     league
   })
