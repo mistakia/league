@@ -34,7 +34,10 @@ const run = async () => {
       order: draftOrder.indexOf(pick.otid) + 1,
       league
     })
-    await db('draft').update({ pick: num }).where('uid', pick.uid)
+    const pick_number_in_round = num - (pick.round - 1) * league.num_teams
+    await db('draft')
+      .update({ pick: num, pick_str: `${pick.round}.${pick_number_in_round}` })
+      .where('uid', pick.uid)
   }
 
   // reset pick numbers as there could be gaps due to decommissioned teams
@@ -74,7 +77,11 @@ const run = async () => {
       inserts.push(pick)
       const num = sorted_draft_picks.length + inserts.length
       await db('draft')
-        .update({ pick: num, round: Math.ceil(num / league.num_teams) })
+        .update({
+          pick: num,
+          round: Math.ceil(num / league.num_teams),
+          pick_str: `${Math.ceil(num / league.num_teams)}.${num % league.num_teams || league.num_teams}`
+        })
         .where('uid', pick.uid)
     }
 
