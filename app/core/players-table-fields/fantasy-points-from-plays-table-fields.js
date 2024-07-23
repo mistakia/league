@@ -26,7 +26,7 @@ export default {
       ...nfl_plays_column_params
     },
     size: 70,
-    splits: ['year'],
+    splits: ['year', 'week'],
     column_title: 'Fantasy Points (By Play)',
     column_groups: [COLUMN_GROUPS.FANTASY_POINTS],
     header_label: 'FP',

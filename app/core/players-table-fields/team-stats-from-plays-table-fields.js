@@ -11,7 +11,7 @@ const from_play_field = (field) => ({
   },
   size: 70,
   fixed: 2,
-  splits: ['year'],
+  splits: ['year', 'week'],
   ...field
 })
 
