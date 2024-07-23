@@ -599,6 +599,7 @@ export default function ({
       const year_select = select_columns.find(
         (col) => players_table_column_definitions[col.column_id]?.year_select
       )
+
       add_clauses_for_table({
         players_query,
         select_columns,
@@ -611,16 +612,15 @@ export default function ({
         year_split_join_clause,
         rate_type_column_mapping
       })
-      if (
-        !year_split_join_clause &&
-        table_name !== 'player' &&
-        table_name !== 'rosters_players'
-      ) {
-        year_split_join_clause = year_select
-          ? players_table_column_definitions[year_select.column_id].year_select(
-              table_name
-            )
-          : `${table_name}.year`
+
+      if (table_name !== 'player' && table_name !== 'rosters_players') {
+        if (!year_split_join_clause) {
+          year_split_join_clause = year_select
+            ? players_table_column_definitions[
+                year_select.column_id
+              ].year_select(table_name)
+            : `${table_name}.year`
+        }
       }
     }
   }

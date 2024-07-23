@@ -1,7 +1,7 @@
 import db from '#db'
 import { nfl_plays_column_params } from '#libs-shared'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
-import get_join_func from '#libs-server/get-join-func.mjs'
+import players_table_join_function from '#libs-server/players-table/players-table-join-function.mjs'
 
 const defensive_player_table_alias = ({ pid_columns, params = {} } = {}) => {
   if (!pid_columns || !Array.isArray(pid_columns) || pid_columns.length === 0) {
@@ -22,56 +22,19 @@ const defensive_player_table_alias = ({ pid_columns, params = {} } = {}) => {
   return get_table_hash(`defensive_player_stats_${pid_columns_string}_${key}`)
 }
 
-const defensive_player_join = ({
-  query,
-  table_name,
-  join_type = 'LEFT',
-  splits = [],
-  year_split_join_clause = null,
-  params = {}
-}) => {
-  const join_func = get_join_func(join_type)
-  let year_offset = params.year_offset || 0
-  if (Array.isArray(year_offset)) {
-    year_offset = year_offset[0]
-  }
-
-  if (splits.length && year_split_join_clause) {
-    query[join_func](table_name, function () {
-      this.on(`${table_name}.pid`, '=', 'player.pid')
-      for (const split of splits) {
-        if (split === 'year' && year_offset !== 0) {
-          this.andOn(
-            db.raw(
-              `${table_name}.${split} = ${year_split_join_clause} + ${year_offset}`
-            )
-          )
-        } else if (split === 'year') {
-          this.andOn(db.raw(`${table_name}.year = ${year_split_join_clause}`))
-        }
-      }
-      // Add condition for pid_column to ensure we're joining the correct defensive stat
-      this.andOn(
-        `${table_name}.pid_column`,
-        '=',
-        db.raw('?', [params.pid_column])
-      )
-    })
-  } else {
-    query[join_func](table_name, function () {
-      this.on(`${table_name}.pid`, '=', 'player.pid')
-      if (splits.includes('year') && params.year) {
-        const year_array = Array.isArray(params.year)
-          ? params.year
-          : [params.year]
+const defensive_player_join = (options) => {
+  players_table_join_function({
+    ...options,
+    additional_conditions: function ({ table_name, params }) {
+      if (params.pid_column) {
         this.andOn(
-          db.raw(
-            `${table_name}.year IN (${year_array.map((y) => y + year_offset).join(',')})`
-          )
+          `${table_name}.pid_column`,
+          '=',
+          db.raw('?', [params.pid_column])
         )
       }
-    })
-  }
+    }
+  })
 }
 
 const defensive_player_stat_from_plays = ({

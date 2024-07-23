@@ -1,6 +1,6 @@
-import get_join_func from '#libs-server/get-join-func.mjs'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
 import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
+import players_table_join_function from '#libs-server/players-table/players-table-join-function.mjs'
 
 const generate_table_alias = ({ params = {} } = {}) => {
   const column_param_keys = Object.keys(nfl_plays_column_params).sort()
@@ -16,54 +16,18 @@ const generate_table_alias = ({ params = {} } = {}) => {
   return get_table_hash(`team_stats_from_plays__${key}`)
 }
 
-// TODO get table_name
-const join_filtered_plays_table = ({
-  query,
-  join_type = 'LEFT',
-  splits = [],
-  year_split_join_clause = null,
-  params = {},
-  table_name
-}) => {
-  const join_func = get_join_func(join_type)
-  let year_offset = params.year_offset || 0
-  if (Array.isArray(year_offset)) {
-    year_offset = year_offset[0]
-  }
-
-  query[join_func](`${table_name}_player_team_stats`, function () {
-    this.on('player.pid', '=', `${table_name}_player_team_stats.pid`)
-
-    if (splits.includes('year')) {
-      if (year_split_join_clause) {
-        this.andOn(
-          query.raw(
-            `${table_name}_player_team_stats.year = ${year_split_join_clause} + ?`,
-            [year_offset]
-          )
-        )
-      } else if (params.year) {
-        const year_array = Array.isArray(params.year)
-          ? params.year
-          : [params.year]
-        this.whereIn(
-          `${table_name}_player_team_stats.year`,
-          year_array.map((y) => y + year_offset)
-        )
-      }
-    }
-
-    // TODO support other splits
-  })
-}
-
 const team_stat_from_plays = ({ select_string, stat_name }) => ({
   table_alias: generate_table_alias,
   column_name: stat_name,
   select: () => [`${select_string} AS ${stat_name}_0`],
   where_column: () => select_string,
   use_team_stats_play_by_play_with: true,
-  join: join_filtered_plays_table,
+  join: (args) =>
+    players_table_join_function({
+      ...args,
+      join_year_on_year_split: true,
+      table_name: `${args.table_name}_player_team_stats`
+    }),
   use_having: true,
   supported_splits: ['years'],
   supported_rate_types: ['per_game']

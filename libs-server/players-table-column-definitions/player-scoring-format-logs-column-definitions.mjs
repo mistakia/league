@@ -2,6 +2,7 @@ import db from '#db'
 import { constants } from '#libs-shared'
 import get_join_func from '#libs-server/get-join-func.mjs'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
+import players_table_join_function from '#libs-server/players-table/players-table-join-function.mjs'
 
 const scoring_format_player_seasonlogs_table_alias = ({ params = {} }) => {
   const {
@@ -26,74 +27,21 @@ const scoring_format_player_seasonlogs_table_alias = ({ params = {} }) => {
   )
 }
 
-const scoring_format_player_seasonlogs_join = ({
-  query,
-  table_name,
-  join_type = 'LEFT',
-  splits = [],
-  year_split_join_clause = null,
-  params = {}
-}) => {
-  const join_func = get_join_func(join_type)
-  const {
-    scoring_format_hash = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
-  } = params
+const scoring_format_player_seasonlogs_join = (join_arguments) => {
+  players_table_join_function({
+    ...join_arguments,
+    join_year: true,
+    join_table_clause: `scoring_format_player_seasonlogs as ${join_arguments.table_name}`,
+    additional_conditions: function ({ params, table_name }) {
+      const {
+        scoring_format_hash = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
+      } = params
 
-  let year = params.year || [constants.season.stats_season_year]
-  if (!Array.isArray(year)) {
-    year = [year]
-  }
-
-  if (!year.length) {
-    year = [constants.season.stats_season_year]
-  }
-
-  let year_offset = params.year_offset || 0
-  if (Array.isArray(year_offset)) {
-    year_offset = year_offset[0]
-  }
-
-  // Apply the year_offset
-  year = year.map((y) => y + year_offset)
-
-  const join_conditions = function () {
-    this.on(`${table_name}.pid`, '=', 'player.pid')
-    this.andOn(
-      db.raw(`${table_name}.scoring_format_hash = '${scoring_format_hash}'`)
-    )
-
-    if (splits.length && year_split_join_clause) {
-      for (const split of splits) {
-        if (split === 'year' && year_offset !== 0) {
-          this.andOn(
-            db.raw(
-              `${table_name}.${split} = ${year_split_join_clause} + ${year_offset}`
-            )
-          )
-        } else if (split === 'year') {
-          this.andOn(db.raw(`${table_name}.year = ${year_split_join_clause}`))
-        }
-      }
-    } else if (splits.includes('year')) {
-      if (params.year) {
-        const year_array = Array.isArray(params.year)
-          ? params.year
-          : [params.year]
-        this.andOn(
-          db.raw(
-            `${table_name}.year IN (${year_array.map((y) => y + year_offset).join(',')})`
-          )
-        )
-      }
-    } else {
-      this.andOn(db.raw(`${table_name}.year IN (${year.join(',')})`))
+      this.andOn(
+        db.raw(`${table_name}.scoring_format_hash = ?`, [scoring_format_hash])
+      )
     }
-  }
-
-  query[join_func](
-    `scoring_format_player_seasonlogs as ${table_name}`,
-    join_conditions
-  )
+  })
 }
 
 const scoring_format_player_careerlogs_table_alias = ({ params = {} }) => {

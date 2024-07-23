@@ -1,63 +1,46 @@
 import db from '#db'
-import get_join_func from '#libs-server/get-join-func.mjs'
+import players_table_join_function from '#libs-server/players-table/players-table-join-function.mjs'
 
 const get_valid_year = (year) => {
   const parsed_year = Number(year)
   return parsed_year >= 2017 && parsed_year <= 2023 ? parsed_year : 2023
 }
 
-const create_espn_score_columns = (column_name) => ({
-  table_name: 'player_seasonlogs',
-  column_name,
-  join: ({
-    query,
-    params,
-    join_type = 'LEFT',
-    splits = [],
-    year_split_join_clause = null
-  } = {}) => {
-    const join_func = get_join_func(join_type)
-    const join_conditions = function () {
-      this.on('player_seasonlogs.pid', '=', 'player.pid')
-      this.andOn('player_seasonlogs.seas_type', '=', db.raw('?', ['REG']))
+const espn_score_join = (options) => {
+  players_table_join_function({
+    ...options,
+    additional_conditions: function ({
+      table_name,
+      params,
+      splits,
+      year_split_join_clause
+    }) {
+      this.andOn(`${table_name}.seas_type`, '=', db.raw('?', ['REG']))
 
-      if (splits.includes('year') && year_split_join_clause) {
-        splits.forEach((split) => {
-          this.andOn(
-            'player_seasonlogs.year',
-            '=',
-            db.raw(`${year_split_join_clause}`)
-          )
-        })
-      } else if (splits.includes('year')) {
-        if (params.year) {
-          const year_array = Array.isArray(params.year)
-            ? params.year
-            : [params.year]
-          this.andOn(
-            db.raw(`player_seasonlogs.year IN (${year_array.join(',')})`)
-          )
-        }
-      } else {
+      if (!splits.includes('year') && !year_split_join_clause) {
         const year = get_valid_year(params.year)
-        this.andOn('player_seasonlogs.year', '=', year)
+        this.andOn(`${table_name}.year`, '=', year)
       }
 
       if (params.career_year) {
         this.andOn(
-          'player_seasonlogs.career_year',
+          `${table_name}.career_year`,
           '>=',
           Math.min(params.career_year[0], params.career_year[1])
         ).andOn(
-          'player_seasonlogs.career_year',
+          `${table_name}.career_year`,
           '<=',
           Math.max(params.career_year[0], params.career_year[1])
         )
       }
     }
+  })
+}
 
-    query[join_func]('player_seasonlogs', join_conditions)
-  },
+const create_espn_score_columns = (column_name) => ({
+  table_name: 'player_seasonlogs',
+  column_name,
+  join: espn_score_join,
   supported_splits: ['year']
 })
 

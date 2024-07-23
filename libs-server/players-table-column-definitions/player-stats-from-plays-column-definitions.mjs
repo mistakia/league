@@ -1,8 +1,8 @@
 import db from '#db'
 import { nfl_plays_column_params, players_table_constants } from '#libs-shared'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
-import get_join_func from '#libs-server/get-join-func.mjs'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
+import players_table_join_function from '#libs-server/players-table/players-table-join-function.mjs'
 
 const generate_table_alias = ({ type, params = {}, pid_columns } = {}) => {
   if (!type) {
@@ -27,53 +27,6 @@ const generate_table_alias = ({ type, params = {}, pid_columns } = {}) => {
   return get_table_hash(`${type}_${pid_columns_string}_${key}`)
 }
 
-const join_filtered_plays_table = ({
-  query,
-  table_name,
-  join_type = 'LEFT',
-  splits = [],
-  year_split_join_clause = null,
-  params = {}
-}) => {
-  const join_func = get_join_func(join_type)
-  let year_offset = params.year_offset || 0
-  if (Array.isArray(year_offset)) {
-    year_offset = year_offset[0]
-  }
-
-  if (splits.length && year_split_join_clause) {
-    query[join_func](table_name, function () {
-      this.on(`${table_name}.pid`, '=', 'player.pid')
-      for (const split of splits) {
-        if (split === 'year' && year_offset !== 0) {
-          this.andOn(
-            db.raw(
-              `${table_name}.${split} = ${year_split_join_clause} + ${year_offset}`
-            )
-          )
-        } else if (split === 'year') {
-          this.andOn(db.raw(`${table_name}.year = ${year_split_join_clause}`))
-        }
-      }
-    })
-  } else {
-    query[join_func](table_name, function () {
-      this.on(`${table_name}.pid`, '=', 'player.pid')
-      if (splits.includes('year') && params.year) {
-        const year_array = Array.isArray(params.year)
-          ? params.year
-          : [params.year]
-        // TODO — i dont think this is needed
-        this.andOn(
-          db.raw(
-            `${table_name}.year IN (${year_array.map((y) => y + year_offset).join(',')})`
-          )
-        )
-      }
-    })
-  }
-}
-
 const player_stat_from_plays = ({ pid_columns, select_string, stat_name }) => ({
   table_alias: ({ params }) =>
     generate_table_alias({ type: 'play_by_play', params, pid_columns }),
@@ -82,24 +35,8 @@ const player_stat_from_plays = ({ pid_columns, select_string, stat_name }) => ({
   where_column: () => select_string,
   pid_columns,
   use_player_stats_play_by_play_with: true,
-  join: ({
-    query,
-    table_name = `filtered_plays_${stat_name}`,
-    join_type = 'LEFT',
-    splits = [],
-    year_split_join_clause = null,
-    params
-  }) => {
-    join_filtered_plays_table({
-      query,
-      table_name,
-      pid_columns,
-      join_type,
-      splits,
-      year_split_join_clause,
-      params
-    })
-  },
+  join: (args) =>
+    players_table_join_function({ ...args, join_year_on_year_split: true }),
   use_having: true,
   supported_splits: ['year'],
   supported_rate_types: ['per_game']
@@ -189,22 +126,8 @@ const create_team_share_stat = ({
   },
   table_alias: ({ params }) =>
     generate_table_alias({ type: column_name, params, pid_columns }),
-  join: ({
-    query,
-    table_name,
-    join_type,
-    splits = [],
-    year_split_join_clause = null
-  }) => {
-    join_filtered_plays_table({
-      query,
-      table_name,
-      pid_columns,
-      join_type,
-      splits,
-      year_split_join_clause
-    })
-  },
+  join: (args) =>
+    players_table_join_function({ ...args, join_year_on_year_split: true }),
   supported_splits: ['year']
 })
 

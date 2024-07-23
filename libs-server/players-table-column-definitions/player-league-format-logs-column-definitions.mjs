@@ -2,6 +2,7 @@ import db from '#db'
 import { constants } from '#libs-shared'
 import get_join_func from '#libs-server/get-join-func.mjs'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
+import players_table_join_function from '#libs-server/players-table/players-table-join-function.mjs'
 
 const league_format_player_seasonlogs_table_alias = ({ params = {} }) => {
   const {
@@ -22,70 +23,31 @@ const league_format_player_seasonlogs_table_alias = ({ params = {} }) => {
   )
 }
 
-const league_format_player_seasonlogs_join = ({
-  query,
-  table_name,
-  join_type = 'LEFT',
-  splits = [],
-  year_split_join_clause = null,
-  params = {}
-}) => {
-  const join_func = get_join_func(join_type)
-  const {
-    league_format_hash = '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b'
-  } = params
+const league_format_player_seasonlogs_join = (join_arguments) => {
+  const additional_conditions = function ({ params, table_name, splits }) {
+    const {
+      league_format_hash = '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b'
+    } = params
 
-  let year = params.year || [constants.season.stats_season_year]
-  if (!Array.isArray(year)) {
-    year = [year]
-  }
+    let year = params.year || [constants.season.stats_season_year]
+    if (!Array.isArray(year)) {
+      year = [year]
+    }
 
-  let year_offset = params.year_offset || 0
-  if (Array.isArray(year_offset)) {
-    year_offset = year_offset[0]
-  }
-
-  // Apply the year_offset
-  year = year.map((y) => y + year_offset)
-
-  const join_conditions = function () {
-    this.on(`${table_name}.pid`, '=', 'player.pid')
     this.andOn(
       db.raw(`${table_name}.league_format_hash = '${league_format_hash}'`)
     )
 
-    if (splits.includes('year') && year_split_join_clause) {
-      for (const split of splits) {
-        if (split === 'year' && year_offset !== 0) {
-          this.andOn(
-            db.raw(
-              `${table_name}.year = ${year_split_join_clause} + ${year_offset}`
-            )
-          )
-        } else {
-          this.andOn(db.raw(`${table_name}.year = ${year_split_join_clause}`))
-        }
-      }
-    } else if (splits.includes('year')) {
-      if (params.year) {
-        const year_array = Array.isArray(params.year)
-          ? params.year
-          : [params.year]
-        this.andOn(
-          db.raw(
-            `${table_name}.year IN (${year_array.map((y) => y + year_offset).join(',')})`
-          )
-        )
-      }
-    } else {
+    if (!splits.includes('year')) {
       this.andOn(db.raw(`${table_name}.year IN (${year.join(',')})`))
     }
   }
 
-  query[join_func](
-    `league_format_player_seasonlogs as ${table_name}`,
-    join_conditions
-  )
+  players_table_join_function({
+    ...join_arguments,
+    join_table_clause: `league_format_player_seasonlogs as ${join_arguments.table_name}`,
+    additional_conditions
+  })
 }
 
 const create_field_from_league_format_player_seasonlogs = (column_name) => ({
