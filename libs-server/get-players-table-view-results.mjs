@@ -28,9 +28,9 @@ const find_sort_column = ({ column_id, column_index = 0, columns }) => {
   return item ? item.column : null
 }
 
-const get_table_name = ({ column_definition, column_params }) => {
+const get_table_name = ({ column_definition, column_params, splits }) => {
   return column_definition.table_alias
-    ? column_definition.table_alias({ params: column_params })
+    ? column_definition.table_alias({ params: column_params, splits })
     : column_definition.table_name
 }
 
@@ -82,7 +82,8 @@ const get_select_string = ({
   column_index,
   column_definition,
   table_name,
-  rate_type_column_mapping
+  rate_type_column_mapping,
+  splits
 }) => {
   const rate_type_table_name =
     rate_type_column_mapping[`${column_id}_${column_index}`]
@@ -101,14 +102,16 @@ const get_select_string = ({
         table_name,
         params: column_params,
         column_index,
-        rate_type_table_name
+        rate_type_table_name,
+        splits
       }),
       group_by: column_definition.group_by
         ? column_definition.group_by({
             table_name,
             params: column_params,
             column_index,
-            rate_type_table_name
+            rate_type_table_name,
+            splits
           })
         : []
     }
@@ -174,7 +177,8 @@ const add_clauses_for_table = ({
       column_index,
       column_definition,
       table_name,
-      rate_type_column_mapping
+      rate_type_column_mapping,
+      splits
     })
 
     select_strings.push(...select_result.select)
@@ -407,7 +411,8 @@ const add_clauses_for_table = ({
 const get_grouped_clauses_by_table = ({
   where: where_clauses,
   table_columns,
-  players_table_column_definitions
+  players_table_column_definitions,
+  splits
 }) => {
   const grouped_clauses_by_table = {}
 
@@ -420,7 +425,8 @@ const get_grouped_clauses_by_table = ({
     }
     const table_name = get_table_name({
       column_definition,
-      column_params
+      column_params,
+      splits
     })
 
     if (!grouped_clauses_by_table[table_name]) {
@@ -449,7 +455,11 @@ const get_grouped_clauses_by_table = ({
     if (!column_definition) {
       continue
     }
-    const table_name = get_table_name({ column_definition, column_params })
+    const table_name = get_table_name({
+      column_definition,
+      column_params,
+      splits
+    })
 
     if (!grouped_clauses_by_table[table_name]) {
       grouped_clauses_by_table[table_name] = {
@@ -582,7 +592,8 @@ export default function ({
   const grouped_clauses_by_table = get_grouped_clauses_by_table({
     where,
     table_columns,
-    players_table_column_definitions
+    players_table_column_definitions,
+    splits
   })
 
   const grouped_by_splits = group_tables_by_supported_splits(
@@ -724,7 +735,11 @@ export default function ({
       continue
     }
 
-    const table_name = get_table_name({ column_definition, column_params })
+    const table_name = get_table_name({
+      column_definition,
+      column_params,
+      splits
+    })
 
     // Find the select position for the sort column
     const column_name = column_definition.select_as
