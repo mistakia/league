@@ -527,6 +527,35 @@ describe('LIBS SERVER get_players_table_view_results', () => {
       ],
       prefix_columns: ['player_name', 'player_league_roster_status'],
       columns: [
+        'player_season_projected_points_added',
+        'player_season_projected_points',
+        'player_season_projected_pass_yds',
+        'player_season_projected_pass_tds',
+        'player_season_projected_pass_ints',
+        'player_season_projected_rush_atts',
+        'player_season_projected_rush_yds',
+        'player_season_projected_rush_tds',
+        'player_season_projected_fumbles_lost',
+        'player_season_projected_targets',
+        'player_season_projected_recs',
+        'player_season_projected_rec_yds',
+        'player_season_projected_rec_tds'
+      ]
+    })
+    const expected_query = `select "player"."pid", player.fname, player.lname, CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, "t265b999c74514c26d03e1e5bf72bbcca"."pts_added" AS "season_projected_points_added_0", "t07887d1cc826d9aef7d20e96e08343f1"."total" AS "season_projected_points_0", "t6f54c05eac6ba296f8748f9026c2d01f"."py" AS "season_projected_pass_yds_0", "t6f54c05eac6ba296f8748f9026c2d01f"."tdp" AS "season_projected_pass_tds_0", "t6f54c05eac6ba296f8748f9026c2d01f"."ints" AS "season_projected_pass_ints_0", "t6f54c05eac6ba296f8748f9026c2d01f"."ra" AS "season_projected_rush_atts_0", "t6f54c05eac6ba296f8748f9026c2d01f"."ry" AS "season_projected_rush_yds_0", "t6f54c05eac6ba296f8748f9026c2d01f"."tdr" AS "season_projected_rush_tds_0", "t6f54c05eac6ba296f8748f9026c2d01f"."fuml" AS "season_projected_fumbles_lost_0", "t6f54c05eac6ba296f8748f9026c2d01f"."trg" AS "season_projected_targets_0", "t6f54c05eac6ba296f8748f9026c2d01f"."rec" AS "season_projected_recs_0", "t6f54c05eac6ba296f8748f9026c2d01f"."recy" AS "season_projected_rec_yds_0", "t6f54c05eac6ba296f8748f9026c2d01f"."tdrec" AS "season_projected_rec_tds_0", "player"."pos" from "player" left join "rosters_players" on "rosters_players"."pid" = "player"."pid" and "rosters_players"."year" = 2024 and "rosters_players"."week" = 0 and "rosters_players"."lid" = 1 left join "league_format_player_projection_values" as "t265b999c74514c26d03e1e5bf72bbcca" on "t265b999c74514c26d03e1e5bf72bbcca"."pid" = "player"."pid" and "t265b999c74514c26d03e1e5bf72bbcca"."year" = 2024 and "t265b999c74514c26d03e1e5bf72bbcca"."week" = '0' and "t265b999c74514c26d03e1e5bf72bbcca"."league_format_hash" = '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b' left join "scoring_format_player_projection_points" as "t07887d1cc826d9aef7d20e96e08343f1" on "t07887d1cc826d9aef7d20e96e08343f1"."pid" = "player"."pid" and "t07887d1cc826d9aef7d20e96e08343f1"."year" = 2024 and "t07887d1cc826d9aef7d20e96e08343f1"."week" = '0' and "t07887d1cc826d9aef7d20e96e08343f1"."scoring_format_hash" = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d' left join "projections_index" as "t6f54c05eac6ba296f8748f9026c2d01f" on "t6f54c05eac6ba296f8748f9026c2d01f"."pid" = "player"."pid" and "t6f54c05eac6ba296f8748f9026c2d01f"."year" = 2024 and "t6f54c05eac6ba296f8748f9026c2d01f"."week" = '0' and "t6f54c05eac6ba296f8748f9026c2d01f"."sourceid" = 18 group by player.fname, player.lname, rosters_players.slot, rosters_players.tid, rosters_players.tag, "t265b999c74514c26d03e1e5bf72bbcca"."pts_added", "t07887d1cc826d9aef7d20e96e08343f1"."total", "t6f54c05eac6ba296f8748f9026c2d01f"."py", "t6f54c05eac6ba296f8748f9026c2d01f"."tdp", "t6f54c05eac6ba296f8748f9026c2d01f"."ints", "t6f54c05eac6ba296f8748f9026c2d01f"."ra", "t6f54c05eac6ba296f8748f9026c2d01f"."ry", "t6f54c05eac6ba296f8748f9026c2d01f"."tdr", "t6f54c05eac6ba296f8748f9026c2d01f"."fuml", "t6f54c05eac6ba296f8748f9026c2d01f"."trg", "t6f54c05eac6ba296f8748f9026c2d01f"."rec", "t6f54c05eac6ba296f8748f9026c2d01f"."recy", "t6f54c05eac6ba296f8748f9026c2d01f"."tdrec", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 8 DESC NULLS LAST, "player"."pid" asc limit 500`
+    expect(query.toString()).to.equal(expected_query)
+  })
+
+  it('should create a query for season projected stats', () => {
+    const query = get_players_table_view_results({
+      sort: [
+        {
+          column_id: 'player_season_projected_points_added',
+          desc: true
+        }
+      ],
+      prefix_columns: ['player_name', 'player_league_roster_status'],
+      columns: [
         {
           column_id: 'player_season_projected_points_added',
           params: {
