@@ -155,7 +155,8 @@ const add_clauses_for_table = ({
   splits = [],
   year_split_join_clause,
   week_split_join_clause,
-  rate_type_column_mapping = {}
+  rate_type_column_mapping = {},
+  players_table_options
 }) => {
   const column_ids = []
   const select_strings = []
@@ -395,7 +396,8 @@ const add_clauses_for_table = ({
       join_type: where_clauses.length ? 'INNER' : 'LEFT',
       splits,
       year_split_join_clause,
-      week_split_join_clause
+      week_split_join_clause,
+      players_table_options
     })
   } else if (
     table_name !== 'player' &&
@@ -535,6 +537,9 @@ export default function ({
   const table_columns = []
   const rate_type_tables = {}
   const rate_type_column_mapping = {}
+  const players_table_options = {
+    opening_days_joined: false
+  }
 
   for (const [index, column] of [...prefix_columns, ...columns].entries()) {
     table_columns.push({ column, index })
@@ -629,7 +634,8 @@ export default function ({
         splits: available_splits,
         year_split_join_clause,
         week_split_join_clause,
-        rate_type_column_mapping
+        rate_type_column_mapping,
+        players_table_options
       })
 
       if (table_name !== 'player' && table_name !== 'rosters_players') {

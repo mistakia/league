@@ -16,7 +16,8 @@ const keeptradecut_join = ({
   join_type = 'LEFT',
   splits = [],
   year_split_join_clause = null,
-  params = {}
+  params = {},
+  players_table_options = {}
 }) => {
   const join_func = get_join_func(join_type)
   let year_offset = params.year_offset || 0
@@ -24,55 +25,50 @@ const keeptradecut_join = ({
     year_offset = year_offset[0]
   }
 
+  if (splits.includes('year')) {
+    query.leftJoin('opening_days', function () {
+      this.on(db.raw('true'))
+    })
+    players_table_options.opening_days_joined = true
+  }
+
   const join_conditions = function () {
     this.on(`${table_name}.pid`, '=', 'player.pid')
     this.andOn(`${table_name}.qb`, '=', db.raw('?', [params.qb || 2]))
     this.andOn(`${table_name}.type`, '=', db.raw('?', [type]))
 
-    if (splits.includes('year') && year_split_join_clause) {
-      splits.forEach((split) => {
-        if (split === 'year') {
-          if (year_offset !== 0) {
-            this.andOn(
-              db.raw(
-                `EXTRACT(YEAR FROM (DATE_TRUNC('year', to_timestamp(${table_name}.d)::timestamp) + interval '${year_offset} year'))`
-              ),
-              '=',
-              db.raw(`(${year_split_join_clause})`)
-            )
-          } else {
-            this.andOn(
-              db.raw(
-                `EXTRACT(YEAR FROM to_timestamp(${table_name}.d)::timestamp)`
-              ),
-              '=',
-              db.raw(`(${year_split_join_clause})`)
-            )
-          }
-        }
-      })
-    } else if (splits.includes('year')) {
-      if (params.year) {
+    if (splits.includes('year')) {
+      this.andOn(
+        db.raw(`EXTRACT(YEAR FROM to_timestamp(${table_name}.d))`),
+        '=',
+        'opening_days.year'
+      )
+      this.andOn(
+        `${table_name}.d`,
+        '=',
+        db.raw(
+          `EXTRACT(EPOCH FROM (date_trunc('day', opening_days.opening_day) + interval '${year_offset} year'))::integer`
+        )
+      )
+
+      if (year_split_join_clause) {
+        this.andOn(
+          db.raw(`opening_days.year`),
+          '=',
+          db.raw(`(${year_split_join_clause})`)
+        )
+      } else if (params.year) {
         const year_array = Array.isArray(params.year)
           ? params.year
           : [params.year]
-        this.andOn(
-          db.raw(
-            `${table_name}.d IN (${year_array
-              .map(
-                (year) =>
-                  `EXTRACT(EPOCH FROM to_timestamp('${year + year_offset}-09-01', 'YYYY-MM-DD') AT TIME ZONE 'UTC')::integer`
-              )
-              .join(', ')})`
-          )
-        )
+        this.andOn(db.raw(`opening_days.year IN (${year_array.join(', ')})`))
       }
     } else if (params.date) {
       this.andOn(
         `${table_name}.d`,
         '=',
         db.raw(
-          `EXTRACT(EPOCH FROM to_timestamp(?, 'YYYY-MM-DD') AT TIME ZONE 'UTC')::integer`,
+          `EXTRACT(EPOCH FROM (to_timestamp(?, 'YYYY-MM-DD') + interval '${year_offset} year') AT TIME ZONE 'UTC')::integer`,
           [params.date]
         )
       )
