@@ -99,7 +99,7 @@ export default function ({ is_logged_in }) {
       player_value_path: 'dob'
     },
     player_age: {
-      column_title: 'Current Age',
+      column_title: 'Age',
       header_label: 'Age',
       player_value_path: 'age',
       size: 60,
