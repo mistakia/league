@@ -37,6 +37,9 @@ DROP INDEX IF EXISTS public.idx_nfl_plays_qtr;
 DROP INDEX IF EXISTS public.idx_nfl_plays_dwn;
 DROP INDEX IF EXISTS public.idx_nfl_plays_assisted_tackle_2_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_assisted_tackle_1_pid;
+DROP INDEX IF EXISTS public.idx_keeptradecut_rankings_type_qb_d_v;
+DROP INDEX IF EXISTS public.idx_keeptradecut_rankings_qb_type_d_pid;
+DROP INDEX IF EXISTS public.idx_keeptradecut_rankings_pid_qb_type_d;
 DROP INDEX IF EXISTS public.idx_25151_lid;
 DROP INDEX IF EXISTS public.idx_25147_waiverid_pid;
 DROP INDEX IF EXISTS public.idx_25147_waiverid;
@@ -303,6 +306,7 @@ DROP TABLE IF EXISTS public.play_changelog;
 DROP SEQUENCE IF EXISTS public.placed_wagers_wager_id_seq;
 DROP TABLE IF EXISTS public.placed_wagers;
 DROP TABLE IF EXISTS public.percentiles;
+DROP MATERIALIZED VIEW IF EXISTS public.opening_days;
 DROP TABLE IF EXISTS public.nfl_team_seasonlogs;
 DROP TABLE IF EXISTS public.nfl_snaps_current_week;
 DROP TABLE IF EXISTS public.nfl_snaps;
@@ -3123,6 +3127,19 @@ CREATE TABLE public.nfl_team_seasonlogs (
     dtpr numeric(5,2) DEFAULT 0.00,
     dtd numeric(5,2) DEFAULT 0.00
 );
+
+
+--
+-- Name: opening_days; Type: MATERIALIZED VIEW; Schema: public; Owner: -
+--
+
+CREATE MATERIALIZED VIEW public.opening_days AS
+ SELECT year,
+    min((date)::date) AS opening_day
+   FROM public.nfl_games
+  WHERE ((seas_type)::text = 'REG'::text)
+  GROUP BY year
+  WITH NO DATA;
 
 
 --
@@ -6401,6 +6418,27 @@ CREATE UNIQUE INDEX idx_25147_waiverid_pid ON public.waiver_releases USING btree
 --
 
 CREATE INDEX idx_25151_lid ON public.waivers USING btree (lid);
+
+
+--
+-- Name: idx_keeptradecut_rankings_pid_qb_type_d; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_keeptradecut_rankings_pid_qb_type_d ON public.keeptradecut_rankings USING btree (pid, qb, type, d);
+
+
+--
+-- Name: idx_keeptradecut_rankings_qb_type_d_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_keeptradecut_rankings_qb_type_d_pid ON public.keeptradecut_rankings USING btree (qb, type, d, pid);
+
+
+--
+-- Name: idx_keeptradecut_rankings_type_qb_d_v; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_keeptradecut_rankings_type_qb_d_v ON public.keeptradecut_rankings USING btree (type, qb, d, v);
 
 
 --

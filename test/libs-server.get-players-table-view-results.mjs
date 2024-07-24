@@ -1097,6 +1097,54 @@ describe('LIBS SERVER get_players_table_view_results', () => {
     expect(query.toString()).to.equal(expected_query)
   })
 
+  it('should create a query with player current age', () => {
+    const query = get_players_table_view_results({
+      prefix_columns: ['player_name'],
+      columns: [
+        'player_age',
+        {
+          column_id: 'player_receiving_yards_from_plays',
+          params: {
+            year: [2023, 2022, 2021, 2020]
+          }
+        }
+      ],
+      sort: [
+        {
+          column_id: 'player_receiving_yards_from_plays',
+          desc: true
+        }
+      ]
+    })
+    const expected_query = `with "t2eca29502df6a0581aafd411a2f4d49f" as (select COALESCE(trg_pid) as pid, SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END) as rec_yds_from_plays_0 from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2020, 2021, 2022, 2023) group by COALESCE(trg_pid)) select "player"."pid", player.fname, player.lname, ROUND(EXTRACT(YEAR FROM AGE(CURRENT_DATE, TO_DATE(player.dob, 'YYYY-MM-DD'))) + (EXTRACT(MONTH FROM AGE(CURRENT_DATE, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 12.0) + (EXTRACT(DAY FROM AGE(CURRENT_DATE, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 365.25), 2) as age_0, "t2eca29502df6a0581aafd411a2f4d49f"."rec_yds_from_plays_0" as "rec_yds_from_plays_0", "player"."pos" from "player" left join "t2eca29502df6a0581aafd411a2f4d49f" on "t2eca29502df6a0581aafd411a2f4d49f"."pid" = "player"."pid" group by player.fname, player.lname, player.dob, "t2eca29502df6a0581aafd411a2f4d49f"."rec_yds_from_plays_0", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 5 DESC NULLS LAST, "player"."pid" asc limit 500`
+    expect(query.toString()).to.equal(expected_query)
+  })
+
+  it('should create a year splits query with player age at time of split', () => {
+    const query = get_players_table_view_results({
+      sort: [
+        {
+          column_id: 'player_receiving_yards_from_plays',
+          desc: true
+        }
+      ],
+      prefix_columns: ['player_name'],
+      columns: [
+        {
+          column_id: 'player_receiving_yards_from_plays',
+          params: {
+            year: [2023, 2022, 2021, 2020]
+          }
+        },
+        'player_age'
+      ],
+      where: [],
+      splits: ['year']
+    })
+    const expected_query = `with "t2eca29502df6a0581aafd411a2f4d49f" as (select COALESCE(trg_pid) as pid, "nfl_plays"."year", SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END) as rec_yds_from_plays_0 from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2020, 2021, 2022, 2023) group by "nfl_plays"."year", COALESCE(trg_pid)), "opening_days" as (select "year", MIN(date::date) as opening_day from "nfl_games" where "seas_type" = 'REG' group by "year") select "player"."pid", player.fname, player.lname, "t2eca29502df6a0581aafd411a2f4d49f"."rec_yds_from_plays_0" as "rec_yds_from_plays_0", ROUND(EXTRACT(YEAR FROM AGE(opening_days.opening_day, TO_DATE(player.dob, 'YYYY-MM-DD'))) + (EXTRACT(MONTH FROM AGE(opening_days.opening_day, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 12.0) + (EXTRACT(DAY FROM AGE(opening_days.opening_day, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 365.25), 2) as age_0, COALESCE(t2eca29502df6a0581aafd411a2f4d49f.year) AS year, "player"."pos" from "player" left join "t2eca29502df6a0581aafd411a2f4d49f" on "t2eca29502df6a0581aafd411a2f4d49f"."pid" = "player"."pid" and t2eca29502df6a0581aafd411a2f4d49f.year IN (2020,2021,2022,2023) left join "opening_days" on "opening_days"."year" = "t2eca29502df6a0581aafd411a2f4d49f"."year" group by player.fname, player.lname, "t2eca29502df6a0581aafd411a2f4d49f"."rec_yds_from_plays_0", player.dob, opening_days.opening_day, COALESCE(t2eca29502df6a0581aafd411a2f4d49f.year), "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 4 DESC NULLS LAST, "player"."pid" asc limit 500`
+    expect(query.toString()).to.equal(expected_query)
+  })
+
   describe('errors', () => {
     it('should throw an error if where value is missing', () => {
       try {

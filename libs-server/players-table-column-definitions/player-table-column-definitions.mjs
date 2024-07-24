@@ -1,4 +1,5 @@
 import db from '#db'
+import get_join_func from '#libs-server/get-join-func.mjs'
 
 export default {
   player_name: {
@@ -103,19 +104,53 @@ export default {
     use_having: true
   },
   player_age: {
-    table_name: 'player',
+    table_alias: ({ splits }) => {
+      if (splits.includes('year')) {
+        return 'year_splits_player_age'
+      }
+
+      return 'player'
+    },
     column_name: 'age',
-    select: ({ column_index }) => [
-      `ROUND(EXTRACT(YEAR FROM AGE(CURRENT_DATE, TO_DATE(player.dob, 'YYYY-MM-DD'))) +
-       (EXTRACT(MONTH FROM AGE(CURRENT_DATE, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 12.0) +
-       (EXTRACT(DAY FROM AGE(CURRENT_DATE, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 365.25), 2) as age_${column_index}`
-    ],
-    group_by: () => ['player.dob'],
-    where_column: () =>
-      `ROUND(EXTRACT(YEAR FROM AGE(CURRENT_DATE, TO_DATE(player.dob, 'YYYY-MM-DD'))) +
-       (EXTRACT(MONTH FROM AGE(CURRENT_DATE, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 12.0) +
-       (EXTRACT(DAY FROM AGE(CURRENT_DATE, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 365.25), 2)`,
-    use_having: true
+    year_select: () => undefined,
+    join: ({ query, splits, join_type, year_split_join_clause }) => {
+      if (!splits.includes('year')) {
+        return
+      }
+
+      if (year_split_join_clause) {
+        const join_func = get_join_func(join_type)
+        query[join_func](
+          'opening_days',
+          'opening_days.year',
+          year_split_join_clause
+        )
+      }
+    },
+    select: ({ column_index, splits }) => {
+      const base_year = splits.includes('year')
+        ? 'opening_days.opening_day'
+        : 'CURRENT_DATE'
+      return [
+        db.raw(
+          `ROUND(EXTRACT(YEAR FROM AGE(${base_year}, TO_DATE(player.dob, 'YYYY-MM-DD'))) + (EXTRACT(MONTH FROM AGE(${base_year}, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 12.0) + (EXTRACT(DAY FROM AGE(${base_year}, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 365.25), 2) as age_${column_index}`
+        )
+      ]
+    },
+    group_by: ({ splits }) =>
+      splits.includes('year')
+        ? ['player.dob', 'opening_days.opening_day']
+        : ['player.dob'],
+    where_column: ({ splits }) => {
+      const base_year = splits.includes('year')
+        ? 'opening_days.opening_day'
+        : 'CURRENT_DATE'
+      return db.raw(
+        `ROUND(EXTRACT(YEAR FROM AGE(${base_year}, TO_DATE(player.dob, 'YYYY-MM-DD'))) + (EXTRACT(MONTH FROM AGE(${base_year}, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 12.0) + (EXTRACT(DAY FROM AGE(${base_year}, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 365.25), 2)`
+      )
+    },
+    use_having: true,
+    supported_splits: ['year']
   },
   player_date_of_birth: {
     table_name: 'player',
