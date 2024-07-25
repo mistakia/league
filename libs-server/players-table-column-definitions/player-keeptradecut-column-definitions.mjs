@@ -19,17 +19,28 @@ const keeptradecut_join = ({
   params = {},
   players_table_options = {}
 }) => {
-  const join_func = get_join_func(join_type)
+  // using an inner join for week splits because its much faster, not sure why
+  const join_func = get_join_func(splits.includes('week') ? 'INNER' : join_type)
   let year_offset = params.year_offset || 0
   if (Array.isArray(year_offset)) {
     year_offset = year_offset[0]
   }
 
-  if (splits.includes('year')) {
+  if (splits.includes('year') && !players_table_options.opening_days_joined) {
     query.leftJoin('opening_days', function () {
       this.on(db.raw('true'))
     })
     players_table_options.opening_days_joined = true
+  }
+
+  if (
+    splits.includes('week') &&
+    !players_table_options.nfl_year_week_timestamp_joined
+  ) {
+    query.leftJoin('nfl_year_week_timestamp', function () {
+      this.on(db.raw('true'))
+    })
+    players_table_options.nfl_year_week_timestamp_joined = true
   }
 
   const join_conditions = function () {
@@ -37,7 +48,14 @@ const keeptradecut_join = ({
     this.andOn(`${table_name}.qb`, '=', db.raw('?', [params.qb || 2]))
     this.andOn(`${table_name}.type`, '=', db.raw('?', [type]))
 
-    if (splits.includes('year')) {
+    if (splits.includes('week')) {
+      // TODO handle year_offset and week_offset
+      this.andOn(
+        `${table_name}.d`,
+        '=',
+        'nfl_year_week_timestamp.week_timestamp'
+      )
+    } else if (splits.includes('year')) {
       this.andOn(
         db.raw(`EXTRACT(YEAR FROM to_timestamp(${table_name}.d))`),
         '=',
@@ -96,9 +114,14 @@ const create_keeptradecut_definition = (type) => ({
       type: constants.KEEPTRADECUT[type.toUpperCase()],
       ...args
     }),
-  year_select: (table_name) =>
-    `EXTRACT(YEAR FROM TO_TIMESTAMP(${table_name}.d))`,
-  supported_splits: ['year']
+  year_select: ({ splits, table_name }) => {
+    if (splits.includes('week')) {
+      return `nfl_year_week_timestamp.year`
+    }
+    return `EXTRACT(YEAR FROM TO_TIMESTAMP(${table_name}.d))`
+  },
+  week_select: () => `nfl_year_week_timestamp.week`,
+  supported_splits: ['year', 'week']
 })
 
 export default {

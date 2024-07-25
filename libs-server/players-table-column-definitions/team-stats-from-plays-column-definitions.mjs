@@ -28,8 +28,8 @@ const team_stat_from_plays = ({ select_string, stat_name }) => ({
       join_year_on_year_split: true,
       table_name: `${args.table_name}_player_team_stats`
     }),
-  year_select: (table_alias) => `${table_alias}_player_team_stats.year`,
-  week_select: (table_alias) => `${table_alias}_player_team_stats.week`,
+  year_select: ({ table_name }) => `${table_name}_player_team_stats.year`,
+  week_select: ({ table_name }) => `${table_name}_player_team_stats.week`,
   use_having: true,
   supported_splits: ['year', 'week'],
   supported_rate_types: ['per_game']
