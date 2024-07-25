@@ -47,6 +47,9 @@ export default class PlayerRosterTotal extends React.Component {
         0
       )
       const hasProjections = playerMap.hasIn(['market_salary', projectionType])
+      const is_restricted_free_agent_tag_processed = playerMap.get(
+        'transition_tag_processed'
+      )
       const savings = hasProjections
         ? projectedSalary -
           (isBeforeExtensionDeadline ? extendedSalary : bid || value)
@@ -54,7 +57,10 @@ export default class PlayerRosterTotal extends React.Component {
 
       const salary = isBeforeExtensionDeadline
         ? value
-        : isBeforeTransitionEnd && isRestrictedFreeAgent && is_team_manager
+        : isBeforeTransitionEnd &&
+            isRestrictedFreeAgent &&
+            is_team_manager &&
+            !is_restricted_free_agent_tag_processed
           ? bid
           : value
       baseSalaryTotal = baseSalaryTotal + salary
