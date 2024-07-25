@@ -9,6 +9,9 @@ import { add_defensive_play_by_play_with_statement } from '#libs-server/players-
 import { add_player_stats_play_by_play_with_statement } from '#libs-server/players-table/add-player-stats-play-by-play-with-statement.mjs'
 import { add_team_stats_play_by_play_with_statement } from '#libs-server/players-table/add-team-stats-play-by-play-with-statement.mjs'
 
+const get_rate_type_sql = ({ table_name, column_name, rate_type_table_name }) =>
+  `CAST(${table_name}.${column_name}_0 AS DECIMAL) / NULLIF(CAST(${rate_type_table_name}.rate_type_total_count AS DECIMAL), 0)`
+
 const get_column_index = ({ column_id, index, columns }) => {
   const columns_with_same_id = columns.filter(
     ({ column: c }) => (typeof c === 'string' ? c : c.column_id) === column_id
@@ -91,7 +94,11 @@ const get_select_string = ({
 
   const get_select_expression = () => {
     if (rate_type_table_name) {
-      return `CAST(${column_value} AS DECIMAL) / NULLIF(CAST(${rate_type_table_name}.rate_type_total_count AS DECIMAL), 0)`
+      return get_rate_type_sql({
+        table_name,
+        column_name: column_definition.column_name,
+        rate_type_table_name
+      })
     }
     return column_value
   }
@@ -264,9 +271,14 @@ const add_clauses_for_table = ({
       const rate_type_table_name =
         rate_type_column_mapping[`${column_id}_${column_index}`]
       if (rate_type_table_name) {
+        const rate_type_sql_string = get_rate_type_sql({
+          table_name,
+          column_name: column_definition.column_name,
+          rate_type_table_name
+        })
         players_query.select(
           db.raw(
-            `CAST(${table_name}.${column_definition.column_name}_0 AS DECIMAL) / nullif(CAST(${rate_type_table_name}.rate_type_total_count AS DECIMAL), 0) as ${column_definition.column_name}_${column_index}`
+            `${rate_type_sql_string} as ${column_definition.column_name}_${column_index}`
           )
         )
         players_query.groupBy(
@@ -305,9 +317,14 @@ const add_clauses_for_table = ({
       const rate_type_table_name =
         rate_type_column_mapping[`${column_id}_${column_index}`]
       if (rate_type_table_name) {
+        const rate_type_sql_string = get_rate_type_sql({
+          table_name,
+          column_name: column_definition.column_name,
+          rate_type_table_name
+        })
         players_query.select(
           db.raw(
-            `CAST(${table_name}_player_team_stats.${column_definition.column_name}_0 AS DECIMAL) / nullif(CAST(${rate_type_table_name}.rate_type_total_count AS DECIMAL), 0) as ${column_definition.column_name}_${column_index}`
+            `${rate_type_sql_string} as ${column_definition.column_name}_${column_index}`
           )
         )
         players_query.groupBy(
@@ -340,9 +357,14 @@ const add_clauses_for_table = ({
       const rate_type_table_name =
         rate_type_column_mapping[`${column_id}_${column_index}`]
       if (rate_type_table_name) {
+        const rate_type_sql_string = get_rate_type_sql({
+          table_name,
+          column_name: column_definition.column_name,
+          rate_type_table_name
+        })
         players_query.select(
           db.raw(
-            `CAST(${table_name}.${column_definition.column_name}_0 AS DECIMAL) / nullif(CAST(${rate_type_table_name}.rate_type_total_count AS DECIMAL), 0) as ${column_definition.column_name}_${column_index}`
+            `${rate_type_sql_string} as ${column_definition.column_name}_${column_index}`
           )
         )
         players_query.groupBy(
@@ -539,6 +561,23 @@ export default function ({
   const rate_type_column_mapping = {}
   const players_table_options = {
     opening_days_joined: false
+  }
+
+  // sanitize parameters
+
+  // if splits week is enabled — delete all per_game rate_type column params
+  if (splits.includes('week')) {
+    columns = columns.map((column) => {
+      if (
+        typeof column === 'object' &&
+        column.params &&
+        column.params.rate_type &&
+        column.params.rate_type[0] === 'per_game'
+      ) {
+        return { ...column, params: { ...column.params, rate_type: undefined } }
+      }
+      return column
+    })
   }
 
   for (const [index, column] of [...prefix_columns, ...columns].entries()) {
