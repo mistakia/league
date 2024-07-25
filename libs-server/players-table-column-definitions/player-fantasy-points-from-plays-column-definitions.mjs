@@ -44,6 +44,10 @@ const fantasy_points_from_plays_with = ({
     'pass_td'
   ])
 
+  if (splits.includes('week')) {
+    base_columns.add('week')
+  }
+
   for (const param_name of Object.keys(params)) {
     if (param_name === 'career_year') {
       base_columns.add('year')
