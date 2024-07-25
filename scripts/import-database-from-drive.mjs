@@ -1,5 +1,7 @@
 import fs from 'fs'
 import cp from 'child_process'
+import path, { dirname } from 'path'
+import { fileURLToPath } from 'url'
 
 import debug from 'debug'
 import yargs from 'yargs'
@@ -19,8 +21,8 @@ const run = async ({
   stats,
   betting,
   cache,
-  user,
-  download_only = false
+  download_only = false,
+  reset = false
 } = {}) => {
   const drive = await googleDrive()
   const listParams = {
@@ -32,16 +34,22 @@ const run = async ({
 
   let file
   if (full) {
+    log('loading full database')
     file = res.data.files.find((f) => f.name.includes('full'))
   } else if (logs) {
+    log('loading logs')
     file = res.data.files.find((f) => f.name.includes('logs'))
   } else if (betting) {
+    log('loading betting')
     file = res.data.files.find((f) => f.name.includes('betting'))
   } else if (stats) {
+    log('loading stats')
     file = res.data.files.find((f) => f.name.includes('stats'))
   } else if (cache) {
+    log('loading cache')
     file = res.data.files.find((f) => f.name.includes('cache'))
   } else {
+    log('loading user')
     file = res.data.files.find((f) => f.name.includes('user'))
   }
 
@@ -49,11 +57,10 @@ const run = async ({
     log('file not found')
     return
   }
-
   const filename = await downloadFile({ drive, file })
 
-  const { user: mysql_user, database } = config.mysql.connection
-  const sqlFile = filename.replace('tar.gz', 'sql')
+  const { user: postgres_user, database } = config.postgres.connection
+  const sql_file = filename.replace('tar.gz', 'sql')
   try {
     cp.execSync(`tar -xvzf ${filename}`)
 
@@ -61,9 +68,28 @@ const run = async ({
       return
     }
 
-    cp.execSync(`mysql -h 127.0.0.1 -u ${mysql_user} -e "RESET MASTER"`)
-    cp.execSync(`mysql -h 127.0.0.1 -u ${mysql_user} ${database} < ${sqlFile}`)
-    log(`imported ${sqlFile} into mysql`)
+    // reset database and load schema
+    if (reset) {
+      const __dirname = dirname(fileURLToPath(import.meta.url))
+      const schema_file = path.resolve(__dirname, '../db/schema.postgres.sql')
+      cp.execSync(
+        `psql -h localhost -U ${postgres_user} -d ${database} -f ${schema_file}`,
+        {
+          maxBuffer: 1024 * 1024 * 100, // Increase buffer size to 100MB
+          stdio: 'inherit' // Inherit stdio to see real-time output
+        }
+      )
+    }
+
+    // Import the SQL file
+    cp.execSync(
+      `psql -h localhost -U ${postgres_user} -d ${database} -f ${sql_file}`,
+      {
+        maxBuffer: 1024 * 1024 * 100, // Increase buffer size to 100MB
+        stdio: 'inherit' // Inherit stdio to see real-time output
+      }
+    )
+    log(`imported ${sql_file} into postgres`)
 
     // clear database notification info
     await db('users').update('phone', null)
@@ -75,7 +101,7 @@ const run = async ({
   } finally {
     if (!download_only) {
       fs.unlinkSync(filename)
-      fs.unlinkSync(sqlFile)
+      fs.unlinkSync(sql_file)
     }
   }
 }
@@ -87,10 +113,10 @@ const main = async () => {
     const logs = argv.logs
     const stats = argv.stats
     const betting = argv.betting
-    const user = argv.user
     const cache = argv.cache
     const download_only = argv.download
-    await run({ full, logs, stats, user, cache, download_only, betting })
+    const reset = argv.reset
+    await run({ full, logs, stats, cache, download_only, betting, reset })
   } catch (err) {
     error = err
     console.log(error)
