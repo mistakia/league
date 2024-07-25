@@ -560,7 +560,8 @@ export default function ({
   const rate_type_tables = {}
   const rate_type_column_mapping = {}
   const players_table_options = {
-    opening_days_joined: false
+    opening_days_joined: false,
+    nfl_year_week_timestamp_joined: false
   }
 
   // sanitize parameters
@@ -682,7 +683,7 @@ export default function ({
           year_split_join_clause = year_select
             ? players_table_column_definitions[
                 year_select.column_id
-              ].year_select(table_name)
+              ].year_select({ table_name, splits })
             : `${table_name}.year`
         }
 
@@ -690,7 +691,7 @@ export default function ({
           week_split_join_clause = week_select
             ? players_table_column_definitions[
                 week_select.column_id
-              ].week_select(table_name)
+              ].week_select({ table_name, splits })
             : `${table_name}.week`
         }
       }
@@ -717,7 +718,10 @@ export default function ({
                 table_info.select_columns[0].column_id
               ]
             if (column_definition && column_definition.year_select) {
-              return column_definition.year_select(table_alias)
+              return column_definition.year_select({
+                table_name: table_alias,
+                splits
+              })
             }
           }
           // Default to standard year column if no custom year_select is available
@@ -750,7 +754,10 @@ export default function ({
                 table_info.select_columns[0].column_id
               ]
             if (column_definition && column_definition.week_select) {
-              return column_definition.week_select(table_alias)
+              return column_definition.week_select({
+                table_name: table_alias,
+                splits
+              })
             }
           }
           // Default to standard week column if no custom week_select is available

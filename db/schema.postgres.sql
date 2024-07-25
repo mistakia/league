@@ -19,6 +19,7 @@ SET search_path = public;
 
 DROP TRIGGER IF EXISTS player_name_search_vector_update ON public.player;
 DROP INDEX IF EXISTS public.player_name_search_idx;
+DROP INDEX IF EXISTS public.nfl_year_week_timestamp_year_week_idx;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_seasonlogs_pid_year_hash;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_gamelogs_pid_esbid_hash;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_careerlogs_pid_hash;
@@ -307,6 +308,7 @@ DROP SEQUENCE IF EXISTS public.placed_wagers_wager_id_seq;
 DROP TABLE IF EXISTS public.placed_wagers;
 DROP TABLE IF EXISTS public.percentiles;
 DROP MATERIALIZED VIEW IF EXISTS public.opening_days;
+DROP MATERIALIZED VIEW IF EXISTS public.nfl_year_week_timestamp;
 DROP TABLE IF EXISTS public.nfl_team_seasonlogs;
 DROP TABLE IF EXISTS public.nfl_snaps_current_week;
 DROP TABLE IF EXISTS public.nfl_snaps;
@@ -3127,6 +3129,26 @@ CREATE TABLE public.nfl_team_seasonlogs (
     dtpr numeric(5,2) DEFAULT 0.00,
     dtd numeric(5,2) DEFAULT 0.00
 );
+
+
+--
+-- Name: nfl_year_week_timestamp; Type: MATERIALIZED VIEW; Schema: public; Owner: -
+--
+
+CREATE MATERIALIZED VIEW public.nfl_year_week_timestamp AS
+ WITH game_weeks AS (
+         SELECT DISTINCT nfl_games.year,
+            nfl_games.week,
+            min((nfl_games.date)::text) OVER (PARTITION BY nfl_games.year, nfl_games.week) AS week_start_date
+           FROM public.nfl_games
+          WHERE ((nfl_games.seas_type)::text = 'REG'::text)
+        )
+ SELECT year,
+    week,
+    (EXTRACT(epoch FROM ((week_start_date)::date AT TIME ZONE 'UTC'::text)))::integer AS week_timestamp
+   FROM game_weeks
+  ORDER BY year, week
+  WITH NO DATA;
 
 
 --
@@ -6565,6 +6587,13 @@ CREATE UNIQUE INDEX idx_scoring_format_player_gamelogs_pid_esbid_hash ON public.
 --
 
 CREATE UNIQUE INDEX idx_scoring_format_player_seasonlogs_pid_year_hash ON public.scoring_format_player_seasonlogs USING btree (pid, year, scoring_format_hash);
+
+
+--
+-- Name: nfl_year_week_timestamp_year_week_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_year_week_timestamp_year_week_idx ON public.nfl_year_week_timestamp USING btree (year, week);
 
 
 --
