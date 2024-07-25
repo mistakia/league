@@ -41,12 +41,16 @@ class PlayerRoster extends Player {
     const { isRegularSeason, isOffseason } = constants
     const tag = playerMap.get('tag')
     const isRestrictedFreeAgent = tag === constants.tags.TRANSITION
+    const is_restricted_free_agent_tag_processed = playerMap.get(
+      'transition_tag_processed'
+    )
 
     const value = playerMap.get('value', 0)
     const bid = playerMap.get('bid')
     const salary = isBeforeExtensionDeadline
       ? value
       : isBeforeTransitionEnd &&
+          !is_restricted_free_agent_tag_processed &&
           isRestrictedFreeAgent &&
           (is_team_manager || isTransition)
         ? bid
