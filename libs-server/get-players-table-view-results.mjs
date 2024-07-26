@@ -553,7 +553,8 @@ export default function ({
   const rate_type_column_mapping = {}
   const players_table_options = {
     opening_days_joined: false,
-    nfl_year_week_timestamp_joined: false
+    nfl_year_week_timestamp_joined: false,
+    year_coalesce_args: []
   }
 
   // sanitize parameters
@@ -669,6 +670,21 @@ export default function ({
         rate_type_column_mapping,
         players_table_options
       })
+
+      if (available_splits.includes('year') && select_columns.length) {
+        const column_definition = players_table_column_definitions[select_columns[0].column_id]
+        if (column_definition && column_definition.year_select) {
+          const year_select_clause = column_definition.year_select({
+            table_name,
+            splits
+          })
+          if (year_select_clause) {
+            players_table_options.year_coalesce_args.push(year_select_clause)
+          }
+        } else {
+          players_table_options.year_coalesce_args.push(`${table_name}.year`)
+        }
+      }
 
       if (table_name !== 'player' && table_name !== 'rosters_players') {
         if (!year_split_join_clause) {

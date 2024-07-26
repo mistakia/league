@@ -1238,6 +1238,47 @@ describe('LIBS SERVER get_players_table_view_results', () => {
     expect(query.toString()).to.equal(expected_query)
   })
 
+  it('', () => {
+    const query = get_players_table_view_results({
+      view_id: '4fcf2ff3-c419-47fd-bf8c-c062f953d2e4',
+      columns: [
+        'player_age',
+        {
+          column_id: 'player_fantasy_points_per_game_from_seasonlogs',
+          params: {
+            year: [2023, 2022, 2021, 2020, 2019, 2018, 2017]
+          }
+        },
+        {
+          column_id: 'player_weighted_opportunity_rating_from_plays',
+          params: {
+            year: [2023, 2022, 2021, 2020, 2019, 2018]
+          }
+        },
+        'player_espn_overall_score',
+        'player_keeptradecut_value'
+      ],
+      sort: [
+        {
+          column_id: 'player_fantasy_points_per_game_from_seasonlogs',
+          desc: true,
+          column_index: 0
+        }
+      ],
+      where: [
+        {
+          column_id: 'player_position',
+          operator: 'IN',
+          value: ['WR']
+        }
+      ],
+      prefix_columns: ['player_name'],
+      splits: ['year']
+    })
+    const expected_query = `with "td39c8430c6b71a1d059ec34d508f2710" as (select "pg"."pid", ROUND((1.5 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0)) + (0.7 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0)), 4) as weighted_opp_rating_from_plays, "nfl_plays"."year" from "nfl_plays" inner join "player_gamelogs" as "pg" on "nfl_plays"."esbid" = "pg"."esbid" and "nfl_plays"."off" = "pg"."tm" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and ("trg_pid" is not null) and "nfl_plays"."year" in (2018, 2019, 2020, 2021, 2022, 2023) group by "pg"."pid", "nfl_plays"."year") select "player"."pid", player.fname, player.lname, ROUND(EXTRACT(YEAR FROM AGE(opening_days.opening_day, TO_DATE(player.dob, 'YYYY-MM-DD'))) + (EXTRACT(MONTH FROM AGE(opening_days.opening_day, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 12.0) + (EXTRACT(DAY FROM AGE(opening_days.opening_day, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 365.25), 2) as age_0, "t8a4a84e735183537b2ba13726efd3e32"."points_per_game" AS "points_per_game_from_seasonlogs_0", "td39c8430c6b71a1d059ec34d508f2710"."weighted_opp_rating_from_plays" AS "weighted_opp_rating_from_plays_0", "player_seasonlogs"."espn_overall_score" AS "espn_overall_score_0", "tf2c4b095a714eac7d86ea8780f70ad1a"."v" AS "player_keeptradecut_value_0", COALESCE(t8a4a84e735183537b2ba13726efd3e32.year, td39c8430c6b71a1d059ec34d508f2710.year, player_seasonlogs.year, EXTRACT(YEAR FROM TO_TIMESTAMP(tf2c4b095a714eac7d86ea8780f70ad1a.d))) AS year, "player"."pos" from "player" left join "scoring_format_player_seasonlogs" as "t8a4a84e735183537b2ba13726efd3e32" on "t8a4a84e735183537b2ba13726efd3e32"."pid" = "player"."pid" and t8a4a84e735183537b2ba13726efd3e32.year IN (2023,2022,2021,2020,2019,2018,2017) and t8a4a84e735183537b2ba13726efd3e32.scoring_format_hash = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d' left join "td39c8430c6b71a1d059ec34d508f2710" on "td39c8430c6b71a1d059ec34d508f2710"."pid" = "player"."pid" and td39c8430c6b71a1d059ec34d508f2710.year = t8a4a84e735183537b2ba13726efd3e32.year left join "player_seasonlogs" on "player_seasonlogs"."pid" = "player"."pid" and player_seasonlogs.year = t8a4a84e735183537b2ba13726efd3e32.year and "player_seasonlogs"."seas_type" = 'REG' left join "opening_days" on "opening_days"."year" = COALESCE(t8a4a84e735183537b2ba13726efd3e32.year, td39c8430c6b71a1d059ec34d508f2710.year, player_seasonlogs.year) left join "keeptradecut_rankings" as "tf2c4b095a714eac7d86ea8780f70ad1a" on "tf2c4b095a714eac7d86ea8780f70ad1a"."pid" = "player"."pid" and "tf2c4b095a714eac7d86ea8780f70ad1a"."qb" = 2 and "tf2c4b095a714eac7d86ea8780f70ad1a"."type" = 1 and EXTRACT(YEAR FROM to_timestamp(tf2c4b095a714eac7d86ea8780f70ad1a.d)) = "opening_days"."year" and "tf2c4b095a714eac7d86ea8780f70ad1a"."d" = EXTRACT(EPOCH FROM (date_trunc('day', opening_days.opening_day) + interval '0 year'))::integer and opening_days.year = (t8a4a84e735183537b2ba13726efd3e32.year) where player.pos IN ('WR') group by player.fname, player.lname, player.dob, opening_days.opening_day, "t8a4a84e735183537b2ba13726efd3e32"."points_per_game", "td39c8430c6b71a1d059ec34d508f2710"."weighted_opp_rating_from_plays", "player_seasonlogs"."espn_overall_score", "tf2c4b095a714eac7d86ea8780f70ad1a"."v", COALESCE(t8a4a84e735183537b2ba13726efd3e32.year, td39c8430c6b71a1d059ec34d508f2710.year, player_seasonlogs.year, EXTRACT(YEAR FROM TO_TIMESTAMP(tf2c4b095a714eac7d86ea8780f70ad1a.d))), "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 5 DESC NULLS LAST, "player"."pid" asc limit 500`
+    expect(query.toString()).to.equal(expected_query)
+  })
+
   describe('errors', () => {
     it('should throw an error if where value is missing', () => {
       try {
