@@ -32,7 +32,9 @@ const keeptradecut_join = ({
         this.on(
           'opening_days.year',
           '=',
-          db.raw(`COALESCE(${players_table_options.year_coalesce_args.join(', ')})`)
+          db.raw(
+            `COALESCE(${players_table_options.year_coalesce_args.join(', ')})`
+          )
         )
       })
     } else {

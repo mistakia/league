@@ -113,8 +113,18 @@ export default {
     },
     column_name: 'age',
     year_select: () => undefined,
-    join: ({ query, splits, join_type, year_split_join_clause }) => {
+    join: ({
+      query,
+      splits,
+      join_type,
+      year_split_join_clause,
+      players_table_options
+    }) => {
       if (!splits.includes('year')) {
+        return
+      }
+
+      if (players_table_options.opening_days_joined) {
         return
       }
 
@@ -125,7 +135,23 @@ export default {
           'opening_days.year',
           year_split_join_clause
         )
+      } else if (players_table_options.year_coalesce_args.length) {
+        query.leftJoin('opening_days', function () {
+          this.on(
+            'opening_days.year',
+            '=',
+            db.raw(
+              `COALESCE(${players_table_options.year_coalesce_args.join(', ')})`
+            )
+          )
+        })
+      } else {
+        query.leftJoin('opening_days', function () {
+          this.on(db.raw('true'))
+        })
       }
+
+      players_table_options.opening_days_joined = true
     },
     select: ({ column_index, splits }) => {
       const base_year = splits.includes('year')
@@ -133,7 +159,7 @@ export default {
         : 'CURRENT_DATE'
       return [
         db.raw(
-          `ROUND(EXTRACT(YEAR FROM AGE(${base_year}, TO_DATE(player.dob, 'YYYY-MM-DD'))) + (EXTRACT(MONTH FROM AGE(${base_year}, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 12.0) + (EXTRACT(DAY FROM AGE(${base_year}, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 365.25), 2) as age_${column_index}`
+          `CASE WHEN player.dob IS NULL OR player.dob = '0000-00-00' THEN NULL ELSE ROUND(EXTRACT(YEAR FROM AGE(${base_year}, TO_DATE(player.dob, 'YYYY-MM-DD'))) + (EXTRACT(MONTH FROM AGE(${base_year}, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 12.0) + (EXTRACT(DAY FROM AGE(${base_year}, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 365.25), 2) END as age_${column_index}`
         )
       ]
     },
@@ -146,7 +172,7 @@ export default {
         ? 'opening_days.opening_day'
         : 'CURRENT_DATE'
       return db.raw(
-        `ROUND(EXTRACT(YEAR FROM AGE(${base_year}, TO_DATE(player.dob, 'YYYY-MM-DD'))) + (EXTRACT(MONTH FROM AGE(${base_year}, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 12.0) + (EXTRACT(DAY FROM AGE(${base_year}, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 365.25), 2)`
+        `CASE WHEN player.dob IS NULL OR player.dob = '0000-00-00' THEN NULL ELSE ROUND(EXTRACT(YEAR FROM AGE(${base_year}, TO_DATE(player.dob, 'YYYY-MM-DD'))) + (EXTRACT(MONTH FROM AGE(${base_year}, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 12.0) + (EXTRACT(DAY FROM AGE(${base_year}, TO_DATE(player.dob, 'YYYY-MM-DD'))) / 365.25), 2) END`
       )
     },
     use_having: true,
