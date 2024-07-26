@@ -10,7 +10,7 @@ import { add_player_stats_play_by_play_with_statement } from '#libs-server/playe
 import { add_team_stats_play_by_play_with_statement } from '#libs-server/players-table/add-team-stats-play-by-play-with-statement.mjs'
 
 const get_rate_type_sql = ({ table_name, column_name, rate_type_table_name }) =>
-  `CAST(${table_name}.${column_name}_0 AS DECIMAL) / NULLIF(CAST(${rate_type_table_name}.rate_type_total_count AS DECIMAL), 0)`
+  `CAST(${table_name}.${column_name} AS DECIMAL) / NULLIF(CAST(${rate_type_table_name}.rate_type_total_count AS DECIMAL), 0)`
 
 const get_column_index = ({ column_id, index, columns }) => {
   const columns_with_same_id = columns.filter(
@@ -281,17 +281,13 @@ const add_clauses_for_table = ({
             `${rate_type_sql_string} as ${column_definition.column_name}_${column_index}`
           )
         )
-        players_query.groupBy(
-          `${table_name}.${column_definition.column_name}_0`
-        )
+        players_query.groupBy(`${table_name}.${column_definition.column_name}`)
         players_query.groupBy(`${rate_type_table_name}.rate_type_total_count`)
       } else {
         players_query.select(
-          `${table_name}.${column_definition.column_name}_0 as ${column_definition.column_name}_${column_index}`
+          `${table_name}.${column_definition.column_name} as ${column_definition.column_name}_${column_index}`
         )
-        players_query.groupBy(
-          `${table_name}.${column_definition.column_name}_0`
-        )
+        players_query.groupBy(`${table_name}.${column_definition.column_name}`)
       }
     }
   } else if (use_team_stats_play_by_play_with) {
@@ -328,15 +324,15 @@ const add_clauses_for_table = ({
           )
         )
         players_query.groupBy(
-          `${table_name}_player_team_stats.${column_definition.column_name}_0`
+          `${table_name}_player_team_stats.${column_definition.column_name}`
         )
         players_query.groupBy(`${rate_type_table_name}.rate_type_total_count`)
       } else {
         players_query.select(
-          `${table_name}_player_team_stats.${column_definition.column_name}_0 as ${column_definition.column_name}_${column_index}`
+          `${table_name}_player_team_stats.${column_definition.column_name} as ${column_definition.column_name}_${column_index}`
         )
         players_query.groupBy(
-          `${table_name}_player_team_stats.${column_definition.column_name}_0`
+          `${table_name}_player_team_stats.${column_definition.column_name}`
         )
       }
     }
@@ -367,17 +363,13 @@ const add_clauses_for_table = ({
             `${rate_type_sql_string} as ${column_definition.column_name}_${column_index}`
           )
         )
-        players_query.groupBy(
-          `${table_name}.${column_definition.column_name}_0`
-        )
+        players_query.groupBy(`${table_name}.${column_definition.column_name}`)
         players_query.groupBy(`${rate_type_table_name}.rate_type_total_count`)
       } else {
         players_query.select(
-          `${table_name}.${column_definition.column_name}_0 as ${column_definition.column_name}_${column_index}`
+          `${table_name}.${column_definition.column_name} as ${column_definition.column_name}_${column_index}`
         )
-        players_query.groupBy(
-          `${table_name}.${column_definition.column_name}_0`
-        )
+        players_query.groupBy(`${table_name}.${column_definition.column_name}`)
       }
     }
   } else if (with_func) {

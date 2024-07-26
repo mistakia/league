@@ -60,7 +60,7 @@ export const add_team_stats_play_by_play_with_statement = ({
   for (const select_column_name of unique_select_column_names) {
     player_team_stats_query.select(
       db.raw(
-        `sum(${with_table_name}.${select_column_name}_0) as ${select_column_name}_0`
+        `sum(${with_table_name}.${select_column_name}) as ${select_column_name}`
       )
     )
   }
