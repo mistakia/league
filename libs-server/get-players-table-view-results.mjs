@@ -639,16 +639,41 @@ export default function ({
     splits
   )
 
-  // call joins for where/having first so they are inner joins
+  // place year split tables last
+  const sorted_grouped_by_splits = Object.entries(grouped_by_splits)
+    .sort(([key_a], [key_b]) => {
+      const has_year_a = key_a.includes('year')
+      const has_year_b = key_b.includes('year')
+      if (has_year_a && !has_year_b) return 1
+      if (!has_year_a && has_year_b) return -1
+      return 0
+    })
+    .reduce((acc, [key, value]) => {
+      acc[key] = value
+      return acc
+    }, {})
+
   for (const [supported_splits_key, tables] of Object.entries(
-    grouped_by_splits
+    sorted_grouped_by_splits
   )) {
     const available_splits = supported_splits_key.split('_').filter(Boolean)
+
+    // TODO setup a more robust sorting system
+    // place year_splits_player_age table last to give other tables a chance to setup the opening_days join
+    const sorted_tables = Object.entries(tables)
+      .sort(([table_name_a], [table_name_b]) => {
+        if (table_name_a === 'year_splits_player_age') return 1
+        if (table_name_b === 'year_splits_player_age') return -1
+        return 0
+      })
+      .map(([table_name, table_info]) => {
+        return [table_name, table_info]
+      })
 
     for (const [
       table_name,
       { column_params, where_clauses, select_columns }
-    ] of Object.entries(tables)) {
+    ] of sorted_tables) {
       const year_select = select_columns.find(
         (col) => players_table_column_definitions[col.column_id]?.year_select
       )
@@ -672,7 +697,8 @@ export default function ({
       })
 
       if (available_splits.includes('year') && select_columns.length) {
-        const column_definition = players_table_column_definitions[select_columns[0].column_id]
+        const column_definition =
+          players_table_column_definitions[select_columns[0].column_id]
         if (column_definition && column_definition.year_select) {
           const year_select_clause = column_definition.year_select({
             table_name,
