@@ -19,7 +19,7 @@ const generate_table_alias = ({ params = {} } = {}) => {
 const team_stat_from_plays = ({ select_string, stat_name }) => ({
   table_alias: generate_table_alias,
   column_name: stat_name,
-  select: () => [`${select_string} AS ${stat_name}_0`],
+  select: () => [`${select_string} AS ${stat_name}`],
   where_column: () => select_string,
   use_team_stats_play_by_play_with: true,
   join: (args) =>

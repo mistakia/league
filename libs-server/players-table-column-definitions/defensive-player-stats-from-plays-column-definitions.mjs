@@ -45,7 +45,7 @@ const defensive_player_stat_from_plays = ({
   table_alias: ({ params }) =>
     defensive_player_table_alias({ pid_columns, params }),
   column_name: stat_name,
-  select: () => [`${select_string} AS ${stat_name}_0`],
+  select: () => [`${select_string} AS ${stat_name}`],
   where_column: () => select_string,
   join: defensive_player_join,
   pid_columns,

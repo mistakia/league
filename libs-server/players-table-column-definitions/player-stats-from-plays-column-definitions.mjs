@@ -31,7 +31,7 @@ const player_stat_from_plays = ({ pid_columns, select_string, stat_name }) => ({
   table_alias: ({ params }) =>
     generate_table_alias({ type: 'play_by_play', params, pid_columns }),
   column_name: stat_name,
-  select: () => [`${select_string} as ${stat_name}_0`],
+  select: () => [`${select_string} as ${stat_name}`],
   where_column: () => select_string,
   pid_columns,
   use_player_stats_play_by_play_with: true,
