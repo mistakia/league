@@ -69,11 +69,6 @@ const keeptradecut_join = ({
       )
     } else if (splits.includes('year')) {
       this.andOn(
-        db.raw(`EXTRACT(YEAR FROM to_timestamp(${table_name}.d))`),
-        '=',
-        'opening_days.year'
-      )
-      this.andOn(
         `${table_name}.d`,
         '=',
         db.raw(

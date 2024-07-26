@@ -696,37 +696,39 @@ export default function ({
         players_table_options
       })
 
-      if (available_splits.includes('year') && select_columns.length) {
-        const column_definition =
-          players_table_column_definitions[select_columns[0].column_id]
-        if (column_definition && column_definition.year_select) {
-          const year_select_clause = column_definition.year_select({
-            table_name,
-            splits
-          })
-          if (year_select_clause) {
-            players_table_options.year_coalesce_args.push(year_select_clause)
+      if (available_splits.includes('year')) {
+        if (select_columns.length) {
+          const column_definition =
+            players_table_column_definitions[select_columns[0].column_id]
+          if (column_definition && column_definition.year_select) {
+            const year_select_clause = column_definition.year_select({
+              table_name,
+              splits
+            })
+            if (year_select_clause) {
+              players_table_options.year_coalesce_args.push(year_select_clause)
+            }
+          } else {
+            players_table_options.year_coalesce_args.push(`${table_name}.year`)
           }
-        } else {
-          players_table_options.year_coalesce_args.push(`${table_name}.year`)
-        }
-      }
-
-      if (table_name !== 'player' && table_name !== 'rosters_players') {
-        if (!year_split_join_clause) {
-          year_split_join_clause = year_select
-            ? players_table_column_definitions[
-                year_select.column_id
-              ].year_select({ table_name, splits })
-            : `${table_name}.year`
         }
 
-        if (!week_split_join_clause && available_splits.includes('week')) {
-          week_split_join_clause = week_select
-            ? players_table_column_definitions[
-                week_select.column_id
-              ].week_select({ table_name, splits })
-            : `${table_name}.week`
+        if (table_name !== 'player' && table_name !== 'rosters_players') {
+          if (!year_split_join_clause) {
+            year_split_join_clause = year_select
+              ? players_table_column_definitions[
+                  year_select.column_id
+                ].year_select({ table_name, splits })
+              : `${table_name}.year`
+          }
+
+          if (!week_split_join_clause && available_splits.includes('week')) {
+            week_split_join_clause = week_select
+              ? players_table_column_definitions[
+                  week_select.column_id
+                ].week_select({ table_name, splits })
+              : `${table_name}.week`
+          }
         }
       }
     }
