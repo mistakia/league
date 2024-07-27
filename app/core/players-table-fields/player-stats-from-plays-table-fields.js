@@ -403,7 +403,7 @@ export default {
     column_groups: [COLUMN_GROUPS.RECEIVING],
     header_label: 'WOPR',
     player_value_path: 'weighted_opp_rating_from_plays',
-    fixed: 1
+    fixed: 2
   }),
   player_receiving_first_down_share_from_plays: from_share_field({
     column_title: 'Share of Team Receiving First Downs (By Play)',

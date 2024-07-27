@@ -31,6 +31,6 @@ export default {
     column_groups: [COLUMN_GROUPS.FANTASY_POINTS],
     header_label: 'FP',
     player_value_path: 'fantasy_points_from_plays',
-    fixed: 3
+    fixed: 1
   }
 }
