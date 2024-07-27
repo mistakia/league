@@ -10,7 +10,7 @@ export default function ({ query, params, table_name = 'nfl_plays' }) {
 
     let param_value = params[column_param_key]
 
-    if (typeof param_value == 'undefined' || param_value === null) {
+    if (typeof param_value === 'undefined' || param_value === null) {
       continue
     }
 
