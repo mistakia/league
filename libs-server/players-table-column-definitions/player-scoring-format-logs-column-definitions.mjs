@@ -5,7 +5,9 @@ import get_table_hash from '#libs-server/get-table-hash.mjs'
 import players_table_join_function from '#libs-server/players-table/players-table-join-function.mjs'
 
 const scoring_format_player_seasonlogs_table_alias = ({ params = {} }) => {
-  let scoring_format_hash = params.scoring_format_hash || '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
+  let scoring_format_hash =
+    params.scoring_format_hash ||
+    '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
   if (Array.isArray(scoring_format_hash)) {
     scoring_format_hash = scoring_format_hash[0]
   }
@@ -35,7 +37,9 @@ const scoring_format_player_seasonlogs_join = (join_arguments) => {
     join_year: true,
     join_table_clause: `scoring_format_player_seasonlogs as ${join_arguments.table_name}`,
     additional_conditions: function ({ params, table_name }) {
-      let scoring_format_hash = params.scoring_format_hash || '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
+      let scoring_format_hash =
+        params.scoring_format_hash ||
+        '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
       if (Array.isArray(scoring_format_hash)) {
         scoring_format_hash = scoring_format_hash[0]
       }
@@ -48,7 +52,9 @@ const scoring_format_player_seasonlogs_join = (join_arguments) => {
 }
 
 const scoring_format_player_careerlogs_table_alias = ({ params = {} }) => {
-  let scoring_format_hash = params.scoring_format_hash || '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
+  let scoring_format_hash =
+    params.scoring_format_hash ||
+    '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
   if (Array.isArray(scoring_format_hash)) {
     scoring_format_hash = scoring_format_hash[0]
   }
@@ -65,7 +71,9 @@ const scoring_format_player_careerlogs_join = ({
   params = {}
 }) => {
   const join_func = get_join_func(join_type)
-  let scoring_format_hash = params.scoring_format_hash || '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
+  let scoring_format_hash =
+    params.scoring_format_hash ||
+    '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
   if (Array.isArray(scoring_format_hash)) {
     scoring_format_hash = scoring_format_hash[0]
   }

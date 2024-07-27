@@ -617,14 +617,15 @@ export default function ({
     rate_type_tables
   )) {
     add_per_game_cte({ players_query, params, rate_type_table_name, splits })
-    players_query.leftJoin(
-      rate_type_table_name,
-      `${rate_type_table_name}.pid`,
-      'player.pid'
-    )
+    players_query.leftJoin(rate_type_table_name, function () {
+      this.on(`${rate_type_table_name}.pid`, 'player.pid')
+
+      if (splits.includes('year') && year_split_join_clause) {
+        this.on(`${rate_type_table_name}.year`, year_split_join_clause)
+      }
+    })
 
     year_split_join_clause = `${rate_type_table_name}.year`
-    week_split_join_clause = `${rate_type_table_name}.week`
   }
 
   const grouped_clauses_by_table = get_grouped_clauses_by_table({
