@@ -107,9 +107,16 @@ function* fetchAPI(apiFunction, actions, opts = {}) {
   } catch (err) {
     console.log(err)
     if (!opts.ignoreError) {
-      yield put(
-        notificationActions.show({ severity: 'error', message: err.message })
+      const is_statement_timeout = err.message.includes(
+        'canceling statement due to statement timeout'
       )
+
+      let message = 'Request failed'
+      if (is_statement_timeout) {
+        message = 'Canceled request — took longer than 40 seconds'
+      }
+
+      yield put(notificationActions.show({ severity: 'error', message }))
       Bugsnag.notify(err, (event) => {
         event.addMetadata('options', opts)
       })
