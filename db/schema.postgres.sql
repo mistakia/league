@@ -25,8 +25,9 @@ DROP INDEX IF EXISTS public.idx_scoring_format_player_gamelogs_pid_esbid_hash;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_careerlogs_pid_hash;
 DROP INDEX IF EXISTS public.idx_prop_markets_index_market_time_year;
 DROP INDEX IF EXISTS public.idx_prop_market_selections_index_composite;
-DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_week;
+DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_week_play_type;
 DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_play_type_trg_pid;
+DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_play_type_player_fuml_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_ydl_100;
 DROP INDEX IF EXISTS public.idx_nfl_plays_tackle_assist_4_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_tackle_assist_3_pid;
@@ -38,7 +39,9 @@ DROP INDEX IF EXISTS public.idx_nfl_plays_solo_tackle_1_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_series_seq;
 DROP INDEX IF EXISTS public.idx_nfl_plays_route_ngs;
 DROP INDEX IF EXISTS public.idx_nfl_plays_qtr;
+DROP INDEX IF EXISTS public.idx_nfl_plays_play_action;
 DROP INDEX IF EXISTS public.idx_nfl_plays_pid_types;
+DROP INDEX IF EXISTS public.idx_nfl_plays_motion;
 DROP INDEX IF EXISTS public.idx_nfl_plays_dwn;
 DROP INDEX IF EXISTS public.idx_nfl_plays_catchable_ball;
 DROP INDEX IF EXISTS public.idx_nfl_plays_assisted_tackle_2_pid;
@@ -6497,10 +6500,24 @@ CREATE INDEX idx_nfl_plays_dwn ON public.nfl_plays USING btree (dwn);
 
 
 --
+-- Name: idx_nfl_plays_motion; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_motion ON public.nfl_plays USING btree (motion);
+
+
+--
 -- Name: idx_nfl_plays_pid_types; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_nfl_plays_pid_types ON public.nfl_plays USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+
+
+--
+-- Name: idx_nfl_plays_play_action; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_play_action ON public.nfl_plays USING btree (play_action);
 
 
 --
@@ -6581,6 +6598,13 @@ CREATE INDEX idx_nfl_plays_ydl_100 ON public.nfl_plays USING btree (ydl_100);
 
 
 --
+-- Name: idx_nfl_plays_year_seas_type_play_type_player_fuml_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_year_seas_type_play_type_player_fuml_pid ON public.nfl_plays USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
 -- Name: idx_nfl_plays_year_seas_type_play_type_trg_pid; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -6588,10 +6612,10 @@ CREATE INDEX idx_nfl_plays_year_seas_type_play_type_trg_pid ON public.nfl_plays 
 
 
 --
--- Name: idx_nfl_plays_year_seas_type_week; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_nfl_plays_year_seas_type_week_play_type; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_year_seas_type_week ON public.nfl_plays USING btree (year, seas_type, week);
+CREATE INDEX idx_nfl_plays_year_seas_type_week_play_type ON public.nfl_plays USING btree (year, seas_type, week, play_type);
 
 
 --
