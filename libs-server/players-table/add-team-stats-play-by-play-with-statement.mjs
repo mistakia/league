@@ -55,6 +55,7 @@ export const add_team_stats_play_by_play_with_statement = ({
       this.andOn('nfl_games.year', '=', `${with_table_name}.year`)
       this.andOn('nfl_games.week', '=', `${with_table_name}.week`)
     })
+    .where('nfl_games.seas_type', 'REG')
 
   const unique_select_column_names = new Set(select_column_names)
   for (const select_column_name of unique_select_column_names) {
