@@ -1496,6 +1496,82 @@ describe('LIBS SERVER get_players_table_view_results', () => {
     expect(query.toString()).to.equal(expected_query)
   })
 
+  it('should adjust specified year params when year_offset is specified', () => {
+    const query = get_players_table_view_results({
+      columns: [
+        {
+          column_id: 'player_targets_from_plays',
+          params: {
+            year: [2023, 2022]
+          }
+        },
+        {
+          column_id: 'player_weighted_opportunity_rating_from_plays',
+          params: {
+            year: [2023, 2022],
+            year_offset: -1
+          }
+        },
+        {
+          column_id: 'player_weighted_opportunity_rating_from_plays',
+          params: {
+            year: [2023, 2022],
+            year_offset: -1,
+            motion: true
+          }
+        },
+        {
+          column_id: 'player_weighted_opportunity_rating_from_plays',
+          params: {
+            year: [2023, 2022],
+            year_offset: -1,
+            play_action: true
+          }
+        },
+        {
+          column_id: 'player_weighted_opportunity_rating_from_plays',
+          params: {
+            year: [2023, 2022],
+            year_offset: -1,
+            dwn: [1, 2]
+          }
+        },
+        {
+          column_id: 'player_espn_open_score',
+          params: {
+            year: [2023, 2022]
+          }
+        }
+      ],
+      sort: [
+        {
+          column_id: 'player_targets_from_plays',
+          desc: true,
+          column_index: 0
+        }
+      ],
+      where: [
+        {
+          column_id: 'player_position',
+          operator: 'IN',
+          value: ['WR']
+        },
+        {
+          column_id: 'player_espn_open_score',
+          operator: '>',
+          value: '0',
+          params: {
+            year: [2023, 2022]
+          }
+        }
+      ],
+      prefix_columns: ['player_name'],
+      splits: ['year']
+    })
+    const expected_query = `with "t4492873ed5b65d0ddaa3d22958f0eff3" as (select COALESCE(trg_pid) as pid, "nfl_plays"."year", SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) as trg_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2022, 2023) group by "nfl_plays"."year", COALESCE(trg_pid)), "tf5daf6f18d7a792a23b1397618dddd44" as (select "pg"."pid", ROUND((1.5 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0)) + (0.7 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0)), 4) as weighted_opp_rating_from_plays, "nfl_plays"."year" from "nfl_plays" inner join "player_gamelogs" as "pg" on "nfl_plays"."esbid" = "pg"."esbid" and "nfl_plays"."off" = "pg"."tm" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and ("trg_pid" is not null) and "nfl_plays"."year" in (2022, 2023, 2021) group by "pg"."pid", "nfl_plays"."year"), "tcf69d387733c395bb5ca73f6af464727" as (select "pg"."pid", ROUND((1.5 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0)) + (0.7 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0)), 4) as weighted_opp_rating_from_plays, "nfl_plays"."year" from "nfl_plays" inner join "player_gamelogs" as "pg" on "nfl_plays"."esbid" = "pg"."esbid" and "nfl_plays"."off" = "pg"."tm" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and ("trg_pid" is not null) and "nfl_plays"."year" in (2022, 2023, 2021) and "nfl_plays"."motion" = true group by "pg"."pid", "nfl_plays"."year"), "t8838ed97ad2f59f4b40dfc81e71d494a" as (select "pg"."pid", ROUND((1.5 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0)) + (0.7 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0)), 4) as weighted_opp_rating_from_plays, "nfl_plays"."year" from "nfl_plays" inner join "player_gamelogs" as "pg" on "nfl_plays"."esbid" = "pg"."esbid" and "nfl_plays"."off" = "pg"."tm" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and ("trg_pid" is not null) and "nfl_plays"."year" in (2022, 2023, 2021) and "nfl_plays"."play_action" = true group by "pg"."pid", "nfl_plays"."year"), "t72eab348baaeb6734616d245162eea39" as (select "pg"."pid", ROUND((1.5 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0)) + (0.7 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0)), 4) as weighted_opp_rating_from_plays, "nfl_plays"."year" from "nfl_plays" inner join "player_gamelogs" as "pg" on "nfl_plays"."esbid" = "pg"."esbid" and "nfl_plays"."off" = "pg"."tm" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and ("trg_pid" is not null) and "nfl_plays"."dwn" in (1, 2) and "nfl_plays"."year" in (2022, 2023, 2021) group by "pg"."pid", "nfl_plays"."year") select "player"."pid", player.fname, player.lname, "player_seasonlogs"."espn_open_score" AS "espn_open_score_0", "t4492873ed5b65d0ddaa3d22958f0eff3"."trg_from_plays" as "trg_from_plays_0", "tf5daf6f18d7a792a23b1397618dddd44"."weighted_opp_rating_from_plays" AS "weighted_opp_rating_from_plays_0", "tcf69d387733c395bb5ca73f6af464727"."weighted_opp_rating_from_plays" AS "weighted_opp_rating_from_plays_1", "t8838ed97ad2f59f4b40dfc81e71d494a"."weighted_opp_rating_from_plays" AS "weighted_opp_rating_from_plays_2", "t72eab348baaeb6734616d245162eea39"."weighted_opp_rating_from_plays" AS "weighted_opp_rating_from_plays_3", COALESCE(player_seasonlogs.year, t4492873ed5b65d0ddaa3d22958f0eff3.year, tf5daf6f18d7a792a23b1397618dddd44.year, tcf69d387733c395bb5ca73f6af464727.year, t8838ed97ad2f59f4b40dfc81e71d494a.year, t72eab348baaeb6734616d245162eea39.year) AS year, "player"."pos" from "player" inner join "player_seasonlogs" on "player_seasonlogs"."pid" = "player"."pid" and "player_seasonlogs"."seas_type" = 'REG' left join "t4492873ed5b65d0ddaa3d22958f0eff3" on "t4492873ed5b65d0ddaa3d22958f0eff3"."pid" = "player"."pid" and t4492873ed5b65d0ddaa3d22958f0eff3.year = player_seasonlogs.year left join "tf5daf6f18d7a792a23b1397618dddd44" on "tf5daf6f18d7a792a23b1397618dddd44"."pid" = "player"."pid" and tf5daf6f18d7a792a23b1397618dddd44.year = player_seasonlogs.year + -1 left join "tcf69d387733c395bb5ca73f6af464727" on "tcf69d387733c395bb5ca73f6af464727"."pid" = "player"."pid" and tcf69d387733c395bb5ca73f6af464727.year = player_seasonlogs.year + -1 left join "t8838ed97ad2f59f4b40dfc81e71d494a" on "t8838ed97ad2f59f4b40dfc81e71d494a"."pid" = "player"."pid" and t8838ed97ad2f59f4b40dfc81e71d494a.year = player_seasonlogs.year + -1 left join "t72eab348baaeb6734616d245162eea39" on "t72eab348baaeb6734616d245162eea39"."pid" = "player"."pid" and t72eab348baaeb6734616d245162eea39.year = player_seasonlogs.year + -1 where player.pos IN ('WR') and player_seasonlogs.espn_open_score > '0' group by player.fname, player.lname, "player_seasonlogs"."espn_open_score", "t4492873ed5b65d0ddaa3d22958f0eff3"."trg_from_plays", "tf5daf6f18d7a792a23b1397618dddd44"."weighted_opp_rating_from_plays", "tcf69d387733c395bb5ca73f6af464727"."weighted_opp_rating_from_plays", "t8838ed97ad2f59f4b40dfc81e71d494a"."weighted_opp_rating_from_plays", "t72eab348baaeb6734616d245162eea39"."weighted_opp_rating_from_plays", COALESCE(player_seasonlogs.year, t4492873ed5b65d0ddaa3d22958f0eff3.year, tf5daf6f18d7a792a23b1397618dddd44.year, tcf69d387733c395bb5ca73f6af464727.year, t8838ed97ad2f59f4b40dfc81e71d494a.year, t72eab348baaeb6734616d245162eea39.year), "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 5 DESC NULLS LAST, "player"."pid" asc limit 500`
+    expect(query.toString()).to.equal(expected_query)
+  })
+
   describe('errors', () => {
     it('should throw an error if where value is missing', () => {
       try {
