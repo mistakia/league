@@ -49,9 +49,15 @@ const keeptradecut_join = ({
     splits.includes('week') &&
     !players_table_options.nfl_year_week_timestamp_joined
   ) {
-    query.leftJoin('nfl_year_week_timestamp', function () {
-      this.on(db.raw('true'))
-    })
+    if (splits.includes('year')) {
+      query.leftJoin('nfl_year_week_timestamp', function () {
+        this.on('nfl_year_week_timestamp.year', '=', 'opening_days.year')
+      })
+    } else {
+      query.leftJoin('nfl_year_week_timestamp', function () {
+        this.on(db.raw('true'))
+      })
+    }
     players_table_options.nfl_year_week_timestamp_joined = true
   }
 
