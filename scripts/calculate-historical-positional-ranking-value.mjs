@@ -37,14 +37,14 @@ const calculateHistoricalPositionalRankingValue = async ({ league }) => {
     for (const year in byPosition) {
       const players = byPosition[year]
       for (const player of players) {
-        if (sums[player.prnk]) {
-          sums[player.prnk].pts_added += player.pts_added
-          sums[player.prnk].value += player.value
-          sums[player.prnk].points += player.points
+        if (sums[player.pos_rnk]) {
+          sums[player.pos_rnk].pts_added += player.pts_added
+          sums[player.pos_rnk].value += player.value
+          sums[player.pos_rnk].points += player.points
         } else {
-          sums[player.prnk] = {
+          sums[player.pos_rnk] = {
             pos,
-            rank: player.prnk,
+            rank: player.pos_rnk,
             pts_added: player.pts_added,
             value: player.value,
             points: player.points
@@ -53,8 +53,8 @@ const calculateHistoricalPositionalRankingValue = async ({ league }) => {
       }
     }
 
-    for (const prnk in sums) {
-      const item = sums[prnk]
+    for (const pos_rnk in sums) {
+      const item = sums[pos_rnk]
       item.value = item.value / years
     }
 
@@ -75,7 +75,7 @@ const calculateHistoricalPositionalRankingValue = async ({ league }) => {
     output = output.concat(values)
   }
 
-  return output.sort((a, b) => b.reg - a.reg)
+  return output.sort((a, b) => b.value - a.value)
 }
 
 if (isMain(import.meta.url)) {
@@ -108,7 +108,7 @@ if (isMain(import.meta.url)) {
         {
           position: `${player.pos}${player.rank}`,
           pts_added: player.pts_added.toFixed(1),
-          value: player.reg,
+          regression: player.reg,
           actual: player.value.toFixed(2)
         },
         {
