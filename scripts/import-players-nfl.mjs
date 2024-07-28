@@ -15,7 +15,7 @@ import {
   updatePlayer,
   createPlayer
 } from '#libs-server'
-import db from '#db'
+// import db from '#db'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-players-nfl')
@@ -147,16 +147,16 @@ const importPlayersNFL = async ({
 const main = async () => {
   let error
   try {
-    const setInactive = async (pids) => {
-      // set current_nfl_team to INA for pid not in pids
-      const player_rows = await db('player')
-        .whereNot('current_nfl_team', 'INA')
-        .whereNot('pos', 'DST')
-        .whereNotIn('pid', pids)
-      for (const player_row of player_rows) {
-        await updatePlayer({ player_row, update: { current_nfl_team: 'INA' } })
-      }
-    }
+    // const setInactive = async (pids) => {
+    //   // set current_nfl_team to INA for pid not in pids
+    //   const player_rows = await db('player')
+    //     .whereNot('current_nfl_team', 'INA')
+    //     .whereNot('pos', 'DST')
+    //     .whereNotIn('pid', pids)
+    //   for (const player_row of player_rows) {
+    //     await updatePlayer({ player_row, update: { current_nfl_team: 'INA' } })
+    //   }
+    // }
 
     if (argv.all) {
       const token = await nfl.getToken()
@@ -167,9 +167,11 @@ const main = async () => {
     } else if (argv.year) {
       const pids = await importPlayersNFL({ year: argv.year })
 
-      if (argv.year === constants.season.year) {
-        await setInactive(pids)
-      }
+      log(`processed ${pids.length} players from nfl`)
+
+      // if (argv.year === constants.season.year) {
+      //   await setInactive(pids)
+      // }
     } else {
       const pids = await importPlayersNFL({
         year: constants.season.year,
