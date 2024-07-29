@@ -1670,3 +1670,60 @@ export const get_player_gamelogs_for_season = async ({
 
   return player_gamelogs
 }
+
+export const get_draft = async ({
+  year = constants.season.year,
+  ignore_cache = false
+} = {}) => {
+  const cache_key = `/pro-football-reference/draft/${year}.json`
+  if (!ignore_cache) {
+    const cache_value = await cache.get({ key: cache_key })
+    if (cache_value) {
+      return cache_value
+    }
+  }
+
+  const url = `${config.pro_football_reference_url}/years/${year}/draft.htm`
+  log(`fetching ${url}`)
+
+  const response = await fetch(url)
+  const text = await response.text()
+  const dom = new JSDOM(text)
+  const doc = dom.window.document
+
+  const draft_players = []
+  const rows = doc.querySelectorAll('#drafts tbody tr:not(.thead)')
+
+  for (const row of rows) {
+    const round = Number(
+      row.querySelector('[data-stat="draft_round"]').textContent
+    )
+    const overall_pick = Number(
+      row.querySelector('[data-stat="draft_pick"]').textContent
+    )
+    const team = fixTeam(row.querySelector('[data-stat="team"] a').textContent)
+    const player_link = row.querySelector('[data-stat="player"] a')
+    const player_name = player_link.textContent
+    const pfr_id = player_link
+      .getAttribute('href')
+      .split('/')
+      .pop()
+      .replace('.htm', '')
+    const draft_position = row.querySelector('[data-stat="pos"]').textContent
+
+    draft_players.push({
+      round,
+      overall_pick,
+      team,
+      player_name,
+      pfr_id,
+      draft_position
+    })
+  }
+
+  if (draft_players.length) {
+    await cache.set({ key: cache_key, value: draft_players })
+  }
+
+  return draft_players
+}
