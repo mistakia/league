@@ -6,11 +6,15 @@
 
 ## Features
 
-- Hosts customizable dynasty leagues ([Genesis League](https://xo.football/leagues/1))
-- Connects with leagues from Sleeper, ESPN, Yahoo, and more.
-- Create custom stat views that stay up to date
-- Tracks a wide range of external data sources (betting markets, player projections, trades, leagues, etc)
-- Calculates tailored fantasy football metrics based on your league settings and team dynamics.
+- Host customizable dynasty leagues (e.g., [Genesis League](https://xo.football/leagues/1))
+- Integrate with platforms: Sleeper, ESPN, Yahoo, and more
+- Utilize data intelligence tools for fantasy football and betting markets ([create custom data views](https://xo.football/leagues/0/players-table))
+- Track diverse data sources:
+  - Betting markets
+  - Player projections
+  - Trade data
+  - League information
+- Calculate personalized fantasy football metrics based on your league settings and team composition
 
 ### [Roadmap](https://github.com/users/mistakia/projects/1/views/3)
 
