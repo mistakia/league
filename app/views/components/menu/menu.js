@@ -188,7 +188,7 @@ export default function AppMenu({
               >
                 <NavLink to='/about'>About</NavLink>
                 {/* <NavLink to='/props'>Props</NavLink> */}
-                <NavLink to='/status'>Status</NavLink>
+                {/* <NavLink to='/status'>Status</NavLink> */}
                 <a
                   href='https://github.com/mistakia/league'
                   target='_blank'
