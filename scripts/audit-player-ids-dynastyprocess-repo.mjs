@@ -6,11 +6,11 @@ import { hideBin } from 'yargs/helpers'
 import fs from 'fs'
 import os from 'os'
 import readline from 'readline'
-import { formatPlayerName, fixTeam } from '#libs-shared'
 
 import db from '#db'
-// import { constants } from '#libs-shared'
+
 import { isMain, readCSV, updatePlayer } from '#libs-server'
+import { formatPlayerName, fixTeam } from '#libs-shared'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('audit-player-ids-dynastyprocess-repo')
@@ -29,7 +29,8 @@ const fantasy_data_id_blacklist = [17165]
 
 const audit_player_ids_dynastyprocess_repo = async ({
   force_download = false,
-  update_player_conflicts = false
+  update_player_conflicts = false,
+  start_year = null
 } = {}) => {
   const url =
     'https://raw.githubusercontent.com/dynastyprocess/data/master/files/db_playerids.csv'
@@ -118,7 +119,8 @@ const audit_player_ids_dynastyprocess_repo = async ({
     'round',
     'dpos',
     'height',
-    'weight'
+    'weight',
+    'start'
     // 'col' TODO
   ])
 
@@ -160,6 +162,10 @@ const audit_player_ids_dynastyprocess_repo = async ({
       continue
     }
 
+    if (start_year && matching_player.start !== start_year) {
+      continue
+    }
+
     const diff_result = diff(
       matching_player,
       dp_player,
@@ -172,9 +178,10 @@ const audit_player_ids_dynastyprocess_repo = async ({
         key === 'nflid' ||
         key === 'current_nfl_team'
     )
+
     if (diff_result) {
       const filtered_diff_result = diff_result.filter(
-        (change) => change.rhs !== null
+        (change) => change.rhs !== null && change.kind !== 'D'
       )
       if (filtered_diff_result.length) {
         total_differences++
@@ -273,7 +280,8 @@ const main = async () => {
     const update_player_conflicts = argv.update
     await audit_player_ids_dynastyprocess_repo({
       force_download,
-      update_player_conflicts
+      update_player_conflicts,
+      start_year: argv.start_year
     })
   } catch (err) {
     error = err
