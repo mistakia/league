@@ -314,7 +314,7 @@ const add_clauses_for_table = ({
         rate_type_column_mapping[`${column_id}_${column_index}`]
       if (rate_type_table_name) {
         const rate_type_sql_string = get_rate_type_sql({
-          table_name,
+          table_name: `${table_name}_player_team_stats`,
           column_name: column_definition.column_name,
           rate_type_table_name
         })
