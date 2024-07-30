@@ -35,6 +35,7 @@ const scoring_format_player_seasonlogs_join = (join_arguments) => {
   players_table_join_function({
     ...join_arguments,
     join_year: true,
+    default_year: constants.season.stats_season_year,
     join_table_clause: `scoring_format_player_seasonlogs as ${join_arguments.table_name}`,
     additional_conditions: function ({ params, table_name }) {
       let scoring_format_hash =

@@ -15,14 +15,15 @@ export default function players_table_join_function(join_arguments) {
     additional_conditions = null,
     join_year = false,
     join_year_on_year_split = false,
-    join_week = false
+    join_week = false,
+    default_year = constants.season.year
   } = join_arguments
 
   const join_func = get_join_func(join_type)
   const year_offset = Array.isArray(params.year_offset)
     ? params.year_offset[0]
     : params.year_offset || 0
-  const year = params.year || constants.season.year
+  const year = params.year || default_year
   const week = params.week || 0
 
   query[join_func](join_table_clause || table_name, function () {
