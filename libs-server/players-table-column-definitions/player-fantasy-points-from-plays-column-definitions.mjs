@@ -30,8 +30,6 @@ const fantasy_points_from_plays_with = ({
   having_clauses = [],
   splits = []
 }) => {
-  const pid_columns = ['bc_pid', 'trg_pid', 'psr_pid', 'player_fuml_pid']
-
   const base_columns = new Set(['play_type', 'seas_type', 'year'])
   const stat_columns = new Set([
     'rush_yds',
