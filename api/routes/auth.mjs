@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 
 import { constants } from '#libs-shared'
-import { createLeague, getLeague } from '#libs-server'
+import { createLeague, getLeague, sendEmail } from '#libs-server'
 
 const router = express.Router()
 
@@ -151,6 +151,55 @@ router.post('/register', async (req, res) => {
 
     const token = jwt.sign({ userId }, config.jwt.secret)
     res.json({ token, userId })
+  } catch (err) {
+    logger(err)
+    res.status(500).send({ error: err.toString() })
+  }
+})
+
+router.post('/reset-password', async (req, res) => {
+  const { db, config, logger } = req.app.locals
+  try {
+    const { username, email } = req.body
+
+    if (!username && !email) {
+      return res.status(400).send({ error: 'missing username or email' })
+    }
+
+    const user = await db('users')
+      .where(function () {
+        if (email) this.where({ email })
+        if (username) this.orWhere({ username })
+      })
+      .first()
+
+    if (!user) {
+      if (!email) {
+        return res.status(400).send({ error: 'user not found' })
+      } else {
+        return res.status(200).send({
+          message: 'If an account exists, a password reset email has been sent'
+        })
+      }
+    }
+
+    const reset_token = jwt.sign({ user_id: user.id }, config.jwt.secret, {
+      expiresIn: '1h'
+    })
+
+    await db('users').where({ id: user.id }).update({ reset_token })
+
+    const reset_link = `${config.url}/reset-password?token=${reset_token}`
+
+    await sendEmail({
+      to: user.email,
+      subject: 'Password Reset Request',
+      text: `Click the following link to reset your password: ${reset_link}. If you did not request a password reset, please ignore this email.`
+    })
+
+    res.json({
+      message: 'If an account exists, a password reset email has been sent'
+    })
   } catch (err) {
     logger(err)
     res.status(500).send({ error: err.toString() })
