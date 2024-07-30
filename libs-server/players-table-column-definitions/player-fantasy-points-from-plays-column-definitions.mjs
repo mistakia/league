@@ -62,7 +62,7 @@ const fantasy_points_from_plays_with = ({
 
   const with_query = db
     .queryBuilder()
-    .select(db.raw('pid'))
+    .select(db.raw('fantasy_points_plays.pid'))
     .select(db.raw(`${select_string} as fantasy_points_from_plays`))
     .from(function () {
       const select_columns_array = Array.from(select_columns)
@@ -108,7 +108,7 @@ const fantasy_points_from_plays_with = ({
         .as('fantasy_points_plays')
     })
     .whereNot('play_type', 'NOPL')
-    .where('seas_type', 'REG')
+    .where('fantasy_points_plays.seas_type', 'REG')
 
   // Add splits
   for (const split of splits) {
@@ -124,15 +124,7 @@ const fantasy_points_from_plays_with = ({
   // Handle career_year and career_game
   if (params.career_year) {
     with_query.join('player_seasonlogs', function () {
-      this.on(function () {
-        for (const pid_column of pid_columns) {
-          this.orOn(
-            `fantasy_points_plays.${pid_column}`,
-            '=',
-            'player_seasonlogs.pid'
-          )
-        }
-      })
+      this.on('fantasy_points_plays.pid', '=', 'player_seasonlogs.pid')
         .andOn('fantasy_points_plays.year', '=', 'player_seasonlogs.year')
         .andOn(
           'fantasy_points_plays.seas_type',
@@ -148,15 +140,11 @@ const fantasy_points_from_plays_with = ({
 
   if (params.career_game) {
     with_query.join('player_gamelogs', function () {
-      this.on(function () {
-        for (const pid_column of pid_columns) {
-          this.orOn(
-            `fantasy_points_plays.${pid_column}`,
-            '=',
-            'player_gamelogs.pid'
-          )
-        }
-      }).andOn('fantasy_points_plays.esbid', '=', 'player_gamelogs.esbid')
+      this.on('fantasy_points_plays.pid', '=', 'player_gamelogs.pid').andOn(
+        'fantasy_points_plays.esbid',
+        '=',
+        'player_gamelogs.esbid'
+      )
     })
     with_query.whereBetween('player_gamelogs.career_game', [
       Math.min(params.career_game[0], params.career_game[1]),
@@ -176,7 +164,7 @@ const fantasy_points_from_plays_with = ({
   })
 
   // Add groupBy clause
-  with_query.groupBy('pid')
+  with_query.groupBy('fantasy_points_plays.pid')
 
   // Add having clauses
   for (const having_clause of having_clauses) {
