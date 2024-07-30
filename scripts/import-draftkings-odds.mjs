@@ -16,7 +16,7 @@ import {
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-draft-kings')
-debug.enable('import-draft-kings,get-player,draftkings,insert-prop-market')
+debug.enable('import-draft-kings,get-player,draftkings,insert-prop-market,insert-prop-market-selections')
 
 const format_market = async ({
   draftkings_market,
