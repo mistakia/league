@@ -11,7 +11,7 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('announce-restricted-free-agent')
 debug.enable('announce-restricted-free-agent')
 
-const announce_restricted_free_agent = async ({ lid }) => {
+const announce_restricted_free_agent = async ({ lid, tid }) => {
   if (!lid) {
     throw new Error('lid is required')
   }
@@ -44,7 +44,9 @@ const announce_restricted_free_agent = async ({ lid }) => {
     'day'
   )
 
-  const nominating_team = teams[days_since_start % teams.length]
+  const nominating_team = tid
+    ? teams.find((t) => t.uid === tid)
+    : teams[days_since_start % teams.length]
 
   if (!nominating_team) {
     throw new Error(`No nominating team found for league ${lid}`)
@@ -95,7 +97,8 @@ const main = async () => {
   let error
   try {
     const lid = argv.lid
-    await announce_restricted_free_agent({ lid })
+    const tid = argv.tid
+    await announce_restricted_free_agent({ lid, tid })
   } catch (err) {
     error = err
     log(error)
