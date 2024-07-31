@@ -13,13 +13,13 @@ const league_format_player_seasonlogs_table_alias = ({ params = {} }) => {
     year = [year]
   }
 
-  let year_offset = params.year_offset || 0
-  if (Array.isArray(year_offset)) {
-    year_offset = year_offset[0]
+  let year_offset_single = params.year_offset || 0
+  if (Array.isArray(year_offset_single)) {
+    year_offset_single = year_offset_single[0]
   }
 
   return get_table_hash(
-    `league_format_player_seasonlogs_${year.join('_')}_${league_format_hash}_year_offset_${year_offset}`
+    `league_format_player_seasonlogs_${year.join('_')}_${league_format_hash}_year_offset_${year_offset_single}`
   )
 }
 
@@ -53,7 +53,7 @@ const league_format_player_seasonlogs_join = (join_arguments) => {
 const create_field_from_league_format_player_seasonlogs = (column_name) => ({
   column_name,
   select_as: () => `${column_name}_from_seasonlogs`,
-  where_column: ({ table_name }) => `${table_name}.${column_name}`,
+  main_where: ({ table_name }) => `${table_name}.${column_name}`,
   table_name: 'league_format_player_seasonlogs',
   table_alias: league_format_player_seasonlogs_table_alias,
   join: league_format_player_seasonlogs_join,
@@ -94,7 +94,7 @@ const league_format_player_careerlogs_join = ({
 const create_field_from_league_format_player_careerlogs = (column_name) => ({
   column_name,
   select_as: () => `${column_name}_from_careerlogs`,
-  where_column: ({ table_name }) => `${table_name}.${column_name}`,
+  main_where: ({ table_name }) => `${table_name}.${column_name}`,
   table_name: 'league_format_player_careerlogs',
   table_alias: league_format_player_careerlogs_table_alias,
   join: league_format_player_careerlogs_join

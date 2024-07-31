@@ -20,9 +20,12 @@ export default function players_table_join_function(join_arguments) {
   } = join_arguments
 
   const join_func = get_join_func(join_type)
-  const year_offset = Array.isArray(params.year_offset)
-    ? params.year_offset[0]
-    : params.year_offset || 0
+  const year_offset_param = params.year_offset
+  const year_offset_range = Array.isArray(year_offset_param)
+    ? year_offset_param
+    : [year_offset_param || 0, year_offset_param || 0]
+  const min_year_offset = Math.min(...year_offset_range)
+  const max_year_offset = Math.max(...year_offset_range)
   const year = params.year || default_year
   const week = params.week || 0
 
@@ -31,12 +34,21 @@ export default function players_table_join_function(join_arguments) {
 
     if (splits.length && year_split_join_clause) {
       if (splits.includes('year')) {
-        if (year_offset !== 0) {
-          this.andOn(
-            db.raw(`${table_name}.year = ${year_split_join_clause} + ?`, [
-              year_offset
-            ])
-          )
+        if (min_year_offset !== 0 || max_year_offset !== 0) {
+          if (min_year_offset === max_year_offset) {
+            this.andOn(
+              db.raw(`${table_name}.year = ${year_split_join_clause} + ?`, [
+                min_year_offset
+              ])
+            )
+          } else {
+            this.andOn(
+              db.raw(
+                `${table_name}.year BETWEEN ${year_split_join_clause} + ? AND ${year_split_join_clause} + ?`,
+                [min_year_offset, max_year_offset]
+              )
+            )
+          }
         } else {
           this.andOn(db.raw(`${table_name}.year = ${year_split_join_clause}`))
         }
@@ -76,11 +88,20 @@ export default function players_table_join_function(join_arguments) {
       if (join_year && (params.year || !splits.includes('year'))) {
         if (splits.includes('year')) {
           const year_array = Array.isArray(year) ? year : [year]
-          this.andOn(
-            db.raw(
-              `${table_name}.year IN (${year_array.map((y) => y + year_offset).join(',')})`
+          if (min_year_offset === max_year_offset) {
+            this.andOn(
+              db.raw(
+                `${table_name}.year IN (${year_array.map((y) => y + min_year_offset).join(',')})`
+              )
             )
-          )
+          } else {
+            this.andOn(
+              db.raw(`${table_name}.year BETWEEN ? AND ?`, [
+                Math.min(...year_array) + min_year_offset,
+                Math.max(...year_array) + max_year_offset
+              ])
+            )
+          }
         } else {
           this.andOn(
             `${table_name}.year`,
@@ -93,11 +114,20 @@ export default function players_table_join_function(join_arguments) {
       // TODO somewhat hacky way to deal with joins for player stats from plays
       if (join_year_on_year_split && splits.includes('year') && params.year) {
         const year_array = Array.isArray(year) ? year : [year]
-        this.andOn(
-          db.raw(
-            `${table_name}.year IN (${year_array.map((y) => y + year_offset).join(',')})`
+        if (min_year_offset === max_year_offset) {
+          this.andOn(
+            db.raw(
+              `${table_name}.year IN (${year_array.map((y) => y + min_year_offset).join(',')})`
+            )
           )
-        )
+        } else {
+          this.andOn(
+            db.raw(`${table_name}.year BETWEEN ? AND ?`, [
+              Math.min(...year_array) + min_year_offset,
+              Math.max(...year_array) + max_year_offset
+            ])
+          )
+        }
       }
 
       if (join_week) {

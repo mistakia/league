@@ -5,12 +5,14 @@ import {
   get_per_game_cte_table_name,
   add_per_game_cte
 } from '#libs-server/players-table/rate-type-per-game.mjs'
-import { add_defensive_play_by_play_with_statement } from '#libs-server/players-table/add-defensive-play-by-play-with-statement.mjs'
-import { add_player_stats_play_by_play_with_statement } from '#libs-server/players-table/add-player-stats-play-by-play-with-statement.mjs'
-import { add_team_stats_play_by_play_with_statement } from '#libs-server/players-table/add-team-stats-play-by-play-with-statement.mjs'
-
-const get_rate_type_sql = ({ table_name, column_name, rate_type_table_name }) =>
-  `CAST(${table_name}.${column_name} AS DECIMAL) / NULLIF(CAST(${rate_type_table_name}.rate_type_total_count AS DECIMAL), 0)`
+import {
+  get_main_select_string,
+  get_with_select_string
+} from '#libs-server/players-table/select-string.mjs'
+import {
+  get_main_where_string,
+  get_with_where_string
+} from '#libs-server/players-table/where-string.mjs'
 
 const get_column_index = ({ column_id, index, columns }) => {
   const columns_with_same_id = columns.filter(
@@ -35,109 +37,6 @@ const get_table_name = ({ column_definition, column_params, splits }) => {
   return column_definition.table_alias
     ? column_definition.table_alias({ params: column_params, splits })
     : column_definition.table_name
-}
-
-// TODO update to return an object containing the where_string and values for parameterized query
-const get_where_string = ({
-  where_clause,
-  column_definition,
-  table_name,
-  column_index = 0
-}) => {
-  const column_name = column_definition.select_as
-    ? column_definition.select_as({ params: where_clause.params })
-    : column_definition.column_name
-  const where_column = column_definition.where_column
-    ? column_definition.where_column({
-        table_name,
-        case_insensitive: where_clause.operator === 'ILIKE'
-      })
-    : column_definition.use_having
-      ? `${column_name}_${column_index}`
-      : `${table_name}.${column_name}`
-
-  let where_string = ''
-
-  if (where_clause.operator === 'IS NULL') {
-    where_string = `${where_column} IS NULL`
-  } else if (where_clause.operator === 'IS NOT NULL') {
-    where_string = `${where_column} IS NOT NULL`
-  } else if (where_clause.operator === 'IN') {
-    where_string = `${where_column} IN ('${where_clause.value.join("', '")}')`
-  } else if (where_clause.operator === 'NOT IN') {
-    where_string = `${where_column} NOT IN ('${where_clause.value.join("', '")}')`
-  } else if (where_clause.operator === 'ILIKE') {
-    where_string = `${where_column} ILIKE '%${where_clause.value}%'`
-  } else if (where_clause.operator === 'LIKE') {
-    where_string = `${where_column} LIKE '%${where_clause.value}%'`
-  } else if (where_clause.operator === 'NOT LIKE') {
-    where_string = `${where_column} NOT LIKE '%${where_clause.value}%'`
-  } else if (where_clause.value || where_clause.value === 0) {
-    where_string = `${where_column} ${where_clause.operator} '${where_clause.value}'`
-  }
-
-  return where_string
-}
-
-const get_select_string = ({
-  column_id,
-  column_params,
-  column_index,
-  column_definition,
-  table_name,
-  rate_type_column_mapping,
-  splits
-}) => {
-  const rate_type_table_name =
-    rate_type_column_mapping[`${column_id}_${column_index}`]
-  const column_value = `"${table_name}"."${column_definition.column_name}"`
-
-  const get_select_expression = () => {
-    if (rate_type_table_name) {
-      return get_rate_type_sql({
-        table_name,
-        column_name: column_definition.column_name,
-        rate_type_table_name
-      })
-    }
-    return column_value
-  }
-
-  if (column_definition.select) {
-    return {
-      select: column_definition.select({
-        table_name,
-        params: column_params,
-        column_index,
-        rate_type_table_name,
-        splits
-      }),
-      group_by: column_definition.group_by
-        ? column_definition.group_by({
-            table_name,
-            params: column_params,
-            column_index,
-            rate_type_table_name,
-            splits
-          })
-        : []
-    }
-  }
-
-  const select_expression = get_select_expression()
-  const select_as = column_definition.select_as
-    ? column_definition.select_as({ params: column_params })
-    : column_definition.column_name
-
-  return {
-    select: [`${select_expression} AS "${select_as}_${column_index}"`],
-    group_by: [
-      column_value,
-      rate_type_table_name
-        ? `${rate_type_table_name}.rate_type_total_count`
-        : null
-    ].filter(Boolean)
-  }
 }
 
 const add_sort_clause = ({
@@ -166,11 +65,9 @@ const add_clauses_for_table = ({
   players_table_options
 }) => {
   const column_ids = []
+  const with_select_strings = []
   const select_strings = []
   const group_by_strings = []
-  let use_player_stats_play_by_play_with = false
-  let use_defensive_play_by_play_with = false
-  let use_team_stats_play_by_play_with = false
 
   // the pid column and join_func should be the same among column definitions with the same table name/alias
   let pid_columns = null
@@ -179,7 +76,7 @@ const add_clauses_for_table = ({
 
   for (const { column_id, column_index } of select_columns) {
     const column_definition = players_table_column_definitions[column_id]
-    const select_result = get_select_string({
+    const main_select_result = get_main_select_string({
       column_id,
       column_params,
       column_index,
@@ -189,52 +86,8 @@ const add_clauses_for_table = ({
       splits
     })
 
-    select_strings.push(...select_result.select)
-    group_by_strings.push(...select_result.group_by)
-
-    if (column_definition.join) {
-      join_func = column_definition.join
-    }
-
-    if (column_definition.use_player_stats_play_by_play_with) {
-      use_player_stats_play_by_play_with = true
-      pid_columns = column_definition.pid_columns
-      join_func = column_definition.join
-    } else if (column_definition.use_defensive_play_by_play_with) {
-      use_defensive_play_by_play_with = true
-      pid_columns = column_definition.pid_columns
-      join_func = column_definition.join
-    } else if (column_definition.use_team_stats_play_by_play_with) {
-      use_team_stats_play_by_play_with = true
-      join_func = column_definition.join
-    } else if (column_definition.with) {
-      with_func = column_definition.with
-    }
-    column_ids.push(column_id)
-  }
-
-  const where_clause_strings = []
-  const having_clause_strings = []
-  const unique_column_ids = new Set(column_ids)
-  for (const where_clause of where_clauses) {
-    const column_definition =
-      players_table_column_definitions[where_clause.column_id]
-    const where_string = get_where_string({
-      where_clause,
-      column_definition,
-      table_name,
-      column_index: 0
-    })
-
-    if (!where_string) {
-      continue
-    }
-
-    if (column_definition.use_having) {
-      having_clause_strings.push(where_string)
-    } else {
-      where_clause_strings.push(where_string)
-    }
+    select_strings.push(...main_select_result.select)
+    group_by_strings.push(...main_select_result.group_by)
 
     if (column_definition.join) {
       join_func = column_definition.join
@@ -242,143 +95,93 @@ const add_clauses_for_table = ({
 
     if (column_definition.with) {
       with_func = column_definition.with
+      pid_columns = column_definition.pid_columns
+
+      const with_select_result = get_with_select_string({
+        column_id,
+        column_params,
+        column_index,
+        column_definition,
+        table_name,
+        rate_type_column_mapping,
+        splits
+      })
+      with_select_strings.push(...with_select_result.select)
+      group_by_strings.push(...with_select_result.group_by)
     }
 
-    if (
-      column_definition.use_player_stats_play_by_play_with &&
-      !unique_column_ids.has(where_clause.column_id)
-    ) {
-      use_player_stats_play_by_play_with = true
-      pid_columns = column_definition.pid_columns
+    column_ids.push(column_id)
+  }
+
+  const main_where_clause_strings = []
+  const main_having_clause_strings = []
+
+  // with statements only have having clauses as of now
+  const with_having_clause_strings = []
+
+  // TODO
+  // const unique_column_ids = new Set(column_ids)
+  for (const where_clause of where_clauses) {
+    const column_definition =
+      players_table_column_definitions[where_clause.column_id]
+
+    if (column_definition.join) {
       join_func = column_definition.join
+    }
+
+    // TODO is `!unique_column_ids.has(where_clause.column_id)` needed?
+    if (column_definition.with) {
+      with_func = column_definition.with
+      pid_columns = column_definition.pid_columns
+
+      const with_having_string = get_with_where_string({
+        where_clause,
+        column_definition,
+        table_name,
+        column_index: 0,
+        params: where_clause.params
+      })
+
+      if (with_having_string) {
+        with_having_clause_strings.push(with_having_string)
+        // when there is a with statement and a where clause is set there is no need to add the where clause to the main query
+        continue
+      }
+    }
+
+    const main_where_string = get_main_where_string({
+      where_clause,
+      column_definition,
+      table_name,
+      column_index: 0,
+      params: where_clause.params
+    })
+
+    if (main_where_string) {
+      if (column_definition.use_having) {
+        main_having_clause_strings.push(main_where_string)
+      } else {
+        main_where_clause_strings.push(main_where_string)
+      }
     }
   }
 
-  if (use_player_stats_play_by_play_with) {
-    add_player_stats_play_by_play_with_statement({
-      query: players_query,
-      params: column_params,
-      with_table_name: table_name,
-      having_clauses: having_clause_strings,
-      select_strings,
-      pid_columns,
-      splits
-    })
-
-    // add select to players_query for each select_column in the with statement
-    for (const { column_id, column_index } of select_columns) {
-      const column_definition = players_table_column_definitions[column_id]
-      const rate_type_table_name =
-        rate_type_column_mapping[`${column_id}_${column_index}`]
-      if (rate_type_table_name) {
-        const rate_type_sql_string = get_rate_type_sql({
-          table_name,
-          column_name: column_definition.column_name,
-          rate_type_table_name
-        })
-        players_query.select(
-          db.raw(
-            `${rate_type_sql_string} as ${column_definition.column_name}_${column_index}`
-          )
-        )
-        players_query.groupBy(`${table_name}.${column_definition.column_name}`)
-        players_query.groupBy(`${rate_type_table_name}.rate_type_total_count`)
-      } else {
-        players_query.select(
-          `${table_name}.${column_definition.column_name} as ${column_definition.column_name}_${column_index}`
-        )
-        players_query.groupBy(`${table_name}.${column_definition.column_name}`)
-      }
-    }
-  } else if (use_team_stats_play_by_play_with) {
+  if (with_func) {
     const select_column_names = []
     for (const { column_id } of select_columns) {
       const column_definition = players_table_column_definitions[column_id]
       // TODO maybe use column_index here
       select_column_names.push(column_definition.column_name)
     }
-    add_team_stats_play_by_play_with_statement({
-      query: players_query,
-      params: column_params,
-      with_table_name: table_name,
-      having_clauses: having_clause_strings,
-      select_strings,
-      splits,
-      select_column_names
-    })
-
-    // add select to players_query for each select_column in the with statement
-    for (const { column_id, column_index } of select_columns) {
-      const column_definition = players_table_column_definitions[column_id]
-      const rate_type_table_name =
-        rate_type_column_mapping[`${column_id}_${column_index}`]
-      if (rate_type_table_name) {
-        const rate_type_sql_string = get_rate_type_sql({
-          table_name: `${table_name}_player_team_stats`,
-          column_name: column_definition.column_name,
-          rate_type_table_name
-        })
-        players_query.select(
-          db.raw(
-            `${rate_type_sql_string} as ${column_definition.column_name}_${column_index}`
-          )
-        )
-        players_query.groupBy(
-          `${table_name}_player_team_stats.${column_definition.column_name}`
-        )
-        players_query.groupBy(`${rate_type_table_name}.rate_type_total_count`)
-      } else {
-        players_query.select(
-          `${table_name}_player_team_stats.${column_definition.column_name} as ${column_definition.column_name}_${column_index}`
-        )
-        players_query.groupBy(
-          `${table_name}_player_team_stats.${column_definition.column_name}`
-        )
-      }
-    }
-  } else if (use_defensive_play_by_play_with) {
-    add_defensive_play_by_play_with_statement({
-      query: players_query,
-      params: column_params,
-      with_table_name: table_name,
-      having_clauses: having_clause_strings,
-      select_strings,
-      pid_columns,
-      splits
-    })
-
-    // add select to players_query for each select_column in the with statement
-    for (const { column_id, column_index } of select_columns) {
-      const column_definition = players_table_column_definitions[column_id]
-      const rate_type_table_name =
-        rate_type_column_mapping[`${column_id}_${column_index}`]
-      if (rate_type_table_name) {
-        const rate_type_sql_string = get_rate_type_sql({
-          table_name,
-          column_name: column_definition.column_name,
-          rate_type_table_name
-        })
-        players_query.select(
-          db.raw(
-            `${rate_type_sql_string} as ${column_definition.column_name}_${column_index}`
-          )
-        )
-        players_query.groupBy(`${table_name}.${column_definition.column_name}`)
-        players_query.groupBy(`${rate_type_table_name}.rate_type_total_count`)
-      } else {
-        players_query.select(
-          `${table_name}.${column_definition.column_name} as ${column_definition.column_name}_${column_index}`
-        )
-        players_query.groupBy(`${table_name}.${column_definition.column_name}`)
-      }
-    }
-  } else if (with_func) {
     with_func({
       query: players_query,
       params: column_params,
       with_table_name: table_name,
-      having_clauses: having_clause_strings,
-      splits
+      having_clauses: with_having_clause_strings,
+      select_strings: with_select_strings,
+      splits,
+      pid_columns,
+      select_column_names
     })
     for (const select_string of select_strings) {
       players_query.select(db.raw(select_string))
@@ -387,11 +190,11 @@ const add_clauses_for_table = ({
       players_query.groupBy(db.raw(group_by_string))
     }
   } else {
-    if (where_clause_strings.length) {
-      players_query.whereRaw(where_clause_strings.join(' AND '))
+    if (main_where_clause_strings.length) {
+      players_query.whereRaw(main_where_clause_strings.join(' AND '))
     }
-    if (having_clause_strings.length) {
-      players_query.havingRaw(having_clause_strings.join(' AND '))
+    if (main_having_clause_strings.length) {
+      players_query.havingRaw(main_having_clause_strings.join(' AND '))
     }
     for (const select_string of select_strings) {
       players_query.select(db.raw(select_string))
@@ -417,8 +220,8 @@ const add_clauses_for_table = ({
     table_name !== 'player' &&
     table_name !== 'nfl_plays' &&
     (select_strings.length ||
-      where_clause_strings.length ||
-      having_clause_strings.length)
+      main_where_clause_strings.length ||
+      main_having_clause_strings.length)
   ) {
     players_query.leftJoin(table_name, `${table_name}.pid`, 'player.pid')
   }
@@ -698,14 +501,19 @@ export default function ({
       })
 
       if (available_splits.includes('year')) {
-        if (select_columns.length) {
+        const has_year_offset_range =
+          column_params.year_offset &&
+          Array.isArray(column_params.year_offset) &&
+          column_params.year_offset.length > 1 &&
+          column_params.year_offset[0] === column_params.year_offset[1]
+        if (select_columns.length && !has_year_offset_range) {
           const column_definition =
             players_table_column_definitions[select_columns[0].column_id]
           if (column_definition && column_definition.year_select) {
             const year_select_clause = column_definition.year_select({
               table_name,
               splits,
-              year_offset: column_params.year_offset
+              column_params
             })
             if (year_select_clause) {
               players_table_options.year_coalesce_args.push(year_select_clause)
@@ -717,14 +525,16 @@ export default function ({
 
         if (table_name !== 'player' && table_name !== 'rosters_players') {
           if (!year_split_join_clause) {
-            const { year_offset } = column_params
-
+            const year_offset = column_params.year_offset
+            const year_offset_single = Array.isArray(year_offset)
+              ? year_offset[0]
+              : year_offset
             year_split_join_clause = year_select
               ? players_table_column_definitions[
                   year_select.column_id
-                ].year_select({ table_name, splits, year_offset })
-              : year_offset
-                ? `${table_name}.year - ${year_offset}`
+                ].year_select({ table_name, splits, column_params })
+              : year_offset_single
+                ? `${table_name}.year - ${year_offset_single}`
                 : `${table_name}.year`
           }
 
@@ -750,10 +560,17 @@ export default function ({
             table_info.supported_splits.includes(split)
         )
         .map(([table_alias, table_info]) => {
-          // Check if select_columns is not empty
+          // Check if select_columns is not empty and doesn't have year_offset
+          const has_year_offset_range =
+            table_info.column_params?.year_offset &&
+            Array.isArray(table_info.column_params.year_offset) &&
+            table_info.column_params.year_offset.length > 1 &&
+            table_info.column_params.year_offset[0] ===
+              table_info.column_params.year_offset[1]
           if (
             table_info.select_columns &&
-            table_info.select_columns.length > 0
+            table_info.select_columns.length > 0 &&
+            !has_year_offset_range
           ) {
             const column_definition =
               players_table_column_definitions[
@@ -766,10 +583,10 @@ export default function ({
               })
             }
           }
-          // Default to standard year column if no custom year_select is available
-          return `${table_alias}.${split}`
+          // Default to standard year column if no custom year_select is available and no year_offset range
+          return !has_year_offset_range ? `${table_alias}.${split}` : null
         })
-        .filter(Boolean) // Remove any undefined entries
+        .filter(Boolean) // Remove any undefined or null entries
         .join(', ')
 
       if (coalesce_args) {

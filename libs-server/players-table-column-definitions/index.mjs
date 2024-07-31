@@ -30,14 +30,14 @@ export default {
 
   player_league_roster_status: {
     table_name: 'rosters_players',
-    where_column: () => player_league_roster_status_select,
-    select: () => [
+    main_where: () => player_league_roster_status_select,
+    main_select: () => [
       `${player_league_roster_status_select} AS player_league_roster_status`,
       'rosters_players.slot',
       'rosters_players.tid',
       'rosters_players.tag'
     ],
-    group_by: () => [
+    main_group_by: () => [
       'rosters_players.slot',
       'rosters_players.tid',
       'rosters_players.tag'

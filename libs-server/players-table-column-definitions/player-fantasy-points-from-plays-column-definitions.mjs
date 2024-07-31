@@ -51,7 +51,10 @@ const fantasy_points_from_plays_with = ({
       base_columns.add('year')
     } else if (param_name === 'career_game') {
       base_columns.add('esbid')
-    } else if (nfl_plays_column_params[param_name] && param_name !== 'year_offset') {
+    } else if (
+      nfl_plays_column_params[param_name] &&
+      param_name !== 'year_offset'
+    ) {
       base_columns.add(param_name)
     }
   }
@@ -174,7 +177,8 @@ const fantasy_points_from_plays_with = ({
 
 export default {
   player_fantasy_points_from_plays: {
-    where_column: () => select_string,
+    // TODO support ranges
+    with_where: () => select_string,
     table_alias: generate_fantasy_points_table_alias,
     column_name: 'fantasy_points_from_plays',
     with: fantasy_points_from_plays_with,
