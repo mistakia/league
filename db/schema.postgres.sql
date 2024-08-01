@@ -4947,8 +4947,8 @@ CREATE TABLE public.users (
     wrb character varying(7),
     teb character varying(7),
     phone character varying(12),
-    text boolean DEFAULT true NOT NULL,
-    voice boolean DEFAULT true NOT NULL
+    user_text_notifications boolean DEFAULT true NOT NULL,
+    user_voice_notifications boolean DEFAULT true NOT NULL
 );
 
 
