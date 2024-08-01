@@ -208,6 +208,7 @@ DROP INDEX IF EXISTS public.idx_24613_team;
 DROP INDEX IF EXISTS public.idx_24608_tid;
 DROP INDEX IF EXISTS public.idx_24608_pick;
 DROP INDEX IF EXISTS public.idx_24608_lid;
+ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_username_unique;
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_key;
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_hash_key;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pkey;
@@ -4935,7 +4936,7 @@ ALTER SEQUENCE public.user_table_views_view_id_seq OWNED BY public.user_table_vi
 
 CREATE TABLE public.users (
     id bigint NOT NULL,
-    username character varying(50) NOT NULL,
+    username character varying(20) NOT NULL,
     email character varying(50) DEFAULT ''::character varying NOT NULL,
     password character varying(60) DEFAULT ''::character varying NOT NULL,
     vbaseline character varying(9) DEFAULT 'default'::character varying NOT NULL,
@@ -5335,6 +5336,14 @@ ALTER TABLE ONLY public.urls
 
 ALTER TABLE ONLY public.urls
     ADD CONSTRAINT urls_url_key UNIQUE (url);
+
+
+--
+-- Name: users users_username_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.users
+    ADD CONSTRAINT users_username_unique UNIQUE (username);
 
 
 --
