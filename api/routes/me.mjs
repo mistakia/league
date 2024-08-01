@@ -1,9 +1,26 @@
 import express from 'express'
 import bcrypt from 'bcrypt'
+import Validator from 'fastest-validator'
 
 import { constants, groupBy } from '#libs-shared'
 
+const v = new Validator({ haltOnFirstError: true })
 const router = express.Router()
+
+const username_schema = {
+  username: {
+    type: 'string',
+    min: 3,
+    max: 20,
+    pattern: /^[a-zA-Z0-9_]+$/,
+    messages: {
+      stringPattern:
+        "The '{field}' field must contain only alphanumeric characters and underscores"
+    }
+  }
+}
+
+const username_validator = v.compile(username_schema)
 
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
@@ -124,8 +141,15 @@ router.put('/?', async (req, res) => {
       return res.status(400).send({ error: 'missing type param' })
     }
 
-    const validTypes = ['email', 'password', 'watchlist', 'text', 'voice']
-    if (!validTypes.includes(type)) {
+    const valid_types = [
+      'email',
+      'password',
+      'watchlist',
+      'text',
+      'voice',
+      'username'
+    ]
+    if (!valid_types.includes(type)) {
       return res.status(400).send({ error: 'invalid type param' })
     }
 
@@ -138,6 +162,18 @@ router.put('/?', async (req, res) => {
       value = await bcrypt.hash(value, salt)
     }
 
+    if (type === 'username') {
+      const result = username_validator({ username: value })
+      if (result !== true) {
+        return res.status(400).send({ error: result[0].message })
+      }
+
+      const existing_user = await db('users').where({ username: value }).first()
+      if (existing_user) {
+        return res.status(400).send({ error: 'username already taken' })
+      }
+    }
+
     await db('users')
       .update({ [type]: value })
       .where({ id: userId })
@@ -145,7 +181,7 @@ router.put('/?', async (req, res) => {
     res.send({ value })
   } catch (error) {
     logger(error)
-    res.status(500).send({ error: error.toString() })
+    res.status(400).send({ error: error.toString() })
   }
 })
 
