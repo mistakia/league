@@ -5,8 +5,8 @@ import Pickr from '@simonwep/pickr'
 import Grid from '@mui/material/Grid'
 
 import SettingsSection from '@components/settings-section'
-import EditableTeamField from '@components/editable-team-field'
-import EditableTeamSwitch from '@components/editable-team-switch'
+import EditableSettingField from '@components/editable-setting-field'
+import EditableSettingSwitch from '@components/editable-setting-switch'
 import TeamImage from '@components/team-image'
 
 import './settings-team.styl'
@@ -82,25 +82,25 @@ export default class SettingsTeam extends React.Component {
   render = () => {
     const { team, isHosted } = this.props
 
-    const props = { team, onchange: this.onchange }
+    const props = { data: team, onchange: this.onchange }
 
     let teamNotificationSection
     if (isHosted) {
       teamNotificationSection = (
         <>
-          <EditableTeamSwitch
+          <EditableSettingSwitch
             label='Team Text Notifications'
             description='Poaching claims and trades'
             field='teamtext'
             {...props}
           />
-          <EditableTeamSwitch
+          <EditableSettingSwitch
             label='Team Voice Notifications'
             description='Poaching claims'
             field='teamvoice'
             {...props}
           />
-          <EditableTeamSwitch
+          <EditableSettingSwitch
             label='League Text Notifications'
             description='Poaching claims, trades, draft selections, released players and added players'
             field='leaguetext'
@@ -114,20 +114,20 @@ export default class SettingsTeam extends React.Component {
     const description = 'Edit Name / Abbreviation / Logo'
     const body = (
       <>
-        <EditableTeamField
+        <EditableSettingField
           label='Team Name'
           field='name'
           limit={100}
           grid={{ xs: 12 }}
           {...props}
         />
-        <EditableTeamField
+        <EditableSettingField
           label='Abbreviation'
           field='abbrv'
           limit={5}
           {...props}
         />
-        <EditableTeamField label='Logo (URL)' field='image' {...props} />
+        <EditableSettingField label='Logo (URL)' field='image' {...props} />
         <Grid xs={12} item container>
           <div className='settings__team-section team__brand'>
             <div

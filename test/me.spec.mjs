@@ -101,5 +101,41 @@ describe('API /me', function () {
 
       await error(res, 'username already taken')
     })
+
+    it('should allow changing email to a valid email address', async () => {
+      const new_email = 'new_email@example.com'
+      const res = await chai
+        .request(server)
+        .put('/api/me')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({ type: 'email', value: new_email })
+
+      res.should.have.status(200)
+      res.body.should.have.property('value').equal(new_email)
+
+      const updated_user = await knex('users').where({ id: 1 }).first()
+      updated_user.email.should.equal(new_email)
+    })
+
+    it('should validate email', async () => {
+      const invalid_emails = [
+        'invalid_email',
+        'invalid@email',
+        '@invalid.com',
+        'invalid@.com',
+        'invalid@com.',
+        'invalid@com'
+      ]
+
+      for (const invalid_email of invalid_emails) {
+        const res = await chai
+          .request(server)
+          .put('/api/me')
+          .set('Authorization', `Bearer ${user1}`)
+          .send({ type: 'email', value: invalid_email })
+
+        await error(res, 'Invalid email address')
+      }
+    })
   })
 })

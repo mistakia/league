@@ -1,49 +1,40 @@
-import React from 'react'
+import React, { useState } from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 import Switch from '@mui/material/Switch'
 
 import './settings-switch.styl'
 
-export default class SettingsSwitch extends React.Component {
-  constructor(props) {
-    super(props)
+export default function SettingsSwitch({
+  field,
+  data,
+  on_change,
+  label,
+  description
+}) {
+  const [checked, set_checked] = useState(Boolean(data[field]))
 
-    const { app, field } = props
-    const checked = Boolean(app[field])
-    this.state = { checked }
-  }
-
-  handleChange = (event) => {
-    const { field } = this.props
+  const handle_change = (event) => {
     const { checked } = event.target
-    this.setState({ checked })
-    this.props.update({ type: field, value: checked ? 1 : 0 })
+    set_checked(checked)
+    on_change({ type: field, value: checked })
   }
 
-  render = () => {
-    return (
-      <div className='settings__switch'>
-        <div className='settings__switch-body'>
-          <div className='settings__switch-body-label'>{this.props.label}</div>
-          <div className='settings__switch-body-description'>
-            {this.props.description}
-          </div>
-        </div>
-        <Switch
-          checked={this.state.checked}
-          onChange={this.handleChange}
-          color='primary'
-        />
+  return (
+    <div className='settings__switch'>
+      <div className='settings__switch-body'>
+        <div className='settings__switch-body-label'>{label}</div>
+        <div className='settings__switch-body-description'>{description}</div>
       </div>
-    )
-  }
+      <Switch checked={checked} onChange={handle_change} color='primary' />
+    </div>
+  )
 }
 
 SettingsSwitch.propTypes = {
-  app: ImmutablePropTypes.record,
+  data: PropTypes.oneOfType([ImmutablePropTypes.record, PropTypes.object]),
   field: PropTypes.string,
   label: PropTypes.string,
   description: PropTypes.string,
-  update: PropTypes.func
+  on_change: PropTypes.func
 }

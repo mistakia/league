@@ -164,7 +164,9 @@ export default function AppMenu({
                   </NavLink>
                   <NavLink to='/lineups'>Lineup</NavLink>
                   <NavLink to='/trade'>Trade</NavLink>
-                  <NavLink to='/settings'>Settings</NavLink>
+                  <NavLink to={`/leagues/${leagueId}/team-settings`}>
+                    Settings
+                  </NavLink>
                 </div>
               </div>
             )}
@@ -179,6 +181,7 @@ export default function AppMenu({
                 ) : (
                   <NavLink to='/login'>Login</NavLink>
                 )}
+                <NavLink to='/settings'>Settings</NavLink>
               </div>
             </div>
             <div className='menu__section'>

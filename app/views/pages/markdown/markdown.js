@@ -17,7 +17,6 @@ export default class MarkdownPage extends React.Component {
   }
 
   _load() {
-    console.log(this.props.path)
     const url =
       this.props.path === '/README.md'
         ? README_URL

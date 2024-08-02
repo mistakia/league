@@ -20,7 +20,7 @@ const PlayersPage = lazy(() => import('@pages/players'))
 const PlayersTablePage = lazy(() => import('@pages/players-table'))
 const LineupsPage = lazy(() => import('@pages/lineups'))
 const TradePage = lazy(() => import('@pages/trade'))
-const SettingsPage = lazy(() => import('@pages/settings'))
+const TeamSettingsPage = lazy(() => import('@pages/team-settings'))
 const MarkdownPage = lazy(() => import('@pages/markdown'))
 const StatusPage = lazy(() => import('@pages/status'))
 const PropsPage = lazy(() => import('@pages/props'))
@@ -33,6 +33,7 @@ const WaiversPage = lazy(() => import('@pages/waivers'))
 const TeamPage = lazy(() => import('@pages/team'))
 const LeagueSettingsPage = lazy(() => import('@pages/league-settings'))
 const MatchupPage = lazy(() => import('@pages/matchup'))
+const UserSettingsPage = lazy(() => import('@pages/user-settings'))
 
 const mapStateToProps = createSelector(get_app, (app) => ({ app }))
 
@@ -88,7 +89,11 @@ const Routes = ({ app }) => {
       </Route>
       <Route path='/props' element={<PropsPage />} />
       <Route path='/status' element={<StatusPage />} />
-      <Route path='/settings' element={<SettingsPage />} />
+      <Route path='/settings' element={<UserSettingsPage />} />
+      <Route
+        path='/leagues/:lid/team-settings'
+        element={<TeamSettingsPage />}
+      />
       <Route path='/about' element={<MarkdownPage path='/README.md' />} />
       <Route
         path='/resources'
