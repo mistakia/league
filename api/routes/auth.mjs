@@ -10,28 +10,30 @@ const router = express.Router()
 router.post('/login', async (req, res) => {
   const { db, config, logger } = req.app.locals
   try {
-    const { email, password } = req.body
-    if (!email) {
-      return res.status(400).send({ error: 'missing email param' })
+    const { email_or_username, password } = req.body
+    if (!email_or_username) {
+      return res.status(400).send({ error: 'missing email or username param' })
     }
 
     if (!password) {
       return res.status(400).send({ error: 'missing password param' })
     }
 
-    const users = await db('users').where({ email })
+    const users = await db('users')
+      .where({ email: email_or_username })
+      .orWhere({ username: email_or_username })
     if (!users.length) {
       return res.status(400).send({ error: 'invalid params' })
     }
 
     const user = users[0]
-    const isValid = await bcrypt.compare(password, user.password)
-    if (!isValid) {
+    const is_valid = await bcrypt.compare(password, user.password)
+    if (!is_valid) {
       return res.status(400).send({ error: 'invalid params' })
     }
 
-    const token = jwt.sign({ userId: user.id }, config.jwt.secret)
-    res.json({ token, userId: user.id })
+    const token = jwt.sign({ user_id: user.id }, config.jwt.secret)
+    res.json({ token, user_id: user.id })
   } catch (err) {
     logger(err)
     res.status(500).send({ error: err.toString() })
