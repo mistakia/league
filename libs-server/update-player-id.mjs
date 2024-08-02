@@ -43,7 +43,9 @@ const update_player_id = async function ({ current_pid, new_pid }) {
     // Check if new_pid already exists in the table
     const existing_rows = await db(table_name).where({ [column_name]: new_pid })
     if (existing_rows.length > 0) {
-      log(`${table_name} ${column_name} new_pid ${new_pid} already exists, skipping update`)
+      log(
+        `${table_name} ${column_name} new_pid ${new_pid} already exists, skipping update`
+      )
       continue
     }
 

@@ -1703,7 +1703,9 @@ export const get_draft = async ({
     )
     const team = fixTeam(row.querySelector('[data-stat="team"] a').textContent)
     const player_link = row.querySelector('[data-stat="player"] a')
-    const player_name = player_link ? player_link.textContent : row.querySelector('[data-stat="player"]').textContent
+    const player_name = player_link
+      ? player_link.textContent
+      : row.querySelector('[data-stat="player"]').textContent
     const pfr_id = player_link
       ? player_link.getAttribute('href').split('/').pop().replace('.htm', '')
       : null
