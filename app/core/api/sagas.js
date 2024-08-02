@@ -116,7 +116,7 @@ function* fetchAPI(apiFunction, actions, opts = {}) {
         message = 'Canceled request — took longer than 40 seconds'
       }
 
-      const is_server_error = err.message.includes('Error')
+      const is_server_error = err.message.includes('Error') || err.message.includes('error')
       if (!is_server_error) {
         message = err.message
       }
