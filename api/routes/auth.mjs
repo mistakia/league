@@ -33,7 +33,7 @@ router.post('/login', async (req, res) => {
     }
 
     const token = jwt.sign({ userId: user.id }, config.jwt.secret)
-    res.json({ token, user_id: user.id })
+    res.json({ token, userId: user.id })
   } catch (err) {
     logger(err)
     res.status(500).send({ error: err.toString() })
@@ -43,7 +43,7 @@ router.post('/login', async (req, res) => {
 router.post('/register', async (req, res) => {
   const { db, config, logger } = req.app.locals
   try {
-    const { email, password } = req.body
+    const { email, password, invite_code } = req.body
     let username = req.body.username
 
     const teamId = req.body.teamId ? parseInt(req.body.teamId, 10) : null
@@ -88,6 +88,29 @@ router.post('/register', async (req, res) => {
       return res.status(400).send({ error: 'username exists' })
     }
 
+    // Validate invite code
+    if (!invite_code) {
+      return res.status(400).send({ error: 'missing invite code' })
+    }
+
+    const invite = await db('invite_codes')
+      .where({ code: invite_code, is_active: true })
+      .first()
+
+    if (!invite) {
+      return res.status(400).send({ error: 'invalid invite code' })
+    }
+
+    if (invite.expires_at && new Date(invite.expires_at) < new Date()) {
+      return res.status(400).send({ error: 'invite code has expired' })
+    }
+
+    if (invite.max_uses && invite.uses_count >= invite.max_uses) {
+      return res
+        .status(400)
+        .send({ error: 'invite code has reached maximum uses' })
+    }
+
     if (leagueId) {
       const league = getLeague({ lid: leagueId })
       if (!league) {
@@ -113,10 +136,20 @@ router.post('/register', async (req, res) => {
       .insert({
         email,
         password: hashedPassword,
-        username
+        username,
+        invite_code
       })
       .returning('id')
     const userId = users[0].id
+
+    // Update invite code usage
+    await db('invite_codes')
+      .where({ code: invite_code })
+      .update({
+        used_by: userId,
+        used_at: db.fn.now(),
+        uses_count: db.raw('uses_count + 1')
+      })
 
     if (leagueId && teamId) {
       await db('users_teams').insert({

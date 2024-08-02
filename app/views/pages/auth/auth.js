@@ -17,135 +17,144 @@ const AuthPageWrapper = (Component) => {
   }
 }
 
-class AuthPage extends React.Component {
-  constructor(props) {
-    super(props)
+const AuthPage = ({ location, login, register, is_pending, auth_error }) => {
+  const [menu, set_menu] = React.useState(
+    queryString.parse(location.search).leagueId ? 'register' : 'login'
+  )
+  const [password_error, set_password_error] = React.useState(false)
 
-    const { leagueId } = queryString.parse(this.props.location.search)
+  const password_ref = React.useRef()
+  const password2_ref = React.useRef()
 
-    this.state = {
-      menu: leagueId ? 'register' : 'login',
-      passwordError: false
-    }
-
-    this.passwordRef = React.createRef()
-    this.password2Ref = React.createRef()
-  }
-
-  handleSubmit = (event) => {
+  const handle_submit = (event) => {
     event.preventDefault()
-    const { leagueId, teamId } = queryString.parse(this.props.location.search)
+    const { leagueId, teamId } = queryString.parse(location.search)
     const data = {
-      email: event.target.email.value,
       password: event.target.password.value,
       leagueId,
       teamId
     }
-    if (this.state.menu === 'login') {
-      this.props.login(data)
+    if (menu === 'login') {
+      data.email_or_username = event.target.email_or_username.value
+      login(data)
     } else if (
-      this.password2Ref.current.value &&
-      this.passwordRef.current.value === this.password2Ref.current.value
+      password2_ref.current.value &&
+      password_ref.current.value === password2_ref.current.value
     ) {
-      this.props.register(data)
+      data.email = event.target.email.value
+      data.username = event.target.username.value
+      register(data)
     }
   }
 
-  handleClick = () => {
-    this.setState({
-      passwordError: false,
-      menu: this.state.menu === 'login' ? 'register' : 'login'
-    })
+  const handle_click = () => {
+    set_password_error(false)
+    set_menu(menu === 'login' ? 'register' : 'login')
   }
 
-  handleChange = () => {
-    if (this.state.menu === 'login') return
-    this.setState({
-      passwordError:
-        this.passwordRef.current.value !== this.password2Ref.current.value
-    })
-  }
-
-  render() {
-    const { leagueId, teamId } = queryString.parse(this.props.location.search)
-    const { isPending, authError } = this.props
-    if (isPending) {
-      return <Loading loading={isPending} />
-    }
-
-    const body = (
-      <div className='auth'>
-        <div className='auth__side' />
-        <div className='auth__main'>
-          <form id='auth' onSubmit={this.handleSubmit}>
-            {authError}
-            {leagueId && (
-              <TextField
-                disabled
-                label='League Id'
-                variant='outlined'
-                value={leagueId}
-              />
-            )}
-            {teamId && (
-              <TextField
-                disabled
-                label='Team Id'
-                variant='outlined'
-                value={teamId}
-              />
-            )}
-            <TextField
-              id='email'
-              label='Email Address'
-              type='email'
-              error={Boolean(authError)}
-              variant='outlined'
-            />
-            <TextField
-              error={Boolean(authError || this.state.passwordError)}
-              helperText={this.state.passwordError && 'Password does not match'}
-              id='password'
-              label='Password'
-              type='password'
-              inputRef={this.passwordRef}
-              onChange={this.handleChange}
-              variant='outlined'
-            />
-            {this.state.menu === 'register' && (
-              <TextField
-                error={Boolean(authError || this.state.passwordError)}
-                helperText={
-                  this.state.passwordError && 'Password does not match'
-                }
-                id='password2'
-                label='Confirm Password'
-                type='password'
-                inputRef={this.password2Ref}
-                onChange={this.handleChange}
-                variant='outlined'
-              />
-            )}
-            <Button type='submit' isLoading={isPending}>
-              {this.state.menu}
-            </Button>
-          </form>
-          {/* <Button className='auth__toggle' text onClick={this.handleClick}>
-              {this.state.menu === 'register' ? 'login' : 'register'}
-              </Button> */}
-        </div>
-      </div>
+  const handle_change = () => {
+    if (menu === 'login') return
+    set_password_error(
+      password_ref.current.value !== password2_ref.current.value
     )
-
-    return <PageLayout body={body} />
   }
+
+  if (is_pending) {
+    return <Loading loading={is_pending} />
+  }
+
+  const { leagueId, teamId } = queryString.parse(location.search)
+
+  const body = (
+    <div className='auth'>
+      <div className='auth__side' />
+      <div className='auth__main'>
+        <form id='auth' onSubmit={handle_submit}>
+          {auth_error}
+          {leagueId && (
+            <TextField
+              disabled
+              label='League Id'
+              variant='outlined'
+              value={leagueId}
+            />
+          )}
+          {teamId && (
+            <TextField
+              disabled
+              label='Team Id'
+              variant='outlined'
+              value={teamId}
+            />
+          )}
+          {menu === 'login' ? (
+            <TextField
+              id='email_or_username'
+              label='Email/Username'
+              type='text'
+              error={Boolean(auth_error)}
+              variant='outlined'
+            />
+          ) : (
+            <>
+              <TextField
+                id='username'
+                label='Username'
+                type='text'
+                error={Boolean(auth_error)}
+                variant='outlined'
+              />
+              <TextField
+                id='email'
+                label='Email'
+                type='email'
+                error={Boolean(auth_error)}
+                variant='outlined'
+                helperText='Used for account recovery (Optional)'
+              />
+            </>
+          )}
+          <TextField
+            error={Boolean(auth_error || password_error)}
+            helperText={password_error && 'Password does not match'}
+            id='password'
+            label='Password'
+            type='password'
+            inputRef={password_ref}
+            onChange={handle_change}
+            variant='outlined'
+          />
+          {menu === 'register' && (
+            <TextField
+              error={Boolean(auth_error || password_error)}
+              helperText={password_error && 'Password does not match'}
+              id='password2'
+              label='Confirm Password'
+              type='password'
+              inputRef={password2_ref}
+              onChange={handle_change}
+              variant='outlined'
+            />
+          )}
+          <Button type='submit' is_loading={is_pending}>
+            {menu}
+          </Button>
+        </form>
+        <Button className='auth__toggle' text onClick={handle_click}>
+          {menu === 'register' ? 'login' : 'register'}
+        </Button>
+      </div>
+    </div>
+  )
+
+  return <PageLayout body={body} />
 }
 
 AuthPage.propTypes = {
   location: PropTypes.object,
   login: PropTypes.func,
-  isPending: PropTypes.bool,
-  authError: PropTypes.string,
+  is_pending: PropTypes.bool,
+  auth_error: PropTypes.string,
   register: PropTypes.func
 }
 
