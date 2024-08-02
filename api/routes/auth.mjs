@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 
 import { constants } from '#libs-shared'
-import { createLeague, getLeague, sendEmail } from '#libs-server'
+import { getLeague, sendEmail } from '#libs-server'
 
 const router = express.Router()
 
@@ -46,8 +46,8 @@ router.post('/register', async (req, res) => {
     const { email, password } = req.body
     let username = req.body.username
 
-    let teamId = req.body.teamId ? parseInt(req.body.teamId, 10) : null
-    let leagueId = req.body.leagueId ? parseInt(req.body.leagueId, 10) : null
+    const teamId = req.body.teamId ? parseInt(req.body.teamId, 10) : null
+    const leagueId = req.body.leagueId ? parseInt(req.body.leagueId, 10) : null
 
     if (!email) {
       return res.status(400).send({ error: 'missing email param' })
@@ -122,34 +122,12 @@ router.post('/register', async (req, res) => {
       .returning('uid')
     const userId = users[0].id
 
-    if (!leagueId) {
-      leagueId = await createLeague({ commishid: userId })
-
-      const teams = await db('teams')
-        .insert({
-          lid: leagueId,
-          name: 'Team Name',
-          abbrv: 'TM',
-          year: constants.season.year
-        })
-        .returning('uid')
-      teamId = teams[0].uid
-    }
-
-    if (!req.body.teamId) {
-      await db('rosters').insert({
-        tid: teamId,
-        lid: leagueId,
-        week: constants.season.week,
-        year: constants.season.year,
-        last_updated: Math.round(Date.now() / 1000)
+    if (leagueId && teamId) {
+      await db('users_teams').insert({
+        userid: userId,
+        tid: teamId
       })
     }
-
-    await db('users_teams').insert({
-      userid: userId,
-      tid: teamId
-    })
 
     const token = jwt.sign({ userId }, config.jwt.secret)
     res.json({ token, userId })
