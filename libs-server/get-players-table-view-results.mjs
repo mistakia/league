@@ -673,7 +673,7 @@ export default function ({
 
     for (const [
       table_name,
-      { column_params, where_clauses, select_columns }
+      { column_params = {}, where_clauses, select_columns }
     ] of sorted_tables) {
       const year_select = select_columns.find(
         (col) => players_table_column_definitions[col.column_id]?.year_select
@@ -704,7 +704,8 @@ export default function ({
           if (column_definition && column_definition.year_select) {
             const year_select_clause = column_definition.year_select({
               table_name,
-              splits
+              splits,
+              year_offset: column_params.year_offset
             })
             if (year_select_clause) {
               players_table_options.year_coalesce_args.push(year_select_clause)
@@ -716,11 +717,15 @@ export default function ({
 
         if (table_name !== 'player' && table_name !== 'rosters_players') {
           if (!year_split_join_clause) {
+            const { year_offset } = column_params
+
             year_split_join_clause = year_select
               ? players_table_column_definitions[
                   year_select.column_id
-                ].year_select({ table_name, splits })
-              : `${table_name}.year`
+                ].year_select({ table_name, splits, year_offset })
+              : year_offset
+                ? `${table_name}.year - ${year_offset}`
+                : `${table_name}.year`
           }
 
           if (!week_split_join_clause && available_splits.includes('week')) {
