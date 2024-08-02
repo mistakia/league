@@ -22,6 +22,18 @@ const username_schema = {
 
 const username_validator = v.compile(username_schema)
 
+const email_schema = {
+  email: {
+    type: 'string',
+    pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    messages: {
+      stringPattern: 'Invalid email address'
+    }
+  }
+}
+
+const email_validator = v.compile(email_schema)
+
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -145,8 +157,8 @@ router.put('/?', async (req, res) => {
       'email',
       'password',
       'watchlist',
-      'text',
-      'voice',
+      'user_text_notifications',
+      'user_voice_notifications',
       'username'
     ]
     if (!valid_types.includes(type)) {
@@ -171,6 +183,13 @@ router.put('/?', async (req, res) => {
       const existing_user = await db('users').where({ username: value }).first()
       if (existing_user) {
         return res.status(400).send({ error: 'username already taken' })
+      }
+    }
+
+    if (type === 'email') {
+      const result = email_validator({ email: value })
+      if (result !== true) {
+        return res.status(400).send({ error: result[0].message })
       }
     }
 
