@@ -17,9 +17,11 @@ SET client_min_messages = warning;
 SET row_security = off;
 SET search_path = public;
 
+ALTER TABLE IF EXISTS ONLY public.invite_codes DROP CONSTRAINT IF EXISTS invite_codes_created_by_fkey;
 DROP TRIGGER IF EXISTS player_name_search_vector_update ON public.player;
 DROP INDEX IF EXISTS public.player_name_search_idx;
 DROP INDEX IF EXISTS public.nfl_year_week_timestamp_year_week_idx;
+DROP INDEX IF EXISTS public.idx_users_invite_code;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_seasonlogs_pid_year_hash;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_gamelogs_pid_esbid_hash;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_careerlogs_pid_hash;
@@ -49,6 +51,9 @@ DROP INDEX IF EXISTS public.idx_nfl_plays_assisted_tackle_1_pid;
 DROP INDEX IF EXISTS public.idx_keeptradecut_rankings_type_qb_d_v;
 DROP INDEX IF EXISTS public.idx_keeptradecut_rankings_qb_type_d_pid;
 DROP INDEX IF EXISTS public.idx_keeptradecut_rankings_pid_qb_type_d;
+DROP INDEX IF EXISTS public.idx_invite_codes_used_by;
+DROP INDEX IF EXISTS public.idx_invite_codes_is_active;
+DROP INDEX IF EXISTS public.idx_invite_codes_created_by;
 DROP INDEX IF EXISTS public.idx_25151_lid;
 DROP INDEX IF EXISTS public.idx_25147_waiverid_pid;
 DROP INDEX IF EXISTS public.idx_25147_waiverid;
@@ -212,6 +217,7 @@ ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_username
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_key;
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_hash_key;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pkey;
+ALTER TABLE IF EXISTS ONLY public.invite_codes DROP CONSTRAINT IF EXISTS invite_codes_pkey;
 ALTER TABLE IF EXISTS ONLY public.waivers DROP CONSTRAINT IF EXISTS "idx_25151_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS "idx_25127_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.user_table_views DROP CONSTRAINT IF EXISTS "idx_25118_PRIMARY";
@@ -356,6 +362,7 @@ DROP TABLE IF EXISTS public.league_baselines;
 DROP TABLE IF EXISTS public.keeptradecut_rankings;
 DROP SEQUENCE IF EXISTS public.jobs_uid_seq;
 DROP TABLE IF EXISTS public.jobs;
+DROP TABLE IF EXISTS public.invite_codes;
 DROP TABLE IF EXISTS public.footballoutsiders;
 DROP SEQUENCE IF EXISTS public.draft_uid_seq;
 DROP TABLE IF EXISTS public.draft;
@@ -660,6 +667,23 @@ CREATE TABLE public.footballoutsiders (
     dtdprz numeric(4,3),
     oavgld numeric(4,2),
     davgld numeric(4,2)
+);
+
+
+--
+-- Name: invite_codes; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.invite_codes (
+    code character varying(20) NOT NULL,
+    created_by integer NOT NULL,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    expires_at timestamp with time zone,
+    used_by integer,
+    used_at timestamp with time zone,
+    is_active boolean DEFAULT true,
+    max_uses integer DEFAULT 1,
+    uses_count integer DEFAULT 0
 );
 
 
@@ -4948,7 +4972,8 @@ CREATE TABLE public.users (
     teb character varying(7),
     phone character varying(12),
     user_text_notifications boolean DEFAULT true NOT NULL,
-    user_voice_notifications boolean DEFAULT true NOT NULL
+    user_voice_notifications boolean DEFAULT true NOT NULL,
+    invite_code character varying(20)
 );
 
 
@@ -5312,6 +5337,14 @@ ALTER TABLE ONLY public.users
 
 ALTER TABLE ONLY public.waivers
     ADD CONSTRAINT "idx_25151_PRIMARY" PRIMARY KEY (uid);
+
+
+--
+-- Name: invite_codes invite_codes_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.invite_codes
+    ADD CONSTRAINT invite_codes_pkey PRIMARY KEY (code);
 
 
 --
@@ -6460,6 +6493,27 @@ CREATE INDEX idx_25151_lid ON public.waivers USING btree (lid);
 
 
 --
+-- Name: idx_invite_codes_created_by; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_invite_codes_created_by ON public.invite_codes USING btree (created_by);
+
+
+--
+-- Name: idx_invite_codes_is_active; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_invite_codes_is_active ON public.invite_codes USING btree (is_active);
+
+
+--
+-- Name: idx_invite_codes_used_by; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_invite_codes_used_by ON public.invite_codes USING btree (used_by);
+
+
+--
 -- Name: idx_keeptradecut_rankings_pid_qb_type_d; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -6663,6 +6717,13 @@ CREATE UNIQUE INDEX idx_scoring_format_player_seasonlogs_pid_year_hash ON public
 
 
 --
+-- Name: idx_users_invite_code; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_users_invite_code ON public.users USING btree (invite_code);
+
+
+--
 -- Name: nfl_year_week_timestamp_year_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -6681,6 +6742,14 @@ CREATE INDEX player_name_search_idx ON public.player USING gin (name_search_vect
 --
 
 CREATE TRIGGER player_name_search_vector_update BEFORE INSERT OR UPDATE ON public.player FOR EACH ROW EXECUTE FUNCTION public.player_name_search_vector_update();
+
+
+--
+-- Name: invite_codes invite_codes_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.invite_codes
+    ADD CONSTRAINT invite_codes_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(id);
 
 
 --

@@ -116,6 +116,11 @@ function* fetchAPI(apiFunction, actions, opts = {}) {
         message = 'Canceled request — took longer than 40 seconds'
       }
 
+      const is_server_error = err.message.includes('Error')
+      if (!is_server_error) {
+        message = err.message
+      }
+
       yield put(notificationActions.show({ severity: 'error', message }))
       Bugsnag.notify(err, (event) => {
         event.addMetadata('options', opts)
