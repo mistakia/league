@@ -48,14 +48,15 @@ export const appActions = {
     type: appActions.LOGOUT
   }),
 
-  register: ({ email, username, password, leagueId, teamId }) => ({
+  register: ({ email, username, password, leagueId, teamId, invite_code }) => ({
     type: appActions.REGISTER,
     payload: {
       email,
       username,
       password,
       leagueId,
-      teamId
+      teamId,
+      invite_code
     }
   }),
 
