@@ -127,11 +127,13 @@ const create_keeptradecut_definition = (type) => ({
       type: constants.KEEPTRADECUT[type.toUpperCase()],
       ...args
     }),
-  year_select: ({ splits, table_name }) => {
+  year_select: ({ splits, table_name, year_offset }) => {
     if (splits.includes('week')) {
       return `nfl_year_week_timestamp.year`
     }
-    return `EXTRACT(YEAR FROM TO_TIMESTAMP(${table_name}.d))`
+    return year_offset
+      ? `EXTRACT(YEAR FROM TO_TIMESTAMP(${table_name}.d)) - ${year_offset}`
+      : `EXTRACT(YEAR FROM TO_TIMESTAMP(${table_name}.d))`
   },
   week_select: () => `nfl_year_week_timestamp.week`,
   supported_splits: ['year', 'week']
