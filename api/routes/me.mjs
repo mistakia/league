@@ -37,6 +37,10 @@ const email_validator = v.compile(email_schema)
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
+    if (!req.auth || !req.auth.userId) {
+      return res.status(401).send({ error: 'missing auth token' })
+    }
+
     const users = await db('users').where({ id: req.auth.userId })
     const user = users[0]
     if (!user) {

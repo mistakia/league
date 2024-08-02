@@ -32,7 +32,7 @@ router.post('/login', async (req, res) => {
       return res.status(400).send({ error: 'invalid params' })
     }
 
-    const token = jwt.sign({ user_id: user.id }, config.jwt.secret)
+    const token = jwt.sign({ userId: user.id }, config.jwt.secret)
     res.json({ token, user_id: user.id })
   } catch (err) {
     logger(err)
