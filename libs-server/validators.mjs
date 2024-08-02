@@ -176,3 +176,30 @@ const short_url_schema = {
 }
 
 export const short_url_validator = v.compile(short_url_schema)
+
+const username_schema = {
+  username: {
+    type: 'string',
+    min: 3,
+    max: 20,
+    pattern: /^[a-zA-Z0-9_]+$/,
+    messages: {
+      stringPattern:
+        "The '{field}' field must contain only alphanumeric characters and underscores"
+    }
+  }
+}
+
+export const username_validator = v.compile(username_schema)
+
+const email_schema = {
+  email: {
+    type: 'string',
+    pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
+    messages: {
+      stringPattern: 'Invalid email address'
+    }
+  }
+}
+
+export const email_validator = v.compile(email_schema)

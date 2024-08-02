@@ -1,38 +1,10 @@
 import express from 'express'
 import bcrypt from 'bcrypt'
-import Validator from 'fastest-validator'
 
 import { constants, groupBy } from '#libs-shared'
+import { validators } from '#libs-server'
 
-const v = new Validator({ haltOnFirstError: true })
 const router = express.Router()
-
-const username_schema = {
-  username: {
-    type: 'string',
-    min: 3,
-    max: 20,
-    pattern: /^[a-zA-Z0-9_]+$/,
-    messages: {
-      stringPattern:
-        "The '{field}' field must contain only alphanumeric characters and underscores"
-    }
-  }
-}
-
-const username_validator = v.compile(username_schema)
-
-const email_schema = {
-  email: {
-    type: 'string',
-    pattern: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-    messages: {
-      stringPattern: 'Invalid email address'
-    }
-  }
-}
-
-const email_validator = v.compile(email_schema)
 
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
@@ -179,7 +151,7 @@ router.put('/?', async (req, res) => {
     }
 
     if (type === 'username') {
-      const result = username_validator({ username: value })
+      const result = validators.username_validator({ username: value })
       if (result !== true) {
         return res.status(400).send({ error: result[0].message })
       }
@@ -191,9 +163,14 @@ router.put('/?', async (req, res) => {
     }
 
     if (type === 'email') {
-      const result = email_validator({ email: value })
+      const result = validators.email_validator({ email: value })
       if (result !== true) {
         return res.status(400).send({ error: result[0].message })
+      }
+
+      const existing_user = await db('users').where({ email: value }).first()
+      if (existing_user) {
+        return res.status(400).send({ error: 'email already taken' })
       }
     }
 

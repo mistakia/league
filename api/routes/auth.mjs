@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 
 import { constants } from '#libs-shared'
-import { getLeague, sendEmail } from '#libs-server'
+import { getLeague, sendEmail, validators } from '#libs-server'
 
 const router = express.Router()
 
@@ -49,21 +49,20 @@ router.post('/register', async (req, res) => {
     const teamId = req.body.teamId ? parseInt(req.body.teamId, 10) : null
     const leagueId = req.body.leagueId ? parseInt(req.body.leagueId, 10) : null
 
-    if (!email) {
-      return res.status(400).send({ error: 'missing email param' })
-    }
-
     if (!password) {
       return res.status(400).send({ error: 'missing password param' })
     }
 
-    if (email.length > 60) {
-      return res.status(400).send({ error: 'email too long' })
-    }
+    if (email) {
+      const result = validators.email_validator({ email })
+      if (result !== true) {
+        return res.status(400).send({ error: result[0].message })
+      }
 
-    const emailExists = await db('users').where({ email })
-    if (emailExists.length) {
-      return res.status(400).send({ error: 'email exists' })
+      const emailExists = await db('users').where({ email })
+      if (emailExists.length) {
+        return res.status(400).send({ error: 'email exists' })
+      }
     }
 
     if (!username) {
@@ -79,12 +78,9 @@ router.post('/register', async (req, res) => {
       }
     }
 
-    if (username.length < 3) {
-      return res.status(400).send({ error: 'username too short' })
-    }
-
-    if (username.length > 60) {
-      return res.status(400).send({ error: 'username too long' })
+    const result = validators.username_validator({ username })
+    if (result !== true) {
+      return res.status(400).send({ error: result[0].message })
     }
 
     const usernameExists = await db('users').where({ username })
