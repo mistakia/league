@@ -43,6 +43,7 @@ const AuthPage = ({ location, login, register, is_pending, auth_error }) => {
     ) {
       data.email = event.target.email.value
       data.username = event.target.username.value
+      data.invite_code = event.target.invite_code.value
       register(data)
     }
   }
@@ -67,7 +68,6 @@ const AuthPage = ({ location, login, register, is_pending, auth_error }) => {
 
   const body = (
     <div className='auth'>
-      <div className='auth__side' />
       <div className='auth__main'>
         <form id='auth' onSubmit={handle_submit}>
           {auth_error}
@@ -98,11 +98,21 @@ const AuthPage = ({ location, login, register, is_pending, auth_error }) => {
           ) : (
             <>
               <TextField
+                id='invite_code'
+                label='Invite Code'
+                type='text'
+                error={Boolean(auth_error)}
+                variant='outlined'
+                helperText='Available for contributors and testers. Request via discord'
+                required
+              />
+              <TextField
                 id='username'
                 label='Username'
                 type='text'
                 error={Boolean(auth_error)}
                 variant='outlined'
+                required
               />
               <TextField
                 id='email'
@@ -136,13 +146,17 @@ const AuthPage = ({ location, login, register, is_pending, auth_error }) => {
               variant='outlined'
             />
           )}
-          <Button type='submit' is_loading={is_pending}>
+          <Button
+            type='submit'
+            is_loading={is_pending}
+            className='auth__button'
+          >
             {menu}
           </Button>
         </form>
-        <Button className='auth__toggle' text onClick={handle_click}>
-          {menu === 'register' ? 'login' : 'register'}
-        </Button>
+        <div className='auth__toggle' onClick={handle_click}>
+          {menu === 'register' ? 'Login' : 'Create account'}
+        </div>
       </div>
     </div>
   )
