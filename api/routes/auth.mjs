@@ -115,7 +115,7 @@ router.post('/register', async (req, res) => {
         password: hashedPassword,
         username
       })
-      .returning('uid')
+      .returning('id')
     const userId = users[0].id
 
     if (leagueId && teamId) {
