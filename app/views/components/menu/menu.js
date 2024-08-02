@@ -181,7 +181,7 @@ export default function AppMenu({
                 ) : (
                   <NavLink to='/login'>Login</NavLink>
                 )}
-                <NavLink to='/settings'>Settings</NavLink>
+                {is_logged_in && <NavLink to='/settings'>Settings</NavLink>}
               </div>
             </div>
             <div className='menu__section'>
