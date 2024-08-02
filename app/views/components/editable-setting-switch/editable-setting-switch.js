@@ -4,14 +4,14 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import Switch from '@mui/material/Switch'
 import Grid from '@mui/material/Grid'
 
-export default function EditableTeamSwitch({
-  team,
+export default function EditableSettingSwitch({
+  data,
   field,
   label,
   description,
   onchange
 }) {
-  const [checked, set_checked] = useState(Boolean(team[field]))
+  const [checked, set_checked] = useState(Boolean(data[field]))
 
   const handleChange = (event) => {
     const { checked } = event.target
@@ -30,8 +30,8 @@ export default function EditableTeamSwitch({
   )
 }
 
-EditableTeamSwitch.propTypes = {
-  team: ImmutablePropTypes.record,
+EditableSettingSwitch.propTypes = {
+  data: PropTypes.oneOfType([ImmutablePropTypes.record, PropTypes.object]),
   field: PropTypes.string,
   onchange: PropTypes.func,
   label: PropTypes.string,

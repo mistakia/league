@@ -199,7 +199,7 @@ export function* init({ payload }) {
     const leagueId = (payload.data.leagues[0] || {}).uid
     yield fork(loadTeamPlayers, { payload: { teamId, leagueId } })
   }
-  yield fork(getBaselines, { leagueId: league.uid })
+  if (league.uid) yield fork(getBaselines, { leagueId: league.uid })
   if (app.teamId) yield fork(fetchCutlist)
 
   const { watchlist } = payload.data.user

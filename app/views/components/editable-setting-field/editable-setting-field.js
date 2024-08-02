@@ -5,27 +5,42 @@ import Grid from '@mui/material/Grid'
 
 import TextField from '@mui/material/TextField'
 
-export default function EditableTeamField({
-  team,
+export default function EditableSettingField({
+  data,
   field,
   onchange,
   limit,
   label,
-  grid = { xs: 6, sm: 3 }
+  grid = { xs: 6, sm: 3 },
+  default_helper_text = '',
+  validation = null
 }) {
-  const [value, set_value] = useState(team[field])
+  const [value, set_value] = useState(data[field])
   const [invalid, set_invalid] = useState(false)
-  const [helper_text, set_helper_text] = useState('')
+  const [helper_text, set_helper_text] = useState(default_helper_text)
+
+  const validate_value = (value) => {
+    if (validation) {
+      const { is_valid, error_message } = validation(value)
+      set_invalid(!is_valid)
+      set_helper_text(is_valid ? default_helper_text : error_message)
+      return is_valid
+    }
+
+    set_invalid(false)
+    set_helper_text(default_helper_text)
+    return true
+  }
 
   const handleBlur = (event) => {
     const { value } = event.target
-    const defaultValue = team[field]
+    const defaultValue = data[field]
 
     if (!value) {
       return set_value(defaultValue)
     }
 
-    if (value !== defaultValue && !invalid) {
+    if (value !== defaultValue && validate_value(value)) {
       onchange({ field, value })
     }
   }
@@ -40,8 +55,7 @@ export default function EditableTeamField({
       return
     }
 
-    set_invalid(false)
-    set_helper_text('')
+    validate_value(value)
   }
 
   return (
@@ -61,11 +75,13 @@ export default function EditableTeamField({
   )
 }
 
-EditableTeamField.propTypes = {
-  team: ImmutablePropTypes.record,
+EditableSettingField.propTypes = {
+  data: PropTypes.oneOfType([ImmutablePropTypes.record, PropTypes.object]),
   field: PropTypes.string,
   onchange: PropTypes.func,
   limit: PropTypes.number,
   label: PropTypes.string,
-  grid: PropTypes.object
+  grid: PropTypes.object,
+  validation: PropTypes.func,
+  default_helper_text: PropTypes.string
 }

@@ -8,7 +8,7 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import IconButton from '@mui/material/IconButton'
 import AddCircleOutlineIcon from '@mui/icons-material/AddCircleOutline'
 
-import EditableTeamField from '@components/editable-team-field'
+import EditableSettingField from '@components/editable-setting-field'
 import SettingsTeamsTeamPlayer from '@components/settings-teams-team-player'
 
 import Button from '@components/button'
@@ -79,11 +79,11 @@ export default class SettingsTeamsTeam extends React.Component {
           </div>
         </AccordionSummary>
         <AccordionDetails>
-          <EditableTeamField
+          <EditableSettingField
             label='Team Name'
             field='name'
             limit={100}
-            team={this.props.team}
+            data={this.props.team}
             onchange={this.onChange}
           />
           <div className='heading__section-title'>

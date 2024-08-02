@@ -11,9 +11,11 @@ import {
   players_table_views_actions,
   default_players_table_views
 } from '@core/players-table-views'
+import { create_user_record, User } from './user'
 
 const initialState = new Record({
   token: null,
+  user: new User(),
   userId: 0,
   clientId: uuidv4(),
   year: constants.year,
@@ -22,9 +24,6 @@ const initialState = new Record({
   isPending: true,
   isUpdating: false,
   authError: null,
-  email: null,
-  text: 0,
-  voice: 0,
   teamIds: new List(),
   leagueIds: new List([constants.DEFAULTS.LEAGUE_ID]),
 
@@ -103,9 +102,7 @@ export function appReducer(state = initialState(), { payload, type }) {
 
         state.merge({
           userId: payload.data.user.id,
-          email: payload.data.user.eamil,
-          text: payload.data.user.text,
-          voice: payload.data.user.voice,
+          user: create_user_record(payload.data.user),
           teamIds: new List(payload.data.teams.map((t) => t.uid)),
           leagueIds: new List(payload.data.leagues.map((l) => l.uid)),
           isPending: false
