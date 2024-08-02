@@ -184,7 +184,7 @@ const process_scoring_format = async ({
   if (pointsInserts.length) {
     await db('scoring_format_player_projection_points')
       .del()
-      .where({ scoring_format_hash })
+      .where({ scoring_format_hash, year })
     await batch_insert({
       items: pointsInserts,
       save: (items) =>
