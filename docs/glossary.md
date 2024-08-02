@@ -70,57 +70,57 @@
 
 ### Passing
 
-| Abbrev         | Name                                     | Description                                                                                                                                                                                                                           | Status    | Since |
-| -------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ----- |
-| aCOMP%         | Adjusted Completion Percentage           | ((Completions + Drops) / (Attempts - Throw Aways - Spikes - Batted Passes - Hit As Thrown))                                                                                                                                           | Planned   | 2020  |
-| POC            | Average Pocket Size                      | Average distance in yards between the QB and the closest defender when the ball left his hand.                                                                                                                                        | Planned   | 2020  |
-| AGG%           | Aggressive Rate                          | Percentage of passing attempts a quarterback makes that are into tight coverage, where there is a defender within 1 yard or less of the receiver at the time of completion or incompletion                                            | Planned   | 2020  |
-| AVSK           | Avoided Sack                             | -                                                                                                                                                                                                                                     | Planned   | 2020  |
-| AY             | Air Yards                                | Distance the ball traveled through the air relative to the line of scrimmage                                                                                                                                                          | Available | 2019  |
-| AY%            | Air Yards Percentage                     | Percent of passing yards gained through Air-Yards                                                                                                                                                                                     | Planned   | 2019  |
-| AY/A           | Air Yards Per Attempt                    | Total air yards divided by total passing attempts                                                                                                                                                                                     | Available | 2019  |
-| aY/A           | Adjusted Yards Per Attempt               | Modified yards per attempt incorporates a premium for touchdowns and a discount for interceptions. This stat was introduced and fully outlined in the book The Hidden Game of Football by Bob Carroll, Pete Palmer, and John Thorn.   | Planned   | 2000  |
-| AYD            | Average Air Yards Differential           | Calculated by subtracting the passer’s average Intended Air Yards from his average Completed Air Yards.                                                                                                                               | Planned   | 2019  |
-| BAD%           | Bad Throw Rate                           | Percentage of poor throws per pass attempt, excluding spikes and throwaways                                                                                                                                                           | Planned   | 2020  |
-| CAY            | Completed Air Yards                      | Distance the ball traveled through the air relative to the line of scrimmage on completions                                                                                                                                           | Planned   | 2019  |
-| CAY/C          | Completed Air Yards Per Completion       | -                                                                                                                                                                                                                                     | Available | 2019  |
-| CCOMP%         | Clean Completion Rate                    | Completion percentage on passing attempts in a clean pocket                                                                                                                                                                           | Planned   | 2019  |
-| CPOE           | Completion Percentage Over Expectation   | A passer’s actual completion percentage compared to their Expected Completion Percentage (XPC%).                                                                                                                                      | Planned   | 2000  |
-| CTH%           | Catchable Rate                           | Percentage of passing attempts that were deemed catchable                                                                                                                                                                             | Planned   | 2020  |
-| DAY            | Dropped Air Yards                        | Total number of air yards on dropped passes                                                                                                                                                                                           | Available | 2019  |
-| DB             | Dropbacks                                | the number of times the QB dropped back to pass                                                                                                                                                                                       | Planned   | 2000  |
-| DBP%           | Dropback Pressure Rate                   | Percentage of dropbacks when under pressure                                                                                                                                                                                           | Planned   | 2019  |
-| DTD            | Dropped Touchdowns                       | Passing attempts that would have resulted in a touchdown but were dropped by the receiver                                                                                                                                             | Planned   | 2019  |
-| DOT            | Depth of Target                          | Average depth of each of the quarterbacks pass attempts                                                                                                                                                                               | Available | 2019  |
-| DEEP%          | Deep Rate                                | Percentage of passing attempts that travel 20 yards or farther down the line of scrimmage                                                                                                                                             | Planned   | 2019  |
-| aDCOMP%        | Adjusted Deep Completion Rate            | Percentage of deep passing attempts completed                                                                                                                                                                                         | Planned   | 2000  |
-| FP/A           | Fantasy Points Per Attempt               | Fantasy points generated per passing attempt                                                                                                                                                                                          | Planned   | 2000  |
-| INT%           | Int Rate                                 | The percentage of attempts that result in an interception                                                                                                                                                                             | Available | 2000  |
-| LEFT%          | Left Rate                                | Percentage of throws to the left of the hashmarks                                                                                                                                                                                     | Planned   | 2006  |
-| MED%           | Medium Rate                              | Percentage of throws where the depth of target is between 10 and 19 yards                                                                                                                                                             | Planned   | 2019  |
-| MT             | Money Throw                              | A completed passs requiring exceptional skill or athleticism as well as critical completions in clutch moments during the game.                                                                                                       | Planned   | 2019  |
-| MT%            | Money Throw Rate                         | Percentage of passing attempts resuling in money throws                                                                                                                                                                               | Planned   | 2019  |
-| NY/A           | Net Yards Gained Per Attempt             | (Total passing yards - sack yards) / (total number of passing attempts and sacks)                                                                                                                                                     | Available | 2000  |
-| aNY/A          | Adjusted Net Yards Per Attempt           | (Passing Yards - Sack Yards + (20 _ Passing TD) - (45 _ Interceptions)) / (Passes Attempted + Times Sacked)                                                                                                                           | Planned   | 2000  |
-| PACR           | Passer Air Conversion Ratio              | total completed air yards / total air yards                                                                                                                                                                                           | Available | 2019  |
-| PAC%           | Play Action Completion Rate              | Completion percentage on play action passing attempts                                                                                                                                                                                 | Planned   | 2019  |
-| PCOMP%         | Pressured Completion Rate                | Completion percentage on pressured passing attempts                                                                                                                                                                                   | Planned   | 2019  |
-| PPE            | Pass Points Earned                       | -                                                                                                                                                                                                                                     | Planned   | 2000  |
-| RIGHT%         | Right Rate                               | Percentage of throws to the right of the hashmarks                                                                                                                                                                                    | Planned   | 2006  |
-| RQBR           | Receiver QB Rating                       | The quarterbacks traditional Passer Rating on throws when targeting the receiver.                                                                                                                                                     | Planned   | 2000  |
-| SHT%           | Short Rate                               | Percentage of throws where the depth of target is under 10 yards                                                                                                                                                                      | Planned   | 2020  |
-| SKY            | Sack Yards                               | Total yards lost on sacks                                                                                                                                                                                                             | Available | 2000  |
-| SUCC%          | Success Rate                             | Percentage of passing plays deemed 'Successful': 40% of yards-to-go are gained on 1st down; 60% of yards-to-go on 2nd down; or 100% of yards-to-go on 3rd & 4th down. The formula changes slightly in the 4th quarter of close games. | Planned   | 2000  |
-| TA             | Throw Away                               | Passes intentionally thrown out of play.                                                                                                                                                                                              | Planned   | 2020  |
-| BAT            | Batted Passes                            | the number of passes batted or deflected at the line of scrimage                                                                                                                                                                      | Planned   | 2020  |
-| true_air_yards | True Air Yards                           | Distance ball travels in the air from point of throw to a receivers hands; back of endzone or sideline                                                                                                                                | Planned   | 2019  |
-| TD%            | TD Rate                                  | The percentage of attempts that result in passing touchdowns                                                                                                                                                                          | Available | 2000  |
-| TT             | Time To Throw                            | Average amount of time elapsed from the time of snap to throw on every pass attempt for a passer (sacks excluded)                                                                                                                     | Planned   | 2020  |
-| TPRS           | Time To Pressure                         | Average amount of time elapsed from the time of the snap to when the QB starts to feel pressure                                                                                                                                       | Planned   | 2020  |
-| XPC%           | Expected Completion Percentage           | Using the average completion percentage for a given play, determine what a passer's completion percentage is expected to be                                                                                                           | Planned   | 2000  |
-| YAC/C          | Yards After Catch Per Completion (YAC/C) | -                                                                                                                                                                                                                                     | Available | 2019  |
-| Y/A            | Yards Per Attempt                        | Total passing yards divided by total passing attempts                                                                                                                                                                                 | Available | 2000  |
-| Y/C            | Yards Per Completion                     | Total passing yards divided by total passing completions                                                                                                                                                                              | Planned   | 2000  |
+| Abbrev         | Name                                     | Description                                                                                                                                                                                                                           | Status    | Since      |
+| -------------- | ---------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ---------- |
+| aCOMP%         | Adjusted Completion Percentage           | ((Completions + Drops) / (Attempts - Throw Aways - Spikes - Batted Passes - Hit As Thrown))                                                                                                                                           | Planned   | 2020       |
+| POC            | Average Pocket Size                      | Average distance in yards between the QB and the closest defender when the ball left his hand.                                                                                                                                        | Planned   | 2020       |
+| AGG%           | Aggressive Rate                          | Percentage of passing attempts a quarterback makes that are into tight coverage, where there is a defender within 1 yard or less of the receiver at the time of completion or incompletion                                            | Planned   | 2020       |
+| AVSK           | Avoided Sack                             | -                                                                                                                                                                                                                                     | Planned   | 2020       |
+| AY             | Air Yards                                | Distance the ball traveled through the air relative to the line of scrimmage                                                                                                                                                          | Available | 2019       |
+| AY%            | Air Yards Percentage                     | Percent of passing yards gained through Air-Yards                                                                                                                                                                                     | Planned   | 2019       |
+| AY/A           | Air Yards Per Attempt                    | Total air yards divided by total passing attempts                                                                                                                                                                                     | Available | 2019       |
+| aY/A           | Adjusted Yards Per Attempt               | Modified yards per attempt incorporates a premium for touchdowns and a discount for interceptions. This stat was introduced and fully outlined in the book The Hidden Game of Football by Bob Carroll, Pete Palmer, and John Thorn.   | Planned   | 2000       |
+| AYD            | Average Air Yards Differential           | Calculated by subtracting the passer’s average Intended Air Yards from his average Completed Air Yards.                                                                                                                               | Planned   | 2019       |
+| BAD%           | Bad Throw Rate                           | Percentage of poor throws per pass attempt, excluding spikes and throwaways                                                                                                                                                           | Planned   | 2020       |
+| CAY            | Completed Air Yards                      | Distance the ball traveled through the air relative to the line of scrimmage on completions                                                                                                                                           | Planned   | 2019       |
+| CAY/C          | Completed Air Yards Per Completion       | -                                                                                                                                                                                                                                     | Available | 2019       |
+| CCOMP%         | Clean Completion Rate                    | Completion percentage on passing attempts in a clean pocket                                                                                                                                                                           | Planned   | 2019       |
+| CPOE           | Completion Percentage Over Expectation   | A passer’s actual completion percentage compared to their Expected Completion Percentage (XPC%).                                                                                                                                      | Planned   | 2000       |
+| CTH%           | Catchable Rate                           | Percentage of passing attempts that were deemed catchable                                                                                                                                                                             | Planned   | 2020       |
+| DAY            | Dropped Air Yards                        | Total number of air yards on dropped passes                                                                                                                                                                                           | Available | 2019       |
+| DB             | Dropbacks                                | the number of times the QB dropped back to pass                                                                                                                                                                                       | Planned   | 2000       |
+| DBP%           | Dropback Pressure Rate                   | Percentage of dropbacks when under pressure                                                                                                                                                                                           | Planned   | 2019       |
+| DTD            | Dropped Touchdowns                       | Passing attempts that would have resulted in a touchdown but were dropped by the receiver                                                                                                                                             | Planned   | 2019       |
+| DOT            | Depth of Target                          | Average depth of each of the quarterbacks pass attempts                                                                                                                                                                               | Available | 2019       |
+| DEEP%          | Deep Rate                                | Percentage of passing attempts that travel 20 yards or farther down the line of scrimmage                                                                                                                                             | Planned   | 2019       |
+| aDCOMP%        | Adjusted Deep Completion Rate            | Percentage of deep passing attempts completed                                                                                                                                                                                         | Planned   | 2000       |
+| FP/A           | Fantasy Points Per Attempt               | Fantasy points generated per passing attempt                                                                                                                                                                                          | Planned   | 2000       |
+| INT%           | Int Rate                                 | The percentage of attempts that result in an interception                                                                                                                                                                             | Available | 2000       |
+| LEFT%          | Left Rate                                | Percentage of throws to the left of the hashmarks                                                                                                                                                                                     | Planned   | 2006       |
+| MED%           | Medium Rate                              | Percentage of throws where the depth of target is between 10 and 19 yards                                                                                                                                                             | Planned   | 2019       |
+| MT             | Money Throw                              | A completed passs requiring exceptional skill or athleticism as well as critical completions in clutch moments during the game.                                                                                                       | Planned   | 2019       |
+| MT%            | Money Throw Rate                         | Percentage of passing attempts resuling in money throws                                                                                                                                                                               | Planned   | 2019       |
+| NY/A           | Net Yards Gained Per Attempt             | (Total passing yards - sack yards) / (total number of passing attempts and sacks)                                                                                                                                                     | Available | 2000       |
+| aNY/A          | Adjusted Net Yards Per Attempt           | (Passing Yards - Sack Yards + (20 _ Passing TD) - (45 _ Interceptions)) / (Passes Attempted + Times Sacked)                                                                                                                           | Planned   | 2000       |
+| PACR           | Passer Air Conversion Ratio              | total completed air yards / total air yards                                                                                                                                                                                           | Available | 2019       |
+| PAC%           | Play Action Completion Rate              | Completion percentage on play action passing attempts                                                                                                                                                                                 | Planned   | 2019       |
+| PCOMP%         | Pressured Completion Rate                | Completion percentage on pressured passing attempts                                                                                                                                                                                   | Planned   | 2019       |
+| PPE            | Pass Points Earned                       | -                                                                                                                                                                                                                                     | Planned   | 2000       |
+| RIGHT%         | Right Rate                               | Percentage of throws to the right of the hashmarks                                                                                                                                                                                    | Planned   | 2006       |
+| RQBR           | Receiver QB Rating                       | The quarterbacks traditional Passer Rating on throws when targeting the receiver.                                                                                                                                                     | Planned   | 2000       |
+| SHT%           | Short Rate                               | Percentage of throws where the depth of target is under 10 yards                                                                                                                                                                      | Planned   | 2020       |
+| SKY            | Sack Yards                               | Total yards lost on sacks                                                                                                                                                                                                             | Available | 2000       |
+| SUCC%          | Success Rate                             | Percentage of passing plays deemed 'Successful': 40% of yards-to-go are gained on 1st down; 60% of yards-to-go on 2nd down; or 100% of yards-to-go on 3rd & 4th down. The formula changes slightly in the 4th quarter of close games. | Planned   | 2000       |
+| TA             | Throw Away                               | Passes intentionally thrown out of play.                                                                                                                                                                                              | Planned   | 2020       |
+| BAT            | Batted Passes                            | the number of passes batted or deflected at the line of scrimage                                                                                                                                                                      | Planned   | 2020       |
+| true_air_yards | True Air Yards                           | Distance ball travels in the air from point of throw to a receivers hands; back of endzone or sideline                                                                                                                                | 23.42%    | 2021/09/10 |
+| TD%            | TD Rate                                  | The percentage of attempts that result in passing touchdowns                                                                                                                                                                          | Available | 2000       |
+| TT             | Time To Throw                            | Average amount of time elapsed from the time of snap to throw on every pass attempt for a passer (sacks excluded)                                                                                                                     | Planned   | 2020       |
+| TPRS           | Time To Pressure                         | Average amount of time elapsed from the time of the snap to when the QB starts to feel pressure                                                                                                                                       | Planned   | 2020       |
+| XPC%           | Expected Completion Percentage           | Using the average completion percentage for a given play, determine what a passer's completion percentage is expected to be                                                                                                           | Planned   | 2000       |
+| YAC/C          | Yards After Catch Per Completion (YAC/C) | -                                                                                                                                                                                                                                     | Available | 2019       |
+| Y/A            | Yards Per Attempt                        | Total passing yards divided by total passing attempts                                                                                                                                                                                 | Available | 2000       |
+| Y/C            | Yards Per Completion                     | Total passing yards divided by total passing completions                                                                                                                                                                              | Planned   | 2000       |
 
 ### Rushing
 
@@ -204,21 +204,21 @@
 | column                  | name                    | description                                                                       | coverage | since      |
 | ----------------------- | ----------------------- | --------------------------------------------------------------------------------- | -------- | ---------- |
 | desc                    | Description             | Text description of the play                                                      | 100.00%  | 2001/01/06 |
-| motion                  | Motion Type             | Type of motion: Pre-snap (P), during the snap (S), or both (PS)                   | -        | -          |
+| motion                  | Motion Type             | Type of motion: Pre-snap (P), during the snap (S), or both (PS)                   | 92.07%   | 2022/09/08 |
 | timestamp               | Timestamp               | Timestamp of the play                                                             | 99.11%   | 2001/01/06 |
 | pos_team                | Possession Team         | Team in possession of the ball                                                    | 99.99%   | 2001/01/06 |
 | pos_team_id             | Possession Team ID      | ID of the team in possession                                                      | 99.38%   | 2002/08/03 |
-| off                     | Offense                 | Abbreviation for the offensive team                                               | 99.33%   | 2001/01/06 |
-| def                     | Defense                 | Abbreviation for the defensive team                                               | 99.33%   | 2001/01/06 |
-| trick_play              | Trick Play              | Indicator if the play was a trick play                                            | 23.42%   | 2021/09/10 |
+| off                     | Offense                 | Abbreviation for the offensive team                                               | 99.99%   | 2001/01/06 |
+| def                     | Defense                 | Abbreviation for the defensive team                                               | 99.99%   | 2001/01/06 |
+| trick_play              | Trick Play              | Indicator if the play was a trick play                                            | 83.19%   | 2021/09/10 |
 | mbt                     | Missed or Broken Tackle | Indicator if the tackle was missed or broken                                      | 23.42%   | 2021/09/10 |
 | oob                     | Out of Bounds           | Indicator if the play ended out of bounds                                         | 55.59%   | 2001/09/09 |
 | pen_team                | Penalty Team            | Team that was penalized                                                           | 58.10%   | 2002/09/05 |
 | pen_yds                 | Penalty Yards           | Yards gained by the team after the penalty                                        | 55.55%   | 2001/09/09 |
 | penalty                 | Penalty                 | Indicator if the play was a penalty                                               | 99.11%   | 2001/01/06 |
-| ret_td                  | Return Touchdown        | Indicator if the return was a touchdown                                           | 20.00%   | 2001/01/06 |
+| ret_td                  | Return Touchdown        | Indicator if the return was a touchdown                                           | 20.11%   | 2001/01/06 |
 | ret_tm                  | Return Team             | Team that was returned to                                                         | -        | -          |
-| ret_yds                 | Return Yards            | Yards gained by the team after the return                                         | 83.71%   | 2001/01/06 |
+| ret_yds                 | Return Yards            | Yards gained by the team after the return                                         | 84.19%   | 2001/01/06 |
 | stunt                   | Stunt                   | stunt, when any two pass rushers cross, trading pass rush lanes on a passing down | 23.42%   | 2021/09/10 |
 | tfl                     | Tackle For Loss         | Indicator if the tackle was for loss                                              | 55.59%   | 2001/09/09 |
 | to                      | Timeout                 | Indicator if the play was a timeout                                               | 55.59%   | 2001/09/09 |
@@ -235,50 +235,50 @@
 | oopd               | Out of Pocket Details    | Details about the quarterback being out of the pocket                                                                                                                                                                                                                                                  | 23.42%   | 2021/09/10 |
 | avsk               | Avoided Sacks            | Number of sacks avoided by the quarterback                                                                                                                                                                                                                                                             | 23.42%   | 2021/09/10 |
 | batted_pass        | Batted Pass              | Indicator if the pass was batted down by a defender                                                                                                                                                                                                                                                    | 23.42%   | 2021/09/10 |
-| catchable_ball     | Catchable Ball           | Indicator if the pass was a catchable ball                                                                                                                                                                                                                                                             | 23.42%   | 2021/09/10 |
-| contested_ball     | Contested Ball           | Indicator if the pass was contested                                                                                                                                                                                                                                                                    | 23.42%   | 2021/09/10 |
+| catchable_ball     | Catchable Ball           | Indicator if the pass was a catchable ball                                                                                                                                                                                                                                                             | 83.19%   | 2021/09/10 |
+| contested_ball     | Contested Ball           | Indicator if the pass was contested                                                                                                                                                                                                                                                                    | 83.19%   | 2021/09/10 |
 | phyb               | Physical Ball            | Indicator if the pass was a physical ball                                                                                                                                                                                                                                                              | 23.42%   | 2021/09/10 |
-| created_reception  | Created Reception        | Indicator if the reception was exceptional                                                                                                                                                                                                                                                             | 23.42%   | 2021/09/10 |
-| dot                | Depth of Target          | Distance the ball traveled to the receiver                                                                                                                                                                                                                                                             | 91.09%   | 2001/01/06 |
-| dropped_pass       | Dropped Pass             | Indicator if the pass was dropped by the receiver                                                                                                                                                                                                                                                      | 23.42%   | 2021/09/10 |
+| created_reception  | Created Reception        | Indicator if the reception was exceptional                                                                                                                                                                                                                                                             | 83.19%   | 2021/09/10 |
+| dot                | Depth of Target          | Distance the ball traveled to the receiver                                                                                                                                                                                                                                                             | 91.75%   | 2001/01/06 |
+| dropped_pass       | Dropped Pass             | Indicator if the pass was dropped by the receiver                                                                                                                                                                                                                                                      | 83.19%   | 2021/09/10 |
 | highlight_pass     | Highlight Pass           | Indicator if the pass was a highlight pass                                                                                                                                                                                                                                                             | 23.42%   | 2021/09/10 |
 | hindered_pass      | Hindered Throw Motion    | Indicator if the throwing motion was hindered                                                                                                                                                                                                                                                          | 23.42%   | 2021/09/10 |
-| int_worthy         | Interception Worthy      | A bad pass that is interceptable as determined by a video scout. An interception worthy throw is not always an INT. Perhaps the defender muffs the opportunity. Also, not every INT is a interception worthy throw. Ex: a catchable ball bouncing off a receivers chest, into the hands of a defender. | 23.42%   | 2021/09/10 |
-| play_action        | Play Action Pass         | Indicator if the pass was a play action pass                                                                                                                                                                                                                                                           | 23.42%   | 2021/09/10 |
-| out_of_pocket_pass | Out of Pocket Pass       | Indicator if the pass was out of pocket                                                                                                                                                                                                                                                                | 23.42%   | 2021/09/10 |
+| int_worthy         | Interception Worthy      | A bad pass that is interceptable as determined by a video scout. An interception worthy throw is not always an INT. Perhaps the defender muffs the opportunity. Also, not every INT is a interception worthy throw. Ex: a catchable ball bouncing off a receivers chest, into the hands of a defender. | 83.19%   | 2021/09/10 |
+| play_action        | Play Action Pass         | Indicator if the pass was a play action pass                                                                                                                                                                                                                                                           | 83.19%   | 2021/09/10 |
+| out_of_pocket_pass | Out of Pocket Pass       | Indicator if the pass was out of pocket                                                                                                                                                                                                                                                                | 83.19%   | 2021/09/10 |
 | pass               | Pass Play                | Indicator if the play was a pass attempt (includes sacks)                                                                                                                                                                                                                                              | 55.59%   | 2001/09/09 |
-| pass_td            | Pass Touchdown           | Indicator if the pass was a touchdown                                                                                                                                                                                                                                                                  | 95.66%   | 2001/01/06 |
-| pass_yds           | Pass Yards               | Pass yards attributed to the quarterback                                                                                                                                                                                                                                                               | 99.33%   | 2001/01/06 |
-| qb_hit             | Quarterback Hit          | Indicator if the quarterback was hit by the pass                                                                                                                                                                                                                                                       | 100.00%  | 2001/01/06 |
-| qb_hurry           | Quarterback Hurry        | Indicator if the quarterback was hurried by the pass                                                                                                                                                                                                                                                   | 100.00%  | 2001/01/06 |
-| qb_pressure        | Quarterback Pressure     | Indicator if the quarterback was pressed by the pass                                                                                                                                                                                                                                                   | 100.00%  | 2001/01/06 |
-| qb_pressure_ngs    | Quarterback Pressure NGS | Indicator if the quarterback was pressed by the pass                                                                                                                                                                                                                                                   | 100.00%  | 2001/01/06 |
+| pass_td            | Pass Touchdown           | Indicator if the pass was a touchdown                                                                                                                                                                                                                                                                  | 96.27%   | 2001/01/06 |
+| pass_yds           | Pass Yards               | Pass yards attributed to the quarterback                                                                                                                                                                                                                                                               | 99.99%   | 2001/01/06 |
+| qb_hit             | Quarterback Hit          | Indicator if the quarterback was hit by the pass                                                                                                                                                                                                                                                       | 23.42%   | 2021/09/10 |
+| qb_hurry           | Quarterback Hurry        | Indicator if the quarterback was hurried by the pass                                                                                                                                                                                                                                                   | -        | -          |
+| qb_pressure        | Quarterback Pressure     | Indicator if the quarterback was pressed by the pass                                                                                                                                                                                                                                                   | 23.42%   | 2021/09/10 |
+| qb_pressure_ngs    | Quarterback Pressure NGS | Indicator if the quarterback was pressed by the pass                                                                                                                                                                                                                                                   | 96.96%   | 2016/08/11 |
 | qb_dropback        | Quarterback Dropback     | Indicator if the quarterback dropped back on the play                                                                                                                                                                                                                                                  | 55.59%   | 2001/09/09 |
 | qb_kneel           | Quarterback Kneel        | Indicator if the quarterback kneeled on the play                                                                                                                                                                                                                                                       | 55.59%   | 2001/09/09 |
 | qb_rush            | Quarterback Run          | Indicator if the quarterback ran on the play                                                                                                                                                                                                                                                           | 23.42%   | 2021/09/10 |
 | qb_scramble        | Quarterback Scramble     | Indicator if the quarterback scramble on the play                                                                                                                                                                                                                                                      | 23.42%   | 2021/09/10 |
 | qb_spike           | Quarterback Spike        | Indicator if the quarterback spiked on the play                                                                                                                                                                                                                                                        | 55.59%   | 2001/09/09 |
-| qb_fault_sack      | Quarterback Sack         | Indicator if the quarterback sacked on the play                                                                                                                                                                                                                                                        | 23.42%   | 2021/09/10 |
-| throw_away         | Quarterback Throwaway    | Indicator if the quarterback threw away on the play                                                                                                                                                                                                                                                    | 23.42%   | 2021/09/10 |
-| recv_yds           | Receiver Yards           | Receiver yards attributed to the receiver                                                                                                                                                                                                                                                              | 99.33%   | 2001/01/06 |
-| screen_pass        | Screen Pass              | Indicator if the pass was a screen pass                                                                                                                                                                                                                                                                | 23.42%   | 2021/09/10 |
+| qb_fault_sack      | Quarterback Sack         | Indicator if the quarterback sacked on the play                                                                                                                                                                                                                                                        | 83.19%   | 2021/09/10 |
+| throw_away         | Quarterback Throwaway    | Indicator if the quarterback threw away on the play                                                                                                                                                                                                                                                    | 83.19%   | 2021/09/10 |
+| recv_yds           | Receiver Yards           | Receiver yards attributed to the receiver                                                                                                                                                                                                                                                              | 99.99%   | 2001/01/06 |
+| screen_pass        | Screen Pass              | Indicator if the pass was a screen pass                                                                                                                                                                                                                                                                | 83.19%   | 2021/09/10 |
 | shovel_pass        | Shovel Pass              | Indicator if the pass was a shovel pass                                                                                                                                                                                                                                                                | 23.42%   | 2021/09/10 |
 | sideline_pass      | Sideline Pass            | Indicator if the pass was a sideline pass                                                                                                                                                                                                                                                              | 23.42%   | 2021/09/10 |
-| qb_sneak           | Quarterback Sneak        | Indicator if the quarterback sneaked on the play                                                                                                                                                                                                                                                       | 23.42%   | 2021/09/10 |
+| qb_sneak           | Quarterback Sneak        | Indicator if the quarterback sneaked on the play                                                                                                                                                                                                                                                       | 83.19%   | 2021/09/10 |
 | true_air_yards     | True Air Yards           | Distance ball travels in the air from point of throw to a receivers hands; back of endzone or sideline                                                                                                                                                                                                 | 23.42%   | 2021/09/10 |
 | time_to_pass       | Time to Pass             | Time elapsed from the snap to the throw                                                                                                                                                                                                                                                                | 23.42%   | 2021/09/10 |
 | time_to_pressure   | Time to Pressure         | Time elapsed from the snap to the pressure                                                                                                                                                                                                                                                             | 23.42%   | 2021/09/10 |
 | ttscrm             | Time to Scramble         | Time elapsed from the snap to the scramble                                                                                                                                                                                                                                                             | -        | -          |
 | ttsk               | Time to Sack             | Time elapsed from the snap to the sack                                                                                                                                                                                                                                                                 | -        | -          |
-| yards_after_catch  | Yards After Catch        | Yards gained by the receiver after the catch                                                                                                                                                                                                                                                           | 99.14%   | 2006/08/06 |
+| yards_after_catch  | Yards After Catch        | Yards gained by the receiver after the catch                                                                                                                                                                                                                                                           | 99.98%   | 2006/08/06 |
 
 ### Rushing
 
 | column       | name           | description                                           | coverage | since      |
 | ------------ | -------------- | ----------------------------------------------------- | -------- | ---------- |
 | rush         | Rush Attempt   | Indicator if the play was a rush attempt              | 55.59%   | 2001/09/09 |
-| rush_td      | Rush Touchdown | Indicator if the rush was a touchdown                 | 90.49%   | 2001/01/06 |
-| rush_yds     | Rush Yards     | Rush yards attributed to the rusher                   | 99.33%   | 2001/01/06 |
+| rush_td      | Rush Touchdown | Indicator if the rush was a touchdown                 | 91.07%   | 2001/01/06 |
+| rush_yds     | Rush Yards     | Rush yards attributed to the rusher                   | 99.99%   | 2001/01/06 |
 | run_gap      | Run Gap        | Indicator for line gap of run: end, guard, or tackle  | 55.58%   | 2001/09/09 |
 | run_location | Run Location   | Indicator for location of run: left, middle, or right | 55.59%   | 2001/09/09 |
 
@@ -294,17 +294,17 @@
 
 | column             | name               | description                                                   | coverage | since      |
 | ------------------ | ------------------ | ------------------------------------------------------------- | -------- | ---------- |
-| play_type          | Play Type          | Type of play (e.g., RUSH, PASS)                               | 99.28%   | 2002/08/03 |
+| play_type          | Play Type          | Type of play (e.g., RUSH, PASS)                               | 99.99%   | 2001/01/06 |
 | play_type_nfl      | Play Type NFL      | NFL-defined type of play                                      | 99.11%   | 2001/01/06 |
 | play_type_ngs      | Play Type NGS      | Next Gen Stats defined type of play                           | 99.38%   | 2002/08/03 |
 | next_play_type     | Next Play Type     | Type of the next play                                         | 98.29%   | 2001/01/06 |
-| yds_gained         | Yards Gained       | Yardage gained or lost by the possessing team during the play | 99.33%   | 2001/01/06 |
+| yds_gained         | Yards Gained       | Yardage gained or lost by the possessing team during the play | 99.99%   | 2001/01/06 |
 | fum                | Fumble Occurred    | Indicator if a fumble occurred during the play                | 55.59%   | 2001/09/09 |
-| fuml               | Fumble Lost        | Indicator if the fumble was lost to the opposing team         | 71.15%   | 2001/01/06 |
-| int                | Interception       | Indicator if an interception occurred during the play         | 83.71%   | 2001/01/06 |
-| sk                 | Sack               | Indicator if a sack occurred during the play                  | 97.30%   | 2001/01/06 |
+| fuml               | Fumble Lost        | Indicator if the fumble was lost to the opposing team         | 71.59%   | 2001/01/06 |
+| int                | Interception       | Indicator if an interception occurred during the play         | 84.26%   | 2001/01/06 |
+| sk                 | Sack               | Indicator if a sack occurred during the play                  | 97.94%   | 2001/01/06 |
 | succ               | Successful Play    | Indicator if the play was successful                          | 23.42%   | 2021/09/10 |
-| comp               | Completion         | Indicator if the pass was completed                           | 99.33%   | 2001/01/06 |
+| comp               | Completion         | Indicator if the pass was completed                           | 99.99%   | 2001/01/06 |
 | incomp             | Incompletion       | Indicator if the pass was incomplete                          | 55.59%   | 2001/09/09 |
 | safety             | Safety             | Indicator if a safety occurred                                | 55.59%   | 2001/09/09 |
 | punt_blocked       | Punt Blocked       | Binary indicator for if the punt was blocked.                 | 55.59%   | 2001/09/09 |
@@ -313,11 +313,11 @@
 | score_team         | Scoring Team       | Team that scored                                              | 99.10%   | 2001/01/06 |
 | solo_tk            | Solo Tackle        | Indicator if the tackle was solo                              | 55.59%   | 2001/09/09 |
 | assist_tk          | Assist Tackle      | Indicator if the tackle was an assist                         | 55.59%   | 2001/09/09 |
-| first_down         | First Down         | Indicator if the play was a first down                        | 99.34%   | 2001/01/06 |
+| first_down         | First Down         | Indicator if the play was a first down                        | 100.00%  | 2001/01/06 |
 | first_down_rush    | First Down Rush    | Indicator if the play was a first down rush                   | 55.59%   | 2001/09/09 |
 | first_down_pass    | First Down Pass    | Indicator if the play was a first down pass                   | 55.59%   | 2001/09/09 |
 | first_down_penalty | First Down Penalty | Indicator if the play was a first down penalty                | 55.59%   | 2001/09/09 |
-| td                 | Touchdown          | Indicator if the play was a touchdown                         | 98.52%   | 2001/01/06 |
+| td                 | Touchdown          | Indicator if the play was a touchdown                         | 99.18%   | 2001/01/06 |
 | td_tm              | Touchdown Team     | Team that scored the touchdown                                | -        | -          |
 
 ### Game
@@ -339,7 +339,7 @@
 | ydl_start             | Yard Line Start               | Starting yard line for the play                                              | 99.11%   | 2001/01/06 |
 | ydl_end               | Yard Line End                 | Ending yard line after the play                                              | 99.10%   | 2001/01/06 |
 | ydl_100               | Yard Line 100                 | Numeric distance in yards from the opponent's endzone for the posteam        | 99.07%   | 2001/01/06 |
-| starting_hash         | Starting Hash                 | Starting hash location LEFT, RIGHT, or MIDDLE (in-between)                   | 23.42%   | 2021/09/10 |
+| starting_hash         | Starting Hash                 | Starting hash location LEFT, RIGHT, or MIDDLE (in-between)                   | 83.19%   | 2021/09/10 |
 | yards_to_go           | Yards to Go                   | Yards remaining to achieve a first down                                      | 100.00%  | 2001/01/06 |
 | yfog                  | Yards from Own Goal           | Yards from the team's own goal line                                          | -        | -          |
 | goal_to_go            | Goal to Go                    | Indicator if the team is in a goal-to-go situation                           | 99.11%   | 2001/01/06 |
@@ -368,27 +368,31 @@
 
 ### Personnel, Formation & Coverage
 
-| column           | name                  | description                                                                              | coverage | since      |
-| ---------------- | --------------------- | ---------------------------------------------------------------------------------------- | -------- | ---------- |
-| off_formation    | Offensive Formation   | Description of the offensive formation                                                   | 98.15%   | 2016/08/11 |
-| off_personnel    | Offensive Personnel   | Description of the offensive personnel involved                                          | 98.19%   | 2016/08/11 |
-| def_personnel    | Defensive Personnel   | Description of the defensive personnel involved                                          | 98.19%   | 2016/08/11 |
-| man_zone_ngs     | Man Zone NGS          | Man or zone coverage according to Next Gen Stats                                         | 94.15%   | 2018/08/09 |
-| cov_type_ngs     | Coverage Type NGS     | Type of coverage according to Next Gen Stats                                             | 94.15%   | 2018/08/09 |
-| cov_type_charted | Coverage Type Charted | Type of coverage according to Charted Stats                                              | 23.42%   | 2021/09/10 |
-| cov              | Coverage on Target    | Coverage on the targeted receiver (0: Uncovered, 1: Single, 2: Double)                   | 23.42%   | 2021/09/10 |
-| box_ngs          | Box NGS               | Number of defenders in the box according to Next Gen Stats                               | 98.15%   | 2016/08/11 |
-| pru_ngs          | Pass Rushers NGS      | Number of pass rushers according to Next Gen Stats                                       | 98.15%   | 2016/08/11 |
-| db               | Defensive Backs       | Number of defensive backs involved in the play                                           | 23.42%   | 2021/09/10 |
-| box              | Defenders in the Box  | Number of defenders in the box                                                           | 23.42%   | 2021/09/10 |
-| boxdb            | DBs in the Box        | Number of defensive backs in the box                                                     | -        | -          |
-| pass_rushers     | Pass Rushers          | Number of pass rushers involved in the play                                              | 23.42%   | 2021/09/10 |
-| blitzers         | Blitzers              | Number of linebackers and defensive backs blitzing                                       | 23.42%   | 2021/09/10 |
-| db_blitzers      | DB Blitzers           | Number of defensive backs blitzing                                                       | -        | -          |
-| back             | Number in Backfield   | Number of players in the backfield                                                       | -        | -          |
-| no_huddle        | No Huddle             | Indicator if the huddle was not used                                                     | 23.42%   | 2021/09/10 |
-| xlm              | Extra Men on Line     | Number of players lined up on either side of the Offensive Tackles - usually a Tight End | -        | -          |
-| zero_blitz       | Zero Blitz            | At least one Off-Ball LB rushed the passer instead of a DL who dropped into coverage     | 23.42%   | 2021/09/10 |
+| column              | name                  | description                                                                              | coverage | since      |
+| ------------------- | --------------------- | ---------------------------------------------------------------------------------------- | -------- | ---------- |
+| off_formation       | Offensive Formation   | Description of the offensive formation                                                   | 98.15%   | 2016/08/11 |
+| off_personnel       | Offensive Personnel   | Description of the offensive personnel involved                                          | 98.19%   | 2016/08/11 |
+| def_personnel       | Defensive Personnel   | Description of the defensive personnel involved                                          | 98.19%   | 2016/08/11 |
+| man_zone_ngs        | Man Zone NGS          | Man or zone coverage according to Next Gen Stats                                         | 94.15%   | 2018/08/09 |
+| cov_type_ngs        | Coverage Type NGS     | Type of coverage according to Next Gen Stats                                             | 94.15%   | 2018/08/09 |
+| cov_type_charted    | Coverage Type Charted | Type of coverage according to Charted Stats                                              | 23.42%   | 2021/09/10 |
+| cov                 | Coverage on Target    | Coverage on the targeted receiver (0: Uncovered, 1: Single, 2: Double)                   | 23.42%   | 2021/09/10 |
+| box_ngs             | Box NGS               | Number of defenders in the box according to Next Gen Stats                               | 98.15%   | 2016/08/11 |
+| pru_ngs             | Pass Rushers NGS      | Number of pass rushers according to Next Gen Stats                                       | 98.15%   | 2016/08/11 |
+| db                  | Defensive Backs       | Number of defensive backs involved in the play                                           | 23.42%   | 2021/09/10 |
+| box                 | Defenders in the Box  | Number of defenders in the box                                                           | 23.42%   | 2021/09/10 |
+| boxdb               | DBs in the Box        | Number of defensive backs in the box                                                     | -        | -          |
+| pass_rushers        | Pass Rushers          | Number of pass rushers involved in the play                                              | 83.19%   | 2021/09/10 |
+| blitzers            | Blitzers              | Number of linebackers and defensive backs blitzing                                       | 83.19%   | 2021/09/10 |
+| db_blitzers         | DB Blitzers           | Number of defensive backs blitzing                                                       | -        | -          |
+| back                | Number in Backfield   | Number of players in the backfield                                                       | -        | -          |
+| no_huddle           | No Huddle             | Indicator if the huddle was not used                                                     | 83.19%   | 2021/09/10 |
+| xlm                 | Extra Men on Line     | Number of players lined up on either side of the Offensive Tackles - usually a Tight End | -        | -          |
+| zero_blitz          | Zero Blitz            | At least one Off-Ball LB rushed the passer instead of a DL who dropped into coverage     | 23.42%   | 2021/09/10 |
+| qb_position         | QB Position           | Position of the quarterback (UNDER_CENTER, SHOTGUN, or PISTOL)                           | 83.19%   | 2021/09/10 |
+| n_offense_backfield | Offensive Backfield   | Number of offensive players in the backfield                                             | 92.07%   | 2022/09/08 |
+| run_play_option     | Run Play Option       | Indicator if the play was a run option                                                   | 92.07%   | 2022/09/08 |
+| read_thrown         | Read Thrown           | Indicator if the quarterback made a read and threw the ball                              | 83.19%   | 2021/09/10 |
 
 ### Drive
 
@@ -499,16 +503,16 @@
 
 | column           | name                        | description                          | coverage | since      |
 | ---------------- | --------------------------- | ------------------------------------ | -------- | ---------- |
-| player_fuml_pid  | Player Fumble Player ID     | Player ID of the player who fumbled  | 70.02%   | 2002/08/08 |
-| player_fuml_gsis | Player Fumble GSIS ID       | GSIS ID of the player who fumbled    | 70.35%   | 2002/08/08 |
-| bc_pid           | Ball Carrier Player ID      | Player ID of the ball carrier        | 99.28%   | 2002/08/03 |
-| bc_gsis          | Ball Carrier GSIS ID        | GSIS ID of the ball carrier          | 99.28%   | 2002/08/03 |
-| psr_pid          | Passer Player ID            | Player ID of the passer              | 99.28%   | 2002/08/03 |
-| psr_gsis         | Passer GSIS ID              | GSIS ID of the passer                | 99.28%   | 2002/08/03 |
-| trg_pid          | Targeted Player ID          | Player ID of the targeted player     | 92.37%   | 2002/08/03 |
-| trg_gsis         | Targeted Player GSIS ID     | GSIS ID of the targeted player       | 92.37%   | 2002/08/03 |
-| intp_pid         | Intercepting Player ID      | Player ID of the intercepting player | 82.24%   | 2002/08/03 |
-| intp_gsis        | Intercepting Player GSIS ID | GSIS ID of the intercepting player   | 83.04%   | 2002/08/03 |
+| player_fuml_pid  | Player Fumble Player ID     | Player ID of the player who fumbled  | 70.51%   | 2002/08/08 |
+| player_fuml_gsis | Player Fumble GSIS ID       | GSIS ID of the player who fumbled    | 70.82%   | 2002/08/08 |
+| bc_pid           | Ball Carrier Player ID      | Player ID of the ball carrier        | 99.97%   | 2002/08/03 |
+| bc_gsis          | Ball Carrier GSIS ID        | GSIS ID of the ball carrier          | 99.97%   | 2002/08/03 |
+| psr_pid          | Passer Player ID            | Player ID of the passer              | 99.97%   | 2002/08/03 |
+| psr_gsis         | Passer GSIS ID              | GSIS ID of the passer                | 99.97%   | 2002/08/03 |
+| trg_pid          | Targeted Player ID          | Player ID of the targeted player     | 93.06%   | 2002/08/03 |
+| trg_gsis         | Targeted Player GSIS ID     | GSIS ID of the targeted player       | 93.06%   | 2002/08/03 |
+| intp_pid         | Intercepting Player ID      | Player ID of the intercepting player | 82.95%   | 2002/08/03 |
+| intp_gsis        | Intercepting Player GSIS ID | GSIS ID of the intercepting player   | 83.61%   | 2002/08/03 |
 
 ### Special Teams
 
@@ -540,20 +544,20 @@
 | formatted        | Formatted Name       | Name in a formatted display version               | 100.00%  |
 | pos              | Primary Position     | Primary position                                  | 100.00%  |
 | pos1             | Secondary Position   | Secondary position                                | 100.00%  |
-| pos2             | Tertiary Position    | Tertiary position                                 | 50.39%   |
+| pos2             | Tertiary Position    | Tertiary position                                 | 50.43%   |
 | dob              | Date of Birth        | Date of birth                                     | 100.00%  |
 | col              | College              | College                                           | 99.02%   |
-| dv               | College Division     | College division                                  | 46.61%   |
+| dv               | College Division     | College division                                  | 46.67%   |
 | start            | NFL Start Year       | Year started in the NFL                           | 100.00%  |
 | current_nfl_team | Current NFL Team     | Current NFL team (default 'INA' if not on a team) | 100.00%  |
 | posd             | Position Depth       | Position depth                                    | 100.00%  |
 | jnum             | Jersey Number        | Jersey number                                     | 99.99%   |
-| status           | Player Status        | Current status                                    | 32.99%   |
-| nfl_status       | NFL Status           | Current NFL status                                | 75.21%   |
+| status           | Player Status        | Current status                                    | 33.03%   |
+| nfl_status       | NFL Status           | Current NFL status                                | 75.30%   |
 | injury_status    | Injury Status        | Current injury status                             | 1.89%    |
-| high_school      | High School          | High school                                       | 84.25%   |
-| dpos             | Draft Position       | Draft position                                    | 99.35%   |
-| round            | Draft Round          | Draft round                                       | 99.23%   |
+| high_school      | High School          | High school                                       | 84.32%   |
+| dpos             | Draft Position       | Draft position                                    | 41.06%   |
+| round            | Draft Round          | Draft round                                       | 99.35%   |
 | dcp              | Draft Capital Points | Draft capital points                              | 99.23%   |
 
 ### Measurables
@@ -562,36 +566,36 @@
 | --------------------- | --------------------- | --------------------------------- | -------- |
 | height                | Height                | Height in inches                  | 100.00%  |
 | weight                | Weight                | Weight in pounds                  | 100.00%  |
-| forty                 | 40-Yard Dash Time     | 40-yard dash time                 | 42.69%   |
+| forty                 | 40-Yard Dash Time     | 40-yard dash time                 | 42.70%   |
 | bench                 | Bench Press Reps      | Number of bench press repetitions | 32.51%   |
 | vertical              | Vertical Jump         | Vertical jump height              | 37.15%   |
 | broad                 | Broad Jump            | Broad jump distance               | 36.60%   |
-| shuttle               | Shuttle Run Time      | Shuttle run time                  | 33.02%   |
+| shuttle               | Shuttle Run Time      | Shuttle run time                  | 33.03%   |
 | cone                  | 3-Cone Drill Time     | 3-cone drill time                 | 32.49%   |
-| arm                   | Arm Length            | Arm length                        | 27.58%   |
-| hand                  | Hand Size             | Hand size                         | 27.50%   |
-| ngs_athleticism_score | NGS Athleticism Score | NGS Prospect athleticism score    | 21.56%   |
-| ngs_draft_grade       | NGS Draft Grade       | NGS Prospect draft grade          | 21.56%   |
-| nfl_grade             | NFL Grade             | NFL Prospect grade                | 21.48%   |
-| ngs_production_score  | NGS Production Score  | NGS Prospect production score     | 21.56%   |
-| ngs_size_score        | NGS Size Score        | NGS Prospect size score           | 19.38%   |
+| arm                   | Arm Length            | Arm length                        | 27.52%   |
+| hand                  | Hand Size             | Hand size                         | 27.44%   |
+| ngs_athleticism_score | NGS Athleticism Score | NGS Prospect athleticism score    | 21.59%   |
+| ngs_draft_grade       | NGS Draft Grade       | NGS Prospect draft grade          | 21.59%   |
+| nfl_grade             | NFL Grade             | NFL Prospect grade                | 21.51%   |
+| ngs_production_score  | NGS Production Score  | NGS Prospect production score     | 21.59%   |
+| ngs_size_score        | NGS Size Score        | NGS Prospect size score           | 19.40%   |
 
 ### Player Identification
 
 | column          | name                      | description               | coverage |
 | --------------- | ------------------------- | ------------------------- | -------- |
-| nflid           | NFL ID                    | NFL ID                    | 47.61%   |
-| gsisid          | GSIS ID                   | GSIS ID                   | 53.92%   |
-| gsispid         | GSIS Player ID            | GSIS Player ID            | 40.34%   |
-| gsisItId        | GSIS It ID                | GSIS It ID                | 28.37%   |
-| sleeper_id      | Sleeper ID                | Sleeper ID                | 28.24%   |
-| rotoworld_id    | Rotoworld ID              | Rotoworld ID              | 19.00%   |
-| rotowire_id     | Rotowire ID               | Rotowire ID               | 33.30%   |
-| sportradar_id   | Sportradar ID             | Sportradar ID             | 29.35%   |
-| espn_id         | ESPN ID                   | ESPN ID                   | 27.68%   |
-| fantasy_data_id | Fantasy Data ID           | Fantasy Data ID           | 23.11%   |
-| yahoo_id        | Yahoo ID                  | Yahoo ID                  | 25.44%   |
-| keeptradecut_id | Keep Trade Cut ID         | Keep Trade Cut ID         | 2.58%    |
-| pfr_id          | Pro Football Reference ID | Pro Football Reference ID | 45.21%   |
+| nflid           | NFL ID                    | NFL ID                    | 47.67%   |
+| gsisid          | GSIS ID                   | GSIS ID                   | 53.99%   |
+| gsispid         | GSIS Player ID            | GSIS Player ID            | 40.39%   |
+| gsisItId        | GSIS It ID                | GSIS It ID                | 28.40%   |
+| sleeper_id      | Sleeper ID                | Sleeper ID                | 29.04%   |
+| rotoworld_id    | Rotoworld ID              | Rotoworld ID              | 19.40%   |
+| rotowire_id     | Rotowire ID               | Rotowire ID               | 34.18%   |
+| sportradar_id   | Sportradar ID             | Sportradar ID             | 30.20%   |
+| espn_id         | ESPN ID                   | ESPN ID                   | 28.16%   |
+| fantasy_data_id | Fantasy Data ID           | Fantasy Data ID           | 23.21%   |
+| yahoo_id        | Yahoo ID                  | Yahoo ID                  | 26.52%   |
+| keeptradecut_id | Keep Trade Cut ID         | Keep Trade Cut ID         | 2.60%    |
+| pfr_id          | Pro Football Reference ID | Pro Football Reference ID | 46.96%   |
 
 </div>
