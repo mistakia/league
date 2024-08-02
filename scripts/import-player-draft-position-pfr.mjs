@@ -34,7 +34,8 @@ const import_player_draft_position_pfr = async ({
       try {
         const params = {
           name: draft_player.player_name,
-          team: draft_player.team
+          team: draft_player.team,
+          start: year
         }
         player_row = await getPlayer(params)
       } catch (err) {

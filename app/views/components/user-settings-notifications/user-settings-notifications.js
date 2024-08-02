@@ -41,9 +41,6 @@ export default function UserSettingsNotifications({ user, update }) {
 }
 
 UserSettingsNotifications.propTypes = {
-  user: PropTypes.oneOfType([
-    ImmutablePropTypes.record,
-    PropTypes.object
-  ]),
+  user: PropTypes.oneOfType([ImmutablePropTypes.record, PropTypes.object]),
   update: PropTypes.func
 }
