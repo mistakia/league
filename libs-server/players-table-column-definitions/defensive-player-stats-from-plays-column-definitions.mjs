@@ -2,6 +2,7 @@ import db from '#db'
 import { nfl_plays_column_params } from '#libs-shared'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
 import players_table_join_function from '#libs-server/players-table/players-table-join-function.mjs'
+import { add_defensive_play_by_play_with_statement } from '#libs-server/players-table/add-defensive-play-by-play-with-statement.mjs'
 
 const defensive_player_table_alias = ({ pid_columns, params = {} } = {}) => {
   if (!pid_columns || !Array.isArray(pid_columns) || pid_columns.length === 0) {
@@ -45,14 +46,14 @@ const defensive_player_stat_from_plays = ({
   table_alias: ({ params }) =>
     defensive_player_table_alias({ pid_columns, params }),
   column_name: stat_name,
-  select: () => [`${select_string} AS ${stat_name}`],
-  where_column: () => select_string,
+  with_select: () => [`${select_string} AS ${stat_name}`],
+  with_where: () => select_string,
   join: defensive_player_join,
   pid_columns,
   supported_splits: ['year', 'week'],
   supported_rate_types: ['per_game'],
   use_having: true,
-  use_defensive_play_by_play_with: true
+  with: add_defensive_play_by_play_with_statement
 })
 
 export default {

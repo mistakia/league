@@ -34,7 +34,6 @@ export default {
     min: -30,
     max: 30,
     default_value: 0,
-    is_single: true,
     enable_on_splits: ['year']
   },
   // TODO

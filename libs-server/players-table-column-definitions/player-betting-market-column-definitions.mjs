@@ -97,7 +97,7 @@ const betting_markets_join = ({
 const create_betting_market_field = ({ column_name, column_alias }) => ({
   column_name,
   select_as: () => `${column_alias}_betting_market`,
-  where_column: ({ table_name }) => `${table_name}.${column_name}`,
+  main_where: ({ table_name }) => `${table_name}.${column_name}`,
   table_alias: betting_markets_table_alias,
   join: betting_markets_join,
   with: betting_markets_with
