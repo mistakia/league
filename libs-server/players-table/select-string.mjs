@@ -77,6 +77,11 @@ const get_select_string = ({
   if (is_main_select && has_year_offset_range) {
     if (column_definition.has_numerator_denominator) {
       final_select_expression = `SUM(${join_table_name}.${select_as}_numerator) / NULLIF(SUM(${join_table_name}.${select_as}_denominator), 0)`
+    } else if (column_definition.main_select_string_year_offset_range) {
+      final_select_expression =
+        column_definition.main_select_string_year_offset_range({
+          table_name: join_table_name
+        })
     } else {
       final_select_expression = `SUM(${column_value})`
     }
@@ -92,17 +97,24 @@ const get_select_string = ({
     final_select_expression = select_expression
   }
 
+  const group_by =
+    !is_main_select || has_year_offset_range
+      ? []
+      : [
+          column_value,
+          rate_type_table_name
+            ? `${rate_type_table_name}.rate_type_total_count`
+            : null
+        ]
+
+  // TODO unused currently
+  // if (is_main_select && column_definition.main_group_by) {
+  //   group_by.push(...column_definition.main_group_by({ table_name, params: column_params, column_index, rate_type_table_name, splits }))
+  // }
+
   return {
     select: [`${final_select_expression} AS "${select_as}_${column_index}"`],
-    group_by:
-      has_year_offset_range || !is_main_select
-        ? []
-        : [
-            column_value,
-            rate_type_table_name
-              ? `${rate_type_table_name}.rate_type_total_count`
-              : null
-          ].filter(Boolean)
+    group_by: group_by.filter(Boolean)
   }
 }
 

@@ -91,7 +91,9 @@ const create_team_share_stat = ({
   with_select_string,
   numerator_select,
   denominator_select,
-  has_numerator_denominator = false
+  has_numerator_denominator = false,
+  with_select_string_year_offset_range,
+  main_select_string_year_offset_range
 }) => ({
   column_name,
   with_where: ({ params }) => {
@@ -135,15 +137,18 @@ const create_team_share_stat = ({
     if (
       params.year_offset &&
       Array.isArray(params.year_offset) &&
-      params.year_offset.length > 1 &&
-      has_numerator_denominator
+      params.year_offset.length > 1
     ) {
-      with_query.select(
-        db.raw(`${numerator_select} as ${column_name}_numerator`)
-      )
-      with_query.select(
-        db.raw(`${denominator_select} as ${column_name}_denominator`)
-      )
+      if (has_numerator_denominator) {
+        with_query.select(
+          db.raw(`${numerator_select} as ${column_name}_numerator`)
+        )
+        with_query.select(
+          db.raw(`${denominator_select} as ${column_name}_denominator`)
+        )
+      } else if (with_select_string_year_offset_range) {
+        with_query.select(db.raw(with_select_string_year_offset_range))
+      }
     } else {
       with_query.select(db.raw(`${with_select_string} as ${column_name}`))
     }
@@ -202,14 +207,18 @@ const create_team_share_stat = ({
     players_table_join_function({ ...args, join_year_on_year_split: true }),
   supported_splits: ['year', 'week'],
   has_numerator_denominator,
+  main_select_string_year_offset_range,
   main_where: ({ params, table_name }) => {
     if (
       params.year_offset &&
       Array.isArray(params.year_offset) &&
-      params.year_offset.length > 1 &&
-      has_numerator_denominator
+      params.year_offset.length > 1
     ) {
-      return `CASE WHEN SUM(${table_name}.${column_name}_denominator) > 0 THEN ROUND(100.0 * SUM(${table_name}.${column_name}_numerator) / SUM(${table_name}.${column_name}_denominator), 2) ELSE 0 END`
+      if (has_numerator_denominator) {
+        return `CASE WHEN SUM(${table_name}.${column_name}_denominator) > 0 THEN ROUND(100.0 * SUM(${table_name}.${column_name}_numerator) / SUM(${table_name}.${column_name}_denominator), 2) ELSE 0 END`
+      } else if (main_select_string_year_offset_range) {
+        return main_select_string_year_offset_range({ table_name })
+      }
     }
     return null
   }
@@ -420,7 +429,6 @@ export default {
     with_select_string: `SUM(yards_after_any_contact)`,
     stat_name: 'rush_yds_after_contact_from_plays'
   }),
-  // TODO might have an issue with casting
   player_rush_yards_after_contact_per_attempt_from_plays:
     player_stat_from_plays({
       pid_columns: ['bc_pid'],
@@ -603,12 +611,15 @@ export default {
     denominator_select: `SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true
   }),
-  // TODO not just a numerator and denominator
   player_weighted_opportunity_rating_from_plays: create_team_share_stat({
     column_name: 'weighted_opp_rating_from_plays',
     pid_columns: ['trg_pid'],
     with_select_string:
-      'ROUND((1.5 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0)) + (0.7 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0)), 4)'
+      'ROUND((1.5 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0)) + (0.7 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0)), 4)',
+    with_select_string_year_offset_range:
+      'COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) as player_targets, SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) as team_targets, SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) as player_air_yards, SUM(nfl_plays.dot) as team_air_yards',
+    main_select_string_year_offset_range: ({ table_name }) =>
+      `ROUND((1.5 * SUM(${table_name}.player_targets) / NULLIF(SUM(${table_name}.team_targets), 0)) + (0.7 * SUM(${table_name}.player_air_yards) / NULLIF(SUM(${table_name}.team_air_yards), 0)), 4)`
   }),
   player_receiving_first_down_share_from_plays: create_team_share_stat({
     column_name: 'recv_first_down_share_from_plays',
