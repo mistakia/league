@@ -19,6 +19,8 @@ export default function players_table_join_function(join_arguments) {
     default_year = constants.season.year
   } = join_arguments
 
+  // TODO join_type should be left in some cases where year_offset range is used without a with_where
+
   const join_func = get_join_func(join_type)
   const year_offset_param = params.year_offset
   const year_offset_range = Array.isArray(year_offset_param)

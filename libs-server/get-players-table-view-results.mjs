@@ -506,7 +506,7 @@ export default function ({
           column_params.year_offset &&
           Array.isArray(column_params.year_offset) &&
           column_params.year_offset.length > 1 &&
-          column_params.year_offset[0] === column_params.year_offset[1]
+          column_params.year_offset[0] !== column_params.year_offset[1]
         if (select_columns.length && !has_year_offset_range) {
           const column_definition =
             players_table_column_definitions[select_columns[0].column_id]
@@ -566,8 +566,9 @@ export default function ({
             table_info.column_params?.year_offset &&
             Array.isArray(table_info.column_params.year_offset) &&
             table_info.column_params.year_offset.length > 1 &&
-            table_info.column_params.year_offset[0] ===
+            table_info.column_params.year_offset[0] !==
               table_info.column_params.year_offset[1]
+
           if (
             table_info.select_columns &&
             table_info.select_columns.length > 0 &&

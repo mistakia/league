@@ -74,14 +74,20 @@ const get_select_string = ({
     column_params.year_offset[0] !== column_params.year_offset[1]
 
   let final_select_expression
-  if (
-    has_year_offset_range &&
-    is_main_select &&
-    column_definition.has_numerator_denominator
-  ) {
-    final_select_expression = `CASE WHEN SUM(${join_table_name}.${select_as}_denominator) > 0 THEN ROUND(100.0 * SUM(${join_table_name}.${select_as}_numerator) / SUM(${join_table_name}.${select_as}_denominator), 2) ELSE 0 END`
-  } else if (has_year_offset_range && is_main_select) {
-    final_select_expression = `SUM(${select_expression})`
+  if (is_main_select && has_year_offset_range) {
+    if (column_definition.has_numerator_denominator) {
+      final_select_expression = `SUM(${join_table_name}.${select_as}_numerator) / NULLIF(SUM(${join_table_name}.${select_as}_denominator), 0)`
+    } else {
+      final_select_expression = `SUM(${column_value})`
+    }
+
+    if (rate_type_table_name) {
+      const min_year_offset = Math.min(...column_params.year_offset)
+      const max_year_offset = Math.max(...column_params.year_offset)
+
+      // TODO not working correctly
+      final_select_expression = `${final_select_expression} / NULLIF(CAST(SUM(CASE WHEN ${rate_type_table_name}.year BETWEEN ${table_name}.year + ${min_year_offset} AND ${table_name}.year + ${max_year_offset} THEN ${rate_type_table_name}.rate_type_total_count ELSE 0 END) AS DECIMAL), 0)`
+    }
   } else {
     final_select_expression = select_expression
   }
