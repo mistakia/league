@@ -1705,7 +1705,31 @@ describe('LIBS SERVER get_players_table_view_results', () => {
         }
       ],
       splits: ['year'],
-      where: []
+      where: [
+        {
+          column_id: 'player_position',
+          operator: 'IN',
+          value: ['QB']
+        },
+        {
+          column_id: 'player_fantasy_points_from_plays',
+          operator: '>=',
+          value: 100,
+          params: {
+            year: [2018, 2019, 2020, 2021]
+          }
+        },
+        {
+          column_id: 'player_fantasy_points_from_plays',
+          column_index: 1,
+          operator: '>=',
+          value: 300,
+          params: {
+            year: [2018, 2019, 2020, 2021],
+            year_offset: [1, 3]
+          }
+        }
+      ]
     })
   })
 

@@ -190,18 +190,19 @@ const add_clauses_for_table = ({
       players_query.groupBy(db.raw(group_by_string))
     }
   } else {
-    if (main_where_clause_strings.length) {
-      players_query.whereRaw(main_where_clause_strings.join(' AND '))
-    }
-    if (main_having_clause_strings.length) {
-      players_query.havingRaw(main_having_clause_strings.join(' AND '))
-    }
     for (const select_string of select_strings) {
       players_query.select(db.raw(select_string))
     }
     for (const group_by_string of group_by_strings) {
       players_query.groupBy(db.raw(group_by_string))
     }
+  }
+
+  if (main_where_clause_strings.length) {
+    players_query.whereRaw(main_where_clause_strings.join(' AND '))
+  }
+  if (main_having_clause_strings.length) {
+    players_query.havingRaw(main_having_clause_strings.join(' AND '))
   }
 
   // join table if needed

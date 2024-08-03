@@ -101,7 +101,8 @@ const create_team_share_stat = ({
       params.year_offset.length > 1 &&
       has_numerator_denominator
     ) {
-      return null // No where clause in the WITH statement when using year_offset range with numerator/denominator
+      // No where clause in the WITH statement when using year_offset range with numerator/denominator
+      return null
     }
     return with_select_string
   },

@@ -177,8 +177,26 @@ const fantasy_points_from_plays_with = ({
 
 export default {
   player_fantasy_points_from_plays: {
-    // TODO support ranges
-    with_where: () => select_string,
+    with_where: ({ params }) => {
+      if (
+        params.year_offset &&
+        Array.isArray(params.year_offset) &&
+        params.year_offset.length > 1
+      ) {
+        return null
+      }
+      return select_string
+    },
+    main_where: ({ params, table_name }) => {
+      if (
+        params.year_offset &&
+        Array.isArray(params.year_offset) &&
+        params.year_offset.length > 1
+      ) {
+        return `SUM(${table_name}.fantasy_points_from_plays)`
+      }
+      return null
+    },
     table_alias: generate_fantasy_points_table_alias,
     column_name: 'fantasy_points_from_plays',
     with: fantasy_points_from_plays_with,
