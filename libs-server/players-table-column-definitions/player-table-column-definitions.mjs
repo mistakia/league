@@ -4,15 +4,15 @@ import get_join_func from '#libs-server/get-join-func.mjs'
 export default {
   player_name: {
     table_name: 'player',
-    where_column: ({ case_insensitive = false }) => {
+    main_where: ({ case_insensitive = false }) => {
       if (case_insensitive) {
         return db.raw(`UPPER(player.fname || ' ' || player.lname)`)
       } else {
         return db.raw(`player.fname || ' ' || player.lname`)
       }
     },
-    select: () => ['player.fname', 'player.lname'],
-    group_by: () => ['player.fname', 'player.lname']
+    main_select: () => ['player.fname', 'player.lname'],
+    main_group_by: () => ['player.fname', 'player.lname']
   },
   player_position: {
     table_name: 'player',
@@ -30,44 +30,44 @@ export default {
   player_body_mass_index: {
     table_name: 'player',
     column_name: 'bmi',
-    select: ({ column_index }) => [
+    main_select: ({ column_index }) => [
       db.raw(
         `CASE WHEN player.height > 0 THEN ROUND(CAST((player.weight::float / NULLIF(player.height::float * player.height::float, 0)) * 703 AS NUMERIC), 2) ELSE NULL END as bmi_${column_index}`
       )
     ],
-    where_column: () =>
+    main_where: () =>
       db.raw(
         `CASE WHEN player.height > 0 THEN ROUND(CAST((player.weight::float / NULLIF(player.height::float * player.height::float, 0)) * 703 AS NUMERIC), 2) ELSE NULL END`
       ),
-    group_by: () => ['player.weight', 'player.height'],
+    main_group_by: () => ['player.weight', 'player.height'],
     use_having: true
   },
   player_speed_score: {
     table_name: 'player',
-    select: ({ column_index }) => [
+    main_select: ({ column_index }) => [
       db.raw(
         `CASE WHEN player.forty > 0 THEN ROUND((player.weight * 200.0) / NULLIF(POWER(player.forty, 4), 0), 2) ELSE NULL END as speed_score_${column_index}`
       )
     ],
-    where_column: () =>
+    main_where: () =>
       db.raw(
         `CASE WHEN player.forty > 0 THEN ROUND((player.weight * 200.0) / NULLIF(POWER(player.forty, 4), 0), 2) ELSE NULL END`
       ),
-    group_by: () => ['player.weight', 'player.forty'],
+    main_group_by: () => ['player.weight', 'player.forty'],
     use_having: true
   },
   player_height_adjusted_speed_score: {
     table_name: 'player',
-    select: ({ column_index }) => [
+    main_select: ({ column_index }) => [
       db.raw(
         `CASE WHEN player.pos IN ('WR', 'TE') AND player.forty > 0 THEN ROUND(((player.weight * 200.0) / NULLIF(POWER(player.forty, 4), 0)) * (player.height / CASE WHEN player.pos = 'TE' THEN 76.4 ELSE 73.0 END), 2) ELSE NULL END as height_adjusted_speed_score_${column_index}`
       )
     ],
-    where_column: () =>
+    main_where: () =>
       db.raw(
         `CASE WHEN player.pos IN ('WR', 'TE') AND player.forty > 0 THEN ROUND(((player.weight * 200.0) / NULLIF(POWER(player.forty, 4), 0)) * (player.height / CASE WHEN player.pos = 'TE' THEN 76.4 ELSE 73.0 END), 2) ELSE NULL END`
       ),
-    group_by: () => [
+    main_group_by: () => [
       'player.weight',
       'player.forty',
       'player.height',
@@ -77,30 +77,30 @@ export default {
   },
   player_agility_score: {
     table_name: 'player',
-    select: ({ column_index }) => [
+    main_select: ({ column_index }) => [
       db.raw(
         `ROUND(COALESCE(player.shuttle, 0) + COALESCE(player.cone, 0), 2) as agility_score_${column_index}`
       )
     ],
-    where_column: () =>
+    main_where: () =>
       db.raw(
         'ROUND(COALESCE(player.shuttle, 0) + COALESCE(player.cone, 0), 2)'
       ),
-    group_by: () => ['player.shuttle', 'player.cone'],
+    main_group_by: () => ['player.shuttle', 'player.cone'],
     use_having: true
   },
   player_burst_score: {
     table_name: 'player',
-    select: ({ column_index }) => [
+    main_select: ({ column_index }) => [
       db.raw(
         `ROUND(COALESCE(player.vertical, 0) + (COALESCE(player.broad, 0) / 12.0), 2) as burst_score_${column_index}`
       )
     ],
-    where_column: () =>
+    main_where: () =>
       db.raw(
         `ROUND(COALESCE(player.vertical, 0) + (COALESCE(player.broad, 0) / 12.0), 2)`
       ),
-    group_by: () => ['player.vertical', 'player.broad'],
+    main_group_by: () => ['player.vertical', 'player.broad'],
     use_having: true
   },
   player_age: {
@@ -153,7 +153,7 @@ export default {
 
       players_table_options.opening_days_joined = true
     },
-    select: ({ column_index, splits }) => {
+    main_select: ({ column_index, splits }) => {
       const base_year = splits.includes('year')
         ? 'opening_days.opening_day'
         : 'CURRENT_DATE'
@@ -163,11 +163,11 @@ export default {
         )
       ]
     },
-    group_by: ({ splits }) =>
+    main_group_by: ({ splits }) =>
       splits.includes('year')
         ? ['player.dob', 'opening_days.opening_day']
         : ['player.dob'],
-    where_column: ({ splits }) => {
+    main_where: ({ splits }) => {
       const base_year = splits.includes('year')
         ? 'opening_days.opening_day'
         : 'CURRENT_DATE'

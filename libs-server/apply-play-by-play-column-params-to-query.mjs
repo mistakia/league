@@ -14,21 +14,26 @@ export default function ({ query, params, table_name = 'nfl_plays' }) {
       continue
     }
 
-    // if year params and year_offset are set, adjust the year params to include the year for the year_offset
+    // if year params and year_offset are set, adjust the year params to include the years for the year_offset range
     if (column_param_key === 'year' && params.year_offset) {
       // convert param_value to an array
       param_value = Array.isArray(param_value) ? param_value : [param_value]
 
-      const year_offset = Number(
-        Array.isArray(params.year_offset)
-          ? params.year_offset[0]
-          : params.year_offset
-      )
+      const year_offset_range = Array.isArray(params.year_offset)
+        ? params.year_offset
+        : [params.year_offset]
 
-      // Add year_offset to each item in the array and ensure uniqueness
-      const adjusted_years = param_value.map(
-        (year) => Number(year) + year_offset
-      )
+      const min_offset = Math.min(...year_offset_range.map(Number))
+      const max_offset = Math.max(...year_offset_range.map(Number))
+
+      // Add year_offset_range to each item in the array and ensure uniqueness
+      const adjusted_years = param_value.flatMap((year) => {
+        const base_year = Number(year)
+        return Array.from(
+          { length: max_offset - min_offset + 1 },
+          (_, i) => base_year + min_offset + i
+        )
+      })
       param_value = [...new Set([...param_value, ...adjusted_years])]
     }
 
