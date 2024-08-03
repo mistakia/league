@@ -21,7 +21,6 @@ const team_stat_from_plays = ({ select_string, stat_name }) => ({
   table_alias: generate_table_alias,
   column_name: stat_name,
   with_select: () => [`${select_string} AS ${stat_name}`],
-  // TODO support ranges
   with_where: () => select_string,
   with: add_team_stats_play_by_play_with_statement,
   join_table_name: (args) => `${args.table_name}_player_team_stats`,
@@ -31,11 +30,17 @@ const team_stat_from_plays = ({ select_string, stat_name }) => ({
       join_year_on_year_split: true,
       table_name: `${args.table_name}_player_team_stats`
     }),
-  // TODO handle year_offset as an array or a number
-  year_select: ({ table_name, column_params = {} }) =>
-    column_params.year_offset
-      ? `${table_name}_player_team_stats.year - ${column_params.year_offset}`
-      : `${table_name}_player_team_stats.year`,
+  year_select: ({ table_name, column_params = {} }) => {
+    if (!column_params.year_offset) {
+      return `${table_name}_player_team_stats.year`
+    }
+
+    const year_offset = Array.isArray(column_params.year_offset)
+      ? column_params.year_offset[0]
+      : column_params.year_offset
+
+    return `${table_name}_player_team_stats.year - ${year_offset}`
+  },
   week_select: ({ table_name }) => `${table_name}_player_team_stats.week`,
   use_having: true,
   supported_splits: ['year', 'week'],

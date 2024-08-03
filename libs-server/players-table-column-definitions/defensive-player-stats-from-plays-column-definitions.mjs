@@ -47,7 +47,6 @@ const defensive_player_stat_from_plays = ({
     defensive_player_table_alias({ pid_columns, params }),
   column_name: stat_name,
   with_select: () => [`${select_string} AS ${stat_name}`],
-  // TODO update for ranges
   with_where: () => select_string,
   join: defensive_player_join,
   pid_columns,
