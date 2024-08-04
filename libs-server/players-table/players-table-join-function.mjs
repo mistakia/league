@@ -53,6 +53,14 @@ export default function players_table_join_function(join_arguments) {
           }
         } else {
           this.andOn(db.raw(`${table_name}.year = ${year_split_join_clause}`))
+
+          if (params.year) {
+            this.andOn(
+              db.raw(
+                `${table_name}.year IN (${Array.isArray(year) ? year.join(',') : year})`
+              )
+            )
+          }
         }
       } else if (year) {
         this.andOn(
