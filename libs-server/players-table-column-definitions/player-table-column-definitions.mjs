@@ -1,5 +1,4 @@
 import db from '#db'
-import get_join_func from '#libs-server/get-join-func.mjs'
 
 export default {
   player_name: {
