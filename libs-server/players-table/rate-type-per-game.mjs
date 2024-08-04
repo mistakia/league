@@ -47,6 +47,7 @@ export const add_per_game_cte = ({
     .leftJoin('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
     .count('* as rate_type_total_count')
     .where('seas_type', 'REG')
+    .where('active', true)
 
   if (year) {
     cte_query.whereIn('year', year)

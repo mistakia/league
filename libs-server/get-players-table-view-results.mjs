@@ -1,4 +1,5 @@
 import db from '#db'
+import { constants } from '#libs-shared'
 import players_table_column_definitions from '#libs-server/players-table-column-definitions/index.mjs'
 import * as validators from '#libs-server/validators.mjs'
 import {
@@ -13,6 +14,57 @@ import {
   get_main_where_string,
   get_with_where_string
 } from '#libs-server/players-table/where-string.mjs'
+
+const get_year_range = (columns, where) => {
+  const years = new Set()
+  let min_offset = 0
+  let max_offset = 0
+
+  const check_params = (params) => {
+    if (params.year) {
+      const year_array = Array.isArray(params.year)
+        ? params.year
+        : [params.year]
+      year_array.forEach((year) => years.add(parseInt(year)))
+    }
+    if (params.year_offset) {
+      const offset = Array.isArray(params.year_offset)
+        ? params.year_offset
+        : [params.year_offset]
+      min_offset = Math.min(min_offset, Math.min(...offset))
+      max_offset = Math.max(max_offset, Math.max(...offset))
+    }
+  }
+
+  columns.forEach((column) => {
+    if (typeof column === 'object' && column.params) {
+      check_params(column.params)
+    }
+  })
+
+  where.forEach((clause) => {
+    if (clause.params) {
+      check_params(clause.params)
+    }
+  })
+
+  // If no years are set, use all years from 2000 to the current year
+  if (years.size === 0) {
+    for (let year = 2000; year <= constants.season.year; year++) {
+      years.add(year)
+    }
+  }
+
+  // Add offset years
+  const all_years = new Set(years)
+  years.forEach((year) => {
+    for (let i = min_offset; i <= max_offset; i++) {
+      all_years.add(year + i)
+    }
+  })
+
+  return Array.from(all_years).sort((a, b) => a - b)
+}
 
 const get_column_index = ({ column_id, index, columns }) => {
   const columns_with_same_id = columns.filter(
@@ -361,6 +413,30 @@ export default function ({
     year_coalesce_args: []
   }
 
+  let year_split_join_clause
+  let week_split_join_clause
+
+  if (splits.includes('year')) {
+    const year_range = get_year_range([...prefix_columns, ...columns], where)
+
+    players_query.with(
+      'base_years',
+      db.raw(`SELECT unnest(ARRAY[${year_range.join(',')}]) as year`)
+    )
+    players_query.with(
+      'player_years',
+      db.raw(
+        'SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years'
+      )
+    )
+
+    // Modify the main query to start from player_years
+    players_query.from('player_years')
+    players_query.join('player', 'player.pid', 'player_years.pid')
+
+    year_split_join_clause = 'player_years.year'
+  }
+
   // sanitize parameters
 
   // if splits week is enabled — delete all per_game rate_type column params
@@ -414,22 +490,39 @@ export default function ({
     }
   }
 
-  let year_split_join_clause
-  let week_split_join_clause
-
   for (const [rate_type_table_name, params] of Object.entries(
     rate_type_tables
   )) {
+    const has_year_offset_range =
+      params.year_offset &&
+      Array.isArray(params.year_offset) &&
+      params.year_offset.length > 1 &&
+      params.year_offset[0] !== params.year_offset[1]
     add_per_game_cte({ players_query, params, rate_type_table_name, splits })
     players_query.leftJoin(rate_type_table_name, function () {
       this.on(`${rate_type_table_name}.pid`, 'player.pid')
 
       if (splits.includes('year') && year_split_join_clause) {
-        this.on(`${rate_type_table_name}.year`, year_split_join_clause)
+        if (has_year_offset_range) {
+          const min_offset = Math.min(
+            params.year_offset[0],
+            params.year_offset[1]
+          )
+          const max_offset = Math.max(
+            params.year_offset[0],
+            params.year_offset[1]
+          )
+          this.on(
+            db.raw(
+              `${rate_type_table_name}.year BETWEEN player_years.year + ? AND player_years.year + ?`,
+              [min_offset, max_offset]
+            )
+          )
+        } else {
+          this.on(`${rate_type_table_name}.year`, year_split_join_clause)
+        }
       }
     })
-
-    year_split_join_clause = `${rate_type_table_name}.year`
   }
 
   const grouped_clauses_by_table = get_grouped_clauses_by_table({
@@ -554,47 +647,8 @@ export default function ({
   // Add a coalesce select for each split
   for (const split of splits) {
     if (split === 'year') {
-      const coalesce_args = Object.entries(grouped_clauses_by_table)
-        .filter(
-          ([_, table_info]) =>
-            table_info.supported_splits &&
-            table_info.supported_splits.includes(split)
-        )
-        .map(([table_alias, table_info]) => {
-          // Check if select_columns is not empty and doesn't have year_offset
-          const has_year_offset_range =
-            table_info.column_params?.year_offset &&
-            Array.isArray(table_info.column_params.year_offset) &&
-            table_info.column_params.year_offset.length > 1 &&
-            table_info.column_params.year_offset[0] !==
-              table_info.column_params.year_offset[1]
-
-          if (
-            table_info.select_columns &&
-            table_info.select_columns.length > 0 &&
-            !has_year_offset_range
-          ) {
-            const column_definition =
-              players_table_column_definitions[
-                table_info.select_columns[0].column_id
-              ]
-            if (column_definition && column_definition.year_select) {
-              return column_definition.year_select({
-                table_name: table_alias,
-                splits
-              })
-            }
-          }
-          // Default to standard year column if no custom year_select is available and no year_offset range
-          return !has_year_offset_range ? `${table_alias}.${split}` : null
-        })
-        .filter(Boolean) // Remove any undefined or null entries
-        .join(', ')
-
-      if (coalesce_args) {
-        players_query.select(db.raw(`COALESCE(${coalesce_args}) AS year`))
-        players_query.groupBy(db.raw(`COALESCE(${coalesce_args})`))
-      }
+      players_query.select('player_years.year')
+      players_query.groupBy('player_years.year')
     }
 
     if (split === 'week') {

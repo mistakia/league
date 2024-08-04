@@ -128,29 +128,7 @@ export default {
         return
       }
 
-      if (year_split_join_clause) {
-        const join_func = get_join_func(join_type)
-        query[join_func](
-          'opening_days',
-          'opening_days.year',
-          year_split_join_clause
-        )
-      } else if (players_table_options.year_coalesce_args.length) {
-        query.leftJoin('opening_days', function () {
-          this.on(
-            'opening_days.year',
-            '=',
-            db.raw(
-              `COALESCE(${players_table_options.year_coalesce_args.join(', ')})`
-            )
-          )
-        })
-      } else {
-        query.leftJoin('opening_days', function () {
-          this.on(db.raw('true'))
-        })
-      }
-
+      query.leftJoin('opening_days', 'opening_days.year', 'player_years.year')
       players_table_options.opening_days_joined = true
     },
     main_select: ({ column_index, splits }) => {
