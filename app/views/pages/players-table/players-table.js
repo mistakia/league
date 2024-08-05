@@ -27,6 +27,7 @@ export default function PlayersTablePage({
   delete_players_table_view,
   selected_player_pid,
   teamId,
+  leagueId,
   highlight_team_ids,
   teams,
   players_percentiles
@@ -114,7 +115,7 @@ export default function PlayersTablePage({
   }
 
   const new_prefix_columns = ['player_name']
-  if (isLoggedIn) {
+  if (isLoggedIn && leagueId) {
     new_prefix_columns.push('player_league_roster_status')
   }
 
@@ -170,6 +171,7 @@ PlayersTablePage.propTypes = {
   delete_players_table_view: PropTypes.func,
   selected_player_pid: PropTypes.string,
   teamId: PropTypes.number,
+  leagueId: PropTypes.number,
   highlight_team_ids: ImmutablePropTypes.list,
   teams: ImmutablePropTypes.map,
   players_percentiles: PropTypes.object
