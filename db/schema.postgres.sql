@@ -25,11 +25,19 @@ DROP INDEX IF EXISTS public.idx_users_invite_code;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_seasonlogs_pid_year_hash;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_gamelogs_pid_esbid_hash;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_careerlogs_pid_hash;
+DROP INDEX IF EXISTS public.idx_rosters_players_year_week_lid_pid;
 DROP INDEX IF EXISTS public.idx_prop_markets_index_market_time_year;
 DROP INDEX IF EXISTS public.idx_prop_market_selections_index_composite;
+DROP INDEX IF EXISTS public.idx_player_seasonlogs_year_seas_type_career_year_pid;
+DROP INDEX IF EXISTS public.idx_player_pid_pos;
+DROP INDEX IF EXISTS public.idx_player_gamelogs_esbid_active_pid;
+DROP INDEX IF EXISTS public.idx_opening_days_year_opening_day;
 DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_week_play_type;
 DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_play_type_trg_pid;
+DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_play_type_psr_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_play_type_player_fuml_pid;
+DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_play_type_bc_trg_pid;
+DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_play_type_bc_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_ydl_100;
 DROP INDEX IF EXISTS public.idx_nfl_plays_tackle_assist_4_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_tackle_assist_3_pid;
@@ -48,6 +56,7 @@ DROP INDEX IF EXISTS public.idx_nfl_plays_dwn;
 DROP INDEX IF EXISTS public.idx_nfl_plays_catchable_ball;
 DROP INDEX IF EXISTS public.idx_nfl_plays_assisted_tackle_2_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_assisted_tackle_1_pid;
+DROP INDEX IF EXISTS public.idx_nfl_games_year_seas_type_esbid;
 DROP INDEX IF EXISTS public.idx_keeptradecut_rankings_type_qb_d_v;
 DROP INDEX IF EXISTS public.idx_keeptradecut_rankings_qb_type_d_pid;
 DROP INDEX IF EXISTS public.idx_keeptradecut_rankings_pid_qb_type_d;
@@ -6535,6 +6544,13 @@ CREATE INDEX idx_keeptradecut_rankings_type_qb_d_v ON public.keeptradecut_rankin
 
 
 --
+-- Name: idx_nfl_games_year_seas_type_esbid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_games_year_seas_type_esbid ON public.nfl_games USING btree (year, seas_type, esbid);
+
+
+--
 -- Name: idx_nfl_plays_assisted_tackle_1_pid; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -6661,10 +6677,31 @@ CREATE INDEX idx_nfl_plays_ydl_100 ON public.nfl_plays USING btree (ydl_100);
 
 
 --
+-- Name: idx_nfl_plays_year_seas_type_play_type_bc_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_year_seas_type_play_type_bc_pid ON public.nfl_plays USING btree (year, seas_type, play_type, bc_pid);
+
+
+--
+-- Name: idx_nfl_plays_year_seas_type_play_type_bc_trg_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_year_seas_type_play_type_bc_trg_pid ON public.nfl_plays USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+
+
+--
 -- Name: idx_nfl_plays_year_seas_type_play_type_player_fuml_pid; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_nfl_plays_year_seas_type_play_type_player_fuml_pid ON public.nfl_plays USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
+-- Name: idx_nfl_plays_year_seas_type_play_type_psr_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_year_seas_type_play_type_psr_pid ON public.nfl_plays USING btree (year, seas_type, play_type, psr_pid);
 
 
 --
@@ -6682,6 +6719,34 @@ CREATE INDEX idx_nfl_plays_year_seas_type_week_play_type ON public.nfl_plays USI
 
 
 --
+-- Name: idx_opening_days_year_opening_day; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_opening_days_year_opening_day ON public.opening_days USING btree (year, opening_day);
+
+
+--
+-- Name: idx_player_gamelogs_esbid_active_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_gamelogs_esbid_active_pid ON public.player_gamelogs USING btree (esbid, active, pid);
+
+
+--
+-- Name: idx_player_pid_pos; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_pid_pos ON public.player USING btree (pid, pos);
+
+
+--
+-- Name: idx_player_seasonlogs_year_seas_type_career_year_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_seasonlogs_year_seas_type_career_year_pid ON public.player_seasonlogs USING btree (year, seas_type, career_year, pid);
+
+
+--
 -- Name: idx_prop_market_selections_index_composite; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -6693,6 +6758,13 @@ CREATE INDEX idx_prop_market_selections_index_composite ON public.prop_market_se
 --
 
 CREATE INDEX idx_prop_markets_index_market_time_year ON public.prop_markets_index USING btree (market_type, time_type, year);
+
+
+--
+-- Name: idx_rosters_players_year_week_lid_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_rosters_players_year_week_lid_pid ON public.rosters_players USING btree (year, week, lid, pid);
 
 
 --
