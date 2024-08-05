@@ -36,6 +36,14 @@ export default {
     default_value: 0,
     enable_on_splits: ['year']
   },
+  week_offset: {
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    label: 'Week + N',
+    min: -18,
+    max: 18,
+    default_value: 0,
+    enable_on_splits: ['week']
+  },
   // TODO
   // seas_type: {
   //   values: constants.seas_types,

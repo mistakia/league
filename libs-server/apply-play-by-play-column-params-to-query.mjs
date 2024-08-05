@@ -1,10 +1,12 @@
 import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
 import * as table_constants from 'react-table/src/constants.mjs'
 
+const ignore_column_params = ['year_offset', 'week_offset']
+
 export default function ({ query, params, table_name = 'nfl_plays' }) {
   const column_param_keys = Object.keys(nfl_plays_column_params)
   for (const column_param_key of column_param_keys) {
-    if (column_param_key === 'year_offset') {
+    if (ignore_column_params.includes(column_param_key)) {
       continue
     }
 
@@ -35,6 +37,26 @@ export default function ({ query, params, table_name = 'nfl_plays' }) {
         )
       })
       param_value = [...new Set([...param_value, ...adjusted_years])]
+    }
+
+    // if week params and week_offset are set, adjust the week params to include the weeks for the week_offset range
+    if (column_param_key === 'week' && params.week_offset) {
+      // convert param_value to an array
+      param_value = Array.isArray(param_value) ? param_value : [param_value]
+
+      const week_offset_range = Array.isArray(params.week_offset)
+        ? params.week_offset
+        : [params.week_offset]
+
+      const min_offset = Math.min(...week_offset_range.map(Number))
+      const max_offset = Math.max(...week_offset_range.map(Number))
+
+      // Add week_offset_range to each item in the array and ensure uniqueness
+      const adjusted_weeks = param_value.flatMap((week) => {
+        const base_week = Number(week)
+        return Array.from({ length: max_offset - min_offset + 1 }, (_, i) => base_week + min_offset + i)
+      })
+      param_value = [...new Set([...param_value, ...adjusted_weeks])]
     }
 
     const column_param_definition = nfl_plays_column_params[column_param_key]

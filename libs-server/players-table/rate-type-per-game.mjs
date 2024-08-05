@@ -2,6 +2,8 @@ import get_table_hash from '../get-table-hash.mjs'
 import { constants } from '#libs-shared'
 import db from '#db'
 
+// TODO add support for week_offset
+
 export const get_per_game_cte_table_name = ({ params = {} } = {}) => {
   let year = params.year || [constants.season.stats_season_year]
   if (!Array.isArray(year)) {
