@@ -66,6 +66,33 @@ export const add_per_game_cte = ({
     week = [week]
   }
 
+  let year_offset = params.year_offset || []
+  if (!Array.isArray(year_offset)) {
+    year_offset = [year_offset]
+  }
+
+  const adjusted_years = year.flatMap((y) => {
+    const base_year = Number(y)
+    if (year_offset.length === 2) {
+      // If year_offset is a range
+      const max_offset = Math.max(...year_offset.map(Number))
+      const min_offset = Math.min(...year_offset.map(Number))
+      return Array.from(
+        { length: max_offset - min_offset + 1 },
+        (_, i) => base_year + min_offset + i
+      )
+    } else if (year_offset.length === 1) {
+      // If year_offset is a single number
+      return [base_year + Number(year_offset[0])]
+    } else {
+      return [base_year]
+    }
+  })
+
+  const all_years = [...new Set([...year, ...adjusted_years])].sort(
+    (a, b) => a - b
+  )
+
   const cte_query = db('player_gamelogs')
     .select('pid')
     .leftJoin('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
@@ -73,9 +100,8 @@ export const add_per_game_cte = ({
     .where('seas_type', 'REG')
     .where('active', true)
 
-  if (year) {
-    cte_query.whereIn('year', year)
-  }
+  cte_query.whereIn('year', all_years)
+
   if (week.length) {
     cte_query.whereIn('week', week)
   }
