@@ -70,6 +70,7 @@ const mapStateToProps = createSelector(
   get_players_table_views,
   (state) => state.getIn(['players', 'selected']),
   (state) => state.getIn(['app', 'teamId']),
+  (state) => state.getIn(['app', 'leagueId']),
   (state) => state.getIn(['players', 'highlight_teamIds']),
   getTeams,
   get_players_percentiles,
@@ -83,6 +84,7 @@ const mapStateToProps = createSelector(
     players_table_views,
     selected_player_pid,
     teamId,
+    leagueId,
     highlight_team_ids,
     teams,
     players_percentiles
@@ -98,6 +100,7 @@ const mapStateToProps = createSelector(
     players_table_views,
     selected_player_pid,
     teamId,
+    leagueId,
     highlight_team_ids,
     teams,
     players_percentiles
