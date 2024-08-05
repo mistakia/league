@@ -528,7 +528,21 @@ export default function ({
             ])
           )
         } else {
-          this.on(`${rate_type_table_name}.year`, year_split_join_clause)
+          const single_year_param_set =
+            params.year &&
+            (Array.isArray(params.year) ? params.year.length === 1 : true)
+          if (single_year_param_set) {
+            const specific_year = Array.isArray(params.year)
+              ? params.year[0]
+              : params.year
+            this.andOn(
+              `${rate_type_table_name}.year`,
+              '=',
+              db.raw('?', [specific_year])
+            )
+          } else {
+            this.on(`${rate_type_table_name}.year`, year_split_join_clause)
+          }
         }
       }
     })
