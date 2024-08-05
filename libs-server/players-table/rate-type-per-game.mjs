@@ -17,8 +17,32 @@ export const get_per_game_cte_table_name = ({ params = {} } = {}) => {
     week = [week]
   }
 
+  let year_offset = params.year_offset || []
+  if (!Array.isArray(year_offset)) {
+    year_offset = [year_offset]
+  }
+
+  const adjusted_years = year.flatMap((y) => {
+    const base_year = Number(y)
+    if (year_offset.length === 2) {
+      // If year_offset is a range
+      const max_offset = Math.max(...year_offset.map(Number))
+      const min_offset = Math.min(...year_offset.map(Number))
+      return Array.from(
+        { length: max_offset - min_offset + 1 },
+        (_, i) => base_year + min_offset + i
+      )
+    } else {
+      return base_year + Number(year_offset)
+    }
+  })
+
+  const all_years = [...new Set([...year, ...adjusted_years])].sort(
+    (a, b) => a - b
+  )
+
   return get_table_hash(
-    `games_played_years_${year.join('_')}_weeks_${week.join('_')}`
+    `games_played_years_${all_years.join('_')}_weeks_${week.join('_')}`
   )
 }
 
