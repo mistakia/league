@@ -52,14 +52,25 @@ export default function players_table_join_function(join_arguments) {
             )
           }
         } else {
-          this.andOn(db.raw(`${table_name}.year = ${year_split_join_clause}`))
+          const single_year_param_set =
+            params.year &&
+            (Array.isArray(params.year) ? params.year.length === 1 : true)
 
-          if (params.year) {
-            this.andOn(
-              db.raw(
-                `${table_name}.year IN (${Array.isArray(year) ? year.join(',') : year})`
+          if (single_year_param_set) {
+            const specific_year = Array.isArray(params.year)
+              ? params.year[0]
+              : params.year
+            this.andOn(`${table_name}.year`, '=', db.raw('?', [specific_year]))
+          } else {
+            this.andOn(db.raw(`${table_name}.year = ${year_split_join_clause}`))
+
+            if (params.year) {
+              this.andOn(
+                db.raw(
+                  `${table_name}.year IN (${Array.isArray(year) ? year.join(',') : year})`
+                )
               )
-            )
+            }
           }
         }
       } else if (year) {
