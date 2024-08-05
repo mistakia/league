@@ -493,30 +493,39 @@ export default function ({
   for (const [rate_type_table_name, params] of Object.entries(
     rate_type_tables
   )) {
+    const year_offset = params.year_offset
     const has_year_offset_range =
-      params.year_offset &&
-      Array.isArray(params.year_offset) &&
-      params.year_offset.length > 1 &&
-      params.year_offset[0] !== params.year_offset[1]
+      year_offset &&
+      Array.isArray(year_offset) &&
+      year_offset.length > 1 &&
+      year_offset[0] !== year_offset[1]
+    const has_single_year_offset =
+      year_offset &&
+      ((Array.isArray(year_offset) && year_offset.length === 1) ||
+        typeof year_offset === 'number')
+
     add_per_game_cte({ players_query, params, rate_type_table_name, splits })
     players_query.leftJoin(rate_type_table_name, function () {
       this.on(`${rate_type_table_name}.pid`, 'player.pid')
 
       if (splits.includes('year') && year_split_join_clause) {
         if (has_year_offset_range) {
-          const min_offset = Math.min(
-            params.year_offset[0],
-            params.year_offset[1]
-          )
-          const max_offset = Math.max(
-            params.year_offset[0],
-            params.year_offset[1]
-          )
+          const min_offset = Math.min(year_offset[0], year_offset[1])
+          const max_offset = Math.max(year_offset[0], year_offset[1])
           this.on(
             db.raw(
               `${rate_type_table_name}.year BETWEEN player_years.year + ? AND player_years.year + ?`,
               [min_offset, max_offset]
             )
+          )
+        } else if (has_single_year_offset) {
+          const offset = Array.isArray(year_offset)
+            ? year_offset[0]
+            : year_offset
+          this.on(
+            db.raw(`${rate_type_table_name}.year = player_years.year + ?`, [
+              offset
+            ])
           )
         } else {
           this.on(`${rate_type_table_name}.year`, year_split_join_clause)
