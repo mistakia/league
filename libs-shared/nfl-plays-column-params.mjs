@@ -26,7 +26,14 @@ export default {
   },
   year: {
     values: constants.years,
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    dynamic_values: [
+      {
+        dynamic_type: 'last_n_years',
+        label: 'Last N Years',
+        default_value: 3
+      }
+    ]
   },
   year_offset: {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,

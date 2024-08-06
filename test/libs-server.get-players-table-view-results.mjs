@@ -1941,6 +1941,35 @@ describe('LIBS SERVER get_players_table_view_results', () => {
     expect(query.toString()).to.equal(expected_query)
   })
 
+  it('dynamic year param', () => {
+    const query = get_players_table_view_results({
+      sort: [
+        {
+          column_id: 'player_receiving_yards_from_plays',
+          desc: true
+        }
+      ],
+      prefix_columns: ['player_name'],
+      columns: [
+        {
+          column_id: 'player_receiving_yards_from_plays',
+          params: {
+            year: [
+              2023,
+              {
+                dynamic_type: 'last_n_years',
+                value: 3
+              }
+            ]
+          }
+        }
+      ],
+      where: []
+    })
+    const expected_query = `with "taebf6a446d8236a599cb596c9bcc380b" as (select COALESCE(trg_pid) as pid, SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END) as rec_yds_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2022, 2023, 2024) group by COALESCE(trg_pid)) select "player"."pid", player.fname, player.lname, "taebf6a446d8236a599cb596c9bcc380b"."rec_yds_from_plays" AS "rec_yds_from_plays_0", "player"."pos" from "player" left join "taebf6a446d8236a599cb596c9bcc380b" on "taebf6a446d8236a599cb596c9bcc380b"."pid" = "player"."pid" group by player.fname, player.lname, "taebf6a446d8236a599cb596c9bcc380b"."rec_yds_from_plays", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 4 DESC NULLS LAST, "player"."pid" asc limit 500`
+    expect(query.toString()).to.equal(expected_query)
+  })
+
   describe('errors', () => {
     it('should throw an error if where value is missing', () => {
       try {
