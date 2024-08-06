@@ -15,6 +15,32 @@ import {
   get_with_where_string
 } from '#libs-server/players-table/where-string.mjs'
 
+const process_dynamic_params = (params) => {
+  const processed_params = { ...params }
+
+  if (params.year) {
+    let years = Array.isArray(params.year) ? params.year : [params.year]
+    const current_year = constants.season.year
+    const min_year = 2000
+
+    years = years.flatMap((year) => {
+      if (typeof year === 'object' && year.dynamic_type === 'last_n_years') {
+        const n = year.value || 3 // TODO set and use a const somewhere for the default value
+        return Array.from({ length: n }, (_, i) => {
+          const generated_year = current_year - i
+          return Math.max(min_year, Math.min(current_year, generated_year))
+        })
+      }
+      return year
+    })
+
+    // Convert to numbers and get unique values
+    processed_params.year = [...new Set(years.map(Number))]
+  }
+
+  return processed_params
+}
+
 const get_year_range = (columns, where) => {
   const years = new Set()
   let min_offset = 0
@@ -400,6 +426,22 @@ export default function ({
     })
     throw new Error(error_messages.join('\n'))
   }
+
+  // process params and convert dynamic params to static
+  where = where.map((where_clause) => ({
+    ...where_clause,
+    params: process_dynamic_params(where_clause.params || {})
+  }))
+
+  columns = columns.map((column) => {
+    if (typeof column === 'object' && column.params) {
+      return {
+        ...column,
+        params: process_dynamic_params(column.params || {})
+      }
+    }
+    return column
+  })
 
   const joined_table_index = {}
   const with_statement_index = {}
