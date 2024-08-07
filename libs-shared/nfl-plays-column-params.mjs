@@ -109,8 +109,12 @@ export default {
         values: [0, 20]
       },
       {
-        label: 'Goaline',
+        label: 'Inside 10',
         values: [0, 10]
+      },
+      {
+        label: 'Inside 5',
+        values: [0, 5]
       },
       {
         label: 'Between 20s',
