@@ -1,29 +1,12 @@
 import * as table_constants from 'react-table/src/constants.mjs'
 import * as constants from './constants.mjs'
 
+import { career_year, career_game } from './common-column-params.mjs'
+
 export default {
-  career_year: {
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
-    min: 1,
-    max: 25
-  },
-  career_game: {
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
-    min: 1,
-    max: 500
-  },
-  week: {
-    values: constants.nfl_weeks,
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
-  },
-  dwn: {
-    values: constants.downs,
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
-  },
-  qtr: {
-    values: constants.quarters,
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
-  },
+  career_year,
+  career_game,
+
   year: {
     values: constants.years,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
@@ -31,6 +14,11 @@ export default {
       {
         dynamic_type: 'last_n_years',
         label: 'Last N Years',
+        default_value: 3
+      },
+      {
+        dynamic_type: 'next_n_years',
+        label: 'Next N Years',
         default_value: 3
       }
     ]
@@ -48,6 +36,51 @@ export default {
   //   values: constants.seas_types,
   //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
   // },
+
+  week: {
+    values: constants.nfl_weeks,
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    dynamic_values: [
+      {
+        dynamic_type: 'last_n_weeks',
+        label: 'Last N Weeks',
+        default_value: 3
+      },
+      {
+        dynamic_type: 'next_n_weeks',
+        label: 'Next N Weeks',
+        default_value: 3
+      }
+    ]
+  },
+  dwn: {
+    values: constants.downs,
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    preset_values: [
+      {
+        label: 'Early Downs',
+        values: [1, 2]
+      },
+      {
+        label: 'Late Downs',
+        values: [3, 4]
+      }
+    ]
+  },
+  qtr: {
+    values: constants.quarters,
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    preset_values: [
+      {
+        label: 'First Half',
+        values: [1, 2]
+      },
+      {
+        label: 'Second Half',
+        values: [3, 4]
+      }
+    ]
+  },
 
   ydl_num: {
     min: 1,
@@ -69,7 +102,21 @@ export default {
   ydl_100: {
     min: 0,
     max: 99,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    preset_values: [
+      {
+        label: 'Redzone',
+        values: [0, 20]
+      },
+      {
+        label: 'Goaline',
+        values: [0, 10]
+      },
+      {
+        label: 'Between 20s',
+        values: [20, 80]
+      }
+    ]
   },
 
   starting_hash: {
@@ -803,7 +850,13 @@ export default {
   box_ngs: {
     min: 0,
     max: 11,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    preset_values: [
+      {
+        label: '8+',
+        values: [8, 11]
+      }
+    ]
   },
   pru_ngs: {
     min: 0,
@@ -813,7 +866,13 @@ export default {
   air_yards_ngs: {
     min: -99,
     max: 99,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    preset_values: [
+      {
+        label: '15+',
+        values: [15, 99]
+      }
+    ]
   },
   // TODO allow decimal precision for time_to_throw_ngs
   time_to_throw_ngs: {
@@ -1079,7 +1138,13 @@ export default {
   yds_gained: {
     min: -99,
     max: 99,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    preset_values: [
+      {
+        label: '10+',
+        values: [10, 99]
+      }
+    ]
   },
 
   fum: {
@@ -1172,23 +1237,95 @@ export default {
   pass_yds: {
     min: -99,
     max: 99,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    preset_values: [
+      {
+        label: '10+',
+        values: [10, 99]
+      },
+      {
+        label: '15+',
+        values: [15, 99]
+      },
+      {
+        label: '30+',
+        values: [20, 99]
+      },
+      {
+        label: '40+',
+        values: [40, 99]
+      }
+    ]
   },
   recv_yds: {
     min: -99,
     max: 99,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    preset_values: [
+      {
+        label: '10+',
+        values: [10, 99]
+      },
+      {
+        label: '15+',
+        values: [15, 99]
+      },
+      {
+        label: '30+',
+        values: [20, 99]
+      },
+      {
+        label: '40+',
+        values: [40, 99]
+      }
+    ]
   },
   rush_yds: {
     min: -99,
     max: 99,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    preset_values: [
+      {
+        label: '10+',
+        values: [10, 99]
+      },
+      {
+        label: '15+',
+        values: [15, 99]
+      },
+      {
+        label: '30+',
+        values: [20, 99]
+      },
+      {
+        label: '40+',
+        values: [40, 99]
+      }
+    ]
   },
 
   dot: {
     min: -99,
     max: 99,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    preset_values: [
+      {
+        label: '10+',
+        values: [10, 99]
+      },
+      {
+        label: '15+',
+        values: [15, 99]
+      },
+      {
+        label: '30+',
+        values: [20, 99]
+      },
+      {
+        label: '40+',
+        values: [40, 99]
+      }
+    ]
   },
   true_air_yards: {
     min: -40,
@@ -1411,7 +1548,13 @@ export default {
   box: {
     min: 0,
     max: 11,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    preset_values: [
+      {
+        label: '8+',
+        values: [8, 11]
+      }
+    ]
   },
   boxdb: {
     min: 0,
@@ -1450,7 +1593,13 @@ export default {
   epa: {
     min: -14,
     max: 14,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    preset_values: [
+      {
+        label: '0+',
+        values: [0, 14]
+      }
+    ]
   },
   ep_succ: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
@@ -1568,7 +1717,13 @@ export default {
     min: -1,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    preset_values: [
+      {
+        label: '0+',
+        values: [0, 1]
+      }
+    ]
   },
   home_wp: {
     min: 0,

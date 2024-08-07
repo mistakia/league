@@ -18,27 +18,70 @@ import {
 const process_dynamic_params = (params) => {
   const processed_params = { ...params }
 
+  // Process year parameter
   if (params.year) {
-    let years = Array.isArray(params.year) ? params.year : [params.year]
-    const current_year = constants.season.year
-    const min_year = 2000
+    processed_params.year = process_dynamic_year_param(params.year)
+  }
 
-    years = years.flatMap((year) => {
-      if (typeof year === 'object' && year.dynamic_type === 'last_n_years') {
-        const n = year.value || 3 // TODO set and use a const somewhere for the default value
-        return Array.from({ length: n }, (_, i) => {
-          const generated_year = current_year - i
-          return Math.max(min_year, Math.min(current_year, generated_year))
-        })
-      }
-      return year
-    })
-
-    // Convert to numbers and get unique values
-    processed_params.year = [...new Set(years.map(Number))]
+  // Process week parameter
+  if (params.week) {
+    processed_params.week = process_dynamic_week_param(params.week)
   }
 
   return processed_params
+}
+
+const process_dynamic_year_param = (year_param) => {
+  let years = Array.isArray(year_param) ? year_param : [year_param]
+  const current_year = constants.season.year
+  const max_year = constants.season.year
+  const min_year = 2000
+
+  years = years.flatMap((year) => {
+    if (typeof year === 'object') {
+      if (year.dynamic_type === 'last_n_years') {
+        const n = year.value || 3
+        return Array.from({ length: n }, (_, i) =>
+          Math.max(min_year, current_year - i)
+        )
+      } else if (year.dynamic_type === 'next_n_years') {
+        const n = year.value || 3
+        return Array.from({ length: n }, (_, i) =>
+          Math.min(max_year, current_year + i + 1)
+        )
+      }
+    }
+    return Math.max(min_year, Math.min(max_year, Number(year)))
+  })
+
+  return [...new Set(years)]
+}
+
+const process_dynamic_week_param = (week_param) => {
+  let weeks = Array.isArray(week_param) ? week_param : [week_param]
+  const current_week = constants.season.week
+  // TODO get max_week from db based on year
+  const max_week = 18
+  const min_week = 0
+
+  weeks = weeks.flatMap((week) => {
+    if (typeof week === 'object') {
+      if (week.dynamic_type === 'last_n_weeks') {
+        const n = week.value || 3
+        return Array.from({ length: n }, (_, i) =>
+          Math.max(min_week, current_week - i)
+        )
+      } else if (week.dynamic_type === 'next_n_weeks') {
+        const n = week.value || 3
+        return Array.from({ length: n }, (_, i) =>
+          Math.min(max_week, current_week + i + 1)
+        )
+      }
+    }
+    return Math.max(min_week, Math.min(max_week, Number(week)))
+  })
+
+  return [...new Set(weeks)]
 }
 
 const get_year_range = (columns, where) => {
