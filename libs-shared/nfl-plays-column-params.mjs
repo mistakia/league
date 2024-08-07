@@ -1715,7 +1715,17 @@ export default {
     min: 0,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    preset_values: [
+      {
+        label: 'Exclude Garbage Time (20% to 80%)',
+        values: [0.2, 0.8]
+      },
+      {
+        label: 'Neutral (35% to 65%)',
+        values: [0.35, 0.65]
+      }
+    ]
   },
   wpa: {
     min: -1,
