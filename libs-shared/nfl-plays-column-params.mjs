@@ -2,58 +2,27 @@ import * as table_constants from 'react-table/src/constants.mjs'
 import * as constants from './constants.mjs'
 import { COLUMN_PARAM_GROUPS } from './column-param-groups.mjs'
 
-import { career_year, career_game } from './common-column-params.mjs'
+import {
+  career_year,
+  career_game,
+  year,
+  week,
+  year_offset
+} from './common-column-params.mjs'
 
 export default {
   career_year,
   career_game,
 
-  year: {
-    values: constants.years,
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-    dynamic_values: [
-      {
-        dynamic_type: 'last_n_years',
-        label: 'Last N Years',
-        default_value: 3
-      },
-      {
-        dynamic_type: 'next_n_years',
-        label: 'Next N Years',
-        default_value: 3
-      }
-    ]
-  },
-  year_offset: {
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
-    label: 'Year + N',
-    min: -30,
-    max: 30,
-    default_value: 0,
-    enable_on_splits: ['year']
-  },
+  year,
+  year_offset,
   // TODO
   // seas_type: {
   //   values: constants.seas_types,
   //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
   // },
+  week,
 
-  week: {
-    values: constants.nfl_weeks,
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-    dynamic_values: [
-      {
-        dynamic_type: 'last_n_weeks',
-        label: 'Last N Weeks',
-        default_value: 3
-      },
-      {
-        dynamic_type: 'next_n_weeks',
-        label: 'Next N Weeks',
-        default_value: 3
-      }
-    ]
-  },
   dwn: {
     values: constants.downs,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,

@@ -56,11 +56,6 @@ const from_scoring_format_careerlogs = (field) => ({
 })
 
 export default {
-  player_fantasy_games_played_from_seasonlogs: from_scoring_format_seasonlogs({
-    column_title: 'Games Played (By Season)',
-    header_label: 'GP',
-    player_value_path: 'games_from_seasonlogs'
-  }),
   player_fantasy_points_rank_from_seasonlogs: from_scoring_format_seasonlogs({
     column_title: 'Fantasy Points Rank (By Season)',
     header_label: 'RNK',
@@ -73,11 +68,6 @@ export default {
       player_value_path: 'points_pos_rnk_from_seasonlogs'
     }),
 
-  player_fantasy_games_played_from_careerlogs: from_scoring_format_careerlogs({
-    column_title: 'Games Played (Career)',
-    header_label: 'GP',
-    player_value_path: 'games_from_careerlogs'
-  }),
   player_fantasy_top_1_seasons_from_careerlogs: from_scoring_format_careerlogs({
     column_title: 'Top 1 Season (Career)',
     header_label: 'TOP 1',

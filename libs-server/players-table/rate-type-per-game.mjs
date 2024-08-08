@@ -117,3 +117,62 @@ export const add_per_game_cte = ({
 
   players_query.with(rate_type_table_name, cte_query)
 }
+
+export const join_per_game_cte = ({
+  players_query,
+  rate_type_table_name,
+  splits,
+  year_split_join_clause,
+  params
+}) => {
+  const year_offset = params.year_offset
+  const has_year_offset_range =
+    year_offset &&
+    Array.isArray(year_offset) &&
+    year_offset.length > 1 &&
+    year_offset[0] !== year_offset[1]
+  const has_single_year_offset =
+    year_offset &&
+    ((Array.isArray(year_offset) && year_offset.length === 1) ||
+      typeof year_offset === 'number')
+
+  players_query.leftJoin(rate_type_table_name, function () {
+    this.on(`${rate_type_table_name}.pid`, 'player.pid')
+
+    if (splits.includes('year') && year_split_join_clause) {
+      if (has_year_offset_range) {
+        const min_offset = Math.min(year_offset[0], year_offset[1])
+        const max_offset = Math.max(year_offset[0], year_offset[1])
+        this.on(
+          db.raw(
+            `${rate_type_table_name}.year BETWEEN player_years.year + ? AND player_years.year + ?`,
+            [min_offset, max_offset]
+          )
+        )
+      } else if (has_single_year_offset) {
+        const offset = Array.isArray(year_offset) ? year_offset[0] : year_offset
+        this.on(
+          db.raw(`${rate_type_table_name}.year = player_years.year + ?`, [
+            offset
+          ])
+        )
+      } else {
+        const single_year_param_set =
+          params.year &&
+          (Array.isArray(params.year) ? params.year.length === 1 : true)
+        if (single_year_param_set) {
+          const specific_year = Array.isArray(params.year)
+            ? params.year[0]
+            : params.year
+          this.andOn(
+            `${rate_type_table_name}.year`,
+            '=',
+            db.raw('?', [specific_year])
+          )
+        } else {
+          this.on(`${rate_type_table_name}.year`, year_split_join_clause)
+        }
+      }
+    }
+  })
+}
