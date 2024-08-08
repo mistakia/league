@@ -43,8 +43,13 @@ const update_play = async ({
   for (const edit of edits) {
     const prop = edit.path[0]
 
-    const is_null = !edit.rhs
+    const is_null = edit.rhs === null
     if (is_null) {
+      continue
+    }
+
+    const is_undefined = edit.rhs === undefined
+    if (is_undefined) {
       continue
     }
 

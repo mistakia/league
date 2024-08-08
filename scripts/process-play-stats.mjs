@@ -16,13 +16,27 @@ import {
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process-play-stats')
-debug.enable('process-play-stats')
+debug.enable('process-play-stats,update-play')
 const current_week = Math.max(
   dayjs().day() === 2
     ? constants.season.nfl_seas_week - 1
     : constants.season.nfl_seas_week,
   1
 )
+
+const is_successful_play = ({ yds_gained, yards_to_go, dwn }) => {
+  if (!dwn || !yards_to_go || !yds_gained) return null
+
+  if (dwn === 1) {
+    return yds_gained >= 0.4 * yards_to_go
+  } else if (dwn === 2) {
+    return yds_gained >= 0.6 * yards_to_go
+  } else if (dwn === 3 || dwn === 4) {
+    return yds_gained >= yards_to_go
+  }
+
+  return null
+}
 
 // TODO - add KNEE, SPKE
 const get_play_type_ngs = (play_type_ngs) => {
@@ -309,7 +323,11 @@ const run = async ({
       'nfl_plays.playId',
       'nfl_plays.play_type_ngs',
       'nfl_plays.play_type_nfl',
-      'nfl_plays.pos_team'
+      'nfl_plays.pos_team',
+      'nfl_plays.yds_gained',
+      'nfl_plays.yards_to_go',
+      'nfl_plays.dwn',
+      'nfl_plays.succ'
     )
     .join('nfl_games', 'nfl_plays.esbid', '=', 'nfl_games.esbid')
     .where('nfl_plays.year', year)
@@ -328,18 +346,22 @@ const run = async ({
       continue
     }
 
+    const succ = is_successful_play(play)
+
     await update_play({
       play_row: {
         off: play.off,
         def: play.def,
         play_type: play.play_type,
         esbid: play.esbid,
-        playId: play.playId
+        playId: play.playId,
+        succ: play.succ
       },
       update: {
         off,
         def,
-        play_type
+        play_type,
+        succ
       },
       ignore_conflicts
     })
@@ -356,8 +378,6 @@ const run = async ({
 
       const play_row = getPlayFromPlayStats({ playStats })
       if (Object.keys(play_row).length === 0) continue
-
-      // TODO - succ
 
       if (play_row.player_fuml_gsis) {
         const player = player_gsisid_rows.find(
