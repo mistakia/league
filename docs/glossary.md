@@ -218,7 +218,6 @@
 | penalty                 | Penalty                 | Indicator if the play was a penalty                                               | 99.11%   | 2001/01/06 |
 | ret_td                  | Return Touchdown        | Indicator if the return was a touchdown                                           | 20.11%   | 2001/01/06 |
 | ret_tm                  | Return Team             | Team that was returned to                                                         | -        | -          |
-| ret_yds                 | Return Yards            | Yards gained by the team after the return                                         | 84.19%   | 2001/01/06 |
 | stunt                   | Stunt                   | stunt, when any two pass rushers cross, trading pass rush lanes on a passing down | 23.42%   | 2021/09/10 |
 | tfl                     | Tackle For Loss         | Indicator if the tackle was for loss                                              | 55.59%   | 2001/09/09 |
 | to                      | Timeout                 | Indicator if the play was a timeout                                               | 55.59%   | 2001/09/09 |
@@ -520,6 +519,7 @@
 | ----------------- | ---------------------------- | ---------------------------------------------------------------------------- | -------- | ---------- |
 | special           | Special Teams Play           | Indicator if a special teams play occurred                                   | 96.47%   | 2001/09/09 |
 | special_play_type | Special Play Type            | -                                                                            | 15.72%   | 2001/01/06 |
+| ret_yds           | Return Yards                 | Yards gained by the team after the return                                    | 84.19%   | 2001/01/06 |
 | touchback         | Touchback                    | Indicator if a touchback occurred                                            | 55.59%   | 2001/09/09 |
 | ep_att            | Extra Point Attempt          | Binary indicator for extra point attempt.                                    | 55.59%   | 2001/09/09 |
 | two_att           | Two Point Conversion Attempt | Binary indicator for two point conversion attempt.                           | 55.59%   | 2001/09/09 |
