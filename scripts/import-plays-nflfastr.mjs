@@ -304,7 +304,18 @@ const main = async () => {
     const year = argv.year || constants.season.year
     const force_import = argv.force
     const force_download = argv.d
-    await run({ year, force_import, force_download })
+    const all = argv.all
+    if (all) {
+      for (
+        let year = 1999;
+        year <= constants.season.stats_season_year;
+        year++
+      ) {
+        await run({ year, force_import, force_download })
+      }
+    } else {
+      await run({ year, force_import, force_download })
+    }
   } catch (err) {
     error = err
     console.log(error)
