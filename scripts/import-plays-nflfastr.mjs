@@ -48,6 +48,18 @@ const format_number = (num) => {
   return Number(n.toFixed(12))
 }
 
+const format_play_direction = (direction) => {
+  if (!direction) return null
+
+  const normalized = direction.toUpperCase()
+
+  if (['LEFT', 'MIDDLE', 'RIGHT'].includes(normalized)) {
+    return normalized
+  }
+
+  return null
+}
+
 const format_play = (play) => ({
   ydl_100: format_number(play.yardline_100),
 
@@ -103,8 +115,10 @@ const format_play = (play) => ({
   qb_kneel: format_number(play.qb_kneel),
   qb_spike: format_number(play.qb_spike),
 
-  run_location: play.run_location || null,
+  run_location: format_play_direction(play.run_location),
   run_gap: play.run_gap || null,
+
+  pass_location: format_play_direction(play.pass_location),
 
   first_down_rush: format_number(play.first_down_rush),
   first_down_pass: format_number(play.first_down_pass),
