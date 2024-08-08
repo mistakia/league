@@ -1524,7 +1524,7 @@ export default {
   },
 
   run_location: {
-    values: ['left', 'right', 'middle'],
+    values: ['LEFT', 'RIGHT', 'MIDDLE'],
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.RUSHING]
   },
@@ -1532,6 +1532,12 @@ export default {
     values: ['end', 'tackle', 'guard'],
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.RUSHING]
+  },
+
+  pass_location: {
+    values: ['LEFT', 'RIGHT', 'MIDDLE'],
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
 
   trick_look: {
