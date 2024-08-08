@@ -380,6 +380,7 @@ DROP TYPE IF EXISTS public.wager_status;
 DROP TYPE IF EXISTS public.time_type;
 DROP TYPE IF EXISTS public.read_thrown_type;
 DROP TYPE IF EXISTS public.qb_position;
+DROP TYPE IF EXISTS public.play_direction;
 DROP TYPE IF EXISTS public.placed_wagers_wager_type;
 DROP TYPE IF EXISTS public.placed_wagers_book_id;
 DROP TYPE IF EXISTS public.nfl_play_type;
@@ -477,6 +478,17 @@ CREATE TYPE public.placed_wagers_wager_type AS ENUM (
     'SINGLE',
     'PARLAY',
     'ROUND_ROBIN'
+);
+
+
+--
+-- Name: play_direction; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.play_direction AS ENUM (
+    'LEFT',
+    'MIDDLE',
+    'RIGHT'
 );
 
 
@@ -1546,7 +1558,7 @@ CREATE TABLE public.nfl_plays (
     qb_dropback boolean,
     qb_kneel boolean,
     qb_spike boolean,
-    run_location character varying(10),
+    run_location public.play_direction,
     run_gap character varying(10),
     first_down_rush boolean,
     first_down_pass boolean,
@@ -1673,7 +1685,8 @@ CREATE TABLE public.nfl_plays (
     tackle_assist_3_gsis character varying(36),
     tackle_assist_3_pid character varying(25),
     tackle_assist_4_gsis character varying(36),
-    tackle_assist_4_pid character varying(25)
+    tackle_assist_4_pid character varying(25),
+    pass_location public.play_direction
 );
 
 
