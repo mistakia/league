@@ -69,5 +69,11 @@ export default {
     column_groups: [COLUMN_GROUPS.TEAM_STATS, COLUMN_GROUPS.ADVANCED],
     header_label: 'EPA',
     player_value_path: 'team_ep_added_from_plays'
+  }),
+  team_win_percentage_added_from_plays: from_play_field({
+    column_title: 'Team Win Percentage Added (By Play)',
+    column_groups: [COLUMN_GROUPS.TEAM_STATS, COLUMN_GROUPS.ADVANCED],
+    header_label: 'WPA',
+    player_value_path: 'team_wp_added_from_plays'
   })
 }

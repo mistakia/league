@@ -83,5 +83,9 @@ export default {
   team_expected_points_added_from_plays: team_stat_from_plays({
     select_string: `SUM(epa)`,
     stat_name: 'team_ep_added_from_plays'
+  }),
+  team_win_percentage_added_from_plays: team_stat_from_plays({
+    select_string: `SUM(wpa)`,
+    stat_name: 'team_wp_added_from_plays'
   })
 }
