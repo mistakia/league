@@ -116,8 +116,6 @@ export default {
     create_field_from_scoring_format_player_seasonlogs('points'),
   player_fantasy_points_per_game_from_seasonlogs:
     create_field_from_scoring_format_player_seasonlogs('points_per_game'),
-  player_fantasy_games_played_from_seasonlogs:
-    create_field_from_scoring_format_player_seasonlogs('games'),
   player_fantasy_points_rank_from_seasonlogs:
     create_field_from_scoring_format_player_seasonlogs('points_rnk'),
   player_fantasy_points_position_rank_from_seasonlogs:
@@ -127,8 +125,6 @@ export default {
     create_field_from_scoring_format_player_careerlogs('points'),
   player_fantasy_points_per_game_from_careerlogs:
     create_field_from_scoring_format_player_careerlogs('points_per_game'),
-  player_fantasy_games_played_from_careerlogs:
-    create_field_from_scoring_format_player_careerlogs('games'),
   player_fantasy_top_1_seasons_from_careerlogs:
     create_field_from_scoring_format_player_careerlogs('top_1'),
   player_fantasy_top_3_seasons_from_careerlogs:
