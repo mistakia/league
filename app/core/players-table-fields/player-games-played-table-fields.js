@@ -9,7 +9,7 @@ export default {
     header_label: 'GP',
     player_value_path: 'games_played',
     size: 40,
-    date_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+    data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
     column_params: {
       year,
       week,
