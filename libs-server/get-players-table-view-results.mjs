@@ -4,7 +4,8 @@ import players_table_column_definitions from '#libs-server/players-table-column-
 import * as validators from '#libs-server/validators.mjs'
 import {
   get_per_game_cte_table_name,
-  add_per_game_cte
+  add_per_game_cte,
+  join_per_game_cte
 } from '#libs-server/players-table/rate-type-per-game.mjs'
 import {
   get_main_select_string,
@@ -490,12 +491,12 @@ export default function ({
   const with_statement_index = {}
   const players_query = db('player').select('player.pid')
   const table_columns = []
-  const rate_type_tables = {}
   const rate_type_column_mapping = {}
   const players_table_options = {
     opening_days_joined: false,
     nfl_year_week_timestamp_joined: false,
-    year_coalesce_args: []
+    year_coalesce_args: [],
+    rate_type_tables: {}
   }
 
   let year_split_join_clause
@@ -569,67 +570,23 @@ export default function ({
       const rate_type_table_name = get_per_game_cte_table_name({
         params: column.params
       })
-      rate_type_tables[rate_type_table_name] = column.params
+      players_table_options.rate_type_tables[rate_type_table_name] =
+        column.params
       rate_type_column_mapping[`${column.column_id}_${column_index}`] =
         rate_type_table_name
     }
   }
 
   for (const [rate_type_table_name, params] of Object.entries(
-    rate_type_tables
+    players_table_options.rate_type_tables
   )) {
-    const year_offset = params.year_offset
-    const has_year_offset_range =
-      year_offset &&
-      Array.isArray(year_offset) &&
-      year_offset.length > 1 &&
-      year_offset[0] !== year_offset[1]
-    const has_single_year_offset =
-      year_offset &&
-      ((Array.isArray(year_offset) && year_offset.length === 1) ||
-        typeof year_offset === 'number')
-
     add_per_game_cte({ players_query, params, rate_type_table_name, splits })
-    players_query.leftJoin(rate_type_table_name, function () {
-      this.on(`${rate_type_table_name}.pid`, 'player.pid')
-
-      if (splits.includes('year') && year_split_join_clause) {
-        if (has_year_offset_range) {
-          const min_offset = Math.min(year_offset[0], year_offset[1])
-          const max_offset = Math.max(year_offset[0], year_offset[1])
-          this.on(
-            db.raw(
-              `${rate_type_table_name}.year BETWEEN player_years.year + ? AND player_years.year + ?`,
-              [min_offset, max_offset]
-            )
-          )
-        } else if (has_single_year_offset) {
-          const offset = Array.isArray(year_offset)
-            ? year_offset[0]
-            : year_offset
-          this.on(
-            db.raw(`${rate_type_table_name}.year = player_years.year + ?`, [
-              offset
-            ])
-          )
-        } else {
-          const single_year_param_set =
-            params.year &&
-            (Array.isArray(params.year) ? params.year.length === 1 : true)
-          if (single_year_param_set) {
-            const specific_year = Array.isArray(params.year)
-              ? params.year[0]
-              : params.year
-            this.andOn(
-              `${rate_type_table_name}.year`,
-              '=',
-              db.raw('?', [specific_year])
-            )
-          } else {
-            this.on(`${rate_type_table_name}.year`, year_split_join_clause)
-          }
-        }
-      }
+    join_per_game_cte({
+      players_query,
+      params,
+      rate_type_table_name,
+      splits,
+      year_split_join_clause
     })
   }
 
