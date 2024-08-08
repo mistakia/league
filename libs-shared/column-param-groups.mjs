@@ -1,0 +1,23 @@
+export const COLUMN_PARAM_GROUPS = {
+  WEATHER: 'Weather',
+  PASSING: 'Passing',
+  RECEIVING: 'Receiving',
+  RUSHING: 'Rushing',
+  DEFENSE: 'Defense',
+  COVERAGE: 'Coverage',
+  DRIVE: 'Drive',
+  SERIES: 'Series',
+  PACE: 'Pace',
+  PLAY_TYPE: 'Play Type',
+  PLAY_TIMEOUT: 'Play Timeout',
+  PLAY_SITUATION: 'Play Situation',
+  PLAY_OUTCOME: 'Play Outcome',
+  SCORE: 'Score',
+  WIN_PROBABILITY: 'Win Probability',
+  EXPECTED_POINTS: 'Expected Points',
+  PROBABILITY: 'Probability',
+  PENALTY: 'Penalty',
+  FORMATION_PERSONNEL: 'Formation / Personnel',
+  SPECIAL_TEAMS: 'Special Teams',
+  PRESSURE: 'Pressure'
+}
