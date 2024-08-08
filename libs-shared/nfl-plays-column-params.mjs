@@ -1,5 +1,6 @@
 import * as table_constants from 'react-table/src/constants.mjs'
 import * as constants from './constants.mjs'
+import { COLUMN_PARAM_GROUPS } from './column-param-groups.mjs'
 
 import { career_year, career_game } from './common-column-params.mjs'
 
@@ -56,6 +57,7 @@ export default {
   dwn: {
     values: constants.downs,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_SITUATION],
     preset_values: [
       {
         label: 'Early Downs',
@@ -70,6 +72,7 @@ export default {
   qtr: {
     values: constants.quarters,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_SITUATION],
     preset_values: [
       {
         label: 'First Half',
@@ -82,10 +85,28 @@ export default {
     ]
   },
 
+  play_type: {
+    values: ['CONV', 'FGXP', 'KOFF', 'NOPL', 'PASS', 'PUNT', 'RUSH'],
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_TYPE]
+  },
+  // play_type_nfl: {
+  //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
+  // },
+  // play_type_ngs: {
+  //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
+  // },
+
+  // TODO look into this
+  // next_play_type: {
+  //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
+  // },
+
   ydl_num: {
     min: 1,
     max: 50,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_SITUATION]
   },
   // TODO
   // ydl_side: {
@@ -103,6 +124,7 @@ export default {
     min: 0,
     max: 99,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_SITUATION],
     preset_values: [
       {
         label: 'Redzone',
@@ -125,7 +147,8 @@ export default {
 
   starting_hash: {
     values: ['RIGHT', 'MIDDLE', 'LEFT'],
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_SITUATION]
   },
 
   motion: {
@@ -135,14 +158,15 @@ export default {
   yards_to_go: {
     min: 0,
     max: 99,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_SITUATION]
   },
   // TODO data missing
   // yfog: {
   //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
   // },
 
-  off_formation: {
+  off_FORMATION_PERSONNEL: {
     values: [
       'SHOTGUN',
       'SINGLEBACK',
@@ -152,7 +176,8 @@ export default {
       'PISTOL',
       'WILDCAT'
     ],
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.FORMATION_PERSONNEL]
   },
   off_personnel: {
     values: [
@@ -509,7 +534,8 @@ export default {
       '8 OL, 1 RB, 1 TE, 0 WR',
       '8 OL, 2 RB, 0 TE, 0 WR'
     ],
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.FORMATION_PERSONNEL]
   },
   def_personnel: {
     values: [
@@ -848,13 +874,15 @@ export default {
       '7 DL, 3 LB, 1 DB',
       '7 DL, 5 LB, 5 DB, 1 WR'
     ],
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.FORMATION_PERSONNEL]
   },
 
   box_ngs: {
     min: 0,
     max: 11,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.DEFENSE],
     preset_values: [
       {
         label: '8+',
@@ -865,12 +893,14 @@ export default {
   pru_ngs: {
     min: 0,
     max: 11,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.DEFENSE]
   },
   air_yards_ngs: {
     min: -99,
     max: 99,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PASSING],
     preset_values: [
       {
         label: '15+',
@@ -882,7 +912,8 @@ export default {
   time_to_throw_ngs: {
     min: 0,
     max: 30,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
   route_ngs: {
     values: [
@@ -899,11 +930,13 @@ export default {
       'ANGLE',
       'WHEEL'
     ],
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.RECEIVING]
   },
   man_zone_ngs: {
     values: ['MAN_COVERAGE', 'ZONE_COVERAGE'],
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.COVERAGE]
   },
   cov_type_ngs: {
     values: [
@@ -916,23 +949,27 @@ export default {
       'COVER_6',
       'PREVENT'
     ],
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.COVERAGE]
   },
 
   drive_seq: {
     min: 1,
     max: 50,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.DRIVE]
   },
   drive_yds: {
     min: -99,
     max: 99,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.DRIVE]
   },
   drive_play_count: {
     min: 0,
     max: 30,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.DRIVE]
   },
   drive_result: {
     values: [
@@ -946,7 +983,8 @@ export default {
       'Opp touchdown',
       'Safety'
     ],
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.DRIVE]
   },
   // TODO change format to allow for range
   // drive_top: {
@@ -955,26 +993,32 @@ export default {
   drive_fds: {
     min: 0,
     max: 20,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.DRIVE]
   },
   drive_inside20: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.DRIVE]
   },
   drive_score: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.DRIVE]
   },
   drive_start_qtr: {
     values: constants.quarters,
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.DRIVE]
   },
   drive_end_qtr: {
     values: constants.quarters,
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.DRIVE]
   },
   drive_yds_penalized: {
     min: -99,
     max: 99,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.DRIVE]
   },
   drive_start_transition: {
     values: [
@@ -994,7 +1038,8 @@ export default {
       'BLOCKED_FG,_DOWNS',
       'BLOCKED_PUNT,_DOWNS'
     ],
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.DRIVE]
   },
   drive_end_transition: {
     values: [
@@ -1017,7 +1062,8 @@ export default {
       'FUMBLE,_SAFETY',
       'BLOCKED_PUNT,_DOWNS'
     ],
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.DRIVE]
   },
   // TODO change format to allow for range
   // drive_game_clock_start: {
@@ -1038,10 +1084,12 @@ export default {
   series_seq: {
     min: 1,
     max: 90,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.SERIES]
   },
   series_suc: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.SERIES]
   },
   series_result: {
     values: [
@@ -1057,29 +1105,35 @@ export default {
       'TURNOVER',
       'TURNOVER_ON_DOWNS'
     ],
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.SERIES]
   },
 
   goal_to_go: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_SITUATION]
   },
 
   score: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
   score_type: {
     values: ['FG', 'PAT', 'PAT2', 'SFTY', 'TD'],
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
   score_team: {
     values: constants.nflTeams,
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
 
   play_clock: {
     min: 0,
     max: 90, // TODO figure out why this is so high
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PACE]
   },
 
   // TODO change format to allow for range
@@ -1092,17 +1146,20 @@ export default {
   sec_rem_qtr: {
     min: 0,
     max: 900,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_SITUATION]
   },
   sec_rem_half: {
     min: 0,
     max: 1800,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_SITUATION]
   },
   sec_rem_gm: {
     min: 0,
     max: 3600,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_SITUATION]
   },
 
   pos_team: {
@@ -1123,22 +1180,6 @@ export default {
   //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
   // },
 
-  play_type: {
-    values: ['CONV', 'FGXP', 'KOFF', 'NOPL', 'PASS', 'PUNT', 'RUSH'],
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
-  },
-  // play_type_nfl: {
-  //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
-  // },
-  // play_type_ngs: {
-  //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
-  // },
-
-  // TODO look into this
-  // next_play_type: {
-  //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
-  // },
-
   yds_gained: {
     min: -99,
     max: 99,
@@ -1148,53 +1189,67 @@ export default {
         label: '10+',
         values: [10, 99]
       }
-    ]
+    ],
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
 
   fum: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
   fuml: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
   int: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
   sk: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
   succ: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
   comp: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
   incomp: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
   trick_play: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
   touchback: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
   safety: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
   penalty: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
   oob: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
   tfl: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
   rush: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_TYPE]
   },
   pass: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_TYPE]
   },
   solo_tk: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
@@ -1204,7 +1259,8 @@ export default {
   },
 
   special: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.SPECIAL_TEAMS]
   },
   // TODO look into this
   // special_play_type: {
@@ -1213,25 +1269,31 @@ export default {
 
   pen_team: {
     values: constants.nflTeams,
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.PENALTY]
   },
   pen_yds: {
     min: 0,
     max: 99,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PENALTY]
   },
 
   td: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
   ret_td: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
   pass_td: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
   rush_td: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
   // TODO look into this
   // td_tm: {
@@ -1242,6 +1304,7 @@ export default {
     min: -99,
     max: 99,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PASSING],
     preset_values: [
       {
         label: '10+',
@@ -1265,6 +1328,7 @@ export default {
     min: -99,
     max: 99,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.RECEIVING],
     preset_values: [
       {
         label: '10+',
@@ -1288,6 +1352,7 @@ export default {
     min: -99,
     max: 99,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.RUSHING],
     preset_values: [
       {
         label: '10+',
@@ -1312,6 +1377,7 @@ export default {
     min: -99,
     max: 99,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PASSING],
     preset_values: [
       {
         label: '10+',
@@ -1334,12 +1400,14 @@ export default {
   true_air_yards: {
     min: -40,
     max: 99,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
   yards_after_catch: {
     min: -99,
     max: 99,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.RECEIVING]
   },
   yards_after_any_contact: {
     min: -99,
@@ -1349,77 +1417,98 @@ export default {
   ret_yds: {
     min: -100,
     max: 120,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.SPECIAL_TEAMS]
   },
   // ret_tm: {
   //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
   // },
 
   no_huddle: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_SITUATION]
   },
   play_action: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
   qb_dropback: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
   qb_kneel: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
   qb_spike: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
   qb_rush: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.RUSHING]
   },
   qb_sneak: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.RUSHING]
   },
   qb_scramble: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.RUSHING]
   },
 
   qb_pressure: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PRESSURE]
   },
   qb_pressure_ngs: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PRESSURE]
   },
   qb_hit: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PRESSURE]
   },
   qb_hurry: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PRESSURE]
   },
 
   int_worthy: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
   catchable_ball: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
   throw_away: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
   shovel_pass: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
   sideline_pass: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
   highlight_pass: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
 
   dropped_pass: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
   contested_ball: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
   created_reception: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.RECEIVING]
   },
 
   mbt: {
@@ -1430,92 +1519,116 @@ export default {
   avsk: {
     min: 0,
     max: 11,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PRESSURE]
   },
 
   run_location: {
     values: ['left', 'right', 'middle'],
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.RUSHING]
   },
   run_gap: {
     values: ['end', 'tackle', 'guard'],
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.RUSHING]
   },
 
   trick_look: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.FORMATION_PERSONNEL]
   },
 
   first_down: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
   first_down_rush: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.RUSHING]
   },
   first_down_pass: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
   first_down_penalty: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PENALTY]
   },
 
   third_down_converted: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
   third_down_failed: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
   fourth_down_converted: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
   fourth_down_failed: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
 
   hindered_pass: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
   zero_blitz: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.DEFENSE]
   },
   stunt: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.DEFENSE]
   },
   out_of_pocket_pass: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
   phyb: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
   batted_pass: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
   screen_pass: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
   pain_free_play: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
   run_play_option: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_TYPE]
   },
   qb_fault_sack: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PRESSURE]
   },
   qb_position: {
     values: ['UNDER_CENTER', 'SHOTGUN', 'PISTOL'],
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.FORMATION_PERSONNEL]
   },
 
   read_thrown: {
     values: ['FIRST', 'SECOND', 'DESIGNED', 'CHECKDOWN', 'SCRAMBLE_DRILL'],
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
 
   n_offense_backfield: {
     min: 0,
     max: 11,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.FORMATION_PERSONNEL]
   },
 
   // TODO
@@ -1525,7 +1638,8 @@ export default {
   time_to_pass: {
     min: 0,
     max: 15,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
   // TODO
   // ttsk: {
@@ -1534,7 +1648,8 @@ export default {
   time_to_pressure: {
     min: 0,
     max: 15,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
 
   // TODO
@@ -1547,7 +1662,8 @@ export default {
   db: {
     min: 0,
     max: 11,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.DEFENSE]
   },
   box: {
     min: 0,
@@ -1558,27 +1674,32 @@ export default {
         label: '8+',
         values: [8, 11]
       }
-    ]
+    ],
+    groups: [COLUMN_PARAM_GROUPS.DEFENSE]
   },
   boxdb: {
     min: 0,
     max: 11,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.DEFENSE]
   },
   pass_rushers: {
     min: 0,
     max: 11,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.DEFENSE]
   },
   blitzers: {
     min: 0,
     max: 11,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.DEFENSE]
   },
   db_blitzers: {
     min: 0,
     max: 11,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.DEFENSE]
   },
   oopd: {
     values: ['C', 'P', 'D', 'DR', 'BT', 'BL'],
@@ -1586,18 +1707,21 @@ export default {
   },
   cov: {
     values: [0, 1, 2],
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.COVERAGE]
   },
 
   ep: {
     min: -4,
     max: 7,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
   epa: {
     min: -14,
     max: 14,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS],
     preset_values: [
       {
         label: '0+',
@@ -1606,109 +1730,130 @@ export default {
     ]
   },
   ep_succ: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
 
   total_home_epa: {
     min: -80,
     max: 80,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
   total_away_epa: {
     min: -80,
     max: 80,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
   total_home_rush_epa: {
     min: -80,
     max: 80,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
   total_away_rush_epa: {
     min: -80,
     max: 80,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
   total_home_pass_epa: {
     min: -80,
     max: 80,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
   total_away_pass_epa: {
     min: -80,
     max: 80,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
 
   qb_epa: {
     min: -80,
     max: 80,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
   air_epa: {
     min: -80,
     max: 80,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
   yac_epa: {
     min: -80,
     max: 80,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
   comp_air_epa: {
     min: -80,
     max: 80,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
   comp_yac_epa: {
     min: -80,
     max: 80,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
   xyac_epa: {
     min: -80,
     max: 80,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
   total_home_comp_air_epa: {
     min: -80,
     max: 80,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
   total_away_comp_air_epa: {
     min: -80,
     max: 80,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
   total_home_comp_yac_epa: {
     min: -80,
     max: 80,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
   total_away_comp_yac_epa: {
     min: -80,
     max: 80,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
   total_home_raw_air_epa: {
     min: -80,
     max: 80,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
   total_away_raw_air_epa: {
     min: -80,
     max: 80,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
   total_home_raw_yac_epa: {
     min: -80,
     max: 80,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
   total_away_raw_yac_epa: {
     min: -80,
     max: 80,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.EXPECTED_POINTS]
   },
 
   wp: {
@@ -1716,6 +1861,7 @@ export default {
     max: 1,
     step: 0.01,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY],
     preset_values: [
       {
         label: 'Exclude Garbage Time (20% to 80%)',
@@ -1732,6 +1878,7 @@ export default {
     max: 1,
     step: 0.01,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY],
     preset_values: [
       {
         label: '0+',
@@ -1743,352 +1890,416 @@ export default {
     min: 0,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   away_wp: {
     min: 0,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   vegas_wpa: {
     min: -1,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   vegas_home_wpa: {
     min: -1,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   home_wp_post: {
     min: 0,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   away_wp_post: {
     min: 0,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   vegas_wp: {
     min: 0,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   vegas_home_wp: {
     min: 0,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   total_home_rush_wpa: {
     min: -1,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   total_away_rush_wpa: {
     min: -1,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   total_home_pass_wpa: {
     min: -1,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   total_away_pass_wpa: {
     min: -1,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   air_wpa: {
     min: -1,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   yac_wpa: {
     min: -1,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   comp_air_wpa: {
     min: -1,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   comp_yac_wpa: {
     min: -1,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   total_home_comp_air_wpa: {
     min: -1,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   total_away_comp_air_wpa: {
     min: -1,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   total_home_comp_yac_wpa: {
     min: -1,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   total_away_comp_yac_wpa: {
     min: -1,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   total_home_raw_air_wpa: {
     min: -1,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   total_away_raw_air_wpa: {
     min: -1,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   total_home_raw_yac_wpa: {
     min: -1,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
   total_away_raw_yac_wpa: {
     min: -1,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WIN_PROBABILITY]
   },
 
   xyac_mean_yds: {
     min: 0,
     max: 100,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.RECEIVING]
   },
   xyac_median_yds: {
     min: 0,
     max: 100,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.RECEIVING]
   },
   xyac_succ_prob: {
     min: 0,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.RECEIVING]
   },
   xyac_fd_prob: {
     min: 0,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.RECEIVING]
   },
 
   ep_att: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.SPECIAL_TEAMS]
   },
   two_att: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.SPECIAL_TEAMS]
   },
   fg_att: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.SPECIAL_TEAMS]
   },
   kickoff_att: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.SPECIAL_TEAMS]
   },
   punt_att: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.SPECIAL_TEAMS]
   },
 
   fg_result: {
     values: ['blocked', 'made', 'missed'],
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
   kick_distance: {
     min: 0, // TODO figure out why there is a play with -1
     max: 100,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.SPECIAL_TEAMS]
   },
   ep_result: {
     values: ['blocked', 'failed', 'good'],
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
   // TODO change to boolean
   // tp_result: {
   //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
   // },
   punt_blocked: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
 
   home_to_rem: {
     min: 0,
     max: 3,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_TIMEOUT]
   },
   away_to_rem: {
     min: 0,
     max: 3,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_TIMEOUT]
   },
   pos_to_rem: {
     min: 0,
     max: 3,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_TIMEOUT]
   },
   def_to_rem: {
     min: 0,
     max: 3,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_TIMEOUT]
   },
   to: {
-    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_TIMEOUT]
   },
   to_team: {
     values: constants.nflTeams,
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_TIMEOUT]
   },
 
   home_score: {
     min: 0,
     max: 80,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.SCORE]
   },
   away_score: {
     min: 0,
     max: 80,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.SCORE]
   },
   pos_score: {
     min: 0,
     max: 80,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.SCORE]
   },
   def_score: {
     min: 0,
     max: 80,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.SCORE]
   },
   score_diff: {
     min: -70,
     max: 70,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.SCORE]
   },
   pos_score_post: {
     min: 0,
     max: 80,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.SCORE]
   },
   def_score_post: {
     min: 0,
     max: 80,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.SCORE]
   },
   score_diff_post: {
     min: -70,
     max: 70,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.SCORE]
   },
 
   no_score_prob: {
     min: 0,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PROBABILITY]
   },
   opp_fg_prob: {
     min: 0,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PROBABILITY]
   },
   opp_safety_prob: {
     min: 0,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PROBABILITY]
   },
   opp_td_prob: {
     min: 0,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PROBABILITY]
   },
   fg_prob: {
     min: 0,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PROBABILITY]
   },
   safety_prob: {
     min: 0,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PROBABILITY]
   },
   td_prob: {
     min: 0,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PROBABILITY]
   },
   extra_point_prob: {
     min: 0,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PROBABILITY]
   },
   two_conv_prob: {
     min: 0,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PROBABILITY]
   },
 
   xpass_prob: {
     min: 0,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_SITUATION]
   },
   pass_oe: {
     min: -99,
     max: 99,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PLAY_SITUATION]
   },
 
   cp: {
     min: 0,
     max: 1,
     step: 0.01,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
   cpoe: {
     min: -99,
     max: 99,
-    data_type: table_constants.TABLE_DATA_TYPES.RANGE
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.PASSING]
   }
 }
