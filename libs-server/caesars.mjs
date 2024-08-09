@@ -16,7 +16,11 @@ const get_caesars_config_from_db = async () => {
     return Object.fromEntries(
       result.map((row) => [
         row.key,
-        typeof row.value === 'object' ? row.value : JSON.parse(row.value)
+        typeof row.value === 'object'
+          ? row.value
+          : typeof row.value === 'string' && row.value.startsWith('{')
+            ? JSON.parse(row.value)
+            : row.value
       ])
     )
   } catch (error) {
