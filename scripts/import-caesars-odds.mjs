@@ -144,7 +144,7 @@ const run = async () => {
   const formatted_markets = []
   const all_markets = []
 
-  const futures = await caesars.getFutures()
+  const futures = await caesars.get_futures()
 
   if (futures && futures.competitions && futures.competitions.length) {
     for (const event of futures.competitions[0].events) {
@@ -161,14 +161,14 @@ const run = async () => {
     year: constants.season.year
   })
 
-  const schedule = await caesars.getSchedule()
+  const schedule = await caesars.get_schedule()
   const { events } = schedule.competitions[0]
 
   log(`Getting odds for ${events.length} events`)
 
   for (const event of events) {
     console.time(`caesars-event-${event.id}`)
-    const event_odds = await caesars.getEvent(event.id)
+    const event_odds = await caesars.get_event(event.id)
 
     let nfl_game = null
 
