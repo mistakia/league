@@ -34,15 +34,12 @@ schedule.scheduleJob('*/1 9-23 * 12 6', import_live_plays)
 // sunday
 schedule.scheduleJob('*/1 9-23 * 1,2,9-12 7', import_live_plays)
 
-// monday through thursday and sunday
-schedule.scheduleJob('*/10 * * 1,2,9-12 1-4,7', import_live_odds)
-
 // friday through saturday
 schedule.scheduleJob('*/5 * * 1,2,9-12 5-6', import_live_odds)
 
-// OFF SEASON
+// All times
 
-// every 10 minutes
-schedule.scheduleJob('*/10 * * 3,4,5,6,7,8 *', import_live_odds)
+// every 4 hours all year
+schedule.scheduleJob('0 */4 * * *', import_live_odds)
 
 log('all jobs registered')
