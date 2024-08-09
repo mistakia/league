@@ -5,7 +5,8 @@ const get_where_string = ({
   table_name,
   column_index = 0,
   is_main_select = false,
-  params = {}
+  params = {},
+  rate_type_column_mapping
 }) => {
   const column_name = column_definition.select_as
     ? column_definition.select_as({ params: where_clause.params })
@@ -17,7 +18,10 @@ const get_where_string = ({
     ? where_func({
         table_name,
         case_insensitive: where_clause.operator === 'ILIKE',
-        params
+        params,
+        rate_type_column_mapping,
+        column_id: where_clause.column_id,
+        column_index
       })
     : column_definition.use_having
       ? `${column_name}_${column_index}`

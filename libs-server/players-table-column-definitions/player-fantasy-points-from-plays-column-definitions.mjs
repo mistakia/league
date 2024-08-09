@@ -3,6 +3,7 @@ import { nfl_plays_column_params, players_table_constants } from '#libs-shared'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '../apply-play-by-play-column-params-to-query.mjs'
 import players_table_join_function from '#libs-server/players-table/players-table-join-function.mjs'
+import { get_rate_type_sql } from '#libs-server/players-table/select-string.mjs'
 
 const generate_fantasy_points_table_alias = ({ params = {} } = {}) => {
   const column_param_keys = Object.keys(nfl_plays_column_params).sort()
@@ -175,24 +176,40 @@ const fantasy_points_from_plays_with = ({
   query.with(with_table_name, with_query)
 }
 
+const should_use_main_where = ({ params }) => {
+  return (
+    (params.year_offset &&
+      Array.isArray(params.year_offset) &&
+      params.year_offset.length > 1) ||
+    (params.rate_type && params.rate_type.length > 0)
+  )
+}
+
 export default {
   player_fantasy_points_from_plays: {
     with_where: ({ params }) => {
-      if (
-        params.year_offset &&
-        Array.isArray(params.year_offset) &&
-        params.year_offset.length > 1
-      ) {
+      if (should_use_main_where({ params })) {
         return null
       }
       return select_string
     },
-    main_where: ({ params, table_name }) => {
-      if (
-        params.year_offset &&
-        Array.isArray(params.year_offset) &&
-        params.year_offset.length > 1
-      ) {
+    main_where: ({
+      params,
+      table_name,
+      column_id,
+      column_index,
+      rate_type_column_mapping
+    }) => {
+      if (should_use_main_where({ params })) {
+        if (params.rate_type && params.rate_type.includes('per_game')) {
+          const rate_type_table_name =
+            rate_type_column_mapping[`${column_id}_${column_index}`]
+          return get_rate_type_sql({
+            table_name,
+            column_name: 'fantasy_points_from_plays',
+            rate_type_table_name
+          })
+        }
         return `SUM(${table_name}.fantasy_points_from_plays)`
       }
       return null

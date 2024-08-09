@@ -259,7 +259,8 @@ const add_clauses_for_table = ({
         column_definition,
         table_name,
         column_index: 0,
-        params: where_clause.params
+        params: where_clause.params,
+        rate_type_column_mapping
       })
 
       // add with selects for columns that are not in the select_columns
@@ -291,7 +292,8 @@ const add_clauses_for_table = ({
       column_definition,
       table_name,
       column_index: 0,
-      params: where_clause.params
+      params: where_clause.params,
+      rate_type_column_mapping
     })
 
     if (main_where_string) {
