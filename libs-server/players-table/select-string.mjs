@@ -1,4 +1,8 @@
-const get_rate_type_sql = ({ table_name, column_name, rate_type_table_name }) =>
+export const get_rate_type_sql = ({
+  table_name,
+  column_name,
+  rate_type_table_name
+}) =>
   `CAST(${table_name}.${column_name} AS DECIMAL) / NULLIF(CAST(${rate_type_table_name}.rate_type_total_count AS DECIMAL), 0)`
 
 const get_select_string = ({
