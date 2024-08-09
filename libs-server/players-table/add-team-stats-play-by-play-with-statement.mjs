@@ -8,7 +8,8 @@ export const add_team_stats_play_by_play_with_statement = ({
   having_clauses = [],
   select_strings = [],
   splits = [],
-  select_column_names = []
+  select_column_names = [],
+  rate_columns = []
 }) => {
   if (!with_table_name) {
     throw new Error('with_table_name is required')
@@ -38,11 +39,6 @@ export const add_team_stats_play_by_play_with_statement = ({
   // Add groupBy clause before having
   with_query.groupBy('nfl_plays.off', 'nfl_plays.year', 'nfl_plays.week')
 
-  // where_clauses to filter stats/metrics
-  for (const having_clause of having_clauses) {
-    with_query.havingRaw(having_clause)
-  }
-
   query.with(with_table_name, with_query)
 
   // Add the player_team_stats with table
@@ -57,13 +53,26 @@ export const add_team_stats_play_by_play_with_statement = ({
     })
     .where('nfl_games.seas_type', 'REG')
 
+  // where_clauses to filter stats/metrics
+  for (const having_clause of having_clauses) {
+    player_team_stats_query.havingRaw(having_clause)
+  }
+
   const unique_select_column_names = new Set(select_column_names)
   for (const select_column_name of unique_select_column_names) {
-    player_team_stats_query.select(
-      db.raw(
-        `sum(${with_table_name}.${select_column_name}) as ${select_column_name}`
+    if (rate_columns.includes(select_column_name)) {
+      player_team_stats_query.select(
+        db.raw(
+          `sum(${with_table_name}.${select_column_name}_numerator) / sum(${with_table_name}.${select_column_name}_denominator) as ${select_column_name}`
+        )
       )
-    )
+    } else {
+      player_team_stats_query.select(
+        db.raw(
+          `sum(${with_table_name}.${select_column_name}) as ${select_column_name}`
+        )
+      )
+    }
   }
 
   if (splits.includes('year')) {

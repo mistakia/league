@@ -66,7 +66,9 @@ const update_play = async ({
     }
 
     changes += 1
-    log(`Updating play: ${play_row.esbid} - ${play_row.playId}, Field: ${prop}, Value: ${edit.rhs}`)
+    log(
+      `Updating play: ${play_row.esbid} - ${play_row.playId}, Field: ${prop}, Value: ${edit.rhs}`
+    )
 
     const prev = edit.lhs
     if (prev) {
