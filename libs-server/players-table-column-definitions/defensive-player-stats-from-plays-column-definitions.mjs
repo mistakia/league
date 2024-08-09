@@ -3,6 +3,7 @@ import { nfl_plays_column_params } from '#libs-shared'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
 import players_table_join_function from '#libs-server/players-table/players-table-join-function.mjs'
 import { add_defensive_play_by_play_with_statement } from '#libs-server/players-table/add-defensive-play-by-play-with-statement.mjs'
+import { get_rate_type_sql } from '#libs-server/players-table/select-string.mjs'
 
 const defensive_player_table_alias = ({ pid_columns, params = {} } = {}) => {
   if (!pid_columns || !Array.isArray(pid_columns) || pid_columns.length === 0) {
@@ -47,7 +48,33 @@ const defensive_player_stat_from_plays = ({
     defensive_player_table_alias({ pid_columns, params }),
   column_name: stat_name,
   with_select: () => [`${select_string} AS ${stat_name}`],
-  with_where: () => select_string,
+  with_where: ({ params }) => {
+    // should be handled in main where
+    if (params.rate_type && params.rate_type.length) {
+      return null
+    }
+
+    return select_string
+  },
+  main_where: ({
+    table_name,
+    params,
+    column_id,
+    column_index,
+    rate_type_column_mapping
+  }) => {
+    if (params.rate_type && params.rate_type.length) {
+      const rate_type_table_name =
+        rate_type_column_mapping[`${column_id}_${column_index}`]
+      return get_rate_type_sql({
+        table_name,
+        column_name: stat_name,
+        rate_type_table_name
+      })
+    }
+
+    return null
+  },
   join: defensive_player_join,
   pid_columns,
   supported_splits: ['year', 'week'],

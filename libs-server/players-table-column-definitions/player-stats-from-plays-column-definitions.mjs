@@ -4,6 +4,17 @@ import get_table_hash from '#libs-server/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 import players_table_join_function from '#libs-server/players-table/players-table-join-function.mjs'
 import { add_player_stats_play_by_play_with_statement } from '#libs-server/players-table/add-player-stats-play-by-play-with-statement.mjs'
+import { get_rate_type_sql } from '#libs-server/players-table/select-string.mjs'
+
+const should_use_main_where = ({ params, has_numerator_denominator }) => {
+  return (
+    (params.year_offset &&
+      Array.isArray(params.year_offset) &&
+      params.year_offset.length > 1 &&
+      has_numerator_denominator) ||
+    (params.rate_type && params.rate_type.length > 0)
+  )
+}
 
 const generate_table_alias = ({ type, params = {}, pid_columns } = {}) => {
   if (!type) {
@@ -55,24 +66,35 @@ const player_stat_from_plays = ({
   },
   has_numerator_denominator,
   with_where: ({ params }) => {
-    if (
-      params.year_offset &&
-      Array.isArray(params.year_offset) &&
-      params.year_offset.length > 1 &&
-      has_numerator_denominator
-    ) {
+    if (should_use_main_where({ params, has_numerator_denominator })) {
       return null // No where clause in the WITH statement when using year_offset range with numerator/denominator
     }
     return with_select_string
   },
-  main_where: ({ params, table_name }) => {
-    if (
-      params.year_offset &&
-      Array.isArray(params.year_offset) &&
-      params.year_offset.length > 1 &&
-      has_numerator_denominator
-    ) {
-      return `CASE WHEN SUM(${table_name}.${stat_name}_denominator) > 0 THEN ROUND(100.0 * SUM(${table_name}.${stat_name}_numerator) / SUM(${table_name}.${stat_name}_denominator), 2) ELSE 0 END`
+  main_where: ({
+    params,
+    table_name,
+    column_id,
+    column_index,
+    rate_type_column_mapping
+  }) => {
+    if (should_use_main_where({ params, has_numerator_denominator })) {
+      if (params.rate_type && params.rate_type.includes('per_game')) {
+        const rate_type_table_name =
+          rate_type_column_mapping[`${column_id}_${column_index}`]
+        if (has_numerator_denominator) {
+          return `CASE WHEN SUM(${table_name}.${stat_name}_denominator) > 0 THEN ROUND(100.0 * SUM(${table_name}.${stat_name}_numerator) / NULLIF(SUM(${table_name}.${stat_name}_denominator), 0), 2) / NULLIF(CAST(${rate_type_table_name}.rate_type_total_count AS DECIMAL), 0) ELSE 0 END`
+        } else {
+          return get_rate_type_sql({
+            table_name,
+            column_name: stat_name,
+            rate_type_table_name
+          })
+        }
+      } else {
+        // if there is no rate_type than it must have a numerator/denominator
+        return `CASE WHEN SUM(${table_name}.${stat_name}_denominator) > 0 THEN ROUND(100.0 * SUM(${table_name}.${stat_name}_numerator) / NULLIF(SUM(${table_name}.${stat_name}_denominator), 0), 2) ELSE 0 END`
+      }
     }
     return null
   },
@@ -95,20 +117,6 @@ const create_team_share_stat = ({
   with_select_string_year_offset_range,
   main_select_string_year_offset_range
 }) => ({
-  column_name,
-  with_where: ({ params }) => {
-    if (
-      params.year_offset &&
-      Array.isArray(params.year_offset) &&
-      params.year_offset.length > 1 &&
-      has_numerator_denominator
-    ) {
-      // No where clause in the WITH statement when using year_offset range with numerator/denominator
-      return null
-    }
-    return with_select_string
-  },
-  use_having: true,
   with: ({
     query,
     with_table_name,
@@ -201,6 +209,8 @@ const create_team_share_stat = ({
 
     query.with(with_table_name, with_query)
   },
+  column_name,
+  use_having: true,
   table_alias: ({ params }) =>
     generate_table_alias({ type: column_name, params, pid_columns }),
   join: (args) =>
@@ -208,6 +218,18 @@ const create_team_share_stat = ({
   supported_splits: ['year', 'week'],
   has_numerator_denominator,
   main_select_string_year_offset_range,
+  with_where: ({ params }) => {
+    if (
+      params.year_offset &&
+      Array.isArray(params.year_offset) &&
+      params.year_offset.length > 1 &&
+      has_numerator_denominator
+    ) {
+      // No where clause in the WITH statement when using year_offset range with numerator/denominator
+      return null
+    }
+    return with_select_string
+  },
   main_where: ({ params, table_name }) => {
     if (
       params.year_offset &&
