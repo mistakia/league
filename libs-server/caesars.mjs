@@ -1,11 +1,36 @@
 import fetch from 'node-fetch'
 import debug from 'debug'
+import db from '#db'
 
-import config from '#config'
 import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 
 const log = debug('caesars')
 debug.enable('caesars')
+
+const get_caesars_config_from_db = async () => {
+  try {
+    const result = await db('config')
+      .select('key', 'value')
+      .where('key', 'like', 'caesars_%')
+
+    return Object.fromEntries(
+      result.map((row) => [
+        row.key,
+        typeof row.value === 'object' ? row.value : JSON.parse(row.value)
+      ])
+    )
+  } catch (error) {
+    console.error('Error fetching Caesars config:', error)
+    throw error
+  }
+}
+
+const format_caesars_headers = (config) => ({
+  'X-App-Version': config.caesars_x_app_version,
+  'X-Aws-Waf-Token': config.caesars_x_aws_waf_token,
+  'X-Platform': config.caesars_x_platform,
+  'X-Unique-Device-Id': config.caesars_x_unique_device_id
+})
 
 export const markets = {
   PASSING_TOUCHDOWNS: player_prop_types.GAME_PASSING_TOUCHDOWNS,
@@ -30,34 +55,30 @@ export const markets = {
 // KICKING_POINTS
 // EXTRA_POINT_MADE
 
-export const getSchedule = async () => {
-  const url = `${config.caesars_api_v3_url}/sports/americanfootball/events/schedule?competitionIds=007d7c61-07a7-4e18-bb40-15104b6eac92`
-
-  // log(`fetching ${url}`)
-  const res = await fetch(url)
-  const data = await res.json()
-
-  return data
-}
-
-export const getFutures = async () => {
-  const url = `${config.caesars_api_v3_url}/sports/americanfootball/events/futures?competitionIds=007d7c61-07a7-4e18-bb40-15104b6eac92`
+const caesars_fetch = async (endpoint) => {
+  const config = await get_caesars_config_from_db()
+  const url = `${config.caesars_api_v3_url}${endpoint}`
+  const headers = format_caesars_headers(config)
 
   log(`fetching ${url}`)
-  const res = await fetch(url)
-  const data = await res.json()
-
-  return data
+  const res = await fetch(url, { headers })
+  return res.json()
 }
 
-export const getEvent = async (eventId) => {
-  const url = `${config.caesars_api_v3_url}/events/${eventId}`
+export const get_schedule = async () => {
+  return caesars_fetch(
+    '/sports/americanfootball/events/schedule?competitionIds=007d7c61-07a7-4e18-bb40-15104b6eac92'
+  )
+}
 
-  // log(`fetching ${url}`)
-  const res = await fetch(url)
-  const data = await res.json()
+export const get_futures = async () => {
+  return caesars_fetch(
+    '/sports/americanfootball/events/futures?competitionIds=007d7c61-07a7-4e18-bb40-15104b6eac92'
+  )
+}
 
-  return data
+export const get_event = async (event_id) => {
+  return caesars_fetch(`/events/${event_id}`)
 }
 
 // player prop marketIds

@@ -18,6 +18,7 @@ SET row_security = off;
 SET search_path = public;
 
 ALTER TABLE IF EXISTS ONLY public.invite_codes DROP CONSTRAINT IF EXISTS invite_codes_created_by_fkey;
+DROP TRIGGER IF EXISTS update_config_modtime ON public.config;
 DROP TRIGGER IF EXISTS player_name_search_vector_update ON public.player;
 DROP INDEX IF EXISTS public.player_name_search_idx;
 DROP INDEX IF EXISTS public.nfl_year_week_timestamp_year_week_idx;
@@ -32,6 +33,10 @@ DROP INDEX IF EXISTS public.idx_player_seasonlogs_year_seas_type_career_year_pid
 DROP INDEX IF EXISTS public.idx_player_pid_pos;
 DROP INDEX IF EXISTS public.idx_player_gamelogs_esbid_active_pid;
 DROP INDEX IF EXISTS public.idx_opening_days_year_opening_day;
+DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_week_play_type_trg_pid;
+DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_week_play_type_psr_pid;
+DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_week_play_type_player_fuml_pid;
+DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_week_play_type_bc_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_week_play_type;
 DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_play_type_trg_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_play_type_psr_pid;
@@ -56,6 +61,7 @@ DROP INDEX IF EXISTS public.idx_nfl_plays_dwn;
 DROP INDEX IF EXISTS public.idx_nfl_plays_catchable_ball;
 DROP INDEX IF EXISTS public.idx_nfl_plays_assisted_tackle_2_pid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_assisted_tackle_1_pid;
+DROP INDEX IF EXISTS public.idx_nfl_games_year_seas_type_week_esbid;
 DROP INDEX IF EXISTS public.idx_nfl_games_year_seas_type_esbid;
 DROP INDEX IF EXISTS public.idx_keeptradecut_rankings_type_qb_d_v;
 DROP INDEX IF EXISTS public.idx_keeptradecut_rankings_qb_type_d_pid;
@@ -243,6 +249,8 @@ ALTER TABLE IF EXISTS ONLY public.matchups DROP CONSTRAINT IF EXISTS "idx_24699_
 ALTER TABLE IF EXISTS ONLY public.league_migrations_lock DROP CONSTRAINT IF EXISTS "idx_24658_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.league_migrations DROP CONSTRAINT IF EXISTS "idx_24652_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.draft DROP CONSTRAINT IF EXISTS "idx_24608_PRIMARY";
+ALTER TABLE IF EXISTS ONLY public.config DROP CONSTRAINT IF EXISTS config_pkey;
+ALTER TABLE IF EXISTS ONLY public.config DROP CONSTRAINT IF EXISTS config_key_unique;
 ALTER TABLE IF EXISTS public.waivers ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.users ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.user_table_views ALTER COLUMN view_id DROP DEFAULT;
@@ -375,6 +383,8 @@ DROP TABLE IF EXISTS public.invite_codes;
 DROP TABLE IF EXISTS public.footballoutsiders;
 DROP SEQUENCE IF EXISTS public.draft_uid_seq;
 DROP TABLE IF EXISTS public.draft;
+DROP TABLE IF EXISTS public.config;
+DROP FUNCTION IF EXISTS public.update_modified_column();
 DROP FUNCTION IF EXISTS public.player_name_search_vector_update();
 DROP TYPE IF EXISTS public.wager_status;
 DROP TYPE IF EXISTS public.time_type;
@@ -562,7 +572,32 @@ END
 $$;
 
 
+--
+-- Name: update_modified_column(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.update_modified_column() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$;
+
+
 SET default_table_access_method = heap;
+
+--
+-- Name: config; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.config (
+    key character varying(255) NOT NULL,
+    value jsonb,
+    updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
 
 --
 -- Name: draft; Type: TABLE; Schema: public; Owner: -
@@ -5234,6 +5269,22 @@ ALTER TABLE ONLY public.waivers ALTER COLUMN uid SET DEFAULT nextval('public.wai
 
 
 --
+-- Name: config config_key_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.config
+    ADD CONSTRAINT config_key_unique UNIQUE (key);
+
+
+--
+-- Name: config config_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.config
+    ADD CONSTRAINT config_pkey PRIMARY KEY (key);
+
+
+--
 -- Name: draft idx_24608_PRIMARY; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -6564,6 +6615,13 @@ CREATE INDEX idx_nfl_games_year_seas_type_esbid ON public.nfl_games USING btree 
 
 
 --
+-- Name: idx_nfl_games_year_seas_type_week_esbid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_games_year_seas_type_week_esbid ON public.nfl_games USING btree (year, seas_type, week, esbid);
+
+
+--
 -- Name: idx_nfl_plays_assisted_tackle_1_pid; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -6732,6 +6790,34 @@ CREATE INDEX idx_nfl_plays_year_seas_type_week_play_type ON public.nfl_plays USI
 
 
 --
+-- Name: idx_nfl_plays_year_seas_type_week_play_type_bc_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_year_seas_type_week_play_type_bc_pid ON public.nfl_plays USING btree (year, seas_type, week, play_type, bc_pid);
+
+
+--
+-- Name: idx_nfl_plays_year_seas_type_week_play_type_player_fuml_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ON public.nfl_plays USING btree (year, seas_type, week, play_type, player_fuml_pid);
+
+
+--
+-- Name: idx_nfl_plays_year_seas_type_week_play_type_psr_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_year_seas_type_week_play_type_psr_pid ON public.nfl_plays USING btree (year, seas_type, week, play_type, psr_pid);
+
+
+--
+-- Name: idx_nfl_plays_year_seas_type_week_play_type_trg_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_year_seas_type_week_play_type_trg_pid ON public.nfl_plays USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
 -- Name: idx_opening_days_year_opening_day; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -6827,6 +6913,13 @@ CREATE INDEX player_name_search_idx ON public.player USING gin (name_search_vect
 --
 
 CREATE TRIGGER player_name_search_vector_update BEFORE INSERT OR UPDATE ON public.player FOR EACH ROW EXECUTE FUNCTION public.player_name_search_vector_update();
+
+
+--
+-- Name: config update_config_modtime; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER update_config_modtime BEFORE UPDATE ON public.config FOR EACH ROW EXECUTE FUNCTION public.update_modified_column();
 
 
 --
