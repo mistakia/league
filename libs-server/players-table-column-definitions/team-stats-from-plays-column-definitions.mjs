@@ -17,11 +17,20 @@ const generate_table_alias = ({ params = {} } = {}) => {
   return get_table_hash(`team_stats_from_plays__${key}`)
 }
 
-const team_stat_from_plays = ({ select_string, stat_name }) => ({
+const team_stat_from_plays = ({
+  select_string,
+  stat_name,
+  is_rate = false,
+  rate_with_selects
+}) => ({
   table_alias: generate_table_alias,
   column_name: stat_name,
-  with_select: () => [`${select_string} AS ${stat_name}`],
-  with_where: () => select_string,
+  with_select: () =>
+    is_rate ? rate_with_selects : [`${select_string} AS ${stat_name}`],
+  with_where: ({ table_name }) =>
+    is_rate
+      ? `sum(${table_name}.${stat_name}_numerator) / sum(${table_name}.${stat_name}_denominator)`
+      : `sum(${table_name}.${stat_name})`,
   with: add_team_stats_play_by_play_with_statement,
   join_table_name: (args) => `${args.table_name}_player_team_stats`,
   join: (args) =>
@@ -44,7 +53,8 @@ const team_stat_from_plays = ({ select_string, stat_name }) => ({
   week_select: ({ table_name }) => `${table_name}_player_team_stats.week`,
   use_having: true,
   supported_splits: ['year', 'week'],
-  supported_rate_types: ['per_game']
+  supported_rate_types: ['per_game'],
+  is_rate
 })
 
 export default {
@@ -87,5 +97,25 @@ export default {
   team_win_percentage_added_from_plays: team_stat_from_plays({
     select_string: `SUM(wpa)`,
     stat_name: 'team_wp_added_from_plays'
+  }),
+  team_success_rate_from_plays: team_stat_from_plays({
+    rate_with_selects: [
+      `SUM(CASE WHEN succ = true THEN 1 ELSE 0 END) as team_success_rate_from_plays_numerator`,
+      `COUNT(*) as team_success_rate_from_plays_denominator`
+    ],
+    stat_name: 'team_success_rate_from_plays',
+    is_rate: true
+  }),
+  team_explosive_play_rate_from_plays: team_stat_from_plays({
+    rate_with_selects: [
+      `SUM(CASE WHEN pass_yds >= 20 OR rush_yds >= 10 THEN 1 ELSE 0 END) as team_explosive_play_rate_from_plays_numerator`,
+      `COUNT(*) as team_explosive_play_rate_from_plays_denominator`
+    ],
+    stat_name: 'team_explosive_play_rate_from_plays',
+    is_rate: true
+  }),
+  team_play_count_from_plays: team_stat_from_plays({
+    select_string: `COUNT(*)`,
+    stat_name: 'team_play_count_from_plays'
   })
 }

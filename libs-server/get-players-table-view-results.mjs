@@ -235,14 +235,13 @@ const add_clauses_for_table = ({
     column_ids.push(column_id)
   }
 
+  const unique_column_ids = new Set(column_ids)
   const main_where_clause_strings = []
   const main_having_clause_strings = []
 
   // with statements only have having clauses as of now
   const with_having_clause_strings = []
 
-  // TODO
-  // const unique_column_ids = new Set(column_ids)
   for (const where_clause of where_clauses) {
     const column_definition =
       players_table_column_definitions[where_clause.column_id]
@@ -251,7 +250,6 @@ const add_clauses_for_table = ({
       join_func = column_definition.join
     }
 
-    // TODO is `!unique_column_ids.has(where_clause.column_id)` needed?
     if (column_definition.with) {
       with_func = column_definition.with
       pid_columns = column_definition.pid_columns
@@ -263,6 +261,23 @@ const add_clauses_for_table = ({
         column_index: 0,
         params: where_clause.params
       })
+
+      // add with selects for columns that are not in the select_columns
+      if (!unique_column_ids.has(where_clause.column_id)) {
+        unique_column_ids.add(where_clause.column_id)
+
+        const with_select_result = get_with_select_string({
+          column_id: where_clause.column_id,
+          column_params: where_clause.params,
+          column_index: 0,
+          column_definition,
+          table_name,
+          rate_type_column_mapping,
+          splits
+        })
+        with_select_strings.push(...with_select_result.select)
+        group_by_strings.push(...with_select_result.group_by)
+      }
 
       if (with_having_string) {
         with_having_clause_strings.push(with_having_string)
@@ -289,11 +304,16 @@ const add_clauses_for_table = ({
   }
 
   if (with_func) {
+    // used by team stats column definitions
     const select_column_names = []
-    for (const { column_id } of select_columns) {
+    const rate_columns = []
+    for (const column_id of unique_column_ids) {
       const column_definition = players_table_column_definitions[column_id]
       // TODO maybe use column_index here
       select_column_names.push(column_definition.column_name)
+      if (column_definition.is_rate) {
+        rate_columns.push(column_definition.column_name)
+      }
     }
     with_func({
       query: players_query,
@@ -303,7 +323,8 @@ const add_clauses_for_table = ({
       select_strings: with_select_strings,
       splits,
       pid_columns,
-      select_column_names
+      select_column_names,
+      rate_columns
     })
     for (const select_string of select_strings) {
       players_query.select(db.raw(select_string))
