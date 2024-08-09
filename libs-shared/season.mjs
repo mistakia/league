@@ -119,15 +119,16 @@ export default class Season {
   // POST and REG seas_type starts at 1
   // PRE seas_type starts at 0
   calculate_week(dayjs_date) {
-    const diff = Math.max(0, dayjs_date.diff(this.start, 'weeks'))
+    const diff = dayjs_date.diff(this.start, 'weeks')
     let seas_type = 'PRE'
     let week_number = 0
 
     if (diff <= 0) {
-      throw new Error('Date is before season start')
-      // TODO use a variable to determine start and number of preseason weeks
-      // seas_type = 'PRE'
-      // week_number = diff + 4
+      // Handle preseason weeks
+      week_number = Math.max(diff + 3, 0)
+      if (week_number > 4) {
+        throw new Error('Date is before preseason start')
+      }
     } else if (diff > this.nflFinalWeek) {
       seas_type = 'POST'
       week_number = Math.min(diff - this.nflFinalWeek, 4)

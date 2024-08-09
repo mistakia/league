@@ -6,7 +6,13 @@ import fs from 'fs-extra'
 
 import db from '#db'
 import { constants, fixTeam } from '#libs-shared'
-import { isMain, getPlayer, caesars, insert_prop_markets } from '#libs-server'
+import {
+  isMain,
+  getPlayer,
+  caesars,
+  insert_prop_markets,
+  wait
+} from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-caesars')
@@ -178,13 +184,10 @@ const run = async () => {
       } else {
         try {
           const event_name_split = event.name.replaceAll('|', '').split(' at ')
-          const { week, seas_type } = constants.season.calculate_week(
-            dayjs(event.startTime)
-          )
+          const event_date = dayjs(event.startTime).format('YYYY-MM-DD')
           nfl_game = nfl_games.find(
             (game) =>
-              game.week === week &&
-              game.seas_type === seas_type &&
+              game.date === event_date &&
               game.year === constants.season.year &&
               game.v === fixTeam(event_name_split[0]) &&
               game.h === fixTeam(event_name_split[1])
@@ -207,6 +210,8 @@ const run = async () => {
         })
       )
     }
+
+    await wait(10000)
 
     console.timeEnd(`caesars-event-${event.id}`)
   }
