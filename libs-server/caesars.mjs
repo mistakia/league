@@ -1,11 +1,20 @@
 import fetch from 'node-fetch'
 import debug from 'debug'
+import fs from 'fs-extra'
+import path, { dirname } from 'path'
+import { fileURLToPath } from 'url'
+
 import db from '#db'
 
 import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 
 const log = debug('caesars')
 debug.enable('caesars')
+
+const __dirname = dirname(fileURLToPath(import.meta.url))
+const data_path = path.join(__dirname, '../tmp')
+
+const tmp_caesars_session_path = path.join(data_path, 'caesars_session.json')
 
 const get_caesars_config_from_db = async () => {
   try {
@@ -28,13 +37,6 @@ const get_caesars_config_from_db = async () => {
     throw error
   }
 }
-
-const format_caesars_headers = (config) => ({
-  'X-App-Version': config.caesars_x_app_version,
-  'X-Aws-Waf-Token': config.caesars_x_aws_waf_token,
-  'X-Platform': config.caesars_x_platform,
-  'X-Unique-Device-Id': config.caesars_x_unique_device_id
-})
 
 export const markets = {
   PASSING_TOUCHDOWNS: player_prop_types.GAME_PASSING_TOUCHDOWNS,
@@ -62,9 +64,17 @@ export const markets = {
 const caesars_fetch = async (endpoint) => {
   const config = await get_caesars_config_from_db()
   const url = `${config.caesars_api_v3_url}${endpoint}`
-  const headers = format_caesars_headers(config)
+  const session_headers = await fs.readJson(tmp_caesars_session_path)
+
+  const headers = {
+    'X-App-Version': session_headers.x_app_version,
+    'X-Aws-Waf-Token': session_headers.x_aws_waf_token,
+    'X-Platform': session_headers.x_platform,
+    'X-Unique-Device-Id': session_headers.x_unique_device_id
+  }
 
   log(`fetching ${url}`)
+  log(headers)
   const res = await fetch(url, { headers })
   return res.json()
 }
