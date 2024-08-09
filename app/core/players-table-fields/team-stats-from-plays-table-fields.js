@@ -75,5 +75,23 @@ export default {
     column_groups: [COLUMN_GROUPS.TEAM_STATS, COLUMN_GROUPS.ADVANCED],
     header_label: 'WPA',
     player_value_path: 'team_wp_added_from_plays'
+  }),
+  team_success_rate_from_plays: from_play_field({
+    column_title: 'Team Success Rate (By Play)',
+    column_groups: [COLUMN_GROUPS.TEAM_STATS, COLUMN_GROUPS.ADVANCED],
+    header_label: 'SR',
+    player_value_path: 'team_success_rate_from_plays'
+  }),
+  team_explosive_play_rate_from_plays: from_play_field({
+    column_title: 'Team Explosive Play Rate (By Play)',
+    column_groups: [COLUMN_GROUPS.TEAM_STATS, COLUMN_GROUPS.ADVANCED],
+    header_label: 'EPR',
+    player_value_path: 'team_explosive_play_rate_from_plays'
+  }),
+  team_play_count_from_plays: from_play_field({
+    column_title: 'Team Play Count (By Play)',
+    column_groups: [COLUMN_GROUPS.TEAM_STATS],
+    header_label: 'PLAYS',
+    player_value_path: 'team_play_count_from_plays'
   })
 }
