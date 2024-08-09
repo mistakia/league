@@ -55,6 +55,10 @@ const format_market = async ({
   }
 
   for (const outcome of draftkings_market.outcomes) {
+    if (outcome.hidden && !outcome.oddsDecimal) {
+      continue
+    }
+
     let player_row
 
     const player_name =
