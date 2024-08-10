@@ -101,9 +101,13 @@ function* fetchAPI(apiFunction, actions, opts = {}) {
   const { token } = yield select(get_app)
   const { request } = apiRequest(apiFunction, opts, token)
   try {
-    yield put(actions.pending(opts))
+    yield put(actions.pending({ opts }))
     const data = yield call(request)
-    yield put(actions.fulfilled(opts, data))
+    console.log({
+      opts,
+      data
+    })
+    yield put(actions.fulfilled({ opts, data }))
   } catch (err) {
     console.log(err)
     if (!opts.ignoreError) {
@@ -127,7 +131,7 @@ function* fetchAPI(apiFunction, actions, opts = {}) {
         event.addMetadata('options', opts)
       })
     }
-    yield put(actions.failed(opts, err.toString()))
+    yield put(actions.failed({ opts, error: err.toString() }))
   } finally {
     if (yield cancelled()) {
       // TODO re-enable request cancellation

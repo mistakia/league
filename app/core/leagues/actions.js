@@ -1,20 +1,16 @@
+import { actions_utils } from '@core/utils'
+const { create_api_actions, create_api_action_types } = actions_utils
+
 export const leagueActions = {
+  ...create_api_action_types('PUT_LEAGUE'),
+  ...create_api_action_types('GET_LEAGUE'),
+
   LOAD_LEAGUE: 'LOAD_LEAGUE',
-  UPDATE_LEAGUE: 'UPDATE_LEAGUE',
-  SET_LEAGUE: 'SET_LEAGUE',
-
-  PUT_LEAGUE_FAILED: 'PUT_LEAGUE_FAILED',
-  PUT_LEAGUE_PENDING: 'PUT_LEAGUE_PENDING',
-  PUT_LEAGUE_FULFILLED: 'PUT_LEAGUE_FULFILLED',
-
-  GET_LEAGUE_FAILED: 'GET_LEAGUE_FAILED',
-  GET_LEAGUE_PENDING: 'GET_LEAGUE_PENDING',
-  GET_LEAGUE_FULFILLED: 'GET_LEAGUE_FULFILLED',
-
   load_league: () => ({
     type: leagueActions.LOAD_LEAGUE
   }),
 
+  UPDATE_LEAGUE: 'UPDATE_LEAGUE',
   update: ({ leagueId, value, field }) => ({
     type: leagueActions.UPDATE_LEAGUE,
     payload: {
@@ -24,68 +20,14 @@ export const leagueActions = {
     }
   }),
 
+  SET_LEAGUE: 'SET_LEAGUE',
   set: (opts) => ({
     type: leagueActions.SET_LEAGUE,
     payload: {
       opts
     }
-  }),
-
-  putLeaguePending: (opts) => ({
-    type: leagueActions.PUT_LEAGUE_PENDING,
-    payload: {
-      opts
-    }
-  }),
-
-  putLeagueFailed: (opts, error) => ({
-    type: leagueActions.PUT_LEAGUE_FAILED,
-    payload: {
-      opts,
-      error
-    }
-  }),
-
-  putLeagueFulfilled: (opts, data) => ({
-    type: leagueActions.PUT_LEAGUE_FULFILLED,
-    payload: {
-      opts,
-      data
-    }
-  }),
-
-  getLeaguePending: (opts) => ({
-    type: leagueActions.GET_LEAGUE_PENDING,
-    payload: {
-      opts
-    }
-  }),
-
-  getLeagueFailed: (opts, error) => ({
-    type: leagueActions.GET_LEAGUE_FAILED,
-    payload: {
-      opts,
-      error
-    }
-  }),
-
-  getLeagueFulfilled: (opts, data) => ({
-    type: leagueActions.GET_LEAGUE_FULFILLED,
-    payload: {
-      opts,
-      data
-    }
   })
 }
 
-export const putLeagueActions = {
-  failed: leagueActions.putLeagueFailed,
-  pending: leagueActions.putLeaguePending,
-  fulfilled: leagueActions.putLeagueFulfilled
-}
-
-export const getLeagueActions = {
-  failed: leagueActions.getLeagueFailed,
-  pending: leagueActions.getLeaguePending,
-  fulfilled: leagueActions.getLeagueFulfilled
-}
+export const putLeagueActions = create_api_actions('PUT_LEAGUE')
+export const getLeagueActions = create_api_actions('GET_LEAGUE')

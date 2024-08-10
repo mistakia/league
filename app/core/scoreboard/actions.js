@@ -1,47 +1,20 @@
-export const scoreboardActions = {
-  SCOREBOARD_SELECT_WEEK: 'SCOREBOARD_SELECT_WEEK',
+import { actions_utils } from '@core/utils'
+const { create_api_actions, create_api_action_types } = actions_utils
 
+export const scoreboardActions = {
   // websocket events
   SCOREBOARD_REGISTER: 'SCOREBOARD_REGISTER',
   UPDATE_SCOREBOARD_PLAYS: 'UPDATE_SCOREBOARD_PLAYS',
 
-  GET_SCOREBOARD_PENDING: 'GET_SCOREBOARD_PENDING',
-  GET_SCOREBOARD_FAILED: 'GET_SCOREBOARD_FAILED',
-  GET_SCOREBOARD_FULFILLED: 'GET_SCOREBOARD_FULFILLED',
+  ...create_api_action_types('GET_SCOREBOARD'),
 
+  SCOREBOARD_SELECT_WEEK: 'SCOREBOARD_SELECT_WEEK',
   selectWeek: (week) => ({
     type: scoreboardActions.SCOREBOARD_SELECT_WEEK,
     payload: {
       week: Number(week)
     }
-  }),
-
-  getScoreboardPending: (opts) => ({
-    type: scoreboardActions.GET_SCOREBOARD_PENDING,
-    payload: {
-      opts
-    }
-  }),
-
-  getScoreboardFailed: (opts, error) => ({
-    type: scoreboardActions.GET_SCOREBOARD_FAILED,
-    payload: {
-      opts,
-      error
-    }
-  }),
-
-  getScoreboardFulfilled: (opts, data) => ({
-    type: scoreboardActions.GET_SCOREBOARD_FULFILLED,
-    payload: {
-      opts,
-      data
-    }
   })
 }
 
-export const getScoreboardActions = {
-  pending: scoreboardActions.getScoreboardPending,
-  failed: scoreboardActions.getScoreboardFailed,
-  fulfilled: scoreboardActions.getScoreboardFulfilled
-}
+export const getScoreboardActions = create_api_actions('GET_SCOREBOARD')
