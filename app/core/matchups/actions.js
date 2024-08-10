@@ -42,9 +42,5 @@ export const matchupsActions = {
   })
 }
 
-export const getMatchupsActions = create_api_actions(
-  matchupsActions.GET_MATCHUPS
-)
-export const postMatchupsActions = create_api_actions(
-  matchupsActions.POST_MATCHUPS
-)
+export const getMatchupsActions = create_api_actions('GET_MATCHUPS')
+export const postMatchupsActions = create_api_actions('POST_MATCHUPS')
