@@ -66,15 +66,9 @@ export const waiverActions = {
   })
 }
 
-export const postWaiverActions = create_api_actions(waiverActions.POST_WAIVER)
-export const putWaiverActions = create_api_actions(waiverActions.PUT_WAIVER)
-export const postCancelWaiverActions = create_api_actions(
-  waiverActions.POST_CANCEL_WAIVER
-)
-export const postWaiverOrderActions = create_api_actions(
-  waiverActions.POST_WAIVER_ORDER
-)
-export const getWaiversActions = create_api_actions(waiverActions.GET_WAIVERS)
-export const getWaiverReportActions = create_api_actions(
-  waiverActions.GET_WAIVER_REPORT
-)
+export const postWaiverActions = create_api_actions('POST_WAIVER')
+export const putWaiverActions = create_api_actions('PUT_WAIVER')
+export const postCancelWaiverActions = create_api_actions('POST_CANCEL_WAIVER')
+export const postWaiverOrderActions = create_api_actions('POST_WAIVER_ORDER')
+export const getWaiversActions = create_api_actions('GET_WAIVERS')
+export const getWaiverReportActions = create_api_actions('GET_WAIVER_REPORT')
