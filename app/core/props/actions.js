@@ -1,40 +1,13 @@
+import { actions_utils } from '@core/utils'
+const { create_api_actions, create_api_action_types } = actions_utils
+
 export const propActions = {
+  ...create_api_action_types('GET_PROPS'),
+
   LOAD_PROPS: 'LOAD_PROPS',
-
-  GET_PROPS_PENDING: 'GET_PROPS_PENDING',
-  GET_PROPS_FULFILLED: 'GET_PROPS_FULFILLED',
-  GET_PROPS_FAILED: 'GET_PROPS_FAILED',
-
   load: () => ({
     type: propActions.LOAD_PROPS
-  }),
-
-  getPropsPending: (opts) => ({
-    type: propActions.GET_PROPS_PENDING,
-    payload: {
-      opts
-    }
-  }),
-
-  getPropsFailed: (opts, error) => ({
-    type: propActions.GET_PROPS_FAILED,
-    payload: {
-      opts,
-      error
-    }
-  }),
-
-  getPropsFulfilled: (opts, data) => ({
-    type: propActions.GET_PROPS_FULFILLED,
-    payload: {
-      opts,
-      data
-    }
   })
 }
 
-export const getPropsActions = {
-  failed: propActions.getPropsFailed,
-  pending: propActions.getPropsPending,
-  fulfilled: propActions.getPropsFulfilled
-}
+export const getPropsActions = create_api_actions('GET_PROPS')

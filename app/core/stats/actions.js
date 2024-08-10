@@ -1,15 +1,10 @@
+import { actions_utils } from '@core/utils'
+const { create_api_actions, create_api_action_types } = actions_utils
+
 export const statActions = {
-  GET_CHARTED_PLAYS_FAILED: 'GET_CHARTED_PLAYS_FAILED',
-  GET_CHARTED_PLAYS_PENDING: 'GET_CHARTED_PLAYS_PENDING',
-  GET_CHARTED_PLAYS_FULFILLED: 'GET_CHARTED_PLAYS_FULFILLED',
+  ...create_api_action_types('GET_CHARTED_PLAYS'),
 
   SET_TEAM_STATS_PERCENTILES: 'SET_TEAM_STATS_PERCENTILES',
-
-  FILTER_STATS: 'FILTER_STATS',
-  FILTER_STATS_YARDLINE: 'FILTER_STATS_YARDLINE',
-
-  UPDATE_QUALIFIER: 'UPDATE_QUALIFIER',
-
   setTeamStatsPercentiles: (percentiles) => ({
     type: statActions.SET_TEAM_STATS_PERCENTILES,
     payload: {
@@ -17,6 +12,7 @@ export const statActions = {
     }
   }),
 
+  UPDATE_QUALIFIER: 'UPDATE_QUALIFIER',
   updateQualifier: ({ qualifier, value }) => ({
     type: statActions.UPDATE_QUALIFIER,
     payload: {
@@ -25,6 +21,7 @@ export const statActions = {
     }
   }),
 
+  FILTER_STATS: 'FILTER_STATS',
   filter: ({ type, values }) => ({
     type: statActions.FILTER_STATS,
     payload: {
@@ -33,40 +30,14 @@ export const statActions = {
     }
   }),
 
+  FILTER_STATS_YARDLINE: 'FILTER_STATS_YARDLINE',
   filter_yardline: ({ yardline_start, yardline_end }) => ({
     type: statActions.FILTER_STATS_YARDLINE,
     payload: {
       yardline_start,
       yardline_end
     }
-  }),
-
-  getChartedPlaysPending: (opts) => ({
-    type: statActions.GET_CHARTED_PLAYS_PENDING,
-    payload: {
-      opts
-    }
-  }),
-
-  getChartedPlaysFulfilled: (opts, data) => ({
-    type: statActions.GET_CHARTED_PLAYS_FULFILLED,
-    payload: {
-      opts,
-      data
-    }
-  }),
-
-  getChartedPlaysFailed: (opts, error) => ({
-    type: statActions.GET_CHARTED_PLAYS_FAILED,
-    payload: {
-      opts,
-      error
-    }
   })
 }
 
-export const getChartedPlaysActions = {
-  failed: statActions.getChartedPlaysFailed,
-  fulfilled: statActions.getChartedPlaysFulfilled,
-  pending: statActions.getChartedPlaysPending
-}
+export const getChartedPlaysActions = create_api_actions('GET_CHARTED_PLAYS')
