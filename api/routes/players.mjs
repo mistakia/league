@@ -269,4 +269,82 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
   }
 })
 
+router.get('/:pid/markets/?', async (req, res) => {
+  const { db, logger } = req.app.locals
+  try {
+    const { pid } = req.params
+
+    // Query to get markets and selections for the player
+    const markets_and_selections = await db('prop_markets_index')
+      .select(
+        'prop_markets_index.*',
+        'prop_market_selections_index.source_selection_id',
+        'prop_market_selections_index.selection_name',
+        'prop_market_selections_index.selection_metric_line',
+        'prop_market_selections_index.odds_decimal',
+        'prop_market_selections_index.odds_american',
+        'prop_market_selections_index.result',
+        'prop_market_selections_index.timestamp as selection_timestamp',
+        'prop_market_selections_index.time_type as selection_time_type'
+      )
+      .join('prop_market_selections_index', function () {
+        this.on(
+          'prop_markets_index.source_id',
+          '=',
+          'prop_market_selections_index.source_id'
+        ).andOn(
+          'prop_markets_index.source_market_id',
+          '=',
+          'prop_market_selections_index.source_market_id'
+        )
+      })
+      .where('prop_market_selections_index.selection_pid', pid)
+      .orderBy('prop_markets_index.timestamp', 'desc')
+
+    // Group selections by market
+    const grouped_markets = markets_and_selections.reduce((acc, row) => {
+      const market_key = `${row.source_id}_${row.source_market_id}`
+      if (!acc[market_key]) {
+        acc[market_key] = {
+          market_type: row.market_type,
+          source_id: row.source_id,
+          source_market_id: row.source_market_id,
+          source_market_name: row.source_market_name,
+          esbid: row.esbid,
+          source_event_id: row.source_event_id,
+          source_event_name: row.source_event_name,
+          open: row.open,
+          live: row.live,
+          settled: row.settled,
+          winning_selection_id: row.winning_selection_id,
+          metric_result_value: row.metric_result_value,
+          time_type: row.time_type,
+          timestamp: row.timestamp,
+          year: row.year,
+          selections: []
+        }
+      }
+
+      acc[market_key].selections.push({
+        source_selection_id: row.source_selection_id,
+        selection_name: row.selection_name,
+        selection_metric_line: row.selection_metric_line,
+        odds_decimal: row.odds_decimal,
+        odds_american: row.odds_american,
+        result: row.result,
+        timestamp: row.selection_timestamp,
+        time_type: row.selection_time_type
+      })
+
+      return acc
+    }, {})
+
+    const result = Object.values(grouped_markets)
+    res.send(result)
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
 export default router
