@@ -1,40 +1,13 @@
+import { actions_utils } from '@core/utils'
+const { create_api_actions, create_api_action_types } = actions_utils
+
 export const statusActions = {
+  ...create_api_action_types('GET_STATUS'),
+
   LOAD_STATUS: 'LOAD_STATUS',
-
-  GET_STATUS_PENDING: 'GET_STATUS_PENDING',
-  GET_STATUS_FAILED: 'GET_STATUS_FAILED',
-  GET_STATUS_FULFILLED: 'GET_STATUS_FULFILLED',
-
   load: () => ({
     type: statusActions.LOAD_STATUS
-  }),
-
-  getStatusPending: (opts) => ({
-    type: statusActions.GET_STATUS_PENDING,
-    payload: {
-      opts
-    }
-  }),
-
-  getStatusFailed: (opts, error) => ({
-    type: statusActions.GET_STATUS_FAILED,
-    payload: {
-      opts,
-      error
-    }
-  }),
-
-  getStatusFulfilled: (opts, data) => ({
-    type: statusActions.GET_STATUS_FULFILLED,
-    payload: {
-      opts,
-      data
-    }
   })
 }
 
-export const getStatusActions = {
-  pending: statusActions.getStatusPending,
-  failed: statusActions.getStatusFailed,
-  fulfilled: statusActions.getStatusFulfilled
-}
+export const getStatusActions = create_api_actions('GET_STATUS')

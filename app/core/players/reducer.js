@@ -203,6 +203,8 @@ export function playersReducer(state = initialState, { payload, type }) {
         }
         players.set('isPending', false)
 
+        console.log(payload)
+
         payload.data.forEach((playerData) => {
           if (players.hasIn(['items', playerData.pid])) {
             const data = players.getIn(['items', playerData.pid])

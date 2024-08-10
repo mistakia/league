@@ -1,19 +1,13 @@
+import { actions_utils } from '@core/utils'
+const { create_api_actions, create_api_action_types } = actions_utils
+
 export const draftActions = {
-  LOAD_DRAFT: 'LOAD_DRAFT',
-
-  DRAFT_SELECT_PLAYER: 'DRAFT_SELECT_PLAYER',
-  DRAFT_PLAYER: 'DRAFT_PLAYER',
-
   DRAFTED_PLAYER: 'DRAFTED_PLAYER',
 
-  GET_DRAFT_FAILED: 'GET_DRAFT_FAILED',
-  GET_DRAFT_PENDING: 'GET_DRAFT_PENDING',
-  GET_DRAFT_FULFILLED: 'GET_DRAFT_FULFILLED',
+  ...create_api_action_types('GET_DRAFT'),
+  ...create_api_action_types('POST_DRAFT'),
 
-  POST_DRAFT_FAILED: 'POST_DRAFT_FAILED',
-  POST_DRAFT_PENDING: 'POST_DRAFT_PENDING',
-  POST_DRAFT_FULFILLED: 'POST_DRAFT_FULFILLED',
-
+  DRAFT_SELECT_PLAYER: 'DRAFT_SELECT_PLAYER',
   selectPlayer: (pid) => ({
     type: draftActions.DRAFT_SELECT_PLAYER,
     payload: {
@@ -21,69 +15,16 @@ export const draftActions = {
     }
   }),
 
+  LOAD_DRAFT: 'LOAD_DRAFT',
   loadDraft: () => ({
     type: draftActions.LOAD_DRAFT
   }),
 
+  DRAFT_PLAYER: 'DRAFT_PLAYER',
   draftPlayer: () => ({
     type: draftActions.DRAFT_PLAYER
-  }),
-
-  getDraftFailed: (opts, error) => ({
-    type: draftActions.GET_DRAFT_FAILED,
-    payload: {
-      opts,
-      error
-    }
-  }),
-
-  getDraftFulfilled: (opts, data) => ({
-    type: draftActions.GET_DRAFT_FULFILLED,
-    payload: {
-      opts,
-      data
-    }
-  }),
-
-  getDraftPending: (opts) => ({
-    type: draftActions.GET_DRAFT_PENDING,
-    payload: {
-      opts
-    }
-  }),
-
-  postDraftPending: (opts) => ({
-    type: draftActions.POST_DRAFT_PENDING,
-    payload: {
-      opts
-    }
-  }),
-
-  postDraftFailed: (opts, error) => ({
-    type: draftActions.POST_DRAFT_FAILED,
-    payload: {
-      opts,
-      error
-    }
-  }),
-
-  postDraftFulfilled: (opts, data) => ({
-    type: draftActions.POST_DRAFT_FULFILLED,
-    payload: {
-      opts,
-      data
-    }
   })
 }
 
-export const getDraftActions = {
-  failed: draftActions.getDraftFailed,
-  pending: draftActions.getDraftPending,
-  fulfilled: draftActions.getDraftFulfilled
-}
-
-export const postDraftActions = {
-  failed: draftActions.postDraftFailed,
-  pending: draftActions.postDraftPending,
-  fulfilled: draftActions.postDraftFulfilled
-}
+export const getDraftActions = create_api_actions('GET_DRAFT')
+export const postDraftActions = create_api_actions('POST_DRAFT')

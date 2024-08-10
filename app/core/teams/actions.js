@@ -1,33 +1,14 @@
+import { actions_utils } from '@core/utils'
+const { create_api_actions, create_api_action_types } = actions_utils
+
 export const teamActions = {
+  ...create_api_action_types('GET_TEAMS'),
+  ...create_api_action_types('PUT_TEAM'),
+  ...create_api_action_types('POST_TEAMS'),
+  ...create_api_action_types('DELETE_TEAMS'),
+  ...create_api_action_types('GET_LEAGUE_TEAM_STATS'),
+
   LOAD_TEAMS: 'LOAD_TEAMS',
-
-  UPDATE_TEAM: 'UPDATE_TEAM',
-
-  ADD_TEAM: 'ADD_TEAM',
-  DELETE_TEAM: 'DELETE_TEAM',
-
-  LOAD_LEAGUE_TEAM_STATS: 'LOAD_LEAGUE_TEAM_STATS',
-
-  GET_TEAMS_FAILED: 'GET_TEAMS_FAILED',
-  GET_TEAMS_PENDING: 'GET_TEAMS_PENDING',
-  GET_TEAMS_FULFILLED: 'GET_TEAMS_FULFILLED',
-
-  PUT_TEAM_FAILED: 'PUT_TEAM_FAILED',
-  PUT_TEAM_PENDING: 'PUT_TEAM_PENDING',
-  PUT_TEAM_FULFILLED: 'PUT_TEAM_FULFILLED',
-
-  POST_TEAMS_FAILED: 'POST_TEAMS_FAILED',
-  POST_TEAMS_PENDING: 'POST_TEAMS_PENDING',
-  POST_TEAMS_FULFILLED: 'POST_TEAMS_FULFILLED',
-
-  DELETE_TEAMS_PENDING: 'DELETE_TEAMS_PENDING',
-  DELETE_TEAMS_FAILED: 'DELETE_TEAMS_FAILED',
-  DELETE_TEAMS_FULFILLED: 'DELETE_TEAMS_FULFILLED',
-
-  GET_LEAGUE_TEAM_STATS_FAILED: 'GET_LEAGUE_TEAM_STATS_FAILED',
-  GET_LEAGUE_TEAM_STATS_PENDING: 'GET_LEAGUE_TEAM_STATS_PENDING',
-  GET_LEAGUE_TEAM_STATS_FULFILLED: 'GET_LEAGUE_TEAM_STATS_FULFILLED',
-
   loadTeams: (leagueId) => ({
     type: teamActions.LOAD_TEAMS,
     payload: {
@@ -35,6 +16,7 @@ export const teamActions = {
     }
   }),
 
+  LOAD_LEAGUE_TEAM_STATS: 'LOAD_LEAGUE_TEAM_STATS',
   loadLeagueTeamStats: (leagueId) => ({
     type: teamActions.LOAD_LEAGUE_TEAM_STATS,
     payload: {
@@ -42,17 +24,18 @@ export const teamActions = {
     }
   }),
 
+  ADD_TEAM: 'ADD_TEAM',
   add: () => ({
     type: teamActions.ADD_TEAM
   }),
-
+  DELETE_TEAM: 'DELETE_TEAM',
   delete: (teamId) => ({
     type: teamActions.DELETE_TEAM,
     payload: {
       teamId
     }
   }),
-
+  UPDATE_TEAM: 'UPDATE_TEAM',
   update: ({ teamId, field, value }) => ({
     type: teamActions.UPDATE_TEAM,
     payload: {
@@ -60,150 +43,13 @@ export const teamActions = {
       field,
       value
     }
-  }),
-
-  getTeamsFailed: (opts, error) => ({
-    type: teamActions.GET_TEAMS_FAILED,
-    payload: {
-      opts,
-      error
-    }
-  }),
-
-  getTeamsFulfilled: (opts, data) => ({
-    type: teamActions.GET_TEAMS_FULFILLED,
-    payload: {
-      opts,
-      data
-    }
-  }),
-
-  getTeamsPending: (opts) => ({
-    type: teamActions.GET_TEAMS_PENDING,
-    payload: {
-      opts
-    }
-  }),
-
-  putTeamFailed: (opts, error) => ({
-    type: teamActions.PUT_TEAM_FAILED,
-    payload: {
-      opts,
-      error
-    }
-  }),
-
-  putTeamPending: (opts) => ({
-    type: teamActions.PUT_TEAM_PENDING,
-    payload: {
-      opts
-    }
-  }),
-
-  putTeamFulfilled: (opts, data) => ({
-    type: teamActions.PUT_TEAM_FULFILLED,
-    payload: {
-      opts,
-      data
-    }
-  }),
-
-  postTeamsFailed: (opts, error) => ({
-    type: teamActions.POST_TEAMS_FAILED,
-    payload: {
-      opts,
-      error
-    }
-  }),
-
-  postTeamsPending: (opts) => ({
-    type: teamActions.POST_TEAMS_PENDING,
-    payload: {
-      opts
-    }
-  }),
-
-  postTeamsFulfilled: (opts, data) => ({
-    type: teamActions.POST_TEAMS_FULFILLED,
-    payload: {
-      opts,
-      data
-    }
-  }),
-
-  deleteTeamsPending: (opts) => ({
-    type: teamActions.DELETE_TEAMS_PENDING,
-    payload: {
-      opts
-    }
-  }),
-
-  deleteTeamsFailed: (opts, error) => ({
-    type: teamActions.DELETE_TEAMS_FAILED,
-    payload: {
-      opts,
-      error
-    }
-  }),
-
-  deleteTeamsFulfilled: (opts, data) => ({
-    type: teamActions.DELETE_TEAMS_FULFILLED,
-    payload: {
-      opts,
-      data
-    }
-  }),
-
-  getLeagueTeamStatsFailed: (opts, error) => ({
-    type: teamActions.GET_LEAGUE_TEAM_STATS_FAILED,
-    payload: {
-      opts,
-      error
-    }
-  }),
-
-  getLeagueTeamStatsPending: (opts) => ({
-    type: teamActions.GET_LEAGUE_TEAM_STATS_PENDING,
-    payload: {
-      opts
-    }
-  }),
-
-  getLeagueTeamStatsFulfilled: (opts, data) => ({
-    type: teamActions.GET_LEAGUE_TEAM_STATS_FULFILLED,
-    payload: {
-      opts,
-      data
-    }
   })
 }
 
-export const getTeamsActions = {
-  failed: teamActions.getTeamsFailed,
-  pending: teamActions.getTeamsPending,
-  fulfilled: teamActions.getTeamsFulfilled
-}
-
-export const putTeamActions = {
-  failed: teamActions.putTeamFailed,
-  pending: teamActions.putTeamPending,
-  fulfilled: teamActions.putTeamFulfilled
-}
-
-export const postTeamsActions = {
-  failed: teamActions.postTeamsFailed,
-  pending: teamActions.postTeamsPending,
-  fulfilled: teamActions.postTeamsFulfilled
-}
-
-export const deleteTeamsActions = {
-  failed: teamActions.deleteTeamsFailed,
-  pending: teamActions.deleteTeamsPending,
-  fulfilled: teamActions.deleteTeamsFulfilled
-}
-
-export const getLeagueTeamStatsActions = {
-  failed: teamActions.getLeagueTeamStatsFailed,
-  pending: teamActions.getLeagueTeamStatsPending,
-  fulfilled: teamActions.getLeagueTeamStatsFulfilled
-}
+export const getTeamsActions = create_api_actions(teamActions.GET_TEAMS)
+export const putTeamActions = create_api_actions(teamActions.PUT_TEAM)
+export const postTeamsActions = create_api_actions(teamActions.POST_TEAMS)
+export const deleteTeamsActions = create_api_actions(teamActions.DELETE_TEAMS)
+export const getLeagueTeamStatsActions = create_api_actions(
+  teamActions.GET_LEAGUE_TEAM_STATS
+)
