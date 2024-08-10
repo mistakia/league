@@ -46,10 +46,10 @@ export const teamActions = {
   })
 }
 
-export const getTeamsActions = create_api_actions(teamActions.GET_TEAMS)
-export const putTeamActions = create_api_actions(teamActions.PUT_TEAM)
-export const postTeamsActions = create_api_actions(teamActions.POST_TEAMS)
-export const deleteTeamsActions = create_api_actions(teamActions.DELETE_TEAMS)
+export const getTeamsActions = create_api_actions('GET_TEAMS')
+export const putTeamActions = create_api_actions('PUT_TEAM')
+export const postTeamsActions = create_api_actions('POST_TEAMS')
+export const deleteTeamsActions = create_api_actions('DELETE_TEAMS')
 export const getLeagueTeamStatsActions = create_api_actions(
-  teamActions.GET_LEAGUE_TEAM_STATS
+  'GET_LEAGUE_TEAM_STATS'
 )
