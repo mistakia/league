@@ -285,7 +285,12 @@ router.get('/:pid/markets/?', async (req, res) => {
         'prop_market_selections_index.odds_american',
         'prop_market_selections_index.result',
         'prop_market_selections_index.timestamp as selection_timestamp',
-        'prop_market_selections_index.time_type as selection_time_type'
+        'prop_market_selections_index.time_type as selection_time_type',
+        'nfl_games.h',
+        'nfl_games.v',
+        'nfl_games.week',
+        'nfl_games.date',
+        'nfl_games.time_est'
       )
       .join('prop_market_selections_index', function () {
         this.on(
@@ -298,6 +303,7 @@ router.get('/:pid/markets/?', async (req, res) => {
           'prop_market_selections_index.source_market_id'
         )
       })
+      .leftJoin('nfl_games', 'prop_markets_index.esbid', 'nfl_games.esbid')
       .where('prop_market_selections_index.selection_pid', pid)
       .orderBy('prop_markets_index.timestamp', 'desc')
 
@@ -321,6 +327,11 @@ router.get('/:pid/markets/?', async (req, res) => {
           time_type: row.time_type,
           timestamp: row.timestamp,
           year: row.year,
+          week: row.week,
+          event_date: row.date,
+          event_time_est: row.time_est,
+          home_team: row.h,
+          away_team: row.v,
           selections: []
         }
       }
