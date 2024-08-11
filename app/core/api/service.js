@@ -330,6 +330,10 @@ export const api = {
     const url = `${API_URL}/players/${pid}/practices`
     return { url }
   },
+  get_player_betting_markets({ pid }) {
+    const url = `${API_URL}/players/${pid}/markets`
+    return { url }
+  },
   getDraftPickValue({ leagueId }) {
     const url = `${API_URL}/leagues/${leagueId}/draft-pick-value`
     return { url }

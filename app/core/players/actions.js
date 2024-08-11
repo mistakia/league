@@ -221,6 +221,12 @@ export const playerActions = {
   ...create_api_action_types('POST_PLAYERS_TABLE_VIEW_SEARCH'),
 
   LOAD_PLAYER_BETTING_MARKETS: 'LOAD_PLAYER_BETTING_MARKETS',
+  load_player_betting_markets: (pid) => ({
+    type: playerActions.LOAD_PLAYER_BETTING_MARKETS,
+    payload: {
+      pid
+    }
+  }),
   ...create_api_action_types('GET_PLAYER_BETTING_MARKETS')
 }
 
@@ -252,4 +258,7 @@ export const getPlayerPracticesActions = create_api_actions(
 )
 export const post_players_table_view_search_actions = create_api_actions(
   'POST_PLAYERS_TABLE_VIEW_SEARCH'
+)
+export const get_player_betting_markets_actions = create_api_actions(
+  'GET_PLAYER_BETTING_MARKETS'
 )

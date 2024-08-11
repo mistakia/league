@@ -30,6 +30,7 @@ import SelectedPlayerGamelogs from '@components/selected-player-gamelogs'
 import SelectedPlayerPractice from '@components/selected-player-practice'
 import SelectedPlayerSchedule from '@components/selected-player-schedule'
 import SelectedPlayerTransactions from '@components/selected-player-transactions'
+import SelectedPlayerMarkets from '@components/selected-player-markets'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
 import PlayerContextMenu from '@components/player-context-menu'
 
@@ -325,6 +326,7 @@ export default function SelectedPlayer({
             {/* <Tab>Team Splits</Tab> */}
             {/* <Tab>Efficiency</Tab> */}
             <Tab>Practice</Tab>
+            <Tab>Betting Markets</Tab>
             {is_logged_in && <Tab>Contribution</Tab>}
             {is_logged_in && <Tab>Value</Tab>}
             {is_logged_in && <Tab>Transactions</Tab>}
@@ -353,12 +355,15 @@ export default function SelectedPlayer({
             <SelectedPlayerPractice />
           </TabPanel>
           <TabPanel value={5}>
-            <SelectedPlayerLineupImpact />
+            <SelectedPlayerMarkets />
           </TabPanel>
           <TabPanel value={6}>
-            <SelectedPlayerValue />
+            <SelectedPlayerLineupImpact />
           </TabPanel>
           <TabPanel value={7}>
+            <SelectedPlayerValue />
+          </TabPanel>
+          <TabPanel value={8}>
             <SelectedPlayerTransactions />
           </TabPanel>
         </Tabs>
