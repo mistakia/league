@@ -112,9 +112,15 @@ export const playerActions = {
   ...create_api_action_types('FETCH_TEAM_PLAYERS'),
   ...create_api_action_types('SEARCH_PLAYERS'),
   ...create_api_action_types('GET_PLAYER'),
+  ...create_api_action_types('GET_PLAYER_TRANSACTIONS'),
 
   GET_PLAYER_TRANSACTIONS: 'GET_PLAYER_TRANSACTIONS',
-  ...create_api_action_types('GET_PLAYER_TRANSACTIONS'),
+  getPlayerTransactions: (pid) => ({
+    type: playerActions.GET_PLAYER_TRANSACTIONS,
+    payload: {
+      pid
+    }
+  }),
 
   SAVE_PROJECTION: 'SAVE_PROJECTION',
   saveProjection: ({ pid, value, type, userId, week }) => ({
@@ -190,13 +196,14 @@ export const playerActions = {
   }),
   ...create_api_action_types('GET_PLAYER_PROJECTIONS'),
 
-  LOAD_PLAYER_GAMELOGS: 'LOAD_PLAYER_GAMELOGS',
+  LOAD_PLAYER_PRACTICES: 'LOAD_PLAYER_PRACTICES',
   loadPlayerPractices: (pid) => ({
     type: playerActions.LOAD_PLAYER_PRACTICES,
     payload: {
       pid
     }
   }),
+  LOAD_PLAYER_GAMELOGS: 'LOAD_PLAYER_GAMELOGS',
   loadPlayerGamelogs: (pid) => ({
     type: playerActions.LOAD_PLAYER_GAMELOGS,
     payload: {
@@ -204,8 +211,6 @@ export const playerActions = {
     }
   }),
   ...create_api_action_types('GET_PLAYER_GAMELOGS'),
-
-  LOAD_PLAYER_PRACTICES: 'LOAD_PLAYER_PRACTICES',
   ...create_api_action_types('GET_PLAYER_PRACTICES'),
 
   RESET_PLAYER_FILTER_OPTIONS: 'RESET_PLAYER_FILTER_OPTIONS',
