@@ -5,6 +5,7 @@ import { seasonlogsActions } from '@core/seasonlogs/actions'
 import { matchupsActions } from '@core/matchups/actions'
 import { gamelogsActions } from '@core/gamelogs/actions'
 import { waiverActions } from '@core/waivers/actions'
+import { playerActions } from '@core/players/actions'
 import { league_team_daily_values_actions } from '@core/league-team-daily-values/actions'
 
 const initialState = new Map({
@@ -95,6 +96,18 @@ export function apiReducer(state = initialState, { payload, type }) {
         ],
         true
       )
+
+    case playerActions.GET_PLAYER_BETTING_MARKETS_PENDING:
+      return state.setIn(
+        ['request_history', `GET_PLAYER_BETTING_MARKETS_${payload.opts.pid}`],
+        true
+      )
+
+    case playerActions.GET_PLAYER_BETTING_MARKETS_FAILED:
+      return state.deleteIn([
+        'request_history',
+        `GET_PLAYER_BETTING_MARKETS_${payload.opts.pid}`
+      ])
 
     default:
       return state

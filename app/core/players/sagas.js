@@ -18,7 +18,8 @@ import {
   getPlayers,
   getCurrentLeague,
   getSources,
-  getRostersForCurrentLeague
+  getRostersForCurrentLeague,
+  get_request_history
 } from '@core/selectors'
 import { notificationActions } from '@core/notifications'
 import {
@@ -37,7 +38,8 @@ import {
   getBaselines,
   getPlayerProjections,
   getPlayerGamelogs,
-  getPlayerPractices
+  getPlayerPractices,
+  get_player_betting_markets
 } from '@core/api'
 import { draftActions } from '@core/draft'
 import { playerActions } from './actions'
@@ -274,6 +276,16 @@ export function* loadPlayerPractices({ payload }) {
   yield call(getPlayerPractices, { pid })
 }
 
+export function* load_player_betting_markets({ payload }) {
+  const { pid } = payload
+  const request_history = yield select(get_request_history)
+  const is_pending_or_fulfilled = request_history.get(
+    `GET_PLAYER_BETTING_MARKETS_${pid}`
+  )
+  if (is_pending_or_fulfilled) return
+  yield call(get_player_betting_markets, { pid })
+}
+
 export function* load_missing_roster_players({ payload }) {
   const { leagueId } = yield select(get_app)
   const players_map = yield select((state) =>
@@ -397,6 +409,13 @@ export function* watchLoadPlayerPractices() {
   yield takeLatest(playerActions.LOAD_PLAYER_PRACTICES, loadPlayerPractices)
 }
 
+export function* watch_load_player_betting_markets() {
+  yield takeLatest(
+    playerActions.LOAD_PLAYER_BETTING_MARKETS,
+    load_player_betting_markets
+  )
+}
+
 export function* watchLoadAllPlayers() {
   yield takeEvery(playerActions.LOAD_ALL_PLAYERS, loadAllPlayers)
 }
@@ -454,6 +473,7 @@ export const playerSagas = [
 
   fork(watchLoadPlayerGamelogs),
   fork(watchLoadPlayerPractices),
+  fork(watch_load_player_betting_markets),
   fork(watchLoadAllPlayers),
   fork(watchLoadLeaguePlayers),
   fork(watchLoadTeamPlayers),

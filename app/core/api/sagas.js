@@ -45,7 +45,8 @@ import {
   getPlayerProjectionsActions,
   getPlayerGamelogsActions,
   getPlayerPracticesActions,
-  post_players_table_view_search_actions
+  post_players_table_view_search_actions,
+  get_player_betting_markets_actions
 } from '@core/players/actions'
 import { getChartedPlaysActions } from '@core/stats/actions'
 import { getPlaysActions, getPlayStatsActions } from '@core/plays/actions'
@@ -103,10 +104,6 @@ function* fetchAPI(apiFunction, actions, opts = {}) {
   try {
     yield put(actions.pending({ opts }))
     const data = yield call(request)
-    console.log({
-      opts,
-      data
-    })
     yield put(actions.fulfilled({ opts, data }))
   } catch (err) {
     console.log(err)
@@ -451,4 +448,10 @@ export const delete_restricted_free_agent_nomination = fetch.bind(
   null,
   api.delete_restricted_free_agent_nomination,
   delete_restricted_free_agent_nomination_actions
+)
+
+export const get_player_betting_markets = fetch.bind(
+  null,
+  api.get_player_betting_markets,
+  get_player_betting_markets_actions
 )

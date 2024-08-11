@@ -542,6 +542,14 @@ export function playersReducer(state = initialState, { payload, type }) {
         })
       })
 
+    case playerActions.GET_PLAYER_BETTING_MARKETS_FULFILLED:
+      return state.withMutations((state) => {
+        state.setIn(
+          ['items', payload.opts.pid, 'betting_markets'],
+          new List(payload.data)
+        )
+      })
+
     default:
       return state
   }
