@@ -66,7 +66,10 @@ const extract_player_name_from_string = (string = '') => {
     'Completion',
     'TDs',
     'Alternate',
-    'X+'
+    'Alt',
+    'X+',
+    'O/U',
+    'on'
   ]
 
   for (const word of words_to_remove) {
@@ -134,7 +137,6 @@ const process_draftkings_markets_and_selections = async ({
   const add_market_selection = ({
     source_market_id,
     market_name,
-    market_type,
     source_market_ids,
     market_selection_row
   }) => {
@@ -212,7 +214,6 @@ const process_draftkings_markets_and_selections = async ({
     add_market_selection({
       source_market_id: market_selection_row.source_market_id,
       market_name,
-      market_type: market_selection_row.market_type,
       source_market_ids: {
         offer_category_id,
         sub_category_id,
@@ -333,8 +334,9 @@ const process_draftkings_markets_and_selections = async ({
           market_type,
           ...selection
         })
-        missing_selection_pids.set(selection.source_selection_id, {
+        missing_selection_pids.set(params.name, {
           params,
+          source_selection_id: selection.source_selection_id,
           source_market_name: source_market.market_name,
           selection_name: selection.selection_name,
           market_type
