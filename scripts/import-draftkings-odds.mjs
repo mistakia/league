@@ -111,14 +111,16 @@ const format_market = async ({
   return {
     market_type: draftkings.get_market_type({
       offerCategoryId: offer_category.offerCategoryId,
-      subcategoryId: offer_sub_category.subcategoryId
+      subcategoryId: offer_sub_category.subcategoryId,
+      betOfferTypeId: draftkings_market.betOfferTypeId
     }),
 
     source_id: 'DRAFTKINGS',
     source_market_id: draftkings_market.providerOfferId,
-    source_market_name: `${offer_category.name} - ${offer_sub_category.name} - ${draftkings_market.label} (categoryId: ${offer_category.offerCategoryId}, subcategoryId: ${offer_sub_category.subcategoryId}))`,
+    source_market_name: `${offer_category.name} - ${offer_sub_category.name} - ${draftkings_market.label} (categoryId: ${offer_category.offerCategoryId}, subcategoryId: ${offer_sub_category.subcategoryId}, betOfferTypeId: ${draftkings_market.betOfferTypeId}))`,
 
     esbid: nfl_game ? nfl_game.esbid : null,
+    year: nfl_game ? nfl_game.year : null,
     source_event_id: draftkings_market.eventId,
     source_event_name: event?.name || null,
 

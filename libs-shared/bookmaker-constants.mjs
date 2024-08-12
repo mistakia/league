@@ -15,6 +15,12 @@ export const time_type = {
   CLOSE: 'CLOSE'
 }
 
+export const game_market_types = {
+  GAME_SPREAD: 'GAME_SPREAD',
+  GAME_TOTAL: 'GAME_TOTAL',
+  GAME_MONEYLINE: 'GAME_MONEYLINE'
+}
+
 export const player_season_prop_types = {
   SEASON_PASSING_YARDS: 'SEASON_PASSING_YARDS',
   SEASON_PASSING_TOUCHDOWNS: 'SEASON_PASSING_TOUCHDOWNS',
