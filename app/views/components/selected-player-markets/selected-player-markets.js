@@ -15,9 +15,11 @@ import './selected-player-markets.styl'
 function MarketCard({ market_name, markets }) {
   const is_alt_line = market_name.includes('ALT')
   const [selected_line, set_selected_line] = useState('')
+  const has_line = useMemo(() => check_has_line(markets), [markets])
 
   const lines = useMemo(() => {
     if (!is_alt_line) return null
+    if (!markets || markets.length === 0) return null
     return [
       ...new Set(
         markets.flatMap((market) =>
@@ -34,6 +36,7 @@ function MarketCard({ market_name, markets }) {
   }, [is_alt_line, lines])
 
   const filtered_markets = useMemo(() => {
+    if (!markets || markets.length === 0) return []
     if (!is_alt_line) return markets
     return markets
       .map((market) => ({
@@ -46,14 +49,22 @@ function MarketCard({ market_name, markets }) {
   }, [is_alt_line, markets, selected_line])
 
   const chart_options = useMemo(
-    () => create_chart_options({ markets: filtered_markets }),
-    [filtered_markets, is_alt_line]
+    () =>
+      create_chart_options({
+        markets: filtered_markets,
+        has_line,
+        is_alt_line
+      }),
+    [filtered_markets, is_alt_line, has_line]
   )
 
   const table_data = useMemo(
-    () => create_table_data({ markets: filtered_markets, is_alt_line }),
-    [filtered_markets, is_alt_line]
+    () =>
+      create_table_data({ markets: filtered_markets, has_line, is_alt_line }),
+    [filtered_markets, is_alt_line, has_line]
   )
+
+  if (!markets || markets.length === 0) return null
 
   return (
     <div className='market-card'>
@@ -76,8 +87,8 @@ function MarketCard({ market_name, markets }) {
       )}
       <HighchartsReact highcharts={Highcharts} options={chart_options} />
       <div className='selected__table'>
-        <TableHeader has_line={false} />
-        <TableBody table_data={table_data} has_line={false} />
+        <TableHeader {...{ has_line, is_alt_line }} />
+        <TableBody {...{ table_data, has_line, is_alt_line }} />
       </div>
     </div>
   )
@@ -88,7 +99,7 @@ MarketCard.propTypes = {
   markets: PropTypes.array.isRequired
 }
 
-function check_has_line(markets) {
+function check_has_line(markets = []) {
   return markets.some((market) =>
     market.selections.some(
       (selection) => selection.selection_metric_line !== null
@@ -96,9 +107,8 @@ function check_has_line(markets) {
   )
 }
 
-function create_table_data({ markets, is_alt_line }) {
+function create_table_data({ markets, is_alt_line, has_line }) {
   const combined_data = {}
-  const has_line = check_has_line(markets)
 
   markets.forEach((market) => {
     market.selections.forEach((selection) => {
@@ -136,7 +146,7 @@ function create_table_data({ markets, is_alt_line }) {
   )
 }
 
-function TableHeader({ has_line }) {
+function TableHeader({ has_line, is_alt_line }) {
   return (
     <>
       <div className='selected__table-header sticky__column'>
@@ -144,7 +154,7 @@ function TableHeader({ has_line }) {
       </div>
       <div className='selected__table-header sticky'>
         <div className='table__cell source'>Source</div>
-        {has_line ? (
+        {has_line && !is_alt_line ? (
           <>
             <div className='table__cell'>Line</div>
             <div className='table__cell'>Over</div>
@@ -162,16 +172,17 @@ function TableHeader({ has_line }) {
 }
 
 TableHeader.propTypes = {
-  has_line: PropTypes.bool.isRequired
+  has_line: PropTypes.bool.isRequired,
+  is_alt_line: PropTypes.bool.isRequired
 }
 
-function TableBody({ table_data, has_line }) {
+function TableBody({ table_data, has_line, is_alt_line }) {
   return (
     <>
       {table_data.map((row, index) => (
         <div key={index} className='table__row'>
           <div className='table__cell source'>{row.source}</div>
-          {has_line ? (
+          {has_line && !is_alt_line ? (
             <>
               <div className='table__cell'>{row.line}</div>
               <div className='table__cell'>{row.over_odds}</div>
@@ -191,11 +202,140 @@ function TableBody({ table_data, has_line }) {
 
 TableBody.propTypes = {
   table_data: PropTypes.array.isRequired,
-  has_line: PropTypes.bool.isRequired
+  has_line: PropTypes.bool.isRequired,
+  is_alt_line: PropTypes.bool.isRequired
 }
 
-function create_chart_options({ markets }) {
-  return create_odds_only_chart({ markets })
+function create_chart_options({ markets, has_line, is_alt_line }) {
+  if (has_line && !is_alt_line) {
+    const combined_data = create_combined_data(markets)
+    return create_line_and_odds_chart({ combined_data, markets })
+  } else {
+    return create_odds_only_chart({ markets })
+  }
+}
+
+function create_combined_data(markets) {
+  const combined_data = []
+
+  markets.forEach((market) => {
+    market.selections.forEach((selection) => {
+      const timestamp = selection.timestamp * 1000
+      const type = selection.selection_name.toLowerCase().includes('over')
+        ? 'over'
+        : 'under'
+      const line = parseFloat(selection.selection_metric_line)
+      const odds = selection.odds_american
+
+      let data_point = combined_data.find((d) => d.timestamp === timestamp)
+      if (!data_point) {
+        data_point = { timestamp, line, over_odds: null, under_odds: null }
+        combined_data.push(data_point)
+      }
+
+      data_point[`${type}_odds`] = odds
+      if (type === 'over') {
+        data_point.line = line
+      }
+    })
+  })
+
+  return combined_data.sort((a, b) => a.timestamp - b.timestamp)
+}
+
+function create_line_and_odds_chart({ combined_data, markets }) {
+  const series_data = {
+    line: [],
+    over_odds: [],
+    under_odds: []
+  }
+
+  combined_data.forEach((data_point) => {
+    series_data.line.push([data_point.timestamp, data_point.line])
+    series_data.over_odds.push([data_point.timestamp, data_point.over_odds])
+    series_data.under_odds.push([data_point.timestamp, data_point.under_odds])
+  })
+
+  const game_info = extract_game_info(markets)
+  const { plot_lines, plot_bands } = create_plot_annotations(game_info)
+
+  return {
+    credits: {
+      enabled: false
+    },
+    chart: {
+      type: 'line',
+      spacingBottom: 50,
+      spacingTop: 50
+    },
+    title: {
+      text: ''
+    },
+    xAxis: create_x_axis({ game_info, plot_lines, plot_bands }),
+    yAxis: [
+      {
+        title: { text: 'Betting Line' },
+        minInterval: 0.5,
+        labels: {
+          reserveSpace: true
+        }
+      },
+      {
+        title: { text: 'Odds (American)' },
+        opposite: true,
+        labels: {
+          reserveSpace: true
+        }
+      }
+    ],
+    series: [
+      {
+        name: 'Line',
+        data: series_data.line,
+        yAxis: 0,
+        color: '#000000',
+        label: true,
+        marker: {
+          enabled: false,
+          states: {
+            hover: {
+              enabled: true
+            }
+          }
+        }
+      },
+      {
+        name: 'Over Odds',
+        data: series_data.over_odds,
+        yAxis: 1,
+        color: '#0000FF',
+        dashStyle: 'dot',
+        marker: {
+          enabled: false,
+          states: {
+            hover: {
+              enabled: true
+            }
+          }
+        }
+      },
+      {
+        name: 'Under Odds',
+        data: series_data.under_odds,
+        yAxis: 1,
+        color: '#008000',
+        dashStyle: 'dot',
+        marker: {
+          enabled: false,
+          states: {
+            hover: {
+              enabled: true
+            }
+          }
+        }
+      }
+    ]
+  }
 }
 
 function create_odds_only_chart({ markets }) {
@@ -215,6 +355,9 @@ function create_odds_only_chart({ markets }) {
   const { plot_lines, plot_bands } = create_plot_annotations(game_info)
 
   return {
+    credits: {
+      enabled: false
+    },
     chart: {
       type: 'line',
       spacingBottom: 50,
@@ -236,11 +379,7 @@ function create_odds_only_chart({ markets }) {
         data: series_data,
         color: '#0000FF'
       }
-    ],
-    tooltip: {
-      shared: true,
-      crosshairs: true
-    }
+    ]
   }
 }
 
