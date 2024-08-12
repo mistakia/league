@@ -194,7 +194,12 @@ router.post('/?', async (req, res) => {
       value
     })
 
-    await db('draft').where({ uid: pickId }).update({ pid })
+    await db('draft')
+      .where({ uid: pickId })
+      .update({
+        pid,
+        selection_timestamp: Math.round(Date.now() / 1000)
+      })
 
     const trades = await db('trades')
       .innerJoin('trades_picks', 'trades.uid', 'trades_picks.tradeid')
