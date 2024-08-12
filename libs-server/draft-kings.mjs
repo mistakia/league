@@ -3,7 +3,10 @@ import debug from 'debug'
 import dayjs from 'dayjs'
 
 import config from '#config'
-import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
+import {
+  player_prop_types,
+  game_market_types
+} from '#libs-shared/bookmaker-constants.mjs'
 import { randomUUID as uuidv4 } from 'crypto'
 import { wait } from '#libs-server'
 import WebSocket from 'ws'
@@ -181,7 +184,36 @@ export const get_market_type_offer_1342 = (subcategoryId) => {
   }
 }
 
-export const get_market_type = ({ offerCategoryId, subcategoryId }) => {
+const get_market_type_offer_492 = ({ subcategoryId, betOfferTypeId }) => {
+  if (subcategoryId !== 4518 || !betOfferTypeId) {
+    return null
+  }
+
+  switch (betOfferTypeId) {
+    case 1:
+      return game_market_types.GAME_SPREAD
+
+    case 2:
+      return game_market_types.GAME_MONEYLINE
+
+    case 6:
+      return game_market_types.GAME_TOTAL
+
+    default:
+      log(`unknown betOfferTypeId ${betOfferTypeId}`)
+      return null
+  }
+}
+
+export const get_market_type = ({
+  offerCategoryId,
+  subcategoryId,
+  betOfferTypeId
+}) => {
+  offerCategoryId = Number(offerCategoryId) || null
+  subcategoryId = Number(subcategoryId) || null
+  betOfferTypeId = Number(betOfferTypeId) || null
+
   switch (offerCategoryId) {
     case 634:
       return get_market_type_offer_634(subcategoryId)
@@ -203,6 +235,9 @@ export const get_market_type = ({ offerCategoryId, subcategoryId }) => {
 
     case 1342:
       return get_market_type_offer_1342(subcategoryId)
+
+    case 492:
+      return get_market_type_offer_492({ subcategoryId, betOfferTypeId })
 
     default:
       log(`unknown offerCategoryId ${offerCategoryId}`)

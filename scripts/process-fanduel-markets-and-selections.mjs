@@ -125,12 +125,14 @@ const process_fanduel_markets_and_selections = async ({
         })
       }
 
-      await db('prop_markets_index')
-        .where({
-          source_market_id: source_market.source_market_id,
-          source_id: source_market.source_id
-        })
-        .update({ year })
+      if (year) {
+        await db('prop_markets_index')
+          .where({
+            source_market_id: source_market.source_market_id,
+            source_id: source_market.source_id
+          })
+          .update({ year })
+      }
     }
 
     for (const selection of source_market.selections) {
