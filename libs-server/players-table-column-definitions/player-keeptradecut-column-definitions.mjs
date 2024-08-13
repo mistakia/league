@@ -37,7 +37,8 @@ const keeptradecut_join = ({
   ) {
     if (splits.includes('year')) {
       query.leftJoin('nfl_year_week_timestamp', function () {
-        this.on('nfl_year_week_timestamp.year', '=', 'opening_days.year')
+        this.on('nfl_year_week_timestamp.year', '=', 'player_years_weeks.year')
+        this.on('nfl_year_week_timestamp.week', '=', 'player_years_weeks.week')
       })
     } else {
       query.leftJoin('nfl_year_week_timestamp', function () {
