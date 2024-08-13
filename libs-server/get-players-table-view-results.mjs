@@ -304,6 +304,17 @@ const add_clauses_for_table = ({
       } else {
         main_where_clause_strings.push(main_where_string)
       }
+
+      if (column_definition.main_where_group_by) {
+        const main_where_group_by_string =
+          column_definition.main_where_group_by({
+            params: where_clause.params,
+            table_name
+          })
+        if (main_where_group_by_string) {
+          group_by_strings.push(main_where_group_by_string)
+        }
+      }
     }
   }
 
