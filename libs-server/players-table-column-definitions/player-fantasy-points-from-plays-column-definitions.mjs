@@ -214,6 +214,12 @@ export default {
       }
       return null
     },
+    main_where_group_by: ({ params, table_name }) => {
+      if (should_use_main_where({ params })) {
+        return `${table_name}.fantasy_points_from_plays`
+      }
+      return null
+    },
     table_alias: generate_fantasy_points_table_alias,
     column_name: 'fantasy_points_from_plays',
     with: fantasy_points_from_plays_with,
