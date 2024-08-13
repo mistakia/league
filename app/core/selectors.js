@@ -22,7 +22,8 @@ import {
   getDraftWindow,
   groupBy,
   fixTeam,
-  is_league_post_season_week
+  is_league_post_season_week,
+  get_last_consecutive_pick
 } from '@libs-shared'
 import { League } from '@core/leagues'
 import { fuzzySearch } from '@core/utils'
@@ -339,6 +340,8 @@ export const getPicks = createSelector(
     let previousSelected = true
     let previousActive = true
     let previousNotActive = false
+    const last_consecutive_pick = get_last_consecutive_pick(picks.toJS())
+
     return picks
       .sort((a, b) => a.pick - b.pick)
       .map((p) => {
@@ -348,6 +351,7 @@ export const getPicks = createSelector(
 
         if (draft_start && draft_type) {
           p.draftWindow = getDraftWindow({
+            last_consecutive_pick,
             start: draft_start,
             type: draft_type,
             min: draft_hour_min,
@@ -402,7 +406,8 @@ export const getDraftEnd = createSelector(
   (state) => state.getIn(['app', 'leagueId']),
   (state) => state.get('leagues'),
   getLastPick,
-  (leagueId, leagues, lastPick) => {
+  getDraft,
+  (leagueId, leagues, lastPick, draft) => {
     if (!lastPick) {
       return null
     }
@@ -412,7 +417,10 @@ export const getDraftEnd = createSelector(
       return dayjs.unix(lastPick.selection_timestamp).endOf('day')
     }
 
+    const { picks } = draft
+    const last_consecutive_pick = get_last_consecutive_pick(picks.toJS())
     const draftEnd = getDraftWindow({
+      last_consecutive_pick,
       start: league.draft_start,
       pickNum: lastPick.pick + 1,
       type: league.draft_type,
@@ -480,8 +488,10 @@ export const getNextPick = createSelector(
     const pick = team_picks.filter((p) => p.pick).find((p) => !p.pid)
     if (!pick) return null
 
+    const last_consecutive_pick = get_last_consecutive_pick(picks.toJS())
     if (draft_start && draft_type) {
       pick.draftWindow = getDraftWindow({
+        last_consecutive_pick,
         start: draft_start,
         type: draft_type,
         min: draft_hour_min,
