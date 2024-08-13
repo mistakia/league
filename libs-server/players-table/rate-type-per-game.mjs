@@ -174,7 +174,7 @@ export const join_per_game_cte = ({
     year_offset[0] !== year_offset[1]
   const has_single_year_offset =
     year_offset &&
-    ((Array.isArray(year_offset) && year_offset.length === 1) ||
+    ((Array.isArray(year_offset) && (year_offset.length === 1 || (year_offset[0] === year_offset[1]))) ||
       typeof year_offset === 'number')
 
   players_query.leftJoin(rate_type_table_name, function () {
