@@ -260,7 +260,8 @@ const add_clauses_for_table = ({
         table_name,
         column_index: 0,
         params: where_clause.params,
-        rate_type_column_mapping
+        rate_type_column_mapping,
+        splits
       })
 
       // add with selects for columns that are not in the select_columns
@@ -293,7 +294,8 @@ const add_clauses_for_table = ({
       table_name,
       column_index: 0,
       params: where_clause.params,
-      rate_type_column_mapping
+      rate_type_column_mapping,
+      splits
     })
 
     if (main_where_string) {
@@ -525,7 +527,7 @@ export default function ({
   let year_split_join_clause
   let week_split_join_clause
 
-  if (splits.includes('year')) {
+  if (splits.includes('week') || splits.includes('year')) {
     const year_range = get_year_range([...prefix_columns, ...columns], where)
 
     players_query.with(
@@ -538,7 +540,30 @@ export default function ({
         'SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years'
       )
     )
+  }
 
+  if (splits.includes('week')) {
+    players_query.with(
+      'player_years_weeks',
+      db.raw(
+        `SELECT player_years.pid, nfl_year_week_timestamp.year, nfl_year_week_timestamp.week FROM player_years INNER JOIN nfl_year_week_timestamp ON player_years.year = nfl_year_week_timestamp.year`
+      )
+    )
+
+    // Modify the main query to start from player_years_weeks
+    players_query.from('player_years_weeks')
+    players_query.join('player', 'player.pid', 'player_years_weeks.pid')
+    players_query.join('player_years', function () {
+      this.on('player_years.pid', 'player.pid')
+      this.on('player_years.year', 'player_years_weeks.year')
+    })
+
+    week_split_join_clause = 'player_years_weeks.week'
+
+    if (splits.includes('year')) {
+      year_split_join_clause = `player_years_weeks.year`
+    }
+  } else if (splits.includes('year')) {
     // Modify the main query to start from player_years
     players_query.from('player_years')
     players_query.join('player', 'player.pid', 'player_years.pid')

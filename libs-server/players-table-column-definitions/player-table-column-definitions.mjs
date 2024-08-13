@@ -144,7 +144,7 @@ export default {
       splits.includes('year')
         ? ['player.dob', 'opening_days.opening_day']
         : ['player.dob'],
-    main_where: ({ splits }) => {
+    main_where: ({ splits = [] } = {}) => {
       const base_year = splits.includes('year')
         ? 'opening_days.opening_day'
         : 'CURRENT_DATE'

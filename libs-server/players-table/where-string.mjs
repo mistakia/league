@@ -6,7 +6,8 @@ const get_where_string = ({
   column_index = 0,
   is_main_select = false,
   params = {},
-  rate_type_column_mapping
+  rate_type_column_mapping,
+  splits
 }) => {
   const column_name = column_definition.select_as
     ? column_definition.select_as({ params: where_clause.params })
@@ -21,7 +22,8 @@ const get_where_string = ({
         params,
         rate_type_column_mapping,
         column_id: where_clause.column_id,
-        column_index
+        column_index,
+        splits
       })
     : column_definition.use_having
       ? `${column_name}_${column_index}`
