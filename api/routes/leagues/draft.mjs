@@ -5,7 +5,8 @@ import {
   constants,
   Roster,
   isDraftWindowOpen,
-  getDraftDates
+  getDraftDates,
+  get_last_consecutive_pick
 } from '#libs-shared'
 import {
   getRoster,
@@ -120,8 +121,15 @@ router.post('/?', async (req, res) => {
     const isPreviousSelectionMade =
       pick.pick === 1 || Boolean(prev_pick && prev_pick.pid)
 
+    // locate the last consecutive pick going back to the first pick
+    const draft_picks = await db('draft')
+      .where({ lid, year: constants.season.year })
+      .orderBy('pick', 'asc')
+    const last_consective_pick = get_last_consecutive_pick(draft_picks)
+
     // if previous selection is not made make, check if teams window has opened
     const isWindowOpen = isDraftWindowOpen({
+      last_consective_pick,
       start: league.draft_start,
       pickNum: pick.pick,
       min: league.draft_hour_min,

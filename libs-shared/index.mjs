@@ -109,6 +109,20 @@ export const uuidv4 = () =>
     ).toString(16)
   )
 
+export const get_last_consecutive_pick = (draft_picks = []) => {
+  const sorted_picks = draft_picks.sort((a, b) => a.pick - b.pick)
+  let last_consecutive_pick = sorted_picks[0]
+  if (!last_consecutive_pick) return null
+
+  let i = 1
+  while (sorted_picks[i]?.pid) {
+    last_consecutive_pick = sorted_picks[i]
+    i++
+  }
+
+  return last_consecutive_pick
+}
+
 export {
   constants,
   common_column_params,

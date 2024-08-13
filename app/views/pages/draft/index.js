@@ -1,7 +1,12 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { constants, getDraftWindow, getDraftDates } from '@libs-shared'
+import {
+  constants,
+  getDraftWindow,
+  getDraftDates,
+  get_last_consecutive_pick
+} from '@libs-shared'
 import { draftActions } from '@core/draft'
 import {
   get_app,
@@ -39,8 +44,10 @@ const mapStateToProps = createSelector(
     app,
     last_pick
   ) => {
+    const last_consecutive_pick = get_last_consecutive_pick(picks.toJS())
     const windowEnd = nextPick
       ? getDraftWindow({
+          last_consecutive_pick,
           start: league.draft_start,
           type: league.draft_type,
           min: league.draft_hour_min,
