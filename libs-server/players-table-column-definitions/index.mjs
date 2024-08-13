@@ -63,6 +63,7 @@ export default {
     table_name: 'transactions',
     table_alias: () => 'latest_transactions',
     select_as: () => 'player_salary',
+    main_where: ({ table_name }) => `${table_name}.value`,
     join: ({ query, params = {} }) => {
       const { lid = 1 } = params
       query.leftJoin(
