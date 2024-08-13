@@ -4,36 +4,9 @@ import chai from 'chai'
 
 import { get_players_table_view_results } from '#libs-server'
 import { bookmaker_constants } from '#libs-shared'
+import { compare_queries } from './utils/index.mjs'
 
 const { expect } = chai
-
-const compare_queries = (actual_query, expected_query) => {
-  const actual_table_hashes = [
-    ...new Set(
-      actual_query.match(/t([A-Za-z0-9]{32})/g).map((match) => match.slice(1))
-    )
-  ]
-  const expected_table_hashes = [
-    ...new Set(
-      expected_query.match(/t([A-Za-z0-9]{32})/g).map((match) => match.slice(1))
-    )
-  ]
-
-  const actual_query_with_replaced_hashes = actual_table_hashes.reduce(
-    (query, hash, index) =>
-      query.replaceAll(new RegExp(`${hash}`, 'g'), `table_${index}`),
-    actual_query
-  )
-  const expected_query_with_replaced_hashes = expected_table_hashes.reduce(
-    (query, hash, index) =>
-      query.replaceAll(new RegExp(`${hash}`, 'g'), `table_${index}`),
-    expected_query
-  )
-
-  expect(actual_query_with_replaced_hashes).to.equal(
-    expected_query_with_replaced_hashes
-  )
-}
 
 describe('LIBS SERVER get_players_table_view_results', () => {
   it('should return a query', () => {

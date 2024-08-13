@@ -1,23 +1,11 @@
-import checkRoster from './check-roster.mjs'
-import checkLastTransaction from './check-last-transaction.mjs'
-import notLoggedIn from './not-logged-in.mjs'
-import missing from './missing.mjs'
-import invalid from './invalid.mjs'
-import error from './error.mjs'
-import addPlayer from './add-player.mjs'
-import releasePlayer from './release-player.mjs'
-import selectPlayer from './select-player.mjs'
-import fillRoster from './fill-roster.mjs'
-
-export {
-  checkRoster,
-  checkLastTransaction,
-  notLoggedIn,
-  missing,
-  invalid,
-  error,
-  addPlayer,
-  releasePlayer,
-  selectPlayer,
-  fillRoster
-}
+export { default as checkRoster } from './check-roster.mjs'
+export { default as checkLastTransaction } from './check-last-transaction.mjs'
+export { default as notLoggedIn } from './not-logged-in.mjs'
+export { default as missing } from './missing.mjs'
+export { default as invalid } from './invalid.mjs'
+export { default as error } from './error.mjs'
+export { default as addPlayer } from './add-player.mjs'
+export { default as releasePlayer } from './release-player.mjs'
+export { default as selectPlayer } from './select-player.mjs'
+export { default as fillRoster } from './fill-roster.mjs'
+export { default as compare_queries } from './compare-queries.mjs'
