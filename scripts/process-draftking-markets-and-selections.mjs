@@ -86,6 +86,206 @@ const extract_player_name_from_string = (string = '') => {
   return name.trim()
 }
 
+const update_market_type = async ({
+  source_market,
+  market_type,
+  ignore_conflicts
+}) => {
+  const should_update_market_type =
+    source_market.existing_market_types.size > 1 ||
+    (source_market.existing_market_types.size === 1 &&
+      !source_market.existing_market_types.has(market_type))
+
+  if (
+    !source_market.existing_market_types.size ||
+    (ignore_conflicts && should_update_market_type)
+  ) {
+    log(
+      `updating market type for ${source_market.source_market_id} to ${market_type}`
+    )
+    await db('prop_markets_index')
+      .where({
+        source_market_id: source_market.source_market_id,
+        source_id: source_market.source_id
+      })
+      .update({ market_type })
+  } else if (should_update_market_type) {
+    log(
+      `conflict found for market type: ${source_market.source_market_id}, existing: ${source_market.existing_market_types}, new: ${market_type}`
+    )
+  }
+}
+
+const update_year = async ({ source_market, year, ignore_conflicts }) => {
+  const should_update_year =
+    source_market.existing_years.size > 1 ||
+    (source_market.existing_years.size === 1 &&
+      !source_market.existing_years.has(year))
+
+  if (
+    !source_market.existing_years.size ||
+    (ignore_conflicts && should_update_year)
+  ) {
+    log(`updating year for ${source_market.source_market_id} to ${year}`)
+    await db('prop_markets_index')
+      .where({
+        source_market_id: source_market.source_market_id,
+        source_id: source_market.source_id
+      })
+      .update({ year })
+  } else if (should_update_year) {
+    log(
+      `conflict found for year: ${source_market.source_market_id}, existing: ${source_market.existing_years}, new: ${year}`
+    )
+  }
+}
+
+const process_selection = async ({
+  selection,
+  source_market,
+  market_type,
+  ignore_conflicts,
+  missing_selection_lines,
+  missing_selection_pids
+}) => {
+  if (!selection.selection_metric_line) {
+    missing_selection_lines.set(selection.source_selection_id, {
+      source_market_name: source_market.market_name,
+      source_event_name: source_market.source_event_name,
+      market_type,
+      ...selection
+    })
+  }
+
+  const name_string = extract_player_name({
+    market_type,
+    market_name: source_market.market_name,
+    selection_name: selection.selection_name
+  })
+  if (!name_string) {
+    log({
+      source_market_name: source_market.market_name,
+      source_event_name: source_market.source_event_name,
+      market_type,
+      ...selection
+    })
+    return
+  }
+
+  const params = {
+    name: name_string,
+    ignore_retired: true
+  }
+
+  let player_row
+  try {
+    player_row = await getPlayer(params)
+  } catch (err) {
+    log(err)
+    return
+  }
+
+  if (!player_row) {
+    log(params)
+    log({
+      source_market_name: source_market.market_name,
+      source_event_name: source_market.source_event_name,
+      market_type,
+      ...selection
+    })
+    missing_selection_pids.set(params.name, {
+      params,
+      source_selection_id: selection.source_selection_id,
+      source_market_name: source_market.market_name,
+      selection_name: selection.selection_name,
+      market_type
+    })
+    return
+  }
+
+  await update_selection_pid({
+    selection,
+    player_row,
+    source_market,
+    ignore_conflicts
+  })
+}
+
+const update_selection_pid = async ({
+  selection,
+  player_row,
+  source_market,
+  ignore_conflicts
+}) => {
+  if (selection.selection_pid) {
+    if (selection.selection_pid !== player_row.pid) {
+      if (ignore_conflicts) {
+        await db('prop_market_selections_index')
+          .where({
+            source_market_id: source_market.source_market_id,
+            source_id: source_market.source_id,
+            selection_id: selection.selection_id
+          })
+          .update({
+            selection_pid: player_row.pid
+          })
+      } else {
+        log(
+          `conflict found for ${selection.source_selection_id}, existing: ${selection.selection_pid}, new: ${player_row.pid}`
+        )
+      }
+    }
+  } else {
+    await db('prop_market_selections_index')
+      .where({
+        source_market_id: source_market.source_market_id,
+        source_id: source_market.source_id,
+        source_selection_id: selection.source_selection_id
+      })
+      .update({
+        selection_pid: player_row.pid
+      })
+  }
+}
+
+const process_market = async ({
+  source_market,
+  ignore_conflicts,
+  missing_selection_lines,
+  missing_selection_pids,
+  missing_market_types
+}) => {
+  const market_type = draftkings.get_market_type({
+    offerCategoryId: source_market.source_market_ids.offer_category_id,
+    subcategoryId: source_market.source_market_ids.sub_category_id,
+    betOfferTypeId: source_market.source_market_ids.bet_offer_type_id
+  })
+  if (!market_type) {
+    missing_market_types.set(source_market.source_market_id, source_market)
+    return
+  }
+
+  await update_market_type({ source_market, market_type, ignore_conflicts })
+
+  if (!source_market.year) {
+    const year = source_market.nfl_games_year
+    if (year) {
+      await update_year({ source_market, year, ignore_conflicts })
+    }
+  }
+
+  for (const selection of source_market.selections) {
+    await process_selection({
+      selection,
+      source_market,
+      market_type,
+      ignore_conflicts,
+      missing_selection_lines,
+      missing_selection_pids
+    })
+  }
+}
+
 const process_draftkings_markets_and_selections = async ({
   missing_only = false,
   since_date = null,
@@ -226,154 +426,13 @@ const process_draftkings_markets_and_selections = async ({
   log(`loaded market types: ${Object.keys(source_market_index).length}`)
 
   for (const source_market of Object.values(source_market_index)) {
-    const market_type = draftkings.get_market_type({
-      offerCategoryId: source_market.source_market_ids.offer_category_id,
-      subcategoryId: source_market.source_market_ids.sub_category_id,
-      betOfferTypeId: source_market.source_market_ids.bet_offer_type_id
+    await process_market({
+      source_market,
+      ignore_conflicts,
+      missing_selection_lines,
+      missing_selection_pids,
+      missing_market_types
     })
-    if (!market_type) {
-      missing_market_types.set(source_market_index, source_market)
-      continue
-    }
-
-    const should_update_market_type =
-      source_market.existing_market_types.size > 1 ||
-      (source_market.existing_market_types.size === 1 &&
-        !source_market.existing_market_types.has(market_type))
-    if (
-      !source_market.existing_market_types.size ||
-      (ignore_conflicts && should_update_market_type)
-    ) {
-      log(
-        `updating market type for ${source_market.source_market_id} to ${market_type}`
-      )
-      await db('prop_markets_index')
-        .where({
-          source_market_id: source_market.source_market_id,
-          source_id: source_market.source_id
-        })
-        .update({
-          market_type
-        })
-    } else if (should_update_market_type) {
-      log(
-        `conflict found for market type: ${source_market.source_market_id}, existing: ${source_market.existing_market_types}, new: ${market_type}`
-      )
-    }
-
-    if (!source_market.year) {
-      const year = source_market.nfl_games_year
-
-      if (year) {
-        const should_update_year =
-          source_market.existing_years.size > 1 ||
-          (source_market.existing_years.size === 1 &&
-            !source_market.existing_years.has(year))
-        if (
-          !source_market.existing_years.size ||
-          (ignore_conflicts && should_update_year)
-        ) {
-          log(`updating year for ${source_market.source_market_id} to ${year}`)
-          await db('prop_markets_index')
-            .where({
-              source_market_id: source_market.source_market_id,
-              source_id: source_market.source_id
-            })
-            .update({ year })
-        } else if (should_update_year) {
-          log(
-            `conflict found for year: ${source_market.source_market_id}, existing: ${source_market.existing_years}, new: ${year}`
-          )
-        }
-      }
-    }
-
-    for (const selection of source_market.selections) {
-      if (!selection.selection_metric_line) {
-        missing_selection_lines.set(selection.source_selection_id, {
-          source_market_name: source_market.market_name,
-          source_event_name: source_market.source_event_name,
-          market_type,
-          ...selection
-        })
-      }
-
-      let player_row
-
-      const name_string = extract_player_name({
-        market_type,
-        market_name: source_market.market_name,
-        selection_name: selection.selection_name
-      })
-      if (!name_string) {
-        log({
-          source_market_name: source_market.market_name,
-          source_event_name: source_market.source_event_name,
-          market_type,
-          ...selection
-        })
-        continue
-      }
-
-      const params = {
-        name: name_string,
-        ignore_retired: true
-      }
-
-      try {
-        player_row = await getPlayer(params)
-      } catch (err) {
-        log(err)
-      }
-
-      if (!player_row) {
-        log(params)
-        log({
-          source_market_name: source_market.market_name,
-          source_event_name: source_market.source_event_name,
-          market_type,
-          ...selection
-        })
-        missing_selection_pids.set(params.name, {
-          params,
-          source_selection_id: selection.source_selection_id,
-          source_market_name: source_market.market_name,
-          selection_name: selection.selection_name,
-          market_type
-        })
-        continue
-      }
-
-      if (selection.selection_pid) {
-        if (selection.selection_pid !== player_row.pid) {
-          if (ignore_conflicts) {
-            await db('prop_market_selections_index')
-              .where({
-                source_market_id: source_market.source_market_id,
-                source_id: source_market.source_id,
-                selection_id: selection.selection_id
-              })
-              .update({
-                selection_pid: player_row.pid
-              })
-          } else {
-            log(
-              `conflict found for ${selection.source_selection_id}, existing: ${selection.selection_pid}, new: ${player_row.pid}`
-            )
-          }
-        }
-      } else {
-        await db('prop_market_selections_index')
-          .where({
-            source_market_id: source_market.source_market_id,
-            source_id: source_market.source_id,
-            source_selection_id: selection.source_selection_id
-          })
-          .update({
-            selection_pid: player_row.pid
-          })
-      }
-    }
   }
 
   // output up to 20 missing market_types
