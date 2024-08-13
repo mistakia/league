@@ -148,6 +148,11 @@ const process_selection = async ({
   missing_selection_lines,
   missing_selection_pids
 }) => {
+  // skip game market types for now
+  if (bookmaker_constants.game_market_types[market_type]) {
+    return
+  }
+
   if (!selection.selection_metric_line) {
     missing_selection_lines.set(selection.source_selection_id, {
       source_market_name: source_market.market_name,
