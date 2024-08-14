@@ -52,7 +52,7 @@ export const getWaivers = (state) => state.get('waivers')
 export const getTransactions = (state) => state.get('transactions')
 export const getTrade = (state) => state.get('trade')
 export const get_teams_for_current_year = (state) =>
-  state.getIn(['teams', constants.year])
+  state.getIn(['teams', constants.year], new Map())
 export const get_team_by_id_for_year = (
   state,
   { tid, year = constants.year }
