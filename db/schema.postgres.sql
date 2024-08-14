@@ -294,7 +294,6 @@ DROP TABLE IF EXISTS public.trades;
 DROP TABLE IF EXISTS public.trade_releases;
 DROP SEQUENCE IF EXISTS public.teams_uid_seq;
 DROP TABLE IF EXISTS public.teams;
-DROP TABLE IF EXISTS public.team_stats;
 DROP SEQUENCE IF EXISTS public.sources_uid_seq;
 DROP TABLE IF EXISTS public.sources;
 DROP TABLE IF EXISTS public.seasons;
@@ -354,6 +353,7 @@ DROP SEQUENCE IF EXISTS public.matchups_uid_seq;
 DROP TABLE IF EXISTS public.matchups;
 DROP SEQUENCE IF EXISTS public.leagues_uid_seq;
 DROP TABLE IF EXISTS public.leagues;
+DROP TABLE IF EXISTS public.league_team_seasonlogs;
 DROP TABLE IF EXISTS public.league_team_lineups;
 DROP TABLE IF EXISTS public.league_team_lineup_starters;
 DROP TABLE IF EXISTS public.league_team_lineup_contributions;
@@ -1233,6 +1233,62 @@ CREATE TABLE public.league_team_lineups (
     lid integer NOT NULL,
     total numeric(5,2),
     baseline_total numeric(5,2)
+);
+
+
+--
+-- Name: league_team_seasonlogs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.league_team_seasonlogs (
+    lid integer NOT NULL,
+    tid integer NOT NULL,
+    div smallint,
+    year smallint,
+    wins smallint DEFAULT '0'::smallint,
+    losses smallint DEFAULT '0'::smallint,
+    ties smallint DEFAULT '0'::smallint,
+    "apWins" smallint DEFAULT '0'::smallint,
+    "apLosses" smallint DEFAULT '0'::smallint,
+    "apTies" smallint DEFAULT '0'::smallint,
+    pf numeric(6,2) DEFAULT 0.00,
+    pa numeric(6,2) DEFAULT 0.00,
+    pdiff numeric(6,2) DEFAULT 0.00,
+    pp numeric(6,2) DEFAULT 0.00,
+    ppp numeric(6,2) DEFAULT 0.00,
+    pw smallint DEFAULT '0'::smallint,
+    pl smallint DEFAULT '0'::smallint,
+    pp_pct numeric(5,2) DEFAULT 0.00,
+    pmax numeric(5,2) DEFAULT 0.00,
+    pmin numeric(5,2) DEFAULT 0.00,
+    pdev numeric(5,2) DEFAULT 0.00,
+    doi numeric(4,2) DEFAULT 0.00,
+    "pSlot1" numeric(6,2) DEFAULT 0.00,
+    "pSlot2" numeric(6,2) DEFAULT 0.00,
+    "pSlot3" numeric(6,2) DEFAULT 0.00,
+    "pSlot4" numeric(6,2) DEFAULT 0.00,
+    "pSlot5" numeric(6,2) DEFAULT 0.00,
+    "pSlot6" numeric(6,2) DEFAULT 0.00,
+    "pSlot7" numeric(6,2) DEFAULT 0.00,
+    "pSlot8" numeric(6,2) DEFAULT 0.00,
+    "pSlot9" numeric(6,2) DEFAULT 0.00,
+    "pSlot10" numeric(6,2) DEFAULT 0.00,
+    "pSlot11" numeric(6,2) DEFAULT 0.00,
+    "pSlot12" numeric(6,2) DEFAULT 0.00,
+    "pSlot13" numeric(6,2) DEFAULT 0.00,
+    "pSlot14" numeric(6,2) DEFAULT 0.00,
+    "pSlot15" numeric(6,2) DEFAULT 0.00,
+    "pSlot16" numeric(6,2),
+    "pSlot17" numeric(6,2),
+    "pPosQB" numeric(6,2) DEFAULT 0.00,
+    "pPosRB" numeric(6,2) DEFAULT 0.00,
+    "pPosWR" numeric(6,2) DEFAULT 0.00,
+    "pPosTE" numeric(6,2) DEFAULT 0.00,
+    "pPosK" numeric(6,2) DEFAULT 0.00,
+    "pPosDST" numeric(6,2) DEFAULT 0.00,
+    division_finish smallint DEFAULT '0'::smallint,
+    regular_season_finish smallint DEFAULT '0'::smallint,
+    post_season_finish smallint DEFAULT '0'::smallint
 );
 
 
@@ -4697,62 +4753,6 @@ ALTER SEQUENCE public.sources_uid_seq OWNED BY public.sources.uid;
 
 
 --
--- Name: team_stats; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.team_stats (
-    lid integer NOT NULL,
-    tid integer NOT NULL,
-    div smallint,
-    year smallint,
-    wins smallint DEFAULT '0'::smallint,
-    losses smallint DEFAULT '0'::smallint,
-    ties smallint DEFAULT '0'::smallint,
-    "apWins" smallint DEFAULT '0'::smallint,
-    "apLosses" smallint DEFAULT '0'::smallint,
-    "apTies" smallint DEFAULT '0'::smallint,
-    pf numeric(6,2) DEFAULT 0.00,
-    pa numeric(6,2) DEFAULT 0.00,
-    pdiff numeric(6,2) DEFAULT 0.00,
-    pp numeric(6,2) DEFAULT 0.00,
-    ppp numeric(6,2) DEFAULT 0.00,
-    pw smallint DEFAULT '0'::smallint,
-    pl smallint DEFAULT '0'::smallint,
-    pp_pct numeric(5,2) DEFAULT 0.00,
-    pmax numeric(5,2) DEFAULT 0.00,
-    pmin numeric(5,2) DEFAULT 0.00,
-    pdev numeric(5,2) DEFAULT 0.00,
-    doi numeric(4,2) DEFAULT 0.00,
-    "pSlot1" numeric(6,2) DEFAULT 0.00,
-    "pSlot2" numeric(6,2) DEFAULT 0.00,
-    "pSlot3" numeric(6,2) DEFAULT 0.00,
-    "pSlot4" numeric(6,2) DEFAULT 0.00,
-    "pSlot5" numeric(6,2) DEFAULT 0.00,
-    "pSlot6" numeric(6,2) DEFAULT 0.00,
-    "pSlot7" numeric(6,2) DEFAULT 0.00,
-    "pSlot8" numeric(6,2) DEFAULT 0.00,
-    "pSlot9" numeric(6,2) DEFAULT 0.00,
-    "pSlot10" numeric(6,2) DEFAULT 0.00,
-    "pSlot11" numeric(6,2) DEFAULT 0.00,
-    "pSlot12" numeric(6,2) DEFAULT 0.00,
-    "pSlot13" numeric(6,2) DEFAULT 0.00,
-    "pSlot14" numeric(6,2) DEFAULT 0.00,
-    "pSlot15" numeric(6,2) DEFAULT 0.00,
-    "pSlot16" numeric(6,2),
-    "pSlot17" numeric(6,2),
-    "pPosQB" numeric(6,2) DEFAULT 0.00,
-    "pPosRB" numeric(6,2) DEFAULT 0.00,
-    "pPosWR" numeric(6,2) DEFAULT 0.00,
-    "pPosTE" numeric(6,2) DEFAULT 0.00,
-    "pPosK" numeric(6,2) DEFAULT 0.00,
-    "pPosDST" numeric(6,2) DEFAULT 0.00,
-    division_finish smallint DEFAULT '0'::smallint,
-    regular_season_finish smallint DEFAULT '0'::smallint,
-    post_season_finish smallint DEFAULT '0'::smallint
-);
-
-
---
 -- Name: teams; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -6387,7 +6387,7 @@ CREATE UNIQUE INDEX idx_25012_season ON public.seasons USING btree (lid, year);
 -- Name: idx_25029_team; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_25029_team ON public.team_stats USING btree (tid, year);
+CREATE UNIQUE INDEX idx_25029_team ON public.league_team_seasonlogs USING btree (tid, year);
 
 
 --

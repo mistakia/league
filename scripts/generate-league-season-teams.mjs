@@ -25,16 +25,19 @@ const generate_league_season_teams = async ({
 
   const previous_year = year - 1
   const teams = await db('teams').where({ lid, year: previous_year })
-  const team_stats = await db('team_stats').where({ lid, year: previous_year })
+  const league_team_seasonlogs = await db('league_team_seasonlogs').where({
+    lid,
+    year: previous_year
+  })
 
   // draft order is determined by draft order index for teams that didnt make the post season
-  const draft_order_non_post_season = team_stats
+  const draft_order_non_post_season = league_team_seasonlogs
     .filter((t) => !t.post_season_finish)
     .sort((a, b) => a.doi - b.doi)
     .map((t) => t.tid)
 
   // draft order is determined by post season finish for teams that made the post season
-  const draft_order_post_season = team_stats
+  const draft_order_post_season = league_team_seasonlogs
     .filter((t) => t.post_season_finish)
     .sort((a, b) => b.post_season_finish - a.post_season_finish)
     .map((t) => t.tid)

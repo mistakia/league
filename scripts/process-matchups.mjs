@@ -74,10 +74,10 @@ const run = async ({ lid = 1, year = constants.season.year }) => {
     matchup.app = result[matchup.aid].potentialPoints[week]
   }
 
-  const teamStats = []
+  const league_team_seasonlogs = []
   for (const [tid, team] of Object.entries(result)) {
     const tm = teams.find((t) => t.uid === team.tid)
-    teamStats.push({
+    league_team_seasonlogs.push({
       tid,
       lid,
       year,
@@ -86,9 +86,12 @@ const run = async ({ lid = 1, year = constants.season.year }) => {
     })
   }
 
-  if (teamStats.length) {
-    await db('team_stats').insert(teamStats).onConflict(['tid', 'year']).merge()
-    log(`saved team stats for ${teamStats.length} teams`)
+  if (league_team_seasonlogs.length) {
+    await db('league_team_seasonlogs')
+      .insert(league_team_seasonlogs)
+      .onConflict(['tid', 'year'])
+      .merge()
+    log(`saved team stats for ${league_team_seasonlogs.length} teams`)
   }
 
   if (matchups.length) {
