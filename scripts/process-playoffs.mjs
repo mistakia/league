@@ -13,16 +13,16 @@ debug.enable('process-playoffs')
 const processPlayoffs = async ({ lid, year }) => {
   const league = await getLeague({ lid })
   const playoffs = await db('playoffs').where({ lid, year })
+  const league_team_seasonlogs = await db('league_team_seasonlogs').where({
+    lid,
+    year
+  })
 
   const is_wildcard_round =
     constants.season.year === year && constants.season.week === 15
   if (!playoffs.length && is_wildcard_round) {
     log(`creating wildcard round matchups for lid ${lid} year ${year}`)
 
-    const league_team_seasonlogs = await db('league_team_seasonlogs').where({
-      lid,
-      year
-    })
     const wildcard_regular_season_finishes = [3, 4, 5, 6]
     const wildcard_teams = league_team_seasonlogs
       .filter((t) =>
@@ -104,7 +104,7 @@ const processPlayoffs = async ({ lid, year }) => {
   if (constants.season.year !== year || constants.season.week > 17) {
     // calculate post season finish
     const playoff_teams = playoffs
-      .filter((p) => p.uid === 1 && p.week === 15)
+      .filter((p) => p.uid === 1)
       .sort((a, b) => b.points - a.points)
       .map((p) => p.tid)
 
@@ -115,7 +115,8 @@ const processPlayoffs = async ({ lid, year }) => {
       lid,
       year,
       tid: playoff_teams[3],
-      post_season_finish: 6
+      post_season_finish: 6,
+      overall_finish: 6
     })
 
     // second lowest scoring wildcard team is 5th place
@@ -123,7 +124,8 @@ const processPlayoffs = async ({ lid, year }) => {
       lid,
       year,
       tid: playoff_teams[2],
-      post_season_finish: 5
+      post_season_finish: 5,
+      overall_finish: 5
     })
 
     // combine championship round week 15 and 16 points
@@ -154,11 +156,28 @@ const processPlayoffs = async ({ lid, year }) => {
         lid,
         year,
         tid,
-        post_season_finish: i + 1
+        post_season_finish: i + 1,
+        overall_finish: i + 1
       })
     }
 
-    log(team_stat_inserts)
+    const playoff_team_ids = team_stat_inserts.map(entry => Number(entry.tid))
+    // Calculate overall finishes for non-playoff teams based on regular season finishes
+    const non_playoff_teams = league_team_seasonlogs
+      .filter(team => !playoff_team_ids.includes(team.tid))
+      .sort((a, b) => a.regular_season_finish - b.regular_season_finish)
+
+    let next_finish_position = playoff_team_ids.length + 1
+    non_playoff_teams.forEach(team => {
+      team_stat_inserts.push({
+        lid,
+        year,
+        tid: team.tid,
+        post_season_finish: null,
+        overall_finish: next_finish_position++
+      })
+    })
+
     await db('league_team_seasonlogs')
       .insert(team_stat_inserts)
       .onConflict(['tid', 'year'])

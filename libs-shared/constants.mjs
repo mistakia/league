@@ -747,6 +747,7 @@ export const fantasyTeamStats = [
   'division_finish',
   'regular_season_finish',
   'post_season_finish',
+  'overall_finish',
 
   'doi',
 
@@ -755,7 +756,12 @@ export const fantasyTeamStats = [
 ]
 
 export const createFantasyTeamStats = () =>
-  fantasyTeamStats.reduce((o, key) => ({ ...o, [key]: 0 }), {})
+  fantasyTeamStats.reduce((o, key) => {
+    if (['division_finish', 'regular_season_finish', 'post_season_finish', 'overall_finish'].includes(key)) {
+      return { ...o, [key]: null }
+    }
+    return { ...o, [key]: 0 }
+  }, {})
 
 export const waivers = {
   FREE_AGENCY: 1,

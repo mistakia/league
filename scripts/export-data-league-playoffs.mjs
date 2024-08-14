@@ -30,6 +30,7 @@ const export_league_playoffs = async () => {
     )
     .orderBy('year', 'asc')
     .orderBy('uid', 'asc')
+    .orderBy('tid', 'asc')
 
   const header = {}
   for (const field of Object.keys(data[0])) {
