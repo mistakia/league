@@ -25,9 +25,9 @@ const run = async ({ lid, print = true, dry_run = false, num_divisions }) => {
 
   const tids = teams.map((t) => t.uid)
 
-  // get team stats for last three years
+  // get team sesaonlogs for last three years
   const cutoff = constants.season.year - 2
-  const teamStats = await db('team_stats')
+  const league_team_seasonlogs = await db('league_team_seasonlogs')
     .where('year', '>=', cutoff)
     .whereIn('tid', tids)
 
@@ -37,10 +37,12 @@ const run = async ({ lid, print = true, dry_run = false, num_divisions }) => {
   let minWin = Infinity
 
   for (const team of teams) {
-    const stats = teamStats.filter((t) => t.tid === team.uid)
-    team.wins = sum(stats.map((s) => s.wins))
-    team.losses = sum(stats.map((s) => s.losses))
-    team.pf = sum(stats.map((s) => s.pf))
+    const team_seasonlogs = league_team_seasonlogs.filter(
+      (t) => t.tid === team.uid
+    )
+    team.wins = sum(team_seasonlogs.map((s) => s.wins))
+    team.losses = sum(team_seasonlogs.map((s) => s.losses))
+    team.pf = sum(team_seasonlogs.map((s) => s.pf))
 
     if (team.wins > maxWin) maxWin = team.wins
     if (team.wins < minWin) minWin = team.wins

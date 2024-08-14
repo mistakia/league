@@ -10,14 +10,14 @@ import { convertToCSV } from '#libs-shared'
 import { isMain } from '#libs-server'
 
 // const argv = yargs(hideBin(process.argv)).argv
-const log = debug('export_league_team_stats')
-debug.enable('export_league_team_stats')
+const log = debug('export_league_league_team_seasonlogs')
+debug.enable('export_league_league_team_seasonlogs')
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const data_path = path.join(__dirname, '../data')
 
-const export_league_team_stats = async () => {
-  const data = await db('team_stats')
+const export_league_league_team_seasonlogs = async () => {
+  const data = await db('league_team_seasonlogs')
     .orderBy('year', 'asc')
     .orderBy('lid', 'asc')
     .orderBy('tid', 'asc')
@@ -30,8 +30,8 @@ const export_league_team_stats = async () => {
   const csv_data_string = JSON.stringify(csv_data)
   const csv = convertToCSV(csv_data_string)
 
-  const json_file_path = `${data_path}/league/team_stats.json`
-  const csv_file_path = `${data_path}/league/team_stats.csv`
+  const json_file_path = `${data_path}/league/league_team_seasonlogs.json`
+  const csv_file_path = `${data_path}/league/league_team_seasonlogs.csv`
 
   await fs.ensureDir(`${data_path}/league`)
   await fs.writeJson(json_file_path, data, { spaces: 2 })
@@ -44,7 +44,7 @@ const export_league_team_stats = async () => {
 const main = async () => {
   let error
   try {
-    await export_league_team_stats()
+    await export_league_league_team_seasonlogs()
   } catch (err) {
     error = err
     log(error)
@@ -64,4 +64,4 @@ if (isMain(import.meta.url)) {
   main()
 }
 
-export default export_league_team_stats
+export default export_league_league_team_seasonlogs

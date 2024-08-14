@@ -28,7 +28,7 @@ const simulate_season = async (lid) => {
     .where('week', '>=', currentWeek)
   const rosterRows = await getRosters({ lid })
   const tids = teamRows.map((t) => t.uid)
-  const teamStats = await db('team_stats')
+  const teamStats = await db('league_team_seasonlogs')
     .where('year', constants.season.year)
     .whereIn('tid', tids)
 

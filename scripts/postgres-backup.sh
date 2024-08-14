@@ -40,7 +40,7 @@ rosters
 rosters_players
 schedule
 seasons
-team_stats
+league_team_seasonlogs
 teams
 trade_releases
 trades

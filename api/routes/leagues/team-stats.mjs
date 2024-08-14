@@ -14,11 +14,11 @@ router.get('/?', async (req, res) => {
 
     const year = req.query.year || constants.season.year
 
-    const teamStats = await db('team_stats').where({
+    const league_team_seasonlogs = await db('league_team_seasonlogs').where({
       lid: leagueId,
       year
     })
-    res.send(teamStats)
+    res.send(league_team_seasonlogs)
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })

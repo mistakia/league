@@ -19,9 +19,12 @@ const processPlayoffs = async ({ lid, year }) => {
   if (!playoffs.length && is_wildcard_round) {
     log(`creating wildcard round matchups for lid ${lid} year ${year}`)
 
-    const team_stats = await db('team_stats').where({ lid, year })
+    const league_team_seasonlogs = await db('league_team_seasonlogs').where({
+      lid,
+      year
+    })
     const wildcard_regular_season_finishes = [3, 4, 5, 6]
-    const wildcard_teams = team_stats
+    const wildcard_teams = league_team_seasonlogs
       .filter((t) =>
         wildcard_regular_season_finishes.includes(t.regular_season_finish)
       )
@@ -156,7 +159,7 @@ const processPlayoffs = async ({ lid, year }) => {
     }
 
     log(team_stat_inserts)
-    await db('team_stats')
+    await db('league_team_seasonlogs')
       .insert(team_stat_inserts)
       .onConflict(['tid', 'year'])
       .merge()
@@ -176,9 +179,12 @@ const processPlayoffs = async ({ lid, year }) => {
     log(`creating championship round matchups for lid ${lid} year ${year}`)
     // create championship round matchups
     // regular season 1st and 2nd place finish + two highest points from the wildcard round
-    const team_stats = await db('team_stats').where({ lid, year })
+    const league_team_seasonlogs = await db('league_team_seasonlogs').where({
+      lid,
+      year
+    })
     const regular_season_finishes = [1, 2]
-    const regular_season_teams = team_stats
+    const regular_season_teams = league_team_seasonlogs
       .filter((t) => regular_season_finishes.includes(t.regular_season_finish))
       .map((t) => t.tid)
 
