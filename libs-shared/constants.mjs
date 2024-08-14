@@ -757,7 +757,14 @@ export const fantasyTeamStats = [
 
 export const createFantasyTeamStats = () =>
   fantasyTeamStats.reduce((o, key) => {
-    if (['division_finish', 'regular_season_finish', 'post_season_finish', 'overall_finish'].includes(key)) {
+    if (
+      [
+        'division_finish',
+        'regular_season_finish',
+        'post_season_finish',
+        'overall_finish'
+      ].includes(key)
+    ) {
       return { ...o, [key]: null }
     }
     return { ...o, [key]: 0 }
