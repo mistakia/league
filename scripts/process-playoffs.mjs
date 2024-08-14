@@ -161,14 +161,14 @@ const processPlayoffs = async ({ lid, year }) => {
       })
     }
 
-    const playoff_team_ids = team_stat_inserts.map(entry => Number(entry.tid))
+    const playoff_team_ids = team_stat_inserts.map((entry) => Number(entry.tid))
     // Calculate overall finishes for non-playoff teams based on regular season finishes
     const non_playoff_teams = league_team_seasonlogs
-      .filter(team => !playoff_team_ids.includes(team.tid))
+      .filter((team) => !playoff_team_ids.includes(team.tid))
       .sort((a, b) => a.regular_season_finish - b.regular_season_finish)
 
     let next_finish_position = playoff_team_ids.length + 1
-    non_playoff_teams.forEach(team => {
+    non_playoff_teams.forEach((team) => {
       team_stat_inserts.push({
         lid,
         year,
