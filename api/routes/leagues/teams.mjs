@@ -3,7 +3,89 @@ import express from 'express'
 import { constants } from '#libs-shared'
 import { getLeague } from '#libs-server'
 
-const router = express.Router()
+const router = express.Router({
+  mergeParams: true
+})
+
+router.get('/?', async (req, res) => {
+  const { db, logger } = req.app.locals
+  try {
+    const { leagueId } = req.params
+    const { year: requested_year } = req.query
+
+    let year = constants.season.year
+    if (requested_year) {
+      const parsed_year = Number(requested_year)
+      if (
+        isNaN(parsed_year) ||
+        parsed_year > constants.season.year ||
+        parsed_year < 1990
+      ) {
+        return res.status(400).send({ error: 'Invalid year parameter' })
+      }
+      year = parsed_year
+    }
+
+    const teams = await db('teams').where({
+      lid: leagueId,
+      year
+    })
+    const picks = await db('draft').where({ lid: leagueId }).whereNull('pid')
+
+    const sub_query = db('league_team_forecast')
+      .select(db.raw('max(timestamp) AS maxtime, tid AS teamid'))
+      .groupBy('teamid')
+      .where('year', year)
+      .as('sub_query')
+    const forecasts = await db
+      .select(
+        'playoff_odds',
+        'bye_odds',
+        'division_odds',
+        'championship_odds',
+        'tid'
+      )
+      .from(sub_query)
+      .innerJoin('league_team_forecast', function () {
+        this.on(function () {
+          this.on('teamid', '=', 'tid')
+          this.andOn('timestamp', '=', 'maxtime')
+        })
+      })
+
+    const teamIds = teams.map((t) => t.uid)
+
+    for (const team of teams) {
+      const forecast = forecasts.find((f) => f.tid === team.uid) || {}
+      team.picks = picks.filter((p) => p.tid === team.uid)
+      team.playoff_odds = forecast.playoff_odds
+      team.division_odds = forecast.division_odds
+      team.bye_odds = forecast.bye_odds
+      team.championship_odds = forecast.championship_odds
+    }
+
+    if (req.auth && req.auth.userId) {
+      const usersTeams = await db('users_teams')
+        .where({ userid: req.auth.userId })
+        .whereIn('tid', teamIds)
+
+      for (const usersTeam of usersTeams) {
+        const { tid, teamtext, teamvoice, leaguetext } = usersTeam
+        for (const [index, team] of teams.entries()) {
+          if (team.uid === tid) {
+            teams[index] = { teamtext, teamvoice, leaguetext, ...team }
+            break
+          }
+        }
+      }
+    }
+
+    res.send({ teams })
+  } catch (err) {
+    logger(err)
+    res.status(500).send({ error: err.toString() })
+  }
+})
 
 router.post('/?', async (req, res) => {
   const { db, logger } = req.app.locals
