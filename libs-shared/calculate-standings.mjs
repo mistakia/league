@@ -210,16 +210,31 @@ const calculateStandings = ({
 
   // calculate regular season finish
 
-  // best all play among each set of division leaders
+  const number_of_divisions = Object.keys(divisions).length
   const bye_teams = []
   const division_wildcard_teams = []
-  for (const div in divisions) {
-    const sorted_division_leaders = Object.values(teamStats)
-      .filter((p) => p.stats.division_finish < 3 && p.div === Number(div))
+
+  if (number_of_divisions === 4) {
+    const all_division_winners = Object.values(teamStats)
+      .filter((p) => p.stats.division_finish === 1)
       .sort((a, b) => b.stats.apWins - a.stats.apWins)
 
-    bye_teams.push(sorted_division_leaders[0])
-    division_wildcard_teams.push(sorted_division_leaders[0])
+    bye_teams.push(all_division_winners[0], all_division_winners[1])
+    division_wildcard_teams.push(
+      all_division_winners[2],
+      all_division_winners[3]
+    )
+  } else if (number_of_divisions === 2) {
+    for (const div in divisions) {
+      const sorted_division_leaders = Object.values(teamStats)
+        .filter((p) => p.stats.division_finish < 3 && p.div === Number(div))
+        .sort((a, b) => b.stats.apWins - a.stats.apWins)
+
+      bye_teams.push(sorted_division_leaders[0])
+      division_wildcard_teams.push(sorted_division_leaders[1])
+    }
+  } else {
+    throw new Error(`Unsupported number of divisions: ${number_of_divisions}`)
   }
 
   const sorted_bye_team_ids = bye_teams
@@ -241,8 +256,9 @@ const calculateStandings = ({
   }
 
   // remaining teams are sorted by points for
+  const division_finish_threshold = number_of_divisions === 4 ? 1 : 2
   const remaining_teams = Object.values(teamStats)
-    .filter((p) => p.stats.division_finish > 2)
+    .filter((p) => p.stats.division_finish > division_finish_threshold)
     .sort((a, b) => b.stats.pf - a.stats.pf)
     .map((p) => p.tid)
 

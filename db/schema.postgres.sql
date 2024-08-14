@@ -232,6 +232,8 @@ ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_username
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_key;
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_hash_key;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pkey;
+ALTER TABLE IF EXISTS ONLY public.league_team_seasonlogs DROP CONSTRAINT IF EXISTS league_team_seasonlogs_pkey;
+ALTER TABLE IF EXISTS ONLY public.league_team_careerlogs DROP CONSTRAINT IF EXISTS league_team_careerlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.invite_codes DROP CONSTRAINT IF EXISTS invite_codes_pkey;
 ALTER TABLE IF EXISTS ONLY public.waivers DROP CONSTRAINT IF EXISTS "idx_25151_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS "idx_25127_PRIMARY";
@@ -360,6 +362,7 @@ DROP TABLE IF EXISTS public.league_team_lineup_contributions;
 DROP TABLE IF EXISTS public.league_team_lineup_contribution_weeks;
 DROP TABLE IF EXISTS public.league_team_forecast;
 DROP TABLE IF EXISTS public.league_team_daily_values;
+DROP TABLE IF EXISTS public.league_team_careerlogs;
 DROP TABLE IF EXISTS public.league_scoring_formats;
 DROP TABLE IF EXISTS public.league_player_seasonlogs;
 DROP TABLE IF EXISTS public.league_player_projection_values;
@@ -1147,6 +1150,35 @@ CREATE TABLE public.league_scoring_formats (
 
 
 --
+-- Name: league_team_careerlogs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.league_team_careerlogs (
+    lid integer NOT NULL,
+    tid integer NOT NULL,
+    wins smallint DEFAULT 0,
+    losses smallint DEFAULT 0,
+    ties smallint DEFAULT 0,
+    "apWins" smallint DEFAULT 0,
+    "apLosses" smallint DEFAULT 0,
+    "apTies" smallint DEFAULT 0,
+    pf numeric(8,2) DEFAULT 0.00,
+    pa numeric(8,2) DEFAULT 0.00,
+    pdiff numeric(8,2) DEFAULT 0.00,
+    pp numeric(8,2) DEFAULT 0.00,
+    pw smallint DEFAULT 0,
+    pl smallint DEFAULT 0,
+    pp_pct numeric(5,2) DEFAULT 0.00,
+    pmax numeric(6,2) DEFAULT 0.00,
+    pmin numeric(6,2) DEFAULT 0.00,
+    worst_regular_season_finish smallint,
+    best_regular_season_finish smallint,
+    best_overall_finish smallint,
+    worst_overall_finish smallint
+);
+
+
+--
 -- Name: league_team_daily_values; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -1244,7 +1276,7 @@ CREATE TABLE public.league_team_seasonlogs (
     lid integer NOT NULL,
     tid integer NOT NULL,
     div smallint,
-    year smallint,
+    year smallint NOT NULL,
     wins smallint DEFAULT '0'::smallint,
     losses smallint DEFAULT '0'::smallint,
     ties smallint DEFAULT '0'::smallint,
@@ -1286,9 +1318,10 @@ CREATE TABLE public.league_team_seasonlogs (
     "pPosTE" numeric(6,2) DEFAULT 0.00,
     "pPosK" numeric(6,2) DEFAULT 0.00,
     "pPosDST" numeric(6,2) DEFAULT 0.00,
-    division_finish smallint DEFAULT '0'::smallint,
-    regular_season_finish smallint DEFAULT '0'::smallint,
-    post_season_finish smallint DEFAULT '0'::smallint
+    division_finish smallint,
+    regular_season_finish smallint,
+    post_season_finish smallint,
+    overall_finish smallint
 );
 
 
@@ -5418,6 +5451,22 @@ ALTER TABLE ONLY public.waivers
 
 ALTER TABLE ONLY public.invite_codes
     ADD CONSTRAINT invite_codes_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: league_team_careerlogs league_team_careerlogs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.league_team_careerlogs
+    ADD CONSTRAINT league_team_careerlogs_pkey PRIMARY KEY (lid, tid);
+
+
+--
+-- Name: league_team_seasonlogs league_team_seasonlogs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.league_team_seasonlogs
+    ADD CONSTRAINT league_team_seasonlogs_pkey PRIMARY KEY (lid, tid, year);
 
 
 --
