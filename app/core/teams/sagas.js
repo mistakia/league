@@ -2,7 +2,7 @@ import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
 import { teamActions } from './actions'
 import { appActions } from '@core/app'
-import { get_app } from '@core/selectors'
+import { get_app, get_request_history } from '@core/selectors'
 import {
   getTeams,
   putTeam,
@@ -22,17 +22,16 @@ export function* initTeams() {
 }
 
 export function* loadTeams() {
-  const { leagueId } = yield select(get_app)
-  const state = yield select()
-  const isLoading = state.getIn(['app', 'isLoadingTeams'])
-  const isLoaded = state.getIn(['app', 'isLoadedTeams'])
-  if (isLoading === leagueId || isLoaded === leagueId) {
+  const { leagueId, year } = yield select(get_app)
+  const request_history = yield select(get_request_history)
+
+  if (request_history.has(`GET_TEAMS_${leagueId}_${year}`)) {
     return
   }
 
   if (!leagueId) return
 
-  yield call(getTeams, { leagueId })
+  yield call(getTeams, { leagueId, year })
 }
 
 export function* updateTeam({ payload }) {
@@ -139,6 +138,10 @@ export function* watchLoadTeams() {
   yield takeLatest(teamActions.LOAD_TEAMS, loadTeams)
 }
 
+export function* watch_select_year() {
+  yield takeLatest(appActions.SELECT_YEAR, loadTeams)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -159,5 +162,6 @@ export const teamSagas = [
   fork(watchLoadWaivers),
   fork(watchLoadMatchups),
   fork(watchLoadRosters),
-  fork(watchLoadTeams)
+  fork(watchLoadTeams),
+  fork(watch_select_year)
 ]

@@ -51,9 +51,14 @@ export const get_players_table_views = (state) =>
 export const getWaivers = (state) => state.get('waivers')
 export const getTransactions = (state) => state.get('transactions')
 export const getTrade = (state) => state.get('trade')
-export const getTeams = (state) => state.get('teams')
-export const getTeamById = (state, { tid }) =>
-  state.getIn(['teams', tid], new Team())
+export const get_teams_for_current_year = (state) =>
+  state.getIn(['teams', constants.year])
+export const get_team_by_id_for_year = (
+  state,
+  { tid, year = constants.year }
+) => state.getIn(['teams', year, tid], new Team())
+export const get_team_by_id_for_current_year = (state, { tid }) =>
+  state.getIn(['teams', constants.year, tid], new Team())
 export const getScoreboard = (state) => state.get('scoreboard')
 export const getProps = (state) => state.getIn(['props', 'items'])
 export const getPlays = (state, { week = constants.week } = {}) =>
@@ -105,9 +110,17 @@ export const isTeamConnected = createSelector(
   (connected, tid) => connected.includes(tid)
 )
 
+export const get_teams_for_current_league_and_year = createSelector(
+  (state) => state.getIn(['app', 'leagueId']),
+  (state) => state.getIn(['app', 'year']),
+  (state) => state.get('teams'),
+  (leagueId, year, teams) =>
+    teams.get(year, new Map()).filter((t) => t.lid === leagueId)
+)
+
 export const getCurrentTeam = createSelector(
   (state) => state.getIn(['app', 'teamId']),
-  (state) => state.get('teams'),
+  get_teams_for_current_league_and_year,
   (teamId, teams) => teams.get(teamId, new Team())
 )
 
@@ -124,7 +137,7 @@ export const getCurrentTeamRosterRecord = createSelector(
 
 export const getTeamsForCurrentLeague = createSelector(
   (state) => state.getIn(['app', 'leagueId']),
-  getTeams,
+  get_teams_for_current_year,
   (leagueId, teams) => teams.filter((t) => t.lid === leagueId)
 )
 
@@ -749,15 +762,23 @@ export const getLeagueEvents = createSelector(
 )
 
 export const get_regular_season_weeks = createSelector(
-  (state) => state.getIn(['matchups', 'items']),
+  (state) => state.getIn(['matchups', 'matchups_by_id']).toList(),
   (state) => state.getIn(['app', 'year'], constants.year),
-  (matchups, year) => matchups.filter((m) => m.year === year).map((m) => m.week)
+  (matchups, year) =>
+    matchups
+      .filter((m) => m.year === year)
+      .map((m) => m.week)
+      .sort((a, b) => a - b)
 )
 
 export const get_post_season_weeks = createSelector(
   (state) => state.getIn(['matchups', 'playoffs']),
   (state) => state.getIn(['app', 'year'], constants.year),
-  (playoffs, year) => playoffs.filter((m) => m.year === year).map((m) => m.week)
+  (playoffs, year) =>
+    playoffs
+      .filter((m) => m.year === year)
+      .map((m) => m.week)
+      .sort((a, b) => a - b)
 )
 
 export const getWeeksForSelectedYearMatchups = createSelector(
@@ -770,19 +791,21 @@ export const getWeeksForSelectedYearMatchups = createSelector(
 
 export function getMatchupById(state, { matchupId }) {
   const matchups = state.get('matchups')
-  const items = matchups.get('items')
-  return items.find((m) => m.uid === matchupId)
+  return matchups.getIn(['matchups_by_id', matchupId], createMatchup())
 }
 
 export function getFilteredMatchups(state) {
   const matchups = state.get('matchups')
-  const items = matchups.get('items')
+  const items = matchups.get('matchups_by_id').toList()
   const teams = matchups.get('teams')
   const weeks = matchups.get('weeks')
+  const year = state.getIn(['app', 'year'], constants.year)
   const filtered = items.filter(
-    (m) => teams.includes(m.aid) || teams.includes(m.hid)
+    (m) =>
+      teams.includes(m.aid) ||
+      (teams.includes(m.hid) && m.year === year && weeks.includes(m.week))
   )
-  return filtered.filter((m) => weeks.includes(m.week))
+  return filtered
 }
 
 export function getSelectedMatchup(state) {
@@ -800,14 +823,15 @@ export function getSelectedMatchup(state) {
       createMatchup()
     )
   } else {
-    const items = matchups.get('items')
-    return items.find((m) => m.uid === matchupId) || createMatchup()
+    return matchups.getIn(['matchups_by_id', matchupId], createMatchup())
   }
 }
 
 export function getSelectedMatchupTeams(state) {
   const matchup = getSelectedMatchup(state)
-  const teams = matchup.tids.map((tid) => getTeamById(state, { tid }))
+  const teams = matchup.tids.map((tid) =>
+    get_team_by_id_for_year(state, { tid, year: matchup.year })
+  )
   if (matchup.week === constants.season.finalWeek) {
     const prevWeek = constants.season.finalWeek - 1
     return teams.map((teamRecord) => {
@@ -822,9 +846,10 @@ export function getSelectedMatchupTeams(state) {
 }
 
 export function getMatchupsForSelectedWeek(state) {
-  const matchups = state.getIn(['matchups', 'items'])
+  const matchups = state.getIn(['matchups', 'matchups_by_id']).toList()
   const week = state.getIn(['scoreboard', 'week'])
-  return matchups.filter((m) => m.week === week)
+  const year = state.getIn(['app', 'year'], constants.year)
+  return matchups.filter((m) => m.week === week && m.year === year)
 }
 
 export function getMatchupByTeamId(state, { tid, year, week }) {
@@ -846,7 +871,7 @@ export function getMatchupByTeamId(state, { tid, year, week }) {
     )
   }
 
-  const matchups = state.getIn(['matchups', 'items'])
+  const matchups = state.getIn(['matchups', 'matchups_by_id']).toList()
   return (
     matchups.find(
       (m) =>
@@ -1750,7 +1775,7 @@ export const getRosterPositionalValueByTeamId = createSelector(
   getRostersForCurrentLeague,
   getCurrentLeague,
   getTeamsForCurrentLeague,
-  getTeamById,
+  get_team_by_id_for_current_year,
   get_rostered_player_maps,
   get_draft_pick_values,
   (rosterRecords, league, teams, team, player_maps, draft_pick_values) => {
@@ -2411,7 +2436,7 @@ export function getGamelogForPlayer(
 }
 
 export function getDraftPickById(state, { pickId }) {
-  const teams = state.get('teams')
+  const teams = get_teams_for_current_league_and_year(state)
   for (const team of teams.valueSeq()) {
     const picks = team.get('picks')
     const pick = picks.find((p) => p.uid === pickId)
@@ -2423,20 +2448,17 @@ export function getDraftPickById(state, { pickId }) {
   return {}
 }
 
-// TODO update to use info in team_stats
+// gets the overall standings for the current league and year
 export function getOverallStandings(state) {
-  const { year } = get_app(state)
-  const teams = getTeamsForCurrentLeague(state)
+  const teams = get_teams_for_current_league_and_year(state)
   const divisionTeams = teams.groupBy((x) => x.getIn(['div'], 0))
   let divisionLeaders = new List()
   for (const teams of divisionTeams.values()) {
     const sorted = teams.sort(
       (a, b) =>
-        b.getIn(['stats', year, 'wins'], 0) -
-          a.getIn(['stats', year, 'wins'], 0) ||
-        b.getIn(['stats', year, 'ties'], 0) -
-          a.getIn(['stats', year, 'ties'], 0) ||
-        b.getIn(['stats', year, 'pf'], 0) - a.getIn(['stats', year, 'pf'], 0)
+        b.getIn(['stats', 'wins'], 0) - a.getIn(['stats', 'wins'], 0) ||
+        b.getIn(['stats', 'ties'], 0) - a.getIn(['stats', 'ties'], 0) ||
+        b.getIn(['stats', 'pf'], 0) - a.getIn(['stats', 'pf'], 0)
     )
 
     // top two teams
@@ -2446,11 +2468,9 @@ export function getOverallStandings(state) {
 
   let sortedDivisionLeaders = divisionLeaders.sort(
     (a, b) =>
-      b.getIn(['stats', year, 'apWins'], 0) -
-        a.getIn(['stats', year, 'apWins'], 0) ||
-      b.getIn(['stats', year, 'apTies'], 0) -
-        a.getIn(['stats', year, 'apTies'], 0) ||
-      b.getIn(['stats', year, 'pf'], 0) - a.getIn(['stats', year, 'pf'], 0)
+      b.getIn(['stats', 'apWins'], 0) - a.getIn(['stats', 'apWins'], 0) ||
+      b.getIn(['stats', 'apTies'], 0) - a.getIn(['stats', 'apTies'], 0) ||
+      b.getIn(['stats', 'pf'], 0) - a.getIn(['stats', 'pf'], 0)
   )
 
   // TODO cleanup
@@ -2470,8 +2490,7 @@ export function getOverallStandings(state) {
     .filter((t) => !playoffTeamTids.includes(t.uid))
     .toList()
   const sortedWildcardTeams = wildcardTeams.sort(
-    (a, b) =>
-      b.getIn(['stats', year, 'pf'], 0) - a.getIn(['stats', year, 'pf'], 0)
+    (a, b) => b.getIn(['stats', 'pf'], 0) - a.getIn(['stats', 'pf'], 0)
   )
 
   return {
@@ -2644,7 +2663,9 @@ function calculateTradedPicks({ picks, add, remove }) {
 
 export function getProposingTeamTradedPicks(state) {
   const trade = getCurrentTrade(state)
-  const team = getTeamById(state, { tid: trade.propose_tid })
+  const team = get_team_by_id_for_current_year(state, {
+    tid: trade.propose_tid
+  })
 
   return calculateTradedPicks({
     picks: team.picks,
@@ -2655,7 +2676,7 @@ export function getProposingTeamTradedPicks(state) {
 
 export function getAcceptingTeamTradedPicks(state) {
   const trade = getCurrentTrade(state)
-  const team = getTeamById(state, { tid: trade.accept_tid })
+  const team = get_team_by_id_for_current_year(state, { tid: trade.accept_tid })
 
   return calculateTradedPicks({
     picks: team.picks,
@@ -2775,7 +2796,9 @@ export function getCurrentTradeAnalysis(state) {
     tid: trade.accept_tid
   })
 
-  const proposingTeamRecord = getTeamById(state, { tid: trade.propose_tid })
+  const proposingTeamRecord = get_team_by_id_for_current_year(state, {
+    tid: trade.propose_tid
+  })
   const proposingTeam = {
     team: proposingTeamRecord,
     before: getTeamTradeSummary(state, {
@@ -2790,7 +2813,9 @@ export function getCurrentTradeAnalysis(state) {
     })
   }
 
-  const acceptingTeamRecord = getTeamById(state, { tid: trade.accept_tid })
+  const acceptingTeamRecord = get_team_by_id_for_current_year(state, {
+    tid: trade.accept_tid
+  })
   const acceptingTeam = {
     team: acceptingTeamRecord,
     before: getTeamTradeSummary(state, {
@@ -2820,12 +2845,12 @@ export function getAcceptingTeamPlayers(state) {
 
 export function getProposingTeam(state) {
   const trade = getCurrentTrade(state)
-  return getTeamById(state, { tid: trade.propose_tid })
+  return get_team_by_id_for_current_year(state, { tid: trade.propose_tid })
 }
 
 export function getAcceptingTeam(state) {
   const trade = getCurrentTrade(state)
-  return getTeamById(state, { tid: trade.accept_tid })
+  return get_team_by_id_for_current_year(state, { tid: trade.accept_tid })
 }
 
 export function getProposingTeamRoster(state) {

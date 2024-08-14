@@ -6,6 +6,7 @@ import { teamActions } from './actions'
 import { auctionActions } from '@core/auction'
 import { draftActions } from '@core/draft'
 import { tradeActions } from '@core/trade'
+import { constants } from '@libs-shared'
 
 const initialState = new Map()
 
@@ -14,21 +15,26 @@ export function teamsReducer(state = initialState, { payload, type }) {
     case appActions.AUTH_FULFILLED:
     case teamActions.GET_TEAMS_FULFILLED:
       return state.withMutations((state) => {
+        const year = payload.opts.year || constants.year
         payload.data.teams.forEach((t) => {
-          if (state.has(t.uid)) {
+          if (state.hasIn([year, t.uid])) {
             if (t.stats) {
-              state.set(t.uid, state.get(t.uid).mergeDeep(createTeam(t)))
+              state.setIn(
+                [year, t.uid],
+                state.getIn([year, t.uid]).mergeDeep(createTeam(t))
+              )
             } else {
-              let new_team = state.get(t.uid).merge(createTeam(t))
-              const existing_stats = state.get(t.uid).get('stats')
-              for (const [year, stats] of existing_stats.entrySeq()) {
-                new_team = new_team.setIn(['stats', Number(year)], stats)
-              }
+              const new_team = state.getIn([year, t.uid]).merge(createTeam(t))
+              // TODO dont think this is needed anymore
+              // const existing_stats = state.getIn([year, t.uid]).get('stats')
+              // for (const [year, stats] of existing_stats.entrySeq()) {
+              //   new_team = new_team.setIn(['stats', Number(year)], stats)
+              // }
 
-              state.set(t.uid, new_team)
+              state.setIn([year, t.uid], new_team)
             }
           } else {
-            state.set(t.uid, createTeam(t))
+            state.setIn([year, t.uid], createTeam(t))
           }
         })
       })
@@ -37,22 +43,26 @@ export function teamsReducer(state = initialState, { payload, type }) {
       return initialState
 
     case auctionActions.AUCTION_PROCESSED: {
-      const newCap = state.get(payload.tid).get('cap') - payload.value
-      return state.setIn([payload.tid, 'cap'], newCap)
+      const newCap =
+        state.getIn([constants.year, payload.tid, 'cap']) - payload.value
+      return state.setIn([constants.year, payload.tid, 'cap'], newCap)
     }
 
     case teamActions.PUT_TEAM_FULFILLED:
       return state.setIn(
-        [payload.opts.teamId, payload.opts.field],
+        [constants.year, payload.opts.teamId, payload.opts.field],
         payload.data.value
       )
 
     case draftActions.DRAFTED_PLAYER:
     case draftActions.POST_DRAFT_FULFILLED: {
       const { data } = payload
-      const teamPicks = state.getIn([data.tid, 'picks'])
+      const teamPicks = state.getIn([constants.year, data.tid, 'picks'])
       const key = teamPicks.findKey((p) => p.uid === data.uid)
-      return state.setIn([data.tid, 'picks', key, 'pid'], data.pid)
+      return state.setIn(
+        [constants.year, data.tid, 'picks', key, 'pid'],
+        data.pid
+      )
     }
 
     case tradeActions.POST_TRADE_ACCEPT_FULFILLED:
@@ -65,8 +75,11 @@ export function teamsReducer(state = initialState, { payload, type }) {
 
       return state.withMutations((state) => {
         // make changes to proposing team picks
-        if (state.get(payload.data.propose_tid)) {
-          const proposingTeam = state.get(payload.data.propose_tid)
+        if (state.getIn([constants.year, payload.data.propose_tid])) {
+          const proposingTeam = state.getIn([
+            constants.year,
+            payload.data.propose_tid
+          ])
           let proposingTeamPicks = proposingTeam.get('picks')
           // remove traded picks
           if (payload.data.proposingTeamPicks.length) {
@@ -83,11 +96,17 @@ export function teamsReducer(state = initialState, { payload, type }) {
             )
           }
 
-          state.setIn([payload.data.propose_tid, 'picks'], proposingTeamPicks)
+          state.setIn(
+            [constants.year, payload.data.propose_tid, 'picks'],
+            proposingTeamPicks
+          )
         }
 
-        if (state.get(payload.data.accept_tid)) {
-          const acceptingTeam = state.get(payload.data.accept_tid)
+        if (state.getIn([constants.year, payload.data.accept_tid])) {
+          const acceptingTeam = state.getIn([
+            constants.year,
+            payload.data.accept_tid
+          ])
           let acceptingTeamPicks = acceptingTeam.get('picks')
           // remove traded picks
           if (payload.data.acceptingTeamPicks.length) {
@@ -104,28 +123,34 @@ export function teamsReducer(state = initialState, { payload, type }) {
             )
           }
 
-          state.setIn([payload.data.accept_tid, 'picks'], acceptingTeamPicks)
+          state.setIn(
+            [constants.year, payload.data.accept_tid, 'picks'],
+            acceptingTeamPicks
+          )
         }
       })
 
     case teamActions.POST_TEAMS_FULFILLED:
-      return state.set(payload.data.team.uid, createTeam(payload.data.team))
+      return state.setIn(
+        [constants.year, payload.data.team.uid],
+        createTeam(payload.data.team)
+      )
 
     case teamActions.DELETE_TEAMS_FULFILLED:
-      return state.delete(payload.opts.teamId)
+      return state.deleteIn([constants.year, payload.opts.teamId])
 
     case teamActions.GET_LEAGUE_TEAM_STATS_FULFILLED:
       return state.withMutations((state) => {
         payload.data.forEach((stats) => {
-          if (state.hasIn([stats.tid, 'uid'])) {
-            const team = state.get(stats.tid)
-            state.set(
-              stats.tid,
-              team.setIn(['stats', stats.year], new Map(stats))
+          if (state.hasIn([payload.opts.year, stats.tid, 'uid'])) {
+            const team = state.getIn([payload.opts.year, stats.tid])
+            state.setIn(
+              [payload.opts.year, stats.tid],
+              team.set('stats', new Map(stats))
             )
           } else {
-            state.set(
-              stats.tid,
+            state.setIn(
+              [payload.opts.year, stats.tid],
               createTeam({ ...stats, uid: stats.tid, stats })
             )
           }

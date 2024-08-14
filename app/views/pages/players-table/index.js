@@ -4,7 +4,7 @@ import { createSelector } from 'reselect'
 import {
   getStats,
   get_selected_players_table_view,
-  getTeams
+  get_teams_for_current_year
 } from '@core/selectors'
 import { players_table_views_actions } from '@core/players-table-views'
 import { getPlayerTableFields } from '@core/players-table-fields'
@@ -72,7 +72,7 @@ const mapStateToProps = createSelector(
   (state) => state.getIn(['app', 'teamId']),
   (state) => state.getIn(['app', 'leagueId']),
   (state) => state.getIn(['players', 'highlight_teamIds']),
-  getTeams,
+  get_teams_for_current_year,
   get_players_percentiles,
   (
     players_table_data,

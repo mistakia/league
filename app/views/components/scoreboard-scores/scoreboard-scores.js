@@ -6,7 +6,11 @@ import ScoreboardScoreTeam from '@components/scoreboard-score-team'
 
 import './scoreboard-scores.styl'
 
-export default function ScoreboardScores({ select, matchups, selected }) {
+export default function ScoreboardScores({
+  select_matchup,
+  matchups,
+  selected
+}) {
   const items = []
   for (const [index, matchup] of matchups.entries()) {
     const classNames = ['scoreboard__matchup cursor']
@@ -15,10 +19,18 @@ export default function ScoreboardScores({ select, matchups, selected }) {
       <div
         key={index}
         className={classNames.join(' ')}
-        onClick={() => select({ matchupId: matchup.uid })}
+        onClick={() => select_matchup({ matchupId: matchup.uid })}
       >
-        <ScoreboardScoreTeam tid={matchup.aid} week={matchup.week} />
-        <ScoreboardScoreTeam tid={matchup.hid} week={matchup.week} />
+        <ScoreboardScoreTeam
+          tid={matchup.aid}
+          week={matchup.week}
+          year={matchup.year}
+        />
+        <ScoreboardScoreTeam
+          tid={matchup.hid}
+          week={matchup.week}
+          year={matchup.year}
+        />
       </div>
     )
   }
@@ -26,7 +38,7 @@ export default function ScoreboardScores({ select, matchups, selected }) {
 }
 
 ScoreboardScores.propTypes = {
-  select: PropTypes.func,
+  select_matchup: PropTypes.func,
   matchups: ImmutablePropTypes.list,
   selected: PropTypes.number
 }

@@ -18,9 +18,7 @@ export const Team = new Record({
   teamvoice: 0,
   leaguetext: 0,
   picks: new List(),
-  stats: new Map({
-    [constants.year]: new Map(constants.createFantasyTeamStats())
-  }),
+  stats: new Map(constants.createFantasyTeamStats()),
 
   playoff_odds: null,
   division_odds: null,
@@ -73,13 +71,7 @@ export function createTeam({
     leaguetext,
     picks: new List(picks),
 
-    stats: Map.isMap(stats)
-      ? stats
-      : stats
-        ? new Map({
-            [stats.year]: new Map(stats)
-          })
-        : undefined,
+    stats: Map.isMap(stats) ? stats : stats ? new Map(stats) : undefined,
 
     playoff_odds,
     division_odds,

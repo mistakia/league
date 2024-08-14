@@ -31,9 +31,7 @@ const initialState = new Record({
     default_players_table_views.SEASON_PROJECTIONS.view_id,
 
   isLoadingRosters: null,
-  isLoadedRosters: null,
-  isLoadingTeams: null,
-  isLoadedTeams: null
+  isLoadedRosters: null
 })
 
 export function appReducer(state = initialState(), { payload, type }) {
@@ -57,19 +55,11 @@ export function appReducer(state = initialState(), { payload, type }) {
         state.set('isLoadedRosters', payload.opts.leagueId)
       })
 
-    case teamActions.GET_TEAMS_PENDING:
-      return state.set('isLoadingTeams', payload.opts.leagueId)
-
-    case teamActions.GET_TEAMS_FAILED:
-      return state.set('isLoadingTeams', null)
-
     case teamActions.GET_TEAMS_FULFILLED:
       return state.withMutations((state) => {
         const teamId = state.get('teamId')
         const team = payload.data.teams.find((t) => t.uid === teamId)
         if (!team) state.set('teamId', null)
-        state.set('isLoadingTeams', null)
-        state.set('isLoadedTeams', payload.opts.leagueId)
       })
 
     case appActions.LOGOUT:

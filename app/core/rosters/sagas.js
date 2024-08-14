@@ -47,7 +47,7 @@ import {
   getPoachPlayersForCurrentTeam,
   getWaiverPlayersForCurrentTeam,
   getCurrentLeague,
-  getTeamById
+  get_team_by_id_for_current_year
 } from '@core/selectors'
 import { constants } from '@libs-shared'
 import { playerActions } from '@core/players'
@@ -458,7 +458,7 @@ export function* exportRosters() {
 
   const data = []
   for (const [tid, roster] of rosters.entrySeq()) {
-    const team = yield select(getTeamById, { tid })
+    const team = yield select(get_team_by_id_for_current_year, { tid })
     for (const rosterPlayer of roster.players) {
       const playerMap = playerMaps.get(rosterPlayer.pid)
       data.push({
@@ -681,6 +681,10 @@ export function* watchSelectYear() {
   yield takeLatest(appActions.SELECT_YEAR, load_rosters_for_year)
 }
 
+export function* watch_load_rosters_for_year() {
+  yield takeLatest(rosterActions.LOAD_ROSTERS_FOR_YEAR, load_rosters_for_year)
+}
+
 export function* watchPostProcessPoachFulfilled() {
   yield takeLatest(
     poachActions.POST_PROCESS_POACH_FULFILLED,
@@ -774,5 +778,7 @@ export const rosterSagas = [
   fork(watch_unnominate_restricted_free_agent),
 
   fork(watch_post_restricted_free_agent_nomination_fulfilled),
-  fork(watch_delete_restricted_free_agent_nomination_fulfilled)
+  fork(watch_delete_restricted_free_agent_nomination_fulfilled),
+
+  fork(watch_load_rosters_for_year)
 ]

@@ -6,7 +6,7 @@ import Grid from '@mui/material/Grid'
 
 import SettingsSection from '@components/settings-section'
 import EditableSettingField from '@components/editable-setting-field'
-import EditableSettingSwitch from '@components/editable-setting-switch'
+import SettingsSwitch from '@components/settings-switch'
 import TeamImage from '@components/team-image'
 
 import './settings-team.styl'
@@ -82,31 +82,31 @@ export default class SettingsTeam extends React.Component {
   render = () => {
     const { team, isHosted } = this.props
 
-    const props = { data: team, onchange: this.onchange }
+    const props = { data: team, on_change: this.onchange }
 
     let teamNotificationSection
     if (isHosted) {
       teamNotificationSection = (
-        <>
-          <EditableSettingSwitch
+        <Grid xs={12} item container className='settings__team-notifications'>
+          <SettingsSwitch
             label='Team Text Notifications'
             description='Poaching claims and trades'
             field='teamtext'
             {...props}
           />
-          <EditableSettingSwitch
+          <SettingsSwitch
             label='Team Voice Notifications'
             description='Poaching claims'
             field='teamvoice'
             {...props}
           />
-          <EditableSettingSwitch
+          <SettingsSwitch
             label='League Text Notifications'
             description='Poaching claims, trades, draft selections, released players and added players'
             field='leaguetext'
             {...props}
           />
-        </>
+        </Grid>
       )
     }
 

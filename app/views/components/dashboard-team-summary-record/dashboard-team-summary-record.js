@@ -8,7 +8,6 @@ import AccordionSummary from '@mui/material/AccordionSummary'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
 import Rank from '@components/rank'
-import { constants } from '@libs-shared'
 import { Team } from '@core/teams'
 
 export default function DashboardTeamSummaryRecord({
@@ -18,7 +17,6 @@ export default function DashboardTeamSummaryRecord({
 }) {
   const team = standings.teams.find((t) => t.uid === tid) || new Team()
   const rank = overall.findIndex((t) => t.uid === tid) + 1
-  const { year } = constants
 
   const leagueStandings = []
   const divStandings = []
@@ -27,12 +25,11 @@ export default function DashboardTeamSummaryRecord({
       <tr key={t.uid}>
         <td>{t.name}</td>
         <td style={{ minWidth: '58px' }}>
-          {t.getIn(['stats', year, 'wins'], 0)}-
-          {t.getIn(['stats', year, 'losses'], 0)}-
-          {t.getIn(['stats', year, 'ties'], 0)}
+          {t.getIn(['stats', 'wins'], 0)}-{t.getIn(['stats', 'losses'], 0)}-
+          {t.getIn(['stats', 'ties'], 0)}
         </td>
         <td style={{ minWidth: '58px' }}>
-          {t.getIn(['stats', year, 'pf'], 0).toFixed(1)}
+          {t.getIn(['stats', 'pf'], 0).toFixed(1)}
         </td>
       </tr>
     )
@@ -70,9 +67,9 @@ export default function DashboardTeamSummaryRecord({
             Record
           </Grid>
           <Grid item xs={3}>
-            {team.getIn(['stats', year, 'wins'], 0)}-
-            {team.getIn(['stats', year, 'losses'], 0)}-
-            {team.getIn(['stats', year, 'ties'], 0)}
+            {team.getIn(['stats', 'wins'], 0)}-
+            {team.getIn(['stats', 'losses'], 0)}-
+            {team.getIn(['stats', 'ties'], 0)}
           </Grid>
           <Grid item xs={2}>
             <Rank rank={rank} size={standings.teams.size} />

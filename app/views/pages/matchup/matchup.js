@@ -26,10 +26,10 @@ export default function MatchupPage({
   week,
   loadMatchups,
   loadLeaguePlayers,
-  loadRosters,
+  load_rosters_for_year,
   selectWeek,
   selectYear,
-  selectMatchup
+  select_matchup
 }) {
   const isHeadToHead = matchup.type === constants.matchups.H2H
   const navigate = useNavigate()
@@ -53,12 +53,12 @@ export default function MatchupPage({
     }
 
     if (matchupId)
-      selectMatchup({ matchupId, year: seas_year, week: seas_week })
+      select_matchup({ matchupId, year: seas_year, week: seas_week })
     else if (seas_week) selectWeek(seas_week)
     else if (seas_year) selectYear(seas_year)
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [seas_year, seas_week, matchupId, selectYear, selectWeek, selectMatchup])
+  }, [seas_year, seas_week, matchupId, selectYear, selectWeek, select_matchup])
 
   useEffect(() => {
     if (isNaN(lid)) {
@@ -66,9 +66,9 @@ export default function MatchupPage({
     }
 
     loadLeaguePlayers()
-    loadRosters(lid)
+    load_rosters_for_year({ lid, year: seas_year })
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lid, loadLeaguePlayers, loadRosters])
+  }, [lid, loadLeaguePlayers, load_rosters_for_year])
 
   useEffect(() => {
     if (seas_week && Number(seas_week) !== week) {
@@ -116,6 +116,7 @@ export default function MatchupPage({
                 <ScoreboardTeam
                   tid={matchup.aid}
                   week={matchup.week}
+                  year={matchup.year}
                   type='away'
                   showBench={show_bench}
                 />
@@ -124,6 +125,7 @@ export default function MatchupPage({
               <ScoreboardTeam
                 tid={selected_tid}
                 week={matchup.week}
+                year={matchup.year}
                 type='home'
                 showBench={show_bench}
               />
@@ -173,7 +175,7 @@ MatchupPage.propTypes = {
   selectYear: PropTypes.func,
   selectWeek: PropTypes.func,
   loadMatchups: PropTypes.func,
-  selectMatchup: PropTypes.func,
-  loadRosters: PropTypes.func,
+  select_matchup: PropTypes.func,
+  load_rosters_for_year: PropTypes.func,
   loadLeaguePlayers: PropTypes.func
 }

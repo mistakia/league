@@ -15,7 +15,7 @@ export const matchupsActions = {
   }),
 
   SELECT_MATCHUP: 'SELECT_MATCHUP',
-  select: ({ matchupId, week, year }) => ({
+  select_matchup: ({ matchupId, week, year }) => ({
     type: matchupsActions.SELECT_MATCHUP,
     payload: {
       matchupId: Number(matchupId),
