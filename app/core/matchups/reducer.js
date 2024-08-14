@@ -10,7 +10,7 @@ import { createMatchup } from './matchup'
 const initialState = new Map({
   isPending: false,
   selected: null,
-  items: new List(),
+  matchups_by_id: new Map(),
   teams: new List(),
   weeks: new List(constants.weeks),
   playoffs: new List()
@@ -40,17 +40,18 @@ export function matchupsReducer(state = initialState, { payload, type }) {
 
     case matchupsActions.GET_MATCHUPS_FULFILLED: {
       return state.withMutations((state) => {
-        const matchups = payload.data.matchups.map((m) =>
-          createMatchup({
+        payload.data.matchups.forEach((m) => {
+          const matchup = createMatchup({
             ...m,
             tids: [m.hid, m.aid],
             type: constants.matchups.H2H,
             points: [m.hp, m.ap],
             projections: [m.home_projection, m.away_projection]
           })
-        )
+          state.setIn(['matchups_by_id', m.uid], matchup)
+        })
+
         state.merge({
-          items: new List(matchups),
           isPending: false
         })
 

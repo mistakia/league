@@ -13,7 +13,7 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  select: matchupsActions.select
+  select_matchup: matchupsActions.select_matchup
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(ScoreboardScores)

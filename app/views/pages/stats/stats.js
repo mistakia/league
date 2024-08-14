@@ -14,10 +14,7 @@ import SelectYear from '@components/select-year'
 import './stats.styl'
 
 function SummaryRow({ team, percentiles, year }) {
-  const stats = team.getIn(
-    ['stats', year],
-    new Map(constants.createFantasyTeamStats())
-  )
+  const stats = team.get('stats', new Map(constants.createFantasyTeamStats()))
 
   const items = []
   const fields = [
@@ -71,10 +68,10 @@ function SummaryRow({ team, percentiles, year }) {
           />
           <div className='table__cell metric'>
             {toPercent(
-              team.getIn(['stats', year, 'apWins'], 0) /
-                (team.getIn(['stats', year, 'apWins'], 0) +
-                  team.getIn(['stats', year, 'apLosses'], 0) +
-                  team.getIn(['stats', year, 'apTies'], 0))
+              team.getIn(['stats', 'apWins'], 0) /
+                (team.getIn(['stats', 'apWins'], 0) +
+                  team.getIn(['stats', 'apLosses'], 0) +
+                  team.getIn(['stats', 'apTies'], 0))
             )}
           </div>
         </div>
@@ -93,14 +90,14 @@ function PositionRow({ team, percentiles, year }) {
   const positionCells = []
   for (const [index, position] of constants.positions.entries()) {
     const key = `pPos${position}`
-    const value = team.getIn(['stats', year, key], 0)
+    const value = team.getIn(['stats', key], 0)
     const percentile = percentiles[key]
     positionCells.push(
       <PercentileMetric key={index} scaled {...{ value, percentile }} />
     )
     positionCells.push(
       <div key={`${index}%`} className='table__cell metric'>
-        {toPercent(value / team.getIn(['stats', year, 'pf'], 0))}
+        {toPercent(value / team.getIn(['stats', 'pf'], 0))}
       </div>
     )
   }
@@ -124,14 +121,14 @@ function SlotRow({ team, slots, percentiles, year }) {
   for (const [index, s] of slots.entries()) {
     const slot = constants.slots[s]
     const key = `pSlot${slot}`
-    const value = team.getIn(['stats', year, key], 0)
+    const value = team.getIn(['stats', key], 0)
     const percentile = percentiles[key]
     slotCells.push(
       <PercentileMetric key={index} scaled {...{ value, percentile }} />
     )
     slotCells.push(
       <div key={`${index}%`} className='table__cell metric'>
-        {toPercent(value / team.getIn(['stats', year, 'pf'], 0))}
+        {toPercent(value / team.getIn(['stats', 'pf'], 0))}
       </div>
     )
   }
@@ -203,9 +200,8 @@ export default function StatsPage({
 
   const sorted = teams.sort(
     (a, b) =>
-      b.getIn(['stats', year, 'apWins'], 0) -
-        a.getIn(['stats', year, 'apWins'], 0) ||
-      b.getIn(['stats', year, 'pf'], 0) - a.getIn(['stats', year, 'pf'], 0)
+      b.getIn(['stats', 'apWins'], 0) - a.getIn(['stats', 'apWins'], 0) ||
+      b.getIn(['stats', 'pf'], 0) - a.getIn(['stats', 'pf'], 0)
   )
 
   const summaryRows = []

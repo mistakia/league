@@ -44,7 +44,7 @@ export default function ScoreboardScoreTeam({
 
   return (
     <div className='scoreboard__score-team'>
-      <TeamName tid={tid} />
+      <TeamName tid={tid} year={scoreboard.matchup.year} />
       <div className='scoreboard__score-score metric'>
         {scoreboard.points ? scoreboard.points.toFixed(0) : ''}
       </div>

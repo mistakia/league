@@ -2,7 +2,7 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import {
-  getTeamById,
+  get_team_by_id_for_year,
   getCurrentLeague,
   getScoreboardByTeamId,
   getScoreboardRosterByTeamId
@@ -11,7 +11,7 @@ import {
 import ScoreboardTeam from './scoreboard-team'
 
 const mapStateToProps = createSelector(
-  getTeamById,
+  get_team_by_id_for_year,
   getScoreboardRosterByTeamId,
   getCurrentLeague,
   getScoreboardByTeamId,

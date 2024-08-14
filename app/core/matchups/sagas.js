@@ -19,6 +19,8 @@ export function* loadMatchups() {
   const key = `GET_MATCHUPS_LEAGUE_${leagueId}_${year}`
   if (!request_history.has(key)) {
     yield call(fetchMatchups, { leagueId, year })
+  } else {
+    yield call(selectMatchup)
   }
 }
 
@@ -29,6 +31,7 @@ export function* generate({ payload }) {
 export function* selectMatchup() {
   const state = yield select(getMatchups)
 
+  console.log(`selected: ${state.get('selected')}`)
   if (state.get('selected')) {
     return
   }
@@ -37,6 +40,8 @@ export function* selectMatchup() {
   const scoreboard = yield select(getScoreboard)
   const week = scoreboard.get('week')
 
+  console.log(`week: ${week}`)
+
   // TODO temp fix for 2020 season
   if (year === 2020 && week > 16) {
     yield put(scoreboardActions.selectWeek(16))
@@ -44,6 +49,8 @@ export function* selectMatchup() {
   }
 
   const is_post_season_week = is_league_post_season_week({ year, week })
+  console.log(`is_post_season_week: ${is_post_season_week}`)
+
   if (year === constants.week && is_post_season_week) {
     yield put(scoreboardActions.selectWeek(constants.week))
     return
@@ -56,19 +63,22 @@ export function* selectMatchup() {
       ? filtered.find((m) => m.tids.includes(teamId))
       : filtered.first()
     const first = filtered.first()
+    console.log(`matchup: ${matchup}`)
+    console.log(`first: ${first}`)
     if (matchup || first) {
       const uid = matchup ? matchup.uid : first.uid
-      yield put(matchupsActions.select({ matchupId: uid }))
+      yield put(matchupsActions.select_matchup({ matchupId: uid }))
     }
   } else {
-    const matchups = state.get('items')
+    const matchups = state.get('matchups_by_id').toList()
     const matchup = teamId
       ? matchups.find(
           (m) => m.tids.includes(teamId) && m.week === week && m.year === year
         )
       : matchups.first()
+    console.log(`matchup: ${matchup}`)
     if (matchup) {
-      yield put(matchupsActions.select({ matchupId: matchup.uid }))
+      yield put(matchupsActions.select_matchup({ matchupId: matchup.uid }))
     }
   }
 }

@@ -20,8 +20,7 @@ export default function Matchup({ matchup, teams, scoreboard }) {
     value === 0 ? 'EVEN' : value > 0 ? `+${value}` : value
 
   const is_current_week =
-    matchup.week === constants.season.week &&
-    matchup.year === constants.season.year
+    matchup.week === constants.week && matchup.year === constants.year
   const is_final = Boolean(matchup.ap && matchup.hp)
   const home_score =
     !is_final && is_current_week ? scoreboard.home.points : matchup.hp
@@ -55,8 +54,8 @@ export default function Matchup({ matchup, teams, scoreboard }) {
             backgroundColor: `#${away.pc}`
           }}
         />
-        <TeamImage tid={matchup.aid} />
-        <TeamName tid={matchup.aid} />
+        <TeamImage tid={matchup.aid} year={matchup.year} />
+        <TeamName tid={matchup.aid} year={matchup.year} />
         <div className='matchup__col metric spread'>
           {formatSpread(matchup.home_projection - matchup.away_projection)}
         </div>
@@ -78,8 +77,8 @@ export default function Matchup({ matchup, teams, scoreboard }) {
             backgroundColor: `#${home.pc}`
           }}
         />
-        <TeamImage tid={matchup.hid} />
-        <TeamName tid={matchup.hid} />
+        <TeamImage tid={matchup.hid} year={matchup.year} />
+        <TeamName tid={matchup.hid} year={matchup.year} />
         <div className='matchup__col metric spread'>
           {formatSpread(matchup.away_projection - matchup.home_projection)}
         </div>

@@ -97,8 +97,8 @@ export default function ScoreboardTeam({
             backgroundColor: `#${team.ac || 'd0d0d0'}`
           }}
         />
-        <TeamImage tid={team.uid} />
-        <TeamName tid={team.uid} />
+        <TeamImage tid={team.uid} year={matchup.year} />
+        <TeamName tid={team.uid} year={matchup.year} />
       </div>
       <div className='scoreboard__team-meta'>
         <div className='scoreboard__team-score'>

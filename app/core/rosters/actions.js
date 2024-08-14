@@ -1,4 +1,5 @@
 import { actions_utils } from '@core/utils'
+import { constants } from '@libs-shared'
 const { create_api_actions, create_api_action_types } = actions_utils
 
 export const rosterActions = {
@@ -37,6 +38,15 @@ export const rosterActions = {
     type: rosterActions.LOAD_ROSTERS,
     payload: {
       leagueId: Number(leagueId)
+    }
+  }),
+
+  LOAD_ROSTERS_FOR_YEAR: 'LOAD_ROSTERS_FOR_YEAR',
+  load_rosters_for_year: ({ lid, year = constants.year }) => ({
+    type: rosterActions.LOAD_ROSTERS_FOR_YEAR,
+    payload: {
+      lid: Number(lid),
+      year: Number(year)
     }
   }),
 

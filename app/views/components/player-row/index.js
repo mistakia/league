@@ -1,7 +1,12 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getTeams, getPlayers, get_app, getPlayerStatus } from '@core/selectors'
+import {
+  get_teams_for_current_year,
+  getPlayers,
+  get_app,
+  getPlayerStatus
+} from '@core/selectors'
 import { playerActions } from '@core/players'
 import { getSelectedViewGroupedFields } from '@core/players/selectors'
 
@@ -11,7 +16,7 @@ const mapStateToProps = createSelector(
   getPlayers,
   get_app,
   getPlayerStatus,
-  getTeams,
+  get_teams_for_current_year,
   getSelectedViewGroupedFields,
   (players, app, status, teams, selected_view_grouped_fields) => ({
     selected_view_grouped_fields,

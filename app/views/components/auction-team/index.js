@@ -6,7 +6,7 @@ import {
   getAuction,
   isTeamConnected,
   getTeamBid,
-  getTeamById,
+  get_team_by_id_for_current_year,
   getRosterByTeamId
 } from '@core/selectors'
 
@@ -14,7 +14,7 @@ import AuctionTeam from './auction-team'
 
 const mapStateToProps = createSelector(
   getAuction,
-  getTeamById,
+  get_team_by_id_for_current_year,
   isTeamConnected,
   getRosterByTeamId,
   getTeamBid,

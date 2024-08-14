@@ -2,12 +2,15 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { teamActions } from '@core/teams'
-import { getTeamById, getCurrentLeague } from '@core/selectors'
+import {
+  get_team_by_id_for_current_year,
+  getCurrentLeague
+} from '@core/selectors'
 
 import SettingsTeam from './settings-team'
 
 const mapStateToProps = createSelector(
-  getTeamById,
+  get_team_by_id_for_current_year,
   getCurrentLeague,
   (team, league) => ({ team, isHosted: Boolean(league.hosted) })
 )
