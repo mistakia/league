@@ -1,9 +1,26 @@
 import express from 'express'
 
-import { constants, Roster } from '#libs-shared'
+import { constants, Roster, getRosters } from '#libs-shared'
 import { getLeague, getRoster } from '#libs-server'
 
-const router = express.Router()
+const router = express.Router({ mergeParams: true })
+
+router.get('/?', async (req, res) => {
+  const { logger } = req.app.locals
+  try {
+    const { leagueId } = req.params
+    const { year } = req.query
+    const rosters = await getRosters({
+      lid: leagueId,
+      userId: req.auth ? req.auth.userId : null,
+      year
+    })
+    res.send(rosters)
+  } catch (err) {
+    logger(err)
+    res.status(500).send({ error: err.toString() })
+  }
+})
 
 router.post('/?', async (req, res) => {
   const { db, logger } = req.app.locals

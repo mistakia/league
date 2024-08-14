@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { getRosters, getLeague } from '#libs-server'
+import { getLeague } from '#libs-server'
 import {
   constants,
   generate_league_format_hash,
@@ -283,23 +283,6 @@ router.get('/:leagueId/?', async (req, res) => {
     const seasons = await db('seasons').where('lid', leagueId)
     league.years = seasons.map((s) => s.year)
     res.send(league)
-  } catch (err) {
-    logger(err)
-    res.status(500).send({ error: err.toString() })
-  }
-})
-
-router.get('/:leagueId/rosters/?', async (req, res) => {
-  const { logger } = req.app.locals
-  try {
-    const { leagueId } = req.params
-    const { year } = req.query
-    const rosters = await getRosters({
-      lid: leagueId,
-      userId: req.auth ? req.auth.userId : null,
-      year
-    })
-    res.send(rosters)
   } catch (err) {
     logger(err)
     res.status(500).send({ error: err.toString() })
