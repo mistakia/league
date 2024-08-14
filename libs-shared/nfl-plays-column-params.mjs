@@ -10,6 +10,49 @@ import {
   year_offset
 } from './common-column-params.mjs'
 
+const score_diff_preset_values = [
+  {
+    label: 'Leading',
+    values: [1, 70]
+  },
+  {
+    label: 'Trailing',
+    values: [-70, -1]
+  },
+  {
+    label: 'Tied',
+    values: [0, 0]
+  },
+  {
+    label: 'One Score Game',
+    values: [-8, 8]
+  },
+  {
+    label: 'Two Score Game',
+    values: [-16, 16]
+  },
+  {
+    label: 'Close Game',
+    values: [-7, 7]
+  },
+  {
+    label: 'Blowout (Leading)',
+    values: [17, 70]
+  },
+  {
+    label: 'Blowout (Trailing)',
+    values: [-70, -17]
+  },
+  {
+    label: 'Garbage Time (Leading)',
+    values: [22, 70]
+  },
+  {
+    label: 'Garbage Time (Trailing)',
+    values: [-70, -22]
+  }
+]
+
 export default {
   career_year,
   career_game,
@@ -2165,7 +2208,8 @@ export default {
     min: -70,
     max: 70,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
-    groups: [COLUMN_PARAM_GROUPS.SCORE]
+    groups: [COLUMN_PARAM_GROUPS.SCORE],
+    preset_values: score_diff_preset_values
   },
   pos_score_post: {
     min: 0,
@@ -2183,7 +2227,8 @@ export default {
     min: -70,
     max: 70,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
-    groups: [COLUMN_PARAM_GROUPS.SCORE]
+    groups: [COLUMN_PARAM_GROUPS.SCORE],
+    preset_values: score_diff_preset_values
   },
 
   no_score_prob: {
