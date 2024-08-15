@@ -22,6 +22,7 @@ import players from './players.mjs'
 import matchups from './matchups.mjs'
 import draft_pick_value from './draft-pick-value.mjs'
 import team_daily_values from './team-daily-values.mjs'
+import careerlogs from './careerlogs.mjs'
 
 const router = express.Router()
 
@@ -305,5 +306,6 @@ router.use('/:leagueId/team-stats', teamStats)
 router.use('/:leagueId/team-daily-values', team_daily_values)
 router.use('/:leagueId/players', players)
 router.use('/:leagueId/matchups', matchups)
+router.use('/:leagueId/careerlogs', careerlogs)
 
 export default router
