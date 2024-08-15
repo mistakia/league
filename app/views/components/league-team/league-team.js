@@ -119,8 +119,16 @@ export default function LeagueTeam({
   }
 
   return (
-    <Grid container spacing={2} alignItems='flex-start'>
-      <Grid container item xs={12} lg={9}>
+    <Grid
+      container
+      spacing={2}
+      alignItems='flex-start'
+      style={{ marginBottom: '60px' }}
+    >
+      <Grid container item xs={12} lg={9} className='league-team-main'>
+        <Grid item md={12} sx={{ display: { md: 'block' } }}>
+          <LeagueTeamValueDeltas tid={teamId} />
+        </Grid>
         {Boolean(cutlist.size) && is_team_manager && (
           <Grid item xs={12}>
             <DashboardPlayersTable
@@ -179,29 +187,26 @@ export default function LeagueTeam({
             />
           )}
         </Grid>
-        <Grid item md={12} sx={{ display: { xs: 'none', md: 'block' } }}>
-          <LeagueTeamValueDeltas tid={teamId} />
-        </Grid>
-      </Grid>
-      <Grid container item xs={12} lg={3}>
         <Grid item xs={12}>
-          <div className='section expand'>
+          <div className='section expand league-team-draft-picks'>
             <Toolbar>
               <div className='section-header-title'>Draft Picks</div>
             </Toolbar>
             <DashboardDraftPicks picks={picks} />
           </div>
         </Grid>
+      </Grid>
+      <Grid container item xs={12} lg={3}>
         {is_hosted_league && (
           <Grid item xs={12}>
             <DashboardTeamSummary tid={teamId} />
           </Grid>
         )}
         <Grid item xs={12}>
-          <DashboardByeWeeks tid={teamId} />
+          <DashboardTeamValue tid={teamId} />
         </Grid>
         <Grid item xs={12}>
-          <DashboardTeamValue tid={teamId} />
+          <DashboardByeWeeks tid={teamId} />
         </Grid>
       </Grid>
     </Grid>
