@@ -355,6 +355,7 @@ DROP SEQUENCE IF EXISTS public.matchups_uid_seq;
 DROP TABLE IF EXISTS public.matchups;
 DROP SEQUENCE IF EXISTS public.leagues_uid_seq;
 DROP TABLE IF EXISTS public.leagues;
+DROP TABLE IF EXISTS public.league_user_careerlogs;
 DROP TABLE IF EXISTS public.league_team_seasonlogs;
 DROP TABLE IF EXISTS public.league_team_lineups;
 DROP TABLE IF EXISTS public.league_team_lineup_starters;
@@ -1174,7 +1175,26 @@ CREATE TABLE public.league_team_careerlogs (
     worst_regular_season_finish smallint,
     best_regular_season_finish smallint,
     best_overall_finish smallint,
-    worst_overall_finish smallint
+    worst_overall_finish smallint,
+    first_season_year smallint,
+    last_season_year smallint,
+    num_seasons smallint,
+    weekly_high_scores smallint DEFAULT 0,
+    post_seasons smallint DEFAULT 0,
+    championships smallint DEFAULT 0,
+    championship_rounds smallint DEFAULT 0,
+    regular_season_leader smallint DEFAULT 0,
+    num_byes smallint DEFAULT 0,
+    best_season_win_pct numeric(5,4),
+    best_season_all_play_pct numeric(5,4),
+    wildcards smallint DEFAULT 0,
+    wildcard_wins smallint DEFAULT 0,
+    wildcard_highest_score numeric(6,2),
+    wildcard_total_points numeric(8,2),
+    wildcard_lowest_score numeric(6,2),
+    championship_highest_score numeric(6,2),
+    championship_total_points numeric(8,2),
+    championship_lowest_score numeric(6,2)
 );
 
 
@@ -1322,6 +1342,54 @@ CREATE TABLE public.league_team_seasonlogs (
     regular_season_finish smallint,
     post_season_finish smallint,
     overall_finish smallint
+);
+
+
+--
+-- Name: league_user_careerlogs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.league_user_careerlogs (
+    lid integer NOT NULL,
+    userid integer NOT NULL,
+    wins smallint DEFAULT 0,
+    losses smallint DEFAULT 0,
+    ties smallint DEFAULT 0,
+    "apWins" smallint DEFAULT 0,
+    "apLosses" smallint DEFAULT 0,
+    "apTies" smallint DEFAULT 0,
+    pf numeric(8,2) DEFAULT 0.00,
+    pa numeric(8,2) DEFAULT 0.00,
+    pdiff numeric(8,2) DEFAULT 0.00,
+    pp numeric(8,2) DEFAULT 0.00,
+    pw smallint DEFAULT 0,
+    pl smallint DEFAULT 0,
+    pp_pct numeric(5,2) DEFAULT 0.00,
+    pmax numeric(6,2) DEFAULT 0.00,
+    pmin numeric(6,2) DEFAULT 0.00,
+    worst_regular_season_finish smallint,
+    best_regular_season_finish smallint,
+    best_overall_finish smallint,
+    worst_overall_finish smallint,
+    first_season_year smallint,
+    last_season_year smallint,
+    num_seasons smallint,
+    weekly_high_scores smallint DEFAULT 0,
+    post_seasons smallint DEFAULT 0,
+    championships smallint DEFAULT 0,
+    championship_rounds smallint DEFAULT 0,
+    regular_season_leader smallint DEFAULT 0,
+    num_byes smallint DEFAULT 0,
+    best_season_win_pct numeric(5,4),
+    best_season_all_play_pct numeric(5,4),
+    wildcards smallint DEFAULT 0,
+    wildcard_wins smallint DEFAULT 0,
+    wildcard_highest_score numeric(6,2),
+    wildcard_total_points numeric(8,2),
+    wildcard_lowest_score numeric(6,2),
+    championship_highest_score numeric(6,2),
+    championship_total_points numeric(8,2),
+    championship_lowest_score numeric(6,2)
 );
 
 
