@@ -31,7 +31,7 @@ export default function LeagueTeamValueDeltas({
     if (delta) {
       const { delta_pct, delta_dollar_amount } = delta
       const pct = (delta_pct * 100).toFixed(2)
-      const dollar_amount_abs = Math.abs(delta_dollar_amount).toFixed(2)
+      // const dollar_amount_abs = Math.abs(delta_dollar_amount).toFixed(2)
       const is_negative = delta_dollar_amount < 0
 
       const background_intensity = Math.min(
@@ -53,9 +53,9 @@ export default function LeagueTeamValueDeltas({
         >
           <div className='deltas-item-time'>{label}</div>
           <div className='deltas-item-pct'>{pct}%</div>
-          <div className='deltas-item-amount'>
+          {/* <div className='deltas-item-amount'>
             {is_negative ? '-' : ''}${dollar_amount_abs}
-          </div>
+          </div> */}
         </div>
       )
     } else {
@@ -63,7 +63,7 @@ export default function LeagueTeamValueDeltas({
         <div key={days} className='league__team-value-deltas-item placeholder'>
           <div className='deltas-item-time'>{label}</div>
           <div className='deltas-item-pct'>-- %</div>
-          <div className='deltas-item-amount' />
+          {/* <div className='deltas-item-amount' /> */}
         </div>
       )
     }
@@ -72,7 +72,7 @@ export default function LeagueTeamValueDeltas({
   return (
     <div className='league__team-value-deltas'>
       <LeagueTeamValueOverTime tid={tid} />
-      {delta_items}
+      <div className='league__team-value-deltas-items'>{delta_items}</div>
     </div>
   )
 }

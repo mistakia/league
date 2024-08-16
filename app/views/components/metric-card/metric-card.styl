@@ -1,0 +1,50 @@
+.metric-card
+  display flex
+  flex 1
+  flex-direction column
+  justify-content center
+  padding 6px 16px 16px
+  border-radius 0.25rem
+  // border 1px solid #e0e0e0
+  background #fafafa
+  align-items stretch
+  position relative
+  
+  label
+    font-size 10px
+    font-family "Inter", "Helvetica", "Arial", sans-serif;
+    font-weight 300
+    text-transform uppercase
+    display block
+    padding-bottom 6px
+    display flex
+    justify-content center
+    text-align center
+
+  .metric-card__value
+    display flex
+    flex 1
+    justify-content center
+    align-items center
+    font-size 1rem
+    font-family 'IBM Plex Mono', monospace
+    font-weight 600
+
+  .metric-card__rank
+    position absolute
+    bottom 4px
+    right 6px
+    font-size 10px
+    font-family 'IBM Plex Mono', monospace
+    font-weight 600
+    color #757575
+
+  &.top
+    background-color rgba($green, 0.1)
+    .metric-card__rank
+      color $green
+
+  &.bottom
+    background-color rgba($red, 0.1)
+    .metric-card__rank
+      color $red

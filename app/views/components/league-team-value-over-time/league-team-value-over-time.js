@@ -21,7 +21,7 @@ export default function LeagueTeamValueOverTime({ series_data }) {
     chart: {
       backgroundColor: 'transparent',
       height: 60,
-      width: 250,
+      width: '560',
       type: 'line',
       marginTop: 0,
       marginBottom: 0

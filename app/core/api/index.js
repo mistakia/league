@@ -83,5 +83,6 @@ export {
   delete_players_table_view,
   post_restricted_free_agent_nomination,
   delete_restricted_free_agent_nomination,
-  get_player_betting_markets
+  get_player_betting_markets,
+  get_league_careerlogs
 } from './sagas'
