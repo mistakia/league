@@ -35,8 +35,8 @@ export default function LeagueTeamValueDeltas({
       const is_negative = delta_dollar_amount < 0
 
       const background_intensity = Math.min(
-        Math.abs(delta_dollar_amount) / 30,
-        0.2
+        Math.abs(delta_dollar_amount) / 40,
+        0.05
       )
       const background = is_negative
         ? `rgba(255, 80, 0, ${background_intensity})`

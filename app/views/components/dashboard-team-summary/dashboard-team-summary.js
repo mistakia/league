@@ -15,23 +15,21 @@ import DashboardTeamSummaryFranchiseTags from '@components/dashboard-team-summar
 export default function DashboardTeamSummary({ tid }) {
   return (
     <div className='league-team-section-side'>
-      <div className='league-team-section-side-body'>
-        {constants.isRegularSeason && <DashboardTeamSummaryRecord tid={tid} />}
-        {constants.isRegularSeason && (
-          <DashboardTeamSummaryPlayoffOdds tid={tid} />
-        )}
-        {constants.isRegularSeason && (
-          <DashboardTeamSummaryDivisionOdds tid={tid} />
-        )}
-        {constants.isRegularSeason && <DashboardTeamSummaryByeOdds tid={tid} />}
-        {constants.isRegularSeason && (
-          <DashboardTeamSummaryChampionshipOdds tid={tid} />
-        )}
-        {constants.isRegularSeason && <DashboardTeamSummaryFAAB tid={tid} />}
-        <DashboardTeamSummarySalary tid={tid} />
-        <DashboardTeamSummaryWaiverOrder tid={tid} />
-        <DashboardTeamSummaryFranchiseTags tid={tid} />
-      </div>
+      {constants.isRegularSeason && <DashboardTeamSummaryRecord tid={tid} />}
+      {constants.isRegularSeason && (
+        <DashboardTeamSummaryPlayoffOdds tid={tid} />
+      )}
+      {constants.isRegularSeason && (
+        <DashboardTeamSummaryDivisionOdds tid={tid} />
+      )}
+      {constants.isRegularSeason && <DashboardTeamSummaryByeOdds tid={tid} />}
+      {constants.isRegularSeason && (
+        <DashboardTeamSummaryChampionshipOdds tid={tid} />
+      )}
+      {constants.isRegularSeason && <DashboardTeamSummaryFAAB tid={tid} />}
+      <DashboardTeamSummarySalary tid={tid} />
+      <DashboardTeamSummaryWaiverOrder tid={tid} />
+      <DashboardTeamSummaryFranchiseTags tid={tid} />
     </div>
   )
 }

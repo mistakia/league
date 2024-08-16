@@ -153,12 +153,10 @@ export default class DashboardTeamValue extends React.Component {
 
     return (
       <div className='league-team-section-side'>
-        <div className='league-team-section-side-body'>
-          <HighchartsReact highcharts={Highcharts} options={options} />
-          <table>
-            <tbody>{rows}</tbody>
-          </table>
-        </div>
+        <HighchartsReact highcharts={Highcharts} options={options} />
+        <table>
+          <tbody>{rows}</tbody>
+        </table>
       </div>
     )
   }

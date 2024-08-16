@@ -131,7 +131,7 @@ export default class DashboardPlayersTable extends React.Component {
       body = <div className='table__body empty'>{items}</div>
     }
 
-    const classNames = ['section', 'dashboard__players-table']
+    const classNames = ['dashboard__players-table']
     if (isClaim) classNames.push('waiver')
     if (cutlist) classNames.push('cutlist')
 

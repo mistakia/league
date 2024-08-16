@@ -3,7 +3,6 @@ import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import { useParams } from 'react-router-dom'
 import { List } from 'immutable'
-import Grid from '@mui/material/Grid'
 import Toolbar from '@mui/material/Toolbar'
 import NotInterestedIcon from '@mui/icons-material/NotInterested'
 
@@ -15,7 +14,6 @@ import DashboardTeamValue from '@components/dashboard-team-value'
 import PlayerRoster from '@components/player-roster'
 import { constants } from '@libs-shared'
 import LeagueTeamValueDeltas from '@components/league-team-value-deltas'
-import LeagueTeamHistoricalRanks from '@components/league-team-historical-ranks'
 
 import './league-team.styl'
 
@@ -120,21 +118,13 @@ export default function LeagueTeam({
   }
 
   return (
-    <Grid
-      container
-      spacing={2}
-      alignItems='flex-start'
-      style={{ marginBottom: '60px' }}
-    >
-      <Grid container item xs={12} lg={9} className='league-team-main'>
-        <Grid item xs={12}>
+    <div className='league-team-container'>
+      <div className='league-team-main'>
+        <div className='league-team-main-section'>
           <LeagueTeamValueDeltas tid={teamId} />
-        </Grid>
-        <Grid item xs={12}>
-          <LeagueTeamHistoricalRanks tid={teamId} />
-        </Grid>
+        </div>
         {Boolean(cutlist.size) && is_team_manager && (
-          <Grid item xs={12}>
+          <div className='league-team-main-section'>
             <DashboardPlayersTable
               title={
                 <>
@@ -146,9 +136,9 @@ export default function LeagueTeam({
               total={cutlist}
               {...{ percentiles, is_team_manager }}
             />
-          </Grid>
+          </div>
         )}
-        <Grid item xs={12}>
+        <div className='league-team-main-section'>
           <DashboardPlayersTable
             items={activeItems}
             title='Active Roster'
@@ -156,23 +146,23 @@ export default function LeagueTeam({
             total={activePlayers}
             {...{ percentiles, is_team_manager }}
           />
-        </Grid>
-        <Grid item xs={12}>
+        </div>
+        <div className='league-team-main-section'>
           <DashboardPlayersTable
             items={practice_signed_items}
             title='Practice Squad — Signed'
             space={roster.availablePracticeSpace}
             {...{ percentiles, is_team_manager }}
           />
-        </Grid>
-        <Grid item xs={12}>
+        </div>
+        <div className='league-team-main-section'>
           <DashboardPlayersTable
             items={practice_drafted_items}
             title='Practice Squad — Drafted'
             {...{ percentiles, is_team_manager }}
           />
-        </Grid>
-        <Grid item xs={12}>
+        </div>
+        <div className='league-team-main-section'>
           {Boolean(reserveIRItems.length) && (
             <DashboardPlayersTable
               items={reserveIRItems}
@@ -181,8 +171,8 @@ export default function LeagueTeam({
               {...{ percentiles, is_team_manager }}
             />
           )}
-        </Grid>
-        <Grid item xs={12}>
+        </div>
+        <div className='league-team-main-section'>
           {Boolean(reserveCOVItems.length) && (
             <DashboardPlayersTable
               items={reserveCOVItems}
@@ -190,30 +180,20 @@ export default function LeagueTeam({
               {...{ percentiles, is_team_manager }}
             />
           )}
-        </Grid>
-        <Grid item xs={12}>
-          <div className='section expand league-team-draft-picks'>
-            <Toolbar>
-              <div className='section-header-title'>Draft Picks</div>
-            </Toolbar>
-            <DashboardDraftPicks picks={picks} />
-          </div>
-        </Grid>
-      </Grid>
-      <Grid container item xs={12} lg={3}>
-        {is_hosted_league && (
-          <Grid item xs={12}>
-            <DashboardTeamSummary tid={teamId} />
-          </Grid>
-        )}
-        <Grid item xs={12}>
-          <DashboardTeamValue tid={teamId} />
-        </Grid>
-        <Grid item xs={12}>
-          <DashboardByeWeeks tid={teamId} />
-        </Grid>
-      </Grid>
-    </Grid>
+        </div>
+        <div className='expand league-team-draft-picks'>
+          <Toolbar>
+            <div className='section-header-title'>Draft Picks</div>
+          </Toolbar>
+          <DashboardDraftPicks picks={picks} />
+        </div>
+      </div>
+      <div className='league-team-sidebar'>
+        {is_hosted_league && <DashboardTeamSummary tid={teamId} />}
+        <DashboardTeamValue tid={teamId} />
+        <DashboardByeWeeks tid={teamId} />
+      </div>
+    </div>
   )
 }
 
