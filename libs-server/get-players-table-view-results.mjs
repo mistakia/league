@@ -241,6 +241,7 @@ const add_clauses_for_table = ({
 
   // with statements only have having clauses as of now
   const with_having_clause_strings = []
+  const with_where_clause_strings = []
 
   for (const where_clause of where_clauses) {
     const column_definition =
@@ -254,7 +255,7 @@ const add_clauses_for_table = ({
       with_func = column_definition.with
       pid_columns = column_definition.pid_columns
 
-      const with_having_string = get_with_where_string({
+      const with_filter_string = get_with_where_string({
         where_clause,
         column_definition,
         table_name,
@@ -281,8 +282,12 @@ const add_clauses_for_table = ({
         group_by_strings.push(...with_select_result.group_by)
       }
 
-      if (with_having_string) {
-        with_having_clause_strings.push(with_having_string)
+      if (with_filter_string) {
+        if (column_definition.use_having) {
+          with_having_clause_strings.push(with_filter_string)
+        } else {
+          with_where_clause_strings.push(with_filter_string)
+        }
         // when there is a with statement and a where clause is set there is no need to add the where clause to the main query
         continue
       }
@@ -335,6 +340,7 @@ const add_clauses_for_table = ({
       params: column_params,
       with_table_name: table_name,
       having_clauses: with_having_clause_strings,
+      where_clauses: with_where_clause_strings,
       select_strings: with_select_strings,
       splits,
       pid_columns,
