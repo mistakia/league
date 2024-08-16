@@ -181,7 +181,7 @@
 ################################### League ########################################
 
 ## Every day at 4:00AM
-0 4 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/calculate-team-daily-ktc-values.mjs &>> /var/log/league/league-calculate-team-daily-ktc-values.log
+0 4 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/calculate-team-daily-ktc-value.mjs &>> /var/log/league/league-calculate-team-daily-ktc-value.log
 
 ################################### League Each Season Week ########################################
 
