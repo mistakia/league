@@ -91,7 +91,6 @@ const run = async () => {
       fantasy_data_id,
       yahoo_id,
       // stats_global_id: stats_id,
-      injury_status,
       sleeper_id,
       current_nfl_team: team
     }
