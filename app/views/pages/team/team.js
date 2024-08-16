@@ -6,6 +6,7 @@ import { useParams, useNavigate } from 'react-router-dom'
 import PageLayout from '@layouts/page'
 import LeagueSelectTeam from '@components/league-select-team'
 import LeagueTeam from '@components/league-team'
+import LeagueTeamHistoricalRanks from '@components/league-team-historical-ranks'
 
 import './team.styl'
 
@@ -55,7 +56,12 @@ export default function TeamPage({
 
   const body = (
     <div className='league-container full'>
-      <LeagueSelectTeam selected_tid={teamId} />
+      <div className='league-page-top'>
+        <LeagueSelectTeam selected_tid={teamId} />
+        <div className='league-page-top-metrics'>
+          <LeagueTeamHistoricalRanks tid={teamId} />
+        </div>
+      </div>
       <LeagueTeam tid={teamId} />
     </div>
   )

@@ -6,7 +6,6 @@ import MetricCard from '@components/metric-card'
 import './league-team-historical-ranks.styl'
 
 export default function LeagueTeamHistoricalRanks({ historical_ranks }) {
-  console.log(historical_ranks)
   return (
     <div className='league-team-historical-ranks'>
       <MetricCard

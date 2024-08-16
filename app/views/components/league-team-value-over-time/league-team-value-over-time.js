@@ -20,7 +20,7 @@ export default function LeagueTeamValueOverTime({ series_data }) {
   const options = {
     chart: {
       backgroundColor: 'transparent',
-      height: 60,
+      height: 36,
       width: '560',
       type: 'line',
       marginTop: 0,
@@ -56,7 +56,7 @@ export default function LeagueTeamValueOverTime({ series_data }) {
     series: [
       {
         name: 'Market Value',
-        height: 60,
+        height: 36,
         data: series_data,
         label: {
           enabled: false
@@ -99,10 +99,8 @@ export default function LeagueTeamValueOverTime({ series_data }) {
     <div className='league__team-value-over-time'>
       <HighchartsReact highcharts={Highcharts} options={options} />
       <div className='league__team-current-value'>
-        <div className='league__team-current-value-label'>
-          Team Market Value
-        </div>
-        ${latest_team_market_value}
+        <div className='league__team-current-value-label'>Market Value</div>$
+        {latest_team_market_value}
       </div>
     </div>
   )

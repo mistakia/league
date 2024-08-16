@@ -1,5 +1,30 @@
+.league-team-container
+  display flex
+  max-width 1200px
+  margin 0 auto 32px
+  flex-wrap wrap
+  justify-content center
+  gap 32px
+
+.league-team-sidebar
+  display flex
+  gap 16px
+  flex-direction column
+  width 100%
+
+.league-team-main
+  flex-direction column
+  gap 16px
+  align-items center
+  display flex
+  max-width 100%
+
+.league-team-main-section
+  max-width 100%
+  justify-content center
+  display flex
+
 .league-team-section-side
-  padding 16px
   thead
     font-weight 700
     font-family 'IBM Plex Mono', monospace
@@ -19,17 +44,37 @@
     + table
       margin-top 16px
 
+  .MuiPaper-root
+    background transparent
+    box-shadow none
+    transition background 120ms ease-in 0s
+
+    &.Mui-expanded
+      background white
+
+    &:hover
+      background white
+
 .league-team-main
   .MuiGrid-root.MuiGrid-item
     display flex
     justify-content center
 
 .league-team-draft-picks
-  flex 1
-  max-width 800px
+  width 100%
+  background white
+  border-radius 8px
 
 .league-team-section-side-title
   font-weight 500
   text-transform uppercase
   font-size 11px
   margin-bottom 15px
+
+@media (min-width: 600px)
+  .league-team-sidebar
+    max-width 600px
+
+@media (min-width: 1050px)
+  .league-team-sidebar
+    max-width 260px
