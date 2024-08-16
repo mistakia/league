@@ -232,6 +232,7 @@ ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_username
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_key;
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_hash_key;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pkey;
+ALTER TABLE IF EXISTS ONLY public.league_user_careerlogs DROP CONSTRAINT IF EXISTS league_user_careerlogs_lid_userid_unique;
 ALTER TABLE IF EXISTS ONLY public.league_team_seasonlogs DROP CONSTRAINT IF EXISTS league_team_seasonlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_team_careerlogs DROP CONSTRAINT IF EXISTS league_team_careerlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.invite_codes DROP CONSTRAINT IF EXISTS invite_codes_pkey;
@@ -5174,7 +5175,8 @@ CREATE TABLE public.users_teams (
     tid integer NOT NULL,
     teamtext boolean DEFAULT true NOT NULL,
     teamvoice boolean DEFAULT true NOT NULL,
-    leaguetext boolean DEFAULT true NOT NULL
+    leaguetext boolean DEFAULT true NOT NULL,
+    year smallint
 );
 
 
@@ -5535,6 +5537,14 @@ ALTER TABLE ONLY public.league_team_careerlogs
 
 ALTER TABLE ONLY public.league_team_seasonlogs
     ADD CONSTRAINT league_team_seasonlogs_pkey PRIMARY KEY (lid, tid, year);
+
+
+--
+-- Name: league_user_careerlogs league_user_careerlogs_lid_userid_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.league_user_careerlogs
+    ADD CONSTRAINT league_user_careerlogs_lid_userid_unique UNIQUE (lid, userid);
 
 
 --

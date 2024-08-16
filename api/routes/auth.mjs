@@ -154,7 +154,8 @@ router.post('/register', async (req, res) => {
     if (leagueId && teamId) {
       await db('users_teams').insert({
         userid: userId,
-        tid: teamId
+        tid: teamId,
+        year: constants.season.year
       })
     }
 

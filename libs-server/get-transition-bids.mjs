@@ -4,7 +4,13 @@ import { constants } from '#libs-shared'
 export default async function ({ userId, leagueId }) {
   const query1 = await db('teams')
     .select('teams.*')
-    .join('users_teams', 'teams.uid', 'users_teams.tid')
+    .join('users_teams', function () {
+      this.on('teams.uid', '=', 'users_teams.tid').andOn(
+        'teams.year',
+        '=',
+        'users_teams.year'
+      )
+    })
     .where('users_teams.userid', userId)
     .where('teams.lid', leagueId)
     .where('teams.year', constants.season.year)

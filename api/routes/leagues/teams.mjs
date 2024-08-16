@@ -66,7 +66,7 @@ router.get('/?', async (req, res) => {
 
     if (req.auth && req.auth.userId) {
       const usersTeams = await db('users_teams')
-        .where({ userid: req.auth.userId })
+        .where({ userid: req.auth.userId, year: constants.season.year })
         .whereIn('tid', teamIds)
 
       for (const usersTeam of usersTeams) {
@@ -174,13 +174,17 @@ router.delete('/?', async (req, res) => {
 
     // make sure it's not user team
     const teamRows = await db('teams')
-      .join('users_teams', 'teams.uid', 'users_teams.tid')
+      .select('teams.*')
+      .join('users_teams', function () {
+        this.on('teams.uid', '=', 'users_teams.tid')
+        this.andOn('teams.year', '=', 'users_teams.year')
+      })
       .where({
-        year: constants.season.year,
         lid: leagueId,
         tid: teamId,
         userid: req.auth.userId
       })
+      .where('teams.year', constants.season.year)
     if (teamRows.length) {
       return res.status(400).send({ error: 'can not remove user team' })
     }

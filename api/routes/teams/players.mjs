@@ -2,6 +2,7 @@ import express from 'express'
 
 import cache from '#api/cache.mjs'
 import { getPlayers, getTransitionBids } from '#libs-server'
+import { constants } from '#libs-shared'
 
 const router = express.Router({ mergeParams: true })
 
@@ -20,7 +21,8 @@ router.get('/?', async (req, res) => {
         // check if userId is a team manager
         const rows = await db('users_teams').where({
           userid: userId,
-          tid: teamId
+          tid: teamId,
+          year: constants.season.year
         })
 
         if (!rows.length) {
@@ -54,7 +56,8 @@ router.get('/?', async (req, res) => {
       // check if userId is a team manager
       const rows = await db('users_teams').where({
         userid: userId,
-        tid: teamId
+        tid: teamId,
+        year: constants.season.year
       })
 
       if (!rows.length) {

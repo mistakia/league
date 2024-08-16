@@ -20,7 +20,13 @@ export default async function ({ userId, leagueId, teamId, requireLeague }) {
   // verify team belongs to user
   const userTeams = await db('teams')
     .select('teams.*', 'users_teams.*', 'leagues.commishid')
-    .leftJoin('users_teams', 'teams.uid', 'users_teams.tid')
+    .leftJoin('users_teams', function () {
+      this.on('teams.uid', '=', 'users_teams.tid').andOn(
+        'teams.year',
+        '=',
+        'users_teams.year'
+      )
+    })
     .join('leagues', 'teams.lid', 'leagues.uid')
     .where('teams.uid', tid)
     .where('teams.year', constants.season.year)

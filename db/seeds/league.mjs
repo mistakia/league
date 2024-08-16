@@ -49,7 +49,8 @@ export default async function (knex, league_params = {}) {
 
     await knex('users_teams').insert({
       userid: i,
-      tid: i
+      tid: i,
+      year: constants.season.year
     })
   }
 

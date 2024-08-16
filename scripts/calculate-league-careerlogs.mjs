@@ -31,7 +31,8 @@ const calculate_league_careerlogs = async ({ lid }) => {
 
     // Get all users associated with this team
     const users_teams = await db('users_teams').where({
-      tid: league_team_seasonlog.tid
+      tid: league_team_seasonlog.tid,
+      year: league_team_seasonlog.year
     })
     for (const user_team of users_teams) {
       if (!user_seasonlogs[user_team.userid]) {

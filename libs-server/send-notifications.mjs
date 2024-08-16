@@ -20,7 +20,10 @@ export default async function ({
   const textMessages = []
   const voiceMessages = []
   /* const users = await db('users_teams')
-   *   .join('teams', 'users_teams.tid', 'teams.uid')
+   *   .join('teams', function() {
+   *     this.on('users_teams.tid', '=', 'teams.uid')
+   *         .andOn('users_teams.year', '=', 'teams.year')
+   *   })
    *   .join('users', 'users_teams.userid', 'users.id')
    *   .where('teams.lid', league.uid)
    *   .where('teams.year', constants.season.year)
