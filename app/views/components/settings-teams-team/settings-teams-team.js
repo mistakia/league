@@ -84,7 +84,7 @@ export default class SettingsTeamsTeam extends React.Component {
             field='name'
             limit={100}
             data={this.props.team}
-            onchange={this.onChange}
+            on_change={this.onChange}
           />
           <div className='heading__section-title'>
             Players
