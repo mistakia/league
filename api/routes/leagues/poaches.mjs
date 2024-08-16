@@ -49,7 +49,10 @@ router.post('/?', async (req, res) => {
 
     // verify poaching teamId using userId
     const userTeams = await db('users_teams')
-      .join('teams', 'users_teams.tid', 'teams.uid')
+      .join('teams', function () {
+        this.on('users_teams.tid', '=', 'teams.uid')
+        this.andOn('users_teams.year', '=', 'teams.year')
+      })
       .where('userid', req.auth.userId)
       .where('teams.year', constants.season.year)
     const team = userTeams.find((p) => p.tid === teamId)

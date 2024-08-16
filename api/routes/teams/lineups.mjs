@@ -23,7 +23,10 @@ router.get('/?', async (req, res) => {
 
     const tid = parseInt(teamId, 10)
 
-    const teams = await db('users_teams').where({ userid: req.auth.userId })
+    const teams = await db('users_teams').where({
+      userid: req.auth.userId,
+      year: constants.season.year
+    })
     const teamIds = teams.map((r) => r.tid)
 
     if (!teamIds.includes(tid)) {

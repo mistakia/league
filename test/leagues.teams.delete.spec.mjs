@@ -152,7 +152,8 @@ describe('API /leagues/teams - delete', function () {
 
       await knex('users_teams').insert({
         userid: 1,
-        tid
+        tid,
+        year: constants.season.year
       })
 
       const request = chai

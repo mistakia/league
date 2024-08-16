@@ -65,7 +65,11 @@ router.put('/:teamId', async (req, res) => {
     } else {
       await db('users_teams')
         .update({ [field]: value })
-        .where({ tid: teamId, userid: req.auth.userId })
+        .where({
+          tid: teamId,
+          userid: req.auth.userId,
+          year: constants.season.year
+        })
     }
     res.send({ value })
   } catch (error) {

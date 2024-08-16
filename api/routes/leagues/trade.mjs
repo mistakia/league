@@ -91,7 +91,10 @@ router.post(
       const { tradeId, leagueId } = req.params
 
       const trades = await db('trades')
-        .join('users_teams', 'trades.accept_tid', 'users_teams.tid')
+        .join('users_teams', function () {
+          this.on('trades.accept_tid', '=', 'users_teams.tid')
+          this.andOn(db.raw('users_teams.year = ?', [constants.season.year]))
+        })
         .where('trades.uid', tradeId)
         .where('users_teams.userid', req.auth.userId)
         .whereNull('accepted')
@@ -597,7 +600,10 @@ router.post(
 
       const trades = await db('trades')
         .join('teams', 'trades.accept_tid', 'teams.uid')
-        .join('users_teams', 'trades.accept_tid', 'users_teams.tid')
+        .join('users_teams', function () {
+          this.on('trades.accept_tid', '=', 'users_teams.tid')
+          this.andOn(db.raw('users_teams.year = ?', [constants.season.year]))
+        })
         .where('trades.uid', tradeId)
         .where('teams.year', constants.season.year)
         .where('users_teams.userid', req.auth.userId)
@@ -653,7 +659,10 @@ router.post(
       const { tradeId, leagueId } = req.params
 
       const trades = await db('trades')
-        .join('users_teams', 'trades.propose_tid', 'users_teams.tid')
+        .join('users_teams', function () {
+          this.on('trades.propose_tid', '=', 'users_teams.tid')
+          this.andOn(db.raw('users_teams.year = ?', [constants.season.year]))
+        })
         .join('teams', 'trades.propose_tid', 'teams.uid')
         .where('trades.uid', tradeId)
         .where('teams.year', constants.season.year)

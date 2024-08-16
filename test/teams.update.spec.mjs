@@ -42,7 +42,7 @@ describe('API /teams - update', function () {
       // verify database change
       res.body.value.should.equal(value)
       const teams = await knex('users_teams')
-        .where({ tid: 1, userid: 1 })
+        .where({ tid: 1, userid: 1, year: constants.season.year })
         .limit(1)
       const team = teams[0]
 
@@ -67,7 +67,7 @@ describe('API /teams - update', function () {
       // verify database change
       res.body.value.should.equal(value)
       const teams = await knex('users_teams')
-        .where({ tid: 1, userid: 1 })
+        .where({ tid: 1, userid: 1, year: constants.season.year })
         .limit(1)
       const team = teams[0]
 
