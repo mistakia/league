@@ -97,6 +97,7 @@ import {
   post_players_table_view_actions,
   delete_players_table_view_actions
 } from '@core/players-table-views/actions'
+import { get_league_careerlogs_actions } from '@core/league-careerlogs/actions'
 
 function* fetchAPI(apiFunction, actions, opts = {}) {
   const { token } = yield select(get_app)
@@ -454,4 +455,10 @@ export const get_player_betting_markets = fetch.bind(
   null,
   api.get_player_betting_markets,
   get_player_betting_markets_actions
+)
+
+export const get_league_careerlogs = fetch.bind(
+  null,
+  api.get_league_careerlogs,
+  get_league_careerlogs_actions
 )

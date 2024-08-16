@@ -2947,3 +2947,84 @@ export const get_selected_players_table_view = createSelector(
   get_players_table_views,
   (view_id, views) => views.get(view_id, new Map()).toJS()
 )
+
+export const get_league_historical_ranks = createSelector(
+  (state) => state.getIn(['app', 'leagueId']),
+  (state) => state.getIn(['league_careerlogs']),
+  (league_id, league_careerlogs) => {
+    const league_careerlogs_data = league_careerlogs.get(`${league_id}`)
+    if (!league_careerlogs_data) {
+      return {}
+    }
+
+    const team_careerlogs = league_careerlogs_data.get('team_careerlogs')
+    const rankableFields = [
+      'wins',
+      'losses',
+      'ties',
+      'apWins',
+      'apLosses',
+      'apTies',
+      'pf',
+      'pa',
+      'pdiff',
+      'pp',
+      'pw',
+      'pl',
+      'pp_pct',
+      'pmax',
+      'pmin',
+      'weekly_high_scores',
+      'post_seasons',
+      'championships',
+      'championship_rounds',
+      'regular_season_leader',
+      'num_byes',
+      'best_season_win_pct',
+      'best_season_all_play_pct',
+      'wildcards',
+      'wildcard_wins',
+      'wildcard_highest_score',
+      'wildcard_total_points',
+      'wildcard_lowest_score',
+      'championship_highest_score',
+      'championship_total_points',
+      'championship_lowest_score',
+      'worst_regular_season_finish',
+      'best_regular_season_finish',
+      'best_overall_finish',
+      'worst_overall_finish'
+    ]
+
+    const ranks = {}
+    team_careerlogs.forEach((team_careerlog) => {
+      const result = {}
+      rankableFields.forEach((field) => {
+        const value = team_careerlog[field]
+        result[field] = value
+
+        // Calculate rank
+        const sortedValues = team_careerlogs
+          .map((log) => log[field])
+          .sort((a, b) => b - a) // Sort in descending order
+        const rank = sortedValues.indexOf(value) + 1
+        result[`${field}_rank`] = rank
+      })
+
+      // Add non-rankable fields
+      result.first_season_year = team_careerlog.first_season_year
+      result.last_season_year = team_careerlog.last_season_year
+      result.num_seasons = team_careerlog.num_seasons
+      result.tid = team_careerlog.tid
+
+      ranks[team_careerlog.tid] = result
+    })
+
+    return ranks
+  }
+)
+
+export function get_league_historical_ranks_by_team_id(state, { tid }) {
+  const league_historical_ranks = get_league_historical_ranks(state)
+  return league_historical_ranks[tid] || {}
+}

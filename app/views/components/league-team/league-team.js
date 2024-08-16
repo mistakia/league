@@ -15,6 +15,7 @@ import DashboardTeamValue from '@components/dashboard-team-value'
 import PlayerRoster from '@components/player-roster'
 import { constants } from '@libs-shared'
 import LeagueTeamValueDeltas from '@components/league-team-value-deltas'
+import LeagueTeamHistoricalRanks from '@components/league-team-historical-ranks'
 
 import './league-team.styl'
 
@@ -126,8 +127,11 @@ export default function LeagueTeam({
       style={{ marginBottom: '60px' }}
     >
       <Grid container item xs={12} lg={9} className='league-team-main'>
-        <Grid item md={12} sx={{ display: { md: 'block' } }}>
+        <Grid item xs={12}>
           <LeagueTeamValueDeltas tid={teamId} />
+        </Grid>
+        <Grid item xs={12}>
+          <LeagueTeamHistoricalRanks tid={teamId} />
         </Grid>
         {Boolean(cutlist.size) && is_team_manager && (
           <Grid item xs={12}>

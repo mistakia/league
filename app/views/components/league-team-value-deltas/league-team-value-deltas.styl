@@ -1,11 +1,13 @@
 .league__team-value-deltas
   background white
-  border-radius 16px
+  border-radius 0.25em
   overflow hidden
   display flex
   width fit-content
   font-family 'IBM Plex Mono', monospace
   margin-top 16px
+  flex-direction column
+  justify-content stretch
 
   .league__team-value-deltas-item
     padding 8px
@@ -13,21 +15,26 @@
     align-items center
     justify-content center
     position relative
-    height 60px
+    height 30px
     flex-direction column
-    width 80px
+    flex 1
+
+  .league__team-value-deltas-items
+    margin-top 8px
+    display flex
+    justify-content stretch
 
 .deltas-item-time
   position absolute
   top 2px
   font-size 10px
-  color black
+  color rgba(0, 0, 0, 0.7)
 
-.deltas-item-amount
-  font-size 10px
-  margin-top 4px
+// .deltas-item-amount
+//   font-size 10px
+//   margin-top 4px
 
 .deltas-item-pct
-  font-size 16px
+  font-size 14px
   font-weight 500
   padding-top 10px

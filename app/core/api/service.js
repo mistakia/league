@@ -374,6 +374,10 @@ export const api = {
   delete_restricted_free_agent_nomination({ teamId, ...data }) {
     const url = `${API_URL}/teams/${teamId}/tag/transition/nominate`
     return { url, ...DELETE(data) }
+  },
+  get_league_careerlogs({ leagueId }) {
+    const url = `${API_URL}/leagues/${leagueId}/careerlogs`
+    return { url }
   }
 }
 

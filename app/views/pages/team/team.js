@@ -14,7 +14,8 @@ export default function TeamPage({
   loadLeagueTeamStats,
   loadLeaguePlayers,
   teams,
-  loadDraftPickValue
+  loadDraftPickValue,
+  load_league_careerlogs
 }) {
   const { lid, tid } = useParams()
   const navigate = useNavigate()
@@ -28,6 +29,7 @@ export default function TeamPage({
     loadLeaguePlayers(lid)
     loadDraftPickValue()
     loadLeagueTeamStats(lid)
+    load_league_careerlogs(lid)
   }, [
     lid,
     tid,
@@ -35,6 +37,7 @@ export default function TeamPage({
     loadLeaguePlayers,
     loadDraftPickValue,
     loadLeagueTeamStats,
+    load_league_careerlogs,
     navigate
   ])
 
@@ -65,5 +68,6 @@ TeamPage.propTypes = {
   loadLeagueTeamStats: PropTypes.func,
   loadLeaguePlayers: PropTypes.func,
   teams: ImmutablePropTypes.map,
-  loadDraftPickValue: PropTypes.func
+  loadDraftPickValue: PropTypes.func,
+  load_league_careerlogs: PropTypes.func
 }
