@@ -31,6 +31,7 @@ const player_betting_market_with = ({
   params,
   with_table_name,
   having_clauses,
+  where_clauses,
   splits
 }) => {
   const time_type = Array.isArray(params.time_type)
@@ -80,6 +81,18 @@ const player_betting_market_with = ({
           .andOn('pms.source_market_id', '=', 'm.source_market_id')
           .andOn('pms.time_type', '=', 'm.time_type')
       })
+
+    if (having_clauses) {
+      for (const having_clause of having_clauses) {
+        qb.havingRaw(having_clause)
+      }
+    }
+
+    if (where_clauses) {
+      for (const where_clause of where_clauses) {
+        qb.whereRaw(where_clause)
+      }
+    }
   })
 }
 
@@ -116,6 +129,7 @@ const team_betting_market_with = ({
   params,
   with_table_name,
   having_clauses,
+  where_clauses,
   splits
 }) => {
   const time_type = Array.isArray(params.time_type)
@@ -176,7 +190,7 @@ const team_betting_market_with = ({
 const create_player_betting_market_field = ({ column_name, column_alias }) => ({
   column_name,
   select_as: () => `${column_alias}_betting_market`,
-  main_where: ({ table_name }) => `${table_name}.${column_name}`,
+  with_where: () => `pms.${column_name}`,
   table_alias: betting_markets_table_alias,
   join: player_betting_market_join,
   with: player_betting_market_with
@@ -185,7 +199,7 @@ const create_player_betting_market_field = ({ column_name, column_alias }) => ({
 const create_team_betting_market_field = ({ column_name, column_alias }) => ({
   column_name,
   select_as: () => `${column_alias}_betting_market`,
-  main_where: ({ table_name }) => `${table_name}.${column_name}`,
+  with_where: ({ table_name }) => `${table_name}.${column_name}`,
   table_alias: betting_markets_table_alias,
   join: team_betting_market_join,
   with: team_betting_market_with
