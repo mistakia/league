@@ -34,7 +34,7 @@ export default function UserSettingsPage({ user, update }) {
     update({ type: field, value })
   }
 
-  const props = { data: user, onchange: handle_change }
+  const props = { data: user, on_change: handle_change }
 
   const body = (
     <div className='league-container'>

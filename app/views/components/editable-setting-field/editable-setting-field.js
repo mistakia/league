@@ -8,7 +8,7 @@ import TextField from '@mui/material/TextField'
 export default function EditableSettingField({
   data,
   field,
-  onchange,
+  on_change,
   limit,
   label,
   grid = { xs: 6, sm: 3 },
@@ -41,7 +41,7 @@ export default function EditableSettingField({
     }
 
     if (value !== defaultValue && validate_value(value)) {
-      onchange({ field, value })
+      on_change({ field, value })
     }
   }
 
@@ -78,7 +78,7 @@ export default function EditableSettingField({
 EditableSettingField.propTypes = {
   data: PropTypes.oneOfType([ImmutablePropTypes.record, PropTypes.object]),
   field: PropTypes.string,
-  onchange: PropTypes.func,
+  on_change: PropTypes.func,
   limit: PropTypes.number,
   label: PropTypes.string,
   grid: PropTypes.object,
