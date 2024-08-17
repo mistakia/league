@@ -8933,6 +8933,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"hyparquet@npm:^1.2.1":
+  version: 1.2.1
+  resolution: "hyparquet@npm:1.2.1"
+  checksum: 5504988312a918b3b4ab5a0656af1de843ee193587fce801d64ab65c112c21bc5f3b143b590ca8a5261fca2bbc0625d5304bf591a67d6007df8227c40518aaa3
+  languageName: node
+  linkType: hard
+
 "iconv-lite@npm:0.4.24":
   version: 0.4.24
   resolution: "iconv-lite@npm:0.4.24"
@@ -13615,6 +13622,7 @@ __metadata:
     hotkeys-js: ^3.13.7
     html-webpack-inline-source-plugin: ^1.0.0-beta.2
     html-webpack-plugin: ^5.6.0
+    hyparquet: ^1.2.1
     immutable: 4.3.5
     javascript-lp-solver: ^0.4.24
     jsdom: ^24.0.0

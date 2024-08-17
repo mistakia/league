@@ -52,6 +52,7 @@ const getPlayer = async ({
   sleeper_id,
   keeptradecut_id,
   pfr_id,
+  otc_id,
   esbid,
   gsisid,
   pname,
@@ -82,6 +83,8 @@ const getPlayer = async ({
     query.where({ gsisid })
   } else if (gsisItId) {
     query.where({ gsisItId })
+  } else if (otc_id) {
+    query.where({ otc_id })
   } else {
     if (name) {
       const formatted = formatPlayerName(name)
