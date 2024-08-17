@@ -814,3 +814,17 @@ Interpretive Note: _While the Commissioner is the dispute resolution officer of 
 3. If a player has no such games available then stats can be used from an NFL regular-season game where at the start of the game the result of that game is needed to determine the playoff seed of the NFL opponent of that player’s NFL team.
 
 4. If a substitute and rescheduled game is not available, the REGULAR SEASON ALL-PLAY record will be used to determine the results among teams whose results are impacted by a cancelled or suspended NFL game. REGULAR SEASON POINTS FOR would serve as a tiebreaker.
+
+## Article XXI
+
+> DECOMMISSIONED TEAMS
+
+**Decommissioned**
+
+1. An Orphaned Team can be decommissioned through unanimous consent.
+
+2. Players rostered on a decommissioned team shall be released.
+
+3. Draft picks in possession of the decommissioned team shall be nullified.
+
+4. Draft picks for future seasons originally belonging to the decommissioned team and in possession of another team will be given a mid round position.
