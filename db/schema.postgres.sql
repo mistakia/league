@@ -72,7 +72,7 @@ DROP INDEX IF EXISTS public.idx_invite_codes_created_by;
 DROP INDEX IF EXISTS public.idx_25151_lid;
 DROP INDEX IF EXISTS public.idx_25147_waiverid_pid;
 DROP INDEX IF EXISTS public.idx_25147_waiverid;
-DROP INDEX IF EXISTS public.idx_25141_userid;
+DROP INDEX IF EXISTS public.idx_25141_userid_tid_year;
 DROP INDEX IF EXISTS public.idx_25138_userid;
 DROP INDEX IF EXISTS public.idx_25138_sourceid;
 DROP INDEX IF EXISTS public.idx_25127_email;
@@ -229,6 +229,7 @@ DROP INDEX IF EXISTS public.idx_24608_tid;
 DROP INDEX IF EXISTS public.idx_24608_pick;
 DROP INDEX IF EXISTS public.idx_24608_lid;
 ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_username_unique;
+ALTER TABLE IF EXISTS ONLY public.users_teams DROP CONSTRAINT IF EXISTS users_teams_pkey;
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_key;
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_hash_key;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pkey;
@@ -5176,7 +5177,7 @@ CREATE TABLE public.users_teams (
     teamtext boolean DEFAULT true NOT NULL,
     teamvoice boolean DEFAULT true NOT NULL,
     leaguetext boolean DEFAULT true NOT NULL,
-    year smallint
+    year smallint NOT NULL
 );
 
 
@@ -5569,6 +5570,14 @@ ALTER TABLE ONLY public.urls
 
 ALTER TABLE ONLY public.urls
     ADD CONSTRAINT urls_url_key UNIQUE (url);
+
+
+--
+-- Name: users_teams users_teams_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.users_teams
+    ADD CONSTRAINT users_teams_pkey PRIMARY KEY (userid, tid, year);
 
 
 --
@@ -6665,10 +6674,10 @@ CREATE INDEX idx_25138_userid ON public.users_sources USING btree (userid);
 
 
 --
--- Name: idx_25141_userid; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_25141_userid_tid_year; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_25141_userid ON public.users_teams USING btree (userid, tid);
+CREATE UNIQUE INDEX idx_25141_userid_tid_year ON public.users_teams USING btree (userid, tid, year);
 
 
 --
