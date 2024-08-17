@@ -77,12 +77,14 @@ const run = async ({ lid = 1, year = constants.season.year }) => {
   const league_team_seasonlogs = []
   for (const [tid, team] of Object.entries(result)) {
     const tm = teams.find((t) => t.uid === team.tid)
+    // Remove post_season_finish and overall_finish from the stats object as they are not calculated and should not overwrite existing values
+    const { post_season_finish, overall_finish, ...remainingStats } = team.stats
     league_team_seasonlogs.push({
       tid,
       lid,
       year,
       div: tm.div,
-      ...team.stats
+      ...remainingStats
     })
   }
 

@@ -79,14 +79,14 @@ const calculate_league_careerlogs = async ({ lid }) => {
       num_byes: 0,
       best_season_win_pct: 0,
       best_season_all_play_pct: 0,
-      wildcards: 0
-      // wildcard_wins: 0,
-      // wildcard_highest_score: 0,
-      // wildcard_total_points: 0,
-      // wildcard_lowest_score: Number.MAX_VALUE,
-      // championship_highest_score: 0,
-      // championship_total_points: 0,
-      // championship_lowest_score: Number.MAX_VALUE
+      wildcards: 0,
+      wildcard_wins: 0,
+      wildcard_highest_score: 0,
+      wildcard_total_points: 0,
+      wildcard_lowest_score: Number.MAX_VALUE,
+      championship_highest_score: 0,
+      championship_total_points: 0,
+      championship_lowest_score: Number.MAX_VALUE
     }
 
     for (const league_team_seasonlog of league_team_seasonlogs) {
@@ -128,8 +128,7 @@ const calculate_league_careerlogs = async ({ lid }) => {
         careerlog.last_season_year,
         league_team_seasonlog.year
       )
-      // TODO
-      // careerlog.weekly_high_scores += league_team_seasonlog.weekly_high_scores || 0
+      careerlog.weekly_high_scores += league_team_seasonlog.weekly_high_scores || 0
 
       careerlog.post_seasons +=
         league_team_seasonlog.overall_finish <= 6 ? 1 : 0
@@ -161,14 +160,43 @@ const calculate_league_careerlogs = async ({ lid }) => {
           ? 1
           : 0
 
-      // TODO
-      // wildcard_wins
-      // wildcard_highest_score
-      // wildcard_lowest_score
-      // wildcard_total_points
-      // championship_highest_score
-      // championship_lowest_score
-      // championship_total_points
+      // Fetch playoff data for this team and year
+      const playoff_data = await db('playoffs')
+        .where({
+          tid: league_team_seasonlog.tid,
+          lid: league_team_seasonlog.lid,
+          year: league_team_seasonlog.year
+        })
+        .orderBy('uid')
+
+      // Process wildcard round
+      const wildcard_game = playoff_data.find(game => game.uid === 1)
+      if (wildcard_game) {
+        careerlog.wildcard_total_points += wildcard_game.points || 0
+        careerlog.wildcard_highest_score = Math.max(careerlog.wildcard_highest_score, wildcard_game.points || 0)
+        careerlog.wildcard_lowest_score = Math.min(careerlog.wildcard_lowest_score, wildcard_game.points || Number.MAX_VALUE)
+
+        // Check if team won the wildcard round
+        if (playoff_data.some(game => game.uid === 2)) {
+          careerlog.wildcard_wins += 1
+        }
+      }
+
+      // Process championship round
+      const championship_games = playoff_data.filter(game => game.uid === 2 || game.uid === 3)
+      for (const game of championship_games) {
+        careerlog.championship_total_points += game.points || 0
+        careerlog.championship_highest_score = Math.max(careerlog.championship_highest_score, game.points || 0)
+        careerlog.championship_lowest_score = Math.min(careerlog.championship_lowest_score, game.points || Number.MAX_VALUE)
+      }
+    }
+
+    // Adjust lowest scores if they weren't set
+    if (careerlog.wildcard_lowest_score === Number.MAX_VALUE) {
+      careerlog.wildcard_lowest_score = 0
+    }
+    if (careerlog.championship_lowest_score === Number.MAX_VALUE) {
+      careerlog.championship_lowest_score = 0
     }
 
     careerlog.pp_pct = (careerlog.pf / careerlog.pp) * 100

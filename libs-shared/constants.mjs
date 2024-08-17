@@ -749,6 +749,8 @@ export const fantasyTeamStats = [
   'post_season_finish',
   'overall_finish',
 
+  'weekly_high_scores',
+
   'doi',
 
   ...Object.values(slots).map((s) => `pSlot${s}`),
