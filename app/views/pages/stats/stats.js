@@ -13,69 +13,211 @@ import SelectYear from '@components/select-year'
 
 import './stats.styl'
 
+const careerlog_single_fields = {
+  num_seasons: 'Seasons'
+}
+
+const careerlog_group_fields = {
+  Record: {
+    wins: 'Wins',
+    losses: 'Losses',
+    ties: 'Ties'
+  },
+  'All Play': {
+    apWins: 'Wins',
+    apLosses: 'Losses',
+    apTies: 'Ties',
+    best_season_all_play_pct: 'Best %'
+  },
+  Points: {
+    pf: 'Total',
+    pa: 'Against',
+    pdiff: 'Diff',
+    pmax: 'Max',
+    pmin: 'Min',
+    weekly_high_scores: 'Week Leader'
+  },
+  Potential: {
+    pp: 'Points',
+    pp_pct: '%',
+    pw: 'Wins',
+    pl: 'Losses'
+  },
+  'Overall Finish': {
+    best_overall_finish: 'Best',
+    worst_overall_finish: 'Worst'
+  },
+  'Regular Season': {
+    regular_season_leader: 'Leader',
+    best_season_win_pct: 'Best Win %',
+    best_regular_season_finish: 'Best Finish',
+    worst_regular_season_finish: 'Worst Finish'
+  },
+  'Post Season': {
+    post_seasons: '#',
+    num_byes: 'Byes'
+  },
+  Wildcards: {
+    wildcards: '#',
+    wildcard_wins: 'Wins',
+    wildcard_highest_score: 'Max Points',
+    wildcard_total_points: 'Total Points',
+    wildcard_lowest_score: 'Min Points'
+  },
+  Championship: {
+    championship_rounds: '#',
+    championships: 'Wins',
+    championship_highest_score: 'Max Points',
+    championship_total_points: 'Total Points',
+    championship_lowest_score: 'Min Points'
+  }
+}
+
+function CareerLogRow({ user_careerlog, percentiles }) {
+  const fields = Object.keys(careerlog_single_fields)
+  const single_items = fields.map((field, index) => (
+    <PercentileMetric
+      key={index}
+      scaled
+      value={user_careerlog[field]}
+      percentile={percentiles[field]}
+    />
+  ))
+
+  const group_items = []
+  for (const [key, value] of Object.entries(careerlog_group_fields)) {
+    const field_items = []
+    for (const field of Object.keys(value)) {
+      field_items.push(
+        <PercentileMetric
+          key={field}
+          scaled
+          value={user_careerlog[field]}
+          percentile={percentiles[field]}
+        />
+      )
+    }
+    group_items.push(
+      <div key={key} className='row__group'>
+        <div className='row__group-body'>{field_items}</div>
+      </div>
+    )
+  }
+
+  return (
+    <div className='table__row'>
+      <div className='table__cell text lead-cell sticky__column'>
+        {user_careerlog.username}
+      </div>
+      {single_items}
+      {group_items}
+    </div>
+  )
+}
+
+CareerLogRow.propTypes = {
+  user_careerlog: PropTypes.object,
+  percentiles: PropTypes.object
+}
+
+const season_fields = {
+  Points: {
+    pf: {
+      label: 'Total',
+      tooltip: 'Points scored'
+    },
+    pa: {
+      label: 'Against',
+      tooltip: 'Points against'
+    },
+    pdiff: {
+      label: 'Diff',
+      tooltip: 'Point differential'
+    },
+    pmax: {
+      label: 'Max',
+      tooltip: 'Maximum points for'
+    },
+    pmin: {
+      label: 'Min',
+      tooltip: 'Minimum points for'
+    },
+    pdev: {
+      label: 'Stdev',
+      tooltip: 'Points scored standard deviation'
+    }
+  },
+  Potential: {
+    pp: {
+      label: 'Points',
+      tooltip: 'Potential points. Points scored with optimal lineup.'
+    },
+    pp_pct: {
+      label: '%',
+      tooltip: 'Potential points percentage. Points scored with optimal lineup.'
+    },
+    pw: {
+      label: 'Wins',
+      tooltip: 'Potential wins. Wins with optimal lineup.'
+    },
+    pl: {
+      label: 'Losses',
+      tooltip: 'Potential losses. Losses with optimal lineup.'
+    }
+  },
+  'All Play': {
+    apWins: {
+      label: 'Wins',
+      tooltip: 'Wins verse all teams each week'
+    },
+    apLosses: {
+      label: 'Losses',
+      tooltip: 'Losses verse all teams each week'
+    },
+    apTies: {
+      label: 'Ties',
+      tooltip: 'Ties verse all teams each week'
+    },
+    all_play_win_pct: {
+      label: 'Win %',
+      tooltip: 'All Play Win %',
+      fixed: 1
+    }
+  }
+}
+
 function SummaryRow({ team, percentiles, year }) {
   const stats = team.get('stats', new Map(constants.createFantasyTeamStats()))
 
   const items = []
-  const fields = [
-    'pf',
-    'pa',
-    'pdiff',
-    'pp',
-    'pp_pct',
-    'pw',
-    'pl',
-    'pmax',
-    'pmin',
-    'pdev'
-  ]
-  fields.forEach((field, index) => {
+  for (const [key, value] of Object.entries(season_fields)) {
+    const fields = []
+    for (const [field, { fixed }] of Object.entries(value)) {
+      fields.push(
+        <PercentileMetric
+          key={field}
+          scaled
+          {...{
+            value: stats.get(field),
+            percentile: percentiles[field],
+            fixed
+          }}
+        />
+      )
+    }
     items.push(
-      <PercentileMetric
-        key={index}
-        scaled
-        {...{ value: stats.get(field), percentile: percentiles[field] }}
-      />
+      <div key={key} className='row__group'>
+        <div className='row__group-body'>{fields}</div>
+      </div>
     )
-  })
+  }
 
   return (
     <div className='table__row'>
-      <div className='table__cell text lead-cell'>{team.name}</div>
-      {items}
-      <div className='row__group'>
-        <div className='row__group-body'>
-          <PercentileMetric
-            scaled
-            {...{
-              value: stats.get('apWins'),
-              percentile: percentiles.apWins
-            }}
-          />
-          <PercentileMetric
-            scaled
-            {...{
-              value: stats.get('apLosses'),
-              percentile: percentiles.apLosses
-            }}
-          />
-          <PercentileMetric
-            scaled
-            {...{
-              value: stats.get('apTies'),
-              percentile: percentiles.apTies
-            }}
-          />
-          <div className='table__cell metric'>
-            {toPercent(
-              team.getIn(['stats', 'apWins'], 0) /
-                (team.getIn(['stats', 'apWins'], 0) +
-                  team.getIn(['stats', 'apLosses'], 0) +
-                  team.getIn(['stats', 'apTies'], 0))
-            )}
-          </div>
-        </div>
+      <div className='table__cell text lead-cell sticky__column'>
+        {team.name}
       </div>
+      {items}
     </div>
   )
 }
@@ -135,7 +277,9 @@ function SlotRow({ team, slots, percentiles, year }) {
 
   return (
     <div className='table__row'>
-      <div className='table__cell text lead-cell'>{team.name}</div>
+      <div className='table__cell text lead-cell sticky__column'>
+        {team.name}
+      </div>
       {slotCells}
     </div>
   )
@@ -153,7 +297,10 @@ export default function StatsPage({
   teams,
   percentiles,
   year,
-  loadLeagueTeamStats
+  loadLeagueTeamStats,
+  league_user_historical_ranks,
+  load_league_careerlogs,
+  careerlog_percentiles
 }) {
   const navigate = useNavigate()
   const { lid } = useParams()
@@ -166,7 +313,8 @@ export default function StatsPage({
 
   useEffect(() => {
     loadLeagueTeamStats()
-  }, [year, loadLeagueTeamStats])
+    load_league_careerlogs(lid)
+  }, [year, loadLeagueTeamStats, load_league_careerlogs, lid])
 
   const slotHeaders = []
   const eligibleStarterSlots = getEligibleSlots({ pos: 'ALL', league })
@@ -245,6 +393,24 @@ export default function StatsPage({
   if (year === constants.year && constants.week === 0) {
     stats_body = <div className='section empty' />
   } else {
+    const season_stats_header_items = []
+    for (const [key, value] of Object.entries(season_fields)) {
+      const field_items = []
+      for (const { label, tooltip } of Object.values(value)) {
+        field_items.push(
+          <Tooltip title={tooltip}>
+            <div className='table__cell metric'>{label}</div>
+          </Tooltip>
+        )
+      }
+      season_stats_header_items.push(
+        <div key={key} className='row__group'>
+          <div className='row__group-head'>{key}</div>
+          <div className='row__group-body'>{field_items}</div>
+        </div>
+      )
+    }
+
     stats_body = (
       <>
         <div className='section'>
@@ -253,46 +419,10 @@ export default function StatsPage({
           </Toolbar>
           <div className='table__container'>
             <div className='table__row table__head'>
-              <div className='table__cell text lead-cell'>Team</div>
-              <Tooltip title='Points scored'>
-                <div className='table__cell metric'>PF</div>
-              </Tooltip>
-              <Tooltip title='Points against'>
-                <div className='table__cell metric'>PA</div>
-              </Tooltip>
-              <Tooltip title='Point differential'>
-                <div className='table__cell metric'>DIFF</div>
-              </Tooltip>
-              <Tooltip title='Potential points. Points scored with optimal lineup.'>
-                <div className='table__cell metric'>PP</div>
-              </Tooltip>
-              <Tooltip title='Percentage of potential points scored'>
-                <div className='table__cell metric'>PP%</div>
-              </Tooltip>
-              <Tooltip title='Potential wins. Games that could have been won with optimal lineup'>
-                <div className='table__cell metric'>P WINS</div>
-              </Tooltip>
-              <Tooltip title='Potential losses. Games that could have been lost with opponents optimal lineup'>
-                <div className='table__cell metric'>P LOSSES</div>
-              </Tooltip>
-              <Tooltip title='Maximum points for'>
-                <div className='table__cell metric'>MAX</div>
-              </Tooltip>
-              <Tooltip title='Minimum points for'>
-                <div className='table__cell metric'>MIN</div>
-              </Tooltip>
-              <Tooltip title='Points scored standard deviation'>
-                <div className='table__cell metric'>STDEV</div>
-              </Tooltip>
-              <div className='row__group'>
-                <div className='row__group-head'>All Play Record</div>
-                <div className='row__group-body'>
-                  <div className='table__cell metric'>W</div>
-                  <div className='table__cell metric'>L</div>
-                  <div className='table__cell metric'>T</div>
-                  <div className='table__cell metric'>PCT</div>
-                </div>
+              <div className='table__cell text lead-cell sticky__column'>
+                Team
               </div>
+              {season_stats_header_items}
             </div>
             <div className='table__body'>{summaryRows}</div>
           </div>
@@ -303,7 +433,9 @@ export default function StatsPage({
           </Toolbar>
           <div className='table__container'>
             <div className='table__row table__head'>
-              <div className='table__cell text lead-cell'>Team</div>
+              <div className='table__cell text lead-cell sticky__column'>
+                Team
+              </div>
               {slotHeaders}
             </div>
             <div className='table__body'>{slotRows}</div>
@@ -315,7 +447,9 @@ export default function StatsPage({
           </Toolbar>
           <div className='table__container'>
             <div className='table__row table__head'>
-              <div className='table__cell text lead-cell'>Team</div>
+              <div className='table__cell text lead-cell sticky__column'>
+                Team
+              </div>
               {positionHeaders}
             </div>
             <div className='table__body'>{positionRows}</div>
@@ -325,8 +459,58 @@ export default function StatsPage({
     )
   }
 
+  const careerLogRows = league_user_historical_ranks.map(
+    (user_careerlog) => (
+      <CareerLogRow
+        key={user_careerlog.userid}
+        user_careerlog={user_careerlog}
+        percentiles={careerlog_percentiles}
+      />
+    )
+  )
+
+  const careerlog_single_field_items = []
+  for (const [key, value] of Object.entries(careerlog_single_fields)) {
+    careerlog_single_field_items.push(
+      <div key={key} className='table__cell metric'>
+        {value}
+      </div>
+    )
+  }
+
+  const careerlog_group_field_items = []
+  for (const [key, value] of Object.entries(careerlog_group_fields)) {
+    const field_items = []
+    for (const label of Object.values(value)) {
+      field_items.push(<div className='table__cell metric'>{label}</div>)
+    }
+    careerlog_group_field_items.push(
+      <div key={key} className='row__group'>
+        <div className='row__group-head'>{key}</div>
+        <div className='row__group-body'>{field_items}</div>
+      </div>
+    )
+  }
+  const careerlog_body = (
+    <div className='section'>
+      <Toolbar>
+        <div className='section-header-title'>Career Stats</div>
+      </Toolbar>
+      <div className='table__container'>
+        <div className='table__row table__head'>
+          <div className='table__cell text lead-cell sticky__column'>
+            Manager
+          </div>
+          {careerlog_single_field_items}
+          {careerlog_group_field_items}
+        </div>
+        <div className='table__body'>{careerLogRows}</div>
+      </div>
+    </div>
+  )
   const body = (
     <div className='stats'>
+      {careerlog_body}
       <SelectYear />
       {stats_body}
     </div>
@@ -340,5 +524,8 @@ StatsPage.propTypes = {
   league: PropTypes.object,
   percentiles: PropTypes.object,
   year: PropTypes.number,
-  loadLeagueTeamStats: PropTypes.func
+  loadLeagueTeamStats: PropTypes.func,
+  league_user_historical_ranks: PropTypes.array,
+  load_league_careerlogs: PropTypes.func,
+  careerlog_percentiles: PropTypes.object
 }
