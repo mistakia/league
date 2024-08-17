@@ -199,6 +199,9 @@ const calculate_league_careerlogs = async ({ lid }) => {
       careerlog.championship_lowest_score = 0
     }
 
+    careerlog.best_season_win_pct = careerlog.best_season_win_pct * 100
+    careerlog.best_season_all_play_pct = careerlog.best_season_all_play_pct * 100
+
     careerlog.pp_pct = (careerlog.pf / careerlog.pp) * 100
 
     return careerlog

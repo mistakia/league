@@ -19,57 +19,57 @@ const careerlog_single_fields = {
 
 const careerlog_group_fields = {
   Record: {
-    wins: 'Wins',
-    losses: 'Losses',
-    ties: 'Ties'
+    wins: { label: 'Wins' },
+    losses: { label: 'Losses' },
+    ties: { label: 'Ties' }
   },
   'All Play': {
-    apWins: 'Wins',
-    apLosses: 'Losses',
-    apTies: 'Ties',
-    best_season_all_play_pct: 'Best %'
+    apWins: { label: 'Wins' },
+    apLosses: { label: 'Losses' },
+    apTies: { label: 'Ties' },
+    best_season_all_play_pct: { label: 'Best %', fixed: 1 }
   },
   Points: {
-    pf: 'Total',
-    pa: 'Against',
-    pdiff: 'Diff',
-    pmax: 'Max',
-    pmin: 'Min',
-    weekly_high_scores: 'Week Leader'
+    pf: { label: 'Total' },
+    pa: { label: 'Against' },
+    pdiff: { label: 'Diff' },
+    pmax: { label: 'Max' },
+    pmin: { label: 'Min' },
+    weekly_high_scores: { label: 'Week Leader' }
   },
   Potential: {
-    pp: 'Points',
-    pp_pct: '%',
-    pw: 'Wins',
-    pl: 'Losses'
+    pp: { label: 'Points' },
+    pp_pct: { label: '%', fixed: 1 },
+    pw: { label: 'Wins' },
+    pl: { label: 'Losses' }
   },
   'Overall Finish': {
-    best_overall_finish: 'Best',
-    worst_overall_finish: 'Worst'
+    best_overall_finish: { label: 'Best' },
+    worst_overall_finish: { label: 'Worst' }
   },
   'Regular Season': {
-    regular_season_leader: 'Leader',
-    best_season_win_pct: 'Best Win %',
-    best_regular_season_finish: 'Best Finish',
-    worst_regular_season_finish: 'Worst Finish'
+    regular_season_leader: { label: 'Leader' },
+    best_season_win_pct: { label: 'Best Win %', fixed: 1 },
+    best_regular_season_finish: { label: 'Best Finish' },
+    worst_regular_season_finish: { label: 'Worst Finish' }
   },
   'Post Season': {
-    post_seasons: '#',
-    num_byes: 'Byes'
+    post_seasons: { label: '#' },
+    num_byes: { label: 'Byes' }
   },
   Wildcards: {
-    wildcards: '#',
-    wildcard_wins: 'Wins',
-    wildcard_highest_score: 'Max Points',
-    wildcard_total_points: 'Total Points',
-    wildcard_lowest_score: 'Min Points'
+    wildcards: { label: '#' },
+    wildcard_wins: { label: 'Wins' },
+    wildcard_highest_score: { label: 'Max Points' },
+    wildcard_total_points: { label: 'Total Points' },
+    wildcard_lowest_score: { label: 'Min Points' }
   },
   Championship: {
-    championship_rounds: '#',
-    championships: 'Wins',
-    championship_highest_score: 'Max Points',
-    championship_total_points: 'Total Points',
-    championship_lowest_score: 'Min Points'
+    championship_rounds: { label: '#' },
+    championships: { label: 'Wins' },
+    championship_highest_score: { label: 'Max Points' },
+    championship_total_points: { label: 'Total Points' },
+    championship_lowest_score: { label: 'Min Points' }
   }
 }
 function CareerLogRow({ user_careerlog, percentiles, key }) {
@@ -85,12 +85,13 @@ function CareerLogRow({ user_careerlog, percentiles, key }) {
 
   const group_items = Object.entries(careerlog_group_fields).map(
     ([group_name, value]) => {
-      const field_items = Object.entries(value).map(([field, label]) => (
+      const field_items = Object.entries(value).map(([field, { label, fixed }]) => (
         <PercentileMetric
           key={`${group_name}-${field}`}
           scaled
           value={user_careerlog[field]}
           percentile={percentiles[field]}
+          fixed={fixed}
         />
       ))
 
@@ -478,7 +479,7 @@ export default function StatsPage({
   const careerlog_group_field_items = Object.entries(
     careerlog_group_fields
   ).map(([group_name, value]) => {
-    const field_items = Object.entries(value).map(([field, label]) => (
+    const field_items = Object.entries(value).map(([field, { label }]) => (
       <div key={`${group_name}-${field}`} className='table__cell metric'>
         {label}
       </div>
