@@ -85,15 +85,17 @@ function CareerLogRow({ user_careerlog, percentiles, key }) {
 
   const group_items = Object.entries(careerlog_group_fields).map(
     ([group_name, value]) => {
-      const field_items = Object.entries(value).map(([field, { label, fixed }]) => (
-        <PercentileMetric
-          key={`${group_name}-${field}`}
-          scaled
-          value={user_careerlog[field]}
-          percentile={percentiles[field]}
-          fixed={fixed}
-        />
-      ))
+      const field_items = Object.entries(value).map(
+        ([field, { label, fixed }]) => (
+          <PercentileMetric
+            key={`${group_name}-${field}`}
+            scaled
+            value={user_careerlog[field]}
+            percentile={percentiles[field]}
+            fixed={fixed}
+          />
+        )
+      )
 
       return (
         <div key={`group_${group_name}`} className='row__group'>
@@ -106,7 +108,7 @@ function CareerLogRow({ user_careerlog, percentiles, key }) {
   return (
     <div key={key} className='table__row'>
       <div className='table__cell text lead-cell sticky__column'>
-        {user_careerlog.username}
+        <div className='table__cell-text'>{user_careerlog.username}</div>
       </div>
       {single_items}
       {group_items}

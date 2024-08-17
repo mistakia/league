@@ -9,7 +9,7 @@ import { toPercent, constants } from '@libs-shared'
 import PageLayout from '@layouts/page'
 
 function Divider({ title }) {
-  return <div className='table__row table__divider'>{title}</div>
+  return <div className='table__row table__divider sticky__column'>{title}</div>
 }
 
 Divider.propTypes = {
@@ -19,7 +19,9 @@ Divider.propTypes = {
 function StandingsTeam({ team, year, is_current_year }) {
   return (
     <div className='table__row'>
-      <div className='table__cell text lead-cell'>{team.name}</div>
+      <div className='table__cell text lead-cell sticky__column'>
+        <div className='table__cell-text'>{team.name}</div>
+      </div>
       <div className='table__cell metric wide_cell'>
         {team.getIn(['stats', 'wins'], 0)}-{team.getIn(['stats', 'losses'], 0)}-
         {team.getIn(['stats', 'ties'], 0)}
@@ -77,7 +79,7 @@ function Standings({ teams, title, year, is_current_year }) {
       </Toolbar>
       <div className='table__container'>
         <div className='table__row table__head'>
-          <div className='table__cell text lead-cell'>Team</div>
+          <div className='table__cell text lead-cell sticky__column'>Team</div>
           <div className='table__cell metric wide_cell'>Record</div>
           <div className='table__cell metric wide_cell'>All Play</div>
           <div className='table__cell metric wide_cell'>Points</div>
@@ -92,7 +94,7 @@ function Standings({ teams, title, year, is_current_year }) {
           )}
           <div className='table__cell metric'>DOI</div>
         </div>
-        <div className='table__body'>{overallRows}</div>
+        {overallRows}
       </div>
     </div>
   )
@@ -140,7 +142,7 @@ function Overall({ standings, year, is_current_year }) {
       </Toolbar>
       <div className='table__container'>
         <div className='table__row table__head'>
-          <div className='table__cell text lead-cell'>Team</div>
+          <div className='table__cell text lead-cell sticky__column'>Team</div>
           <div className='table__cell metric wide_cell'>Record</div>
           <div className='table__cell metric wide_cell'>All Play</div>
           <div className='table__cell metric wide_cell'>Points</div>
@@ -155,7 +157,7 @@ function Overall({ standings, year, is_current_year }) {
           )}
           <div className='table__cell metric'>Draft Index</div>
         </div>
-        <div className='table__body'>{overallRows}</div>
+        {overallRows}
       </div>
     </div>
   )
