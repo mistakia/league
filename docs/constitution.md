@@ -512,6 +512,10 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 7. Teams who have more than one (1) compensatory pick will make their second selection after all the Teams with a compensatory pick have made their first selection.
 
+**Rookie Clock.**
+
+8. When utilizing 24-hour draft windows, the draft window will commence immediately following the previous pick. The window will extend until the next midnight Eastern Standard Time that occurs at least 24 hours after the start of the draft window.
+
 ## Article XII
 
 > FREE AGENCY AUCTION
