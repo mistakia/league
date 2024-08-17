@@ -229,6 +229,7 @@ export default function (team) {
     case 'TITANS':
     case 'TEN':
     case 'OTI':
+    case 'OILERS':
     case 'TEN TITANS':
       return 'TEN'
 
