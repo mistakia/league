@@ -233,6 +233,8 @@ ALTER TABLE IF EXISTS ONLY public.users_teams DROP CONSTRAINT IF EXISTS users_te
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_key;
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_hash_key;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pid_year_unique;
 ALTER TABLE IF EXISTS ONLY public.league_user_careerlogs DROP CONSTRAINT IF EXISTS league_user_careerlogs_lid_userid_unique;
 ALTER TABLE IF EXISTS ONLY public.league_team_seasonlogs DROP CONSTRAINT IF EXISTS league_team_seasonlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_team_careerlogs DROP CONSTRAINT IF EXISTS league_team_careerlogs_pkey;
@@ -334,6 +336,7 @@ DROP TABLE IF EXISTS public.players_status;
 DROP TABLE IF EXISTS public.player_snaps_game;
 DROP TABLE IF EXISTS public.player_seasonlogs;
 DROP TABLE IF EXISTS public.player_gamelogs;
+DROP TABLE IF EXISTS public.player_contracts;
 DROP SEQUENCE IF EXISTS public.player_changelog_uid_seq;
 DROP TABLE IF EXISTS public.player_changelog;
 DROP TABLE IF EXISTS public.player_aliases;
@@ -3583,7 +3586,17 @@ CREATE TABLE public.player (
     ngs_draft_grade numeric(5,2),
     nfl_grade numeric(4,2),
     ngs_production_score numeric(5,2),
-    ngs_size_score numeric(5,2)
+    ngs_size_score numeric(5,2),
+    otc_id integer,
+    contract_year_signed smallint,
+    contract_years smallint,
+    contract_value numeric(10,2),
+    contract_apy numeric(10,2),
+    contract_guaranteed numeric(10,2),
+    contract_apy_cap_pct numeric(5,3),
+    contract_inflated_value numeric(12,6),
+    contract_inflated_apy numeric(10,6),
+    contract_inflated_guaranteed numeric(12,6)
 );
 
 
@@ -3812,6 +3825,69 @@ COMMENT ON COLUMN public.player.ngs_size_score IS 'NGS Prospect size score';
 
 
 --
+-- Name: COLUMN player.contract_year_signed; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player.contract_year_signed IS 'Year the contract was signed';
+
+
+--
+-- Name: COLUMN player.contract_years; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player.contract_years IS 'Duration of the contract in years';
+
+
+--
+-- Name: COLUMN player.contract_value; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player.contract_value IS 'Total value of the contract in millions';
+
+
+--
+-- Name: COLUMN player.contract_apy; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player.contract_apy IS 'Average per year value of the contract in millions';
+
+
+--
+-- Name: COLUMN player.contract_guaranteed; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player.contract_guaranteed IS 'Guaranteed amount of the contract in millions';
+
+
+--
+-- Name: COLUMN player.contract_apy_cap_pct; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player.contract_apy_cap_pct IS 'Average per year value as a percentage of the salary cap';
+
+
+--
+-- Name: COLUMN player.contract_inflated_value; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player.contract_inflated_value IS 'Inflated total value of the contract in millions';
+
+
+--
+-- Name: COLUMN player.contract_inflated_apy; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player.contract_inflated_apy IS 'Inflated average per year value of the contract in millions';
+
+
+--
+-- Name: COLUMN player.contract_inflated_guaranteed; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player.contract_inflated_guaranteed IS 'Inflated guaranteed amount of the contract in millions';
+
+
+--
 -- Name: player_aliases; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -3853,6 +3929,133 @@ CREATE SEQUENCE public.player_changelog_uid_seq
 --
 
 ALTER SEQUENCE public.player_changelog_uid_seq OWNED BY public.player_changelog.uid;
+
+
+--
+-- Name: player_contracts; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_contracts (
+    pid character varying(25) NOT NULL,
+    year character varying(5) NOT NULL,
+    team character varying(3),
+    base_salary numeric(10,3),
+    prorated_bonus numeric(10,5),
+    roster_bonus numeric(10,6),
+    guaranteed_salary numeric(10,6),
+    cap_number numeric(10,5),
+    cap_percent numeric(5,2),
+    cash_paid numeric(10,6),
+    workout_bonus numeric(10,2),
+    other_bonus numeric(10,2),
+    per_game_roster_bonus numeric(10,2),
+    option_bonus numeric(10,2)
+);
+
+
+--
+-- Name: TABLE player_contracts; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.player_contracts IS 'Player contract details by year';
+
+
+--
+-- Name: COLUMN player_contracts.pid; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_contracts.pid IS 'Player ID';
+
+
+--
+-- Name: COLUMN player_contracts.year; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_contracts.year IS 'Contract year or "Total"';
+
+
+--
+-- Name: COLUMN player_contracts.team; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_contracts.team IS 'Team abbreviation';
+
+
+--
+-- Name: COLUMN player_contracts.base_salary; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_contracts.base_salary IS 'Base salary in millions';
+
+
+--
+-- Name: COLUMN player_contracts.prorated_bonus; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_contracts.prorated_bonus IS 'Prorated bonus in millions';
+
+
+--
+-- Name: COLUMN player_contracts.roster_bonus; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_contracts.roster_bonus IS 'Roster bonus in millions';
+
+
+--
+-- Name: COLUMN player_contracts.guaranteed_salary; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_contracts.guaranteed_salary IS 'Guaranteed salary in millions';
+
+
+--
+-- Name: COLUMN player_contracts.cap_number; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_contracts.cap_number IS 'Cap number in millions';
+
+
+--
+-- Name: COLUMN player_contracts.cap_percent; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_contracts.cap_percent IS 'Cap percentage';
+
+
+--
+-- Name: COLUMN player_contracts.cash_paid; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_contracts.cash_paid IS 'Cash paid in millions';
+
+
+--
+-- Name: COLUMN player_contracts.workout_bonus; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_contracts.workout_bonus IS 'Workout bonus in millions';
+
+
+--
+-- Name: COLUMN player_contracts.other_bonus; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_contracts.other_bonus IS 'Other bonus in millions';
+
+
+--
+-- Name: COLUMN player_contracts.per_game_roster_bonus; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_contracts.per_game_roster_bonus IS 'Per-game roster bonus in millions';
+
+
+--
+-- Name: COLUMN player_contracts.option_bonus; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_contracts.option_bonus IS 'Option bonus in millions';
 
 
 --
@@ -5549,6 +5752,22 @@ ALTER TABLE ONLY public.league_team_seasonlogs
 
 ALTER TABLE ONLY public.league_user_careerlogs
     ADD CONSTRAINT league_user_careerlogs_lid_userid_unique UNIQUE (lid, userid);
+
+
+--
+-- Name: player_contracts player_contracts_pid_year_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_contracts
+    ADD CONSTRAINT player_contracts_pid_year_unique UNIQUE (pid, year);
+
+
+--
+-- Name: player_contracts player_contracts_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_contracts
+    ADD CONSTRAINT player_contracts_pkey PRIMARY KEY (pid, year);
 
 
 --

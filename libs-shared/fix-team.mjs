@@ -235,6 +235,7 @@ export default function (team) {
     case 'WASHINGTON REDSKINS':
     case 'WASHINGTON FOOTBALL TEAM':
     case 'WASHINGTON COMMANDERS':
+    case 'WASHINGTON':
     case 'COMMANDERS':
     case 'REDSKINS':
     case 'WSH':
