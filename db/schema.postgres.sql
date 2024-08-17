@@ -1196,7 +1196,8 @@ CREATE TABLE public.league_team_careerlogs (
     wildcard_lowest_score numeric(6,2),
     championship_highest_score numeric(6,2),
     championship_total_points numeric(8,2),
-    championship_lowest_score numeric(6,2)
+    championship_lowest_score numeric(6,2),
+    division_wins smallint DEFAULT 0
 );
 
 
@@ -1392,7 +1393,8 @@ CREATE TABLE public.league_user_careerlogs (
     wildcard_lowest_score numeric(6,2),
     championship_highest_score numeric(6,2),
     championship_total_points numeric(8,2),
-    championship_lowest_score numeric(6,2)
+    championship_lowest_score numeric(6,2),
+    division_wins smallint DEFAULT 0
 );
 
 

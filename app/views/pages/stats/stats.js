@@ -14,7 +14,8 @@ import SelectYear from '@components/select-year'
 import './stats.styl'
 
 const careerlog_single_fields = {
-  num_seasons: 'Seasons'
+  num_seasons: 'Seasons',
+  division_wins: 'Division Wins'
 }
 
 const careerlog_group_fields = {

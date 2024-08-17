@@ -2993,7 +2993,8 @@ export const get_league_user_historical_ranks = createSelector(
       'worst_regular_season_finish',
       'best_regular_season_finish',
       'best_overall_finish',
-      'worst_overall_finish'
+      'worst_overall_finish',
+      'division_wins'
     ]
 
     const ranks = {}
@@ -3070,7 +3071,8 @@ export const get_league_team_historical_ranks = createSelector(
       'worst_regular_season_finish',
       'best_regular_season_finish',
       'best_overall_finish',
-      'worst_overall_finish'
+      'worst_overall_finish',
+      'division_wins'
     ]
 
     const ranks = {}

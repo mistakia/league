@@ -79,7 +79,8 @@ const mapStateToProps = createSelector(
       'worst_regular_season_finish',
       'best_regular_season_finish',
       'best_overall_finish',
-      'worst_overall_finish'
+      'worst_overall_finish',
+      'division_wins'
     ]
 
     const sorted_league_user_historical_ranks = Object.values(

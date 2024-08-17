@@ -86,7 +86,8 @@ const calculate_league_careerlogs = async ({ lid }) => {
       wildcard_lowest_score: Number.MAX_VALUE,
       championship_highest_score: 0,
       championship_total_points: 0,
-      championship_lowest_score: Number.MAX_VALUE
+      championship_lowest_score: Number.MAX_VALUE,
+      division_wins: 0
     }
 
     for (const league_team_seasonlog of league_team_seasonlogs) {
@@ -160,6 +161,8 @@ const calculate_league_careerlogs = async ({ lid }) => {
         league_team_seasonlog.regular_season_finish <= 6
           ? 1
           : 0
+      careerlog.division_wins +=
+        league_team_seasonlog.division_finish === 1 ? 1 : 0
 
       // Fetch playoff data for this team and year
       const playoff_data = await db('playoffs')
