@@ -82,7 +82,9 @@ const mapStateToProps = createSelector(
       'worst_overall_finish'
     ]
 
-    const sorted_league_user_historical_ranks = Object.values(league_user_historical_ranks).sort((a, b) => b.wins - a.wins)
+    const sorted_league_user_historical_ranks = Object.values(
+      league_user_historical_ranks
+    ).sort((a, b) => b.wins - a.wins)
 
     const careerlog_percentiles = calculatePercentiles({
       items: sorted_league_user_historical_ranks,
