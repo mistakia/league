@@ -72,40 +72,38 @@ const careerlog_group_fields = {
     championship_lowest_score: 'Min Points'
   }
 }
-
-function CareerLogRow({ user_careerlog, percentiles }) {
+function CareerLogRow({ user_careerlog, percentiles, key }) {
   const fields = Object.keys(careerlog_single_fields)
-  const single_items = fields.map((field, index) => (
+  const single_items = fields.map((field) => (
     <PercentileMetric
-      key={index}
+      key={`single_${field}`}
       scaled
       value={user_careerlog[field]}
       percentile={percentiles[field]}
     />
   ))
 
-  const group_items = []
-  for (const [key, value] of Object.entries(careerlog_group_fields)) {
-    const field_items = []
-    for (const field of Object.keys(value)) {
-      field_items.push(
+  const group_items = Object.entries(careerlog_group_fields).map(
+    ([group_name, value]) => {
+      const field_items = Object.entries(value).map(([field, label]) => (
         <PercentileMetric
-          key={field}
+          key={`${group_name}-${field}`}
           scaled
           value={user_careerlog[field]}
           percentile={percentiles[field]}
         />
+      ))
+
+      return (
+        <div key={`group_${group_name}`} className='row__group'>
+          <div className='row__group-body'>{field_items}</div>
+        </div>
       )
     }
-    group_items.push(
-      <div key={key} className='row__group'>
-        <div className='row__group-body'>{field_items}</div>
-      </div>
-    )
-  }
+  )
 
   return (
-    <div className='table__row'>
+    <div key={key} className='table__row'>
       <div className='table__cell text lead-cell sticky__column'>
         {user_careerlog.username}
       </div>
@@ -117,7 +115,8 @@ function CareerLogRow({ user_careerlog, percentiles }) {
 
 CareerLogRow.propTypes = {
   user_careerlog: PropTypes.object,
-  percentiles: PropTypes.object
+  percentiles: PropTypes.object,
+  key: PropTypes.string
 }
 
 const season_fields = {
@@ -186,34 +185,29 @@ const season_fields = {
   }
 }
 
-function SummaryRow({ team, percentiles, year }) {
+function SummaryRow({ team, percentiles, year, key }) {
   const stats = team.get('stats', new Map(constants.createFantasyTeamStats()))
 
-  const items = []
-  for (const [key, value] of Object.entries(season_fields)) {
-    const fields = []
-    for (const [field, { fixed }] of Object.entries(value)) {
-      fields.push(
-        <PercentileMetric
-          key={field}
-          scaled
-          {...{
-            value: stats.get(field),
-            percentile: percentiles[field],
-            fixed
-          }}
-        />
-      )
-    }
-    items.push(
-      <div key={key} className='row__group'>
+  const items = Object.entries(season_fields).map(([key, value]) => {
+    const fields = Object.entries(value).map(([field, { fixed }]) => (
+      <PercentileMetric
+        key={`${key}-${field}`}
+        scaled
+        value={stats.get(field)}
+        percentile={percentiles[field]}
+        fixed={fixed}
+      />
+    ))
+
+    return (
+      <div key={`group_${key}`} className='row__group'>
         <div className='row__group-body'>{fields}</div>
       </div>
     )
-  }
+  })
 
   return (
-    <div className='table__row'>
+    <div key={key} className='table__row'>
       <div className='table__cell text lead-cell sticky__column'>
         {team.name}
       </div>
@@ -225,27 +219,30 @@ function SummaryRow({ team, percentiles, year }) {
 SummaryRow.propTypes = {
   team: ImmutablePropTypes.record,
   percentiles: PropTypes.object,
-  year: PropTypes.number
+  year: PropTypes.number,
+  key: PropTypes.string
 }
 
-function PositionRow({ team, percentiles, year }) {
-  const positionCells = []
-  for (const [index, position] of constants.positions.entries()) {
+function PositionRow({ team, percentiles, year, key }) {
+  const positionCells = constants.positions.map((position) => {
     const key = `pPos${position}`
     const value = team.getIn(['stats', key], 0)
     const percentile = percentiles[key]
-    positionCells.push(
-      <PercentileMetric key={index} scaled {...{ value, percentile }} />
-    )
-    positionCells.push(
-      <div key={`${index}%`} className='table__cell metric'>
+    return [
+      <PercentileMetric
+        key={`metric_${position}`}
+        scaled
+        value={value}
+        percentile={percentile}
+      />,
+      <div key={`percent_${position}`} className='table__cell metric'>
         {toPercent(value / team.getIn(['stats', 'pf'], 0))}
       </div>
-    )
-  }
+    ]
+  })
 
   return (
-    <div className='table__row'>
+    <div key={key} className='table__row'>
       <div className='table__cell text lead-cell'>{team.name}</div>
       {positionCells}
     </div>
@@ -255,28 +252,33 @@ function PositionRow({ team, percentiles, year }) {
 PositionRow.propTypes = {
   team: ImmutablePropTypes.record,
   percentiles: PropTypes.object,
-  year: PropTypes.number
+  year: PropTypes.number,
+  key: PropTypes.string
 }
 
-function SlotRow({ team, slots, percentiles, year }) {
-  const slotCells = []
-  for (const [index, s] of slots.entries()) {
+function SlotRow({ team, slots, percentiles, key }) {
+  const slotCells = slots.map((s) => {
     const slot = constants.slots[s]
     const key = `pSlot${slot}`
     const value = team.getIn(['stats', key], 0)
     const percentile = percentiles[key]
-    slotCells.push(
-      <PercentileMetric key={index} scaled {...{ value, percentile }} />
-    )
-    slotCells.push(
-      <div key={`${index}%`} className='table__cell metric'>
-        {toPercent(value / team.getIn(['stats', 'pf'], 0))}
+    const total_points = team.getIn(['stats', 'pf'], 0)
+
+    return [
+      <PercentileMetric
+        key={`percentile_${slot}`}
+        scaled
+        value={value}
+        percentile={percentile}
+      />,
+      <div key={`percent_${slot}`} className='table__cell metric'>
+        {toPercent(value / total_points)}
       </div>
-    )
-  }
+    ]
+  })
 
   return (
-    <div className='table__row'>
+    <div key={key} className='table__row'>
       <div className='table__cell text lead-cell sticky__column'>
         {team.name}
       </div>
@@ -289,7 +291,7 @@ SlotRow.propTypes = {
   team: ImmutablePropTypes.record,
   slots: PropTypes.array,
   percentiles: PropTypes.object,
-  year: PropTypes.number
+  key: PropTypes.string
 }
 
 export default function StatsPage({
@@ -319,28 +321,28 @@ export default function StatsPage({
   const slotHeaders = []
   const eligibleStarterSlots = getEligibleSlots({ pos: 'ALL', league })
   const slots = [...new Set(eligibleStarterSlots)]
-  for (const [index, slot] of slots.entries()) {
+  for (const slot of slots) {
     slotHeaders.push(
-      <div key={index} className='table__cell metric'>
+      <div key={`slot_${slot}`} className='table__cell metric'>
         {constants.slotName[constants.slots[slot]]}
       </div>
     )
     slotHeaders.push(
-      <div key={`${index}_pct`} className='table__cell metric'>
+      <div key={`slot_${slot}_pct`} className='table__cell metric'>
         %
       </div>
     )
   }
 
   const positionHeaders = []
-  constants.positions.forEach((position, index) => {
+  constants.positions.forEach((position) => {
     positionHeaders.push(
-      <div key={index} className='table__cell metric'>
+      <div key={`position_${position}`} className='table__cell metric'>
         {position}
       </div>
     )
     positionHeaders.push(
-      <div key={`${index}_pct`} className='table__cell metric'>
+      <div key={`position_${position}_pct`} className='table__cell metric'>
         %
       </div>
     )
@@ -356,7 +358,7 @@ export default function StatsPage({
   for (const team of sorted.valueSeq()) {
     summaryRows.push(
       <SummaryRow
-        key={team.uid}
+        key={`summary_${team.uid}`}
         team={team}
         percentiles={percentiles}
         year={year}
@@ -368,10 +370,9 @@ export default function StatsPage({
   for (const team of sorted.valueSeq()) {
     slotRows.push(
       <SlotRow
-        key={team.uid}
+        key={`slot_${team.uid}`}
         team={team}
         slots={slots}
-        year={year}
         percentiles={percentiles}
       />
     )
@@ -381,7 +382,7 @@ export default function StatsPage({
   for (const team of sorted.valueSeq()) {
     positionRows.push(
       <PositionRow
-        key={team.uid}
+        key={`position_${team.uid}`}
         team={team}
         percentiles={percentiles}
         year={year}
@@ -393,23 +394,22 @@ export default function StatsPage({
   if (year === constants.year && constants.week === 0) {
     stats_body = <div className='section empty' />
   } else {
-    const season_stats_header_items = []
-    for (const [key, value] of Object.entries(season_fields)) {
-      const field_items = []
-      for (const { label, tooltip } of Object.values(value)) {
-        field_items.push(
-          <Tooltip title={tooltip}>
+    const season_stats_header_items = Object.entries(season_fields).map(
+      ([key, value]) => {
+        const field_items = Object.values(value).map(({ label, tooltip }) => (
+          <Tooltip title={tooltip} key={`${key}-${label}`}>
             <div className='table__cell metric'>{label}</div>
           </Tooltip>
+        ))
+
+        return (
+          <div key={`group_${key}`} className='row__group'>
+            <div className='row__group-head'>{key}</div>
+            <div className='row__group-body'>{field_items}</div>
+          </div>
         )
       }
-      season_stats_header_items.push(
-        <div key={key} className='row__group'>
-          <div className='row__group-head'>{key}</div>
-          <div className='row__group-body'>{field_items}</div>
-        </div>
-      )
-    }
+    )
 
     stats_body = (
       <>
@@ -459,38 +459,39 @@ export default function StatsPage({
     )
   }
 
-  const careerLogRows = league_user_historical_ranks.map(
-    (user_careerlog) => (
-      <CareerLogRow
-        key={user_careerlog.userid}
-        user_careerlog={user_careerlog}
-        percentiles={careerlog_percentiles}
-      />
-    )
-  )
+  const careerLogRows = league_user_historical_ranks.map((user_careerlog) => (
+    <CareerLogRow
+      key={`careerlog_${user_careerlog.userid}`}
+      user_careerlog={user_careerlog}
+      percentiles={careerlog_percentiles}
+    />
+  ))
 
-  const careerlog_single_field_items = []
-  for (const [key, value] of Object.entries(careerlog_single_fields)) {
-    careerlog_single_field_items.push(
-      <div key={key} className='table__cell metric'>
-        {value}
+  const careerlog_single_field_items = Object.entries(
+    careerlog_single_fields
+  ).map(([key, value]) => (
+    <div key={`single_${key}`} className='table__cell metric'>
+      {value}
+    </div>
+  ))
+
+  const careerlog_group_field_items = Object.entries(
+    careerlog_group_fields
+  ).map(([group_name, value]) => {
+    const field_items = Object.entries(value).map(([field, label]) => (
+      <div key={`${group_name}-${field}`} className='table__cell metric'>
+        {label}
       </div>
-    )
-  }
+    ))
 
-  const careerlog_group_field_items = []
-  for (const [key, value] of Object.entries(careerlog_group_fields)) {
-    const field_items = []
-    for (const label of Object.values(value)) {
-      field_items.push(<div className='table__cell metric'>{label}</div>)
-    }
-    careerlog_group_field_items.push(
-      <div key={key} className='row__group'>
-        <div className='row__group-head'>{key}</div>
+    return (
+      <div key={`group-${group_name}`} className='row__group'>
+        <div className='row__group-head'>{group_name}</div>
         <div className='row__group-body'>{field_items}</div>
       </div>
     )
-  }
+  })
+
   const careerlog_body = (
     <div className='section'>
       <Toolbar>
