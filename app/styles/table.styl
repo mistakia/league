@@ -49,8 +49,6 @@
     flex 0 0 90px
 
   &.lead-cell
-    flex 0 0 250px
-    width 250px
     background white
     border-right 1px solid #f0f0f0
     padding 0 4px 0 4px
@@ -61,6 +59,7 @@
   overflow hidden
   white-space nowrap
   min-width 48px
+  line-height 1.43
 
 .table__head .table__cell
   height 100%
@@ -146,3 +145,14 @@
   font-size 14px
   color lighten($textColor, 40%)
   padding 16px 0
+
+@media (min-width 600px)
+  .table__cell.lead-cell
+    flex 0 0 250px
+    width 250px
+
+@media (max-width 599px)
+  .table__cell.lead-cell
+    flex 0 0 25vw
+    width 25vw
+    max-width 250px

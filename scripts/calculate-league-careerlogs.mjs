@@ -128,7 +128,8 @@ const calculate_league_careerlogs = async ({ lid }) => {
         careerlog.last_season_year,
         league_team_seasonlog.year
       )
-      careerlog.weekly_high_scores += league_team_seasonlog.weekly_high_scores || 0
+      careerlog.weekly_high_scores +=
+        league_team_seasonlog.weekly_high_scores || 0
 
       careerlog.post_seasons +=
         league_team_seasonlog.overall_finish <= 6 ? 1 : 0
@@ -170,24 +171,38 @@ const calculate_league_careerlogs = async ({ lid }) => {
         .orderBy('uid')
 
       // Process wildcard round
-      const wildcard_game = playoff_data.find(game => game.uid === 1)
+      const wildcard_game = playoff_data.find((game) => game.uid === 1)
       if (wildcard_game) {
         careerlog.wildcard_total_points += wildcard_game.points || 0
-        careerlog.wildcard_highest_score = Math.max(careerlog.wildcard_highest_score, wildcard_game.points || 0)
-        careerlog.wildcard_lowest_score = Math.min(careerlog.wildcard_lowest_score, wildcard_game.points || Number.MAX_VALUE)
+        careerlog.wildcard_highest_score = Math.max(
+          careerlog.wildcard_highest_score,
+          wildcard_game.points || 0
+        )
+        careerlog.wildcard_lowest_score = Math.min(
+          careerlog.wildcard_lowest_score,
+          wildcard_game.points || Number.MAX_VALUE
+        )
 
         // Check if team won the wildcard round
-        if (playoff_data.some(game => game.uid === 2)) {
+        if (playoff_data.some((game) => game.uid === 2)) {
           careerlog.wildcard_wins += 1
         }
       }
 
       // Process championship round
-      const championship_games = playoff_data.filter(game => game.uid === 2 || game.uid === 3)
+      const championship_games = playoff_data.filter(
+        (game) => game.uid === 2 || game.uid === 3
+      )
       for (const game of championship_games) {
         careerlog.championship_total_points += game.points || 0
-        careerlog.championship_highest_score = Math.max(careerlog.championship_highest_score, game.points || 0)
-        careerlog.championship_lowest_score = Math.min(careerlog.championship_lowest_score, game.points || Number.MAX_VALUE)
+        careerlog.championship_highest_score = Math.max(
+          careerlog.championship_highest_score,
+          game.points || 0
+        )
+        careerlog.championship_lowest_score = Math.min(
+          careerlog.championship_lowest_score,
+          game.points || Number.MAX_VALUE
+        )
       }
     }
 
@@ -200,7 +215,8 @@ const calculate_league_careerlogs = async ({ lid }) => {
     }
 
     careerlog.best_season_win_pct = careerlog.best_season_win_pct * 100
-    careerlog.best_season_all_play_pct = careerlog.best_season_all_play_pct * 100
+    careerlog.best_season_all_play_pct =
+      careerlog.best_season_all_play_pct * 100
 
     careerlog.pp_pct = (careerlog.pf / careerlog.pp) * 100
 
