@@ -44,6 +44,9 @@ const calculateStandings = ({
   }
 
   for (let week = 1; week <= finalWeek; week++) {
+    let highest_score = -Infinity
+    let highest_scoring_teams = []
+
     for (const { uid: tid } of teams) {
       const startingPlayers = starters[week][tid]
       const starter_pids = startingPlayers.map((p) => p.pid)
@@ -90,6 +93,19 @@ const calculateStandings = ({
 
       teamStats[tid].points.weeks[week] = total
       teamStats[tid].stats.pf += total
+
+      // Update highest score tracking
+      if (total > highest_score) {
+        highest_score = total
+        highest_scoring_teams = [tid]
+      } else if (total === highest_score) {
+        highest_scoring_teams.push(tid)
+      }
+    }
+
+    // Increment weekly_high_scores for the highest scoring team(s)
+    for (const tid of highest_scoring_teams) {
+      teamStats[tid].stats.weekly_high_scores += 1
     }
   }
 

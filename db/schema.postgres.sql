@@ -1343,7 +1343,8 @@ CREATE TABLE public.league_team_seasonlogs (
     division_finish smallint,
     regular_season_finish smallint,
     post_season_finish smallint,
-    overall_finish smallint
+    overall_finish smallint,
+    weekly_high_scores smallint DEFAULT 0
 );
 
 
