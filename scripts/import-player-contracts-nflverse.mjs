@@ -90,15 +90,19 @@ const process_row = async ({ row }) => {
     update: player_data
   })
 
-  const player_contract_rows = row.cols.map((item) => ({
-    ...format_contract_row(item),
-    pid: player_row.pid
-  }))
+  const player_contract_rows = row.cols
+    ? row.cols.map((item) => ({
+        ...format_contract_row(item),
+        pid: player_row.pid
+      }))
+    : []
 
-  await db('player_contracts')
-    .insert(player_contract_rows)
-    .onConflict(['year', 'pid'])
-    .merge()
+  if (player_contract_rows.length) {
+    await db('player_contracts')
+      .insert(player_contract_rows)
+      .onConflict(['year', 'pid'])
+      .merge()
+  }
 
   return changes
 }
