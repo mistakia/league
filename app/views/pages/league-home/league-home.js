@@ -74,7 +74,7 @@ export default function LeagueHomePage({
     const faPeriod = getFreeAgentPeriod(league)
     if (constants.season.now.isBefore(faPeriod.start)) {
       notices.push(
-        <Alert key='fa-period' severity='warning'>
+        <Alert key='fa-period' severity='info'>
           <AlertTitle>
             Free Agency (FA) period begins {dayjs().to(faPeriod.start)}
           </AlertTitle>
