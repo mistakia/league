@@ -299,7 +299,46 @@ export default {
   player_pfr_id: {
     table_name: 'player',
     column_name: 'pfr_id'
+  },
+  player_otc_id: {
+    table_name: 'player',
+    column_name: 'otc_id'
+  },
+  player_contract_year_signed: {
+    table_name: 'player',
+    column_name: 'contract_year_signed'
+  },
+  player_contract_years: {
+    table_name: 'player',
+    column_name: 'contract_years'
+  },
+  player_contract_value: {
+    table_name: 'player',
+    column_name: 'contract_value'
+  },
+  player_contract_apy: {
+    table_name: 'player',
+    column_name: 'contract_apy'
+  },
+  player_contract_guaranteed: {
+    table_name: 'player',
+    column_name: 'contract_guaranteed'
+  },
+  player_contract_apy_cap_pct: {
+    table_name: 'player',
+    column_name: 'contract_apy_cap_pct'
+  },
+  player_contract_inflated_value: {
+    table_name: 'player',
+    column_name: 'contract_inflated_value'
+  },
+  player_contract_inflated_apy: {
+    table_name: 'player',
+    column_name: 'contract_inflated_apy'
+  },
+  player_contract_inflated_guaranteed: {
+    table_name: 'player',
+    column_name: 'contract_inflated_guaranteed'
   }
-
   // TODO player.dcp ??
 }
