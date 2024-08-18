@@ -42,7 +42,11 @@ export default function LeagueHeader({ league, is_in_league }) {
         key={index}
         className={`starters ${clean_label}`}
         size='small'
-        label={`${value}${starting_label.toUpperCase()}`}
+        label={
+          starting_label === 'qb/rb/wr/te'
+            ? `SUPERFLEX`
+            : `${value}${starting_label.toUpperCase()}`
+        }
       />
     )
   })
