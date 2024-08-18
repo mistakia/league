@@ -6,6 +6,13 @@ import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
 import { constants } from '@libs-shared'
 
+const contract_field = (props) => ({
+  ...props,
+  size: 80,
+  data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+  column_groups: [COLUMN_GROUPS.PLAYER_CONTRACT]
+})
+
 export default function ({ is_logged_in }) {
   return {
     player_name: {
@@ -393,6 +400,59 @@ export default function ({ is_logged_in }) {
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
       player_value_path: 'pfr_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
-    }
+    },
+    player_otc_id: {
+      column_title: 'Over The Cap Player ID',
+      header_label: 'OTC ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'otc_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_contract_year_signed: contract_field({
+      column_title: 'Contract Year Signed (Current)',
+      header_label: 'Signed',
+      player_value_path: 'contract_year_signed'
+    }),
+    player_contract_years: contract_field({
+      column_title: 'Contract Years Remaining (Current)',
+      header_label: 'Years',
+      player_value_path: 'contract_years'
+    }),
+    player_contract_value: contract_field({
+      column_title: 'Contract Value (Current)',
+      header_label: 'Value',
+      player_value_path: 'contract_value'
+    }),
+    player_contract_apy: contract_field({
+      column_title: 'Contract APY (Current)',
+      header_label: 'APY',
+      player_value_path: 'contract_apy'
+    }),
+    player_contract_guaranteed: contract_field({
+      column_title: 'Contract Guaranteed (Current)',
+      header_label: 'Gtd',
+      player_value_path: 'contract_guaranteed'
+    }),
+    player_contract_apy_cap_pct: contract_field({
+      column_title: 'Contract APY Cap % (Current)',
+      header_label: 'APY Cap %',
+      player_value_path: 'contract_apy_cap_pct'
+    }),
+    player_contract_inflated_value: contract_field({
+      column_title: 'Contract Inflated Value (Current)',
+      header_label: 'Inflated Value',
+      player_value_path: 'contract_inflated_value'
+    }),
+    player_contract_inflated_apy: contract_field({
+      column_title: 'Contract Inflated APY (Current)',
+      header_label: 'Inflated APY',
+      player_value_path: 'contract_inflated_apy'
+    }),
+    player_contract_inflated_guaranteed: contract_field({
+      column_title: 'Contract Inflated Guaranteed (Current)',
+      header_label: 'Inflated Gtd',
+      player_value_path: 'contract_inflated_guaranteed'
+    })
   }
 }
