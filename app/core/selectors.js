@@ -1808,8 +1808,12 @@ export const getRosterPositionalValueByTeamId = createSelector(
 
     const seasonType = constants.isOffseason ? '0' : 'ros'
     for (const position of constants.positions) {
-      const league = []
-      const div = []
+      // skip positions that don't start in the current league
+      if (!league[`s${position.toLowerCase()}`]) {
+        continue
+      }
+      const position_values_by_team = []
+      const div_position_values = []
       for (const roster of rosters) {
         const rosterPlayers = roster.active.filter((p) => p.pos === position)
         const playerMaps = rosterPlayers.map(({ pid }) =>
@@ -1819,21 +1823,25 @@ export const getRosterPositionalValueByTeamId = createSelector(
           Math.max(pMap.getIn(['pts_added', seasonType], 0), 0)
         )
         const pts_added_total = pts_added_array.reduce((s, i) => s + i, 0)
-        league.push(pts_added_total)
+        position_values_by_team.push(pts_added_total)
         values.rosters[roster.tid][position] = pts_added_total
-        if (divTeamIds.includes(roster.tid)) div.push(pts_added_total)
+        if (divTeamIds.includes(roster.tid))
+          div_position_values.push(pts_added_total)
         if (roster.tid === team.uid) values.team[position] = pts_added_total
         values.total[roster.tid] =
           (values.total[roster.tid] ?? 0) + pts_added_total
       }
       values.league_avg[position] =
-        league.reduce((s, i) => s + i, 0) / league.length
-      values.league[position] = league
-      values.div_avg[position] = div.reduce((s, i) => s + i, 0) / div.length
-      values.div[position] = div
+        position_values_by_team.reduce((s, i) => s + i, 0) /
+        position_values_by_team.length
+      values.league[position] = position_values_by_team
+      values.div_avg[position] =
+        div_position_values.reduce((s, i) => s + i, 0) /
+        div_position_values.length
+      values.div[position] = div_position_values
 
-      values.league_min[position] = Math.min(...league)
-      values.league_max[position] = Math.max(...league)
+      values.league_min[position] = Math.min(...position_values_by_team)
+      values.league_max[position] = Math.max(...position_values_by_team)
       const team_value = values.team[position]
       const min_value = values.league_min[position]
       const max_value = values.league_max[position]
