@@ -409,15 +409,21 @@ export default function ({ is_logged_in }) {
       player_value_path: 'otc_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     },
+
     player_contract_year_signed: contract_field({
       column_title: 'Contract Year Signed (Current)',
       header_label: 'Signed',
       player_value_path: 'contract_year_signed'
     }),
     player_contract_years: contract_field({
-      column_title: 'Contract Years Remaining (Current)',
+      column_title: 'Contract Years Total (Current)',
       header_label: 'Years',
       player_value_path: 'contract_years'
+    }),
+    player_contract_years_remaining: contract_field({
+      column_title: 'Contract Years Remaining (Current)',
+      header_label: 'Years Remaining',
+      player_value_path: 'contract_years_remaining'
     }),
     player_contract_value: contract_field({
       column_title: 'Contract Value (Current)',
