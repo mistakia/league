@@ -8,21 +8,21 @@
   flex-direction column
   justify-content stretch
 
-  .league__team-value-deltas-item
-    padding 4px
-    display flex 
-    align-items center
-    justify-content center
-    position relative
-    height 20px
-    flex-direction column
-    flex 1
+.league__team-value-deltas-item
+  padding 4px
+  display flex
+  align-items center
+  justify-content center
+  position relative
+  height 20px
+  flex-direction column
+  flex 1
 
-  .league__team-value-deltas-items
-    margin-top 4px
-    display flex
-    justify-content stretch
-    border-top 1px solid $backgroundColor
+.league__team-value-deltas-items
+  margin-top 4px
+  display flex
+  justify-content stretch
+  border-top 1px solid $backgroundColor
 
 .deltas-item-time
   position absolute
@@ -37,3 +37,13 @@
 .deltas-item-pct
   font-size 14px
   font-weight 500
+
+@media (max-width 600px)
+  .league__team-value-deltas-items
+    overflow-x scroll
+
+  .league__team-value-deltas-item
+    padding 4px 24px
+
+  .deltas-item-time
+    left 4px

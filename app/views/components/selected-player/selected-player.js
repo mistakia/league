@@ -305,9 +305,6 @@ export default function SelectedPlayer({
             )}
           </div>
         </div>
-        <Button className='selected__player-close' onClick={handleClose}>
-          <CloseIcon />
-        </Button>
       </div>
       <div className='selected__player-main'>
         <Tabs
@@ -368,13 +365,22 @@ export default function SelectedPlayer({
           </TabPanel>
         </Tabs>
       </div>
-      <div className='selected__player-actions'>
-        {is_logged_in && (
-          <PlayerContextMenu pid={pid} hideDisabled buttonGroup />
-        )}
-        {external_button_items.length > 0 && (
-          <ButtonGroup variant='contained'>{external_button_items}</ButtonGroup>
-        )}
+      <div className='selected__player-actions-container'>
+        <div className='selected__player-actions'>
+          {is_logged_in && (
+            <PlayerContextMenu pid={pid} hideDisabled buttonGroup />
+          )}
+          {external_button_items.length > 0 && (
+            <ButtonGroup variant='contained'>
+              {external_button_items}
+            </ButtonGroup>
+          )}
+        </div>
+        <div className='selected__player-actions-close'>
+          <Button variant='contained' onClick={handleClose}>
+            <CloseIcon />
+          </Button>
+        </div>
       </div>
     </Drawer>
   )

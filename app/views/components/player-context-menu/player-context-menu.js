@@ -439,6 +439,10 @@ export default function PlayerContextMenu({
     }
   }
 
+  if (buttonGroup && items.length === 0) {
+    return null
+  }
+
   return buttonGroup ? (
     <ButtonGroup variant='contained'>{items}</ButtonGroup>
   ) : (
