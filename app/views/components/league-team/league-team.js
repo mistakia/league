@@ -5,14 +5,20 @@ import { useParams } from 'react-router-dom'
 import { List } from 'immutable'
 import Toolbar from '@mui/material/Toolbar'
 import NotInterestedIcon from '@mui/icons-material/NotInterested'
+import Alert from '@mui/material/Alert'
 
 import DashboardDraftPicks from '@components/dashboard-draft-picks'
 import DashboardByeWeeks from '@components/dashboard-bye-weeks'
 import DashboardPlayersTable from '@components/dashboard-players-table'
 import DashboardTeamSummary from '@components/dashboard-team-summary'
 import DashboardTeamValue from '@components/dashboard-team-value'
+import PoachNotice from '@components/poach-notice'
 import PlayerRoster from '@components/player-roster'
-import { constants } from '@libs-shared'
+import {
+  constants,
+  isReserveEligible,
+  isReserveCovEligible
+} from '@libs-shared'
 import LeagueTeamValueDeltas from '@components/league-team-value-deltas'
 
 import './league-team.styl'
@@ -25,7 +31,8 @@ export default function LeagueTeam({
   players,
   percentiles,
   cutlist,
-  is_team_manager
+  is_team_manager,
+  poaches
 }) {
   const { lid, tid } = useParams()
 
@@ -117,12 +124,68 @@ export default function LeagueTeam({
     )
   }
 
+  const notices = []
+
+  // Add reserve notices
+  for (const playerMap of players.ir) {
+    if (!playerMap.get('pid')) continue
+
+    if (
+      !isReserveEligible({
+        nfl_status: playerMap.get('nfl_status'),
+        injury_status: playerMap.get('injury_status')
+      })
+    ) {
+      notices.push(
+        <Alert key={playerMap.get('pid')} severity='error'>
+          {playerMap.get('name', 'N/A')} is not eligible for Reserve/IR
+          {is_team_manager
+            ? '. You will need to activate or release him before you can make any acquisitions or claims.'
+            : ''}
+        </Alert>
+      )
+    }
+  }
+
+  for (const playerMap of players.cov) {
+    if (!playerMap.get('pid')) continue
+
+    if (
+      !isReserveCovEligible({
+        nfl_status: playerMap.get('nfl_status')
+      })
+    ) {
+      notices.push(
+        <Alert key={playerMap.get('pid')} severity='error'>
+          {playerMap.get('name', 'N/A')} is not eligible for Reserve/COVID-19
+          {is_team_manager
+            ? '. You will need to activate or release him before you can make any acquisitions or claims.'
+            : ''}
+        </Alert>
+      )
+    }
+  }
+
+  // Add poach notices
+  for (const poach of poaches) {
+    const playerMap = poach.get('playerMap')
+    if (!playerMap) continue
+
+    const player_tid = poach.get('player_tid')
+    if (player_tid !== teamId) continue
+
+    notices.push(<PoachNotice key={playerMap.get('pid')} poach={poach} />)
+  }
+
   return (
     <div className='league-team-container'>
       <div className='league-team-main'>
         <div className='league-team-main-section'>
           <LeagueTeamValueDeltas tid={teamId} />
         </div>
+        {notices.length > 0 && (
+          <div className='league-team-notices-container'>{notices}</div>
+        )}
         {Boolean(cutlist.size) && is_team_manager && (
           <div className='league-team-main-section'>
             <DashboardPlayersTable
@@ -205,5 +268,6 @@ LeagueTeam.propTypes = {
   players: PropTypes.object,
   percentiles: PropTypes.object,
   cutlist: ImmutablePropTypes.list,
-  is_team_manager: PropTypes.bool
+  is_team_manager: PropTypes.bool,
+  poaches: ImmutablePropTypes.list
 }

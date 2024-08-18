@@ -7,21 +7,19 @@ import Alert from '@mui/material/Alert'
 import AlertTitle from '@mui/material/AlertTitle'
 import Grid from '@mui/material/Grid'
 import NotInterestedIcon from '@mui/icons-material/NotInterested'
-import Button from '@mui/material/Button'
 
 import LeagueHeader from '@components/league-header'
-import TeamName from '@components/team-name'
 import DashboardLeaguePositionalValue from '@components/dashboard-league-positional-value'
 import DashboardPlayersTable from '@components/dashboard-players-table'
 import PlayerRoster from '@components/player-roster'
 import LeagueRecentTransactions from '@components/league-recent-transactions'
+import PoachNotice from '@components/poach-notice'
 import PageLayout from '@layouts/page'
 import {
   constants,
   isReserveEligible,
   isReserveCovEligible,
-  getFreeAgentPeriod,
-  getPoachProcessingTime
+  getFreeAgentPeriod
 } from '@libs-shared'
 
 import './league-home.styl'
@@ -41,9 +39,7 @@ export default function LeagueHomePage({
   loadTeams,
   loadRosters,
   leagueId,
-  percentiles,
-  process_poach,
-  showConfirmation
+  percentiles
 }) {
   const navigate = useNavigate()
   const { lid } = useParams()
@@ -192,48 +188,11 @@ export default function LeagueHomePage({
     }
   }
 
-  const handle_process_poach = (poach) => {
-    const playerMap = poach.get('playerMap')
-    showConfirmation({
-      title: 'Process Poach',
-      description: `${playerMap.get('fname')} ${playerMap.get(
-        'lname'
-      )} (${playerMap.get(
-        'pos'
-      )}) will be poached. Are you sure you want to proceed? This will remove the player from your roster and add them to the roster of the team that submitted the poach.`,
-      onConfirm: () => process_poach(poach.get('uid'))
-    })
-  }
-
   for (const poach of poaches) {
     const playerMap = poach.get('playerMap')
     if (!playerMap) continue
 
-    const processingTime = getPoachProcessingTime(poach.submitted)
-    notices.push(
-      <Alert key={playerMap.get('pid')} severity='warning'>
-        <div>
-          {playerMap.get('name', 'N/A')} has a poaching claim that will be
-          processed no later than {processingTime.fromNow()} on{' '}
-          {processingTime.format('dddd, h:mm a')}. It can be processed at any
-          time prior to that by <TeamName tid={poach.get('player_tid')} />.
-        </div>
-        <div>
-          Submitted by: <TeamName tid={poach.tid} />
-        </div>
-        {poach.get('player_tid') === teamId && (
-          <div style={{ paddingTop: '16px' }}>
-            <Button
-              variant='contained'
-              color='primary'
-              onClick={() => handle_process_poach(poach)}
-            >
-              Process Poach
-            </Button>
-          </div>
-        )}
-      </Alert>
-    )
+    notices.push(<PoachNotice key={playerMap.get('pid')} poach={poach} />)
   }
 
   const teamPoaches = poaches.filter((p) => p.tid === teamId)
@@ -357,7 +316,5 @@ LeagueHomePage.propTypes = {
   loadTeams: PropTypes.func,
   leagueId: PropTypes.number,
   loadRosters: PropTypes.func,
-  percentiles: PropTypes.object,
-  process_poach: PropTypes.func,
-  showConfirmation: PropTypes.func
+  percentiles: PropTypes.object
 }
