@@ -312,21 +312,6 @@ export default {
     table_name: 'player',
     column_name: 'contract_years'
   },
-  player_contract_years_remaining: {
-    table_name: 'player',
-    main_select: ({ column_index }) => {
-      return [
-        db.raw(
-          `CASE WHEN player.contract_year_signed IS NULL THEN NULL ELSE player.contract_years - (EXTRACT(YEAR FROM CURRENT_DATE) - player.contract_year_signed) END as contract_years_remaining_${column_index}`
-        )
-      ]
-    },
-    main_where: () => {
-      return db.raw(
-        `CASE WHEN player.contract_year_signed IS NULL THEN NULL ELSE player.contract_years - (EXTRACT(YEAR FROM CURRENT_DATE) - player.contract_year_signed) END`
-      )
-    }
-  },
   player_contract_value: {
     table_name: 'player',
     column_name: 'contract_value'
