@@ -8,10 +8,13 @@ const player_contract_field = (props) => ({
   size: 70,
   data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
   column_params: {
-    year: {
-      values: [...Array(constants.year - 1982).keys()]
-        .map((i) => constants.year - i)
-        .concat(['Total']),
+    contract_year: {
+      values: [
+        constants.year,
+        'Total',
+        ...[...Array(constants.year - 1983).keys()]
+          .map((i) => constants.year - 1 - i)
+      ],
       data_type: table_constants.TABLE_DATA_TYPES.SELECT,
       single: true,
       default_value: constants.year
