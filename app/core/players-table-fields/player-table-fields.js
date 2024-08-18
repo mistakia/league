@@ -420,11 +420,6 @@ export default function ({ is_logged_in }) {
       header_label: 'Years',
       player_value_path: 'contract_years'
     }),
-    player_contract_years_remaining: contract_field({
-      column_title: 'Contract Years Remaining (Current)',
-      header_label: 'Years Remaining',
-      player_value_path: 'contract_years_remaining'
-    }),
     player_contract_value: contract_field({
       column_title: 'Contract Value (Current)',
       header_label: 'Value',
