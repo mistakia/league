@@ -95,7 +95,8 @@ import { getNflTeamSeasonlogsActions } from '@core/seasonlogs/actions'
 import { get_league_team_daily_values_actions } from '@core/league-team-daily-values/actions'
 import {
   post_players_table_view_actions,
-  delete_players_table_view_actions
+  delete_players_table_view_actions,
+  get_players_table_views_actions
 } from '@core/players-table-views/actions'
 import { get_league_careerlogs_actions } from '@core/league-careerlogs/actions'
 
@@ -437,6 +438,12 @@ export const delete_players_table_view = fetch.bind(
   null,
   api.delete_players_table_view,
   delete_players_table_view_actions
+)
+
+export const get_players_table_views = fetch.bind(
+  null,
+  api.get_players_table_views,
+  get_players_table_views_actions
 )
 
 export const post_restricted_free_agent_nomination = fetch.bind(

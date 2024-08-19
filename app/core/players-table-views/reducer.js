@@ -22,11 +22,29 @@ export function players_table_views_reducer(
             new Map({
               ...view,
               table_state: view.table_state,
-              saved_table_state: view.saved_table_state
+              saved_table_state: view.table_state
             })
           )
         })
       })
+
+    case players_table_views_actions.POST_PLAYERS_TABLE_VIEW_FULFILLED:
+      return state.set(
+        payload.data.view_id,
+        new Map({
+          view_id: payload.data.view_id,
+          view_name: payload.data.view_name,
+          view_description: payload.data.view_description,
+          user_id: payload.data.user_id,
+          table_state: payload.data.table_state,
+          saved_table_state: payload.data.table_state
+        })
+      )
+
+    case players_table_views_actions.DELETE_PLAYERS_TABLE_VIEW_FULFILLED: {
+      const { view_id } = payload.opts
+      return state.delete(view_id)
+    }
 
     case appActions.AUTH_FULFILLED: {
       const leagueId = payload.data.leagues.length

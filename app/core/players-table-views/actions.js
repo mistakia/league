@@ -31,6 +31,12 @@ export const players_table_views_actions = {
   save_players_table_view: (players_table_view) => ({
     type: players_table_views_actions.SAVE_PLAYERS_TABLE_VIEW,
     payload: { players_table_view }
+  }),
+
+  LOAD_PLAYERS_TABLE_VIEWS: 'LOAD_PLAYERS_TABLE_VIEWS',
+  load_players_table_views: ({ user_id, username } = {}) => ({
+    type: players_table_views_actions.LOAD_PLAYERS_TABLE_VIEWS,
+    payload: { user_id, username }
   })
 }
 

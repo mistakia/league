@@ -45,8 +45,6 @@ export const get_confirmation_info = (state) => state.get('confirmation')
 export const get_context_menu_info = (state) => state.get('contextMenu')
 export const get_player_maps = (state) => state.getIn(['players', 'items'])
 export const get_draft_pick_values = (state) => state.get('draft_pick_value')
-export const get_players_table_views = (state) =>
-  state.get('players_table_views')
 
 export const getWaivers = (state) => state.get('waivers')
 export const getTransactions = (state) => state.get('transactions')
@@ -2949,6 +2947,20 @@ export const getWaiverPlayersForCurrentTeam = createSelector(
     return { poach, active, practice }
   }
 )
+
+export const get_players_table_views = createSelector(
+  (state) => state.get('players_table_views'),
+  (state) => state.getIn(['app', 'userId']),
+  (views, current_user_id) => {
+    return views.map((view) =>
+      view.set('is_editable', view.get('user_id') === current_user_id)
+    )
+  }
+)
+
+export const get_players_table_view_by_id = (state, { view_id }) => {
+  return state.get('players_table_views').get(view_id, new Map())
+}
 
 export const get_selected_players_table_view = createSelector(
   (state) => state.getIn(['app', 'selected_players_table_view_id']),

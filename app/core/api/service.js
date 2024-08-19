@@ -360,12 +360,16 @@ export const api = {
     return { url, ...POST(data) }
   },
   post_players_table_view(data) {
-    const url = `${API_URL}/players/table-views`
+    const url = `${API_URL}/table-views`
     return { url, ...POST(data) }
   },
   delete_players_table_view({ view_id }) {
-    const url = `${API_URL}/players/table-views/${view_id}`
+    const url = `${API_URL}/table-views/${view_id}`
     return { url, method: 'DELETE' }
+  },
+  get_players_table_views({ user_id, username }) {
+    const url = `${API_URL}/table-views?user_id=${user_id}&username=${username}`
+    return { url }
   },
   post_restricted_free_agent_nomination({ teamId, ...data }) {
     const url = `${API_URL}/teams/${teamId}/tag/transition/nominate`

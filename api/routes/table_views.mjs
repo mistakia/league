@@ -4,10 +4,40 @@ import { validators } from '#libs-server'
 
 const router = express.Router()
 
+function generate_view_id() {
+  const timestamp = Date.now().toString(36)
+  const random_part = Math.random().toString(36).substr(2, 9)
+  return `${timestamp}-${random_part}-${Math.random().toString(36).substr(2, 9)}-${random_part}`
+}
+
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const views = await db('user_table_views')
+    const { user_id, username } = req.query
+    const user_ids = []
+
+    if (username) {
+      const user = await db('users')
+        .where({
+          username
+        })
+        .first()
+      if (user) {
+        user_ids.push(user.id)
+      }
+    }
+
+    if (user_id) {
+      user_ids.push(user_id)
+    }
+
+    const query = db('user_table_views')
+
+    if (user_ids.length) {
+      query.whereIn('user_id', user_ids)
+    }
+
+    const views = await query
     return res.status(200).send(views)
   } catch (error) {
     logger(error)
@@ -16,7 +46,7 @@ router.get('/?', async (req, res) => {
 })
 
 router.post('/?', async (req, res) => {
-  const { log, db } = req.app.locals
+  const { logger, db } = req.app.locals
   try {
     const { view_id, view_name, table_state, view_description } = req.body
 
@@ -53,7 +83,7 @@ router.post('/?', async (req, res) => {
         return res.status(401).send({ error: 'invalid userId' })
       }
 
-      await db('database_table_views')
+      await db('user_table_views')
         .where({
           view_id,
           user_id
@@ -64,15 +94,15 @@ router.post('/?', async (req, res) => {
           table_state: JSON.stringify(table_state)
         })
     } else {
-      await db('user_table_views')
-        .insert({
-          view_name,
-          view_description,
-          table_state: JSON.stringify(table_state),
-          user_id
-        })
-        .onConflict(['view_name', 'user_id'])
-        .merge()
+      const view_id = generate_view_id()
+
+      await db('user_table_views').insert({
+        view_id,
+        view_name,
+        view_description,
+        table_state: JSON.stringify(table_state),
+        user_id
+      })
     }
 
     const view = await db('user_table_views')
@@ -84,13 +114,13 @@ router.post('/?', async (req, res) => {
 
     res.status(200).send(view)
   } catch (err) {
-    log(err)
+    logger(err)
     res.status(500).send({ error: err.toString() })
   }
 })
 
 router.delete('/:view_id', async (req, res) => {
-  const { log, db } = req.app.locals
+  const { logger, db } = req.app.locals
   try {
     const { view_id } = req.params
 
@@ -123,7 +153,7 @@ router.delete('/:view_id', async (req, res) => {
 
     res.status(200).send({ success: true })
   } catch (err) {
-    log(err)
+    logger(err)
     res.status(500).send({ error: err.toString() })
   }
 })
