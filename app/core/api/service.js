@@ -368,7 +368,11 @@ export const api = {
     return { url, method: 'DELETE' }
   },
   get_players_table_views({ user_id, username }) {
-    const url = `${API_URL}/table-views?user_id=${user_id}&username=${username}`
+    let url = `${API_URL}/table-views`
+    const params = new URLSearchParams()
+    if (user_id) params.append('user_id', user_id)
+    if (username) params.append('username', username)
+    if (params.toString()) url += `?${params.toString()}`
     return { url }
   },
   post_restricted_free_agent_nomination({ teamId, ...data }) {
