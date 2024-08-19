@@ -16,6 +16,7 @@ const log = debug('import-database-from-drive')
 debug.enable('import-database-from-drive')
 
 const run = async ({
+  filepath,
   full,
   logs,
   stats,
@@ -24,40 +25,46 @@ const run = async ({
   download_only = false,
   reset = false
 } = {}) => {
-  const drive = await googleDrive()
-  const listParams = {
-    q: '"1OnikVibAJ5-1uUhEyMHBRpkFGbzUM23v" in parents and trashed=false',
-    orderBy: 'modifiedByMeTime desc',
-    pageSize: 150
-  }
-  const res = await drive.files.list(listParams)
-
-  let file
-  if (full) {
-    log('loading full database')
-    file = res.data.files.find((f) => f.name.includes('full'))
-  } else if (logs) {
-    log('loading logs')
-    file = res.data.files.find((f) => f.name.includes('logs'))
-  } else if (betting) {
-    log('loading betting')
-    file = res.data.files.find((f) => f.name.includes('betting'))
-  } else if (stats) {
-    log('loading stats')
-    file = res.data.files.find((f) => f.name.includes('stats'))
-  } else if (cache) {
-    log('loading cache')
-    file = res.data.files.find((f) => f.name.includes('cache'))
+  let filename
+  if (filepath) {
+    log('using provided filepath')
+    filename = filepath
   } else {
-    log('loading user')
-    file = res.data.files.find((f) => f.name.includes('user'))
-  }
+    const drive = await googleDrive()
+    const listParams = {
+      q: '"1OnikVibAJ5-1uUhEyMHBRpkFGbzUM23v" in parents and trashed=false',
+      orderBy: 'modifiedByMeTime desc',
+      pageSize: 150
+    }
+    const res = await drive.files.list(listParams)
 
-  if (!file) {
-    log('file not found')
-    return
+    let file
+    if (full) {
+      log('loading full database')
+      file = res.data.files.find((f) => f.name.includes('full'))
+    } else if (logs) {
+      log('loading logs')
+      file = res.data.files.find((f) => f.name.includes('logs'))
+    } else if (betting) {
+      log('loading betting')
+      file = res.data.files.find((f) => f.name.includes('betting'))
+    } else if (stats) {
+      log('loading stats')
+      file = res.data.files.find((f) => f.name.includes('stats'))
+    } else if (cache) {
+      log('loading cache')
+      file = res.data.files.find((f) => f.name.includes('cache'))
+    } else {
+      log('loading user')
+      file = res.data.files.find((f) => f.name.includes('user'))
+    }
+
+    if (!file) {
+      log('file not found')
+      return
+    }
+    filename = await downloadFile({ drive, file })
   }
-  const filename = await downloadFile({ drive, file })
 
   const { user: postgres_user, database } = config.postgres.connection
   const sql_file = filename.replace('tar.gz', 'sql')
@@ -109,6 +116,7 @@ const run = async ({
 const main = async () => {
   let error
   try {
+    const filepath = argv.file
     const full = argv.full
     const logs = argv.logs
     const stats = argv.stats
@@ -116,7 +124,16 @@ const main = async () => {
     const cache = argv.cache
     const download_only = argv.download
     const reset = argv.reset
-    await run({ full, logs, stats, cache, download_only, betting, reset })
+    await run({
+      filepath,
+      full,
+      logs,
+      stats,
+      cache,
+      download_only,
+      betting,
+      reset
+    })
   } catch (err) {
     error = err
     console.log(error)
