@@ -76,7 +76,6 @@ DROP INDEX IF EXISTS public.idx_25141_userid_tid_year;
 DROP INDEX IF EXISTS public.idx_25138_userid;
 DROP INDEX IF EXISTS public.idx_25138_sourceid;
 DROP INDEX IF EXISTS public.idx_25127_email;
-DROP INDEX IF EXISTS public.idx_25118_table_view;
 DROP INDEX IF EXISTS public.idx_25114_transitionid;
 DROP INDEX IF EXISTS public.idx_25114_pid;
 DROP INDEX IF EXISTS public.idx_25108_lid;
@@ -232,6 +231,7 @@ ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_username
 ALTER TABLE IF EXISTS ONLY public.users_teams DROP CONSTRAINT IF EXISTS users_teams_pkey;
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_key;
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_hash_key;
+ALTER TABLE IF EXISTS ONLY public.seasons DROP CONSTRAINT IF EXISTS seasons_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pid_year_unique;
@@ -4993,7 +4993,7 @@ CREATE TABLE public.scoring_format_player_seasonlogs (
 
 CREATE TABLE public.seasons (
     lid integer NOT NULL,
-    year smallint,
+    year smallint NOT NULL,
     season_started_at bigint,
     league_format_hash character varying(64) NOT NULL,
     scoring_format_hash character varying(64) NOT NULL,
@@ -5290,14 +5290,13 @@ CREATE TABLE public.urls (
 --
 
 CREATE TABLE public.user_table_views (
-    view_id bigint NOT NULL,
+    view_id character varying(36) NOT NULL,
     view_name character varying(30) NOT NULL,
     view_description text,
-    table_name character varying(255) NOT NULL,
     table_state json,
-    user_id bytea NOT NULL,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
-    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    user_id bigint
 );
 
 
@@ -5776,6 +5775,14 @@ ALTER TABLE ONLY public.player_contracts
 
 ALTER TABLE ONLY public.player
     ADD CONSTRAINT player_pkey PRIMARY KEY (pid);
+
+
+--
+-- Name: seasons seasons_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.seasons
+    ADD CONSTRAINT seasons_pkey PRIMARY KEY (lid, year);
 
 
 --
@@ -6865,13 +6872,6 @@ CREATE UNIQUE INDEX idx_25114_pid ON public.transition_releases USING btree (tra
 --
 
 CREATE INDEX idx_25114_transitionid ON public.transition_releases USING btree (transitionid);
-
-
---
--- Name: idx_25118_table_view; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_25118_table_view ON public.user_table_views USING btree (view_name, user_id);
 
 
 --

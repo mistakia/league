@@ -30,9 +30,16 @@ export default function PlayersTablePage({
   leagueId,
   highlight_team_ids,
   teams,
-  players_percentiles
+  players_percentiles,
+  user_id,
+  save_players_table_view,
+  load_players_table_views
 }) {
   const location = useLocation()
+
+  useEffect(() => {
+    load_players_table_views()
+  }, [load_players_table_views])
 
   useEffect(() => {
     const search_params = new URLSearchParams(location.search)
@@ -119,6 +126,13 @@ export default function PlayersTablePage({
     new_prefix_columns.push('player_league_roster_status')
   }
 
+  const on_view_change = (players_table_view, view_change_params = {}) => {
+    if (view_change_params.is_new_view) {
+      players_table_view.user_id = user_id
+    }
+    players_table_view_changed(players_table_view, view_change_params)
+  }
+
   const body = isPending ? (
     <Loading loading />
   ) : (
@@ -133,7 +147,8 @@ export default function PlayersTablePage({
       <Table
         style={{ fontFamily: "'IBM Plex Mono', monospace" }}
         data={players}
-        on_view_change={players_table_view_changed}
+        on_view_change={on_view_change}
+        on_save_view={save_players_table_view}
         table_state={selected_players_table_view.table_state}
         saved_table_state={selected_players_table_view.saved_table_state}
         all_columns={player_fields}
@@ -144,11 +159,14 @@ export default function PlayersTablePage({
         total_row_count={players.size} // TODO get from server
         is_fetching_more={selected_players_table_view.is_fetching} // TODO
         is_loading={selected_players_table_view.is_fetching}
+        is_selected_view_editable={
+          isLoggedIn && selected_players_table_view.user_id === user_id
+        }
         views={players_table_views}
         delete_view={delete_players_table_view}
         disable_rank_aggregation
         percentiles={players_percentiles}
-        disable_edit_view
+        disable_edit_view={!isLoggedIn} // TODO check if user has permission to edit
         enable_duplicate_column_ids
         new_view_prefix_columns={new_prefix_columns}
         shorten_url={shorten_url}
@@ -174,5 +192,8 @@ PlayersTablePage.propTypes = {
   leagueId: PropTypes.number,
   highlight_team_ids: ImmutablePropTypes.list,
   teams: ImmutablePropTypes.map,
-  players_percentiles: PropTypes.object
+  players_percentiles: PropTypes.object,
+  user_id: PropTypes.number,
+  save_players_table_view: PropTypes.func,
+  load_players_table_views: PropTypes.func
 }

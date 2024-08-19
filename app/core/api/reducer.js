@@ -7,6 +7,7 @@ import { gamelogsActions } from '@core/gamelogs/actions'
 import { waiverActions } from '@core/waivers/actions'
 import { playerActions } from '@core/players/actions'
 import { teamActions } from '@core/teams/actions'
+import { players_table_views_actions } from '@core/players-table-views/actions'
 import { league_team_daily_values_actions } from '@core/league-team-daily-values/actions'
 
 const initialState = new Map({
@@ -124,6 +125,15 @@ export function apiReducer(state = initialState, { payload, type }) {
         'request_history',
         `GET_TEAMS_${payload.opts.leagueId}_${payload.opts.year}`
       ])
+
+    case players_table_views_actions.GET_PLAYERS_TABLE_VIEWS_FULFILLED:
+      return state.setIn(
+        [
+          'request_history',
+          `GET_PLAYERS_TABLE_VIEWS${payload.opts.user_id ? `_USER_ID_${payload.opts.user_id}` : payload.opts.username ? `_USERNAME_${payload.opts.username}` : ''}`
+        ],
+        true
+      )
 
     default:
       return state

@@ -4,7 +4,8 @@ import { createSelector } from 'reselect'
 import {
   getStats,
   get_selected_players_table_view,
-  get_teams_for_current_year
+  get_teams_for_current_year,
+  get_players_table_views
 } from '@core/selectors'
 import { players_table_views_actions } from '@core/players-table-views'
 import { getPlayerTableFields } from '@core/players-table-fields'
@@ -12,11 +13,6 @@ import { calculatePercentiles } from '@libs-shared'
 import * as table_constants from 'react-table/src/constants.mjs'
 
 import PlayersTablePage from './players-table'
-
-const get_players_table_views = createSelector(
-  (state) => state.get('players_table_views'),
-  (players_table_views) => players_table_views.toList().toJS()
-)
 
 const get_players_percentiles = createSelector(
   (state) => state.getIn(['players_table']),
@@ -89,6 +85,7 @@ const mapStateToProps = createSelector(
     teams,
     players_percentiles
   ) => ({
+    user_id: userId,
     players: players_table_data.toJS(),
     isLoggedIn: Boolean(userId),
     isPending:
@@ -97,7 +94,7 @@ const mapStateToProps = createSelector(
         stats.isPending), // TODO handle player fields being loaded (stats, etc)
     selected_players_table_view,
     player_fields,
-    players_table_views,
+    players_table_views: players_table_views.toList().toJS(),
     selected_player_pid,
     teamId,
     leagueId,
@@ -113,7 +110,9 @@ const mapDispatchToProps = {
   set_selected_players_table_view:
     players_table_views_actions.set_selected_players_table_view,
   delete_players_table_view:
-    players_table_views_actions.delete_players_table_view
+    players_table_views_actions.delete_players_table_view,
+  save_players_table_view: players_table_views_actions.save_players_table_view,
+  load_players_table_views: players_table_views_actions.load_players_table_views
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlayersTablePage)
