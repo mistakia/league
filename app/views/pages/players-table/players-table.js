@@ -4,6 +4,7 @@ import { useLocation, NavLink } from 'react-router-dom'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import Table from 'react-table/index.js'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
+import generate_view_id from 'react-table/src/utils/generate-view-id.js'
 
 import PageLayout from '@layouts/page'
 import Loading from '@components/loading'
@@ -49,7 +50,6 @@ export default function PlayersTablePage({
     const prefix_columns =
       JSON.parse(search_params.get('prefix_columns') || 'null') || []
     const splits = JSON.parse(search_params.get('splits') || 'null') || []
-    const view_id = search_params.get('view_id') || ''
     const view_name = search_params.get('view_name') || ''
     const view_search_column_id =
       search_params.get('view_search_column_id') || ''
@@ -61,7 +61,8 @@ export default function PlayersTablePage({
     if (has_table_state) {
       players_table_view_changed(
         {
-          view_id,
+          // generate a new view_id to make sure it doesn't conflict with a saved view
+          view_id: generate_view_id(),
           view_name,
           view_search_column_id,
           view_description,
