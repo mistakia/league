@@ -15,6 +15,7 @@ import PlayerRoster from '@components/player-roster'
 import LeagueRecentTransactions from '@components/league-recent-transactions'
 import PoachNotice from '@components/poach-notice'
 import PageLayout from '@layouts/page'
+import Notices from '@components/notices'
 import {
   constants,
   isReserveEligible,
@@ -69,11 +70,11 @@ export default function LeagueHomePage({
     loadRecentTransactions
   ])
 
-  const notices = []
+  const notice_items = []
   if (league.free_agency_live_auction_start) {
     const faPeriod = getFreeAgentPeriod(league)
     if (constants.season.now.isBefore(faPeriod.start)) {
-      notices.push(
+      notice_items.push(
         <Alert key='fa-period' severity='info'>
           <AlertTitle>
             Free Agency (FA) period begins {dayjs().to(faPeriod.start)}
@@ -156,7 +157,7 @@ export default function LeagueHomePage({
         injury_status: playerMap.get('injury_status')
       })
     ) {
-      notices.push(
+      notice_items.push(
         <Alert key={playerMap.get('pid')} severity='error'>
           <AlertTitle>
             {playerMap.get('name', 'N/A')} not eligible for Reserve/IR
@@ -176,7 +177,7 @@ export default function LeagueHomePage({
         nfl_status: playerMap.get('nfl_status')
       })
     ) {
-      notices.push(
+      notice_items.push(
         <Alert key={playerMap.get('pid')} severity='error'>
           <AlertTitle>
             {playerMap.get('name', 'N/A')} not eligible for Reserve/COVID-19
@@ -192,7 +193,7 @@ export default function LeagueHomePage({
     const playerMap = poach.get('playerMap')
     if (!playerMap) continue
 
-    notices.push(<PoachNotice key={playerMap.get('pid')} poach={poach} />)
+    notice_items.push(<PoachNotice key={playerMap.get('pid')} poach={poach} />)
   }
 
   const teamPoaches = poaches.filter((p) => p.tid === teamId)
@@ -200,9 +201,9 @@ export default function LeagueHomePage({
   const body = (
     <div className='league-container league__home'>
       <Grid container spacing={2} alignItems='flex-start'>
-        {notices.length ? (
+        {notice_items.length ? (
           <Grid item xs={12}>
-            {notices}
+            <Notices notices={notice_items} />
           </Grid>
         ) : null}
         {active_free_agent_items.length > 0 && (
