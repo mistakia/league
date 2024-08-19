@@ -2962,8 +2962,11 @@ export const get_players_table_view_by_id = (state, { view_id }) => {
   return state.get('players_table_views').get(view_id, new Map())
 }
 
+export const get_selected_players_table_view_id = (state) =>
+  state.getIn(['app', 'selected_players_table_view_id'])
+
 export const get_selected_players_table_view = createSelector(
-  (state) => state.getIn(['app', 'selected_players_table_view_id']),
+  get_selected_players_table_view_id,
   get_players_table_views,
   (view_id, views) => views.get(view_id, new Map()).toJS()
 )

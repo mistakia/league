@@ -29,17 +29,25 @@ export function players_table_views_reducer(
       })
 
     case players_table_views_actions.POST_PLAYERS_TABLE_VIEW_FULFILLED:
-      return state.set(
-        payload.data.view_id,
-        new Map({
-          view_id: payload.data.view_id,
-          view_name: payload.data.view_name,
-          view_description: payload.data.view_description,
-          user_id: payload.data.user_id,
-          table_state: payload.data.table_state,
-          saved_table_state: payload.data.table_state
-        })
-      )
+      return state.withMutations((state) => {
+        state.set(
+          payload.data.view_id,
+          new Map({
+            view_id: payload.data.view_id,
+            view_name: payload.data.view_name,
+            view_description: payload.data.view_description,
+            user_id: payload.data.user_id,
+            table_state: payload.data.table_state,
+            saved_table_state: payload.data.table_state
+          })
+        )
+        if (
+          payload.opts.client_generated_view_id &&
+          payload.opts.client_generated_view_id !== payload.data.view_id
+        ) {
+          state.delete(payload.opts.client_generated_view_id)
+        }
+      })
 
     case players_table_views_actions.DELETE_PLAYERS_TABLE_VIEW_FULFILLED: {
       const { view_id } = payload.opts

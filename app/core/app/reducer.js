@@ -144,6 +144,16 @@ export function appReducer(state = initialState(), { payload, type }) {
         selected_players_table_view_id: payload.players_table_view_id
       })
 
+    case players_table_views_actions.POST_PLAYERS_TABLE_VIEW_FULFILLED:
+      if (
+        payload.opts.client_generated_view_id ===
+          state.get('selected_players_table_view_id') &&
+        payload.data.view_id !== payload.opts.client_generated_view_id
+      ) {
+        return state.set('selected_players_table_view_id', payload.data.view_id)
+      }
+      return state
+
     case players_table_views_actions.PLAYERS_TABLE_VIEW_CHANGED:
       return state.merge({
         selected_players_table_view_id: payload.players_table_view.view_id
