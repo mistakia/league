@@ -1,6 +1,7 @@
 import { takeLatest, fork, call, select, put } from 'redux-saga/effects'
 
 import { players_table_views_actions } from './actions'
+import { default_players_table_views } from './default-players-table-views'
 import {
   post_players_table_view_search,
   post_players_table_view,
@@ -11,7 +12,8 @@ import {
   get_app,
   get_selected_players_table_view,
   get_players_table_view_by_id,
-  get_request_history
+  get_request_history,
+  get_selected_players_table_view_id
 } from '@core/selectors'
 import { notificationActions } from '@core/notifications/actions'
 
@@ -63,6 +65,8 @@ export function* save_players_table_view({ payload }) {
   // if the view already exists use the view_id, otherwise the server will create a new one
   if (view.get('saved_table_state')) {
     params.view_id = view_id
+  } else {
+    params.client_generated_view_id = view_id
   }
 
   yield call(post_players_table_view, params)
@@ -103,7 +107,16 @@ export function* post_players_table_view_fulfilled_notification() {
   )
 }
 
-export function* delete_players_table_view_fulfilled_notification() {
+export function* handle_delete_players_table_view_fulfilled({ payload }) {
+  const selected_view_id = yield select(get_selected_players_table_view_id)
+  if (payload.opts.view_id === selected_view_id) {
+    yield put(
+      players_table_views_actions.set_selected_players_table_view(
+        default_players_table_views.SEASON_PROJECTIONS.view_id
+      )
+    )
+  }
+
   yield put(
     notificationActions.show({
       message: 'Deleted Players Table View',
@@ -154,7 +167,7 @@ export function* watch_post_players_table_view_fulfilled() {
 export function* watch_delete_players_table_view_fulfilled() {
   yield takeLatest(
     players_table_views_actions.DELETE_PLAYERS_TABLE_VIEW_FULFILLED,
-    delete_players_table_view_fulfilled_notification
+    handle_delete_players_table_view_fulfilled
   )
 }
 
