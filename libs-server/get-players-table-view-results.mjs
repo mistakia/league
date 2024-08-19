@@ -41,18 +41,21 @@ const process_dynamic_year_param = (year_param) => {
   years = years.flatMap((year) => {
     if (typeof year === 'object') {
       if (year.dynamic_type === 'last_n_years') {
-        const n = year.value || 3
+        const n = Number(year.value || 3)
         return Array.from({ length: n }, (_, i) =>
           Math.max(min_year, current_year - i)
         )
       } else if (year.dynamic_type === 'next_n_years') {
-        const n = year.value || 3
+        const n = Number(year.value || 3)
         return Array.from({ length: n }, (_, i) =>
           Math.min(max_year, current_year + i + 1)
         )
       }
     }
-    return Math.max(min_year, Math.min(max_year, Number(year)))
+    const numeric_year = Number(year)
+    return isNaN(numeric_year)
+      ? []
+      : Math.max(min_year, Math.min(max_year, numeric_year))
   })
 
   return [...new Set(years)]
@@ -68,18 +71,21 @@ const process_dynamic_week_param = (week_param) => {
   weeks = weeks.flatMap((week) => {
     if (typeof week === 'object') {
       if (week.dynamic_type === 'last_n_weeks') {
-        const n = week.value || 3
+        const n = Number(week.value || 3)
         return Array.from({ length: n }, (_, i) =>
           Math.max(min_week, current_week - i)
         )
       } else if (week.dynamic_type === 'next_n_weeks') {
-        const n = week.value || 3
+        const n = Number(week.value || 3)
         return Array.from({ length: n }, (_, i) =>
           Math.min(max_week, current_week + i + 1)
         )
       }
     }
-    return Math.max(min_week, Math.min(max_week, Number(week)))
+    const numeric_week = Number(week)
+    return isNaN(numeric_week)
+      ? []
+      : Math.max(min_week, Math.min(max_week, numeric_week))
   })
 
   return [...new Set(weeks)]
