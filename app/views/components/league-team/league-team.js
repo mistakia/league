@@ -20,6 +20,7 @@ import {
   isReserveCovEligible
 } from '@libs-shared'
 import LeagueTeamValueDeltas from '@components/league-team-value-deltas'
+import Notices from '@components/notices'
 
 import './league-team.styl'
 
@@ -124,7 +125,7 @@ export default function LeagueTeam({
     )
   }
 
-  const notices = []
+  const notice_items = []
 
   // Add reserve notices
   for (const playerMap of players.ir) {
@@ -136,7 +137,7 @@ export default function LeagueTeam({
         injury_status: playerMap.get('injury_status')
       })
     ) {
-      notices.push(
+      notice_items.push(
         <Alert key={playerMap.get('pid')} severity='error'>
           {playerMap.get('name', 'N/A')} is not eligible for Reserve/IR
           {is_team_manager
@@ -155,7 +156,7 @@ export default function LeagueTeam({
         nfl_status: playerMap.get('nfl_status')
       })
     ) {
-      notices.push(
+      notice_items.push(
         <Alert key={playerMap.get('pid')} severity='error'>
           {playerMap.get('name', 'N/A')} is not eligible for Reserve/COVID-19
           {is_team_manager
@@ -174,7 +175,7 @@ export default function LeagueTeam({
     const player_tid = poach.get('player_tid')
     if (player_tid !== teamId) continue
 
-    notices.push(<PoachNotice key={playerMap.get('pid')} poach={poach} />)
+    notice_items.push(<PoachNotice key={playerMap.get('pid')} poach={poach} />)
   }
 
   return (
@@ -183,8 +184,10 @@ export default function LeagueTeam({
         <div className='league-team-main-section'>
           <LeagueTeamValueDeltas tid={teamId} />
         </div>
-        {notices.length > 0 && (
-          <div className='league-team-notices-container'>{notices}</div>
+        {notice_items.length > 0 && (
+          <div className='league-team-notices-container'>
+            <Notices notices={notice_items} />
+          </div>
         )}
         {Boolean(cutlist.size) && is_team_manager && (
           <div className='league-team-main-section'>

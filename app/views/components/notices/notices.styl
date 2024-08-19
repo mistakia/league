@@ -1,0 +1,26 @@
+.notices-container
+  border 1px solid $borderColor
+  border-radius 5px
+  transition background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms
+
+  &:hover
+    border-color $hoverBorder
+    background white
+    box-shadow $hoverShadow 4px 4px 0px 0px
+
+  .MuiPaper-root
+    border-radius 0
+    + .MuiPaper-root
+      border-top 1px solid $borderColor
+
+  &.-expanded
+    .notices-toggle
+      border-bottom 1px solid $borderColor
+
+.notices-toggle
+  padding 16px
+  cursor pointer
+  font-weight 600
+
+  &:hover
+    color red
