@@ -48,17 +48,21 @@ export function* save_players_table_view({ payload }) {
     players_table_view
 
   const params = {
-    view_id,
     view_name,
     view_description,
     table_state
   }
 
   const { userId } = yield select(get_app)
-  const { user_id } = yield select(get_selected_players_table_view)
-  if (userId !== user_id) {
+  const view = yield select(get_players_table_view_by_id, { view_id })
+  if (userId !== view.get('user_id')) {
     console.warn('User does not have permission to save this view')
     return
+  }
+
+  // if the view already exists use the view_id, otherwise the server will create a new one
+  if (view.get('saved_table_state')) {
+    params.view_id = view_id
   }
 
   yield call(post_players_table_view, params)

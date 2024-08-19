@@ -1,14 +1,9 @@
 import express from 'express'
+import crypto from 'crypto'
 
 import { validators } from '#libs-server'
 
 const router = express.Router()
-
-function generate_view_id() {
-  const timestamp = Date.now().toString(36)
-  const random_part = Math.random().toString(36).substr(2, 9)
-  return `${timestamp}-${random_part}-${Math.random().toString(36).substr(2, 9)}-${random_part}`
-}
 
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
@@ -94,7 +89,7 @@ router.post('/?', async (req, res) => {
           table_state: JSON.stringify(table_state)
         })
     } else {
-      const view_id = generate_view_id()
+      const view_id = crypto.randomUUID()
 
       await db('user_table_views').insert({
         view_id,
