@@ -22,6 +22,9 @@ DROP TRIGGER IF EXISTS update_config_modtime ON public.config;
 DROP TRIGGER IF EXISTS player_name_search_vector_update ON public.player;
 DROP INDEX IF EXISTS public.player_name_search_idx;
 DROP INDEX IF EXISTS public.nfl_year_week_timestamp_year_week_idx;
+DROP INDEX IF EXISTS public."nfl_plays_current_week_playId";
+DROP INDEX IF EXISTS public."nfl_plays_current_week_esbid_playId";
+DROP INDEX IF EXISTS public.nfl_plays_current_week_esbid;
 DROP INDEX IF EXISTS public.idx_users_invite_code;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_seasonlogs_pid_year_hash;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_gamelogs_pid_esbid_hash;
@@ -175,9 +178,6 @@ DROP INDEX IF EXISTS public.idx_24738_snap;
 DROP INDEX IF EXISTS public."idx_24738_playId";
 DROP INDEX IF EXISTS public.idx_24735_snap;
 DROP INDEX IF EXISTS public."idx_24735_playId";
-DROP INDEX IF EXISTS public."idx_24730_playId";
-DROP INDEX IF EXISTS public."idx_24730_gamePlay";
-DROP INDEX IF EXISTS public.idx_24730_esbid;
 DROP INDEX IF EXISTS public.idx_24725_trg_pid;
 DROP INDEX IF EXISTS public.idx_24725_psr_pid;
 DROP INDEX IF EXISTS public."idx_24725_playId";
@@ -2466,29 +2466,123 @@ CREATE TABLE public.nfl_plays_current_week (
     "playId" integer NOT NULL,
     sequence integer,
     state character varying(36),
-    week smallint NOT NULL,
     dwn integer,
+    home_score smallint,
+    special boolean,
+    "desc" text,
+    play_type_ngs character varying(36),
+    pos_team character varying(4),
+    pos_team_id character varying(36),
     qtr integer,
     year smallint NOT NULL,
     seas_type character varying(36),
-    "desc" text,
+    away_score smallint,
+    week smallint NOT NULL,
     ydl_num integer,
     ydl_side character varying(10),
-    ydl_start character varying(10),
-    ydl_end character varying(10),
-    ydl_100 integer,
-    hash character varying(1),
-    mot character varying(2),
-    ytg integer,
-    yfog integer,
+    yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    def_personnel character varying(36),
     box_ngs integer,
     pru_ngs integer,
+    def_personnel character varying(100),
+    game_clock_start character varying(10),
     drive_seq integer,
+    ydl_end character varying(10),
+    ydl_start character varying(10),
+    first_down boolean,
+    goal_to_go boolean,
+    next_play_type character varying(36),
+    penalty boolean,
     drive_yds integer,
     drive_play_count integer,
+    play_clock smallint,
+    deleted boolean,
+    review text,
+    score boolean,
+    score_type character varying(10),
+    score_team character varying(4),
+    special_play_type character varying(10),
+    "timestamp" character varying(10),
+    play_type_nfl character varying(36),
+    updated integer NOT NULL,
+    off character varying(3),
+    def character varying(3),
+    play_type public.nfl_play_type,
+    player_fuml_pid character varying(25),
+    player_fuml_gsis character varying(36),
+    bc_pid character varying(25),
+    bc_gsis character varying(36),
+    psr_pid character varying(25),
+    psr_gsis character varying(36),
+    trg_pid character varying(25),
+    trg_gsis character varying(36),
+    intp_pid character varying(25),
+    intp_gsis character varying(36),
+    yds_gained smallint,
+    dot integer,
+    yards_after_catch integer,
+    yards_after_any_contact integer,
+    ret_yds integer,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
+    highlight_pass boolean,
+    int_worthy boolean,
+    dropped_pass boolean,
+    contested_ball boolean,
+    mbt smallint,
+    fuml boolean,
+    "int" boolean,
+    sk boolean,
+    succ boolean,
+    comp boolean,
+    td boolean,
+    ret_td boolean,
+    td_tm character varying(5),
+    ret_tm character varying(5),
+    charted boolean,
+    yfog integer,
+    true_air_yards smallint,
+    created_reception boolean,
+    avsk smallint,
+    no_huddle boolean,
+    play_action boolean,
+    trick_look boolean,
+    trick_play boolean,
+    qb_rush boolean,
+    qb_sneak boolean,
+    qb_scramble boolean,
+    hindered_pass boolean,
+    zero_blitz boolean,
+    stunt boolean,
+    out_of_pocket_pass boolean,
+    phyb boolean,
+    catchable_ball boolean,
+    throw_away boolean,
+    shovel_pass boolean,
+    sideline_pass boolean,
+    batted_pass boolean,
+    screen_pass boolean,
+    pain_free_play boolean,
+    qb_fault_sack boolean,
+    ttscrm numeric(16,12),
+    time_to_pass numeric(16,12),
+    ttsk numeric(16,12),
+    time_to_pressure numeric(16,12),
+    back smallint,
+    xlm smallint,
+    db smallint,
+    box smallint,
+    boxdb smallint,
+    pass_rushers smallint,
+    blitzers smallint,
+    db_blitzers smallint,
+    oopd character varying(2),
+    cov smallint,
+    cov_type_charted character varying(3),
+    sep character varying(3),
+    ydl_100 integer,
     drive_result character varying(30),
     drive_top character varying(10),
     drive_fds integer,
@@ -2508,132 +2602,39 @@ CREATE TABLE public.nfl_plays_current_week (
     series_seq integer,
     series_suc boolean,
     series_result character varying(100),
-    gtg boolean,
-    score boolean,
-    score_type character varying(10),
-    score_team character varying(4),
-    "timestamp" character varying(10),
-    play_clock smallint,
-    game_clock_start character varying(10),
     game_clock_end character varying(10),
     sec_rem_qtr integer,
     sec_rem_half integer,
     sec_rem_gm integer,
-    pos_team character varying(4),
-    pos_team_id character varying(36),
-    off character varying(3),
-    def character varying(3),
-    deleted boolean,
-    review text,
-    play_type public.nfl_play_type,
-    play_type_nfl character varying(36),
-    play_type_ngs character varying(36),
-    next_play_type character varying(36),
-    player_fuml_pid character varying(25),
-    player_fuml_gsis character varying(36),
-    bc_pid character varying(25),
-    bc_gsis character varying(36),
-    psr_pid character varying(25),
-    psr_gsis character varying(36),
-    trg_pid character varying(25),
-    trg_gsis character varying(36),
-    intp_pid character varying(25),
-    intp_gsis character varying(36),
-    yds_gained smallint,
     fum boolean,
-    fuml boolean,
-    "int" boolean,
-    sk boolean,
-    succ boolean,
-    comp boolean,
     incomp boolean,
-    trick boolean,
     touchback boolean,
     safety boolean,
-    penalty boolean,
     oob boolean,
     tfl boolean,
     rush boolean,
     pass boolean,
     solo_tk boolean,
     assist_tk boolean,
-    special boolean,
-    special_play_type character varying(10),
     pen_team character varying(3),
     pen_yds integer,
-    td boolean,
-    ret_td boolean,
     pass_td boolean,
     rush_td boolean,
-    td_tm character varying(5),
     pass_yds smallint,
-    recv_yds integer,
+    recv_yds smallint,
     rush_yds integer,
-    dot integer,
-    tay smallint,
-    yac integer,
-    yaco integer,
-    ret_yds integer,
-    ret_tm character varying(5),
-    sg boolean,
-    nh boolean,
-    pap boolean,
-    qbd boolean,
-    qbk boolean,
-    qbs boolean,
-    qbru boolean,
-    sneak boolean,
-    scrm boolean,
-    qb_pressure boolean,
-    qb_hit boolean,
-    qb_hurry boolean,
-    int_worthy boolean,
-    cball boolean,
-    qbta boolean,
-    shov boolean,
-    side boolean,
-    high boolean,
-    drp boolean,
-    cnb boolean,
-    crr boolean,
-    mbt smallint,
-    avsk smallint,
-    run_location character varying(10),
+    qb_dropback boolean,
+    qb_kneel boolean,
+    qb_spike boolean,
+    run_location public.play_direction,
     run_gap character varying(10),
-    option character varying(3),
-    tlook boolean,
-    fd boolean,
-    fd_rush boolean,
-    fd_pass boolean,
-    fd_penalty boolean,
+    first_down_rush boolean,
+    first_down_pass boolean,
+    first_down_penalty boolean,
     third_down_converted boolean,
     third_down_failed boolean,
     fourth_down_converted boolean,
     fourth_down_failed boolean,
-    htm boolean,
-    zblz boolean,
-    stnt boolean,
-    oop boolean,
-    phyb boolean,
-    bap boolean,
-    fread boolean,
-    scre boolean,
-    pfp boolean,
-    qbsk boolean,
-    ttscrm numeric(16,12),
-    ttp numeric(16,12),
-    ttsk numeric(16,12),
-    ttpr numeric(16,12),
-    back smallint,
-    xlm smallint,
-    db smallint,
-    box smallint,
-    boxdb smallint,
-    pru smallint,
-    blz smallint,
-    dblz smallint,
-    oopd character varying(2),
-    cov smallint,
     ep numeric(16,12),
     epa numeric(16,12),
     ep_succ boolean,
@@ -2703,8 +2704,6 @@ CREATE TABLE public.nfl_plays_current_week (
     def_to_rem smallint,
     "to" boolean,
     to_team character varying(3),
-    home_score smallint,
-    away_score smallint,
     pos_score smallint,
     def_score smallint,
     score_diff smallint,
@@ -2724,589 +2723,39 @@ CREATE TABLE public.nfl_plays_current_week (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    charted boolean,
-    updated integer NOT NULL,
     air_yards_ngs numeric(8,4),
     time_to_throw_ngs numeric(8,4),
     route_ngs character varying(100),
     man_zone_ngs character varying(100),
     cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean
+    qb_pressure_ngs boolean,
+    starting_hash public.hash_position,
+    ftn_play_id numeric,
+    qb_position public.qb_position,
+    n_offense_backfield numeric,
+    run_play_option boolean,
+    read_thrown public.read_thrown_type,
+    motion boolean,
+    solo_tackle_1_gsis character varying(36),
+    solo_tackle_1_pid character varying(25),
+    solo_tackle_2_gsis character varying(36),
+    solo_tackle_2_pid character varying(25),
+    solo_tackle_3_gsis character varying(36),
+    solo_tackle_3_pid character varying(25),
+    assisted_tackle_1_gsis character varying(36),
+    assisted_tackle_1_pid character varying(25),
+    assisted_tackle_2_gsis character varying(36),
+    assisted_tackle_2_pid character varying(25),
+    tackle_assist_1_gsis character varying(36),
+    tackle_assist_1_pid character varying(25),
+    tackle_assist_2_gsis character varying(36),
+    tackle_assist_2_pid character varying(25),
+    tackle_assist_3_gsis character varying(36),
+    tackle_assist_3_pid character varying(25),
+    tackle_assist_4_gsis character varying(36),
+    tackle_assist_4_pid character varying(25),
+    pass_location public.play_direction
 );
-
-
---
--- Name: COLUMN nfl_plays_current_week.drive_inside20; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.drive_inside20 IS 'Binary indicator if the offense was able to get inside the opponents 20 yard line.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.drive_score; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.drive_score IS 'Binary indicator the drive ended with a score.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.drive_start_qtr; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.drive_start_qtr IS 'Numeric value indicating in which quarter the given drive has started.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.drive_end_qtr; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.drive_end_qtr IS 'Numeric value indicating in which quarter the given drive has ended.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.series_suc; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.series_suc IS '1: scored touchdown, gained enough yards for first down.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.gtg; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.gtg IS 'Binary indicator for whether or not the posteam is in a goal down situation.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.score; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.score IS 'Binary indicator for whether or not a score occurred on the play.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.fum; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.fum IS 'fumble occurred';
-
-
---
--- Name: COLUMN nfl_plays_current_week.fuml; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.fuml IS 'fumble lost';
-
-
---
--- Name: COLUMN nfl_plays_current_week."int"; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week."int" IS 'interception';
-
-
---
--- Name: COLUMN nfl_plays_current_week.sk; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.sk IS 'sack';
-
-
---
--- Name: COLUMN nfl_plays_current_week.succ; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.succ IS 'successful play';
-
-
---
--- Name: COLUMN nfl_plays_current_week.comp; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.comp IS 'completion';
-
-
---
--- Name: COLUMN nfl_plays_current_week.incomp; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.incomp IS 'incompletion';
-
-
---
--- Name: COLUMN nfl_plays_current_week.trick; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.trick IS 'trick play';
-
-
---
--- Name: COLUMN nfl_plays_current_week.touchback; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.touchback IS 'touchback';
-
-
---
--- Name: COLUMN nfl_plays_current_week.safety; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.safety IS 'safety';
-
-
---
--- Name: COLUMN nfl_plays_current_week.penalty; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.penalty IS 'penalty';
-
-
---
--- Name: COLUMN nfl_plays_current_week.oob; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.oob IS '1 if play description contains ran ob, pushed ob, or sacked ob; 0 otherwise.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.tfl; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.tfl IS 'Binary indicator for whether or not a tackle for loss on a run play occurred.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.rush; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.rush IS 'Binary indicator for if the play was a run.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.pass; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.pass IS 'Binary indicator for if the play was a pass attempt (includes sacks).';
-
-
---
--- Name: COLUMN nfl_plays_current_week.solo_tk; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.solo_tk IS 'Binary indicator if the play had a solo tackle (could be multiple due to fumbles).';
-
-
---
--- Name: COLUMN nfl_plays_current_week.assist_tk; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.assist_tk IS 'Binary indicator for if an assist tackle occurred.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.special; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.special IS 'special teams';
-
-
---
--- Name: COLUMN nfl_plays_current_week.td; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.td IS 'touchdown';
-
-
---
--- Name: COLUMN nfl_plays_current_week.ret_td; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.ret_td IS 'return touchdown';
-
-
---
--- Name: COLUMN nfl_plays_current_week.pass_td; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.pass_td IS 'passing touchdown';
-
-
---
--- Name: COLUMN nfl_plays_current_week.rush_td; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.rush_td IS 'rushing touchdown';
-
-
---
--- Name: COLUMN nfl_plays_current_week.tay; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.tay IS 'true air yards, Distance ball travels in the air from point of throw to a receivers hands; back of endzone or sideline.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.sg; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.sg IS 'shotgun';
-
-
---
--- Name: COLUMN nfl_plays_current_week.nh; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.nh IS 'no huddle';
-
-
---
--- Name: COLUMN nfl_plays_current_week.pap; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.pap IS 'play action pass';
-
-
---
--- Name: COLUMN nfl_plays_current_week.qbd; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.qbd IS 'QB dropped back on the play (pass attempt, sack, or scrambled).';
-
-
---
--- Name: COLUMN nfl_plays_current_week.qbk; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.qbk IS 'QB took a knee.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.qbs; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.qbs IS 'QB spiked the ball.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.qbru; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.qbru IS 'QB run, a designed running play for the QB. These are only marked on runs by a natural QB where he lined up as a QB. Also, sneaks and kneel-downs are not counted.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.sneak; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.sneak IS 'QB sneak';
-
-
---
--- Name: COLUMN nfl_plays_current_week.scrm; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.scrm IS 'QB scramble';
-
-
---
--- Name: COLUMN nfl_plays_current_week.qb_pressure; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.qb_pressure IS 'QB pressure';
-
-
---
--- Name: COLUMN nfl_plays_current_week.qb_hit; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.qb_hit IS 'QB hit';
-
-
---
--- Name: COLUMN nfl_plays_current_week.qb_hurry; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.qb_hurry IS 'QB hurry';
-
-
---
--- Name: COLUMN nfl_plays_current_week.int_worthy; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.int_worthy IS 'interception worthy';
-
-
---
--- Name: COLUMN nfl_plays_current_week.cball; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.cball IS 'catchable ball, A pass in which an eligible receiver has the opportunity to get his hands on the football with reasonable movement, timing, and opportunity.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.qbta; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.qbta IS 'QB Throw Away';
-
-
---
--- Name: COLUMN nfl_plays_current_week.shov; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.shov IS 'Shovel/Touch Pass';
-
-
---
--- Name: COLUMN nfl_plays_current_week.side; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.side IS 'Sideline pass, Balls outside of the field but catchable when the receiver extends body/arms.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.high; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.high IS 'Highlight pass, Perfect pass that only the receiver can reach. Features perfect placement in a tight window.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.drp; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.drp IS 'dropped pass';
-
-
---
--- Name: COLUMN nfl_plays_current_week.cnb; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.cnb IS 'contested ball, Passes into close coverage that involve a physical battle between receiver and defender for control of the ball.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.crr; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.crr IS 'Created Reception, Difficult catches that require exceptional body control; hands; acrobatics, or any combination thereof.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.mbt; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.mbt IS 'missed or broken tackles';
-
-
---
--- Name: COLUMN nfl_plays_current_week.avsk; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.avsk IS 'number of avoided sacks';
-
-
---
--- Name: COLUMN nfl_plays_current_week.tlook; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.tlook IS 'trick look';
-
-
---
--- Name: COLUMN nfl_plays_current_week.fd; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.fd IS 'first down';
-
-
---
--- Name: COLUMN nfl_plays_current_week.fd_rush; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.fd_rush IS 'Binary indicator for if a running play converted the first down.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.fd_pass; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.fd_pass IS 'Binary indicator for if a passing play converted the first down.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.fd_penalty; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.fd_penalty IS 'Binary indicator for if a penalty converted the first down.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.third_down_converted; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.third_down_converted IS 'Binary indicator for if the first down was converted on third down.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.third_down_failed; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.third_down_failed IS 'Binary indicator for if the posteam failed to convert first down on third down.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.fourth_down_converted; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.fourth_down_converted IS 'Binary indicator for if the first down was converted on fourth down.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.fourth_down_failed; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.fourth_down_failed IS 'Binary indicator for if the posteam failed to convert first down on fourth down.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.htm; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.htm IS 'hindered throwing motion';
-
-
---
--- Name: COLUMN nfl_plays_current_week.zblz; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.zblz IS 'zone blitz, at least one Off-Ball LB rushed the passer instead of a DL who dropped into coverage';
-
-
---
--- Name: COLUMN nfl_plays_current_week.stnt; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.stnt IS 'stunt, when any two pass rushers cross, trading pass rush lanes on a passing down';
-
-
---
--- Name: COLUMN nfl_plays_current_week.oop; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.oop IS 'out of pocket pass';
-
-
---
--- Name: COLUMN nfl_plays_current_week.phyb; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.phyb IS 'physical ball, Pass target takes significant punishment whether the pass is caught or not. Most Contested Balls will also be a Physical Ball.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.bap; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.bap IS 'batted pass';
-
-
---
--- Name: COLUMN nfl_plays_current_week.fread; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.fread IS 'first read';
-
-
---
--- Name: COLUMN nfl_plays_current_week.scre; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.scre IS 'screen pass';
-
-
---
--- Name: COLUMN nfl_plays_current_week.pfp; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.pfp IS 'pain free play, Ball carrier is only lightly touched by a defender on the field (ie QB slide) or runs out of bounds with little or no physical contact with the defender or sideline personnel/equipment. Includes TDs';
-
-
---
--- Name: COLUMN nfl_plays_current_week.qbsk; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.qbsk IS 'qb sack, QB was to blame for the sack: held ball too long; missed wide open receiver etc';
-
-
---
--- Name: COLUMN nfl_plays_current_week.xlm; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.xlm IS 'extra men on the line, Number of players lined up on either side of the Offensive Tackles - usually a Tight End.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.pru; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.pru IS 'pass rushers';
-
-
---
--- Name: COLUMN nfl_plays_current_week.blz; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.blz IS 'number of LBs and DBs blitzing';
-
-
---
--- Name: COLUMN nfl_plays_current_week.dblz; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.dblz IS 'Number of DBs blitzing';
-
-
---
--- Name: COLUMN nfl_plays_current_week.cov; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.cov IS 'coverage on target, Uncovered is 0, single coverage is 1, double is 2.';
-
-
---
--- Name: COLUMN nfl_plays_current_week.home_to_rem; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.home_to_rem IS 'Numeric timeouts remaining in the half for the home team';
-
-
---
--- Name: COLUMN nfl_plays_current_week.away_to_rem; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.away_to_rem IS 'Numeric timeouts remaining in the half for the away team';
-
-
---
--- Name: COLUMN nfl_plays_current_week.pos_to_rem; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.pos_to_rem IS 'Number of timeouts remaining for the possession team';
-
-
---
--- Name: COLUMN nfl_plays_current_week.def_to_rem; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.def_to_rem IS 'Number of timeouts remaining for the team on defense';
-
-
---
--- Name: COLUMN nfl_plays_current_week.qb_pressure_ngs; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_plays_current_week.qb_pressure_ngs IS 'QB pressure (NGS)';
 
 
 --
@@ -6161,27 +5610,6 @@ CREATE INDEX idx_24725_trg_pid ON public.nfl_plays USING btree (trg_pid);
 
 
 --
--- Name: idx_24730_esbid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_24730_esbid ON public.nfl_plays_current_week USING btree (esbid);
-
-
---
--- Name: idx_24730_gamePlay; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX "idx_24730_gamePlay" ON public.nfl_plays_current_week USING btree (esbid, "playId");
-
-
---
--- Name: idx_24730_playId; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX "idx_24730_playId" ON public.nfl_plays_current_week USING btree ("playId");
-
-
---
 -- Name: idx_24735_playId; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -7250,6 +6678,27 @@ CREATE UNIQUE INDEX idx_scoring_format_player_seasonlogs_pid_year_hash ON public
 --
 
 CREATE INDEX idx_users_invite_code ON public.users USING btree (invite_code);
+
+
+--
+-- Name: nfl_plays_current_week_esbid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_current_week_esbid ON public.nfl_plays_current_week USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_current_week_esbid_playId; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_plays_current_week_esbid_playId" ON public.nfl_plays_current_week USING btree (esbid, "playId");
+
+
+--
+-- Name: nfl_plays_current_week_playId; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "nfl_plays_current_week_playId" ON public.nfl_plays_current_week USING btree ("playId");
 
 
 --
