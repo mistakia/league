@@ -1,12 +1,56 @@
 import fetch, { FormData } from 'node-fetch'
 import debug from 'debug'
 
+import db from '#db'
 import config from '#config'
 import { wait } from './wait.mjs'
 import * as cache from './cache.mjs'
 
 const log = debug('nfl')
 debug.enable('nfl')
+
+const generate_guid = () => {
+  let e = new Date().getTime()
+  return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (x) {
+    const r = (e + 16 * Math.random()) % 16 | 0
+    e = Math.floor(e / 16)
+    return (x === 'x' ? r : (3 & r) | 8).toString(16)
+  })
+}
+
+export const get_session_token_v3 = async () => {
+  const device_id = generate_guid()
+  const refresh_token = generate_guid()
+
+  const config_row = await db('config').where({ key: 'nfl_api_config' }).first()
+  log(config_row)
+  const { client_key, client_secret, session_url, user_agent } =
+    config_row.value
+
+  const form = new FormData()
+  form.set('clientKey', client_key)
+  form.set('clientSecret', client_secret)
+  form.set('deviceId', device_id)
+  form.set('deviceInfo', '')
+  form.set('refreshToken', refresh_token)
+  form.set('networkType', 'wifi')
+  form.set('nflClaimGroupsToAdd', '[]')
+  form.set('nflClaimGroupsToRemove', '[]')
+
+  const response = await fetch(session_url, {
+    method: 'POST',
+    body: form,
+    headers: {
+      origin: 'https://www.nfl.com',
+      referer: 'https://www.nfl.com/',
+      'User-Agent': user_agent
+    }
+  })
+
+  const data = await response.json()
+  log(data)
+  return data.accessToken
+}
 
 export const getToken = async () => {
   const form = new FormData()
@@ -157,7 +201,7 @@ export const getGames = async ({
   }
 
   if (!token) {
-    token = await getToken()
+    token = await get_session_token_v3()
   }
 
   const url = `${config.nfl_api_url}/experience/v1/games?season=${year}&seasonType=${seas_type}&week=${week}&withExternalIds=true&limit=100`
@@ -189,7 +233,7 @@ export const get_plays_v1 = async ({ id, token, ignore_cache = false }) => {
 
   log(`getting game details for ${id}`)
   if (!token) {
-    token = await getToken()
+    token = await get_session_token_v3()
   }
 
   const url = `${config.nfl_api_url}/experience/v1/gamedetails/${id}?withExternalIds`

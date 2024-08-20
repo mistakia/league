@@ -9,7 +9,7 @@ import { isMain, wait, nfl } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('import-plays-nfl-v1')
-debug.enable('import-plays-nfl-v1')
+debug.enable('import-plays-nfl-v1,nfl')
 
 const argv = yargs(hideBin(process.argv)).argv
 
@@ -186,7 +186,7 @@ const importPlaysForWeek = async ({
     }
 
     if (!token) {
-      token = await nfl.getToken()
+      token = await nfl.get_session_token_v3()
     }
 
     if (!token) {
@@ -313,12 +313,12 @@ const importPlaysForYear = async ({
     .orderBy('week', 'asc')
 
   if (!token) {
-    token = await nfl.getToken()
+    token = await nfl.get_session_token_v3()
   }
 
   log(`processing plays for ${weeks.length} weeks in ${year} (${seas_type})`)
   for (const { week } of weeks) {
-    log(`loading plays for week: ${week} (REG)`)
+    log(`loading plays for week: ${week} (${seas_type})`)
     await importPlaysForWeek({
       year,
       week,
@@ -352,7 +352,7 @@ const importAllPlays = async ({
   }
 
   for (const year of years) {
-    const token = await nfl.getToken()
+    const token = await nfl.get_session_token_v3()
     log(`loading plays for year: ${year}, seas_type: ${seas_type}`)
     const is_seas_type_all = seas_type.toLowerCase() === 'all'
 
