@@ -10,6 +10,24 @@
   background white
   z-index 1
 
+.auction__teams
+  display flex
+  flex-wrap nowrap
+  align-items center
+  background white
+  padding-bottom 24px
+  border-top 1px solid $borderColor
+  border-bottom 1px solid $borderColor
+
+@media (max-width 800px)
+  .auction__teams
+    overflow-x scroll
+    overflow-y hidden
+
+@media (min-width 1000px)
+  .auction__teams
+    justify-content center
+
 @media (min-width 800px)
   .auction__controls
     transition margin 225ms cubic-bezier(0, 0, 0.2, 1) 0ms
