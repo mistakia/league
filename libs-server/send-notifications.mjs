@@ -3,7 +3,7 @@
 import sendVoiceNotifications from './send-voice-notifications.mjs'
 import sendTextNotifications from './send-text-notifications.mjs'
 import sendGroupmeMessage from './send-groupme-message.mjs'
-import sendDiscordMessage from './send-discord-message.mjs'
+import send_discord_message from './send-discord-message.mjs'
 
 export default async function ({
   teamIds = [],
@@ -54,8 +54,8 @@ export default async function ({
 
     // send league discord messages
     if (league.discord_webhook_url) {
-      await sendDiscordMessage({
-        webhookUrl: league.discord_webhook_url,
+      await send_discord_message({
+        discord_webhook_url: league.discord_webhook_url,
         message
       })
     }

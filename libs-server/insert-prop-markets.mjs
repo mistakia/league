@@ -2,7 +2,7 @@ import debug from 'debug'
 
 import db from '#db'
 import config from '#config'
-import sendDiscordMessage from './send-discord-message.mjs'
+import send_discord_message from './send-discord-message.mjs'
 import insert_prop_market_selections from './insert-prop-market-selections.mjs'
 import diff from 'deep-diff'
 
@@ -68,8 +68,8 @@ const insert_market = async ({ timestamp, selections, ...market }) => {
 
     log(message)
 
-    await sendDiscordMessage({
-      webhookUrl: config.discord_props_market_new_channel_webhook_url,
+    await send_discord_message({
+      discord_webhook_url: config.discord_props_market_new_channel_webhook_url,
       message
     })
   } else {
@@ -172,8 +172,8 @@ const insert_market = async ({ timestamp, selections, ...market }) => {
           log(message)
 
           // send notification to `props_market_update` channel
-          // await sendDiscordMessage({
-          //   webhookUrl: config.discord_props_market_update_channel_webhook_url,
+          // await send_discord_message({
+          //   discord_webhook_url: config.discord_props_market_update_channel_webhook_url,
           //   message
           // })
         }
