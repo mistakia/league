@@ -96,7 +96,7 @@ const run = async ({
   }
 
   if (!token) {
-    token = await nfl.getToken()
+    token = await nfl.get_session_token_v3()
   }
 
   if (!token) {
