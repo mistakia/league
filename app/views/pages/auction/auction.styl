@@ -15,15 +15,6 @@
   .base-TabsList-root
     flex 0 0 auto
 
-.auction__teams
-  display flex
-  flex-wrap nowrap
-  align-items center
-  background white
-  padding-bottom 24px
-  border-top 1px solid $borderColor
-  border-bottom 1px solid $borderColor
-
 .auction__main-board
   display flex
   height 100%
@@ -33,33 +24,6 @@
   overflow-y scroll
   background white
 
-.auction__side
-  flex 1
-  min-width 280px
-  display flex
-  flex-direction column
-  padding 1%
-  height 100%
-  overflow hidden
-
-.auction__log
-  flex 1
-  border-top 1px solid $borderColor
-  border-radius 3px
-  height 100%
-  overflow hidden
-
 @media (max-width 800px)
   .auction__main
     margin 0
-
-  .auction__side
-    display none
-
-  .auction__teams
-    overflow-x scroll
-    overflow-y hidden
-
-@media (min-width 1000px)
-  .auction__teams
-    justify-content center
