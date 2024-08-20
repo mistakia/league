@@ -1,7 +1,7 @@
 import express from 'express'
 import dayjs from 'dayjs'
 
-import { constants } from '#libs-shared'
+import { job_title_by_id } from '#libs-shared/job-constants'
 import { getJobs } from '#libs-server'
 
 const router = express.Router()
@@ -30,7 +30,7 @@ router.get('/overall', async (req, res) => {
     const errors = failed_jobs.map((job) => {
       const timestamp = dayjs.unix(job.timestamp).format('YYYY/MM/DD HH:mm')
       return {
-        job: constants.job_title_by_id[job.type],
+        job: job_title_by_id[job.type],
         reason: job.reason,
         timestamp
       }

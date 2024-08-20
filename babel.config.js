@@ -35,6 +35,7 @@ module.exports = (api) => {
         {
           root: ['./'],
           alias: {
+            '@libs-shared/job-constants': './libs-shared/job-constants.mjs',
             '@libs-shared': './libs-shared/index.mjs',
             '@views': './app/views',
             '@pages': './app/views/pages',

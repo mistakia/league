@@ -18,7 +18,7 @@ import TaskAltIcon from '@mui/icons-material/TaskAlt'
 import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 
 import Loading from '@components/loading'
-import { constants } from '@libs-shared'
+import { job_title_by_id } from '@libs-shared/job-constants'
 import PageLayout from '@layouts/page'
 
 import './status.styl'
@@ -48,7 +48,7 @@ const StatusItem = ({ status_item, index }) => {
   return (
     <ListItem key={index} button onClick={handle_click}>
       <ListItemText
-        primary={constants.job_title_by_id[status_item.type]}
+        primary={job_title_by_id[status_item.type]}
         secondary={expanded ? message : secondary}
       />
       <ListItemSecondaryAction>{icon}</ListItemSecondaryAction>
