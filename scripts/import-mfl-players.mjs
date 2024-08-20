@@ -7,6 +7,7 @@ import db from '#db'
 import { constants, fixTeam } from '#libs-shared'
 import { isMain, getPlayer } from '#libs-server'
 import config from '#config'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import:players:mfl')
@@ -138,7 +139,7 @@ const main = async () => {
   }
 
   await db('jobs').insert({
-    type: constants.jobs.PLAYERS_MFL,
+    type: job_types.PLAYERS_MFL,
     succ: error ? 0 : 1,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)

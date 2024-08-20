@@ -2,6 +2,7 @@ import debug from 'debug'
 import db from '#db'
 // import { constants } from '#libs-shared'
 import { isMain, update_player_id } from '#libs-server'
+// import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('update-player-ids-from-changelog')
 debug.enable('update-player-ids-from-changelog,update-player-id')
@@ -30,7 +31,7 @@ const main = async () => {
   }
 
   // await db('jobs').insert({
-  //   type: constants.jobs.update_player_ids_from_changelog,
+  //   type: job_types.update_player_ids_from_changelog,
   //   succ: error ? 0 : 1,
   //   reason: error ? error.message : null,
   //   timestamp: Math.round(Date.now() / 1000)

@@ -7,6 +7,7 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { getYardlineInfoFromString } from '#libs-shared'
 import { isMain, readCSV, getPlay, format_starting_hash } from '#libs-server'
+// import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 dayjs.extend(duration)
@@ -143,7 +144,7 @@ const main = async () => {
   }
 
   /* await db('jobs').insert({
-   *   type: constants.jobs.EXAMPLE,
+   *   type: job_types.EXAMPLE,
    *   succ: error ? 0 : 1,
    *   reason: error ? error.message : null,
    *   timestamp: Math.round(Date.now() / 1000)

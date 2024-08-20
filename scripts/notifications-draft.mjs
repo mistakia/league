@@ -4,6 +4,7 @@ import debug from 'debug'
 import db from '#db'
 import { constants } from '#libs-shared'
 import { isMain, getLeague } from '#libs-server'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('notifications-draft')
 debug.enable('notifications-draft')
@@ -65,7 +66,7 @@ const main = async () => {
   }
 
   await db('jobs').insert({
-    type: constants.jobs.NOTIFICATIONS_DRAFT,
+    type: job_types.NOTIFICATIONS_DRAFT,
     succ: error ? 0 : 1,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)

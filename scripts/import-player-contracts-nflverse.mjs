@@ -11,6 +11,7 @@ import dayjs from 'dayjs'
 import db from '#db'
 import { fixTeam } from '#libs-shared'
 import { isMain, getPlayer, updatePlayer } from '#libs-server'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-player-contracts-nflverse')
@@ -160,12 +161,12 @@ const main = async () => {
     log(error)
   }
 
-  // await db('jobs').insert({
-  //   type: constants.jobs.EXAMPLE,
-  //   succ: error ? 0 : 1,
-  //   reason: error ? error.message : null,
-  //   timestamp: Math.round(Date.now() / 1000)
-  // })
+  await db('jobs').insert({
+    type: job_types.IMPORT_PLAYER_CONTRACTS_NFLVERSE,
+    succ: error ? 0 : 1,
+    reason: error ? error.message : null,
+    timestamp: Math.round(Date.now() / 1000)
+  })
 
   process.exit()
 }

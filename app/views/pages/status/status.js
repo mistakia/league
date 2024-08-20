@@ -48,7 +48,7 @@ const StatusItem = ({ status_item, index }) => {
   return (
     <ListItem key={index} button onClick={handle_click}>
       <ListItemText
-        primary={constants.jobDetails[status_item.type]}
+        primary={constants.job_title_by_id[status_item.type]}
         secondary={expanded ? message : secondary}
       />
       <ListItemSecondaryAction>{icon}</ListItemSecondaryAction>

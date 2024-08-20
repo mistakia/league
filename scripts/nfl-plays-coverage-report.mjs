@@ -100,7 +100,7 @@ const main = async () => {
   }
 
   // await db('jobs').insert({
-  //   type: constants.jobs.EXAMPLE,
+  //   type: job_types.EXAMPLE,
   //   succ: error ? 0 : 1,
   //   reason: error ? error.message : null,
   //   timestamp: Math.round(Date.now() / 1000)

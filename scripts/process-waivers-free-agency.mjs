@@ -1,5 +1,6 @@
 import db from '#db'
-import { constants, Errors } from '#libs-shared'
+import { Errors } from '#libs-shared'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 import processActiveWaivers from './process-waivers-free-agency-active.mjs'
 import processPracticeWaivers from './process-waivers-free-agency-practice.mjs'
@@ -23,7 +24,7 @@ const runActive = async () => {
   }
 
   await db('jobs').insert({
-    type: constants.jobs.CLAIMS_WAIVERS_ACTIVE,
+    type: job_types.CLAIMS_WAIVERS_ACTIVE,
     succ,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)
@@ -47,7 +48,7 @@ const runPractice = async () => {
   }
 
   await db('jobs').insert({
-    type: constants.jobs.CLAIMS_WAIVERS_PRACTICE,
+    type: job_types.CLAIMS_WAIVERS_PRACTICE,
     succ,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)

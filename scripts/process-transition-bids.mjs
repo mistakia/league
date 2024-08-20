@@ -8,6 +8,7 @@ import {
   isMain,
   resetWaiverOrder
 } from '#libs-server'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('process-transition-bids')
 debug.enable('process-transition-bids')
@@ -144,7 +145,7 @@ const main = async () => {
   }
 
   await db('jobs').insert({
-    type: constants.jobs.PROCESS_TRANSITION_BIDS,
+    type: job_types.PROCESS_TRANSITION_BIDS,
     succ: error ? 0 : 1,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)

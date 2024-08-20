@@ -13,6 +13,7 @@ import {
   insert_prop_markets,
   wait
 } from '#libs-server'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-fanduel')
@@ -274,7 +275,7 @@ export const job = async () => {
 
   if (!argv.dry) {
     await db('jobs').insert({
-      type: constants.jobs.FANDUEL_ODDS,
+      type: job_types.FANDUEL_ODDS,
       succ: error ? 0 : 1,
       reason: error ? error.message : null,
       timestamp: Math.round(Date.now() / 1000)

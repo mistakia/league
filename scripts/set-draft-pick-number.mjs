@@ -3,6 +3,7 @@ import debug from 'debug'
 import db from '#db'
 import { constants } from '#libs-shared'
 import { getLeague, isMain } from '#libs-server'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('set-draft-pick-number')
 
@@ -106,7 +107,7 @@ const main = async () => {
   }
 
   await db('jobs').insert({
-    type: constants.jobs.SET_DRAFT_PICK_NUMBER,
+    type: job_types.SET_DRAFT_PICK_NUMBER,
     succ: error ? 0 : 1,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)

@@ -7,6 +7,7 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { constants, fixTeam, getGameDayAbbreviation } from '#libs-shared'
 import { isMain, wait, nfl } from '#libs-server'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 dayjs.extend(timezone)
 
@@ -191,7 +192,7 @@ const main = async () => {
   }
 
   await db('jobs').insert({
-    type: constants.jobs.IMPORT_NFL_GAMES_NFL,
+    type: job_types.IMPORT_NFL_GAMES_NFL,
     succ: error ? 0 : 1,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)

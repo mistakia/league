@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url'
 import { Table } from 'console-table-printer'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+// import { job_types } from '#libs-shared/job-constants.mjs'
 
 // import db from '#db'
 import { constants } from '#libs-shared'
@@ -551,7 +552,7 @@ const main = async () => {
   }
 
   /* await db('jobs').insert({
-   *   type: constants.jobs.EXAMPLE,
+   *   type: job_types.EXAMPLE,
    *   succ: error ? 0 : 1,
    *   reason: error ? error.message : null,
    *   timestamp: Math.round(Date.now() / 1000)

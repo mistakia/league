@@ -11,6 +11,7 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { constants, fixTeam } from '#libs-shared'
 import { isMain, readCSV, getPlay, update_play } from '#libs-server'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-nflfastr-plays')
@@ -329,7 +330,7 @@ const main = async () => {
   }
 
   await db('jobs').insert({
-    type: constants.jobs.IMPORT_PLAYS_NFLFASTR,
+    type: job_types.IMPORT_PLAYS_NFLFASTR,
     succ: error ? 0 : 1,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)

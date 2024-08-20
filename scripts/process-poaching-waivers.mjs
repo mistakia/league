@@ -10,6 +10,7 @@ import {
   isMain
 } from '#libs-server'
 import db from '#db'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('process:waivers:poach')
 if (process.env.NODE_ENV !== 'test') {
@@ -107,7 +108,7 @@ const main = async () => {
   }
 
   await db('jobs').insert({
-    type: constants.jobs.CLAIMS_WAIVERS_POACH,
+    type: job_types.CLAIMS_WAIVERS_POACH,
     succ,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)

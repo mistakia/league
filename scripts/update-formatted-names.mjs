@@ -1,8 +1,9 @@
 import debug from 'debug'
 
 import db from '#db'
-import { constants, formatPlayerName } from '#libs-shared'
+import { formatPlayerName } from '#libs-shared'
 import { isMain, updatePlayer } from '#libs-server'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('update-formatted-names')
 debug.enable('update-formatted-names')
@@ -37,7 +38,7 @@ const main = async () => {
   }
 
   await db('jobs').insert({
-    type: constants.jobs.UPDATE_FORMATTED_NAMES,
+    type: job_types.UPDATE_FORMATTED_NAMES,
     succ: error ? 0 : 1,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)

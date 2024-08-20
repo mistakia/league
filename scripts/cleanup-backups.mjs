@@ -1,6 +1,7 @@
 import debug from 'debug'
 
 import { googleDrive, isMain } from '#libs-server'
+// import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('cleanup-backups')
 debug.enable('cleanup-backups')
@@ -28,7 +29,7 @@ const main = async () => {
   }
 
   /* await db('jobs').insert({
-   *   type: constants.jobs.CLEANUP_BACKUPS,
+   *   type: job_types.CLEANUP_BACKUPS,
    *   succ: error ? 0 : 1,
    *   reason: error ? error.message : null,
    *   timestamp: Math.round(Date.now() / 1000)

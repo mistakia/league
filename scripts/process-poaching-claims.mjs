@@ -9,6 +9,7 @@ import {
   getLeague,
   isMain
 } from '#libs-server'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('process:claims')
 if (process.env.NODE_ENV !== 'test') {
@@ -107,7 +108,7 @@ const main = async () => {
   }
 
   await db('jobs').insert({
-    type: constants.jobs.CLAIMS_POACH,
+    type: job_types.CLAIMS_POACH,
     succ,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)
