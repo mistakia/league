@@ -29,6 +29,7 @@ db_user="league_user"
 db_host="localhost"
 
 db_user_tables="
+config
 draft
 league_cutlist
 leagues
