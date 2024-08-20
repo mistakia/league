@@ -8,6 +8,7 @@ import {
   getTopPracticeSquadWaiver,
   isMain
 } from '#libs-server'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('process:waivers:freeagency')
 if (process.env.NODE_ENV !== 'test') {
@@ -129,7 +130,7 @@ const main = async () => {
   }
 
   await db('jobs').insert({
-    type: constants.jobs.CLAIMS_WAIVERS_PRACTICE,
+    type: job_types.CLAIMS_WAIVERS_PRACTICE,
     succ,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)

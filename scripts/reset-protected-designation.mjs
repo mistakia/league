@@ -3,6 +3,7 @@ import debug from 'debug'
 import db from '#db'
 import { constants } from '#libs-shared'
 import { isMain } from '#libs-server'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('reset-protected-designation')
 debug.enable('reset-protected-designation')
@@ -44,7 +45,7 @@ const main = async () => {
   }
 
   await db('jobs').insert({
-    type: constants.jobs.RESET_PROTECTED_DESIGNATION,
+    type: job_types.RESET_PROTECTED_DESIGNATION,
     succ: error ? 0 : 1,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)

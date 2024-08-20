@@ -14,6 +14,7 @@ import {
   getPlayer,
   insert_prop_markets
 } from '#libs-server'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-gambet-odds')
@@ -186,7 +187,7 @@ export const job = async () => {
   }
 
   await db('jobs').insert({
-    type: constants.jobs.GAMBET_ODDS,
+    type: job_types.GAMBET_ODDS,
     succ: error ? 0 : 1,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)

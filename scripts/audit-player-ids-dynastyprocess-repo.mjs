@@ -8,6 +8,7 @@ import os from 'os'
 import readline from 'readline'
 
 import db from '#db'
+// import { job_types } from '#libs-shared/job-constants.mjs'
 
 import { isMain, readCSV, updatePlayer } from '#libs-server'
 import { formatPlayerName, fixTeam } from '#libs-shared'
@@ -289,7 +290,7 @@ const main = async () => {
   }
 
   // await db('jobs').insert({
-  //   type: constants.jobs.EXAMPLE,
+  //   type: job_types.EXAMPLE,
   //   succ: error ? 0 : 1,
   //   reason: error ? error.message : null,
   //   timestamp: Math.round(Date.now() / 1000)

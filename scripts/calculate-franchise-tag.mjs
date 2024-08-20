@@ -5,6 +5,7 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { constants, groupBy } from '#libs-shared'
 import { isMain } from '#libs-server'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('calculate:franchise-tags')
@@ -92,7 +93,7 @@ const main = async () => {
   }
 
   await db('jobs').insert({
-    type: constants.jobs.CALCULATE_FRANCHISE_TAGS,
+    type: job_types.CALCULATE_FRANCHISE_TAGS,
     succ: error ? 0 : 1,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)

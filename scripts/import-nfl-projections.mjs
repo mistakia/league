@@ -6,6 +6,7 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { constants } from '#libs-shared'
 import { isMain, getPlayer } from '#libs-server'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import:projections')
@@ -170,7 +171,7 @@ const main = async () => {
   }
 
   await db('jobs').insert({
-    type: constants.jobs.PROJECTIONS_NFL,
+    type: job_types.PROJECTIONS_NFL,
     succ: error ? 0 : 1,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)

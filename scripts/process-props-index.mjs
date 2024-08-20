@@ -7,6 +7,7 @@ import db from '#db'
 import { constants } from '#libs-shared'
 import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 import { isMain } from '#libs-server'
+// import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process-props-index')
@@ -490,7 +491,7 @@ const main = async () => {
   }
 
   /* await db('jobs').insert({
-   *   type: constants.jobs.EXAMPLE,
+   *   type: job_types.EXAMPLE,
    *   succ: error ? 0 : 1,
    *   reason: error ? error.message : null,
    *   timestamp: Math.round(Date.now() / 1000)

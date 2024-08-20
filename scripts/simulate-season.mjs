@@ -7,6 +7,7 @@ import dayOfYear from 'dayjs/plugin/dayOfYear.js'
 import db from '#db'
 import { constants, simulate } from '#libs-shared'
 import { getRosters, isMain } from '#libs-server'
+// import { job_types } from '#libs-shared/job-constants.mjs'
 
 dayjs.extend(dayOfYear)
 const log = debug('simulate-season')
@@ -92,7 +93,7 @@ const main = async () => {
   }
 
   /* await db('jobs').insert({
-   *   type: constants.jobs.SIMULATE_SEASON,
+   *   type: job_types.SIMULATE_SEASON,
    *   succ: error ? 0 : 1,
    *   reason: error ? error.message : null,
    *   timestamp: Math.round(Date.now() / 1000)

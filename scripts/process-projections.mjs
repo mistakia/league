@@ -27,6 +27,7 @@ import project_lineups from './project-lineups.mjs'
 import simulate_season from './simulate-season.mjs'
 import calculateMatchupProjection from './calculate-matchup-projection.mjs'
 import calculatePlayoffMatchupProjection from './calculate-playoff-matchup-projection.mjs'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('process-projections')
 debug.enable('process-projections')
@@ -526,7 +527,7 @@ const main = async () => {
   }
 
   await db('jobs').insert({
-    type: constants.jobs.PROCESS_PROJECTIONS,
+    type: job_types.PROCESS_PROJECTIONS,
     succ: error ? 0 : 1,
     reason: error ? error.message : null,
     timestamp

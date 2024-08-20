@@ -5,6 +5,7 @@ import db from '#db'
 import { isMain, getPlayer, wait, updatePlayer, nfl } from '#libs-server'
 import { constants, fixTeam } from '#libs-shared'
 import config from '#config'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('import:nfl:players')
 debug.enable('import:nfl:players,get-player,update-player')
@@ -88,7 +89,7 @@ const main = async () => {
   }
 
   await db('jobs').insert({
-    type: constants.jobs.NFL_PLAYERS,
+    type: job_types.NFL_PLAYERS,
     succ: error ? 0 : 1,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)

@@ -8,6 +8,7 @@ import config from '#config'
 import { getPlayer, isMain } from '#libs-server'
 import { constants } from '#libs-shared'
 import db from '#db'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('import:projections')
 debug.enable('import:projections,get-player')
@@ -144,7 +145,7 @@ const main = async () => {
   }
 
   await db('jobs').insert({
-    type: constants.jobs.PROJECTIONS_4FOR4,
+    type: job_types.PROJECTIONS_4FOR4,
     succ: error ? 0 : 1,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)

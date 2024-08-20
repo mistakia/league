@@ -7,6 +7,7 @@ import db from '#db'
 import { isMain, fanduel, getPlayer } from '#libs-server'
 // import { constants } from '#libs-shared'
 // import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
+// import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process-fanduel-markets-and-selections')
@@ -250,7 +251,7 @@ async function main() {
   }
 
   /* await db('jobs').insert({
-   *   type: constants.jobs.EXAMPLE,
+   *   type: job_types.EXAMPLE,
    *   succ: error ? 0 : 1,
    *   reason: error ? error.message : null,
    *   timestamp: Math.round(Date.now() / 1000)

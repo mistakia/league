@@ -8,6 +8,7 @@ import {
   format_nfl_injury_status
 } from '#libs-shared'
 import { isMain, getPlayer } from '#libs-server'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('import:practice-report')
 debug.enable('import:practice-report,get-player')
@@ -123,7 +124,7 @@ const main = async () => {
   }
 
   await db('jobs').insert({
-    type: constants.jobs.PRACTICE_REPORT,
+    type: job_types.PRACTICE_REPORT,
     succ: error ? 0 : 1,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)

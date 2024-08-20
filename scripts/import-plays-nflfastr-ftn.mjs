@@ -16,6 +16,7 @@ import {
   update_play,
   format_starting_hash
 } from '#libs-server'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-ftn-charting-plays')
@@ -183,7 +184,7 @@ const main = async () => {
   }
 
   await db('jobs').insert({
-    type: constants.jobs.IMPORT_PLAYS_FTN_CHARTING,
+    type: job_types.IMPORT_PLAYS_FTN_CHARTING,
     succ: error ? 0 : 1,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)

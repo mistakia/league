@@ -5,6 +5,7 @@ import debug from 'debug'
 import db from '#db'
 import { constants, fixTeam } from '#libs-shared'
 import { isMain, wait } from '#libs-server'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('import:footballoutsiders')
 debug.enable('import:footballoutsiders')
@@ -253,7 +254,7 @@ const main = async () => {
   }
 
   await db('jobs').insert({
-    type: constants.jobs.DATA_FOOTBALL_OUTSIDERS,
+    type: job_types.DATA_FOOTBALL_OUTSIDERS,
     succ: error ? 0 : 1,
     reason: error ? error.message : null,
     timestamp: Math.round(Date.now() / 1000)

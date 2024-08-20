@@ -6,6 +6,7 @@ import db from '#db'
 import { constants } from '#libs-shared'
 import { isMain, getLeague, get_league_format } from '#libs-server'
 import calculate_points_added from './calculate-points-added.mjs'
+// import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('generate-league-format-player-gamelogs')
@@ -135,7 +136,7 @@ const main = async () => {
   }
 
   /* await db('jobs').insert({
-   *   type: constants.jobs.EXAMPLE,
+   *   type: job_types.EXAMPLE,
    *   succ: error ? 0 : 1,
    *   reason: error ? error.message : null,
    *   timestamp: Math.round(Date.now() / 1000)

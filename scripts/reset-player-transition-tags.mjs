@@ -6,6 +6,7 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { constants } from '#libs-shared'
 import { getLeague, isMain } from '#libs-server'
+// import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('reset-player-transition-tags')
 const argv = yargs(hideBin(process.argv)).argv
@@ -62,7 +63,7 @@ const main = async () => {
   }
 
   /* await db('jobs').insert({
-   *   type: constants.jobs.RESET_PLAYER_TAGS,
+   *   type: job_types.RESET_PLAYER_TAGS,
    *   succ: error ? 0 : 1,
    *   reason: error ? error.message : null,
    *   timestamp: Math.round(Date.now() / 1000)
