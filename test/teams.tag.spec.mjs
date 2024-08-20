@@ -54,6 +54,8 @@ describe('API /teams - tag', function () {
   })
 
   describe('errors', function () {
+    const exclude_pids = []
+
     it('not logged in', async () => {
       const request = chai.request(server).post('/api/teams/1/tag')
       await notLoggedIn(request)
@@ -64,6 +66,7 @@ describe('API /teams - tag', function () {
       const leagueId = 1
       const userId = 1
       const player = await selectPlayer()
+      exclude_pids.push(player.pid)
       await addPlayer({
         player,
         leagueId,
@@ -128,7 +131,7 @@ describe('API /teams - tag', function () {
       const teamId = 1
       const leagueId = 1
       const userId = 1
-      const player = await selectPlayer()
+      const player = await selectPlayer({ exclude_pids })
       await addPlayer({
         player,
         leagueId,
@@ -179,7 +182,7 @@ describe('API /teams - tag', function () {
     })
 
     it('player not on team', async () => {
-      const player = await selectPlayer()
+      const player = await selectPlayer({ exclude_pids })
       const request = chai
         .request(server)
         .post('/api/teams/1/tag')
