@@ -104,7 +104,7 @@ const import_all_players_from_combine_profiles = async ({
   end,
   ignore_cache = false
 }) => {
-  const token = await nfl.getToken()
+  const token = await nfl.get_session_token_v3()
   const min_year = 2006
   const max_year = constants.season.year
 
