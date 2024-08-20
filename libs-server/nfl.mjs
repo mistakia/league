@@ -526,7 +526,7 @@ export const get_combine_profiles = async ({
   }
 
   if (!token) {
-    token = await getToken()
+    token = await get_session_token_v3()
   }
 
   const url = `${config.nfl_combine_profiles_url}?year=${year}&limit=1000`
