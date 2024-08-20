@@ -82,6 +82,7 @@ const scoring_format_player_projection_points_join = (join_arguments) => {
     ...join_arguments,
     join_year: true,
     join_week: true,
+    cast_join_week_to_string: true,
     join_table_clause: `scoring_format_player_projection_points as ${join_arguments.table_name}`,
     additional_conditions: function () {
       this.andOn(

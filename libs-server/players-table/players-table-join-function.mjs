@@ -16,6 +16,7 @@ export default function players_table_join_function(join_arguments) {
     join_year = false,
     join_year_on_year_split = false,
     join_week = false,
+    cast_join_week_to_string = false,
     default_year = constants.season.year
   } = join_arguments
 
@@ -82,7 +83,10 @@ export default function players_table_join_function(join_arguments) {
       }
 
       if (splits.includes('week') && week_split_join_clause) {
-        this.andOn(db.raw(`${table_name}.week = ${week_split_join_clause}`))
+        const week_clause = cast_join_week_to_string
+          ? `CAST(${week_split_join_clause} AS VARCHAR)`
+          : week_split_join_clause
+        this.andOn(db.raw(`${table_name}.week = ${week_clause}`))
       }
 
       if (join_week) {
