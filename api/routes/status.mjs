@@ -1,7 +1,7 @@
 import express from 'express'
 import dayjs from 'dayjs'
 
-import { job_title_by_id } from '#libs-shared/job-constants'
+import { job_title_by_id } from '#libs-shared/job-constants.mjs'
 import { getJobs } from '#libs-server'
 
 const router = express.Router()
