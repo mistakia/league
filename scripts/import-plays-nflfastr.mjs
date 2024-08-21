@@ -70,6 +70,7 @@ const format_play_direction = (direction) => {
 const format_play = (play) => ({
   ydl_100: format_number(play.yardline_100),
 
+  // TODO this might not match the drive sequence number in nfl/ngs system
   drive_seq: format_number(play.fixed_drive),
   drive_result: play.fixed_drive_result || null,
   drive_top: play.drive_time_of_possession || null,
