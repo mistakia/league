@@ -22,7 +22,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
     column_params: {
       scoring_format_hash: scoring_format_hash_param,
-      rate_type: rate_type_column_param,
+      rate_type: rate_type_column_param.offensive_rate_type_param,
       ...nfl_plays_column_params
     },
     size: 70,
