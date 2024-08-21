@@ -6,13 +6,21 @@ import { nfl_plays_column_params, rate_type_column_param } from '@libs-shared'
 const from_play_field = (field) => ({
   data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
   column_params: {
-    rate_type: rate_type_column_param,
+    rate_type: rate_type_column_param.offensive_rate_type_param,
     ...nfl_plays_column_params
   },
   size: 70,
   fixed: 2,
   splits: ['year', 'week'],
   ...field
+})
+
+const from_defensive_play_field = (field) => ({
+  ...from_play_field(field),
+  column_params: {
+    rate_type: rate_type_column_param.defensive_rate_type_param,
+    ...nfl_plays_column_params
+  }
 })
 
 const from_share_field = (field) => ({
@@ -441,19 +449,19 @@ export default {
     fixed: 1
   }),
 
-  player_solo_tackles_from_plays: from_play_field({
+  player_solo_tackles_from_plays: from_defensive_play_field({
     column_title: 'Solo Tackles (By Play)',
     column_groups: [COLUMN_GROUPS.TACKLES],
     header_label: 'SOLO',
     player_value_path: 'solo_tackles_from_plays'
   }),
-  player_tackle_assists_from_plays: from_play_field({
+  player_tackle_assists_from_plays: from_defensive_play_field({
     column_title: 'Tackle Assists (By Play)',
     column_groups: [COLUMN_GROUPS.TACKLES],
     header_label: 'AST',
     player_value_path: 'tackle_assists_from_plays'
   }),
-  player_combined_tackles_from_plays: from_play_field({
+  player_combined_tackles_from_plays: from_defensive_play_field({
     column_title: 'Combined Tackles (By Play)',
     column_groups: [COLUMN_GROUPS.TACKLES],
     header_label: 'COMB',
