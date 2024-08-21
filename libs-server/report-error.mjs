@@ -1,5 +1,5 @@
 import db from '#db'
-import { job_details } from '#libs-shared/job-constants.mjs'
+import { job_title_by_id } from '#libs-shared/job-constants.mjs'
 
 import send_discord_message from './send-discord-message.mjs'
 
@@ -17,7 +17,7 @@ export default async function report_error({ job_type, error, message }) {
   let alert_message = ''
 
   if (job_type) {
-    alert_message = `**[${job_details[job_type]}]** `
+    alert_message = `**[${job_title_by_id[job_type]}]** `
   }
 
   alert_message += `${message}`
