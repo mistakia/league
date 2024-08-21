@@ -2,11 +2,12 @@ import db from '#db'
 import { constants } from '#libs-shared'
 import players_table_column_definitions from '#libs-server/players-table-column-definitions/index.mjs'
 import * as validators from '#libs-server/validators.mjs'
+
 import {
-  get_per_game_cte_table_name,
-  add_per_game_cte,
-  join_per_game_cte
-} from '#libs-server/players-table/rate-type-per-game.mjs'
+  get_rate_type_cte_table_name,
+  add_rate_type_cte,
+  join_rate_type_cte
+} from '#libs-server/players-table/rate-type/index.mjs'
 import {
   get_main_select_string,
   get_with_select_string
@@ -619,16 +620,18 @@ export default function ({
     if (
       typeof column === 'object' &&
       column.params &&
-      (Array.isArray(column.params.rate_type)
-        ? column.params.rate_type[0] === 'per_game'
-        : column.params.rate_type === 'per_game')
+      column.params.rate_type
     ) {
+      const rate_type = Array.isArray(column.params.rate_type)
+        ? column.params.rate_type[0]
+        : column.params.rate_type
+
       const column_definition =
         players_table_column_definitions[column.column_id]
       if (
         !column_definition ||
         !column_definition.supported_rate_types ||
-        !column_definition.supported_rate_types.includes('per_game')
+        !column_definition.supported_rate_types.includes(rate_type)
       ) {
         continue
       }
@@ -638,26 +641,36 @@ export default function ({
         index,
         columns: table_columns
       })
-      const rate_type_table_name = get_per_game_cte_table_name({
-        params: column.params
+      const rate_type_table_name = get_rate_type_cte_table_name({
+        params: column.params,
+        rate_type
       })
-      players_table_options.rate_type_tables[rate_type_table_name] =
-        column.params
+      players_table_options.rate_type_tables[rate_type_table_name] = {
+        params: column.params,
+        rate_type
+      }
       rate_type_column_mapping[`${column.column_id}_${column_index}`] =
         rate_type_table_name
     }
   }
 
-  for (const [rate_type_table_name, params] of Object.entries(
+  for (const [rate_type_table_name, { params, rate_type }] of Object.entries(
     players_table_options.rate_type_tables
   )) {
-    add_per_game_cte({ players_query, params, rate_type_table_name, splits })
-    join_per_game_cte({
+    add_rate_type_cte({
       players_query,
       params,
       rate_type_table_name,
       splits,
-      year_split_join_clause
+      rate_type
+    })
+    join_rate_type_cte({
+      players_query,
+      params,
+      rate_type_table_name,
+      splits,
+      year_split_join_clause,
+      rate_type
     })
   }
 

@@ -3,7 +3,7 @@ import {
   get_per_game_cte_table_name,
   add_per_game_cte,
   join_per_game_cte
-} from '#libs-server/players-table/rate-type-per-game.mjs'
+} from '#libs-server/players-table/rate-type/rate-type-per-game.mjs'
 
 const games_played_join = ({
   players_table_options,

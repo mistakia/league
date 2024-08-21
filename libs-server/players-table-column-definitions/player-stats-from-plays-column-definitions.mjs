@@ -104,7 +104,16 @@ const player_stat_from_plays = ({
     players_table_join_function({ ...args, join_year_on_year_split: true }),
   use_having: true,
   supported_splits: ['year', 'week'],
-  supported_rate_types: ['per_game']
+  supported_rate_types: [
+    'per_game',
+    'per_team_half',
+    'per_team_quarter',
+    'per_team_off_play',
+    'per_team_off_pass_play',
+    'per_team_off_rush_play',
+    'per_team_off_drive',
+    'per_team_off_series'
+  ]
 })
 
 const create_team_share_stat = ({

@@ -19,6 +19,7 @@ const getPlayData = ({ play, year, week, seas_type }) => {
     dwn: play.down,
     drive_play_count: play.drivePlayCount,
     game_clock_start: play.clockTime,
+    // TODO this might not match the drive sequence number in nflfastr
     drive_seq: play.driveSequenceNumber,
     drive_yds: play.driveNetYards,
     ydl_end: play.endYardLine,

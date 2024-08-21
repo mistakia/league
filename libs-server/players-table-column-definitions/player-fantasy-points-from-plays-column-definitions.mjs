@@ -225,7 +225,16 @@ export default {
     with: fantasy_points_from_plays_with,
     join: players_table_join_function,
     supported_splits: ['year', 'week'],
-    supported_rate_types: ['per_game'],
+    supported_rate_types: [
+      'per_game',
+      'per_team_half',
+      'per_team_quarter',
+      'per_team_off_play',
+      'per_team_off_pass_play',
+      'per_team_off_rush_play',
+      'per_team_off_drive',
+      'per_team_off_series'
+    ],
     use_having: true
   }
 }
