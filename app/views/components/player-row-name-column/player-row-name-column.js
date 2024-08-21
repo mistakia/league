@@ -5,7 +5,6 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import { constants, get_string_from_object } from '@libs-shared'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
-import Position from '@components/position'
 import PlayerLabel from '@components/player-label'
 import PlayerTag from '@components/player-tag'
 import NFLTeam from '@components/nfl-team'
@@ -25,7 +24,6 @@ export default function PlayerRowNameColumn({
   const name =
     window.innerWidth < 600 ? player_map.get('pname') : player_map.get('name')
   const nfl_team = player_map.get('team')
-  const pos = player_map.get('pos')
   const pid = player_map.get('pid')
   const tag = player_map.get('tag')
 
@@ -43,8 +41,7 @@ export default function PlayerRowNameColumn({
   return (
     <div
       className={get_string_from_object({
-        'player__row-name-column': true,
-        border_right: is_logged_in
+        'player__row-name-column': true
       })}
     >
       {is_logged_in && (
@@ -52,9 +49,7 @@ export default function PlayerRowNameColumn({
           <PlayerWatchlistAction pid={pid} />
         </div>
       )}
-      <div className='player__row-name-column-pos'>
-        <Position pos={pos} />
-      </div>
+
       <div
         className='player__row-name-column-name cursor'
         onClick={handle_click}

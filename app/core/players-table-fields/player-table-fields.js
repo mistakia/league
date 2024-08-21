@@ -2,6 +2,7 @@ import React from 'react'
 
 import PlayerRowNameColumn from '@components/player-row-name-column'
 import PlayerRowNFLTeam from '@components/player-row-nfl-team'
+import PlayerRowPositionColumn from '@components/player-row-position-column'
 import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
 import { constants } from '@libs-shared'
@@ -37,6 +38,7 @@ export default function ({ is_logged_in }) {
       data_type: table_constants.TABLE_DATA_TYPES.SELECT,
       column_values: constants.positions,
       player_value_path: 'pos',
+      component: React.memo(PlayerRowPositionColumn),
       operators: [
         table_constants.TABLE_OPERATORS.IN,
         table_constants.TABLE_OPERATORS.NOT_IN
