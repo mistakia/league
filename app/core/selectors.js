@@ -1,4 +1,5 @@
 import dayjs from 'dayjs'
+import timezone from 'dayjs/plugin/timezone'
 import utc from 'dayjs/plugin/utc.js'
 import { createSelector } from 'reselect'
 import Immutable, { Map, List } from 'immutable'
@@ -36,6 +37,7 @@ import { Team } from '@core/teams'
 import { createTrade } from '@core/trade'
 
 dayjs.extend(utc)
+dayjs.extend(timezone)
 
 export const get_app = (state) => state.get('app')
 export const get_router = (state) => state.get('router')
@@ -425,7 +427,10 @@ export const getDraftEnd = createSelector(
 
     const league = leagues.get(leagueId, new League())
     if (lastPick.selection_timestamp) {
-      return dayjs.unix(lastPick.selection_timestamp).endOf('day')
+      return dayjs
+        .unix(lastPick.selection_timestamp)
+        .tz('America/New_York')
+        .endOf('day')
     }
 
     const { picks } = draft
@@ -461,7 +466,9 @@ export const isAfterDraft = createSelector(
     const afterWaivers =
       league.draft_start &&
       draftEnd &&
-      dayjs().isAfter(draftEnd.endOf('day').add(1, 'day'))
+      dayjs().isAfter(
+        draftEnd.tz('America/New_York').endOf('day').add(1, 'day')
+      )
     return {
       afterDraft,
       afterWaivers
