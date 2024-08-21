@@ -11,7 +11,8 @@ import {
   getPlayer,
   fanduel,
   insert_prop_markets,
-  wait
+  wait,
+  report_job
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -274,11 +275,9 @@ export const job = async () => {
   }
 
   if (!argv.dry) {
-    await db('jobs').insert({
+    await report_job({
       type: job_types.FANDUEL_ODDS,
-      succ: error ? 0 : 1,
-      reason: error ? error.message : null,
-      timestamp: Math.round(Date.now() / 1000)
+      error
     })
   }
 }

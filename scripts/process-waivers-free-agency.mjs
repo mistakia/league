@@ -1,6 +1,6 @@
-import db from '#db'
 import { Errors } from '#libs-shared'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { report_job } from '#libs-server'
 
 import processActiveWaivers from './process-waivers-free-agency-active.mjs'
 import processPracticeWaivers from './process-waivers-free-agency-practice.mjs'
@@ -13,21 +13,20 @@ const runActive = async () => {
     error = err
   }
 
-  const succ =
+  const job_success = Boolean(
     !error ||
-    error instanceof Errors.EmptyFreeAgencyWaivers ||
-    error instanceof Errors.NotRegularSeason
-      ? 1
-      : 0
-  if (!succ) {
+      error instanceof Errors.EmptyFreeAgencyWaivers ||
+      error instanceof Errors.NotRegularSeason
+  )
+
+  if (!job_success) {
     console.log(error)
   }
 
-  await db('jobs').insert({
+  await report_job({
     type: job_types.CLAIMS_WAIVERS_ACTIVE,
-    succ,
-    reason: error ? error.message : null,
-    timestamp: Math.round(Date.now() / 1000)
+    job_success,
+    job_reason: error ? error.message : null
   })
 }
 
@@ -39,19 +38,18 @@ const runPractice = async () => {
     error = err
   }
 
-  const succ =
+  const job_success = Boolean(
     !error || error instanceof Errors.EmptyPracticeSquadFreeAgencyWaivers
-      ? 1
-      : 0
-  if (!succ) {
+  )
+
+  if (!job_success) {
     console.log(error)
   }
 
-  await db('jobs').insert({
+  await report_job({
     type: job_types.CLAIMS_WAIVERS_PRACTICE,
-    succ,
-    reason: error ? error.message : null,
-    timestamp: Math.round(Date.now() / 1000)
+    job_success,
+    job_reason: error ? error.message : null
   })
 }
 

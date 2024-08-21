@@ -4,7 +4,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants, groupBy } from '#libs-shared'
-import { isMain } from '#libs-server'
+import { isMain, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -92,11 +92,9 @@ const main = async () => {
     console.log(error)
   }
 
-  await db('jobs').insert({
-    type: job_types.CALCULATE_FRANCHISE_TAGS,
-    succ: error ? 0 : 1,
-    reason: error ? error.message : null,
-    timestamp: Math.round(Date.now() / 1000)
+  await report_job({
+    job_type: job_types.CALCULATE_FRANCHISE_TAGS,
+    error
   })
 
   process.exit()

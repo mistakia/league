@@ -1,9 +1,9 @@
 import dayjs from 'dayjs'
 import { constants } from '#libs-shared'
 import db from '#db'
-import { isMain } from '#libs-server'
+import { isMain, report_job } from '#libs-server'
 import debug from 'debug'
-// import { job_types } from '#libs-shared/job-constants.mjs'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 // import import_plays_nfl_v3 from '#scripts/import-plays-nfl-v3.mjs'
 import import_plays_nfl_v1 from '#scripts/import-plays-nfl-v1.mjs'
@@ -50,13 +50,10 @@ const main = async () => {
     log(error)
   }
 
-  // TODO add job type
-  // await db('jobs').insert({
-  //   type: job_types.EXAMPLE,
-  //   succ: error ? 0 : 1,
-  //   reason: error ? error.message : null,
-  //   timestamp: Math.round(Date.now() / 1000)
-  // })
+  await report_job({
+    job_type: job_types.FINALIZE_WEEK,
+    error
+  })
 
   process.exit()
 }

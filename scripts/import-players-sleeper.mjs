@@ -10,7 +10,13 @@ import {
   format_nfl_status,
   format_nfl_injury_status
 } from '#libs-shared'
-import { isMain, getPlayer, updatePlayer, createPlayer } from '#libs-server'
+import {
+  isMain,
+  getPlayer,
+  updatePlayer,
+  createPlayer,
+  report_job
+} from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -204,11 +210,9 @@ const main = async () => {
     console.log(error)
   }
 
-  await db('jobs').insert({
+  await report_job({
     type: job_types.IMPORT_PLAYERS_SLEEPER,
-    succ: error ? 0 : 1,
-    reason: error ? error.message : null,
-    timestamp: Math.round(Date.now() / 1000)
+    error
   })
 
   process.exit()
