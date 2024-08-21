@@ -127,7 +127,7 @@ router.post('/?', async (req, res) => {
     if (player_rows.length !== pids.length) {
       return res.status(400).send({ error: 'invalid player' })
     }
-    const player_row = player_rows[0]
+    const player_row = player_rows.find((p) => p.pid === pid)
 
     if (type === constants.waivers.FREE_AGENCY_PRACTICE) {
       // set bid to zero for practice squad waivers
