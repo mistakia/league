@@ -21,7 +21,8 @@ import {
   getLeague,
   getPlayerTransactions,
   isMain,
-  batch_insert
+  batch_insert,
+  report_job
 } from '#libs-server'
 import project_lineups from './project-lineups.mjs'
 import simulate_season from './simulate-season.mjs'
@@ -526,11 +527,9 @@ const main = async () => {
     console.log(error)
   }
 
-  await db('jobs').insert({
+  await report_job({
     type: job_types.PROCESS_PROJECTIONS,
-    succ: error ? 0 : 1,
-    reason: error ? error.message : null,
-    timestamp
+    error
   })
 
   process.exit()

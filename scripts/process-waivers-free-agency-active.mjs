@@ -7,7 +7,8 @@ import {
   resetWaiverOrder,
   getTopFreeAgencyWaiver,
   isMain,
-  getLeague
+  getLeague,
+  report_job
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -142,21 +143,19 @@ const main = async () => {
     error = err
   }
 
-  const succ =
+  const job_success = Boolean(
     !error ||
-    error instanceof Errors.EmptyFreeAgencyWaivers ||
-    error instanceof Errors.NotRegularSeason
-      ? 1
-      : 0
-  if (!succ) {
+      error instanceof Errors.EmptyFreeAgencyWaivers ||
+      error instanceof Errors.NotRegularSeason
+  )
+  if (!job_success) {
     console.log(error)
   }
 
-  await db('jobs').insert({
+  await report_job({
     type: job_types.CLAIMS_WAIVERS_ACTIVE,
-    succ,
-    reason: error ? error.message : null,
-    timestamp: Math.round(Date.now() / 1000)
+    job_success,
+    job_reason: error ? error.message : null
   })
 
   process.exit()

@@ -30,13 +30,6 @@ const main = async () => {
     log(error)
   }
 
-  // await db('jobs').insert({
-  //   type: job_types.update_player_ids_from_changelog,
-  //   succ: error ? 0 : 1,
-  //   reason: error ? error.message : null,
-  //   timestamp: Math.round(Date.now() / 1000)
-  // })
-
   process.exit()
 }
 

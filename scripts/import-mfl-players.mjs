@@ -3,9 +3,8 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import db from '#db'
 import { constants, fixTeam } from '#libs-shared'
-import { isMain, getPlayer } from '#libs-server'
+import { isMain, getPlayer, report_job } from '#libs-server'
 import config from '#config'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -138,11 +137,9 @@ const main = async () => {
     console.log(error)
   }
 
-  await db('jobs').insert({
+  await report_job({
     type: job_types.PLAYERS_MFL,
-    succ: error ? 0 : 1,
-    reason: error ? error.message : null,
-    timestamp: Math.round(Date.now() / 1000)
+    error
   })
 
   process.exit()

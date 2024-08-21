@@ -12,7 +12,8 @@ import {
   gambet,
   wait,
   getPlayer,
-  insert_prop_markets
+  insert_prop_markets,
+  report_job
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -186,11 +187,9 @@ export const job = async () => {
     log(error)
   }
 
-  await db('jobs').insert({
+  await report_job({
     type: job_types.GAMBET_ODDS,
-    succ: error ? 0 : 1,
-    reason: error ? error.message : null,
-    timestamp: Math.round(Date.now() / 1000)
+    error
   })
 }
 

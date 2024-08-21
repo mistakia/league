@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants, fixTeam } from '#libs-shared'
-import { isMain, wait, nfl } from '#libs-server'
+import { isMain, wait, nfl, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('import-plays-nfl-v1')
@@ -447,11 +447,9 @@ const main = async () => {
     console.log(error)
   }
 
-  await db('jobs').insert({
+  await report_job({
     type: job_types.NFL_PLAYS_NFL,
-    succ: error ? 0 : 1,
-    reason: error ? error.message : null,
-    timestamp: Math.round(Date.now() / 1000)
+    error
   })
 
   await db.destroy()

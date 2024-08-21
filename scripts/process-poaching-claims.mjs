@@ -7,6 +7,7 @@ import {
   processPoach,
   sendNotifications,
   getLeague,
+  report_job,
   isMain
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -102,16 +103,17 @@ const main = async () => {
     error = err
   }
 
-  const succ = !error || error instanceof Errors.EmptyPoachingClaims ? 1 : 0
-  if (!succ) {
+  const job_success = Boolean(
+    !error || error instanceof Errors.EmptyPoachingClaims
+  )
+  if (!job_success) {
     console.log(error)
   }
 
-  await db('jobs').insert({
+  await report_job({
     type: job_types.CLAIMS_POACH,
-    succ,
-    reason: error ? error.message : null,
-    timestamp: Math.round(Date.now() / 1000)
+    job_reason: error ? error.message : null,
+    job_success
   })
 
   process.exit()

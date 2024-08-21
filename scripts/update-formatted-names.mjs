@@ -2,7 +2,7 @@ import debug from 'debug'
 
 import db from '#db'
 import { formatPlayerName } from '#libs-shared'
-import { isMain, updatePlayer } from '#libs-server'
+import { isMain, updatePlayer, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('update-formatted-names')
@@ -37,11 +37,9 @@ const main = async () => {
     log(error)
   }
 
-  await db('jobs').insert({
+  await report_job({
     type: job_types.UPDATE_FORMATTED_NAMES,
-    succ: error ? 0 : 1,
-    reason: error ? error.message : null,
-    timestamp: Math.round(Date.now() / 1000)
+    error
   })
 
   process.exit()

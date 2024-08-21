@@ -82,7 +82,9 @@ export const job_types = {
 
   IMPORT_GAMES_NFLVERSE: 61,
   IMPORT_PLAYS_FTN_CHARTING: 62,
-  IMPORT_PLAYER_CONTRACTS_NFLVERSE: 63
+  IMPORT_PLAYER_CONTRACTS_NFLVERSE: 63,
+
+  FINALIZE_WEEK: 64
 }
 
 export const job_title_by_id = {
@@ -148,5 +150,6 @@ export const job_title_by_id = {
   60: 'Generate New Seasons',
   61: 'Import NFL Games (NFLverse)',
   62: 'Import Charted Plays (NFLverse/FTN)',
-  63: 'Import Player Contracts (NFLverse/OTC)'
+  63: 'Import Player Contracts (NFLverse/OTC)',
+  64: 'Finalize Week'
 }
