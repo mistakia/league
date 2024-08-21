@@ -62,9 +62,6 @@ export function players_table_views_reducer(
         return state.withMutations((state) => {
           state.forEach((view, key) => {
             const updated_view = view
-              .update('view_filters', (filters) =>
-                filters.push('player_league_roster_status')
-              )
               .updateIn(['table_state', 'prefix_columns'], (columns) =>
                 columns.push('player_league_roster_status')
               )

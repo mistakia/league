@@ -10,7 +10,6 @@ export const default_players_table_views = {
     view_description: constants.season.isOffseason
       ? 'Season Projections'
       : 'Rest of Season Projections',
-    view_filters: ['player_position'],
     view_search_column_id: 'player_name',
     table_state: {
       sort: [
@@ -21,7 +20,7 @@ export const default_players_table_views = {
           desc: true
         }
       ],
-      prefix_columns: ['player_name'],
+      prefix_columns: ['player_name', 'player_position'],
       columns: [
         constants.season.isOffseason
           ? 'player_season_projected_points_added'
@@ -103,7 +102,6 @@ export const default_players_table_views = {
     view_id: 'PASSING_STATS_BY_PLAY',
     view_name: 'Passing Stats by Play',
     view_description: 'Passing stats calculated per play',
-    view_filters: ['player_position'],
     table_state: {
       sort: [
         {
@@ -111,7 +109,7 @@ export const default_players_table_views = {
           desc: true
         }
       ],
-      prefix_columns: ['player_name'],
+      prefix_columns: ['player_name', 'player_position'],
       columns: [
         'player_pass_yards_from_plays',
         'player_pass_touchdowns_from_plays',
@@ -142,7 +140,6 @@ export const default_players_table_views = {
     view_id: 'RUSHING_STATS_BY_PLAY',
     view_name: 'Rushing Stats By Play',
     view_description: 'Rushing stats calculated per play',
-    view_filters: ['player_position'],
     table_state: {
       sort: [
         {
@@ -150,7 +147,7 @@ export const default_players_table_views = {
           desc: true
         }
       ],
-      prefix_columns: ['player_name'],
+      prefix_columns: ['player_name', 'player_position'],
       columns: [
         // fantasy_points
         'player_rush_yards_from_plays',
@@ -176,7 +173,6 @@ export const default_players_table_views = {
     view_id: 'RECEIVING_STATS_BY_PLAY',
     view_name: 'Receiving Stats by Play',
     view_description: 'Receiving stats calculated per play',
-    view_filters: ['player_position'],
     table_state: {
       sort: [
         {
@@ -184,7 +180,7 @@ export const default_players_table_views = {
           desc: true
         }
       ],
-      prefix_columns: ['player_name'],
+      prefix_columns: ['player_name', 'player_position'],
       columns: [
         // fantasy points
         'player_receiving_yards_from_plays',
