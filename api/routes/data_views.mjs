@@ -1,6 +1,6 @@
 import express from 'express'
 import crypto from 'crypto'
-import LRU from 'lru-cache'
+import { LRUCache } from 'lru-cache'
 
 import { validators, get_data_view_results } from '#libs-server'
 
@@ -16,7 +16,7 @@ const lru_options = {
   }
 }
 
-const data_view_cache = new LRU(lru_options)
+const data_view_cache = new LRUCache(lru_options)
 
 const router = express.Router()
 
