@@ -2,7 +2,7 @@ import db from '#db'
 import { nfl_plays_column_params, data_views_constants } from '#libs-shared'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '../apply-play-by-play-column-params-to-query.mjs'
-import data_view_join_function from '#libs-server/data-views/data-views-join-function.mjs'
+import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { get_rate_type_sql } from '#libs-server/data-views/select-string.mjs'
 
 const generate_fantasy_points_table_alias = ({ params = {} } = {}) => {

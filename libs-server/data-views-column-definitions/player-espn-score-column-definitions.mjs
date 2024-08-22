@@ -1,5 +1,5 @@
 import db from '#db'
-import data_view_join_function from '#libs-server/data-views/data-views-join-function.mjs'
+import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 
 const get_valid_year = (year) => {
   const parsed_year = Number(year)

@@ -1,7 +1,7 @@
 import db from '#db'
 import { nfl_plays_column_params } from '#libs-shared'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
-import data_view_join_function from '#libs-server/data-views/data-views-join-function.mjs'
+import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { add_defensive_play_by_play_with_statement } from '#libs-server/data-views/add-defensive-play-by-play-with-statement.mjs'
 import { get_rate_type_sql } from '#libs-server/data-views/select-string.mjs'
 

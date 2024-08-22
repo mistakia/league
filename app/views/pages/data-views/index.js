@@ -15,10 +15,10 @@ import * as table_constants from 'react-table/src/constants.mjs'
 import DataViewsPage from './data-views'
 
 const get_players_percentiles = createSelector(
-  (state) => state.getIn(['data_views']),
+  (state) => state.getIn(['data_view_items']),
   get_selected_data_view,
   get_data_views_fields,
-  (data_views_map, selected_data_view, data_views_fields) => {
+  (data_view_items, selected_data_view, data_views_fields) => {
     const percentile_stat_keys = []
     const table_state_columns = []
     for (const [
@@ -48,7 +48,7 @@ const get_players_percentiles = createSelector(
     }
 
     const percentiles = calculatePercentiles({
-      items: data_views_map.toJS(),
+      items: data_view_items.toJS(),
       stats: percentile_stat_keys
     })
 
@@ -57,7 +57,7 @@ const get_players_percentiles = createSelector(
 )
 
 const mapStateToProps = createSelector(
-  (state) => state.getIn(['data_views']),
+  (state) => state.getIn(['data_view_items']),
   (state) => state.getIn(['players', 'allPlayersPending']),
   (state) => state.getIn(['app', 'userId']),
   getStats,
@@ -72,7 +72,7 @@ const mapStateToProps = createSelector(
   get_players_percentiles,
   (state) => state.getIn(['app', 'user', 'username']),
   (
-    data_views_map,
+    data_view_items,
     allPlayersPending,
     userId,
     stats,
@@ -88,7 +88,7 @@ const mapStateToProps = createSelector(
     user_username
   ) => ({
     user_id: userId,
-    players: data_views_map.toJS(),
+    players: data_view_items.toJS(),
     isLoggedIn: Boolean(userId),
     isPending:
       allPlayersPending ||
