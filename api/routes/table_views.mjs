@@ -27,9 +27,11 @@ router.get('/?', async (req, res) => {
     }
 
     const query = db('user_table_views')
+      .select('user_table_views.*', 'users.username as view_username')
+      .leftJoin('users', 'user_table_views.user_id', 'users.id')
 
     if (user_ids.length) {
-      query.whereIn('user_id', user_ids)
+      query.whereIn('user_table_views.user_id', user_ids)
     }
 
     const views = await query
