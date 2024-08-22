@@ -3,6 +3,7 @@ import { constants } from '@libs-shared'
 export const default_players_table_views = {
   SEASON_PROJECTIONS: {
     view_id: 'SEASON_PROJECTIONS',
+    view_username: 'system',
     view_name: constants.season.isOffseason
       ? 'Season Projections'
       : 'Rest of Season Projections',
@@ -66,6 +67,7 @@ export const default_players_table_views = {
   },
   // WEEK_PROJECTIONS: {
   //   view_id: 'WEEK_PROJECTIONS',
+  //   view_username: 'system',
   //   name: 'Week Projections',
   //   order_by: 'player_week_projected_points_added',
   //   fields: [
@@ -100,6 +102,7 @@ export const default_players_table_views = {
   // },
   PASSING_STATS_BY_PLAY: {
     view_id: 'PASSING_STATS_BY_PLAY',
+    view_username: 'system',
     view_name: 'Passing Stats by Play',
     view_description: 'Passing stats calculated per play',
     table_state: {
@@ -138,6 +141,7 @@ export const default_players_table_views = {
   },
   RUSHING_STATS_BY_PLAY: {
     view_id: 'RUSHING_STATS_BY_PLAY',
+    view_username: 'system',
     view_name: 'Rushing Stats By Play',
     view_description: 'Rushing stats calculated per play',
     table_state: {
@@ -171,6 +175,7 @@ export const default_players_table_views = {
 
   RECEIVING_STATS_BY_PLAY: {
     view_id: 'RECEIVING_STATS_BY_PLAY',
+    view_username: 'system',
     view_name: 'Receiving Stats by Play',
     view_description: 'Receiving stats calculated per play',
     table_state: {
