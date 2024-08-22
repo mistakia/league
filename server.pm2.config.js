@@ -7,7 +7,8 @@ module.exports = {
       env_production: {
         NODE_ENV: 'production'
       },
-      max_memory_restart: '2G'
+      max_memory_restart: '3G',
+      node_args: '--max-old-space-size=3072'
     }
   ],
 
