@@ -6,7 +6,7 @@ import {
   getPlayers,
   getTransitionBids,
   getLeague,
-  get_players_table_view_results
+  get_data_view_results
 } from '#libs-server'
 
 const router = express.Router()
@@ -120,7 +120,7 @@ router.post('/search/?', async (req, res) => {
       // TODO validate offset
     }
 
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       where,
       columns,
       sort,

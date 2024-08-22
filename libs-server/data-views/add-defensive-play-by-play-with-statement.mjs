@@ -1,6 +1,6 @@
 import db from '#db'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
-import { nfl_plays_column_params, players_table_constants } from '#libs-shared'
+import { nfl_plays_column_params, data_views_constants } from '#libs-shared'
 
 export const add_defensive_play_by_play_with_statement = ({
   query,
@@ -73,7 +73,7 @@ export const add_defensive_play_by_play_with_statement = ({
 
   // Add splits
   for (const split of splits) {
-    if (players_table_constants.split_params.includes(split)) {
+    if (data_views_constants.split_params.includes(split)) {
       const column_param_definition = nfl_plays_column_params[split]
       const table_name = column_param_definition.table || 'defensive_plays'
       const split_statement = `${table_name}.${split}`

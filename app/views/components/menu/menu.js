@@ -103,9 +103,7 @@ export default function AppMenu({
                   </>
                 )}
                 <NavLink to={`/leagues/${leagueId}/players`}>Players</NavLink>
-                <NavLink to={`/leagues/${leagueId}/players-table`}>
-                  Players Table (Beta)
-                </NavLink>
+                <NavLink to='/data-views'>Data Views (Beta)</NavLink>
                 {Boolean(leagueId) && (
                   <>
                     <NavLink to={`/leagues/${leagueId}/rosters`}>

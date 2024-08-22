@@ -42,7 +42,7 @@ If there's something you'd like to see, or if coverage for a data point is lacki
 
 #### Total targets on first series of a drive in 2023
 
-[View Link](https://xo.football/leagues/0/players-table?columns=%5B%7B%22column_id%22%3A%22player_targets_from_plays%22%2C%22params%22%3A%7B%22series_seq%22%3A%5B1%2C1%5D%2C%22year%22%3A%5B2023%5D%7D%7D%5D&prefix_columns=%5B%22player_name%22%5D&sort=%5B%7B%22column_id%22%3A%22player_targets_from_plays%22%2C%22desc%22%3Atrue%7D%5D&where=%5B%5D&view_id=be8c95c6-b3a0-45e1-a916-c9e2f25a5a23&view_name=New+view&view_search_column_id=player_name&view_description=New+view+description)
+[View Link](https://xo.football/data-views?columns=%5B%7B%22column_id%22%3A%22player_targets_from_plays%22%2C%22params%22%3A%7B%22series_seq%22%3A%5B1%2C1%5D%2C%22year%22%3A%5B2023%5D%7D%7D%5D&prefix_columns=%5B%22player_name%22%5D&sort=%5B%7B%22column_id%22%3A%22player_targets_from_plays%22%2C%22desc%22%3Atrue%7D%5D&where=%5B%5D&view_id=be8c95c6-b3a0-45e1-a916-c9e2f25a5a23&view_name=New+view&view_search_column_id=player_name&view_description=New+view+description)
 
 ```
 - add view
@@ -59,7 +59,7 @@ If there's something you'd like to see, or if coverage for a data point is lacki
 
 #### Total targets on third and fourth down in 2022 and 2023
 
-[View Link](https://xo.football/leagues/0/players-table?columns=%5B%7B%22column_id%22%3A%22player_targets_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%2C2022%5D%2C%22dwn%22%3A%5B3%2C4%5D%7D%7D%5D&prefix_columns=%5B%22player_name%22%5D&sort=%5B%7B%22column_id%22%3A%22player_targets_from_plays%22%2C%22desc%22%3Atrue%7D%5D&where=%5B%5D&view_id=a347f89b-b9c5-4c7b-9247-b59904691bc3&view_name=New+view&view_search_column_id=player_name&view_description=New+view+description)
+[View Link](https://xo.football/data-views?columns=%5B%7B%22column_id%22%3A%22player_targets_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%2C2022%5D%2C%22dwn%22%3A%5B3%2C4%5D%7D%7D%5D&prefix_columns=%5B%22player_name%22%5D&sort=%5B%7B%22column_id%22%3A%22player_targets_from_plays%22%2C%22desc%22%3Atrue%7D%5D&where=%5B%5D&view_id=a347f89b-b9c5-4c7b-9247-b59904691bc3&view_name=New+view&view_search_column_id=player_name&view_description=New+view+description)
 
 ```
 - add view
@@ -80,7 +80,7 @@ TODO
 
 #### Career Receiving Yards & Age of players under 23 years old
 
-[View Link](https://xo.football/leagues/0/players-table?columns=%5B%22player_receiving_yards_from_plays%22%2C%22player_age%22%5D&prefix_columns=%5B%22player_name%22%5D&sort=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22desc%22%3Atrue%7D%5D&where=%5B%7B%22column_id%22%3A%22player_age%22%2C%22operator%22%3A%22%3C%3D%22%2C%22value%22%3A%2223%22%7D%5D&view_id=a4f07e01-37b6-4743-9557-76644968a361&view_name=New+view&view_search_column_id=player_name&view_description=New+view+description)
+[View Link](https://xo.football/data-views?columns=%5B%22player_receiving_yards_from_plays%22%2C%22player_age%22%5D&prefix_columns=%5B%22player_name%22%5D&sort=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22desc%22%3Atrue%7D%5D&where=%5B%7B%22column_id%22%3A%22player_age%22%2C%22operator%22%3A%22%3C%3D%22%2C%22value%22%3A%2223%22%7D%5D&view_id=a4f07e01-37b6-4743-9557-76644968a361&view_name=New+view&view_search_column_id=player_name&view_description=New+view+description)
 
 ```
 - add view
@@ -100,7 +100,7 @@ TODO
 
 #### Receiving Yards in Week 1 (Column for Each Year between 2019-2023)
 
-[View Link](https://xo.football/leagues/0/players-table?columns=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%5D%2C%22week%22%3A%5B1%5D%7D%7D%2C%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2022%5D%2C%22week%22%3A%5B1%5D%7D%7D%2C%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2021%5D%2C%22week%22%3A%5B1%5D%7D%7D%2C%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2020%5D%2C%22week%22%3A%5B1%5D%7D%7D%2C%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2019%5D%2C%22week%22%3A%5B1%5D%7D%7D%2C%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%2C2022%2C2021%2C2020%2C2019%5D%2C%22week%22%3A%5B1%5D%7D%7D%5D&prefix_columns=%5B%22player_name%22%5D&sort=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22desc%22%3Atrue%2C%22column_index%22%3A5%7D%5D&where=%5B%5D&view_id=8ec84f0b-6253-4472-8f25-ade76ec8dd5d&view_name=New+view&view_search_column_id=player_name&view_description=New+view+description)
+[View Link](https://xo.football/data-views?columns=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%5D%2C%22week%22%3A%5B1%5D%7D%7D%2C%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2022%5D%2C%22week%22%3A%5B1%5D%7D%7D%2C%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2021%5D%2C%22week%22%3A%5B1%5D%7D%7D%2C%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2020%5D%2C%22week%22%3A%5B1%5D%7D%7D%2C%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2019%5D%2C%22week%22%3A%5B1%5D%7D%7D%2C%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%2C2022%2C2021%2C2020%2C2019%5D%2C%22week%22%3A%5B1%5D%7D%7D%5D&prefix_columns=%5B%22player_name%22%5D&sort=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22desc%22%3Atrue%2C%22column_index%22%3A5%7D%5D&where=%5B%5D&view_id=8ec84f0b-6253-4472-8f25-ade76ec8dd5d&view_name=New+view&view_search_column_id=player_name&view_description=New+view+description)
 
 ```
 - add view
@@ -127,7 +127,7 @@ TODO
 
 #### Total Receiving Yards from Week 1-3 Between 2021-2023
 
-[View Link](https://xo.football/leagues/0/players-table?columns=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22week%22%3A%5B1%2C2%2C3%5D%2C%22year%22%3A%5B2023%2C2022%2C2021%5D%7D%7D%5D&prefix_columns=%5B%22player_name%22%5D&sort=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22desc%22%3Atrue%7D%5D&where=%5B%5D&view_id=461ff2dd-dd68-4ad8-b52e-e19233f7c23d&view_name=New+view&view_search_column_id=player_name&view_description=New+view+description)
+[View Link](https://xo.football/data-views?columns=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22week%22%3A%5B1%2C2%2C3%5D%2C%22year%22%3A%5B2023%2C2022%2C2021%5D%7D%7D%5D&prefix_columns=%5B%22player_name%22%5D&sort=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22desc%22%3Atrue%7D%5D&where=%5B%5D&view_id=461ff2dd-dd68-4ad8-b52e-e19233f7c23d&view_name=New+view&view_search_column_id=player_name&view_description=New+view+description)
 
 ```
 - add view
@@ -144,7 +144,7 @@ TODO
 
 #### Most Receptions over 60 yards since 2021
 
-[View Link](https://xo.football/leagues/0/players-table?columns=%5B%7B%22column_id%22%3A%22player_receptions_from_plays%22%2C%22params%22%3A%7B%22week%22%3A%5B1%2C2%2C3%2C4%2C5%2C6%2C7%2C8%2C9%2C10%2C11%2C12%2C13%2C14%2C15%2C16%2C17%2C18%2C19%2C20%2C21%5D%2C%22year%22%3A%5B2023%2C2022%2C2021%5D%2C%22recv_yds%22%3A%5B60%2C99%5D%7D%7D%5D&prefix_columns=%5B%22player_name%22%5D&sort=%5B%7B%22column_id%22%3A%22player_receptions_from_plays%22%2C%22desc%22%3Atrue%7D%5D&where=%5B%5D&view_id=0a0b78b0-6e4f-4d0d-8a85-4ee9f301b68c&view_name=New+view&view_search_column_id=player_name&view_description=New+view+description)
+[View Link](https://xo.football/data-views?columns=%5B%7B%22column_id%22%3A%22player_receptions_from_plays%22%2C%22params%22%3A%7B%22week%22%3A%5B1%2C2%2C3%2C4%2C5%2C6%2C7%2C8%2C9%2C10%2C11%2C12%2C13%2C14%2C15%2C16%2C17%2C18%2C19%2C20%2C21%5D%2C%22year%22%3A%5B2023%2C2022%2C2021%5D%2C%22recv_yds%22%3A%5B60%2C99%5D%7D%7D%5D&prefix_columns=%5B%22player_name%22%5D&sort=%5B%7B%22column_id%22%3A%22player_receptions_from_plays%22%2C%22desc%22%3Atrue%7D%5D&where=%5B%5D&view_id=0a0b78b0-6e4f-4d0d-8a85-4ee9f301b68c&view_name=New+view&view_search_column_id=player_name&view_description=New+view+description)
 
 ```
 - add view
@@ -161,7 +161,7 @@ TODO
 
 #### Receiving Yards & Touchdowns from players with an overall ESPN open score over 80 in 2023
 
-[View Link](https://xo.football/leagues/0/players-table?columns=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%5D%7D%7D%2C%7B%22column_id%22%3A%22player_receiving_touchdowns_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%5D%7D%7D%2C%7B%22column_id%22%3A%22player_espn_open_score%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%5D%7D%7D%5D&prefix_columns=%5B%22player_name%22%5D&sort=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22desc%22%3Atrue%7D%5D&where=%5B%7B%22column_id%22%3A%22player_espn_open_score%22%2C%22operator%22%3A%22%3E%3D%22%2C%22value%22%3A%2280%22%7D%5D&view_id=48240f40-87a3-48e3-b03a-4536b9928a17&view_name=New+view&view_search_column_id=player_name&view_description=New+view+description)
+[View Link](https://xo.football/data-views?columns=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%5D%7D%7D%2C%7B%22column_id%22%3A%22player_receiving_touchdowns_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%5D%7D%7D%2C%7B%22column_id%22%3A%22player_espn_open_score%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%5D%7D%7D%5D&prefix_columns=%5B%22player_name%22%5D&sort=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22desc%22%3Atrue%7D%5D&where=%5B%7B%22column_id%22%3A%22player_espn_open_score%22%2C%22operator%22%3A%22%3E%3D%22%2C%22value%22%3A%2280%22%7D%5D&view_id=48240f40-87a3-48e3-b03a-4536b9928a17&view_name=New+view&view_search_column_id=player_name&view_description=New+view+description)
 
 ```
 - add view
@@ -194,7 +194,7 @@ TODO
 
 #### Players with over 80 receiving yards in Week 1 and 1200+ receiving yards in 2023
 
-[View Link](https://xo.football/leagues/0/players-table?columns=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%5D%2C%22week%22%3A%5B1%5D%7D%7D%2C%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%5D%7D%7D%5D&prefix_columns=%5B%22player_name%22%5D&sort=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22desc%22%3Atrue%7D%5D&where=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22operator%22%3A%22%3E%3D%22%2C%22value%22%3A%2280%22%2C%22params%22%3A%7B%22week%22%3A%5B1%5D%2C%22year%22%3A%5B2023%5D%7D%7D%2C%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22operator%22%3A%22%3E%3D%22%2C%22value%22%3A%221200%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%5D%7D%7D%5D&view_id=18c19779-091e-4c31-9791-0b74180d3a8d&view_name=New+view&view_search_column_id=player_name&view_description=New+view+description)
+[View Link](https://xo.football/data-views?columns=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%5D%2C%22week%22%3A%5B1%5D%7D%7D%2C%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%5D%7D%7D%5D&prefix_columns=%5B%22player_name%22%5D&sort=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22desc%22%3Atrue%7D%5D&where=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22operator%22%3A%22%3E%3D%22%2C%22value%22%3A%2280%22%2C%22params%22%3A%7B%22week%22%3A%5B1%5D%2C%22year%22%3A%5B2023%5D%7D%7D%2C%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22operator%22%3A%22%3E%3D%22%2C%22value%22%3A%221200%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%5D%7D%7D%5D&view_id=18c19779-091e-4c31-9791-0b74180d3a8d&view_name=New+view&view_search_column_id=player_name&view_description=New+view+description)
 
 ```
 - add view
@@ -236,7 +236,7 @@ TODO
 
 #### Receiving yards in the first quarter in 2023
 
-[View Link](https://xo.football/leagues/0/players-table?columns=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%5D%2C%22qtr%22%3A%5B1%5D%7D%7D%5D&prefix_columns=%5B%22player_name%22%5D&sort=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22desc%22%3Atrue%7D%5D&where=%5B%5D&view_id=b276184a-5c72-4088-a2cb-e65124f00bb6&view_name=New+view&view_search_column_id=player_name&view_description=New+view+description)
+[View Link](https://xo.football/data-views?columns=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22params%22%3A%7B%22year%22%3A%5B2023%5D%2C%22qtr%22%3A%5B1%5D%7D%7D%5D&prefix_columns=%5B%22player_name%22%5D&sort=%5B%7B%22column_id%22%3A%22player_receiving_yards_from_plays%22%2C%22desc%22%3Atrue%7D%5D&where=%5B%5D&view_id=b276184a-5c72-4088-a2cb-e65124f00bb6&view_name=New+view&view_search_column_id=player_name&view_description=New+view+description)
 
 ```
 - add view

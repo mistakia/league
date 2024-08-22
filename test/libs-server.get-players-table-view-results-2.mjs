@@ -1,11 +1,11 @@
 /* global describe it */
 
-import { get_players_table_view_results } from '#libs-server'
+import { get_data_view_results } from '#libs-server'
 import { compare_queries } from './utils/index.mjs'
 
-describe('LIBS SERVER get_players_table_view_results', () => {
+describe('LIBS SERVER get_data_view_results', () => {
   it('player contract with no params', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         {
           column_id: 'player_contract_base_salary'
@@ -24,7 +24,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('player contract with year', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         {
           column_id: 'player_contract_base_salary',
@@ -51,7 +51,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('team stat with per_team_off_play', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         {
           column_id: 'team_pass_yards_from_plays',
@@ -73,7 +73,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('team stat with per_team_off_pass_play', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         {
           column_id: 'team_pass_yards_from_plays',
@@ -95,7 +95,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('team stat with per_team_off_rush_play', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         {
           column_id: 'team_rush_yards_from_plays',
@@ -117,7 +117,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('team stat with per_team_half', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         {
           column_id: 'team_pass_yards_from_plays',
@@ -139,7 +139,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('team stat with per_team_quarter', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         {
           column_id: 'team_pass_yards_from_plays',
@@ -161,7 +161,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('team stat with per_team_off_drive', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         {
           column_id: 'team_pass_yards_from_plays',
@@ -183,7 +183,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('team stat with per_team_off_series', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         {
           column_id: 'team_pass_yards_from_plays',

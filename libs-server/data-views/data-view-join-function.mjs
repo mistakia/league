@@ -2,7 +2,7 @@ import { constants } from '#libs-shared'
 import db from '#db'
 import get_join_func from '#libs-server/get-join-func.mjs'
 
-export default function players_table_join_function(join_arguments) {
+export default function data_view_join_function(join_arguments) {
   const {
     query,
     table_name,

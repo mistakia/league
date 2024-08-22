@@ -1,7 +1,7 @@
 import * as constants from './constants.mjs'
 import * as common_column_params from './common-column-params.mjs'
 import * as bookmaker_constants from './bookmaker-constants.mjs'
-import * as players_table_constants from './players-table-constants.mjs'
+import * as data_views_constants from './data-views-constants.mjs'
 import getDraftWindow from './get-draft-window.mjs'
 
 export { default as weightProjections } from './weight-projections.mjs'
@@ -128,5 +128,5 @@ export {
   common_column_params,
   getDraftWindow,
   bookmaker_constants,
-  players_table_constants
+  data_views_constants
 }

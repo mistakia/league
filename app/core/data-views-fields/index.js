@@ -35,7 +35,7 @@ import player_contract_table_fields from './player-contract-table-fields'
 
 // fixed - optional
 
-export const getPlayerTableFields = createSelector(
+export const get_data_views_fields = createSelector(
   (state) =>
     state.getIn(['players', 'week'], new List([constants.week])).get(0),
   (state) => state.getIn(['app', 'userId']),

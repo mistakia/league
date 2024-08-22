@@ -8,7 +8,7 @@
 
 - Host customizable dynasty leagues (e.g., [Genesis League](https://xo.football/leagues/1))
 - Integrate with platforms: Sleeper, ESPN, Yahoo, and more
-- Utilize data intelligence tools for fantasy football and betting markets ([create custom data views](https://xo.football/leagues/0/players-table))
+- Utilize data intelligence tools for fantasy football and betting markets ([create custom data views](https://xo.football/data-views))
 - Track diverse data sources:
   - Betting markets
   - Player projections

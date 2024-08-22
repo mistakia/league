@@ -2,7 +2,7 @@ import { constants } from '#libs-shared'
 
 import db from '#db'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
-import players_table_join_function from '#libs-server/players-table/players-table-join-function.mjs'
+import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 
 const projections_index_table_alias = ({ params = {} }) => {
   const year = Array.isArray(params.year)
@@ -57,7 +57,7 @@ const league_player_projection_values_join = (join_arguments) => {
   const { params = {} } = join_arguments
   const league_id = params.league_id || 1
 
-  players_table_join_function({
+  data_view_join_function({
     ...join_arguments,
     join_year: true,
     join_week: true,
@@ -78,7 +78,7 @@ const scoring_format_player_projection_points_join = (join_arguments) => {
     params.scoring_format_hash ||
     '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
 
-  players_table_join_function({
+  data_view_join_function({
     ...join_arguments,
     join_year: true,
     join_week: true,
@@ -100,7 +100,7 @@ const league_format_player_projection_values_join = (join_arguments) => {
     params.league_format_hash ||
     '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b'
 
-  players_table_join_function({
+  data_view_join_function({
     ...join_arguments,
     join_year: true,
     join_week: true,
@@ -116,7 +116,7 @@ const league_format_player_projection_values_join = (join_arguments) => {
 }
 
 const projections_index_join = (join_arguments) => {
-  players_table_join_function({
+  data_view_join_function({
     ...join_arguments,
     join_year: true,
     join_week: true,
