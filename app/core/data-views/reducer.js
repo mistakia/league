@@ -1,20 +1,19 @@
 import Immutable, { Map } from 'immutable'
 
 import { appActions } from '@core/app/actions'
-import { players_table_views_actions } from './actions'
-import { default_players_table_views } from './default-players-table-views'
-import { playerActions } from '@core/players/actions'
+import { data_views_actions } from './actions'
+import { default_data_views } from './default-data-views'
 
-export function players_table_views_reducer(
+export function data_views_reducer(
   state = new Map(
-    Immutable.fromJS(default_players_table_views).map((view) =>
+    Immutable.fromJS(default_data_views).map((view) =>
       view.set('saved_table_state', view.get('table_state'))
     )
   ),
   { payload, type }
 ) {
   switch (type) {
-    case players_table_views_actions.GET_PLAYERS_TABLE_VIEWS_FULFILLED:
+    case data_views_actions.GET_DATA_VIEWS_FULFILLED:
       return state.withMutations((state) => {
         payload.data.forEach((view) => {
           state.set(
@@ -28,7 +27,7 @@ export function players_table_views_reducer(
         })
       })
 
-    case players_table_views_actions.POST_PLAYERS_TABLE_VIEW_FULFILLED:
+    case data_views_actions.POST_DATA_VIEW_FULFILLED:
       return state.withMutations((state) => {
         state.set(
           payload.data.view_id,
@@ -49,7 +48,7 @@ export function players_table_views_reducer(
         }
       })
 
-    case players_table_views_actions.DELETE_PLAYERS_TABLE_VIEW_FULFILLED: {
+    case data_views_actions.DELETE_DATA_VIEW_FULFILLED: {
       const { view_id } = payload.opts
       return state.delete(view_id)
     }
@@ -75,21 +74,21 @@ export function players_table_views_reducer(
       return state
     }
 
-    case players_table_views_actions.PLAYERS_TABLE_VIEW_CHANGED: {
-      const { players_table_view } = payload
-      return state.mergeIn([players_table_view.view_id], {
-        ...players_table_view,
-        table_state: players_table_view.table_state
+    case data_views_actions.DATA_VIEW_CHANGED: {
+      const { data_view } = payload
+      return state.mergeIn([data_view.view_id], {
+        ...data_view,
+        table_state: data_view.table_state
       })
     }
 
-    case playerActions.POST_PLAYERS_TABLE_VIEW_SEARCH_PENDING: {
+    case data_views_actions.POST_DATA_VIEW_SEARCH_PENDING: {
       const { view_id } = payload.opts
       return state.setIn([view_id, 'is_fetching'], true)
     }
 
-    case playerActions.POST_PLAYERS_TABLE_VIEW_SEARCH_FAILED:
-    case playerActions.POST_PLAYERS_TABLE_VIEW_SEARCH_FULFILLED: {
+    case data_views_actions.POST_DATA_VIEW_SEARCH_FAILED:
+    case data_views_actions.POST_DATA_VIEW_SEARCH_FULFILLED: {
       const { view_id } = payload.opts
       return state.setIn([view_id, 'is_fetching'], false)
     }

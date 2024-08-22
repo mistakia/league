@@ -78,12 +78,12 @@ export {
   getNflTeamSeasonlogs,
   get_league_team_daily_values,
   post_process_poach,
-  post_players_table_view_search,
-  post_players_table_view,
-  delete_players_table_view,
+  post_data_view_search,
+  post_data_view,
+  delete_data_view,
   post_restricted_free_agent_nomination,
   delete_restricted_free_agent_nomination,
   get_player_betting_markets,
   get_league_careerlogs,
-  get_players_table_views
+  get_data_views
 } from './sagas'

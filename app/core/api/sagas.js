@@ -45,7 +45,6 @@ import {
   getPlayerProjectionsActions,
   getPlayerGamelogsActions,
   getPlayerPracticesActions,
-  post_players_table_view_search_actions,
   get_player_betting_markets_actions
 } from '@core/players/actions'
 import { getChartedPlaysActions } from '@core/stats/actions'
@@ -94,10 +93,11 @@ import { getPercentilesActions } from '@core/percentiles/actions'
 import { getNflTeamSeasonlogsActions } from '@core/seasonlogs/actions'
 import { get_league_team_daily_values_actions } from '@core/league-team-daily-values/actions'
 import {
-  post_players_table_view_actions,
-  delete_players_table_view_actions,
-  get_players_table_views_actions
-} from '@core/players-table-views/actions'
+  post_data_view_actions,
+  delete_data_view_actions,
+  get_data_views_actions,
+  post_data_view_search_actions
+} from '@core/data-views/actions'
 import { get_league_careerlogs_actions } from '@core/league-careerlogs/actions'
 
 function* fetchAPI(apiFunction, actions, opts = {}) {
@@ -422,28 +422,28 @@ export const post_process_poach = fetch.bind(
   postProcessPoachActions
 )
 
-export const post_players_table_view_search = fetch.bind(
+export const post_data_view_search = fetch.bind(
   null,
-  api.post_players_table_view_search,
-  post_players_table_view_search_actions
+  api.post_data_view_search,
+  post_data_view_search_actions
 )
 
-export const post_players_table_view = fetch.bind(
+export const post_data_view = fetch.bind(
   null,
-  api.post_players_table_view,
-  post_players_table_view_actions
+  api.post_data_view,
+  post_data_view_actions
 )
 
-export const delete_players_table_view = fetch.bind(
+export const delete_data_view = fetch.bind(
   null,
-  api.delete_players_table_view,
-  delete_players_table_view_actions
+  api.delete_data_view,
+  delete_data_view_actions
 )
 
-export const get_players_table_views = fetch.bind(
+export const get_data_views = fetch.bind(
   null,
-  api.get_players_table_views,
-  get_players_table_views_actions
+  api.get_data_views,
+  get_data_views_actions
 )
 
 export const post_restricted_free_agent_nomination = fetch.bind(

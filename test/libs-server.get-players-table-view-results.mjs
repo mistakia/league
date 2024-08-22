@@ -2,22 +2,22 @@
 
 import chai from 'chai'
 
-import { get_players_table_view_results } from '#libs-server'
+import { get_data_view_results } from '#libs-server'
 import { bookmaker_constants } from '#libs-shared'
 import { compare_queries } from './utils/index.mjs'
 
 const { expect } = chai
 
-describe('LIBS SERVER get_players_table_view_results', () => {
+describe('LIBS SERVER get_data_view_results', () => {
   it('should return a query', () => {
-    const query = get_players_table_view_results()
+    const query = get_data_view_results()
     const expected_query =
       'select "player"."pid", "player"."pos" from "player" group by "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by "player"."pid" asc limit 500'
     expect(query.toString()).to.equal(expected_query)
   })
 
   it('should handle player_target_share_from_plays', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       prefix_columns: ['player_name'],
       columns: [
         {
@@ -49,7 +49,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should handle player_target_share_from_plays — duplicates', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       prefix_columns: ['player_name'],
       columns: [
         {
@@ -95,7 +95,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should handle player_target_share_from_plays - different params', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       prefix_columns: ['player_name'],
       columns: [
         {
@@ -134,7 +134,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should handle player_air_yards_share_from_plays', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       prefix_columns: ['player_name'],
       columns: [
         {
@@ -166,7 +166,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should handle player_target_share_from_plays with a where clause', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       prefix_columns: ['player_name'],
       columns: [
         {
@@ -214,7 +214,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should create a split query — year', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       splits: ['year'],
       prefix_columns: ['player_name'],
       columns: [
@@ -235,7 +235,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should create a splits query — year', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       splits: ['year'],
       prefix_columns: ['player_name'],
       columns: [
@@ -267,7 +267,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should create a splits query - year', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         {
           column_id: 'player_weighted_opportunity_rating_from_plays',
@@ -305,7 +305,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should create a splits query with espn open scores', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       splits: ['year'],
       prefix_columns: ['player_name'],
       columns: [
@@ -328,7 +328,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should create a query with fantasy points from seasonlogs', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       prefix_columns: ['player_name'],
       columns: [
         {
@@ -368,7 +368,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should create a query with fantasy points from careerlogs', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       prefix_columns: ['player_name'],
       columns: [
         'player_fantasy_points_from_careerlogs',
@@ -391,7 +391,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should create a query with fields from league format seasonlogs and careerlogs', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       prefix_columns: ['player_name'],
       columns: [
         'player_startable_games_from_seasonlogs',
@@ -423,7 +423,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should create a query with fields from season prop betting markets', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       prefix_columns: ['player_name'],
       columns: [
         {
@@ -461,7 +461,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should create a query with field from player game prop betting markets', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       prefix_columns: ['player_name'],
       columns: [
         {
@@ -486,7 +486,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should create a query showing career gamelogs with a where filter on first game receiving yards', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       prefix_columns: ['player_name'],
       columns: [
         'player_fantasy_top_1_seasons_from_careerlogs',
@@ -518,7 +518,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should create a query for season projected stats', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       sort: [
         {
           column_id: 'player_season_projected_points_added',
@@ -547,7 +547,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should create a query for season projected stats', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       sort: [
         {
           column_id: 'player_season_projected_points_added',
@@ -641,7 +641,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should create a query for week projected stats', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       sort: [
         {
           column_id: 'player_week_projected_pass_yds',
@@ -665,7 +665,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should create a query for season projected stats - split', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         {
           column_id: 'player_season_projected_rush_atts',
@@ -697,7 +697,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should create a query with an N+1 column', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         {
           column_id: 'player_receiving_first_down_share_from_plays',
@@ -768,7 +768,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should create a query with prospect columns, weighted oppurtunity, and oppurtunity share', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         {
           column_id: 'player_weighted_opportunity_from_plays',
@@ -807,7 +807,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should create a query with player metrics, weighted opportunity, and roster status — sorted by bmi', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       sort: [
         {
           column_id: 'player_body_mass_index',
@@ -831,7 +831,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should generate query for fantasy points by plays — split by year 2022 to 2023', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         {
           column_id: 'player_fantasy_points_from_plays',
@@ -861,7 +861,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should generate a fantasy points by play with per_game rate_type query', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       sort: [
         {
           column_id: 'player_fantasy_points_from_plays',
@@ -885,7 +885,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should generate a tackle columns query', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         {
           column_id: 'player_solo_tackles_from_plays',
@@ -906,7 +906,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should generate a tackle assist columns query', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         {
           column_id: 'player_combined_tackles_from_plays',
@@ -927,7 +927,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should filter by active rosters', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       prefix_columns: ['player_name', 'player_league_roster_status'],
       columns: [
         'player_receptions_from_plays',
@@ -964,7 +964,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should generate a query with a team stat column', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       prefix_columns: ['player_name'],
       columns: [
         {
@@ -992,7 +992,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should create a keeptradecut query', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       prefix_columns: ['player_name'],
       columns: [
         {
@@ -1041,7 +1041,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should create a keeptradecut query with splits', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       prefix_columns: ['player_name'],
       columns: [
         {
@@ -1064,7 +1064,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should create a rushing yards split by week', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       splits: ['year', 'week'],
       prefix_columns: ['player_name'],
       columns: [
@@ -1093,7 +1093,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should create a query with player current age', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       prefix_columns: ['player_name'],
       columns: [
         'player_age',
@@ -1116,7 +1116,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should create a year splits query with player age at time of split', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       sort: [
         {
           column_id: 'player_receiving_yards_from_plays',
@@ -1141,7 +1141,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should create a query for player keeptradecut value and fantasy points from plays for wide receivers with year splits', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         'player_keeptradecut_value',
         'player_fantasy_points_from_plays'
@@ -1167,7 +1167,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('week and year split with keeptradecut and fantasypoints from plays with per_game rate_type — should sanitize', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         'player_keeptradecut_value',
         {
@@ -1198,7 +1198,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should create a query for fantasy points from plays with specific route, weeks, rate type, and player filters', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         {
           column_id: 'player_fantasy_points_from_plays',
@@ -1234,7 +1234,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('year split query with player age and ktc value, tests the order in which year split tables are joined', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         'player_age',
         {
@@ -1274,7 +1274,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('year splits with sort by age', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         'player_age',
         'player_ngs_draft_grade',
@@ -1307,7 +1307,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should query WR fantasy stats with year splits and sort by points per game, seasonlogs, careerlogs, plays, and keeptradecut', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         {
           column_id: 'player_fantasy_points_per_game_from_seasonlogs',
@@ -1351,7 +1351,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('test condition for scoring_format_hash param, multiple fantasy points from play', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         {
           column_id: 'player_fantasy_points_per_game_from_seasonlogs',
@@ -1417,7 +1417,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('year split with multiple rate type with statements', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         'player_fantasy_points_per_game_from_seasonlogs',
         {
@@ -1459,7 +1459,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('keeptradecut and fantasy points from plays with year and week split', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         'player_keeptradecut_value',
         {
@@ -1491,7 +1491,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('should adjust specified year params when year_offset is specified', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         {
           column_id: 'player_targets_from_plays',
@@ -1567,7 +1567,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('team pass attempts from plays using dst', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       sort: [
         {
           column_id: 'team_pass_attempts_from_plays',
@@ -1596,7 +1596,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('fantasy points query with career_year param and per_game rate type', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         'player_starting_nfl_year',
         'player_draft_position',
@@ -1662,7 +1662,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('year_offset range with where filters', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       sort: [
         {
           column_id: 'player_fantasy_points_from_plays',
@@ -1730,7 +1730,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('player_rush_yards_after_contact_per_attempt_from_plays year_offset range', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       prefix_columns: ['player_name'],
       columns: [
         {
@@ -1768,7 +1768,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('year_offset range with rate_type and where filter', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       sort: [
         {
           column_id: 'player_fantasy_points_from_plays',
@@ -1830,7 +1830,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('single year_offset with rate_type', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         {
           column_id: 'player_keeptradecut_value',
@@ -1891,7 +1891,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('year splits with a column set to a specific year', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       view_id: '3db1cf6f-3f14-44a1-9a80-60ca32ed32d7',
       columns: [
         {
@@ -1937,7 +1937,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('dynamic year param', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       sort: [
         {
           column_id: 'player_receiving_yards_from_plays',
@@ -1967,7 +1967,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('games played', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         {
           column_id: 'player_games_played',
@@ -1988,7 +1988,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('games played with multiple rate types', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         {
           column_id: 'player_games_played',
@@ -2024,7 +2024,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   })
 
   it('team success rate from plays', () => {
-    const query = get_players_table_view_results({
+    const query = get_data_view_results({
       columns: [
         {
           column_id: 'team_success_rate_from_plays',
@@ -2057,7 +2057,7 @@ describe('LIBS SERVER get_players_table_view_results', () => {
   describe('errors', () => {
     it('should throw an error if where value is missing', () => {
       try {
-        get_players_table_view_results({
+        get_data_view_results({
           prefix_columns: ['player_name'],
           columns: [
             {

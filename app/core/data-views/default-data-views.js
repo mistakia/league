@@ -1,6 +1,6 @@
 import { constants } from '@libs-shared'
 
-export const default_players_table_views = {
+export const default_data_views = {
   SEASON_PROJECTIONS: {
     view_id: 'SEASON_PROJECTIONS',
     view_username: 'system',
@@ -209,10 +209,10 @@ export const default_players_table_views = {
   }
 }
 
-// for (const key of Object.keys(default_players_table_views)) {
-//   default_players_table_views[key].key = key
+// for (const key of Object.keys(default_data_views)) {
+//   default_data_views[key].key = key
 
-//   for (const column of default_players_table_views[key].table_state.columns) {
+//   for (const column of default_data_views[key].table_state.columns) {
 //     column.accessorKey = column.column_name
 //   }
 // }

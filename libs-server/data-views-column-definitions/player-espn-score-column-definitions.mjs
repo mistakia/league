@@ -1,5 +1,5 @@
 import db from '#db'
-import players_table_join_function from '#libs-server/players-table/players-table-join-function.mjs'
+import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 
 const get_valid_year = (year) => {
   const parsed_year = Number(year)
@@ -7,7 +7,7 @@ const get_valid_year = (year) => {
 }
 
 const espn_score_join = (options) => {
-  players_table_join_function({
+  data_view_join_function({
     ...options,
     additional_conditions: function ({
       table_name,

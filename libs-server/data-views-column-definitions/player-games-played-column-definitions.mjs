@@ -3,10 +3,10 @@ import {
   get_per_game_cte_table_name,
   add_per_game_cte,
   join_per_game_cte
-} from '#libs-server/players-table/rate-type/rate-type-per-game.mjs'
+} from '#libs-server/data-views/rate-type/rate-type-per-game.mjs'
 
 const games_played_join = ({
-  players_table_options,
+  data_view_options,
   table_name,
   query,
   params,
@@ -14,7 +14,7 @@ const games_played_join = ({
   year_split_join_clause
 }) => {
   const already_added_for_per_game_rate_type =
-    players_table_options.rate_type_tables[table_name]
+    data_view_options.rate_type_tables[table_name]
   if (already_added_for_per_game_rate_type) {
     return
   }

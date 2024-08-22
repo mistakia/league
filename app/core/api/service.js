@@ -355,19 +355,19 @@ export const api = {
     const url = `${API_URL}/leagues/${leagueId}/team-daily-values`
     return { url }
   },
-  post_players_table_view_search(data) {
+  post_data_view_search(data) {
     const url = `${API_URL}/players/search`
     return { url, ...POST(data) }
   },
-  post_players_table_view(data) {
+  post_data_view(data) {
     const url = `${API_URL}/table-views`
     return { url, ...POST(data) }
   },
-  delete_players_table_view({ view_id }) {
+  delete_data_view({ view_id }) {
     const url = `${API_URL}/table-views/${view_id}`
     return { url, method: 'DELETE' }
   },
-  get_players_table_views({ user_id, username }) {
+  get_data_views({ user_id, username }) {
     let url = `${API_URL}/table-views`
     const params = new URLSearchParams()
     if (user_id) params.append('user_id', user_id)
