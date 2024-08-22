@@ -1,5 +1,5 @@
 import db from '#db'
-import { players_table_constants } from '#libs-shared'
+import { data_views_constants } from '#libs-shared'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
 
@@ -28,7 +28,7 @@ export const add_player_stats_play_by_play_with_statement = ({
   // })
 
   for (const split of splits) {
-    if (players_table_constants.split_params.includes(split)) {
+    if (data_views_constants.split_params.includes(split)) {
       const column_param_definition = nfl_plays_column_params[split]
       const table_name = column_param_definition.table || 'nfl_plays'
       const split_statement = `${table_name}.${split}`

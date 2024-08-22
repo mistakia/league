@@ -1,8 +1,8 @@
 import get_table_hash from '#libs-server/get-table-hash.mjs'
 import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
-import players_table_join_function from '#libs-server/players-table/players-table-join-function.mjs'
-import { add_team_stats_play_by_play_with_statement } from '#libs-server/players-table/add-team-stats-play-by-play-with-statement.mjs'
-import { get_rate_type_sql } from '#libs-server/players-table/select-string.mjs'
+import data_view_join_function from '#libs-server/data-views/data-views-join-function.mjs'
+import { add_team_stats_play_by_play_with_statement } from '#libs-server/data-views/add-team-stats-play-by-play-with-statement.mjs'
+import { get_rate_type_sql } from '#libs-server/data-views/select-string.mjs'
 
 const generate_table_alias = ({ params = {} } = {}) => {
   const column_param_keys = Object.keys(nfl_plays_column_params).sort()
@@ -66,7 +66,7 @@ const team_stat_from_plays = ({
   with: add_team_stats_play_by_play_with_statement,
   join_table_name: (args) => `${args.table_name}_player_team_stats`,
   join: (args) =>
-    players_table_join_function({
+    data_view_join_function({
       ...args,
       join_year_on_year_split: true,
       table_name: `${args.table_name}_player_team_stats`

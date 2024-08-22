@@ -1,21 +1,21 @@
 import db from '#db'
 import { constants } from '#libs-shared'
-import players_table_column_definitions from '#libs-server/players-table-column-definitions/index.mjs'
+import data_views_column_definitions from '#libs-server/data-views-column-definitions/index.mjs'
 import * as validators from '#libs-server/validators.mjs'
 
 import {
   get_rate_type_cte_table_name,
   add_rate_type_cte,
   join_rate_type_cte
-} from '#libs-server/players-table/rate-type/index.mjs'
+} from '#libs-server/data-views/rate-type/index.mjs'
 import {
   get_main_select_string,
   get_with_select_string
-} from '#libs-server/players-table/select-string.mjs'
+} from '#libs-server/data-views/select-string.mjs'
 import {
   get_main_where_string,
   get_with_where_string
-} from '#libs-server/players-table/where-string.mjs'
+} from '#libs-server/data-views/where-string.mjs'
 
 const process_dynamic_params = (params) => {
   const processed_params = { ...params }
@@ -191,7 +191,7 @@ const add_clauses_for_table = ({
   year_split_join_clause,
   week_split_join_clause,
   rate_type_column_mapping = {},
-  players_table_options
+  data_view_options
 }) => {
   const column_ids = []
   const with_select_strings = []
@@ -204,7 +204,7 @@ const add_clauses_for_table = ({
   let with_func = null
 
   for (const { column_id, column_index } of select_columns) {
-    const column_definition = players_table_column_definitions[column_id]
+    const column_definition = data_views_column_definitions[column_id]
     const main_select_result = get_main_select_string({
       column_id,
       column_params,
@@ -252,7 +252,7 @@ const add_clauses_for_table = ({
 
   for (const where_clause of where_clauses) {
     const column_definition =
-      players_table_column_definitions[where_clause.column_id]
+      data_views_column_definitions[where_clause.column_id]
 
     if (column_definition.join) {
       join_func = column_definition.join
@@ -335,7 +335,7 @@ const add_clauses_for_table = ({
     const select_column_names = []
     const rate_columns = []
     for (const column_id of unique_column_ids) {
-      const column_definition = players_table_column_definitions[column_id]
+      const column_definition = data_views_column_definitions[column_id]
       // TODO maybe use column_index here
       select_column_names.push(column_definition.column_name)
       if (column_definition.is_rate) {
@@ -386,7 +386,7 @@ const add_clauses_for_table = ({
       splits,
       year_split_join_clause,
       week_split_join_clause,
-      players_table_options
+      data_view_options
     })
   } else if (
     table_name !== 'player' &&
@@ -402,14 +402,14 @@ const add_clauses_for_table = ({
 const get_grouped_clauses_by_table = ({
   where: where_clauses,
   table_columns,
-  players_table_column_definitions,
+  data_views_column_definitions,
   splits
 }) => {
   const grouped_clauses_by_table = {}
 
   for (const where_clause of where_clauses) {
     const { column_id, params: column_params } = where_clause
-    const column_definition = players_table_column_definitions[column_id]
+    const column_definition = data_views_column_definitions[column_id]
 
     if (!column_definition) {
       continue
@@ -434,7 +434,7 @@ const get_grouped_clauses_by_table = ({
   for (const { column, index } of table_columns) {
     const column_id = typeof column === 'string' ? column : column.column_id
     const column_params = typeof column === 'string' ? {} : column.params
-    const column_definition = players_table_column_definitions[column_id]
+    const column_definition = data_views_column_definitions[column_id]
 
     // column_index among columns with the same column_id
     const column_index = get_column_index({
@@ -541,7 +541,7 @@ export default function ({
   const players_query = db('player').select('player.pid')
   const table_columns = []
   const rate_type_column_mapping = {}
-  const players_table_options = {
+  const data_view_options = {
     opening_days_joined: false,
     nfl_year_week_timestamp_joined: false,
     year_coalesce_args: [],
@@ -626,8 +626,7 @@ export default function ({
         ? column.params.rate_type[0]
         : column.params.rate_type
 
-      const column_definition =
-        players_table_column_definitions[column.column_id]
+      const column_definition = data_views_column_definitions[column.column_id]
       if (
         !column_definition ||
         !column_definition.supported_rate_types ||
@@ -645,7 +644,7 @@ export default function ({
         params: column.params,
         rate_type
       })
-      players_table_options.rate_type_tables[rate_type_table_name] = {
+      data_view_options.rate_type_tables[rate_type_table_name] = {
         params: column.params,
         rate_type
       }
@@ -655,7 +654,7 @@ export default function ({
   }
 
   for (const [rate_type_table_name, { params, rate_type }] of Object.entries(
-    players_table_options.rate_type_tables
+    data_view_options.rate_type_tables
   )) {
     add_rate_type_cte({
       players_query,
@@ -677,7 +676,7 @@ export default function ({
   const grouped_clauses_by_table = get_grouped_clauses_by_table({
     where,
     table_columns,
-    players_table_column_definitions,
+    data_views_column_definitions,
     splits
   })
 
@@ -722,10 +721,10 @@ export default function ({
       { column_params = {}, where_clauses, select_columns }
     ] of sorted_tables) {
       const year_select = select_columns.find(
-        (col) => players_table_column_definitions[col.column_id]?.year_select
+        (col) => data_views_column_definitions[col.column_id]?.year_select
       )
       const week_select = select_columns.find(
-        (col) => players_table_column_definitions[col.column_id]?.week_select
+        (col) => data_views_column_definitions[col.column_id]?.week_select
       )
 
       add_clauses_for_table({
@@ -740,7 +739,7 @@ export default function ({
         year_split_join_clause,
         week_split_join_clause,
         rate_type_column_mapping,
-        players_table_options
+        data_view_options
       })
 
       if (available_splits.includes('year')) {
@@ -751,7 +750,7 @@ export default function ({
           column_params.year_offset[0] !== column_params.year_offset[1]
         if (select_columns.length && !has_year_offset_range) {
           const column_definition =
-            players_table_column_definitions[select_columns[0].column_id]
+            data_views_column_definitions[select_columns[0].column_id]
           if (column_definition && column_definition.year_select) {
             const year_select_clause = column_definition.year_select({
               table_name,
@@ -759,10 +758,10 @@ export default function ({
               column_params
             })
             if (year_select_clause) {
-              players_table_options.year_coalesce_args.push(year_select_clause)
+              data_view_options.year_coalesce_args.push(year_select_clause)
             }
           } else {
-            players_table_options.year_coalesce_args.push(`${table_name}.year`)
+            data_view_options.year_coalesce_args.push(`${table_name}.year`)
           }
         }
 
@@ -773,7 +772,7 @@ export default function ({
               ? year_offset[0]
               : year_offset
             year_split_join_clause = year_select
-              ? players_table_column_definitions[
+              ? data_views_column_definitions[
                   year_select.column_id
                 ].year_select({ table_name, splits, column_params })
               : year_offset_single
@@ -783,7 +782,7 @@ export default function ({
 
           if (!week_split_join_clause && available_splits.includes('week')) {
             week_split_join_clause = week_select
-              ? players_table_column_definitions[
+              ? data_views_column_definitions[
                   week_select.column_id
                 ].week_select({ table_name, splits })
               : `${table_name}.week`
@@ -814,7 +813,7 @@ export default function ({
             table_info.select_columns.length > 0
           ) {
             const column_definition =
-              players_table_column_definitions[
+              data_views_column_definitions[
                 table_info.select_columns[0].column_id
               ]
             if (column_definition && column_definition.week_select) {
@@ -854,7 +853,7 @@ export default function ({
 
     const column_id = typeof column === 'string' ? column : column.column_id
     const column_params = typeof column === 'string' ? {} : column.params
-    const column_definition = players_table_column_definitions[column_id]
+    const column_definition = data_views_column_definitions[column_id]
 
     if (!column_definition) {
       continue

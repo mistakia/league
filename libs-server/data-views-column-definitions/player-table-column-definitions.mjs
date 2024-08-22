@@ -117,18 +117,18 @@ export default {
       splits,
       join_type,
       year_split_join_clause,
-      players_table_options
+      data_view_options
     }) => {
       if (!splits.includes('year')) {
         return
       }
 
-      if (players_table_options.opening_days_joined) {
+      if (data_view_options.opening_days_joined) {
         return
       }
 
       query.leftJoin('opening_days', 'opening_days.year', 'player_years.year')
-      players_table_options.opening_days_joined = true
+      data_view_options.opening_days_joined = true
     },
     main_select: ({ column_index, splits }) => {
       const base_year = splits.includes('year')

@@ -12,20 +12,20 @@ import { Team } from '@core/teams'
 import { get_string_from_object } from '@libs-shared'
 import { shorten_url } from '@core/utils'
 
-import './players-table.styl'
+import './data-views.styl'
 
 const fetch_more = () => {}
 
-export default function PlayersTablePage({
+export default function DataViewsPage({
   players,
-  player_fields,
+  data_views_fields,
   isPending,
   isLoggedIn,
-  selected_players_table_view,
-  players_table_views,
-  players_table_view_changed,
-  set_selected_players_table_view,
-  delete_players_table_view,
+  selected_data_view,
+  data_views,
+  data_view_changed,
+  set_selected_data_view,
+  delete_data_view,
   selected_player_pid,
   teamId,
   leagueId,
@@ -33,15 +33,15 @@ export default function PlayersTablePage({
   teams,
   players_percentiles,
   user_id,
-  save_players_table_view,
-  load_players_table_views,
+  save_data_view,
+  load_data_views,
   user_username
 }) {
   const location = useLocation()
 
   useEffect(() => {
-    load_players_table_views()
-  }, [load_players_table_views])
+    load_data_views()
+  }, [load_data_views])
 
   useEffect(() => {
     const search_params = new URLSearchParams(location.search)
@@ -60,7 +60,7 @@ export default function PlayersTablePage({
       columns.length || where.length || (prefix_columns.length && sort.length)
 
     if (has_table_state) {
-      players_table_view_changed(
+      data_view_changed(
         {
           // generate a new view_id to make sure it doesn't conflict with a saved view
           view_id: generate_view_id(),
@@ -87,24 +87,24 @@ export default function PlayersTablePage({
         }
       )
     } else {
-      players_table_view_changed(selected_players_table_view, {
+      data_view_changed(selected_data_view, {
         view_state_changed: true
       })
     }
-  }, [location, players_table_view_changed]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [location, data_view_changed]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
-    for (const column of selected_players_table_view.table_state.columns) {
+    for (const column of selected_data_view.table_state.columns) {
       const column_id = typeof column === 'string' ? column : column.column_id
-      const player_field = player_fields[column_id]
+      const player_field = data_views_fields[column_id]
       if (player_field.load) {
         player_field.load()
       }
     }
   }, [
-    player_fields,
-    selected_players_table_view.view_id,
-    selected_players_table_view.table_state.columns
+    data_views_fields,
+    selected_data_view.view_id,
+    selected_data_view.table_state.columns
   ])
 
   for (const player of players) {
@@ -128,11 +128,11 @@ export default function PlayersTablePage({
     new_prefix_columns.push('player_league_roster_status')
   }
 
-  const on_view_change = (players_table_view, view_change_params = {}) => {
+  const on_view_change = (data_view, view_change_params = {}) => {
     if (view_change_params.is_new_view) {
-      players_table_view.user_id = user_id
+      data_view.user_id = user_id
     }
-    players_table_view_changed(players_table_view, view_change_params)
+    data_view_changed(data_view, view_change_params)
   }
 
   const body = isPending ? (
@@ -142,30 +142,30 @@ export default function PlayersTablePage({
       <div className='players__table-help'>
         <InfoOutlinedIcon />
         <span>
-          Visit the <NavLink to='/guides/players-table'>guide</NavLink> to learn
-          how to use the players table.
+          Visit the <NavLink to='/guides/data-views'>guide</NavLink> to learn
+          how to build data views.
         </span>
       </div>
       <Table
         style={{ fontFamily: "'IBM Plex Mono', monospace" }}
         data={players}
         on_view_change={on_view_change}
-        on_save_view={save_players_table_view}
-        table_state={selected_players_table_view.table_state}
-        saved_table_state={selected_players_table_view.saved_table_state}
-        all_columns={player_fields}
-        selected_view={selected_players_table_view}
-        select_view={set_selected_players_table_view}
+        on_save_view={save_data_view}
+        table_state={selected_data_view.table_state}
+        saved_table_state={selected_data_view.saved_table_state}
+        all_columns={data_views_fields}
+        selected_view={selected_data_view}
+        select_view={set_selected_data_view}
         fetch_more={fetch_more} // TODO
         total_rows_fetched={players.size}
         total_row_count={players.size} // TODO get from server
-        is_fetching_more={selected_players_table_view.is_fetching} // TODO
-        is_loading={selected_players_table_view.is_fetching}
+        is_fetching_more={selected_data_view.is_fetching} // TODO
+        is_loading={selected_data_view.is_fetching}
         is_selected_view_editable={
-          isLoggedIn && selected_players_table_view.user_id === user_id
+          isLoggedIn && selected_data_view.user_id === user_id
         }
-        views={players_table_views}
-        delete_view={delete_players_table_view}
+        views={data_views}
+        delete_view={delete_data_view}
         disable_rank_aggregation
         percentiles={players_percentiles}
         disable_edit_view={!isLoggedIn} // TODO check if user has permission to edit
@@ -180,16 +180,16 @@ export default function PlayersTablePage({
   return <PageLayout {...{ body }} />
 }
 
-PlayersTablePage.propTypes = {
+DataViewsPage.propTypes = {
   players: PropTypes.array,
   isPending: PropTypes.bool,
   isLoggedIn: PropTypes.bool,
-  player_fields: PropTypes.object,
-  selected_players_table_view: PropTypes.object,
-  players_table_views: PropTypes.array,
-  players_table_view_changed: PropTypes.func,
-  set_selected_players_table_view: PropTypes.func,
-  delete_players_table_view: PropTypes.func,
+  data_views_fields: PropTypes.object,
+  selected_data_view: PropTypes.object,
+  data_views: PropTypes.array,
+  data_view_changed: PropTypes.func,
+  set_selected_data_view: PropTypes.func,
+  delete_data_view: PropTypes.func,
   selected_player_pid: PropTypes.string,
   teamId: PropTypes.number,
   leagueId: PropTypes.number,
@@ -197,7 +197,7 @@ PlayersTablePage.propTypes = {
   teams: ImmutablePropTypes.map,
   players_percentiles: PropTypes.object,
   user_id: PropTypes.number,
-  save_players_table_view: PropTypes.func,
-  load_players_table_views: PropTypes.func,
+  save_data_view: PropTypes.func,
+  load_data_views: PropTypes.func,
   user_username: PropTypes.string
 }

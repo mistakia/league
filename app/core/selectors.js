@@ -2955,8 +2955,8 @@ export const getWaiverPlayersForCurrentTeam = createSelector(
   }
 )
 
-export const get_players_table_views = createSelector(
-  (state) => state.get('players_table_views'),
+export const get_data_views = createSelector(
+  (state) => state.get('data_views'),
   (state) => state.getIn(['app', 'userId']),
   (views, current_user_id) => {
     return views.map((view) =>
@@ -2965,16 +2965,16 @@ export const get_players_table_views = createSelector(
   }
 )
 
-export const get_players_table_view_by_id = (state, { view_id }) => {
-  return state.get('players_table_views').get(view_id, new Map())
+export const get_data_view_by_id = (state, { view_id }) => {
+  return state.get('data_views').get(view_id, new Map())
 }
 
-export const get_selected_players_table_view_id = (state) =>
-  state.getIn(['app', 'selected_players_table_view_id'])
+export const get_selected_data_view_id = (state) =>
+  state.getIn(['app', 'selected_data_view_id'])
 
-export const get_selected_players_table_view = createSelector(
-  get_selected_players_table_view_id,
-  get_players_table_views,
+export const get_selected_data_view = createSelector(
+  get_selected_data_view_id,
+  get_data_views,
   (view_id, views) => views.get(view_id, new Map()).toJS()
 )
 

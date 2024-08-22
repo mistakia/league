@@ -511,7 +511,7 @@ export function playersReducer(state = initialState, { payload, type }) {
     case playerActions.RESET_PLAYER_FILTER_OPTIONS:
       return state.merge({ ...default_player_filter_options })
 
-    case playerActions.POST_PLAYERS_TABLE_VIEW_SEARCH_FULFILLED:
+    case playerActions.POST_DATA_VIEW_SEARCH_FULFILLED:
       return state.withMutations((players) => {
         payload.data.forEach((row) => {
           const formatted_player_data = {

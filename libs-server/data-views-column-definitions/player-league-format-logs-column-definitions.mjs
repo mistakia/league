@@ -2,7 +2,7 @@ import db from '#db'
 import { constants } from '#libs-shared'
 import get_join_func from '#libs-server/get-join-func.mjs'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
-import players_table_join_function from '#libs-server/players-table/players-table-join-function.mjs'
+import data_view_join_function from '#libs-server/data-views/data-views-join-function.mjs'
 
 const league_format_player_seasonlogs_table_alias = ({ params = {} }) => {
   const {
@@ -43,7 +43,7 @@ const league_format_player_seasonlogs_join = (join_arguments) => {
     }
   }
 
-  players_table_join_function({
+  data_view_join_function({
     ...join_arguments,
     join_table_clause: `league_format_player_seasonlogs as ${join_arguments.table_name}`,
     additional_conditions

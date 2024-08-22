@@ -17,7 +17,7 @@ const keeptradecut_join = ({
   splits = [],
   year_split_join_clause = null,
   params = {},
-  players_table_options = {}
+  data_view_options = {}
 }) => {
   // using an inner join for week splits because its much faster, not sure why
   const join_func = get_join_func(splits.includes('week') ? 'INNER' : join_type)
@@ -26,14 +26,14 @@ const keeptradecut_join = ({
     year_offset_single = year_offset_single[0]
   }
 
-  if (splits.includes('year') && !players_table_options.opening_days_joined) {
+  if (splits.includes('year') && !data_view_options.opening_days_joined) {
     query.leftJoin('opening_days', 'opening_days.year', 'player_years.year')
-    players_table_options.opening_days_joined = true
+    data_view_options.opening_days_joined = true
   }
 
   if (
     splits.includes('week') &&
-    !players_table_options.nfl_year_week_timestamp_joined
+    !data_view_options.nfl_year_week_timestamp_joined
   ) {
     if (splits.includes('year')) {
       query.leftJoin('nfl_year_week_timestamp', function () {
@@ -45,7 +45,7 @@ const keeptradecut_join = ({
         this.on(db.raw('true'))
       })
     }
-    players_table_options.nfl_year_week_timestamp_joined = true
+    data_view_options.nfl_year_week_timestamp_joined = true
   }
 
   const join_conditions = function () {

@@ -17,7 +17,7 @@ const LeagueHomePage = lazy(() => import('@pages/league-home'))
 const DraftPage = lazy(() => import('@pages/draft'))
 const AuctionPage = lazy(() => import('@pages/auction'))
 const PlayersPage = lazy(() => import('@pages/players'))
-const PlayersTablePage = lazy(() => import('@pages/players-table'))
+const DataViewsPage = lazy(() => import('@pages/data-views'))
 const LineupsPage = lazy(() => import('@pages/lineups'))
 const TradePage = lazy(() => import('@pages/trade'))
 const TeamSettingsPage = lazy(() => import('@pages/team-settings'))
@@ -47,7 +47,7 @@ const Routes = ({ app }) => {
     } else if (leagueId || teamId) {
       return <Navigate to={`/login${location.search}`} />
     } else {
-      return <Navigate to='/leagues/0/players-table' />
+      return <Navigate to='/data-views' />
     }
   }
 
@@ -56,11 +56,12 @@ const Routes = ({ app }) => {
       {!app.userId && <Route path='/login' element={<AuthPage />} />}
       {app.userId && <Route path='/lineups' element={<LineupsPage />} />}
       {app.userId && <Route path='/trade' element={<TradePage />} />}
+      <Route path='/data-views' element={<DataViewsPage />} />
       <Route path='/leagues/:lid'>
         <Route path='/leagues/:lid/players' element={<PlayersPage />} />
         <Route
           path='/leagues/:lid/players-table'
-          element={<PlayersTablePage />}
+          element={<Navigate to={`/data-views${location.search}`} replace />}
         />
         <Route path='/leagues/:lid/auction' element={<AuctionPage />} />
         <Route path='/leagues/:lid/draft' element={<DraftPage />} />
@@ -101,8 +102,8 @@ const Routes = ({ app }) => {
       />
       <Route path='/glossary' element={<MarkdownPage path='/glossary.md' />} />
       <Route
-        path='/guides/players-table'
-        element={<MarkdownPage path='/guides/players-table.md' />}
+        path='/guides/data-views'
+        element={<MarkdownPage path='/guides/data-views.md' />}
       />
       <Route path='*' element={<UnmatchedRoute />} />
     </RouterRoutes>

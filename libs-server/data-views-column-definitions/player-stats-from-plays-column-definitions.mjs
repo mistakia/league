@@ -1,10 +1,10 @@
 import db from '#db'
-import { nfl_plays_column_params, players_table_constants } from '#libs-shared'
+import { nfl_plays_column_params, data_views_constants } from '#libs-shared'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
-import players_table_join_function from '#libs-server/players-table/players-table-join-function.mjs'
-import { add_player_stats_play_by_play_with_statement } from '#libs-server/players-table/add-player-stats-play-by-play-with-statement.mjs'
-import { get_rate_type_sql } from '#libs-server/players-table/select-string.mjs'
+import data_view_join_function from '#libs-server/data-views/data-views-join-function.mjs'
+import { add_player_stats_play_by_play_with_statement } from '#libs-server/data-views/add-player-stats-play-by-play-with-statement.mjs'
+import { get_rate_type_sql } from '#libs-server/data-views/select-string.mjs'
 
 const should_use_main_where = ({ params, has_numerator_denominator }) => {
   return (
@@ -101,7 +101,7 @@ const player_stat_from_plays = ({
   pid_columns,
   with: add_player_stats_play_by_play_with_statement,
   join: (args) =>
-    players_table_join_function({ ...args, join_year_on_year_split: true }),
+    data_view_join_function({ ...args, join_year_on_year_split: true }),
   use_having: true,
   supported_splits: ['year', 'week'],
   supported_rate_types: [
@@ -171,7 +171,7 @@ const create_team_share_stat = ({
     }
 
     for (const split of splits) {
-      if (players_table_constants.split_params.includes(split)) {
+      if (data_views_constants.split_params.includes(split)) {
         const column_param_definition = nfl_plays_column_params[split]
         const table_name = column_param_definition.table || 'nfl_plays'
         const split_statement = `${table_name}.${split}`
@@ -223,7 +223,7 @@ const create_team_share_stat = ({
   table_alias: ({ params }) =>
     generate_table_alias({ type: column_name, params, pid_columns }),
   join: (args) =>
-    players_table_join_function({ ...args, join_year_on_year_split: true }),
+    data_view_join_function({ ...args, join_year_on_year_split: true }),
   supported_splits: ['year', 'week'],
   has_numerator_denominator,
   main_select_string_year_offset_range,
