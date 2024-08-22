@@ -34,7 +34,8 @@ export default function PlayersTablePage({
   players_percentiles,
   user_id,
   save_players_table_view,
-  load_players_table_views
+  load_players_table_views,
+  user_username
 }) {
   const location = useLocation()
 
@@ -171,6 +172,7 @@ export default function PlayersTablePage({
         enable_duplicate_column_ids
         new_view_prefix_columns={new_prefix_columns}
         shorten_url={shorten_url}
+        table_username={user_username}
       />
     </div>
   )
@@ -196,5 +198,6 @@ PlayersTablePage.propTypes = {
   players_percentiles: PropTypes.object,
   user_id: PropTypes.number,
   save_players_table_view: PropTypes.func,
-  load_players_table_views: PropTypes.func
+  load_players_table_views: PropTypes.func,
+  user_username: PropTypes.string
 }
