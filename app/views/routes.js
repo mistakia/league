@@ -47,7 +47,7 @@ const Routes = ({ app }) => {
     } else if (leagueId || teamId) {
       return <Navigate to={`/login${location.search}`} />
     } else {
-      return <Navigate to='/leagues/0/players' />
+      return <Navigate to='/leagues/0/players-table' />
     }
   }
 
