@@ -218,8 +218,6 @@ export const playerActions = {
     type: playerActions.RESET_PLAYER_FILTER_OPTIONS
   }),
 
-  ...create_api_action_types('POST_DATA_VIEW_SEARCH'),
-
   LOAD_PLAYER_BETTING_MARKETS: 'LOAD_PLAYER_BETTING_MARKETS',
   load_player_betting_markets: (pid) => ({
     type: playerActions.LOAD_PLAYER_BETTING_MARKETS,
@@ -255,9 +253,6 @@ export const getPlayerGamelogsActions = create_api_actions(
 )
 export const getPlayerPracticesActions = create_api_actions(
   'GET_PLAYER_PRACTICES'
-)
-export const post_data_view_search_actions = create_api_actions(
-  'POST_DATA_VIEW_SEARCH'
 )
 export const get_player_betting_markets_actions = create_api_actions(
   'GET_PLAYER_BETTING_MARKETS'

@@ -45,7 +45,6 @@ import {
   getPlayerProjectionsActions,
   getPlayerGamelogsActions,
   getPlayerPracticesActions,
-  post_data_view_search_actions,
   get_player_betting_markets_actions
 } from '@core/players/actions'
 import { getChartedPlaysActions } from '@core/stats/actions'
@@ -96,7 +95,8 @@ import { get_league_team_daily_values_actions } from '@core/league-team-daily-va
 import {
   post_data_view_actions,
   delete_data_view_actions,
-  get_data_views_actions
+  get_data_views_actions,
+  post_data_view_search_actions
 } from '@core/data-views/actions'
 import { get_league_careerlogs_actions } from '@core/league-careerlogs/actions'
 

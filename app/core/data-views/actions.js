@@ -5,6 +5,7 @@ export const data_views_actions = {
   ...create_api_action_types('GET_DATA_VIEWS'),
   ...create_api_action_types('DELETE_DATA_VIEW'),
   ...create_api_action_types('POST_DATA_VIEW'),
+  ...create_api_action_types('POST_DATA_VIEW_SEARCH'),
 
   DATA_VIEW_CHANGED: 'DATA_VIEW_CHANGED',
   data_view_changed: (data_view, view_change_params) => ({
@@ -43,3 +44,6 @@ export const data_views_actions = {
 export const get_data_views_actions = create_api_actions('GET_DATA_VIEWS')
 export const delete_data_view_actions = create_api_actions('DELETE_DATA_VIEW')
 export const post_data_view_actions = create_api_actions('POST_DATA_VIEW')
+export const post_data_view_search_actions = create_api_actions(
+  'POST_DATA_VIEW_SEARCH'
+)
