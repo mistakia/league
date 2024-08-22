@@ -89,7 +89,7 @@ const generate_league_format_player_gamelogs = async ({
 const main = async () => {
   let error
   try {
-    const lid = 1
+    const lid = argv.lid
     const league = await getLeague({ lid })
     const { league_format_hash } = league
 
