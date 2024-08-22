@@ -1,11 +1,11 @@
 import express from 'express'
 import crypto from 'crypto'
 import { LRUCache } from 'lru-cache'
+import get_table_hash from '#libs-server/get-table-hash.mjs'
 
 import { validators, get_data_view_results } from '#libs-server'
 
 const lru_options = {
-  max: 2 * 1024 * 1024 * 1024, // 2GB
   ttl: 1000 * 60 * 60 * 12, // 12 hours
   allowStale: false,
   updateAgeOnGet: true,
@@ -192,7 +192,7 @@ router.post('/search/?', async (req, res) => {
       }
     }
 
-    const cache_key = generate_cache_key({
+    const stringified_key = generate_cache_key({
       where,
       columns,
       sort,
@@ -200,7 +200,7 @@ router.post('/search/?', async (req, res) => {
       prefix_columns,
       splits
     })
-
+    const cache_key = get_table_hash(stringified_key)
     const cached_result = data_view_cache.get(cache_key)
 
     if (cached_result) {
