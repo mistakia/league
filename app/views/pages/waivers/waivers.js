@@ -30,7 +30,7 @@ export default function WaiversPage({ load, items, isPending }) {
   const waiver_body = isPending && !rows.length ? <Loading loading /> : rows
 
   const body = (
-    <div className='league-container'>
+    <div className='league-container waivers-container'>
       <div className='waivers__filter'>
         <WaiverTypeFilter />
         <WaiverProcessedFilter />
