@@ -108,7 +108,7 @@ api.use('/api/markets', speed_limiter, routes.markets)
 api.use('/api/percentiles', routes.percentiles)
 api.use('/api/seasonlogs', routes.seasonlogs)
 api.use('/api/cache', routes.cache)
-api.use('/api/table-views', routes.table_views)
+api.use('/api/data-views', routes.data_views)
 api.use('/api/wagers', routes.wagers)
 
 api.use('/api/*', (req, res, next) => {

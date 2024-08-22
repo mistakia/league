@@ -61,6 +61,7 @@
     "jsdom": "^24.0.0",
     "jsonwebtoken": "^9.0.2",
     "knex": "3.1.0",
+    "lru-cache": "^11.0.0",
     "marked": "^5.1.2",
     "morgan": "^1.10.0",
     "morgan-debug": "^2.0.0",

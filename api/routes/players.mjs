@@ -2,12 +2,7 @@ import express from 'express'
 import cron from 'node-cron'
 
 import cache from '#api/cache.mjs'
-import {
-  getPlayers,
-  getTransitionBids,
-  getLeague,
-  get_data_view_results
-} from '#libs-server'
+import { getPlayers, getTransitionBids, getLeague } from '#libs-server'
 
 const router = express.Router()
 
@@ -94,44 +89,6 @@ router.post('/?', async (req, res) => {
     }
 
     res.send(players)
-  } catch (error) {
-    logger(error)
-    res.status(500).send({ error: error.toString() })
-  }
-})
-
-router.post('/search/?', async (req, res) => {
-  const { logger } = req.app.locals
-  try {
-    const { where, columns, sort, offset, prefix_columns, splits } = req.body
-    if (where) {
-      // TODO validate where
-    }
-
-    if (columns) {
-      // TODO validate columns
-    }
-
-    if (sort) {
-      // TODO validate sort
-    }
-
-    if (offset) {
-      // TODO validate offset
-    }
-
-    const query = get_data_view_results({
-      where,
-      columns,
-      sort,
-      offset,
-      prefix_columns,
-      splits
-    })
-
-    const result = await query
-
-    res.send(result)
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })

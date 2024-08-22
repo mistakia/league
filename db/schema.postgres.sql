@@ -232,6 +232,7 @@ ALTER TABLE IF EXISTS ONLY public.users_teams DROP CONSTRAINT IF EXISTS users_te
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_key;
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_hash_key;
 ALTER TABLE IF EXISTS ONLY public.seasons DROP CONSTRAINT IF EXISTS seasons_pkey;
+ALTER TABLE IF EXISTS ONLY public.rosters_players DROP CONSTRAINT IF EXISTS rosters_players_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pid_year_unique;
@@ -241,7 +242,7 @@ ALTER TABLE IF EXISTS ONLY public.league_team_careerlogs DROP CONSTRAINT IF EXIS
 ALTER TABLE IF EXISTS ONLY public.invite_codes DROP CONSTRAINT IF EXISTS invite_codes_pkey;
 ALTER TABLE IF EXISTS ONLY public.waivers DROP CONSTRAINT IF EXISTS "idx_25151_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS "idx_25127_PRIMARY";
-ALTER TABLE IF EXISTS ONLY public.user_table_views DROP CONSTRAINT IF EXISTS "idx_25118_PRIMARY";
+ALTER TABLE IF EXISTS ONLY public.user_data_views DROP CONSTRAINT IF EXISTS "idx_25118_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.transition_bids DROP CONSTRAINT IF EXISTS "idx_25108_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.sources DROP CONSTRAINT IF EXISTS "idx_25023_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.rosters DROP CONSTRAINT IF EXISTS "idx_24995_PRIMARY";
@@ -259,7 +260,7 @@ ALTER TABLE IF EXISTS ONLY public.config DROP CONSTRAINT IF EXISTS config_pkey;
 ALTER TABLE IF EXISTS ONLY public.config DROP CONSTRAINT IF EXISTS config_key_unique;
 ALTER TABLE IF EXISTS public.waivers ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.users ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.user_table_views ALTER COLUMN view_id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.user_data_views ALTER COLUMN view_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.transition_bids ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.transactions ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.trades ALTER COLUMN uid DROP DEFAULT;
@@ -285,7 +286,7 @@ DROP TABLE IF EXISTS public.users_sources;
 DROP SEQUENCE IF EXISTS public.users_id_seq;
 DROP TABLE IF EXISTS public.users;
 DROP SEQUENCE IF EXISTS public.user_table_views_view_id_seq;
-DROP TABLE IF EXISTS public.user_table_views;
+DROP TABLE IF EXISTS public.user_data_views;
 DROP TABLE IF EXISTS public.urls;
 DROP TABLE IF EXISTS public.transition_releases;
 DROP SEQUENCE IF EXISTS public.transition_bids_uid_seq;
@@ -4735,10 +4736,10 @@ CREATE TABLE public.urls (
 
 
 --
--- Name: user_table_views; Type: TABLE; Schema: public; Owner: -
+-- Name: user_data_views; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.user_table_views (
+CREATE TABLE public.user_data_views (
     view_id character varying(36) NOT NULL,
     view_name character varying(30) NOT NULL,
     view_description text,
@@ -4765,7 +4766,7 @@ CREATE SEQUENCE public.user_table_views_view_id_seq
 -- Name: user_table_views_view_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
 --
 
-ALTER SEQUENCE public.user_table_views_view_id_seq OWNED BY public.user_table_views.view_id;
+ALTER SEQUENCE public.user_table_views_view_id_seq OWNED BY public.user_data_views.view_id;
 
 
 --
@@ -5006,10 +5007,10 @@ ALTER TABLE ONLY public.transition_bids ALTER COLUMN uid SET DEFAULT nextval('pu
 
 
 --
--- Name: user_table_views view_id; Type: DEFAULT; Schema: public; Owner: -
+-- Name: user_data_views view_id; Type: DEFAULT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.user_table_views ALTER COLUMN view_id SET DEFAULT nextval('public.user_table_views_view_id_seq'::regclass);
+ALTER TABLE ONLY public.user_data_views ALTER COLUMN view_id SET DEFAULT nextval('public.user_table_views_view_id_seq'::regclass);
 
 
 --
@@ -5147,10 +5148,10 @@ ALTER TABLE ONLY public.transition_bids
 
 
 --
--- Name: user_table_views idx_25118_PRIMARY; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: user_data_views idx_25118_PRIMARY; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.user_table_views
+ALTER TABLE ONLY public.user_data_views
     ADD CONSTRAINT "idx_25118_PRIMARY" PRIMARY KEY (view_id);
 
 
@@ -5224,6 +5225,14 @@ ALTER TABLE ONLY public.player_contracts
 
 ALTER TABLE ONLY public.player
     ADD CONSTRAINT player_pkey PRIMARY KEY (pid);
+
+
+--
+-- Name: rosters_players rosters_players_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.rosters_players
+    ADD CONSTRAINT rosters_players_pkey PRIMARY KEY (rid, pid);
 
 
 --

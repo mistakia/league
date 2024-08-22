@@ -58,7 +58,7 @@ waiver_releases
 waivers
 placed_wagers
 urls
-user_table_views"
+user_data_views"
 
 db_cache_tables="
 league_baselines
