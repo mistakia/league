@@ -16,7 +16,7 @@ import odds from './odds/index.mjs'
 import percentiles from './percentiles.mjs'
 import seasonlogs from './seasonlogs.mjs'
 import cache from './cache.mjs'
-import table_views from './table_views.mjs'
+import data_views from './data_views.mjs'
 import wagers from './wagers.mjs'
 import markets from './markets.mjs'
 import shorten_url from './shorten_url.mjs'
@@ -40,7 +40,7 @@ export default {
   percentiles,
   seasonlogs,
   cache,
-  table_views,
+  data_views,
   wagers,
   markets,
   shorten_url

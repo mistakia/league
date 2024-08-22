@@ -10323,6 +10323,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"lru-cache@npm:^11.0.0":
+  version: 11.0.0
+  resolution: "lru-cache@npm:11.0.0"
+  checksum: c29385f9369b1a566e1db9eda9a4b12f6507de906e5720ca12844dd775b7139c42b8e5837e7d5162bcc292ce4d3eecfa74ec2856c6afcc0caa2e3c9ea3a17f27
+  languageName: node
+  linkType: hard
+
 "lru-cache@npm:^5.1.1":
   version: 5.1.1
   resolution: "lru-cache@npm:5.1.1"
@@ -13628,6 +13635,7 @@ __metadata:
     jsdom: ^24.0.0
     jsonwebtoken: ^9.0.2
     knex: 3.1.0
+    lru-cache: ^11.0.0
     marked: ^5.1.2
     mini-css-extract-plugin: ^2.9.0
     mocha: ^10.4.0

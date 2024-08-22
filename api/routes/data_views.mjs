@@ -1,7 +1,22 @@
 import express from 'express'
 import crypto from 'crypto'
+import LRU from 'lru-cache'
 
-import { validators } from '#libs-server'
+import { validators, get_data_view_results } from '#libs-server'
+
+const lru_options = {
+  max: 2 * 1024 * 1024 * 1024, // 2GB
+  ttl: 1000 * 60 * 60 * 12, // 12 hours
+  allowStale: false,
+  updateAgeOnGet: true,
+  maxSize: 2 * 1024 * 1024 * 1024, // 2GB
+  sizeCalculation: (value, key) => {
+    // Estimate size in bytes (adjust as needed)
+    return JSON.stringify(value).length + JSON.stringify(key).length
+  }
+}
+
+const data_view_cache = new LRU(lru_options)
 
 const router = express.Router()
 
@@ -26,12 +41,12 @@ router.get('/?', async (req, res) => {
       user_ids.push(user_id)
     }
 
-    const query = db('user_table_views')
-      .select('user_table_views.*', 'users.username as view_username')
-      .leftJoin('users', 'user_table_views.user_id', 'users.id')
+    const query = db('user_data_views')
+      .select('user_data_views.*', 'users.username as view_username')
+      .leftJoin('users', 'user_data_views.user_id', 'users.id')
 
     if (user_ids.length) {
-      query.whereIn('user_table_views.user_id', user_ids)
+      query.whereIn('user_data_views.user_id', user_ids)
     }
 
     const views = await query
@@ -66,7 +81,7 @@ router.post('/?', async (req, res) => {
     }
 
     if (view_id) {
-      const view = await db('user_table_views')
+      const view = await db('user_data_views')
         .where({
           view_id
         })
@@ -80,7 +95,7 @@ router.post('/?', async (req, res) => {
         return res.status(401).send({ error: 'invalid userId' })
       }
 
-      await db('user_table_views')
+      await db('user_data_views')
         .where({
           view_id,
           user_id
@@ -93,7 +108,7 @@ router.post('/?', async (req, res) => {
     } else {
       const view_id = crypto.randomUUID()
 
-      await db('user_table_views').insert({
+      await db('user_data_views').insert({
         view_id,
         view_name,
         view_description,
@@ -102,7 +117,7 @@ router.post('/?', async (req, res) => {
       })
     }
 
-    const view = await db('user_table_views')
+    const view = await db('user_data_views')
       .where({
         view_name,
         user_id
@@ -127,7 +142,7 @@ router.delete('/:view_id', async (req, res) => {
 
     const user_id = req.auth ? req.auth.userId : null
 
-    const view = await db('user_table_views')
+    const view = await db('user_data_views')
       .where({
         view_id
       })
@@ -141,7 +156,7 @@ router.delete('/:view_id', async (req, res) => {
       return res.status(401).send({ error: 'invalid userId' })
     }
 
-    await db('user_table_views')
+    await db('user_data_views')
       .where({
         view_id,
         user_id
@@ -152,6 +167,63 @@ router.delete('/:view_id', async (req, res) => {
   } catch (err) {
     logger(err)
     res.status(500).send({ error: err.toString() })
+  }
+})
+
+router.post('/search/?', async (req, res) => {
+  const { logger } = req.app.locals
+  try {
+    const { where, columns, sort, offset, prefix_columns, splits } = req.body
+
+    const generate_cache_key = (obj) => {
+      if (Array.isArray(obj)) {
+        return JSON.stringify(obj.map(generate_cache_key).sort())
+      } else if (typeof obj === 'object' && obj !== null) {
+        return JSON.stringify(
+          Object.keys(obj)
+            .sort()
+            .reduce((result, key) => {
+              result[key] = generate_cache_key(obj[key])
+              return result
+            }, {})
+        )
+      } else {
+        return JSON.stringify(obj)
+      }
+    }
+
+    const cache_key = generate_cache_key({
+      where,
+      columns,
+      sort,
+      offset,
+      prefix_columns,
+      splits
+    })
+
+    const cached_result = data_view_cache.get(cache_key)
+
+    if (cached_result) {
+      return res.send(cached_result)
+    }
+
+    const query = get_data_view_results({
+      where,
+      columns,
+      sort,
+      offset,
+      prefix_columns,
+      splits
+    })
+
+    const result = await query
+
+    data_view_cache.set(cache_key, result)
+
+    res.send(result)
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
   }
 })
 

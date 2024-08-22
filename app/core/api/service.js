@@ -356,19 +356,19 @@ export const api = {
     return { url }
   },
   post_data_view_search(data) {
-    const url = `${API_URL}/players/search`
+    const url = `${API_URL}/data-views/search`
     return { url, ...POST(data) }
   },
   post_data_view(data) {
-    const url = `${API_URL}/table-views`
+    const url = `${API_URL}/data-views`
     return { url, ...POST(data) }
   },
   delete_data_view({ view_id }) {
-    const url = `${API_URL}/table-views/${view_id}`
+    const url = `${API_URL}/data-views/${view_id}`
     return { url, method: 'DELETE' }
   },
   get_data_views({ user_id, username }) {
-    let url = `${API_URL}/table-views`
+    let url = `${API_URL}/data-views`
     const params = new URLSearchParams()
     if (user_id) params.append('user_id', user_id)
     if (username) params.append('username', username)
