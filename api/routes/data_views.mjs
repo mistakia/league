@@ -1,22 +1,31 @@
 import express from 'express'
 import crypto from 'crypto'
-import { LRUCache } from 'lru-cache'
+import Redis from 'ioredis'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
 
 import { validators, get_data_view_results } from '#libs-server'
 
-const lru_options = {
-  ttl: 1000 * 60 * 60 * 12, // 12 hours
-  allowStale: false,
-  updateAgeOnGet: true,
-  maxSize: 2 * 1024 * 1024 * 1024, // 2GB
-  sizeCalculation: (value, key) => {
-    // Estimate size in bytes (adjust as needed)
-    return JSON.stringify(value).length + JSON.stringify(key).length
+const redis_client = new Redis({
+  host: 'localhost',
+  port: 6379
+})
+
+class RedisCacheAdapter {
+  constructor(client) {
+    this.client = client
+  }
+
+  async get(key) {
+    const value = await this.client.get(key)
+    return value ? JSON.parse(value) : null
+  }
+
+  async set(key, value, ttl) {
+    await this.client.set(key, JSON.stringify(value), 'EX', ttl)
   }
 }
 
-const data_view_cache = new LRUCache(lru_options)
+const data_view_cache = new RedisCacheAdapter(redis_client)
 
 const router = express.Router()
 
@@ -201,7 +210,7 @@ router.post('/search/?', async (req, res) => {
       splits
     })
     const cache_key = get_table_hash(stringified_key)
-    const cached_result = data_view_cache.get(cache_key)
+    const cached_result = await data_view_cache.get(cache_key)
 
     if (cached_result) {
       return res.send(cached_result)
@@ -218,7 +227,8 @@ router.post('/search/?', async (req, res) => {
 
     const result = await query
 
-    data_view_cache.set(cache_key, result)
+    const cache_ttl = 1000 * 60 * 60 * 12 // 12 hours
+    await data_view_cache.set(cache_key, result, cache_ttl)
 
     res.send(result)
   } catch (error) {
