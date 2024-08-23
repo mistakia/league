@@ -10,6 +10,12 @@ import {
   join_per_team_play_cte
 } from './rate-type-per-team-play.mjs'
 
+import {
+  get_per_player_cte_table_name,
+  add_per_player_cte,
+  join_per_player_cte
+} from './rate-type-per-player.mjs'
+
 const rate_type_handlers = {
   per_game: {
     get_cte_table_name: get_per_game_cte_table_name,
@@ -127,6 +133,71 @@ const rate_type_handlers = {
     add_cte: (args) =>
       add_per_team_play_cte({ ...args, group_by: 'series', team_type: 'def' }),
     join_cte: join_per_team_play_cte
+  },
+  per_player_rush_attempt: {
+    get_cte_table_name: (params) =>
+      get_per_player_cte_table_name({ params, stat_type: 'rush_attempt' }),
+    add_cte: (args) =>
+      add_per_player_cte({ ...args, stat_type: 'rush_attempt' }),
+    join_cte: join_per_player_cte
+  },
+  per_player_pass_attempt: {
+    get_cte_table_name: (params) =>
+      get_per_player_cte_table_name({ params, stat_type: 'pass_attempt' }),
+    add_cte: (args) =>
+      add_per_player_cte({ ...args, stat_type: 'pass_attempt' }),
+    join_cte: join_per_player_cte
+  },
+  per_player_target: {
+    get_cte_table_name: (params) =>
+      get_per_player_cte_table_name({ params, stat_type: 'target' }),
+    add_cte: (args) => add_per_player_cte({ ...args, stat_type: 'target' }),
+    join_cte: join_per_player_cte
+  },
+  per_player_catchable_target: {
+    get_cte_table_name: (params) =>
+      get_per_player_cte_table_name({
+        params,
+        stat_type: 'target',
+        rate_type_params: { catchable_ball: true }
+      }),
+    add_cte: (args) =>
+      add_per_player_cte({
+        ...args,
+        stat_type: 'target',
+        rate_type_params: { catchable_ball: true }
+      }),
+    join_cte: join_per_player_cte
+  },
+  per_player_deep_target: {
+    get_cte_table_name: (params) =>
+      get_per_player_cte_table_name({
+        params,
+        stat_type: 'target',
+        rate_type_params: { dot: [20, 99] }
+      }),
+    add_cte: (args) =>
+      add_per_player_cte({
+        ...args,
+        stat_type: 'target',
+        rate_type_params: { dot: [20, 99] }
+      }),
+    join_cte: join_per_player_cte
+  },
+  per_player_catchable_deep_target: {
+    get_cte_table_name: (params) =>
+      get_per_player_cte_table_name({
+        params,
+        stat_type: 'target',
+        rate_type_params: { dot: [20, 99], catchable_ball: true }
+      }),
+    add_cte: (args) =>
+      add_per_player_cte({
+        ...args,
+        stat_type: 'target',
+        rate_type_params: { dot: [20, 99], catchable_ball: true }
+      }),
+    join_cte: join_per_player_cte
   }
 }
 

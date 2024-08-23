@@ -112,7 +112,13 @@ const player_stat_from_plays = ({
     'per_team_off_pass_play',
     'per_team_off_rush_play',
     'per_team_off_drive',
-    'per_team_off_series'
+    'per_team_off_series',
+
+    'per_player_rush_attempt',
+    'per_player_pass_attempt',
+    'per_player_target',
+    'per_player_catchable_target',
+    'per_player_catchable_deep_target'
   ]
 })
 
