@@ -189,7 +189,7 @@ export const job = async () => {
   }
 
   await report_job({
-    type: job_types.BETONLINE_ODDS,
+    job_type: job_types.BETONLINE_ODDS,
     error
   })
 }

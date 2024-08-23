@@ -414,7 +414,7 @@ const main = async () => {
   }
 
   await report_job({
-    type: job_types.NFL_PLAYS_NGS,
+    job_type: job_types.NFL_PLAYS_NGS,
     error
   })
 

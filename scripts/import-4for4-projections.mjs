@@ -145,7 +145,7 @@ const main = async () => {
   }
 
   await report_job({
-    type: job_types.PROJECTIONS_4FOR4,
+    job_type: job_types.PROJECTIONS_4FOR4,
     error
   })
 

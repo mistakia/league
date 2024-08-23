@@ -535,7 +535,7 @@ const main = async () => {
   }
 
   await report_job({
-    type: job_types.PROCESS_PLAY_STATS,
+    job_type: job_types.PROCESS_PLAY_STATS,
     error
   })
 

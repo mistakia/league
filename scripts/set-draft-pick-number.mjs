@@ -107,7 +107,7 @@ const main = async () => {
   }
 
   await report_job({
-    type: job_types.SET_DRAFT_PICK_NUMBER,
+    job_type: job_types.SET_DRAFT_PICK_NUMBER,
     error
   })
 

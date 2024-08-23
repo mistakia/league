@@ -65,7 +65,7 @@ const main = async () => {
   }
 
   await report_job({
-    type: job_types.GENERATE_NEW_SEASONS,
+    job_type: job_types.GENERATE_NEW_SEASONS,
     error
   })
 

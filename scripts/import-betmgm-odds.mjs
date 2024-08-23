@@ -238,7 +238,7 @@ export const job = async () => {
   }
 
   await report_job({
-    type: job_types.BETMGM_ODDS,
+    job_type: job_types.BETMGM_ODDS,
     error
   })
 }

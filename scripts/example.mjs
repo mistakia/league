@@ -20,7 +20,7 @@ const main = async () => {
   }
 
   await report_job({
-    type: job_types.EXAMPLE,
+    job_type: job_types.EXAMPLE,
     error
   })
 

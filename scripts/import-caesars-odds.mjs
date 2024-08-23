@@ -252,7 +252,7 @@ export const job = async () => {
   }
 
   await report_job({
-    type: job_types.CAESARS_ODDS,
+    job_type: job_types.CAESARS_ODDS,
     error
   })
 }

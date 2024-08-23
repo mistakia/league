@@ -138,7 +138,7 @@ const main = async () => {
   }
 
   await report_job({
-    type: job_types.PLAYERS_MFL,
+    job_type: job_types.PLAYERS_MFL,
     error
   })
 

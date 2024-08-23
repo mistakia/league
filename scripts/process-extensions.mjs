@@ -112,7 +112,7 @@ const main = async () => {
   }
 
   await report_job({
-    type: job_types.PROCESS_EXTENSIONS,
+    job_type: job_types.PROCESS_EXTENSIONS,
     error
   })
 

@@ -119,7 +119,7 @@ const main = async () => {
   }
 
   await report_job({
-    type: job_types.PROJECTIONS_FANTASYSHARKS,
+    job_type: job_types.PROJECTIONS_FANTASYSHARKS,
     error
   })
 

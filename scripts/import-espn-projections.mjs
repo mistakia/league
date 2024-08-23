@@ -125,7 +125,7 @@ const main = async () => {
   }
 
   await report_job({
-    type: job_types.PROJECTIONS_ESPN,
+    job_type: job_types.PROJECTIONS_ESPN,
     error
   })
 

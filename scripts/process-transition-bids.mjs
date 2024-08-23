@@ -146,7 +146,7 @@ const main = async () => {
   }
 
   await report_job({
-    type: job_types.PROCESS_TRANSITION_BIDS,
+    job_type: job_types.PROCESS_TRANSITION_BIDS,
     error
   })
 
