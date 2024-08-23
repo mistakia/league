@@ -9,7 +9,13 @@ export default function (wss) {
   handle_data_view_socket(wss)
 
   wss.on('connection', function (ws, request) {
-    const { userId } = request.auth
+    const userId = request.auth ? request.auth.userId : null
+
+    // If the user is not authenticated do not need to handle any of the following messages
+    if (!userId) {
+      return
+    }
+
     ws.on('message', async (msg) => {
       const message = JSON.parse(msg)
 

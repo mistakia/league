@@ -103,19 +103,19 @@ const data_view_queue = new DataViewQueue()
 
 export default function handle_data_view_socket(wss) {
   wss.on('connection', function (ws, request) {
-    const { userId } = request.auth
+    const user_id = request.auth ? request.auth.userId : null
 
     ws.on('message', async (msg) => {
       const message = JSON.parse(msg)
 
       if (message.type === 'DATA_VIEW_REQUEST') {
         const { request_id, params } = message.payload
-        data_view_queue.add_request({ ws, request_id, params, user_id: userId })
+        data_view_queue.add_request({ ws, request_id, params, user_id })
       }
     })
 
     ws.on('close', () => {
-      if (!userId) {
+      if (!user_id) {
         data_view_queue.remove_request(ws)
       }
     })
