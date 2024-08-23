@@ -7,11 +7,27 @@ class DataViewQueue {
     this.processing = false
   }
 
-  add_request({ ws, request_id, params, user_id }) {
-    const position = this.queue.length + 1
-    this.queue.push({ ws, request_id, params, user_id, position })
-    this.send_position_update({ ws, request_id, position })
-    this.process_queue()
+  async add_request({ ws, request_id, params, user_id }) {
+    const cache_key = get_table_hash(JSON.stringify(params))
+    const cached_result = await data_view_cache.get(cache_key)
+
+    if (cached_result) {
+      this.send_cached_result({ ws, request_id, result: cached_result })
+    } else {
+      const position = this.queue.length + 1
+      this.queue.push({ ws, request_id, params, user_id, position, cache_key })
+      this.send_position_update({ ws, request_id, position })
+      this.process_queue()
+    }
+  }
+
+  send_cached_result({ ws, request_id, result }) {
+    ws.send(
+      JSON.stringify({
+        type: 'DATA_VIEW_RESULT',
+        payload: { request_id, result }
+      })
+    )
   }
 
   remove_request(ws) {
@@ -23,8 +39,7 @@ class DataViewQueue {
     ws.send(
       JSON.stringify({
         type: 'DATA_VIEW_POSITION',
-        request_id,
-        position
+        payload: { request_id, position }
       })
     )
   }
@@ -47,46 +62,34 @@ class DataViewQueue {
     if (this.processing || this.queue.length === 0) return
 
     this.processing = true
-    const { ws, request_id, params } = this.queue.shift()
+    const { ws, request_id, params, cache_key } = this.queue.shift()
 
     try {
       ws.send(
         JSON.stringify({
           type: 'DATA_VIEW_STATUS',
-          request_id,
-          status: 'processing'
+          payload: { request_id, status: 'processing' }
         })
       )
 
-      const cache_key = get_table_hash(JSON.stringify(params))
-      const cached_result = await data_view_cache.get(cache_key)
+      const result = await get_data_view_results(params)
 
-      if (cached_result) {
-        ws.send(
-          JSON.stringify({
-            type: 'DATA_VIEW_RESULT',
-            request_id,
-            result: cached_result
-          })
-        )
-      } else {
-        const result = await get_data_view_results(params)
-
-        if (result && result.length) {
-          const cache_ttl = 1000 * 60 * 60 * 12 // 12 hours
-          await data_view_cache.set(cache_key, result, cache_ttl)
-        }
-
-        ws.send(
-          JSON.stringify({ type: 'DATA_VIEW_RESULT', request_id, result })
-        )
+      if (result && result.length) {
+        const cache_ttl = 1000 * 60 * 60 * 12 // 12 hours
+        await data_view_cache.set(cache_key, result, cache_ttl)
       }
+
+      ws.send(
+        JSON.stringify({
+          type: 'DATA_VIEW_RESULT',
+          payload: { request_id, result }
+        })
+      )
     } catch (error) {
       ws.send(
         JSON.stringify({
           type: 'DATA_VIEW_ERROR',
-          request_id,
-          error: error.toString()
+          payload: { request_id, error: error.toString() }
         })
       )
     } finally {
