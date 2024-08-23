@@ -11,10 +11,13 @@
   min-height 35px
   flex 0 0 auto
   max-width 126px
+  transition box-shadow $smooth_transition
+
   &:not(.switch)
     background white
   &:hover
     background white
+    box-shadow $box_shadow
     .player__filter-label
       color $accentColor
 
@@ -36,6 +39,9 @@
   z-index 10001
   display flex
   flex-direction column
+  border 1px solid $borderColor
+  box-shadow $box_shadow
+  border-radius 3px
 
 .player__filter-dropdown-body
   display flex

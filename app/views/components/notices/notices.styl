@@ -1,12 +1,12 @@
 .notices-container
   border 1px solid $borderColor
   border-radius 5px
-  transition background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms
+  transition background-color $smooth_transition,box-shadow $smooth_transition,border $smooth_transition
 
   &:hover
     border-color $hoverBorder
     background white
-    box-shadow $hoverShadow 4px 4px 0px 0px
+    box-shadow $box_shadow
 
   .MuiPaper-root
     border-radius 0

@@ -11,6 +11,11 @@
   min-width 160px
   border-radius 3px
   background white
+  border 1px solid $borderColor
+  transition box-shadow $smooth_transition
+
+  &:hover
+    box-shadow $box_shadow
 
   &.selected
     background lighten(yellow, 93%)
