@@ -1,5 +1,6 @@
 import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
 import * as table_constants from 'react-table/src/constants.mjs'
+import { constants } from '#libs-shared'
 
 export default function ({ query, params, table_name = 'nfl_plays' }) {
   const column_param_keys = Object.keys(nfl_plays_column_params)
@@ -34,7 +35,10 @@ export default function ({ query, params, table_name = 'nfl_plays' }) {
           (_, i) => base_year + min_offset + i
         )
       })
-      param_value = [...new Set([...param_value, ...adjusted_years])]
+
+      // Filter out years greater than the current year
+      const current_year = constants.season.year
+      param_value = [...new Set([...param_value, ...adjusted_years])].filter(year => year <= current_year)
     }
 
     const column_param_definition = nfl_plays_column_params[column_param_key]

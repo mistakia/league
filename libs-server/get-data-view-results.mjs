@@ -102,7 +102,12 @@ const get_year_range = (columns, where) => {
       const year_array = Array.isArray(params.year)
         ? params.year
         : [params.year]
-      year_array.forEach((year) => years.add(parseInt(year)))
+      year_array.forEach((year) => {
+        const parsed_year = parseInt(year)
+        if (parsed_year <= constants.season.year) {
+          years.add(parsed_year)
+        }
+      })
     }
     if (params.year_offset) {
       const offset = Array.isArray(params.year_offset)
@@ -133,10 +138,13 @@ const get_year_range = (columns, where) => {
   }
 
   // Add offset years
-  const all_years = new Set(years)
+  const all_years = new Set()
   years.forEach((year) => {
     for (let i = min_offset; i <= max_offset; i++) {
-      all_years.add(year + i)
+      const offset_year = year + i
+      if (offset_year <= constants.season.year) {
+        all_years.add(offset_year)
+      }
     }
   })
 
