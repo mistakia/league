@@ -227,8 +227,10 @@ router.post('/search/?', async (req, res) => {
 
     const result = await query
 
-    const cache_ttl = 1000 * 60 * 60 * 12 // 12 hours
-    await data_view_cache.set(cache_key, result, cache_ttl)
+    if (result && result.length) {
+      const cache_ttl = 1000 * 60 * 60 * 12 // 12 hours
+      await data_view_cache.set(cache_key, result, cache_ttl)
+    }
 
     res.send(result)
   } catch (error) {
