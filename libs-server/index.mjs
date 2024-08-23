@@ -57,7 +57,6 @@ export { default as getTransitionBids } from './get-transition-bids.mjs'
 export { wait } from './wait.mjs'
 export * as nfl from './nfl.mjs'
 export * as ngs from './ngs.mjs'
-export { default as mergePlayer } from './merge-player.mjs'
 export * as gambet from './gambet.mjs'
 export * as cache from './cache.mjs'
 export * as betrivers from './betrivers.mjs'
@@ -75,6 +74,11 @@ export * as betonline from './betonline.mjs'
 export { default as encode_market_selection_id } from './encode-market-selection-id.mjs'
 export { default as format_starting_hash } from './format-starting-hash.mjs'
 export { default as report_job } from './report-job.mjs'
+export {
+  redis_client,
+  RedisCacheAdapter,
+  data_view_cache
+} from './redis_adapter.mjs'
 
 export const getChartedPlayByPlayQuery = (db) =>
   db('nfl_plays')

@@ -1,10 +1,12 @@
 import Auction from './auction.mjs'
 import Scoreboard from './scoreboard.mjs'
+import handle_data_view_socket from './data_view.mjs'
 
 const auctions = new Map()
 
 export default function (wss) {
   const scoreboard = new Scoreboard(wss)
+  handle_data_view_socket(wss)
 
   wss.on('connection', function (ws, request) {
     const { userId } = request.auth
@@ -16,27 +18,25 @@ export default function (wss) {
         return scoreboard.register({ ws, userId, updated })
       }
 
-      if (message.type !== 'AUCTION_JOIN') {
-        return
-      }
-
-      const { lid, tid, clientId } = message.payload
-      const auction = auctions.get(lid)
-
-      const onclose = () => {
+      if (message.type === 'AUCTION_JOIN') {
+        const { lid, tid, clientId } = message.payload
         const auction = auctions.get(lid)
-        if (!Object.keys(auction._connected).length) {
-          auctions.delete(lid)
-        }
-      }
 
-      if (auction) {
-        auction.join({ ws, tid, userId, onclose, clientId })
-      } else {
-        const auction = new Auction({ wss, lid })
-        auctions.set(lid, auction)
-        await auction.setup()
-        auction.join({ ws, tid, userId, onclose, clientId })
+        const onclose = () => {
+          const auction = auctions.get(lid)
+          if (!Object.keys(auction._connected).length) {
+            auctions.delete(lid)
+          }
+        }
+
+        if (auction) {
+          auction.join({ ws, tid, userId, onclose, clientId })
+        } else {
+          const auction = new Auction({ wss, lid })
+          auctions.set(lid, auction)
+          await auction.setup()
+          auction.join({ ws, tid, userId, onclose, clientId })
+        }
       }
     })
   })

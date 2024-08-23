@@ -1,31 +1,11 @@
 import express from 'express'
 import crypto from 'crypto'
-import Redis from 'ioredis'
+import {
+  validators,
+  get_data_view_results,
+  data_view_cache
+} from '#libs-server'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
-
-import { validators, get_data_view_results } from '#libs-server'
-
-const redis_client = new Redis({
-  host: 'localhost',
-  port: 6379
-})
-
-class RedisCacheAdapter {
-  constructor(client) {
-    this.client = client
-  }
-
-  async get(key) {
-    const value = await this.client.get(key)
-    return value ? JSON.parse(value) : null
-  }
-
-  async set(key, value, ttl) {
-    await this.client.set(key, JSON.stringify(value), 'EX', ttl)
-  }
-}
-
-const data_view_cache = new RedisCacheAdapter(redis_client)
 
 const router = express.Router()
 

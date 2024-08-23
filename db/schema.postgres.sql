@@ -34,6 +34,7 @@ DROP INDEX IF EXISTS public.idx_prop_markets_index_market_time_year;
 DROP INDEX IF EXISTS public.idx_prop_market_selections_index_composite;
 DROP INDEX IF EXISTS public.idx_player_seasonlogs_year_seas_type_career_year_pid;
 DROP INDEX IF EXISTS public.idx_player_pid_pos;
+DROP INDEX IF EXISTS public.idx_player_gamelogs_esbid_tm;
 DROP INDEX IF EXISTS public.idx_player_gamelogs_esbid_active_pid;
 DROP INDEX IF EXISTS public.idx_opening_days_year_opening_day;
 DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_week_play_type_trg_pid;
@@ -260,7 +261,6 @@ ALTER TABLE IF EXISTS ONLY public.config DROP CONSTRAINT IF EXISTS config_pkey;
 ALTER TABLE IF EXISTS ONLY public.config DROP CONSTRAINT IF EXISTS config_key_unique;
 ALTER TABLE IF EXISTS public.waivers ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.users ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.user_data_views ALTER COLUMN view_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.transition_bids ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.transactions ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.trades ALTER COLUMN uid DROP DEFAULT;
@@ -285,7 +285,6 @@ DROP TABLE IF EXISTS public.users_teams;
 DROP TABLE IF EXISTS public.users_sources;
 DROP SEQUENCE IF EXISTS public.users_id_seq;
 DROP TABLE IF EXISTS public.users;
-DROP SEQUENCE IF EXISTS public.user_table_views_view_id_seq;
 DROP TABLE IF EXISTS public.user_data_views;
 DROP TABLE IF EXISTS public.urls;
 DROP TABLE IF EXISTS public.transition_releases;
@@ -4751,25 +4750,6 @@ CREATE TABLE public.user_data_views (
 
 
 --
--- Name: user_table_views_view_id_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.user_table_views_view_id_seq
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: user_table_views_view_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.user_table_views_view_id_seq OWNED BY public.user_data_views.view_id;
-
-
---
 -- Name: users; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -5004,13 +4984,6 @@ ALTER TABLE ONLY public.transactions ALTER COLUMN uid SET DEFAULT nextval('publi
 --
 
 ALTER TABLE ONLY public.transition_bids ALTER COLUMN uid SET DEFAULT nextval('public.transition_bids_uid_seq'::regclass);
-
-
---
--- Name: user_data_views view_id; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.user_data_views ALTER COLUMN view_id SET DEFAULT nextval('public.user_table_views_view_id_seq'::regclass);
 
 
 --
@@ -6624,6 +6597,13 @@ CREATE INDEX idx_opening_days_year_opening_day ON public.opening_days USING btre
 --
 
 CREATE INDEX idx_player_gamelogs_esbid_active_pid ON public.player_gamelogs USING btree (esbid, active, pid);
+
+
+--
+-- Name: idx_player_gamelogs_esbid_tm; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_gamelogs_esbid_tm ON public.player_gamelogs USING btree (esbid, tm);
 
 
 --
