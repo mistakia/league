@@ -179,16 +179,18 @@ server.on('upgrade', async (request, socket, head) => {
   const parsed = new url.URL(request.url, config.url)
   try {
     const token = parsed.searchParams.get('token')
-    const decoded = await jwt.verify(token, config.jwt.secret)
-    request.auth = decoded
+    if (token) {
+      const decoded = await jwt.verify(token, config.jwt.secret)
+      request.auth = decoded
+    }
   } catch (error) {
     logger(error)
-    return socket.destroy()
+    // Don't destroy the socket for invalid tokens, allow connection without auth
   }
 
   wss.handleUpgrade(request, socket, head, function (ws) {
     ws.leagueId = parseInt(parsed.searchParams.get('leagueId'), 10)
-    ws.userId = request.auth.userId
+    ws.userId = request.auth ? request.auth.userId : null
     wss.emit('connection', ws, request)
   })
 })
