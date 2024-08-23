@@ -181,7 +181,7 @@ export const job = async () => {
   }
 
   await report_job({
-    type: job_types.PRIZEPICKS_PROJECTIONS,
+    job_type: job_types.PRIZEPICKS_PROJECTIONS,
     error
   })
 }

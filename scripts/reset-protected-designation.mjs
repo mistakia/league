@@ -45,7 +45,7 @@ const main = async () => {
   }
 
   await report_job({
-    type: job_types.RESET_PROTECTED_DESIGNATION,
+    job_type: job_types.RESET_PROTECTED_DESIGNATION,
     error
   })
 

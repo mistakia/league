@@ -140,7 +140,7 @@ const main = async () => {
   }
 
   await report_job({
-    type: job_types.DRAW_DIVISIONS,
+    job_type: job_types.DRAW_DIVISIONS,
     error
   })
 

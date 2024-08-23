@@ -276,7 +276,7 @@ export const job = async () => {
 
   if (!argv.dry) {
     await report_job({
-      type: job_types.FANDUEL_ODDS,
+      job_type: job_types.FANDUEL_ODDS,
       error
     })
   }

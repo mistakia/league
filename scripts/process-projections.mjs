@@ -528,7 +528,7 @@ const main = async () => {
   }
 
   await report_job({
-    type: job_types.PROCESS_PROJECTIONS,
+    job_type: job_types.PROCESS_PROJECTIONS,
     error
   })
 

@@ -254,7 +254,7 @@ const main = async () => {
   }
 
   await report_job({
-    type: job_types.DATA_FOOTBALL_OUTSIDERS,
+    job_type: job_types.DATA_FOOTBALL_OUTSIDERS,
     error
   })
 

@@ -122,7 +122,7 @@ const main = async () => {
   }
 
   await report_job({
-    type: job_types.FANTASYPROS_WEEKLY,
+    job_type: job_types.FANTASYPROS_WEEKLY,
     error
   })
 

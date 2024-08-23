@@ -133,7 +133,7 @@ const main = async () => {
   }
 
   await report_job({
-    type: job_types.GENERATE_ROSTERS,
+    job_type: job_types.GENERATE_ROSTERS,
     error
   })
 

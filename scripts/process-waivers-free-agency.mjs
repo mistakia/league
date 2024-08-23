@@ -24,7 +24,7 @@ const runActive = async () => {
   }
 
   await report_job({
-    type: job_types.CLAIMS_WAIVERS_ACTIVE,
+    job_type: job_types.CLAIMS_WAIVERS_ACTIVE,
     job_success,
     job_reason: error ? error.message : null
   })
@@ -47,7 +47,7 @@ const runPractice = async () => {
   }
 
   await report_job({
-    type: job_types.CLAIMS_WAIVERS_PRACTICE,
+    job_type: job_types.CLAIMS_WAIVERS_PRACTICE,
     job_success,
     job_reason: error ? error.message : null
   })

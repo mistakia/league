@@ -143,7 +143,7 @@ const main = async () => {
   }
 
   await report_job({
-    type: job_types.PROJECTIONS_PFF,
+    job_type: job_types.PROJECTIONS_PFF,
     error
   })
 

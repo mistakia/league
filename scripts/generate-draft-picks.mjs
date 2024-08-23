@@ -69,7 +69,7 @@ const main = async () => {
   }
 
   await report_job({
-    type: job_types.GENERATE_DRAFT_PICKS,
+    job_type: job_types.GENERATE_DRAFT_PICKS,
     error
   })
 

@@ -111,7 +111,7 @@ const main = async () => {
   }
 
   await report_job({
-    type: job_types.CLAIMS_POACH,
+    job_type: job_types.CLAIMS_POACH,
     job_reason: error ? error.message : null,
     job_success
   })

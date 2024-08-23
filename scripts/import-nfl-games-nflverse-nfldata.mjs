@@ -178,7 +178,7 @@ const main = async () => {
   }
 
   await report_job({
-    type: job_types.IMPORT_GAMES_NFLVERSE,
+    job_type: job_types.IMPORT_GAMES_NFLVERSE,
     error
   })
 

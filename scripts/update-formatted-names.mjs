@@ -38,7 +38,7 @@ const main = async () => {
   }
 
   await report_job({
-    type: job_types.UPDATE_FORMATTED_NAMES,
+    job_type: job_types.UPDATE_FORMATTED_NAMES,
     error
   })
 

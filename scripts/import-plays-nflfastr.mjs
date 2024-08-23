@@ -330,7 +330,7 @@ const main = async () => {
   }
 
   await report_job({
-    type: job_types.IMPORT_PLAYS_NFLFASTR,
+    job_type: job_types.IMPORT_PLAYS_NFLFASTR,
     error
   })
 
