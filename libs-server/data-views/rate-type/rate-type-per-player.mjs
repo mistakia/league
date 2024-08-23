@@ -2,25 +2,24 @@ import db from '#db'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 
-export const get_per_team_play_cte_table_name = ({
+export const get_per_player_cte_table_name = ({
   params = {},
-  play_type = null,
-  group_by = null,
-  team_type = 'off'
+  stat_type = null,
+  rate_type_params = {}
 } = {}) => {
   let year = params.year || []
   if (!Array.isArray(year)) {
     year = [year]
   }
 
-  let week = params.week || []
-  if (!Array.isArray(week)) {
-    week = [week]
-  }
-
   let year_offset = params.year_offset || []
   if (!Array.isArray(year_offset)) {
     year_offset = [year_offset]
+  }
+
+  let week = params.week || []
+  if (!Array.isArray(week)) {
+    week = [week]
   }
 
   const adjusted_years = year.flatMap((y) => {
@@ -45,53 +44,48 @@ export const get_per_team_play_cte_table_name = ({
     ? [...new Set([...year, ...adjusted_years])].sort((a, b) => a - b)
     : []
 
-  const play_type_suffix = play_type ? `_${play_type.toLowerCase()}` : ''
-  const group_by_suffix = group_by ? `_${group_by}` : ''
-  const team_type_suffix = team_type === 'def' ? '_def' : '_off'
+  const stat_type_suffix = stat_type ? `_${stat_type}` : ''
+  const column_params_suffix = Object.entries(rate_type_params)
+    .map(([key, value]) => `_${key}_${value}`)
+    .join('')
+
   return get_table_hash(
-    `per_team_play${play_type_suffix}${group_by_suffix}${team_type_suffix}_years_${all_years.join('_')}_weeks_${week.join('_')}`
+    `per_player${stat_type_suffix}${column_params_suffix}_years_${all_years.join('_')}_weeks_${week.join('_')}`
   )
 }
 
-export const add_per_team_play_cte = ({
+export const add_per_player_cte = ({
   players_query,
   params,
   rate_type_table_name,
   splits,
-  play_type = null,
-  group_by = null,
-  team_type = 'off'
+  stat_type,
+  rate_type_params = {}
 }) => {
   const cte_query = db('nfl_plays')
-    .select(`nfl_plays.${team_type}`)
     .where('nfl_plays.seas_type', 'REG')
     .whereNot('play_type', 'NOPL')
-    .groupBy(`nfl_plays.${team_type}`)
 
   let count_expression = 'COUNT(*)'
-  if (group_by) {
-    switch (group_by) {
-      case 'half':
-        count_expression =
-          'COUNT(DISTINCT CONCAT(nfl_plays.esbid, CASE WHEN qtr <= 2 THEN 1 ELSE 2 END))'
-        break
-      case 'quarter':
-        count_expression = 'COUNT(DISTINCT CONCAT(nfl_plays.esbid, qtr))'
-        break
-      case 'drive':
-        count_expression = 'COUNT(DISTINCT CONCAT(nfl_plays.esbid, drive_seq))'
-        break
-      case 'series':
-        count_expression = 'COUNT(DISTINCT CONCAT(nfl_plays.esbid, series_seq))'
-        break
-    }
+  switch (stat_type) {
+    case 'rush_attempt':
+      count_expression = `SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END)`
+      cte_query.select('nfl_plays.bc_pid as pid')
+      cte_query.groupBy('nfl_plays.bc_pid')
+      break
+    case 'pass_attempt':
+      count_expression = `SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END)`
+      cte_query.select('nfl_plays.psr_pid as pid')
+      cte_query.groupBy('nfl_plays.psr_pid')
+      break
+    case 'target':
+      count_expression = `SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END)`
+      cte_query.select('nfl_plays.trg_pid as pid')
+      cte_query.groupBy('nfl_plays.trg_pid')
+      break
   }
 
   cte_query.select(db.raw(`${count_expression} as rate_type_total_count`))
-
-  if (play_type) {
-    cte_query.where('play_type', play_type)
-  }
 
   for (const split of splits) {
     if (split === 'year') {
@@ -106,14 +100,9 @@ export const add_per_team_play_cte = ({
   // TODO not sure if the column params should be applied to the the rate type as well
 
   // Remove career_year and career_game from params before applying other filters
-  const filtered_params = {
-    year: params.year,
-    week: params.week,
-    year_offset: params.year_offset,
-    week_offset: params.week_offset
-  }
-  // delete filtered_params.career_year
-  // delete filtered_params.career_game
+  const filtered_params = { ...rate_type_params }
+  delete filtered_params.career_year
+  delete filtered_params.career_game
 
   apply_play_by_play_column_params_to_query({
     query: cte_query,
@@ -123,14 +112,12 @@ export const add_per_team_play_cte = ({
   players_query.with(rate_type_table_name, cte_query)
 }
 
-export const join_per_team_play_cte = ({
+export const join_per_player_cte = ({
   players_query,
   params,
   rate_type_table_name,
   splits,
-  year_split_join_clause,
-  group_by = null,
-  team_type = 'off'
+  year_split_join_clause
 }) => {
   const year_offset = params.year_offset
   const has_year_offset_range =
@@ -145,7 +132,7 @@ export const join_per_team_play_cte = ({
       typeof year_offset === 'number')
 
   players_query.leftJoin(rate_type_table_name, function () {
-    this.on(`${rate_type_table_name}.${team_type}`, 'player.current_nfl_team')
+    this.on(`${rate_type_table_name}.pid`, 'player.pid')
 
     if (splits.includes('year') && year_split_join_clause) {
       if (has_year_offset_range) {
@@ -185,32 +172,6 @@ export const join_per_team_play_cte = ({
 
     if (splits.includes('week')) {
       this.on(`${rate_type_table_name}.week`, '=', 'player_weeks.week')
-    }
-
-    // TODO review this
-
-    if (group_by) {
-      switch (group_by) {
-        case 'half':
-          this.on(
-            db.raw(
-              `${rate_type_table_name}.half = CASE WHEN player_games.qtr <= 2 THEN 1 ELSE 2 END`
-            )
-          )
-          break
-        case 'quarter':
-          this.on(`${rate_type_table_name}.qtr`, 'player_games.qtr')
-          break
-        case 'drive':
-          this.on(`${rate_type_table_name}.drive_seq`, 'player_games.drive_seq')
-          break
-        case 'series':
-          this.on(
-            `${rate_type_table_name}.series_seq`,
-            'player_games.series_seq'
-          )
-          break
-      }
     }
   })
 }

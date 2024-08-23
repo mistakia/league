@@ -38,7 +38,9 @@ export default function ({ query, params, table_name = 'nfl_plays' }) {
 
       // Filter out years greater than the current year
       const current_year = constants.season.year
-      param_value = [...new Set([...param_value, ...adjusted_years])].filter(year => year <= current_year)
+      param_value = [...new Set([...param_value, ...adjusted_years])].filter(
+        (year) => year <= current_year
+      )
     }
 
     const column_param_definition = nfl_plays_column_params[column_param_key]
