@@ -41,8 +41,14 @@ export const player_rate_type_param = {
     { value: 'per_player_rush_attempt', label: 'Per Player Rush Attempt' },
     { value: 'per_player_pass_attempt', label: 'Per Player Pass Attempt' },
     { value: 'per_player_target', label: 'Per Player Target' },
-    { value: 'per_player_catchable_target', label: 'Per Player Catchable Target' },
+    {
+      value: 'per_player_catchable_target',
+      label: 'Per Player Catchable Target'
+    },
     { value: 'per_player_deep_target', label: 'Per Player Deep Target' },
-    { value: 'per_player_catchable_deep_target', label: 'Per Player Catchable Deep Target' }
+    {
+      value: 'per_player_catchable_deep_target',
+      label: 'Per Player Catchable Deep Target'
+    }
   ]
 }

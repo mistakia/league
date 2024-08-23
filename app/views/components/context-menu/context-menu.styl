@@ -1,11 +1,13 @@
 .context__menu
   position fixed
-  border 1px solid rgba(255,255,255,0.08)
+  border 1px solid $borderColor
   border-radius 3px
   min-width 160px
   z-index 10002
   animation 141ms cubic-bezier(0.4, 0, 0.2, 1) 0ms 1 growIn
   transform-origin left top
+  box-shadow $box_shadow
+  background white
 
   &.bottom
     transform-origin left bottom

@@ -8,6 +8,7 @@ $height = 45px
   min-width 280px
   background lighten($backgroundColor, 90%)
   border-radius 8px
+  border 1px solid $borderColor
 
   .team__image
     flex 0 0 36px
@@ -59,6 +60,7 @@ $height = 45px
     flex 0 0 40px
     width 40px
     font-size 12px
+    border-left 1px solid $borderColor
 
   &.score
     background white
@@ -70,6 +72,8 @@ $height = 45px
     flex 0 0 40px
     width 40px
     font-size 12px
+    border-left 1px solid $borderColor
+    border-right 1px solid $borderColor
 
 .matchup__head
   background $backgroundColor
@@ -98,7 +102,7 @@ $height = 45px
 
 @media (pointer: fine)
   .matchup:hover
-    box-shadow 0px 3px 3px -2px rgba(0,0,0,0.2), 0px 3px 4px 0px rgba(0,0,0,0.14), 0px 1px 8px 0px rgba(0,0,0,0.12)
+    box-shadow $box_shadow
 
     .matchup__head
       .matchup__col.spread

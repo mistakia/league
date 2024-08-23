@@ -134,7 +134,7 @@ export default function MatchupPage({
               className='scoreboard__bench cursor'
               onClick={() => set_show_bench(!show_bench)}
             >
-              Show Bench
+              {show_bench ? 'Hide Bench' : 'Show Bench'}
             </div>
           </Grid>
           <Grid item xs={12} md={3}>

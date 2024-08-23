@@ -1,7 +1,6 @@
 import React, { useState, useRef } from 'react'
 import { useParams } from 'react-router-dom'
 import PropTypes from 'prop-types'
-import Paper from '@mui/material/Paper'
 import Checkbox from '@mui/material/Checkbox'
 
 import './filter.styl'
@@ -152,9 +151,9 @@ export default function Filter({
         {selected_label || default_selected_label}
       </div>
       {visible && (
-        <Paper ref={dropdown_ref} className='player__filter-dropdown'>
+        <div ref={dropdown_ref} className='player__filter-dropdown'>
           {body || default_body}
-        </Paper>
+        </div>
       )}
     </div>
   )

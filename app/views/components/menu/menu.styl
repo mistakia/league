@@ -49,7 +49,7 @@ $menuBackgroundColor = darken($backgroundColor, 5%)
   background lighten($menuBackgroundColor, 40%)
   flex 1
   margin 8px
-  transition background-color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,border 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms
+  transition background-color $smooth_transition,box-shadow $smooth_transition,border $smooth_transition
 
 .menu__links
   margin-top 8px
@@ -82,7 +82,7 @@ $menuBackgroundColor = darken($backgroundColor, 5%)
   font-size 32px
   letter-spacing 0.1em
   margin 48px auto 32px
-  transition color 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms,box-shadow 250ms cubic-bezier(0.4, 0, 0.2, 1) 0ms
+  transition color $smooth_transition,box-shadow $smooth_transition
 
 .menu__open .main__menu-button.MuiFab-root
   display none
@@ -119,7 +119,7 @@ $menuBackgroundColor = darken($backgroundColor, 5%)
   .menu__section:hover
     border-color $hoverBorder
     background $hoverBackground
-    box-shadow $hoverShadow 4px 4px 0px 0px
+    box-shadow $box_shadow
 
 @media (max-width 500px)
   .menu__links a

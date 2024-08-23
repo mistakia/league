@@ -1,7 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import Paper from '@mui/material/Paper'
 import MenuItem from '@mui/material/MenuItem'
 import MenuList from '@mui/material/MenuList'
 import Button from '@mui/material/Button'
@@ -446,9 +445,7 @@ export default function PlayerContextMenu({
   return buttonGroup ? (
     <ButtonGroup variant='contained'>{items}</ButtonGroup>
   ) : (
-    <Paper>
-      <MenuList>{items}</MenuList>
-    </Paper>
+    <MenuList>{items}</MenuList>
   )
 }
 
