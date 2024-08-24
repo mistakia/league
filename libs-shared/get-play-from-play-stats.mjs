@@ -281,14 +281,17 @@ export default function getPlayFromPlayStats(play) {
 
       // Fumble - Forced
       case 52:
+        playRow.player_fuml_gsis = playStat.gsisId
         break
 
       // Fumble - Not Forced
       case 53:
+        playRow.player_fuml_gsis = playStat.gsisId
         break
 
       // Fumble - Out Of Bounds
       case 54:
+        playRow.player_fuml_gsis = playStat.gsisId
         break
 
       // Own Recovery Yards
