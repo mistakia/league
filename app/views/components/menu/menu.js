@@ -88,7 +88,7 @@ export default function AppMenu({
               >
                 {Boolean(leagueId) && (
                   <NavLink to={`/leagues/${leagueId}`} end>
-                    Home
+                    Front Office
                   </NavLink>
                 )}
                 {Boolean(leagueId) && is_hosted && (
