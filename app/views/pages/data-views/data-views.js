@@ -98,7 +98,7 @@ export default function DataViewsPage({
     for (const column of selected_data_view.table_state.columns) {
       const column_id = typeof column === 'string' ? column : column.column_id
       const player_field = data_views_fields[column_id]
-      if (player_field.load) {
+      if (player_field && player_field.load) {
         player_field.load()
       }
     }
