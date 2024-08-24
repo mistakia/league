@@ -195,7 +195,7 @@ export default class AuctionMainBid extends React.Component {
         </div>
       )
     } else if (isPaused) {
-      main = <div className='auction__text'>Paused</div>
+      main = <div className='auction__text'>Auction is paused</div>
     } else if (nominated_pid) {
       main = <AuctionNominatedPlayer pid={nominated_pid} />
     } else if (selected_pid) {
