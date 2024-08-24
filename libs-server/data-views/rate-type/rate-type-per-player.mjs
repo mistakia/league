@@ -100,9 +100,15 @@ export const add_per_player_cte = ({
   // TODO not sure if the column params should be applied to the the rate type as well
 
   // Remove career_year and career_game from params before applying other filters
-  const filtered_params = { ...rate_type_params }
-  delete filtered_params.career_year
-  delete filtered_params.career_game
+  const filtered_params = {
+    year: params.year,
+    week: params.week,
+    year_offset: params.year_offset,
+    week_offset: params.week_offset,
+    ...rate_type_params
+  }
+  // delete filtered_params.career_year
+  // delete filtered_params.career_game
 
   apply_play_by_play_column_params_to_query({
     query: cte_query,
