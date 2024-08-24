@@ -637,7 +637,7 @@ export default {
     column_name: 'air_yds_share_from_plays',
     pid_columns: ['trg_pid'],
     with_select_string:
-      'ROUND(100.0 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / SUM(nfl_plays.dot), 2)'
+      'CASE WHEN SUM(nfl_plays.dot) > 0 THEN ROUND(100.0 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0), 2) ELSE 0 END'
   }),
   player_target_share_from_plays: create_team_share_stat({
     column_name: 'trg_share_from_plays',
