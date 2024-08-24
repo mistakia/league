@@ -79,6 +79,7 @@ export {
   RedisCacheAdapter,
   data_view_cache
 } from './redis_adapter.mjs'
+export * as pff from './pff.mjs'
 
 export const getChartedPlayByPlayQuery = (db) =>
   db('nfl_plays')

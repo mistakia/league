@@ -17,7 +17,10 @@ export const add_player_stats_play_by_play_with_statement = ({
   }
 
   const ordered_pid_columns_string = pid_columns.includes('player_fuml_pid')
-    ? ['player_fuml_pid', ...pid_columns.filter(col => col !== 'player_fuml_pid')].join(', ')
+    ? [
+        'player_fuml_pid',
+        ...pid_columns.filter((col) => col !== 'player_fuml_pid')
+      ].join(', ')
     : pid_columns.join(', ')
 
   const with_query = db('nfl_plays')
