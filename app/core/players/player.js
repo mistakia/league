@@ -3,6 +3,7 @@ import { List, Map } from 'immutable'
 export function createPlayer({
   fname,
   lname,
+  pname,
   current_nfl_team,
 
   projection,
@@ -28,6 +29,7 @@ export function createPlayer({
     params.fname = fname
     params.lname = lname
     params.name = `${fname} ${lname}`
+    params.pname = pname || `${fname[0]}. ${lname}`
   }
 
   if (projection) {

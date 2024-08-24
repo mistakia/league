@@ -35,7 +35,8 @@ export default function DataViewsPage({
   user_id,
   save_data_view,
   load_data_views,
-  user_username
+  user_username,
+  data_view_request
 }) {
   const location = useLocation()
 
@@ -135,10 +136,43 @@ export default function DataViewsPage({
     data_view_changed(data_view, view_change_params)
   }
 
+  const render_request_status = () => {
+    if (!data_view_request.current_request) return null
+
+    const { status, position } = data_view_request
+
+    if (status === 'pending' && position) {
+      return (
+        <div className='data-view-request-status-container'>
+          Request queued. Position: {position}
+        </div>
+      )
+    }
+
+    if (status === 'processing') {
+      return (
+        <div className='data-view-request-status-container'>
+          Processing request...
+        </div>
+      )
+    }
+
+    if (status === 'error') {
+      return (
+        <div className='data-view-request-status-container error'>
+          Error occured while processing request
+        </div>
+      )
+    }
+
+    return null
+  }
+
   const body = isPending ? (
     <Loading loading />
   ) : (
     <div className='players__table'>
+      {render_request_status()}
       <div className='players__table-help'>
         <InfoOutlinedIcon />
         <span>
@@ -199,5 +233,6 @@ DataViewsPage.propTypes = {
   user_id: PropTypes.number,
   save_data_view: PropTypes.func,
   load_data_views: PropTypes.func,
-  user_username: PropTypes.string
+  user_username: PropTypes.string,
+  data_view_request: PropTypes.object
 }

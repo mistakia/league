@@ -14,6 +14,12 @@ export function* connect() {
   yield call(openWS, { token, leagueId })
 }
 
+export function* connect_auth() {
+  // disconnect any existing connection and connect with auth
+  yield call(disconnect)
+  yield call(connect)
+}
+
 export function* reconnect() {
   const { userId } = yield select(get_app)
   if (userId) {
@@ -35,11 +41,15 @@ export function* watchLogout() {
 }
 
 export function* watchAuthFulfilled() {
-  yield takeLatest(appActions.AUTH_FULFILLED, connect)
+  yield takeLatest(appActions.AUTH_FULFILLED, connect_auth)
 }
 
 export function* watchWebSocketClose() {
   yield takeLatest(wsActions.WEBSOCKET_CLOSE, reconnect)
+}
+
+export function* watch_init_app() {
+  yield takeLatest(appActions.INIT_APP, connect)
 }
 
 //= ====================================
@@ -49,5 +59,6 @@ export function* watchWebSocketClose() {
 export const wsSagas = [
   fork(watchAuthFulfilled),
   fork(watchLogout),
-  fork(watchWebSocketClose)
+  fork(watchWebSocketClose),
+  fork(watch_init_app)
 ]

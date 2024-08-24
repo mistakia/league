@@ -99,3 +99,29 @@
 
   .MuiSvgIcon-root
     color rgb(2, 136, 209)
+
+.data-view-request-status-container
+  position fixed
+  bottom 20px
+  left 50%
+  transform translateX(-50%)
+  max-width 300px
+  width 100%
+  text-align center
+  z-index 1000
+  background white
+  border 1px solid $borderColor
+  box-shadow $box_shadow
+  height 40px
+  display flex
+  align-items center
+  justify-content center
+  border-radius 4px
+  font-size 14px
+  font-weight 500
+  color $textColor
+  opacity 0.8
+
+  &.error
+    color red
+    border-color red
