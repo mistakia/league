@@ -491,7 +491,7 @@ const main = async () => {
       const results = await db('nfl_plays')
         .select('year')
         .groupBy('year')
-        .orderBy('year', 'asc')
+        .orderBy('year', 'desc')
 
       let years = results.map((r) => r.year)
       if (argv.start) {
