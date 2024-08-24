@@ -35,6 +35,21 @@ const get_players_percentiles = createSelector(
     for (const { index, column_id } of table_state_columns) {
       const field = data_views_fields[column_id]
 
+      if (!field) {
+        console.log(`Field not found for column_id: ${column_id}`)
+        Bugsnag.notify(
+          new Error(`Field not found for column_id: ${column_id}`),
+          (event) => {
+            event.addMetadata('field_info', {
+              column_id,
+              index,
+              data_view: selected_data_view.toJS()
+            })
+          }
+        )
+        continue
+      }
+
       const columns_with_same_id = table_state_columns.filter(
         ({ column_id: c_id }) => c_id === column_id
       )
