@@ -89,7 +89,7 @@ export const add_player_stats_play_by_play_with_statement = ({
   })
 
   // Add groupBy clause before having
-  with_query.groupBy(db.raw(`COALESCE(${ordered_pid_columns_string.join(', ')})`))
+  with_query.groupBy(db.raw(`COALESCE(${ordered_pid_columns_string})`))
 
   // where_clauses to filter stats/metrics
   for (const having_clause of having_clauses) {
