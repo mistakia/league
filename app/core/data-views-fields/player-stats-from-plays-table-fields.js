@@ -283,6 +283,18 @@ export default {
     player_value_path: 'opportunity_share_from_plays',
     fixed: 1
   }),
+  player_fumbles_from_plays: from_play_field({
+    column_title: 'Fumbles (By Play)',
+    column_groups: [COLUMN_GROUPS.RUSHING],
+    header_label: 'FMB',
+    player_value_path: 'fumbles_from_plays'
+  }),
+  player_fumbles_lost_from_plays: from_play_field({
+    column_title: 'Fumbles Lost (By Play)',
+    column_groups: [COLUMN_GROUPS.RUSHING],
+    header_label: 'FL',
+    player_value_path: 'fumbles_lost_from_plays'
+  }),
   player_fumble_percentage_from_plays: from_play_field({
     column_title: 'Fumble Percentage (By Play)',
     column_groups: [COLUMN_GROUPS.RUSHING],
