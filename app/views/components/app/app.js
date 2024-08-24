@@ -29,7 +29,8 @@ export default function App({
   isPending,
   isCommish,
   isHosted,
-  is_auction_live
+  is_auction_live,
+  is_logged_in
 }) {
   const isMobile = window.innerWidth < 800
   const [menu_open, set_menu_open] = useState(!isMobile)
@@ -53,7 +54,8 @@ export default function App({
     classNames.push('menu__open')
   }
 
-  if (is_auction_live) {
+  // TODO allow non logged in users to follow the auction
+  if (is_auction_live && is_logged_in) {
     classNames.push('auction__live')
   }
 
@@ -80,5 +82,6 @@ App.propTypes = {
   isPending: PropTypes.bool,
   isCommish: PropTypes.bool,
   isHosted: PropTypes.bool,
-  is_auction_live: PropTypes.bool
+  is_auction_live: PropTypes.bool,
+  is_logged_in: PropTypes.bool
 }

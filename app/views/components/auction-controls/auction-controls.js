@@ -7,11 +7,23 @@ import AuctionMainBid from '@components/auction-main-bid'
 
 import './auction-controls.styl'
 
-export default function AuctionControls({ tids, join, load_league }) {
+export default function AuctionControls({
+  tids,
+  join,
+  load_league,
+  is_logged_in
+}) {
   useEffect(() => {
     load_league()
-    join()
-  }, [join, load_league])
+    if (is_logged_in) {
+      join()
+    }
+  }, [join, load_league, is_logged_in])
+
+  // TODO allow non logged in users to follow the auction
+  if (!is_logged_in) {
+    return null
+  }
 
   const teamItems = []
   tids.forEach((tid, index) => {
@@ -21,7 +33,9 @@ export default function AuctionControls({ tids, join, load_league }) {
   return (
     <div className='auction__controls'>
       <AuctionMainBid />
-      <div className='auction__teams'>{teamItems}</div>
+      {Boolean(teamItems.length) && (
+        <div className='auction__teams'>{teamItems}</div>
+      )}
     </div>
   )
 }
@@ -29,5 +43,6 @@ export default function AuctionControls({ tids, join, load_league }) {
 AuctionControls.propTypes = {
   tids: ImmutablePropTypes.list,
   join: PropTypes.func,
-  load_league: PropTypes.func
+  load_league: PropTypes.func,
+  is_logged_in: PropTypes.bool
 }
