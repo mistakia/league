@@ -30,7 +30,7 @@ const team_stat_from_plays = ({
     is_rate ? rate_with_selects : [`${select_string} AS ${stat_name}`],
   with_where: ({ table_name, params }) => {
     if (is_rate) {
-      return `sum(${table_name}.${stat_name}_numerator) / sum(${table_name}.${stat_name}_denominator)`
+      return `sum(${table_name}.${stat_name}_numerator) / NULLIF(sum(${table_name}.${stat_name}_denominator), 0)`
     }
 
     // should be handled in main where

@@ -252,7 +252,7 @@ const create_team_share_stat = ({
       params.year_offset.length > 1
     ) {
       if (has_numerator_denominator) {
-        return `CASE WHEN SUM(${table_name}.${column_name}_denominator) > 0 THEN ROUND(100.0 * SUM(${table_name}.${column_name}_numerator) / SUM(${table_name}.${column_name}_denominator), 2) ELSE 0 END`
+        return `CASE WHEN SUM(${table_name}.${column_name}_denominator) > 0 THEN ROUND(100.0 * SUM(${table_name}.${column_name}_numerator) / NULLIF(SUM(${table_name}.${column_name}_denominator), 0), 2) ELSE 0 END`
       } else if (main_select_string_year_offset_range) {
         return main_select_string_year_offset_range({ table_name, params })
       }
@@ -502,7 +502,7 @@ export default {
     column_name: 'rush_yds_share_from_plays',
     pid_columns: ['bc_pid'],
     with_select_string:
-      'ROUND(100.0 * SUM(CASE WHEN nfl_plays.bc_pid = pg.pid THEN nfl_plays.rush_yds ELSE 0 END) / SUM(nfl_plays.rush_yds), 2)',
+      'CASE WHEN SUM(nfl_plays.rush_yds) > 0 THEN ROUND(100.0 * SUM(CASE WHEN nfl_plays.bc_pid = pg.pid THEN nfl_plays.rush_yds ELSE 0 END) / NULLIF(SUM(nfl_plays.rush_yds), 0), 2) ELSE 0 END',
     numerator_select: `SUM(CASE WHEN nfl_plays.bc_pid = pg.pid THEN nfl_plays.rush_yds ELSE 0 END)`,
     denominator_select: `SUM(nfl_plays.rush_yds)`,
     has_numerator_denominator: true
@@ -511,7 +511,7 @@ export default {
     column_name: 'rush_first_down_share_from_plays',
     pid_columns: ['bc_pid'],
     with_select_string:
-      'ROUND(100.0 * SUM(CASE WHEN nfl_plays.bc_pid = pg.pid THEN CASE WHEN nfl_plays.first_down THEN 1 ELSE 0 END ELSE 0 END) / NULLIF(SUM(CASE WHEN nfl_plays.first_down THEN 1 ELSE 0 END), 0), 2)',
+      'CASE WHEN SUM(CASE WHEN nfl_plays.first_down THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN nfl_plays.bc_pid = pg.pid THEN CASE WHEN nfl_plays.first_down THEN 1 ELSE 0 END ELSE 0 END) / NULLIF(SUM(CASE WHEN nfl_plays.first_down THEN 1 ELSE 0 END), 0), 2) ELSE 0 END',
     numerator_select: `SUM(CASE WHEN nfl_plays.bc_pid = pg.pid THEN CASE WHEN nfl_plays.first_down THEN 1 ELSE 0 END ELSE 0 END)`,
     denominator_select: `SUM(CASE WHEN nfl_plays.first_down THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true
