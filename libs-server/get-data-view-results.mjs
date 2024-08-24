@@ -499,7 +499,7 @@ const group_tables_by_supported_splits = (grouped_clauses_by_table, splits) => {
   return grouped_by_splits
 }
 
-export default function ({
+export default async function ({
   splits = [],
   where = [],
   columns = [],
@@ -937,7 +937,9 @@ export default function ({
     const timeout_query = `SET LOCAL statement_timeout = ${timeout};`
     const full_query = `${timeout_query} ${query_string};`
 
-    return db.raw(full_query)
+    const response = await db.raw(full_query)
+    const data_view_results = response[1].rows
+    return data_view_results
   }
 
   return players_query
