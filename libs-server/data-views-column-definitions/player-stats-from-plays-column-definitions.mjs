@@ -527,14 +527,14 @@ export default {
   }),
 
   player_fumbles_from_plays: player_stat_from_plays({
-    pid_columns: ['bc_pid'],
-    with_select_string: `SUM(CASE WHEN player_fuml_pid = bc_pid THEN 1 ELSE 0 END)`,
+    pid_columns: ['player_fuml_pid'],
+    with_select_string: `SUM(CASE WHEN player_fuml_pid THEN 1 ELSE 0 END)`,
     stat_name: 'fumbles_from_plays'
   }),
 
   player_fumbles_lost_from_plays: player_stat_from_plays({
-    pid_columns: ['bc_pid'],
-    with_select_string: `SUM(CASE WHEN player_fuml_pid = bc_pid AND fuml = true THEN 1 ELSE 0 END)`,
+    pid_columns: ['player_fuml_pid'],
+    with_select_string: `SUM(CASE WHEN player_fuml_pid AND fuml = true THEN 1 ELSE 0 END)`,
     stat_name: 'fumbles_lost_from_plays'
   }),
 

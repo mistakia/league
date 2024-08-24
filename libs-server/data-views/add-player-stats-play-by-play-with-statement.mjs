@@ -16,8 +16,12 @@ export const add_player_stats_play_by_play_with_statement = ({
     throw new Error('with_table_name is required')
   }
 
+  const ordered_pid_columns_string = pid_columns.includes('player_fuml_pid')
+    ? ['player_fuml_pid', ...pid_columns.filter(col => col !== 'player_fuml_pid')].join(', ')
+    : pid_columns.join(', ')
+
   const with_query = db('nfl_plays')
-    .select(db.raw(`COALESCE(${pid_columns.join(', ')}) as pid`))
+    .select(db.raw(`COALESCE(${ordered_pid_columns_string}) as pid`))
     .whereNot('play_type', 'NOPL')
     .where('nfl_plays.seas_type', 'REG')
   // TODO this could be helpful for performance
@@ -85,7 +89,7 @@ export const add_player_stats_play_by_play_with_statement = ({
   })
 
   // Add groupBy clause before having
-  with_query.groupBy(db.raw(`COALESCE(${pid_columns.join(', ')})`))
+  with_query.groupBy(db.raw(`COALESCE(${ordered_pid_columns_string.join(', ')})`))
 
   // where_clauses to filter stats/metrics
   for (const having_clause of having_clauses) {
