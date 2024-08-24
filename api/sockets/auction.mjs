@@ -107,6 +107,9 @@ export default class Auction {
         case 'AUCTION_SUBMIT_NOMINATION':
           return this.nominate(message.payload, { userId, tid })
 
+        case 'KEEPALIVE':
+          return
+
         default:
           return console.log(`invalid message: ${message.type}`)
       }
@@ -346,10 +349,16 @@ export default class Auction {
     this._locked = false
   }
 
+  // userId passed in is for the connecting socket client
+  // userid in the message is for the team submitting the nomination
   async nominate(message = {}, { userId, tid }) {
     const nominatingTeamId = this.nominatingTeamId
     let { userid, value = 0 } = message
     const { pid } = message
+
+    this.logger(
+      `received nomination for ${pid} for $${value} (teamId ${tid}, socket userId ${userId}, account userId ${userid})`
+    )
 
     if (!pid) {
       this.logger('no player to nominate')
