@@ -526,6 +526,18 @@ export default {
     has_numerator_denominator: true
   }),
 
+  player_fumbles_from_plays: player_stat_from_plays({
+    pid_columns: ['bc_pid'],
+    with_select_string: `SUM(CASE WHEN player_fuml_pid = bc_pid THEN 1 ELSE 0 END)`,
+    stat_name: 'fumbles_from_plays'
+  }),
+
+  player_fumbles_lost_from_plays: player_stat_from_plays({
+    pid_columns: ['bc_pid'],
+    with_select_string: `SUM(CASE WHEN player_fuml_pid = bc_pid AND fuml = true THEN 1 ELSE 0 END)`,
+    stat_name: 'fumbles_lost_from_plays'
+  }),
+
   player_fumble_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['bc_pid'],
     with_select_string: `CASE WHEN SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN player_fuml_pid = bc_pid THEN 1 ELSE 0 END) / SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END`,
