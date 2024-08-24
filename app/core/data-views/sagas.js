@@ -47,6 +47,8 @@ export function* data_view_changed({ payload }) {
     }
   })
 
+  console.log(`Sending data view request: ${opts.view_id}`)
+
   yield put(data_view_request_actions.data_view_request(opts))
 }
 

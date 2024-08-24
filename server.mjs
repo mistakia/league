@@ -17,7 +17,7 @@ if (IS_DEV) {
     'server,api*,notifications*,auction*,scoreboard*,express:*,knex:*'
   )
 } else if (IS_PROD) {
-  debug.enable('api*,notifications*,auction*,scoreboard*')
+  debug.enable('api*,notifications*,auction*,scoreboard*,data-view-socket')
 } else {
   debug.enable('*')
 }
