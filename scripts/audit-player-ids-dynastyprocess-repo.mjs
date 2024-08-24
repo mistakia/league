@@ -121,7 +121,14 @@ const audit_player_ids_dynastyprocess_repo = async ({
     'dpos',
     'height',
     'weight',
-    'start'
+    'start',
+    'pff_id',
+    'mfl_id',
+    'fleaflicker_id',
+    'cbs_id',
+    'cfbref_id',
+    'twitter_username',
+    'swish_id'
     // 'col' TODO
   ])
 
