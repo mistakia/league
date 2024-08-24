@@ -9,7 +9,7 @@ import AuctionControls from './auction-controls'
 
 const mapStateToProps = createSelector(
   getAuction,
-  (state) => state.get('userId'),
+  (state) => state.getIn(['app', 'userId']),
   (auction, userId) => ({
     tids: auction.tids,
     is_logged_in: Boolean(userId)
