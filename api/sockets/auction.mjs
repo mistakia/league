@@ -351,13 +351,14 @@ export default class Auction {
 
   // userId passed in is for the connecting socket client
   // userid in the message is for the team submitting the nomination
+  // tid belongs to the connecting socket client, so it could be a different team if the nomination is from the commish
   async nominate(message = {}, { userId, tid }) {
     const nominatingTeamId = this.nominatingTeamId
     let { userid, value = 0 } = message
     const { pid } = message
 
     this.logger(
-      `received nomination for ${pid} for $${value} (teamId ${tid}, socket userId ${userId}, account userId ${userid})`
+      `received nomination for ${pid} for $${value} (teamId ${tid}, socket userId ${userId}, account userid ${userid})`
     )
 
     if (!pid) {
