@@ -7,9 +7,14 @@ import { leagueActions } from '@core/leagues'
 
 import AuctionControls from './auction-controls'
 
-const mapStateToProps = createSelector(getAuction, (auction) => ({
-  tids: auction.tids
-}))
+const mapStateToProps = createSelector(
+  getAuction,
+  (state) => state.get('userId'),
+  (auction, userId) => ({
+    tids: auction.tids,
+    is_logged_in: Boolean(userId)
+  })
+)
 
 const mapDispatchToProps = {
   join: auctionActions.join,
