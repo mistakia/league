@@ -156,9 +156,7 @@ class DataViewQueue {
       })
     } finally {
       this.processing = false
-      if (!this.non_auth_requests.get(ws.client_id)) {
-        this.non_auth_requests.delete(ws.client_id)
-      }
+      this.non_auth_requests.delete(ws.client_id)
       this.process_queue()
     }
   }
