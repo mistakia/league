@@ -15,7 +15,7 @@ import * as table_constants from 'react-table/src/constants.mjs'
 import DataViewsPage from './data-views'
 
 const get_players_percentiles = createSelector(
-  (state) => state.getIn(['data_view_items']),
+  (state) => state.getIn(['data_view_request', 'result']),
   get_selected_data_view,
   get_data_views_fields,
   (data_view_items, selected_data_view, data_views_fields) => {
@@ -57,7 +57,6 @@ const get_players_percentiles = createSelector(
 )
 
 const mapStateToProps = createSelector(
-  (state) => state.getIn(['data_view_items']),
   (state) => state.getIn(['players', 'allPlayersPending']),
   (state) => state.getIn(['app', 'userId']),
   getStats,
@@ -71,8 +70,8 @@ const mapStateToProps = createSelector(
   get_teams_for_current_year,
   get_players_percentiles,
   (state) => state.getIn(['app', 'user', 'username']),
+  (state) => state.get('data_view_request'),
   (
-    data_view_items,
     allPlayersPending,
     userId,
     stats,
@@ -85,10 +84,11 @@ const mapStateToProps = createSelector(
     highlight_team_ids,
     teams,
     players_percentiles,
-    user_username
+    user_username,
+    data_view_request
   ) => ({
     user_id: userId,
-    players: data_view_items.toJS(),
+    players: data_view_request.get('result').toJS(),
     isLoggedIn: Boolean(userId),
     isPending:
       allPlayersPending ||
@@ -102,7 +102,8 @@ const mapStateToProps = createSelector(
     highlight_team_ids,
     teams,
     players_percentiles,
-    user_username
+    user_username,
+    data_view_request: data_view_request.toJS()
   })
 )
 

@@ -2,12 +2,8 @@ import { takeLatest, fork, call, select, put } from 'redux-saga/effects'
 
 import { data_views_actions } from './actions'
 import { default_data_views } from './default-data-views'
-import {
-  post_data_view_search,
-  post_data_view,
-  get_data_views,
-  delete_data_view
-} from '@core/api'
+import { post_data_view, get_data_views, delete_data_view } from '@core/api'
+import { send } from '@core/ws'
 import {
   get_app,
   get_selected_data_view,
@@ -15,6 +11,7 @@ import {
   get_request_history,
   get_selected_data_view_id
 } from '@core/selectors'
+import { data_view_request_actions } from '@core/data-view-request/actions'
 import { notificationActions } from '@core/notifications/actions'
 
 export function* data_view_changed({ payload }) {
@@ -41,7 +38,16 @@ export function* data_view_changed({ payload }) {
     ...data_view.table_state
   }
 
-  yield call(post_data_view_search, opts)
+  yield call(send, {
+    type: 'DATA_VIEW_REQUEST',
+    payload: {
+      // TODO maybe use something unique
+      request_id: data_view.view_id,
+      params: opts
+    }
+  })
+
+  yield put(data_view_request_actions.data_view_request(opts))
 }
 
 export function* save_data_view({ payload }) {

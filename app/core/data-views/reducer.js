@@ -3,6 +3,7 @@ import Immutable, { Map } from 'immutable'
 import { appActions } from '@core/app/actions'
 import { data_views_actions } from './actions'
 import { default_data_views } from './default-data-views'
+import { data_view_request_actions } from '@core/data-view-request/actions'
 
 export function data_views_reducer(
   state = new Map(
@@ -82,16 +83,12 @@ export function data_views_reducer(
       })
     }
 
-    case data_views_actions.POST_DATA_VIEW_SEARCH_PENDING: {
-      const { view_id } = payload.opts
-      return state.setIn([view_id, 'is_fetching'], true)
-    }
+    case data_view_request_actions.DATA_VIEW_REQUEST:
+      return state.setIn([payload.view_id, 'is_fetching'], true)
 
-    case data_views_actions.POST_DATA_VIEW_SEARCH_FAILED:
-    case data_views_actions.POST_DATA_VIEW_SEARCH_FULFILLED: {
-      const { view_id } = payload.opts
-      return state.setIn([view_id, 'is_fetching'], false)
-    }
+    case data_view_request_actions.DATA_VIEW_RESULT:
+    case data_view_request_actions.DATA_VIEW_ERROR:
+      return state.setIn([payload.request_id, 'is_fetching'], false)
 
     default:
       return state

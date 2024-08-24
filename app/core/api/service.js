@@ -355,10 +355,6 @@ export const api = {
     const url = `${API_URL}/leagues/${leagueId}/team-daily-values`
     return { url }
   },
-  post_data_view_search(data) {
-    const url = `${API_URL}/data-views/search`
-    return { url, ...POST(data) }
-  },
   post_data_view(data) {
     const url = `${API_URL}/data-views`
     return { url, ...POST(data) }

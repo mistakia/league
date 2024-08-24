@@ -506,7 +506,8 @@ export default function ({
   prefix_columns = [],
   sort = [],
   offset = 0,
-  limit = 500
+  limit = 500,
+  timeout = null
 } = {}) {
   const validator_result = validators.table_state_validator({
     splits,
@@ -930,6 +931,14 @@ export default function ({
   players_query.limit(limit)
 
   console.log(players_query.toString())
+
+  if (timeout) {
+    const query_string = players_query.toString()
+    const timeout_query = `SET LOCAL statement_timeout = ${timeout};`
+    const full_query = `${timeout_query} ${query_string};`
+
+    return db.raw(full_query)
+  }
 
   return players_query
 }

@@ -5,7 +5,7 @@ import { createPlayer } from './player'
 import { statActions } from '@core/stats'
 import { rosterActions } from '@core/rosters'
 import { auctionActions } from '@core/auction'
-import { data_views_actions } from '@core/data-views/actions'
+import { data_view_request_actions } from '@core/data-view-request/actions'
 import DefaultPlayersViews from './default-players-views'
 
 import { constants } from '@libs-shared'
@@ -512,9 +512,9 @@ export function playersReducer(state = initialState, { payload, type }) {
     case playerActions.RESET_PLAYER_FILTER_OPTIONS:
       return state.merge({ ...default_player_filter_options })
 
-    case data_views_actions.POST_DATA_VIEW_SEARCH_FULFILLED:
+    case data_view_request_actions.DATA_VIEW_RESULT:
       return state.withMutations((players) => {
-        payload.data.forEach((row) => {
+        payload.result.forEach((row) => {
           const formatted_player_data = {
             pid: row.pid,
             fname: row.fname,

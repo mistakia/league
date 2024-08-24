@@ -78,7 +78,6 @@ export {
   getNflTeamSeasonlogs,
   get_league_team_daily_values,
   post_process_poach,
-  post_data_view_search,
   post_data_view,
   delete_data_view,
   post_restricted_free_agent_nomination,
