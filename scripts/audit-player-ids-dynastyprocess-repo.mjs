@@ -58,16 +58,16 @@ const audit_player_ids_dynastyprocess_repo = async ({
   for (const player_data of csv_data) {
     try {
       dynastyprocess_data.push({
-        // mfl_id: player_data.mfl_id, TODO add field to player table
+        mfl_id: player_data.mfl_id,
         sportradar_id: player_data.sportradar_id,
         gsisid: player_data.gsis_id,
-        // pff_id: player_data.pff_id, TODO add field to player table
+        pff_id: player_data.pff_id,
         sleeper_id: player_data.sleeper_id,
         nflid: player_data.nfl_id,
         espn_id: player_data.espn_id ? Number(player_data.espn_id) : null,
         yahoo_id: player_data.yahoo_id ? Number(player_data.yahoo_id) : null,
-        // fleaflicker_id: player_data.fleaflicker_id, TODO add field to player table
-        // cbs_id: player_data.cbs_id,
+        fleaflicker_id: player_data.fleaflicker_id,
+        cbs_id: player_data.cbs_id,
         rotowire_id: player_data.rotowire_id
           ? Number(player_data.rotowire_id)
           : null,
@@ -76,7 +76,7 @@ const audit_player_ids_dynastyprocess_repo = async ({
           : null,
         keeptradecut_id: player_data.ktc_id ? Number(player_data.ktc_id) : null,
         pfr_id: player_data.pfr_id,
-        // cfbref_id: player_data.cfbref_id,
+        cfbref_id: player_data.cfbref_id,
         // stats_id: player_data.stats_id,
         // stats_global_id: player_data.stats_global_id,
         fantasy_data_id: player_data.fantasy_data_id
@@ -88,11 +88,11 @@ const audit_player_ids_dynastyprocess_repo = async ({
         dob: player_data.birthdate,
         round: player_data.draft_round ? Number(player_data.draft_round) : null,
         dpos: player_data.draft_ovr ? Number(player_data.draft_ovr) : null,
-        // twitter_username: player_data.twitter_username, TODO add field to player table
+        twitter_username: player_data.twitter_username,
         height: player_data.height ? Number(player_data.height) : null,
-        weight: player_data.weight ? Number(player_data.weight) : null
+        weight: player_data.weight ? Number(player_data.weight) : null,
         // col: player_data.college // TODO format/standardize college name
-        // swish_id: player_data.swish_id // TODO add field to player table
+        swish_id: player_data.swish_id
       })
     } catch (err) {
       log(`error parsing row: ${player_data}`)

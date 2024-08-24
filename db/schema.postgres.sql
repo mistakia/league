@@ -232,6 +232,7 @@ ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_username
 ALTER TABLE IF EXISTS ONLY public.users_teams DROP CONSTRAINT IF EXISTS users_teams_pkey;
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_key;
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_hash_key;
+ALTER TABLE IF EXISTS ONLY public.transactions DROP CONSTRAINT IF EXISTS transactions_pkey;
 ALTER TABLE IF EXISTS ONLY public.seasons DROP CONSTRAINT IF EXISTS seasons_pkey;
 ALTER TABLE IF EXISTS ONLY public.rosters_players DROP CONSTRAINT IF EXISTS rosters_players_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pkey;
@@ -3045,7 +3046,14 @@ CREATE TABLE public.player (
     contract_apy_cap_pct numeric(5,3),
     contract_inflated_value numeric(12,6),
     contract_inflated_apy numeric(10,6),
-    contract_inflated_guaranteed numeric(12,6)
+    contract_inflated_guaranteed numeric(12,6),
+    pff_id integer,
+    mfl_id integer,
+    fleaflicker_id integer,
+    cbs_id integer,
+    cfbref_id character varying,
+    twitter_username character varying,
+    swish_id integer
 );
 
 
@@ -5214,6 +5222,14 @@ ALTER TABLE ONLY public.rosters_players
 
 ALTER TABLE ONLY public.seasons
     ADD CONSTRAINT seasons_pkey PRIMARY KEY (lid, year);
+
+
+--
+-- Name: transactions transactions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.transactions
+    ADD CONSTRAINT transactions_pkey PRIMARY KEY (uid);
 
 
 --
