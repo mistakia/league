@@ -1,5 +1,6 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
+import Bugsnag from '@bugsnag/js'
 
 import {
   getStats,
