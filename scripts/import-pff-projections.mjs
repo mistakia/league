@@ -5,23 +5,22 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#libs-shared'
-import { isMain, getPlayer, report_job } from '#libs-server'
-import config from '#config'
+import { isMain, getPlayer, report_job, pff } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import:projections')
-debug.enable('import:projections,get-player')
+debug.enable('import:projections,get-player,pff')
 const timestamp = Math.round(Date.now() / 1000)
 const year = constants.season.year
 
-const runOne = async (week) => {
+const runOne = async ({ week, cookie }) => {
   const missing = []
 
   const URL = `https://www.pff.com/api/fantasy/projections?scoring=preset_ppr&weeks=${week}`
   const result = await fetch(URL, {
     headers: {
-      cookie: config.pff
+      cookie
     }
   }).then((res) => res.json())
 
@@ -124,12 +123,14 @@ const run = async () => {
     return
   }
 
+  const cookie = await pff.get_pff_session_cookie()
+
   for (
     let week = constants.season.week;
     week <= constants.season.nflFinalWeek;
     week++
   ) {
-    await runOne(week)
+    await runOne({ week, cookie })
   }
 }
 

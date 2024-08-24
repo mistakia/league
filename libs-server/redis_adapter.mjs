@@ -1,8 +1,15 @@
 import Redis from 'ioredis'
+import os from 'os'
 
 // Create a function to get the Redis client
 const get_redis_client = () => {
-  if (process.env.NODE_ENV === 'production') {
+  const hostname = os.hostname()
+  const allowed_hostnames = ['league-production']
+
+  if (
+    process.env.NODE_ENV === 'production' &&
+    allowed_hostnames.includes(hostname)
+  ) {
     return new Redis({
       host: 'localhost',
       port: 6379
