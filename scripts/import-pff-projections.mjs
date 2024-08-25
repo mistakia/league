@@ -28,6 +28,8 @@ const runOne = async ({ week, cookie }) => {
     throw new Error('missing projections')
   }
 
+  log(`loaded ${result.player_projections.length} projections`)
+
   const inserts = []
   for (const item of result.player_projections) {
     const name = item.player_name
