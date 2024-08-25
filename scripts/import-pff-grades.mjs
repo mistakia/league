@@ -1,6 +1,7 @@
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+import fetch from 'node-fetch'
 
 import { isMain, report_job, pff, wait, getPlayer } from '#libs-server'
 import { constants, job_constants } from '#libs-shared'
