@@ -35,7 +35,7 @@ schedule.scheduleJob('*/1 9-23 * 12 6', import_live_plays)
 schedule.scheduleJob('*/1 9-23 * 1,2,9-12 7', import_live_plays)
 
 // friday through saturday
-schedule.scheduleJob('*/5 * * 1,2,9-12 5-6', import_live_odds)
+// schedule.scheduleJob('*/5 * * 1,2,9-12 5-6', import_live_odds)
 
 // All times
 

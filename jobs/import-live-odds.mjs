@@ -32,11 +32,11 @@ export default async function () {
     log(err)
   }
 
-  try {
-    await import_caesars_odds()
-  } catch (err) {
-    log(err)
-  }
+  // try {
+  //   await import_caesars_odds()
+  // } catch (err) {
+  //   log(err)
+  // }
 
   try {
     await import_fanduel_odds()
@@ -44,23 +44,23 @@ export default async function () {
     log(err)
   }
 
-  try {
-    await import_betmgm_odds()
-  } catch (err) {
-    log(err)
-  }
+  // try {
+  //   await import_betmgm_odds()
+  // } catch (err) {
+  //   log(err)
+  // }
 
-  try {
-    await import_prizepicks_odds()
-  } catch (err) {
-    log(err)
-  }
+  // try {
+  //   await import_prizepicks_odds()
+  // } catch (err) {
+  //   log(err)
+  // }
 
-  try {
-    await import_betrivers_odds()
-  } catch (err) {
-    log(err)
-  }
+  // try {
+  //   await import_betrivers_odds()
+  // } catch (err) {
+  //   log(err)
+  // }
 
   /* try {
    *   await import_gambet_odds()
