@@ -31,12 +31,40 @@ export const get_pff_session_cookie = async () => {
   await page.waitForTimeout(10000)
 
   // Check if the login button exists
-  const login_button = await page.$('#main_nav_link')
+  const login_button = await page.$(
+    '[data-gtm-id="main_nav"] .site-nav__cta [data-gtm-id="main_nav_link"]'
+  )
 
   if (login_button) {
     // If login button exists, click it and wait for 10 seconds
     await login_button.click()
+    log('clicked login button')
     await page.waitForTimeout(10000)
+
+    // Check if the page has navigated to the sign-in form
+    const sign_in_header = await page.$('header.signup-form-header')
+    if (sign_in_header) {
+      log('Sign-in form detected, entering login info')
+
+      await page.type('#login-form_email', pff_login_config.email, {
+        delay: 100
+      })
+
+      await page.type('#login-form_password', pff_login_config.password, {
+        delay: 100
+      })
+
+      const submit_button = await page.$('#sign-in')
+      if (submit_button) {
+        await submit_button.click()
+        log('Submitted login form')
+        await page.waitForTimeout(10000)
+      } else {
+        log('Submit button not found')
+      }
+    } else {
+      log('Sign-in form not detected after clicking login button')
+    }
   } else {
     log('Already logged in, no login button found')
   }
@@ -49,10 +77,8 @@ export const get_pff_session_cookie = async () => {
 
   log('new_cookies', new_cookies)
 
-  // Close the browser
   await browser.close()
 
-  // Update the config in the database only if there are cookies
   if (new_cookies) {
     const updated_config = { ...pff_login_config, cookie: new_cookies }
     await db('config')
