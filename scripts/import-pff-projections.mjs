@@ -17,7 +17,14 @@ const year = constants.season.year
 const runOne = async ({ week, cookie }) => {
   const missing = []
 
-  const URL = `https://www.pff.com/api/fantasy/projections?scoring=preset_ppr&weeks=${week}`
+  const config_row = await db('config').where({ key: 'pff_config' }).first()
+  const pff_config = config_row.value
+
+  if (!pff_config) {
+    throw new Error('PFF config not found')
+  }
+
+  const URL = `${pff_config.projections_url}?scoring=preset_ppr&weeks=${week}`
   const result = await fetch(URL, {
     headers: {
       cookie
