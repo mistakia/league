@@ -84,7 +84,8 @@ export const job_types = {
   IMPORT_PLAYS_FTN_CHARTING: 62,
   IMPORT_PLAYER_CONTRACTS_NFLVERSE: 63,
 
-  FINALIZE_WEEK: 64
+  FINALIZE_WEEK: 64,
+  IMPORT_PFF_GRADES: 65
 }
 
 export const job_title_by_id = {
@@ -151,5 +152,6 @@ export const job_title_by_id = {
   61: 'Import NFL Games (NFLverse)',
   62: 'Import Charted Plays (NFLverse/FTN)',
   63: 'Import Player Contracts (NFLverse/OTC)',
-  64: 'Finalize Week'
+  64: 'Finalize Week',
+  65: 'Import PFF Grades'
 }

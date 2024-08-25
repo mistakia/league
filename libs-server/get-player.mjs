@@ -15,8 +15,11 @@ import db from '#db'
 const log = debug('get-player')
 debug.enable('get-player')
 
-const fixPosition = (pos) => {
-  switch (pos) {
+const format_position = (pos) => {
+  switch (pos.toUpperCase()) {
+    case 'HB':
+      return 'RB'
+
     case 'C':
       return 'OL'
 
@@ -39,7 +42,7 @@ const fixPosition = (pos) => {
       return 'DB'
 
     default:
-      return pos
+      return pos.toUpperCase()
   }
 }
 
@@ -53,6 +56,7 @@ const getPlayer = async ({
   keeptradecut_id,
   pfr_id,
   otc_id,
+  pff_id,
   esbid,
   gsisid,
   pname,
@@ -85,6 +89,8 @@ const getPlayer = async ({
     query.where({ gsisItId })
   } else if (otc_id) {
     query.where({ otc_id })
+  } else if (pff_id) {
+    query.where({ pff_id })
   } else {
     if (name) {
       const formatted = formatPlayerName(name)
@@ -102,12 +108,12 @@ const getPlayer = async ({
 
     if (pos) {
       if (typeof pos === 'string') {
-        const p = fixPosition(pos)
+        const p = format_position(pos)
         query.where(function () {
           this.where({ pos: p }).orWhere({ pos1: p }).orWhere({ pos2: p })
         })
       } else if (Array.isArray(pos)) {
-        query.whereIn('pos', pos)
+        query.whereIn('pos', pos.map(format_position))
       }
     }
 

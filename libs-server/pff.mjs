@@ -4,13 +4,30 @@ import db from '#db'
 
 const log = debug('pff')
 
+export const positions = [
+  'QB',
+  'HB',
+  'WR',
+  'FB',
+  'TE',
+  'C',
+  'G',
+  'T',
+  'CB',
+  'S',
+  'LB',
+  'DI',
+  'ED',
+  'K',
+  'P'
+]
+
 export const get_pff_session_cookie = async () => {
   // Get the current config from the database
-  const config_row = await db('config').where({ key: 'pff_login' }).first()
+  const config_row = await db('config').where({ key: 'pff_config' }).first()
   if (!config_row) {
     throw new Error('PFF login config not found')
   }
-  log('config_row', config_row)
 
   const pff_login_config = config_row.value
 

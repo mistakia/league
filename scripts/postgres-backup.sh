@@ -108,6 +108,8 @@ practice
 rankings
 player_seasonlogs
 player_snaps_game
+pff_player_seasonlogs
+pff_player_seasonlogs_changelog
 "
 
 db_betting_tables="

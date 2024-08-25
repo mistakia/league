@@ -34,6 +34,7 @@ DROP INDEX IF EXISTS public.idx_prop_markets_index_market_time_year;
 DROP INDEX IF EXISTS public.idx_prop_market_selections_index_composite;
 DROP INDEX IF EXISTS public.idx_player_seasonlogs_year_seas_type_career_year_pid;
 DROP INDEX IF EXISTS public.idx_player_pid_pos;
+DROP INDEX IF EXISTS public.idx_player_pff_id;
 DROP INDEX IF EXISTS public.idx_player_gamelogs_esbid_tm;
 DROP INDEX IF EXISTS public.idx_player_gamelogs_esbid_active_pid;
 DROP INDEX IF EXISTS public.idx_opening_days_year_opening_day;
@@ -238,6 +239,8 @@ ALTER TABLE IF EXISTS ONLY public.rosters_players DROP CONSTRAINT IF EXISTS rost
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pid_year_unique;
+ALTER TABLE IF EXISTS ONLY public.pff_player_seasonlogs DROP CONSTRAINT IF EXISTS pff_player_seasonlogs_pkey;
+ALTER TABLE IF EXISTS ONLY public.pff_player_seasonlogs_changelog DROP CONSTRAINT IF EXISTS pff_player_seasonlogs_changelog_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_user_careerlogs DROP CONSTRAINT IF EXISTS league_user_careerlogs_lid_userid_unique;
 ALTER TABLE IF EXISTS ONLY public.league_team_seasonlogs DROP CONSTRAINT IF EXISTS league_team_seasonlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_team_careerlogs DROP CONSTRAINT IF EXISTS league_team_careerlogs_pkey;
@@ -345,6 +348,9 @@ DROP TABLE IF EXISTS public.player;
 DROP TABLE IF EXISTS public.play_changelog;
 DROP SEQUENCE IF EXISTS public.placed_wagers_wager_id_seq;
 DROP TABLE IF EXISTS public.placed_wagers;
+DROP TABLE IF EXISTS public.pff_player_seasonlogs_changelog;
+DROP SEQUENCE IF EXISTS public.pff_player_seasonlogs_changelog_uid_seq;
+DROP TABLE IF EXISTS public.pff_player_seasonlogs;
 DROP TABLE IF EXISTS public.percentiles;
 DROP MATERIALIZED VIEW IF EXISTS public.opening_days;
 DROP MATERIALIZED VIEW IF EXISTS public.nfl_year_week_timestamp;
@@ -2889,6 +2895,100 @@ CREATE TABLE public.percentiles (
 
 
 --
+-- Name: pff_player_seasonlogs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.pff_player_seasonlogs (
+    pid character varying(25) NOT NULL,
+    year smallint NOT NULL,
+    fg_ep_kicker numeric(4,1),
+    defense_rank smallint,
+    grade_position character varying(5),
+    height smallint,
+    run_block numeric(4,1),
+    offense numeric(4,1),
+    special_teams numeric(4,1),
+    offense_snaps smallint,
+    special_teams_snaps smallint,
+    slug character varying(100),
+    coverage_snaps smallint,
+    punter_rank smallint,
+    age numeric(3,1),
+    pass_rush numeric(4,1),
+    punter numeric(4,1),
+    unit character varying(20),
+    pass_block numeric(4,1),
+    run_block_snaps smallint,
+    draft_franchise_id smallint,
+    draft_league character varying(10),
+    draft_round smallint,
+    draft_season smallint,
+    draft_selection smallint,
+    draft_type character varying(20),
+    offense_ranked smallint,
+    jersey_number character varying(3),
+    "position" character varying(5),
+    defense_snaps smallint,
+    pass_snaps smallint,
+    name character varying(100),
+    defense numeric(4,1),
+    current_eligible_year smallint,
+    receiving numeric(4,1),
+    coverage numeric(4,1),
+    speed numeric(3,2),
+    run numeric(4,1),
+    run_defense_snaps smallint,
+    defense_ranked smallint,
+    pass_rush_snaps smallint,
+    college character varying(50),
+    pass_block_snaps smallint,
+    pff_id integer,
+    run_defense numeric(4,1),
+    special_teams_rank smallint,
+    franchise_id smallint,
+    run_snaps smallint,
+    team_slug character varying(50),
+    meets_snap_minimum boolean,
+    kickoff_kicker numeric(4,1),
+    status character(1),
+    pass numeric(4,1),
+    receiving_snaps smallint,
+    team_name character varying(3),
+    weight smallint,
+    overall_snaps smallint,
+    offense_rank smallint
+);
+
+
+--
+-- Name: pff_player_seasonlogs_changelog_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.pff_player_seasonlogs_changelog_uid_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: pff_player_seasonlogs_changelog; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.pff_player_seasonlogs_changelog (
+    uid integer DEFAULT nextval('public.pff_player_seasonlogs_changelog_uid_seq'::regclass) NOT NULL,
+    pid character varying(25) NOT NULL,
+    year smallint NOT NULL,
+    prop character varying(100) NOT NULL,
+    prev character varying(400) NOT NULL,
+    new character varying(400),
+    "timestamp" integer NOT NULL
+);
+
+
+--
 -- Name: placed_wagers; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -5185,6 +5285,22 @@ ALTER TABLE ONLY public.league_user_careerlogs
 
 
 --
+-- Name: pff_player_seasonlogs_changelog pff_player_seasonlogs_changelog_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.pff_player_seasonlogs_changelog
+    ADD CONSTRAINT pff_player_seasonlogs_changelog_pkey PRIMARY KEY (uid);
+
+
+--
+-- Name: pff_player_seasonlogs pff_player_seasonlogs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.pff_player_seasonlogs
+    ADD CONSTRAINT pff_player_seasonlogs_pkey PRIMARY KEY (pid, year);
+
+
+--
 -- Name: player_contracts player_contracts_pid_year_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -6620,6 +6736,13 @@ CREATE INDEX idx_player_gamelogs_esbid_active_pid ON public.player_gamelogs USIN
 --
 
 CREATE INDEX idx_player_gamelogs_esbid_tm ON public.player_gamelogs USING btree (esbid, tm);
+
+
+--
+-- Name: idx_player_pff_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_pff_id ON public.player USING btree (pff_id);
 
 
 --
