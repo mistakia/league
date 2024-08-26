@@ -17,10 +17,18 @@ if (process.env.NODE_ENV !== 'test') {
   debug.enable('process:waivers:freeagency')
 }
 
-const run = async () => {
+const run = async ({ daily = false }) => {
   const timestamp = Math.round(Date.now() / 1000)
 
+  // only run outside of regular season waiver period
   if (constants.season.isRegularSeason && constants.season.isWaiverPeriod) {
+    log('during regular season waiver period, active waivers not run')
+    return
+  }
+
+  // only run daily waivers during offseason
+  if (!constants.season.isRegularSeason && !daily) {
+    log('outside of daily waivers during offseason, active waivers not run')
     return
   }
 

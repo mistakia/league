@@ -1,14 +1,18 @@
 import { Errors } from '#libs-shared'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { report_job } from '#libs-server'
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
 
 import processActiveWaivers from './process-waivers-free-agency-active.mjs'
 import processPracticeWaivers from './process-waivers-free-agency-practice.mjs'
 
-const runActive = async () => {
+const argv = yargs(hideBin(process.argv)).argv
+
+const runActive = async ({ daily = false }) => {
   let error
   try {
-    await processActiveWaivers()
+    await processActiveWaivers({ daily })
   } catch (err) {
     error = err
   }
@@ -30,10 +34,10 @@ const runActive = async () => {
   })
 }
 
-const runPractice = async () => {
+const runPractice = async ({ daily = false }) => {
   let error = null
   try {
-    await processPracticeWaivers()
+    await processPracticeWaivers({ daily })
   } catch (err) {
     error = err
   }
@@ -54,8 +58,9 @@ const runPractice = async () => {
 }
 
 const main = async () => {
-  await runActive()
-  await runPractice()
+  const daily = argv.daily
+  await runActive({ daily })
+  await runPractice({ daily })
 
   process.exit()
 }
