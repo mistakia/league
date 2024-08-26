@@ -19,13 +19,15 @@ const import_pff_grades_for_position = async ({
   grades_url,
   ignore_cache
 }) => {
-  const players = await pff.get_pff_player_seasonlogs({
+  const data = await pff.get_pff_player_seasonlogs({
     year,
     position,
     cookie,
     grades_url,
     ignore_cache
   })
+
+  const players = data.players
 
   log(`Importing ${players.length} grades for ${position} in ${year}`)
 

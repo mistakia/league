@@ -138,6 +138,7 @@ export const get_pff_player_seasonlogs = async ({
   }
 
   const url = `${grades_url}?league=nfl&position=${position}&season=${year}`
+  log(`Fetching PFF player seasonlogs from ${url}`)
   const response = await fetch(url, {
     headers: {
       cookie
@@ -158,7 +159,7 @@ export const get_pff_player_seasonlogs = async ({
     await cache.set({ key: cache_key, value: data })
   }
 
-  return data.players
+  return data
 }
 
 // Helper function to parse cookie string into an array of cookie objects
