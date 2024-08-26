@@ -737,6 +737,24 @@ export const getLeagueEvents = createSelector(
         })
       }
 
+      if (league.free_agency_live_auction_end) {
+        const next_waiver_processing = now.hour() < 15 ? now : now.add(1, 'day')
+        const waiver_processing_time = next_waiver_processing
+          .hour(15)
+          .minute(0)
+          .second(0)
+
+        if (
+          now.isBefore(faPeriod.end) &&
+          now.isBefore(waiver_processing_time)
+        ) {
+          events.push({
+            detail: 'Waivers Processed',
+            date: waiver_processing_time
+          })
+        }
+      }
+
       if (now.isBefore(faPeriod.end)) {
         events.push({
           detail: 'Free Agency Period Ends',
