@@ -33,7 +33,9 @@ const mapStateToProps = createSelector(
       isHosted: Boolean(league.hosted),
       isCommish: app.userId === league.commishid,
       is_auction_live:
-        auction_is_started && !(auction.isComplete || auction_is_ended),
+        auction_is_started &&
+        !(auction.isComplete || auction_is_ended) &&
+        !league.free_agency_live_auction_end,
       is_logged_in: Boolean(app.userId)
     }
   }

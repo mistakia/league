@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getAuction } from '@core/selectors'
+import { getAuction, getCurrentLeague } from '@core/selectors'
 import { auctionActions } from '@core/auction'
 import { leagueActions } from '@core/leagues'
 
@@ -10,9 +10,11 @@ import AuctionControls from './auction-controls'
 const mapStateToProps = createSelector(
   getAuction,
   (state) => state.getIn(['app', 'userId']),
-  (auction, userId) => ({
+  getCurrentLeague,
+  (auction, userId, league) => ({
     tids: auction.tids,
-    is_logged_in: Boolean(userId)
+    is_logged_in: Boolean(userId),
+    auction_is_ended: auction.isComplete || league.free_agency_live_auction_end
   })
 )
 
