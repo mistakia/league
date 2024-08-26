@@ -7,6 +7,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import { asyncBufferFromFile, parquetRead } from 'hyparquet'
 import dayjs from 'dayjs'
+import fetch from 'node-fetch'
 
 import db from '#db'
 import { fixTeam } from '#libs-shared'
