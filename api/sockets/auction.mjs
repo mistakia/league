@@ -502,12 +502,20 @@ export default class Auction {
     this._clearBidTimer()
   }
 
-  _startNominationTimer() {
+  async _startNominationTimer() {
     this._nominationTimerExpired = false
     this._clearNominationTimer()
     const self = this
     const nominatingTeamId = this.nominatingTeamId
     if (!nominatingTeamId) {
+      await db('seasons')
+        .where('lid', this._lid)
+        .update({
+          free_agency_live_auction_end: Math.round(Date.now() / 1000)
+        })
+
+      this._league = await getLeague({ lid: this._lid })
+
       return this.broadcast({ type: 'AUCTION_COMPLETE' })
     }
 
