@@ -16,6 +16,7 @@ import team_stats_from_plays_table_fields from './team-stats-from-plays-table-fi
 import keeptradecut_table_fields from './keeptradecut-table-fields'
 import player_games_played_table_fields from './player-games-played-table-fields'
 import player_contract_table_fields from './player-contract-table-fields'
+import player_pff_seasonlogs_table_fields from './player-pff-seasonlogs-table-fields'
 
 // Player Column Fields
 // header_label - string, required
@@ -72,6 +73,7 @@ export function PlayerTableFields({
 }) {
   const fields = {
     ...(is_logged_in ? fantasy_league_table_fields({ week }) : {}),
+    ...(is_logged_in ? player_pff_seasonlogs_table_fields : {}),
 
     ...projected_table_fields({ week }),
     ...player_table_fields({ is_logged_in }),
