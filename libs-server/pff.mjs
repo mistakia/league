@@ -158,7 +158,7 @@ export const get_pff_player_seasonlogs = async ({
     await cache.set({ key: cache_key, value: data })
   }
 
-  return data
+  return data.players
 }
 
 // Helper function to parse cookie string into an array of cookie objects
