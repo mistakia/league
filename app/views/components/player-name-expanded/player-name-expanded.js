@@ -34,7 +34,7 @@ function getClock({ desc, game_clock_start, qtr }) {
 }
 
 function GameStatus({ status, playerMap }) {
-  if (!constants.isRegularSeason) {
+  if (!constants.isRegularSeason && !status) {
     return null
   }
 
