@@ -1,7 +1,6 @@
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import fetch from 'node-fetch'
 
 import { isMain, report_job, pff, wait, getPlayer } from '#libs-server'
 import { constants, job_constants } from '#libs-shared'
@@ -17,20 +16,16 @@ const import_pff_grades_for_position = async ({
   year,
   cookie,
   position,
-  grades_url
+  grades_url,
+  ignore_cache
 }) => {
-  const URL = `${grades_url}?league=nfl&position=${position}&season=${year}`
-  const result = await fetch(URL, {
-    headers: {
-      cookie
-    }
-  }).then((res) => res.json())
-
-  if (!result.players) {
-    throw new Error('No players found')
-  }
-
-  const players = result.players
+  const players = await pff.get_pff_player_seasonlogs({
+    year,
+    position,
+    cookie,
+    grades_url,
+    ignore_cache
+  })
 
   log(`Importing ${players.length} grades for ${position} in ${year}`)
 
@@ -191,16 +186,28 @@ const update_pff_seasonlog = async (update, existing_log) => {
   return changes
 }
 
-const import_pff_grades_for_year = async ({ year, cookie, grades_url }) => {
+const import_pff_grades_for_year = async ({
+  year,
+  cookie,
+  grades_url,
+  ignore_cache
+}) => {
   for (const position of pff.positions) {
-    await import_pff_grades_for_position({ year, cookie, position, grades_url })
+    await import_pff_grades_for_position({
+      year,
+      cookie,
+      position,
+      grades_url,
+      ignore_cache
+    })
     await wait(10000)
   }
 }
 
 const import_pff_grades = async ({
   year = constants.season.year,
-  all = false
+  all = false,
+  ignore_cache = false
 }) => {
   const config_row = await db('config').where({ key: 'pff_config' }).first()
   const pff_config = config_row.value
@@ -214,17 +221,26 @@ const import_pff_grades = async ({
 
   if (all) {
     for (const year of pff.years) {
-      await import_pff_grades_for_year({ year, cookie, grades_url })
+      await import_pff_grades_for_year({
+        year,
+        cookie,
+        grades_url,
+        ignore_cache
+      })
     }
   } else {
-    await import_pff_grades_for_year({ year, cookie, grades_url })
+    await import_pff_grades_for_year({ year, cookie, grades_url, ignore_cache })
   }
 }
 
 const main = async () => {
   let error
   try {
-    await import_pff_grades({ year: argv.year, all: argv.all })
+    await import_pff_grades({
+      year: argv.year,
+      all: argv.all,
+      ignore_cache: argv.ignore_cache
+    })
   } catch (err) {
     error = err
     log(error)
