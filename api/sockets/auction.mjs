@@ -149,7 +149,8 @@ export default class Auction {
         bidTimer: config.bidTimer,
         nominationTimer: config.nominationTimer,
         nominatingTeamId,
-        complete: !nominatingTeamId,
+        complete:
+          !nominatingTeamId || this._league.free_agency_live_auction_end,
         pause_on_team_disconnect: this._pause_on_team_disconnect
       }
     })
@@ -507,6 +508,10 @@ export default class Auction {
     const self = this
     const nominatingTeamId = this.nominatingTeamId
     if (!nominatingTeamId) {
+      return this.broadcast({ type: 'AUCTION_COMPLETE' })
+    }
+
+    if (this._league.free_agency_live_auction_end) {
       return this.broadcast({ type: 'AUCTION_COMPLETE' })
     }
 
