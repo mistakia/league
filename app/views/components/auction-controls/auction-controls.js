@@ -19,7 +19,7 @@ export default function AuctionControls({
     if (is_logged_in && !auction_is_ended) {
       join()
     }
-  }, [join, load_league, is_logged_in])
+  }, [join, load_league, is_logged_in, auction_is_ended])
 
   // TODO allow non logged in users to follow the auction
   if (!is_logged_in) {

@@ -115,8 +115,11 @@
 
 # Waivers - Poaching
 
-## Process Poaching Waivers Every 15 Minutes
-*/15 * * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-poaching-waivers.mjs &>> /var/log/league/league-process-poaching-waivers.log
+## Process Poaching Waivers Every 15 Minutes (except at 15:00)
+*/15 0-14,16-23 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-poaching-waivers.mjs &>> /var/log/league/league-process-poaching-waivers.log
+
+## Process Poaching Waivers Daily at 15:15
+15 15 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-poaching-waivers.mjs --daily &>> /var/log/league/league-process-poaching-waivers-daily.log
 
 
 
