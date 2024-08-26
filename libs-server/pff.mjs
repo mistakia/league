@@ -1,6 +1,7 @@
 import { puppeteer } from '#libs-server'
 import debug from 'debug'
 import db from '#db'
+import { constants } from '#libs-shared'
 
 const log = debug('pff')
 
@@ -21,6 +22,11 @@ export const positions = [
   'K',
   'P'
 ]
+
+export const years = Array.from(
+  { length: constants.season.now - 2006 + 1 },
+  (_, index) => 2006 + index
+)
 
 export const get_pff_session_cookie = async () => {
   // Get the current config from the database
