@@ -16,8 +16,15 @@ if (process.env.NODE_ENV !== 'test') {
   debug.enable('process:waivers:freeagency')
 }
 
-const run = async () => {
+const run = async ({ daily = false }) => {
   if (constants.season.week > constants.season.finalWeek) {
+    log('after final week, practice waivers not run')
+    return
+  }
+
+  // only run daily waivers during offseason
+  if (!constants.season.isRegularSeason && !daily) {
+    log('outside of daily waivers during offseason, practice waivers not run')
     return
   }
 
