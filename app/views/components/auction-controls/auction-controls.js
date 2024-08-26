@@ -11,11 +11,12 @@ export default function AuctionControls({
   tids,
   join,
   load_league,
-  is_logged_in
+  is_logged_in,
+  auction_is_ended
 }) {
   useEffect(() => {
     load_league()
-    if (is_logged_in) {
+    if (is_logged_in && !auction_is_ended) {
       join()
     }
   }, [join, load_league, is_logged_in])
@@ -44,5 +45,6 @@ AuctionControls.propTypes = {
   tids: ImmutablePropTypes.list,
   join: PropTypes.func,
   load_league: PropTypes.func,
-  is_logged_in: PropTypes.bool
+  is_logged_in: PropTypes.bool,
+  auction_is_ended: PropTypes.bool
 }

@@ -64,6 +64,7 @@ export const League = new Record({
   free_agency_period_start: null,
   free_agency_period_end: null,
   free_agency_live_auction_start: null,
+  free_agency_live_auction_end: null,
   tddate: null,
 
   draft_start: null,
@@ -168,6 +169,7 @@ export function createLeague({
   free_agency_period_start,
   free_agency_period_end,
   free_agency_live_auction_start,
+  free_agency_live_auction_end,
   tddate,
 
   draft_start,
@@ -271,6 +273,7 @@ export function createLeague({
     free_agency_period_start,
     free_agency_period_end,
     free_agency_live_auction_start,
+    free_agency_live_auction_end,
     tddate,
 
     draft_start,
