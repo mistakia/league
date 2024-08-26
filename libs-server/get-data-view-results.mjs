@@ -499,16 +499,15 @@ const group_tables_by_supported_splits = (grouped_clauses_by_table, splits) => {
   return grouped_by_splits
 }
 
-export default async function ({
+export const get_data_view_results_query = ({
   splits = [],
   where = [],
   columns = [],
   prefix_columns = [],
   sort = [],
   offset = 0,
-  limit = 500,
-  timeout = null
-} = {}) {
+  limit = 500
+} = {}) => {
   const validator_result = validators.table_state_validator({
     splits,
     where,
@@ -929,6 +928,29 @@ export default async function ({
     'player.pos'
   )
   players_query.limit(limit)
+
+  return players_query
+}
+
+export default async function ({
+  splits = [],
+  where = [],
+  columns = [],
+  prefix_columns = [],
+  sort = [],
+  offset = 0,
+  limit = 500,
+  timeout = null
+} = {}) {
+  const players_query = get_data_view_results_query({
+    splits,
+    where,
+    columns,
+    prefix_columns,
+    sort,
+    offset,
+    limit
+  })
 
   console.log(players_query.toString())
 
