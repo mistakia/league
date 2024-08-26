@@ -2,6 +2,8 @@ import { puppeteer } from '#libs-server'
 import debug from 'debug'
 import db from '#db'
 import { constants } from '#libs-shared'
+import fetch from 'node-fetch'
+import * as cache from './cache.mjs'
 
 const log = debug('pff')
 
@@ -24,7 +26,7 @@ export const positions = [
 ]
 
 export const years = Array.from(
-  { length: constants.season.now - 2006 + 1 },
+  { length: constants.season.year - 2006 + 1 },
   (_, index) => 2006 + index
 )
 
@@ -114,6 +116,49 @@ export const get_pff_session_cookie = async () => {
   }
 
   return new_cookies
+}
+
+export const get_pff_player_seasonlogs = async ({
+  year,
+  position,
+  cookie,
+  grades_url,
+  ignore_cache
+}) => {
+  const cache_key = `/pff/player_seasonlogs/${year}/${position}.json`
+
+  if (!ignore_cache) {
+    const cached_data = await cache.get({ key: cache_key })
+    if (cached_data) {
+      log(
+        `cache hit for PFF player seasonlogs: year=${year}, position=${position}`
+      )
+      return cached_data
+    }
+  }
+
+  const url = `${grades_url}?league=nfl&position=${position}&season=${year}`
+  const response = await fetch(url, {
+    headers: {
+      cookie
+    }
+  })
+
+  const data = await response.json()
+
+  if (!data || !data.players) {
+    throw new Error('No players found')
+  }
+
+  log(
+    `Fetched ${data.players.length} player seasonlogs for ${position} in ${year}`
+  )
+
+  if (data.players.length) {
+    await cache.set({ key: cache_key, value: data })
+  }
+
+  return data
 }
 
 // Helper function to parse cookie string into an array of cookie objects
