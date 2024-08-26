@@ -14,6 +14,7 @@ import team_stats_from_plays_column_definitions from './team-stats-from-plays-co
 import player_keeptradecut_column_definitions from './player-keeptradecut-column-definitions.mjs'
 import player_games_played_column_definitions from './player-games-played-column-definitions.mjs'
 import player_contract_column_definitions from './player-contract-column-definitions.mjs'
+import player_pff_seasonlogs_column_definitions from './player-pff-seasonlogs-column-definitions.mjs'
 
 const player_league_roster_status_select = `CASE WHEN rosters_players.slot = ${constants.slots.IR} THEN 'injured_reserve' WHEN rosters_players.slot = ${constants.slots.PS} THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END`
 
@@ -31,6 +32,7 @@ export default {
   ...player_keeptradecut_column_definitions,
   ...player_games_played_column_definitions,
   ...player_contract_column_definitions,
+  ...player_pff_seasonlogs_column_definitions,
 
   player_league_roster_status: {
     table_name: 'rosters_players',
