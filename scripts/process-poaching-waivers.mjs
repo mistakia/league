@@ -1,4 +1,6 @@
 import debug from 'debug'
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
 
 import { constants, Errors, getFreeAgentPeriod } from '#libs-shared'
 import {
@@ -13,12 +15,13 @@ import {
 import db from '#db'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
+const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process:waivers:poach')
 if (process.env.NODE_ENV !== 'test') {
   debug.enable('process:waivers:poach')
 }
 
-const run = async ({ daily = false }) => {
+const run = async ({ daily = false } = {}) => {
   const timestamp = Math.round(Date.now() / 1000)
 
   // get leagueIds with pending waivers
@@ -38,7 +41,11 @@ const run = async ({ daily = false }) => {
   for (const lid of leagueIds) {
     const league = await getLeague({ lid })
     const free_agency_period = getFreeAgentPeriod(league)
-    if (constants.season.now.isAfter(free_agency_period.start) && !daily) {
+    if (
+      !constants.season.isRegularSeason &&
+      constants.season.now.isAfter(free_agency_period.start) &&
+      !daily
+    ) {
       log(
         `outside of daily waivers run during free agency period, skipping league ${lid}`
       )
@@ -106,7 +113,8 @@ export default run
 const main = async () => {
   let error
   try {
-    await run()
+    const daily = argv.daily
+    await run({ daily })
   } catch (err) {
     error = err
   }
