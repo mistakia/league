@@ -1,6 +1,6 @@
 import debug from 'debug'
 
-import { constants, Errors } from '#libs-shared'
+import { constants, Errors, getFreeAgentPeriod } from '#libs-shared'
 import {
   sendNotifications,
   submitPoach,
@@ -18,7 +18,7 @@ if (process.env.NODE_ENV !== 'test') {
   debug.enable('process:waivers:poach')
 }
 
-const run = async () => {
+const run = async ({ daily = false }) => {
   const timestamp = Math.round(Date.now() / 1000)
 
   // get leagueIds with pending waivers
@@ -36,6 +36,15 @@ const run = async () => {
   }
 
   for (const lid of leagueIds) {
+    const league = await getLeague({ lid })
+    const free_agency_period = getFreeAgentPeriod(league)
+    if (constants.season.now.isAfter(free_agency_period.start) && !daily) {
+      log(
+        `outside of daily waivers run during free agency period, skipping league ${lid}`
+      )
+      continue
+    }
+
     let waiver = await getTopPoachingWaiver(lid)
     if (!waiver) {
       log(`no waivers ready to be processed for league ${lid}`)
@@ -70,7 +79,6 @@ const run = async () => {
         )
         const player_rows = await db('player').where('pid', waiver.pid).limit(1)
         const player_row = player_rows[0]
-        const league = await getLeague({ lid: waiver.lid })
         await sendNotifications({
           league,
           teamIds: [waiver.tid],
