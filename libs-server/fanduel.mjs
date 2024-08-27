@@ -3,7 +3,7 @@ import queryString from 'query-string'
 import dayjs from 'dayjs'
 import debug from 'debug'
 
-import config from '#config'
+import db from '#db'
 import { fixTeam } from '#libs-shared'
 import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 import { wait } from './wait.mjs'
@@ -12,6 +12,11 @@ const log = debug('fanduel')
 debug.enable('fanduel')
 
 const nfl_game_compeition_id = 12282733
+
+const get_fanduel_config = async () => {
+  const config_row = await db('config').where('key', 'fanduel_config').first()
+  return config_row.value
+}
 
 export const tabs = [
   'passing-props',
@@ -556,11 +561,13 @@ export const get_market_details_from_wager = (wager_leg) => {
 }
 
 export const getEvents = async () => {
-  const url = `${config.fanduel_api_url}/content-managed-page?betexRegion=GBR&capiJurisdiction=intl&currencyCode=USD&exchangeLocale=en_US&includePrices=true&includeRaceCards=false&includeSeo=true&language=en&regionCode=NAMERICA&timezone=America%2FNew_York&includeMarketBlurbs=true&_ak=FhMFpcPWXMeyZxOx&page=CUSTOM&customPageId=nfl`
+  const fanduel_config = await get_fanduel_config()
+
+  const url = `${fanduel_config.api_url}/content-managed-page?betexRegion=GBR&capiJurisdiction=intl&currencyCode=USD&exchangeLocale=en_US&includePrices=true&includeRaceCards=false&includeSeo=true&language=en&regionCode=NAMERICA&timezone=America%2FNew_York&includeMarketBlurbs=true&_ak=FhMFpcPWXMeyZxOx&page=CUSTOM&customPageId=nfl`
 
   log(`fetching ${url}`)
   const res = await fetch(url, {
-    headers: config.fanduel_api_headers
+    headers: fanduel_config.headers
   })
   const data = await res.json()
 
@@ -573,11 +580,13 @@ export const getEvents = async () => {
 }
 
 export const getEventTab = async ({ eventId, tab }) => {
-  const url = `${config.fanduel_api_url}/event-page?betexRegion=GBR&capiJurisdiction=intl&currencyCode=USD&exchangeLocale=en_US&includePrices=true&language=en&priceHistory=1&regionCode=NAMERICA&_ak=FhMFpcPWXMeyZxOx&eventId=${eventId}&tab=${tab}`
+  const fanduel_config = await get_fanduel_config()
+
+  const url = `${fanduel_config.api_url}/event-page?betexRegion=GBR&capiJurisdiction=intl&currencyCode=USD&exchangeLocale=en_US&includePrices=true&language=en&priceHistory=1&regionCode=NAMERICA&_ak=FhMFpcPWXMeyZxOx&eventId=${eventId}&tab=${tab}`
 
   log(`fetching ${url}`)
   const res = await fetch(url, {
-    headers: config.fanduel_api_headers
+    headers: fanduel_config.headers
   })
   const data = await res.json()
 
@@ -585,11 +594,13 @@ export const getEventTab = async ({ eventId, tab }) => {
 }
 
 export const getWeeklySpecials = async () => {
-  const url = `${config.fanduel_api_url}/content-managed-page?betexRegion=GBR&capiJurisdiction=intl&currencyCode=USD&exchangeLocale=en_US&includePrices=true&includeRaceCards=false&includeSeo=true&language=en&regionCode=NAMERICA&timezone=America%2FNew_York&includeMarketBlurbs=true&_ak=FhMFpcPWXMeyZxOx&page=CUSTOM&customPageId=nfl`
+  const fanduel_config = await get_fanduel_config()
+
+  const url = `${fanduel_config.api_url}/content-managed-page?betexRegion=GBR&capiJurisdiction=intl&currencyCode=USD&exchangeLocale=en_US&includePrices=true&includeRaceCards=false&includeSeo=true&language=en&regionCode=NAMERICA&timezone=America%2FNew_York&includeMarketBlurbs=true&_ak=FhMFpcPWXMeyZxOx&page=CUSTOM&customPageId=nfl`
 
   log(`fetching ${url}`)
   const res = await fetch(url, {
-    headers: config.fanduel_api_headers
+    headers: fanduel_config.headers
   })
   const data = await res.json()
 
