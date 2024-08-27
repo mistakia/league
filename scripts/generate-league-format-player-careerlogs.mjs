@@ -41,6 +41,8 @@ const generate_league_format_player_careerlogs = async ({
     sorted_pids_by_draft_classes[draft_class] = players
       .sort((a, b) => a.dpos - b.dpos)
       .map((i) => i.pid)
+
+    // TODO have a rank based on adp instead of draft position
   }
 
   for (const pid in seasons_by_pid) {

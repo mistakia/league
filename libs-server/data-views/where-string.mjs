@@ -9,7 +9,8 @@ const get_where_string = ({
   rate_type_column_mapping,
   splits
 }) => {
-  const use_select_as = column_definition.select_as && is_main_select && column_definition.with
+  const use_select_as =
+    column_definition.select_as && is_main_select && column_definition.with
   const column_name = use_select_as
     ? column_definition.select_as({ params: where_clause.params })
     : column_definition.column_name
