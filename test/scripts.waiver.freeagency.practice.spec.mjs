@@ -60,7 +60,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
 
       let error
       try {
-        await run()
+        await run({ daily: true })
       } catch (err) {
         console.log(err)
         error = err
