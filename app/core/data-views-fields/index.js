@@ -1,7 +1,7 @@
 import { List } from 'immutable'
 import { createSelector } from 'reselect'
 
-import { constants } from '@libs-shared'
+import { constants, data_view_fields_index } from '@libs-shared'
 
 import betting_market_table_fields from './betting-market-table-fields'
 import espn_table_fields from './espn-table-fields'
@@ -98,6 +98,7 @@ export function PlayerTableFields({
       : []
     fields[key].column_name = value.player_value_path
     fields[key].accessorKey = value.player_value_path || key
+    fields[key].description = data_view_fields_index[key] || null
   }
 
   return fields
