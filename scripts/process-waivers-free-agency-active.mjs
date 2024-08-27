@@ -17,7 +17,7 @@ if (process.env.NODE_ENV !== 'test') {
   debug.enable('process:waivers:freeagency')
 }
 
-const run = async ({ daily = false }) => {
+const run = async ({ daily = false } = {}) => {
   const timestamp = Math.round(Date.now() / 1000)
 
   // only run outside of regular season waiver period
