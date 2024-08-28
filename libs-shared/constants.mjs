@@ -1332,7 +1332,8 @@ export const sources = {
   GAMBET_DC: 24,
   BETRIVERS_MD: 25,
   FANTASYLIFE_DWAIN_MCFARLAND: 26,
-  FANTASYLIFE: 27
+  FANTASYLIFE: 27,
+  SLEEPER: 28
 }
 
 export const source_keys = {}
@@ -1369,7 +1370,8 @@ export const sourcesTitle = {
   24: 'Gambet (DC)',
   25: 'BetRivers (MD)',
   26: 'Fantasy Life (Dwain McFarland)',
-  27: 'Fantasy Life'
+  27: 'Fantasy Life',
+  28: 'Sleeper'
 }
 
 export const seas_types = ['PRE', 'REG', 'POST']
