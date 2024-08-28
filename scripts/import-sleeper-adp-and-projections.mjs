@@ -116,6 +116,10 @@ const import_sleeper_adp_and_projections = async ({
   for (const projection of projections) {
     let player_row
 
+    if (!projection.stats || Object.keys(projection.stats).length === 0) {
+      continue
+    }
+
     try {
       player_row = await getPlayer({ sleeper_id: projection.player_id })
     } catch (err) {
@@ -163,7 +167,38 @@ const import_sleeper_adp_and_projections = async ({
   if (dry_run) {
     log(adp_inserts[0])
     log(projection_inserts[0])
-    log(`Dry run, skipping insertion`)
+
+    // Check for duplicate projection_inserts
+    const unique_keys = new Set()
+    const duplicates = projection_inserts.filter((item) => {
+      const key = `${item.sourceid}-${item.pid}-${item.userid}-${item.week}-${item.year}`
+      if (unique_keys.has(key)) {
+        return true
+      }
+      unique_keys.add(key)
+      return false
+    })
+
+    if (duplicates.length > 0) {
+      log(`Found ${duplicates.length} duplicate projection_inserts`)
+      log('First duplicate:')
+      log(duplicates[0])
+      log('Matching original:')
+      log(
+        projection_inserts.find(
+          (item) =>
+            item.sourceid === duplicates[0].sourceid &&
+            item.pid === duplicates[0].pid &&
+            item.userid === duplicates[0].userid &&
+            item.week === duplicates[0].week &&
+            item.year === duplicates[0].year
+        )
+      )
+    } else {
+      log('No duplicate projection_inserts found')
+    }
+
+    log('dry run, skipping insertion')
     return
   }
 
