@@ -85,6 +85,7 @@ export {
 export * as pff from './pff.mjs'
 export * as sleeper from './sleeper.mjs'
 export * as fantasypros from './fantasypros.mjs'
+export * as four_for_four from './4for4.mjs'
 
 export const getChartedPlayByPlayQuery = (db) =>
   db('nfl_plays')
