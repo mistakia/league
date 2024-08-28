@@ -13,7 +13,7 @@ const log = debug('import:projections')
 debug.enable('import:projections,get-player')
 const week = Math.max(constants.season.week, 1)
 
-const getProjection = (stats) => ({
+const format_projection = (stats) => ({
   py: stats.pyd,
   pa: stats.att,
   pc: stats.cmp,
@@ -31,20 +31,34 @@ const getProjection = (stats) => ({
   tdrec: stats.rectd
 })
 
-const PLAYERS_URL = 'https://appdata.footballguys.com/tn/NFLPlayers.json'
-const PROJECTIONS_URL = `https://appdata.footballguys.com/tn/WeeklyProjections-${constants.season.year}-${constants.season.week}.json`
-const timestamp = new Date()
+const timestamp = Math.floor(Date.now() / 1000)
 
-const run = async () => {
+const run = async ({ dry_run = false } = {}) => {
   // do not pull in any projections after the season has ended
   if (constants.season.week > constants.season.nflFinalWeek) {
     return
   }
 
-  // fetch players
-  const fbg_players = await fetch(PLAYERS_URL).then((res) => res.json())
+  if (!constants.season.week) {
+    log('No projections available for current week')
+    return
+  }
 
-  const data = await fetch(PROJECTIONS_URL).then((res) => res.json())
+  const config_row = await db('config').where({ key: 'fbg_config' }).first()
+  const fbg_config = config_row.value
+
+  if (!fbg_config) {
+    throw new Error('fbg_config not found')
+  }
+
+  // fetch players
+  const players_url = `${fbg_config.data_url}/NFLPlayers.json`
+  log(`fetching players from ${players_url}`)
+  const fbg_players = await fetch(players_url).then((res) => res.json())
+
+  const projections_url = `${fbg_config.data_url}/WeeklyProjections-${constants.season.year}-${constants.season.week}.json`
+  log(`fetching projections from ${projections_url}`)
+  const data = await fetch(projections_url).then((res) => res.json())
 
   // if no projections or 404 exit
   const projectors = {
@@ -103,7 +117,7 @@ const run = async () => {
         continue
       }
 
-      const proj = getProjection(fbg_player_projection)
+      const proj = format_projection(fbg_player_projection)
 
       // ignore if all the values are undefined or null
       if (Object.values(proj).every((v) => v === undefined || v === null)) {
@@ -135,7 +149,7 @@ const run = async () => {
     log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`)
   )
 
-  if (argv.dry) {
+  if (dry_run) {
     log(`${inserts.length} projections`)
     log(inserts[0])
     return
@@ -154,7 +168,7 @@ const run = async () => {
 const main = async () => {
   let error
   try {
-    await run()
+    await run({ dry_run: argv.dry })
   } catch (err) {
     error = err
     console.log(error)
