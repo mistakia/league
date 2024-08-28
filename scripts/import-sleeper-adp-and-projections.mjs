@@ -89,6 +89,32 @@ const create_ranking_entries = ({ player_row, adp }) => {
   }))
 }
 
+const process_matched_player = ({
+  player_row,
+  projection,
+  adp_inserts,
+  projection_inserts
+}) => {
+  const adp = format_adp(projection)
+  const proj = format_projection(projection)
+
+  // Create multiple ranking entries
+  const ranking_entries = create_ranking_entries({
+    player_row,
+    adp
+  })
+  adp_inserts.push(...ranking_entries)
+
+  // Insert into projections_index and projections
+  projection_inserts.push({
+    pid: player_row.pid,
+    year: constants.season.year,
+    week: 0,
+    sourceid: constants.sources.SLEEPER,
+    ...proj
+  })
+}
+
 const import_sleeper_adp_and_projections = async ({
   ignore_cache = false,
   dry_run = false
@@ -112,18 +138,40 @@ const import_sleeper_adp_and_projections = async ({
 
   const adp_inserts = []
   const projection_inserts = []
+  const matched_sleeper_ids = new Set()
+  const unmatched_projections = []
 
+  // First iteration: match by sleeper_id
   for (const projection of projections) {
-    let player_row
-
     if (!projection.stats || Object.keys(projection.stats).length === 0) {
       continue
     }
 
+    let player_row
     try {
       player_row = await getPlayer({ sleeper_id: projection.player_id })
     } catch (err) {
-      log(`Error getting player: ${err}`)
+      log(`Error getting player by sleeper_id: ${err}`)
+      unmatched_projections.push(projection)
+      continue
+    }
+
+    if (player_row) {
+      matched_sleeper_ids.add(Number(projection.player_id))
+      process_matched_player({
+        player_row,
+        projection,
+        adp_inserts,
+        projection_inserts
+      })
+    } else {
+      unmatched_projections.push(projection)
+    }
+  }
+
+  // Second iteration: match remaining players by name, team, pos
+  for (const projection of unmatched_projections) {
+    if (matched_sleeper_ids.has(projection.player_id)) {
       continue
     }
 
@@ -132,34 +180,31 @@ const import_sleeper_adp_and_projections = async ({
       pos: projection?.player?.position,
       team: projection?.player?.team
     }
-    if (!player_row) {
-      try {
-        player_row = await getPlayer(player_params)
-      } catch (err) {
-        log(`Error getting player: ${err}`)
-        log(player_params)
-        continue
-      }
+
+    let player_row
+    try {
+      player_row = await getPlayer(player_params)
+    } catch (err) {
+      log(`Error getting player by name, team, pos: ${err}`)
+      log(player_params)
+      continue
     }
 
     if (player_row) {
-      const adp = format_adp(projection)
-      const proj = format_projection(projection)
+      if (
+        player_row.sleeper_id &&
+        matched_sleeper_ids.has(player_row.sleeper_id)
+      ) {
+        log(`Player ${player_row.sleeper_id} already matched`)
+        continue
+      }
 
-      // Create multiple ranking entries
-      const ranking_entries = create_ranking_entries({
+      matched_sleeper_ids.add(Number(projection.player_id))
+      process_matched_player({
         player_row,
-        adp
-      })
-      adp_inserts.push(...ranking_entries)
-
-      // Insert into projections_index and projections
-      projection_inserts.push({
-        pid: player_row.pid,
-        year: constants.season.year,
-        week: 0,
-        sourceid: constants.sources.SLEEPER,
-        ...proj
+        projection,
+        adp_inserts,
+        projection_inserts
       })
     }
   }
