@@ -95,7 +95,7 @@ nfl_snaps
 player
 players_status
 practice
-rankings
+player_rankings
 "
 
 DB_BETTING_TABLES="

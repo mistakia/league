@@ -105,7 +105,7 @@ player
 player_aliases
 players_status
 practice
-rankings
+player_rankings
 player_seasonlogs
 player_snaps_game
 pff_player_seasonlogs
