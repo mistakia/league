@@ -31,13 +31,15 @@ const import_individual_fantasypros_dynasty_rankings = async ({
   year,
   fantasypros_position_type,
   superflex,
-  dry_run = false
+  dry_run = false,
+  ignore_cache = false
 }) => {
   const data = await fantasypros.get_fantasypros_rankings({
     year,
     fantasypros_scoring_type: 'PPR',
     fantasypros_position_type,
-    dynasty: true
+    dynasty: true,
+    ignore_cache
   })
 
   if (!data || !data.players) {
@@ -101,7 +103,8 @@ const import_individual_fantasypros_dynasty_rankings = async ({
 
 const import_fantasypros_dynasty_rankings = async ({
   year,
-  dry_run = false
+  dry_run = false,
+  ignore_cache = false
 } = {}) => {
   const fantasypros_position_types = [
     {
@@ -118,7 +121,8 @@ const import_fantasypros_dynasty_rankings = async ({
     await import_individual_fantasypros_dynasty_rankings({
       year,
       ...item,
-      dry_run
+      dry_run,
+      ignore_cache
     })
     await wait(2000)
   }
@@ -128,7 +132,11 @@ const main = async () => {
   let error
   try {
     const year = argv.year ? argv.year : constants.season.year
-    await import_fantasypros_dynasty_rankings({ year, dry_run: argv.dry })
+    await import_fantasypros_dynasty_rankings({
+      year,
+      dry_run: argv.dry,
+      ignore_cache: argv.ignore_cache
+    })
   } catch (err) {
     error = err
     console.log(error)

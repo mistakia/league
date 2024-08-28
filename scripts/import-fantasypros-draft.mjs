@@ -47,12 +47,14 @@ const import_single_fantasypros_draft_rankings = async ({
   year,
   fantasypros_scoring_type,
   fantasypros_position_type,
-  dry_run = false
+  dry_run = false,
+  ignore_cache = false
 }) => {
   const data = await fantasypros.get_fantasypros_rankings({
     year,
     fantasypros_scoring_type,
-    fantasypros_position_type
+    fantasypros_position_type,
+    ignore_cache
   })
 
   if (!data || !data.players) {
@@ -118,7 +120,8 @@ const import_single_fantasypros_draft_rankings = async ({
 
 const import_fantasypros_draft_rankings_for_year = async ({
   year = constants.season.year,
-  dry_run = false
+  dry_run = false,
+  ignore_cache = false
 } = {}) => {
   const fantasypros_scoring_types = ['STD', 'PPR', 'HALF']
   const fantasypros_position_types = [
@@ -137,6 +140,7 @@ const import_fantasypros_draft_rankings_for_year = async ({
   for (const fantasypros_scoring_type of fantasypros_scoring_types) {
     for (const item of fantasypros_position_types) {
       await import_single_fantasypros_draft_rankings({
+        ignore_cache,
         fantasypros_scoring_type,
         year,
         dry_run,
@@ -153,7 +157,8 @@ const main = async () => {
     const year = argv.year ? argv.year : constants.season.year
     await import_fantasypros_draft_rankings_for_year({
       year,
-      dry_run: argv.dry
+      dry_run: argv.dry,
+      ignore_cache: argv.ignore_cache
     })
   } catch (err) {
     error = err

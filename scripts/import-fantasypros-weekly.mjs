@@ -37,13 +37,15 @@ const import_individual_fantasypros_weekly_rankings = async ({
   week,
   fantasypros_scoring_type,
   fantasypros_position_type,
-  dry_run = false
+  dry_run = false,
+  ignore_cache = false
 }) => {
   const data = await fantasypros.get_fantasypros_rankings({
     year,
     week,
     fantasypros_scoring_type,
-    fantasypros_position_type
+    fantasypros_position_type,
+    ignore_cache
   })
 
   if (!data || !data.players) {
@@ -108,7 +110,8 @@ const import_individual_fantasypros_weekly_rankings = async ({
 const import_fantasypros_weekly_rankings = async ({
   year,
   week,
-  dry_run = false
+  dry_run = false,
+  ignore_cache = false
 } = {}) => {
   if (week < 1 || week > constants.season.nflFinalWeek) {
     return
@@ -133,7 +136,8 @@ const import_fantasypros_weekly_rankings = async ({
         fantasypros_position_type,
         year,
         week,
-        dry_run
+        dry_run,
+        ignore_cache
       })
       await wait(2000)
     }
@@ -145,7 +149,12 @@ const main = async () => {
   try {
     const year = argv.year ? argv.year : constants.season.year
     const week = argv.week ? argv.week : constants.season.week
-    await import_fantasypros_weekly_rankings({ year, week, dry_run: argv.dry })
+    await import_fantasypros_weekly_rankings({
+      year,
+      week,
+      dry_run: argv.dry,
+      ignore_cache: argv.ignore_cache
+    })
   } catch (err) {
     error = err
     console.log(error)
