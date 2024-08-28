@@ -75,7 +75,6 @@ const import_individual_fantasypros_dynasty_rankings = async ({
       year,
       week: 0,
 
-      adp: 0,
       source_id: 'FANTASYPROS',
       ranking_type: format_ranking_type({
         fantasypros_position_type,

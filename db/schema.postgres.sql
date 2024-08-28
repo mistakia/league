@@ -236,6 +236,7 @@ ALTER TABLE IF EXISTS ONLY public.transactions DROP CONSTRAINT IF EXISTS transac
 ALTER TABLE IF EXISTS ONLY public.teams DROP CONSTRAINT IF EXISTS teams_pkey;
 ALTER TABLE IF EXISTS ONLY public.seasons DROP CONSTRAINT IF EXISTS seasons_pkey;
 ALTER TABLE IF EXISTS ONLY public.rosters_players DROP CONSTRAINT IF EXISTS rosters_players_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_rankings_index DROP CONSTRAINT IF EXISTS player_rankings_index_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pid_year_unique;
@@ -338,6 +339,7 @@ DROP TABLE IF EXISTS public.playoffs;
 DROP TABLE IF EXISTS public.players_status;
 DROP TABLE IF EXISTS public.player_snaps_game;
 DROP TABLE IF EXISTS public.player_seasonlogs;
+DROP TABLE IF EXISTS public.player_rankings_index;
 DROP TABLE IF EXISTS public.player_rankings;
 DROP TABLE IF EXISTS public.player_gamelogs;
 DROP TABLE IF EXISTS public.player_contracts;
@@ -3728,6 +3730,26 @@ CREATE TABLE public.player_rankings (
 
 
 --
+-- Name: player_rankings_index; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_rankings_index (
+    pid character varying(25) NOT NULL,
+    pos character varying(4) NOT NULL,
+    week smallint NOT NULL,
+    year smallint NOT NULL,
+    min integer,
+    max integer,
+    avg numeric(5,2),
+    std numeric(5,2),
+    overall_rank integer,
+    position_rank integer,
+    source_id public.rankings_source_id NOT NULL,
+    ranking_type public.ranking_type NOT NULL
+);
+
+
+--
 -- Name: player_seasonlogs; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -5355,6 +5377,14 @@ ALTER TABLE ONLY public.player_contracts
 
 ALTER TABLE ONLY public.player
     ADD CONSTRAINT player_pkey PRIMARY KEY (pid);
+
+
+--
+-- Name: player_rankings_index player_rankings_index_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_rankings_index
+    ADD CONSTRAINT player_rankings_index_unique UNIQUE (year, week, source_id, ranking_type, pid);
 
 
 --
