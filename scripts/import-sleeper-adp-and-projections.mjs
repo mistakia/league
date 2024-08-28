@@ -2,7 +2,13 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { isMain, report_job, sleeper, getPlayer } from '#libs-server'
+import {
+  isMain,
+  report_job,
+  sleeper,
+  getPlayer,
+  batch_insert
+} from '#libs-server'
 import { constants } from '#libs-shared'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -11,6 +17,7 @@ import db from '#db'
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-sleeper-adp-and-projections')
 const timestamp = Math.floor(Date.now() / 1000)
+const BATCH_SIZE = 500
 debug.enable('import-sleeper-adp-and-projections,sleeper,get-player')
 
 const format_adp = (projection_item) => ({
@@ -162,24 +169,44 @@ const import_sleeper_adp_and_projections = async ({
 
   if (adp_inserts.length) {
     log(`Inserting ${adp_inserts.length} ADP rankings into database`)
-    await db('player_rankings_index')
-      .insert(adp_inserts)
-      .onConflict(['year', 'week', 'source_id', 'ranking_type', 'pid'])
-      .merge()
-    await db('player_rankings').insert(
-      adp_inserts.map((i) => ({ ...i, timestamp }))
-    )
+    await batch_insert({
+      items: adp_inserts,
+      batch_size: BATCH_SIZE,
+      save: async (batch) => {
+        await db('player_rankings_index')
+          .insert(batch)
+          .onConflict(['year', 'week', 'source_id', 'ranking_type', 'pid'])
+          .merge()
+      }
+    })
+    await batch_insert({
+      items: adp_inserts.map((i) => ({ ...i, timestamp })),
+      batch_size: BATCH_SIZE,
+      save: async (batch) => {
+        await db('player_rankings').insert(batch)
+      }
+    })
   }
 
   if (projection_inserts.length) {
     log(`Inserting ${projection_inserts.length} projections into database`)
-    await db('projections_index')
-      .insert(projection_inserts)
-      .onConflict(['sourceid', 'pid', 'userid', 'week', 'year'])
-      .merge()
-    await db('projections').insert(
-      projection_inserts.map((i) => ({ ...i, timestamp }))
-    )
+    await batch_insert({
+      items: projection_inserts,
+      batch_size: BATCH_SIZE,
+      save: async (batch) => {
+        await db('projections_index')
+          .insert(batch)
+          .onConflict(['sourceid', 'pid', 'userid', 'week', 'year'])
+          .merge()
+      }
+    })
+    await batch_insert({
+      items: projection_inserts.map((i) => ({ ...i, timestamp })),
+      batch_size: BATCH_SIZE,
+      save: async (batch) => {
+        await db('projections').insert(batch)
+      }
+    })
   }
 }
 
