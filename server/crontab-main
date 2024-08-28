@@ -105,11 +105,14 @@
 
 # RANKINGS
 
-## At 00:00 on Wednesday and Saturday
-0 0 * * 3,6 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fantasypros-dynasty.mjs --ignore_cache &>> /var/log/league/import-fantasypros-dynasty.log
+## At 03:00 on Wednesday and Saturday — dynasty rankings
+0 3 * * 3,6 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fantasypros-dynasty.mjs --ignore_cache &>> /var/log/league/import-fantasypros-dynasty.log
+
+## Daily from June through August
+0 5 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fantasypros-draft.mjs --ignore_cache &>> /var/log/league/import-fantasypros-draft.log
 
 ## Import weekly rankings
-## Import draft rankings
+## TODO
 
 
 
