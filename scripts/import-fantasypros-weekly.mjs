@@ -1,12 +1,10 @@
-import fetch from 'node-fetch'
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#libs-shared'
-import { isMain, getPlayer, wait, report_job } from '#libs-server'
-import config from '#config'
+import { isMain, getPlayer, wait, report_job, fantasypros } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -14,27 +12,39 @@ const log = debug('import:rankings:weekly')
 debug.enable('import:rankings:weekly,get-player')
 
 const timestamp = Math.round(Date.now() / 1000)
-const year = argv.year ? argv.year : constants.season.year
-const week = argv.week ? argv.week : constants.season.week
-const getURL = (opts) =>
-  `https://api.fantasypros.com/v2/json/nfl/${year}/consensus-rankings?type=weekly&scoring=${opts.type}&position=${opts.pos}&week=${week}&experts=available`
 
-const getRanking = (item) => ({
-  min: parseInt(item.rank_min, 10),
-  max: parseInt(item.rank_max, 10),
-  avg: parseFloat(item.rank_ave),
-  std: parseFloat(item.rank_std),
-  ornk: parseInt(item.rank_ecr, 10),
-  prnk: parseInt(item.pos_rank.replace(/\D/g, ''), 10)
+const get_ranking = (item) => ({
+  min: Number(item.rank_min),
+  max: Number(item.rank_max),
+  avg: Number(item.rank_ave),
+  std: Number(item.rank_std),
+  overall_rank: Number(item.rank_ecr),
+  position_rank: Number(item.pos_rank.replace(/\D/g, ''))
 })
 
-const runOne = async (opts) => {
-  const url = getURL(opts)
-  const data = await fetch(url, {
-    headers: {
-      'x-api-key': config.fantasypros
-    }
-  }).then((res) => res.json())
+const format_ranking_type = ({
+  fantasypros_scoring_type,
+  fantasypros_position_type
+}) => {
+  const scoring_type =
+    fantasypros_scoring_type === 'HALF' ? 'HALF_PPR' : fantasypros_scoring_type
+  const sf = fantasypros_position_type === 'OP' ? 'SUPERFLEX_' : ''
+  return `${scoring_type}_${sf}WEEKLY`
+}
+
+const import_individual_fantasypros_weekly_rankings = async ({
+  year,
+  week,
+  fantasypros_scoring_type,
+  fantasypros_position_type,
+  dry_run = false
+}) => {
+  const data = await fantasypros.get_fantasypros_rankings({
+    year,
+    week,
+    fantasypros_scoring_type,
+    fantasypros_position_type
+  })
 
   if (!data || !data.players) {
     throw new Error('failed to fetch data')
@@ -62,7 +72,7 @@ const runOne = async (opts) => {
       continue
     }
 
-    const ranking = getRanking(item)
+    const ranking = get_ranking(item)
     inserts.push({
       pid: player_row.pid,
       pos: params.pos,
@@ -70,13 +80,11 @@ const runOne = async (opts) => {
       week,
 
       adp: 0,
-      ppr: constants.scoring[opts.type],
-      sf: opts.pos === 'OP' ? 1 : 0,
-      dynasty: 0,
-      rookie: 0,
-      sourceid: constants.sources.FANTASYPROS,
-      type: constants.rankings[opts.pos],
-
+      source_id: 'FANTASYPROS',
+      ranking_type: format_ranking_type({
+        fantasypros_scoring_type,
+        fantasypros_position_type
+      }),
       timestamp,
       ...ranking
     })
@@ -87,26 +95,46 @@ const runOne = async (opts) => {
     log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`)
   )
 
-  if (argv.dry) {
+  if (dry_run) {
     log(`${inserts.length} rankings`)
     log(inserts[0])
     return
   }
 
   log(`Inserting ${inserts.length} rankings into database`)
-  await db('rankings').insert(inserts)
+  await db('player_rankings').insert(inserts)
 }
 
-const run = async () => {
+const import_fantasypros_weekly_rankings = async ({
+  year,
+  week,
+  dry_run = false
+} = {}) => {
   if (week < 1 || week > constants.season.nflFinalWeek) {
     return
   }
 
-  const types = ['STD', 'PPR', 'HALF']
-  const positions = ['QB', 'RB', 'WR', 'TE', 'FLX', 'OP', 'K', 'DST']
-  for (const type of types) {
-    for (const pos of positions) {
-      await runOne({ type, pos })
+  const fantasypros_scoring_types = ['STD', 'PPR', 'HALF']
+  const fantasypros_position_types = [
+    'QB',
+    'RB',
+    'WR',
+    'TE',
+    'FLX',
+    'OP',
+    'K',
+    'DST'
+  ]
+
+  for (const fantasypros_scoring_type of fantasypros_scoring_types) {
+    for (const fantasypros_position_type of fantasypros_position_types) {
+      await import_individual_fantasypros_weekly_rankings({
+        fantasypros_scoring_type,
+        fantasypros_position_type,
+        year,
+        week,
+        dry_run
+      })
       await wait(2000)
     }
   }
@@ -115,7 +143,9 @@ const run = async () => {
 const main = async () => {
   let error
   try {
-    await run()
+    const year = argv.year ? argv.year : constants.season.year
+    const week = argv.week ? argv.week : constants.season.week
+    await import_fantasypros_weekly_rankings({ year, week, dry_run: argv.dry })
   } catch (err) {
     error = err
     console.log(error)
@@ -133,4 +163,4 @@ if (isMain(import.meta.url)) {
   main()
 }
 
-export default run
+export default import_fantasypros_weekly_rankings

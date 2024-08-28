@@ -85,8 +85,8 @@ const calculate_points_added_baseline_season = async ({ league }) => {
       }
     }
 
-    for (const prnk in sums) {
-      const item = sums[prnk]
+    for (const position_rank in sums) {
+      const item = sums[position_rank]
       item.value = item.value / years
       item.pts_added = item.pts_added / years
       item.points = item.points / years

@@ -1,39 +1,44 @@
-import fetch from 'node-fetch'
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#libs-shared'
-import { isMain, getPlayer, wait, report_job } from '#libs-server'
-import config from '#config'
+import { isMain, getPlayer, wait, report_job, fantasypros } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
-const log = debug('import:rankings:dynasty')
-debug.enable('import:rankings:dynasty,get-player')
+const log = debug('import-fantasypros-dynasty')
+debug.enable('import-fantasypros-dynasty,get-player,fantasypros')
 
 const timestamp = Math.round(Date.now() / 1000)
-const year = argv.year ? argv.year : constants.season.year
-const getURL = (opts) =>
-  `https://api.fantasypros.com/v2/json/nfl/${year}/consensus-rankings?type=dynasty&scoring=PPR&position=${opts.type}&week=0&experts=available`
 
-const getRanking = (item) => ({
-  min: parseInt(item.rank_min, 10),
-  max: parseInt(item.rank_max, 10),
-  avg: parseFloat(item.rank_ave),
-  std: parseFloat(item.rank_std),
-  ornk: parseInt(item.rank_ecr, 10),
-  prnk: parseInt(item.pos_rank.replace(/\D/g, ''), 10)
+const get_ranking = (item) => ({
+  min: Number(item.rank_min),
+  max: Number(item.rank_max),
+  avg: Number(item.rank_ave),
+  std: Number(item.rank_std),
+  overall_rank: Number(item.rank_ecr),
+  position_rank: Number(item.pos_rank.replace(/\D/g, ''))
 })
 
-const runOne = async (opts) => {
-  const url = getURL(opts)
-  const data = await fetch(url, {
-    headers: {
-      'x-api-key': config.fantasypros
-    }
-  }).then((res) => res.json())
+const format_ranking_type = ({ fantasypros_position_type, superflex }) => {
+  const sf = superflex ? 'SUPERFLEX_' : ''
+  return `PPR_${sf}DYNASTY`
+}
+
+const import_individual_fantasypros_dynasty_rankings = async ({
+  year,
+  fantasypros_position_type,
+  superflex,
+  dry_run = false
+}) => {
+  const data = await fantasypros.get_fantasypros_rankings({
+    year,
+    fantasypros_scoring_type: 'PPR',
+    fantasypros_position_type,
+    dynasty: true
+  })
 
   if (!data || !data.players) {
     throw new Error('failed to fetch data')
@@ -61,7 +66,7 @@ const runOne = async (opts) => {
       continue
     }
 
-    const ranking = getRanking(item)
+    const ranking = get_ranking(item)
     inserts.push({
       pid: player_row.pid,
       pos: params.pos,
@@ -69,13 +74,11 @@ const runOne = async (opts) => {
       week: 0,
 
       adp: 0,
-      ppr: constants.scoring.PPR,
-      sf: opts.sf,
-      dynasty: 1,
-      rookie: 0,
-      sourceid: constants.sources.FANTASYPROS,
-      type: constants.rankings.OP,
-
+      source_id: 'FANTASYPROS',
+      ranking_type: format_ranking_type({
+        fantasypros_position_type,
+        superflex
+      }),
       timestamp,
       ...ranking
     })
@@ -86,30 +89,37 @@ const runOne = async (opts) => {
     log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`)
   )
 
-  if (argv.dry) {
+  if (dry_run) {
     log(`${inserts.length} rankings`)
     log(inserts[0])
     return
   }
 
   log(`Inserting ${inserts.length} rankings into database`)
-  await db('rankings').insert(inserts)
+  await db('player_rankings').insert(inserts)
 }
 
-const run = async () => {
-  const types = [
+const import_fantasypros_dynasty_rankings = async ({
+  year,
+  dry_run = false
+} = {}) => {
+  const fantasypros_position_types = [
     {
-      type: 'ALL',
-      sf: 0
+      fantasypros_position_type: 'ALL',
+      superflex: false
     },
     {
-      type: 'OP',
-      sf: 1
+      fantasypros_position_type: 'OP',
+      superflex: true
     }
   ]
 
-  for (const type of types) {
-    await runOne(type)
+  for (const item of fantasypros_position_types) {
+    await import_individual_fantasypros_dynasty_rankings({
+      year,
+      ...item,
+      dry_run
+    })
     await wait(2000)
   }
 }
@@ -117,7 +127,8 @@ const run = async () => {
 const main = async () => {
   let error
   try {
-    await run()
+    const year = argv.year ? argv.year : constants.season.year
+    await import_fantasypros_dynasty_rankings({ year, dry_run: argv.dry })
   } catch (err) {
     error = err
     console.log(error)
@@ -135,4 +146,4 @@ if (isMain(import.meta.url)) {
   main()
 }
 
-export default run
+export default import_fantasypros_dynasty_rankings

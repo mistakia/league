@@ -83,6 +83,8 @@ export {
   data_view_cache
 } from './redis_adapter.mjs'
 export * as pff from './pff.mjs'
+export * as sleeper from './sleeper.mjs'
+export * as fantasypros from './fantasypros.mjs'
 
 export const getChartedPlayByPlayQuery = (db) =>
   db('nfl_plays')
