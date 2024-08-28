@@ -98,7 +98,6 @@ const import_single_fantasypros_draft_rankings = async ({
         dynasty: false,
         rookie: false
       }),
-      timestamp,
       ...ranking
     })
   }
@@ -114,8 +113,16 @@ const import_single_fantasypros_draft_rankings = async ({
     return
   }
 
-  log(`Inserting ${inserts.length} rankings into database`)
-  await db('player_rankings').insert(inserts)
+  if (inserts.length) {
+    log(`Inserting ${inserts.length} rankings into database`)
+    await db('player_rankings_index')
+      .insert(inserts)
+      .onConflict(['year', 'week', 'source_id', 'ranking_type', 'pid'])
+      .merge()
+    await db('player_rankings').insert(
+      inserts.map((i) => ({ ...i, timestamp }))
+    )
+  }
 }
 
 const import_fantasypros_draft_rankings_for_year = async ({
