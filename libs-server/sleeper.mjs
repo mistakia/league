@@ -34,7 +34,7 @@ export const get_sleeper_projections = async ({
   log(
     `fetching sleeper projections for year: ${year}, positions: ${positions.join(', ')}`
   )
-  const url = `${sleeper_config.api_url}/projections/nfl/${year}?season_type=regular${positions.map((p) => `positions[]=${p}`).join('&')}&order_by=${order_by}`
+  const url = `${sleeper_config.api_url}/projections/nfl/${year}?season_type=regular&${positions.map((p) => `positions[]=${p}`).join('&')}&order_by=${order_by}`
   const res = await fetch(url)
   const data = await res.json()
 
