@@ -81,7 +81,6 @@ const import_individual_fantasypros_weekly_rankings = async ({
       year,
       week,
 
-      adp: 0,
       source_id: 'FANTASYPROS',
       ranking_type: format_ranking_type({
         fantasypros_scoring_type,
