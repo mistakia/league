@@ -173,12 +173,6 @@ export const nfl_player_status_descriptions = {
   [player_nfl_injury_status.PROBABLE]: 'Probable'
 }
 
-export const scoring = {
-  STD: 1,
-  HALF: 2,
-  PPR: 3
-}
-
 const getAvailableYears = () => {
   const arr = []
   for (let i = season.year; i >= 2000; i--) {
@@ -1338,7 +1332,8 @@ export const sources = {
   GAMBET_DC: 24,
   BETRIVERS_MD: 25,
   FANTASYLIFE_DWAIN_MCFARLAND: 26,
-  FANTASYLIFE: 27
+  FANTASYLIFE: 27,
+  SLEEPER: 28
 }
 
 export const source_keys = {}
@@ -1375,18 +1370,8 @@ export const sourcesTitle = {
   24: 'Gambet (DC)',
   25: 'BetRivers (MD)',
   26: 'Fantasy Life (Dwain McFarland)',
-  27: 'Fantasy Life'
-}
-
-export const rankings = {
-  QB: 1,
-  RB: 2,
-  WR: 3,
-  TE: 4,
-  K: 5,
-  DST: 6,
-  FLX: 7,
-  OP: 8
+  27: 'Fantasy Life',
+  28: 'Sleeper'
 }
 
 export const seas_types = ['PRE', 'REG', 'POST']

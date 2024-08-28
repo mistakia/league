@@ -84,7 +84,7 @@ if (isMain(import.meta.url)) {
             pid: player.pid,
             pts_added: player.pts_added.toFixed(2),
             points: player.points.toFixed(2),
-            prnk: player.prnk,
+            position_rank: player.position_rank,
             value: player.value,
             pos: player.pos
           },

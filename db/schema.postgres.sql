@@ -110,7 +110,6 @@ DROP INDEX IF EXISTS public.idx_24995_tid;
 DROP INDEX IF EXISTS public.idx_24995_teamid;
 DROP INDEX IF EXISTS public.idx_24990_sourceid;
 DROP INDEX IF EXISTS public.idx_24990_pid;
-DROP INDEX IF EXISTS public.idx_24987_ranking;
 DROP INDEX IF EXISTS public.idx_24981_prop;
 DROP INDEX IF EXISTS public.idx_24981_hits_soft;
 DROP INDEX IF EXISTS public.idx_24974_prop;
@@ -234,6 +233,7 @@ ALTER TABLE IF EXISTS ONLY public.users_teams DROP CONSTRAINT IF EXISTS users_te
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_key;
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_hash_key;
 ALTER TABLE IF EXISTS ONLY public.transactions DROP CONSTRAINT IF EXISTS transactions_pkey;
+ALTER TABLE IF EXISTS ONLY public.teams DROP CONSTRAINT IF EXISTS teams_pkey;
 ALTER TABLE IF EXISTS ONLY public.seasons DROP CONSTRAINT IF EXISTS seasons_pkey;
 ALTER TABLE IF EXISTS ONLY public.rosters_players DROP CONSTRAINT IF EXISTS rosters_players_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pkey;
@@ -316,7 +316,6 @@ DROP SEQUENCE IF EXISTS public.rosters_uid_seq;
 DROP TABLE IF EXISTS public.rosters_players;
 DROP TABLE IF EXISTS public.rosters;
 DROP TABLE IF EXISTS public.ros_projections;
-DROP TABLE IF EXISTS public.rankings;
 DROP SEQUENCE IF EXISTS public.props_index_prop_id_seq;
 DROP SEQUENCE IF EXISTS public.props_index_new_prop_id_seq;
 DROP TABLE IF EXISTS public.props_index_new;
@@ -339,6 +338,7 @@ DROP TABLE IF EXISTS public.playoffs;
 DROP TABLE IF EXISTS public.players_status;
 DROP TABLE IF EXISTS public.player_snaps_game;
 DROP TABLE IF EXISTS public.player_seasonlogs;
+DROP TABLE IF EXISTS public.player_rankings;
 DROP TABLE IF EXISTS public.player_gamelogs;
 DROP TABLE IF EXISTS public.player_contracts;
 DROP SEQUENCE IF EXISTS public.player_changelog_uid_seq;
@@ -405,6 +405,8 @@ DROP FUNCTION IF EXISTS public.player_name_search_vector_update();
 DROP TYPE IF EXISTS public.wager_status;
 DROP TYPE IF EXISTS public.time_type;
 DROP TYPE IF EXISTS public.read_thrown_type;
+DROP TYPE IF EXISTS public.rankings_source_id;
+DROP TYPE IF EXISTS public.ranking_type;
 DROP TYPE IF EXISTS public.qb_position;
 DROP TYPE IF EXISTS public.play_direction;
 DROP TYPE IF EXISTS public.placed_wagers_wager_type;
@@ -526,6 +528,41 @@ CREATE TYPE public.qb_position AS ENUM (
     'UNDER_CENTER',
     'SHOTGUN',
     'PISTOL'
+);
+
+
+--
+-- Name: ranking_type; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.ranking_type AS ENUM (
+    'STANDARD_REDRAFT',
+    'PPR_REDRAFT',
+    'STANDARD_SUPERFLEX_REDRAFT',
+    'PPR_SUPERFLEX_REDRAFT',
+    'STANDARD_DYNASTY',
+    'PPR_DYNASTY',
+    'STANDARD_SUPERFLEX_DYNASTY',
+    'PPR_SUPERFLEX_DYNASTY',
+    'STANDARD_ROOKIE',
+    'PPR_ROOKIE',
+    'STANDARD_SUPERFLEX_ROOKIE',
+    'PPR_SUPERFLEX_ROOKIE',
+    'HALF_PPR_REDRAFT',
+    'HALF_PPR_SUPERFLEX_REDRAFT',
+    'HALF_PPR_DYNASTY',
+    'HALF_PPR_SUPERFLEX_DYNASTY',
+    'HALF_PPR_ROOKIE',
+    'HALF_PPR_SUPERFLEX_ROOKIE'
+);
+
+
+--
+-- Name: rankings_source_id; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.rankings_source_id AS ENUM (
+    'FANTASYPROS'
 );
 
 
@@ -2950,7 +2987,7 @@ CREATE TABLE public.pff_player_seasonlogs (
     team_slug character varying(50),
     meets_snap_minimum boolean,
     kickoff_kicker numeric(4,1),
-    status character(1),
+    status character(10),
     pass numeric(4,1),
     receiving_snaps smallint,
     team_name character varying(3),
@@ -3670,6 +3707,27 @@ CREATE TABLE public.player_gamelogs (
 
 
 --
+-- Name: player_rankings; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_rankings (
+    pid character varying(25),
+    pos character varying(4) NOT NULL,
+    week smallint NOT NULL,
+    year smallint,
+    min integer,
+    max integer,
+    avg numeric(5,2),
+    std numeric(5,2),
+    overall_rank integer,
+    position_rank integer,
+    "timestamp" integer NOT NULL,
+    source_id public.rankings_source_id,
+    ranking_type public.ranking_type NOT NULL
+);
+
+
+--
 -- Name: player_seasonlogs; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -4304,32 +4362,6 @@ ALTER SEQUENCE public.props_index_prop_id_seq OWNED BY public.props_index.prop_i
 
 
 --
--- Name: rankings; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.rankings (
-    pid character varying(25),
-    pos character varying(4) NOT NULL,
-    week smallint NOT NULL,
-    year smallint,
-    min integer,
-    max integer,
-    avg numeric(5,2),
-    std numeric(5,2),
-    ornk integer,
-    prnk integer,
-    type integer NOT NULL,
-    adp smallint NOT NULL,
-    ppr integer NOT NULL,
-    sf boolean NOT NULL,
-    dynasty boolean NOT NULL,
-    rookie smallint NOT NULL,
-    sourceid integer NOT NULL,
-    "timestamp" integer NOT NULL
-);
-
-
---
 -- Name: ros_projections; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -4583,7 +4615,8 @@ CREATE TABLE public.seasons (
     ext2 integer DEFAULT 10,
     ext3 integer DEFAULT 20,
     ext4 integer DEFAULT 35,
-    season_due_amount bigint
+    season_due_amount bigint,
+    free_agency_live_auction_end bigint
 );
 
 
@@ -5338,6 +5371,14 @@ ALTER TABLE ONLY public.rosters_players
 
 ALTER TABLE ONLY public.seasons
     ADD CONSTRAINT seasons_pkey PRIMARY KEY (lid, year);
+
+
+--
+-- Name: teams teams_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.teams
+    ADD CONSTRAINT teams_pkey PRIMARY KEY (uid, year);
 
 
 --
@@ -6204,13 +6245,6 @@ CREATE INDEX idx_24981_hits_soft ON public.props_index_new USING btree (hits_sof
 --
 
 CREATE UNIQUE INDEX idx_24981_prop ON public.props_index_new USING btree (sourceid, pid, esbid, prop_type, ln, time_type);
-
-
---
--- Name: idx_24987_ranking; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_24987_ranking ON public.rankings USING btree (pid, sourceid, type, adp, ppr, sf, dynasty, rookie, "timestamp", week, year);
 
 
 --
