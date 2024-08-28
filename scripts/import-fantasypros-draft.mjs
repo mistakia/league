@@ -22,6 +22,19 @@ const getRanking = (item) => ({
   position_rank: Number(item.pos_rank.replace(/\D/g, ''))
 })
 
+const format_scoring_type = (fantasypros_scoring_type) => {
+  switch (fantasypros_scoring_type) {
+    case 'HALF':
+      return 'HALF_PPR'
+    case 'STD':
+      return 'STANDARD'
+    case 'PPR':
+      return 'PPR'
+    default:
+      throw new Error(`Unknown scoring type: ${fantasypros_scoring_type}`)
+  }
+}
+
 const format_ranking_type = ({
   fantasypros_scoring_type,
   fantasypros_position_type,
@@ -29,8 +42,7 @@ const format_ranking_type = ({
   dynasty,
   rookie
 }) => {
-  const scoring_type =
-    fantasypros_scoring_type === 'HALF' ? 'HALF_PPR' : fantasypros_scoring_type
+  const scoring_type = format_scoring_type(fantasypros_scoring_type)
   const sf = superflex ? 'SUPERFLEX_' : ''
   let type = 'REDRAFT'
 
