@@ -1,11 +1,8 @@
-import fetch from 'node-fetch'
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import csv from 'csv-parser'
 
-import config from '#config'
-import { getPlayer, isMain, report_job } from '#libs-server'
+import { getPlayer, isMain, report_job, four_for_four } from '#libs-server'
 import { constants } from '#libs-shared'
 import db from '#db'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -13,65 +10,51 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 const log = debug('import:projections')
 debug.enable('import:projections,get-player')
 
-const timestamp = new Date()
+const timestamp = Math.floor(Date.now() / 1000)
 const argv = yargs(hideBin(process.argv)).argv
 
-const getProjection = (stats) => ({
-  py: parseFloat(stats['Pass Yds']),
-  pa: parseFloat(stats['Pass Att']),
-  pc: stats.Comp
-    ? parseFloat(stats.Comp)
-    : parseFloat(stats['Pass Comp']) || null,
-  tdp: parseFloat(stats['Pass TD']),
-  ints: parseFloat(stats.INT),
+const get_projection = (stats) => ({
+  py: Number(stats['Pass Yds']) || null,
+  pa: Number(stats['Pass Att']) || null,
+  pc: stats.Comp ? Number(stats.Comp) : Number(stats['Pass Comp']) || null,
+  tdp: Number(stats['Pass TD']) || null,
+  ints: Number(stats.INT) || null,
 
-  ra: parseFloat(stats['Rush Att']),
-  ry: parseFloat(stats['Rush Yds']),
-  tdr: parseFloat(stats['Rush TD']),
+  ra: Number(stats['Rush Att']) || null,
+  ry: Number(stats['Rush Yds']) || null,
+  tdr: Number(stats['Rush TD']) || null,
 
-  fuml: parseFloat(stats.Fum),
+  fuml: Number(stats.Fum) || null,
 
-  rec: parseFloat(stats.Rec),
-  recy: parseFloat(stats['Rec Yds']),
-  tdrec: parseFloat(stats['Rec TD']),
+  rec: Number(stats.Rec) || null,
+  recy: Number(stats['Rec Yds']) || null,
+  tdrec: Number(stats['Rec TD']) || null,
 
-  fgm: parseFloat(stats.FG),
-  xpm: parseFloat(stats.XP)
+  fgm: Number(stats.FG) || null,
+  xpm: Number(stats.XP) || null
 })
 
-const run = async ({ url, is_regular_season_projection = false }) => {
+const run = async ({
+  is_regular_season_projection = false,
+  dry_run = false
+}) => {
   // do not pull in any projections after the season has ended
   if (constants.season.week > constants.season.nflFinalWeek) {
     return
   }
 
-  if (!url) {
-    throw new Error('No URL provided')
-  }
+  const year = constants.season.year
+  const week = is_regular_season_projection ? 0 : constants.season.week
 
-  const data = await fetch(url, {
-    headers: {
-      cookie: config.token_4for4
-    }
-  }).then(
-    (res) =>
-      new Promise((resolve, reject) => {
-        const results = []
-        res.body
-          .pipe(csv())
-          .on('data', (data) => results.push(data))
-          .on('error', (error) => resolve(error))
-          .on('end', () => resolve(results))
-      })
-  )
+  const data = await four_for_four.get_4for4_projections({
+    year,
+    week,
+    is_regular_season_projection,
+    ignore_cache: true
+  })
 
   const inserts = []
   const missing = []
-
-  const year = constants.season.year
-  const week = is_regular_season_projection
-    ? 0
-    : Number(data[0].Week) || constants.season.week
 
   for (const item of data) {
     const params = {
@@ -93,7 +76,7 @@ const run = async ({ url, is_regular_season_projection = false }) => {
       continue
     }
 
-    const proj = getProjection(item)
+    const proj = get_projection(item)
     inserts.push({
       pid: player_row.pid,
       year,
@@ -108,7 +91,7 @@ const run = async ({ url, is_regular_season_projection = false }) => {
     log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`)
   )
 
-  if (argv.dry) {
+  if (dry_run) {
     log(`${inserts.length} projections`)
     log(inserts[0])
     return
@@ -138,7 +121,7 @@ const run = async ({ url, is_regular_season_projection = false }) => {
 const main = async () => {
   let error
   try {
-    await run({ url: argv.url, is_regular_season_projection: argv.season })
+    await run({ is_regular_season_projection: argv.season, dry_run: argv.dry })
   } catch (err) {
     error = err
     console.log(error)

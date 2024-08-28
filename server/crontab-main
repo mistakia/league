@@ -36,7 +36,7 @@
 0 0 * 1,2,9-12 1,3-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fbg-projections.mjs &>> /var/log/league/import-fbg.log
 # 0 0 * 1,2,9-12 1,3-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-ffn-projections.mjs &>> /var/log/league/import-ffn.log
 0 1 * 1,2,9-12 1,3-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-numberfire-projections.mjs &>> /var/log/league/import-numberfire.log
-0 0 * 1,2,9-12 1,3-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-4for4-projections.mjs --url https://www.4for4.com/projections_weekly_csv/60444 &>> /var/log/league/import-4for4.log
+0 0 * 1,2,9-12 1,3-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-4for4-projections.mjs &>> /var/log/league/import-4for4.log
 0 0 * 1,2,9-12 3-7 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fantasylife-projections.mjs --table_id 973420e8-60b1-4e42-9dac-52510825dcc7 &>> /var/log/league/import-fantasylife.log
 
 ## import season projections
@@ -45,7 +45,7 @@
 0 0 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fantasysharks-projections.mjs --season &>> /var/log/league/import-fantasysharks-season.log
 0 0 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-fftoday-projections.mjs --season &>> /var/log/league/import-fftoday-season.log
 0 0 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-nfl-projections.mjs --season &>> /var/log/league/import-nfl-season.log
-0 0 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-4for4-projections.mjs --season --url https://www.4for4.com/projections_csv/60444 &>> /var/log/league/import-4for4-season.log
+0 0 * 6-8 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-4for4-projections.mjs --season &>> /var/log/league/import-4for4-season.log
 
 ## process projections & calculate projected points added, market salary
 30 * * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-projections.mjs &>> /var/log/league/process-projections.log
