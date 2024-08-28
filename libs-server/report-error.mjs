@@ -17,7 +17,7 @@ export default async function report_error({ job_type, error, message }) {
   let alert_message = ''
 
   if (job_type) {
-    alert_message = `**[${job_title_by_id[job_type]}]** `
+    alert_message = `**${job_title_by_id[job_type]}** `
   }
 
   alert_message += `${message}`
