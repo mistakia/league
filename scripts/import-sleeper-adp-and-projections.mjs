@@ -196,7 +196,7 @@ const main = async () => {
   }
 
   await report_job({
-    job_type: job_types.EXAMPLE,
+    job_type: job_types.IMPORT_SLEEPER_ADP_AND_PROJECTIONS,
     error
   })
 
