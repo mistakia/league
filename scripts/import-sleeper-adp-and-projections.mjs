@@ -171,10 +171,6 @@ const import_sleeper_adp_and_projections = async ({
 
   // Second iteration: match remaining players by name, team, pos
   for (const projection of unmatched_projections) {
-    if (matched_sleeper_ids.has(projection.player_id)) {
-      continue
-    }
-
     const player_params = {
       name: `${projection?.player?.first_name} ${projection?.player?.last_name}`,
       pos: projection?.player?.position,
@@ -193,7 +189,7 @@ const import_sleeper_adp_and_projections = async ({
     if (player_row) {
       if (
         player_row.sleeper_id &&
-        matched_sleeper_ids.has(player_row.sleeper_id)
+        matched_sleeper_ids.has(Number(player_row.sleeper_id))
       ) {
         log(`Player ${player_row.sleeper_id} already matched`)
         continue
