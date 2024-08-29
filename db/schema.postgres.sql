@@ -33,6 +33,7 @@ DROP INDEX IF EXISTS public.idx_rosters_players_year_week_lid_pid;
 DROP INDEX IF EXISTS public.idx_prop_markets_index_market_time_year;
 DROP INDEX IF EXISTS public.idx_prop_market_selections_index_composite;
 DROP INDEX IF EXISTS public.idx_player_seasonlogs_year_seas_type_career_year_pid;
+DROP INDEX IF EXISTS public.idx_player_salaries_source_id_pid_salary_esbid;
 DROP INDEX IF EXISTS public.idx_player_pid_pos;
 DROP INDEX IF EXISTS public.idx_player_pff_id;
 DROP INDEX IF EXISTS public.idx_player_gamelogs_esbid_tm;
@@ -420,6 +421,17 @@ DROP TYPE IF EXISTS public.nfl_games_surf;
 DROP TYPE IF EXISTS public.nfl_games_roof;
 DROP TYPE IF EXISTS public.market_source_id;
 DROP TYPE IF EXISTS public.hash_position;
+DROP TYPE IF EXISTS public.dfs_source_id;
+--
+-- Name: dfs_source_id; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.dfs_source_id AS ENUM (
+    'DRAFTKINGS',
+    'FANDUEL'
+);
+
+
 --
 -- Name: hash_position; Type: TYPE; Schema: public; Owner: -
 --
@@ -3764,7 +3776,8 @@ CREATE TABLE public.player_salaries (
     source_player_display_name character varying(100),
     source_contest_id character varying(100) NOT NULL,
     salary integer,
-    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    source_id public.dfs_source_id NOT NULL
 );
 
 
@@ -6841,6 +6854,13 @@ CREATE INDEX idx_player_pff_id ON public.player USING btree (pff_id);
 --
 
 CREATE INDEX idx_player_pid_pos ON public.player USING btree (pid, pos);
+
+
+--
+-- Name: idx_player_salaries_source_id_pid_salary_esbid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_salaries_source_id_pid_salary_esbid ON public.player_salaries USING btree (source_id, pid, salary, esbid);
 
 
 --
