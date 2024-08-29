@@ -304,6 +304,39 @@ export default {
     table_name: 'player',
     column_name: 'otc_id'
   },
+  player_draftkings_id: {
+    table_name: 'player',
+    column_name: 'draftkings_id'
+  },
+  player_pff_id: {
+    table_name: 'player',
+    column_name: 'pff_id'
+  },
+  player_mfl_id: {
+    table_name: 'player',
+    column_name: 'mfl_id'
+  },
+  player_fleaflicker_id: {
+    table_name: 'player',
+    column_name: 'fleaflicker_id'
+  },
+  player_cbs_id: {
+    table_name: 'player',
+    column_name: 'cbs_id'
+  },
+  player_cfbref_id: {
+    table_name: 'player',
+    column_name: 'cfbref_id'
+  },
+  player_twitter_username: {
+    table_name: 'player',
+    column_name: 'twitter_username'
+  },
+  player_swish_id: {
+    table_name: 'player',
+    column_name: 'swish_id'
+  },
+
   player_contract_year_signed: {
     table_name: 'player',
     column_name: 'contract_year_signed'
