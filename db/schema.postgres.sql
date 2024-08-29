@@ -22,9 +22,1049 @@ DROP TRIGGER IF EXISTS update_config_modtime ON public.config;
 DROP TRIGGER IF EXISTS player_name_search_vector_update ON public.player;
 DROP INDEX IF EXISTS public.player_name_search_idx;
 DROP INDEX IF EXISTS public.nfl_year_week_timestamp_year_week_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_seas_type_week_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_seas_type_week_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_seas_type_week_play_type_player_fu_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_seas_type_week_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_seas_type_week_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_seas_type_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_seas_type_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_seas_type_play_type_player_fuml_pi_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_seas_type_play_type_bc_pid_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_seas_type_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_play_type_seas_type_trg_pid_off_es_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2024_year_esbid_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_ydl_100_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_tackle_assist_4_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_tackle_assist_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_tackle_assist_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_solo_tackle_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_solo_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_solo_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_series_seq_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_seas_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_qtr_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_play_type_seas_type_trg_pid_off_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_play_action_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2024_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_off_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_dwn_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_catchable_ball_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_assisted_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_assisted_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_year_seas_type_week_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_year_seas_type_week_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_year_seas_type_week_play_type_player_fu_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_year_seas_type_week_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_year_seas_type_week_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_year_seas_type_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_year_seas_type_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_year_seas_type_play_type_player_fuml_pi_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_year_seas_type_play_type_bc_pid_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_year_seas_type_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_year_play_type_seas_type_trg_pid_off_es_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2023_year_esbid_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_year_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_ydl_100_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_tackle_assist_4_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_tackle_assist_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_tackle_assist_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_solo_tackle_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_solo_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_solo_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_series_seq_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_seas_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_qtr_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_play_type_seas_type_trg_pid_off_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_play_action_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2023_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_off_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_dwn_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_catchable_ball_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_assisted_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_assisted_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_year_seas_type_week_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_year_seas_type_week_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_year_seas_type_week_play_type_player_fu_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_year_seas_type_week_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_year_seas_type_week_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_year_seas_type_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_year_seas_type_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_year_seas_type_play_type_player_fuml_pi_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_year_seas_type_play_type_bc_pid_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_year_seas_type_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_year_play_type_seas_type_trg_pid_off_es_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2022_year_esbid_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_year_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_ydl_100_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_tackle_assist_4_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_tackle_assist_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_tackle_assist_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_solo_tackle_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_solo_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_solo_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_series_seq_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_seas_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_qtr_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_play_type_seas_type_trg_pid_off_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_play_action_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2022_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_off_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_dwn_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_catchable_ball_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_assisted_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_assisted_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_year_seas_type_week_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_year_seas_type_week_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_year_seas_type_week_play_type_player_fu_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_year_seas_type_week_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_year_seas_type_week_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_year_seas_type_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_year_seas_type_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_year_seas_type_play_type_player_fuml_pi_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_year_seas_type_play_type_bc_pid_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_year_seas_type_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_year_play_type_seas_type_trg_pid_off_es_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2021_year_esbid_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_year_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_ydl_100_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_tackle_assist_4_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_tackle_assist_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_tackle_assist_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_solo_tackle_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_solo_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_solo_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_series_seq_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_seas_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_qtr_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_play_type_seas_type_trg_pid_off_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_play_action_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2021_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_off_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_dwn_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_catchable_ball_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_assisted_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_assisted_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_year_seas_type_week_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_year_seas_type_week_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_year_seas_type_week_play_type_player_fu_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_year_seas_type_week_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_year_seas_type_week_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_year_seas_type_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_year_seas_type_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_year_seas_type_play_type_player_fuml_pi_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_year_seas_type_play_type_bc_pid_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_year_seas_type_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_year_play_type_seas_type_trg_pid_off_es_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2020_year_esbid_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_year_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_ydl_100_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_tackle_assist_4_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_tackle_assist_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_tackle_assist_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_solo_tackle_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_solo_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_solo_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_series_seq_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_seas_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_qtr_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_play_type_seas_type_trg_pid_off_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_play_action_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2020_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_off_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_dwn_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_catchable_ball_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_assisted_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_assisted_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_year_seas_type_week_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_year_seas_type_week_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_year_seas_type_week_play_type_player_fu_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_year_seas_type_week_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_year_seas_type_week_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_year_seas_type_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_year_seas_type_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_year_seas_type_play_type_player_fuml_pi_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_year_seas_type_play_type_bc_pid_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_year_seas_type_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_year_play_type_seas_type_trg_pid_off_es_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2019_year_esbid_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_year_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_ydl_100_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_tackle_assist_4_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_tackle_assist_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_tackle_assist_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_solo_tackle_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_solo_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_solo_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_series_seq_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_seas_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_qtr_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_play_type_seas_type_trg_pid_off_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_play_action_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2019_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_off_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_dwn_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_catchable_ball_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_assisted_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_assisted_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_year_seas_type_week_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_year_seas_type_week_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_year_seas_type_week_play_type_player_fu_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_year_seas_type_week_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_year_seas_type_week_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_year_seas_type_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_year_seas_type_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_year_seas_type_play_type_player_fuml_pi_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_year_seas_type_play_type_bc_pid_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_year_seas_type_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_year_play_type_seas_type_trg_pid_off_es_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2018_year_esbid_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_year_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_ydl_100_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_tackle_assist_4_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_tackle_assist_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_tackle_assist_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_solo_tackle_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_solo_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_solo_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_series_seq_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_seas_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_qtr_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_play_type_seas_type_trg_pid_off_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_play_action_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2018_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_off_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_dwn_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_catchable_ball_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_assisted_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_assisted_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_year_seas_type_week_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_year_seas_type_week_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_year_seas_type_week_play_type_player_fu_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_year_seas_type_week_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_year_seas_type_week_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_year_seas_type_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_year_seas_type_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_year_seas_type_play_type_player_fuml_pi_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_year_seas_type_play_type_bc_pid_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_year_seas_type_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_year_play_type_seas_type_trg_pid_off_es_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2017_year_esbid_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_year_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_ydl_100_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_tackle_assist_4_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_tackle_assist_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_tackle_assist_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_solo_tackle_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_solo_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_solo_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_series_seq_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_seas_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_qtr_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_play_type_seas_type_trg_pid_off_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_play_action_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2017_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_off_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_dwn_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_catchable_ball_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_assisted_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_assisted_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_year_seas_type_week_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_year_seas_type_week_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_year_seas_type_week_play_type_player_fu_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_year_seas_type_week_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_year_seas_type_week_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_year_seas_type_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_year_seas_type_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_year_seas_type_play_type_player_fuml_pi_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_year_seas_type_play_type_bc_pid_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_year_seas_type_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_year_play_type_seas_type_trg_pid_off_es_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2016_year_esbid_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_year_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_ydl_100_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_tackle_assist_4_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_tackle_assist_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_tackle_assist_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_solo_tackle_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_solo_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_solo_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_series_seq_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_seas_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_qtr_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_play_type_seas_type_trg_pid_off_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_play_action_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2016_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_off_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_dwn_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_catchable_ball_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_assisted_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_assisted_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_year_seas_type_week_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_year_seas_type_week_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_year_seas_type_week_play_type_player_fu_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_year_seas_type_week_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_year_seas_type_week_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_year_seas_type_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_year_seas_type_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_year_seas_type_play_type_player_fuml_pi_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_year_seas_type_play_type_bc_pid_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_year_seas_type_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_year_play_type_seas_type_trg_pid_off_es_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2015_year_esbid_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_year_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_ydl_100_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_tackle_assist_4_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_tackle_assist_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_tackle_assist_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_solo_tackle_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_solo_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_solo_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_series_seq_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_seas_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_qtr_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_play_type_seas_type_trg_pid_off_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_play_action_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2015_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_off_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_dwn_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_catchable_ball_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_assisted_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_assisted_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_year_seas_type_week_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_year_seas_type_week_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_year_seas_type_week_play_type_player_fu_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_year_seas_type_week_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_year_seas_type_week_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_year_seas_type_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_year_seas_type_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_year_seas_type_play_type_player_fuml_pi_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_year_seas_type_play_type_bc_pid_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_year_seas_type_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_year_play_type_seas_type_trg_pid_off_es_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2014_year_esbid_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_year_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_ydl_100_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_tackle_assist_4_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_tackle_assist_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_tackle_assist_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_solo_tackle_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_solo_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_solo_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_series_seq_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_seas_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_qtr_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_play_type_seas_type_trg_pid_off_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_play_action_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2014_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_off_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_dwn_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_catchable_ball_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_assisted_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_assisted_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_year_seas_type_week_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_year_seas_type_week_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_year_seas_type_week_play_type_player_fu_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_year_seas_type_week_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_year_seas_type_week_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_year_seas_type_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_year_seas_type_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_year_seas_type_play_type_player_fuml_pi_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_year_seas_type_play_type_bc_pid_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_year_seas_type_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_year_play_type_seas_type_trg_pid_off_es_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2013_year_esbid_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_year_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_ydl_100_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_tackle_assist_4_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_tackle_assist_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_tackle_assist_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_solo_tackle_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_solo_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_solo_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_series_seq_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_seas_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_qtr_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_play_type_seas_type_trg_pid_off_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_play_action_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2013_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_off_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_dwn_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_catchable_ball_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_assisted_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_assisted_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_year_seas_type_week_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_year_seas_type_week_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_year_seas_type_week_play_type_player_fu_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_year_seas_type_week_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_year_seas_type_week_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_year_seas_type_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_year_seas_type_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_year_seas_type_play_type_player_fuml_pi_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_year_seas_type_play_type_bc_pid_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_year_seas_type_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_year_play_type_seas_type_trg_pid_off_es_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2012_year_esbid_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_year_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_ydl_100_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_tackle_assist_4_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_tackle_assist_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_tackle_assist_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_solo_tackle_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_solo_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_solo_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_series_seq_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_seas_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_qtr_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_play_type_seas_type_trg_pid_off_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_play_action_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2012_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_off_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_dwn_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_catchable_ball_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_assisted_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_assisted_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_year_seas_type_week_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_year_seas_type_week_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_year_seas_type_week_play_type_player_fu_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_year_seas_type_week_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_year_seas_type_week_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_year_seas_type_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_year_seas_type_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_year_seas_type_play_type_player_fuml_pi_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_year_seas_type_play_type_bc_pid_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_year_seas_type_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_year_play_type_seas_type_trg_pid_off_es_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2011_year_esbid_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_year_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_ydl_100_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_tackle_assist_4_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_tackle_assist_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_tackle_assist_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_solo_tackle_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_solo_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_solo_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_series_seq_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_seas_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_qtr_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_play_type_seas_type_trg_pid_off_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_play_action_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2011_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_off_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_dwn_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_catchable_ball_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_assisted_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_assisted_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_year_seas_type_week_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_year_seas_type_week_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_year_seas_type_week_play_type_player_fu_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_year_seas_type_week_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_year_seas_type_week_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_year_seas_type_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_year_seas_type_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_year_seas_type_play_type_player_fuml_pi_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_year_seas_type_play_type_bc_pid_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_year_seas_type_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_year_play_type_seas_type_trg_pid_off_es_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2010_year_esbid_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_year_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_ydl_100_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_tackle_assist_4_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_tackle_assist_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_tackle_assist_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_solo_tackle_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_solo_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_solo_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_series_seq_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_seas_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_qtr_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_play_type_seas_type_trg_pid_off_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_play_action_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2010_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_off_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_dwn_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_catchable_ball_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_assisted_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_assisted_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_year_seas_type_week_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_year_seas_type_week_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_year_seas_type_week_play_type_player_fu_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_year_seas_type_week_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_year_seas_type_week_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_year_seas_type_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_year_seas_type_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_year_seas_type_play_type_player_fuml_pi_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_year_seas_type_play_type_bc_pid_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_year_seas_type_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_year_play_type_seas_type_trg_pid_off_es_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2009_year_esbid_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_year_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_ydl_100_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_tackle_assist_4_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_tackle_assist_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_tackle_assist_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_solo_tackle_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_solo_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_solo_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_series_seq_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_seas_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_qtr_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_play_type_seas_type_trg_pid_off_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_play_action_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2009_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_off_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_dwn_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_catchable_ball_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_assisted_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_assisted_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_year_seas_type_week_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_year_seas_type_week_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_year_seas_type_week_play_type_player_fu_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_year_seas_type_week_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_year_seas_type_week_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_year_seas_type_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_year_seas_type_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_year_seas_type_play_type_player_fuml_pi_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_year_seas_type_play_type_bc_pid_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_year_seas_type_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_year_play_type_seas_type_trg_pid_off_es_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2008_year_esbid_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_year_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_ydl_100_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_tackle_assist_4_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_tackle_assist_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_tackle_assist_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_solo_tackle_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_solo_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_solo_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_series_seq_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_seas_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_qtr_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_play_type_seas_type_trg_pid_off_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_play_action_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2008_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_off_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_dwn_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_catchable_ball_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_assisted_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_assisted_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_year_seas_type_week_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_year_seas_type_week_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_year_seas_type_week_play_type_player_fu_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_year_seas_type_week_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_year_seas_type_week_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_year_seas_type_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_year_seas_type_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_year_seas_type_play_type_player_fuml_pi_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_year_seas_type_play_type_bc_pid_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_year_seas_type_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_year_play_type_seas_type_trg_pid_off_es_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2007_year_esbid_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_year_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_ydl_100_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_tackle_assist_4_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_tackle_assist_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_tackle_assist_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_solo_tackle_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_solo_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_solo_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_series_seq_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_seas_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_qtr_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_play_type_seas_type_trg_pid_off_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_play_action_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2007_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_off_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_dwn_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_catchable_ball_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_assisted_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_assisted_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_year_seas_type_week_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_year_seas_type_week_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_year_seas_type_week_play_type_player_fu_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_year_seas_type_week_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_year_seas_type_week_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_year_seas_type_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_year_seas_type_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_year_seas_type_play_type_player_fuml_pi_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_year_seas_type_play_type_bc_pid_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_year_seas_type_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_year_play_type_seas_type_trg_pid_off_es_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2006_year_esbid_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_year_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_ydl_100_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_tackle_assist_4_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_tackle_assist_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_tackle_assist_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_solo_tackle_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_solo_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_solo_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_series_seq_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_seas_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_qtr_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_play_type_seas_type_trg_pid_off_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_play_action_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2006_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_off_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_dwn_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_catchable_ball_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_assisted_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_assisted_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_year_seas_type_week_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_year_seas_type_week_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_year_seas_type_week_play_type_player_fu_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_year_seas_type_week_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_year_seas_type_week_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_year_seas_type_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_year_seas_type_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_year_seas_type_play_type_player_fuml_pi_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_year_seas_type_play_type_bc_pid_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_year_seas_type_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_year_play_type_seas_type_trg_pid_off_es_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2005_year_esbid_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_year_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_ydl_100_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_tackle_assist_4_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_tackle_assist_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_tackle_assist_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_solo_tackle_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_solo_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_solo_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_series_seq_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_seas_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_qtr_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_play_type_seas_type_trg_pid_off_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_play_action_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2005_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_off_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_dwn_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_catchable_ball_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_assisted_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_assisted_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_year_seas_type_week_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_year_seas_type_week_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_year_seas_type_week_play_type_player_fu_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_year_seas_type_week_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_year_seas_type_week_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_year_seas_type_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_year_seas_type_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_year_seas_type_play_type_player_fuml_pi_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_year_seas_type_play_type_bc_pid_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_year_seas_type_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_year_play_type_seas_type_trg_pid_off_es_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2004_year_esbid_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_year_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_ydl_100_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_tackle_assist_4_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_tackle_assist_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_tackle_assist_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_solo_tackle_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_solo_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_solo_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_series_seq_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_seas_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_qtr_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_play_type_seas_type_trg_pid_off_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_play_action_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2004_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_off_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_dwn_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_catchable_ball_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_assisted_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_assisted_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_year_seas_type_week_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_year_seas_type_week_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_year_seas_type_week_play_type_player_fu_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_year_seas_type_week_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_year_seas_type_week_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_year_seas_type_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_year_seas_type_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_year_seas_type_play_type_player_fuml_pi_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_year_seas_type_play_type_bc_pid_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_year_seas_type_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_year_play_type_seas_type_trg_pid_off_es_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2003_year_esbid_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_year_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_ydl_100_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_tackle_assist_4_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_tackle_assist_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_tackle_assist_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_solo_tackle_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_solo_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_solo_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_series_seq_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_seas_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_qtr_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_play_type_seas_type_trg_pid_off_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_play_action_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2003_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_off_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_dwn_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_catchable_ball_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_assisted_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_assisted_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_year_seas_type_week_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_year_seas_type_week_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_year_seas_type_week_play_type_player_fu_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_year_seas_type_week_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_year_seas_type_week_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_year_seas_type_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_year_seas_type_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_year_seas_type_play_type_player_fuml_pi_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_year_seas_type_play_type_bc_pid_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_year_seas_type_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_year_play_type_seas_type_trg_pid_off_es_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2002_year_esbid_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_year_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_ydl_100_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_tackle_assist_4_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_tackle_assist_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_tackle_assist_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_solo_tackle_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_solo_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_solo_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_series_seq_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_seas_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_qtr_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_play_type_seas_type_trg_pid_off_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_play_action_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2002_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_off_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_dwn_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_catchable_ball_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_assisted_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_assisted_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_year_seas_type_week_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_year_seas_type_week_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_year_seas_type_week_play_type_player_fu_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_year_seas_type_week_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_year_seas_type_week_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_year_seas_type_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_year_seas_type_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_year_seas_type_play_type_player_fuml_pi_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_year_seas_type_play_type_bc_pid_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_year_seas_type_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_year_play_type_seas_type_trg_pid_off_es_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2001_year_esbid_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_year_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_ydl_100_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_tackle_assist_4_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_tackle_assist_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_tackle_assist_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_solo_tackle_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_solo_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_solo_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_series_seq_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_seas_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_qtr_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_play_type_seas_type_trg_pid_off_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_play_action_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2001_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_off_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_dwn_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_catchable_ball_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_assisted_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_assisted_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_year_seas_type_week_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_year_seas_type_week_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_year_seas_type_week_play_type_player_fu_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_year_seas_type_week_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_year_seas_type_week_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_year_seas_type_play_type_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_year_seas_type_play_type_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_year_seas_type_play_type_player_fuml_pi_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_year_seas_type_play_type_bc_pid_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_year_seas_type_play_type_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_year_play_type_seas_type_trg_pid_off_es_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2000_year_esbid_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_year_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_ydl_100_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_trg_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_tackle_assist_4_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_tackle_assist_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_tackle_assist_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_solo_tackle_3_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_solo_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_solo_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_series_seq_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_seas_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_qtr_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_psr_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_play_type_seas_type_trg_pid_off_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_play_type_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_play_action_idx;
+DROP INDEX IF EXISTS public."nfl_plays_year_2000_playId_idx";
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_off_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_esbid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_dwn_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_catchable_ball_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_bc_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_assisted_tackle_2_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_assisted_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public."nfl_plays_current_week_playId";
 DROP INDEX IF EXISTS public."nfl_plays_current_week_esbid_playId";
 DROP INDEX IF EXISTS public.nfl_plays_current_week_esbid;
+DROP INDEX IF EXISTS public.index_nfl_plays_year_seas_type_week_play_type_trg_pid;
+DROP INDEX IF EXISTS public.index_nfl_plays_year_seas_type_week_play_type_psr_pid;
+DROP INDEX IF EXISTS public.index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid;
+DROP INDEX IF EXISTS public.index_nfl_plays_year_seas_type_week_play_type_bc_pid;
+DROP INDEX IF EXISTS public.index_nfl_plays_year_seas_type_week_play_type;
+DROP INDEX IF EXISTS public.index_nfl_plays_year_seas_type_play_type_trg_pid;
+DROP INDEX IF EXISTS public.index_nfl_plays_year_seas_type_play_type_psr_pid;
+DROP INDEX IF EXISTS public.index_nfl_plays_year_seas_type_play_type_player_fuml_pid;
+DROP INDEX IF EXISTS public.index_nfl_plays_year_seas_type_play_type_bc_trg_pid;
+DROP INDEX IF EXISTS public.index_nfl_plays_year_seas_type_play_type_bc_pid;
+DROP INDEX IF EXISTS public.index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid;
+DROP INDEX IF EXISTS public.index_nfl_plays_year_esbid_playid;
+DROP INDEX IF EXISTS public.index_nfl_plays_year_esbid;
+DROP INDEX IF EXISTS public.index_nfl_plays_ydl_100;
+DROP INDEX IF EXISTS public.index_nfl_plays_trg_pid;
+DROP INDEX IF EXISTS public.index_nfl_plays_tackle_assist_4_pid;
+DROP INDEX IF EXISTS public.index_nfl_plays_tackle_assist_3_pid;
+DROP INDEX IF EXISTS public.index_nfl_plays_tackle_assist_2_pid;
+DROP INDEX IF EXISTS public.index_nfl_plays_tackle_assist_1_pid;
+DROP INDEX IF EXISTS public.index_nfl_plays_solo_tackle_3_pid;
+DROP INDEX IF EXISTS public.index_nfl_plays_solo_tackle_2_pid;
+DROP INDEX IF EXISTS public.index_nfl_plays_solo_tackle_1_pid;
+DROP INDEX IF EXISTS public.index_nfl_plays_series_seq;
+DROP INDEX IF EXISTS public.index_nfl_plays_seas_type;
+DROP INDEX IF EXISTS public.index_nfl_plays_route_ngs;
+DROP INDEX IF EXISTS public.index_nfl_plays_qtr;
+DROP INDEX IF EXISTS public.index_nfl_plays_psr_pid;
+DROP INDEX IF EXISTS public.index_nfl_plays_playid;
+DROP INDEX IF EXISTS public.index_nfl_plays_play_type_seas_type_trg_pid_off_esbid;
+DROP INDEX IF EXISTS public.index_nfl_plays_play_type;
+DROP INDEX IF EXISTS public.index_nfl_plays_play_action;
+DROP INDEX IF EXISTS public.index_nfl_plays_pid_types;
+DROP INDEX IF EXISTS public.index_nfl_plays_off;
+DROP INDEX IF EXISTS public.index_nfl_plays_motion;
+DROP INDEX IF EXISTS public.index_nfl_plays_esbid;
+DROP INDEX IF EXISTS public.index_nfl_plays_dwn;
+DROP INDEX IF EXISTS public.index_nfl_plays_catchable_ball;
+DROP INDEX IF EXISTS public.index_nfl_plays_bc_pid;
+DROP INDEX IF EXISTS public.index_nfl_plays_assisted_tackle_2_pid;
+DROP INDEX IF EXISTS public.index_nfl_plays_assisted_tackle_1_pid;
 DROP INDEX IF EXISTS public.idx_users_invite_code;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_seasonlogs_pid_year_hash;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_gamelogs_pid_esbid_hash;
@@ -39,34 +1079,6 @@ DROP INDEX IF EXISTS public.idx_player_pff_id;
 DROP INDEX IF EXISTS public.idx_player_gamelogs_esbid_tm;
 DROP INDEX IF EXISTS public.idx_player_gamelogs_esbid_active_pid;
 DROP INDEX IF EXISTS public.idx_opening_days_year_opening_day;
-DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_week_play_type_trg_pid;
-DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_week_play_type_psr_pid;
-DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_week_play_type_player_fuml_pid;
-DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_week_play_type_bc_pid;
-DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_week_play_type;
-DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_play_type_trg_pid;
-DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_play_type_psr_pid;
-DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_play_type_player_fuml_pid;
-DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_play_type_bc_trg_pid;
-DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_play_type_bc_pid;
-DROP INDEX IF EXISTS public.idx_nfl_plays_ydl_100;
-DROP INDEX IF EXISTS public.idx_nfl_plays_tackle_assist_4_pid;
-DROP INDEX IF EXISTS public.idx_nfl_plays_tackle_assist_3_pid;
-DROP INDEX IF EXISTS public.idx_nfl_plays_tackle_assist_2_pid;
-DROP INDEX IF EXISTS public.idx_nfl_plays_tackle_assist_1_pid;
-DROP INDEX IF EXISTS public.idx_nfl_plays_solo_tackle_3_pid;
-DROP INDEX IF EXISTS public.idx_nfl_plays_solo_tackle_2_pid;
-DROP INDEX IF EXISTS public.idx_nfl_plays_solo_tackle_1_pid;
-DROP INDEX IF EXISTS public.idx_nfl_plays_series_seq;
-DROP INDEX IF EXISTS public.idx_nfl_plays_route_ngs;
-DROP INDEX IF EXISTS public.idx_nfl_plays_qtr;
-DROP INDEX IF EXISTS public.idx_nfl_plays_play_action;
-DROP INDEX IF EXISTS public.idx_nfl_plays_pid_types;
-DROP INDEX IF EXISTS public.idx_nfl_plays_motion;
-DROP INDEX IF EXISTS public.idx_nfl_plays_dwn;
-DROP INDEX IF EXISTS public.idx_nfl_plays_catchable_ball;
-DROP INDEX IF EXISTS public.idx_nfl_plays_assisted_tackle_2_pid;
-DROP INDEX IF EXISTS public.idx_nfl_plays_assisted_tackle_1_pid;
 DROP INDEX IF EXISTS public.idx_nfl_games_year_seas_type_week_esbid;
 DROP INDEX IF EXISTS public.idx_nfl_games_year_seas_type_esbid;
 DROP INDEX IF EXISTS public.idx_keeptradecut_rankings_type_qb_d_v;
@@ -180,18 +1192,6 @@ DROP INDEX IF EXISTS public.idx_24738_snap;
 DROP INDEX IF EXISTS public."idx_24738_playId";
 DROP INDEX IF EXISTS public.idx_24735_snap;
 DROP INDEX IF EXISTS public."idx_24735_playId";
-DROP INDEX IF EXISTS public.idx_24725_trg_pid;
-DROP INDEX IF EXISTS public.idx_24725_psr_pid;
-DROP INDEX IF EXISTS public."idx_24725_playId";
-DROP INDEX IF EXISTS public.idx_24725_nfl_plays_year_target;
-DROP INDEX IF EXISTS public.idx_24725_idx_seas_type;
-DROP INDEX IF EXISTS public.idx_24725_idx_play_type;
-DROP INDEX IF EXISTS public.idx_24725_idx_off;
-DROP INDEX IF EXISTS public.idx_24725_idx_nfl_plays_year_esbid;
-DROP INDEX IF EXISTS public.idx_24725_idx_nfl_plays_target;
-DROP INDEX IF EXISTS public."idx_24725_gamePlay";
-DROP INDEX IF EXISTS public.idx_24725_esbid;
-DROP INDEX IF EXISTS public.idx_24725_bc_pid;
 DROP INDEX IF EXISTS public.idx_24722_play_stat;
 DROP INDEX IF EXISTS public."idx_24722_playId";
 DROP INDEX IF EXISTS public.idx_24719_play_stat;
@@ -362,6 +1362,31 @@ DROP MATERIALIZED VIEW IF EXISTS public.nfl_year_week_timestamp;
 DROP TABLE IF EXISTS public.nfl_team_seasonlogs;
 DROP TABLE IF EXISTS public.nfl_snaps_current_week;
 DROP TABLE IF EXISTS public.nfl_snaps;
+DROP TABLE IF EXISTS public.nfl_plays_year_2024;
+DROP TABLE IF EXISTS public.nfl_plays_year_2023;
+DROP TABLE IF EXISTS public.nfl_plays_year_2022;
+DROP TABLE IF EXISTS public.nfl_plays_year_2021;
+DROP TABLE IF EXISTS public.nfl_plays_year_2020;
+DROP TABLE IF EXISTS public.nfl_plays_year_2019;
+DROP TABLE IF EXISTS public.nfl_plays_year_2018;
+DROP TABLE IF EXISTS public.nfl_plays_year_2017;
+DROP TABLE IF EXISTS public.nfl_plays_year_2016;
+DROP TABLE IF EXISTS public.nfl_plays_year_2015;
+DROP TABLE IF EXISTS public.nfl_plays_year_2014;
+DROP TABLE IF EXISTS public.nfl_plays_year_2013;
+DROP TABLE IF EXISTS public.nfl_plays_year_2012;
+DROP TABLE IF EXISTS public.nfl_plays_year_2011;
+DROP TABLE IF EXISTS public.nfl_plays_year_2010;
+DROP TABLE IF EXISTS public.nfl_plays_year_2009;
+DROP TABLE IF EXISTS public.nfl_plays_year_2008;
+DROP TABLE IF EXISTS public.nfl_plays_year_2007;
+DROP TABLE IF EXISTS public.nfl_plays_year_2006;
+DROP TABLE IF EXISTS public.nfl_plays_year_2005;
+DROP TABLE IF EXISTS public.nfl_plays_year_2004;
+DROP TABLE IF EXISTS public.nfl_plays_year_2003;
+DROP TABLE IF EXISTS public.nfl_plays_year_2002;
+DROP TABLE IF EXISTS public.nfl_plays_year_2001;
+DROP TABLE IF EXISTS public.nfl_plays_year_2000;
 DROP TABLE IF EXISTS public.nfl_plays_current_week;
 DROP TABLE IF EXISTS public.nfl_plays;
 DROP TABLE IF EXISTS public.nfl_play_stats_current_week;
@@ -1948,7 +2973,8 @@ CREATE TABLE public.nfl_plays (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction
-);
+)
+PARTITION BY RANGE (year);
 
 
 --
@@ -2523,6 +3549,7531 @@ COMMENT ON COLUMN public.nfl_plays.read_thrown IS 'The type of read thrown by th
 --
 
 CREATE TABLE public.nfl_plays_current_week (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    sequence integer,
+    state character varying(36),
+    dwn integer,
+    home_score smallint,
+    special boolean,
+    "desc" text,
+    play_type_ngs character varying(36),
+    pos_team character varying(4),
+    pos_team_id character varying(36),
+    qtr integer,
+    year smallint NOT NULL,
+    seas_type character varying(36),
+    away_score smallint,
+    week smallint NOT NULL,
+    ydl_num integer,
+    ydl_side character varying(10),
+    yards_to_go integer,
+    off_formation character varying(100),
+    off_personnel character varying(100),
+    box_ngs integer,
+    pru_ngs integer,
+    def_personnel character varying(100),
+    game_clock_start character varying(10),
+    drive_seq integer,
+    ydl_end character varying(10),
+    ydl_start character varying(10),
+    first_down boolean,
+    goal_to_go boolean,
+    next_play_type character varying(36),
+    penalty boolean,
+    drive_yds integer,
+    drive_play_count integer,
+    play_clock smallint,
+    deleted boolean,
+    review text,
+    score boolean,
+    score_type character varying(10),
+    score_team character varying(4),
+    special_play_type character varying(10),
+    "timestamp" character varying(10),
+    play_type_nfl character varying(36),
+    updated integer NOT NULL,
+    off character varying(3),
+    def character varying(3),
+    play_type public.nfl_play_type,
+    player_fuml_pid character varying(25),
+    player_fuml_gsis character varying(36),
+    bc_pid character varying(25),
+    bc_gsis character varying(36),
+    psr_pid character varying(25),
+    psr_gsis character varying(36),
+    trg_pid character varying(25),
+    trg_gsis character varying(36),
+    intp_pid character varying(25),
+    intp_gsis character varying(36),
+    yds_gained smallint,
+    dot integer,
+    yards_after_catch integer,
+    yards_after_any_contact integer,
+    ret_yds integer,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
+    highlight_pass boolean,
+    int_worthy boolean,
+    dropped_pass boolean,
+    contested_ball boolean,
+    mbt smallint,
+    fuml boolean,
+    "int" boolean,
+    sk boolean,
+    succ boolean,
+    comp boolean,
+    td boolean,
+    ret_td boolean,
+    td_tm character varying(5),
+    ret_tm character varying(5),
+    charted boolean,
+    yfog integer,
+    true_air_yards smallint,
+    created_reception boolean,
+    avsk smallint,
+    no_huddle boolean,
+    play_action boolean,
+    trick_look boolean,
+    trick_play boolean,
+    qb_rush boolean,
+    qb_sneak boolean,
+    qb_scramble boolean,
+    hindered_pass boolean,
+    zero_blitz boolean,
+    stunt boolean,
+    out_of_pocket_pass boolean,
+    phyb boolean,
+    catchable_ball boolean,
+    throw_away boolean,
+    shovel_pass boolean,
+    sideline_pass boolean,
+    batted_pass boolean,
+    screen_pass boolean,
+    pain_free_play boolean,
+    qb_fault_sack boolean,
+    ttscrm numeric(16,12),
+    time_to_pass numeric(16,12),
+    ttsk numeric(16,12),
+    time_to_pressure numeric(16,12),
+    back smallint,
+    xlm smallint,
+    db smallint,
+    box smallint,
+    boxdb smallint,
+    pass_rushers smallint,
+    blitzers smallint,
+    db_blitzers smallint,
+    oopd character varying(2),
+    cov smallint,
+    cov_type_charted character varying(3),
+    sep character varying(3),
+    ydl_100 integer,
+    drive_result character varying(30),
+    drive_top character varying(10),
+    drive_fds integer,
+    drive_inside20 boolean,
+    drive_score boolean,
+    drive_start_qtr smallint,
+    drive_end_qtr smallint,
+    drive_yds_penalized integer,
+    drive_start_transition character varying(30),
+    drive_end_transition character varying(30),
+    drive_game_clock_start character varying(10),
+    drive_game_clock_end character varying(10),
+    drive_start_ydl character varying(10),
+    drive_end_ydl character varying(10),
+    drive_start_play_id integer,
+    drive_end_play_id integer,
+    series_seq integer,
+    series_suc boolean,
+    series_result character varying(100),
+    game_clock_end character varying(10),
+    sec_rem_qtr integer,
+    sec_rem_half integer,
+    sec_rem_gm integer,
+    fum boolean,
+    incomp boolean,
+    touchback boolean,
+    safety boolean,
+    oob boolean,
+    tfl boolean,
+    rush boolean,
+    pass boolean,
+    solo_tk boolean,
+    assist_tk boolean,
+    pen_team character varying(3),
+    pen_yds integer,
+    pass_td boolean,
+    rush_td boolean,
+    pass_yds smallint,
+    recv_yds smallint,
+    rush_yds integer,
+    qb_dropback boolean,
+    qb_kneel boolean,
+    qb_spike boolean,
+    run_location public.play_direction,
+    run_gap character varying(10),
+    first_down_rush boolean,
+    first_down_pass boolean,
+    first_down_penalty boolean,
+    third_down_converted boolean,
+    third_down_failed boolean,
+    fourth_down_converted boolean,
+    fourth_down_failed boolean,
+    ep numeric(16,12),
+    epa numeric(16,12),
+    ep_succ boolean,
+    total_home_epa numeric(16,12),
+    total_away_epa numeric(16,12),
+    total_home_rush_epa numeric(16,12),
+    total_away_rush_epa numeric(16,12),
+    total_home_pass_epa numeric(16,12),
+    total_away_pass_epa numeric(16,12),
+    qb_epa numeric(16,12),
+    air_epa numeric(16,12),
+    yac_epa numeric(16,12),
+    comp_air_epa numeric(16,12),
+    comp_yac_epa numeric(16,12),
+    xyac_epa numeric(16,12),
+    total_home_comp_air_epa numeric(16,12),
+    total_away_comp_air_epa numeric(16,12),
+    total_home_comp_yac_epa numeric(16,12),
+    total_away_comp_yac_epa numeric(16,12),
+    total_home_raw_air_epa numeric(16,12),
+    total_away_raw_air_epa numeric(16,12),
+    total_home_raw_yac_epa numeric(16,12),
+    total_away_raw_yac_epa numeric(16,12),
+    wp numeric(16,12),
+    wpa numeric(16,12),
+    home_wp numeric(16,12),
+    away_wp numeric(16,12),
+    vegas_wpa numeric(16,12),
+    vegas_home_wpa numeric(16,12),
+    home_wp_post numeric(16,12),
+    away_wp_post numeric(16,12),
+    vegas_wp numeric(16,12),
+    vegas_home_wp numeric(16,12),
+    total_home_rush_wpa numeric(16,12),
+    total_away_rush_wpa numeric(16,12),
+    total_home_pass_wpa numeric(16,12),
+    total_away_pass_wpa numeric(16,12),
+    air_wpa numeric(16,12),
+    yac_wpa numeric(16,12),
+    comp_air_wpa numeric(16,12),
+    comp_yac_wpa numeric(16,12),
+    total_home_comp_air_wpa numeric(16,12),
+    total_away_comp_air_wpa numeric(16,12),
+    total_home_comp_yac_wpa numeric(16,12),
+    total_away_comp_yac_wpa numeric(16,12),
+    total_home_raw_air_wpa numeric(16,12),
+    total_away_raw_air_wpa numeric(16,12),
+    total_home_raw_yac_wpa numeric(16,12),
+    total_away_raw_yac_wpa numeric(16,12),
+    xyac_mean_yds numeric(16,12),
+    xyac_median_yds numeric(16,12),
+    xyac_succ_prob numeric(16,12),
+    xyac_fd_prob numeric(16,12),
+    ep_att boolean,
+    two_att boolean,
+    fg_att boolean,
+    kickoff_att boolean,
+    punt_att boolean,
+    fg_result character varying(10),
+    kick_distance integer,
+    ep_result character varying(10),
+    tp_result character varying(10),
+    punt_blocked boolean,
+    home_to_rem smallint,
+    away_to_rem smallint,
+    pos_to_rem smallint,
+    def_to_rem smallint,
+    "to" boolean,
+    to_team character varying(3),
+    pos_score smallint,
+    def_score smallint,
+    score_diff smallint,
+    pos_score_post smallint,
+    def_score_post smallint,
+    score_diff_post smallint,
+    no_score_prob numeric(16,12),
+    opp_fg_prob numeric(16,12),
+    opp_safety_prob numeric(16,12),
+    opp_td_prob numeric(16,12),
+    fg_prob numeric(16,12),
+    safety_prob numeric(16,12),
+    td_prob numeric(16,12),
+    extra_point_prob numeric(16,12),
+    two_conv_prob numeric(16,12),
+    xpass_prob numeric(16,12),
+    pass_oe numeric(16,12),
+    cp numeric(16,12),
+    cpoe numeric(16,12),
+    air_yards_ngs numeric(8,4),
+    time_to_throw_ngs numeric(8,4),
+    route_ngs character varying(100),
+    man_zone_ngs character varying(100),
+    cov_type_ngs character varying(100),
+    qb_pressure_ngs boolean,
+    starting_hash public.hash_position,
+    ftn_play_id numeric,
+    qb_position public.qb_position,
+    n_offense_backfield numeric,
+    run_play_option boolean,
+    read_thrown public.read_thrown_type,
+    motion boolean,
+    solo_tackle_1_gsis character varying(36),
+    solo_tackle_1_pid character varying(25),
+    solo_tackle_2_gsis character varying(36),
+    solo_tackle_2_pid character varying(25),
+    solo_tackle_3_gsis character varying(36),
+    solo_tackle_3_pid character varying(25),
+    assisted_tackle_1_gsis character varying(36),
+    assisted_tackle_1_pid character varying(25),
+    assisted_tackle_2_gsis character varying(36),
+    assisted_tackle_2_pid character varying(25),
+    tackle_assist_1_gsis character varying(36),
+    tackle_assist_1_pid character varying(25),
+    tackle_assist_2_gsis character varying(36),
+    tackle_assist_2_pid character varying(25),
+    tackle_assist_3_gsis character varying(36),
+    tackle_assist_3_pid character varying(25),
+    tackle_assist_4_gsis character varying(36),
+    tackle_assist_4_pid character varying(25),
+    pass_location public.play_direction
+);
+
+
+--
+-- Name: nfl_plays_year_2000; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_plays_year_2000 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    sequence integer,
+    state character varying(36),
+    dwn integer,
+    home_score smallint,
+    special boolean,
+    "desc" text,
+    play_type_ngs character varying(36),
+    pos_team character varying(4),
+    pos_team_id character varying(36),
+    qtr integer,
+    year smallint NOT NULL,
+    seas_type character varying(36),
+    away_score smallint,
+    week smallint NOT NULL,
+    ydl_num integer,
+    ydl_side character varying(10),
+    yards_to_go integer,
+    off_formation character varying(100),
+    off_personnel character varying(100),
+    box_ngs integer,
+    pru_ngs integer,
+    def_personnel character varying(100),
+    game_clock_start character varying(10),
+    drive_seq integer,
+    ydl_end character varying(10),
+    ydl_start character varying(10),
+    first_down boolean,
+    goal_to_go boolean,
+    next_play_type character varying(36),
+    penalty boolean,
+    drive_yds integer,
+    drive_play_count integer,
+    play_clock smallint,
+    deleted boolean,
+    review text,
+    score boolean,
+    score_type character varying(10),
+    score_team character varying(4),
+    special_play_type character varying(10),
+    "timestamp" character varying(10),
+    play_type_nfl character varying(36),
+    updated integer NOT NULL,
+    off character varying(3),
+    def character varying(3),
+    play_type public.nfl_play_type,
+    player_fuml_pid character varying(25),
+    player_fuml_gsis character varying(36),
+    bc_pid character varying(25),
+    bc_gsis character varying(36),
+    psr_pid character varying(25),
+    psr_gsis character varying(36),
+    trg_pid character varying(25),
+    trg_gsis character varying(36),
+    intp_pid character varying(25),
+    intp_gsis character varying(36),
+    yds_gained smallint,
+    dot integer,
+    yards_after_catch integer,
+    yards_after_any_contact integer,
+    ret_yds integer,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
+    highlight_pass boolean,
+    int_worthy boolean,
+    dropped_pass boolean,
+    contested_ball boolean,
+    mbt smallint,
+    fuml boolean,
+    "int" boolean,
+    sk boolean,
+    succ boolean,
+    comp boolean,
+    td boolean,
+    ret_td boolean,
+    td_tm character varying(5),
+    ret_tm character varying(5),
+    charted boolean,
+    yfog integer,
+    true_air_yards smallint,
+    created_reception boolean,
+    avsk smallint,
+    no_huddle boolean,
+    play_action boolean,
+    trick_look boolean,
+    trick_play boolean,
+    qb_rush boolean,
+    qb_sneak boolean,
+    qb_scramble boolean,
+    hindered_pass boolean,
+    zero_blitz boolean,
+    stunt boolean,
+    out_of_pocket_pass boolean,
+    phyb boolean,
+    catchable_ball boolean,
+    throw_away boolean,
+    shovel_pass boolean,
+    sideline_pass boolean,
+    batted_pass boolean,
+    screen_pass boolean,
+    pain_free_play boolean,
+    qb_fault_sack boolean,
+    ttscrm numeric(16,12),
+    time_to_pass numeric(16,12),
+    ttsk numeric(16,12),
+    time_to_pressure numeric(16,12),
+    back smallint,
+    xlm smallint,
+    db smallint,
+    box smallint,
+    boxdb smallint,
+    pass_rushers smallint,
+    blitzers smallint,
+    db_blitzers smallint,
+    oopd character varying(2),
+    cov smallint,
+    cov_type_charted character varying(3),
+    sep character varying(3),
+    ydl_100 integer,
+    drive_result character varying(30),
+    drive_top character varying(10),
+    drive_fds integer,
+    drive_inside20 boolean,
+    drive_score boolean,
+    drive_start_qtr smallint,
+    drive_end_qtr smallint,
+    drive_yds_penalized integer,
+    drive_start_transition character varying(30),
+    drive_end_transition character varying(30),
+    drive_game_clock_start character varying(10),
+    drive_game_clock_end character varying(10),
+    drive_start_ydl character varying(10),
+    drive_end_ydl character varying(10),
+    drive_start_play_id integer,
+    drive_end_play_id integer,
+    series_seq integer,
+    series_suc boolean,
+    series_result character varying(100),
+    game_clock_end character varying(10),
+    sec_rem_qtr integer,
+    sec_rem_half integer,
+    sec_rem_gm integer,
+    fum boolean,
+    incomp boolean,
+    touchback boolean,
+    safety boolean,
+    oob boolean,
+    tfl boolean,
+    rush boolean,
+    pass boolean,
+    solo_tk boolean,
+    assist_tk boolean,
+    pen_team character varying(3),
+    pen_yds integer,
+    pass_td boolean,
+    rush_td boolean,
+    pass_yds smallint,
+    recv_yds smallint,
+    rush_yds integer,
+    qb_dropback boolean,
+    qb_kneel boolean,
+    qb_spike boolean,
+    run_location public.play_direction,
+    run_gap character varying(10),
+    first_down_rush boolean,
+    first_down_pass boolean,
+    first_down_penalty boolean,
+    third_down_converted boolean,
+    third_down_failed boolean,
+    fourth_down_converted boolean,
+    fourth_down_failed boolean,
+    ep numeric(16,12),
+    epa numeric(16,12),
+    ep_succ boolean,
+    total_home_epa numeric(16,12),
+    total_away_epa numeric(16,12),
+    total_home_rush_epa numeric(16,12),
+    total_away_rush_epa numeric(16,12),
+    total_home_pass_epa numeric(16,12),
+    total_away_pass_epa numeric(16,12),
+    qb_epa numeric(16,12),
+    air_epa numeric(16,12),
+    yac_epa numeric(16,12),
+    comp_air_epa numeric(16,12),
+    comp_yac_epa numeric(16,12),
+    xyac_epa numeric(16,12),
+    total_home_comp_air_epa numeric(16,12),
+    total_away_comp_air_epa numeric(16,12),
+    total_home_comp_yac_epa numeric(16,12),
+    total_away_comp_yac_epa numeric(16,12),
+    total_home_raw_air_epa numeric(16,12),
+    total_away_raw_air_epa numeric(16,12),
+    total_home_raw_yac_epa numeric(16,12),
+    total_away_raw_yac_epa numeric(16,12),
+    wp numeric(16,12),
+    wpa numeric(16,12),
+    home_wp numeric(16,12),
+    away_wp numeric(16,12),
+    vegas_wpa numeric(16,12),
+    vegas_home_wpa numeric(16,12),
+    home_wp_post numeric(16,12),
+    away_wp_post numeric(16,12),
+    vegas_wp numeric(16,12),
+    vegas_home_wp numeric(16,12),
+    total_home_rush_wpa numeric(16,12),
+    total_away_rush_wpa numeric(16,12),
+    total_home_pass_wpa numeric(16,12),
+    total_away_pass_wpa numeric(16,12),
+    air_wpa numeric(16,12),
+    yac_wpa numeric(16,12),
+    comp_air_wpa numeric(16,12),
+    comp_yac_wpa numeric(16,12),
+    total_home_comp_air_wpa numeric(16,12),
+    total_away_comp_air_wpa numeric(16,12),
+    total_home_comp_yac_wpa numeric(16,12),
+    total_away_comp_yac_wpa numeric(16,12),
+    total_home_raw_air_wpa numeric(16,12),
+    total_away_raw_air_wpa numeric(16,12),
+    total_home_raw_yac_wpa numeric(16,12),
+    total_away_raw_yac_wpa numeric(16,12),
+    xyac_mean_yds numeric(16,12),
+    xyac_median_yds numeric(16,12),
+    xyac_succ_prob numeric(16,12),
+    xyac_fd_prob numeric(16,12),
+    ep_att boolean,
+    two_att boolean,
+    fg_att boolean,
+    kickoff_att boolean,
+    punt_att boolean,
+    fg_result character varying(10),
+    kick_distance integer,
+    ep_result character varying(10),
+    tp_result character varying(10),
+    punt_blocked boolean,
+    home_to_rem smallint,
+    away_to_rem smallint,
+    pos_to_rem smallint,
+    def_to_rem smallint,
+    "to" boolean,
+    to_team character varying(3),
+    pos_score smallint,
+    def_score smallint,
+    score_diff smallint,
+    pos_score_post smallint,
+    def_score_post smallint,
+    score_diff_post smallint,
+    no_score_prob numeric(16,12),
+    opp_fg_prob numeric(16,12),
+    opp_safety_prob numeric(16,12),
+    opp_td_prob numeric(16,12),
+    fg_prob numeric(16,12),
+    safety_prob numeric(16,12),
+    td_prob numeric(16,12),
+    extra_point_prob numeric(16,12),
+    two_conv_prob numeric(16,12),
+    xpass_prob numeric(16,12),
+    pass_oe numeric(16,12),
+    cp numeric(16,12),
+    cpoe numeric(16,12),
+    air_yards_ngs numeric(8,4),
+    time_to_throw_ngs numeric(8,4),
+    route_ngs character varying(100),
+    man_zone_ngs character varying(100),
+    cov_type_ngs character varying(100),
+    qb_pressure_ngs boolean,
+    starting_hash public.hash_position,
+    ftn_play_id numeric,
+    qb_position public.qb_position,
+    n_offense_backfield numeric,
+    run_play_option boolean,
+    read_thrown public.read_thrown_type,
+    motion boolean,
+    solo_tackle_1_gsis character varying(36),
+    solo_tackle_1_pid character varying(25),
+    solo_tackle_2_gsis character varying(36),
+    solo_tackle_2_pid character varying(25),
+    solo_tackle_3_gsis character varying(36),
+    solo_tackle_3_pid character varying(25),
+    assisted_tackle_1_gsis character varying(36),
+    assisted_tackle_1_pid character varying(25),
+    assisted_tackle_2_gsis character varying(36),
+    assisted_tackle_2_pid character varying(25),
+    tackle_assist_1_gsis character varying(36),
+    tackle_assist_1_pid character varying(25),
+    tackle_assist_2_gsis character varying(36),
+    tackle_assist_2_pid character varying(25),
+    tackle_assist_3_gsis character varying(36),
+    tackle_assist_3_pid character varying(25),
+    tackle_assist_4_gsis character varying(36),
+    tackle_assist_4_pid character varying(25),
+    pass_location public.play_direction
+);
+
+
+--
+-- Name: nfl_plays_year_2001; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_plays_year_2001 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    sequence integer,
+    state character varying(36),
+    dwn integer,
+    home_score smallint,
+    special boolean,
+    "desc" text,
+    play_type_ngs character varying(36),
+    pos_team character varying(4),
+    pos_team_id character varying(36),
+    qtr integer,
+    year smallint NOT NULL,
+    seas_type character varying(36),
+    away_score smallint,
+    week smallint NOT NULL,
+    ydl_num integer,
+    ydl_side character varying(10),
+    yards_to_go integer,
+    off_formation character varying(100),
+    off_personnel character varying(100),
+    box_ngs integer,
+    pru_ngs integer,
+    def_personnel character varying(100),
+    game_clock_start character varying(10),
+    drive_seq integer,
+    ydl_end character varying(10),
+    ydl_start character varying(10),
+    first_down boolean,
+    goal_to_go boolean,
+    next_play_type character varying(36),
+    penalty boolean,
+    drive_yds integer,
+    drive_play_count integer,
+    play_clock smallint,
+    deleted boolean,
+    review text,
+    score boolean,
+    score_type character varying(10),
+    score_team character varying(4),
+    special_play_type character varying(10),
+    "timestamp" character varying(10),
+    play_type_nfl character varying(36),
+    updated integer NOT NULL,
+    off character varying(3),
+    def character varying(3),
+    play_type public.nfl_play_type,
+    player_fuml_pid character varying(25),
+    player_fuml_gsis character varying(36),
+    bc_pid character varying(25),
+    bc_gsis character varying(36),
+    psr_pid character varying(25),
+    psr_gsis character varying(36),
+    trg_pid character varying(25),
+    trg_gsis character varying(36),
+    intp_pid character varying(25),
+    intp_gsis character varying(36),
+    yds_gained smallint,
+    dot integer,
+    yards_after_catch integer,
+    yards_after_any_contact integer,
+    ret_yds integer,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
+    highlight_pass boolean,
+    int_worthy boolean,
+    dropped_pass boolean,
+    contested_ball boolean,
+    mbt smallint,
+    fuml boolean,
+    "int" boolean,
+    sk boolean,
+    succ boolean,
+    comp boolean,
+    td boolean,
+    ret_td boolean,
+    td_tm character varying(5),
+    ret_tm character varying(5),
+    charted boolean,
+    yfog integer,
+    true_air_yards smallint,
+    created_reception boolean,
+    avsk smallint,
+    no_huddle boolean,
+    play_action boolean,
+    trick_look boolean,
+    trick_play boolean,
+    qb_rush boolean,
+    qb_sneak boolean,
+    qb_scramble boolean,
+    hindered_pass boolean,
+    zero_blitz boolean,
+    stunt boolean,
+    out_of_pocket_pass boolean,
+    phyb boolean,
+    catchable_ball boolean,
+    throw_away boolean,
+    shovel_pass boolean,
+    sideline_pass boolean,
+    batted_pass boolean,
+    screen_pass boolean,
+    pain_free_play boolean,
+    qb_fault_sack boolean,
+    ttscrm numeric(16,12),
+    time_to_pass numeric(16,12),
+    ttsk numeric(16,12),
+    time_to_pressure numeric(16,12),
+    back smallint,
+    xlm smallint,
+    db smallint,
+    box smallint,
+    boxdb smallint,
+    pass_rushers smallint,
+    blitzers smallint,
+    db_blitzers smallint,
+    oopd character varying(2),
+    cov smallint,
+    cov_type_charted character varying(3),
+    sep character varying(3),
+    ydl_100 integer,
+    drive_result character varying(30),
+    drive_top character varying(10),
+    drive_fds integer,
+    drive_inside20 boolean,
+    drive_score boolean,
+    drive_start_qtr smallint,
+    drive_end_qtr smallint,
+    drive_yds_penalized integer,
+    drive_start_transition character varying(30),
+    drive_end_transition character varying(30),
+    drive_game_clock_start character varying(10),
+    drive_game_clock_end character varying(10),
+    drive_start_ydl character varying(10),
+    drive_end_ydl character varying(10),
+    drive_start_play_id integer,
+    drive_end_play_id integer,
+    series_seq integer,
+    series_suc boolean,
+    series_result character varying(100),
+    game_clock_end character varying(10),
+    sec_rem_qtr integer,
+    sec_rem_half integer,
+    sec_rem_gm integer,
+    fum boolean,
+    incomp boolean,
+    touchback boolean,
+    safety boolean,
+    oob boolean,
+    tfl boolean,
+    rush boolean,
+    pass boolean,
+    solo_tk boolean,
+    assist_tk boolean,
+    pen_team character varying(3),
+    pen_yds integer,
+    pass_td boolean,
+    rush_td boolean,
+    pass_yds smallint,
+    recv_yds smallint,
+    rush_yds integer,
+    qb_dropback boolean,
+    qb_kneel boolean,
+    qb_spike boolean,
+    run_location public.play_direction,
+    run_gap character varying(10),
+    first_down_rush boolean,
+    first_down_pass boolean,
+    first_down_penalty boolean,
+    third_down_converted boolean,
+    third_down_failed boolean,
+    fourth_down_converted boolean,
+    fourth_down_failed boolean,
+    ep numeric(16,12),
+    epa numeric(16,12),
+    ep_succ boolean,
+    total_home_epa numeric(16,12),
+    total_away_epa numeric(16,12),
+    total_home_rush_epa numeric(16,12),
+    total_away_rush_epa numeric(16,12),
+    total_home_pass_epa numeric(16,12),
+    total_away_pass_epa numeric(16,12),
+    qb_epa numeric(16,12),
+    air_epa numeric(16,12),
+    yac_epa numeric(16,12),
+    comp_air_epa numeric(16,12),
+    comp_yac_epa numeric(16,12),
+    xyac_epa numeric(16,12),
+    total_home_comp_air_epa numeric(16,12),
+    total_away_comp_air_epa numeric(16,12),
+    total_home_comp_yac_epa numeric(16,12),
+    total_away_comp_yac_epa numeric(16,12),
+    total_home_raw_air_epa numeric(16,12),
+    total_away_raw_air_epa numeric(16,12),
+    total_home_raw_yac_epa numeric(16,12),
+    total_away_raw_yac_epa numeric(16,12),
+    wp numeric(16,12),
+    wpa numeric(16,12),
+    home_wp numeric(16,12),
+    away_wp numeric(16,12),
+    vegas_wpa numeric(16,12),
+    vegas_home_wpa numeric(16,12),
+    home_wp_post numeric(16,12),
+    away_wp_post numeric(16,12),
+    vegas_wp numeric(16,12),
+    vegas_home_wp numeric(16,12),
+    total_home_rush_wpa numeric(16,12),
+    total_away_rush_wpa numeric(16,12),
+    total_home_pass_wpa numeric(16,12),
+    total_away_pass_wpa numeric(16,12),
+    air_wpa numeric(16,12),
+    yac_wpa numeric(16,12),
+    comp_air_wpa numeric(16,12),
+    comp_yac_wpa numeric(16,12),
+    total_home_comp_air_wpa numeric(16,12),
+    total_away_comp_air_wpa numeric(16,12),
+    total_home_comp_yac_wpa numeric(16,12),
+    total_away_comp_yac_wpa numeric(16,12),
+    total_home_raw_air_wpa numeric(16,12),
+    total_away_raw_air_wpa numeric(16,12),
+    total_home_raw_yac_wpa numeric(16,12),
+    total_away_raw_yac_wpa numeric(16,12),
+    xyac_mean_yds numeric(16,12),
+    xyac_median_yds numeric(16,12),
+    xyac_succ_prob numeric(16,12),
+    xyac_fd_prob numeric(16,12),
+    ep_att boolean,
+    two_att boolean,
+    fg_att boolean,
+    kickoff_att boolean,
+    punt_att boolean,
+    fg_result character varying(10),
+    kick_distance integer,
+    ep_result character varying(10),
+    tp_result character varying(10),
+    punt_blocked boolean,
+    home_to_rem smallint,
+    away_to_rem smallint,
+    pos_to_rem smallint,
+    def_to_rem smallint,
+    "to" boolean,
+    to_team character varying(3),
+    pos_score smallint,
+    def_score smallint,
+    score_diff smallint,
+    pos_score_post smallint,
+    def_score_post smallint,
+    score_diff_post smallint,
+    no_score_prob numeric(16,12),
+    opp_fg_prob numeric(16,12),
+    opp_safety_prob numeric(16,12),
+    opp_td_prob numeric(16,12),
+    fg_prob numeric(16,12),
+    safety_prob numeric(16,12),
+    td_prob numeric(16,12),
+    extra_point_prob numeric(16,12),
+    two_conv_prob numeric(16,12),
+    xpass_prob numeric(16,12),
+    pass_oe numeric(16,12),
+    cp numeric(16,12),
+    cpoe numeric(16,12),
+    air_yards_ngs numeric(8,4),
+    time_to_throw_ngs numeric(8,4),
+    route_ngs character varying(100),
+    man_zone_ngs character varying(100),
+    cov_type_ngs character varying(100),
+    qb_pressure_ngs boolean,
+    starting_hash public.hash_position,
+    ftn_play_id numeric,
+    qb_position public.qb_position,
+    n_offense_backfield numeric,
+    run_play_option boolean,
+    read_thrown public.read_thrown_type,
+    motion boolean,
+    solo_tackle_1_gsis character varying(36),
+    solo_tackle_1_pid character varying(25),
+    solo_tackle_2_gsis character varying(36),
+    solo_tackle_2_pid character varying(25),
+    solo_tackle_3_gsis character varying(36),
+    solo_tackle_3_pid character varying(25),
+    assisted_tackle_1_gsis character varying(36),
+    assisted_tackle_1_pid character varying(25),
+    assisted_tackle_2_gsis character varying(36),
+    assisted_tackle_2_pid character varying(25),
+    tackle_assist_1_gsis character varying(36),
+    tackle_assist_1_pid character varying(25),
+    tackle_assist_2_gsis character varying(36),
+    tackle_assist_2_pid character varying(25),
+    tackle_assist_3_gsis character varying(36),
+    tackle_assist_3_pid character varying(25),
+    tackle_assist_4_gsis character varying(36),
+    tackle_assist_4_pid character varying(25),
+    pass_location public.play_direction
+);
+
+
+--
+-- Name: nfl_plays_year_2002; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_plays_year_2002 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    sequence integer,
+    state character varying(36),
+    dwn integer,
+    home_score smallint,
+    special boolean,
+    "desc" text,
+    play_type_ngs character varying(36),
+    pos_team character varying(4),
+    pos_team_id character varying(36),
+    qtr integer,
+    year smallint NOT NULL,
+    seas_type character varying(36),
+    away_score smallint,
+    week smallint NOT NULL,
+    ydl_num integer,
+    ydl_side character varying(10),
+    yards_to_go integer,
+    off_formation character varying(100),
+    off_personnel character varying(100),
+    box_ngs integer,
+    pru_ngs integer,
+    def_personnel character varying(100),
+    game_clock_start character varying(10),
+    drive_seq integer,
+    ydl_end character varying(10),
+    ydl_start character varying(10),
+    first_down boolean,
+    goal_to_go boolean,
+    next_play_type character varying(36),
+    penalty boolean,
+    drive_yds integer,
+    drive_play_count integer,
+    play_clock smallint,
+    deleted boolean,
+    review text,
+    score boolean,
+    score_type character varying(10),
+    score_team character varying(4),
+    special_play_type character varying(10),
+    "timestamp" character varying(10),
+    play_type_nfl character varying(36),
+    updated integer NOT NULL,
+    off character varying(3),
+    def character varying(3),
+    play_type public.nfl_play_type,
+    player_fuml_pid character varying(25),
+    player_fuml_gsis character varying(36),
+    bc_pid character varying(25),
+    bc_gsis character varying(36),
+    psr_pid character varying(25),
+    psr_gsis character varying(36),
+    trg_pid character varying(25),
+    trg_gsis character varying(36),
+    intp_pid character varying(25),
+    intp_gsis character varying(36),
+    yds_gained smallint,
+    dot integer,
+    yards_after_catch integer,
+    yards_after_any_contact integer,
+    ret_yds integer,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
+    highlight_pass boolean,
+    int_worthy boolean,
+    dropped_pass boolean,
+    contested_ball boolean,
+    mbt smallint,
+    fuml boolean,
+    "int" boolean,
+    sk boolean,
+    succ boolean,
+    comp boolean,
+    td boolean,
+    ret_td boolean,
+    td_tm character varying(5),
+    ret_tm character varying(5),
+    charted boolean,
+    yfog integer,
+    true_air_yards smallint,
+    created_reception boolean,
+    avsk smallint,
+    no_huddle boolean,
+    play_action boolean,
+    trick_look boolean,
+    trick_play boolean,
+    qb_rush boolean,
+    qb_sneak boolean,
+    qb_scramble boolean,
+    hindered_pass boolean,
+    zero_blitz boolean,
+    stunt boolean,
+    out_of_pocket_pass boolean,
+    phyb boolean,
+    catchable_ball boolean,
+    throw_away boolean,
+    shovel_pass boolean,
+    sideline_pass boolean,
+    batted_pass boolean,
+    screen_pass boolean,
+    pain_free_play boolean,
+    qb_fault_sack boolean,
+    ttscrm numeric(16,12),
+    time_to_pass numeric(16,12),
+    ttsk numeric(16,12),
+    time_to_pressure numeric(16,12),
+    back smallint,
+    xlm smallint,
+    db smallint,
+    box smallint,
+    boxdb smallint,
+    pass_rushers smallint,
+    blitzers smallint,
+    db_blitzers smallint,
+    oopd character varying(2),
+    cov smallint,
+    cov_type_charted character varying(3),
+    sep character varying(3),
+    ydl_100 integer,
+    drive_result character varying(30),
+    drive_top character varying(10),
+    drive_fds integer,
+    drive_inside20 boolean,
+    drive_score boolean,
+    drive_start_qtr smallint,
+    drive_end_qtr smallint,
+    drive_yds_penalized integer,
+    drive_start_transition character varying(30),
+    drive_end_transition character varying(30),
+    drive_game_clock_start character varying(10),
+    drive_game_clock_end character varying(10),
+    drive_start_ydl character varying(10),
+    drive_end_ydl character varying(10),
+    drive_start_play_id integer,
+    drive_end_play_id integer,
+    series_seq integer,
+    series_suc boolean,
+    series_result character varying(100),
+    game_clock_end character varying(10),
+    sec_rem_qtr integer,
+    sec_rem_half integer,
+    sec_rem_gm integer,
+    fum boolean,
+    incomp boolean,
+    touchback boolean,
+    safety boolean,
+    oob boolean,
+    tfl boolean,
+    rush boolean,
+    pass boolean,
+    solo_tk boolean,
+    assist_tk boolean,
+    pen_team character varying(3),
+    pen_yds integer,
+    pass_td boolean,
+    rush_td boolean,
+    pass_yds smallint,
+    recv_yds smallint,
+    rush_yds integer,
+    qb_dropback boolean,
+    qb_kneel boolean,
+    qb_spike boolean,
+    run_location public.play_direction,
+    run_gap character varying(10),
+    first_down_rush boolean,
+    first_down_pass boolean,
+    first_down_penalty boolean,
+    third_down_converted boolean,
+    third_down_failed boolean,
+    fourth_down_converted boolean,
+    fourth_down_failed boolean,
+    ep numeric(16,12),
+    epa numeric(16,12),
+    ep_succ boolean,
+    total_home_epa numeric(16,12),
+    total_away_epa numeric(16,12),
+    total_home_rush_epa numeric(16,12),
+    total_away_rush_epa numeric(16,12),
+    total_home_pass_epa numeric(16,12),
+    total_away_pass_epa numeric(16,12),
+    qb_epa numeric(16,12),
+    air_epa numeric(16,12),
+    yac_epa numeric(16,12),
+    comp_air_epa numeric(16,12),
+    comp_yac_epa numeric(16,12),
+    xyac_epa numeric(16,12),
+    total_home_comp_air_epa numeric(16,12),
+    total_away_comp_air_epa numeric(16,12),
+    total_home_comp_yac_epa numeric(16,12),
+    total_away_comp_yac_epa numeric(16,12),
+    total_home_raw_air_epa numeric(16,12),
+    total_away_raw_air_epa numeric(16,12),
+    total_home_raw_yac_epa numeric(16,12),
+    total_away_raw_yac_epa numeric(16,12),
+    wp numeric(16,12),
+    wpa numeric(16,12),
+    home_wp numeric(16,12),
+    away_wp numeric(16,12),
+    vegas_wpa numeric(16,12),
+    vegas_home_wpa numeric(16,12),
+    home_wp_post numeric(16,12),
+    away_wp_post numeric(16,12),
+    vegas_wp numeric(16,12),
+    vegas_home_wp numeric(16,12),
+    total_home_rush_wpa numeric(16,12),
+    total_away_rush_wpa numeric(16,12),
+    total_home_pass_wpa numeric(16,12),
+    total_away_pass_wpa numeric(16,12),
+    air_wpa numeric(16,12),
+    yac_wpa numeric(16,12),
+    comp_air_wpa numeric(16,12),
+    comp_yac_wpa numeric(16,12),
+    total_home_comp_air_wpa numeric(16,12),
+    total_away_comp_air_wpa numeric(16,12),
+    total_home_comp_yac_wpa numeric(16,12),
+    total_away_comp_yac_wpa numeric(16,12),
+    total_home_raw_air_wpa numeric(16,12),
+    total_away_raw_air_wpa numeric(16,12),
+    total_home_raw_yac_wpa numeric(16,12),
+    total_away_raw_yac_wpa numeric(16,12),
+    xyac_mean_yds numeric(16,12),
+    xyac_median_yds numeric(16,12),
+    xyac_succ_prob numeric(16,12),
+    xyac_fd_prob numeric(16,12),
+    ep_att boolean,
+    two_att boolean,
+    fg_att boolean,
+    kickoff_att boolean,
+    punt_att boolean,
+    fg_result character varying(10),
+    kick_distance integer,
+    ep_result character varying(10),
+    tp_result character varying(10),
+    punt_blocked boolean,
+    home_to_rem smallint,
+    away_to_rem smallint,
+    pos_to_rem smallint,
+    def_to_rem smallint,
+    "to" boolean,
+    to_team character varying(3),
+    pos_score smallint,
+    def_score smallint,
+    score_diff smallint,
+    pos_score_post smallint,
+    def_score_post smallint,
+    score_diff_post smallint,
+    no_score_prob numeric(16,12),
+    opp_fg_prob numeric(16,12),
+    opp_safety_prob numeric(16,12),
+    opp_td_prob numeric(16,12),
+    fg_prob numeric(16,12),
+    safety_prob numeric(16,12),
+    td_prob numeric(16,12),
+    extra_point_prob numeric(16,12),
+    two_conv_prob numeric(16,12),
+    xpass_prob numeric(16,12),
+    pass_oe numeric(16,12),
+    cp numeric(16,12),
+    cpoe numeric(16,12),
+    air_yards_ngs numeric(8,4),
+    time_to_throw_ngs numeric(8,4),
+    route_ngs character varying(100),
+    man_zone_ngs character varying(100),
+    cov_type_ngs character varying(100),
+    qb_pressure_ngs boolean,
+    starting_hash public.hash_position,
+    ftn_play_id numeric,
+    qb_position public.qb_position,
+    n_offense_backfield numeric,
+    run_play_option boolean,
+    read_thrown public.read_thrown_type,
+    motion boolean,
+    solo_tackle_1_gsis character varying(36),
+    solo_tackle_1_pid character varying(25),
+    solo_tackle_2_gsis character varying(36),
+    solo_tackle_2_pid character varying(25),
+    solo_tackle_3_gsis character varying(36),
+    solo_tackle_3_pid character varying(25),
+    assisted_tackle_1_gsis character varying(36),
+    assisted_tackle_1_pid character varying(25),
+    assisted_tackle_2_gsis character varying(36),
+    assisted_tackle_2_pid character varying(25),
+    tackle_assist_1_gsis character varying(36),
+    tackle_assist_1_pid character varying(25),
+    tackle_assist_2_gsis character varying(36),
+    tackle_assist_2_pid character varying(25),
+    tackle_assist_3_gsis character varying(36),
+    tackle_assist_3_pid character varying(25),
+    tackle_assist_4_gsis character varying(36),
+    tackle_assist_4_pid character varying(25),
+    pass_location public.play_direction
+);
+
+
+--
+-- Name: nfl_plays_year_2003; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_plays_year_2003 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    sequence integer,
+    state character varying(36),
+    dwn integer,
+    home_score smallint,
+    special boolean,
+    "desc" text,
+    play_type_ngs character varying(36),
+    pos_team character varying(4),
+    pos_team_id character varying(36),
+    qtr integer,
+    year smallint NOT NULL,
+    seas_type character varying(36),
+    away_score smallint,
+    week smallint NOT NULL,
+    ydl_num integer,
+    ydl_side character varying(10),
+    yards_to_go integer,
+    off_formation character varying(100),
+    off_personnel character varying(100),
+    box_ngs integer,
+    pru_ngs integer,
+    def_personnel character varying(100),
+    game_clock_start character varying(10),
+    drive_seq integer,
+    ydl_end character varying(10),
+    ydl_start character varying(10),
+    first_down boolean,
+    goal_to_go boolean,
+    next_play_type character varying(36),
+    penalty boolean,
+    drive_yds integer,
+    drive_play_count integer,
+    play_clock smallint,
+    deleted boolean,
+    review text,
+    score boolean,
+    score_type character varying(10),
+    score_team character varying(4),
+    special_play_type character varying(10),
+    "timestamp" character varying(10),
+    play_type_nfl character varying(36),
+    updated integer NOT NULL,
+    off character varying(3),
+    def character varying(3),
+    play_type public.nfl_play_type,
+    player_fuml_pid character varying(25),
+    player_fuml_gsis character varying(36),
+    bc_pid character varying(25),
+    bc_gsis character varying(36),
+    psr_pid character varying(25),
+    psr_gsis character varying(36),
+    trg_pid character varying(25),
+    trg_gsis character varying(36),
+    intp_pid character varying(25),
+    intp_gsis character varying(36),
+    yds_gained smallint,
+    dot integer,
+    yards_after_catch integer,
+    yards_after_any_contact integer,
+    ret_yds integer,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
+    highlight_pass boolean,
+    int_worthy boolean,
+    dropped_pass boolean,
+    contested_ball boolean,
+    mbt smallint,
+    fuml boolean,
+    "int" boolean,
+    sk boolean,
+    succ boolean,
+    comp boolean,
+    td boolean,
+    ret_td boolean,
+    td_tm character varying(5),
+    ret_tm character varying(5),
+    charted boolean,
+    yfog integer,
+    true_air_yards smallint,
+    created_reception boolean,
+    avsk smallint,
+    no_huddle boolean,
+    play_action boolean,
+    trick_look boolean,
+    trick_play boolean,
+    qb_rush boolean,
+    qb_sneak boolean,
+    qb_scramble boolean,
+    hindered_pass boolean,
+    zero_blitz boolean,
+    stunt boolean,
+    out_of_pocket_pass boolean,
+    phyb boolean,
+    catchable_ball boolean,
+    throw_away boolean,
+    shovel_pass boolean,
+    sideline_pass boolean,
+    batted_pass boolean,
+    screen_pass boolean,
+    pain_free_play boolean,
+    qb_fault_sack boolean,
+    ttscrm numeric(16,12),
+    time_to_pass numeric(16,12),
+    ttsk numeric(16,12),
+    time_to_pressure numeric(16,12),
+    back smallint,
+    xlm smallint,
+    db smallint,
+    box smallint,
+    boxdb smallint,
+    pass_rushers smallint,
+    blitzers smallint,
+    db_blitzers smallint,
+    oopd character varying(2),
+    cov smallint,
+    cov_type_charted character varying(3),
+    sep character varying(3),
+    ydl_100 integer,
+    drive_result character varying(30),
+    drive_top character varying(10),
+    drive_fds integer,
+    drive_inside20 boolean,
+    drive_score boolean,
+    drive_start_qtr smallint,
+    drive_end_qtr smallint,
+    drive_yds_penalized integer,
+    drive_start_transition character varying(30),
+    drive_end_transition character varying(30),
+    drive_game_clock_start character varying(10),
+    drive_game_clock_end character varying(10),
+    drive_start_ydl character varying(10),
+    drive_end_ydl character varying(10),
+    drive_start_play_id integer,
+    drive_end_play_id integer,
+    series_seq integer,
+    series_suc boolean,
+    series_result character varying(100),
+    game_clock_end character varying(10),
+    sec_rem_qtr integer,
+    sec_rem_half integer,
+    sec_rem_gm integer,
+    fum boolean,
+    incomp boolean,
+    touchback boolean,
+    safety boolean,
+    oob boolean,
+    tfl boolean,
+    rush boolean,
+    pass boolean,
+    solo_tk boolean,
+    assist_tk boolean,
+    pen_team character varying(3),
+    pen_yds integer,
+    pass_td boolean,
+    rush_td boolean,
+    pass_yds smallint,
+    recv_yds smallint,
+    rush_yds integer,
+    qb_dropback boolean,
+    qb_kneel boolean,
+    qb_spike boolean,
+    run_location public.play_direction,
+    run_gap character varying(10),
+    first_down_rush boolean,
+    first_down_pass boolean,
+    first_down_penalty boolean,
+    third_down_converted boolean,
+    third_down_failed boolean,
+    fourth_down_converted boolean,
+    fourth_down_failed boolean,
+    ep numeric(16,12),
+    epa numeric(16,12),
+    ep_succ boolean,
+    total_home_epa numeric(16,12),
+    total_away_epa numeric(16,12),
+    total_home_rush_epa numeric(16,12),
+    total_away_rush_epa numeric(16,12),
+    total_home_pass_epa numeric(16,12),
+    total_away_pass_epa numeric(16,12),
+    qb_epa numeric(16,12),
+    air_epa numeric(16,12),
+    yac_epa numeric(16,12),
+    comp_air_epa numeric(16,12),
+    comp_yac_epa numeric(16,12),
+    xyac_epa numeric(16,12),
+    total_home_comp_air_epa numeric(16,12),
+    total_away_comp_air_epa numeric(16,12),
+    total_home_comp_yac_epa numeric(16,12),
+    total_away_comp_yac_epa numeric(16,12),
+    total_home_raw_air_epa numeric(16,12),
+    total_away_raw_air_epa numeric(16,12),
+    total_home_raw_yac_epa numeric(16,12),
+    total_away_raw_yac_epa numeric(16,12),
+    wp numeric(16,12),
+    wpa numeric(16,12),
+    home_wp numeric(16,12),
+    away_wp numeric(16,12),
+    vegas_wpa numeric(16,12),
+    vegas_home_wpa numeric(16,12),
+    home_wp_post numeric(16,12),
+    away_wp_post numeric(16,12),
+    vegas_wp numeric(16,12),
+    vegas_home_wp numeric(16,12),
+    total_home_rush_wpa numeric(16,12),
+    total_away_rush_wpa numeric(16,12),
+    total_home_pass_wpa numeric(16,12),
+    total_away_pass_wpa numeric(16,12),
+    air_wpa numeric(16,12),
+    yac_wpa numeric(16,12),
+    comp_air_wpa numeric(16,12),
+    comp_yac_wpa numeric(16,12),
+    total_home_comp_air_wpa numeric(16,12),
+    total_away_comp_air_wpa numeric(16,12),
+    total_home_comp_yac_wpa numeric(16,12),
+    total_away_comp_yac_wpa numeric(16,12),
+    total_home_raw_air_wpa numeric(16,12),
+    total_away_raw_air_wpa numeric(16,12),
+    total_home_raw_yac_wpa numeric(16,12),
+    total_away_raw_yac_wpa numeric(16,12),
+    xyac_mean_yds numeric(16,12),
+    xyac_median_yds numeric(16,12),
+    xyac_succ_prob numeric(16,12),
+    xyac_fd_prob numeric(16,12),
+    ep_att boolean,
+    two_att boolean,
+    fg_att boolean,
+    kickoff_att boolean,
+    punt_att boolean,
+    fg_result character varying(10),
+    kick_distance integer,
+    ep_result character varying(10),
+    tp_result character varying(10),
+    punt_blocked boolean,
+    home_to_rem smallint,
+    away_to_rem smallint,
+    pos_to_rem smallint,
+    def_to_rem smallint,
+    "to" boolean,
+    to_team character varying(3),
+    pos_score smallint,
+    def_score smallint,
+    score_diff smallint,
+    pos_score_post smallint,
+    def_score_post smallint,
+    score_diff_post smallint,
+    no_score_prob numeric(16,12),
+    opp_fg_prob numeric(16,12),
+    opp_safety_prob numeric(16,12),
+    opp_td_prob numeric(16,12),
+    fg_prob numeric(16,12),
+    safety_prob numeric(16,12),
+    td_prob numeric(16,12),
+    extra_point_prob numeric(16,12),
+    two_conv_prob numeric(16,12),
+    xpass_prob numeric(16,12),
+    pass_oe numeric(16,12),
+    cp numeric(16,12),
+    cpoe numeric(16,12),
+    air_yards_ngs numeric(8,4),
+    time_to_throw_ngs numeric(8,4),
+    route_ngs character varying(100),
+    man_zone_ngs character varying(100),
+    cov_type_ngs character varying(100),
+    qb_pressure_ngs boolean,
+    starting_hash public.hash_position,
+    ftn_play_id numeric,
+    qb_position public.qb_position,
+    n_offense_backfield numeric,
+    run_play_option boolean,
+    read_thrown public.read_thrown_type,
+    motion boolean,
+    solo_tackle_1_gsis character varying(36),
+    solo_tackle_1_pid character varying(25),
+    solo_tackle_2_gsis character varying(36),
+    solo_tackle_2_pid character varying(25),
+    solo_tackle_3_gsis character varying(36),
+    solo_tackle_3_pid character varying(25),
+    assisted_tackle_1_gsis character varying(36),
+    assisted_tackle_1_pid character varying(25),
+    assisted_tackle_2_gsis character varying(36),
+    assisted_tackle_2_pid character varying(25),
+    tackle_assist_1_gsis character varying(36),
+    tackle_assist_1_pid character varying(25),
+    tackle_assist_2_gsis character varying(36),
+    tackle_assist_2_pid character varying(25),
+    tackle_assist_3_gsis character varying(36),
+    tackle_assist_3_pid character varying(25),
+    tackle_assist_4_gsis character varying(36),
+    tackle_assist_4_pid character varying(25),
+    pass_location public.play_direction
+);
+
+
+--
+-- Name: nfl_plays_year_2004; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_plays_year_2004 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    sequence integer,
+    state character varying(36),
+    dwn integer,
+    home_score smallint,
+    special boolean,
+    "desc" text,
+    play_type_ngs character varying(36),
+    pos_team character varying(4),
+    pos_team_id character varying(36),
+    qtr integer,
+    year smallint NOT NULL,
+    seas_type character varying(36),
+    away_score smallint,
+    week smallint NOT NULL,
+    ydl_num integer,
+    ydl_side character varying(10),
+    yards_to_go integer,
+    off_formation character varying(100),
+    off_personnel character varying(100),
+    box_ngs integer,
+    pru_ngs integer,
+    def_personnel character varying(100),
+    game_clock_start character varying(10),
+    drive_seq integer,
+    ydl_end character varying(10),
+    ydl_start character varying(10),
+    first_down boolean,
+    goal_to_go boolean,
+    next_play_type character varying(36),
+    penalty boolean,
+    drive_yds integer,
+    drive_play_count integer,
+    play_clock smallint,
+    deleted boolean,
+    review text,
+    score boolean,
+    score_type character varying(10),
+    score_team character varying(4),
+    special_play_type character varying(10),
+    "timestamp" character varying(10),
+    play_type_nfl character varying(36),
+    updated integer NOT NULL,
+    off character varying(3),
+    def character varying(3),
+    play_type public.nfl_play_type,
+    player_fuml_pid character varying(25),
+    player_fuml_gsis character varying(36),
+    bc_pid character varying(25),
+    bc_gsis character varying(36),
+    psr_pid character varying(25),
+    psr_gsis character varying(36),
+    trg_pid character varying(25),
+    trg_gsis character varying(36),
+    intp_pid character varying(25),
+    intp_gsis character varying(36),
+    yds_gained smallint,
+    dot integer,
+    yards_after_catch integer,
+    yards_after_any_contact integer,
+    ret_yds integer,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
+    highlight_pass boolean,
+    int_worthy boolean,
+    dropped_pass boolean,
+    contested_ball boolean,
+    mbt smallint,
+    fuml boolean,
+    "int" boolean,
+    sk boolean,
+    succ boolean,
+    comp boolean,
+    td boolean,
+    ret_td boolean,
+    td_tm character varying(5),
+    ret_tm character varying(5),
+    charted boolean,
+    yfog integer,
+    true_air_yards smallint,
+    created_reception boolean,
+    avsk smallint,
+    no_huddle boolean,
+    play_action boolean,
+    trick_look boolean,
+    trick_play boolean,
+    qb_rush boolean,
+    qb_sneak boolean,
+    qb_scramble boolean,
+    hindered_pass boolean,
+    zero_blitz boolean,
+    stunt boolean,
+    out_of_pocket_pass boolean,
+    phyb boolean,
+    catchable_ball boolean,
+    throw_away boolean,
+    shovel_pass boolean,
+    sideline_pass boolean,
+    batted_pass boolean,
+    screen_pass boolean,
+    pain_free_play boolean,
+    qb_fault_sack boolean,
+    ttscrm numeric(16,12),
+    time_to_pass numeric(16,12),
+    ttsk numeric(16,12),
+    time_to_pressure numeric(16,12),
+    back smallint,
+    xlm smallint,
+    db smallint,
+    box smallint,
+    boxdb smallint,
+    pass_rushers smallint,
+    blitzers smallint,
+    db_blitzers smallint,
+    oopd character varying(2),
+    cov smallint,
+    cov_type_charted character varying(3),
+    sep character varying(3),
+    ydl_100 integer,
+    drive_result character varying(30),
+    drive_top character varying(10),
+    drive_fds integer,
+    drive_inside20 boolean,
+    drive_score boolean,
+    drive_start_qtr smallint,
+    drive_end_qtr smallint,
+    drive_yds_penalized integer,
+    drive_start_transition character varying(30),
+    drive_end_transition character varying(30),
+    drive_game_clock_start character varying(10),
+    drive_game_clock_end character varying(10),
+    drive_start_ydl character varying(10),
+    drive_end_ydl character varying(10),
+    drive_start_play_id integer,
+    drive_end_play_id integer,
+    series_seq integer,
+    series_suc boolean,
+    series_result character varying(100),
+    game_clock_end character varying(10),
+    sec_rem_qtr integer,
+    sec_rem_half integer,
+    sec_rem_gm integer,
+    fum boolean,
+    incomp boolean,
+    touchback boolean,
+    safety boolean,
+    oob boolean,
+    tfl boolean,
+    rush boolean,
+    pass boolean,
+    solo_tk boolean,
+    assist_tk boolean,
+    pen_team character varying(3),
+    pen_yds integer,
+    pass_td boolean,
+    rush_td boolean,
+    pass_yds smallint,
+    recv_yds smallint,
+    rush_yds integer,
+    qb_dropback boolean,
+    qb_kneel boolean,
+    qb_spike boolean,
+    run_location public.play_direction,
+    run_gap character varying(10),
+    first_down_rush boolean,
+    first_down_pass boolean,
+    first_down_penalty boolean,
+    third_down_converted boolean,
+    third_down_failed boolean,
+    fourth_down_converted boolean,
+    fourth_down_failed boolean,
+    ep numeric(16,12),
+    epa numeric(16,12),
+    ep_succ boolean,
+    total_home_epa numeric(16,12),
+    total_away_epa numeric(16,12),
+    total_home_rush_epa numeric(16,12),
+    total_away_rush_epa numeric(16,12),
+    total_home_pass_epa numeric(16,12),
+    total_away_pass_epa numeric(16,12),
+    qb_epa numeric(16,12),
+    air_epa numeric(16,12),
+    yac_epa numeric(16,12),
+    comp_air_epa numeric(16,12),
+    comp_yac_epa numeric(16,12),
+    xyac_epa numeric(16,12),
+    total_home_comp_air_epa numeric(16,12),
+    total_away_comp_air_epa numeric(16,12),
+    total_home_comp_yac_epa numeric(16,12),
+    total_away_comp_yac_epa numeric(16,12),
+    total_home_raw_air_epa numeric(16,12),
+    total_away_raw_air_epa numeric(16,12),
+    total_home_raw_yac_epa numeric(16,12),
+    total_away_raw_yac_epa numeric(16,12),
+    wp numeric(16,12),
+    wpa numeric(16,12),
+    home_wp numeric(16,12),
+    away_wp numeric(16,12),
+    vegas_wpa numeric(16,12),
+    vegas_home_wpa numeric(16,12),
+    home_wp_post numeric(16,12),
+    away_wp_post numeric(16,12),
+    vegas_wp numeric(16,12),
+    vegas_home_wp numeric(16,12),
+    total_home_rush_wpa numeric(16,12),
+    total_away_rush_wpa numeric(16,12),
+    total_home_pass_wpa numeric(16,12),
+    total_away_pass_wpa numeric(16,12),
+    air_wpa numeric(16,12),
+    yac_wpa numeric(16,12),
+    comp_air_wpa numeric(16,12),
+    comp_yac_wpa numeric(16,12),
+    total_home_comp_air_wpa numeric(16,12),
+    total_away_comp_air_wpa numeric(16,12),
+    total_home_comp_yac_wpa numeric(16,12),
+    total_away_comp_yac_wpa numeric(16,12),
+    total_home_raw_air_wpa numeric(16,12),
+    total_away_raw_air_wpa numeric(16,12),
+    total_home_raw_yac_wpa numeric(16,12),
+    total_away_raw_yac_wpa numeric(16,12),
+    xyac_mean_yds numeric(16,12),
+    xyac_median_yds numeric(16,12),
+    xyac_succ_prob numeric(16,12),
+    xyac_fd_prob numeric(16,12),
+    ep_att boolean,
+    two_att boolean,
+    fg_att boolean,
+    kickoff_att boolean,
+    punt_att boolean,
+    fg_result character varying(10),
+    kick_distance integer,
+    ep_result character varying(10),
+    tp_result character varying(10),
+    punt_blocked boolean,
+    home_to_rem smallint,
+    away_to_rem smallint,
+    pos_to_rem smallint,
+    def_to_rem smallint,
+    "to" boolean,
+    to_team character varying(3),
+    pos_score smallint,
+    def_score smallint,
+    score_diff smallint,
+    pos_score_post smallint,
+    def_score_post smallint,
+    score_diff_post smallint,
+    no_score_prob numeric(16,12),
+    opp_fg_prob numeric(16,12),
+    opp_safety_prob numeric(16,12),
+    opp_td_prob numeric(16,12),
+    fg_prob numeric(16,12),
+    safety_prob numeric(16,12),
+    td_prob numeric(16,12),
+    extra_point_prob numeric(16,12),
+    two_conv_prob numeric(16,12),
+    xpass_prob numeric(16,12),
+    pass_oe numeric(16,12),
+    cp numeric(16,12),
+    cpoe numeric(16,12),
+    air_yards_ngs numeric(8,4),
+    time_to_throw_ngs numeric(8,4),
+    route_ngs character varying(100),
+    man_zone_ngs character varying(100),
+    cov_type_ngs character varying(100),
+    qb_pressure_ngs boolean,
+    starting_hash public.hash_position,
+    ftn_play_id numeric,
+    qb_position public.qb_position,
+    n_offense_backfield numeric,
+    run_play_option boolean,
+    read_thrown public.read_thrown_type,
+    motion boolean,
+    solo_tackle_1_gsis character varying(36),
+    solo_tackle_1_pid character varying(25),
+    solo_tackle_2_gsis character varying(36),
+    solo_tackle_2_pid character varying(25),
+    solo_tackle_3_gsis character varying(36),
+    solo_tackle_3_pid character varying(25),
+    assisted_tackle_1_gsis character varying(36),
+    assisted_tackle_1_pid character varying(25),
+    assisted_tackle_2_gsis character varying(36),
+    assisted_tackle_2_pid character varying(25),
+    tackle_assist_1_gsis character varying(36),
+    tackle_assist_1_pid character varying(25),
+    tackle_assist_2_gsis character varying(36),
+    tackle_assist_2_pid character varying(25),
+    tackle_assist_3_gsis character varying(36),
+    tackle_assist_3_pid character varying(25),
+    tackle_assist_4_gsis character varying(36),
+    tackle_assist_4_pid character varying(25),
+    pass_location public.play_direction
+);
+
+
+--
+-- Name: nfl_plays_year_2005; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_plays_year_2005 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    sequence integer,
+    state character varying(36),
+    dwn integer,
+    home_score smallint,
+    special boolean,
+    "desc" text,
+    play_type_ngs character varying(36),
+    pos_team character varying(4),
+    pos_team_id character varying(36),
+    qtr integer,
+    year smallint NOT NULL,
+    seas_type character varying(36),
+    away_score smallint,
+    week smallint NOT NULL,
+    ydl_num integer,
+    ydl_side character varying(10),
+    yards_to_go integer,
+    off_formation character varying(100),
+    off_personnel character varying(100),
+    box_ngs integer,
+    pru_ngs integer,
+    def_personnel character varying(100),
+    game_clock_start character varying(10),
+    drive_seq integer,
+    ydl_end character varying(10),
+    ydl_start character varying(10),
+    first_down boolean,
+    goal_to_go boolean,
+    next_play_type character varying(36),
+    penalty boolean,
+    drive_yds integer,
+    drive_play_count integer,
+    play_clock smallint,
+    deleted boolean,
+    review text,
+    score boolean,
+    score_type character varying(10),
+    score_team character varying(4),
+    special_play_type character varying(10),
+    "timestamp" character varying(10),
+    play_type_nfl character varying(36),
+    updated integer NOT NULL,
+    off character varying(3),
+    def character varying(3),
+    play_type public.nfl_play_type,
+    player_fuml_pid character varying(25),
+    player_fuml_gsis character varying(36),
+    bc_pid character varying(25),
+    bc_gsis character varying(36),
+    psr_pid character varying(25),
+    psr_gsis character varying(36),
+    trg_pid character varying(25),
+    trg_gsis character varying(36),
+    intp_pid character varying(25),
+    intp_gsis character varying(36),
+    yds_gained smallint,
+    dot integer,
+    yards_after_catch integer,
+    yards_after_any_contact integer,
+    ret_yds integer,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
+    highlight_pass boolean,
+    int_worthy boolean,
+    dropped_pass boolean,
+    contested_ball boolean,
+    mbt smallint,
+    fuml boolean,
+    "int" boolean,
+    sk boolean,
+    succ boolean,
+    comp boolean,
+    td boolean,
+    ret_td boolean,
+    td_tm character varying(5),
+    ret_tm character varying(5),
+    charted boolean,
+    yfog integer,
+    true_air_yards smallint,
+    created_reception boolean,
+    avsk smallint,
+    no_huddle boolean,
+    play_action boolean,
+    trick_look boolean,
+    trick_play boolean,
+    qb_rush boolean,
+    qb_sneak boolean,
+    qb_scramble boolean,
+    hindered_pass boolean,
+    zero_blitz boolean,
+    stunt boolean,
+    out_of_pocket_pass boolean,
+    phyb boolean,
+    catchable_ball boolean,
+    throw_away boolean,
+    shovel_pass boolean,
+    sideline_pass boolean,
+    batted_pass boolean,
+    screen_pass boolean,
+    pain_free_play boolean,
+    qb_fault_sack boolean,
+    ttscrm numeric(16,12),
+    time_to_pass numeric(16,12),
+    ttsk numeric(16,12),
+    time_to_pressure numeric(16,12),
+    back smallint,
+    xlm smallint,
+    db smallint,
+    box smallint,
+    boxdb smallint,
+    pass_rushers smallint,
+    blitzers smallint,
+    db_blitzers smallint,
+    oopd character varying(2),
+    cov smallint,
+    cov_type_charted character varying(3),
+    sep character varying(3),
+    ydl_100 integer,
+    drive_result character varying(30),
+    drive_top character varying(10),
+    drive_fds integer,
+    drive_inside20 boolean,
+    drive_score boolean,
+    drive_start_qtr smallint,
+    drive_end_qtr smallint,
+    drive_yds_penalized integer,
+    drive_start_transition character varying(30),
+    drive_end_transition character varying(30),
+    drive_game_clock_start character varying(10),
+    drive_game_clock_end character varying(10),
+    drive_start_ydl character varying(10),
+    drive_end_ydl character varying(10),
+    drive_start_play_id integer,
+    drive_end_play_id integer,
+    series_seq integer,
+    series_suc boolean,
+    series_result character varying(100),
+    game_clock_end character varying(10),
+    sec_rem_qtr integer,
+    sec_rem_half integer,
+    sec_rem_gm integer,
+    fum boolean,
+    incomp boolean,
+    touchback boolean,
+    safety boolean,
+    oob boolean,
+    tfl boolean,
+    rush boolean,
+    pass boolean,
+    solo_tk boolean,
+    assist_tk boolean,
+    pen_team character varying(3),
+    pen_yds integer,
+    pass_td boolean,
+    rush_td boolean,
+    pass_yds smallint,
+    recv_yds smallint,
+    rush_yds integer,
+    qb_dropback boolean,
+    qb_kneel boolean,
+    qb_spike boolean,
+    run_location public.play_direction,
+    run_gap character varying(10),
+    first_down_rush boolean,
+    first_down_pass boolean,
+    first_down_penalty boolean,
+    third_down_converted boolean,
+    third_down_failed boolean,
+    fourth_down_converted boolean,
+    fourth_down_failed boolean,
+    ep numeric(16,12),
+    epa numeric(16,12),
+    ep_succ boolean,
+    total_home_epa numeric(16,12),
+    total_away_epa numeric(16,12),
+    total_home_rush_epa numeric(16,12),
+    total_away_rush_epa numeric(16,12),
+    total_home_pass_epa numeric(16,12),
+    total_away_pass_epa numeric(16,12),
+    qb_epa numeric(16,12),
+    air_epa numeric(16,12),
+    yac_epa numeric(16,12),
+    comp_air_epa numeric(16,12),
+    comp_yac_epa numeric(16,12),
+    xyac_epa numeric(16,12),
+    total_home_comp_air_epa numeric(16,12),
+    total_away_comp_air_epa numeric(16,12),
+    total_home_comp_yac_epa numeric(16,12),
+    total_away_comp_yac_epa numeric(16,12),
+    total_home_raw_air_epa numeric(16,12),
+    total_away_raw_air_epa numeric(16,12),
+    total_home_raw_yac_epa numeric(16,12),
+    total_away_raw_yac_epa numeric(16,12),
+    wp numeric(16,12),
+    wpa numeric(16,12),
+    home_wp numeric(16,12),
+    away_wp numeric(16,12),
+    vegas_wpa numeric(16,12),
+    vegas_home_wpa numeric(16,12),
+    home_wp_post numeric(16,12),
+    away_wp_post numeric(16,12),
+    vegas_wp numeric(16,12),
+    vegas_home_wp numeric(16,12),
+    total_home_rush_wpa numeric(16,12),
+    total_away_rush_wpa numeric(16,12),
+    total_home_pass_wpa numeric(16,12),
+    total_away_pass_wpa numeric(16,12),
+    air_wpa numeric(16,12),
+    yac_wpa numeric(16,12),
+    comp_air_wpa numeric(16,12),
+    comp_yac_wpa numeric(16,12),
+    total_home_comp_air_wpa numeric(16,12),
+    total_away_comp_air_wpa numeric(16,12),
+    total_home_comp_yac_wpa numeric(16,12),
+    total_away_comp_yac_wpa numeric(16,12),
+    total_home_raw_air_wpa numeric(16,12),
+    total_away_raw_air_wpa numeric(16,12),
+    total_home_raw_yac_wpa numeric(16,12),
+    total_away_raw_yac_wpa numeric(16,12),
+    xyac_mean_yds numeric(16,12),
+    xyac_median_yds numeric(16,12),
+    xyac_succ_prob numeric(16,12),
+    xyac_fd_prob numeric(16,12),
+    ep_att boolean,
+    two_att boolean,
+    fg_att boolean,
+    kickoff_att boolean,
+    punt_att boolean,
+    fg_result character varying(10),
+    kick_distance integer,
+    ep_result character varying(10),
+    tp_result character varying(10),
+    punt_blocked boolean,
+    home_to_rem smallint,
+    away_to_rem smallint,
+    pos_to_rem smallint,
+    def_to_rem smallint,
+    "to" boolean,
+    to_team character varying(3),
+    pos_score smallint,
+    def_score smallint,
+    score_diff smallint,
+    pos_score_post smallint,
+    def_score_post smallint,
+    score_diff_post smallint,
+    no_score_prob numeric(16,12),
+    opp_fg_prob numeric(16,12),
+    opp_safety_prob numeric(16,12),
+    opp_td_prob numeric(16,12),
+    fg_prob numeric(16,12),
+    safety_prob numeric(16,12),
+    td_prob numeric(16,12),
+    extra_point_prob numeric(16,12),
+    two_conv_prob numeric(16,12),
+    xpass_prob numeric(16,12),
+    pass_oe numeric(16,12),
+    cp numeric(16,12),
+    cpoe numeric(16,12),
+    air_yards_ngs numeric(8,4),
+    time_to_throw_ngs numeric(8,4),
+    route_ngs character varying(100),
+    man_zone_ngs character varying(100),
+    cov_type_ngs character varying(100),
+    qb_pressure_ngs boolean,
+    starting_hash public.hash_position,
+    ftn_play_id numeric,
+    qb_position public.qb_position,
+    n_offense_backfield numeric,
+    run_play_option boolean,
+    read_thrown public.read_thrown_type,
+    motion boolean,
+    solo_tackle_1_gsis character varying(36),
+    solo_tackle_1_pid character varying(25),
+    solo_tackle_2_gsis character varying(36),
+    solo_tackle_2_pid character varying(25),
+    solo_tackle_3_gsis character varying(36),
+    solo_tackle_3_pid character varying(25),
+    assisted_tackle_1_gsis character varying(36),
+    assisted_tackle_1_pid character varying(25),
+    assisted_tackle_2_gsis character varying(36),
+    assisted_tackle_2_pid character varying(25),
+    tackle_assist_1_gsis character varying(36),
+    tackle_assist_1_pid character varying(25),
+    tackle_assist_2_gsis character varying(36),
+    tackle_assist_2_pid character varying(25),
+    tackle_assist_3_gsis character varying(36),
+    tackle_assist_3_pid character varying(25),
+    tackle_assist_4_gsis character varying(36),
+    tackle_assist_4_pid character varying(25),
+    pass_location public.play_direction
+);
+
+
+--
+-- Name: nfl_plays_year_2006; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_plays_year_2006 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    sequence integer,
+    state character varying(36),
+    dwn integer,
+    home_score smallint,
+    special boolean,
+    "desc" text,
+    play_type_ngs character varying(36),
+    pos_team character varying(4),
+    pos_team_id character varying(36),
+    qtr integer,
+    year smallint NOT NULL,
+    seas_type character varying(36),
+    away_score smallint,
+    week smallint NOT NULL,
+    ydl_num integer,
+    ydl_side character varying(10),
+    yards_to_go integer,
+    off_formation character varying(100),
+    off_personnel character varying(100),
+    box_ngs integer,
+    pru_ngs integer,
+    def_personnel character varying(100),
+    game_clock_start character varying(10),
+    drive_seq integer,
+    ydl_end character varying(10),
+    ydl_start character varying(10),
+    first_down boolean,
+    goal_to_go boolean,
+    next_play_type character varying(36),
+    penalty boolean,
+    drive_yds integer,
+    drive_play_count integer,
+    play_clock smallint,
+    deleted boolean,
+    review text,
+    score boolean,
+    score_type character varying(10),
+    score_team character varying(4),
+    special_play_type character varying(10),
+    "timestamp" character varying(10),
+    play_type_nfl character varying(36),
+    updated integer NOT NULL,
+    off character varying(3),
+    def character varying(3),
+    play_type public.nfl_play_type,
+    player_fuml_pid character varying(25),
+    player_fuml_gsis character varying(36),
+    bc_pid character varying(25),
+    bc_gsis character varying(36),
+    psr_pid character varying(25),
+    psr_gsis character varying(36),
+    trg_pid character varying(25),
+    trg_gsis character varying(36),
+    intp_pid character varying(25),
+    intp_gsis character varying(36),
+    yds_gained smallint,
+    dot integer,
+    yards_after_catch integer,
+    yards_after_any_contact integer,
+    ret_yds integer,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
+    highlight_pass boolean,
+    int_worthy boolean,
+    dropped_pass boolean,
+    contested_ball boolean,
+    mbt smallint,
+    fuml boolean,
+    "int" boolean,
+    sk boolean,
+    succ boolean,
+    comp boolean,
+    td boolean,
+    ret_td boolean,
+    td_tm character varying(5),
+    ret_tm character varying(5),
+    charted boolean,
+    yfog integer,
+    true_air_yards smallint,
+    created_reception boolean,
+    avsk smallint,
+    no_huddle boolean,
+    play_action boolean,
+    trick_look boolean,
+    trick_play boolean,
+    qb_rush boolean,
+    qb_sneak boolean,
+    qb_scramble boolean,
+    hindered_pass boolean,
+    zero_blitz boolean,
+    stunt boolean,
+    out_of_pocket_pass boolean,
+    phyb boolean,
+    catchable_ball boolean,
+    throw_away boolean,
+    shovel_pass boolean,
+    sideline_pass boolean,
+    batted_pass boolean,
+    screen_pass boolean,
+    pain_free_play boolean,
+    qb_fault_sack boolean,
+    ttscrm numeric(16,12),
+    time_to_pass numeric(16,12),
+    ttsk numeric(16,12),
+    time_to_pressure numeric(16,12),
+    back smallint,
+    xlm smallint,
+    db smallint,
+    box smallint,
+    boxdb smallint,
+    pass_rushers smallint,
+    blitzers smallint,
+    db_blitzers smallint,
+    oopd character varying(2),
+    cov smallint,
+    cov_type_charted character varying(3),
+    sep character varying(3),
+    ydl_100 integer,
+    drive_result character varying(30),
+    drive_top character varying(10),
+    drive_fds integer,
+    drive_inside20 boolean,
+    drive_score boolean,
+    drive_start_qtr smallint,
+    drive_end_qtr smallint,
+    drive_yds_penalized integer,
+    drive_start_transition character varying(30),
+    drive_end_transition character varying(30),
+    drive_game_clock_start character varying(10),
+    drive_game_clock_end character varying(10),
+    drive_start_ydl character varying(10),
+    drive_end_ydl character varying(10),
+    drive_start_play_id integer,
+    drive_end_play_id integer,
+    series_seq integer,
+    series_suc boolean,
+    series_result character varying(100),
+    game_clock_end character varying(10),
+    sec_rem_qtr integer,
+    sec_rem_half integer,
+    sec_rem_gm integer,
+    fum boolean,
+    incomp boolean,
+    touchback boolean,
+    safety boolean,
+    oob boolean,
+    tfl boolean,
+    rush boolean,
+    pass boolean,
+    solo_tk boolean,
+    assist_tk boolean,
+    pen_team character varying(3),
+    pen_yds integer,
+    pass_td boolean,
+    rush_td boolean,
+    pass_yds smallint,
+    recv_yds smallint,
+    rush_yds integer,
+    qb_dropback boolean,
+    qb_kneel boolean,
+    qb_spike boolean,
+    run_location public.play_direction,
+    run_gap character varying(10),
+    first_down_rush boolean,
+    first_down_pass boolean,
+    first_down_penalty boolean,
+    third_down_converted boolean,
+    third_down_failed boolean,
+    fourth_down_converted boolean,
+    fourth_down_failed boolean,
+    ep numeric(16,12),
+    epa numeric(16,12),
+    ep_succ boolean,
+    total_home_epa numeric(16,12),
+    total_away_epa numeric(16,12),
+    total_home_rush_epa numeric(16,12),
+    total_away_rush_epa numeric(16,12),
+    total_home_pass_epa numeric(16,12),
+    total_away_pass_epa numeric(16,12),
+    qb_epa numeric(16,12),
+    air_epa numeric(16,12),
+    yac_epa numeric(16,12),
+    comp_air_epa numeric(16,12),
+    comp_yac_epa numeric(16,12),
+    xyac_epa numeric(16,12),
+    total_home_comp_air_epa numeric(16,12),
+    total_away_comp_air_epa numeric(16,12),
+    total_home_comp_yac_epa numeric(16,12),
+    total_away_comp_yac_epa numeric(16,12),
+    total_home_raw_air_epa numeric(16,12),
+    total_away_raw_air_epa numeric(16,12),
+    total_home_raw_yac_epa numeric(16,12),
+    total_away_raw_yac_epa numeric(16,12),
+    wp numeric(16,12),
+    wpa numeric(16,12),
+    home_wp numeric(16,12),
+    away_wp numeric(16,12),
+    vegas_wpa numeric(16,12),
+    vegas_home_wpa numeric(16,12),
+    home_wp_post numeric(16,12),
+    away_wp_post numeric(16,12),
+    vegas_wp numeric(16,12),
+    vegas_home_wp numeric(16,12),
+    total_home_rush_wpa numeric(16,12),
+    total_away_rush_wpa numeric(16,12),
+    total_home_pass_wpa numeric(16,12),
+    total_away_pass_wpa numeric(16,12),
+    air_wpa numeric(16,12),
+    yac_wpa numeric(16,12),
+    comp_air_wpa numeric(16,12),
+    comp_yac_wpa numeric(16,12),
+    total_home_comp_air_wpa numeric(16,12),
+    total_away_comp_air_wpa numeric(16,12),
+    total_home_comp_yac_wpa numeric(16,12),
+    total_away_comp_yac_wpa numeric(16,12),
+    total_home_raw_air_wpa numeric(16,12),
+    total_away_raw_air_wpa numeric(16,12),
+    total_home_raw_yac_wpa numeric(16,12),
+    total_away_raw_yac_wpa numeric(16,12),
+    xyac_mean_yds numeric(16,12),
+    xyac_median_yds numeric(16,12),
+    xyac_succ_prob numeric(16,12),
+    xyac_fd_prob numeric(16,12),
+    ep_att boolean,
+    two_att boolean,
+    fg_att boolean,
+    kickoff_att boolean,
+    punt_att boolean,
+    fg_result character varying(10),
+    kick_distance integer,
+    ep_result character varying(10),
+    tp_result character varying(10),
+    punt_blocked boolean,
+    home_to_rem smallint,
+    away_to_rem smallint,
+    pos_to_rem smallint,
+    def_to_rem smallint,
+    "to" boolean,
+    to_team character varying(3),
+    pos_score smallint,
+    def_score smallint,
+    score_diff smallint,
+    pos_score_post smallint,
+    def_score_post smallint,
+    score_diff_post smallint,
+    no_score_prob numeric(16,12),
+    opp_fg_prob numeric(16,12),
+    opp_safety_prob numeric(16,12),
+    opp_td_prob numeric(16,12),
+    fg_prob numeric(16,12),
+    safety_prob numeric(16,12),
+    td_prob numeric(16,12),
+    extra_point_prob numeric(16,12),
+    two_conv_prob numeric(16,12),
+    xpass_prob numeric(16,12),
+    pass_oe numeric(16,12),
+    cp numeric(16,12),
+    cpoe numeric(16,12),
+    air_yards_ngs numeric(8,4),
+    time_to_throw_ngs numeric(8,4),
+    route_ngs character varying(100),
+    man_zone_ngs character varying(100),
+    cov_type_ngs character varying(100),
+    qb_pressure_ngs boolean,
+    starting_hash public.hash_position,
+    ftn_play_id numeric,
+    qb_position public.qb_position,
+    n_offense_backfield numeric,
+    run_play_option boolean,
+    read_thrown public.read_thrown_type,
+    motion boolean,
+    solo_tackle_1_gsis character varying(36),
+    solo_tackle_1_pid character varying(25),
+    solo_tackle_2_gsis character varying(36),
+    solo_tackle_2_pid character varying(25),
+    solo_tackle_3_gsis character varying(36),
+    solo_tackle_3_pid character varying(25),
+    assisted_tackle_1_gsis character varying(36),
+    assisted_tackle_1_pid character varying(25),
+    assisted_tackle_2_gsis character varying(36),
+    assisted_tackle_2_pid character varying(25),
+    tackle_assist_1_gsis character varying(36),
+    tackle_assist_1_pid character varying(25),
+    tackle_assist_2_gsis character varying(36),
+    tackle_assist_2_pid character varying(25),
+    tackle_assist_3_gsis character varying(36),
+    tackle_assist_3_pid character varying(25),
+    tackle_assist_4_gsis character varying(36),
+    tackle_assist_4_pid character varying(25),
+    pass_location public.play_direction
+);
+
+
+--
+-- Name: nfl_plays_year_2007; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_plays_year_2007 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    sequence integer,
+    state character varying(36),
+    dwn integer,
+    home_score smallint,
+    special boolean,
+    "desc" text,
+    play_type_ngs character varying(36),
+    pos_team character varying(4),
+    pos_team_id character varying(36),
+    qtr integer,
+    year smallint NOT NULL,
+    seas_type character varying(36),
+    away_score smallint,
+    week smallint NOT NULL,
+    ydl_num integer,
+    ydl_side character varying(10),
+    yards_to_go integer,
+    off_formation character varying(100),
+    off_personnel character varying(100),
+    box_ngs integer,
+    pru_ngs integer,
+    def_personnel character varying(100),
+    game_clock_start character varying(10),
+    drive_seq integer,
+    ydl_end character varying(10),
+    ydl_start character varying(10),
+    first_down boolean,
+    goal_to_go boolean,
+    next_play_type character varying(36),
+    penalty boolean,
+    drive_yds integer,
+    drive_play_count integer,
+    play_clock smallint,
+    deleted boolean,
+    review text,
+    score boolean,
+    score_type character varying(10),
+    score_team character varying(4),
+    special_play_type character varying(10),
+    "timestamp" character varying(10),
+    play_type_nfl character varying(36),
+    updated integer NOT NULL,
+    off character varying(3),
+    def character varying(3),
+    play_type public.nfl_play_type,
+    player_fuml_pid character varying(25),
+    player_fuml_gsis character varying(36),
+    bc_pid character varying(25),
+    bc_gsis character varying(36),
+    psr_pid character varying(25),
+    psr_gsis character varying(36),
+    trg_pid character varying(25),
+    trg_gsis character varying(36),
+    intp_pid character varying(25),
+    intp_gsis character varying(36),
+    yds_gained smallint,
+    dot integer,
+    yards_after_catch integer,
+    yards_after_any_contact integer,
+    ret_yds integer,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
+    highlight_pass boolean,
+    int_worthy boolean,
+    dropped_pass boolean,
+    contested_ball boolean,
+    mbt smallint,
+    fuml boolean,
+    "int" boolean,
+    sk boolean,
+    succ boolean,
+    comp boolean,
+    td boolean,
+    ret_td boolean,
+    td_tm character varying(5),
+    ret_tm character varying(5),
+    charted boolean,
+    yfog integer,
+    true_air_yards smallint,
+    created_reception boolean,
+    avsk smallint,
+    no_huddle boolean,
+    play_action boolean,
+    trick_look boolean,
+    trick_play boolean,
+    qb_rush boolean,
+    qb_sneak boolean,
+    qb_scramble boolean,
+    hindered_pass boolean,
+    zero_blitz boolean,
+    stunt boolean,
+    out_of_pocket_pass boolean,
+    phyb boolean,
+    catchable_ball boolean,
+    throw_away boolean,
+    shovel_pass boolean,
+    sideline_pass boolean,
+    batted_pass boolean,
+    screen_pass boolean,
+    pain_free_play boolean,
+    qb_fault_sack boolean,
+    ttscrm numeric(16,12),
+    time_to_pass numeric(16,12),
+    ttsk numeric(16,12),
+    time_to_pressure numeric(16,12),
+    back smallint,
+    xlm smallint,
+    db smallint,
+    box smallint,
+    boxdb smallint,
+    pass_rushers smallint,
+    blitzers smallint,
+    db_blitzers smallint,
+    oopd character varying(2),
+    cov smallint,
+    cov_type_charted character varying(3),
+    sep character varying(3),
+    ydl_100 integer,
+    drive_result character varying(30),
+    drive_top character varying(10),
+    drive_fds integer,
+    drive_inside20 boolean,
+    drive_score boolean,
+    drive_start_qtr smallint,
+    drive_end_qtr smallint,
+    drive_yds_penalized integer,
+    drive_start_transition character varying(30),
+    drive_end_transition character varying(30),
+    drive_game_clock_start character varying(10),
+    drive_game_clock_end character varying(10),
+    drive_start_ydl character varying(10),
+    drive_end_ydl character varying(10),
+    drive_start_play_id integer,
+    drive_end_play_id integer,
+    series_seq integer,
+    series_suc boolean,
+    series_result character varying(100),
+    game_clock_end character varying(10),
+    sec_rem_qtr integer,
+    sec_rem_half integer,
+    sec_rem_gm integer,
+    fum boolean,
+    incomp boolean,
+    touchback boolean,
+    safety boolean,
+    oob boolean,
+    tfl boolean,
+    rush boolean,
+    pass boolean,
+    solo_tk boolean,
+    assist_tk boolean,
+    pen_team character varying(3),
+    pen_yds integer,
+    pass_td boolean,
+    rush_td boolean,
+    pass_yds smallint,
+    recv_yds smallint,
+    rush_yds integer,
+    qb_dropback boolean,
+    qb_kneel boolean,
+    qb_spike boolean,
+    run_location public.play_direction,
+    run_gap character varying(10),
+    first_down_rush boolean,
+    first_down_pass boolean,
+    first_down_penalty boolean,
+    third_down_converted boolean,
+    third_down_failed boolean,
+    fourth_down_converted boolean,
+    fourth_down_failed boolean,
+    ep numeric(16,12),
+    epa numeric(16,12),
+    ep_succ boolean,
+    total_home_epa numeric(16,12),
+    total_away_epa numeric(16,12),
+    total_home_rush_epa numeric(16,12),
+    total_away_rush_epa numeric(16,12),
+    total_home_pass_epa numeric(16,12),
+    total_away_pass_epa numeric(16,12),
+    qb_epa numeric(16,12),
+    air_epa numeric(16,12),
+    yac_epa numeric(16,12),
+    comp_air_epa numeric(16,12),
+    comp_yac_epa numeric(16,12),
+    xyac_epa numeric(16,12),
+    total_home_comp_air_epa numeric(16,12),
+    total_away_comp_air_epa numeric(16,12),
+    total_home_comp_yac_epa numeric(16,12),
+    total_away_comp_yac_epa numeric(16,12),
+    total_home_raw_air_epa numeric(16,12),
+    total_away_raw_air_epa numeric(16,12),
+    total_home_raw_yac_epa numeric(16,12),
+    total_away_raw_yac_epa numeric(16,12),
+    wp numeric(16,12),
+    wpa numeric(16,12),
+    home_wp numeric(16,12),
+    away_wp numeric(16,12),
+    vegas_wpa numeric(16,12),
+    vegas_home_wpa numeric(16,12),
+    home_wp_post numeric(16,12),
+    away_wp_post numeric(16,12),
+    vegas_wp numeric(16,12),
+    vegas_home_wp numeric(16,12),
+    total_home_rush_wpa numeric(16,12),
+    total_away_rush_wpa numeric(16,12),
+    total_home_pass_wpa numeric(16,12),
+    total_away_pass_wpa numeric(16,12),
+    air_wpa numeric(16,12),
+    yac_wpa numeric(16,12),
+    comp_air_wpa numeric(16,12),
+    comp_yac_wpa numeric(16,12),
+    total_home_comp_air_wpa numeric(16,12),
+    total_away_comp_air_wpa numeric(16,12),
+    total_home_comp_yac_wpa numeric(16,12),
+    total_away_comp_yac_wpa numeric(16,12),
+    total_home_raw_air_wpa numeric(16,12),
+    total_away_raw_air_wpa numeric(16,12),
+    total_home_raw_yac_wpa numeric(16,12),
+    total_away_raw_yac_wpa numeric(16,12),
+    xyac_mean_yds numeric(16,12),
+    xyac_median_yds numeric(16,12),
+    xyac_succ_prob numeric(16,12),
+    xyac_fd_prob numeric(16,12),
+    ep_att boolean,
+    two_att boolean,
+    fg_att boolean,
+    kickoff_att boolean,
+    punt_att boolean,
+    fg_result character varying(10),
+    kick_distance integer,
+    ep_result character varying(10),
+    tp_result character varying(10),
+    punt_blocked boolean,
+    home_to_rem smallint,
+    away_to_rem smallint,
+    pos_to_rem smallint,
+    def_to_rem smallint,
+    "to" boolean,
+    to_team character varying(3),
+    pos_score smallint,
+    def_score smallint,
+    score_diff smallint,
+    pos_score_post smallint,
+    def_score_post smallint,
+    score_diff_post smallint,
+    no_score_prob numeric(16,12),
+    opp_fg_prob numeric(16,12),
+    opp_safety_prob numeric(16,12),
+    opp_td_prob numeric(16,12),
+    fg_prob numeric(16,12),
+    safety_prob numeric(16,12),
+    td_prob numeric(16,12),
+    extra_point_prob numeric(16,12),
+    two_conv_prob numeric(16,12),
+    xpass_prob numeric(16,12),
+    pass_oe numeric(16,12),
+    cp numeric(16,12),
+    cpoe numeric(16,12),
+    air_yards_ngs numeric(8,4),
+    time_to_throw_ngs numeric(8,4),
+    route_ngs character varying(100),
+    man_zone_ngs character varying(100),
+    cov_type_ngs character varying(100),
+    qb_pressure_ngs boolean,
+    starting_hash public.hash_position,
+    ftn_play_id numeric,
+    qb_position public.qb_position,
+    n_offense_backfield numeric,
+    run_play_option boolean,
+    read_thrown public.read_thrown_type,
+    motion boolean,
+    solo_tackle_1_gsis character varying(36),
+    solo_tackle_1_pid character varying(25),
+    solo_tackle_2_gsis character varying(36),
+    solo_tackle_2_pid character varying(25),
+    solo_tackle_3_gsis character varying(36),
+    solo_tackle_3_pid character varying(25),
+    assisted_tackle_1_gsis character varying(36),
+    assisted_tackle_1_pid character varying(25),
+    assisted_tackle_2_gsis character varying(36),
+    assisted_tackle_2_pid character varying(25),
+    tackle_assist_1_gsis character varying(36),
+    tackle_assist_1_pid character varying(25),
+    tackle_assist_2_gsis character varying(36),
+    tackle_assist_2_pid character varying(25),
+    tackle_assist_3_gsis character varying(36),
+    tackle_assist_3_pid character varying(25),
+    tackle_assist_4_gsis character varying(36),
+    tackle_assist_4_pid character varying(25),
+    pass_location public.play_direction
+);
+
+
+--
+-- Name: nfl_plays_year_2008; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_plays_year_2008 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    sequence integer,
+    state character varying(36),
+    dwn integer,
+    home_score smallint,
+    special boolean,
+    "desc" text,
+    play_type_ngs character varying(36),
+    pos_team character varying(4),
+    pos_team_id character varying(36),
+    qtr integer,
+    year smallint NOT NULL,
+    seas_type character varying(36),
+    away_score smallint,
+    week smallint NOT NULL,
+    ydl_num integer,
+    ydl_side character varying(10),
+    yards_to_go integer,
+    off_formation character varying(100),
+    off_personnel character varying(100),
+    box_ngs integer,
+    pru_ngs integer,
+    def_personnel character varying(100),
+    game_clock_start character varying(10),
+    drive_seq integer,
+    ydl_end character varying(10),
+    ydl_start character varying(10),
+    first_down boolean,
+    goal_to_go boolean,
+    next_play_type character varying(36),
+    penalty boolean,
+    drive_yds integer,
+    drive_play_count integer,
+    play_clock smallint,
+    deleted boolean,
+    review text,
+    score boolean,
+    score_type character varying(10),
+    score_team character varying(4),
+    special_play_type character varying(10),
+    "timestamp" character varying(10),
+    play_type_nfl character varying(36),
+    updated integer NOT NULL,
+    off character varying(3),
+    def character varying(3),
+    play_type public.nfl_play_type,
+    player_fuml_pid character varying(25),
+    player_fuml_gsis character varying(36),
+    bc_pid character varying(25),
+    bc_gsis character varying(36),
+    psr_pid character varying(25),
+    psr_gsis character varying(36),
+    trg_pid character varying(25),
+    trg_gsis character varying(36),
+    intp_pid character varying(25),
+    intp_gsis character varying(36),
+    yds_gained smallint,
+    dot integer,
+    yards_after_catch integer,
+    yards_after_any_contact integer,
+    ret_yds integer,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
+    highlight_pass boolean,
+    int_worthy boolean,
+    dropped_pass boolean,
+    contested_ball boolean,
+    mbt smallint,
+    fuml boolean,
+    "int" boolean,
+    sk boolean,
+    succ boolean,
+    comp boolean,
+    td boolean,
+    ret_td boolean,
+    td_tm character varying(5),
+    ret_tm character varying(5),
+    charted boolean,
+    yfog integer,
+    true_air_yards smallint,
+    created_reception boolean,
+    avsk smallint,
+    no_huddle boolean,
+    play_action boolean,
+    trick_look boolean,
+    trick_play boolean,
+    qb_rush boolean,
+    qb_sneak boolean,
+    qb_scramble boolean,
+    hindered_pass boolean,
+    zero_blitz boolean,
+    stunt boolean,
+    out_of_pocket_pass boolean,
+    phyb boolean,
+    catchable_ball boolean,
+    throw_away boolean,
+    shovel_pass boolean,
+    sideline_pass boolean,
+    batted_pass boolean,
+    screen_pass boolean,
+    pain_free_play boolean,
+    qb_fault_sack boolean,
+    ttscrm numeric(16,12),
+    time_to_pass numeric(16,12),
+    ttsk numeric(16,12),
+    time_to_pressure numeric(16,12),
+    back smallint,
+    xlm smallint,
+    db smallint,
+    box smallint,
+    boxdb smallint,
+    pass_rushers smallint,
+    blitzers smallint,
+    db_blitzers smallint,
+    oopd character varying(2),
+    cov smallint,
+    cov_type_charted character varying(3),
+    sep character varying(3),
+    ydl_100 integer,
+    drive_result character varying(30),
+    drive_top character varying(10),
+    drive_fds integer,
+    drive_inside20 boolean,
+    drive_score boolean,
+    drive_start_qtr smallint,
+    drive_end_qtr smallint,
+    drive_yds_penalized integer,
+    drive_start_transition character varying(30),
+    drive_end_transition character varying(30),
+    drive_game_clock_start character varying(10),
+    drive_game_clock_end character varying(10),
+    drive_start_ydl character varying(10),
+    drive_end_ydl character varying(10),
+    drive_start_play_id integer,
+    drive_end_play_id integer,
+    series_seq integer,
+    series_suc boolean,
+    series_result character varying(100),
+    game_clock_end character varying(10),
+    sec_rem_qtr integer,
+    sec_rem_half integer,
+    sec_rem_gm integer,
+    fum boolean,
+    incomp boolean,
+    touchback boolean,
+    safety boolean,
+    oob boolean,
+    tfl boolean,
+    rush boolean,
+    pass boolean,
+    solo_tk boolean,
+    assist_tk boolean,
+    pen_team character varying(3),
+    pen_yds integer,
+    pass_td boolean,
+    rush_td boolean,
+    pass_yds smallint,
+    recv_yds smallint,
+    rush_yds integer,
+    qb_dropback boolean,
+    qb_kneel boolean,
+    qb_spike boolean,
+    run_location public.play_direction,
+    run_gap character varying(10),
+    first_down_rush boolean,
+    first_down_pass boolean,
+    first_down_penalty boolean,
+    third_down_converted boolean,
+    third_down_failed boolean,
+    fourth_down_converted boolean,
+    fourth_down_failed boolean,
+    ep numeric(16,12),
+    epa numeric(16,12),
+    ep_succ boolean,
+    total_home_epa numeric(16,12),
+    total_away_epa numeric(16,12),
+    total_home_rush_epa numeric(16,12),
+    total_away_rush_epa numeric(16,12),
+    total_home_pass_epa numeric(16,12),
+    total_away_pass_epa numeric(16,12),
+    qb_epa numeric(16,12),
+    air_epa numeric(16,12),
+    yac_epa numeric(16,12),
+    comp_air_epa numeric(16,12),
+    comp_yac_epa numeric(16,12),
+    xyac_epa numeric(16,12),
+    total_home_comp_air_epa numeric(16,12),
+    total_away_comp_air_epa numeric(16,12),
+    total_home_comp_yac_epa numeric(16,12),
+    total_away_comp_yac_epa numeric(16,12),
+    total_home_raw_air_epa numeric(16,12),
+    total_away_raw_air_epa numeric(16,12),
+    total_home_raw_yac_epa numeric(16,12),
+    total_away_raw_yac_epa numeric(16,12),
+    wp numeric(16,12),
+    wpa numeric(16,12),
+    home_wp numeric(16,12),
+    away_wp numeric(16,12),
+    vegas_wpa numeric(16,12),
+    vegas_home_wpa numeric(16,12),
+    home_wp_post numeric(16,12),
+    away_wp_post numeric(16,12),
+    vegas_wp numeric(16,12),
+    vegas_home_wp numeric(16,12),
+    total_home_rush_wpa numeric(16,12),
+    total_away_rush_wpa numeric(16,12),
+    total_home_pass_wpa numeric(16,12),
+    total_away_pass_wpa numeric(16,12),
+    air_wpa numeric(16,12),
+    yac_wpa numeric(16,12),
+    comp_air_wpa numeric(16,12),
+    comp_yac_wpa numeric(16,12),
+    total_home_comp_air_wpa numeric(16,12),
+    total_away_comp_air_wpa numeric(16,12),
+    total_home_comp_yac_wpa numeric(16,12),
+    total_away_comp_yac_wpa numeric(16,12),
+    total_home_raw_air_wpa numeric(16,12),
+    total_away_raw_air_wpa numeric(16,12),
+    total_home_raw_yac_wpa numeric(16,12),
+    total_away_raw_yac_wpa numeric(16,12),
+    xyac_mean_yds numeric(16,12),
+    xyac_median_yds numeric(16,12),
+    xyac_succ_prob numeric(16,12),
+    xyac_fd_prob numeric(16,12),
+    ep_att boolean,
+    two_att boolean,
+    fg_att boolean,
+    kickoff_att boolean,
+    punt_att boolean,
+    fg_result character varying(10),
+    kick_distance integer,
+    ep_result character varying(10),
+    tp_result character varying(10),
+    punt_blocked boolean,
+    home_to_rem smallint,
+    away_to_rem smallint,
+    pos_to_rem smallint,
+    def_to_rem smallint,
+    "to" boolean,
+    to_team character varying(3),
+    pos_score smallint,
+    def_score smallint,
+    score_diff smallint,
+    pos_score_post smallint,
+    def_score_post smallint,
+    score_diff_post smallint,
+    no_score_prob numeric(16,12),
+    opp_fg_prob numeric(16,12),
+    opp_safety_prob numeric(16,12),
+    opp_td_prob numeric(16,12),
+    fg_prob numeric(16,12),
+    safety_prob numeric(16,12),
+    td_prob numeric(16,12),
+    extra_point_prob numeric(16,12),
+    two_conv_prob numeric(16,12),
+    xpass_prob numeric(16,12),
+    pass_oe numeric(16,12),
+    cp numeric(16,12),
+    cpoe numeric(16,12),
+    air_yards_ngs numeric(8,4),
+    time_to_throw_ngs numeric(8,4),
+    route_ngs character varying(100),
+    man_zone_ngs character varying(100),
+    cov_type_ngs character varying(100),
+    qb_pressure_ngs boolean,
+    starting_hash public.hash_position,
+    ftn_play_id numeric,
+    qb_position public.qb_position,
+    n_offense_backfield numeric,
+    run_play_option boolean,
+    read_thrown public.read_thrown_type,
+    motion boolean,
+    solo_tackle_1_gsis character varying(36),
+    solo_tackle_1_pid character varying(25),
+    solo_tackle_2_gsis character varying(36),
+    solo_tackle_2_pid character varying(25),
+    solo_tackle_3_gsis character varying(36),
+    solo_tackle_3_pid character varying(25),
+    assisted_tackle_1_gsis character varying(36),
+    assisted_tackle_1_pid character varying(25),
+    assisted_tackle_2_gsis character varying(36),
+    assisted_tackle_2_pid character varying(25),
+    tackle_assist_1_gsis character varying(36),
+    tackle_assist_1_pid character varying(25),
+    tackle_assist_2_gsis character varying(36),
+    tackle_assist_2_pid character varying(25),
+    tackle_assist_3_gsis character varying(36),
+    tackle_assist_3_pid character varying(25),
+    tackle_assist_4_gsis character varying(36),
+    tackle_assist_4_pid character varying(25),
+    pass_location public.play_direction
+);
+
+
+--
+-- Name: nfl_plays_year_2009; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_plays_year_2009 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    sequence integer,
+    state character varying(36),
+    dwn integer,
+    home_score smallint,
+    special boolean,
+    "desc" text,
+    play_type_ngs character varying(36),
+    pos_team character varying(4),
+    pos_team_id character varying(36),
+    qtr integer,
+    year smallint NOT NULL,
+    seas_type character varying(36),
+    away_score smallint,
+    week smallint NOT NULL,
+    ydl_num integer,
+    ydl_side character varying(10),
+    yards_to_go integer,
+    off_formation character varying(100),
+    off_personnel character varying(100),
+    box_ngs integer,
+    pru_ngs integer,
+    def_personnel character varying(100),
+    game_clock_start character varying(10),
+    drive_seq integer,
+    ydl_end character varying(10),
+    ydl_start character varying(10),
+    first_down boolean,
+    goal_to_go boolean,
+    next_play_type character varying(36),
+    penalty boolean,
+    drive_yds integer,
+    drive_play_count integer,
+    play_clock smallint,
+    deleted boolean,
+    review text,
+    score boolean,
+    score_type character varying(10),
+    score_team character varying(4),
+    special_play_type character varying(10),
+    "timestamp" character varying(10),
+    play_type_nfl character varying(36),
+    updated integer NOT NULL,
+    off character varying(3),
+    def character varying(3),
+    play_type public.nfl_play_type,
+    player_fuml_pid character varying(25),
+    player_fuml_gsis character varying(36),
+    bc_pid character varying(25),
+    bc_gsis character varying(36),
+    psr_pid character varying(25),
+    psr_gsis character varying(36),
+    trg_pid character varying(25),
+    trg_gsis character varying(36),
+    intp_pid character varying(25),
+    intp_gsis character varying(36),
+    yds_gained smallint,
+    dot integer,
+    yards_after_catch integer,
+    yards_after_any_contact integer,
+    ret_yds integer,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
+    highlight_pass boolean,
+    int_worthy boolean,
+    dropped_pass boolean,
+    contested_ball boolean,
+    mbt smallint,
+    fuml boolean,
+    "int" boolean,
+    sk boolean,
+    succ boolean,
+    comp boolean,
+    td boolean,
+    ret_td boolean,
+    td_tm character varying(5),
+    ret_tm character varying(5),
+    charted boolean,
+    yfog integer,
+    true_air_yards smallint,
+    created_reception boolean,
+    avsk smallint,
+    no_huddle boolean,
+    play_action boolean,
+    trick_look boolean,
+    trick_play boolean,
+    qb_rush boolean,
+    qb_sneak boolean,
+    qb_scramble boolean,
+    hindered_pass boolean,
+    zero_blitz boolean,
+    stunt boolean,
+    out_of_pocket_pass boolean,
+    phyb boolean,
+    catchable_ball boolean,
+    throw_away boolean,
+    shovel_pass boolean,
+    sideline_pass boolean,
+    batted_pass boolean,
+    screen_pass boolean,
+    pain_free_play boolean,
+    qb_fault_sack boolean,
+    ttscrm numeric(16,12),
+    time_to_pass numeric(16,12),
+    ttsk numeric(16,12),
+    time_to_pressure numeric(16,12),
+    back smallint,
+    xlm smallint,
+    db smallint,
+    box smallint,
+    boxdb smallint,
+    pass_rushers smallint,
+    blitzers smallint,
+    db_blitzers smallint,
+    oopd character varying(2),
+    cov smallint,
+    cov_type_charted character varying(3),
+    sep character varying(3),
+    ydl_100 integer,
+    drive_result character varying(30),
+    drive_top character varying(10),
+    drive_fds integer,
+    drive_inside20 boolean,
+    drive_score boolean,
+    drive_start_qtr smallint,
+    drive_end_qtr smallint,
+    drive_yds_penalized integer,
+    drive_start_transition character varying(30),
+    drive_end_transition character varying(30),
+    drive_game_clock_start character varying(10),
+    drive_game_clock_end character varying(10),
+    drive_start_ydl character varying(10),
+    drive_end_ydl character varying(10),
+    drive_start_play_id integer,
+    drive_end_play_id integer,
+    series_seq integer,
+    series_suc boolean,
+    series_result character varying(100),
+    game_clock_end character varying(10),
+    sec_rem_qtr integer,
+    sec_rem_half integer,
+    sec_rem_gm integer,
+    fum boolean,
+    incomp boolean,
+    touchback boolean,
+    safety boolean,
+    oob boolean,
+    tfl boolean,
+    rush boolean,
+    pass boolean,
+    solo_tk boolean,
+    assist_tk boolean,
+    pen_team character varying(3),
+    pen_yds integer,
+    pass_td boolean,
+    rush_td boolean,
+    pass_yds smallint,
+    recv_yds smallint,
+    rush_yds integer,
+    qb_dropback boolean,
+    qb_kneel boolean,
+    qb_spike boolean,
+    run_location public.play_direction,
+    run_gap character varying(10),
+    first_down_rush boolean,
+    first_down_pass boolean,
+    first_down_penalty boolean,
+    third_down_converted boolean,
+    third_down_failed boolean,
+    fourth_down_converted boolean,
+    fourth_down_failed boolean,
+    ep numeric(16,12),
+    epa numeric(16,12),
+    ep_succ boolean,
+    total_home_epa numeric(16,12),
+    total_away_epa numeric(16,12),
+    total_home_rush_epa numeric(16,12),
+    total_away_rush_epa numeric(16,12),
+    total_home_pass_epa numeric(16,12),
+    total_away_pass_epa numeric(16,12),
+    qb_epa numeric(16,12),
+    air_epa numeric(16,12),
+    yac_epa numeric(16,12),
+    comp_air_epa numeric(16,12),
+    comp_yac_epa numeric(16,12),
+    xyac_epa numeric(16,12),
+    total_home_comp_air_epa numeric(16,12),
+    total_away_comp_air_epa numeric(16,12),
+    total_home_comp_yac_epa numeric(16,12),
+    total_away_comp_yac_epa numeric(16,12),
+    total_home_raw_air_epa numeric(16,12),
+    total_away_raw_air_epa numeric(16,12),
+    total_home_raw_yac_epa numeric(16,12),
+    total_away_raw_yac_epa numeric(16,12),
+    wp numeric(16,12),
+    wpa numeric(16,12),
+    home_wp numeric(16,12),
+    away_wp numeric(16,12),
+    vegas_wpa numeric(16,12),
+    vegas_home_wpa numeric(16,12),
+    home_wp_post numeric(16,12),
+    away_wp_post numeric(16,12),
+    vegas_wp numeric(16,12),
+    vegas_home_wp numeric(16,12),
+    total_home_rush_wpa numeric(16,12),
+    total_away_rush_wpa numeric(16,12),
+    total_home_pass_wpa numeric(16,12),
+    total_away_pass_wpa numeric(16,12),
+    air_wpa numeric(16,12),
+    yac_wpa numeric(16,12),
+    comp_air_wpa numeric(16,12),
+    comp_yac_wpa numeric(16,12),
+    total_home_comp_air_wpa numeric(16,12),
+    total_away_comp_air_wpa numeric(16,12),
+    total_home_comp_yac_wpa numeric(16,12),
+    total_away_comp_yac_wpa numeric(16,12),
+    total_home_raw_air_wpa numeric(16,12),
+    total_away_raw_air_wpa numeric(16,12),
+    total_home_raw_yac_wpa numeric(16,12),
+    total_away_raw_yac_wpa numeric(16,12),
+    xyac_mean_yds numeric(16,12),
+    xyac_median_yds numeric(16,12),
+    xyac_succ_prob numeric(16,12),
+    xyac_fd_prob numeric(16,12),
+    ep_att boolean,
+    two_att boolean,
+    fg_att boolean,
+    kickoff_att boolean,
+    punt_att boolean,
+    fg_result character varying(10),
+    kick_distance integer,
+    ep_result character varying(10),
+    tp_result character varying(10),
+    punt_blocked boolean,
+    home_to_rem smallint,
+    away_to_rem smallint,
+    pos_to_rem smallint,
+    def_to_rem smallint,
+    "to" boolean,
+    to_team character varying(3),
+    pos_score smallint,
+    def_score smallint,
+    score_diff smallint,
+    pos_score_post smallint,
+    def_score_post smallint,
+    score_diff_post smallint,
+    no_score_prob numeric(16,12),
+    opp_fg_prob numeric(16,12),
+    opp_safety_prob numeric(16,12),
+    opp_td_prob numeric(16,12),
+    fg_prob numeric(16,12),
+    safety_prob numeric(16,12),
+    td_prob numeric(16,12),
+    extra_point_prob numeric(16,12),
+    two_conv_prob numeric(16,12),
+    xpass_prob numeric(16,12),
+    pass_oe numeric(16,12),
+    cp numeric(16,12),
+    cpoe numeric(16,12),
+    air_yards_ngs numeric(8,4),
+    time_to_throw_ngs numeric(8,4),
+    route_ngs character varying(100),
+    man_zone_ngs character varying(100),
+    cov_type_ngs character varying(100),
+    qb_pressure_ngs boolean,
+    starting_hash public.hash_position,
+    ftn_play_id numeric,
+    qb_position public.qb_position,
+    n_offense_backfield numeric,
+    run_play_option boolean,
+    read_thrown public.read_thrown_type,
+    motion boolean,
+    solo_tackle_1_gsis character varying(36),
+    solo_tackle_1_pid character varying(25),
+    solo_tackle_2_gsis character varying(36),
+    solo_tackle_2_pid character varying(25),
+    solo_tackle_3_gsis character varying(36),
+    solo_tackle_3_pid character varying(25),
+    assisted_tackle_1_gsis character varying(36),
+    assisted_tackle_1_pid character varying(25),
+    assisted_tackle_2_gsis character varying(36),
+    assisted_tackle_2_pid character varying(25),
+    tackle_assist_1_gsis character varying(36),
+    tackle_assist_1_pid character varying(25),
+    tackle_assist_2_gsis character varying(36),
+    tackle_assist_2_pid character varying(25),
+    tackle_assist_3_gsis character varying(36),
+    tackle_assist_3_pid character varying(25),
+    tackle_assist_4_gsis character varying(36),
+    tackle_assist_4_pid character varying(25),
+    pass_location public.play_direction
+);
+
+
+--
+-- Name: nfl_plays_year_2010; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_plays_year_2010 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    sequence integer,
+    state character varying(36),
+    dwn integer,
+    home_score smallint,
+    special boolean,
+    "desc" text,
+    play_type_ngs character varying(36),
+    pos_team character varying(4),
+    pos_team_id character varying(36),
+    qtr integer,
+    year smallint NOT NULL,
+    seas_type character varying(36),
+    away_score smallint,
+    week smallint NOT NULL,
+    ydl_num integer,
+    ydl_side character varying(10),
+    yards_to_go integer,
+    off_formation character varying(100),
+    off_personnel character varying(100),
+    box_ngs integer,
+    pru_ngs integer,
+    def_personnel character varying(100),
+    game_clock_start character varying(10),
+    drive_seq integer,
+    ydl_end character varying(10),
+    ydl_start character varying(10),
+    first_down boolean,
+    goal_to_go boolean,
+    next_play_type character varying(36),
+    penalty boolean,
+    drive_yds integer,
+    drive_play_count integer,
+    play_clock smallint,
+    deleted boolean,
+    review text,
+    score boolean,
+    score_type character varying(10),
+    score_team character varying(4),
+    special_play_type character varying(10),
+    "timestamp" character varying(10),
+    play_type_nfl character varying(36),
+    updated integer NOT NULL,
+    off character varying(3),
+    def character varying(3),
+    play_type public.nfl_play_type,
+    player_fuml_pid character varying(25),
+    player_fuml_gsis character varying(36),
+    bc_pid character varying(25),
+    bc_gsis character varying(36),
+    psr_pid character varying(25),
+    psr_gsis character varying(36),
+    trg_pid character varying(25),
+    trg_gsis character varying(36),
+    intp_pid character varying(25),
+    intp_gsis character varying(36),
+    yds_gained smallint,
+    dot integer,
+    yards_after_catch integer,
+    yards_after_any_contact integer,
+    ret_yds integer,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
+    highlight_pass boolean,
+    int_worthy boolean,
+    dropped_pass boolean,
+    contested_ball boolean,
+    mbt smallint,
+    fuml boolean,
+    "int" boolean,
+    sk boolean,
+    succ boolean,
+    comp boolean,
+    td boolean,
+    ret_td boolean,
+    td_tm character varying(5),
+    ret_tm character varying(5),
+    charted boolean,
+    yfog integer,
+    true_air_yards smallint,
+    created_reception boolean,
+    avsk smallint,
+    no_huddle boolean,
+    play_action boolean,
+    trick_look boolean,
+    trick_play boolean,
+    qb_rush boolean,
+    qb_sneak boolean,
+    qb_scramble boolean,
+    hindered_pass boolean,
+    zero_blitz boolean,
+    stunt boolean,
+    out_of_pocket_pass boolean,
+    phyb boolean,
+    catchable_ball boolean,
+    throw_away boolean,
+    shovel_pass boolean,
+    sideline_pass boolean,
+    batted_pass boolean,
+    screen_pass boolean,
+    pain_free_play boolean,
+    qb_fault_sack boolean,
+    ttscrm numeric(16,12),
+    time_to_pass numeric(16,12),
+    ttsk numeric(16,12),
+    time_to_pressure numeric(16,12),
+    back smallint,
+    xlm smallint,
+    db smallint,
+    box smallint,
+    boxdb smallint,
+    pass_rushers smallint,
+    blitzers smallint,
+    db_blitzers smallint,
+    oopd character varying(2),
+    cov smallint,
+    cov_type_charted character varying(3),
+    sep character varying(3),
+    ydl_100 integer,
+    drive_result character varying(30),
+    drive_top character varying(10),
+    drive_fds integer,
+    drive_inside20 boolean,
+    drive_score boolean,
+    drive_start_qtr smallint,
+    drive_end_qtr smallint,
+    drive_yds_penalized integer,
+    drive_start_transition character varying(30),
+    drive_end_transition character varying(30),
+    drive_game_clock_start character varying(10),
+    drive_game_clock_end character varying(10),
+    drive_start_ydl character varying(10),
+    drive_end_ydl character varying(10),
+    drive_start_play_id integer,
+    drive_end_play_id integer,
+    series_seq integer,
+    series_suc boolean,
+    series_result character varying(100),
+    game_clock_end character varying(10),
+    sec_rem_qtr integer,
+    sec_rem_half integer,
+    sec_rem_gm integer,
+    fum boolean,
+    incomp boolean,
+    touchback boolean,
+    safety boolean,
+    oob boolean,
+    tfl boolean,
+    rush boolean,
+    pass boolean,
+    solo_tk boolean,
+    assist_tk boolean,
+    pen_team character varying(3),
+    pen_yds integer,
+    pass_td boolean,
+    rush_td boolean,
+    pass_yds smallint,
+    recv_yds smallint,
+    rush_yds integer,
+    qb_dropback boolean,
+    qb_kneel boolean,
+    qb_spike boolean,
+    run_location public.play_direction,
+    run_gap character varying(10),
+    first_down_rush boolean,
+    first_down_pass boolean,
+    first_down_penalty boolean,
+    third_down_converted boolean,
+    third_down_failed boolean,
+    fourth_down_converted boolean,
+    fourth_down_failed boolean,
+    ep numeric(16,12),
+    epa numeric(16,12),
+    ep_succ boolean,
+    total_home_epa numeric(16,12),
+    total_away_epa numeric(16,12),
+    total_home_rush_epa numeric(16,12),
+    total_away_rush_epa numeric(16,12),
+    total_home_pass_epa numeric(16,12),
+    total_away_pass_epa numeric(16,12),
+    qb_epa numeric(16,12),
+    air_epa numeric(16,12),
+    yac_epa numeric(16,12),
+    comp_air_epa numeric(16,12),
+    comp_yac_epa numeric(16,12),
+    xyac_epa numeric(16,12),
+    total_home_comp_air_epa numeric(16,12),
+    total_away_comp_air_epa numeric(16,12),
+    total_home_comp_yac_epa numeric(16,12),
+    total_away_comp_yac_epa numeric(16,12),
+    total_home_raw_air_epa numeric(16,12),
+    total_away_raw_air_epa numeric(16,12),
+    total_home_raw_yac_epa numeric(16,12),
+    total_away_raw_yac_epa numeric(16,12),
+    wp numeric(16,12),
+    wpa numeric(16,12),
+    home_wp numeric(16,12),
+    away_wp numeric(16,12),
+    vegas_wpa numeric(16,12),
+    vegas_home_wpa numeric(16,12),
+    home_wp_post numeric(16,12),
+    away_wp_post numeric(16,12),
+    vegas_wp numeric(16,12),
+    vegas_home_wp numeric(16,12),
+    total_home_rush_wpa numeric(16,12),
+    total_away_rush_wpa numeric(16,12),
+    total_home_pass_wpa numeric(16,12),
+    total_away_pass_wpa numeric(16,12),
+    air_wpa numeric(16,12),
+    yac_wpa numeric(16,12),
+    comp_air_wpa numeric(16,12),
+    comp_yac_wpa numeric(16,12),
+    total_home_comp_air_wpa numeric(16,12),
+    total_away_comp_air_wpa numeric(16,12),
+    total_home_comp_yac_wpa numeric(16,12),
+    total_away_comp_yac_wpa numeric(16,12),
+    total_home_raw_air_wpa numeric(16,12),
+    total_away_raw_air_wpa numeric(16,12),
+    total_home_raw_yac_wpa numeric(16,12),
+    total_away_raw_yac_wpa numeric(16,12),
+    xyac_mean_yds numeric(16,12),
+    xyac_median_yds numeric(16,12),
+    xyac_succ_prob numeric(16,12),
+    xyac_fd_prob numeric(16,12),
+    ep_att boolean,
+    two_att boolean,
+    fg_att boolean,
+    kickoff_att boolean,
+    punt_att boolean,
+    fg_result character varying(10),
+    kick_distance integer,
+    ep_result character varying(10),
+    tp_result character varying(10),
+    punt_blocked boolean,
+    home_to_rem smallint,
+    away_to_rem smallint,
+    pos_to_rem smallint,
+    def_to_rem smallint,
+    "to" boolean,
+    to_team character varying(3),
+    pos_score smallint,
+    def_score smallint,
+    score_diff smallint,
+    pos_score_post smallint,
+    def_score_post smallint,
+    score_diff_post smallint,
+    no_score_prob numeric(16,12),
+    opp_fg_prob numeric(16,12),
+    opp_safety_prob numeric(16,12),
+    opp_td_prob numeric(16,12),
+    fg_prob numeric(16,12),
+    safety_prob numeric(16,12),
+    td_prob numeric(16,12),
+    extra_point_prob numeric(16,12),
+    two_conv_prob numeric(16,12),
+    xpass_prob numeric(16,12),
+    pass_oe numeric(16,12),
+    cp numeric(16,12),
+    cpoe numeric(16,12),
+    air_yards_ngs numeric(8,4),
+    time_to_throw_ngs numeric(8,4),
+    route_ngs character varying(100),
+    man_zone_ngs character varying(100),
+    cov_type_ngs character varying(100),
+    qb_pressure_ngs boolean,
+    starting_hash public.hash_position,
+    ftn_play_id numeric,
+    qb_position public.qb_position,
+    n_offense_backfield numeric,
+    run_play_option boolean,
+    read_thrown public.read_thrown_type,
+    motion boolean,
+    solo_tackle_1_gsis character varying(36),
+    solo_tackle_1_pid character varying(25),
+    solo_tackle_2_gsis character varying(36),
+    solo_tackle_2_pid character varying(25),
+    solo_tackle_3_gsis character varying(36),
+    solo_tackle_3_pid character varying(25),
+    assisted_tackle_1_gsis character varying(36),
+    assisted_tackle_1_pid character varying(25),
+    assisted_tackle_2_gsis character varying(36),
+    assisted_tackle_2_pid character varying(25),
+    tackle_assist_1_gsis character varying(36),
+    tackle_assist_1_pid character varying(25),
+    tackle_assist_2_gsis character varying(36),
+    tackle_assist_2_pid character varying(25),
+    tackle_assist_3_gsis character varying(36),
+    tackle_assist_3_pid character varying(25),
+    tackle_assist_4_gsis character varying(36),
+    tackle_assist_4_pid character varying(25),
+    pass_location public.play_direction
+);
+
+
+--
+-- Name: nfl_plays_year_2011; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_plays_year_2011 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    sequence integer,
+    state character varying(36),
+    dwn integer,
+    home_score smallint,
+    special boolean,
+    "desc" text,
+    play_type_ngs character varying(36),
+    pos_team character varying(4),
+    pos_team_id character varying(36),
+    qtr integer,
+    year smallint NOT NULL,
+    seas_type character varying(36),
+    away_score smallint,
+    week smallint NOT NULL,
+    ydl_num integer,
+    ydl_side character varying(10),
+    yards_to_go integer,
+    off_formation character varying(100),
+    off_personnel character varying(100),
+    box_ngs integer,
+    pru_ngs integer,
+    def_personnel character varying(100),
+    game_clock_start character varying(10),
+    drive_seq integer,
+    ydl_end character varying(10),
+    ydl_start character varying(10),
+    first_down boolean,
+    goal_to_go boolean,
+    next_play_type character varying(36),
+    penalty boolean,
+    drive_yds integer,
+    drive_play_count integer,
+    play_clock smallint,
+    deleted boolean,
+    review text,
+    score boolean,
+    score_type character varying(10),
+    score_team character varying(4),
+    special_play_type character varying(10),
+    "timestamp" character varying(10),
+    play_type_nfl character varying(36),
+    updated integer NOT NULL,
+    off character varying(3),
+    def character varying(3),
+    play_type public.nfl_play_type,
+    player_fuml_pid character varying(25),
+    player_fuml_gsis character varying(36),
+    bc_pid character varying(25),
+    bc_gsis character varying(36),
+    psr_pid character varying(25),
+    psr_gsis character varying(36),
+    trg_pid character varying(25),
+    trg_gsis character varying(36),
+    intp_pid character varying(25),
+    intp_gsis character varying(36),
+    yds_gained smallint,
+    dot integer,
+    yards_after_catch integer,
+    yards_after_any_contact integer,
+    ret_yds integer,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
+    highlight_pass boolean,
+    int_worthy boolean,
+    dropped_pass boolean,
+    contested_ball boolean,
+    mbt smallint,
+    fuml boolean,
+    "int" boolean,
+    sk boolean,
+    succ boolean,
+    comp boolean,
+    td boolean,
+    ret_td boolean,
+    td_tm character varying(5),
+    ret_tm character varying(5),
+    charted boolean,
+    yfog integer,
+    true_air_yards smallint,
+    created_reception boolean,
+    avsk smallint,
+    no_huddle boolean,
+    play_action boolean,
+    trick_look boolean,
+    trick_play boolean,
+    qb_rush boolean,
+    qb_sneak boolean,
+    qb_scramble boolean,
+    hindered_pass boolean,
+    zero_blitz boolean,
+    stunt boolean,
+    out_of_pocket_pass boolean,
+    phyb boolean,
+    catchable_ball boolean,
+    throw_away boolean,
+    shovel_pass boolean,
+    sideline_pass boolean,
+    batted_pass boolean,
+    screen_pass boolean,
+    pain_free_play boolean,
+    qb_fault_sack boolean,
+    ttscrm numeric(16,12),
+    time_to_pass numeric(16,12),
+    ttsk numeric(16,12),
+    time_to_pressure numeric(16,12),
+    back smallint,
+    xlm smallint,
+    db smallint,
+    box smallint,
+    boxdb smallint,
+    pass_rushers smallint,
+    blitzers smallint,
+    db_blitzers smallint,
+    oopd character varying(2),
+    cov smallint,
+    cov_type_charted character varying(3),
+    sep character varying(3),
+    ydl_100 integer,
+    drive_result character varying(30),
+    drive_top character varying(10),
+    drive_fds integer,
+    drive_inside20 boolean,
+    drive_score boolean,
+    drive_start_qtr smallint,
+    drive_end_qtr smallint,
+    drive_yds_penalized integer,
+    drive_start_transition character varying(30),
+    drive_end_transition character varying(30),
+    drive_game_clock_start character varying(10),
+    drive_game_clock_end character varying(10),
+    drive_start_ydl character varying(10),
+    drive_end_ydl character varying(10),
+    drive_start_play_id integer,
+    drive_end_play_id integer,
+    series_seq integer,
+    series_suc boolean,
+    series_result character varying(100),
+    game_clock_end character varying(10),
+    sec_rem_qtr integer,
+    sec_rem_half integer,
+    sec_rem_gm integer,
+    fum boolean,
+    incomp boolean,
+    touchback boolean,
+    safety boolean,
+    oob boolean,
+    tfl boolean,
+    rush boolean,
+    pass boolean,
+    solo_tk boolean,
+    assist_tk boolean,
+    pen_team character varying(3),
+    pen_yds integer,
+    pass_td boolean,
+    rush_td boolean,
+    pass_yds smallint,
+    recv_yds smallint,
+    rush_yds integer,
+    qb_dropback boolean,
+    qb_kneel boolean,
+    qb_spike boolean,
+    run_location public.play_direction,
+    run_gap character varying(10),
+    first_down_rush boolean,
+    first_down_pass boolean,
+    first_down_penalty boolean,
+    third_down_converted boolean,
+    third_down_failed boolean,
+    fourth_down_converted boolean,
+    fourth_down_failed boolean,
+    ep numeric(16,12),
+    epa numeric(16,12),
+    ep_succ boolean,
+    total_home_epa numeric(16,12),
+    total_away_epa numeric(16,12),
+    total_home_rush_epa numeric(16,12),
+    total_away_rush_epa numeric(16,12),
+    total_home_pass_epa numeric(16,12),
+    total_away_pass_epa numeric(16,12),
+    qb_epa numeric(16,12),
+    air_epa numeric(16,12),
+    yac_epa numeric(16,12),
+    comp_air_epa numeric(16,12),
+    comp_yac_epa numeric(16,12),
+    xyac_epa numeric(16,12),
+    total_home_comp_air_epa numeric(16,12),
+    total_away_comp_air_epa numeric(16,12),
+    total_home_comp_yac_epa numeric(16,12),
+    total_away_comp_yac_epa numeric(16,12),
+    total_home_raw_air_epa numeric(16,12),
+    total_away_raw_air_epa numeric(16,12),
+    total_home_raw_yac_epa numeric(16,12),
+    total_away_raw_yac_epa numeric(16,12),
+    wp numeric(16,12),
+    wpa numeric(16,12),
+    home_wp numeric(16,12),
+    away_wp numeric(16,12),
+    vegas_wpa numeric(16,12),
+    vegas_home_wpa numeric(16,12),
+    home_wp_post numeric(16,12),
+    away_wp_post numeric(16,12),
+    vegas_wp numeric(16,12),
+    vegas_home_wp numeric(16,12),
+    total_home_rush_wpa numeric(16,12),
+    total_away_rush_wpa numeric(16,12),
+    total_home_pass_wpa numeric(16,12),
+    total_away_pass_wpa numeric(16,12),
+    air_wpa numeric(16,12),
+    yac_wpa numeric(16,12),
+    comp_air_wpa numeric(16,12),
+    comp_yac_wpa numeric(16,12),
+    total_home_comp_air_wpa numeric(16,12),
+    total_away_comp_air_wpa numeric(16,12),
+    total_home_comp_yac_wpa numeric(16,12),
+    total_away_comp_yac_wpa numeric(16,12),
+    total_home_raw_air_wpa numeric(16,12),
+    total_away_raw_air_wpa numeric(16,12),
+    total_home_raw_yac_wpa numeric(16,12),
+    total_away_raw_yac_wpa numeric(16,12),
+    xyac_mean_yds numeric(16,12),
+    xyac_median_yds numeric(16,12),
+    xyac_succ_prob numeric(16,12),
+    xyac_fd_prob numeric(16,12),
+    ep_att boolean,
+    two_att boolean,
+    fg_att boolean,
+    kickoff_att boolean,
+    punt_att boolean,
+    fg_result character varying(10),
+    kick_distance integer,
+    ep_result character varying(10),
+    tp_result character varying(10),
+    punt_blocked boolean,
+    home_to_rem smallint,
+    away_to_rem smallint,
+    pos_to_rem smallint,
+    def_to_rem smallint,
+    "to" boolean,
+    to_team character varying(3),
+    pos_score smallint,
+    def_score smallint,
+    score_diff smallint,
+    pos_score_post smallint,
+    def_score_post smallint,
+    score_diff_post smallint,
+    no_score_prob numeric(16,12),
+    opp_fg_prob numeric(16,12),
+    opp_safety_prob numeric(16,12),
+    opp_td_prob numeric(16,12),
+    fg_prob numeric(16,12),
+    safety_prob numeric(16,12),
+    td_prob numeric(16,12),
+    extra_point_prob numeric(16,12),
+    two_conv_prob numeric(16,12),
+    xpass_prob numeric(16,12),
+    pass_oe numeric(16,12),
+    cp numeric(16,12),
+    cpoe numeric(16,12),
+    air_yards_ngs numeric(8,4),
+    time_to_throw_ngs numeric(8,4),
+    route_ngs character varying(100),
+    man_zone_ngs character varying(100),
+    cov_type_ngs character varying(100),
+    qb_pressure_ngs boolean,
+    starting_hash public.hash_position,
+    ftn_play_id numeric,
+    qb_position public.qb_position,
+    n_offense_backfield numeric,
+    run_play_option boolean,
+    read_thrown public.read_thrown_type,
+    motion boolean,
+    solo_tackle_1_gsis character varying(36),
+    solo_tackle_1_pid character varying(25),
+    solo_tackle_2_gsis character varying(36),
+    solo_tackle_2_pid character varying(25),
+    solo_tackle_3_gsis character varying(36),
+    solo_tackle_3_pid character varying(25),
+    assisted_tackle_1_gsis character varying(36),
+    assisted_tackle_1_pid character varying(25),
+    assisted_tackle_2_gsis character varying(36),
+    assisted_tackle_2_pid character varying(25),
+    tackle_assist_1_gsis character varying(36),
+    tackle_assist_1_pid character varying(25),
+    tackle_assist_2_gsis character varying(36),
+    tackle_assist_2_pid character varying(25),
+    tackle_assist_3_gsis character varying(36),
+    tackle_assist_3_pid character varying(25),
+    tackle_assist_4_gsis character varying(36),
+    tackle_assist_4_pid character varying(25),
+    pass_location public.play_direction
+);
+
+
+--
+-- Name: nfl_plays_year_2012; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_plays_year_2012 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    sequence integer,
+    state character varying(36),
+    dwn integer,
+    home_score smallint,
+    special boolean,
+    "desc" text,
+    play_type_ngs character varying(36),
+    pos_team character varying(4),
+    pos_team_id character varying(36),
+    qtr integer,
+    year smallint NOT NULL,
+    seas_type character varying(36),
+    away_score smallint,
+    week smallint NOT NULL,
+    ydl_num integer,
+    ydl_side character varying(10),
+    yards_to_go integer,
+    off_formation character varying(100),
+    off_personnel character varying(100),
+    box_ngs integer,
+    pru_ngs integer,
+    def_personnel character varying(100),
+    game_clock_start character varying(10),
+    drive_seq integer,
+    ydl_end character varying(10),
+    ydl_start character varying(10),
+    first_down boolean,
+    goal_to_go boolean,
+    next_play_type character varying(36),
+    penalty boolean,
+    drive_yds integer,
+    drive_play_count integer,
+    play_clock smallint,
+    deleted boolean,
+    review text,
+    score boolean,
+    score_type character varying(10),
+    score_team character varying(4),
+    special_play_type character varying(10),
+    "timestamp" character varying(10),
+    play_type_nfl character varying(36),
+    updated integer NOT NULL,
+    off character varying(3),
+    def character varying(3),
+    play_type public.nfl_play_type,
+    player_fuml_pid character varying(25),
+    player_fuml_gsis character varying(36),
+    bc_pid character varying(25),
+    bc_gsis character varying(36),
+    psr_pid character varying(25),
+    psr_gsis character varying(36),
+    trg_pid character varying(25),
+    trg_gsis character varying(36),
+    intp_pid character varying(25),
+    intp_gsis character varying(36),
+    yds_gained smallint,
+    dot integer,
+    yards_after_catch integer,
+    yards_after_any_contact integer,
+    ret_yds integer,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
+    highlight_pass boolean,
+    int_worthy boolean,
+    dropped_pass boolean,
+    contested_ball boolean,
+    mbt smallint,
+    fuml boolean,
+    "int" boolean,
+    sk boolean,
+    succ boolean,
+    comp boolean,
+    td boolean,
+    ret_td boolean,
+    td_tm character varying(5),
+    ret_tm character varying(5),
+    charted boolean,
+    yfog integer,
+    true_air_yards smallint,
+    created_reception boolean,
+    avsk smallint,
+    no_huddle boolean,
+    play_action boolean,
+    trick_look boolean,
+    trick_play boolean,
+    qb_rush boolean,
+    qb_sneak boolean,
+    qb_scramble boolean,
+    hindered_pass boolean,
+    zero_blitz boolean,
+    stunt boolean,
+    out_of_pocket_pass boolean,
+    phyb boolean,
+    catchable_ball boolean,
+    throw_away boolean,
+    shovel_pass boolean,
+    sideline_pass boolean,
+    batted_pass boolean,
+    screen_pass boolean,
+    pain_free_play boolean,
+    qb_fault_sack boolean,
+    ttscrm numeric(16,12),
+    time_to_pass numeric(16,12),
+    ttsk numeric(16,12),
+    time_to_pressure numeric(16,12),
+    back smallint,
+    xlm smallint,
+    db smallint,
+    box smallint,
+    boxdb smallint,
+    pass_rushers smallint,
+    blitzers smallint,
+    db_blitzers smallint,
+    oopd character varying(2),
+    cov smallint,
+    cov_type_charted character varying(3),
+    sep character varying(3),
+    ydl_100 integer,
+    drive_result character varying(30),
+    drive_top character varying(10),
+    drive_fds integer,
+    drive_inside20 boolean,
+    drive_score boolean,
+    drive_start_qtr smallint,
+    drive_end_qtr smallint,
+    drive_yds_penalized integer,
+    drive_start_transition character varying(30),
+    drive_end_transition character varying(30),
+    drive_game_clock_start character varying(10),
+    drive_game_clock_end character varying(10),
+    drive_start_ydl character varying(10),
+    drive_end_ydl character varying(10),
+    drive_start_play_id integer,
+    drive_end_play_id integer,
+    series_seq integer,
+    series_suc boolean,
+    series_result character varying(100),
+    game_clock_end character varying(10),
+    sec_rem_qtr integer,
+    sec_rem_half integer,
+    sec_rem_gm integer,
+    fum boolean,
+    incomp boolean,
+    touchback boolean,
+    safety boolean,
+    oob boolean,
+    tfl boolean,
+    rush boolean,
+    pass boolean,
+    solo_tk boolean,
+    assist_tk boolean,
+    pen_team character varying(3),
+    pen_yds integer,
+    pass_td boolean,
+    rush_td boolean,
+    pass_yds smallint,
+    recv_yds smallint,
+    rush_yds integer,
+    qb_dropback boolean,
+    qb_kneel boolean,
+    qb_spike boolean,
+    run_location public.play_direction,
+    run_gap character varying(10),
+    first_down_rush boolean,
+    first_down_pass boolean,
+    first_down_penalty boolean,
+    third_down_converted boolean,
+    third_down_failed boolean,
+    fourth_down_converted boolean,
+    fourth_down_failed boolean,
+    ep numeric(16,12),
+    epa numeric(16,12),
+    ep_succ boolean,
+    total_home_epa numeric(16,12),
+    total_away_epa numeric(16,12),
+    total_home_rush_epa numeric(16,12),
+    total_away_rush_epa numeric(16,12),
+    total_home_pass_epa numeric(16,12),
+    total_away_pass_epa numeric(16,12),
+    qb_epa numeric(16,12),
+    air_epa numeric(16,12),
+    yac_epa numeric(16,12),
+    comp_air_epa numeric(16,12),
+    comp_yac_epa numeric(16,12),
+    xyac_epa numeric(16,12),
+    total_home_comp_air_epa numeric(16,12),
+    total_away_comp_air_epa numeric(16,12),
+    total_home_comp_yac_epa numeric(16,12),
+    total_away_comp_yac_epa numeric(16,12),
+    total_home_raw_air_epa numeric(16,12),
+    total_away_raw_air_epa numeric(16,12),
+    total_home_raw_yac_epa numeric(16,12),
+    total_away_raw_yac_epa numeric(16,12),
+    wp numeric(16,12),
+    wpa numeric(16,12),
+    home_wp numeric(16,12),
+    away_wp numeric(16,12),
+    vegas_wpa numeric(16,12),
+    vegas_home_wpa numeric(16,12),
+    home_wp_post numeric(16,12),
+    away_wp_post numeric(16,12),
+    vegas_wp numeric(16,12),
+    vegas_home_wp numeric(16,12),
+    total_home_rush_wpa numeric(16,12),
+    total_away_rush_wpa numeric(16,12),
+    total_home_pass_wpa numeric(16,12),
+    total_away_pass_wpa numeric(16,12),
+    air_wpa numeric(16,12),
+    yac_wpa numeric(16,12),
+    comp_air_wpa numeric(16,12),
+    comp_yac_wpa numeric(16,12),
+    total_home_comp_air_wpa numeric(16,12),
+    total_away_comp_air_wpa numeric(16,12),
+    total_home_comp_yac_wpa numeric(16,12),
+    total_away_comp_yac_wpa numeric(16,12),
+    total_home_raw_air_wpa numeric(16,12),
+    total_away_raw_air_wpa numeric(16,12),
+    total_home_raw_yac_wpa numeric(16,12),
+    total_away_raw_yac_wpa numeric(16,12),
+    xyac_mean_yds numeric(16,12),
+    xyac_median_yds numeric(16,12),
+    xyac_succ_prob numeric(16,12),
+    xyac_fd_prob numeric(16,12),
+    ep_att boolean,
+    two_att boolean,
+    fg_att boolean,
+    kickoff_att boolean,
+    punt_att boolean,
+    fg_result character varying(10),
+    kick_distance integer,
+    ep_result character varying(10),
+    tp_result character varying(10),
+    punt_blocked boolean,
+    home_to_rem smallint,
+    away_to_rem smallint,
+    pos_to_rem smallint,
+    def_to_rem smallint,
+    "to" boolean,
+    to_team character varying(3),
+    pos_score smallint,
+    def_score smallint,
+    score_diff smallint,
+    pos_score_post smallint,
+    def_score_post smallint,
+    score_diff_post smallint,
+    no_score_prob numeric(16,12),
+    opp_fg_prob numeric(16,12),
+    opp_safety_prob numeric(16,12),
+    opp_td_prob numeric(16,12),
+    fg_prob numeric(16,12),
+    safety_prob numeric(16,12),
+    td_prob numeric(16,12),
+    extra_point_prob numeric(16,12),
+    two_conv_prob numeric(16,12),
+    xpass_prob numeric(16,12),
+    pass_oe numeric(16,12),
+    cp numeric(16,12),
+    cpoe numeric(16,12),
+    air_yards_ngs numeric(8,4),
+    time_to_throw_ngs numeric(8,4),
+    route_ngs character varying(100),
+    man_zone_ngs character varying(100),
+    cov_type_ngs character varying(100),
+    qb_pressure_ngs boolean,
+    starting_hash public.hash_position,
+    ftn_play_id numeric,
+    qb_position public.qb_position,
+    n_offense_backfield numeric,
+    run_play_option boolean,
+    read_thrown public.read_thrown_type,
+    motion boolean,
+    solo_tackle_1_gsis character varying(36),
+    solo_tackle_1_pid character varying(25),
+    solo_tackle_2_gsis character varying(36),
+    solo_tackle_2_pid character varying(25),
+    solo_tackle_3_gsis character varying(36),
+    solo_tackle_3_pid character varying(25),
+    assisted_tackle_1_gsis character varying(36),
+    assisted_tackle_1_pid character varying(25),
+    assisted_tackle_2_gsis character varying(36),
+    assisted_tackle_2_pid character varying(25),
+    tackle_assist_1_gsis character varying(36),
+    tackle_assist_1_pid character varying(25),
+    tackle_assist_2_gsis character varying(36),
+    tackle_assist_2_pid character varying(25),
+    tackle_assist_3_gsis character varying(36),
+    tackle_assist_3_pid character varying(25),
+    tackle_assist_4_gsis character varying(36),
+    tackle_assist_4_pid character varying(25),
+    pass_location public.play_direction
+);
+
+
+--
+-- Name: nfl_plays_year_2013; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_plays_year_2013 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    sequence integer,
+    state character varying(36),
+    dwn integer,
+    home_score smallint,
+    special boolean,
+    "desc" text,
+    play_type_ngs character varying(36),
+    pos_team character varying(4),
+    pos_team_id character varying(36),
+    qtr integer,
+    year smallint NOT NULL,
+    seas_type character varying(36),
+    away_score smallint,
+    week smallint NOT NULL,
+    ydl_num integer,
+    ydl_side character varying(10),
+    yards_to_go integer,
+    off_formation character varying(100),
+    off_personnel character varying(100),
+    box_ngs integer,
+    pru_ngs integer,
+    def_personnel character varying(100),
+    game_clock_start character varying(10),
+    drive_seq integer,
+    ydl_end character varying(10),
+    ydl_start character varying(10),
+    first_down boolean,
+    goal_to_go boolean,
+    next_play_type character varying(36),
+    penalty boolean,
+    drive_yds integer,
+    drive_play_count integer,
+    play_clock smallint,
+    deleted boolean,
+    review text,
+    score boolean,
+    score_type character varying(10),
+    score_team character varying(4),
+    special_play_type character varying(10),
+    "timestamp" character varying(10),
+    play_type_nfl character varying(36),
+    updated integer NOT NULL,
+    off character varying(3),
+    def character varying(3),
+    play_type public.nfl_play_type,
+    player_fuml_pid character varying(25),
+    player_fuml_gsis character varying(36),
+    bc_pid character varying(25),
+    bc_gsis character varying(36),
+    psr_pid character varying(25),
+    psr_gsis character varying(36),
+    trg_pid character varying(25),
+    trg_gsis character varying(36),
+    intp_pid character varying(25),
+    intp_gsis character varying(36),
+    yds_gained smallint,
+    dot integer,
+    yards_after_catch integer,
+    yards_after_any_contact integer,
+    ret_yds integer,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
+    highlight_pass boolean,
+    int_worthy boolean,
+    dropped_pass boolean,
+    contested_ball boolean,
+    mbt smallint,
+    fuml boolean,
+    "int" boolean,
+    sk boolean,
+    succ boolean,
+    comp boolean,
+    td boolean,
+    ret_td boolean,
+    td_tm character varying(5),
+    ret_tm character varying(5),
+    charted boolean,
+    yfog integer,
+    true_air_yards smallint,
+    created_reception boolean,
+    avsk smallint,
+    no_huddle boolean,
+    play_action boolean,
+    trick_look boolean,
+    trick_play boolean,
+    qb_rush boolean,
+    qb_sneak boolean,
+    qb_scramble boolean,
+    hindered_pass boolean,
+    zero_blitz boolean,
+    stunt boolean,
+    out_of_pocket_pass boolean,
+    phyb boolean,
+    catchable_ball boolean,
+    throw_away boolean,
+    shovel_pass boolean,
+    sideline_pass boolean,
+    batted_pass boolean,
+    screen_pass boolean,
+    pain_free_play boolean,
+    qb_fault_sack boolean,
+    ttscrm numeric(16,12),
+    time_to_pass numeric(16,12),
+    ttsk numeric(16,12),
+    time_to_pressure numeric(16,12),
+    back smallint,
+    xlm smallint,
+    db smallint,
+    box smallint,
+    boxdb smallint,
+    pass_rushers smallint,
+    blitzers smallint,
+    db_blitzers smallint,
+    oopd character varying(2),
+    cov smallint,
+    cov_type_charted character varying(3),
+    sep character varying(3),
+    ydl_100 integer,
+    drive_result character varying(30),
+    drive_top character varying(10),
+    drive_fds integer,
+    drive_inside20 boolean,
+    drive_score boolean,
+    drive_start_qtr smallint,
+    drive_end_qtr smallint,
+    drive_yds_penalized integer,
+    drive_start_transition character varying(30),
+    drive_end_transition character varying(30),
+    drive_game_clock_start character varying(10),
+    drive_game_clock_end character varying(10),
+    drive_start_ydl character varying(10),
+    drive_end_ydl character varying(10),
+    drive_start_play_id integer,
+    drive_end_play_id integer,
+    series_seq integer,
+    series_suc boolean,
+    series_result character varying(100),
+    game_clock_end character varying(10),
+    sec_rem_qtr integer,
+    sec_rem_half integer,
+    sec_rem_gm integer,
+    fum boolean,
+    incomp boolean,
+    touchback boolean,
+    safety boolean,
+    oob boolean,
+    tfl boolean,
+    rush boolean,
+    pass boolean,
+    solo_tk boolean,
+    assist_tk boolean,
+    pen_team character varying(3),
+    pen_yds integer,
+    pass_td boolean,
+    rush_td boolean,
+    pass_yds smallint,
+    recv_yds smallint,
+    rush_yds integer,
+    qb_dropback boolean,
+    qb_kneel boolean,
+    qb_spike boolean,
+    run_location public.play_direction,
+    run_gap character varying(10),
+    first_down_rush boolean,
+    first_down_pass boolean,
+    first_down_penalty boolean,
+    third_down_converted boolean,
+    third_down_failed boolean,
+    fourth_down_converted boolean,
+    fourth_down_failed boolean,
+    ep numeric(16,12),
+    epa numeric(16,12),
+    ep_succ boolean,
+    total_home_epa numeric(16,12),
+    total_away_epa numeric(16,12),
+    total_home_rush_epa numeric(16,12),
+    total_away_rush_epa numeric(16,12),
+    total_home_pass_epa numeric(16,12),
+    total_away_pass_epa numeric(16,12),
+    qb_epa numeric(16,12),
+    air_epa numeric(16,12),
+    yac_epa numeric(16,12),
+    comp_air_epa numeric(16,12),
+    comp_yac_epa numeric(16,12),
+    xyac_epa numeric(16,12),
+    total_home_comp_air_epa numeric(16,12),
+    total_away_comp_air_epa numeric(16,12),
+    total_home_comp_yac_epa numeric(16,12),
+    total_away_comp_yac_epa numeric(16,12),
+    total_home_raw_air_epa numeric(16,12),
+    total_away_raw_air_epa numeric(16,12),
+    total_home_raw_yac_epa numeric(16,12),
+    total_away_raw_yac_epa numeric(16,12),
+    wp numeric(16,12),
+    wpa numeric(16,12),
+    home_wp numeric(16,12),
+    away_wp numeric(16,12),
+    vegas_wpa numeric(16,12),
+    vegas_home_wpa numeric(16,12),
+    home_wp_post numeric(16,12),
+    away_wp_post numeric(16,12),
+    vegas_wp numeric(16,12),
+    vegas_home_wp numeric(16,12),
+    total_home_rush_wpa numeric(16,12),
+    total_away_rush_wpa numeric(16,12),
+    total_home_pass_wpa numeric(16,12),
+    total_away_pass_wpa numeric(16,12),
+    air_wpa numeric(16,12),
+    yac_wpa numeric(16,12),
+    comp_air_wpa numeric(16,12),
+    comp_yac_wpa numeric(16,12),
+    total_home_comp_air_wpa numeric(16,12),
+    total_away_comp_air_wpa numeric(16,12),
+    total_home_comp_yac_wpa numeric(16,12),
+    total_away_comp_yac_wpa numeric(16,12),
+    total_home_raw_air_wpa numeric(16,12),
+    total_away_raw_air_wpa numeric(16,12),
+    total_home_raw_yac_wpa numeric(16,12),
+    total_away_raw_yac_wpa numeric(16,12),
+    xyac_mean_yds numeric(16,12),
+    xyac_median_yds numeric(16,12),
+    xyac_succ_prob numeric(16,12),
+    xyac_fd_prob numeric(16,12),
+    ep_att boolean,
+    two_att boolean,
+    fg_att boolean,
+    kickoff_att boolean,
+    punt_att boolean,
+    fg_result character varying(10),
+    kick_distance integer,
+    ep_result character varying(10),
+    tp_result character varying(10),
+    punt_blocked boolean,
+    home_to_rem smallint,
+    away_to_rem smallint,
+    pos_to_rem smallint,
+    def_to_rem smallint,
+    "to" boolean,
+    to_team character varying(3),
+    pos_score smallint,
+    def_score smallint,
+    score_diff smallint,
+    pos_score_post smallint,
+    def_score_post smallint,
+    score_diff_post smallint,
+    no_score_prob numeric(16,12),
+    opp_fg_prob numeric(16,12),
+    opp_safety_prob numeric(16,12),
+    opp_td_prob numeric(16,12),
+    fg_prob numeric(16,12),
+    safety_prob numeric(16,12),
+    td_prob numeric(16,12),
+    extra_point_prob numeric(16,12),
+    two_conv_prob numeric(16,12),
+    xpass_prob numeric(16,12),
+    pass_oe numeric(16,12),
+    cp numeric(16,12),
+    cpoe numeric(16,12),
+    air_yards_ngs numeric(8,4),
+    time_to_throw_ngs numeric(8,4),
+    route_ngs character varying(100),
+    man_zone_ngs character varying(100),
+    cov_type_ngs character varying(100),
+    qb_pressure_ngs boolean,
+    starting_hash public.hash_position,
+    ftn_play_id numeric,
+    qb_position public.qb_position,
+    n_offense_backfield numeric,
+    run_play_option boolean,
+    read_thrown public.read_thrown_type,
+    motion boolean,
+    solo_tackle_1_gsis character varying(36),
+    solo_tackle_1_pid character varying(25),
+    solo_tackle_2_gsis character varying(36),
+    solo_tackle_2_pid character varying(25),
+    solo_tackle_3_gsis character varying(36),
+    solo_tackle_3_pid character varying(25),
+    assisted_tackle_1_gsis character varying(36),
+    assisted_tackle_1_pid character varying(25),
+    assisted_tackle_2_gsis character varying(36),
+    assisted_tackle_2_pid character varying(25),
+    tackle_assist_1_gsis character varying(36),
+    tackle_assist_1_pid character varying(25),
+    tackle_assist_2_gsis character varying(36),
+    tackle_assist_2_pid character varying(25),
+    tackle_assist_3_gsis character varying(36),
+    tackle_assist_3_pid character varying(25),
+    tackle_assist_4_gsis character varying(36),
+    tackle_assist_4_pid character varying(25),
+    pass_location public.play_direction
+);
+
+
+--
+-- Name: nfl_plays_year_2014; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_plays_year_2014 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    sequence integer,
+    state character varying(36),
+    dwn integer,
+    home_score smallint,
+    special boolean,
+    "desc" text,
+    play_type_ngs character varying(36),
+    pos_team character varying(4),
+    pos_team_id character varying(36),
+    qtr integer,
+    year smallint NOT NULL,
+    seas_type character varying(36),
+    away_score smallint,
+    week smallint NOT NULL,
+    ydl_num integer,
+    ydl_side character varying(10),
+    yards_to_go integer,
+    off_formation character varying(100),
+    off_personnel character varying(100),
+    box_ngs integer,
+    pru_ngs integer,
+    def_personnel character varying(100),
+    game_clock_start character varying(10),
+    drive_seq integer,
+    ydl_end character varying(10),
+    ydl_start character varying(10),
+    first_down boolean,
+    goal_to_go boolean,
+    next_play_type character varying(36),
+    penalty boolean,
+    drive_yds integer,
+    drive_play_count integer,
+    play_clock smallint,
+    deleted boolean,
+    review text,
+    score boolean,
+    score_type character varying(10),
+    score_team character varying(4),
+    special_play_type character varying(10),
+    "timestamp" character varying(10),
+    play_type_nfl character varying(36),
+    updated integer NOT NULL,
+    off character varying(3),
+    def character varying(3),
+    play_type public.nfl_play_type,
+    player_fuml_pid character varying(25),
+    player_fuml_gsis character varying(36),
+    bc_pid character varying(25),
+    bc_gsis character varying(36),
+    psr_pid character varying(25),
+    psr_gsis character varying(36),
+    trg_pid character varying(25),
+    trg_gsis character varying(36),
+    intp_pid character varying(25),
+    intp_gsis character varying(36),
+    yds_gained smallint,
+    dot integer,
+    yards_after_catch integer,
+    yards_after_any_contact integer,
+    ret_yds integer,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
+    highlight_pass boolean,
+    int_worthy boolean,
+    dropped_pass boolean,
+    contested_ball boolean,
+    mbt smallint,
+    fuml boolean,
+    "int" boolean,
+    sk boolean,
+    succ boolean,
+    comp boolean,
+    td boolean,
+    ret_td boolean,
+    td_tm character varying(5),
+    ret_tm character varying(5),
+    charted boolean,
+    yfog integer,
+    true_air_yards smallint,
+    created_reception boolean,
+    avsk smallint,
+    no_huddle boolean,
+    play_action boolean,
+    trick_look boolean,
+    trick_play boolean,
+    qb_rush boolean,
+    qb_sneak boolean,
+    qb_scramble boolean,
+    hindered_pass boolean,
+    zero_blitz boolean,
+    stunt boolean,
+    out_of_pocket_pass boolean,
+    phyb boolean,
+    catchable_ball boolean,
+    throw_away boolean,
+    shovel_pass boolean,
+    sideline_pass boolean,
+    batted_pass boolean,
+    screen_pass boolean,
+    pain_free_play boolean,
+    qb_fault_sack boolean,
+    ttscrm numeric(16,12),
+    time_to_pass numeric(16,12),
+    ttsk numeric(16,12),
+    time_to_pressure numeric(16,12),
+    back smallint,
+    xlm smallint,
+    db smallint,
+    box smallint,
+    boxdb smallint,
+    pass_rushers smallint,
+    blitzers smallint,
+    db_blitzers smallint,
+    oopd character varying(2),
+    cov smallint,
+    cov_type_charted character varying(3),
+    sep character varying(3),
+    ydl_100 integer,
+    drive_result character varying(30),
+    drive_top character varying(10),
+    drive_fds integer,
+    drive_inside20 boolean,
+    drive_score boolean,
+    drive_start_qtr smallint,
+    drive_end_qtr smallint,
+    drive_yds_penalized integer,
+    drive_start_transition character varying(30),
+    drive_end_transition character varying(30),
+    drive_game_clock_start character varying(10),
+    drive_game_clock_end character varying(10),
+    drive_start_ydl character varying(10),
+    drive_end_ydl character varying(10),
+    drive_start_play_id integer,
+    drive_end_play_id integer,
+    series_seq integer,
+    series_suc boolean,
+    series_result character varying(100),
+    game_clock_end character varying(10),
+    sec_rem_qtr integer,
+    sec_rem_half integer,
+    sec_rem_gm integer,
+    fum boolean,
+    incomp boolean,
+    touchback boolean,
+    safety boolean,
+    oob boolean,
+    tfl boolean,
+    rush boolean,
+    pass boolean,
+    solo_tk boolean,
+    assist_tk boolean,
+    pen_team character varying(3),
+    pen_yds integer,
+    pass_td boolean,
+    rush_td boolean,
+    pass_yds smallint,
+    recv_yds smallint,
+    rush_yds integer,
+    qb_dropback boolean,
+    qb_kneel boolean,
+    qb_spike boolean,
+    run_location public.play_direction,
+    run_gap character varying(10),
+    first_down_rush boolean,
+    first_down_pass boolean,
+    first_down_penalty boolean,
+    third_down_converted boolean,
+    third_down_failed boolean,
+    fourth_down_converted boolean,
+    fourth_down_failed boolean,
+    ep numeric(16,12),
+    epa numeric(16,12),
+    ep_succ boolean,
+    total_home_epa numeric(16,12),
+    total_away_epa numeric(16,12),
+    total_home_rush_epa numeric(16,12),
+    total_away_rush_epa numeric(16,12),
+    total_home_pass_epa numeric(16,12),
+    total_away_pass_epa numeric(16,12),
+    qb_epa numeric(16,12),
+    air_epa numeric(16,12),
+    yac_epa numeric(16,12),
+    comp_air_epa numeric(16,12),
+    comp_yac_epa numeric(16,12),
+    xyac_epa numeric(16,12),
+    total_home_comp_air_epa numeric(16,12),
+    total_away_comp_air_epa numeric(16,12),
+    total_home_comp_yac_epa numeric(16,12),
+    total_away_comp_yac_epa numeric(16,12),
+    total_home_raw_air_epa numeric(16,12),
+    total_away_raw_air_epa numeric(16,12),
+    total_home_raw_yac_epa numeric(16,12),
+    total_away_raw_yac_epa numeric(16,12),
+    wp numeric(16,12),
+    wpa numeric(16,12),
+    home_wp numeric(16,12),
+    away_wp numeric(16,12),
+    vegas_wpa numeric(16,12),
+    vegas_home_wpa numeric(16,12),
+    home_wp_post numeric(16,12),
+    away_wp_post numeric(16,12),
+    vegas_wp numeric(16,12),
+    vegas_home_wp numeric(16,12),
+    total_home_rush_wpa numeric(16,12),
+    total_away_rush_wpa numeric(16,12),
+    total_home_pass_wpa numeric(16,12),
+    total_away_pass_wpa numeric(16,12),
+    air_wpa numeric(16,12),
+    yac_wpa numeric(16,12),
+    comp_air_wpa numeric(16,12),
+    comp_yac_wpa numeric(16,12),
+    total_home_comp_air_wpa numeric(16,12),
+    total_away_comp_air_wpa numeric(16,12),
+    total_home_comp_yac_wpa numeric(16,12),
+    total_away_comp_yac_wpa numeric(16,12),
+    total_home_raw_air_wpa numeric(16,12),
+    total_away_raw_air_wpa numeric(16,12),
+    total_home_raw_yac_wpa numeric(16,12),
+    total_away_raw_yac_wpa numeric(16,12),
+    xyac_mean_yds numeric(16,12),
+    xyac_median_yds numeric(16,12),
+    xyac_succ_prob numeric(16,12),
+    xyac_fd_prob numeric(16,12),
+    ep_att boolean,
+    two_att boolean,
+    fg_att boolean,
+    kickoff_att boolean,
+    punt_att boolean,
+    fg_result character varying(10),
+    kick_distance integer,
+    ep_result character varying(10),
+    tp_result character varying(10),
+    punt_blocked boolean,
+    home_to_rem smallint,
+    away_to_rem smallint,
+    pos_to_rem smallint,
+    def_to_rem smallint,
+    "to" boolean,
+    to_team character varying(3),
+    pos_score smallint,
+    def_score smallint,
+    score_diff smallint,
+    pos_score_post smallint,
+    def_score_post smallint,
+    score_diff_post smallint,
+    no_score_prob numeric(16,12),
+    opp_fg_prob numeric(16,12),
+    opp_safety_prob numeric(16,12),
+    opp_td_prob numeric(16,12),
+    fg_prob numeric(16,12),
+    safety_prob numeric(16,12),
+    td_prob numeric(16,12),
+    extra_point_prob numeric(16,12),
+    two_conv_prob numeric(16,12),
+    xpass_prob numeric(16,12),
+    pass_oe numeric(16,12),
+    cp numeric(16,12),
+    cpoe numeric(16,12),
+    air_yards_ngs numeric(8,4),
+    time_to_throw_ngs numeric(8,4),
+    route_ngs character varying(100),
+    man_zone_ngs character varying(100),
+    cov_type_ngs character varying(100),
+    qb_pressure_ngs boolean,
+    starting_hash public.hash_position,
+    ftn_play_id numeric,
+    qb_position public.qb_position,
+    n_offense_backfield numeric,
+    run_play_option boolean,
+    read_thrown public.read_thrown_type,
+    motion boolean,
+    solo_tackle_1_gsis character varying(36),
+    solo_tackle_1_pid character varying(25),
+    solo_tackle_2_gsis character varying(36),
+    solo_tackle_2_pid character varying(25),
+    solo_tackle_3_gsis character varying(36),
+    solo_tackle_3_pid character varying(25),
+    assisted_tackle_1_gsis character varying(36),
+    assisted_tackle_1_pid character varying(25),
+    assisted_tackle_2_gsis character varying(36),
+    assisted_tackle_2_pid character varying(25),
+    tackle_assist_1_gsis character varying(36),
+    tackle_assist_1_pid character varying(25),
+    tackle_assist_2_gsis character varying(36),
+    tackle_assist_2_pid character varying(25),
+    tackle_assist_3_gsis character varying(36),
+    tackle_assist_3_pid character varying(25),
+    tackle_assist_4_gsis character varying(36),
+    tackle_assist_4_pid character varying(25),
+    pass_location public.play_direction
+);
+
+
+--
+-- Name: nfl_plays_year_2015; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_plays_year_2015 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    sequence integer,
+    state character varying(36),
+    dwn integer,
+    home_score smallint,
+    special boolean,
+    "desc" text,
+    play_type_ngs character varying(36),
+    pos_team character varying(4),
+    pos_team_id character varying(36),
+    qtr integer,
+    year smallint NOT NULL,
+    seas_type character varying(36),
+    away_score smallint,
+    week smallint NOT NULL,
+    ydl_num integer,
+    ydl_side character varying(10),
+    yards_to_go integer,
+    off_formation character varying(100),
+    off_personnel character varying(100),
+    box_ngs integer,
+    pru_ngs integer,
+    def_personnel character varying(100),
+    game_clock_start character varying(10),
+    drive_seq integer,
+    ydl_end character varying(10),
+    ydl_start character varying(10),
+    first_down boolean,
+    goal_to_go boolean,
+    next_play_type character varying(36),
+    penalty boolean,
+    drive_yds integer,
+    drive_play_count integer,
+    play_clock smallint,
+    deleted boolean,
+    review text,
+    score boolean,
+    score_type character varying(10),
+    score_team character varying(4),
+    special_play_type character varying(10),
+    "timestamp" character varying(10),
+    play_type_nfl character varying(36),
+    updated integer NOT NULL,
+    off character varying(3),
+    def character varying(3),
+    play_type public.nfl_play_type,
+    player_fuml_pid character varying(25),
+    player_fuml_gsis character varying(36),
+    bc_pid character varying(25),
+    bc_gsis character varying(36),
+    psr_pid character varying(25),
+    psr_gsis character varying(36),
+    trg_pid character varying(25),
+    trg_gsis character varying(36),
+    intp_pid character varying(25),
+    intp_gsis character varying(36),
+    yds_gained smallint,
+    dot integer,
+    yards_after_catch integer,
+    yards_after_any_contact integer,
+    ret_yds integer,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
+    highlight_pass boolean,
+    int_worthy boolean,
+    dropped_pass boolean,
+    contested_ball boolean,
+    mbt smallint,
+    fuml boolean,
+    "int" boolean,
+    sk boolean,
+    succ boolean,
+    comp boolean,
+    td boolean,
+    ret_td boolean,
+    td_tm character varying(5),
+    ret_tm character varying(5),
+    charted boolean,
+    yfog integer,
+    true_air_yards smallint,
+    created_reception boolean,
+    avsk smallint,
+    no_huddle boolean,
+    play_action boolean,
+    trick_look boolean,
+    trick_play boolean,
+    qb_rush boolean,
+    qb_sneak boolean,
+    qb_scramble boolean,
+    hindered_pass boolean,
+    zero_blitz boolean,
+    stunt boolean,
+    out_of_pocket_pass boolean,
+    phyb boolean,
+    catchable_ball boolean,
+    throw_away boolean,
+    shovel_pass boolean,
+    sideline_pass boolean,
+    batted_pass boolean,
+    screen_pass boolean,
+    pain_free_play boolean,
+    qb_fault_sack boolean,
+    ttscrm numeric(16,12),
+    time_to_pass numeric(16,12),
+    ttsk numeric(16,12),
+    time_to_pressure numeric(16,12),
+    back smallint,
+    xlm smallint,
+    db smallint,
+    box smallint,
+    boxdb smallint,
+    pass_rushers smallint,
+    blitzers smallint,
+    db_blitzers smallint,
+    oopd character varying(2),
+    cov smallint,
+    cov_type_charted character varying(3),
+    sep character varying(3),
+    ydl_100 integer,
+    drive_result character varying(30),
+    drive_top character varying(10),
+    drive_fds integer,
+    drive_inside20 boolean,
+    drive_score boolean,
+    drive_start_qtr smallint,
+    drive_end_qtr smallint,
+    drive_yds_penalized integer,
+    drive_start_transition character varying(30),
+    drive_end_transition character varying(30),
+    drive_game_clock_start character varying(10),
+    drive_game_clock_end character varying(10),
+    drive_start_ydl character varying(10),
+    drive_end_ydl character varying(10),
+    drive_start_play_id integer,
+    drive_end_play_id integer,
+    series_seq integer,
+    series_suc boolean,
+    series_result character varying(100),
+    game_clock_end character varying(10),
+    sec_rem_qtr integer,
+    sec_rem_half integer,
+    sec_rem_gm integer,
+    fum boolean,
+    incomp boolean,
+    touchback boolean,
+    safety boolean,
+    oob boolean,
+    tfl boolean,
+    rush boolean,
+    pass boolean,
+    solo_tk boolean,
+    assist_tk boolean,
+    pen_team character varying(3),
+    pen_yds integer,
+    pass_td boolean,
+    rush_td boolean,
+    pass_yds smallint,
+    recv_yds smallint,
+    rush_yds integer,
+    qb_dropback boolean,
+    qb_kneel boolean,
+    qb_spike boolean,
+    run_location public.play_direction,
+    run_gap character varying(10),
+    first_down_rush boolean,
+    first_down_pass boolean,
+    first_down_penalty boolean,
+    third_down_converted boolean,
+    third_down_failed boolean,
+    fourth_down_converted boolean,
+    fourth_down_failed boolean,
+    ep numeric(16,12),
+    epa numeric(16,12),
+    ep_succ boolean,
+    total_home_epa numeric(16,12),
+    total_away_epa numeric(16,12),
+    total_home_rush_epa numeric(16,12),
+    total_away_rush_epa numeric(16,12),
+    total_home_pass_epa numeric(16,12),
+    total_away_pass_epa numeric(16,12),
+    qb_epa numeric(16,12),
+    air_epa numeric(16,12),
+    yac_epa numeric(16,12),
+    comp_air_epa numeric(16,12),
+    comp_yac_epa numeric(16,12),
+    xyac_epa numeric(16,12),
+    total_home_comp_air_epa numeric(16,12),
+    total_away_comp_air_epa numeric(16,12),
+    total_home_comp_yac_epa numeric(16,12),
+    total_away_comp_yac_epa numeric(16,12),
+    total_home_raw_air_epa numeric(16,12),
+    total_away_raw_air_epa numeric(16,12),
+    total_home_raw_yac_epa numeric(16,12),
+    total_away_raw_yac_epa numeric(16,12),
+    wp numeric(16,12),
+    wpa numeric(16,12),
+    home_wp numeric(16,12),
+    away_wp numeric(16,12),
+    vegas_wpa numeric(16,12),
+    vegas_home_wpa numeric(16,12),
+    home_wp_post numeric(16,12),
+    away_wp_post numeric(16,12),
+    vegas_wp numeric(16,12),
+    vegas_home_wp numeric(16,12),
+    total_home_rush_wpa numeric(16,12),
+    total_away_rush_wpa numeric(16,12),
+    total_home_pass_wpa numeric(16,12),
+    total_away_pass_wpa numeric(16,12),
+    air_wpa numeric(16,12),
+    yac_wpa numeric(16,12),
+    comp_air_wpa numeric(16,12),
+    comp_yac_wpa numeric(16,12),
+    total_home_comp_air_wpa numeric(16,12),
+    total_away_comp_air_wpa numeric(16,12),
+    total_home_comp_yac_wpa numeric(16,12),
+    total_away_comp_yac_wpa numeric(16,12),
+    total_home_raw_air_wpa numeric(16,12),
+    total_away_raw_air_wpa numeric(16,12),
+    total_home_raw_yac_wpa numeric(16,12),
+    total_away_raw_yac_wpa numeric(16,12),
+    xyac_mean_yds numeric(16,12),
+    xyac_median_yds numeric(16,12),
+    xyac_succ_prob numeric(16,12),
+    xyac_fd_prob numeric(16,12),
+    ep_att boolean,
+    two_att boolean,
+    fg_att boolean,
+    kickoff_att boolean,
+    punt_att boolean,
+    fg_result character varying(10),
+    kick_distance integer,
+    ep_result character varying(10),
+    tp_result character varying(10),
+    punt_blocked boolean,
+    home_to_rem smallint,
+    away_to_rem smallint,
+    pos_to_rem smallint,
+    def_to_rem smallint,
+    "to" boolean,
+    to_team character varying(3),
+    pos_score smallint,
+    def_score smallint,
+    score_diff smallint,
+    pos_score_post smallint,
+    def_score_post smallint,
+    score_diff_post smallint,
+    no_score_prob numeric(16,12),
+    opp_fg_prob numeric(16,12),
+    opp_safety_prob numeric(16,12),
+    opp_td_prob numeric(16,12),
+    fg_prob numeric(16,12),
+    safety_prob numeric(16,12),
+    td_prob numeric(16,12),
+    extra_point_prob numeric(16,12),
+    two_conv_prob numeric(16,12),
+    xpass_prob numeric(16,12),
+    pass_oe numeric(16,12),
+    cp numeric(16,12),
+    cpoe numeric(16,12),
+    air_yards_ngs numeric(8,4),
+    time_to_throw_ngs numeric(8,4),
+    route_ngs character varying(100),
+    man_zone_ngs character varying(100),
+    cov_type_ngs character varying(100),
+    qb_pressure_ngs boolean,
+    starting_hash public.hash_position,
+    ftn_play_id numeric,
+    qb_position public.qb_position,
+    n_offense_backfield numeric,
+    run_play_option boolean,
+    read_thrown public.read_thrown_type,
+    motion boolean,
+    solo_tackle_1_gsis character varying(36),
+    solo_tackle_1_pid character varying(25),
+    solo_tackle_2_gsis character varying(36),
+    solo_tackle_2_pid character varying(25),
+    solo_tackle_3_gsis character varying(36),
+    solo_tackle_3_pid character varying(25),
+    assisted_tackle_1_gsis character varying(36),
+    assisted_tackle_1_pid character varying(25),
+    assisted_tackle_2_gsis character varying(36),
+    assisted_tackle_2_pid character varying(25),
+    tackle_assist_1_gsis character varying(36),
+    tackle_assist_1_pid character varying(25),
+    tackle_assist_2_gsis character varying(36),
+    tackle_assist_2_pid character varying(25),
+    tackle_assist_3_gsis character varying(36),
+    tackle_assist_3_pid character varying(25),
+    tackle_assist_4_gsis character varying(36),
+    tackle_assist_4_pid character varying(25),
+    pass_location public.play_direction
+);
+
+
+--
+-- Name: nfl_plays_year_2016; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_plays_year_2016 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    sequence integer,
+    state character varying(36),
+    dwn integer,
+    home_score smallint,
+    special boolean,
+    "desc" text,
+    play_type_ngs character varying(36),
+    pos_team character varying(4),
+    pos_team_id character varying(36),
+    qtr integer,
+    year smallint NOT NULL,
+    seas_type character varying(36),
+    away_score smallint,
+    week smallint NOT NULL,
+    ydl_num integer,
+    ydl_side character varying(10),
+    yards_to_go integer,
+    off_formation character varying(100),
+    off_personnel character varying(100),
+    box_ngs integer,
+    pru_ngs integer,
+    def_personnel character varying(100),
+    game_clock_start character varying(10),
+    drive_seq integer,
+    ydl_end character varying(10),
+    ydl_start character varying(10),
+    first_down boolean,
+    goal_to_go boolean,
+    next_play_type character varying(36),
+    penalty boolean,
+    drive_yds integer,
+    drive_play_count integer,
+    play_clock smallint,
+    deleted boolean,
+    review text,
+    score boolean,
+    score_type character varying(10),
+    score_team character varying(4),
+    special_play_type character varying(10),
+    "timestamp" character varying(10),
+    play_type_nfl character varying(36),
+    updated integer NOT NULL,
+    off character varying(3),
+    def character varying(3),
+    play_type public.nfl_play_type,
+    player_fuml_pid character varying(25),
+    player_fuml_gsis character varying(36),
+    bc_pid character varying(25),
+    bc_gsis character varying(36),
+    psr_pid character varying(25),
+    psr_gsis character varying(36),
+    trg_pid character varying(25),
+    trg_gsis character varying(36),
+    intp_pid character varying(25),
+    intp_gsis character varying(36),
+    yds_gained smallint,
+    dot integer,
+    yards_after_catch integer,
+    yards_after_any_contact integer,
+    ret_yds integer,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
+    highlight_pass boolean,
+    int_worthy boolean,
+    dropped_pass boolean,
+    contested_ball boolean,
+    mbt smallint,
+    fuml boolean,
+    "int" boolean,
+    sk boolean,
+    succ boolean,
+    comp boolean,
+    td boolean,
+    ret_td boolean,
+    td_tm character varying(5),
+    ret_tm character varying(5),
+    charted boolean,
+    yfog integer,
+    true_air_yards smallint,
+    created_reception boolean,
+    avsk smallint,
+    no_huddle boolean,
+    play_action boolean,
+    trick_look boolean,
+    trick_play boolean,
+    qb_rush boolean,
+    qb_sneak boolean,
+    qb_scramble boolean,
+    hindered_pass boolean,
+    zero_blitz boolean,
+    stunt boolean,
+    out_of_pocket_pass boolean,
+    phyb boolean,
+    catchable_ball boolean,
+    throw_away boolean,
+    shovel_pass boolean,
+    sideline_pass boolean,
+    batted_pass boolean,
+    screen_pass boolean,
+    pain_free_play boolean,
+    qb_fault_sack boolean,
+    ttscrm numeric(16,12),
+    time_to_pass numeric(16,12),
+    ttsk numeric(16,12),
+    time_to_pressure numeric(16,12),
+    back smallint,
+    xlm smallint,
+    db smallint,
+    box smallint,
+    boxdb smallint,
+    pass_rushers smallint,
+    blitzers smallint,
+    db_blitzers smallint,
+    oopd character varying(2),
+    cov smallint,
+    cov_type_charted character varying(3),
+    sep character varying(3),
+    ydl_100 integer,
+    drive_result character varying(30),
+    drive_top character varying(10),
+    drive_fds integer,
+    drive_inside20 boolean,
+    drive_score boolean,
+    drive_start_qtr smallint,
+    drive_end_qtr smallint,
+    drive_yds_penalized integer,
+    drive_start_transition character varying(30),
+    drive_end_transition character varying(30),
+    drive_game_clock_start character varying(10),
+    drive_game_clock_end character varying(10),
+    drive_start_ydl character varying(10),
+    drive_end_ydl character varying(10),
+    drive_start_play_id integer,
+    drive_end_play_id integer,
+    series_seq integer,
+    series_suc boolean,
+    series_result character varying(100),
+    game_clock_end character varying(10),
+    sec_rem_qtr integer,
+    sec_rem_half integer,
+    sec_rem_gm integer,
+    fum boolean,
+    incomp boolean,
+    touchback boolean,
+    safety boolean,
+    oob boolean,
+    tfl boolean,
+    rush boolean,
+    pass boolean,
+    solo_tk boolean,
+    assist_tk boolean,
+    pen_team character varying(3),
+    pen_yds integer,
+    pass_td boolean,
+    rush_td boolean,
+    pass_yds smallint,
+    recv_yds smallint,
+    rush_yds integer,
+    qb_dropback boolean,
+    qb_kneel boolean,
+    qb_spike boolean,
+    run_location public.play_direction,
+    run_gap character varying(10),
+    first_down_rush boolean,
+    first_down_pass boolean,
+    first_down_penalty boolean,
+    third_down_converted boolean,
+    third_down_failed boolean,
+    fourth_down_converted boolean,
+    fourth_down_failed boolean,
+    ep numeric(16,12),
+    epa numeric(16,12),
+    ep_succ boolean,
+    total_home_epa numeric(16,12),
+    total_away_epa numeric(16,12),
+    total_home_rush_epa numeric(16,12),
+    total_away_rush_epa numeric(16,12),
+    total_home_pass_epa numeric(16,12),
+    total_away_pass_epa numeric(16,12),
+    qb_epa numeric(16,12),
+    air_epa numeric(16,12),
+    yac_epa numeric(16,12),
+    comp_air_epa numeric(16,12),
+    comp_yac_epa numeric(16,12),
+    xyac_epa numeric(16,12),
+    total_home_comp_air_epa numeric(16,12),
+    total_away_comp_air_epa numeric(16,12),
+    total_home_comp_yac_epa numeric(16,12),
+    total_away_comp_yac_epa numeric(16,12),
+    total_home_raw_air_epa numeric(16,12),
+    total_away_raw_air_epa numeric(16,12),
+    total_home_raw_yac_epa numeric(16,12),
+    total_away_raw_yac_epa numeric(16,12),
+    wp numeric(16,12),
+    wpa numeric(16,12),
+    home_wp numeric(16,12),
+    away_wp numeric(16,12),
+    vegas_wpa numeric(16,12),
+    vegas_home_wpa numeric(16,12),
+    home_wp_post numeric(16,12),
+    away_wp_post numeric(16,12),
+    vegas_wp numeric(16,12),
+    vegas_home_wp numeric(16,12),
+    total_home_rush_wpa numeric(16,12),
+    total_away_rush_wpa numeric(16,12),
+    total_home_pass_wpa numeric(16,12),
+    total_away_pass_wpa numeric(16,12),
+    air_wpa numeric(16,12),
+    yac_wpa numeric(16,12),
+    comp_air_wpa numeric(16,12),
+    comp_yac_wpa numeric(16,12),
+    total_home_comp_air_wpa numeric(16,12),
+    total_away_comp_air_wpa numeric(16,12),
+    total_home_comp_yac_wpa numeric(16,12),
+    total_away_comp_yac_wpa numeric(16,12),
+    total_home_raw_air_wpa numeric(16,12),
+    total_away_raw_air_wpa numeric(16,12),
+    total_home_raw_yac_wpa numeric(16,12),
+    total_away_raw_yac_wpa numeric(16,12),
+    xyac_mean_yds numeric(16,12),
+    xyac_median_yds numeric(16,12),
+    xyac_succ_prob numeric(16,12),
+    xyac_fd_prob numeric(16,12),
+    ep_att boolean,
+    two_att boolean,
+    fg_att boolean,
+    kickoff_att boolean,
+    punt_att boolean,
+    fg_result character varying(10),
+    kick_distance integer,
+    ep_result character varying(10),
+    tp_result character varying(10),
+    punt_blocked boolean,
+    home_to_rem smallint,
+    away_to_rem smallint,
+    pos_to_rem smallint,
+    def_to_rem smallint,
+    "to" boolean,
+    to_team character varying(3),
+    pos_score smallint,
+    def_score smallint,
+    score_diff smallint,
+    pos_score_post smallint,
+    def_score_post smallint,
+    score_diff_post smallint,
+    no_score_prob numeric(16,12),
+    opp_fg_prob numeric(16,12),
+    opp_safety_prob numeric(16,12),
+    opp_td_prob numeric(16,12),
+    fg_prob numeric(16,12),
+    safety_prob numeric(16,12),
+    td_prob numeric(16,12),
+    extra_point_prob numeric(16,12),
+    two_conv_prob numeric(16,12),
+    xpass_prob numeric(16,12),
+    pass_oe numeric(16,12),
+    cp numeric(16,12),
+    cpoe numeric(16,12),
+    air_yards_ngs numeric(8,4),
+    time_to_throw_ngs numeric(8,4),
+    route_ngs character varying(100),
+    man_zone_ngs character varying(100),
+    cov_type_ngs character varying(100),
+    qb_pressure_ngs boolean,
+    starting_hash public.hash_position,
+    ftn_play_id numeric,
+    qb_position public.qb_position,
+    n_offense_backfield numeric,
+    run_play_option boolean,
+    read_thrown public.read_thrown_type,
+    motion boolean,
+    solo_tackle_1_gsis character varying(36),
+    solo_tackle_1_pid character varying(25),
+    solo_tackle_2_gsis character varying(36),
+    solo_tackle_2_pid character varying(25),
+    solo_tackle_3_gsis character varying(36),
+    solo_tackle_3_pid character varying(25),
+    assisted_tackle_1_gsis character varying(36),
+    assisted_tackle_1_pid character varying(25),
+    assisted_tackle_2_gsis character varying(36),
+    assisted_tackle_2_pid character varying(25),
+    tackle_assist_1_gsis character varying(36),
+    tackle_assist_1_pid character varying(25),
+    tackle_assist_2_gsis character varying(36),
+    tackle_assist_2_pid character varying(25),
+    tackle_assist_3_gsis character varying(36),
+    tackle_assist_3_pid character varying(25),
+    tackle_assist_4_gsis character varying(36),
+    tackle_assist_4_pid character varying(25),
+    pass_location public.play_direction
+);
+
+
+--
+-- Name: nfl_plays_year_2017; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_plays_year_2017 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    sequence integer,
+    state character varying(36),
+    dwn integer,
+    home_score smallint,
+    special boolean,
+    "desc" text,
+    play_type_ngs character varying(36),
+    pos_team character varying(4),
+    pos_team_id character varying(36),
+    qtr integer,
+    year smallint NOT NULL,
+    seas_type character varying(36),
+    away_score smallint,
+    week smallint NOT NULL,
+    ydl_num integer,
+    ydl_side character varying(10),
+    yards_to_go integer,
+    off_formation character varying(100),
+    off_personnel character varying(100),
+    box_ngs integer,
+    pru_ngs integer,
+    def_personnel character varying(100),
+    game_clock_start character varying(10),
+    drive_seq integer,
+    ydl_end character varying(10),
+    ydl_start character varying(10),
+    first_down boolean,
+    goal_to_go boolean,
+    next_play_type character varying(36),
+    penalty boolean,
+    drive_yds integer,
+    drive_play_count integer,
+    play_clock smallint,
+    deleted boolean,
+    review text,
+    score boolean,
+    score_type character varying(10),
+    score_team character varying(4),
+    special_play_type character varying(10),
+    "timestamp" character varying(10),
+    play_type_nfl character varying(36),
+    updated integer NOT NULL,
+    off character varying(3),
+    def character varying(3),
+    play_type public.nfl_play_type,
+    player_fuml_pid character varying(25),
+    player_fuml_gsis character varying(36),
+    bc_pid character varying(25),
+    bc_gsis character varying(36),
+    psr_pid character varying(25),
+    psr_gsis character varying(36),
+    trg_pid character varying(25),
+    trg_gsis character varying(36),
+    intp_pid character varying(25),
+    intp_gsis character varying(36),
+    yds_gained smallint,
+    dot integer,
+    yards_after_catch integer,
+    yards_after_any_contact integer,
+    ret_yds integer,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
+    highlight_pass boolean,
+    int_worthy boolean,
+    dropped_pass boolean,
+    contested_ball boolean,
+    mbt smallint,
+    fuml boolean,
+    "int" boolean,
+    sk boolean,
+    succ boolean,
+    comp boolean,
+    td boolean,
+    ret_td boolean,
+    td_tm character varying(5),
+    ret_tm character varying(5),
+    charted boolean,
+    yfog integer,
+    true_air_yards smallint,
+    created_reception boolean,
+    avsk smallint,
+    no_huddle boolean,
+    play_action boolean,
+    trick_look boolean,
+    trick_play boolean,
+    qb_rush boolean,
+    qb_sneak boolean,
+    qb_scramble boolean,
+    hindered_pass boolean,
+    zero_blitz boolean,
+    stunt boolean,
+    out_of_pocket_pass boolean,
+    phyb boolean,
+    catchable_ball boolean,
+    throw_away boolean,
+    shovel_pass boolean,
+    sideline_pass boolean,
+    batted_pass boolean,
+    screen_pass boolean,
+    pain_free_play boolean,
+    qb_fault_sack boolean,
+    ttscrm numeric(16,12),
+    time_to_pass numeric(16,12),
+    ttsk numeric(16,12),
+    time_to_pressure numeric(16,12),
+    back smallint,
+    xlm smallint,
+    db smallint,
+    box smallint,
+    boxdb smallint,
+    pass_rushers smallint,
+    blitzers smallint,
+    db_blitzers smallint,
+    oopd character varying(2),
+    cov smallint,
+    cov_type_charted character varying(3),
+    sep character varying(3),
+    ydl_100 integer,
+    drive_result character varying(30),
+    drive_top character varying(10),
+    drive_fds integer,
+    drive_inside20 boolean,
+    drive_score boolean,
+    drive_start_qtr smallint,
+    drive_end_qtr smallint,
+    drive_yds_penalized integer,
+    drive_start_transition character varying(30),
+    drive_end_transition character varying(30),
+    drive_game_clock_start character varying(10),
+    drive_game_clock_end character varying(10),
+    drive_start_ydl character varying(10),
+    drive_end_ydl character varying(10),
+    drive_start_play_id integer,
+    drive_end_play_id integer,
+    series_seq integer,
+    series_suc boolean,
+    series_result character varying(100),
+    game_clock_end character varying(10),
+    sec_rem_qtr integer,
+    sec_rem_half integer,
+    sec_rem_gm integer,
+    fum boolean,
+    incomp boolean,
+    touchback boolean,
+    safety boolean,
+    oob boolean,
+    tfl boolean,
+    rush boolean,
+    pass boolean,
+    solo_tk boolean,
+    assist_tk boolean,
+    pen_team character varying(3),
+    pen_yds integer,
+    pass_td boolean,
+    rush_td boolean,
+    pass_yds smallint,
+    recv_yds smallint,
+    rush_yds integer,
+    qb_dropback boolean,
+    qb_kneel boolean,
+    qb_spike boolean,
+    run_location public.play_direction,
+    run_gap character varying(10),
+    first_down_rush boolean,
+    first_down_pass boolean,
+    first_down_penalty boolean,
+    third_down_converted boolean,
+    third_down_failed boolean,
+    fourth_down_converted boolean,
+    fourth_down_failed boolean,
+    ep numeric(16,12),
+    epa numeric(16,12),
+    ep_succ boolean,
+    total_home_epa numeric(16,12),
+    total_away_epa numeric(16,12),
+    total_home_rush_epa numeric(16,12),
+    total_away_rush_epa numeric(16,12),
+    total_home_pass_epa numeric(16,12),
+    total_away_pass_epa numeric(16,12),
+    qb_epa numeric(16,12),
+    air_epa numeric(16,12),
+    yac_epa numeric(16,12),
+    comp_air_epa numeric(16,12),
+    comp_yac_epa numeric(16,12),
+    xyac_epa numeric(16,12),
+    total_home_comp_air_epa numeric(16,12),
+    total_away_comp_air_epa numeric(16,12),
+    total_home_comp_yac_epa numeric(16,12),
+    total_away_comp_yac_epa numeric(16,12),
+    total_home_raw_air_epa numeric(16,12),
+    total_away_raw_air_epa numeric(16,12),
+    total_home_raw_yac_epa numeric(16,12),
+    total_away_raw_yac_epa numeric(16,12),
+    wp numeric(16,12),
+    wpa numeric(16,12),
+    home_wp numeric(16,12),
+    away_wp numeric(16,12),
+    vegas_wpa numeric(16,12),
+    vegas_home_wpa numeric(16,12),
+    home_wp_post numeric(16,12),
+    away_wp_post numeric(16,12),
+    vegas_wp numeric(16,12),
+    vegas_home_wp numeric(16,12),
+    total_home_rush_wpa numeric(16,12),
+    total_away_rush_wpa numeric(16,12),
+    total_home_pass_wpa numeric(16,12),
+    total_away_pass_wpa numeric(16,12),
+    air_wpa numeric(16,12),
+    yac_wpa numeric(16,12),
+    comp_air_wpa numeric(16,12),
+    comp_yac_wpa numeric(16,12),
+    total_home_comp_air_wpa numeric(16,12),
+    total_away_comp_air_wpa numeric(16,12),
+    total_home_comp_yac_wpa numeric(16,12),
+    total_away_comp_yac_wpa numeric(16,12),
+    total_home_raw_air_wpa numeric(16,12),
+    total_away_raw_air_wpa numeric(16,12),
+    total_home_raw_yac_wpa numeric(16,12),
+    total_away_raw_yac_wpa numeric(16,12),
+    xyac_mean_yds numeric(16,12),
+    xyac_median_yds numeric(16,12),
+    xyac_succ_prob numeric(16,12),
+    xyac_fd_prob numeric(16,12),
+    ep_att boolean,
+    two_att boolean,
+    fg_att boolean,
+    kickoff_att boolean,
+    punt_att boolean,
+    fg_result character varying(10),
+    kick_distance integer,
+    ep_result character varying(10),
+    tp_result character varying(10),
+    punt_blocked boolean,
+    home_to_rem smallint,
+    away_to_rem smallint,
+    pos_to_rem smallint,
+    def_to_rem smallint,
+    "to" boolean,
+    to_team character varying(3),
+    pos_score smallint,
+    def_score smallint,
+    score_diff smallint,
+    pos_score_post smallint,
+    def_score_post smallint,
+    score_diff_post smallint,
+    no_score_prob numeric(16,12),
+    opp_fg_prob numeric(16,12),
+    opp_safety_prob numeric(16,12),
+    opp_td_prob numeric(16,12),
+    fg_prob numeric(16,12),
+    safety_prob numeric(16,12),
+    td_prob numeric(16,12),
+    extra_point_prob numeric(16,12),
+    two_conv_prob numeric(16,12),
+    xpass_prob numeric(16,12),
+    pass_oe numeric(16,12),
+    cp numeric(16,12),
+    cpoe numeric(16,12),
+    air_yards_ngs numeric(8,4),
+    time_to_throw_ngs numeric(8,4),
+    route_ngs character varying(100),
+    man_zone_ngs character varying(100),
+    cov_type_ngs character varying(100),
+    qb_pressure_ngs boolean,
+    starting_hash public.hash_position,
+    ftn_play_id numeric,
+    qb_position public.qb_position,
+    n_offense_backfield numeric,
+    run_play_option boolean,
+    read_thrown public.read_thrown_type,
+    motion boolean,
+    solo_tackle_1_gsis character varying(36),
+    solo_tackle_1_pid character varying(25),
+    solo_tackle_2_gsis character varying(36),
+    solo_tackle_2_pid character varying(25),
+    solo_tackle_3_gsis character varying(36),
+    solo_tackle_3_pid character varying(25),
+    assisted_tackle_1_gsis character varying(36),
+    assisted_tackle_1_pid character varying(25),
+    assisted_tackle_2_gsis character varying(36),
+    assisted_tackle_2_pid character varying(25),
+    tackle_assist_1_gsis character varying(36),
+    tackle_assist_1_pid character varying(25),
+    tackle_assist_2_gsis character varying(36),
+    tackle_assist_2_pid character varying(25),
+    tackle_assist_3_gsis character varying(36),
+    tackle_assist_3_pid character varying(25),
+    tackle_assist_4_gsis character varying(36),
+    tackle_assist_4_pid character varying(25),
+    pass_location public.play_direction
+);
+
+
+--
+-- Name: nfl_plays_year_2018; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_plays_year_2018 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    sequence integer,
+    state character varying(36),
+    dwn integer,
+    home_score smallint,
+    special boolean,
+    "desc" text,
+    play_type_ngs character varying(36),
+    pos_team character varying(4),
+    pos_team_id character varying(36),
+    qtr integer,
+    year smallint NOT NULL,
+    seas_type character varying(36),
+    away_score smallint,
+    week smallint NOT NULL,
+    ydl_num integer,
+    ydl_side character varying(10),
+    yards_to_go integer,
+    off_formation character varying(100),
+    off_personnel character varying(100),
+    box_ngs integer,
+    pru_ngs integer,
+    def_personnel character varying(100),
+    game_clock_start character varying(10),
+    drive_seq integer,
+    ydl_end character varying(10),
+    ydl_start character varying(10),
+    first_down boolean,
+    goal_to_go boolean,
+    next_play_type character varying(36),
+    penalty boolean,
+    drive_yds integer,
+    drive_play_count integer,
+    play_clock smallint,
+    deleted boolean,
+    review text,
+    score boolean,
+    score_type character varying(10),
+    score_team character varying(4),
+    special_play_type character varying(10),
+    "timestamp" character varying(10),
+    play_type_nfl character varying(36),
+    updated integer NOT NULL,
+    off character varying(3),
+    def character varying(3),
+    play_type public.nfl_play_type,
+    player_fuml_pid character varying(25),
+    player_fuml_gsis character varying(36),
+    bc_pid character varying(25),
+    bc_gsis character varying(36),
+    psr_pid character varying(25),
+    psr_gsis character varying(36),
+    trg_pid character varying(25),
+    trg_gsis character varying(36),
+    intp_pid character varying(25),
+    intp_gsis character varying(36),
+    yds_gained smallint,
+    dot integer,
+    yards_after_catch integer,
+    yards_after_any_contact integer,
+    ret_yds integer,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
+    highlight_pass boolean,
+    int_worthy boolean,
+    dropped_pass boolean,
+    contested_ball boolean,
+    mbt smallint,
+    fuml boolean,
+    "int" boolean,
+    sk boolean,
+    succ boolean,
+    comp boolean,
+    td boolean,
+    ret_td boolean,
+    td_tm character varying(5),
+    ret_tm character varying(5),
+    charted boolean,
+    yfog integer,
+    true_air_yards smallint,
+    created_reception boolean,
+    avsk smallint,
+    no_huddle boolean,
+    play_action boolean,
+    trick_look boolean,
+    trick_play boolean,
+    qb_rush boolean,
+    qb_sneak boolean,
+    qb_scramble boolean,
+    hindered_pass boolean,
+    zero_blitz boolean,
+    stunt boolean,
+    out_of_pocket_pass boolean,
+    phyb boolean,
+    catchable_ball boolean,
+    throw_away boolean,
+    shovel_pass boolean,
+    sideline_pass boolean,
+    batted_pass boolean,
+    screen_pass boolean,
+    pain_free_play boolean,
+    qb_fault_sack boolean,
+    ttscrm numeric(16,12),
+    time_to_pass numeric(16,12),
+    ttsk numeric(16,12),
+    time_to_pressure numeric(16,12),
+    back smallint,
+    xlm smallint,
+    db smallint,
+    box smallint,
+    boxdb smallint,
+    pass_rushers smallint,
+    blitzers smallint,
+    db_blitzers smallint,
+    oopd character varying(2),
+    cov smallint,
+    cov_type_charted character varying(3),
+    sep character varying(3),
+    ydl_100 integer,
+    drive_result character varying(30),
+    drive_top character varying(10),
+    drive_fds integer,
+    drive_inside20 boolean,
+    drive_score boolean,
+    drive_start_qtr smallint,
+    drive_end_qtr smallint,
+    drive_yds_penalized integer,
+    drive_start_transition character varying(30),
+    drive_end_transition character varying(30),
+    drive_game_clock_start character varying(10),
+    drive_game_clock_end character varying(10),
+    drive_start_ydl character varying(10),
+    drive_end_ydl character varying(10),
+    drive_start_play_id integer,
+    drive_end_play_id integer,
+    series_seq integer,
+    series_suc boolean,
+    series_result character varying(100),
+    game_clock_end character varying(10),
+    sec_rem_qtr integer,
+    sec_rem_half integer,
+    sec_rem_gm integer,
+    fum boolean,
+    incomp boolean,
+    touchback boolean,
+    safety boolean,
+    oob boolean,
+    tfl boolean,
+    rush boolean,
+    pass boolean,
+    solo_tk boolean,
+    assist_tk boolean,
+    pen_team character varying(3),
+    pen_yds integer,
+    pass_td boolean,
+    rush_td boolean,
+    pass_yds smallint,
+    recv_yds smallint,
+    rush_yds integer,
+    qb_dropback boolean,
+    qb_kneel boolean,
+    qb_spike boolean,
+    run_location public.play_direction,
+    run_gap character varying(10),
+    first_down_rush boolean,
+    first_down_pass boolean,
+    first_down_penalty boolean,
+    third_down_converted boolean,
+    third_down_failed boolean,
+    fourth_down_converted boolean,
+    fourth_down_failed boolean,
+    ep numeric(16,12),
+    epa numeric(16,12),
+    ep_succ boolean,
+    total_home_epa numeric(16,12),
+    total_away_epa numeric(16,12),
+    total_home_rush_epa numeric(16,12),
+    total_away_rush_epa numeric(16,12),
+    total_home_pass_epa numeric(16,12),
+    total_away_pass_epa numeric(16,12),
+    qb_epa numeric(16,12),
+    air_epa numeric(16,12),
+    yac_epa numeric(16,12),
+    comp_air_epa numeric(16,12),
+    comp_yac_epa numeric(16,12),
+    xyac_epa numeric(16,12),
+    total_home_comp_air_epa numeric(16,12),
+    total_away_comp_air_epa numeric(16,12),
+    total_home_comp_yac_epa numeric(16,12),
+    total_away_comp_yac_epa numeric(16,12),
+    total_home_raw_air_epa numeric(16,12),
+    total_away_raw_air_epa numeric(16,12),
+    total_home_raw_yac_epa numeric(16,12),
+    total_away_raw_yac_epa numeric(16,12),
+    wp numeric(16,12),
+    wpa numeric(16,12),
+    home_wp numeric(16,12),
+    away_wp numeric(16,12),
+    vegas_wpa numeric(16,12),
+    vegas_home_wpa numeric(16,12),
+    home_wp_post numeric(16,12),
+    away_wp_post numeric(16,12),
+    vegas_wp numeric(16,12),
+    vegas_home_wp numeric(16,12),
+    total_home_rush_wpa numeric(16,12),
+    total_away_rush_wpa numeric(16,12),
+    total_home_pass_wpa numeric(16,12),
+    total_away_pass_wpa numeric(16,12),
+    air_wpa numeric(16,12),
+    yac_wpa numeric(16,12),
+    comp_air_wpa numeric(16,12),
+    comp_yac_wpa numeric(16,12),
+    total_home_comp_air_wpa numeric(16,12),
+    total_away_comp_air_wpa numeric(16,12),
+    total_home_comp_yac_wpa numeric(16,12),
+    total_away_comp_yac_wpa numeric(16,12),
+    total_home_raw_air_wpa numeric(16,12),
+    total_away_raw_air_wpa numeric(16,12),
+    total_home_raw_yac_wpa numeric(16,12),
+    total_away_raw_yac_wpa numeric(16,12),
+    xyac_mean_yds numeric(16,12),
+    xyac_median_yds numeric(16,12),
+    xyac_succ_prob numeric(16,12),
+    xyac_fd_prob numeric(16,12),
+    ep_att boolean,
+    two_att boolean,
+    fg_att boolean,
+    kickoff_att boolean,
+    punt_att boolean,
+    fg_result character varying(10),
+    kick_distance integer,
+    ep_result character varying(10),
+    tp_result character varying(10),
+    punt_blocked boolean,
+    home_to_rem smallint,
+    away_to_rem smallint,
+    pos_to_rem smallint,
+    def_to_rem smallint,
+    "to" boolean,
+    to_team character varying(3),
+    pos_score smallint,
+    def_score smallint,
+    score_diff smallint,
+    pos_score_post smallint,
+    def_score_post smallint,
+    score_diff_post smallint,
+    no_score_prob numeric(16,12),
+    opp_fg_prob numeric(16,12),
+    opp_safety_prob numeric(16,12),
+    opp_td_prob numeric(16,12),
+    fg_prob numeric(16,12),
+    safety_prob numeric(16,12),
+    td_prob numeric(16,12),
+    extra_point_prob numeric(16,12),
+    two_conv_prob numeric(16,12),
+    xpass_prob numeric(16,12),
+    pass_oe numeric(16,12),
+    cp numeric(16,12),
+    cpoe numeric(16,12),
+    air_yards_ngs numeric(8,4),
+    time_to_throw_ngs numeric(8,4),
+    route_ngs character varying(100),
+    man_zone_ngs character varying(100),
+    cov_type_ngs character varying(100),
+    qb_pressure_ngs boolean,
+    starting_hash public.hash_position,
+    ftn_play_id numeric,
+    qb_position public.qb_position,
+    n_offense_backfield numeric,
+    run_play_option boolean,
+    read_thrown public.read_thrown_type,
+    motion boolean,
+    solo_tackle_1_gsis character varying(36),
+    solo_tackle_1_pid character varying(25),
+    solo_tackle_2_gsis character varying(36),
+    solo_tackle_2_pid character varying(25),
+    solo_tackle_3_gsis character varying(36),
+    solo_tackle_3_pid character varying(25),
+    assisted_tackle_1_gsis character varying(36),
+    assisted_tackle_1_pid character varying(25),
+    assisted_tackle_2_gsis character varying(36),
+    assisted_tackle_2_pid character varying(25),
+    tackle_assist_1_gsis character varying(36),
+    tackle_assist_1_pid character varying(25),
+    tackle_assist_2_gsis character varying(36),
+    tackle_assist_2_pid character varying(25),
+    tackle_assist_3_gsis character varying(36),
+    tackle_assist_3_pid character varying(25),
+    tackle_assist_4_gsis character varying(36),
+    tackle_assist_4_pid character varying(25),
+    pass_location public.play_direction
+);
+
+
+--
+-- Name: nfl_plays_year_2019; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_plays_year_2019 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    sequence integer,
+    state character varying(36),
+    dwn integer,
+    home_score smallint,
+    special boolean,
+    "desc" text,
+    play_type_ngs character varying(36),
+    pos_team character varying(4),
+    pos_team_id character varying(36),
+    qtr integer,
+    year smallint NOT NULL,
+    seas_type character varying(36),
+    away_score smallint,
+    week smallint NOT NULL,
+    ydl_num integer,
+    ydl_side character varying(10),
+    yards_to_go integer,
+    off_formation character varying(100),
+    off_personnel character varying(100),
+    box_ngs integer,
+    pru_ngs integer,
+    def_personnel character varying(100),
+    game_clock_start character varying(10),
+    drive_seq integer,
+    ydl_end character varying(10),
+    ydl_start character varying(10),
+    first_down boolean,
+    goal_to_go boolean,
+    next_play_type character varying(36),
+    penalty boolean,
+    drive_yds integer,
+    drive_play_count integer,
+    play_clock smallint,
+    deleted boolean,
+    review text,
+    score boolean,
+    score_type character varying(10),
+    score_team character varying(4),
+    special_play_type character varying(10),
+    "timestamp" character varying(10),
+    play_type_nfl character varying(36),
+    updated integer NOT NULL,
+    off character varying(3),
+    def character varying(3),
+    play_type public.nfl_play_type,
+    player_fuml_pid character varying(25),
+    player_fuml_gsis character varying(36),
+    bc_pid character varying(25),
+    bc_gsis character varying(36),
+    psr_pid character varying(25),
+    psr_gsis character varying(36),
+    trg_pid character varying(25),
+    trg_gsis character varying(36),
+    intp_pid character varying(25),
+    intp_gsis character varying(36),
+    yds_gained smallint,
+    dot integer,
+    yards_after_catch integer,
+    yards_after_any_contact integer,
+    ret_yds integer,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
+    highlight_pass boolean,
+    int_worthy boolean,
+    dropped_pass boolean,
+    contested_ball boolean,
+    mbt smallint,
+    fuml boolean,
+    "int" boolean,
+    sk boolean,
+    succ boolean,
+    comp boolean,
+    td boolean,
+    ret_td boolean,
+    td_tm character varying(5),
+    ret_tm character varying(5),
+    charted boolean,
+    yfog integer,
+    true_air_yards smallint,
+    created_reception boolean,
+    avsk smallint,
+    no_huddle boolean,
+    play_action boolean,
+    trick_look boolean,
+    trick_play boolean,
+    qb_rush boolean,
+    qb_sneak boolean,
+    qb_scramble boolean,
+    hindered_pass boolean,
+    zero_blitz boolean,
+    stunt boolean,
+    out_of_pocket_pass boolean,
+    phyb boolean,
+    catchable_ball boolean,
+    throw_away boolean,
+    shovel_pass boolean,
+    sideline_pass boolean,
+    batted_pass boolean,
+    screen_pass boolean,
+    pain_free_play boolean,
+    qb_fault_sack boolean,
+    ttscrm numeric(16,12),
+    time_to_pass numeric(16,12),
+    ttsk numeric(16,12),
+    time_to_pressure numeric(16,12),
+    back smallint,
+    xlm smallint,
+    db smallint,
+    box smallint,
+    boxdb smallint,
+    pass_rushers smallint,
+    blitzers smallint,
+    db_blitzers smallint,
+    oopd character varying(2),
+    cov smallint,
+    cov_type_charted character varying(3),
+    sep character varying(3),
+    ydl_100 integer,
+    drive_result character varying(30),
+    drive_top character varying(10),
+    drive_fds integer,
+    drive_inside20 boolean,
+    drive_score boolean,
+    drive_start_qtr smallint,
+    drive_end_qtr smallint,
+    drive_yds_penalized integer,
+    drive_start_transition character varying(30),
+    drive_end_transition character varying(30),
+    drive_game_clock_start character varying(10),
+    drive_game_clock_end character varying(10),
+    drive_start_ydl character varying(10),
+    drive_end_ydl character varying(10),
+    drive_start_play_id integer,
+    drive_end_play_id integer,
+    series_seq integer,
+    series_suc boolean,
+    series_result character varying(100),
+    game_clock_end character varying(10),
+    sec_rem_qtr integer,
+    sec_rem_half integer,
+    sec_rem_gm integer,
+    fum boolean,
+    incomp boolean,
+    touchback boolean,
+    safety boolean,
+    oob boolean,
+    tfl boolean,
+    rush boolean,
+    pass boolean,
+    solo_tk boolean,
+    assist_tk boolean,
+    pen_team character varying(3),
+    pen_yds integer,
+    pass_td boolean,
+    rush_td boolean,
+    pass_yds smallint,
+    recv_yds smallint,
+    rush_yds integer,
+    qb_dropback boolean,
+    qb_kneel boolean,
+    qb_spike boolean,
+    run_location public.play_direction,
+    run_gap character varying(10),
+    first_down_rush boolean,
+    first_down_pass boolean,
+    first_down_penalty boolean,
+    third_down_converted boolean,
+    third_down_failed boolean,
+    fourth_down_converted boolean,
+    fourth_down_failed boolean,
+    ep numeric(16,12),
+    epa numeric(16,12),
+    ep_succ boolean,
+    total_home_epa numeric(16,12),
+    total_away_epa numeric(16,12),
+    total_home_rush_epa numeric(16,12),
+    total_away_rush_epa numeric(16,12),
+    total_home_pass_epa numeric(16,12),
+    total_away_pass_epa numeric(16,12),
+    qb_epa numeric(16,12),
+    air_epa numeric(16,12),
+    yac_epa numeric(16,12),
+    comp_air_epa numeric(16,12),
+    comp_yac_epa numeric(16,12),
+    xyac_epa numeric(16,12),
+    total_home_comp_air_epa numeric(16,12),
+    total_away_comp_air_epa numeric(16,12),
+    total_home_comp_yac_epa numeric(16,12),
+    total_away_comp_yac_epa numeric(16,12),
+    total_home_raw_air_epa numeric(16,12),
+    total_away_raw_air_epa numeric(16,12),
+    total_home_raw_yac_epa numeric(16,12),
+    total_away_raw_yac_epa numeric(16,12),
+    wp numeric(16,12),
+    wpa numeric(16,12),
+    home_wp numeric(16,12),
+    away_wp numeric(16,12),
+    vegas_wpa numeric(16,12),
+    vegas_home_wpa numeric(16,12),
+    home_wp_post numeric(16,12),
+    away_wp_post numeric(16,12),
+    vegas_wp numeric(16,12),
+    vegas_home_wp numeric(16,12),
+    total_home_rush_wpa numeric(16,12),
+    total_away_rush_wpa numeric(16,12),
+    total_home_pass_wpa numeric(16,12),
+    total_away_pass_wpa numeric(16,12),
+    air_wpa numeric(16,12),
+    yac_wpa numeric(16,12),
+    comp_air_wpa numeric(16,12),
+    comp_yac_wpa numeric(16,12),
+    total_home_comp_air_wpa numeric(16,12),
+    total_away_comp_air_wpa numeric(16,12),
+    total_home_comp_yac_wpa numeric(16,12),
+    total_away_comp_yac_wpa numeric(16,12),
+    total_home_raw_air_wpa numeric(16,12),
+    total_away_raw_air_wpa numeric(16,12),
+    total_home_raw_yac_wpa numeric(16,12),
+    total_away_raw_yac_wpa numeric(16,12),
+    xyac_mean_yds numeric(16,12),
+    xyac_median_yds numeric(16,12),
+    xyac_succ_prob numeric(16,12),
+    xyac_fd_prob numeric(16,12),
+    ep_att boolean,
+    two_att boolean,
+    fg_att boolean,
+    kickoff_att boolean,
+    punt_att boolean,
+    fg_result character varying(10),
+    kick_distance integer,
+    ep_result character varying(10),
+    tp_result character varying(10),
+    punt_blocked boolean,
+    home_to_rem smallint,
+    away_to_rem smallint,
+    pos_to_rem smallint,
+    def_to_rem smallint,
+    "to" boolean,
+    to_team character varying(3),
+    pos_score smallint,
+    def_score smallint,
+    score_diff smallint,
+    pos_score_post smallint,
+    def_score_post smallint,
+    score_diff_post smallint,
+    no_score_prob numeric(16,12),
+    opp_fg_prob numeric(16,12),
+    opp_safety_prob numeric(16,12),
+    opp_td_prob numeric(16,12),
+    fg_prob numeric(16,12),
+    safety_prob numeric(16,12),
+    td_prob numeric(16,12),
+    extra_point_prob numeric(16,12),
+    two_conv_prob numeric(16,12),
+    xpass_prob numeric(16,12),
+    pass_oe numeric(16,12),
+    cp numeric(16,12),
+    cpoe numeric(16,12),
+    air_yards_ngs numeric(8,4),
+    time_to_throw_ngs numeric(8,4),
+    route_ngs character varying(100),
+    man_zone_ngs character varying(100),
+    cov_type_ngs character varying(100),
+    qb_pressure_ngs boolean,
+    starting_hash public.hash_position,
+    ftn_play_id numeric,
+    qb_position public.qb_position,
+    n_offense_backfield numeric,
+    run_play_option boolean,
+    read_thrown public.read_thrown_type,
+    motion boolean,
+    solo_tackle_1_gsis character varying(36),
+    solo_tackle_1_pid character varying(25),
+    solo_tackle_2_gsis character varying(36),
+    solo_tackle_2_pid character varying(25),
+    solo_tackle_3_gsis character varying(36),
+    solo_tackle_3_pid character varying(25),
+    assisted_tackle_1_gsis character varying(36),
+    assisted_tackle_1_pid character varying(25),
+    assisted_tackle_2_gsis character varying(36),
+    assisted_tackle_2_pid character varying(25),
+    tackle_assist_1_gsis character varying(36),
+    tackle_assist_1_pid character varying(25),
+    tackle_assist_2_gsis character varying(36),
+    tackle_assist_2_pid character varying(25),
+    tackle_assist_3_gsis character varying(36),
+    tackle_assist_3_pid character varying(25),
+    tackle_assist_4_gsis character varying(36),
+    tackle_assist_4_pid character varying(25),
+    pass_location public.play_direction
+);
+
+
+--
+-- Name: nfl_plays_year_2020; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_plays_year_2020 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    sequence integer,
+    state character varying(36),
+    dwn integer,
+    home_score smallint,
+    special boolean,
+    "desc" text,
+    play_type_ngs character varying(36),
+    pos_team character varying(4),
+    pos_team_id character varying(36),
+    qtr integer,
+    year smallint NOT NULL,
+    seas_type character varying(36),
+    away_score smallint,
+    week smallint NOT NULL,
+    ydl_num integer,
+    ydl_side character varying(10),
+    yards_to_go integer,
+    off_formation character varying(100),
+    off_personnel character varying(100),
+    box_ngs integer,
+    pru_ngs integer,
+    def_personnel character varying(100),
+    game_clock_start character varying(10),
+    drive_seq integer,
+    ydl_end character varying(10),
+    ydl_start character varying(10),
+    first_down boolean,
+    goal_to_go boolean,
+    next_play_type character varying(36),
+    penalty boolean,
+    drive_yds integer,
+    drive_play_count integer,
+    play_clock smallint,
+    deleted boolean,
+    review text,
+    score boolean,
+    score_type character varying(10),
+    score_team character varying(4),
+    special_play_type character varying(10),
+    "timestamp" character varying(10),
+    play_type_nfl character varying(36),
+    updated integer NOT NULL,
+    off character varying(3),
+    def character varying(3),
+    play_type public.nfl_play_type,
+    player_fuml_pid character varying(25),
+    player_fuml_gsis character varying(36),
+    bc_pid character varying(25),
+    bc_gsis character varying(36),
+    psr_pid character varying(25),
+    psr_gsis character varying(36),
+    trg_pid character varying(25),
+    trg_gsis character varying(36),
+    intp_pid character varying(25),
+    intp_gsis character varying(36),
+    yds_gained smallint,
+    dot integer,
+    yards_after_catch integer,
+    yards_after_any_contact integer,
+    ret_yds integer,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
+    highlight_pass boolean,
+    int_worthy boolean,
+    dropped_pass boolean,
+    contested_ball boolean,
+    mbt smallint,
+    fuml boolean,
+    "int" boolean,
+    sk boolean,
+    succ boolean,
+    comp boolean,
+    td boolean,
+    ret_td boolean,
+    td_tm character varying(5),
+    ret_tm character varying(5),
+    charted boolean,
+    yfog integer,
+    true_air_yards smallint,
+    created_reception boolean,
+    avsk smallint,
+    no_huddle boolean,
+    play_action boolean,
+    trick_look boolean,
+    trick_play boolean,
+    qb_rush boolean,
+    qb_sneak boolean,
+    qb_scramble boolean,
+    hindered_pass boolean,
+    zero_blitz boolean,
+    stunt boolean,
+    out_of_pocket_pass boolean,
+    phyb boolean,
+    catchable_ball boolean,
+    throw_away boolean,
+    shovel_pass boolean,
+    sideline_pass boolean,
+    batted_pass boolean,
+    screen_pass boolean,
+    pain_free_play boolean,
+    qb_fault_sack boolean,
+    ttscrm numeric(16,12),
+    time_to_pass numeric(16,12),
+    ttsk numeric(16,12),
+    time_to_pressure numeric(16,12),
+    back smallint,
+    xlm smallint,
+    db smallint,
+    box smallint,
+    boxdb smallint,
+    pass_rushers smallint,
+    blitzers smallint,
+    db_blitzers smallint,
+    oopd character varying(2),
+    cov smallint,
+    cov_type_charted character varying(3),
+    sep character varying(3),
+    ydl_100 integer,
+    drive_result character varying(30),
+    drive_top character varying(10),
+    drive_fds integer,
+    drive_inside20 boolean,
+    drive_score boolean,
+    drive_start_qtr smallint,
+    drive_end_qtr smallint,
+    drive_yds_penalized integer,
+    drive_start_transition character varying(30),
+    drive_end_transition character varying(30),
+    drive_game_clock_start character varying(10),
+    drive_game_clock_end character varying(10),
+    drive_start_ydl character varying(10),
+    drive_end_ydl character varying(10),
+    drive_start_play_id integer,
+    drive_end_play_id integer,
+    series_seq integer,
+    series_suc boolean,
+    series_result character varying(100),
+    game_clock_end character varying(10),
+    sec_rem_qtr integer,
+    sec_rem_half integer,
+    sec_rem_gm integer,
+    fum boolean,
+    incomp boolean,
+    touchback boolean,
+    safety boolean,
+    oob boolean,
+    tfl boolean,
+    rush boolean,
+    pass boolean,
+    solo_tk boolean,
+    assist_tk boolean,
+    pen_team character varying(3),
+    pen_yds integer,
+    pass_td boolean,
+    rush_td boolean,
+    pass_yds smallint,
+    recv_yds smallint,
+    rush_yds integer,
+    qb_dropback boolean,
+    qb_kneel boolean,
+    qb_spike boolean,
+    run_location public.play_direction,
+    run_gap character varying(10),
+    first_down_rush boolean,
+    first_down_pass boolean,
+    first_down_penalty boolean,
+    third_down_converted boolean,
+    third_down_failed boolean,
+    fourth_down_converted boolean,
+    fourth_down_failed boolean,
+    ep numeric(16,12),
+    epa numeric(16,12),
+    ep_succ boolean,
+    total_home_epa numeric(16,12),
+    total_away_epa numeric(16,12),
+    total_home_rush_epa numeric(16,12),
+    total_away_rush_epa numeric(16,12),
+    total_home_pass_epa numeric(16,12),
+    total_away_pass_epa numeric(16,12),
+    qb_epa numeric(16,12),
+    air_epa numeric(16,12),
+    yac_epa numeric(16,12),
+    comp_air_epa numeric(16,12),
+    comp_yac_epa numeric(16,12),
+    xyac_epa numeric(16,12),
+    total_home_comp_air_epa numeric(16,12),
+    total_away_comp_air_epa numeric(16,12),
+    total_home_comp_yac_epa numeric(16,12),
+    total_away_comp_yac_epa numeric(16,12),
+    total_home_raw_air_epa numeric(16,12),
+    total_away_raw_air_epa numeric(16,12),
+    total_home_raw_yac_epa numeric(16,12),
+    total_away_raw_yac_epa numeric(16,12),
+    wp numeric(16,12),
+    wpa numeric(16,12),
+    home_wp numeric(16,12),
+    away_wp numeric(16,12),
+    vegas_wpa numeric(16,12),
+    vegas_home_wpa numeric(16,12),
+    home_wp_post numeric(16,12),
+    away_wp_post numeric(16,12),
+    vegas_wp numeric(16,12),
+    vegas_home_wp numeric(16,12),
+    total_home_rush_wpa numeric(16,12),
+    total_away_rush_wpa numeric(16,12),
+    total_home_pass_wpa numeric(16,12),
+    total_away_pass_wpa numeric(16,12),
+    air_wpa numeric(16,12),
+    yac_wpa numeric(16,12),
+    comp_air_wpa numeric(16,12),
+    comp_yac_wpa numeric(16,12),
+    total_home_comp_air_wpa numeric(16,12),
+    total_away_comp_air_wpa numeric(16,12),
+    total_home_comp_yac_wpa numeric(16,12),
+    total_away_comp_yac_wpa numeric(16,12),
+    total_home_raw_air_wpa numeric(16,12),
+    total_away_raw_air_wpa numeric(16,12),
+    total_home_raw_yac_wpa numeric(16,12),
+    total_away_raw_yac_wpa numeric(16,12),
+    xyac_mean_yds numeric(16,12),
+    xyac_median_yds numeric(16,12),
+    xyac_succ_prob numeric(16,12),
+    xyac_fd_prob numeric(16,12),
+    ep_att boolean,
+    two_att boolean,
+    fg_att boolean,
+    kickoff_att boolean,
+    punt_att boolean,
+    fg_result character varying(10),
+    kick_distance integer,
+    ep_result character varying(10),
+    tp_result character varying(10),
+    punt_blocked boolean,
+    home_to_rem smallint,
+    away_to_rem smallint,
+    pos_to_rem smallint,
+    def_to_rem smallint,
+    "to" boolean,
+    to_team character varying(3),
+    pos_score smallint,
+    def_score smallint,
+    score_diff smallint,
+    pos_score_post smallint,
+    def_score_post smallint,
+    score_diff_post smallint,
+    no_score_prob numeric(16,12),
+    opp_fg_prob numeric(16,12),
+    opp_safety_prob numeric(16,12),
+    opp_td_prob numeric(16,12),
+    fg_prob numeric(16,12),
+    safety_prob numeric(16,12),
+    td_prob numeric(16,12),
+    extra_point_prob numeric(16,12),
+    two_conv_prob numeric(16,12),
+    xpass_prob numeric(16,12),
+    pass_oe numeric(16,12),
+    cp numeric(16,12),
+    cpoe numeric(16,12),
+    air_yards_ngs numeric(8,4),
+    time_to_throw_ngs numeric(8,4),
+    route_ngs character varying(100),
+    man_zone_ngs character varying(100),
+    cov_type_ngs character varying(100),
+    qb_pressure_ngs boolean,
+    starting_hash public.hash_position,
+    ftn_play_id numeric,
+    qb_position public.qb_position,
+    n_offense_backfield numeric,
+    run_play_option boolean,
+    read_thrown public.read_thrown_type,
+    motion boolean,
+    solo_tackle_1_gsis character varying(36),
+    solo_tackle_1_pid character varying(25),
+    solo_tackle_2_gsis character varying(36),
+    solo_tackle_2_pid character varying(25),
+    solo_tackle_3_gsis character varying(36),
+    solo_tackle_3_pid character varying(25),
+    assisted_tackle_1_gsis character varying(36),
+    assisted_tackle_1_pid character varying(25),
+    assisted_tackle_2_gsis character varying(36),
+    assisted_tackle_2_pid character varying(25),
+    tackle_assist_1_gsis character varying(36),
+    tackle_assist_1_pid character varying(25),
+    tackle_assist_2_gsis character varying(36),
+    tackle_assist_2_pid character varying(25),
+    tackle_assist_3_gsis character varying(36),
+    tackle_assist_3_pid character varying(25),
+    tackle_assist_4_gsis character varying(36),
+    tackle_assist_4_pid character varying(25),
+    pass_location public.play_direction
+);
+
+
+--
+-- Name: nfl_plays_year_2021; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_plays_year_2021 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    sequence integer,
+    state character varying(36),
+    dwn integer,
+    home_score smallint,
+    special boolean,
+    "desc" text,
+    play_type_ngs character varying(36),
+    pos_team character varying(4),
+    pos_team_id character varying(36),
+    qtr integer,
+    year smallint NOT NULL,
+    seas_type character varying(36),
+    away_score smallint,
+    week smallint NOT NULL,
+    ydl_num integer,
+    ydl_side character varying(10),
+    yards_to_go integer,
+    off_formation character varying(100),
+    off_personnel character varying(100),
+    box_ngs integer,
+    pru_ngs integer,
+    def_personnel character varying(100),
+    game_clock_start character varying(10),
+    drive_seq integer,
+    ydl_end character varying(10),
+    ydl_start character varying(10),
+    first_down boolean,
+    goal_to_go boolean,
+    next_play_type character varying(36),
+    penalty boolean,
+    drive_yds integer,
+    drive_play_count integer,
+    play_clock smallint,
+    deleted boolean,
+    review text,
+    score boolean,
+    score_type character varying(10),
+    score_team character varying(4),
+    special_play_type character varying(10),
+    "timestamp" character varying(10),
+    play_type_nfl character varying(36),
+    updated integer NOT NULL,
+    off character varying(3),
+    def character varying(3),
+    play_type public.nfl_play_type,
+    player_fuml_pid character varying(25),
+    player_fuml_gsis character varying(36),
+    bc_pid character varying(25),
+    bc_gsis character varying(36),
+    psr_pid character varying(25),
+    psr_gsis character varying(36),
+    trg_pid character varying(25),
+    trg_gsis character varying(36),
+    intp_pid character varying(25),
+    intp_gsis character varying(36),
+    yds_gained smallint,
+    dot integer,
+    yards_after_catch integer,
+    yards_after_any_contact integer,
+    ret_yds integer,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
+    highlight_pass boolean,
+    int_worthy boolean,
+    dropped_pass boolean,
+    contested_ball boolean,
+    mbt smallint,
+    fuml boolean,
+    "int" boolean,
+    sk boolean,
+    succ boolean,
+    comp boolean,
+    td boolean,
+    ret_td boolean,
+    td_tm character varying(5),
+    ret_tm character varying(5),
+    charted boolean,
+    yfog integer,
+    true_air_yards smallint,
+    created_reception boolean,
+    avsk smallint,
+    no_huddle boolean,
+    play_action boolean,
+    trick_look boolean,
+    trick_play boolean,
+    qb_rush boolean,
+    qb_sneak boolean,
+    qb_scramble boolean,
+    hindered_pass boolean,
+    zero_blitz boolean,
+    stunt boolean,
+    out_of_pocket_pass boolean,
+    phyb boolean,
+    catchable_ball boolean,
+    throw_away boolean,
+    shovel_pass boolean,
+    sideline_pass boolean,
+    batted_pass boolean,
+    screen_pass boolean,
+    pain_free_play boolean,
+    qb_fault_sack boolean,
+    ttscrm numeric(16,12),
+    time_to_pass numeric(16,12),
+    ttsk numeric(16,12),
+    time_to_pressure numeric(16,12),
+    back smallint,
+    xlm smallint,
+    db smallint,
+    box smallint,
+    boxdb smallint,
+    pass_rushers smallint,
+    blitzers smallint,
+    db_blitzers smallint,
+    oopd character varying(2),
+    cov smallint,
+    cov_type_charted character varying(3),
+    sep character varying(3),
+    ydl_100 integer,
+    drive_result character varying(30),
+    drive_top character varying(10),
+    drive_fds integer,
+    drive_inside20 boolean,
+    drive_score boolean,
+    drive_start_qtr smallint,
+    drive_end_qtr smallint,
+    drive_yds_penalized integer,
+    drive_start_transition character varying(30),
+    drive_end_transition character varying(30),
+    drive_game_clock_start character varying(10),
+    drive_game_clock_end character varying(10),
+    drive_start_ydl character varying(10),
+    drive_end_ydl character varying(10),
+    drive_start_play_id integer,
+    drive_end_play_id integer,
+    series_seq integer,
+    series_suc boolean,
+    series_result character varying(100),
+    game_clock_end character varying(10),
+    sec_rem_qtr integer,
+    sec_rem_half integer,
+    sec_rem_gm integer,
+    fum boolean,
+    incomp boolean,
+    touchback boolean,
+    safety boolean,
+    oob boolean,
+    tfl boolean,
+    rush boolean,
+    pass boolean,
+    solo_tk boolean,
+    assist_tk boolean,
+    pen_team character varying(3),
+    pen_yds integer,
+    pass_td boolean,
+    rush_td boolean,
+    pass_yds smallint,
+    recv_yds smallint,
+    rush_yds integer,
+    qb_dropback boolean,
+    qb_kneel boolean,
+    qb_spike boolean,
+    run_location public.play_direction,
+    run_gap character varying(10),
+    first_down_rush boolean,
+    first_down_pass boolean,
+    first_down_penalty boolean,
+    third_down_converted boolean,
+    third_down_failed boolean,
+    fourth_down_converted boolean,
+    fourth_down_failed boolean,
+    ep numeric(16,12),
+    epa numeric(16,12),
+    ep_succ boolean,
+    total_home_epa numeric(16,12),
+    total_away_epa numeric(16,12),
+    total_home_rush_epa numeric(16,12),
+    total_away_rush_epa numeric(16,12),
+    total_home_pass_epa numeric(16,12),
+    total_away_pass_epa numeric(16,12),
+    qb_epa numeric(16,12),
+    air_epa numeric(16,12),
+    yac_epa numeric(16,12),
+    comp_air_epa numeric(16,12),
+    comp_yac_epa numeric(16,12),
+    xyac_epa numeric(16,12),
+    total_home_comp_air_epa numeric(16,12),
+    total_away_comp_air_epa numeric(16,12),
+    total_home_comp_yac_epa numeric(16,12),
+    total_away_comp_yac_epa numeric(16,12),
+    total_home_raw_air_epa numeric(16,12),
+    total_away_raw_air_epa numeric(16,12),
+    total_home_raw_yac_epa numeric(16,12),
+    total_away_raw_yac_epa numeric(16,12),
+    wp numeric(16,12),
+    wpa numeric(16,12),
+    home_wp numeric(16,12),
+    away_wp numeric(16,12),
+    vegas_wpa numeric(16,12),
+    vegas_home_wpa numeric(16,12),
+    home_wp_post numeric(16,12),
+    away_wp_post numeric(16,12),
+    vegas_wp numeric(16,12),
+    vegas_home_wp numeric(16,12),
+    total_home_rush_wpa numeric(16,12),
+    total_away_rush_wpa numeric(16,12),
+    total_home_pass_wpa numeric(16,12),
+    total_away_pass_wpa numeric(16,12),
+    air_wpa numeric(16,12),
+    yac_wpa numeric(16,12),
+    comp_air_wpa numeric(16,12),
+    comp_yac_wpa numeric(16,12),
+    total_home_comp_air_wpa numeric(16,12),
+    total_away_comp_air_wpa numeric(16,12),
+    total_home_comp_yac_wpa numeric(16,12),
+    total_away_comp_yac_wpa numeric(16,12),
+    total_home_raw_air_wpa numeric(16,12),
+    total_away_raw_air_wpa numeric(16,12),
+    total_home_raw_yac_wpa numeric(16,12),
+    total_away_raw_yac_wpa numeric(16,12),
+    xyac_mean_yds numeric(16,12),
+    xyac_median_yds numeric(16,12),
+    xyac_succ_prob numeric(16,12),
+    xyac_fd_prob numeric(16,12),
+    ep_att boolean,
+    two_att boolean,
+    fg_att boolean,
+    kickoff_att boolean,
+    punt_att boolean,
+    fg_result character varying(10),
+    kick_distance integer,
+    ep_result character varying(10),
+    tp_result character varying(10),
+    punt_blocked boolean,
+    home_to_rem smallint,
+    away_to_rem smallint,
+    pos_to_rem smallint,
+    def_to_rem smallint,
+    "to" boolean,
+    to_team character varying(3),
+    pos_score smallint,
+    def_score smallint,
+    score_diff smallint,
+    pos_score_post smallint,
+    def_score_post smallint,
+    score_diff_post smallint,
+    no_score_prob numeric(16,12),
+    opp_fg_prob numeric(16,12),
+    opp_safety_prob numeric(16,12),
+    opp_td_prob numeric(16,12),
+    fg_prob numeric(16,12),
+    safety_prob numeric(16,12),
+    td_prob numeric(16,12),
+    extra_point_prob numeric(16,12),
+    two_conv_prob numeric(16,12),
+    xpass_prob numeric(16,12),
+    pass_oe numeric(16,12),
+    cp numeric(16,12),
+    cpoe numeric(16,12),
+    air_yards_ngs numeric(8,4),
+    time_to_throw_ngs numeric(8,4),
+    route_ngs character varying(100),
+    man_zone_ngs character varying(100),
+    cov_type_ngs character varying(100),
+    qb_pressure_ngs boolean,
+    starting_hash public.hash_position,
+    ftn_play_id numeric,
+    qb_position public.qb_position,
+    n_offense_backfield numeric,
+    run_play_option boolean,
+    read_thrown public.read_thrown_type,
+    motion boolean,
+    solo_tackle_1_gsis character varying(36),
+    solo_tackle_1_pid character varying(25),
+    solo_tackle_2_gsis character varying(36),
+    solo_tackle_2_pid character varying(25),
+    solo_tackle_3_gsis character varying(36),
+    solo_tackle_3_pid character varying(25),
+    assisted_tackle_1_gsis character varying(36),
+    assisted_tackle_1_pid character varying(25),
+    assisted_tackle_2_gsis character varying(36),
+    assisted_tackle_2_pid character varying(25),
+    tackle_assist_1_gsis character varying(36),
+    tackle_assist_1_pid character varying(25),
+    tackle_assist_2_gsis character varying(36),
+    tackle_assist_2_pid character varying(25),
+    tackle_assist_3_gsis character varying(36),
+    tackle_assist_3_pid character varying(25),
+    tackle_assist_4_gsis character varying(36),
+    tackle_assist_4_pid character varying(25),
+    pass_location public.play_direction
+);
+
+
+--
+-- Name: nfl_plays_year_2022; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_plays_year_2022 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    sequence integer,
+    state character varying(36),
+    dwn integer,
+    home_score smallint,
+    special boolean,
+    "desc" text,
+    play_type_ngs character varying(36),
+    pos_team character varying(4),
+    pos_team_id character varying(36),
+    qtr integer,
+    year smallint NOT NULL,
+    seas_type character varying(36),
+    away_score smallint,
+    week smallint NOT NULL,
+    ydl_num integer,
+    ydl_side character varying(10),
+    yards_to_go integer,
+    off_formation character varying(100),
+    off_personnel character varying(100),
+    box_ngs integer,
+    pru_ngs integer,
+    def_personnel character varying(100),
+    game_clock_start character varying(10),
+    drive_seq integer,
+    ydl_end character varying(10),
+    ydl_start character varying(10),
+    first_down boolean,
+    goal_to_go boolean,
+    next_play_type character varying(36),
+    penalty boolean,
+    drive_yds integer,
+    drive_play_count integer,
+    play_clock smallint,
+    deleted boolean,
+    review text,
+    score boolean,
+    score_type character varying(10),
+    score_team character varying(4),
+    special_play_type character varying(10),
+    "timestamp" character varying(10),
+    play_type_nfl character varying(36),
+    updated integer NOT NULL,
+    off character varying(3),
+    def character varying(3),
+    play_type public.nfl_play_type,
+    player_fuml_pid character varying(25),
+    player_fuml_gsis character varying(36),
+    bc_pid character varying(25),
+    bc_gsis character varying(36),
+    psr_pid character varying(25),
+    psr_gsis character varying(36),
+    trg_pid character varying(25),
+    trg_gsis character varying(36),
+    intp_pid character varying(25),
+    intp_gsis character varying(36),
+    yds_gained smallint,
+    dot integer,
+    yards_after_catch integer,
+    yards_after_any_contact integer,
+    ret_yds integer,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
+    highlight_pass boolean,
+    int_worthy boolean,
+    dropped_pass boolean,
+    contested_ball boolean,
+    mbt smallint,
+    fuml boolean,
+    "int" boolean,
+    sk boolean,
+    succ boolean,
+    comp boolean,
+    td boolean,
+    ret_td boolean,
+    td_tm character varying(5),
+    ret_tm character varying(5),
+    charted boolean,
+    yfog integer,
+    true_air_yards smallint,
+    created_reception boolean,
+    avsk smallint,
+    no_huddle boolean,
+    play_action boolean,
+    trick_look boolean,
+    trick_play boolean,
+    qb_rush boolean,
+    qb_sneak boolean,
+    qb_scramble boolean,
+    hindered_pass boolean,
+    zero_blitz boolean,
+    stunt boolean,
+    out_of_pocket_pass boolean,
+    phyb boolean,
+    catchable_ball boolean,
+    throw_away boolean,
+    shovel_pass boolean,
+    sideline_pass boolean,
+    batted_pass boolean,
+    screen_pass boolean,
+    pain_free_play boolean,
+    qb_fault_sack boolean,
+    ttscrm numeric(16,12),
+    time_to_pass numeric(16,12),
+    ttsk numeric(16,12),
+    time_to_pressure numeric(16,12),
+    back smallint,
+    xlm smallint,
+    db smallint,
+    box smallint,
+    boxdb smallint,
+    pass_rushers smallint,
+    blitzers smallint,
+    db_blitzers smallint,
+    oopd character varying(2),
+    cov smallint,
+    cov_type_charted character varying(3),
+    sep character varying(3),
+    ydl_100 integer,
+    drive_result character varying(30),
+    drive_top character varying(10),
+    drive_fds integer,
+    drive_inside20 boolean,
+    drive_score boolean,
+    drive_start_qtr smallint,
+    drive_end_qtr smallint,
+    drive_yds_penalized integer,
+    drive_start_transition character varying(30),
+    drive_end_transition character varying(30),
+    drive_game_clock_start character varying(10),
+    drive_game_clock_end character varying(10),
+    drive_start_ydl character varying(10),
+    drive_end_ydl character varying(10),
+    drive_start_play_id integer,
+    drive_end_play_id integer,
+    series_seq integer,
+    series_suc boolean,
+    series_result character varying(100),
+    game_clock_end character varying(10),
+    sec_rem_qtr integer,
+    sec_rem_half integer,
+    sec_rem_gm integer,
+    fum boolean,
+    incomp boolean,
+    touchback boolean,
+    safety boolean,
+    oob boolean,
+    tfl boolean,
+    rush boolean,
+    pass boolean,
+    solo_tk boolean,
+    assist_tk boolean,
+    pen_team character varying(3),
+    pen_yds integer,
+    pass_td boolean,
+    rush_td boolean,
+    pass_yds smallint,
+    recv_yds smallint,
+    rush_yds integer,
+    qb_dropback boolean,
+    qb_kneel boolean,
+    qb_spike boolean,
+    run_location public.play_direction,
+    run_gap character varying(10),
+    first_down_rush boolean,
+    first_down_pass boolean,
+    first_down_penalty boolean,
+    third_down_converted boolean,
+    third_down_failed boolean,
+    fourth_down_converted boolean,
+    fourth_down_failed boolean,
+    ep numeric(16,12),
+    epa numeric(16,12),
+    ep_succ boolean,
+    total_home_epa numeric(16,12),
+    total_away_epa numeric(16,12),
+    total_home_rush_epa numeric(16,12),
+    total_away_rush_epa numeric(16,12),
+    total_home_pass_epa numeric(16,12),
+    total_away_pass_epa numeric(16,12),
+    qb_epa numeric(16,12),
+    air_epa numeric(16,12),
+    yac_epa numeric(16,12),
+    comp_air_epa numeric(16,12),
+    comp_yac_epa numeric(16,12),
+    xyac_epa numeric(16,12),
+    total_home_comp_air_epa numeric(16,12),
+    total_away_comp_air_epa numeric(16,12),
+    total_home_comp_yac_epa numeric(16,12),
+    total_away_comp_yac_epa numeric(16,12),
+    total_home_raw_air_epa numeric(16,12),
+    total_away_raw_air_epa numeric(16,12),
+    total_home_raw_yac_epa numeric(16,12),
+    total_away_raw_yac_epa numeric(16,12),
+    wp numeric(16,12),
+    wpa numeric(16,12),
+    home_wp numeric(16,12),
+    away_wp numeric(16,12),
+    vegas_wpa numeric(16,12),
+    vegas_home_wpa numeric(16,12),
+    home_wp_post numeric(16,12),
+    away_wp_post numeric(16,12),
+    vegas_wp numeric(16,12),
+    vegas_home_wp numeric(16,12),
+    total_home_rush_wpa numeric(16,12),
+    total_away_rush_wpa numeric(16,12),
+    total_home_pass_wpa numeric(16,12),
+    total_away_pass_wpa numeric(16,12),
+    air_wpa numeric(16,12),
+    yac_wpa numeric(16,12),
+    comp_air_wpa numeric(16,12),
+    comp_yac_wpa numeric(16,12),
+    total_home_comp_air_wpa numeric(16,12),
+    total_away_comp_air_wpa numeric(16,12),
+    total_home_comp_yac_wpa numeric(16,12),
+    total_away_comp_yac_wpa numeric(16,12),
+    total_home_raw_air_wpa numeric(16,12),
+    total_away_raw_air_wpa numeric(16,12),
+    total_home_raw_yac_wpa numeric(16,12),
+    total_away_raw_yac_wpa numeric(16,12),
+    xyac_mean_yds numeric(16,12),
+    xyac_median_yds numeric(16,12),
+    xyac_succ_prob numeric(16,12),
+    xyac_fd_prob numeric(16,12),
+    ep_att boolean,
+    two_att boolean,
+    fg_att boolean,
+    kickoff_att boolean,
+    punt_att boolean,
+    fg_result character varying(10),
+    kick_distance integer,
+    ep_result character varying(10),
+    tp_result character varying(10),
+    punt_blocked boolean,
+    home_to_rem smallint,
+    away_to_rem smallint,
+    pos_to_rem smallint,
+    def_to_rem smallint,
+    "to" boolean,
+    to_team character varying(3),
+    pos_score smallint,
+    def_score smallint,
+    score_diff smallint,
+    pos_score_post smallint,
+    def_score_post smallint,
+    score_diff_post smallint,
+    no_score_prob numeric(16,12),
+    opp_fg_prob numeric(16,12),
+    opp_safety_prob numeric(16,12),
+    opp_td_prob numeric(16,12),
+    fg_prob numeric(16,12),
+    safety_prob numeric(16,12),
+    td_prob numeric(16,12),
+    extra_point_prob numeric(16,12),
+    two_conv_prob numeric(16,12),
+    xpass_prob numeric(16,12),
+    pass_oe numeric(16,12),
+    cp numeric(16,12),
+    cpoe numeric(16,12),
+    air_yards_ngs numeric(8,4),
+    time_to_throw_ngs numeric(8,4),
+    route_ngs character varying(100),
+    man_zone_ngs character varying(100),
+    cov_type_ngs character varying(100),
+    qb_pressure_ngs boolean,
+    starting_hash public.hash_position,
+    ftn_play_id numeric,
+    qb_position public.qb_position,
+    n_offense_backfield numeric,
+    run_play_option boolean,
+    read_thrown public.read_thrown_type,
+    motion boolean,
+    solo_tackle_1_gsis character varying(36),
+    solo_tackle_1_pid character varying(25),
+    solo_tackle_2_gsis character varying(36),
+    solo_tackle_2_pid character varying(25),
+    solo_tackle_3_gsis character varying(36),
+    solo_tackle_3_pid character varying(25),
+    assisted_tackle_1_gsis character varying(36),
+    assisted_tackle_1_pid character varying(25),
+    assisted_tackle_2_gsis character varying(36),
+    assisted_tackle_2_pid character varying(25),
+    tackle_assist_1_gsis character varying(36),
+    tackle_assist_1_pid character varying(25),
+    tackle_assist_2_gsis character varying(36),
+    tackle_assist_2_pid character varying(25),
+    tackle_assist_3_gsis character varying(36),
+    tackle_assist_3_pid character varying(25),
+    tackle_assist_4_gsis character varying(36),
+    tackle_assist_4_pid character varying(25),
+    pass_location public.play_direction
+);
+
+
+--
+-- Name: nfl_plays_year_2023; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_plays_year_2023 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    sequence integer,
+    state character varying(36),
+    dwn integer,
+    home_score smallint,
+    special boolean,
+    "desc" text,
+    play_type_ngs character varying(36),
+    pos_team character varying(4),
+    pos_team_id character varying(36),
+    qtr integer,
+    year smallint NOT NULL,
+    seas_type character varying(36),
+    away_score smallint,
+    week smallint NOT NULL,
+    ydl_num integer,
+    ydl_side character varying(10),
+    yards_to_go integer,
+    off_formation character varying(100),
+    off_personnel character varying(100),
+    box_ngs integer,
+    pru_ngs integer,
+    def_personnel character varying(100),
+    game_clock_start character varying(10),
+    drive_seq integer,
+    ydl_end character varying(10),
+    ydl_start character varying(10),
+    first_down boolean,
+    goal_to_go boolean,
+    next_play_type character varying(36),
+    penalty boolean,
+    drive_yds integer,
+    drive_play_count integer,
+    play_clock smallint,
+    deleted boolean,
+    review text,
+    score boolean,
+    score_type character varying(10),
+    score_team character varying(4),
+    special_play_type character varying(10),
+    "timestamp" character varying(10),
+    play_type_nfl character varying(36),
+    updated integer NOT NULL,
+    off character varying(3),
+    def character varying(3),
+    play_type public.nfl_play_type,
+    player_fuml_pid character varying(25),
+    player_fuml_gsis character varying(36),
+    bc_pid character varying(25),
+    bc_gsis character varying(36),
+    psr_pid character varying(25),
+    psr_gsis character varying(36),
+    trg_pid character varying(25),
+    trg_gsis character varying(36),
+    intp_pid character varying(25),
+    intp_gsis character varying(36),
+    yds_gained smallint,
+    dot integer,
+    yards_after_catch integer,
+    yards_after_any_contact integer,
+    ret_yds integer,
+    qb_pressure boolean,
+    qb_hit boolean,
+    qb_hurry boolean,
+    highlight_pass boolean,
+    int_worthy boolean,
+    dropped_pass boolean,
+    contested_ball boolean,
+    mbt smallint,
+    fuml boolean,
+    "int" boolean,
+    sk boolean,
+    succ boolean,
+    comp boolean,
+    td boolean,
+    ret_td boolean,
+    td_tm character varying(5),
+    ret_tm character varying(5),
+    charted boolean,
+    yfog integer,
+    true_air_yards smallint,
+    created_reception boolean,
+    avsk smallint,
+    no_huddle boolean,
+    play_action boolean,
+    trick_look boolean,
+    trick_play boolean,
+    qb_rush boolean,
+    qb_sneak boolean,
+    qb_scramble boolean,
+    hindered_pass boolean,
+    zero_blitz boolean,
+    stunt boolean,
+    out_of_pocket_pass boolean,
+    phyb boolean,
+    catchable_ball boolean,
+    throw_away boolean,
+    shovel_pass boolean,
+    sideline_pass boolean,
+    batted_pass boolean,
+    screen_pass boolean,
+    pain_free_play boolean,
+    qb_fault_sack boolean,
+    ttscrm numeric(16,12),
+    time_to_pass numeric(16,12),
+    ttsk numeric(16,12),
+    time_to_pressure numeric(16,12),
+    back smallint,
+    xlm smallint,
+    db smallint,
+    box smallint,
+    boxdb smallint,
+    pass_rushers smallint,
+    blitzers smallint,
+    db_blitzers smallint,
+    oopd character varying(2),
+    cov smallint,
+    cov_type_charted character varying(3),
+    sep character varying(3),
+    ydl_100 integer,
+    drive_result character varying(30),
+    drive_top character varying(10),
+    drive_fds integer,
+    drive_inside20 boolean,
+    drive_score boolean,
+    drive_start_qtr smallint,
+    drive_end_qtr smallint,
+    drive_yds_penalized integer,
+    drive_start_transition character varying(30),
+    drive_end_transition character varying(30),
+    drive_game_clock_start character varying(10),
+    drive_game_clock_end character varying(10),
+    drive_start_ydl character varying(10),
+    drive_end_ydl character varying(10),
+    drive_start_play_id integer,
+    drive_end_play_id integer,
+    series_seq integer,
+    series_suc boolean,
+    series_result character varying(100),
+    game_clock_end character varying(10),
+    sec_rem_qtr integer,
+    sec_rem_half integer,
+    sec_rem_gm integer,
+    fum boolean,
+    incomp boolean,
+    touchback boolean,
+    safety boolean,
+    oob boolean,
+    tfl boolean,
+    rush boolean,
+    pass boolean,
+    solo_tk boolean,
+    assist_tk boolean,
+    pen_team character varying(3),
+    pen_yds integer,
+    pass_td boolean,
+    rush_td boolean,
+    pass_yds smallint,
+    recv_yds smallint,
+    rush_yds integer,
+    qb_dropback boolean,
+    qb_kneel boolean,
+    qb_spike boolean,
+    run_location public.play_direction,
+    run_gap character varying(10),
+    first_down_rush boolean,
+    first_down_pass boolean,
+    first_down_penalty boolean,
+    third_down_converted boolean,
+    third_down_failed boolean,
+    fourth_down_converted boolean,
+    fourth_down_failed boolean,
+    ep numeric(16,12),
+    epa numeric(16,12),
+    ep_succ boolean,
+    total_home_epa numeric(16,12),
+    total_away_epa numeric(16,12),
+    total_home_rush_epa numeric(16,12),
+    total_away_rush_epa numeric(16,12),
+    total_home_pass_epa numeric(16,12),
+    total_away_pass_epa numeric(16,12),
+    qb_epa numeric(16,12),
+    air_epa numeric(16,12),
+    yac_epa numeric(16,12),
+    comp_air_epa numeric(16,12),
+    comp_yac_epa numeric(16,12),
+    xyac_epa numeric(16,12),
+    total_home_comp_air_epa numeric(16,12),
+    total_away_comp_air_epa numeric(16,12),
+    total_home_comp_yac_epa numeric(16,12),
+    total_away_comp_yac_epa numeric(16,12),
+    total_home_raw_air_epa numeric(16,12),
+    total_away_raw_air_epa numeric(16,12),
+    total_home_raw_yac_epa numeric(16,12),
+    total_away_raw_yac_epa numeric(16,12),
+    wp numeric(16,12),
+    wpa numeric(16,12),
+    home_wp numeric(16,12),
+    away_wp numeric(16,12),
+    vegas_wpa numeric(16,12),
+    vegas_home_wpa numeric(16,12),
+    home_wp_post numeric(16,12),
+    away_wp_post numeric(16,12),
+    vegas_wp numeric(16,12),
+    vegas_home_wp numeric(16,12),
+    total_home_rush_wpa numeric(16,12),
+    total_away_rush_wpa numeric(16,12),
+    total_home_pass_wpa numeric(16,12),
+    total_away_pass_wpa numeric(16,12),
+    air_wpa numeric(16,12),
+    yac_wpa numeric(16,12),
+    comp_air_wpa numeric(16,12),
+    comp_yac_wpa numeric(16,12),
+    total_home_comp_air_wpa numeric(16,12),
+    total_away_comp_air_wpa numeric(16,12),
+    total_home_comp_yac_wpa numeric(16,12),
+    total_away_comp_yac_wpa numeric(16,12),
+    total_home_raw_air_wpa numeric(16,12),
+    total_away_raw_air_wpa numeric(16,12),
+    total_home_raw_yac_wpa numeric(16,12),
+    total_away_raw_yac_wpa numeric(16,12),
+    xyac_mean_yds numeric(16,12),
+    xyac_median_yds numeric(16,12),
+    xyac_succ_prob numeric(16,12),
+    xyac_fd_prob numeric(16,12),
+    ep_att boolean,
+    two_att boolean,
+    fg_att boolean,
+    kickoff_att boolean,
+    punt_att boolean,
+    fg_result character varying(10),
+    kick_distance integer,
+    ep_result character varying(10),
+    tp_result character varying(10),
+    punt_blocked boolean,
+    home_to_rem smallint,
+    away_to_rem smallint,
+    pos_to_rem smallint,
+    def_to_rem smallint,
+    "to" boolean,
+    to_team character varying(3),
+    pos_score smallint,
+    def_score smallint,
+    score_diff smallint,
+    pos_score_post smallint,
+    def_score_post smallint,
+    score_diff_post smallint,
+    no_score_prob numeric(16,12),
+    opp_fg_prob numeric(16,12),
+    opp_safety_prob numeric(16,12),
+    opp_td_prob numeric(16,12),
+    fg_prob numeric(16,12),
+    safety_prob numeric(16,12),
+    td_prob numeric(16,12),
+    extra_point_prob numeric(16,12),
+    two_conv_prob numeric(16,12),
+    xpass_prob numeric(16,12),
+    pass_oe numeric(16,12),
+    cp numeric(16,12),
+    cpoe numeric(16,12),
+    air_yards_ngs numeric(8,4),
+    time_to_throw_ngs numeric(8,4),
+    route_ngs character varying(100),
+    man_zone_ngs character varying(100),
+    cov_type_ngs character varying(100),
+    qb_pressure_ngs boolean,
+    starting_hash public.hash_position,
+    ftn_play_id numeric,
+    qb_position public.qb_position,
+    n_offense_backfield numeric,
+    run_play_option boolean,
+    read_thrown public.read_thrown_type,
+    motion boolean,
+    solo_tackle_1_gsis character varying(36),
+    solo_tackle_1_pid character varying(25),
+    solo_tackle_2_gsis character varying(36),
+    solo_tackle_2_pid character varying(25),
+    solo_tackle_3_gsis character varying(36),
+    solo_tackle_3_pid character varying(25),
+    assisted_tackle_1_gsis character varying(36),
+    assisted_tackle_1_pid character varying(25),
+    assisted_tackle_2_gsis character varying(36),
+    assisted_tackle_2_pid character varying(25),
+    tackle_assist_1_gsis character varying(36),
+    tackle_assist_1_pid character varying(25),
+    tackle_assist_2_gsis character varying(36),
+    tackle_assist_2_pid character varying(25),
+    tackle_assist_3_gsis character varying(36),
+    tackle_assist_3_pid character varying(25),
+    tackle_assist_4_gsis character varying(36),
+    tackle_assist_4_pid character varying(25),
+    pass_location public.play_direction
+);
+
+
+--
+-- Name: nfl_plays_year_2024; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_plays_year_2024 (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
     sequence integer,
@@ -5063,6 +13614,181 @@ ALTER SEQUENCE public.waivers_uid_seq OWNED BY public.waivers.uid;
 
 
 --
+-- Name: nfl_plays_year_2000; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_plays ATTACH PARTITION public.nfl_plays_year_2000 FOR VALUES FROM ('2000') TO ('2001');
+
+
+--
+-- Name: nfl_plays_year_2001; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_plays ATTACH PARTITION public.nfl_plays_year_2001 FOR VALUES FROM ('2001') TO ('2002');
+
+
+--
+-- Name: nfl_plays_year_2002; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_plays ATTACH PARTITION public.nfl_plays_year_2002 FOR VALUES FROM ('2002') TO ('2003');
+
+
+--
+-- Name: nfl_plays_year_2003; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_plays ATTACH PARTITION public.nfl_plays_year_2003 FOR VALUES FROM ('2003') TO ('2004');
+
+
+--
+-- Name: nfl_plays_year_2004; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_plays ATTACH PARTITION public.nfl_plays_year_2004 FOR VALUES FROM ('2004') TO ('2005');
+
+
+--
+-- Name: nfl_plays_year_2005; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_plays ATTACH PARTITION public.nfl_plays_year_2005 FOR VALUES FROM ('2005') TO ('2006');
+
+
+--
+-- Name: nfl_plays_year_2006; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_plays ATTACH PARTITION public.nfl_plays_year_2006 FOR VALUES FROM ('2006') TO ('2007');
+
+
+--
+-- Name: nfl_plays_year_2007; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_plays ATTACH PARTITION public.nfl_plays_year_2007 FOR VALUES FROM ('2007') TO ('2008');
+
+
+--
+-- Name: nfl_plays_year_2008; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_plays ATTACH PARTITION public.nfl_plays_year_2008 FOR VALUES FROM ('2008') TO ('2009');
+
+
+--
+-- Name: nfl_plays_year_2009; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_plays ATTACH PARTITION public.nfl_plays_year_2009 FOR VALUES FROM ('2009') TO ('2010');
+
+
+--
+-- Name: nfl_plays_year_2010; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_plays ATTACH PARTITION public.nfl_plays_year_2010 FOR VALUES FROM ('2010') TO ('2011');
+
+
+--
+-- Name: nfl_plays_year_2011; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_plays ATTACH PARTITION public.nfl_plays_year_2011 FOR VALUES FROM ('2011') TO ('2012');
+
+
+--
+-- Name: nfl_plays_year_2012; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_plays ATTACH PARTITION public.nfl_plays_year_2012 FOR VALUES FROM ('2012') TO ('2013');
+
+
+--
+-- Name: nfl_plays_year_2013; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_plays ATTACH PARTITION public.nfl_plays_year_2013 FOR VALUES FROM ('2013') TO ('2014');
+
+
+--
+-- Name: nfl_plays_year_2014; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_plays ATTACH PARTITION public.nfl_plays_year_2014 FOR VALUES FROM ('2014') TO ('2015');
+
+
+--
+-- Name: nfl_plays_year_2015; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_plays ATTACH PARTITION public.nfl_plays_year_2015 FOR VALUES FROM ('2015') TO ('2016');
+
+
+--
+-- Name: nfl_plays_year_2016; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_plays ATTACH PARTITION public.nfl_plays_year_2016 FOR VALUES FROM ('2016') TO ('2017');
+
+
+--
+-- Name: nfl_plays_year_2017; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_plays ATTACH PARTITION public.nfl_plays_year_2017 FOR VALUES FROM ('2017') TO ('2018');
+
+
+--
+-- Name: nfl_plays_year_2018; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_plays ATTACH PARTITION public.nfl_plays_year_2018 FOR VALUES FROM ('2018') TO ('2019');
+
+
+--
+-- Name: nfl_plays_year_2019; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_plays ATTACH PARTITION public.nfl_plays_year_2019 FOR VALUES FROM ('2019') TO ('2020');
+
+
+--
+-- Name: nfl_plays_year_2020; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_plays ATTACH PARTITION public.nfl_plays_year_2020 FOR VALUES FROM ('2020') TO ('2021');
+
+
+--
+-- Name: nfl_plays_year_2021; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_plays ATTACH PARTITION public.nfl_plays_year_2021 FOR VALUES FROM ('2021') TO ('2022');
+
+
+--
+-- Name: nfl_plays_year_2022; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_plays ATTACH PARTITION public.nfl_plays_year_2022 FOR VALUES FROM ('2022') TO ('2023');
+
+
+--
+-- Name: nfl_plays_year_2023; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_plays ATTACH PARTITION public.nfl_plays_year_2023 FOR VALUES FROM ('2023') TO ('2024');
+
+
+--
+-- Name: nfl_plays_year_2024; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_plays ATTACH PARTITION public.nfl_plays_year_2024 FOR VALUES FROM ('2024') TO ('2025');
+
+
+--
 -- Name: draft uid; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -5748,90 +14474,6 @@ CREATE INDEX "idx_24722_playId" ON public.nfl_play_stats_current_week USING btre
 --
 
 CREATE UNIQUE INDEX idx_24722_play_stat ON public.nfl_play_stats_current_week USING btree (esbid, "playId", "statId", "playerName");
-
-
---
--- Name: idx_24725_bc_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_24725_bc_pid ON public.nfl_plays USING btree (bc_pid);
-
-
---
--- Name: idx_24725_esbid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_24725_esbid ON public.nfl_plays USING btree (esbid);
-
-
---
--- Name: idx_24725_gamePlay; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX "idx_24725_gamePlay" ON public.nfl_plays USING btree (esbid, "playId");
-
-
---
--- Name: idx_24725_idx_nfl_plays_target; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_24725_idx_nfl_plays_target ON public.nfl_plays USING btree (play_type, seas_type, trg_pid, off, esbid);
-
-
---
--- Name: idx_24725_idx_nfl_plays_year_esbid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_24725_idx_nfl_plays_year_esbid ON public.nfl_plays USING btree (year, esbid);
-
-
---
--- Name: idx_24725_idx_off; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_24725_idx_off ON public.nfl_plays USING btree (off);
-
-
---
--- Name: idx_24725_idx_play_type; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_24725_idx_play_type ON public.nfl_plays USING btree (play_type);
-
-
---
--- Name: idx_24725_idx_seas_type; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_24725_idx_seas_type ON public.nfl_plays USING btree (seas_type);
-
-
---
--- Name: idx_24725_nfl_plays_year_target; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_24725_nfl_plays_year_target ON public.nfl_plays USING btree (year, play_type, seas_type, trg_pid, off, esbid);
-
-
---
--- Name: idx_24725_playId; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX "idx_24725_playId" ON public.nfl_plays USING btree ("playId");
-
-
---
--- Name: idx_24725_psr_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_24725_psr_pid ON public.nfl_plays USING btree (psr_pid);
-
-
---
--- Name: idx_24725_trg_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_24725_trg_pid ON public.nfl_plays USING btree (trg_pid);
 
 
 --
@@ -6626,202 +15268,6 @@ CREATE INDEX idx_nfl_games_year_seas_type_week_esbid ON public.nfl_games USING b
 
 
 --
--- Name: idx_nfl_plays_assisted_tackle_1_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_assisted_tackle_1_pid ON public.nfl_plays USING btree (assisted_tackle_1_pid);
-
-
---
--- Name: idx_nfl_plays_assisted_tackle_2_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_assisted_tackle_2_pid ON public.nfl_plays USING btree (assisted_tackle_2_pid);
-
-
---
--- Name: idx_nfl_plays_catchable_ball; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_catchable_ball ON public.nfl_plays USING btree (catchable_ball);
-
-
---
--- Name: idx_nfl_plays_dwn; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_dwn ON public.nfl_plays USING btree (dwn);
-
-
---
--- Name: idx_nfl_plays_motion; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_motion ON public.nfl_plays USING btree (motion);
-
-
---
--- Name: idx_nfl_plays_pid_types; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_pid_types ON public.nfl_plays USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
-
-
---
--- Name: idx_nfl_plays_play_action; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_play_action ON public.nfl_plays USING btree (play_action);
-
-
---
--- Name: idx_nfl_plays_qtr; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_qtr ON public.nfl_plays USING btree (qtr);
-
-
---
--- Name: idx_nfl_plays_route_ngs; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_route_ngs ON public.nfl_plays USING btree (route_ngs);
-
-
---
--- Name: idx_nfl_plays_series_seq; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_series_seq ON public.nfl_plays USING btree (series_seq);
-
-
---
--- Name: idx_nfl_plays_solo_tackle_1_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_solo_tackle_1_pid ON public.nfl_plays USING btree (solo_tackle_1_pid);
-
-
---
--- Name: idx_nfl_plays_solo_tackle_2_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_solo_tackle_2_pid ON public.nfl_plays USING btree (solo_tackle_2_pid);
-
-
---
--- Name: idx_nfl_plays_solo_tackle_3_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_solo_tackle_3_pid ON public.nfl_plays USING btree (solo_tackle_3_pid);
-
-
---
--- Name: idx_nfl_plays_tackle_assist_1_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_tackle_assist_1_pid ON public.nfl_plays USING btree (tackle_assist_1_pid);
-
-
---
--- Name: idx_nfl_plays_tackle_assist_2_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_tackle_assist_2_pid ON public.nfl_plays USING btree (tackle_assist_2_pid);
-
-
---
--- Name: idx_nfl_plays_tackle_assist_3_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_tackle_assist_3_pid ON public.nfl_plays USING btree (tackle_assist_3_pid);
-
-
---
--- Name: idx_nfl_plays_tackle_assist_4_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_tackle_assist_4_pid ON public.nfl_plays USING btree (tackle_assist_4_pid);
-
-
---
--- Name: idx_nfl_plays_ydl_100; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_ydl_100 ON public.nfl_plays USING btree (ydl_100);
-
-
---
--- Name: idx_nfl_plays_year_seas_type_play_type_bc_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_year_seas_type_play_type_bc_pid ON public.nfl_plays USING btree (year, seas_type, play_type, bc_pid);
-
-
---
--- Name: idx_nfl_plays_year_seas_type_play_type_bc_trg_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_year_seas_type_play_type_bc_trg_pid ON public.nfl_plays USING btree (year, seas_type, play_type, bc_pid, trg_pid);
-
-
---
--- Name: idx_nfl_plays_year_seas_type_play_type_player_fuml_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_year_seas_type_play_type_player_fuml_pid ON public.nfl_plays USING btree (year, seas_type, play_type, player_fuml_pid);
-
-
---
--- Name: idx_nfl_plays_year_seas_type_play_type_psr_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_year_seas_type_play_type_psr_pid ON public.nfl_plays USING btree (year, seas_type, play_type, psr_pid);
-
-
---
--- Name: idx_nfl_plays_year_seas_type_play_type_trg_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_year_seas_type_play_type_trg_pid ON public.nfl_plays USING btree (year, seas_type, play_type, trg_pid);
-
-
---
--- Name: idx_nfl_plays_year_seas_type_week_play_type; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_year_seas_type_week_play_type ON public.nfl_plays USING btree (year, seas_type, week, play_type);
-
-
---
--- Name: idx_nfl_plays_year_seas_type_week_play_type_bc_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_year_seas_type_week_play_type_bc_pid ON public.nfl_plays USING btree (year, seas_type, week, play_type, bc_pid);
-
-
---
--- Name: idx_nfl_plays_year_seas_type_week_play_type_player_fuml_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ON public.nfl_plays USING btree (year, seas_type, week, play_type, player_fuml_pid);
-
-
---
--- Name: idx_nfl_plays_year_seas_type_week_play_type_psr_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_year_seas_type_week_play_type_psr_pid ON public.nfl_plays USING btree (year, seas_type, week, play_type, psr_pid);
-
-
---
--- Name: idx_nfl_plays_year_seas_type_week_play_type_trg_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_nfl_plays_year_seas_type_week_play_type_trg_pid ON public.nfl_plays USING btree (year, seas_type, week, play_type, trg_pid);
-
-
---
 -- Name: idx_opening_days_year_opening_day; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -6920,6 +15366,286 @@ CREATE INDEX idx_users_invite_code ON public.users USING btree (invite_code);
 
 
 --
+-- Name: index_nfl_plays_assisted_tackle_1_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_assisted_tackle_1_pid ON ONLY public.nfl_plays USING btree (assisted_tackle_1_pid);
+
+
+--
+-- Name: index_nfl_plays_assisted_tackle_2_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_assisted_tackle_2_pid ON ONLY public.nfl_plays USING btree (assisted_tackle_2_pid);
+
+
+--
+-- Name: index_nfl_plays_bc_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_bc_pid ON ONLY public.nfl_plays USING btree (bc_pid);
+
+
+--
+-- Name: index_nfl_plays_catchable_ball; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_catchable_ball ON ONLY public.nfl_plays USING btree (catchable_ball);
+
+
+--
+-- Name: index_nfl_plays_dwn; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_dwn ON ONLY public.nfl_plays USING btree (dwn);
+
+
+--
+-- Name: index_nfl_plays_esbid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_esbid ON ONLY public.nfl_plays USING btree (esbid);
+
+
+--
+-- Name: index_nfl_plays_motion; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_motion ON ONLY public.nfl_plays USING btree (motion);
+
+
+--
+-- Name: index_nfl_plays_off; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_off ON ONLY public.nfl_plays USING btree (off);
+
+
+--
+-- Name: index_nfl_plays_pid_types; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_pid_types ON ONLY public.nfl_plays USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+
+
+--
+-- Name: index_nfl_plays_play_action; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_play_action ON ONLY public.nfl_plays USING btree (play_action);
+
+
+--
+-- Name: index_nfl_plays_play_type; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_play_type ON ONLY public.nfl_plays USING btree (play_type);
+
+
+--
+-- Name: index_nfl_plays_play_type_seas_type_trg_pid_off_esbid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_play_type_seas_type_trg_pid_off_esbid ON ONLY public.nfl_plays USING btree (play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: index_nfl_plays_playid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_playid ON ONLY public.nfl_plays USING btree ("playId");
+
+
+--
+-- Name: index_nfl_plays_psr_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_psr_pid ON ONLY public.nfl_plays USING btree (psr_pid);
+
+
+--
+-- Name: index_nfl_plays_qtr; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_qtr ON ONLY public.nfl_plays USING btree (qtr);
+
+
+--
+-- Name: index_nfl_plays_route_ngs; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_route_ngs ON ONLY public.nfl_plays USING btree (route_ngs);
+
+
+--
+-- Name: index_nfl_plays_seas_type; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_seas_type ON ONLY public.nfl_plays USING btree (seas_type);
+
+
+--
+-- Name: index_nfl_plays_series_seq; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_series_seq ON ONLY public.nfl_plays USING btree (series_seq);
+
+
+--
+-- Name: index_nfl_plays_solo_tackle_1_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_solo_tackle_1_pid ON ONLY public.nfl_plays USING btree (solo_tackle_1_pid);
+
+
+--
+-- Name: index_nfl_plays_solo_tackle_2_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_solo_tackle_2_pid ON ONLY public.nfl_plays USING btree (solo_tackle_2_pid);
+
+
+--
+-- Name: index_nfl_plays_solo_tackle_3_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_solo_tackle_3_pid ON ONLY public.nfl_plays USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: index_nfl_plays_tackle_assist_1_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_tackle_assist_1_pid ON ONLY public.nfl_plays USING btree (tackle_assist_1_pid);
+
+
+--
+-- Name: index_nfl_plays_tackle_assist_2_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_tackle_assist_2_pid ON ONLY public.nfl_plays USING btree (tackle_assist_2_pid);
+
+
+--
+-- Name: index_nfl_plays_tackle_assist_3_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_tackle_assist_3_pid ON ONLY public.nfl_plays USING btree (tackle_assist_3_pid);
+
+
+--
+-- Name: index_nfl_plays_tackle_assist_4_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_tackle_assist_4_pid ON ONLY public.nfl_plays USING btree (tackle_assist_4_pid);
+
+
+--
+-- Name: index_nfl_plays_trg_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_trg_pid ON ONLY public.nfl_plays USING btree (trg_pid);
+
+
+--
+-- Name: index_nfl_plays_ydl_100; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_ydl_100 ON ONLY public.nfl_plays USING btree (ydl_100);
+
+
+--
+-- Name: index_nfl_plays_year_esbid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_year_esbid ON ONLY public.nfl_plays USING btree (year, esbid);
+
+
+--
+-- Name: index_nfl_plays_year_esbid_playid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_nfl_plays_year_esbid_playid ON ONLY public.nfl_plays USING btree (year, esbid, "playId");
+
+
+--
+-- Name: index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ON ONLY public.nfl_plays USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: index_nfl_plays_year_seas_type_play_type_bc_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_year_seas_type_play_type_bc_pid ON ONLY public.nfl_plays USING btree (year, seas_type, play_type, bc_pid);
+
+
+--
+-- Name: index_nfl_plays_year_seas_type_play_type_bc_trg_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_year_seas_type_play_type_bc_trg_pid ON ONLY public.nfl_plays USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+
+
+--
+-- Name: index_nfl_plays_year_seas_type_play_type_player_fuml_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_year_seas_type_play_type_player_fuml_pid ON ONLY public.nfl_plays USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
+-- Name: index_nfl_plays_year_seas_type_play_type_psr_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_year_seas_type_play_type_psr_pid ON ONLY public.nfl_plays USING btree (year, seas_type, play_type, psr_pid);
+
+
+--
+-- Name: index_nfl_plays_year_seas_type_play_type_trg_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_year_seas_type_play_type_trg_pid ON ONLY public.nfl_plays USING btree (year, seas_type, play_type, trg_pid);
+
+
+--
+-- Name: index_nfl_plays_year_seas_type_week_play_type; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_year_seas_type_week_play_type ON ONLY public.nfl_plays USING btree (year, seas_type, week, play_type);
+
+
+--
+-- Name: index_nfl_plays_year_seas_type_week_play_type_bc_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_year_seas_type_week_play_type_bc_pid ON ONLY public.nfl_plays USING btree (year, seas_type, week, play_type, bc_pid);
+
+
+--
+-- Name: index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ON ONLY public.nfl_plays USING btree (year, seas_type, week, play_type, player_fuml_pid);
+
+
+--
+-- Name: index_nfl_plays_year_seas_type_week_play_type_psr_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_year_seas_type_week_play_type_psr_pid ON ONLY public.nfl_plays USING btree (year, seas_type, week, play_type, psr_pid);
+
+
+--
+-- Name: index_nfl_plays_year_seas_type_week_play_type_trg_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_nfl_plays_year_seas_type_week_play_type_trg_pid ON ONLY public.nfl_plays USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
 -- Name: nfl_plays_current_week_esbid; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -6941,6 +15667,7006 @@ CREATE INDEX "nfl_plays_current_week_playId" ON public.nfl_plays_current_week US
 
 
 --
+-- Name: nfl_plays_year_2000_assisted_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_assisted_tackle_1_pid_idx ON public.nfl_plays_year_2000 USING btree (assisted_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2000_assisted_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_assisted_tackle_2_pid_idx ON public.nfl_plays_year_2000 USING btree (assisted_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2000_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_bc_pid_idx ON public.nfl_plays_year_2000 USING btree (bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2000_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2000 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2000_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_catchable_ball_idx ON public.nfl_plays_year_2000 USING btree (catchable_ball);
+
+
+--
+-- Name: nfl_plays_year_2000_dwn_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_dwn_idx ON public.nfl_plays_year_2000 USING btree (dwn);
+
+
+--
+-- Name: nfl_plays_year_2000_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_esbid_idx ON public.nfl_plays_year_2000 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2000_motion_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_motion_idx ON public.nfl_plays_year_2000 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2000_off_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_off_idx ON public.nfl_plays_year_2000 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2000_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "nfl_plays_year_2000_playId_idx" ON public.nfl_plays_year_2000 USING btree ("playId");
+
+
+--
+-- Name: nfl_plays_year_2000_play_action_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_play_action_idx ON public.nfl_plays_year_2000 USING btree (play_action);
+
+
+--
+-- Name: nfl_plays_year_2000_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_play_type_idx ON public.nfl_plays_year_2000 USING btree (play_type);
+
+
+--
+-- Name: nfl_plays_year_2000_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2000 USING btree (play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2000_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_psr_pid_idx ON public.nfl_plays_year_2000 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2000_qtr_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_qtr_idx ON public.nfl_plays_year_2000 USING btree (qtr);
+
+
+--
+-- Name: nfl_plays_year_2000_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_route_ngs_idx ON public.nfl_plays_year_2000 USING btree (route_ngs);
+
+
+--
+-- Name: nfl_plays_year_2000_seas_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_seas_type_idx ON public.nfl_plays_year_2000 USING btree (seas_type);
+
+
+--
+-- Name: nfl_plays_year_2000_series_seq_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_series_seq_idx ON public.nfl_plays_year_2000 USING btree (series_seq);
+
+
+--
+-- Name: nfl_plays_year_2000_solo_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_solo_tackle_1_pid_idx ON public.nfl_plays_year_2000 USING btree (solo_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2000_solo_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_solo_tackle_2_pid_idx ON public.nfl_plays_year_2000 USING btree (solo_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2000_solo_tackle_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_solo_tackle_3_pid_idx ON public.nfl_plays_year_2000 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2000_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_tackle_assist_1_pid_idx ON public.nfl_plays_year_2000 USING btree (tackle_assist_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2000_tackle_assist_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_tackle_assist_2_pid_idx ON public.nfl_plays_year_2000 USING btree (tackle_assist_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2000_tackle_assist_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_tackle_assist_3_pid_idx ON public.nfl_plays_year_2000 USING btree (tackle_assist_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2000_tackle_assist_4_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_tackle_assist_4_pid_idx ON public.nfl_plays_year_2000 USING btree (tackle_assist_4_pid);
+
+
+--
+-- Name: nfl_plays_year_2000_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_trg_pid_idx ON public.nfl_plays_year_2000 USING btree (trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2000_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_ydl_100_idx ON public.nfl_plays_year_2000 USING btree (ydl_100);
+
+
+--
+-- Name: nfl_plays_year_2000_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_year_esbid_idx ON public.nfl_plays_year_2000 USING btree (year, esbid);
+
+
+--
+-- Name: nfl_plays_year_2000_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_plays_year_2000_year_esbid_playId_idx" ON public.nfl_plays_year_2000 USING btree (year, esbid, "playId");
+
+
+--
+-- Name: nfl_plays_year_2000_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2000 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2000_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2000 USING btree (year, seas_type, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2000_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2000 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2000_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2000 USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2000_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2000 USING btree (year, seas_type, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2000_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2000 USING btree (year, seas_type, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2000_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2000 USING btree (year, seas_type, week, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2000_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2000 USING btree (year, seas_type, week, play_type);
+
+
+--
+-- Name: nfl_plays_year_2000_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2000 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2000_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2000 USING btree (year, seas_type, week, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2000_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2000 USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2001_assisted_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_assisted_tackle_1_pid_idx ON public.nfl_plays_year_2001 USING btree (assisted_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2001_assisted_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_assisted_tackle_2_pid_idx ON public.nfl_plays_year_2001 USING btree (assisted_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2001_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_bc_pid_idx ON public.nfl_plays_year_2001 USING btree (bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2001_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2001 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2001_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_catchable_ball_idx ON public.nfl_plays_year_2001 USING btree (catchable_ball);
+
+
+--
+-- Name: nfl_plays_year_2001_dwn_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_dwn_idx ON public.nfl_plays_year_2001 USING btree (dwn);
+
+
+--
+-- Name: nfl_plays_year_2001_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_esbid_idx ON public.nfl_plays_year_2001 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2001_motion_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_motion_idx ON public.nfl_plays_year_2001 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2001_off_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_off_idx ON public.nfl_plays_year_2001 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2001_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "nfl_plays_year_2001_playId_idx" ON public.nfl_plays_year_2001 USING btree ("playId");
+
+
+--
+-- Name: nfl_plays_year_2001_play_action_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_play_action_idx ON public.nfl_plays_year_2001 USING btree (play_action);
+
+
+--
+-- Name: nfl_plays_year_2001_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_play_type_idx ON public.nfl_plays_year_2001 USING btree (play_type);
+
+
+--
+-- Name: nfl_plays_year_2001_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2001 USING btree (play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2001_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_psr_pid_idx ON public.nfl_plays_year_2001 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2001_qtr_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_qtr_idx ON public.nfl_plays_year_2001 USING btree (qtr);
+
+
+--
+-- Name: nfl_plays_year_2001_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_route_ngs_idx ON public.nfl_plays_year_2001 USING btree (route_ngs);
+
+
+--
+-- Name: nfl_plays_year_2001_seas_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_seas_type_idx ON public.nfl_plays_year_2001 USING btree (seas_type);
+
+
+--
+-- Name: nfl_plays_year_2001_series_seq_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_series_seq_idx ON public.nfl_plays_year_2001 USING btree (series_seq);
+
+
+--
+-- Name: nfl_plays_year_2001_solo_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_solo_tackle_1_pid_idx ON public.nfl_plays_year_2001 USING btree (solo_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2001_solo_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_solo_tackle_2_pid_idx ON public.nfl_plays_year_2001 USING btree (solo_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2001_solo_tackle_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_solo_tackle_3_pid_idx ON public.nfl_plays_year_2001 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2001_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_tackle_assist_1_pid_idx ON public.nfl_plays_year_2001 USING btree (tackle_assist_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2001_tackle_assist_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_tackle_assist_2_pid_idx ON public.nfl_plays_year_2001 USING btree (tackle_assist_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2001_tackle_assist_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_tackle_assist_3_pid_idx ON public.nfl_plays_year_2001 USING btree (tackle_assist_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2001_tackle_assist_4_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_tackle_assist_4_pid_idx ON public.nfl_plays_year_2001 USING btree (tackle_assist_4_pid);
+
+
+--
+-- Name: nfl_plays_year_2001_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_trg_pid_idx ON public.nfl_plays_year_2001 USING btree (trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2001_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_ydl_100_idx ON public.nfl_plays_year_2001 USING btree (ydl_100);
+
+
+--
+-- Name: nfl_plays_year_2001_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_year_esbid_idx ON public.nfl_plays_year_2001 USING btree (year, esbid);
+
+
+--
+-- Name: nfl_plays_year_2001_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_plays_year_2001_year_esbid_playId_idx" ON public.nfl_plays_year_2001 USING btree (year, esbid, "playId");
+
+
+--
+-- Name: nfl_plays_year_2001_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2001 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2001_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2001 USING btree (year, seas_type, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2001_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2001 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2001_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2001 USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2001_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2001 USING btree (year, seas_type, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2001_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2001 USING btree (year, seas_type, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2001_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2001 USING btree (year, seas_type, week, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2001_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2001 USING btree (year, seas_type, week, play_type);
+
+
+--
+-- Name: nfl_plays_year_2001_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2001 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2001_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2001 USING btree (year, seas_type, week, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2001_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2001 USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2002_assisted_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_assisted_tackle_1_pid_idx ON public.nfl_plays_year_2002 USING btree (assisted_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2002_assisted_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_assisted_tackle_2_pid_idx ON public.nfl_plays_year_2002 USING btree (assisted_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2002_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_bc_pid_idx ON public.nfl_plays_year_2002 USING btree (bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2002_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2002 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2002_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_catchable_ball_idx ON public.nfl_plays_year_2002 USING btree (catchable_ball);
+
+
+--
+-- Name: nfl_plays_year_2002_dwn_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_dwn_idx ON public.nfl_plays_year_2002 USING btree (dwn);
+
+
+--
+-- Name: nfl_plays_year_2002_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_esbid_idx ON public.nfl_plays_year_2002 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2002_motion_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_motion_idx ON public.nfl_plays_year_2002 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2002_off_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_off_idx ON public.nfl_plays_year_2002 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2002_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "nfl_plays_year_2002_playId_idx" ON public.nfl_plays_year_2002 USING btree ("playId");
+
+
+--
+-- Name: nfl_plays_year_2002_play_action_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_play_action_idx ON public.nfl_plays_year_2002 USING btree (play_action);
+
+
+--
+-- Name: nfl_plays_year_2002_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_play_type_idx ON public.nfl_plays_year_2002 USING btree (play_type);
+
+
+--
+-- Name: nfl_plays_year_2002_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2002 USING btree (play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2002_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_psr_pid_idx ON public.nfl_plays_year_2002 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2002_qtr_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_qtr_idx ON public.nfl_plays_year_2002 USING btree (qtr);
+
+
+--
+-- Name: nfl_plays_year_2002_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_route_ngs_idx ON public.nfl_plays_year_2002 USING btree (route_ngs);
+
+
+--
+-- Name: nfl_plays_year_2002_seas_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_seas_type_idx ON public.nfl_plays_year_2002 USING btree (seas_type);
+
+
+--
+-- Name: nfl_plays_year_2002_series_seq_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_series_seq_idx ON public.nfl_plays_year_2002 USING btree (series_seq);
+
+
+--
+-- Name: nfl_plays_year_2002_solo_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_solo_tackle_1_pid_idx ON public.nfl_plays_year_2002 USING btree (solo_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2002_solo_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_solo_tackle_2_pid_idx ON public.nfl_plays_year_2002 USING btree (solo_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2002_solo_tackle_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_solo_tackle_3_pid_idx ON public.nfl_plays_year_2002 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2002_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_tackle_assist_1_pid_idx ON public.nfl_plays_year_2002 USING btree (tackle_assist_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2002_tackle_assist_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_tackle_assist_2_pid_idx ON public.nfl_plays_year_2002 USING btree (tackle_assist_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2002_tackle_assist_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_tackle_assist_3_pid_idx ON public.nfl_plays_year_2002 USING btree (tackle_assist_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2002_tackle_assist_4_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_tackle_assist_4_pid_idx ON public.nfl_plays_year_2002 USING btree (tackle_assist_4_pid);
+
+
+--
+-- Name: nfl_plays_year_2002_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_trg_pid_idx ON public.nfl_plays_year_2002 USING btree (trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2002_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_ydl_100_idx ON public.nfl_plays_year_2002 USING btree (ydl_100);
+
+
+--
+-- Name: nfl_plays_year_2002_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_year_esbid_idx ON public.nfl_plays_year_2002 USING btree (year, esbid);
+
+
+--
+-- Name: nfl_plays_year_2002_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_plays_year_2002_year_esbid_playId_idx" ON public.nfl_plays_year_2002 USING btree (year, esbid, "playId");
+
+
+--
+-- Name: nfl_plays_year_2002_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2002 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2002_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2002 USING btree (year, seas_type, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2002_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2002 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2002_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2002 USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2002_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2002 USING btree (year, seas_type, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2002_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2002 USING btree (year, seas_type, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2002_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2002 USING btree (year, seas_type, week, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2002_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2002 USING btree (year, seas_type, week, play_type);
+
+
+--
+-- Name: nfl_plays_year_2002_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2002 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2002_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2002 USING btree (year, seas_type, week, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2002_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2002 USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2003_assisted_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_assisted_tackle_1_pid_idx ON public.nfl_plays_year_2003 USING btree (assisted_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2003_assisted_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_assisted_tackle_2_pid_idx ON public.nfl_plays_year_2003 USING btree (assisted_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2003_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_bc_pid_idx ON public.nfl_plays_year_2003 USING btree (bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2003_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2003 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2003_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_catchable_ball_idx ON public.nfl_plays_year_2003 USING btree (catchable_ball);
+
+
+--
+-- Name: nfl_plays_year_2003_dwn_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_dwn_idx ON public.nfl_plays_year_2003 USING btree (dwn);
+
+
+--
+-- Name: nfl_plays_year_2003_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_esbid_idx ON public.nfl_plays_year_2003 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2003_motion_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_motion_idx ON public.nfl_plays_year_2003 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2003_off_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_off_idx ON public.nfl_plays_year_2003 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2003_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "nfl_plays_year_2003_playId_idx" ON public.nfl_plays_year_2003 USING btree ("playId");
+
+
+--
+-- Name: nfl_plays_year_2003_play_action_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_play_action_idx ON public.nfl_plays_year_2003 USING btree (play_action);
+
+
+--
+-- Name: nfl_plays_year_2003_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_play_type_idx ON public.nfl_plays_year_2003 USING btree (play_type);
+
+
+--
+-- Name: nfl_plays_year_2003_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2003 USING btree (play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2003_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_psr_pid_idx ON public.nfl_plays_year_2003 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2003_qtr_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_qtr_idx ON public.nfl_plays_year_2003 USING btree (qtr);
+
+
+--
+-- Name: nfl_plays_year_2003_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_route_ngs_idx ON public.nfl_plays_year_2003 USING btree (route_ngs);
+
+
+--
+-- Name: nfl_plays_year_2003_seas_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_seas_type_idx ON public.nfl_plays_year_2003 USING btree (seas_type);
+
+
+--
+-- Name: nfl_plays_year_2003_series_seq_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_series_seq_idx ON public.nfl_plays_year_2003 USING btree (series_seq);
+
+
+--
+-- Name: nfl_plays_year_2003_solo_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_solo_tackle_1_pid_idx ON public.nfl_plays_year_2003 USING btree (solo_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2003_solo_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_solo_tackle_2_pid_idx ON public.nfl_plays_year_2003 USING btree (solo_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2003_solo_tackle_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_solo_tackle_3_pid_idx ON public.nfl_plays_year_2003 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2003_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_tackle_assist_1_pid_idx ON public.nfl_plays_year_2003 USING btree (tackle_assist_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2003_tackle_assist_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_tackle_assist_2_pid_idx ON public.nfl_plays_year_2003 USING btree (tackle_assist_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2003_tackle_assist_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_tackle_assist_3_pid_idx ON public.nfl_plays_year_2003 USING btree (tackle_assist_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2003_tackle_assist_4_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_tackle_assist_4_pid_idx ON public.nfl_plays_year_2003 USING btree (tackle_assist_4_pid);
+
+
+--
+-- Name: nfl_plays_year_2003_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_trg_pid_idx ON public.nfl_plays_year_2003 USING btree (trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2003_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_ydl_100_idx ON public.nfl_plays_year_2003 USING btree (ydl_100);
+
+
+--
+-- Name: nfl_plays_year_2003_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_year_esbid_idx ON public.nfl_plays_year_2003 USING btree (year, esbid);
+
+
+--
+-- Name: nfl_plays_year_2003_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_plays_year_2003_year_esbid_playId_idx" ON public.nfl_plays_year_2003 USING btree (year, esbid, "playId");
+
+
+--
+-- Name: nfl_plays_year_2003_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2003 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2003_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2003 USING btree (year, seas_type, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2003_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2003 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2003_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2003 USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2003_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2003 USING btree (year, seas_type, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2003_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2003 USING btree (year, seas_type, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2003_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2003 USING btree (year, seas_type, week, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2003_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2003 USING btree (year, seas_type, week, play_type);
+
+
+--
+-- Name: nfl_plays_year_2003_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2003 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2003_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2003 USING btree (year, seas_type, week, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2003_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2003 USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2004_assisted_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_assisted_tackle_1_pid_idx ON public.nfl_plays_year_2004 USING btree (assisted_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2004_assisted_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_assisted_tackle_2_pid_idx ON public.nfl_plays_year_2004 USING btree (assisted_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2004_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_bc_pid_idx ON public.nfl_plays_year_2004 USING btree (bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2004_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2004 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2004_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_catchable_ball_idx ON public.nfl_plays_year_2004 USING btree (catchable_ball);
+
+
+--
+-- Name: nfl_plays_year_2004_dwn_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_dwn_idx ON public.nfl_plays_year_2004 USING btree (dwn);
+
+
+--
+-- Name: nfl_plays_year_2004_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_esbid_idx ON public.nfl_plays_year_2004 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2004_motion_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_motion_idx ON public.nfl_plays_year_2004 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2004_off_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_off_idx ON public.nfl_plays_year_2004 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2004_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "nfl_plays_year_2004_playId_idx" ON public.nfl_plays_year_2004 USING btree ("playId");
+
+
+--
+-- Name: nfl_plays_year_2004_play_action_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_play_action_idx ON public.nfl_plays_year_2004 USING btree (play_action);
+
+
+--
+-- Name: nfl_plays_year_2004_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_play_type_idx ON public.nfl_plays_year_2004 USING btree (play_type);
+
+
+--
+-- Name: nfl_plays_year_2004_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2004 USING btree (play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2004_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_psr_pid_idx ON public.nfl_plays_year_2004 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2004_qtr_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_qtr_idx ON public.nfl_plays_year_2004 USING btree (qtr);
+
+
+--
+-- Name: nfl_plays_year_2004_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_route_ngs_idx ON public.nfl_plays_year_2004 USING btree (route_ngs);
+
+
+--
+-- Name: nfl_plays_year_2004_seas_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_seas_type_idx ON public.nfl_plays_year_2004 USING btree (seas_type);
+
+
+--
+-- Name: nfl_plays_year_2004_series_seq_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_series_seq_idx ON public.nfl_plays_year_2004 USING btree (series_seq);
+
+
+--
+-- Name: nfl_plays_year_2004_solo_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_solo_tackle_1_pid_idx ON public.nfl_plays_year_2004 USING btree (solo_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2004_solo_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_solo_tackle_2_pid_idx ON public.nfl_plays_year_2004 USING btree (solo_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2004_solo_tackle_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_solo_tackle_3_pid_idx ON public.nfl_plays_year_2004 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2004_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_tackle_assist_1_pid_idx ON public.nfl_plays_year_2004 USING btree (tackle_assist_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2004_tackle_assist_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_tackle_assist_2_pid_idx ON public.nfl_plays_year_2004 USING btree (tackle_assist_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2004_tackle_assist_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_tackle_assist_3_pid_idx ON public.nfl_plays_year_2004 USING btree (tackle_assist_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2004_tackle_assist_4_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_tackle_assist_4_pid_idx ON public.nfl_plays_year_2004 USING btree (tackle_assist_4_pid);
+
+
+--
+-- Name: nfl_plays_year_2004_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_trg_pid_idx ON public.nfl_plays_year_2004 USING btree (trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2004_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_ydl_100_idx ON public.nfl_plays_year_2004 USING btree (ydl_100);
+
+
+--
+-- Name: nfl_plays_year_2004_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_year_esbid_idx ON public.nfl_plays_year_2004 USING btree (year, esbid);
+
+
+--
+-- Name: nfl_plays_year_2004_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_plays_year_2004_year_esbid_playId_idx" ON public.nfl_plays_year_2004 USING btree (year, esbid, "playId");
+
+
+--
+-- Name: nfl_plays_year_2004_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2004 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2004_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2004 USING btree (year, seas_type, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2004_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2004 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2004_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2004 USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2004_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2004 USING btree (year, seas_type, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2004_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2004 USING btree (year, seas_type, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2004_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2004 USING btree (year, seas_type, week, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2004_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2004 USING btree (year, seas_type, week, play_type);
+
+
+--
+-- Name: nfl_plays_year_2004_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2004 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2004_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2004 USING btree (year, seas_type, week, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2004_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2004 USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2005_assisted_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_assisted_tackle_1_pid_idx ON public.nfl_plays_year_2005 USING btree (assisted_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2005_assisted_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_assisted_tackle_2_pid_idx ON public.nfl_plays_year_2005 USING btree (assisted_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2005_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_bc_pid_idx ON public.nfl_plays_year_2005 USING btree (bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2005_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2005 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2005_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_catchable_ball_idx ON public.nfl_plays_year_2005 USING btree (catchable_ball);
+
+
+--
+-- Name: nfl_plays_year_2005_dwn_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_dwn_idx ON public.nfl_plays_year_2005 USING btree (dwn);
+
+
+--
+-- Name: nfl_plays_year_2005_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_esbid_idx ON public.nfl_plays_year_2005 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2005_motion_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_motion_idx ON public.nfl_plays_year_2005 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2005_off_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_off_idx ON public.nfl_plays_year_2005 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2005_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "nfl_plays_year_2005_playId_idx" ON public.nfl_plays_year_2005 USING btree ("playId");
+
+
+--
+-- Name: nfl_plays_year_2005_play_action_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_play_action_idx ON public.nfl_plays_year_2005 USING btree (play_action);
+
+
+--
+-- Name: nfl_plays_year_2005_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_play_type_idx ON public.nfl_plays_year_2005 USING btree (play_type);
+
+
+--
+-- Name: nfl_plays_year_2005_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2005 USING btree (play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2005_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_psr_pid_idx ON public.nfl_plays_year_2005 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2005_qtr_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_qtr_idx ON public.nfl_plays_year_2005 USING btree (qtr);
+
+
+--
+-- Name: nfl_plays_year_2005_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_route_ngs_idx ON public.nfl_plays_year_2005 USING btree (route_ngs);
+
+
+--
+-- Name: nfl_plays_year_2005_seas_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_seas_type_idx ON public.nfl_plays_year_2005 USING btree (seas_type);
+
+
+--
+-- Name: nfl_plays_year_2005_series_seq_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_series_seq_idx ON public.nfl_plays_year_2005 USING btree (series_seq);
+
+
+--
+-- Name: nfl_plays_year_2005_solo_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_solo_tackle_1_pid_idx ON public.nfl_plays_year_2005 USING btree (solo_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2005_solo_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_solo_tackle_2_pid_idx ON public.nfl_plays_year_2005 USING btree (solo_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2005_solo_tackle_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_solo_tackle_3_pid_idx ON public.nfl_plays_year_2005 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2005_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_tackle_assist_1_pid_idx ON public.nfl_plays_year_2005 USING btree (tackle_assist_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2005_tackle_assist_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_tackle_assist_2_pid_idx ON public.nfl_plays_year_2005 USING btree (tackle_assist_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2005_tackle_assist_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_tackle_assist_3_pid_idx ON public.nfl_plays_year_2005 USING btree (tackle_assist_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2005_tackle_assist_4_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_tackle_assist_4_pid_idx ON public.nfl_plays_year_2005 USING btree (tackle_assist_4_pid);
+
+
+--
+-- Name: nfl_plays_year_2005_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_trg_pid_idx ON public.nfl_plays_year_2005 USING btree (trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2005_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_ydl_100_idx ON public.nfl_plays_year_2005 USING btree (ydl_100);
+
+
+--
+-- Name: nfl_plays_year_2005_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_year_esbid_idx ON public.nfl_plays_year_2005 USING btree (year, esbid);
+
+
+--
+-- Name: nfl_plays_year_2005_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_plays_year_2005_year_esbid_playId_idx" ON public.nfl_plays_year_2005 USING btree (year, esbid, "playId");
+
+
+--
+-- Name: nfl_plays_year_2005_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2005 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2005_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2005 USING btree (year, seas_type, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2005_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2005 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2005_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2005 USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2005_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2005 USING btree (year, seas_type, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2005_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2005 USING btree (year, seas_type, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2005_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2005 USING btree (year, seas_type, week, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2005_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2005 USING btree (year, seas_type, week, play_type);
+
+
+--
+-- Name: nfl_plays_year_2005_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2005 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2005_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2005 USING btree (year, seas_type, week, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2005_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2005 USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2006_assisted_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_assisted_tackle_1_pid_idx ON public.nfl_plays_year_2006 USING btree (assisted_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2006_assisted_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_assisted_tackle_2_pid_idx ON public.nfl_plays_year_2006 USING btree (assisted_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2006_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_bc_pid_idx ON public.nfl_plays_year_2006 USING btree (bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2006_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2006 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2006_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_catchable_ball_idx ON public.nfl_plays_year_2006 USING btree (catchable_ball);
+
+
+--
+-- Name: nfl_plays_year_2006_dwn_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_dwn_idx ON public.nfl_plays_year_2006 USING btree (dwn);
+
+
+--
+-- Name: nfl_plays_year_2006_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_esbid_idx ON public.nfl_plays_year_2006 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2006_motion_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_motion_idx ON public.nfl_plays_year_2006 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2006_off_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_off_idx ON public.nfl_plays_year_2006 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2006_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "nfl_plays_year_2006_playId_idx" ON public.nfl_plays_year_2006 USING btree ("playId");
+
+
+--
+-- Name: nfl_plays_year_2006_play_action_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_play_action_idx ON public.nfl_plays_year_2006 USING btree (play_action);
+
+
+--
+-- Name: nfl_plays_year_2006_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_play_type_idx ON public.nfl_plays_year_2006 USING btree (play_type);
+
+
+--
+-- Name: nfl_plays_year_2006_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2006 USING btree (play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2006_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_psr_pid_idx ON public.nfl_plays_year_2006 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2006_qtr_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_qtr_idx ON public.nfl_plays_year_2006 USING btree (qtr);
+
+
+--
+-- Name: nfl_plays_year_2006_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_route_ngs_idx ON public.nfl_plays_year_2006 USING btree (route_ngs);
+
+
+--
+-- Name: nfl_plays_year_2006_seas_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_seas_type_idx ON public.nfl_plays_year_2006 USING btree (seas_type);
+
+
+--
+-- Name: nfl_plays_year_2006_series_seq_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_series_seq_idx ON public.nfl_plays_year_2006 USING btree (series_seq);
+
+
+--
+-- Name: nfl_plays_year_2006_solo_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_solo_tackle_1_pid_idx ON public.nfl_plays_year_2006 USING btree (solo_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2006_solo_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_solo_tackle_2_pid_idx ON public.nfl_plays_year_2006 USING btree (solo_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2006_solo_tackle_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_solo_tackle_3_pid_idx ON public.nfl_plays_year_2006 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2006_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_tackle_assist_1_pid_idx ON public.nfl_plays_year_2006 USING btree (tackle_assist_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2006_tackle_assist_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_tackle_assist_2_pid_idx ON public.nfl_plays_year_2006 USING btree (tackle_assist_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2006_tackle_assist_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_tackle_assist_3_pid_idx ON public.nfl_plays_year_2006 USING btree (tackle_assist_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2006_tackle_assist_4_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_tackle_assist_4_pid_idx ON public.nfl_plays_year_2006 USING btree (tackle_assist_4_pid);
+
+
+--
+-- Name: nfl_plays_year_2006_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_trg_pid_idx ON public.nfl_plays_year_2006 USING btree (trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2006_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_ydl_100_idx ON public.nfl_plays_year_2006 USING btree (ydl_100);
+
+
+--
+-- Name: nfl_plays_year_2006_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_year_esbid_idx ON public.nfl_plays_year_2006 USING btree (year, esbid);
+
+
+--
+-- Name: nfl_plays_year_2006_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_plays_year_2006_year_esbid_playId_idx" ON public.nfl_plays_year_2006 USING btree (year, esbid, "playId");
+
+
+--
+-- Name: nfl_plays_year_2006_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2006 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2006_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2006 USING btree (year, seas_type, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2006_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2006 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2006_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2006 USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2006_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2006 USING btree (year, seas_type, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2006_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2006 USING btree (year, seas_type, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2006_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2006 USING btree (year, seas_type, week, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2006_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2006 USING btree (year, seas_type, week, play_type);
+
+
+--
+-- Name: nfl_plays_year_2006_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2006 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2006_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2006 USING btree (year, seas_type, week, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2006_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2006 USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2007_assisted_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_assisted_tackle_1_pid_idx ON public.nfl_plays_year_2007 USING btree (assisted_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2007_assisted_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_assisted_tackle_2_pid_idx ON public.nfl_plays_year_2007 USING btree (assisted_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2007_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_bc_pid_idx ON public.nfl_plays_year_2007 USING btree (bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2007_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2007 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2007_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_catchable_ball_idx ON public.nfl_plays_year_2007 USING btree (catchable_ball);
+
+
+--
+-- Name: nfl_plays_year_2007_dwn_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_dwn_idx ON public.nfl_plays_year_2007 USING btree (dwn);
+
+
+--
+-- Name: nfl_plays_year_2007_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_esbid_idx ON public.nfl_plays_year_2007 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2007_motion_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_motion_idx ON public.nfl_plays_year_2007 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2007_off_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_off_idx ON public.nfl_plays_year_2007 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2007_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "nfl_plays_year_2007_playId_idx" ON public.nfl_plays_year_2007 USING btree ("playId");
+
+
+--
+-- Name: nfl_plays_year_2007_play_action_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_play_action_idx ON public.nfl_plays_year_2007 USING btree (play_action);
+
+
+--
+-- Name: nfl_plays_year_2007_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_play_type_idx ON public.nfl_plays_year_2007 USING btree (play_type);
+
+
+--
+-- Name: nfl_plays_year_2007_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2007 USING btree (play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2007_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_psr_pid_idx ON public.nfl_plays_year_2007 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2007_qtr_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_qtr_idx ON public.nfl_plays_year_2007 USING btree (qtr);
+
+
+--
+-- Name: nfl_plays_year_2007_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_route_ngs_idx ON public.nfl_plays_year_2007 USING btree (route_ngs);
+
+
+--
+-- Name: nfl_plays_year_2007_seas_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_seas_type_idx ON public.nfl_plays_year_2007 USING btree (seas_type);
+
+
+--
+-- Name: nfl_plays_year_2007_series_seq_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_series_seq_idx ON public.nfl_plays_year_2007 USING btree (series_seq);
+
+
+--
+-- Name: nfl_plays_year_2007_solo_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_solo_tackle_1_pid_idx ON public.nfl_plays_year_2007 USING btree (solo_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2007_solo_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_solo_tackle_2_pid_idx ON public.nfl_plays_year_2007 USING btree (solo_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2007_solo_tackle_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_solo_tackle_3_pid_idx ON public.nfl_plays_year_2007 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2007_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_tackle_assist_1_pid_idx ON public.nfl_plays_year_2007 USING btree (tackle_assist_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2007_tackle_assist_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_tackle_assist_2_pid_idx ON public.nfl_plays_year_2007 USING btree (tackle_assist_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2007_tackle_assist_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_tackle_assist_3_pid_idx ON public.nfl_plays_year_2007 USING btree (tackle_assist_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2007_tackle_assist_4_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_tackle_assist_4_pid_idx ON public.nfl_plays_year_2007 USING btree (tackle_assist_4_pid);
+
+
+--
+-- Name: nfl_plays_year_2007_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_trg_pid_idx ON public.nfl_plays_year_2007 USING btree (trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2007_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_ydl_100_idx ON public.nfl_plays_year_2007 USING btree (ydl_100);
+
+
+--
+-- Name: nfl_plays_year_2007_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_year_esbid_idx ON public.nfl_plays_year_2007 USING btree (year, esbid);
+
+
+--
+-- Name: nfl_plays_year_2007_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_plays_year_2007_year_esbid_playId_idx" ON public.nfl_plays_year_2007 USING btree (year, esbid, "playId");
+
+
+--
+-- Name: nfl_plays_year_2007_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2007 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2007_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2007 USING btree (year, seas_type, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2007_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2007 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2007_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2007 USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2007_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2007 USING btree (year, seas_type, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2007_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2007 USING btree (year, seas_type, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2007_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2007 USING btree (year, seas_type, week, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2007_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2007 USING btree (year, seas_type, week, play_type);
+
+
+--
+-- Name: nfl_plays_year_2007_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2007 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2007_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2007 USING btree (year, seas_type, week, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2007_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2007 USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2008_assisted_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_assisted_tackle_1_pid_idx ON public.nfl_plays_year_2008 USING btree (assisted_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2008_assisted_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_assisted_tackle_2_pid_idx ON public.nfl_plays_year_2008 USING btree (assisted_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2008_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_bc_pid_idx ON public.nfl_plays_year_2008 USING btree (bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2008_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2008 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2008_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_catchable_ball_idx ON public.nfl_plays_year_2008 USING btree (catchable_ball);
+
+
+--
+-- Name: nfl_plays_year_2008_dwn_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_dwn_idx ON public.nfl_plays_year_2008 USING btree (dwn);
+
+
+--
+-- Name: nfl_plays_year_2008_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_esbid_idx ON public.nfl_plays_year_2008 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2008_motion_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_motion_idx ON public.nfl_plays_year_2008 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2008_off_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_off_idx ON public.nfl_plays_year_2008 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2008_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "nfl_plays_year_2008_playId_idx" ON public.nfl_plays_year_2008 USING btree ("playId");
+
+
+--
+-- Name: nfl_plays_year_2008_play_action_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_play_action_idx ON public.nfl_plays_year_2008 USING btree (play_action);
+
+
+--
+-- Name: nfl_plays_year_2008_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_play_type_idx ON public.nfl_plays_year_2008 USING btree (play_type);
+
+
+--
+-- Name: nfl_plays_year_2008_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2008 USING btree (play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2008_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_psr_pid_idx ON public.nfl_plays_year_2008 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2008_qtr_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_qtr_idx ON public.nfl_plays_year_2008 USING btree (qtr);
+
+
+--
+-- Name: nfl_plays_year_2008_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_route_ngs_idx ON public.nfl_plays_year_2008 USING btree (route_ngs);
+
+
+--
+-- Name: nfl_plays_year_2008_seas_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_seas_type_idx ON public.nfl_plays_year_2008 USING btree (seas_type);
+
+
+--
+-- Name: nfl_plays_year_2008_series_seq_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_series_seq_idx ON public.nfl_plays_year_2008 USING btree (series_seq);
+
+
+--
+-- Name: nfl_plays_year_2008_solo_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_solo_tackle_1_pid_idx ON public.nfl_plays_year_2008 USING btree (solo_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2008_solo_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_solo_tackle_2_pid_idx ON public.nfl_plays_year_2008 USING btree (solo_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2008_solo_tackle_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_solo_tackle_3_pid_idx ON public.nfl_plays_year_2008 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2008_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_tackle_assist_1_pid_idx ON public.nfl_plays_year_2008 USING btree (tackle_assist_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2008_tackle_assist_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_tackle_assist_2_pid_idx ON public.nfl_plays_year_2008 USING btree (tackle_assist_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2008_tackle_assist_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_tackle_assist_3_pid_idx ON public.nfl_plays_year_2008 USING btree (tackle_assist_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2008_tackle_assist_4_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_tackle_assist_4_pid_idx ON public.nfl_plays_year_2008 USING btree (tackle_assist_4_pid);
+
+
+--
+-- Name: nfl_plays_year_2008_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_trg_pid_idx ON public.nfl_plays_year_2008 USING btree (trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2008_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_ydl_100_idx ON public.nfl_plays_year_2008 USING btree (ydl_100);
+
+
+--
+-- Name: nfl_plays_year_2008_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_year_esbid_idx ON public.nfl_plays_year_2008 USING btree (year, esbid);
+
+
+--
+-- Name: nfl_plays_year_2008_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_plays_year_2008_year_esbid_playId_idx" ON public.nfl_plays_year_2008 USING btree (year, esbid, "playId");
+
+
+--
+-- Name: nfl_plays_year_2008_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2008 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2008_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2008 USING btree (year, seas_type, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2008_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2008 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2008_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2008 USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2008_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2008 USING btree (year, seas_type, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2008_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2008 USING btree (year, seas_type, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2008_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2008 USING btree (year, seas_type, week, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2008_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2008 USING btree (year, seas_type, week, play_type);
+
+
+--
+-- Name: nfl_plays_year_2008_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2008 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2008_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2008 USING btree (year, seas_type, week, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2008_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2008 USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2009_assisted_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_assisted_tackle_1_pid_idx ON public.nfl_plays_year_2009 USING btree (assisted_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2009_assisted_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_assisted_tackle_2_pid_idx ON public.nfl_plays_year_2009 USING btree (assisted_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2009_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_bc_pid_idx ON public.nfl_plays_year_2009 USING btree (bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2009_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2009 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2009_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_catchable_ball_idx ON public.nfl_plays_year_2009 USING btree (catchable_ball);
+
+
+--
+-- Name: nfl_plays_year_2009_dwn_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_dwn_idx ON public.nfl_plays_year_2009 USING btree (dwn);
+
+
+--
+-- Name: nfl_plays_year_2009_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_esbid_idx ON public.nfl_plays_year_2009 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2009_motion_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_motion_idx ON public.nfl_plays_year_2009 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2009_off_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_off_idx ON public.nfl_plays_year_2009 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2009_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "nfl_plays_year_2009_playId_idx" ON public.nfl_plays_year_2009 USING btree ("playId");
+
+
+--
+-- Name: nfl_plays_year_2009_play_action_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_play_action_idx ON public.nfl_plays_year_2009 USING btree (play_action);
+
+
+--
+-- Name: nfl_plays_year_2009_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_play_type_idx ON public.nfl_plays_year_2009 USING btree (play_type);
+
+
+--
+-- Name: nfl_plays_year_2009_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2009 USING btree (play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2009_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_psr_pid_idx ON public.nfl_plays_year_2009 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2009_qtr_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_qtr_idx ON public.nfl_plays_year_2009 USING btree (qtr);
+
+
+--
+-- Name: nfl_plays_year_2009_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_route_ngs_idx ON public.nfl_plays_year_2009 USING btree (route_ngs);
+
+
+--
+-- Name: nfl_plays_year_2009_seas_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_seas_type_idx ON public.nfl_plays_year_2009 USING btree (seas_type);
+
+
+--
+-- Name: nfl_plays_year_2009_series_seq_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_series_seq_idx ON public.nfl_plays_year_2009 USING btree (series_seq);
+
+
+--
+-- Name: nfl_plays_year_2009_solo_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_solo_tackle_1_pid_idx ON public.nfl_plays_year_2009 USING btree (solo_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2009_solo_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_solo_tackle_2_pid_idx ON public.nfl_plays_year_2009 USING btree (solo_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2009_solo_tackle_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_solo_tackle_3_pid_idx ON public.nfl_plays_year_2009 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2009_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_tackle_assist_1_pid_idx ON public.nfl_plays_year_2009 USING btree (tackle_assist_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2009_tackle_assist_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_tackle_assist_2_pid_idx ON public.nfl_plays_year_2009 USING btree (tackle_assist_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2009_tackle_assist_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_tackle_assist_3_pid_idx ON public.nfl_plays_year_2009 USING btree (tackle_assist_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2009_tackle_assist_4_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_tackle_assist_4_pid_idx ON public.nfl_plays_year_2009 USING btree (tackle_assist_4_pid);
+
+
+--
+-- Name: nfl_plays_year_2009_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_trg_pid_idx ON public.nfl_plays_year_2009 USING btree (trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2009_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_ydl_100_idx ON public.nfl_plays_year_2009 USING btree (ydl_100);
+
+
+--
+-- Name: nfl_plays_year_2009_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_year_esbid_idx ON public.nfl_plays_year_2009 USING btree (year, esbid);
+
+
+--
+-- Name: nfl_plays_year_2009_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_plays_year_2009_year_esbid_playId_idx" ON public.nfl_plays_year_2009 USING btree (year, esbid, "playId");
+
+
+--
+-- Name: nfl_plays_year_2009_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2009 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2009_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2009 USING btree (year, seas_type, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2009_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2009 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2009_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2009 USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2009_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2009 USING btree (year, seas_type, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2009_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2009 USING btree (year, seas_type, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2009_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2009 USING btree (year, seas_type, week, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2009_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2009 USING btree (year, seas_type, week, play_type);
+
+
+--
+-- Name: nfl_plays_year_2009_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2009 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2009_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2009 USING btree (year, seas_type, week, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2009_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2009 USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2010_assisted_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_assisted_tackle_1_pid_idx ON public.nfl_plays_year_2010 USING btree (assisted_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2010_assisted_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_assisted_tackle_2_pid_idx ON public.nfl_plays_year_2010 USING btree (assisted_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2010_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_bc_pid_idx ON public.nfl_plays_year_2010 USING btree (bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2010_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2010 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2010_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_catchable_ball_idx ON public.nfl_plays_year_2010 USING btree (catchable_ball);
+
+
+--
+-- Name: nfl_plays_year_2010_dwn_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_dwn_idx ON public.nfl_plays_year_2010 USING btree (dwn);
+
+
+--
+-- Name: nfl_plays_year_2010_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_esbid_idx ON public.nfl_plays_year_2010 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2010_motion_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_motion_idx ON public.nfl_plays_year_2010 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2010_off_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_off_idx ON public.nfl_plays_year_2010 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2010_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "nfl_plays_year_2010_playId_idx" ON public.nfl_plays_year_2010 USING btree ("playId");
+
+
+--
+-- Name: nfl_plays_year_2010_play_action_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_play_action_idx ON public.nfl_plays_year_2010 USING btree (play_action);
+
+
+--
+-- Name: nfl_plays_year_2010_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_play_type_idx ON public.nfl_plays_year_2010 USING btree (play_type);
+
+
+--
+-- Name: nfl_plays_year_2010_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2010 USING btree (play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2010_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_psr_pid_idx ON public.nfl_plays_year_2010 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2010_qtr_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_qtr_idx ON public.nfl_plays_year_2010 USING btree (qtr);
+
+
+--
+-- Name: nfl_plays_year_2010_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_route_ngs_idx ON public.nfl_plays_year_2010 USING btree (route_ngs);
+
+
+--
+-- Name: nfl_plays_year_2010_seas_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_seas_type_idx ON public.nfl_plays_year_2010 USING btree (seas_type);
+
+
+--
+-- Name: nfl_plays_year_2010_series_seq_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_series_seq_idx ON public.nfl_plays_year_2010 USING btree (series_seq);
+
+
+--
+-- Name: nfl_plays_year_2010_solo_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_solo_tackle_1_pid_idx ON public.nfl_plays_year_2010 USING btree (solo_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2010_solo_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_solo_tackle_2_pid_idx ON public.nfl_plays_year_2010 USING btree (solo_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2010_solo_tackle_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_solo_tackle_3_pid_idx ON public.nfl_plays_year_2010 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2010_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_tackle_assist_1_pid_idx ON public.nfl_plays_year_2010 USING btree (tackle_assist_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2010_tackle_assist_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_tackle_assist_2_pid_idx ON public.nfl_plays_year_2010 USING btree (tackle_assist_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2010_tackle_assist_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_tackle_assist_3_pid_idx ON public.nfl_plays_year_2010 USING btree (tackle_assist_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2010_tackle_assist_4_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_tackle_assist_4_pid_idx ON public.nfl_plays_year_2010 USING btree (tackle_assist_4_pid);
+
+
+--
+-- Name: nfl_plays_year_2010_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_trg_pid_idx ON public.nfl_plays_year_2010 USING btree (trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2010_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_ydl_100_idx ON public.nfl_plays_year_2010 USING btree (ydl_100);
+
+
+--
+-- Name: nfl_plays_year_2010_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_year_esbid_idx ON public.nfl_plays_year_2010 USING btree (year, esbid);
+
+
+--
+-- Name: nfl_plays_year_2010_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_plays_year_2010_year_esbid_playId_idx" ON public.nfl_plays_year_2010 USING btree (year, esbid, "playId");
+
+
+--
+-- Name: nfl_plays_year_2010_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2010 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2010_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2010 USING btree (year, seas_type, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2010_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2010 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2010_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2010 USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2010_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2010 USING btree (year, seas_type, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2010_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2010 USING btree (year, seas_type, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2010_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2010 USING btree (year, seas_type, week, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2010_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2010 USING btree (year, seas_type, week, play_type);
+
+
+--
+-- Name: nfl_plays_year_2010_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2010 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2010_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2010 USING btree (year, seas_type, week, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2010_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2010 USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2011_assisted_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_assisted_tackle_1_pid_idx ON public.nfl_plays_year_2011 USING btree (assisted_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2011_assisted_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_assisted_tackle_2_pid_idx ON public.nfl_plays_year_2011 USING btree (assisted_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2011_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_bc_pid_idx ON public.nfl_plays_year_2011 USING btree (bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2011_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2011 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2011_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_catchable_ball_idx ON public.nfl_plays_year_2011 USING btree (catchable_ball);
+
+
+--
+-- Name: nfl_plays_year_2011_dwn_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_dwn_idx ON public.nfl_plays_year_2011 USING btree (dwn);
+
+
+--
+-- Name: nfl_plays_year_2011_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_esbid_idx ON public.nfl_plays_year_2011 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2011_motion_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_motion_idx ON public.nfl_plays_year_2011 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2011_off_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_off_idx ON public.nfl_plays_year_2011 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2011_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "nfl_plays_year_2011_playId_idx" ON public.nfl_plays_year_2011 USING btree ("playId");
+
+
+--
+-- Name: nfl_plays_year_2011_play_action_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_play_action_idx ON public.nfl_plays_year_2011 USING btree (play_action);
+
+
+--
+-- Name: nfl_plays_year_2011_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_play_type_idx ON public.nfl_plays_year_2011 USING btree (play_type);
+
+
+--
+-- Name: nfl_plays_year_2011_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2011 USING btree (play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2011_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_psr_pid_idx ON public.nfl_plays_year_2011 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2011_qtr_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_qtr_idx ON public.nfl_plays_year_2011 USING btree (qtr);
+
+
+--
+-- Name: nfl_plays_year_2011_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_route_ngs_idx ON public.nfl_plays_year_2011 USING btree (route_ngs);
+
+
+--
+-- Name: nfl_plays_year_2011_seas_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_seas_type_idx ON public.nfl_plays_year_2011 USING btree (seas_type);
+
+
+--
+-- Name: nfl_plays_year_2011_series_seq_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_series_seq_idx ON public.nfl_plays_year_2011 USING btree (series_seq);
+
+
+--
+-- Name: nfl_plays_year_2011_solo_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_solo_tackle_1_pid_idx ON public.nfl_plays_year_2011 USING btree (solo_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2011_solo_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_solo_tackle_2_pid_idx ON public.nfl_plays_year_2011 USING btree (solo_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2011_solo_tackle_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_solo_tackle_3_pid_idx ON public.nfl_plays_year_2011 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2011_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_tackle_assist_1_pid_idx ON public.nfl_plays_year_2011 USING btree (tackle_assist_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2011_tackle_assist_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_tackle_assist_2_pid_idx ON public.nfl_plays_year_2011 USING btree (tackle_assist_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2011_tackle_assist_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_tackle_assist_3_pid_idx ON public.nfl_plays_year_2011 USING btree (tackle_assist_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2011_tackle_assist_4_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_tackle_assist_4_pid_idx ON public.nfl_plays_year_2011 USING btree (tackle_assist_4_pid);
+
+
+--
+-- Name: nfl_plays_year_2011_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_trg_pid_idx ON public.nfl_plays_year_2011 USING btree (trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2011_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_ydl_100_idx ON public.nfl_plays_year_2011 USING btree (ydl_100);
+
+
+--
+-- Name: nfl_plays_year_2011_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_year_esbid_idx ON public.nfl_plays_year_2011 USING btree (year, esbid);
+
+
+--
+-- Name: nfl_plays_year_2011_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_plays_year_2011_year_esbid_playId_idx" ON public.nfl_plays_year_2011 USING btree (year, esbid, "playId");
+
+
+--
+-- Name: nfl_plays_year_2011_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2011 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2011_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2011 USING btree (year, seas_type, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2011_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2011 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2011_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2011 USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2011_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2011 USING btree (year, seas_type, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2011_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2011 USING btree (year, seas_type, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2011_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2011 USING btree (year, seas_type, week, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2011_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2011 USING btree (year, seas_type, week, play_type);
+
+
+--
+-- Name: nfl_plays_year_2011_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2011 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2011_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2011 USING btree (year, seas_type, week, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2011_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2011 USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2012_assisted_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_assisted_tackle_1_pid_idx ON public.nfl_plays_year_2012 USING btree (assisted_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2012_assisted_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_assisted_tackle_2_pid_idx ON public.nfl_plays_year_2012 USING btree (assisted_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2012_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_bc_pid_idx ON public.nfl_plays_year_2012 USING btree (bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2012_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2012 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2012_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_catchable_ball_idx ON public.nfl_plays_year_2012 USING btree (catchable_ball);
+
+
+--
+-- Name: nfl_plays_year_2012_dwn_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_dwn_idx ON public.nfl_plays_year_2012 USING btree (dwn);
+
+
+--
+-- Name: nfl_plays_year_2012_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_esbid_idx ON public.nfl_plays_year_2012 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2012_motion_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_motion_idx ON public.nfl_plays_year_2012 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2012_off_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_off_idx ON public.nfl_plays_year_2012 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2012_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "nfl_plays_year_2012_playId_idx" ON public.nfl_plays_year_2012 USING btree ("playId");
+
+
+--
+-- Name: nfl_plays_year_2012_play_action_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_play_action_idx ON public.nfl_plays_year_2012 USING btree (play_action);
+
+
+--
+-- Name: nfl_plays_year_2012_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_play_type_idx ON public.nfl_plays_year_2012 USING btree (play_type);
+
+
+--
+-- Name: nfl_plays_year_2012_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2012 USING btree (play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2012_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_psr_pid_idx ON public.nfl_plays_year_2012 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2012_qtr_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_qtr_idx ON public.nfl_plays_year_2012 USING btree (qtr);
+
+
+--
+-- Name: nfl_plays_year_2012_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_route_ngs_idx ON public.nfl_plays_year_2012 USING btree (route_ngs);
+
+
+--
+-- Name: nfl_plays_year_2012_seas_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_seas_type_idx ON public.nfl_plays_year_2012 USING btree (seas_type);
+
+
+--
+-- Name: nfl_plays_year_2012_series_seq_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_series_seq_idx ON public.nfl_plays_year_2012 USING btree (series_seq);
+
+
+--
+-- Name: nfl_plays_year_2012_solo_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_solo_tackle_1_pid_idx ON public.nfl_plays_year_2012 USING btree (solo_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2012_solo_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_solo_tackle_2_pid_idx ON public.nfl_plays_year_2012 USING btree (solo_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2012_solo_tackle_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_solo_tackle_3_pid_idx ON public.nfl_plays_year_2012 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2012_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_tackle_assist_1_pid_idx ON public.nfl_plays_year_2012 USING btree (tackle_assist_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2012_tackle_assist_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_tackle_assist_2_pid_idx ON public.nfl_plays_year_2012 USING btree (tackle_assist_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2012_tackle_assist_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_tackle_assist_3_pid_idx ON public.nfl_plays_year_2012 USING btree (tackle_assist_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2012_tackle_assist_4_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_tackle_assist_4_pid_idx ON public.nfl_plays_year_2012 USING btree (tackle_assist_4_pid);
+
+
+--
+-- Name: nfl_plays_year_2012_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_trg_pid_idx ON public.nfl_plays_year_2012 USING btree (trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2012_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_ydl_100_idx ON public.nfl_plays_year_2012 USING btree (ydl_100);
+
+
+--
+-- Name: nfl_plays_year_2012_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_year_esbid_idx ON public.nfl_plays_year_2012 USING btree (year, esbid);
+
+
+--
+-- Name: nfl_plays_year_2012_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_plays_year_2012_year_esbid_playId_idx" ON public.nfl_plays_year_2012 USING btree (year, esbid, "playId");
+
+
+--
+-- Name: nfl_plays_year_2012_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2012 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2012_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2012 USING btree (year, seas_type, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2012_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2012 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2012_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2012 USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2012_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2012 USING btree (year, seas_type, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2012_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2012 USING btree (year, seas_type, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2012_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2012 USING btree (year, seas_type, week, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2012_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2012 USING btree (year, seas_type, week, play_type);
+
+
+--
+-- Name: nfl_plays_year_2012_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2012 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2012_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2012 USING btree (year, seas_type, week, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2012_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2012 USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2013_assisted_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_assisted_tackle_1_pid_idx ON public.nfl_plays_year_2013 USING btree (assisted_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2013_assisted_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_assisted_tackle_2_pid_idx ON public.nfl_plays_year_2013 USING btree (assisted_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2013_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_bc_pid_idx ON public.nfl_plays_year_2013 USING btree (bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2013_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2013 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2013_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_catchable_ball_idx ON public.nfl_plays_year_2013 USING btree (catchable_ball);
+
+
+--
+-- Name: nfl_plays_year_2013_dwn_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_dwn_idx ON public.nfl_plays_year_2013 USING btree (dwn);
+
+
+--
+-- Name: nfl_plays_year_2013_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_esbid_idx ON public.nfl_plays_year_2013 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2013_motion_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_motion_idx ON public.nfl_plays_year_2013 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2013_off_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_off_idx ON public.nfl_plays_year_2013 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2013_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "nfl_plays_year_2013_playId_idx" ON public.nfl_plays_year_2013 USING btree ("playId");
+
+
+--
+-- Name: nfl_plays_year_2013_play_action_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_play_action_idx ON public.nfl_plays_year_2013 USING btree (play_action);
+
+
+--
+-- Name: nfl_plays_year_2013_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_play_type_idx ON public.nfl_plays_year_2013 USING btree (play_type);
+
+
+--
+-- Name: nfl_plays_year_2013_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2013 USING btree (play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2013_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_psr_pid_idx ON public.nfl_plays_year_2013 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2013_qtr_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_qtr_idx ON public.nfl_plays_year_2013 USING btree (qtr);
+
+
+--
+-- Name: nfl_plays_year_2013_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_route_ngs_idx ON public.nfl_plays_year_2013 USING btree (route_ngs);
+
+
+--
+-- Name: nfl_plays_year_2013_seas_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_seas_type_idx ON public.nfl_plays_year_2013 USING btree (seas_type);
+
+
+--
+-- Name: nfl_plays_year_2013_series_seq_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_series_seq_idx ON public.nfl_plays_year_2013 USING btree (series_seq);
+
+
+--
+-- Name: nfl_plays_year_2013_solo_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_solo_tackle_1_pid_idx ON public.nfl_plays_year_2013 USING btree (solo_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2013_solo_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_solo_tackle_2_pid_idx ON public.nfl_plays_year_2013 USING btree (solo_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2013_solo_tackle_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_solo_tackle_3_pid_idx ON public.nfl_plays_year_2013 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2013_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_tackle_assist_1_pid_idx ON public.nfl_plays_year_2013 USING btree (tackle_assist_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2013_tackle_assist_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_tackle_assist_2_pid_idx ON public.nfl_plays_year_2013 USING btree (tackle_assist_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2013_tackle_assist_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_tackle_assist_3_pid_idx ON public.nfl_plays_year_2013 USING btree (tackle_assist_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2013_tackle_assist_4_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_tackle_assist_4_pid_idx ON public.nfl_plays_year_2013 USING btree (tackle_assist_4_pid);
+
+
+--
+-- Name: nfl_plays_year_2013_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_trg_pid_idx ON public.nfl_plays_year_2013 USING btree (trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2013_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_ydl_100_idx ON public.nfl_plays_year_2013 USING btree (ydl_100);
+
+
+--
+-- Name: nfl_plays_year_2013_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_year_esbid_idx ON public.nfl_plays_year_2013 USING btree (year, esbid);
+
+
+--
+-- Name: nfl_plays_year_2013_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_plays_year_2013_year_esbid_playId_idx" ON public.nfl_plays_year_2013 USING btree (year, esbid, "playId");
+
+
+--
+-- Name: nfl_plays_year_2013_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2013 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2013_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2013 USING btree (year, seas_type, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2013_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2013 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2013_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2013 USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2013_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2013 USING btree (year, seas_type, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2013_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2013 USING btree (year, seas_type, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2013_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2013 USING btree (year, seas_type, week, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2013_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2013 USING btree (year, seas_type, week, play_type);
+
+
+--
+-- Name: nfl_plays_year_2013_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2013 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2013_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2013 USING btree (year, seas_type, week, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2013_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2013 USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2014_assisted_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_assisted_tackle_1_pid_idx ON public.nfl_plays_year_2014 USING btree (assisted_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2014_assisted_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_assisted_tackle_2_pid_idx ON public.nfl_plays_year_2014 USING btree (assisted_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2014_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_bc_pid_idx ON public.nfl_plays_year_2014 USING btree (bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2014_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2014 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2014_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_catchable_ball_idx ON public.nfl_plays_year_2014 USING btree (catchable_ball);
+
+
+--
+-- Name: nfl_plays_year_2014_dwn_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_dwn_idx ON public.nfl_plays_year_2014 USING btree (dwn);
+
+
+--
+-- Name: nfl_plays_year_2014_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_esbid_idx ON public.nfl_plays_year_2014 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2014_motion_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_motion_idx ON public.nfl_plays_year_2014 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2014_off_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_off_idx ON public.nfl_plays_year_2014 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2014_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "nfl_plays_year_2014_playId_idx" ON public.nfl_plays_year_2014 USING btree ("playId");
+
+
+--
+-- Name: nfl_plays_year_2014_play_action_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_play_action_idx ON public.nfl_plays_year_2014 USING btree (play_action);
+
+
+--
+-- Name: nfl_plays_year_2014_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_play_type_idx ON public.nfl_plays_year_2014 USING btree (play_type);
+
+
+--
+-- Name: nfl_plays_year_2014_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2014 USING btree (play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2014_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_psr_pid_idx ON public.nfl_plays_year_2014 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2014_qtr_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_qtr_idx ON public.nfl_plays_year_2014 USING btree (qtr);
+
+
+--
+-- Name: nfl_plays_year_2014_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_route_ngs_idx ON public.nfl_plays_year_2014 USING btree (route_ngs);
+
+
+--
+-- Name: nfl_plays_year_2014_seas_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_seas_type_idx ON public.nfl_plays_year_2014 USING btree (seas_type);
+
+
+--
+-- Name: nfl_plays_year_2014_series_seq_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_series_seq_idx ON public.nfl_plays_year_2014 USING btree (series_seq);
+
+
+--
+-- Name: nfl_plays_year_2014_solo_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_solo_tackle_1_pid_idx ON public.nfl_plays_year_2014 USING btree (solo_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2014_solo_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_solo_tackle_2_pid_idx ON public.nfl_plays_year_2014 USING btree (solo_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2014_solo_tackle_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_solo_tackle_3_pid_idx ON public.nfl_plays_year_2014 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2014_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_tackle_assist_1_pid_idx ON public.nfl_plays_year_2014 USING btree (tackle_assist_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2014_tackle_assist_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_tackle_assist_2_pid_idx ON public.nfl_plays_year_2014 USING btree (tackle_assist_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2014_tackle_assist_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_tackle_assist_3_pid_idx ON public.nfl_plays_year_2014 USING btree (tackle_assist_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2014_tackle_assist_4_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_tackle_assist_4_pid_idx ON public.nfl_plays_year_2014 USING btree (tackle_assist_4_pid);
+
+
+--
+-- Name: nfl_plays_year_2014_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_trg_pid_idx ON public.nfl_plays_year_2014 USING btree (trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2014_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_ydl_100_idx ON public.nfl_plays_year_2014 USING btree (ydl_100);
+
+
+--
+-- Name: nfl_plays_year_2014_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_year_esbid_idx ON public.nfl_plays_year_2014 USING btree (year, esbid);
+
+
+--
+-- Name: nfl_plays_year_2014_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_plays_year_2014_year_esbid_playId_idx" ON public.nfl_plays_year_2014 USING btree (year, esbid, "playId");
+
+
+--
+-- Name: nfl_plays_year_2014_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2014 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2014_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2014 USING btree (year, seas_type, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2014_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2014 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2014_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2014 USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2014_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2014 USING btree (year, seas_type, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2014_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2014 USING btree (year, seas_type, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2014_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2014 USING btree (year, seas_type, week, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2014_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2014 USING btree (year, seas_type, week, play_type);
+
+
+--
+-- Name: nfl_plays_year_2014_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2014 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2014_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2014 USING btree (year, seas_type, week, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2014_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2014 USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2015_assisted_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_assisted_tackle_1_pid_idx ON public.nfl_plays_year_2015 USING btree (assisted_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2015_assisted_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_assisted_tackle_2_pid_idx ON public.nfl_plays_year_2015 USING btree (assisted_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2015_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_bc_pid_idx ON public.nfl_plays_year_2015 USING btree (bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2015_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2015 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2015_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_catchable_ball_idx ON public.nfl_plays_year_2015 USING btree (catchable_ball);
+
+
+--
+-- Name: nfl_plays_year_2015_dwn_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_dwn_idx ON public.nfl_plays_year_2015 USING btree (dwn);
+
+
+--
+-- Name: nfl_plays_year_2015_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_esbid_idx ON public.nfl_plays_year_2015 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2015_motion_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_motion_idx ON public.nfl_plays_year_2015 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2015_off_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_off_idx ON public.nfl_plays_year_2015 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2015_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "nfl_plays_year_2015_playId_idx" ON public.nfl_plays_year_2015 USING btree ("playId");
+
+
+--
+-- Name: nfl_plays_year_2015_play_action_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_play_action_idx ON public.nfl_plays_year_2015 USING btree (play_action);
+
+
+--
+-- Name: nfl_plays_year_2015_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_play_type_idx ON public.nfl_plays_year_2015 USING btree (play_type);
+
+
+--
+-- Name: nfl_plays_year_2015_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2015 USING btree (play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2015_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_psr_pid_idx ON public.nfl_plays_year_2015 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2015_qtr_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_qtr_idx ON public.nfl_plays_year_2015 USING btree (qtr);
+
+
+--
+-- Name: nfl_plays_year_2015_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_route_ngs_idx ON public.nfl_plays_year_2015 USING btree (route_ngs);
+
+
+--
+-- Name: nfl_plays_year_2015_seas_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_seas_type_idx ON public.nfl_plays_year_2015 USING btree (seas_type);
+
+
+--
+-- Name: nfl_plays_year_2015_series_seq_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_series_seq_idx ON public.nfl_plays_year_2015 USING btree (series_seq);
+
+
+--
+-- Name: nfl_plays_year_2015_solo_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_solo_tackle_1_pid_idx ON public.nfl_plays_year_2015 USING btree (solo_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2015_solo_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_solo_tackle_2_pid_idx ON public.nfl_plays_year_2015 USING btree (solo_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2015_solo_tackle_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_solo_tackle_3_pid_idx ON public.nfl_plays_year_2015 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2015_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_tackle_assist_1_pid_idx ON public.nfl_plays_year_2015 USING btree (tackle_assist_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2015_tackle_assist_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_tackle_assist_2_pid_idx ON public.nfl_plays_year_2015 USING btree (tackle_assist_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2015_tackle_assist_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_tackle_assist_3_pid_idx ON public.nfl_plays_year_2015 USING btree (tackle_assist_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2015_tackle_assist_4_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_tackle_assist_4_pid_idx ON public.nfl_plays_year_2015 USING btree (tackle_assist_4_pid);
+
+
+--
+-- Name: nfl_plays_year_2015_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_trg_pid_idx ON public.nfl_plays_year_2015 USING btree (trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2015_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_ydl_100_idx ON public.nfl_plays_year_2015 USING btree (ydl_100);
+
+
+--
+-- Name: nfl_plays_year_2015_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_year_esbid_idx ON public.nfl_plays_year_2015 USING btree (year, esbid);
+
+
+--
+-- Name: nfl_plays_year_2015_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_plays_year_2015_year_esbid_playId_idx" ON public.nfl_plays_year_2015 USING btree (year, esbid, "playId");
+
+
+--
+-- Name: nfl_plays_year_2015_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2015 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2015_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2015 USING btree (year, seas_type, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2015_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2015 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2015_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2015 USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2015_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2015 USING btree (year, seas_type, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2015_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2015 USING btree (year, seas_type, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2015_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2015 USING btree (year, seas_type, week, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2015_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2015 USING btree (year, seas_type, week, play_type);
+
+
+--
+-- Name: nfl_plays_year_2015_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2015 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2015_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2015 USING btree (year, seas_type, week, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2015_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2015 USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2016_assisted_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_assisted_tackle_1_pid_idx ON public.nfl_plays_year_2016 USING btree (assisted_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2016_assisted_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_assisted_tackle_2_pid_idx ON public.nfl_plays_year_2016 USING btree (assisted_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2016_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_bc_pid_idx ON public.nfl_plays_year_2016 USING btree (bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2016_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2016 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2016_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_catchable_ball_idx ON public.nfl_plays_year_2016 USING btree (catchable_ball);
+
+
+--
+-- Name: nfl_plays_year_2016_dwn_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_dwn_idx ON public.nfl_plays_year_2016 USING btree (dwn);
+
+
+--
+-- Name: nfl_plays_year_2016_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_esbid_idx ON public.nfl_plays_year_2016 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2016_motion_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_motion_idx ON public.nfl_plays_year_2016 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2016_off_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_off_idx ON public.nfl_plays_year_2016 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2016_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "nfl_plays_year_2016_playId_idx" ON public.nfl_plays_year_2016 USING btree ("playId");
+
+
+--
+-- Name: nfl_plays_year_2016_play_action_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_play_action_idx ON public.nfl_plays_year_2016 USING btree (play_action);
+
+
+--
+-- Name: nfl_plays_year_2016_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_play_type_idx ON public.nfl_plays_year_2016 USING btree (play_type);
+
+
+--
+-- Name: nfl_plays_year_2016_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2016 USING btree (play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2016_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_psr_pid_idx ON public.nfl_plays_year_2016 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2016_qtr_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_qtr_idx ON public.nfl_plays_year_2016 USING btree (qtr);
+
+
+--
+-- Name: nfl_plays_year_2016_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_route_ngs_idx ON public.nfl_plays_year_2016 USING btree (route_ngs);
+
+
+--
+-- Name: nfl_plays_year_2016_seas_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_seas_type_idx ON public.nfl_plays_year_2016 USING btree (seas_type);
+
+
+--
+-- Name: nfl_plays_year_2016_series_seq_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_series_seq_idx ON public.nfl_plays_year_2016 USING btree (series_seq);
+
+
+--
+-- Name: nfl_plays_year_2016_solo_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_solo_tackle_1_pid_idx ON public.nfl_plays_year_2016 USING btree (solo_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2016_solo_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_solo_tackle_2_pid_idx ON public.nfl_plays_year_2016 USING btree (solo_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2016_solo_tackle_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_solo_tackle_3_pid_idx ON public.nfl_plays_year_2016 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2016_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_tackle_assist_1_pid_idx ON public.nfl_plays_year_2016 USING btree (tackle_assist_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2016_tackle_assist_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_tackle_assist_2_pid_idx ON public.nfl_plays_year_2016 USING btree (tackle_assist_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2016_tackle_assist_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_tackle_assist_3_pid_idx ON public.nfl_plays_year_2016 USING btree (tackle_assist_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2016_tackle_assist_4_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_tackle_assist_4_pid_idx ON public.nfl_plays_year_2016 USING btree (tackle_assist_4_pid);
+
+
+--
+-- Name: nfl_plays_year_2016_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_trg_pid_idx ON public.nfl_plays_year_2016 USING btree (trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2016_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_ydl_100_idx ON public.nfl_plays_year_2016 USING btree (ydl_100);
+
+
+--
+-- Name: nfl_plays_year_2016_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_year_esbid_idx ON public.nfl_plays_year_2016 USING btree (year, esbid);
+
+
+--
+-- Name: nfl_plays_year_2016_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_plays_year_2016_year_esbid_playId_idx" ON public.nfl_plays_year_2016 USING btree (year, esbid, "playId");
+
+
+--
+-- Name: nfl_plays_year_2016_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2016 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2016_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2016 USING btree (year, seas_type, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2016_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2016 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2016_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2016 USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2016_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2016 USING btree (year, seas_type, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2016_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2016 USING btree (year, seas_type, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2016_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2016 USING btree (year, seas_type, week, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2016_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2016 USING btree (year, seas_type, week, play_type);
+
+
+--
+-- Name: nfl_plays_year_2016_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2016 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2016_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2016 USING btree (year, seas_type, week, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2016_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2016 USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2017_assisted_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_assisted_tackle_1_pid_idx ON public.nfl_plays_year_2017 USING btree (assisted_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2017_assisted_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_assisted_tackle_2_pid_idx ON public.nfl_plays_year_2017 USING btree (assisted_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2017_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_bc_pid_idx ON public.nfl_plays_year_2017 USING btree (bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2017_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2017 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2017_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_catchable_ball_idx ON public.nfl_plays_year_2017 USING btree (catchable_ball);
+
+
+--
+-- Name: nfl_plays_year_2017_dwn_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_dwn_idx ON public.nfl_plays_year_2017 USING btree (dwn);
+
+
+--
+-- Name: nfl_plays_year_2017_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_esbid_idx ON public.nfl_plays_year_2017 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2017_motion_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_motion_idx ON public.nfl_plays_year_2017 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2017_off_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_off_idx ON public.nfl_plays_year_2017 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2017_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "nfl_plays_year_2017_playId_idx" ON public.nfl_plays_year_2017 USING btree ("playId");
+
+
+--
+-- Name: nfl_plays_year_2017_play_action_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_play_action_idx ON public.nfl_plays_year_2017 USING btree (play_action);
+
+
+--
+-- Name: nfl_plays_year_2017_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_play_type_idx ON public.nfl_plays_year_2017 USING btree (play_type);
+
+
+--
+-- Name: nfl_plays_year_2017_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2017 USING btree (play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2017_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_psr_pid_idx ON public.nfl_plays_year_2017 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2017_qtr_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_qtr_idx ON public.nfl_plays_year_2017 USING btree (qtr);
+
+
+--
+-- Name: nfl_plays_year_2017_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_route_ngs_idx ON public.nfl_plays_year_2017 USING btree (route_ngs);
+
+
+--
+-- Name: nfl_plays_year_2017_seas_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_seas_type_idx ON public.nfl_plays_year_2017 USING btree (seas_type);
+
+
+--
+-- Name: nfl_plays_year_2017_series_seq_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_series_seq_idx ON public.nfl_plays_year_2017 USING btree (series_seq);
+
+
+--
+-- Name: nfl_plays_year_2017_solo_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_solo_tackle_1_pid_idx ON public.nfl_plays_year_2017 USING btree (solo_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2017_solo_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_solo_tackle_2_pid_idx ON public.nfl_plays_year_2017 USING btree (solo_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2017_solo_tackle_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_solo_tackle_3_pid_idx ON public.nfl_plays_year_2017 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2017_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_tackle_assist_1_pid_idx ON public.nfl_plays_year_2017 USING btree (tackle_assist_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2017_tackle_assist_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_tackle_assist_2_pid_idx ON public.nfl_plays_year_2017 USING btree (tackle_assist_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2017_tackle_assist_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_tackle_assist_3_pid_idx ON public.nfl_plays_year_2017 USING btree (tackle_assist_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2017_tackle_assist_4_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_tackle_assist_4_pid_idx ON public.nfl_plays_year_2017 USING btree (tackle_assist_4_pid);
+
+
+--
+-- Name: nfl_plays_year_2017_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_trg_pid_idx ON public.nfl_plays_year_2017 USING btree (trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2017_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_ydl_100_idx ON public.nfl_plays_year_2017 USING btree (ydl_100);
+
+
+--
+-- Name: nfl_plays_year_2017_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_year_esbid_idx ON public.nfl_plays_year_2017 USING btree (year, esbid);
+
+
+--
+-- Name: nfl_plays_year_2017_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_plays_year_2017_year_esbid_playId_idx" ON public.nfl_plays_year_2017 USING btree (year, esbid, "playId");
+
+
+--
+-- Name: nfl_plays_year_2017_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2017 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2017_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2017 USING btree (year, seas_type, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2017_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2017 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2017_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2017 USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2017_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2017 USING btree (year, seas_type, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2017_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2017 USING btree (year, seas_type, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2017_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2017 USING btree (year, seas_type, week, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2017_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2017 USING btree (year, seas_type, week, play_type);
+
+
+--
+-- Name: nfl_plays_year_2017_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2017 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2017_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2017 USING btree (year, seas_type, week, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2017_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2017 USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2018_assisted_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_assisted_tackle_1_pid_idx ON public.nfl_plays_year_2018 USING btree (assisted_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2018_assisted_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_assisted_tackle_2_pid_idx ON public.nfl_plays_year_2018 USING btree (assisted_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2018_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_bc_pid_idx ON public.nfl_plays_year_2018 USING btree (bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2018_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2018 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2018_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_catchable_ball_idx ON public.nfl_plays_year_2018 USING btree (catchable_ball);
+
+
+--
+-- Name: nfl_plays_year_2018_dwn_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_dwn_idx ON public.nfl_plays_year_2018 USING btree (dwn);
+
+
+--
+-- Name: nfl_plays_year_2018_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_esbid_idx ON public.nfl_plays_year_2018 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2018_motion_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_motion_idx ON public.nfl_plays_year_2018 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2018_off_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_off_idx ON public.nfl_plays_year_2018 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2018_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "nfl_plays_year_2018_playId_idx" ON public.nfl_plays_year_2018 USING btree ("playId");
+
+
+--
+-- Name: nfl_plays_year_2018_play_action_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_play_action_idx ON public.nfl_plays_year_2018 USING btree (play_action);
+
+
+--
+-- Name: nfl_plays_year_2018_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_play_type_idx ON public.nfl_plays_year_2018 USING btree (play_type);
+
+
+--
+-- Name: nfl_plays_year_2018_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2018 USING btree (play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2018_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_psr_pid_idx ON public.nfl_plays_year_2018 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2018_qtr_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_qtr_idx ON public.nfl_plays_year_2018 USING btree (qtr);
+
+
+--
+-- Name: nfl_plays_year_2018_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_route_ngs_idx ON public.nfl_plays_year_2018 USING btree (route_ngs);
+
+
+--
+-- Name: nfl_plays_year_2018_seas_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_seas_type_idx ON public.nfl_plays_year_2018 USING btree (seas_type);
+
+
+--
+-- Name: nfl_plays_year_2018_series_seq_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_series_seq_idx ON public.nfl_plays_year_2018 USING btree (series_seq);
+
+
+--
+-- Name: nfl_plays_year_2018_solo_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_solo_tackle_1_pid_idx ON public.nfl_plays_year_2018 USING btree (solo_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2018_solo_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_solo_tackle_2_pid_idx ON public.nfl_plays_year_2018 USING btree (solo_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2018_solo_tackle_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_solo_tackle_3_pid_idx ON public.nfl_plays_year_2018 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2018_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_tackle_assist_1_pid_idx ON public.nfl_plays_year_2018 USING btree (tackle_assist_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2018_tackle_assist_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_tackle_assist_2_pid_idx ON public.nfl_plays_year_2018 USING btree (tackle_assist_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2018_tackle_assist_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_tackle_assist_3_pid_idx ON public.nfl_plays_year_2018 USING btree (tackle_assist_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2018_tackle_assist_4_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_tackle_assist_4_pid_idx ON public.nfl_plays_year_2018 USING btree (tackle_assist_4_pid);
+
+
+--
+-- Name: nfl_plays_year_2018_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_trg_pid_idx ON public.nfl_plays_year_2018 USING btree (trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2018_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_ydl_100_idx ON public.nfl_plays_year_2018 USING btree (ydl_100);
+
+
+--
+-- Name: nfl_plays_year_2018_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_year_esbid_idx ON public.nfl_plays_year_2018 USING btree (year, esbid);
+
+
+--
+-- Name: nfl_plays_year_2018_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_plays_year_2018_year_esbid_playId_idx" ON public.nfl_plays_year_2018 USING btree (year, esbid, "playId");
+
+
+--
+-- Name: nfl_plays_year_2018_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2018 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2018_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2018 USING btree (year, seas_type, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2018_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2018 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2018_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2018 USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2018_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2018 USING btree (year, seas_type, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2018_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2018 USING btree (year, seas_type, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2018_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2018 USING btree (year, seas_type, week, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2018_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2018 USING btree (year, seas_type, week, play_type);
+
+
+--
+-- Name: nfl_plays_year_2018_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2018 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2018_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2018 USING btree (year, seas_type, week, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2018_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2018 USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2019_assisted_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_assisted_tackle_1_pid_idx ON public.nfl_plays_year_2019 USING btree (assisted_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2019_assisted_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_assisted_tackle_2_pid_idx ON public.nfl_plays_year_2019 USING btree (assisted_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2019_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_bc_pid_idx ON public.nfl_plays_year_2019 USING btree (bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2019_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2019 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2019_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_catchable_ball_idx ON public.nfl_plays_year_2019 USING btree (catchable_ball);
+
+
+--
+-- Name: nfl_plays_year_2019_dwn_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_dwn_idx ON public.nfl_plays_year_2019 USING btree (dwn);
+
+
+--
+-- Name: nfl_plays_year_2019_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_esbid_idx ON public.nfl_plays_year_2019 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2019_motion_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_motion_idx ON public.nfl_plays_year_2019 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2019_off_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_off_idx ON public.nfl_plays_year_2019 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2019_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "nfl_plays_year_2019_playId_idx" ON public.nfl_plays_year_2019 USING btree ("playId");
+
+
+--
+-- Name: nfl_plays_year_2019_play_action_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_play_action_idx ON public.nfl_plays_year_2019 USING btree (play_action);
+
+
+--
+-- Name: nfl_plays_year_2019_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_play_type_idx ON public.nfl_plays_year_2019 USING btree (play_type);
+
+
+--
+-- Name: nfl_plays_year_2019_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2019 USING btree (play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2019_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_psr_pid_idx ON public.nfl_plays_year_2019 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2019_qtr_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_qtr_idx ON public.nfl_plays_year_2019 USING btree (qtr);
+
+
+--
+-- Name: nfl_plays_year_2019_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_route_ngs_idx ON public.nfl_plays_year_2019 USING btree (route_ngs);
+
+
+--
+-- Name: nfl_plays_year_2019_seas_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_seas_type_idx ON public.nfl_plays_year_2019 USING btree (seas_type);
+
+
+--
+-- Name: nfl_plays_year_2019_series_seq_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_series_seq_idx ON public.nfl_plays_year_2019 USING btree (series_seq);
+
+
+--
+-- Name: nfl_plays_year_2019_solo_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_solo_tackle_1_pid_idx ON public.nfl_plays_year_2019 USING btree (solo_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2019_solo_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_solo_tackle_2_pid_idx ON public.nfl_plays_year_2019 USING btree (solo_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2019_solo_tackle_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_solo_tackle_3_pid_idx ON public.nfl_plays_year_2019 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2019_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_tackle_assist_1_pid_idx ON public.nfl_plays_year_2019 USING btree (tackle_assist_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2019_tackle_assist_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_tackle_assist_2_pid_idx ON public.nfl_plays_year_2019 USING btree (tackle_assist_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2019_tackle_assist_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_tackle_assist_3_pid_idx ON public.nfl_plays_year_2019 USING btree (tackle_assist_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2019_tackle_assist_4_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_tackle_assist_4_pid_idx ON public.nfl_plays_year_2019 USING btree (tackle_assist_4_pid);
+
+
+--
+-- Name: nfl_plays_year_2019_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_trg_pid_idx ON public.nfl_plays_year_2019 USING btree (trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2019_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_ydl_100_idx ON public.nfl_plays_year_2019 USING btree (ydl_100);
+
+
+--
+-- Name: nfl_plays_year_2019_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_year_esbid_idx ON public.nfl_plays_year_2019 USING btree (year, esbid);
+
+
+--
+-- Name: nfl_plays_year_2019_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_plays_year_2019_year_esbid_playId_idx" ON public.nfl_plays_year_2019 USING btree (year, esbid, "playId");
+
+
+--
+-- Name: nfl_plays_year_2019_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2019 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2019_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2019 USING btree (year, seas_type, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2019_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2019 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2019_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2019 USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2019_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2019 USING btree (year, seas_type, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2019_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2019 USING btree (year, seas_type, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2019_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2019 USING btree (year, seas_type, week, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2019_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2019 USING btree (year, seas_type, week, play_type);
+
+
+--
+-- Name: nfl_plays_year_2019_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2019 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2019_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2019 USING btree (year, seas_type, week, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2019_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2019 USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2020_assisted_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_assisted_tackle_1_pid_idx ON public.nfl_plays_year_2020 USING btree (assisted_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2020_assisted_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_assisted_tackle_2_pid_idx ON public.nfl_plays_year_2020 USING btree (assisted_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2020_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_bc_pid_idx ON public.nfl_plays_year_2020 USING btree (bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2020_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2020 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2020_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_catchable_ball_idx ON public.nfl_plays_year_2020 USING btree (catchable_ball);
+
+
+--
+-- Name: nfl_plays_year_2020_dwn_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_dwn_idx ON public.nfl_plays_year_2020 USING btree (dwn);
+
+
+--
+-- Name: nfl_plays_year_2020_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_esbid_idx ON public.nfl_plays_year_2020 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2020_motion_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_motion_idx ON public.nfl_plays_year_2020 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2020_off_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_off_idx ON public.nfl_plays_year_2020 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2020_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "nfl_plays_year_2020_playId_idx" ON public.nfl_plays_year_2020 USING btree ("playId");
+
+
+--
+-- Name: nfl_plays_year_2020_play_action_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_play_action_idx ON public.nfl_plays_year_2020 USING btree (play_action);
+
+
+--
+-- Name: nfl_plays_year_2020_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_play_type_idx ON public.nfl_plays_year_2020 USING btree (play_type);
+
+
+--
+-- Name: nfl_plays_year_2020_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2020 USING btree (play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2020_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_psr_pid_idx ON public.nfl_plays_year_2020 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2020_qtr_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_qtr_idx ON public.nfl_plays_year_2020 USING btree (qtr);
+
+
+--
+-- Name: nfl_plays_year_2020_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_route_ngs_idx ON public.nfl_plays_year_2020 USING btree (route_ngs);
+
+
+--
+-- Name: nfl_plays_year_2020_seas_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_seas_type_idx ON public.nfl_plays_year_2020 USING btree (seas_type);
+
+
+--
+-- Name: nfl_plays_year_2020_series_seq_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_series_seq_idx ON public.nfl_plays_year_2020 USING btree (series_seq);
+
+
+--
+-- Name: nfl_plays_year_2020_solo_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_solo_tackle_1_pid_idx ON public.nfl_plays_year_2020 USING btree (solo_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2020_solo_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_solo_tackle_2_pid_idx ON public.nfl_plays_year_2020 USING btree (solo_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2020_solo_tackle_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_solo_tackle_3_pid_idx ON public.nfl_plays_year_2020 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2020_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_tackle_assist_1_pid_idx ON public.nfl_plays_year_2020 USING btree (tackle_assist_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2020_tackle_assist_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_tackle_assist_2_pid_idx ON public.nfl_plays_year_2020 USING btree (tackle_assist_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2020_tackle_assist_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_tackle_assist_3_pid_idx ON public.nfl_plays_year_2020 USING btree (tackle_assist_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2020_tackle_assist_4_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_tackle_assist_4_pid_idx ON public.nfl_plays_year_2020 USING btree (tackle_assist_4_pid);
+
+
+--
+-- Name: nfl_plays_year_2020_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_trg_pid_idx ON public.nfl_plays_year_2020 USING btree (trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2020_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_ydl_100_idx ON public.nfl_plays_year_2020 USING btree (ydl_100);
+
+
+--
+-- Name: nfl_plays_year_2020_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_year_esbid_idx ON public.nfl_plays_year_2020 USING btree (year, esbid);
+
+
+--
+-- Name: nfl_plays_year_2020_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_plays_year_2020_year_esbid_playId_idx" ON public.nfl_plays_year_2020 USING btree (year, esbid, "playId");
+
+
+--
+-- Name: nfl_plays_year_2020_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2020 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2020_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2020 USING btree (year, seas_type, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2020_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2020 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2020_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2020 USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2020_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2020 USING btree (year, seas_type, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2020_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2020 USING btree (year, seas_type, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2020_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2020 USING btree (year, seas_type, week, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2020_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2020 USING btree (year, seas_type, week, play_type);
+
+
+--
+-- Name: nfl_plays_year_2020_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2020 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2020_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2020 USING btree (year, seas_type, week, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2020_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2020 USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2021_assisted_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_assisted_tackle_1_pid_idx ON public.nfl_plays_year_2021 USING btree (assisted_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2021_assisted_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_assisted_tackle_2_pid_idx ON public.nfl_plays_year_2021 USING btree (assisted_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2021_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_bc_pid_idx ON public.nfl_plays_year_2021 USING btree (bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2021_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2021 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2021_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_catchable_ball_idx ON public.nfl_plays_year_2021 USING btree (catchable_ball);
+
+
+--
+-- Name: nfl_plays_year_2021_dwn_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_dwn_idx ON public.nfl_plays_year_2021 USING btree (dwn);
+
+
+--
+-- Name: nfl_plays_year_2021_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_esbid_idx ON public.nfl_plays_year_2021 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2021_motion_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_motion_idx ON public.nfl_plays_year_2021 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2021_off_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_off_idx ON public.nfl_plays_year_2021 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2021_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "nfl_plays_year_2021_playId_idx" ON public.nfl_plays_year_2021 USING btree ("playId");
+
+
+--
+-- Name: nfl_plays_year_2021_play_action_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_play_action_idx ON public.nfl_plays_year_2021 USING btree (play_action);
+
+
+--
+-- Name: nfl_plays_year_2021_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_play_type_idx ON public.nfl_plays_year_2021 USING btree (play_type);
+
+
+--
+-- Name: nfl_plays_year_2021_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2021 USING btree (play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2021_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_psr_pid_idx ON public.nfl_plays_year_2021 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2021_qtr_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_qtr_idx ON public.nfl_plays_year_2021 USING btree (qtr);
+
+
+--
+-- Name: nfl_plays_year_2021_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_route_ngs_idx ON public.nfl_plays_year_2021 USING btree (route_ngs);
+
+
+--
+-- Name: nfl_plays_year_2021_seas_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_seas_type_idx ON public.nfl_plays_year_2021 USING btree (seas_type);
+
+
+--
+-- Name: nfl_plays_year_2021_series_seq_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_series_seq_idx ON public.nfl_plays_year_2021 USING btree (series_seq);
+
+
+--
+-- Name: nfl_plays_year_2021_solo_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_solo_tackle_1_pid_idx ON public.nfl_plays_year_2021 USING btree (solo_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2021_solo_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_solo_tackle_2_pid_idx ON public.nfl_plays_year_2021 USING btree (solo_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2021_solo_tackle_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_solo_tackle_3_pid_idx ON public.nfl_plays_year_2021 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2021_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_tackle_assist_1_pid_idx ON public.nfl_plays_year_2021 USING btree (tackle_assist_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2021_tackle_assist_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_tackle_assist_2_pid_idx ON public.nfl_plays_year_2021 USING btree (tackle_assist_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2021_tackle_assist_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_tackle_assist_3_pid_idx ON public.nfl_plays_year_2021 USING btree (tackle_assist_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2021_tackle_assist_4_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_tackle_assist_4_pid_idx ON public.nfl_plays_year_2021 USING btree (tackle_assist_4_pid);
+
+
+--
+-- Name: nfl_plays_year_2021_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_trg_pid_idx ON public.nfl_plays_year_2021 USING btree (trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2021_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_ydl_100_idx ON public.nfl_plays_year_2021 USING btree (ydl_100);
+
+
+--
+-- Name: nfl_plays_year_2021_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_year_esbid_idx ON public.nfl_plays_year_2021 USING btree (year, esbid);
+
+
+--
+-- Name: nfl_plays_year_2021_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_plays_year_2021_year_esbid_playId_idx" ON public.nfl_plays_year_2021 USING btree (year, esbid, "playId");
+
+
+--
+-- Name: nfl_plays_year_2021_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2021 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2021_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2021 USING btree (year, seas_type, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2021_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2021 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2021_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2021 USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2021_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2021 USING btree (year, seas_type, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2021_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2021 USING btree (year, seas_type, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2021_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2021 USING btree (year, seas_type, week, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2021_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2021 USING btree (year, seas_type, week, play_type);
+
+
+--
+-- Name: nfl_plays_year_2021_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2021 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2021_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2021 USING btree (year, seas_type, week, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2021_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2021 USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2022_assisted_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_assisted_tackle_1_pid_idx ON public.nfl_plays_year_2022 USING btree (assisted_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2022_assisted_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_assisted_tackle_2_pid_idx ON public.nfl_plays_year_2022 USING btree (assisted_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2022_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_bc_pid_idx ON public.nfl_plays_year_2022 USING btree (bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2022_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2022 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2022_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_catchable_ball_idx ON public.nfl_plays_year_2022 USING btree (catchable_ball);
+
+
+--
+-- Name: nfl_plays_year_2022_dwn_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_dwn_idx ON public.nfl_plays_year_2022 USING btree (dwn);
+
+
+--
+-- Name: nfl_plays_year_2022_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_esbid_idx ON public.nfl_plays_year_2022 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2022_motion_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_motion_idx ON public.nfl_plays_year_2022 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2022_off_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_off_idx ON public.nfl_plays_year_2022 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2022_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "nfl_plays_year_2022_playId_idx" ON public.nfl_plays_year_2022 USING btree ("playId");
+
+
+--
+-- Name: nfl_plays_year_2022_play_action_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_play_action_idx ON public.nfl_plays_year_2022 USING btree (play_action);
+
+
+--
+-- Name: nfl_plays_year_2022_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_play_type_idx ON public.nfl_plays_year_2022 USING btree (play_type);
+
+
+--
+-- Name: nfl_plays_year_2022_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2022 USING btree (play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2022_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_psr_pid_idx ON public.nfl_plays_year_2022 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2022_qtr_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_qtr_idx ON public.nfl_plays_year_2022 USING btree (qtr);
+
+
+--
+-- Name: nfl_plays_year_2022_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_route_ngs_idx ON public.nfl_plays_year_2022 USING btree (route_ngs);
+
+
+--
+-- Name: nfl_plays_year_2022_seas_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_seas_type_idx ON public.nfl_plays_year_2022 USING btree (seas_type);
+
+
+--
+-- Name: nfl_plays_year_2022_series_seq_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_series_seq_idx ON public.nfl_plays_year_2022 USING btree (series_seq);
+
+
+--
+-- Name: nfl_plays_year_2022_solo_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_solo_tackle_1_pid_idx ON public.nfl_plays_year_2022 USING btree (solo_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2022_solo_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_solo_tackle_2_pid_idx ON public.nfl_plays_year_2022 USING btree (solo_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2022_solo_tackle_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_solo_tackle_3_pid_idx ON public.nfl_plays_year_2022 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2022_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_tackle_assist_1_pid_idx ON public.nfl_plays_year_2022 USING btree (tackle_assist_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2022_tackle_assist_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_tackle_assist_2_pid_idx ON public.nfl_plays_year_2022 USING btree (tackle_assist_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2022_tackle_assist_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_tackle_assist_3_pid_idx ON public.nfl_plays_year_2022 USING btree (tackle_assist_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2022_tackle_assist_4_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_tackle_assist_4_pid_idx ON public.nfl_plays_year_2022 USING btree (tackle_assist_4_pid);
+
+
+--
+-- Name: nfl_plays_year_2022_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_trg_pid_idx ON public.nfl_plays_year_2022 USING btree (trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2022_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_ydl_100_idx ON public.nfl_plays_year_2022 USING btree (ydl_100);
+
+
+--
+-- Name: nfl_plays_year_2022_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_year_esbid_idx ON public.nfl_plays_year_2022 USING btree (year, esbid);
+
+
+--
+-- Name: nfl_plays_year_2022_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_plays_year_2022_year_esbid_playId_idx" ON public.nfl_plays_year_2022 USING btree (year, esbid, "playId");
+
+
+--
+-- Name: nfl_plays_year_2022_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2022 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2022_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2022 USING btree (year, seas_type, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2022_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2022 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2022_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2022 USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2022_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2022 USING btree (year, seas_type, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2022_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2022 USING btree (year, seas_type, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2022_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2022 USING btree (year, seas_type, week, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2022_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2022 USING btree (year, seas_type, week, play_type);
+
+
+--
+-- Name: nfl_plays_year_2022_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2022 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2022_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2022 USING btree (year, seas_type, week, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2022_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2022 USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2023_assisted_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_assisted_tackle_1_pid_idx ON public.nfl_plays_year_2023 USING btree (assisted_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2023_assisted_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_assisted_tackle_2_pid_idx ON public.nfl_plays_year_2023 USING btree (assisted_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2023_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_bc_pid_idx ON public.nfl_plays_year_2023 USING btree (bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2023_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2023 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2023_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_catchable_ball_idx ON public.nfl_plays_year_2023 USING btree (catchable_ball);
+
+
+--
+-- Name: nfl_plays_year_2023_dwn_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_dwn_idx ON public.nfl_plays_year_2023 USING btree (dwn);
+
+
+--
+-- Name: nfl_plays_year_2023_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_esbid_idx ON public.nfl_plays_year_2023 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2023_motion_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_motion_idx ON public.nfl_plays_year_2023 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2023_off_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_off_idx ON public.nfl_plays_year_2023 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2023_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "nfl_plays_year_2023_playId_idx" ON public.nfl_plays_year_2023 USING btree ("playId");
+
+
+--
+-- Name: nfl_plays_year_2023_play_action_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_play_action_idx ON public.nfl_plays_year_2023 USING btree (play_action);
+
+
+--
+-- Name: nfl_plays_year_2023_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_play_type_idx ON public.nfl_plays_year_2023 USING btree (play_type);
+
+
+--
+-- Name: nfl_plays_year_2023_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2023 USING btree (play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2023_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_psr_pid_idx ON public.nfl_plays_year_2023 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2023_qtr_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_qtr_idx ON public.nfl_plays_year_2023 USING btree (qtr);
+
+
+--
+-- Name: nfl_plays_year_2023_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_route_ngs_idx ON public.nfl_plays_year_2023 USING btree (route_ngs);
+
+
+--
+-- Name: nfl_plays_year_2023_seas_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_seas_type_idx ON public.nfl_plays_year_2023 USING btree (seas_type);
+
+
+--
+-- Name: nfl_plays_year_2023_series_seq_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_series_seq_idx ON public.nfl_plays_year_2023 USING btree (series_seq);
+
+
+--
+-- Name: nfl_plays_year_2023_solo_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_solo_tackle_1_pid_idx ON public.nfl_plays_year_2023 USING btree (solo_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2023_solo_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_solo_tackle_2_pid_idx ON public.nfl_plays_year_2023 USING btree (solo_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2023_solo_tackle_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_solo_tackle_3_pid_idx ON public.nfl_plays_year_2023 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2023_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_tackle_assist_1_pid_idx ON public.nfl_plays_year_2023 USING btree (tackle_assist_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2023_tackle_assist_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_tackle_assist_2_pid_idx ON public.nfl_plays_year_2023 USING btree (tackle_assist_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2023_tackle_assist_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_tackle_assist_3_pid_idx ON public.nfl_plays_year_2023 USING btree (tackle_assist_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2023_tackle_assist_4_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_tackle_assist_4_pid_idx ON public.nfl_plays_year_2023 USING btree (tackle_assist_4_pid);
+
+
+--
+-- Name: nfl_plays_year_2023_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_trg_pid_idx ON public.nfl_plays_year_2023 USING btree (trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2023_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_ydl_100_idx ON public.nfl_plays_year_2023 USING btree (ydl_100);
+
+
+--
+-- Name: nfl_plays_year_2023_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_year_esbid_idx ON public.nfl_plays_year_2023 USING btree (year, esbid);
+
+
+--
+-- Name: nfl_plays_year_2023_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_plays_year_2023_year_esbid_playId_idx" ON public.nfl_plays_year_2023 USING btree (year, esbid, "playId");
+
+
+--
+-- Name: nfl_plays_year_2023_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2023 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2023_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2023 USING btree (year, seas_type, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2023_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2023 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2023_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2023 USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2023_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2023 USING btree (year, seas_type, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2023_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2023 USING btree (year, seas_type, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2023_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2023 USING btree (year, seas_type, week, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2023_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2023 USING btree (year, seas_type, week, play_type);
+
+
+--
+-- Name: nfl_plays_year_2023_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2023 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2023_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2023 USING btree (year, seas_type, week, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2023_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2023 USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2024_assisted_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_assisted_tackle_1_pid_idx ON public.nfl_plays_year_2024 USING btree (assisted_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2024_assisted_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_assisted_tackle_2_pid_idx ON public.nfl_plays_year_2024 USING btree (assisted_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2024_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_bc_pid_idx ON public.nfl_plays_year_2024 USING btree (bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2024_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON public.nfl_plays_year_2024 USING btree (bc_pid, psr_pid, trg_pid, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2024_catchable_ball_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_catchable_ball_idx ON public.nfl_plays_year_2024 USING btree (catchable_ball);
+
+
+--
+-- Name: nfl_plays_year_2024_dwn_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_dwn_idx ON public.nfl_plays_year_2024 USING btree (dwn);
+
+
+--
+-- Name: nfl_plays_year_2024_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_esbid_idx ON public.nfl_plays_year_2024 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2024_motion_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_motion_idx ON public.nfl_plays_year_2024 USING btree (motion);
+
+
+--
+-- Name: nfl_plays_year_2024_off_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_off_idx ON public.nfl_plays_year_2024 USING btree (off);
+
+
+--
+-- Name: nfl_plays_year_2024_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX "nfl_plays_year_2024_playId_idx" ON public.nfl_plays_year_2024 USING btree ("playId");
+
+
+--
+-- Name: nfl_plays_year_2024_play_action_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_play_action_idx ON public.nfl_plays_year_2024 USING btree (play_action);
+
+
+--
+-- Name: nfl_plays_year_2024_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_play_type_idx ON public.nfl_plays_year_2024 USING btree (play_type);
+
+
+--
+-- Name: nfl_plays_year_2024_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_play_type_seas_type_trg_pid_off_esbid_idx ON public.nfl_plays_year_2024 USING btree (play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2024_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_psr_pid_idx ON public.nfl_plays_year_2024 USING btree (psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2024_qtr_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_qtr_idx ON public.nfl_plays_year_2024 USING btree (qtr);
+
+
+--
+-- Name: nfl_plays_year_2024_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_route_ngs_idx ON public.nfl_plays_year_2024 USING btree (route_ngs);
+
+
+--
+-- Name: nfl_plays_year_2024_seas_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_seas_type_idx ON public.nfl_plays_year_2024 USING btree (seas_type);
+
+
+--
+-- Name: nfl_plays_year_2024_series_seq_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_series_seq_idx ON public.nfl_plays_year_2024 USING btree (series_seq);
+
+
+--
+-- Name: nfl_plays_year_2024_solo_tackle_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_solo_tackle_1_pid_idx ON public.nfl_plays_year_2024 USING btree (solo_tackle_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2024_solo_tackle_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_solo_tackle_2_pid_idx ON public.nfl_plays_year_2024 USING btree (solo_tackle_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2024_solo_tackle_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_solo_tackle_3_pid_idx ON public.nfl_plays_year_2024 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2024_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_tackle_assist_1_pid_idx ON public.nfl_plays_year_2024 USING btree (tackle_assist_1_pid);
+
+
+--
+-- Name: nfl_plays_year_2024_tackle_assist_2_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_tackle_assist_2_pid_idx ON public.nfl_plays_year_2024 USING btree (tackle_assist_2_pid);
+
+
+--
+-- Name: nfl_plays_year_2024_tackle_assist_3_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_tackle_assist_3_pid_idx ON public.nfl_plays_year_2024 USING btree (tackle_assist_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2024_tackle_assist_4_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_tackle_assist_4_pid_idx ON public.nfl_plays_year_2024 USING btree (tackle_assist_4_pid);
+
+
+--
+-- Name: nfl_plays_year_2024_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_trg_pid_idx ON public.nfl_plays_year_2024 USING btree (trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2024_ydl_100_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_ydl_100_idx ON public.nfl_plays_year_2024 USING btree (ydl_100);
+
+
+--
+-- Name: nfl_plays_year_2024_year_esbid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_year_esbid_idx ON public.nfl_plays_year_2024 USING btree (year, esbid);
+
+
+--
+-- Name: nfl_plays_year_2024_year_esbid_playId_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_plays_year_2024_year_esbid_playId_idx" ON public.nfl_plays_year_2024 USING btree (year, esbid, "playId");
+
+
+--
+-- Name: nfl_plays_year_2024_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_year_play_type_seas_type_trg_pid_off_es_idx ON public.nfl_plays_year_2024 USING btree (year, play_type, seas_type, trg_pid, off, esbid);
+
+
+--
+-- Name: nfl_plays_year_2024_year_seas_type_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_bc_pid_idx ON public.nfl_plays_year_2024 USING btree (year, seas_type, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2024_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_bc_pid_trg_pid_idx ON public.nfl_plays_year_2024 USING btree (year, seas_type, play_type, bc_pid, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2024_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_player_fuml_pi_idx ON public.nfl_plays_year_2024 USING btree (year, seas_type, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2024_year_seas_type_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_psr_pid_idx ON public.nfl_plays_year_2024 USING btree (year, seas_type, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2024_year_seas_type_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_year_seas_type_play_type_trg_pid_idx ON public.nfl_plays_year_2024 USING btree (year, seas_type, play_type, trg_pid);
+
+
+--
+-- Name: nfl_plays_year_2024_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_year_seas_type_week_play_type_bc_pid_idx ON public.nfl_plays_year_2024 USING btree (year, seas_type, week, play_type, bc_pid);
+
+
+--
+-- Name: nfl_plays_year_2024_year_seas_type_week_play_type_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_year_seas_type_week_play_type_idx ON public.nfl_plays_year_2024 USING btree (year, seas_type, week, play_type);
+
+
+--
+-- Name: nfl_plays_year_2024_year_seas_type_week_play_type_player_fu_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_year_seas_type_week_play_type_player_fu_idx ON public.nfl_plays_year_2024 USING btree (year, seas_type, week, play_type, player_fuml_pid);
+
+
+--
+-- Name: nfl_plays_year_2024_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_year_seas_type_week_play_type_psr_pid_idx ON public.nfl_plays_year_2024 USING btree (year, seas_type, week, play_type, psr_pid);
+
+
+--
+-- Name: nfl_plays_year_2024_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2024 USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
 -- Name: nfl_year_week_timestamp_year_week_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -6952,6 +22678,7006 @@ CREATE INDEX nfl_year_week_timestamp_year_week_idx ON public.nfl_year_week_times
 --
 
 CREATE INDEX player_name_search_idx ON public.player USING gin (name_search_vector);
+
+
+--
+-- Name: nfl_plays_year_2000_assisted_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2000_assisted_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_assisted_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2000_assisted_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2000_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_pid_types ATTACH PARTITION public.nfl_plays_year_2000_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_catchable_ball_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2000_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2000_dwn_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2000_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2000_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2000_off_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_playid ATTACH PARTITION public."nfl_plays_year_2000_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2000_play_action_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_action ATTACH PARTITION public.nfl_plays_year_2000_play_action_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type ATTACH PARTITION public.nfl_plays_year_2000_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2000_play_type_seas_type_trg_pid_off_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2000_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2000_qtr_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2000_route_ngs_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2000_seas_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_series_seq_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_series_seq ATTACH PARTITION public.nfl_plays_year_2000_series_seq_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_solo_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2000_solo_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_solo_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2000_solo_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_solo_tackle_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2000_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_1_pid ATTACH PARTITION public.nfl_plays_year_2000_tackle_assist_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_tackle_assist_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_2_pid ATTACH PARTITION public.nfl_plays_year_2000_tackle_assist_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_tackle_assist_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_3_pid ATTACH PARTITION public.nfl_plays_year_2000_tackle_assist_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_tackle_assist_4_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl_plays_year_2000_tackle_assist_4_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2000_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_ydl_100_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_2000_ydl_100_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2000_year_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid_playid ATTACH PARTITION public."nfl_plays_year_2000_year_esbid_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2000_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2000_year_play_type_seas_type_trg_pid_off_es_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_year_seas_type_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2000_year_seas_type_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_trg_pid ATTACH PARTITION public.nfl_plays_year_2000_year_seas_type_play_type_bc_pid_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2000_year_seas_type_play_type_player_fuml_pi_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_year_seas_type_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2000_year_seas_type_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_year_seas_type_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2000_year_seas_type_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2000_year_seas_type_week_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_year_seas_type_week_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type ATTACH PARTITION public.nfl_plays_year_2000_year_seas_type_week_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_year_seas_type_week_play_type_player_fu_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2000_year_seas_type_week_play_type_player_fu_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2000_year_seas_type_week_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2000_year_seas_type_week_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_assisted_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2001_assisted_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_assisted_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2001_assisted_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2001_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_pid_types ATTACH PARTITION public.nfl_plays_year_2001_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_catchable_ball_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2001_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2001_dwn_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2001_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2001_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2001_off_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_playid ATTACH PARTITION public."nfl_plays_year_2001_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2001_play_action_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_action ATTACH PARTITION public.nfl_plays_year_2001_play_action_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type ATTACH PARTITION public.nfl_plays_year_2001_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2001_play_type_seas_type_trg_pid_off_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2001_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2001_qtr_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2001_route_ngs_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2001_seas_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_series_seq_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_series_seq ATTACH PARTITION public.nfl_plays_year_2001_series_seq_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_solo_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2001_solo_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_solo_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2001_solo_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_solo_tackle_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2001_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_1_pid ATTACH PARTITION public.nfl_plays_year_2001_tackle_assist_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_tackle_assist_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_2_pid ATTACH PARTITION public.nfl_plays_year_2001_tackle_assist_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_tackle_assist_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_3_pid ATTACH PARTITION public.nfl_plays_year_2001_tackle_assist_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_tackle_assist_4_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl_plays_year_2001_tackle_assist_4_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2001_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_ydl_100_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_2001_ydl_100_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2001_year_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid_playid ATTACH PARTITION public."nfl_plays_year_2001_year_esbid_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2001_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2001_year_play_type_seas_type_trg_pid_off_es_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_year_seas_type_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2001_year_seas_type_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_trg_pid ATTACH PARTITION public.nfl_plays_year_2001_year_seas_type_play_type_bc_pid_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2001_year_seas_type_play_type_player_fuml_pi_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_year_seas_type_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2001_year_seas_type_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_year_seas_type_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2001_year_seas_type_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2001_year_seas_type_week_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_year_seas_type_week_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type ATTACH PARTITION public.nfl_plays_year_2001_year_seas_type_week_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_year_seas_type_week_play_type_player_fu_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2001_year_seas_type_week_play_type_player_fu_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2001_year_seas_type_week_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2001_year_seas_type_week_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_assisted_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2002_assisted_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_assisted_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2002_assisted_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2002_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_pid_types ATTACH PARTITION public.nfl_plays_year_2002_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_catchable_ball_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2002_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2002_dwn_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2002_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2002_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2002_off_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_playid ATTACH PARTITION public."nfl_plays_year_2002_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2002_play_action_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_action ATTACH PARTITION public.nfl_plays_year_2002_play_action_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type ATTACH PARTITION public.nfl_plays_year_2002_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2002_play_type_seas_type_trg_pid_off_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2002_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2002_qtr_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2002_route_ngs_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2002_seas_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_series_seq_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_series_seq ATTACH PARTITION public.nfl_plays_year_2002_series_seq_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_solo_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2002_solo_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_solo_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2002_solo_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_solo_tackle_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2002_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_1_pid ATTACH PARTITION public.nfl_plays_year_2002_tackle_assist_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_tackle_assist_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_2_pid ATTACH PARTITION public.nfl_plays_year_2002_tackle_assist_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_tackle_assist_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_3_pid ATTACH PARTITION public.nfl_plays_year_2002_tackle_assist_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_tackle_assist_4_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl_plays_year_2002_tackle_assist_4_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2002_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_ydl_100_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_2002_ydl_100_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2002_year_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid_playid ATTACH PARTITION public."nfl_plays_year_2002_year_esbid_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2002_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2002_year_play_type_seas_type_trg_pid_off_es_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_year_seas_type_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2002_year_seas_type_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_trg_pid ATTACH PARTITION public.nfl_plays_year_2002_year_seas_type_play_type_bc_pid_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2002_year_seas_type_play_type_player_fuml_pi_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_year_seas_type_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2002_year_seas_type_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_year_seas_type_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2002_year_seas_type_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2002_year_seas_type_week_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_year_seas_type_week_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type ATTACH PARTITION public.nfl_plays_year_2002_year_seas_type_week_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_year_seas_type_week_play_type_player_fu_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2002_year_seas_type_week_play_type_player_fu_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2002_year_seas_type_week_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2002_year_seas_type_week_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_assisted_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2003_assisted_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_assisted_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2003_assisted_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2003_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_pid_types ATTACH PARTITION public.nfl_plays_year_2003_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_catchable_ball_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2003_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2003_dwn_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2003_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2003_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2003_off_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_playid ATTACH PARTITION public."nfl_plays_year_2003_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2003_play_action_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_action ATTACH PARTITION public.nfl_plays_year_2003_play_action_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type ATTACH PARTITION public.nfl_plays_year_2003_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2003_play_type_seas_type_trg_pid_off_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2003_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2003_qtr_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2003_route_ngs_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2003_seas_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_series_seq_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_series_seq ATTACH PARTITION public.nfl_plays_year_2003_series_seq_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_solo_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2003_solo_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_solo_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2003_solo_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_solo_tackle_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2003_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_1_pid ATTACH PARTITION public.nfl_plays_year_2003_tackle_assist_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_tackle_assist_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_2_pid ATTACH PARTITION public.nfl_plays_year_2003_tackle_assist_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_tackle_assist_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_3_pid ATTACH PARTITION public.nfl_plays_year_2003_tackle_assist_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_tackle_assist_4_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl_plays_year_2003_tackle_assist_4_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2003_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_ydl_100_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_2003_ydl_100_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2003_year_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid_playid ATTACH PARTITION public."nfl_plays_year_2003_year_esbid_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2003_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2003_year_play_type_seas_type_trg_pid_off_es_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_year_seas_type_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2003_year_seas_type_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_trg_pid ATTACH PARTITION public.nfl_plays_year_2003_year_seas_type_play_type_bc_pid_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2003_year_seas_type_play_type_player_fuml_pi_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_year_seas_type_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2003_year_seas_type_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_year_seas_type_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2003_year_seas_type_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2003_year_seas_type_week_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_year_seas_type_week_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type ATTACH PARTITION public.nfl_plays_year_2003_year_seas_type_week_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_year_seas_type_week_play_type_player_fu_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2003_year_seas_type_week_play_type_player_fu_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2003_year_seas_type_week_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2003_year_seas_type_week_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_assisted_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2004_assisted_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_assisted_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2004_assisted_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2004_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_pid_types ATTACH PARTITION public.nfl_plays_year_2004_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_catchable_ball_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2004_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2004_dwn_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2004_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2004_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2004_off_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_playid ATTACH PARTITION public."nfl_plays_year_2004_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2004_play_action_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_action ATTACH PARTITION public.nfl_plays_year_2004_play_action_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type ATTACH PARTITION public.nfl_plays_year_2004_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2004_play_type_seas_type_trg_pid_off_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2004_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2004_qtr_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2004_route_ngs_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2004_seas_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_series_seq_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_series_seq ATTACH PARTITION public.nfl_plays_year_2004_series_seq_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_solo_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2004_solo_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_solo_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2004_solo_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_solo_tackle_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2004_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_1_pid ATTACH PARTITION public.nfl_plays_year_2004_tackle_assist_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_tackle_assist_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_2_pid ATTACH PARTITION public.nfl_plays_year_2004_tackle_assist_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_tackle_assist_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_3_pid ATTACH PARTITION public.nfl_plays_year_2004_tackle_assist_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_tackle_assist_4_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl_plays_year_2004_tackle_assist_4_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2004_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_ydl_100_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_2004_ydl_100_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2004_year_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid_playid ATTACH PARTITION public."nfl_plays_year_2004_year_esbid_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2004_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2004_year_play_type_seas_type_trg_pid_off_es_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_year_seas_type_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2004_year_seas_type_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_trg_pid ATTACH PARTITION public.nfl_plays_year_2004_year_seas_type_play_type_bc_pid_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2004_year_seas_type_play_type_player_fuml_pi_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_year_seas_type_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2004_year_seas_type_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_year_seas_type_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2004_year_seas_type_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2004_year_seas_type_week_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_year_seas_type_week_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type ATTACH PARTITION public.nfl_plays_year_2004_year_seas_type_week_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_year_seas_type_week_play_type_player_fu_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2004_year_seas_type_week_play_type_player_fu_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2004_year_seas_type_week_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2004_year_seas_type_week_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_assisted_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2005_assisted_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_assisted_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2005_assisted_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2005_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_pid_types ATTACH PARTITION public.nfl_plays_year_2005_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_catchable_ball_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2005_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2005_dwn_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2005_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2005_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2005_off_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_playid ATTACH PARTITION public."nfl_plays_year_2005_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2005_play_action_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_action ATTACH PARTITION public.nfl_plays_year_2005_play_action_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type ATTACH PARTITION public.nfl_plays_year_2005_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2005_play_type_seas_type_trg_pid_off_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2005_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2005_qtr_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2005_route_ngs_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2005_seas_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_series_seq_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_series_seq ATTACH PARTITION public.nfl_plays_year_2005_series_seq_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_solo_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2005_solo_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_solo_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2005_solo_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_solo_tackle_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2005_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_1_pid ATTACH PARTITION public.nfl_plays_year_2005_tackle_assist_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_tackle_assist_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_2_pid ATTACH PARTITION public.nfl_plays_year_2005_tackle_assist_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_tackle_assist_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_3_pid ATTACH PARTITION public.nfl_plays_year_2005_tackle_assist_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_tackle_assist_4_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl_plays_year_2005_tackle_assist_4_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2005_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_ydl_100_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_2005_ydl_100_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2005_year_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid_playid ATTACH PARTITION public."nfl_plays_year_2005_year_esbid_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2005_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2005_year_play_type_seas_type_trg_pid_off_es_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_year_seas_type_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2005_year_seas_type_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_trg_pid ATTACH PARTITION public.nfl_plays_year_2005_year_seas_type_play_type_bc_pid_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2005_year_seas_type_play_type_player_fuml_pi_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_year_seas_type_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2005_year_seas_type_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_year_seas_type_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2005_year_seas_type_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2005_year_seas_type_week_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_year_seas_type_week_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type ATTACH PARTITION public.nfl_plays_year_2005_year_seas_type_week_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_year_seas_type_week_play_type_player_fu_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2005_year_seas_type_week_play_type_player_fu_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2005_year_seas_type_week_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2005_year_seas_type_week_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_assisted_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2006_assisted_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_assisted_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2006_assisted_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2006_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_pid_types ATTACH PARTITION public.nfl_plays_year_2006_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_catchable_ball_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2006_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2006_dwn_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2006_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2006_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2006_off_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_playid ATTACH PARTITION public."nfl_plays_year_2006_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2006_play_action_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_action ATTACH PARTITION public.nfl_plays_year_2006_play_action_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type ATTACH PARTITION public.nfl_plays_year_2006_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2006_play_type_seas_type_trg_pid_off_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2006_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2006_qtr_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2006_route_ngs_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2006_seas_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_series_seq_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_series_seq ATTACH PARTITION public.nfl_plays_year_2006_series_seq_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_solo_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2006_solo_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_solo_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2006_solo_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_solo_tackle_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2006_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_1_pid ATTACH PARTITION public.nfl_plays_year_2006_tackle_assist_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_tackle_assist_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_2_pid ATTACH PARTITION public.nfl_plays_year_2006_tackle_assist_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_tackle_assist_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_3_pid ATTACH PARTITION public.nfl_plays_year_2006_tackle_assist_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_tackle_assist_4_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl_plays_year_2006_tackle_assist_4_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2006_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_ydl_100_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_2006_ydl_100_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2006_year_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid_playid ATTACH PARTITION public."nfl_plays_year_2006_year_esbid_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2006_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2006_year_play_type_seas_type_trg_pid_off_es_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_year_seas_type_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2006_year_seas_type_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_trg_pid ATTACH PARTITION public.nfl_plays_year_2006_year_seas_type_play_type_bc_pid_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2006_year_seas_type_play_type_player_fuml_pi_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_year_seas_type_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2006_year_seas_type_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_year_seas_type_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2006_year_seas_type_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2006_year_seas_type_week_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_year_seas_type_week_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type ATTACH PARTITION public.nfl_plays_year_2006_year_seas_type_week_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_year_seas_type_week_play_type_player_fu_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2006_year_seas_type_week_play_type_player_fu_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2006_year_seas_type_week_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2006_year_seas_type_week_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_assisted_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2007_assisted_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_assisted_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2007_assisted_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2007_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_pid_types ATTACH PARTITION public.nfl_plays_year_2007_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_catchable_ball_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2007_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2007_dwn_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2007_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2007_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2007_off_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_playid ATTACH PARTITION public."nfl_plays_year_2007_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2007_play_action_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_action ATTACH PARTITION public.nfl_plays_year_2007_play_action_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type ATTACH PARTITION public.nfl_plays_year_2007_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2007_play_type_seas_type_trg_pid_off_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2007_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2007_qtr_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2007_route_ngs_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2007_seas_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_series_seq_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_series_seq ATTACH PARTITION public.nfl_plays_year_2007_series_seq_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_solo_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2007_solo_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_solo_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2007_solo_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_solo_tackle_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2007_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_1_pid ATTACH PARTITION public.nfl_plays_year_2007_tackle_assist_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_tackle_assist_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_2_pid ATTACH PARTITION public.nfl_plays_year_2007_tackle_assist_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_tackle_assist_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_3_pid ATTACH PARTITION public.nfl_plays_year_2007_tackle_assist_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_tackle_assist_4_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl_plays_year_2007_tackle_assist_4_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2007_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_ydl_100_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_2007_ydl_100_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2007_year_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid_playid ATTACH PARTITION public."nfl_plays_year_2007_year_esbid_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2007_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2007_year_play_type_seas_type_trg_pid_off_es_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_year_seas_type_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2007_year_seas_type_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_trg_pid ATTACH PARTITION public.nfl_plays_year_2007_year_seas_type_play_type_bc_pid_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2007_year_seas_type_play_type_player_fuml_pi_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_year_seas_type_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2007_year_seas_type_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_year_seas_type_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2007_year_seas_type_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2007_year_seas_type_week_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_year_seas_type_week_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type ATTACH PARTITION public.nfl_plays_year_2007_year_seas_type_week_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_year_seas_type_week_play_type_player_fu_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2007_year_seas_type_week_play_type_player_fu_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2007_year_seas_type_week_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2007_year_seas_type_week_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_assisted_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2008_assisted_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_assisted_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2008_assisted_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2008_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_pid_types ATTACH PARTITION public.nfl_plays_year_2008_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_catchable_ball_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2008_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2008_dwn_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2008_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2008_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2008_off_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_playid ATTACH PARTITION public."nfl_plays_year_2008_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2008_play_action_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_action ATTACH PARTITION public.nfl_plays_year_2008_play_action_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type ATTACH PARTITION public.nfl_plays_year_2008_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2008_play_type_seas_type_trg_pid_off_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2008_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2008_qtr_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2008_route_ngs_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2008_seas_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_series_seq_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_series_seq ATTACH PARTITION public.nfl_plays_year_2008_series_seq_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_solo_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2008_solo_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_solo_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2008_solo_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_solo_tackle_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2008_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_1_pid ATTACH PARTITION public.nfl_plays_year_2008_tackle_assist_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_tackle_assist_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_2_pid ATTACH PARTITION public.nfl_plays_year_2008_tackle_assist_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_tackle_assist_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_3_pid ATTACH PARTITION public.nfl_plays_year_2008_tackle_assist_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_tackle_assist_4_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl_plays_year_2008_tackle_assist_4_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2008_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_ydl_100_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_2008_ydl_100_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2008_year_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid_playid ATTACH PARTITION public."nfl_plays_year_2008_year_esbid_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2008_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2008_year_play_type_seas_type_trg_pid_off_es_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_year_seas_type_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2008_year_seas_type_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_trg_pid ATTACH PARTITION public.nfl_plays_year_2008_year_seas_type_play_type_bc_pid_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2008_year_seas_type_play_type_player_fuml_pi_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_year_seas_type_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2008_year_seas_type_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_year_seas_type_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2008_year_seas_type_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2008_year_seas_type_week_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_year_seas_type_week_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type ATTACH PARTITION public.nfl_plays_year_2008_year_seas_type_week_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_year_seas_type_week_play_type_player_fu_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2008_year_seas_type_week_play_type_player_fu_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2008_year_seas_type_week_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2008_year_seas_type_week_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_assisted_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2009_assisted_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_assisted_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2009_assisted_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2009_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_pid_types ATTACH PARTITION public.nfl_plays_year_2009_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_catchable_ball_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2009_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2009_dwn_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2009_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2009_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2009_off_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_playid ATTACH PARTITION public."nfl_plays_year_2009_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2009_play_action_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_action ATTACH PARTITION public.nfl_plays_year_2009_play_action_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type ATTACH PARTITION public.nfl_plays_year_2009_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2009_play_type_seas_type_trg_pid_off_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2009_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2009_qtr_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2009_route_ngs_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2009_seas_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_series_seq_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_series_seq ATTACH PARTITION public.nfl_plays_year_2009_series_seq_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_solo_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2009_solo_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_solo_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2009_solo_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_solo_tackle_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2009_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_1_pid ATTACH PARTITION public.nfl_plays_year_2009_tackle_assist_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_tackle_assist_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_2_pid ATTACH PARTITION public.nfl_plays_year_2009_tackle_assist_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_tackle_assist_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_3_pid ATTACH PARTITION public.nfl_plays_year_2009_tackle_assist_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_tackle_assist_4_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl_plays_year_2009_tackle_assist_4_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2009_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_ydl_100_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_2009_ydl_100_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2009_year_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid_playid ATTACH PARTITION public."nfl_plays_year_2009_year_esbid_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2009_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2009_year_play_type_seas_type_trg_pid_off_es_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_year_seas_type_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2009_year_seas_type_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_trg_pid ATTACH PARTITION public.nfl_plays_year_2009_year_seas_type_play_type_bc_pid_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2009_year_seas_type_play_type_player_fuml_pi_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_year_seas_type_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2009_year_seas_type_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_year_seas_type_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2009_year_seas_type_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2009_year_seas_type_week_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_year_seas_type_week_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type ATTACH PARTITION public.nfl_plays_year_2009_year_seas_type_week_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_year_seas_type_week_play_type_player_fu_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2009_year_seas_type_week_play_type_player_fu_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2009_year_seas_type_week_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2009_year_seas_type_week_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_assisted_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2010_assisted_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_assisted_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2010_assisted_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2010_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_pid_types ATTACH PARTITION public.nfl_plays_year_2010_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_catchable_ball_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2010_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2010_dwn_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2010_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2010_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2010_off_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_playid ATTACH PARTITION public."nfl_plays_year_2010_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2010_play_action_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_action ATTACH PARTITION public.nfl_plays_year_2010_play_action_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type ATTACH PARTITION public.nfl_plays_year_2010_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2010_play_type_seas_type_trg_pid_off_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2010_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2010_qtr_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2010_route_ngs_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2010_seas_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_series_seq_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_series_seq ATTACH PARTITION public.nfl_plays_year_2010_series_seq_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_solo_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2010_solo_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_solo_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2010_solo_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_solo_tackle_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2010_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_1_pid ATTACH PARTITION public.nfl_plays_year_2010_tackle_assist_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_tackle_assist_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_2_pid ATTACH PARTITION public.nfl_plays_year_2010_tackle_assist_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_tackle_assist_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_3_pid ATTACH PARTITION public.nfl_plays_year_2010_tackle_assist_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_tackle_assist_4_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl_plays_year_2010_tackle_assist_4_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2010_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_ydl_100_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_2010_ydl_100_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2010_year_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid_playid ATTACH PARTITION public."nfl_plays_year_2010_year_esbid_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2010_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2010_year_play_type_seas_type_trg_pid_off_es_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_year_seas_type_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2010_year_seas_type_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_trg_pid ATTACH PARTITION public.nfl_plays_year_2010_year_seas_type_play_type_bc_pid_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2010_year_seas_type_play_type_player_fuml_pi_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_year_seas_type_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2010_year_seas_type_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_year_seas_type_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2010_year_seas_type_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2010_year_seas_type_week_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_year_seas_type_week_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type ATTACH PARTITION public.nfl_plays_year_2010_year_seas_type_week_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_year_seas_type_week_play_type_player_fu_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2010_year_seas_type_week_play_type_player_fu_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2010_year_seas_type_week_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2010_year_seas_type_week_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_assisted_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2011_assisted_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_assisted_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2011_assisted_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2011_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_pid_types ATTACH PARTITION public.nfl_plays_year_2011_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_catchable_ball_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2011_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2011_dwn_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2011_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2011_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2011_off_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_playid ATTACH PARTITION public."nfl_plays_year_2011_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2011_play_action_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_action ATTACH PARTITION public.nfl_plays_year_2011_play_action_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type ATTACH PARTITION public.nfl_plays_year_2011_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2011_play_type_seas_type_trg_pid_off_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2011_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2011_qtr_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2011_route_ngs_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2011_seas_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_series_seq_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_series_seq ATTACH PARTITION public.nfl_plays_year_2011_series_seq_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_solo_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2011_solo_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_solo_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2011_solo_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_solo_tackle_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2011_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_1_pid ATTACH PARTITION public.nfl_plays_year_2011_tackle_assist_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_tackle_assist_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_2_pid ATTACH PARTITION public.nfl_plays_year_2011_tackle_assist_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_tackle_assist_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_3_pid ATTACH PARTITION public.nfl_plays_year_2011_tackle_assist_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_tackle_assist_4_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl_plays_year_2011_tackle_assist_4_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2011_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_ydl_100_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_2011_ydl_100_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2011_year_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid_playid ATTACH PARTITION public."nfl_plays_year_2011_year_esbid_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2011_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2011_year_play_type_seas_type_trg_pid_off_es_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_year_seas_type_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2011_year_seas_type_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_trg_pid ATTACH PARTITION public.nfl_plays_year_2011_year_seas_type_play_type_bc_pid_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2011_year_seas_type_play_type_player_fuml_pi_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_year_seas_type_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2011_year_seas_type_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_year_seas_type_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2011_year_seas_type_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2011_year_seas_type_week_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_year_seas_type_week_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type ATTACH PARTITION public.nfl_plays_year_2011_year_seas_type_week_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_year_seas_type_week_play_type_player_fu_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2011_year_seas_type_week_play_type_player_fu_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2011_year_seas_type_week_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2011_year_seas_type_week_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_assisted_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2012_assisted_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_assisted_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2012_assisted_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2012_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_pid_types ATTACH PARTITION public.nfl_plays_year_2012_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_catchable_ball_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2012_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2012_dwn_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2012_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2012_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2012_off_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_playid ATTACH PARTITION public."nfl_plays_year_2012_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2012_play_action_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_action ATTACH PARTITION public.nfl_plays_year_2012_play_action_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type ATTACH PARTITION public.nfl_plays_year_2012_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2012_play_type_seas_type_trg_pid_off_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2012_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2012_qtr_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2012_route_ngs_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2012_seas_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_series_seq_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_series_seq ATTACH PARTITION public.nfl_plays_year_2012_series_seq_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_solo_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2012_solo_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_solo_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2012_solo_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_solo_tackle_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2012_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_1_pid ATTACH PARTITION public.nfl_plays_year_2012_tackle_assist_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_tackle_assist_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_2_pid ATTACH PARTITION public.nfl_plays_year_2012_tackle_assist_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_tackle_assist_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_3_pid ATTACH PARTITION public.nfl_plays_year_2012_tackle_assist_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_tackle_assist_4_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl_plays_year_2012_tackle_assist_4_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2012_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_ydl_100_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_2012_ydl_100_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2012_year_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid_playid ATTACH PARTITION public."nfl_plays_year_2012_year_esbid_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2012_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2012_year_play_type_seas_type_trg_pid_off_es_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_year_seas_type_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2012_year_seas_type_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_trg_pid ATTACH PARTITION public.nfl_plays_year_2012_year_seas_type_play_type_bc_pid_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2012_year_seas_type_play_type_player_fuml_pi_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_year_seas_type_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2012_year_seas_type_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_year_seas_type_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2012_year_seas_type_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2012_year_seas_type_week_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_year_seas_type_week_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type ATTACH PARTITION public.nfl_plays_year_2012_year_seas_type_week_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_year_seas_type_week_play_type_player_fu_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2012_year_seas_type_week_play_type_player_fu_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2012_year_seas_type_week_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2012_year_seas_type_week_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_assisted_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2013_assisted_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_assisted_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2013_assisted_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2013_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_pid_types ATTACH PARTITION public.nfl_plays_year_2013_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_catchable_ball_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2013_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2013_dwn_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2013_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2013_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2013_off_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_playid ATTACH PARTITION public."nfl_plays_year_2013_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2013_play_action_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_action ATTACH PARTITION public.nfl_plays_year_2013_play_action_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type ATTACH PARTITION public.nfl_plays_year_2013_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2013_play_type_seas_type_trg_pid_off_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2013_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2013_qtr_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2013_route_ngs_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2013_seas_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_series_seq_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_series_seq ATTACH PARTITION public.nfl_plays_year_2013_series_seq_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_solo_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2013_solo_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_solo_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2013_solo_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_solo_tackle_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2013_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_1_pid ATTACH PARTITION public.nfl_plays_year_2013_tackle_assist_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_tackle_assist_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_2_pid ATTACH PARTITION public.nfl_plays_year_2013_tackle_assist_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_tackle_assist_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_3_pid ATTACH PARTITION public.nfl_plays_year_2013_tackle_assist_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_tackle_assist_4_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl_plays_year_2013_tackle_assist_4_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2013_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_ydl_100_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_2013_ydl_100_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2013_year_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid_playid ATTACH PARTITION public."nfl_plays_year_2013_year_esbid_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2013_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2013_year_play_type_seas_type_trg_pid_off_es_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_year_seas_type_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2013_year_seas_type_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_trg_pid ATTACH PARTITION public.nfl_plays_year_2013_year_seas_type_play_type_bc_pid_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2013_year_seas_type_play_type_player_fuml_pi_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_year_seas_type_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2013_year_seas_type_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_year_seas_type_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2013_year_seas_type_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2013_year_seas_type_week_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_year_seas_type_week_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type ATTACH PARTITION public.nfl_plays_year_2013_year_seas_type_week_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_year_seas_type_week_play_type_player_fu_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2013_year_seas_type_week_play_type_player_fu_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2013_year_seas_type_week_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2013_year_seas_type_week_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_assisted_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2014_assisted_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_assisted_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2014_assisted_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2014_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_pid_types ATTACH PARTITION public.nfl_plays_year_2014_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_catchable_ball_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2014_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2014_dwn_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2014_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2014_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2014_off_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_playid ATTACH PARTITION public."nfl_plays_year_2014_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2014_play_action_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_action ATTACH PARTITION public.nfl_plays_year_2014_play_action_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type ATTACH PARTITION public.nfl_plays_year_2014_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2014_play_type_seas_type_trg_pid_off_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2014_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2014_qtr_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2014_route_ngs_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2014_seas_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_series_seq_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_series_seq ATTACH PARTITION public.nfl_plays_year_2014_series_seq_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_solo_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2014_solo_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_solo_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2014_solo_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_solo_tackle_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2014_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_1_pid ATTACH PARTITION public.nfl_plays_year_2014_tackle_assist_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_tackle_assist_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_2_pid ATTACH PARTITION public.nfl_plays_year_2014_tackle_assist_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_tackle_assist_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_3_pid ATTACH PARTITION public.nfl_plays_year_2014_tackle_assist_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_tackle_assist_4_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl_plays_year_2014_tackle_assist_4_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2014_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_ydl_100_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_2014_ydl_100_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2014_year_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid_playid ATTACH PARTITION public."nfl_plays_year_2014_year_esbid_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2014_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2014_year_play_type_seas_type_trg_pid_off_es_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_year_seas_type_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2014_year_seas_type_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_trg_pid ATTACH PARTITION public.nfl_plays_year_2014_year_seas_type_play_type_bc_pid_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2014_year_seas_type_play_type_player_fuml_pi_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_year_seas_type_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2014_year_seas_type_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_year_seas_type_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2014_year_seas_type_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2014_year_seas_type_week_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_year_seas_type_week_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type ATTACH PARTITION public.nfl_plays_year_2014_year_seas_type_week_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_year_seas_type_week_play_type_player_fu_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2014_year_seas_type_week_play_type_player_fu_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2014_year_seas_type_week_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2014_year_seas_type_week_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_assisted_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2015_assisted_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_assisted_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2015_assisted_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2015_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_pid_types ATTACH PARTITION public.nfl_plays_year_2015_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_catchable_ball_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2015_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2015_dwn_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2015_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2015_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2015_off_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_playid ATTACH PARTITION public."nfl_plays_year_2015_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2015_play_action_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_action ATTACH PARTITION public.nfl_plays_year_2015_play_action_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type ATTACH PARTITION public.nfl_plays_year_2015_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2015_play_type_seas_type_trg_pid_off_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2015_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2015_qtr_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2015_route_ngs_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2015_seas_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_series_seq_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_series_seq ATTACH PARTITION public.nfl_plays_year_2015_series_seq_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_solo_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2015_solo_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_solo_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2015_solo_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_solo_tackle_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2015_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_1_pid ATTACH PARTITION public.nfl_plays_year_2015_tackle_assist_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_tackle_assist_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_2_pid ATTACH PARTITION public.nfl_plays_year_2015_tackle_assist_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_tackle_assist_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_3_pid ATTACH PARTITION public.nfl_plays_year_2015_tackle_assist_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_tackle_assist_4_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl_plays_year_2015_tackle_assist_4_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2015_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_ydl_100_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_2015_ydl_100_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2015_year_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid_playid ATTACH PARTITION public."nfl_plays_year_2015_year_esbid_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2015_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2015_year_play_type_seas_type_trg_pid_off_es_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_year_seas_type_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2015_year_seas_type_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_trg_pid ATTACH PARTITION public.nfl_plays_year_2015_year_seas_type_play_type_bc_pid_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2015_year_seas_type_play_type_player_fuml_pi_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_year_seas_type_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2015_year_seas_type_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_year_seas_type_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2015_year_seas_type_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2015_year_seas_type_week_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_year_seas_type_week_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type ATTACH PARTITION public.nfl_plays_year_2015_year_seas_type_week_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_year_seas_type_week_play_type_player_fu_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2015_year_seas_type_week_play_type_player_fu_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2015_year_seas_type_week_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2015_year_seas_type_week_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_assisted_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2016_assisted_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_assisted_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2016_assisted_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2016_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_pid_types ATTACH PARTITION public.nfl_plays_year_2016_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_catchable_ball_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2016_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2016_dwn_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2016_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2016_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2016_off_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_playid ATTACH PARTITION public."nfl_plays_year_2016_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2016_play_action_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_action ATTACH PARTITION public.nfl_plays_year_2016_play_action_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type ATTACH PARTITION public.nfl_plays_year_2016_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2016_play_type_seas_type_trg_pid_off_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2016_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2016_qtr_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2016_route_ngs_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2016_seas_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_series_seq_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_series_seq ATTACH PARTITION public.nfl_plays_year_2016_series_seq_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_solo_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2016_solo_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_solo_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2016_solo_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_solo_tackle_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2016_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_1_pid ATTACH PARTITION public.nfl_plays_year_2016_tackle_assist_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_tackle_assist_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_2_pid ATTACH PARTITION public.nfl_plays_year_2016_tackle_assist_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_tackle_assist_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_3_pid ATTACH PARTITION public.nfl_plays_year_2016_tackle_assist_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_tackle_assist_4_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl_plays_year_2016_tackle_assist_4_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2016_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_ydl_100_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_2016_ydl_100_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2016_year_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid_playid ATTACH PARTITION public."nfl_plays_year_2016_year_esbid_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2016_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2016_year_play_type_seas_type_trg_pid_off_es_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_year_seas_type_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2016_year_seas_type_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_trg_pid ATTACH PARTITION public.nfl_plays_year_2016_year_seas_type_play_type_bc_pid_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2016_year_seas_type_play_type_player_fuml_pi_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_year_seas_type_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2016_year_seas_type_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_year_seas_type_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2016_year_seas_type_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2016_year_seas_type_week_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_year_seas_type_week_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type ATTACH PARTITION public.nfl_plays_year_2016_year_seas_type_week_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_year_seas_type_week_play_type_player_fu_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2016_year_seas_type_week_play_type_player_fu_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2016_year_seas_type_week_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2016_year_seas_type_week_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_assisted_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2017_assisted_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_assisted_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2017_assisted_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2017_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_pid_types ATTACH PARTITION public.nfl_plays_year_2017_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_catchable_ball_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2017_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2017_dwn_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2017_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2017_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2017_off_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_playid ATTACH PARTITION public."nfl_plays_year_2017_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2017_play_action_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_action ATTACH PARTITION public.nfl_plays_year_2017_play_action_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type ATTACH PARTITION public.nfl_plays_year_2017_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2017_play_type_seas_type_trg_pid_off_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2017_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2017_qtr_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2017_route_ngs_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2017_seas_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_series_seq_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_series_seq ATTACH PARTITION public.nfl_plays_year_2017_series_seq_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_solo_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2017_solo_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_solo_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2017_solo_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_solo_tackle_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2017_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_1_pid ATTACH PARTITION public.nfl_plays_year_2017_tackle_assist_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_tackle_assist_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_2_pid ATTACH PARTITION public.nfl_plays_year_2017_tackle_assist_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_tackle_assist_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_3_pid ATTACH PARTITION public.nfl_plays_year_2017_tackle_assist_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_tackle_assist_4_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl_plays_year_2017_tackle_assist_4_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2017_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_ydl_100_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_2017_ydl_100_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2017_year_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid_playid ATTACH PARTITION public."nfl_plays_year_2017_year_esbid_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2017_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2017_year_play_type_seas_type_trg_pid_off_es_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_year_seas_type_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2017_year_seas_type_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_trg_pid ATTACH PARTITION public.nfl_plays_year_2017_year_seas_type_play_type_bc_pid_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2017_year_seas_type_play_type_player_fuml_pi_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_year_seas_type_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2017_year_seas_type_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_year_seas_type_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2017_year_seas_type_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2017_year_seas_type_week_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_year_seas_type_week_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type ATTACH PARTITION public.nfl_plays_year_2017_year_seas_type_week_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_year_seas_type_week_play_type_player_fu_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2017_year_seas_type_week_play_type_player_fu_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2017_year_seas_type_week_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2017_year_seas_type_week_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_assisted_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2018_assisted_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_assisted_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2018_assisted_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2018_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_pid_types ATTACH PARTITION public.nfl_plays_year_2018_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_catchable_ball_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2018_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2018_dwn_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2018_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2018_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2018_off_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_playid ATTACH PARTITION public."nfl_plays_year_2018_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2018_play_action_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_action ATTACH PARTITION public.nfl_plays_year_2018_play_action_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type ATTACH PARTITION public.nfl_plays_year_2018_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2018_play_type_seas_type_trg_pid_off_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2018_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2018_qtr_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2018_route_ngs_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2018_seas_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_series_seq_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_series_seq ATTACH PARTITION public.nfl_plays_year_2018_series_seq_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_solo_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2018_solo_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_solo_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2018_solo_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_solo_tackle_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2018_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_1_pid ATTACH PARTITION public.nfl_plays_year_2018_tackle_assist_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_tackle_assist_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_2_pid ATTACH PARTITION public.nfl_plays_year_2018_tackle_assist_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_tackle_assist_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_3_pid ATTACH PARTITION public.nfl_plays_year_2018_tackle_assist_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_tackle_assist_4_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl_plays_year_2018_tackle_assist_4_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2018_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_ydl_100_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_2018_ydl_100_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2018_year_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid_playid ATTACH PARTITION public."nfl_plays_year_2018_year_esbid_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2018_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2018_year_play_type_seas_type_trg_pid_off_es_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_year_seas_type_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2018_year_seas_type_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_trg_pid ATTACH PARTITION public.nfl_plays_year_2018_year_seas_type_play_type_bc_pid_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2018_year_seas_type_play_type_player_fuml_pi_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_year_seas_type_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2018_year_seas_type_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_year_seas_type_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2018_year_seas_type_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2018_year_seas_type_week_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_year_seas_type_week_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type ATTACH PARTITION public.nfl_plays_year_2018_year_seas_type_week_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_year_seas_type_week_play_type_player_fu_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2018_year_seas_type_week_play_type_player_fu_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2018_year_seas_type_week_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2018_year_seas_type_week_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_assisted_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2019_assisted_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_assisted_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2019_assisted_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2019_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_pid_types ATTACH PARTITION public.nfl_plays_year_2019_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_catchable_ball_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2019_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2019_dwn_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2019_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2019_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2019_off_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_playid ATTACH PARTITION public."nfl_plays_year_2019_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2019_play_action_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_action ATTACH PARTITION public.nfl_plays_year_2019_play_action_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type ATTACH PARTITION public.nfl_plays_year_2019_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2019_play_type_seas_type_trg_pid_off_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2019_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2019_qtr_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2019_route_ngs_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2019_seas_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_series_seq_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_series_seq ATTACH PARTITION public.nfl_plays_year_2019_series_seq_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_solo_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2019_solo_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_solo_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2019_solo_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_solo_tackle_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2019_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_1_pid ATTACH PARTITION public.nfl_plays_year_2019_tackle_assist_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_tackle_assist_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_2_pid ATTACH PARTITION public.nfl_plays_year_2019_tackle_assist_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_tackle_assist_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_3_pid ATTACH PARTITION public.nfl_plays_year_2019_tackle_assist_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_tackle_assist_4_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl_plays_year_2019_tackle_assist_4_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2019_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_ydl_100_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_2019_ydl_100_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2019_year_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid_playid ATTACH PARTITION public."nfl_plays_year_2019_year_esbid_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2019_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2019_year_play_type_seas_type_trg_pid_off_es_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_year_seas_type_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2019_year_seas_type_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_trg_pid ATTACH PARTITION public.nfl_plays_year_2019_year_seas_type_play_type_bc_pid_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2019_year_seas_type_play_type_player_fuml_pi_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_year_seas_type_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2019_year_seas_type_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_year_seas_type_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2019_year_seas_type_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2019_year_seas_type_week_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_year_seas_type_week_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type ATTACH PARTITION public.nfl_plays_year_2019_year_seas_type_week_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_year_seas_type_week_play_type_player_fu_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2019_year_seas_type_week_play_type_player_fu_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2019_year_seas_type_week_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2019_year_seas_type_week_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_assisted_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2020_assisted_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_assisted_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2020_assisted_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2020_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_pid_types ATTACH PARTITION public.nfl_plays_year_2020_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_catchable_ball_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2020_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2020_dwn_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2020_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2020_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2020_off_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_playid ATTACH PARTITION public."nfl_plays_year_2020_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2020_play_action_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_action ATTACH PARTITION public.nfl_plays_year_2020_play_action_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type ATTACH PARTITION public.nfl_plays_year_2020_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2020_play_type_seas_type_trg_pid_off_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2020_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2020_qtr_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2020_route_ngs_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2020_seas_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_series_seq_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_series_seq ATTACH PARTITION public.nfl_plays_year_2020_series_seq_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_solo_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2020_solo_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_solo_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2020_solo_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_solo_tackle_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2020_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_1_pid ATTACH PARTITION public.nfl_plays_year_2020_tackle_assist_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_tackle_assist_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_2_pid ATTACH PARTITION public.nfl_plays_year_2020_tackle_assist_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_tackle_assist_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_3_pid ATTACH PARTITION public.nfl_plays_year_2020_tackle_assist_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_tackle_assist_4_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl_plays_year_2020_tackle_assist_4_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2020_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_ydl_100_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_2020_ydl_100_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2020_year_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid_playid ATTACH PARTITION public."nfl_plays_year_2020_year_esbid_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2020_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2020_year_play_type_seas_type_trg_pid_off_es_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_year_seas_type_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2020_year_seas_type_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_trg_pid ATTACH PARTITION public.nfl_plays_year_2020_year_seas_type_play_type_bc_pid_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2020_year_seas_type_play_type_player_fuml_pi_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_year_seas_type_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2020_year_seas_type_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_year_seas_type_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2020_year_seas_type_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2020_year_seas_type_week_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_year_seas_type_week_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type ATTACH PARTITION public.nfl_plays_year_2020_year_seas_type_week_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_year_seas_type_week_play_type_player_fu_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2020_year_seas_type_week_play_type_player_fu_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2020_year_seas_type_week_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2020_year_seas_type_week_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_assisted_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2021_assisted_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_assisted_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2021_assisted_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2021_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_pid_types ATTACH PARTITION public.nfl_plays_year_2021_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_catchable_ball_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2021_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2021_dwn_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2021_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2021_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2021_off_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_playid ATTACH PARTITION public."nfl_plays_year_2021_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2021_play_action_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_action ATTACH PARTITION public.nfl_plays_year_2021_play_action_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type ATTACH PARTITION public.nfl_plays_year_2021_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2021_play_type_seas_type_trg_pid_off_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2021_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2021_qtr_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2021_route_ngs_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2021_seas_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_series_seq_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_series_seq ATTACH PARTITION public.nfl_plays_year_2021_series_seq_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_solo_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2021_solo_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_solo_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2021_solo_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_solo_tackle_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2021_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_1_pid ATTACH PARTITION public.nfl_plays_year_2021_tackle_assist_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_tackle_assist_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_2_pid ATTACH PARTITION public.nfl_plays_year_2021_tackle_assist_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_tackle_assist_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_3_pid ATTACH PARTITION public.nfl_plays_year_2021_tackle_assist_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_tackle_assist_4_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl_plays_year_2021_tackle_assist_4_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2021_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_ydl_100_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_2021_ydl_100_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2021_year_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid_playid ATTACH PARTITION public."nfl_plays_year_2021_year_esbid_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2021_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2021_year_play_type_seas_type_trg_pid_off_es_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_year_seas_type_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2021_year_seas_type_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_trg_pid ATTACH PARTITION public.nfl_plays_year_2021_year_seas_type_play_type_bc_pid_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2021_year_seas_type_play_type_player_fuml_pi_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_year_seas_type_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2021_year_seas_type_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_year_seas_type_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2021_year_seas_type_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2021_year_seas_type_week_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_year_seas_type_week_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type ATTACH PARTITION public.nfl_plays_year_2021_year_seas_type_week_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_year_seas_type_week_play_type_player_fu_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2021_year_seas_type_week_play_type_player_fu_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2021_year_seas_type_week_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2021_year_seas_type_week_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_assisted_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2022_assisted_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_assisted_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2022_assisted_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2022_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_pid_types ATTACH PARTITION public.nfl_plays_year_2022_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_catchable_ball_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2022_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2022_dwn_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2022_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2022_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2022_off_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_playid ATTACH PARTITION public."nfl_plays_year_2022_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2022_play_action_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_action ATTACH PARTITION public.nfl_plays_year_2022_play_action_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type ATTACH PARTITION public.nfl_plays_year_2022_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2022_play_type_seas_type_trg_pid_off_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2022_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2022_qtr_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2022_route_ngs_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2022_seas_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_series_seq_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_series_seq ATTACH PARTITION public.nfl_plays_year_2022_series_seq_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_solo_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2022_solo_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_solo_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2022_solo_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_solo_tackle_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2022_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_1_pid ATTACH PARTITION public.nfl_plays_year_2022_tackle_assist_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_tackle_assist_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_2_pid ATTACH PARTITION public.nfl_plays_year_2022_tackle_assist_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_tackle_assist_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_3_pid ATTACH PARTITION public.nfl_plays_year_2022_tackle_assist_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_tackle_assist_4_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl_plays_year_2022_tackle_assist_4_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2022_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_ydl_100_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_2022_ydl_100_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2022_year_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid_playid ATTACH PARTITION public."nfl_plays_year_2022_year_esbid_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2022_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2022_year_play_type_seas_type_trg_pid_off_es_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_year_seas_type_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2022_year_seas_type_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_trg_pid ATTACH PARTITION public.nfl_plays_year_2022_year_seas_type_play_type_bc_pid_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2022_year_seas_type_play_type_player_fuml_pi_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_year_seas_type_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2022_year_seas_type_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_year_seas_type_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2022_year_seas_type_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2022_year_seas_type_week_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_year_seas_type_week_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type ATTACH PARTITION public.nfl_plays_year_2022_year_seas_type_week_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_year_seas_type_week_play_type_player_fu_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2022_year_seas_type_week_play_type_player_fu_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2022_year_seas_type_week_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2022_year_seas_type_week_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_assisted_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2023_assisted_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_assisted_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2023_assisted_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2023_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_pid_types ATTACH PARTITION public.nfl_plays_year_2023_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_catchable_ball_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2023_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2023_dwn_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2023_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2023_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2023_off_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_playid ATTACH PARTITION public."nfl_plays_year_2023_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2023_play_action_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_action ATTACH PARTITION public.nfl_plays_year_2023_play_action_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type ATTACH PARTITION public.nfl_plays_year_2023_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2023_play_type_seas_type_trg_pid_off_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2023_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2023_qtr_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2023_route_ngs_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2023_seas_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_series_seq_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_series_seq ATTACH PARTITION public.nfl_plays_year_2023_series_seq_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_solo_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2023_solo_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_solo_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2023_solo_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_solo_tackle_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2023_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_1_pid ATTACH PARTITION public.nfl_plays_year_2023_tackle_assist_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_tackle_assist_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_2_pid ATTACH PARTITION public.nfl_plays_year_2023_tackle_assist_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_tackle_assist_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_3_pid ATTACH PARTITION public.nfl_plays_year_2023_tackle_assist_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_tackle_assist_4_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl_plays_year_2023_tackle_assist_4_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2023_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_ydl_100_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_2023_ydl_100_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2023_year_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid_playid ATTACH PARTITION public."nfl_plays_year_2023_year_esbid_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2023_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2023_year_play_type_seas_type_trg_pid_off_es_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_year_seas_type_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2023_year_seas_type_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_trg_pid ATTACH PARTITION public.nfl_plays_year_2023_year_seas_type_play_type_bc_pid_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2023_year_seas_type_play_type_player_fuml_pi_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_year_seas_type_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2023_year_seas_type_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_year_seas_type_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2023_year_seas_type_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2023_year_seas_type_week_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_year_seas_type_week_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type ATTACH PARTITION public.nfl_plays_year_2023_year_seas_type_week_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_year_seas_type_week_play_type_player_fu_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2023_year_seas_type_week_play_type_player_fu_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2023_year_seas_type_week_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2023_year_seas_type_week_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_assisted_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2024_assisted_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_assisted_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_assisted_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2024_assisted_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_bc_pid ATTACH PARTITION public.nfl_plays_year_2024_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_pid_types ATTACH PARTITION public.nfl_plays_year_2024_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_catchable_ball_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_catchable_ball ATTACH PARTITION public.nfl_plays_year_2024_catchable_ball_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_dwn_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2024_dwn_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2024_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_motion ATTACH PARTITION public.nfl_plays_year_2024_motion_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_off_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_off ATTACH PARTITION public.nfl_plays_year_2024_off_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_playid ATTACH PARTITION public."nfl_plays_year_2024_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2024_play_action_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_action ATTACH PARTITION public.nfl_plays_year_2024_play_action_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type ATTACH PARTITION public.nfl_plays_year_2024_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_play_type_seas_type_trg_pid_off_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2024_play_type_seas_type_trg_pid_off_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_psr_pid ATTACH PARTITION public.nfl_plays_year_2024_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_qtr_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2024_qtr_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2024_route_ngs_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_seas_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_seas_type ATTACH PARTITION public.nfl_plays_year_2024_seas_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_series_seq_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_series_seq ATTACH PARTITION public.nfl_plays_year_2024_series_seq_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_solo_tackle_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_1_pid ATTACH PARTITION public.nfl_plays_year_2024_solo_tackle_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_solo_tackle_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_plays_year_2024_solo_tackle_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_solo_tackle_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2024_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_1_pid ATTACH PARTITION public.nfl_plays_year_2024_tackle_assist_1_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_tackle_assist_2_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_2_pid ATTACH PARTITION public.nfl_plays_year_2024_tackle_assist_2_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_tackle_assist_3_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_3_pid ATTACH PARTITION public.nfl_plays_year_2024_tackle_assist_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_tackle_assist_4_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_tackle_assist_4_pid ATTACH PARTITION public.nfl_plays_year_2024_tackle_assist_4_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_trg_pid ATTACH PARTITION public.nfl_plays_year_2024_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_ydl_100_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_ydl_100 ATTACH PARTITION public.nfl_plays_year_2024_ydl_100_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_year_esbid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid ATTACH PARTITION public.nfl_plays_year_2024_year_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_year_esbid_playId_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_esbid_playid ATTACH PARTITION public."nfl_plays_year_2024_year_esbid_playId_idx";
+
+
+--
+-- Name: nfl_plays_year_2024_year_play_type_seas_type_trg_pid_off_es_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_play_type_seas_type_trg_pid_off_esbid ATTACH PARTITION public.nfl_plays_year_2024_year_play_type_seas_type_trg_pid_off_es_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_year_seas_type_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2024_year_seas_type_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_year_seas_type_play_type_bc_pid_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_bc_trg_pid ATTACH PARTITION public.nfl_plays_year_2024_year_seas_type_play_type_bc_pid_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_year_seas_type_play_type_player_fuml_pi_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2024_year_seas_type_play_type_player_fuml_pi_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_year_seas_type_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2024_year_seas_type_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_year_seas_type_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2024_year_seas_type_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_year_seas_type_week_play_type_bc_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_bc_pid ATTACH PARTITION public.nfl_plays_year_2024_year_seas_type_week_play_type_bc_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_year_seas_type_week_play_type_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type ATTACH PARTITION public.nfl_plays_year_2024_year_seas_type_week_play_type_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_year_seas_type_week_play_type_player_fu_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid ATTACH PARTITION public.nfl_plays_year_2024_year_seas_type_week_play_type_player_fu_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_year_seas_type_week_play_type_psr_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_psr_pid ATTACH PARTITION public.nfl_plays_year_2024_year_seas_type_week_play_type_psr_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_year_seas_type_week_play_type_trg_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2024_year_seas_type_week_play_type_trg_pid_idx;
 
 
 --

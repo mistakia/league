@@ -19,8 +19,7 @@ debug.enable('export-data-player-gamelogs')
 
 const export_data_player_gamelogs = async () => {
   const data = await db('player_gamelogs')
-    .select('player_gamelogs.*', 'nfl_games.year')
-    .join('nfl_games', 'player_gamelogs.esbid', 'nfl_games.esbid')
+    .select('player_gamelogs.*')
     .orderBy('esbid', 'asc')
     .orderBy('pid', 'asc')
 

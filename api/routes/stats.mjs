@@ -25,7 +25,6 @@ router.get('/gamelogs/players', async (req, res) => {
       .select(
         'player_gamelogs.*',
         'nfl_games.week',
-        'nfl_games.year',
         'nfl_games.day',
         'nfl_games.date',
         'nfl_games.seas_type',
