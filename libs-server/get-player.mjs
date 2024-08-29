@@ -62,6 +62,7 @@ const getPlayer = async ({
   pname,
   start,
   gsisItId,
+  draftkings_id,
 
   ignore_retired = false,
   ignore_free_agent = false
@@ -91,6 +92,8 @@ const getPlayer = async ({
     query.where({ otc_id })
   } else if (pff_id) {
     query.where({ pff_id })
+  } else if (draftkings_id) {
+    query.where({ draftkings_id })
   } else {
     if (name) {
       const formatted = formatPlayerName(name)

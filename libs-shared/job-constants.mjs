@@ -86,7 +86,8 @@ export const job_types = {
 
   FINALIZE_WEEK: 64,
   IMPORT_PFF_GRADES: 65,
-  IMPORT_SLEEPER_ADP_AND_PROJECTIONS: 66
+  IMPORT_SLEEPER_ADP_AND_PROJECTIONS: 66,
+  IMPORT_DRAFTKINGS_DFS_SALARIES: 67
 }
 
 export const job_title_by_id = {
@@ -155,5 +156,6 @@ export const job_title_by_id = {
   63: 'Import Player Contracts (NFLverse/OTC)',
   64: 'Finalize Week',
   65: 'Import PFF Grades',
-  66: 'Import Sleeper ADP and Projections'
+  66: 'Import Sleeper ADP and Projections',
+  67: 'Import DraftKings DFS Salaries'
 }

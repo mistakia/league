@@ -236,6 +236,7 @@ ALTER TABLE IF EXISTS ONLY public.transactions DROP CONSTRAINT IF EXISTS transac
 ALTER TABLE IF EXISTS ONLY public.teams DROP CONSTRAINT IF EXISTS teams_pkey;
 ALTER TABLE IF EXISTS ONLY public.seasons DROP CONSTRAINT IF EXISTS seasons_pkey;
 ALTER TABLE IF EXISTS ONLY public.rosters_players DROP CONSTRAINT IF EXISTS rosters_players_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_salaries DROP CONSTRAINT IF EXISTS player_salaries_pid_esbid_source_contest_id_key;
 ALTER TABLE IF EXISTS ONLY public.player_rankings_index DROP CONSTRAINT IF EXISTS player_rankings_index_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pkey;
@@ -339,6 +340,7 @@ DROP TABLE IF EXISTS public.playoffs;
 DROP TABLE IF EXISTS public.players_status;
 DROP TABLE IF EXISTS public.player_snaps_game;
 DROP TABLE IF EXISTS public.player_seasonlogs;
+DROP TABLE IF EXISTS public.player_salaries;
 DROP TABLE IF EXISTS public.player_rankings_index;
 DROP TABLE IF EXISTS public.player_rankings;
 DROP TABLE IF EXISTS public.player_gamelogs;
@@ -564,7 +566,8 @@ CREATE TYPE public.ranking_type AS ENUM (
 --
 
 CREATE TYPE public.rankings_source_id AS ENUM (
-    'FANTASYPROS'
+    'FANTASYPROS',
+    'SLEEPER'
 );
 
 
@@ -3192,7 +3195,8 @@ CREATE TABLE public.player (
     cbs_id integer,
     cfbref_id character varying,
     twitter_username character varying,
-    swish_id integer
+    swish_id integer,
+    draftkings_id integer
 );
 
 
@@ -3746,6 +3750,21 @@ CREATE TABLE public.player_rankings_index (
     position_rank integer,
     source_id public.rankings_source_id NOT NULL,
     ranking_type public.ranking_type NOT NULL
+);
+
+
+--
+-- Name: player_salaries; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_salaries (
+    pid character varying(25),
+    esbid integer,
+    source_competition_name character varying(100),
+    source_player_display_name character varying(100),
+    source_contest_id character varying(100) NOT NULL,
+    salary integer,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
 );
 
 
@@ -5385,6 +5404,14 @@ ALTER TABLE ONLY public.player
 
 ALTER TABLE ONLY public.player_rankings_index
     ADD CONSTRAINT player_rankings_index_unique UNIQUE (year, week, source_id, ranking_type, pid);
+
+
+--
+-- Name: player_salaries player_salaries_pid_esbid_source_contest_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_salaries
+    ADD CONSTRAINT player_salaries_pid_esbid_source_contest_id_key UNIQUE (pid, esbid, source_contest_id);
 
 
 --
