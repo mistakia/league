@@ -320,4 +320,21 @@ describe('LIBS SERVER get_data_view_results', () => {
     const expected_query = `select "player"."pid", "ta90cad343257940bfecf8a1ded1f3615"."offense_rank" AS "pff_offense_rank_0", "ta90cad343257940bfecf8a1ded1f3615"."offense" AS "pff_offense_0", "ta90cad343257940bfecf8a1ded1f3615"."offense_snaps" AS "pff_offense_snaps_0", "ta90cad343257940bfecf8a1ded1f3615"."offense_ranked" AS "pff_offense_ranked_0", player.fname, player.lname, "player"."pos" AS "pos_0", CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, "player"."pos" from "player" inner join "pff_player_seasonlogs" as "ta90cad343257940bfecf8a1ded1f3615" on "ta90cad343257940bfecf8a1ded1f3615"."pid" = "player"."pid" and "ta90cad343257940bfecf8a1ded1f3615"."year" = 2023 left join "rosters_players" on "rosters_players"."pid" = "player"."pid" and "rosters_players"."year" = 2024 and "rosters_players"."week" = 0 and "rosters_players"."lid" = 1 where ta90cad343257940bfecf8a1ded1f3615.offense_snaps >= '200' group by "ta90cad343257940bfecf8a1ded1f3615"."offense_rank", "ta90cad343257940bfecf8a1ded1f3615"."offense", "ta90cad343257940bfecf8a1ded1f3615"."offense_snaps", "ta90cad343257940bfecf8a1ded1f3615"."offense_ranked", player.fname, player.lname, "player"."pos", rosters_players.slot, rosters_players.tid, rosters_players.tag, "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 3 DESC NULLS LAST, "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
   })
+
+  it('player_salaries with where', () => {
+    const query = get_data_view_results_query({
+      columns: [{ column_id: 'player_dfs_salary' }],
+      sort: [{ column_id: 'player_dfs_salary', desc: true }],
+      where: [
+        {
+          column_id: 'player_dfs_salary',
+          params: {},
+          value: '5000',
+          operator: '>='
+        }
+      ]
+    })
+    const expected_query = `with "tfdc85d6d1e23cd26bfb9b1ea27ad3e87" as (select "player_salaries"."pid", "player_salaries"."salary", "nfl_games"."year", "nfl_games"."week" from "player_salaries" inner join "nfl_games" on "player_salaries"."esbid" = "nfl_games"."esbid" where "player_salaries"."source_id" = 'DRAFTKINGS' and "nfl_games"."year" in (2024) and "nfl_games"."week" in (1) and player_salaries.salary >= '5000') select "player"."pid", "tfdc85d6d1e23cd26bfb9b1ea27ad3e87"."salary" AS "salary_0", "player"."pos" from "player" inner join "tfdc85d6d1e23cd26bfb9b1ea27ad3e87" on "tfdc85d6d1e23cd26bfb9b1ea27ad3e87"."pid" = "player"."pid" group by "tfdc85d6d1e23cd26bfb9b1ea27ad3e87"."salary", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 2 DESC NULLS LAST, "player"."pid" asc limit 500`
+    compare_queries(query.toString(), expected_query)
+  })
 })
