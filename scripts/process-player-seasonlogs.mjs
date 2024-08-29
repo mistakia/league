@@ -20,7 +20,8 @@ const processPlayerSeasonlogs = async ({
     .select('player_gamelogs.*', 'player.pos')
     .join('player', 'player.pid', 'player_gamelogs.pid')
     .join('nfl_games', 'player_gamelogs.esbid', 'nfl_games.esbid')
-    .where({ year, seas_type })
+    .where('nfl_games.year', year)
+    .where('nfl_games.seas_type', seas_type)
 
   const inserts = []
 

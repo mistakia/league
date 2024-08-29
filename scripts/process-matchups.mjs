@@ -49,7 +49,7 @@ const run = async ({ lid = 1, year = constants.season.year }) => {
   }
 
   const gamelogs = await db('player_gamelogs')
-    .select('player_gamelogs.*', 'nfl_games.week', 'nfl_games.year')
+    .select('player_gamelogs.*', 'nfl_games.week')
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
     .where('nfl_games.year', year)
     .where('player_gamelogs.active', true)

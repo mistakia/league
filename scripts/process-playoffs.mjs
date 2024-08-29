@@ -64,7 +64,7 @@ const processPlayoffs = async ({ lid, year }) => {
         ]
       : [...new Set(playoffs.map((p) => p.week))]
   const gamelogs = await db('player_gamelogs')
-    .select('player_gamelogs.*', 'nfl_games.week', 'nfl_games.year')
+    .select('player_gamelogs.*', 'nfl_games.week')
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
     .where('nfl_games.year', year)
     .where('nfl_games.seas_type', 'REG')
