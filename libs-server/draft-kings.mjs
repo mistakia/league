@@ -10,9 +10,17 @@ import {
 import { randomUUID as uuidv4 } from 'crypto'
 import { wait } from '#libs-server'
 import WebSocket from 'ws'
+import db from '#db'
 
 const log = debug('draft-kings')
 // debug.enable('draft-kings')
+
+const get_draftkings_config = async () => {
+  const config_row = await db('config')
+    .where({ key: 'draftkings_config' })
+    .first()
+  return config_row?.value
+}
 
 export const get_market_type_offer_634 = (subcategoryId) => {
   switch (subcategoryId) {
@@ -481,4 +489,34 @@ export const get_all_wagers = async ({
   wss.terminate()
 
   return wagers
+}
+
+const get_draftkings_contests = async () => {
+  const draftkings_config = await get_draftkings_config()
+  const url = draftkings_config.draftkings_contests_url
+  log(`fetching ${url}`)
+  const data = await fetch(url).then((res) => res.json())
+  return data
+}
+
+export const get_draftkings_draft_groups = async () => {
+  const data = await get_draftkings_contests()
+  return data.DraftGroups
+}
+
+export const get_draftkings_nfl_draft_groups = async () => {
+  const draft_groups = await get_draftkings_draft_groups()
+  return draft_groups.filter(
+    (draft_group) => draft_group.Sport === 'NFL' && draft_group.GameTypeId === 1
+  )
+}
+
+export const get_draftkings_draft_group_draftables = async ({
+  draft_group_id
+}) => {
+  const draftkings_config = await get_draftkings_config()
+  const url = `${draftkings_config.draftkings_salary_url}/${draft_group_id}/draftables`
+  log(`fetching ${url}`)
+  const data = await fetch(url).then((res) => res.json())
+  return data
 }
