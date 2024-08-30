@@ -20,7 +20,123 @@ SET search_path = public;
 ALTER TABLE IF EXISTS ONLY public.invite_codes DROP CONSTRAINT IF EXISTS invite_codes_created_by_fkey;
 DROP TRIGGER IF EXISTS update_config_modtime ON public.config;
 DROP TRIGGER IF EXISTS player_name_search_vector_update ON public.player;
+DROP INDEX IF EXISTS public.projections_index_y2024_sourceid_pid_userid_week_year_idx;
+DROP INDEX IF EXISTS public.projections_index_y2024_pid_idx;
+DROP INDEX IF EXISTS public.projections_index_y2023_sourceid_pid_userid_week_year_idx;
+DROP INDEX IF EXISTS public.projections_index_y2023_pid_idx;
+DROP INDEX IF EXISTS public.projections_index_y2022_sourceid_pid_userid_week_year_idx;
+DROP INDEX IF EXISTS public.projections_index_y2022_pid_idx;
+DROP INDEX IF EXISTS public.projections_index_y2021_sourceid_pid_userid_week_year_idx;
+DROP INDEX IF EXISTS public.projections_index_y2021_pid_idx;
+DROP INDEX IF EXISTS public.projections_index_y2020_sourceid_pid_userid_week_year_idx;
+DROP INDEX IF EXISTS public.projections_index_y2020_pid_idx;
+DROP INDEX IF EXISTS public.projections_index_default_sourceid_pid_userid_week_year_idx;
+DROP INDEX IF EXISTS public.projections_index_default_pid_idx;
 DROP INDEX IF EXISTS public.player_name_search_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2024_year_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2024_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2024_esbid_tm_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2024_esbid_pid_active_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2023_year_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2023_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2023_esbid_tm_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2023_esbid_pid_active_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2022_year_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2022_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2022_esbid_tm_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2022_esbid_pid_active_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2021_year_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2021_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2021_esbid_tm_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2021_esbid_pid_active_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2020_year_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2020_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2020_esbid_tm_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2020_esbid_pid_active_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2019_year_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2019_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2019_esbid_tm_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2019_esbid_pid_active_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2018_year_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2018_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2018_esbid_tm_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2018_esbid_pid_active_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2017_year_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2017_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2017_esbid_tm_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2017_esbid_pid_active_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2016_year_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2016_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2016_esbid_tm_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2016_esbid_pid_active_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2015_year_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2015_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2015_esbid_tm_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2015_esbid_pid_active_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2014_year_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2014_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2014_esbid_tm_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2014_esbid_pid_active_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2013_year_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2013_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2013_esbid_tm_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2013_esbid_pid_active_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2012_year_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2012_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2012_esbid_tm_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2012_esbid_pid_active_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2011_year_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2011_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2011_esbid_tm_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2011_esbid_pid_active_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2010_year_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2010_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2010_esbid_tm_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2010_esbid_pid_active_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2009_year_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2009_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2009_esbid_tm_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2009_esbid_pid_active_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2008_year_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2008_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2008_esbid_tm_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2008_esbid_pid_active_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2007_year_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2007_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2007_esbid_tm_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2007_esbid_pid_active_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2006_year_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2006_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2006_esbid_tm_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2006_esbid_pid_active_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2005_year_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2005_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2005_esbid_tm_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2005_esbid_pid_active_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2004_year_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2004_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2004_esbid_tm_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2004_esbid_pid_active_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2003_year_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2003_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2003_esbid_tm_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2003_esbid_pid_active_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2002_year_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2002_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2002_esbid_tm_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2002_esbid_pid_active_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2001_year_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2001_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2001_esbid_tm_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2001_esbid_pid_active_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2000_year_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2000_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2000_esbid_tm_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2000_esbid_pid_active_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_default_year_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_default_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_default_esbid_tm_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_default_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.nfl_year_week_timestamp_year_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_seas_type_week_play_type_trg_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_seas_type_week_play_type_psr_pid_idx;
@@ -1025,6 +1141,12 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2000_assisted_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public."nfl_plays_current_week_playId";
 DROP INDEX IF EXISTS public."nfl_plays_current_week_esbid_playId";
 DROP INDEX IF EXISTS public.nfl_plays_current_week_esbid;
+DROP INDEX IF EXISTS public.index_projections_index_sourceid_pid_userid_week_year;
+DROP INDEX IF EXISTS public.index_projections_index_pid;
+DROP INDEX IF EXISTS public.index_player_gamelogs_year_esbid_pid;
+DROP INDEX IF EXISTS public.index_player_gamelogs_esbid_tm_pid;
+DROP INDEX IF EXISTS public.index_player_gamelogs_esbid_tm;
+DROP INDEX IF EXISTS public.index_player_gamelogs_esbid_active_pid;
 DROP INDEX IF EXISTS public.index_nfl_plays_year_seas_type_week_play_type_trg_pid;
 DROP INDEX IF EXISTS public.index_nfl_plays_year_seas_type_week_play_type_psr_pid;
 DROP INDEX IF EXISTS public.index_nfl_plays_year_seas_type_week_play_type_player_fuml_pid;
@@ -1076,8 +1198,6 @@ DROP INDEX IF EXISTS public.idx_player_seasonlogs_year_seas_type_career_year_pid
 DROP INDEX IF EXISTS public.idx_player_salaries_source_id_pid_salary_esbid;
 DROP INDEX IF EXISTS public.idx_player_pid_pos;
 DROP INDEX IF EXISTS public.idx_player_pff_id;
-DROP INDEX IF EXISTS public.idx_player_gamelogs_esbid_tm;
-DROP INDEX IF EXISTS public.idx_player_gamelogs_esbid_active_pid;
 DROP INDEX IF EXISTS public.idx_opening_days_year_opening_day;
 DROP INDEX IF EXISTS public.idx_nfl_games_year_seas_type_week_esbid;
 DROP INDEX IF EXISTS public.idx_nfl_games_year_seas_type_esbid;
@@ -1146,8 +1266,6 @@ DROP INDEX IF EXISTS public.idx_24959_market;
 DROP INDEX IF EXISTS public.idx_24954_market;
 DROP INDEX IF EXISTS public.idx_24949_market;
 DROP INDEX IF EXISTS public.idx_24944_market_selection;
-DROP INDEX IF EXISTS public.idx_24938_projection;
-DROP INDEX IF EXISTS public.idx_24938_pid;
 DROP INDEX IF EXISTS public.idx_24932_projection;
 DROP INDEX IF EXISTS public.idx_24932_pid;
 DROP INDEX IF EXISTS public.idx_24926_projection;
@@ -1162,8 +1280,6 @@ DROP INDEX IF EXISTS public.idx_24905_status;
 DROP INDEX IF EXISTS public.idx_24905_pid;
 DROP INDEX IF EXISTS public.idx_24902_pid;
 DROP INDEX IF EXISTS public.idx_24855_pid;
-DROP INDEX IF EXISTS public.idx_24814_pid;
-DROP INDEX IF EXISTS public.idx_24814_idx_player_gamelogs_esbid_tm_pid;
 DROP INDEX IF EXISTS public.idx_24804_alias;
 DROP INDEX IF EXISTS public.idx_24798_yahoo_id;
 DROP INDEX IF EXISTS public.idx_24798_sportradar_id;
@@ -1330,6 +1446,12 @@ DROP TABLE IF EXISTS public.prop_markets_index;
 DROP TABLE IF EXISTS public.prop_markets_history;
 DROP TABLE IF EXISTS public.prop_market_selections_index;
 DROP TABLE IF EXISTS public.prop_market_selections_history;
+DROP TABLE IF EXISTS public.projections_index_y2024;
+DROP TABLE IF EXISTS public.projections_index_y2023;
+DROP TABLE IF EXISTS public.projections_index_y2022;
+DROP TABLE IF EXISTS public.projections_index_y2021;
+DROP TABLE IF EXISTS public.projections_index_y2020;
+DROP TABLE IF EXISTS public.projections_index_default;
 DROP TABLE IF EXISTS public.projections_index;
 DROP TABLE IF EXISTS public.projections_archive;
 DROP TABLE IF EXISTS public.projections;
@@ -1344,6 +1466,32 @@ DROP TABLE IF EXISTS public.player_seasonlogs;
 DROP TABLE IF EXISTS public.player_salaries;
 DROP TABLE IF EXISTS public.player_rankings_index;
 DROP TABLE IF EXISTS public.player_rankings;
+DROP TABLE IF EXISTS public.player_gamelogs_year_2024;
+DROP TABLE IF EXISTS public.player_gamelogs_year_2023;
+DROP TABLE IF EXISTS public.player_gamelogs_year_2022;
+DROP TABLE IF EXISTS public.player_gamelogs_year_2021;
+DROP TABLE IF EXISTS public.player_gamelogs_year_2020;
+DROP TABLE IF EXISTS public.player_gamelogs_year_2019;
+DROP TABLE IF EXISTS public.player_gamelogs_year_2018;
+DROP TABLE IF EXISTS public.player_gamelogs_year_2017;
+DROP TABLE IF EXISTS public.player_gamelogs_year_2016;
+DROP TABLE IF EXISTS public.player_gamelogs_year_2015;
+DROP TABLE IF EXISTS public.player_gamelogs_year_2014;
+DROP TABLE IF EXISTS public.player_gamelogs_year_2013;
+DROP TABLE IF EXISTS public.player_gamelogs_year_2012;
+DROP TABLE IF EXISTS public.player_gamelogs_year_2011;
+DROP TABLE IF EXISTS public.player_gamelogs_year_2010;
+DROP TABLE IF EXISTS public.player_gamelogs_year_2009;
+DROP TABLE IF EXISTS public.player_gamelogs_year_2008;
+DROP TABLE IF EXISTS public.player_gamelogs_year_2007;
+DROP TABLE IF EXISTS public.player_gamelogs_year_2006;
+DROP TABLE IF EXISTS public.player_gamelogs_year_2005;
+DROP TABLE IF EXISTS public.player_gamelogs_year_2004;
+DROP TABLE IF EXISTS public.player_gamelogs_year_2003;
+DROP TABLE IF EXISTS public.player_gamelogs_year_2002;
+DROP TABLE IF EXISTS public.player_gamelogs_year_2001;
+DROP TABLE IF EXISTS public.player_gamelogs_year_2000;
+DROP TABLE IF EXISTS public.player_gamelogs_default;
 DROP TABLE IF EXISTS public.player_gamelogs;
 DROP TABLE IF EXISTS public.player_contracts;
 DROP SEQUENCE IF EXISTS public.player_changelog_uid_seq;
@@ -12271,7 +12419,1439 @@ CREATE TABLE public.player_gamelogs (
     dsf smallint DEFAULT '0'::smallint,
     dtpr smallint DEFAULT '0'::smallint,
     dtd smallint DEFAULT '0'::smallint,
-    career_game smallint DEFAULT '0'::smallint
+    career_game smallint DEFAULT '0'::smallint,
+    year smallint NOT NULL
+)
+PARTITION BY RANGE (year);
+
+
+--
+-- Name: player_gamelogs_default; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_gamelogs_default (
+    esbid integer NOT NULL,
+    pid character varying(25),
+    opp character varying(3) NOT NULL,
+    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    pos character varying(4) NOT NULL,
+    jnum smallint,
+    active boolean,
+    started boolean,
+    pa smallint DEFAULT '0'::smallint,
+    pc smallint DEFAULT '0'::smallint,
+    py integer DEFAULT 0,
+    ints smallint DEFAULT '0'::smallint,
+    tdp smallint DEFAULT '0'::smallint,
+    ra smallint DEFAULT '0'::smallint,
+    ry integer DEFAULT 0,
+    tdr smallint DEFAULT '0'::smallint,
+    fuml smallint DEFAULT '0'::smallint,
+    trg smallint DEFAULT '0'::smallint,
+    rec smallint DEFAULT '0'::smallint,
+    recy integer DEFAULT 0,
+    tdrec smallint DEFAULT '0'::smallint,
+    twoptc smallint DEFAULT '0'::smallint,
+    prtd smallint DEFAULT '0'::smallint,
+    krtd smallint DEFAULT '0'::smallint,
+    snp smallint DEFAULT '0'::smallint,
+    fgm smallint DEFAULT '0'::smallint,
+    fgy integer DEFAULT 0,
+    fg19 smallint DEFAULT '0'::smallint,
+    fg29 smallint DEFAULT '0'::smallint,
+    fg39 smallint DEFAULT '0'::smallint,
+    fg49 smallint DEFAULT '0'::smallint,
+    fg50 smallint DEFAULT '0'::smallint,
+    xpm smallint DEFAULT '0'::smallint,
+    dsk smallint DEFAULT '0'::smallint,
+    dint smallint DEFAULT '0'::smallint,
+    dff smallint DEFAULT '0'::smallint,
+    drf smallint DEFAULT '0'::smallint,
+    dtno smallint DEFAULT '0'::smallint,
+    dfds smallint DEFAULT '0'::smallint,
+    dpa smallint DEFAULT '0'::smallint,
+    dya integer DEFAULT 0,
+    dblk smallint DEFAULT '0'::smallint,
+    dsf smallint DEFAULT '0'::smallint,
+    dtpr smallint DEFAULT '0'::smallint,
+    dtd smallint DEFAULT '0'::smallint,
+    career_game smallint DEFAULT '0'::smallint,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: player_gamelogs_year_2000; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_gamelogs_year_2000 (
+    esbid integer NOT NULL,
+    pid character varying(25),
+    opp character varying(3) NOT NULL,
+    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    pos character varying(4) NOT NULL,
+    jnum smallint,
+    active boolean,
+    started boolean,
+    pa smallint DEFAULT '0'::smallint,
+    pc smallint DEFAULT '0'::smallint,
+    py integer DEFAULT 0,
+    ints smallint DEFAULT '0'::smallint,
+    tdp smallint DEFAULT '0'::smallint,
+    ra smallint DEFAULT '0'::smallint,
+    ry integer DEFAULT 0,
+    tdr smallint DEFAULT '0'::smallint,
+    fuml smallint DEFAULT '0'::smallint,
+    trg smallint DEFAULT '0'::smallint,
+    rec smallint DEFAULT '0'::smallint,
+    recy integer DEFAULT 0,
+    tdrec smallint DEFAULT '0'::smallint,
+    twoptc smallint DEFAULT '0'::smallint,
+    prtd smallint DEFAULT '0'::smallint,
+    krtd smallint DEFAULT '0'::smallint,
+    snp smallint DEFAULT '0'::smallint,
+    fgm smallint DEFAULT '0'::smallint,
+    fgy integer DEFAULT 0,
+    fg19 smallint DEFAULT '0'::smallint,
+    fg29 smallint DEFAULT '0'::smallint,
+    fg39 smallint DEFAULT '0'::smallint,
+    fg49 smallint DEFAULT '0'::smallint,
+    fg50 smallint DEFAULT '0'::smallint,
+    xpm smallint DEFAULT '0'::smallint,
+    dsk smallint DEFAULT '0'::smallint,
+    dint smallint DEFAULT '0'::smallint,
+    dff smallint DEFAULT '0'::smallint,
+    drf smallint DEFAULT '0'::smallint,
+    dtno smallint DEFAULT '0'::smallint,
+    dfds smallint DEFAULT '0'::smallint,
+    dpa smallint DEFAULT '0'::smallint,
+    dya integer DEFAULT 0,
+    dblk smallint DEFAULT '0'::smallint,
+    dsf smallint DEFAULT '0'::smallint,
+    dtpr smallint DEFAULT '0'::smallint,
+    dtd smallint DEFAULT '0'::smallint,
+    career_game smallint DEFAULT '0'::smallint,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: player_gamelogs_year_2001; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_gamelogs_year_2001 (
+    esbid integer NOT NULL,
+    pid character varying(25),
+    opp character varying(3) NOT NULL,
+    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    pos character varying(4) NOT NULL,
+    jnum smallint,
+    active boolean,
+    started boolean,
+    pa smallint DEFAULT '0'::smallint,
+    pc smallint DEFAULT '0'::smallint,
+    py integer DEFAULT 0,
+    ints smallint DEFAULT '0'::smallint,
+    tdp smallint DEFAULT '0'::smallint,
+    ra smallint DEFAULT '0'::smallint,
+    ry integer DEFAULT 0,
+    tdr smallint DEFAULT '0'::smallint,
+    fuml smallint DEFAULT '0'::smallint,
+    trg smallint DEFAULT '0'::smallint,
+    rec smallint DEFAULT '0'::smallint,
+    recy integer DEFAULT 0,
+    tdrec smallint DEFAULT '0'::smallint,
+    twoptc smallint DEFAULT '0'::smallint,
+    prtd smallint DEFAULT '0'::smallint,
+    krtd smallint DEFAULT '0'::smallint,
+    snp smallint DEFAULT '0'::smallint,
+    fgm smallint DEFAULT '0'::smallint,
+    fgy integer DEFAULT 0,
+    fg19 smallint DEFAULT '0'::smallint,
+    fg29 smallint DEFAULT '0'::smallint,
+    fg39 smallint DEFAULT '0'::smallint,
+    fg49 smallint DEFAULT '0'::smallint,
+    fg50 smallint DEFAULT '0'::smallint,
+    xpm smallint DEFAULT '0'::smallint,
+    dsk smallint DEFAULT '0'::smallint,
+    dint smallint DEFAULT '0'::smallint,
+    dff smallint DEFAULT '0'::smallint,
+    drf smallint DEFAULT '0'::smallint,
+    dtno smallint DEFAULT '0'::smallint,
+    dfds smallint DEFAULT '0'::smallint,
+    dpa smallint DEFAULT '0'::smallint,
+    dya integer DEFAULT 0,
+    dblk smallint DEFAULT '0'::smallint,
+    dsf smallint DEFAULT '0'::smallint,
+    dtpr smallint DEFAULT '0'::smallint,
+    dtd smallint DEFAULT '0'::smallint,
+    career_game smallint DEFAULT '0'::smallint,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: player_gamelogs_year_2002; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_gamelogs_year_2002 (
+    esbid integer NOT NULL,
+    pid character varying(25),
+    opp character varying(3) NOT NULL,
+    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    pos character varying(4) NOT NULL,
+    jnum smallint,
+    active boolean,
+    started boolean,
+    pa smallint DEFAULT '0'::smallint,
+    pc smallint DEFAULT '0'::smallint,
+    py integer DEFAULT 0,
+    ints smallint DEFAULT '0'::smallint,
+    tdp smallint DEFAULT '0'::smallint,
+    ra smallint DEFAULT '0'::smallint,
+    ry integer DEFAULT 0,
+    tdr smallint DEFAULT '0'::smallint,
+    fuml smallint DEFAULT '0'::smallint,
+    trg smallint DEFAULT '0'::smallint,
+    rec smallint DEFAULT '0'::smallint,
+    recy integer DEFAULT 0,
+    tdrec smallint DEFAULT '0'::smallint,
+    twoptc smallint DEFAULT '0'::smallint,
+    prtd smallint DEFAULT '0'::smallint,
+    krtd smallint DEFAULT '0'::smallint,
+    snp smallint DEFAULT '0'::smallint,
+    fgm smallint DEFAULT '0'::smallint,
+    fgy integer DEFAULT 0,
+    fg19 smallint DEFAULT '0'::smallint,
+    fg29 smallint DEFAULT '0'::smallint,
+    fg39 smallint DEFAULT '0'::smallint,
+    fg49 smallint DEFAULT '0'::smallint,
+    fg50 smallint DEFAULT '0'::smallint,
+    xpm smallint DEFAULT '0'::smallint,
+    dsk smallint DEFAULT '0'::smallint,
+    dint smallint DEFAULT '0'::smallint,
+    dff smallint DEFAULT '0'::smallint,
+    drf smallint DEFAULT '0'::smallint,
+    dtno smallint DEFAULT '0'::smallint,
+    dfds smallint DEFAULT '0'::smallint,
+    dpa smallint DEFAULT '0'::smallint,
+    dya integer DEFAULT 0,
+    dblk smallint DEFAULT '0'::smallint,
+    dsf smallint DEFAULT '0'::smallint,
+    dtpr smallint DEFAULT '0'::smallint,
+    dtd smallint DEFAULT '0'::smallint,
+    career_game smallint DEFAULT '0'::smallint,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: player_gamelogs_year_2003; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_gamelogs_year_2003 (
+    esbid integer NOT NULL,
+    pid character varying(25),
+    opp character varying(3) NOT NULL,
+    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    pos character varying(4) NOT NULL,
+    jnum smallint,
+    active boolean,
+    started boolean,
+    pa smallint DEFAULT '0'::smallint,
+    pc smallint DEFAULT '0'::smallint,
+    py integer DEFAULT 0,
+    ints smallint DEFAULT '0'::smallint,
+    tdp smallint DEFAULT '0'::smallint,
+    ra smallint DEFAULT '0'::smallint,
+    ry integer DEFAULT 0,
+    tdr smallint DEFAULT '0'::smallint,
+    fuml smallint DEFAULT '0'::smallint,
+    trg smallint DEFAULT '0'::smallint,
+    rec smallint DEFAULT '0'::smallint,
+    recy integer DEFAULT 0,
+    tdrec smallint DEFAULT '0'::smallint,
+    twoptc smallint DEFAULT '0'::smallint,
+    prtd smallint DEFAULT '0'::smallint,
+    krtd smallint DEFAULT '0'::smallint,
+    snp smallint DEFAULT '0'::smallint,
+    fgm smallint DEFAULT '0'::smallint,
+    fgy integer DEFAULT 0,
+    fg19 smallint DEFAULT '0'::smallint,
+    fg29 smallint DEFAULT '0'::smallint,
+    fg39 smallint DEFAULT '0'::smallint,
+    fg49 smallint DEFAULT '0'::smallint,
+    fg50 smallint DEFAULT '0'::smallint,
+    xpm smallint DEFAULT '0'::smallint,
+    dsk smallint DEFAULT '0'::smallint,
+    dint smallint DEFAULT '0'::smallint,
+    dff smallint DEFAULT '0'::smallint,
+    drf smallint DEFAULT '0'::smallint,
+    dtno smallint DEFAULT '0'::smallint,
+    dfds smallint DEFAULT '0'::smallint,
+    dpa smallint DEFAULT '0'::smallint,
+    dya integer DEFAULT 0,
+    dblk smallint DEFAULT '0'::smallint,
+    dsf smallint DEFAULT '0'::smallint,
+    dtpr smallint DEFAULT '0'::smallint,
+    dtd smallint DEFAULT '0'::smallint,
+    career_game smallint DEFAULT '0'::smallint,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: player_gamelogs_year_2004; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_gamelogs_year_2004 (
+    esbid integer NOT NULL,
+    pid character varying(25),
+    opp character varying(3) NOT NULL,
+    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    pos character varying(4) NOT NULL,
+    jnum smallint,
+    active boolean,
+    started boolean,
+    pa smallint DEFAULT '0'::smallint,
+    pc smallint DEFAULT '0'::smallint,
+    py integer DEFAULT 0,
+    ints smallint DEFAULT '0'::smallint,
+    tdp smallint DEFAULT '0'::smallint,
+    ra smallint DEFAULT '0'::smallint,
+    ry integer DEFAULT 0,
+    tdr smallint DEFAULT '0'::smallint,
+    fuml smallint DEFAULT '0'::smallint,
+    trg smallint DEFAULT '0'::smallint,
+    rec smallint DEFAULT '0'::smallint,
+    recy integer DEFAULT 0,
+    tdrec smallint DEFAULT '0'::smallint,
+    twoptc smallint DEFAULT '0'::smallint,
+    prtd smallint DEFAULT '0'::smallint,
+    krtd smallint DEFAULT '0'::smallint,
+    snp smallint DEFAULT '0'::smallint,
+    fgm smallint DEFAULT '0'::smallint,
+    fgy integer DEFAULT 0,
+    fg19 smallint DEFAULT '0'::smallint,
+    fg29 smallint DEFAULT '0'::smallint,
+    fg39 smallint DEFAULT '0'::smallint,
+    fg49 smallint DEFAULT '0'::smallint,
+    fg50 smallint DEFAULT '0'::smallint,
+    xpm smallint DEFAULT '0'::smallint,
+    dsk smallint DEFAULT '0'::smallint,
+    dint smallint DEFAULT '0'::smallint,
+    dff smallint DEFAULT '0'::smallint,
+    drf smallint DEFAULT '0'::smallint,
+    dtno smallint DEFAULT '0'::smallint,
+    dfds smallint DEFAULT '0'::smallint,
+    dpa smallint DEFAULT '0'::smallint,
+    dya integer DEFAULT 0,
+    dblk smallint DEFAULT '0'::smallint,
+    dsf smallint DEFAULT '0'::smallint,
+    dtpr smallint DEFAULT '0'::smallint,
+    dtd smallint DEFAULT '0'::smallint,
+    career_game smallint DEFAULT '0'::smallint,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: player_gamelogs_year_2005; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_gamelogs_year_2005 (
+    esbid integer NOT NULL,
+    pid character varying(25),
+    opp character varying(3) NOT NULL,
+    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    pos character varying(4) NOT NULL,
+    jnum smallint,
+    active boolean,
+    started boolean,
+    pa smallint DEFAULT '0'::smallint,
+    pc smallint DEFAULT '0'::smallint,
+    py integer DEFAULT 0,
+    ints smallint DEFAULT '0'::smallint,
+    tdp smallint DEFAULT '0'::smallint,
+    ra smallint DEFAULT '0'::smallint,
+    ry integer DEFAULT 0,
+    tdr smallint DEFAULT '0'::smallint,
+    fuml smallint DEFAULT '0'::smallint,
+    trg smallint DEFAULT '0'::smallint,
+    rec smallint DEFAULT '0'::smallint,
+    recy integer DEFAULT 0,
+    tdrec smallint DEFAULT '0'::smallint,
+    twoptc smallint DEFAULT '0'::smallint,
+    prtd smallint DEFAULT '0'::smallint,
+    krtd smallint DEFAULT '0'::smallint,
+    snp smallint DEFAULT '0'::smallint,
+    fgm smallint DEFAULT '0'::smallint,
+    fgy integer DEFAULT 0,
+    fg19 smallint DEFAULT '0'::smallint,
+    fg29 smallint DEFAULT '0'::smallint,
+    fg39 smallint DEFAULT '0'::smallint,
+    fg49 smallint DEFAULT '0'::smallint,
+    fg50 smallint DEFAULT '0'::smallint,
+    xpm smallint DEFAULT '0'::smallint,
+    dsk smallint DEFAULT '0'::smallint,
+    dint smallint DEFAULT '0'::smallint,
+    dff smallint DEFAULT '0'::smallint,
+    drf smallint DEFAULT '0'::smallint,
+    dtno smallint DEFAULT '0'::smallint,
+    dfds smallint DEFAULT '0'::smallint,
+    dpa smallint DEFAULT '0'::smallint,
+    dya integer DEFAULT 0,
+    dblk smallint DEFAULT '0'::smallint,
+    dsf smallint DEFAULT '0'::smallint,
+    dtpr smallint DEFAULT '0'::smallint,
+    dtd smallint DEFAULT '0'::smallint,
+    career_game smallint DEFAULT '0'::smallint,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: player_gamelogs_year_2006; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_gamelogs_year_2006 (
+    esbid integer NOT NULL,
+    pid character varying(25),
+    opp character varying(3) NOT NULL,
+    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    pos character varying(4) NOT NULL,
+    jnum smallint,
+    active boolean,
+    started boolean,
+    pa smallint DEFAULT '0'::smallint,
+    pc smallint DEFAULT '0'::smallint,
+    py integer DEFAULT 0,
+    ints smallint DEFAULT '0'::smallint,
+    tdp smallint DEFAULT '0'::smallint,
+    ra smallint DEFAULT '0'::smallint,
+    ry integer DEFAULT 0,
+    tdr smallint DEFAULT '0'::smallint,
+    fuml smallint DEFAULT '0'::smallint,
+    trg smallint DEFAULT '0'::smallint,
+    rec smallint DEFAULT '0'::smallint,
+    recy integer DEFAULT 0,
+    tdrec smallint DEFAULT '0'::smallint,
+    twoptc smallint DEFAULT '0'::smallint,
+    prtd smallint DEFAULT '0'::smallint,
+    krtd smallint DEFAULT '0'::smallint,
+    snp smallint DEFAULT '0'::smallint,
+    fgm smallint DEFAULT '0'::smallint,
+    fgy integer DEFAULT 0,
+    fg19 smallint DEFAULT '0'::smallint,
+    fg29 smallint DEFAULT '0'::smallint,
+    fg39 smallint DEFAULT '0'::smallint,
+    fg49 smallint DEFAULT '0'::smallint,
+    fg50 smallint DEFAULT '0'::smallint,
+    xpm smallint DEFAULT '0'::smallint,
+    dsk smallint DEFAULT '0'::smallint,
+    dint smallint DEFAULT '0'::smallint,
+    dff smallint DEFAULT '0'::smallint,
+    drf smallint DEFAULT '0'::smallint,
+    dtno smallint DEFAULT '0'::smallint,
+    dfds smallint DEFAULT '0'::smallint,
+    dpa smallint DEFAULT '0'::smallint,
+    dya integer DEFAULT 0,
+    dblk smallint DEFAULT '0'::smallint,
+    dsf smallint DEFAULT '0'::smallint,
+    dtpr smallint DEFAULT '0'::smallint,
+    dtd smallint DEFAULT '0'::smallint,
+    career_game smallint DEFAULT '0'::smallint,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: player_gamelogs_year_2007; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_gamelogs_year_2007 (
+    esbid integer NOT NULL,
+    pid character varying(25),
+    opp character varying(3) NOT NULL,
+    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    pos character varying(4) NOT NULL,
+    jnum smallint,
+    active boolean,
+    started boolean,
+    pa smallint DEFAULT '0'::smallint,
+    pc smallint DEFAULT '0'::smallint,
+    py integer DEFAULT 0,
+    ints smallint DEFAULT '0'::smallint,
+    tdp smallint DEFAULT '0'::smallint,
+    ra smallint DEFAULT '0'::smallint,
+    ry integer DEFAULT 0,
+    tdr smallint DEFAULT '0'::smallint,
+    fuml smallint DEFAULT '0'::smallint,
+    trg smallint DEFAULT '0'::smallint,
+    rec smallint DEFAULT '0'::smallint,
+    recy integer DEFAULT 0,
+    tdrec smallint DEFAULT '0'::smallint,
+    twoptc smallint DEFAULT '0'::smallint,
+    prtd smallint DEFAULT '0'::smallint,
+    krtd smallint DEFAULT '0'::smallint,
+    snp smallint DEFAULT '0'::smallint,
+    fgm smallint DEFAULT '0'::smallint,
+    fgy integer DEFAULT 0,
+    fg19 smallint DEFAULT '0'::smallint,
+    fg29 smallint DEFAULT '0'::smallint,
+    fg39 smallint DEFAULT '0'::smallint,
+    fg49 smallint DEFAULT '0'::smallint,
+    fg50 smallint DEFAULT '0'::smallint,
+    xpm smallint DEFAULT '0'::smallint,
+    dsk smallint DEFAULT '0'::smallint,
+    dint smallint DEFAULT '0'::smallint,
+    dff smallint DEFAULT '0'::smallint,
+    drf smallint DEFAULT '0'::smallint,
+    dtno smallint DEFAULT '0'::smallint,
+    dfds smallint DEFAULT '0'::smallint,
+    dpa smallint DEFAULT '0'::smallint,
+    dya integer DEFAULT 0,
+    dblk smallint DEFAULT '0'::smallint,
+    dsf smallint DEFAULT '0'::smallint,
+    dtpr smallint DEFAULT '0'::smallint,
+    dtd smallint DEFAULT '0'::smallint,
+    career_game smallint DEFAULT '0'::smallint,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: player_gamelogs_year_2008; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_gamelogs_year_2008 (
+    esbid integer NOT NULL,
+    pid character varying(25),
+    opp character varying(3) NOT NULL,
+    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    pos character varying(4) NOT NULL,
+    jnum smallint,
+    active boolean,
+    started boolean,
+    pa smallint DEFAULT '0'::smallint,
+    pc smallint DEFAULT '0'::smallint,
+    py integer DEFAULT 0,
+    ints smallint DEFAULT '0'::smallint,
+    tdp smallint DEFAULT '0'::smallint,
+    ra smallint DEFAULT '0'::smallint,
+    ry integer DEFAULT 0,
+    tdr smallint DEFAULT '0'::smallint,
+    fuml smallint DEFAULT '0'::smallint,
+    trg smallint DEFAULT '0'::smallint,
+    rec smallint DEFAULT '0'::smallint,
+    recy integer DEFAULT 0,
+    tdrec smallint DEFAULT '0'::smallint,
+    twoptc smallint DEFAULT '0'::smallint,
+    prtd smallint DEFAULT '0'::smallint,
+    krtd smallint DEFAULT '0'::smallint,
+    snp smallint DEFAULT '0'::smallint,
+    fgm smallint DEFAULT '0'::smallint,
+    fgy integer DEFAULT 0,
+    fg19 smallint DEFAULT '0'::smallint,
+    fg29 smallint DEFAULT '0'::smallint,
+    fg39 smallint DEFAULT '0'::smallint,
+    fg49 smallint DEFAULT '0'::smallint,
+    fg50 smallint DEFAULT '0'::smallint,
+    xpm smallint DEFAULT '0'::smallint,
+    dsk smallint DEFAULT '0'::smallint,
+    dint smallint DEFAULT '0'::smallint,
+    dff smallint DEFAULT '0'::smallint,
+    drf smallint DEFAULT '0'::smallint,
+    dtno smallint DEFAULT '0'::smallint,
+    dfds smallint DEFAULT '0'::smallint,
+    dpa smallint DEFAULT '0'::smallint,
+    dya integer DEFAULT 0,
+    dblk smallint DEFAULT '0'::smallint,
+    dsf smallint DEFAULT '0'::smallint,
+    dtpr smallint DEFAULT '0'::smallint,
+    dtd smallint DEFAULT '0'::smallint,
+    career_game smallint DEFAULT '0'::smallint,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: player_gamelogs_year_2009; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_gamelogs_year_2009 (
+    esbid integer NOT NULL,
+    pid character varying(25),
+    opp character varying(3) NOT NULL,
+    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    pos character varying(4) NOT NULL,
+    jnum smallint,
+    active boolean,
+    started boolean,
+    pa smallint DEFAULT '0'::smallint,
+    pc smallint DEFAULT '0'::smallint,
+    py integer DEFAULT 0,
+    ints smallint DEFAULT '0'::smallint,
+    tdp smallint DEFAULT '0'::smallint,
+    ra smallint DEFAULT '0'::smallint,
+    ry integer DEFAULT 0,
+    tdr smallint DEFAULT '0'::smallint,
+    fuml smallint DEFAULT '0'::smallint,
+    trg smallint DEFAULT '0'::smallint,
+    rec smallint DEFAULT '0'::smallint,
+    recy integer DEFAULT 0,
+    tdrec smallint DEFAULT '0'::smallint,
+    twoptc smallint DEFAULT '0'::smallint,
+    prtd smallint DEFAULT '0'::smallint,
+    krtd smallint DEFAULT '0'::smallint,
+    snp smallint DEFAULT '0'::smallint,
+    fgm smallint DEFAULT '0'::smallint,
+    fgy integer DEFAULT 0,
+    fg19 smallint DEFAULT '0'::smallint,
+    fg29 smallint DEFAULT '0'::smallint,
+    fg39 smallint DEFAULT '0'::smallint,
+    fg49 smallint DEFAULT '0'::smallint,
+    fg50 smallint DEFAULT '0'::smallint,
+    xpm smallint DEFAULT '0'::smallint,
+    dsk smallint DEFAULT '0'::smallint,
+    dint smallint DEFAULT '0'::smallint,
+    dff smallint DEFAULT '0'::smallint,
+    drf smallint DEFAULT '0'::smallint,
+    dtno smallint DEFAULT '0'::smallint,
+    dfds smallint DEFAULT '0'::smallint,
+    dpa smallint DEFAULT '0'::smallint,
+    dya integer DEFAULT 0,
+    dblk smallint DEFAULT '0'::smallint,
+    dsf smallint DEFAULT '0'::smallint,
+    dtpr smallint DEFAULT '0'::smallint,
+    dtd smallint DEFAULT '0'::smallint,
+    career_game smallint DEFAULT '0'::smallint,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: player_gamelogs_year_2010; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_gamelogs_year_2010 (
+    esbid integer NOT NULL,
+    pid character varying(25),
+    opp character varying(3) NOT NULL,
+    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    pos character varying(4) NOT NULL,
+    jnum smallint,
+    active boolean,
+    started boolean,
+    pa smallint DEFAULT '0'::smallint,
+    pc smallint DEFAULT '0'::smallint,
+    py integer DEFAULT 0,
+    ints smallint DEFAULT '0'::smallint,
+    tdp smallint DEFAULT '0'::smallint,
+    ra smallint DEFAULT '0'::smallint,
+    ry integer DEFAULT 0,
+    tdr smallint DEFAULT '0'::smallint,
+    fuml smallint DEFAULT '0'::smallint,
+    trg smallint DEFAULT '0'::smallint,
+    rec smallint DEFAULT '0'::smallint,
+    recy integer DEFAULT 0,
+    tdrec smallint DEFAULT '0'::smallint,
+    twoptc smallint DEFAULT '0'::smallint,
+    prtd smallint DEFAULT '0'::smallint,
+    krtd smallint DEFAULT '0'::smallint,
+    snp smallint DEFAULT '0'::smallint,
+    fgm smallint DEFAULT '0'::smallint,
+    fgy integer DEFAULT 0,
+    fg19 smallint DEFAULT '0'::smallint,
+    fg29 smallint DEFAULT '0'::smallint,
+    fg39 smallint DEFAULT '0'::smallint,
+    fg49 smallint DEFAULT '0'::smallint,
+    fg50 smallint DEFAULT '0'::smallint,
+    xpm smallint DEFAULT '0'::smallint,
+    dsk smallint DEFAULT '0'::smallint,
+    dint smallint DEFAULT '0'::smallint,
+    dff smallint DEFAULT '0'::smallint,
+    drf smallint DEFAULT '0'::smallint,
+    dtno smallint DEFAULT '0'::smallint,
+    dfds smallint DEFAULT '0'::smallint,
+    dpa smallint DEFAULT '0'::smallint,
+    dya integer DEFAULT 0,
+    dblk smallint DEFAULT '0'::smallint,
+    dsf smallint DEFAULT '0'::smallint,
+    dtpr smallint DEFAULT '0'::smallint,
+    dtd smallint DEFAULT '0'::smallint,
+    career_game smallint DEFAULT '0'::smallint,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: player_gamelogs_year_2011; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_gamelogs_year_2011 (
+    esbid integer NOT NULL,
+    pid character varying(25),
+    opp character varying(3) NOT NULL,
+    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    pos character varying(4) NOT NULL,
+    jnum smallint,
+    active boolean,
+    started boolean,
+    pa smallint DEFAULT '0'::smallint,
+    pc smallint DEFAULT '0'::smallint,
+    py integer DEFAULT 0,
+    ints smallint DEFAULT '0'::smallint,
+    tdp smallint DEFAULT '0'::smallint,
+    ra smallint DEFAULT '0'::smallint,
+    ry integer DEFAULT 0,
+    tdr smallint DEFAULT '0'::smallint,
+    fuml smallint DEFAULT '0'::smallint,
+    trg smallint DEFAULT '0'::smallint,
+    rec smallint DEFAULT '0'::smallint,
+    recy integer DEFAULT 0,
+    tdrec smallint DEFAULT '0'::smallint,
+    twoptc smallint DEFAULT '0'::smallint,
+    prtd smallint DEFAULT '0'::smallint,
+    krtd smallint DEFAULT '0'::smallint,
+    snp smallint DEFAULT '0'::smallint,
+    fgm smallint DEFAULT '0'::smallint,
+    fgy integer DEFAULT 0,
+    fg19 smallint DEFAULT '0'::smallint,
+    fg29 smallint DEFAULT '0'::smallint,
+    fg39 smallint DEFAULT '0'::smallint,
+    fg49 smallint DEFAULT '0'::smallint,
+    fg50 smallint DEFAULT '0'::smallint,
+    xpm smallint DEFAULT '0'::smallint,
+    dsk smallint DEFAULT '0'::smallint,
+    dint smallint DEFAULT '0'::smallint,
+    dff smallint DEFAULT '0'::smallint,
+    drf smallint DEFAULT '0'::smallint,
+    dtno smallint DEFAULT '0'::smallint,
+    dfds smallint DEFAULT '0'::smallint,
+    dpa smallint DEFAULT '0'::smallint,
+    dya integer DEFAULT 0,
+    dblk smallint DEFAULT '0'::smallint,
+    dsf smallint DEFAULT '0'::smallint,
+    dtpr smallint DEFAULT '0'::smallint,
+    dtd smallint DEFAULT '0'::smallint,
+    career_game smallint DEFAULT '0'::smallint,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: player_gamelogs_year_2012; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_gamelogs_year_2012 (
+    esbid integer NOT NULL,
+    pid character varying(25),
+    opp character varying(3) NOT NULL,
+    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    pos character varying(4) NOT NULL,
+    jnum smallint,
+    active boolean,
+    started boolean,
+    pa smallint DEFAULT '0'::smallint,
+    pc smallint DEFAULT '0'::smallint,
+    py integer DEFAULT 0,
+    ints smallint DEFAULT '0'::smallint,
+    tdp smallint DEFAULT '0'::smallint,
+    ra smallint DEFAULT '0'::smallint,
+    ry integer DEFAULT 0,
+    tdr smallint DEFAULT '0'::smallint,
+    fuml smallint DEFAULT '0'::smallint,
+    trg smallint DEFAULT '0'::smallint,
+    rec smallint DEFAULT '0'::smallint,
+    recy integer DEFAULT 0,
+    tdrec smallint DEFAULT '0'::smallint,
+    twoptc smallint DEFAULT '0'::smallint,
+    prtd smallint DEFAULT '0'::smallint,
+    krtd smallint DEFAULT '0'::smallint,
+    snp smallint DEFAULT '0'::smallint,
+    fgm smallint DEFAULT '0'::smallint,
+    fgy integer DEFAULT 0,
+    fg19 smallint DEFAULT '0'::smallint,
+    fg29 smallint DEFAULT '0'::smallint,
+    fg39 smallint DEFAULT '0'::smallint,
+    fg49 smallint DEFAULT '0'::smallint,
+    fg50 smallint DEFAULT '0'::smallint,
+    xpm smallint DEFAULT '0'::smallint,
+    dsk smallint DEFAULT '0'::smallint,
+    dint smallint DEFAULT '0'::smallint,
+    dff smallint DEFAULT '0'::smallint,
+    drf smallint DEFAULT '0'::smallint,
+    dtno smallint DEFAULT '0'::smallint,
+    dfds smallint DEFAULT '0'::smallint,
+    dpa smallint DEFAULT '0'::smallint,
+    dya integer DEFAULT 0,
+    dblk smallint DEFAULT '0'::smallint,
+    dsf smallint DEFAULT '0'::smallint,
+    dtpr smallint DEFAULT '0'::smallint,
+    dtd smallint DEFAULT '0'::smallint,
+    career_game smallint DEFAULT '0'::smallint,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: player_gamelogs_year_2013; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_gamelogs_year_2013 (
+    esbid integer NOT NULL,
+    pid character varying(25),
+    opp character varying(3) NOT NULL,
+    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    pos character varying(4) NOT NULL,
+    jnum smallint,
+    active boolean,
+    started boolean,
+    pa smallint DEFAULT '0'::smallint,
+    pc smallint DEFAULT '0'::smallint,
+    py integer DEFAULT 0,
+    ints smallint DEFAULT '0'::smallint,
+    tdp smallint DEFAULT '0'::smallint,
+    ra smallint DEFAULT '0'::smallint,
+    ry integer DEFAULT 0,
+    tdr smallint DEFAULT '0'::smallint,
+    fuml smallint DEFAULT '0'::smallint,
+    trg smallint DEFAULT '0'::smallint,
+    rec smallint DEFAULT '0'::smallint,
+    recy integer DEFAULT 0,
+    tdrec smallint DEFAULT '0'::smallint,
+    twoptc smallint DEFAULT '0'::smallint,
+    prtd smallint DEFAULT '0'::smallint,
+    krtd smallint DEFAULT '0'::smallint,
+    snp smallint DEFAULT '0'::smallint,
+    fgm smallint DEFAULT '0'::smallint,
+    fgy integer DEFAULT 0,
+    fg19 smallint DEFAULT '0'::smallint,
+    fg29 smallint DEFAULT '0'::smallint,
+    fg39 smallint DEFAULT '0'::smallint,
+    fg49 smallint DEFAULT '0'::smallint,
+    fg50 smallint DEFAULT '0'::smallint,
+    xpm smallint DEFAULT '0'::smallint,
+    dsk smallint DEFAULT '0'::smallint,
+    dint smallint DEFAULT '0'::smallint,
+    dff smallint DEFAULT '0'::smallint,
+    drf smallint DEFAULT '0'::smallint,
+    dtno smallint DEFAULT '0'::smallint,
+    dfds smallint DEFAULT '0'::smallint,
+    dpa smallint DEFAULT '0'::smallint,
+    dya integer DEFAULT 0,
+    dblk smallint DEFAULT '0'::smallint,
+    dsf smallint DEFAULT '0'::smallint,
+    dtpr smallint DEFAULT '0'::smallint,
+    dtd smallint DEFAULT '0'::smallint,
+    career_game smallint DEFAULT '0'::smallint,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: player_gamelogs_year_2014; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_gamelogs_year_2014 (
+    esbid integer NOT NULL,
+    pid character varying(25),
+    opp character varying(3) NOT NULL,
+    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    pos character varying(4) NOT NULL,
+    jnum smallint,
+    active boolean,
+    started boolean,
+    pa smallint DEFAULT '0'::smallint,
+    pc smallint DEFAULT '0'::smallint,
+    py integer DEFAULT 0,
+    ints smallint DEFAULT '0'::smallint,
+    tdp smallint DEFAULT '0'::smallint,
+    ra smallint DEFAULT '0'::smallint,
+    ry integer DEFAULT 0,
+    tdr smallint DEFAULT '0'::smallint,
+    fuml smallint DEFAULT '0'::smallint,
+    trg smallint DEFAULT '0'::smallint,
+    rec smallint DEFAULT '0'::smallint,
+    recy integer DEFAULT 0,
+    tdrec smallint DEFAULT '0'::smallint,
+    twoptc smallint DEFAULT '0'::smallint,
+    prtd smallint DEFAULT '0'::smallint,
+    krtd smallint DEFAULT '0'::smallint,
+    snp smallint DEFAULT '0'::smallint,
+    fgm smallint DEFAULT '0'::smallint,
+    fgy integer DEFAULT 0,
+    fg19 smallint DEFAULT '0'::smallint,
+    fg29 smallint DEFAULT '0'::smallint,
+    fg39 smallint DEFAULT '0'::smallint,
+    fg49 smallint DEFAULT '0'::smallint,
+    fg50 smallint DEFAULT '0'::smallint,
+    xpm smallint DEFAULT '0'::smallint,
+    dsk smallint DEFAULT '0'::smallint,
+    dint smallint DEFAULT '0'::smallint,
+    dff smallint DEFAULT '0'::smallint,
+    drf smallint DEFAULT '0'::smallint,
+    dtno smallint DEFAULT '0'::smallint,
+    dfds smallint DEFAULT '0'::smallint,
+    dpa smallint DEFAULT '0'::smallint,
+    dya integer DEFAULT 0,
+    dblk smallint DEFAULT '0'::smallint,
+    dsf smallint DEFAULT '0'::smallint,
+    dtpr smallint DEFAULT '0'::smallint,
+    dtd smallint DEFAULT '0'::smallint,
+    career_game smallint DEFAULT '0'::smallint,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: player_gamelogs_year_2015; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_gamelogs_year_2015 (
+    esbid integer NOT NULL,
+    pid character varying(25),
+    opp character varying(3) NOT NULL,
+    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    pos character varying(4) NOT NULL,
+    jnum smallint,
+    active boolean,
+    started boolean,
+    pa smallint DEFAULT '0'::smallint,
+    pc smallint DEFAULT '0'::smallint,
+    py integer DEFAULT 0,
+    ints smallint DEFAULT '0'::smallint,
+    tdp smallint DEFAULT '0'::smallint,
+    ra smallint DEFAULT '0'::smallint,
+    ry integer DEFAULT 0,
+    tdr smallint DEFAULT '0'::smallint,
+    fuml smallint DEFAULT '0'::smallint,
+    trg smallint DEFAULT '0'::smallint,
+    rec smallint DEFAULT '0'::smallint,
+    recy integer DEFAULT 0,
+    tdrec smallint DEFAULT '0'::smallint,
+    twoptc smallint DEFAULT '0'::smallint,
+    prtd smallint DEFAULT '0'::smallint,
+    krtd smallint DEFAULT '0'::smallint,
+    snp smallint DEFAULT '0'::smallint,
+    fgm smallint DEFAULT '0'::smallint,
+    fgy integer DEFAULT 0,
+    fg19 smallint DEFAULT '0'::smallint,
+    fg29 smallint DEFAULT '0'::smallint,
+    fg39 smallint DEFAULT '0'::smallint,
+    fg49 smallint DEFAULT '0'::smallint,
+    fg50 smallint DEFAULT '0'::smallint,
+    xpm smallint DEFAULT '0'::smallint,
+    dsk smallint DEFAULT '0'::smallint,
+    dint smallint DEFAULT '0'::smallint,
+    dff smallint DEFAULT '0'::smallint,
+    drf smallint DEFAULT '0'::smallint,
+    dtno smallint DEFAULT '0'::smallint,
+    dfds smallint DEFAULT '0'::smallint,
+    dpa smallint DEFAULT '0'::smallint,
+    dya integer DEFAULT 0,
+    dblk smallint DEFAULT '0'::smallint,
+    dsf smallint DEFAULT '0'::smallint,
+    dtpr smallint DEFAULT '0'::smallint,
+    dtd smallint DEFAULT '0'::smallint,
+    career_game smallint DEFAULT '0'::smallint,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: player_gamelogs_year_2016; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_gamelogs_year_2016 (
+    esbid integer NOT NULL,
+    pid character varying(25),
+    opp character varying(3) NOT NULL,
+    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    pos character varying(4) NOT NULL,
+    jnum smallint,
+    active boolean,
+    started boolean,
+    pa smallint DEFAULT '0'::smallint,
+    pc smallint DEFAULT '0'::smallint,
+    py integer DEFAULT 0,
+    ints smallint DEFAULT '0'::smallint,
+    tdp smallint DEFAULT '0'::smallint,
+    ra smallint DEFAULT '0'::smallint,
+    ry integer DEFAULT 0,
+    tdr smallint DEFAULT '0'::smallint,
+    fuml smallint DEFAULT '0'::smallint,
+    trg smallint DEFAULT '0'::smallint,
+    rec smallint DEFAULT '0'::smallint,
+    recy integer DEFAULT 0,
+    tdrec smallint DEFAULT '0'::smallint,
+    twoptc smallint DEFAULT '0'::smallint,
+    prtd smallint DEFAULT '0'::smallint,
+    krtd smallint DEFAULT '0'::smallint,
+    snp smallint DEFAULT '0'::smallint,
+    fgm smallint DEFAULT '0'::smallint,
+    fgy integer DEFAULT 0,
+    fg19 smallint DEFAULT '0'::smallint,
+    fg29 smallint DEFAULT '0'::smallint,
+    fg39 smallint DEFAULT '0'::smallint,
+    fg49 smallint DEFAULT '0'::smallint,
+    fg50 smallint DEFAULT '0'::smallint,
+    xpm smallint DEFAULT '0'::smallint,
+    dsk smallint DEFAULT '0'::smallint,
+    dint smallint DEFAULT '0'::smallint,
+    dff smallint DEFAULT '0'::smallint,
+    drf smallint DEFAULT '0'::smallint,
+    dtno smallint DEFAULT '0'::smallint,
+    dfds smallint DEFAULT '0'::smallint,
+    dpa smallint DEFAULT '0'::smallint,
+    dya integer DEFAULT 0,
+    dblk smallint DEFAULT '0'::smallint,
+    dsf smallint DEFAULT '0'::smallint,
+    dtpr smallint DEFAULT '0'::smallint,
+    dtd smallint DEFAULT '0'::smallint,
+    career_game smallint DEFAULT '0'::smallint,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: player_gamelogs_year_2017; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_gamelogs_year_2017 (
+    esbid integer NOT NULL,
+    pid character varying(25),
+    opp character varying(3) NOT NULL,
+    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    pos character varying(4) NOT NULL,
+    jnum smallint,
+    active boolean,
+    started boolean,
+    pa smallint DEFAULT '0'::smallint,
+    pc smallint DEFAULT '0'::smallint,
+    py integer DEFAULT 0,
+    ints smallint DEFAULT '0'::smallint,
+    tdp smallint DEFAULT '0'::smallint,
+    ra smallint DEFAULT '0'::smallint,
+    ry integer DEFAULT 0,
+    tdr smallint DEFAULT '0'::smallint,
+    fuml smallint DEFAULT '0'::smallint,
+    trg smallint DEFAULT '0'::smallint,
+    rec smallint DEFAULT '0'::smallint,
+    recy integer DEFAULT 0,
+    tdrec smallint DEFAULT '0'::smallint,
+    twoptc smallint DEFAULT '0'::smallint,
+    prtd smallint DEFAULT '0'::smallint,
+    krtd smallint DEFAULT '0'::smallint,
+    snp smallint DEFAULT '0'::smallint,
+    fgm smallint DEFAULT '0'::smallint,
+    fgy integer DEFAULT 0,
+    fg19 smallint DEFAULT '0'::smallint,
+    fg29 smallint DEFAULT '0'::smallint,
+    fg39 smallint DEFAULT '0'::smallint,
+    fg49 smallint DEFAULT '0'::smallint,
+    fg50 smallint DEFAULT '0'::smallint,
+    xpm smallint DEFAULT '0'::smallint,
+    dsk smallint DEFAULT '0'::smallint,
+    dint smallint DEFAULT '0'::smallint,
+    dff smallint DEFAULT '0'::smallint,
+    drf smallint DEFAULT '0'::smallint,
+    dtno smallint DEFAULT '0'::smallint,
+    dfds smallint DEFAULT '0'::smallint,
+    dpa smallint DEFAULT '0'::smallint,
+    dya integer DEFAULT 0,
+    dblk smallint DEFAULT '0'::smallint,
+    dsf smallint DEFAULT '0'::smallint,
+    dtpr smallint DEFAULT '0'::smallint,
+    dtd smallint DEFAULT '0'::smallint,
+    career_game smallint DEFAULT '0'::smallint,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: player_gamelogs_year_2018; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_gamelogs_year_2018 (
+    esbid integer NOT NULL,
+    pid character varying(25),
+    opp character varying(3) NOT NULL,
+    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    pos character varying(4) NOT NULL,
+    jnum smallint,
+    active boolean,
+    started boolean,
+    pa smallint DEFAULT '0'::smallint,
+    pc smallint DEFAULT '0'::smallint,
+    py integer DEFAULT 0,
+    ints smallint DEFAULT '0'::smallint,
+    tdp smallint DEFAULT '0'::smallint,
+    ra smallint DEFAULT '0'::smallint,
+    ry integer DEFAULT 0,
+    tdr smallint DEFAULT '0'::smallint,
+    fuml smallint DEFAULT '0'::smallint,
+    trg smallint DEFAULT '0'::smallint,
+    rec smallint DEFAULT '0'::smallint,
+    recy integer DEFAULT 0,
+    tdrec smallint DEFAULT '0'::smallint,
+    twoptc smallint DEFAULT '0'::smallint,
+    prtd smallint DEFAULT '0'::smallint,
+    krtd smallint DEFAULT '0'::smallint,
+    snp smallint DEFAULT '0'::smallint,
+    fgm smallint DEFAULT '0'::smallint,
+    fgy integer DEFAULT 0,
+    fg19 smallint DEFAULT '0'::smallint,
+    fg29 smallint DEFAULT '0'::smallint,
+    fg39 smallint DEFAULT '0'::smallint,
+    fg49 smallint DEFAULT '0'::smallint,
+    fg50 smallint DEFAULT '0'::smallint,
+    xpm smallint DEFAULT '0'::smallint,
+    dsk smallint DEFAULT '0'::smallint,
+    dint smallint DEFAULT '0'::smallint,
+    dff smallint DEFAULT '0'::smallint,
+    drf smallint DEFAULT '0'::smallint,
+    dtno smallint DEFAULT '0'::smallint,
+    dfds smallint DEFAULT '0'::smallint,
+    dpa smallint DEFAULT '0'::smallint,
+    dya integer DEFAULT 0,
+    dblk smallint DEFAULT '0'::smallint,
+    dsf smallint DEFAULT '0'::smallint,
+    dtpr smallint DEFAULT '0'::smallint,
+    dtd smallint DEFAULT '0'::smallint,
+    career_game smallint DEFAULT '0'::smallint,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: player_gamelogs_year_2019; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_gamelogs_year_2019 (
+    esbid integer NOT NULL,
+    pid character varying(25),
+    opp character varying(3) NOT NULL,
+    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    pos character varying(4) NOT NULL,
+    jnum smallint,
+    active boolean,
+    started boolean,
+    pa smallint DEFAULT '0'::smallint,
+    pc smallint DEFAULT '0'::smallint,
+    py integer DEFAULT 0,
+    ints smallint DEFAULT '0'::smallint,
+    tdp smallint DEFAULT '0'::smallint,
+    ra smallint DEFAULT '0'::smallint,
+    ry integer DEFAULT 0,
+    tdr smallint DEFAULT '0'::smallint,
+    fuml smallint DEFAULT '0'::smallint,
+    trg smallint DEFAULT '0'::smallint,
+    rec smallint DEFAULT '0'::smallint,
+    recy integer DEFAULT 0,
+    tdrec smallint DEFAULT '0'::smallint,
+    twoptc smallint DEFAULT '0'::smallint,
+    prtd smallint DEFAULT '0'::smallint,
+    krtd smallint DEFAULT '0'::smallint,
+    snp smallint DEFAULT '0'::smallint,
+    fgm smallint DEFAULT '0'::smallint,
+    fgy integer DEFAULT 0,
+    fg19 smallint DEFAULT '0'::smallint,
+    fg29 smallint DEFAULT '0'::smallint,
+    fg39 smallint DEFAULT '0'::smallint,
+    fg49 smallint DEFAULT '0'::smallint,
+    fg50 smallint DEFAULT '0'::smallint,
+    xpm smallint DEFAULT '0'::smallint,
+    dsk smallint DEFAULT '0'::smallint,
+    dint smallint DEFAULT '0'::smallint,
+    dff smallint DEFAULT '0'::smallint,
+    drf smallint DEFAULT '0'::smallint,
+    dtno smallint DEFAULT '0'::smallint,
+    dfds smallint DEFAULT '0'::smallint,
+    dpa smallint DEFAULT '0'::smallint,
+    dya integer DEFAULT 0,
+    dblk smallint DEFAULT '0'::smallint,
+    dsf smallint DEFAULT '0'::smallint,
+    dtpr smallint DEFAULT '0'::smallint,
+    dtd smallint DEFAULT '0'::smallint,
+    career_game smallint DEFAULT '0'::smallint,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: player_gamelogs_year_2020; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_gamelogs_year_2020 (
+    esbid integer NOT NULL,
+    pid character varying(25),
+    opp character varying(3) NOT NULL,
+    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    pos character varying(4) NOT NULL,
+    jnum smallint,
+    active boolean,
+    started boolean,
+    pa smallint DEFAULT '0'::smallint,
+    pc smallint DEFAULT '0'::smallint,
+    py integer DEFAULT 0,
+    ints smallint DEFAULT '0'::smallint,
+    tdp smallint DEFAULT '0'::smallint,
+    ra smallint DEFAULT '0'::smallint,
+    ry integer DEFAULT 0,
+    tdr smallint DEFAULT '0'::smallint,
+    fuml smallint DEFAULT '0'::smallint,
+    trg smallint DEFAULT '0'::smallint,
+    rec smallint DEFAULT '0'::smallint,
+    recy integer DEFAULT 0,
+    tdrec smallint DEFAULT '0'::smallint,
+    twoptc smallint DEFAULT '0'::smallint,
+    prtd smallint DEFAULT '0'::smallint,
+    krtd smallint DEFAULT '0'::smallint,
+    snp smallint DEFAULT '0'::smallint,
+    fgm smallint DEFAULT '0'::smallint,
+    fgy integer DEFAULT 0,
+    fg19 smallint DEFAULT '0'::smallint,
+    fg29 smallint DEFAULT '0'::smallint,
+    fg39 smallint DEFAULT '0'::smallint,
+    fg49 smallint DEFAULT '0'::smallint,
+    fg50 smallint DEFAULT '0'::smallint,
+    xpm smallint DEFAULT '0'::smallint,
+    dsk smallint DEFAULT '0'::smallint,
+    dint smallint DEFAULT '0'::smallint,
+    dff smallint DEFAULT '0'::smallint,
+    drf smallint DEFAULT '0'::smallint,
+    dtno smallint DEFAULT '0'::smallint,
+    dfds smallint DEFAULT '0'::smallint,
+    dpa smallint DEFAULT '0'::smallint,
+    dya integer DEFAULT 0,
+    dblk smallint DEFAULT '0'::smallint,
+    dsf smallint DEFAULT '0'::smallint,
+    dtpr smallint DEFAULT '0'::smallint,
+    dtd smallint DEFAULT '0'::smallint,
+    career_game smallint DEFAULT '0'::smallint,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: player_gamelogs_year_2021; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_gamelogs_year_2021 (
+    esbid integer NOT NULL,
+    pid character varying(25),
+    opp character varying(3) NOT NULL,
+    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    pos character varying(4) NOT NULL,
+    jnum smallint,
+    active boolean,
+    started boolean,
+    pa smallint DEFAULT '0'::smallint,
+    pc smallint DEFAULT '0'::smallint,
+    py integer DEFAULT 0,
+    ints smallint DEFAULT '0'::smallint,
+    tdp smallint DEFAULT '0'::smallint,
+    ra smallint DEFAULT '0'::smallint,
+    ry integer DEFAULT 0,
+    tdr smallint DEFAULT '0'::smallint,
+    fuml smallint DEFAULT '0'::smallint,
+    trg smallint DEFAULT '0'::smallint,
+    rec smallint DEFAULT '0'::smallint,
+    recy integer DEFAULT 0,
+    tdrec smallint DEFAULT '0'::smallint,
+    twoptc smallint DEFAULT '0'::smallint,
+    prtd smallint DEFAULT '0'::smallint,
+    krtd smallint DEFAULT '0'::smallint,
+    snp smallint DEFAULT '0'::smallint,
+    fgm smallint DEFAULT '0'::smallint,
+    fgy integer DEFAULT 0,
+    fg19 smallint DEFAULT '0'::smallint,
+    fg29 smallint DEFAULT '0'::smallint,
+    fg39 smallint DEFAULT '0'::smallint,
+    fg49 smallint DEFAULT '0'::smallint,
+    fg50 smallint DEFAULT '0'::smallint,
+    xpm smallint DEFAULT '0'::smallint,
+    dsk smallint DEFAULT '0'::smallint,
+    dint smallint DEFAULT '0'::smallint,
+    dff smallint DEFAULT '0'::smallint,
+    drf smallint DEFAULT '0'::smallint,
+    dtno smallint DEFAULT '0'::smallint,
+    dfds smallint DEFAULT '0'::smallint,
+    dpa smallint DEFAULT '0'::smallint,
+    dya integer DEFAULT 0,
+    dblk smallint DEFAULT '0'::smallint,
+    dsf smallint DEFAULT '0'::smallint,
+    dtpr smallint DEFAULT '0'::smallint,
+    dtd smallint DEFAULT '0'::smallint,
+    career_game smallint DEFAULT '0'::smallint,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: player_gamelogs_year_2022; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_gamelogs_year_2022 (
+    esbid integer NOT NULL,
+    pid character varying(25),
+    opp character varying(3) NOT NULL,
+    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    pos character varying(4) NOT NULL,
+    jnum smallint,
+    active boolean,
+    started boolean,
+    pa smallint DEFAULT '0'::smallint,
+    pc smallint DEFAULT '0'::smallint,
+    py integer DEFAULT 0,
+    ints smallint DEFAULT '0'::smallint,
+    tdp smallint DEFAULT '0'::smallint,
+    ra smallint DEFAULT '0'::smallint,
+    ry integer DEFAULT 0,
+    tdr smallint DEFAULT '0'::smallint,
+    fuml smallint DEFAULT '0'::smallint,
+    trg smallint DEFAULT '0'::smallint,
+    rec smallint DEFAULT '0'::smallint,
+    recy integer DEFAULT 0,
+    tdrec smallint DEFAULT '0'::smallint,
+    twoptc smallint DEFAULT '0'::smallint,
+    prtd smallint DEFAULT '0'::smallint,
+    krtd smallint DEFAULT '0'::smallint,
+    snp smallint DEFAULT '0'::smallint,
+    fgm smallint DEFAULT '0'::smallint,
+    fgy integer DEFAULT 0,
+    fg19 smallint DEFAULT '0'::smallint,
+    fg29 smallint DEFAULT '0'::smallint,
+    fg39 smallint DEFAULT '0'::smallint,
+    fg49 smallint DEFAULT '0'::smallint,
+    fg50 smallint DEFAULT '0'::smallint,
+    xpm smallint DEFAULT '0'::smallint,
+    dsk smallint DEFAULT '0'::smallint,
+    dint smallint DEFAULT '0'::smallint,
+    dff smallint DEFAULT '0'::smallint,
+    drf smallint DEFAULT '0'::smallint,
+    dtno smallint DEFAULT '0'::smallint,
+    dfds smallint DEFAULT '0'::smallint,
+    dpa smallint DEFAULT '0'::smallint,
+    dya integer DEFAULT 0,
+    dblk smallint DEFAULT '0'::smallint,
+    dsf smallint DEFAULT '0'::smallint,
+    dtpr smallint DEFAULT '0'::smallint,
+    dtd smallint DEFAULT '0'::smallint,
+    career_game smallint DEFAULT '0'::smallint,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: player_gamelogs_year_2023; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_gamelogs_year_2023 (
+    esbid integer NOT NULL,
+    pid character varying(25),
+    opp character varying(3) NOT NULL,
+    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    pos character varying(4) NOT NULL,
+    jnum smallint,
+    active boolean,
+    started boolean,
+    pa smallint DEFAULT '0'::smallint,
+    pc smallint DEFAULT '0'::smallint,
+    py integer DEFAULT 0,
+    ints smallint DEFAULT '0'::smallint,
+    tdp smallint DEFAULT '0'::smallint,
+    ra smallint DEFAULT '0'::smallint,
+    ry integer DEFAULT 0,
+    tdr smallint DEFAULT '0'::smallint,
+    fuml smallint DEFAULT '0'::smallint,
+    trg smallint DEFAULT '0'::smallint,
+    rec smallint DEFAULT '0'::smallint,
+    recy integer DEFAULT 0,
+    tdrec smallint DEFAULT '0'::smallint,
+    twoptc smallint DEFAULT '0'::smallint,
+    prtd smallint DEFAULT '0'::smallint,
+    krtd smallint DEFAULT '0'::smallint,
+    snp smallint DEFAULT '0'::smallint,
+    fgm smallint DEFAULT '0'::smallint,
+    fgy integer DEFAULT 0,
+    fg19 smallint DEFAULT '0'::smallint,
+    fg29 smallint DEFAULT '0'::smallint,
+    fg39 smallint DEFAULT '0'::smallint,
+    fg49 smallint DEFAULT '0'::smallint,
+    fg50 smallint DEFAULT '0'::smallint,
+    xpm smallint DEFAULT '0'::smallint,
+    dsk smallint DEFAULT '0'::smallint,
+    dint smallint DEFAULT '0'::smallint,
+    dff smallint DEFAULT '0'::smallint,
+    drf smallint DEFAULT '0'::smallint,
+    dtno smallint DEFAULT '0'::smallint,
+    dfds smallint DEFAULT '0'::smallint,
+    dpa smallint DEFAULT '0'::smallint,
+    dya integer DEFAULT 0,
+    dblk smallint DEFAULT '0'::smallint,
+    dsf smallint DEFAULT '0'::smallint,
+    dtpr smallint DEFAULT '0'::smallint,
+    dtd smallint DEFAULT '0'::smallint,
+    career_game smallint DEFAULT '0'::smallint,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: player_gamelogs_year_2024; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_gamelogs_year_2024 (
+    esbid integer NOT NULL,
+    pid character varying(25),
+    opp character varying(3) NOT NULL,
+    tm character varying(3) DEFAULT ''::character varying NOT NULL,
+    pos character varying(4) NOT NULL,
+    jnum smallint,
+    active boolean,
+    started boolean,
+    pa smallint DEFAULT '0'::smallint,
+    pc smallint DEFAULT '0'::smallint,
+    py integer DEFAULT 0,
+    ints smallint DEFAULT '0'::smallint,
+    tdp smallint DEFAULT '0'::smallint,
+    ra smallint DEFAULT '0'::smallint,
+    ry integer DEFAULT 0,
+    tdr smallint DEFAULT '0'::smallint,
+    fuml smallint DEFAULT '0'::smallint,
+    trg smallint DEFAULT '0'::smallint,
+    rec smallint DEFAULT '0'::smallint,
+    recy integer DEFAULT 0,
+    tdrec smallint DEFAULT '0'::smallint,
+    twoptc smallint DEFAULT '0'::smallint,
+    prtd smallint DEFAULT '0'::smallint,
+    krtd smallint DEFAULT '0'::smallint,
+    snp smallint DEFAULT '0'::smallint,
+    fgm smallint DEFAULT '0'::smallint,
+    fgy integer DEFAULT 0,
+    fg19 smallint DEFAULT '0'::smallint,
+    fg29 smallint DEFAULT '0'::smallint,
+    fg39 smallint DEFAULT '0'::smallint,
+    fg49 smallint DEFAULT '0'::smallint,
+    fg50 smallint DEFAULT '0'::smallint,
+    xpm smallint DEFAULT '0'::smallint,
+    dsk smallint DEFAULT '0'::smallint,
+    dint smallint DEFAULT '0'::smallint,
+    dff smallint DEFAULT '0'::smallint,
+    drf smallint DEFAULT '0'::smallint,
+    dtno smallint DEFAULT '0'::smallint,
+    dfds smallint DEFAULT '0'::smallint,
+    dpa smallint DEFAULT '0'::smallint,
+    dya integer DEFAULT 0,
+    dblk smallint DEFAULT '0'::smallint,
+    dsf smallint DEFAULT '0'::smallint,
+    dtpr smallint DEFAULT '0'::smallint,
+    dtd smallint DEFAULT '0'::smallint,
+    career_game smallint DEFAULT '0'::smallint,
+    year smallint NOT NULL
 );
 
 
@@ -12656,6 +14236,307 @@ CREATE TABLE public.projections_archive (
 --
 
 CREATE TABLE public.projections_index (
+    pid character varying(25) NOT NULL,
+    sourceid integer DEFAULT 0 NOT NULL,
+    userid integer DEFAULT 0 NOT NULL,
+    week smallint NOT NULL,
+    year smallint NOT NULL,
+    pa numeric(5,1),
+    pc numeric(5,1),
+    py numeric(5,1),
+    ints numeric(3,1),
+    tdp numeric(3,1),
+    ra numeric(4,1),
+    ry numeric(5,1),
+    tdr numeric(3,1),
+    trg numeric(4,1),
+    rec numeric(4,1),
+    recy numeric(5,1),
+    tdrec numeric(3,1),
+    fuml numeric(3,1),
+    snp numeric(5,1),
+    twoptc numeric(3,1),
+    fgm numeric(4,1),
+    fgy integer DEFAULT 0,
+    fg19 numeric(3,1),
+    fg29 numeric(3,1),
+    fg39 numeric(3,1),
+    fg49 numeric(3,1),
+    fg50 numeric(3,1),
+    xpm numeric(3,1),
+    dsk numeric(4,1),
+    dint numeric(4,1),
+    dff numeric(4,1),
+    drf numeric(4,1),
+    dtno numeric(4,1),
+    dfds numeric(4,1),
+    dpa numeric(4,1),
+    dya numeric(5,1),
+    dblk numeric(4,1),
+    dsf numeric(4,1),
+    dtpr numeric(4,1),
+    dtd numeric(4,1),
+    krtd numeric(4,1),
+    prtd numeric(4,1)
+)
+PARTITION BY RANGE (year);
+
+
+--
+-- Name: projections_index_default; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.projections_index_default (
+    pid character varying(25) NOT NULL,
+    sourceid integer DEFAULT 0 NOT NULL,
+    userid integer DEFAULT 0 NOT NULL,
+    week smallint NOT NULL,
+    year smallint NOT NULL,
+    pa numeric(5,1),
+    pc numeric(5,1),
+    py numeric(5,1),
+    ints numeric(3,1),
+    tdp numeric(3,1),
+    ra numeric(4,1),
+    ry numeric(5,1),
+    tdr numeric(3,1),
+    trg numeric(4,1),
+    rec numeric(4,1),
+    recy numeric(5,1),
+    tdrec numeric(3,1),
+    fuml numeric(3,1),
+    snp numeric(5,1),
+    twoptc numeric(3,1),
+    fgm numeric(4,1),
+    fgy integer DEFAULT 0,
+    fg19 numeric(3,1),
+    fg29 numeric(3,1),
+    fg39 numeric(3,1),
+    fg49 numeric(3,1),
+    fg50 numeric(3,1),
+    xpm numeric(3,1),
+    dsk numeric(4,1),
+    dint numeric(4,1),
+    dff numeric(4,1),
+    drf numeric(4,1),
+    dtno numeric(4,1),
+    dfds numeric(4,1),
+    dpa numeric(4,1),
+    dya numeric(5,1),
+    dblk numeric(4,1),
+    dsf numeric(4,1),
+    dtpr numeric(4,1),
+    dtd numeric(4,1),
+    krtd numeric(4,1),
+    prtd numeric(4,1)
+);
+
+
+--
+-- Name: projections_index_y2020; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.projections_index_y2020 (
+    pid character varying(25) NOT NULL,
+    sourceid integer DEFAULT 0 NOT NULL,
+    userid integer DEFAULT 0 NOT NULL,
+    week smallint NOT NULL,
+    year smallint NOT NULL,
+    pa numeric(5,1),
+    pc numeric(5,1),
+    py numeric(5,1),
+    ints numeric(3,1),
+    tdp numeric(3,1),
+    ra numeric(4,1),
+    ry numeric(5,1),
+    tdr numeric(3,1),
+    trg numeric(4,1),
+    rec numeric(4,1),
+    recy numeric(5,1),
+    tdrec numeric(3,1),
+    fuml numeric(3,1),
+    snp numeric(5,1),
+    twoptc numeric(3,1),
+    fgm numeric(4,1),
+    fgy integer DEFAULT 0,
+    fg19 numeric(3,1),
+    fg29 numeric(3,1),
+    fg39 numeric(3,1),
+    fg49 numeric(3,1),
+    fg50 numeric(3,1),
+    xpm numeric(3,1),
+    dsk numeric(4,1),
+    dint numeric(4,1),
+    dff numeric(4,1),
+    drf numeric(4,1),
+    dtno numeric(4,1),
+    dfds numeric(4,1),
+    dpa numeric(4,1),
+    dya numeric(5,1),
+    dblk numeric(4,1),
+    dsf numeric(4,1),
+    dtpr numeric(4,1),
+    dtd numeric(4,1),
+    krtd numeric(4,1),
+    prtd numeric(4,1)
+);
+
+
+--
+-- Name: projections_index_y2021; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.projections_index_y2021 (
+    pid character varying(25) NOT NULL,
+    sourceid integer DEFAULT 0 NOT NULL,
+    userid integer DEFAULT 0 NOT NULL,
+    week smallint NOT NULL,
+    year smallint NOT NULL,
+    pa numeric(5,1),
+    pc numeric(5,1),
+    py numeric(5,1),
+    ints numeric(3,1),
+    tdp numeric(3,1),
+    ra numeric(4,1),
+    ry numeric(5,1),
+    tdr numeric(3,1),
+    trg numeric(4,1),
+    rec numeric(4,1),
+    recy numeric(5,1),
+    tdrec numeric(3,1),
+    fuml numeric(3,1),
+    snp numeric(5,1),
+    twoptc numeric(3,1),
+    fgm numeric(4,1),
+    fgy integer DEFAULT 0,
+    fg19 numeric(3,1),
+    fg29 numeric(3,1),
+    fg39 numeric(3,1),
+    fg49 numeric(3,1),
+    fg50 numeric(3,1),
+    xpm numeric(3,1),
+    dsk numeric(4,1),
+    dint numeric(4,1),
+    dff numeric(4,1),
+    drf numeric(4,1),
+    dtno numeric(4,1),
+    dfds numeric(4,1),
+    dpa numeric(4,1),
+    dya numeric(5,1),
+    dblk numeric(4,1),
+    dsf numeric(4,1),
+    dtpr numeric(4,1),
+    dtd numeric(4,1),
+    krtd numeric(4,1),
+    prtd numeric(4,1)
+);
+
+
+--
+-- Name: projections_index_y2022; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.projections_index_y2022 (
+    pid character varying(25) NOT NULL,
+    sourceid integer DEFAULT 0 NOT NULL,
+    userid integer DEFAULT 0 NOT NULL,
+    week smallint NOT NULL,
+    year smallint NOT NULL,
+    pa numeric(5,1),
+    pc numeric(5,1),
+    py numeric(5,1),
+    ints numeric(3,1),
+    tdp numeric(3,1),
+    ra numeric(4,1),
+    ry numeric(5,1),
+    tdr numeric(3,1),
+    trg numeric(4,1),
+    rec numeric(4,1),
+    recy numeric(5,1),
+    tdrec numeric(3,1),
+    fuml numeric(3,1),
+    snp numeric(5,1),
+    twoptc numeric(3,1),
+    fgm numeric(4,1),
+    fgy integer DEFAULT 0,
+    fg19 numeric(3,1),
+    fg29 numeric(3,1),
+    fg39 numeric(3,1),
+    fg49 numeric(3,1),
+    fg50 numeric(3,1),
+    xpm numeric(3,1),
+    dsk numeric(4,1),
+    dint numeric(4,1),
+    dff numeric(4,1),
+    drf numeric(4,1),
+    dtno numeric(4,1),
+    dfds numeric(4,1),
+    dpa numeric(4,1),
+    dya numeric(5,1),
+    dblk numeric(4,1),
+    dsf numeric(4,1),
+    dtpr numeric(4,1),
+    dtd numeric(4,1),
+    krtd numeric(4,1),
+    prtd numeric(4,1)
+);
+
+
+--
+-- Name: projections_index_y2023; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.projections_index_y2023 (
+    pid character varying(25) NOT NULL,
+    sourceid integer DEFAULT 0 NOT NULL,
+    userid integer DEFAULT 0 NOT NULL,
+    week smallint NOT NULL,
+    year smallint NOT NULL,
+    pa numeric(5,1),
+    pc numeric(5,1),
+    py numeric(5,1),
+    ints numeric(3,1),
+    tdp numeric(3,1),
+    ra numeric(4,1),
+    ry numeric(5,1),
+    tdr numeric(3,1),
+    trg numeric(4,1),
+    rec numeric(4,1),
+    recy numeric(5,1),
+    tdrec numeric(3,1),
+    fuml numeric(3,1),
+    snp numeric(5,1),
+    twoptc numeric(3,1),
+    fgm numeric(4,1),
+    fgy integer DEFAULT 0,
+    fg19 numeric(3,1),
+    fg29 numeric(3,1),
+    fg39 numeric(3,1),
+    fg49 numeric(3,1),
+    fg50 numeric(3,1),
+    xpm numeric(3,1),
+    dsk numeric(4,1),
+    dint numeric(4,1),
+    dff numeric(4,1),
+    drf numeric(4,1),
+    dtno numeric(4,1),
+    dfds numeric(4,1),
+    dpa numeric(4,1),
+    dya numeric(5,1),
+    dblk numeric(4,1),
+    dsf numeric(4,1),
+    dtpr numeric(4,1),
+    dtd numeric(4,1),
+    krtd numeric(4,1),
+    prtd numeric(4,1)
+);
+
+
+--
+-- Name: projections_index_y2024; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.projections_index_y2024 (
     pid character varying(25) NOT NULL,
     sourceid integer DEFAULT 0 NOT NULL,
     userid integer DEFAULT 0 NOT NULL,
@@ -13789,6 +15670,230 @@ ALTER TABLE ONLY public.nfl_plays ATTACH PARTITION public.nfl_plays_year_2024 FO
 
 
 --
+-- Name: player_gamelogs_default; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_default DEFAULT;
+
+
+--
+-- Name: player_gamelogs_year_2000; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_year_2000 FOR VALUES FROM ('2000') TO ('2001');
+
+
+--
+-- Name: player_gamelogs_year_2001; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_year_2001 FOR VALUES FROM ('2001') TO ('2002');
+
+
+--
+-- Name: player_gamelogs_year_2002; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_year_2002 FOR VALUES FROM ('2002') TO ('2003');
+
+
+--
+-- Name: player_gamelogs_year_2003; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_year_2003 FOR VALUES FROM ('2003') TO ('2004');
+
+
+--
+-- Name: player_gamelogs_year_2004; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_year_2004 FOR VALUES FROM ('2004') TO ('2005');
+
+
+--
+-- Name: player_gamelogs_year_2005; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_year_2005 FOR VALUES FROM ('2005') TO ('2006');
+
+
+--
+-- Name: player_gamelogs_year_2006; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_year_2006 FOR VALUES FROM ('2006') TO ('2007');
+
+
+--
+-- Name: player_gamelogs_year_2007; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_year_2007 FOR VALUES FROM ('2007') TO ('2008');
+
+
+--
+-- Name: player_gamelogs_year_2008; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_year_2008 FOR VALUES FROM ('2008') TO ('2009');
+
+
+--
+-- Name: player_gamelogs_year_2009; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_year_2009 FOR VALUES FROM ('2009') TO ('2010');
+
+
+--
+-- Name: player_gamelogs_year_2010; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_year_2010 FOR VALUES FROM ('2010') TO ('2011');
+
+
+--
+-- Name: player_gamelogs_year_2011; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_year_2011 FOR VALUES FROM ('2011') TO ('2012');
+
+
+--
+-- Name: player_gamelogs_year_2012; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_year_2012 FOR VALUES FROM ('2012') TO ('2013');
+
+
+--
+-- Name: player_gamelogs_year_2013; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_year_2013 FOR VALUES FROM ('2013') TO ('2014');
+
+
+--
+-- Name: player_gamelogs_year_2014; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_year_2014 FOR VALUES FROM ('2014') TO ('2015');
+
+
+--
+-- Name: player_gamelogs_year_2015; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_year_2015 FOR VALUES FROM ('2015') TO ('2016');
+
+
+--
+-- Name: player_gamelogs_year_2016; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_year_2016 FOR VALUES FROM ('2016') TO ('2017');
+
+
+--
+-- Name: player_gamelogs_year_2017; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_year_2017 FOR VALUES FROM ('2017') TO ('2018');
+
+
+--
+-- Name: player_gamelogs_year_2018; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_year_2018 FOR VALUES FROM ('2018') TO ('2019');
+
+
+--
+-- Name: player_gamelogs_year_2019; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_year_2019 FOR VALUES FROM ('2019') TO ('2020');
+
+
+--
+-- Name: player_gamelogs_year_2020; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_year_2020 FOR VALUES FROM ('2020') TO ('2021');
+
+
+--
+-- Name: player_gamelogs_year_2021; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_year_2021 FOR VALUES FROM ('2021') TO ('2022');
+
+
+--
+-- Name: player_gamelogs_year_2022; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_year_2022 FOR VALUES FROM ('2022') TO ('2023');
+
+
+--
+-- Name: player_gamelogs_year_2023; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_year_2023 FOR VALUES FROM ('2023') TO ('2024');
+
+
+--
+-- Name: player_gamelogs_year_2024; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs ATTACH PARTITION public.player_gamelogs_year_2024 FOR VALUES FROM ('2024') TO ('2025');
+
+
+--
+-- Name: projections_index_default; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projections_index ATTACH PARTITION public.projections_index_default DEFAULT;
+
+
+--
+-- Name: projections_index_y2020; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projections_index ATTACH PARTITION public.projections_index_y2020 FOR VALUES FROM ('2020') TO ('2021');
+
+
+--
+-- Name: projections_index_y2021; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projections_index ATTACH PARTITION public.projections_index_y2021 FOR VALUES FROM ('2021') TO ('2022');
+
+
+--
+-- Name: projections_index_y2022; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projections_index ATTACH PARTITION public.projections_index_y2022 FOR VALUES FROM ('2022') TO ('2023');
+
+
+--
+-- Name: projections_index_y2023; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projections_index ATTACH PARTITION public.projections_index_y2023 FOR VALUES FROM ('2023') TO ('2024');
+
+
+--
+-- Name: projections_index_y2024; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.projections_index ATTACH PARTITION public.projections_index_y2024 FOR VALUES FROM ('2024') TO ('2025');
+
+
+--
 -- Name: draft uid; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -14673,20 +16778,6 @@ CREATE UNIQUE INDEX idx_24804_alias ON public.player_aliases USING btree (pid, f
 
 
 --
--- Name: idx_24814_idx_player_gamelogs_esbid_tm_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_24814_idx_player_gamelogs_esbid_tm_pid ON public.player_gamelogs USING btree (esbid, tm, pid);
-
-
---
--- Name: idx_24814_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_24814_pid ON public.player_gamelogs USING btree (pid, esbid);
-
-
---
 -- Name: idx_24855_pid; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -14782,20 +16873,6 @@ CREATE INDEX idx_24932_pid ON public.projections_archive USING btree (pid);
 --
 
 CREATE UNIQUE INDEX idx_24932_projection ON public.projections_archive USING btree (sourceid, pid, userid, week, year, "timestamp");
-
-
---
--- Name: idx_24938_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_24938_pid ON public.projections_index USING btree (pid);
-
-
---
--- Name: idx_24938_projection; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_24938_projection ON public.projections_index USING btree (sourceid, pid, userid, week, year);
 
 
 --
@@ -15275,20 +17352,6 @@ CREATE INDEX idx_opening_days_year_opening_day ON public.opening_days USING btre
 
 
 --
--- Name: idx_player_gamelogs_esbid_active_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_player_gamelogs_esbid_active_pid ON public.player_gamelogs USING btree (esbid, active, pid);
-
-
---
--- Name: idx_player_gamelogs_esbid_tm; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_player_gamelogs_esbid_tm ON public.player_gamelogs USING btree (esbid, tm);
-
-
---
 -- Name: idx_player_pff_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -15643,6 +17706,48 @@ CREATE INDEX index_nfl_plays_year_seas_type_week_play_type_psr_pid ON ONLY publi
 --
 
 CREATE INDEX index_nfl_plays_year_seas_type_week_play_type_trg_pid ON ONLY public.nfl_plays USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
+-- Name: index_player_gamelogs_esbid_active_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_player_gamelogs_esbid_active_pid ON ONLY public.player_gamelogs USING btree (esbid, pid, active);
+
+
+--
+-- Name: index_player_gamelogs_esbid_tm; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_player_gamelogs_esbid_tm ON ONLY public.player_gamelogs USING btree (esbid, tm);
+
+
+--
+-- Name: index_player_gamelogs_esbid_tm_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_player_gamelogs_esbid_tm_pid ON ONLY public.player_gamelogs USING btree (tm, esbid, pid);
+
+
+--
+-- Name: index_player_gamelogs_year_esbid_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_player_gamelogs_year_esbid_pid ON ONLY public.player_gamelogs USING btree (year, esbid, pid);
+
+
+--
+-- Name: index_projections_index_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX index_projections_index_pid ON ONLY public.projections_index USING btree (pid);
+
+
+--
+-- Name: index_projections_index_sourceid_pid_userid_week_year; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX index_projections_index_sourceid_pid_userid_week_year ON ONLY public.projections_index USING btree (sourceid, pid, userid, week, year);
 
 
 --
@@ -22674,10 +24779,822 @@ CREATE INDEX nfl_year_week_timestamp_year_week_idx ON public.nfl_year_week_times
 
 
 --
+-- Name: player_gamelogs_default_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_default_esbid_pid_active_idx ON public.player_gamelogs_default USING btree (esbid, pid, active);
+
+
+--
+-- Name: player_gamelogs_default_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_default_esbid_tm_idx ON public.player_gamelogs_default USING btree (esbid, tm);
+
+
+--
+-- Name: player_gamelogs_default_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_default_tm_esbid_pid_idx ON public.player_gamelogs_default USING btree (tm, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_default_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_gamelogs_default_year_esbid_pid_idx ON public.player_gamelogs_default USING btree (year, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2000_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2000_esbid_pid_active_idx ON public.player_gamelogs_year_2000 USING btree (esbid, pid, active);
+
+
+--
+-- Name: player_gamelogs_year_2000_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2000_esbid_tm_idx ON public.player_gamelogs_year_2000 USING btree (esbid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2000_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2000_tm_esbid_pid_idx ON public.player_gamelogs_year_2000 USING btree (tm, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2000_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_gamelogs_year_2000_year_esbid_pid_idx ON public.player_gamelogs_year_2000 USING btree (year, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2001_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2001_esbid_pid_active_idx ON public.player_gamelogs_year_2001 USING btree (esbid, pid, active);
+
+
+--
+-- Name: player_gamelogs_year_2001_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2001_esbid_tm_idx ON public.player_gamelogs_year_2001 USING btree (esbid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2001_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2001_tm_esbid_pid_idx ON public.player_gamelogs_year_2001 USING btree (tm, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2001_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_gamelogs_year_2001_year_esbid_pid_idx ON public.player_gamelogs_year_2001 USING btree (year, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2002_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2002_esbid_pid_active_idx ON public.player_gamelogs_year_2002 USING btree (esbid, pid, active);
+
+
+--
+-- Name: player_gamelogs_year_2002_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2002_esbid_tm_idx ON public.player_gamelogs_year_2002 USING btree (esbid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2002_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2002_tm_esbid_pid_idx ON public.player_gamelogs_year_2002 USING btree (tm, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2002_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_gamelogs_year_2002_year_esbid_pid_idx ON public.player_gamelogs_year_2002 USING btree (year, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2003_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2003_esbid_pid_active_idx ON public.player_gamelogs_year_2003 USING btree (esbid, pid, active);
+
+
+--
+-- Name: player_gamelogs_year_2003_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2003_esbid_tm_idx ON public.player_gamelogs_year_2003 USING btree (esbid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2003_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2003_tm_esbid_pid_idx ON public.player_gamelogs_year_2003 USING btree (tm, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2003_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_gamelogs_year_2003_year_esbid_pid_idx ON public.player_gamelogs_year_2003 USING btree (year, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2004_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2004_esbid_pid_active_idx ON public.player_gamelogs_year_2004 USING btree (esbid, pid, active);
+
+
+--
+-- Name: player_gamelogs_year_2004_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2004_esbid_tm_idx ON public.player_gamelogs_year_2004 USING btree (esbid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2004_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2004_tm_esbid_pid_idx ON public.player_gamelogs_year_2004 USING btree (tm, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2004_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_gamelogs_year_2004_year_esbid_pid_idx ON public.player_gamelogs_year_2004 USING btree (year, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2005_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2005_esbid_pid_active_idx ON public.player_gamelogs_year_2005 USING btree (esbid, pid, active);
+
+
+--
+-- Name: player_gamelogs_year_2005_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2005_esbid_tm_idx ON public.player_gamelogs_year_2005 USING btree (esbid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2005_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2005_tm_esbid_pid_idx ON public.player_gamelogs_year_2005 USING btree (tm, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2005_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_gamelogs_year_2005_year_esbid_pid_idx ON public.player_gamelogs_year_2005 USING btree (year, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2006_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2006_esbid_pid_active_idx ON public.player_gamelogs_year_2006 USING btree (esbid, pid, active);
+
+
+--
+-- Name: player_gamelogs_year_2006_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2006_esbid_tm_idx ON public.player_gamelogs_year_2006 USING btree (esbid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2006_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2006_tm_esbid_pid_idx ON public.player_gamelogs_year_2006 USING btree (tm, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2006_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_gamelogs_year_2006_year_esbid_pid_idx ON public.player_gamelogs_year_2006 USING btree (year, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2007_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2007_esbid_pid_active_idx ON public.player_gamelogs_year_2007 USING btree (esbid, pid, active);
+
+
+--
+-- Name: player_gamelogs_year_2007_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2007_esbid_tm_idx ON public.player_gamelogs_year_2007 USING btree (esbid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2007_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2007_tm_esbid_pid_idx ON public.player_gamelogs_year_2007 USING btree (tm, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2007_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_gamelogs_year_2007_year_esbid_pid_idx ON public.player_gamelogs_year_2007 USING btree (year, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2008_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2008_esbid_pid_active_idx ON public.player_gamelogs_year_2008 USING btree (esbid, pid, active);
+
+
+--
+-- Name: player_gamelogs_year_2008_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2008_esbid_tm_idx ON public.player_gamelogs_year_2008 USING btree (esbid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2008_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2008_tm_esbid_pid_idx ON public.player_gamelogs_year_2008 USING btree (tm, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2008_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_gamelogs_year_2008_year_esbid_pid_idx ON public.player_gamelogs_year_2008 USING btree (year, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2009_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2009_esbid_pid_active_idx ON public.player_gamelogs_year_2009 USING btree (esbid, pid, active);
+
+
+--
+-- Name: player_gamelogs_year_2009_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2009_esbid_tm_idx ON public.player_gamelogs_year_2009 USING btree (esbid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2009_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2009_tm_esbid_pid_idx ON public.player_gamelogs_year_2009 USING btree (tm, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2009_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_gamelogs_year_2009_year_esbid_pid_idx ON public.player_gamelogs_year_2009 USING btree (year, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2010_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2010_esbid_pid_active_idx ON public.player_gamelogs_year_2010 USING btree (esbid, pid, active);
+
+
+--
+-- Name: player_gamelogs_year_2010_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2010_esbid_tm_idx ON public.player_gamelogs_year_2010 USING btree (esbid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2010_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2010_tm_esbid_pid_idx ON public.player_gamelogs_year_2010 USING btree (tm, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2010_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_gamelogs_year_2010_year_esbid_pid_idx ON public.player_gamelogs_year_2010 USING btree (year, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2011_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2011_esbid_pid_active_idx ON public.player_gamelogs_year_2011 USING btree (esbid, pid, active);
+
+
+--
+-- Name: player_gamelogs_year_2011_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2011_esbid_tm_idx ON public.player_gamelogs_year_2011 USING btree (esbid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2011_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2011_tm_esbid_pid_idx ON public.player_gamelogs_year_2011 USING btree (tm, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2011_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_gamelogs_year_2011_year_esbid_pid_idx ON public.player_gamelogs_year_2011 USING btree (year, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2012_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2012_esbid_pid_active_idx ON public.player_gamelogs_year_2012 USING btree (esbid, pid, active);
+
+
+--
+-- Name: player_gamelogs_year_2012_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2012_esbid_tm_idx ON public.player_gamelogs_year_2012 USING btree (esbid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2012_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2012_tm_esbid_pid_idx ON public.player_gamelogs_year_2012 USING btree (tm, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2012_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_gamelogs_year_2012_year_esbid_pid_idx ON public.player_gamelogs_year_2012 USING btree (year, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2013_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2013_esbid_pid_active_idx ON public.player_gamelogs_year_2013 USING btree (esbid, pid, active);
+
+
+--
+-- Name: player_gamelogs_year_2013_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2013_esbid_tm_idx ON public.player_gamelogs_year_2013 USING btree (esbid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2013_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2013_tm_esbid_pid_idx ON public.player_gamelogs_year_2013 USING btree (tm, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2013_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_gamelogs_year_2013_year_esbid_pid_idx ON public.player_gamelogs_year_2013 USING btree (year, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2014_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2014_esbid_pid_active_idx ON public.player_gamelogs_year_2014 USING btree (esbid, pid, active);
+
+
+--
+-- Name: player_gamelogs_year_2014_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2014_esbid_tm_idx ON public.player_gamelogs_year_2014 USING btree (esbid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2014_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2014_tm_esbid_pid_idx ON public.player_gamelogs_year_2014 USING btree (tm, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2014_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_gamelogs_year_2014_year_esbid_pid_idx ON public.player_gamelogs_year_2014 USING btree (year, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2015_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2015_esbid_pid_active_idx ON public.player_gamelogs_year_2015 USING btree (esbid, pid, active);
+
+
+--
+-- Name: player_gamelogs_year_2015_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2015_esbid_tm_idx ON public.player_gamelogs_year_2015 USING btree (esbid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2015_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2015_tm_esbid_pid_idx ON public.player_gamelogs_year_2015 USING btree (tm, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2015_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_gamelogs_year_2015_year_esbid_pid_idx ON public.player_gamelogs_year_2015 USING btree (year, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2016_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2016_esbid_pid_active_idx ON public.player_gamelogs_year_2016 USING btree (esbid, pid, active);
+
+
+--
+-- Name: player_gamelogs_year_2016_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2016_esbid_tm_idx ON public.player_gamelogs_year_2016 USING btree (esbid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2016_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2016_tm_esbid_pid_idx ON public.player_gamelogs_year_2016 USING btree (tm, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2016_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_gamelogs_year_2016_year_esbid_pid_idx ON public.player_gamelogs_year_2016 USING btree (year, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2017_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2017_esbid_pid_active_idx ON public.player_gamelogs_year_2017 USING btree (esbid, pid, active);
+
+
+--
+-- Name: player_gamelogs_year_2017_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2017_esbid_tm_idx ON public.player_gamelogs_year_2017 USING btree (esbid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2017_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2017_tm_esbid_pid_idx ON public.player_gamelogs_year_2017 USING btree (tm, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2017_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_gamelogs_year_2017_year_esbid_pid_idx ON public.player_gamelogs_year_2017 USING btree (year, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2018_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2018_esbid_pid_active_idx ON public.player_gamelogs_year_2018 USING btree (esbid, pid, active);
+
+
+--
+-- Name: player_gamelogs_year_2018_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2018_esbid_tm_idx ON public.player_gamelogs_year_2018 USING btree (esbid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2018_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2018_tm_esbid_pid_idx ON public.player_gamelogs_year_2018 USING btree (tm, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2018_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_gamelogs_year_2018_year_esbid_pid_idx ON public.player_gamelogs_year_2018 USING btree (year, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2019_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2019_esbid_pid_active_idx ON public.player_gamelogs_year_2019 USING btree (esbid, pid, active);
+
+
+--
+-- Name: player_gamelogs_year_2019_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2019_esbid_tm_idx ON public.player_gamelogs_year_2019 USING btree (esbid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2019_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2019_tm_esbid_pid_idx ON public.player_gamelogs_year_2019 USING btree (tm, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2019_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_gamelogs_year_2019_year_esbid_pid_idx ON public.player_gamelogs_year_2019 USING btree (year, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2020_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2020_esbid_pid_active_idx ON public.player_gamelogs_year_2020 USING btree (esbid, pid, active);
+
+
+--
+-- Name: player_gamelogs_year_2020_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2020_esbid_tm_idx ON public.player_gamelogs_year_2020 USING btree (esbid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2020_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2020_tm_esbid_pid_idx ON public.player_gamelogs_year_2020 USING btree (tm, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2020_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_gamelogs_year_2020_year_esbid_pid_idx ON public.player_gamelogs_year_2020 USING btree (year, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2021_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2021_esbid_pid_active_idx ON public.player_gamelogs_year_2021 USING btree (esbid, pid, active);
+
+
+--
+-- Name: player_gamelogs_year_2021_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2021_esbid_tm_idx ON public.player_gamelogs_year_2021 USING btree (esbid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2021_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2021_tm_esbid_pid_idx ON public.player_gamelogs_year_2021 USING btree (tm, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2021_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_gamelogs_year_2021_year_esbid_pid_idx ON public.player_gamelogs_year_2021 USING btree (year, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2022_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2022_esbid_pid_active_idx ON public.player_gamelogs_year_2022 USING btree (esbid, pid, active);
+
+
+--
+-- Name: player_gamelogs_year_2022_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2022_esbid_tm_idx ON public.player_gamelogs_year_2022 USING btree (esbid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2022_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2022_tm_esbid_pid_idx ON public.player_gamelogs_year_2022 USING btree (tm, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2022_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_gamelogs_year_2022_year_esbid_pid_idx ON public.player_gamelogs_year_2022 USING btree (year, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2023_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2023_esbid_pid_active_idx ON public.player_gamelogs_year_2023 USING btree (esbid, pid, active);
+
+
+--
+-- Name: player_gamelogs_year_2023_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2023_esbid_tm_idx ON public.player_gamelogs_year_2023 USING btree (esbid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2023_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2023_tm_esbid_pid_idx ON public.player_gamelogs_year_2023 USING btree (tm, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2023_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_gamelogs_year_2023_year_esbid_pid_idx ON public.player_gamelogs_year_2023 USING btree (year, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2024_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2024_esbid_pid_active_idx ON public.player_gamelogs_year_2024 USING btree (esbid, pid, active);
+
+
+--
+-- Name: player_gamelogs_year_2024_esbid_tm_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2024_esbid_tm_idx ON public.player_gamelogs_year_2024 USING btree (esbid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2024_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2024_tm_esbid_pid_idx ON public.player_gamelogs_year_2024 USING btree (tm, esbid, pid);
+
+
+--
+-- Name: player_gamelogs_year_2024_year_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX player_gamelogs_year_2024_year_esbid_pid_idx ON public.player_gamelogs_year_2024 USING btree (year, esbid, pid);
+
+
+--
 -- Name: player_name_search_idx; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX player_name_search_idx ON public.player USING gin (name_search_vector);
+
+
+--
+-- Name: projections_index_default_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_index_default_pid_idx ON public.projections_index_default USING btree (pid);
+
+
+--
+-- Name: projections_index_default_sourceid_pid_userid_week_year_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX projections_index_default_sourceid_pid_userid_week_year_idx ON public.projections_index_default USING btree (sourceid, pid, userid, week, year);
+
+
+--
+-- Name: projections_index_y2020_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_index_y2020_pid_idx ON public.projections_index_y2020 USING btree (pid);
+
+
+--
+-- Name: projections_index_y2020_sourceid_pid_userid_week_year_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX projections_index_y2020_sourceid_pid_userid_week_year_idx ON public.projections_index_y2020 USING btree (sourceid, pid, userid, week, year);
+
+
+--
+-- Name: projections_index_y2021_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_index_y2021_pid_idx ON public.projections_index_y2021 USING btree (pid);
+
+
+--
+-- Name: projections_index_y2021_sourceid_pid_userid_week_year_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX projections_index_y2021_sourceid_pid_userid_week_year_idx ON public.projections_index_y2021 USING btree (sourceid, pid, userid, week, year);
+
+
+--
+-- Name: projections_index_y2022_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_index_y2022_pid_idx ON public.projections_index_y2022 USING btree (pid);
+
+
+--
+-- Name: projections_index_y2022_sourceid_pid_userid_week_year_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX projections_index_y2022_sourceid_pid_userid_week_year_idx ON public.projections_index_y2022 USING btree (sourceid, pid, userid, week, year);
+
+
+--
+-- Name: projections_index_y2023_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_index_y2023_pid_idx ON public.projections_index_y2023 USING btree (pid);
+
+
+--
+-- Name: projections_index_y2023_sourceid_pid_userid_week_year_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX projections_index_y2023_sourceid_pid_userid_week_year_idx ON public.projections_index_y2023 USING btree (sourceid, pid, userid, week, year);
+
+
+--
+-- Name: projections_index_y2024_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX projections_index_y2024_pid_idx ON public.projections_index_y2024 USING btree (pid);
+
+
+--
+-- Name: projections_index_y2024_sourceid_pid_userid_week_year_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX projections_index_y2024_sourceid_pid_userid_week_year_idx ON public.projections_index_y2024 USING btree (sourceid, pid, userid, week, year);
 
 
 --
@@ -29678,6 +32595,818 @@ ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_psr_pid ATTACH 
 --
 
 ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2024_year_seas_type_week_play_type_trg_pid_idx;
+
+
+--
+-- Name: player_gamelogs_default_esbid_pid_active_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION public.player_gamelogs_default_esbid_pid_active_idx;
+
+
+--
+-- Name: player_gamelogs_default_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_default_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_default_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_default_tm_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_default_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_default_year_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2000_esbid_pid_active_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION public.player_gamelogs_year_2000_esbid_pid_active_idx;
+
+
+--
+-- Name: player_gamelogs_year_2000_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2000_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2000_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2000_tm_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2000_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2000_year_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2001_esbid_pid_active_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION public.player_gamelogs_year_2001_esbid_pid_active_idx;
+
+
+--
+-- Name: player_gamelogs_year_2001_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2001_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2001_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2001_tm_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2001_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2001_year_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2002_esbid_pid_active_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION public.player_gamelogs_year_2002_esbid_pid_active_idx;
+
+
+--
+-- Name: player_gamelogs_year_2002_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2002_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2002_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2002_tm_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2002_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2002_year_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2003_esbid_pid_active_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION public.player_gamelogs_year_2003_esbid_pid_active_idx;
+
+
+--
+-- Name: player_gamelogs_year_2003_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2003_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2003_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2003_tm_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2003_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2003_year_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2004_esbid_pid_active_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION public.player_gamelogs_year_2004_esbid_pid_active_idx;
+
+
+--
+-- Name: player_gamelogs_year_2004_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2004_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2004_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2004_tm_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2004_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2004_year_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2005_esbid_pid_active_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION public.player_gamelogs_year_2005_esbid_pid_active_idx;
+
+
+--
+-- Name: player_gamelogs_year_2005_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2005_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2005_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2005_tm_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2005_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2005_year_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2006_esbid_pid_active_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION public.player_gamelogs_year_2006_esbid_pid_active_idx;
+
+
+--
+-- Name: player_gamelogs_year_2006_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2006_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2006_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2006_tm_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2006_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2006_year_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2007_esbid_pid_active_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION public.player_gamelogs_year_2007_esbid_pid_active_idx;
+
+
+--
+-- Name: player_gamelogs_year_2007_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2007_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2007_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2007_tm_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2007_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2007_year_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2008_esbid_pid_active_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION public.player_gamelogs_year_2008_esbid_pid_active_idx;
+
+
+--
+-- Name: player_gamelogs_year_2008_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2008_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2008_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2008_tm_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2008_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2008_year_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2009_esbid_pid_active_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION public.player_gamelogs_year_2009_esbid_pid_active_idx;
+
+
+--
+-- Name: player_gamelogs_year_2009_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2009_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2009_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2009_tm_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2009_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2009_year_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2010_esbid_pid_active_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION public.player_gamelogs_year_2010_esbid_pid_active_idx;
+
+
+--
+-- Name: player_gamelogs_year_2010_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2010_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2010_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2010_tm_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2010_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2010_year_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2011_esbid_pid_active_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION public.player_gamelogs_year_2011_esbid_pid_active_idx;
+
+
+--
+-- Name: player_gamelogs_year_2011_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2011_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2011_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2011_tm_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2011_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2011_year_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2012_esbid_pid_active_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION public.player_gamelogs_year_2012_esbid_pid_active_idx;
+
+
+--
+-- Name: player_gamelogs_year_2012_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2012_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2012_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2012_tm_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2012_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2012_year_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2013_esbid_pid_active_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION public.player_gamelogs_year_2013_esbid_pid_active_idx;
+
+
+--
+-- Name: player_gamelogs_year_2013_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2013_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2013_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2013_tm_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2013_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2013_year_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2014_esbid_pid_active_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION public.player_gamelogs_year_2014_esbid_pid_active_idx;
+
+
+--
+-- Name: player_gamelogs_year_2014_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2014_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2014_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2014_tm_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2014_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2014_year_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2015_esbid_pid_active_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION public.player_gamelogs_year_2015_esbid_pid_active_idx;
+
+
+--
+-- Name: player_gamelogs_year_2015_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2015_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2015_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2015_tm_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2015_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2015_year_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2016_esbid_pid_active_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION public.player_gamelogs_year_2016_esbid_pid_active_idx;
+
+
+--
+-- Name: player_gamelogs_year_2016_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2016_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2016_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2016_tm_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2016_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2016_year_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2017_esbid_pid_active_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION public.player_gamelogs_year_2017_esbid_pid_active_idx;
+
+
+--
+-- Name: player_gamelogs_year_2017_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2017_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2017_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2017_tm_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2017_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2017_year_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2018_esbid_pid_active_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION public.player_gamelogs_year_2018_esbid_pid_active_idx;
+
+
+--
+-- Name: player_gamelogs_year_2018_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2018_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2018_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2018_tm_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2018_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2018_year_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2019_esbid_pid_active_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION public.player_gamelogs_year_2019_esbid_pid_active_idx;
+
+
+--
+-- Name: player_gamelogs_year_2019_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2019_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2019_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2019_tm_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2019_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2019_year_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2020_esbid_pid_active_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION public.player_gamelogs_year_2020_esbid_pid_active_idx;
+
+
+--
+-- Name: player_gamelogs_year_2020_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2020_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2020_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2020_tm_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2020_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2020_year_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2021_esbid_pid_active_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION public.player_gamelogs_year_2021_esbid_pid_active_idx;
+
+
+--
+-- Name: player_gamelogs_year_2021_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2021_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2021_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2021_tm_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2021_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2021_year_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2022_esbid_pid_active_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION public.player_gamelogs_year_2022_esbid_pid_active_idx;
+
+
+--
+-- Name: player_gamelogs_year_2022_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2022_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2022_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2022_tm_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2022_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2022_year_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2023_esbid_pid_active_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION public.player_gamelogs_year_2023_esbid_pid_active_idx;
+
+
+--
+-- Name: player_gamelogs_year_2023_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2023_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2023_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2023_tm_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2023_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2023_year_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2024_esbid_pid_active_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION public.player_gamelogs_year_2024_esbid_pid_active_idx;
+
+
+--
+-- Name: player_gamelogs_year_2024_esbid_tm_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2024_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2024_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_esbid_tm_pid ATTACH PARTITION public.player_gamelogs_year_2024_tm_esbid_pid_idx;
+
+
+--
+-- Name: player_gamelogs_year_2024_year_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_player_gamelogs_year_esbid_pid ATTACH PARTITION public.player_gamelogs_year_2024_year_esbid_pid_idx;
+
+
+--
+-- Name: projections_index_default_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_projections_index_pid ATTACH PARTITION public.projections_index_default_pid_idx;
+
+
+--
+-- Name: projections_index_default_sourceid_pid_userid_week_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_projections_index_sourceid_pid_userid_week_year ATTACH PARTITION public.projections_index_default_sourceid_pid_userid_week_year_idx;
+
+
+--
+-- Name: projections_index_y2020_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_projections_index_pid ATTACH PARTITION public.projections_index_y2020_pid_idx;
+
+
+--
+-- Name: projections_index_y2020_sourceid_pid_userid_week_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_projections_index_sourceid_pid_userid_week_year ATTACH PARTITION public.projections_index_y2020_sourceid_pid_userid_week_year_idx;
+
+
+--
+-- Name: projections_index_y2021_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_projections_index_pid ATTACH PARTITION public.projections_index_y2021_pid_idx;
+
+
+--
+-- Name: projections_index_y2021_sourceid_pid_userid_week_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_projections_index_sourceid_pid_userid_week_year ATTACH PARTITION public.projections_index_y2021_sourceid_pid_userid_week_year_idx;
+
+
+--
+-- Name: projections_index_y2022_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_projections_index_pid ATTACH PARTITION public.projections_index_y2022_pid_idx;
+
+
+--
+-- Name: projections_index_y2022_sourceid_pid_userid_week_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_projections_index_sourceid_pid_userid_week_year ATTACH PARTITION public.projections_index_y2022_sourceid_pid_userid_week_year_idx;
+
+
+--
+-- Name: projections_index_y2023_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_projections_index_pid ATTACH PARTITION public.projections_index_y2023_pid_idx;
+
+
+--
+-- Name: projections_index_y2023_sourceid_pid_userid_week_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_projections_index_sourceid_pid_userid_week_year ATTACH PARTITION public.projections_index_y2023_sourceid_pid_userid_week_year_idx;
+
+
+--
+-- Name: projections_index_y2024_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_projections_index_pid ATTACH PARTITION public.projections_index_y2024_pid_idx;
+
+
+--
+-- Name: projections_index_y2024_sourceid_pid_userid_week_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.index_projections_index_sourceid_pid_userid_week_year ATTACH PARTITION public.projections_index_y2024_sourceid_pid_userid_week_year_idx;
 
 
 --
