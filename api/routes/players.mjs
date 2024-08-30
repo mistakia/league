@@ -30,62 +30,44 @@ router.post('/?', async (req, res) => {
     const search = req.body.q
     const { leagueId } = req.body
     const userId = req.auth ? req.auth.userId : null
-    const pids = req.body.pids
-      ? Array.isArray(req.body.pids)
-        ? req.body.pids
-        : [req.body.pids]
-      : []
+    const pids = Array.isArray(req.body.pids)
+      ? req.body.pids
+      : req.body.pids
+        ? [req.body.pids]
+        : []
 
-    const cacheKey = `/players/${leagueId || 0}`
+    const cache_key = `/players/${leagueId || 0}`
+    let players
+
     if (!search && !pids.length) {
-      const players = cache.get(cacheKey)
+      players = cache.get(cache_key)
       if (players) {
         logger('USING CACHE')
-        if (userId) {
-          const bids = await getTransitionBids({
-            userId,
-            leagueId
-          })
-
-          if (!bids.length) {
-            return res.send(players)
-          }
-
-          return res.send(
-            players.map((p) => {
-              const { bid } = bids.find((b) => b.pid === p.pid) || {}
-              return { bid, ...p }
-            })
-          )
-        }
-
-        return res.send(players)
       }
     }
 
-    const players = await getPlayers({
-      leagueId,
-      pids,
-      textSearch: search,
-      include_all_active_players: !pids.length
-    })
+    if (!players) {
+      players = await getPlayers({
+        leagueId,
+        pids,
+        textSearch: search,
+        include_all_active_players: !pids.length
+      })
 
-    if (!search && !pids.length) {
-      cache.set(cacheKey, players, 1800) // 30 mins
+      if (!search && !pids.length) {
+        cache.set(cache_key, players, 1800) // 30 mins
+      }
     }
 
     if (userId) {
       const bids = await getTransitionBids({ userId, leagueId })
-      if (!bids.length) {
-        return res.send(players)
+      if (bids.length) {
+        const bid_map = new Map(bids.map((b) => [b.pid, b.bid]))
+        players = players.map((p) => ({
+          ...p,
+          bid: bid_map.get(p.pid)
+        }))
       }
-
-      return res.send(
-        players.map((p) => {
-          const { bid } = bids.find((b) => b.pid === p.pid) || {}
-          return { bid, ...p }
-        })
-      )
     }
 
     res.send(players)
