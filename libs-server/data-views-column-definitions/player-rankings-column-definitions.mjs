@@ -39,12 +39,16 @@ const add_player_rankings_with_statement = ({
   if (!Array.isArray(ranking_source_id)) {
     ranking_source_id = [ranking_source_id]
   }
-  const ranking_type = params.ranking_type || 'PPR_REDRAFT'
+
+  let ranking_type = params.ranking_type || 'PPR_REDRAFT'
+  if (!Array.isArray(ranking_type)) {
+    ranking_type = [ranking_type]
+  }
 
   const with_query = db('player_rankings_index')
     .select('pid')
     .whereIn('source_id', ranking_source_id)
-    .where('ranking_type', ranking_type)
+    .whereIn('ranking_type', ranking_type)
     .whereIn('year', year)
     .whereIn('week', week)
 
