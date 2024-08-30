@@ -337,4 +337,39 @@ describe('LIBS SERVER get_data_view_results', () => {
     const expected_query = `with "tfdc85d6d1e23cd26bfb9b1ea27ad3e87" as (select "player_salaries"."pid", "player_salaries"."salary", "nfl_games"."year", "nfl_games"."week" from "player_salaries" inner join "nfl_games" on "player_salaries"."esbid" = "nfl_games"."esbid" where "player_salaries"."source_id" = 'DRAFTKINGS' and "nfl_games"."year" in (2024) and "nfl_games"."week" in (1) and player_salaries.salary >= '5000') select "player"."pid", "tfdc85d6d1e23cd26bfb9b1ea27ad3e87"."salary" AS "salary_0", "player"."pos" from "player" inner join "tfdc85d6d1e23cd26bfb9b1ea27ad3e87" on "tfdc85d6d1e23cd26bfb9b1ea27ad3e87"."pid" = "player"."pid" group by "tfdc85d6d1e23cd26bfb9b1ea27ad3e87"."salary", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 2 DESC NULLS LAST, "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
   })
+
+  it('player_rankings', () => {
+    const query = get_data_view_results_query({
+      columns: [
+        {
+          column_id: 'player_average_ranking'
+        },
+        {
+          column_id: 'player_overall_ranking'
+        },
+        {
+          column_id: 'player_position_ranking'
+        },
+        {
+          column_id: 'player_min_ranking'
+        },
+        {
+          column_id: 'player_max_ranking'
+        },
+        {
+          column_id: 'player_ranking_standard_deviation'
+        }
+      ],
+      where: [
+        {
+          column_id: 'player_average_ranking',
+          value: '50',
+          operator: '<='
+        }
+      ],
+      sort: [{ column_id: 'player_average_ranking', desc: false }]
+    })
+    const expected_query = `with "t058c73ac39f13734c9eda890a301cfe1" as (select "pid", "player_rankings_index"."avg" AS "avg", "player_rankings_index"."overall_rank" AS "overall_rank", "player_rankings_index"."position_rank" AS "position_rank", "player_rankings_index"."min" AS "min", "player_rankings_index"."max" AS "max", "player_rankings_index"."std" AS "std" from "player_rankings_index" where "source_id" = 'FANTASYPROS' and "ranking_type" = 'PPR_REDRAFT' and "year" in (2024) and "week" in (0) and player_rankings_index.avg <= '50') select "player"."pid", "t058c73ac39f13734c9eda890a301cfe1"."avg" AS "avg_0", "t058c73ac39f13734c9eda890a301cfe1"."overall_rank" AS "overall_rank_0", "t058c73ac39f13734c9eda890a301cfe1"."position_rank" AS "position_rank_0", "t058c73ac39f13734c9eda890a301cfe1"."min" AS "min_0", "t058c73ac39f13734c9eda890a301cfe1"."max" AS "max_0", "t058c73ac39f13734c9eda890a301cfe1"."std" AS "std_0", "player"."pos" from "player" inner join "t058c73ac39f13734c9eda890a301cfe1" on "t058c73ac39f13734c9eda890a301cfe1"."pid" = "player"."pid" group by "t058c73ac39f13734c9eda890a301cfe1"."avg", "t058c73ac39f13734c9eda890a301cfe1"."overall_rank", "t058c73ac39f13734c9eda890a301cfe1"."position_rank", "t058c73ac39f13734c9eda890a301cfe1"."min", "t058c73ac39f13734c9eda890a301cfe1"."max", "t058c73ac39f13734c9eda890a301cfe1"."std", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 2 ASC NULLS LAST, "player"."pid" asc limit 500`
+    compare_queries(query.toString(), expected_query)
+  })
 })
