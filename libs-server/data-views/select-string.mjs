@@ -26,7 +26,9 @@ const get_select_string = ({
           rate_type_table_name,
           splits
         })
-      : table_name
+      : !is_main_select && column_definition.table_name
+        ? column_definition.table_name
+        : table_name
   const column_value = `"${join_table_name}"."${column_definition.column_name}"`
 
   const get_select_expression = () => {
@@ -116,8 +118,12 @@ const get_select_string = ({
   //   group_by.push(...column_definition.main_group_by({ table_name, params: column_params, column_index, rate_type_table_name, splits }))
   // }
 
+  const select_alias = is_main_select
+    ? `${select_as}_${column_index}`
+    : select_as
+
   return {
-    select: [`${final_select_expression} AS "${select_as}_${column_index}"`],
+    select: [`${final_select_expression} AS "${select_alias}"`],
     group_by: group_by.filter(Boolean)
   }
 }
