@@ -369,7 +369,7 @@ export default function ({ is_logged_in }) {
       size: 80,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
       player_value_path: 'espn_id',
-      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS, COLUMN_GROUPS.ESPN]
     },
     player_fantasy_data_id: {
       column_title: 'Fantasy Data Player ID',
@@ -409,6 +409,70 @@ export default function ({ is_logged_in }) {
       size: 80,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
       player_value_path: 'otc_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_draftkings_id: {
+      column_title: 'DraftKings Player ID',
+      header_label: 'DraftKings ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'draftkings_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_pff_id: {
+      column_title: 'PFF Player ID',
+      header_label: 'PFF ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'pff_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS, COLUMN_GROUPS.PFF]
+    },
+    player_mfl_id: {
+      column_title: 'MFL Player ID',
+      header_label: 'MFL ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'mfl_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_fleaflicker_id: {
+      column_title: 'Fleaflicker Player ID',
+      header_label: 'Fleaflicker ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'fleaflicker_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_cbs_id: {
+      column_title: 'CBS Player ID',
+      header_label: 'CBS ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'cbs_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_cfbref_id: {
+      column_title: 'CFB Reference Player ID',
+      header_label: 'CFBRef ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'cfbref_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_twitter_username: {
+      column_title: 'Twitter Username',
+      header_label: 'Twitter',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'twitter_username',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_swish_id: {
+      column_title: 'Swish Player ID',
+      header_label: 'Swish ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'swish_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     },
 
