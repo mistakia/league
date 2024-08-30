@@ -148,7 +148,8 @@ const run = async ({
       'nfl_plays.pos_team',
       'nfl_games.h',
       'nfl_games.v',
-      'nfl_games.esbid'
+      'nfl_games.esbid',
+      'nfl_games.year'
     )
     .join('nfl_games', 'nfl_play_stats.esbid', '=', 'nfl_games.esbid')
     .join('nfl_plays', function () {
@@ -212,6 +213,7 @@ const run = async ({
       tm: fixTeam(playStat.clubCode),
       opp,
       esbid: playStat.esbid,
+      year: playStat.year,
       stats
     })
     player_gamelog_inserts.push(player_gamelog)
@@ -246,6 +248,7 @@ const run = async ({
       tm: fixTeam(playStat.clubCode),
       opp,
       esbid: playStat.esbid,
+      year: playStat.year,
       stats
     })
     player_gamelog_inserts.push(player_gamelog)
@@ -287,6 +290,7 @@ const run = async ({
       pos: 'DST',
       tm: team,
       esbid: play.esbid,
+      year: play.year,
       opp: fixTeam(opp),
       stats
     })
