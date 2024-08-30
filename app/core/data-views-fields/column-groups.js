@@ -12,6 +12,8 @@ const COLUMN_GROUPS = {
   TEAM_STATS: { priority: 1 },
   KEEPTRADECUT: { priority: 1 },
   PLAYER_CONTRACT: { priority: 1 },
+  DFS_SALARIES: { priority: 1 },
+  RANKINGS_ADP: { priority: 1 },
   NFL: { priority: 2 },
   NGS: { priority: 2 },
   SEASON_PROPS: { priority: 2 },
