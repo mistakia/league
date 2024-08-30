@@ -31,44 +31,26 @@ router.get('/?', async (req, res) => {
 
     const cacheKey = `/players/leagues/${leagueId}`
     let players = cache.get(cacheKey)
-    if (players) {
+    if (!players) {
+      players = await getPlayers({ leagueId })
+      cache.set(cacheKey, players, 1800) // 30 mins
+    } else {
       logger('USING CACHE')
-      if (userId) {
-        const bids = await getTransitionBids({
-          userId,
-          leagueId
-        })
-
-        if (!bids.length) {
-          return res.send(players)
-        }
-
-        return res.send(
-          players.map((p) => {
-            const { bid } = bids.find((b) => b.pid === p.pid) || {}
-            return { bid, ...p }
-          })
-        )
-      }
-
-      return res.send(players)
     }
 
-    players = await getPlayers({ leagueId })
-    cache.set(cacheKey, players, 1800) // 30 mins
-
     if (userId) {
-      const bids = await getTransitionBids({ userId, leagueId })
-      if (!bids.length) {
-        return res.send(players)
-      }
+      const bids = await getTransitionBids({
+        userId,
+        leagueId
+      })
 
-      return res.send(
-        players.map((p) => {
-          const { bid } = bids.find((b) => b.pid === p.pid) || {}
-          return { bid, ...p }
-        })
-      )
+      if (bids.length) {
+        const bidMap = new Map(bids.map((b) => [b.pid, b.bid]))
+        players = players.map((p) => ({
+          ...p,
+          bid: bidMap.get(p.pid) || undefined
+        }))
+      }
     }
 
     res.send(players)
