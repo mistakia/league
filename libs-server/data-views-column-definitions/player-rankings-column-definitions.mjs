@@ -35,12 +35,12 @@ const add_player_rankings_with_statement = ({
     week = [week]
   }
 
-  const source_id = params.source_id || 'FANTASYPROS'
+  const ranking_source_id = params.ranking_source_id || 'FANTASYPROS'
   const ranking_type = params.ranking_type || 'PPR_REDRAFT'
 
   const with_query = db('player_rankings_index')
     .select('pid')
-    .where('source_id', source_id)
+    .where('source_id', ranking_source_id)
     .where('ranking_type', ranking_type)
     .whereIn('year', year)
     .whereIn('week', week)
@@ -60,8 +60,9 @@ const add_player_rankings_with_statement = ({
   query.with(with_table_name, with_query)
 }
 
-const create_player_rankings_field = (field) => ({
+const create_player_rankings_field = (field, select_as) => ({
   column_name: field,
+  select_as: () => select_as,
   table_name: 'player_rankings_index',
   table_alias: generate_table_alias,
   join: data_view_join_function,
@@ -71,10 +72,19 @@ const create_player_rankings_field = (field) => ({
 })
 
 export default {
-  player_average_ranking: create_player_rankings_field('avg'),
-  player_overall_ranking: create_player_rankings_field('overall_rank'),
-  player_position_ranking: create_player_rankings_field('position_rank'),
-  player_min_ranking: create_player_rankings_field('min'),
-  player_max_ranking: create_player_rankings_field('max'),
-  player_ranking_standard_deviation: create_player_rankings_field('std')
+  player_average_ranking: create_player_rankings_field('avg', 'average_rank'),
+  player_overall_ranking: create_player_rankings_field(
+    'overall_rank',
+    'overall_rank'
+  ),
+  player_position_ranking: create_player_rankings_field(
+    'position_rank',
+    'position_rank'
+  ),
+  player_min_ranking: create_player_rankings_field('min', 'min_rank'),
+  player_max_ranking: create_player_rankings_field('max', 'max_rank'),
+  player_ranking_standard_deviation: create_player_rankings_field(
+    'std',
+    'rank_stddev'
+  )
 }

@@ -68,7 +68,7 @@ const get_select_string = ({
   }
 
   const select_expression = get_select_expression()
-  const select_as = column_definition.select_as
+  const select_as = is_main_select && column_definition.select_as
     ? column_definition.select_as({ params: column_params })
     : column_definition.column_name
 

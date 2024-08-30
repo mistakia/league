@@ -34,7 +34,7 @@ const add_player_dfs_salaries_with_statement = ({
     week = [week]
   }
 
-  const source_id = params.source_id || 'DRAFTKINGS'
+  const platform_source_id = params.platform_source_id || 'DRAFTKINGS'
 
   // need to set the source_contest_id
 
@@ -48,7 +48,7 @@ const add_player_dfs_salaries_with_statement = ({
     .join('nfl_games', function () {
       this.on('player_salaries.esbid', '=', 'nfl_games.esbid')
     })
-    .where('player_salaries.source_id', source_id)
+    .where('player_salaries.source_id', platform_source_id)
     .whereIn('nfl_games.year', year)
     .whereIn('nfl_games.week', week)
 
@@ -64,6 +64,7 @@ const add_player_dfs_salaries_with_statement = ({
 const create_player_dfs_salaries_field = (field) => ({
   column_name: field,
   table_name: 'player_salaries',
+  select_as: () => 'dfs_salary',
   table_alias: generate_table_alias,
   join: data_view_join_function,
   with: add_player_dfs_salaries_with_statement,
