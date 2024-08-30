@@ -217,7 +217,7 @@ const importPlaysForWeek = async ({
             .merge()
           await db('nfl_plays')
             .insert(play_inserts)
-            .onConflict(['esbid', 'playId'])
+            .onConflict(['esbid', 'playId', 'year'])
             .merge()
           log(
             `inserted ${play_inserts.length} play stats for esbid: ${game.esbid}`
