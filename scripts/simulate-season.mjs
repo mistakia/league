@@ -27,6 +27,14 @@ const simulate_season = async (lid) => {
   const matchups = await db('matchups')
     .where({ lid, year: constants.season.year })
     .where('week', '>=', currentWeek)
+
+  if (!matchups.length) {
+    log(
+      `No matchups found for year ${constants.season.year} from week ${currentWeek} on`
+    )
+    return
+  }
+
   const rosterRows = await getRosters({ lid })
   const tids = teamRows.map((t) => t.uid)
   const teamStats = await db('league_team_seasonlogs')

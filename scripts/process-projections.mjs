@@ -31,7 +31,9 @@ import calculatePlayoffMatchupProjection from './calculate-playoff-matchup-proje
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('process-projections')
-debug.enable('process-projections')
+debug.enable(
+  'process-projections,project-lineups,simulate-season,calculate-matchup-projection'
+)
 
 const timestamp = Math.round(Date.now() / 1000)
 
@@ -461,16 +463,13 @@ const process_league = async ({ year, lid }) => {
     log(`processed and saved ${valueInserts.length} player values`)
   }
 
-  if (week <= constants.season.finalWeek) {
+  if (constants.season.week <= constants.season.finalWeek) {
     await project_lineups(lid)
     await calculateMatchupProjection({ lid })
     await calculatePlayoffMatchupProjection({ lid })
   }
 
-  if (
-    constants.season.week &&
-    constants.season.week <= constants.season.regularSeasonFinalWeek
-  ) {
+  if (constants.season.week <= constants.season.regularSeasonFinalWeek) {
     await simulate_season(lid)
   }
 
