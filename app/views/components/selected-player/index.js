@@ -38,6 +38,7 @@ const mapStateToProps = createSelector(
       playerMap,
       market_salary_adjusted,
       is_logged_in: Boolean(app.userId),
+      is_hosted_league: Boolean(league.hosted),
       is_before_end_of_free_agent_period
     }
   }
