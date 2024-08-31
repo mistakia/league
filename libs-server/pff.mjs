@@ -1,4 +1,4 @@
-import { puppeteer } from '#libs-server'
+import { puppeteer, wait } from '#libs-server'
 import debug from 'debug'
 import db from '#db'
 import { constants } from '#libs-shared'
@@ -45,15 +45,13 @@ export const get_pff_session_cookie = async () => {
 
   // Launch a new page with Puppeteer
   const { page, browser } = await puppeteer.getPage(pff_login_config.url, {
-    headless: true
+    headless: true,
+    cookie_string: pff_login_config.cookie
   })
 
-  // Set the initial cookies
-  await page.setCookie(...parseCookieString(pff_login_config.cookie))
-
   // Navigate to the homepage and wait for 10 seconds
-  await page.goto(pff_login_config.url)
-  await page.waitForTimeout(10000)
+  // await page.goto(pff_login_config.url)
+  await wait(10000)
 
   // Check if the login button exists
   const login_button = await page.$(
@@ -64,7 +62,7 @@ export const get_pff_session_cookie = async () => {
     // If login button exists, click it and wait for 10 seconds
     await login_button.click()
     log('clicked login button')
-    await page.waitForTimeout(10000)
+    await wait(10000)
 
     // Check if the page has navigated to the sign-in form
     const sign_in_header = await page.$('header.signup-form-header')
@@ -83,7 +81,7 @@ export const get_pff_session_cookie = async () => {
       if (submit_button) {
         await submit_button.click()
         log('Submitted login form')
-        await page.waitForTimeout(10000)
+        await wait(10000)
       } else {
         log('Submit button not found')
       }
@@ -160,12 +158,4 @@ export const get_pff_player_seasonlogs = async ({
   }
 
   return data
-}
-
-// Helper function to parse cookie string into an array of cookie objects
-function parseCookieString(cookie_string) {
-  return cookie_string.split('; ').map((cookie) => {
-    const [name, value] = cookie.split('=')
-    return { name, value, domain: '.pff.com' }
-  })
 }

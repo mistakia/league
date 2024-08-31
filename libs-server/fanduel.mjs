@@ -562,8 +562,8 @@ export const get_market_details_from_wager = (wager_leg) => {
 
 export const getEvents = async () => {
   const fanduel_config = await get_fanduel_config()
-
-  const url = `${fanduel_config.api_url}/content-managed-page?betexRegion=GBR&capiJurisdiction=intl&currencyCode=USD&exchangeLocale=en_US&includePrices=true&includeRaceCards=false&includeSeo=true&language=en&regionCode=NAMERICA&timezone=America%2FNew_York&includeMarketBlurbs=true&_ak=FhMFpcPWXMeyZxOx&page=CUSTOM&customPageId=nfl`
+  const query_params = fanduel_config.query_params || ''
+  const url = `${fanduel_config.api_url}/content-managed-page?betexRegion=GBR&capiJurisdiction=intl&currencyCode=USD&exchangeLocale=en_US&includePrices=true&includeRaceCards=false&includeSeo=true&language=en&regionCode=NAMERICA&timezone=America%2FNew_York&includeMarketBlurbs=true&page=CUSTOM&customPageId=nfl${query_params}`
 
   log(`fetching ${url}`)
   const res = await fetch(url, {
@@ -581,8 +581,8 @@ export const getEvents = async () => {
 
 export const getEventTab = async ({ eventId, tab }) => {
   const fanduel_config = await get_fanduel_config()
-
-  const url = `${fanduel_config.api_url}/event-page?betexRegion=GBR&capiJurisdiction=intl&currencyCode=USD&exchangeLocale=en_US&includePrices=true&language=en&priceHistory=1&regionCode=NAMERICA&_ak=FhMFpcPWXMeyZxOx&eventId=${eventId}&tab=${tab}`
+  const query_params = fanduel_config.query_params || ''
+  const url = `${fanduel_config.api_url}/event-page?betexRegion=GBR&capiJurisdiction=intl&currencyCode=USD&exchangeLocale=en_US&includePrices=true&language=en&priceHistory=1&regionCode=NAMERICA&eventId=${eventId}&tab=${tab}${query_params}`
 
   log(`fetching ${url}`)
   const res = await fetch(url, {
@@ -595,8 +595,8 @@ export const getEventTab = async ({ eventId, tab }) => {
 
 export const getWeeklySpecials = async () => {
   const fanduel_config = await get_fanduel_config()
-
-  const url = `${fanduel_config.api_url}/content-managed-page?betexRegion=GBR&capiJurisdiction=intl&currencyCode=USD&exchangeLocale=en_US&includePrices=true&includeRaceCards=false&includeSeo=true&language=en&regionCode=NAMERICA&timezone=America%2FNew_York&includeMarketBlurbs=true&_ak=FhMFpcPWXMeyZxOx&page=CUSTOM&customPageId=nfl`
+  const query_params = fanduel_config.query_params || ''
+  const url = `${fanduel_config.api_url}/content-managed-page?betexRegion=GBR&capiJurisdiction=intl&currencyCode=USD&exchangeLocale=en_US&includePrices=true&includeRaceCards=false&includeSeo=true&language=en&regionCode=NAMERICA&timezone=America%2FNew_York&includeMarketBlurbs=true&page=CUSTOM&customPageId=nfl${query_params}`
 
   log(`fetching ${url}`)
   const res = await fetch(url, {

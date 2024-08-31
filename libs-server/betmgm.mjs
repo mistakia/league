@@ -2,7 +2,7 @@ import debug from 'debug'
 
 import config from '#config'
 import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
-import { puppeteer } from '#libs-server'
+import { puppeteer, wait } from '#libs-server'
 
 const log = debug('betmgm')
 debug.enable('betmgm')
@@ -34,7 +34,7 @@ export const get_markets = async () => {
   )
   const market_data_url = `${config.betmgm_api_url}/bettingoffer/fixtures?x-bwin-accessid=YmNkZjhiMzEtYWIwYS00ZDg1LWE2MWYtOGMyYjljNTdjYjFl&country=US&lang=en-us&offerMapping=All&sportIds=11&competitionIds=35`
   log(`fetching ${market_data_url}`)
-  await page.waitForTimeout(2000)
+  await wait(2000)
   const response = await page.goto(market_data_url)
   const data = await response.json()
   await browser.close()
