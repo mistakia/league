@@ -54,17 +54,15 @@ export default function SelectedPlayer({
   market_salary_adjusted,
   is_before_end_of_free_agent_period,
   deselect,
-  loadAllPlayers
+  loadAllPlayers,
+  is_hosted_league
 }) {
   const projectionView = 0
-  const transactionsView = 6
-  const gamelogsView = 1
+  const transactionsView = 8
   const [value, setValue] = useState(
-    is_logged_in
-      ? constants.isRegularSeason
-        ? projectionView
-        : transactionsView
-      : gamelogsView
+    is_logged_in && is_hosted_league ?
+      transactionsView
+      : projectionView
   )
   const [headshot_width, setHeadshotWidth] = useState(getHeadshotWidth())
   const [show_collapse, setShowCollapse] = useState(showCollapse())
@@ -243,13 +241,13 @@ export default function SelectedPlayer({
                 {playerMap.getIn(['market_salary', '0'], 0)}
               </div>
             )}
-            {is_logged_in && is_before_end_of_free_agent_period && (
+            {is_logged_in && is_hosted_league && is_before_end_of_free_agent_period && (
               <div className='selected__player-header-item'>
                 <label>Adjusted</label>${market_salary_adjusted}
               </div>
             )}
 
-            {is_logged_in && (show_collapse ? !collapsed : true) && (
+            {is_logged_in && is_hosted_league && (show_collapse ? !collapsed : true) && (
               <>
                 <div className='selected__player-header-item'>
                   <label>Projected Starts</label>
@@ -279,25 +277,29 @@ export default function SelectedPlayer({
               <label>Age</label>
               <PlayerAge date={playerMap.get('dob')} />
             </div>
-            <div className='selected__player-header-item'>
-              <label>Draft</label>
-              {draftNum ? (
-                <>
-                  {draftRound}
-                  {nth(draftRound)}{' '}
-                  <small>
-                    (#
-                    {draftNum})
-                  </small>
-                </>
-              ) : (
-                'UDFA'
-              )}
-            </div>
-            <div className='selected__player-header-item'>
-              <label>Exp.</label>
-              {constants.year - draftYear || 'Rookie'}
-            </div>
+            {draftNum != null && draftNum !== undefined && (
+              <>
+                <div className='selected__player-header-item'>
+                  <label>Draft</label>
+                  {draftNum ? (
+                  <>
+                    {draftRound}
+                    {nth(draftRound)}{' '}
+                    <small>
+                      (#
+                      {draftNum})
+                    </small>
+                  </>
+                ) : (
+                  'UDFA'
+                )}
+              </div>
+              <div className='selected__player-header-item'>
+                <label>Exp.</label>
+                  {constants.year - draftYear || 'Rookie'}
+                </div>
+              </>
+            )}
             {show_collapse && (
               <IconButton onClick={handleToggleExpand}>
                 {collapsed ? <ExpandMoreIcon /> : <ExpandLessIcon />}
@@ -324,9 +326,13 @@ export default function SelectedPlayer({
             {/* <Tab>Efficiency</Tab> */}
             <Tab>Practice</Tab>
             <Tab>Betting Markets</Tab>
-            {is_logged_in && <Tab>Contribution</Tab>}
-            {is_logged_in && <Tab>Value</Tab>}
-            {is_logged_in && <Tab>Transactions</Tab>}
+            {is_logged_in && is_hosted_league && (
+              <>
+                <Tab>Contribution</Tab>
+                <Tab>Value</Tab>
+                <Tab>Transactions</Tab>
+              </>
+            )}
           </TabsList>
           <TabPanel value={0}>
             <SelectedPlayerProjections />
@@ -354,15 +360,19 @@ export default function SelectedPlayer({
           <TabPanel value={5}>
             <SelectedPlayerMarkets />
           </TabPanel>
-          <TabPanel value={6}>
-            <SelectedPlayerLineupImpact />
-          </TabPanel>
-          <TabPanel value={7}>
-            <SelectedPlayerValue />
-          </TabPanel>
-          <TabPanel value={8}>
-            <SelectedPlayerTransactions />
-          </TabPanel>
+          {is_logged_in && is_hosted_league && (
+            <>
+              <TabPanel value={6}>
+                <SelectedPlayerLineupImpact />
+              </TabPanel>
+              <TabPanel value={7}>
+                <SelectedPlayerValue />
+              </TabPanel>
+              <TabPanel value={8}>
+                <SelectedPlayerTransactions />
+              </TabPanel>
+            </>
+          )}
         </Tabs>
       </div>
       <div className='selected__player-actions-container'>
