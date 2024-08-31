@@ -60,9 +60,7 @@ export default function SelectedPlayer({
   const projectionView = 0
   const transactionsView = 8
   const [value, setValue] = useState(
-    is_logged_in && is_hosted_league ?
-      transactionsView
-      : projectionView
+    is_logged_in && is_hosted_league ? transactionsView : projectionView
   )
   const [headshot_width, setHeadshotWidth] = useState(getHeadshotWidth())
   const [show_collapse, setShowCollapse] = useState(showCollapse())
@@ -241,28 +239,32 @@ export default function SelectedPlayer({
                 {playerMap.getIn(['market_salary', '0'], 0)}
               </div>
             )}
-            {is_logged_in && is_hosted_league && is_before_end_of_free_agent_period && (
-              <div className='selected__player-header-item'>
-                <label>Adjusted</label>${market_salary_adjusted}
-              </div>
-            )}
+            {is_logged_in &&
+              is_hosted_league &&
+              is_before_end_of_free_agent_period && (
+                <div className='selected__player-header-item'>
+                  <label>Adjusted</label>${market_salary_adjusted}
+                </div>
+              )}
 
-            {is_logged_in && is_hosted_league && (show_collapse ? !collapsed : true) && (
-              <>
-                <div className='selected__player-header-item'>
-                  <label>Projected Starts</label>
-                  {playerMap.getIn(['lineups', 'starts'], '-')}
-                </div>
-                <div className='selected__player-header-item'>
-                  <label>Projected Points+</label>
-                  {playerMap.getIn(['lineups', 'sp'], 0).toFixed(1)}
-                </div>
-                <div className='selected__player-header-item'>
-                  <label>Projected Bench+</label>
-                  {playerMap.getIn(['lineups', 'bp'], 0).toFixed(1)}
-                </div>
-              </>
-            )}
+            {is_logged_in &&
+              is_hosted_league &&
+              (show_collapse ? !collapsed : true) && (
+                <>
+                  <div className='selected__player-header-item'>
+                    <label>Projected Starts</label>
+                    {playerMap.getIn(['lineups', 'starts'], '-')}
+                  </div>
+                  <div className='selected__player-header-item'>
+                    <label>Projected Points+</label>
+                    {playerMap.getIn(['lineups', 'sp'], 0).toFixed(1)}
+                  </div>
+                  <div className='selected__player-header-item'>
+                    <label>Projected Bench+</label>
+                    {playerMap.getIn(['lineups', 'bp'], 0).toFixed(1)}
+                  </div>
+                </>
+              )}
             {(show_collapse ? !collapsed : true) && (
               <>
                 <div className='selected__player-header-item'>
@@ -282,20 +284,20 @@ export default function SelectedPlayer({
                 <div className='selected__player-header-item'>
                   <label>Draft</label>
                   {draftNum ? (
-                  <>
-                    {draftRound}
-                    {nth(draftRound)}{' '}
-                    <small>
-                      (#
-                      {draftNum})
-                    </small>
-                  </>
-                ) : (
-                  'UDFA'
-                )}
-              </div>
-              <div className='selected__player-header-item'>
-                <label>Exp.</label>
+                    <>
+                      {draftRound}
+                      {nth(draftRound)}{' '}
+                      <small>
+                        (#
+                        {draftNum})
+                      </small>
+                    </>
+                  ) : (
+                    'UDFA'
+                  )}
+                </div>
+                <div className='selected__player-header-item'>
+                  <label>Exp.</label>
                   {constants.year - draftYear || 'Rookie'}
                 </div>
               </>
@@ -402,5 +404,6 @@ SelectedPlayer.propTypes = {
   is_logged_in: PropTypes.bool,
   market_salary_adjusted: PropTypes.number,
   is_before_end_of_free_agent_period: PropTypes.bool,
-  loadAllPlayers: PropTypes.func
+  loadAllPlayers: PropTypes.func,
+  is_hosted_league: PropTypes.bool
 }
