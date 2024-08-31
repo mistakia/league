@@ -6,6 +6,14 @@ import os from 'os'
 puppeteer.use(StealthPlugin())
 puppeteer.use(AnonymizeUaPlugin())
 
+// Helper function to parse cookie string into an array of cookie objects
+function parseCookieString(cookie_string) {
+  return cookie_string.split('; ').map((cookie) => {
+    const [name, value] = cookie.split('=')
+    return { name, value, domain: '.pff.com' }
+  })
+}
+
 /*
  * @title user-agents-generator 🚀
  * @desc 📝 A Minimal Package to Generate unlimited user agents 🚀
@@ -75,7 +83,11 @@ export const getPage = async (
     plugins = true,
     languages = true,
     timeout = 90000,
-    headless = true
+    headless = true,
+    random_viewport = true,
+    random_user_agent = true,
+    cookie_string = '',
+    executable_path = ''
   } = {}
 ) => {
   const args = [
@@ -84,29 +96,39 @@ export const getPage = async (
     '--disable-infobars',
     '--window-position=0,0',
     '--ignore-certifcate-errors',
-    '--ignore-certifcate-errors-spki-list',
-    `--user-agent="${chromeUserAgent}"`
+    '--ignore-certifcate-errors-spki-list'
   ]
+
+  if (random_user_agent) {
+    args.push(`--user-agent="${chromeUserAgent}"`)
+  }
+
   const browser = await puppeteer.launch({
     headless: headless ? 'new' : false,
     args,
     timeout,
-    ignoreDefaultArgs: ['--enable-automation']
+    ignoreDefaultArgs: ['--enable-automation'],
+    executablePath: executable_path
   })
 
   const page = await browser.newPage()
 
   // Randomize viewport size
-  await page.setViewport({
-    width: 1300 + Math.floor(Math.random() * 100),
-    height: 500 + Math.floor(Math.random() * 100),
-    deviceScaleFactor: 1,
-    hasTouch: false,
-    isLandscape: false,
-    isMobile: false
-  })
+  if (random_viewport) {
+    await page.setViewport({
+      width: 1300 + Math.floor(Math.random() * 100),
+      height: 500 + Math.floor(Math.random() * 100),
+      deviceScaleFactor: 1,
+      hasTouch: false,
+      isLandscape: false,
+      isMobile: false
+    })
+  }
 
-  await page.setUserAgent(chromeUserAgent)
+  if (random_user_agent) {
+    await page.setUserAgent(chromeUserAgent)
+  }
+
   await page.setJavaScriptEnabled(true)
   await page.setDefaultNavigationTimeout(timeout)
 
@@ -131,6 +153,11 @@ export const getPage = async (
       Object.defineProperty(navigator, 'webdriver', {
         get: () => false
       })
+
+      // Additional webdriver evasion
+      const new_proto = navigator.__proto__
+      delete new_proto.webdriver
+      navigator.__proto__ = new_proto
     })
   }
 
@@ -146,12 +173,41 @@ export const getPage = async (
 
   if (notifications) {
     await page.evaluateOnNewDocument(() => {
-      // Pass notifications check
-      const originalQuery = window.navigator.permissions.query
-      return (window.navigator.permissions.query = (parameters) =>
-        parameters.name === 'notifications'
-          ? Promise.resolve({ state: Notification.permission })
-          : originalQuery(parameters))
+      // Additional notification evasion
+      if (!window.Notification) {
+        window.Notification = {
+          permission: 'denied'
+        }
+      }
+
+      const old_call = Function.prototype.call
+      function call() {
+        return old_call.apply(this, arguments)
+      }
+      Function.prototype.call = call
+
+      const native_to_string_function_string = Error.toString().replace(
+        /Error/g,
+        'toString'
+      )
+      const old_to_string = Function.prototype.toString
+
+      function function_to_string() {
+        if (this === window.navigator.permissions.query) {
+          return 'function query() { [native code] }'
+        }
+        if (this === function_to_string) {
+          return native_to_string_function_string
+        }
+        return old_call.call(old_to_string, this)
+      }
+      Function.prototype.toString = function_to_string
+    // Pass notifications check
+    const originalQuery = window.navigator.permissions.query
+    return (window.navigator.permissions.query = (parameters) =>
+      parameters.name === 'notifications'
+        ? Promise.resolve({ state: Notification.permission })
+        : originalQuery(parameters))
     })
   }
 
@@ -173,6 +229,11 @@ export const getPage = async (
         get: () => ['en-US', 'en']
       })
     })
+  }
+
+  if (cookie_string) {
+    const cookies = parseCookieString(cookie_string)
+    await page.setCookie(...cookies)
   }
 
   await page._client().send('Network.enable', {
