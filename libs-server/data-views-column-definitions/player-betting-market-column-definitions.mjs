@@ -3,23 +3,44 @@ import db from '#db'
 import get_join_func from '#libs-server/get-join-func.mjs'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
 
-const betting_markets_table_alias = ({ params = {} }) => {
+const get_default_params = (params, is_game_prop) => {
   const year = Array.isArray(params.year)
     ? params.year[0]
     : params.year || constants.season.year
-  const week = Array.isArray(params.week)
-    ? params.week[0]
-    : params.week || constants.season.week
-  const source_id = Array.isArray(params.source_id)
-    ? params.source_id[0]
-    : params.source_id || bookmaker_constants.bookmakers.FANDUEL
+
+  let week, market_type
+
+  if (is_game_prop) {
+    week = Array.isArray(params.week)
+      ? params.week[0]
+      : params.week || Math.max(1, constants.season.week)
+    market_type = Array.isArray(params.market_type)
+      ? params.market_type[0]
+      : params.market_type ||
+        bookmaker_constants.player_prop_types.GAME_PASSING_YARDS
+  } else {
+    week = Array.isArray(params.week) ? params.week[0] : params.week || 0
+    market_type = Array.isArray(params.market_type)
+      ? params.market_type[0]
+      : params.market_type ||
+        bookmaker_constants.player_prop_types.SEASON_PASSING_YARDS
+  }
+
   const time_type = Array.isArray(params.time_type)
     ? params.time_type[0]
     : params.time_type || bookmaker_constants.time_type.CLOSE
-  const market_type = Array.isArray(params.market_type)
-    ? params.market_type[0]
-    : params.market_type ||
-      bookmaker_constants.player_prop_types.SEASON_PASSING_YARDS
+  const source_id = Array.isArray(params.source_id)
+    ? params.source_id[0]
+    : params.source_id || bookmaker_constants.bookmakers.FANDUEL
+
+  return { year, week, market_type, time_type, source_id }
+}
+
+const betting_markets_table_alias = ({ params = {}, is_game_prop = false }) => {
+  const { year, week, market_type, time_type, source_id } = get_default_params(
+    params,
+    is_game_prop
+  )
 
   return get_table_hash(
     `betting_markets_${year}_week_${week}_source_id_${source_id}_market_type_${market_type}_time_type_${time_type}`
@@ -32,27 +53,13 @@ const player_betting_market_with = ({
   with_table_name,
   having_clauses,
   where_clauses,
-  splits
+  splits,
+  is_game_prop = false
 }) => {
-  const time_type = Array.isArray(params.time_type)
-    ? params.time_type[0]
-    : params.time_type || bookmaker_constants.time_type.CLOSE
-  const market_type = Array.isArray(params.market_type)
-    ? params.market_type[0]
-    : params.market_type ||
-      bookmaker_constants.player_prop_types.SEASON_PASSING_YARDS
-  const source_id = Array.isArray(params.source_id)
-    ? params.source_id[0]
-    : params.source_id || bookmaker_constants.bookmakers.FANDUEL
-
-  const year = Array.isArray(params.year)
-    ? params.year[0]
-    : params.year || constants.season.year
-  let week = Array.isArray(params.week) ? params.week[0] : params.week
-
-  if (bookmaker_constants.player_game_prop_types[market_type] && !week) {
-    week = Math.max(1, constants.season.week)
-  }
+  const { year, week, market_type, time_type, source_id } = get_default_params(
+    params,
+    is_game_prop
+  )
 
   const markets_cte = `${with_table_name}_markets`
 
@@ -187,13 +194,17 @@ const team_betting_market_with = ({
   })
 }
 
-const create_player_betting_market_field = ({ column_name, column_alias }) => ({
+const create_player_betting_market_field = ({
+  column_name,
+  column_alias,
+  is_game_prop
+}) => ({
   column_name,
   select_as: () => `${column_alias}_betting_market`,
   with_where: () => `pms.${column_name}`,
-  table_alias: betting_markets_table_alias,
+  table_alias: (args) => betting_markets_table_alias({ ...args, is_game_prop }),
   join: player_betting_market_join,
-  with: player_betting_market_with
+  with: (args) => player_betting_market_with({ ...args, is_game_prop })
 })
 
 const create_team_betting_market_field = ({ column_name, column_alias }) => ({
@@ -209,13 +220,15 @@ export default {
   player_season_prop_line_from_betting_markets:
     create_player_betting_market_field({
       column_name: 'selection_metric_line',
-      column_alias: 'season_prop_line'
+      column_alias: 'season_prop_line',
+      is_game_prop: false
     }),
 
   player_game_prop_line_from_betting_markets:
     create_player_betting_market_field({
       column_name: 'selection_metric_line',
-      column_alias: 'game_prop_line'
+      column_alias: 'game_prop_line',
+      is_game_prop: true
     }),
 
   team_game_prop_line_from_betting_markets: create_team_betting_market_field({
