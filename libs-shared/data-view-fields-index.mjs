@@ -339,6 +339,11 @@ export default {
   player_season_projected_points: 'Projected Fantasy Points for the season',
   player_rest_of_season_projected_points:
     'Projected Fantasy Points for the rest of the season',
+  player_week_projected_pass_atts: 'Projected Passing Attempts for the week',
+  player_season_projected_pass_atts:
+    'Projected Passing Attempts for the season',
+  player_rest_of_season_projected_pass_atts:
+    'Projected Passing Attempts for the rest of the season',
   player_week_projected_pass_yds: 'Projected Passing Yards for the week',
   player_season_projected_pass_yds: 'Projected Passing Yards for the season',
   player_rest_of_season_projected_pass_yds:

@@ -55,7 +55,7 @@ export default function PlayerSelectedRow({
   title,
   stats,
   action,
-  class_name,
+  className,
   games,
   lead,
   pos,
@@ -72,7 +72,7 @@ export default function PlayerSelectedRow({
   }, [percentile_key, load_percentiles])
 
   const class_names = ['player__selected-row']
-  if (class_name) class_names.push(class_name)
+  if (className) class_names.push(className)
   if (header) class_names.push('header')
   const fields = get_stat_fields(pos)
   const items = []
@@ -126,7 +126,7 @@ PlayerSelectedRow.propTypes = {
   title: PropTypes.node,
   stats: PropTypes.object,
   action: PropTypes.element,
-  class_name: PropTypes.string,
+  className: PropTypes.string,
   games: PropTypes.number,
   lead: PropTypes.element,
   pos: PropTypes.string,

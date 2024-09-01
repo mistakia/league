@@ -30,6 +30,9 @@ export const default_data_views = {
           ? 'player_season_projected_points'
           : 'player_rest_of_season_projected_points',
         constants.season.isOffseason
+          ? 'player_season_projected_pass_atts'
+          : 'player_rest_of_season_projected_pass_atts',
+        constants.season.isOffseason
           ? 'player_season_projected_pass_yds'
           : 'player_rest_of_season_projected_pass_yds',
         constants.season.isOffseason

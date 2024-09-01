@@ -195,6 +195,12 @@ function PlayerFields({ week, state }) {
       fixed: 1
     },
 
+    'projection.week.pa': {
+      category: 'passing',
+      column_header: 'ATT',
+      csv_header: 'Projected Passing Attempts (Week)',
+      player_value_path: `projection.${week}.pa`
+    },
     'projection.week.py': {
       category: 'passing',
       column_header: 'YDS',
@@ -216,6 +222,12 @@ function PlayerFields({ week, state }) {
       fixed: 1
     },
 
+    'projection.0.pa': {
+      category: 'passing',
+      column_header: 'ATT',
+      csv_header: 'Projected Passing Attempts (Season)',
+      player_value_path: 'projection.0.pa'
+    },
     'projection.0.py': {
       category: 'passing',
       column_header: 'YDS',
@@ -237,6 +249,12 @@ function PlayerFields({ week, state }) {
       fixed: 1
     },
 
+    'projection.ros.pa': {
+      category: 'passing',
+      column_header: 'ATT',
+      csv_header: 'Projected Passing Attempts (Rest-Of-Season)',
+      player_value_path: 'projection.ros.pa'
+    },
     'projection.ros.py': {
       column_header: 'YDS',
       csv_header: 'Projected Passing Yards (Rest-Of-Season)',

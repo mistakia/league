@@ -104,6 +104,12 @@ export default function ({ week }) {
       options: { fixed: 1 }
     }),
     ...create_field({
+      base_name: 'pass_atts',
+      title: 'Passing Attempts',
+      groups: [COLUMN_GROUPS.PASSING],
+      label: 'ATT'
+    }),
+    ...create_field({
       base_name: 'pass_yds',
       title: 'Passing Yards',
       groups: [COLUMN_GROUPS.PASSING],
