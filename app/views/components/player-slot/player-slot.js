@@ -73,25 +73,25 @@ export default class PlayerSlot extends React.Component {
     const week = Math.max(constants.week, 1)
 
     const statSuffix = {
-      pa: 'att',
-      pc: 'comp',
-      py: 'yds',
+      pa: 'pass att',
+      pc: 'pass comp',
+      py: 'pass yds',
       ints: 'ints',
-      tdp: 'TD',
+      tdp: 'pass TD',
 
-      ra: 'car',
-      ry: 'yds',
-      tdr: 'TD',
-      fuml: 'fuml',
+      ra: 'rush att',
+      ry: 'rush yds',
+      tdr: 'rush TD',
+      fuml: 'fum lost',
 
       trg: 'tar',
       rec: 'rec',
-      recy: 'yds',
-      tdrec: 'TD',
+      recy: 'rec yds',
+      tdrec: 'rec TD',
 
-      snp: '',
+      snp: 'snp',
 
-      twoptc: ''
+      twoptc: 'twoptc'
     }
 
     const passing = []
