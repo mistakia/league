@@ -3,7 +3,7 @@ import debug from 'debug'
 import { wait } from '#libs-server'
 import { job as import_draftkings_odds } from '#scripts/import-draftkings-odds.mjs'
 // import { job as import_caesars_odds } from '#scripts/import-caesars-odds.mjs'
-import { job as import_fanduel_odds } from '#scripts/import-fanduel-odds.mjs'
+// import { job as import_fanduel_odds } from '#scripts/import-fanduel-odds.mjs'
 // import { job as import_betmgm_odds } from '#scripts/import-betmgm-odds.mjs'
 // import { job as import_prizepicks_odds } from '#scripts/import-prizepicks-odds.mjs'
 // import { job as import_betrivers_odds } from '#scripts/import-betrivers-odds.mjs'
@@ -38,11 +38,11 @@ export default async function () {
   //   log(err)
   // }
 
-  try {
-    await import_fanduel_odds()
-  } catch (err) {
-    log(err)
-  }
+  // try {
+  //   await import_fanduel_odds()
+  // } catch (err) {
+  //   log(err)
+  // }
 
   // try {
   //   await import_betmgm_odds()
