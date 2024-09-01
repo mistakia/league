@@ -63,8 +63,13 @@ const format_market = async ({
 
     let player_row
 
-    const player_name =
-      outcome.participantType === 'Player' ? outcome.participant : null
+    const is_player =
+      outcome.participantType === 'Player' ||
+      (outcome.participants &&
+        outcome.participants.length === 1 &&
+        outcome.participants[0].type === 'Player')
+
+    const player_name = is_player ? outcome.participant : null
     if (player_name) {
       const params = {
         name: player_name,
