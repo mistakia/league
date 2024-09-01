@@ -40,7 +40,7 @@ const passing_rushing = () => [
   <div className='row__group' key={0}>
     <div className='row__group-head'>Passing</div>
     <div className='row__group-body'>
-      <div className='table__cell'>PA</div>
+      <div className='table__cell'>ATT</div>
       <div className='table__cell'>YDS</div>
       <div className='table__cell'>TD</div>
       <div className='table__cell'>INT</div>
@@ -49,7 +49,7 @@ const passing_rushing = () => [
   <div className='row__group' key={1}>
     <div className='row__group-head'>Rushing</div>
     <div className='row__group-body'>
-      <div className='table__cell'>CAR</div>
+      <div className='table__cell'>ATT</div>
       <div className='table__cell'>YDS</div>
       <div className='table__cell'>TD</div>
       <div className='table__cell'>FUM</div>
@@ -61,7 +61,7 @@ const rushing_receiving = () => [
   <div className='row__group' key={0}>
     <div className='row__group-head'>Rushing</div>
     <div className='row__group-body'>
-      <div className='table__cell'>CAR</div>
+      <div className='table__cell'>ATT</div>
       <div className='table__cell'>YDS</div>
       <div className='table__cell'>TD</div>
       <div className='table__cell'>FUM</div>
@@ -91,7 +91,7 @@ const receiving_rushing = () => [
   <div className='row__group' key={1}>
     <div className='row__group-head'>Rushing</div>
     <div className='row__group-body'>
-      <div className='table__cell'>CAR</div>
+      <div className='table__cell'>ATT</div>
       <div className='table__cell'>YDS</div>
       <div className='table__cell'>TD</div>
       <div className='table__cell'>FUM</div>
