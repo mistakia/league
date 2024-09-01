@@ -29,17 +29,21 @@ const mapStateToProps = createSelector(
       0
     )
 
-    const faPeriod = getFreeAgentPeriod(league)
-    const is_before_end_of_free_agent_period = constants.season.now.isBefore(
-      faPeriod.end
-    )
+    const free_agency_period_dates = getFreeAgentPeriod(league)
+    const is_before_live_auction_end =
+      constants.season.now.isBefore(free_agency_period_dates.end) &&
+      (free_agency_period_dates.free_agency_live_auction_end
+        ? constants.season.now.isBefore(
+            free_agency_period_dates.free_agency_live_auction_end
+          )
+        : true)
 
     return {
       playerMap,
       market_salary_adjusted,
       is_logged_in: Boolean(app.userId),
       is_hosted_league: Boolean(league.hosted),
-      is_before_end_of_free_agent_period
+      is_before_live_auction_end
     }
   }
 )
