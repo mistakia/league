@@ -5,7 +5,7 @@ export const percentileActions = {
   ...create_api_action_types('GET_PERCENTILES'),
 
   LOAD_PERCENTILES: 'LOAD_PERCENTILES',
-  loadPercentiles: (percentile_key) => ({
+  load_percentiles: (percentile_key) => ({
     type: percentileActions.LOAD_PERCENTILES,
     payload: {
       percentile_key

@@ -75,7 +75,7 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  loadPercentiles: percentileActions.loadPercentiles,
+  load_percentiles: percentileActions.load_percentiles,
   load_players_gamelogs: gamelogsActions.load_players_gamelogs
 }
 

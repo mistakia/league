@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 
 import PercentileMetric from '@components/percentile-metric'
 
-const defenseStats = [
+const defense_stats = [
   'dpa',
   'dya',
   'dsk',
@@ -19,21 +19,35 @@ const defenseStats = [
   'prtd',
   'krtd'
 ]
-const kickerStats = ['xpm', 'fgm', 'fg19', 'fg29', 'fg39', 'fg49', 'fg50']
-const playerStats = [
+const kicker_stats = ['xpm', 'fgm', 'fg19', 'fg29', 'fg39', 'fg49', 'fg50']
+const passing_rushing_stats = [
   ['pa', 'py', 'tdp', 'ints'],
+  ['ra', 'ry', 'tdr', 'fuml']
+]
+const rushing_receiving_stats = [
   ['ra', 'ry', 'tdr', 'fuml'],
   ['trg', 'rec', 'recy', 'tdrec']
 ]
+const receiving_rushing_stats = [
+  ['trg', 'rec', 'recy', 'tdrec'],
+  ['ra', 'ry', 'tdr', 'fuml']
+]
 
-const getStatFields = (pos) => {
+const get_stat_fields = (pos) => {
   switch (pos) {
     case 'DST':
-      return defenseStats
+      return defense_stats
     case 'K':
-      return kickerStats
+      return kicker_stats
+    case 'QB':
+      return passing_rushing_stats
+    case 'RB':
+      return rushing_receiving_stats
+    case 'WR':
+    case 'TE':
+      return receiving_rushing_stats
     default:
-      return playerStats
+      return []
   }
 }
 
@@ -41,11 +55,11 @@ export default function PlayerSelectedRow({
   title,
   stats,
   action,
-  className,
+  class_name,
   games,
   lead,
   pos,
-  loadPercentiles,
+  load_percentiles,
   percentile_key,
   percentiles = {},
   header,
@@ -53,15 +67,16 @@ export default function PlayerSelectedRow({
 }) {
   useEffect(() => {
     if (percentile_key) {
-      loadPercentiles(percentile_key)
+      load_percentiles(percentile_key)
     }
-  }, [percentile_key, loadPercentiles])
+  }, [percentile_key, load_percentiles])
 
-  const classNames = ['player__selected-row']
-  if (className) classNames.push(className)
-  if (header) classNames.push('header')
-  const fields = getStatFields(pos)
+  const class_names = ['player__selected-row']
+  if (class_name) class_names.push(class_name)
+  if (header) class_names.push('header')
+  const fields = get_stat_fields(pos)
   const items = []
+
   fields.forEach((field, index) => {
     const is_group = Array.isArray(field)
     if (is_group) {
@@ -98,7 +113,7 @@ export default function PlayerSelectedRow({
     }
   })
   return (
-    <div className={classNames.join(' ')}>
+    <div className={class_names.join(' ')}>
       {lead || <div className='table__cell text'>{title}</div>}
       {games && <div className='table__cell metric'>{games}</div>}
       {items}
@@ -111,11 +126,11 @@ PlayerSelectedRow.propTypes = {
   title: PropTypes.node,
   stats: PropTypes.object,
   action: PropTypes.element,
-  className: PropTypes.string,
+  class_name: PropTypes.string,
   games: PropTypes.number,
   lead: PropTypes.element,
   pos: PropTypes.string,
-  loadPercentiles: PropTypes.func,
+  load_percentiles: PropTypes.func,
   percentiles: PropTypes.object,
   percentile_key: PropTypes.string,
   header: PropTypes.bool,
