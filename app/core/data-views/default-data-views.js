@@ -165,6 +165,8 @@ export const default_data_views = {
         'player_positive_rush_attempts_from_plays',
         'player_rush_yards_after_contact_from_plays',
         'player_rush_yards_after_contact_per_attempt_from_plays',
+        'player_weighted_opportunity_from_plays',
+        'player_high_value_touches_from_plays',
         'player_rush_attempts_share_from_plays',
         'player_rush_yards_share_from_plays',
         'player_fumble_percentage_from_plays',
