@@ -13,6 +13,7 @@ const views = {
       // TODO player market adjusted salary
       constants.season.isOffseason ? 'pts_added.0' : 'pts_added.ros',
       constants.season.isOffseason ? 'points.0.total' : 'points.ros.total',
+      constants.season.isOffseason ? 'projection.0.pa' : 'projection.ros.pa',
       constants.season.isOffseason ? 'projection.0.py' : 'projection.ros.py',
       constants.season.isOffseason ? 'projection.0.tdp' : 'projection.ros.tdp',
       constants.season.isOffseason
@@ -42,6 +43,7 @@ const views = {
       'opponent_strength',
       'pts_added.week',
       'points.week.total',
+      'projection.week.pa',
       'projection.week.py',
       'projection.week.tdp',
       'projection.week.ints',
