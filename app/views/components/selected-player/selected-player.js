@@ -52,7 +52,7 @@ export default function SelectedPlayer({
   playerMap,
   is_logged_in,
   market_salary_adjusted,
-  is_before_end_of_free_agent_period,
+  is_before_live_auction_end,
   deselect,
   loadAllPlayers,
   is_hosted_league
@@ -84,10 +84,10 @@ export default function SelectedPlayer({
   }, [])
 
   useEffect(() => {
-    if (is_before_end_of_free_agent_period) {
+    if (is_before_live_auction_end) {
       loadAllPlayers()
     }
-  }, [is_before_end_of_free_agent_period, loadAllPlayers])
+  }, [is_before_live_auction_end, loadAllPlayers])
 
   const handleChange = (event, value) => setValue(value)
   const handleToggleExpand = (event) => setCollapsed(!collapsed)
@@ -239,13 +239,11 @@ export default function SelectedPlayer({
                 {playerMap.getIn(['market_salary', '0'], 0)}
               </div>
             )}
-            {is_logged_in &&
-              is_hosted_league &&
-              is_before_end_of_free_agent_period && (
-                <div className='selected__player-header-item'>
-                  <label>Adjusted</label>${market_salary_adjusted}
-                </div>
-              )}
+            {is_logged_in && is_hosted_league && is_before_live_auction_end && (
+              <div className='selected__player-header-item'>
+                <label>Adjusted</label>${market_salary_adjusted}
+              </div>
+            )}
 
             {is_logged_in &&
               is_hosted_league &&
@@ -403,7 +401,7 @@ SelectedPlayer.propTypes = {
   playerMap: ImmutablePropTypes.map,
   is_logged_in: PropTypes.bool,
   market_salary_adjusted: PropTypes.number,
-  is_before_end_of_free_agent_period: PropTypes.bool,
+  is_before_live_auction_end: PropTypes.bool,
   loadAllPlayers: PropTypes.func,
   is_hosted_league: PropTypes.bool
 }
