@@ -11,7 +11,7 @@ export default function SelectedPlayerMatchupTable({
   position,
   opponent,
   nfl_team_against_seasonlogs,
-  loadPercentiles,
+  load_percentiles,
   load_players_gamelogs,
   year
 }) {
@@ -27,11 +27,11 @@ export default function SelectedPlayerMatchupTable({
       percentile_keys.push(item.percentile_key)
     )
     for (const percentile_key of percentile_keys) {
-      loadPercentiles(percentile_key)
+      load_percentiles(percentile_key)
     }
   }, [
     individual_percentile_key,
-    loadPercentiles,
+    load_percentiles,
     nfl_team_against_seasonlogs,
     opponent
   ])
@@ -136,7 +136,7 @@ export default function SelectedPlayerMatchupTable({
 }
 
 SelectedPlayerMatchupTable.propTypes = {
-  loadPercentiles: PropTypes.func,
+  load_percentiles: PropTypes.func,
   gamelogs: ImmutablePropTypes.list,
   position: PropTypes.string,
   opponent: PropTypes.string,

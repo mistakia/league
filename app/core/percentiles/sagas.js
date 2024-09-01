@@ -4,7 +4,7 @@ import { percentileActions } from './actions'
 import { getPercentiles } from '@core/api'
 import { get_request_history } from '@core/selectors'
 
-export function* loadPercentiles({ payload }) {
+export function* load_percentiles({ payload }) {
   const request_history = yield select(get_request_history)
   const key = `GET_PERCENTILES_${payload.percentile_key}`
   if (!request_history.has(key)) {
@@ -16,12 +16,12 @@ export function* loadPercentiles({ payload }) {
 //  WATCHERS
 // -------------------------------------
 
-export function* watchLoadPercentiles() {
-  yield takeEvery(percentileActions.LOAD_PERCENTILES, loadPercentiles)
+export function* watch_load_percentiles() {
+  yield takeEvery(percentileActions.LOAD_PERCENTILES, load_percentiles)
 }
 
 //= ====================================
 //  ROOT
 // -------------------------------------
 
-export const percentileSagas = [fork(watchLoadPercentiles)]
+export const percentileSagas = [fork(watch_load_percentiles)]

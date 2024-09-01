@@ -5,7 +5,7 @@ import { percentileActions } from '@core/percentiles'
 import PlayerSelectedRow from './player-selected-row'
 
 const mapDispatchToProps = {
-  loadPercentiles: percentileActions.loadPercentiles
+  load_percentiles: percentileActions.load_percentiles
 }
 
 export default connect(null, mapDispatchToProps)(PlayerSelectedRow)

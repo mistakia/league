@@ -45,7 +45,7 @@ function PlayerFields({ week, state }) {
         const positions = state.getIn(['players', 'positions'])
         positions.forEach((pos) => {
           const percentile_key = `${pos}_AGAINST_ADJ`
-          store.dispatch(percentileActions.loadPercentiles(percentile_key))
+          store.dispatch(percentileActions.load_percentiles(percentile_key))
         })
         store.dispatch(seasonlogsActions.load_nfl_team_seasonlogs())
       },
@@ -104,7 +104,7 @@ function PlayerFields({ week, state }) {
         const positions = state.getIn(['players', 'positions'])
         positions.forEach((pos) => {
           const percentile_key = `${pos}_AGAINST_ADJ`
-          store.dispatch(percentileActions.loadPercentiles(percentile_key))
+          store.dispatch(percentileActions.load_percentiles(percentile_key))
         })
         store.dispatch(seasonlogsActions.load_nfl_team_seasonlogs())
       },
