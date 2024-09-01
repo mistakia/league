@@ -155,8 +155,10 @@ export const getPage = async (
       })
 
       // Additional webdriver evasion
+      // eslint-disable-next-line no-proto
       const new_proto = navigator.__proto__
       delete new_proto.webdriver
+      // eslint-disable-next-line no-proto
       navigator.__proto__ = new_proto
     })
   }
@@ -184,6 +186,7 @@ export const getPage = async (
       function call() {
         return old_call.apply(this, arguments)
       }
+      // eslint-disable-next-line no-extend-native
       Function.prototype.call = call
 
       const native_to_string_function_string = Error.toString().replace(
@@ -201,13 +204,14 @@ export const getPage = async (
         }
         return old_call.call(old_to_string, this)
       }
+      // eslint-disable-next-line no-extend-native
       Function.prototype.toString = function_to_string
-    // Pass notifications check
-    const originalQuery = window.navigator.permissions.query
-    return (window.navigator.permissions.query = (parameters) =>
-      parameters.name === 'notifications'
-        ? Promise.resolve({ state: Notification.permission })
-        : originalQuery(parameters))
+      // Pass notifications check
+      const originalQuery = window.navigator.permissions.query
+      return (window.navigator.permissions.query = (parameters) =>
+        parameters.name === 'notifications'
+          ? Promise.resolve({ state: Notification.permission })
+          : originalQuery(parameters))
     })
   }
 
