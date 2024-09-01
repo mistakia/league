@@ -255,6 +255,12 @@ export default {
     player_value_path: 'weighted_opportunity_from_plays',
     fixed: 2
   }),
+  player_high_value_touches_from_plays: from_play_field({
+    column_title: 'High Value Touches (HVT) (By Play)',
+    column_groups: [COLUMN_GROUPS.RUSHING, COLUMN_GROUPS.OPPURTUNITY],
+    header_label: 'HVT',
+    player_value_path: 'high_value_touches_from_plays'
+  }),
   player_rush_attempts_share_from_plays: from_share_field({
     column_title: 'Share of Team Rushing Attempts (By Play)',
     column_groups: [COLUMN_GROUPS.RUSHING],

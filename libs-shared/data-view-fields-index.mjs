@@ -218,6 +218,8 @@ export default {
     'The percentage of rushing attempts resulting in a first down (calculated from play-by-play data)',
   player_weighted_opportunity_from_plays:
     "A weighted measure of the player's opportunity based on carries and targets (calculated from play-by-play data)",
+  player_high_value_touches_from_plays:
+    'The number of high value touches by the player. Defined as a carry inside the 10 or a reception anywhere on the field. Popularized by Ben Gretch. (calculated from play-by-play data)',
   player_rush_attempts_share_from_plays:
     "The player's share of team rushing attempts (calculated from play-by-play data)",
   player_rush_yards_share_from_plays:
