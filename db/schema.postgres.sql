@@ -1358,6 +1358,7 @@ ALTER TABLE IF EXISTS ONLY public.player_rankings_index DROP CONSTRAINT IF EXIST
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pid_year_unique;
+ALTER TABLE IF EXISTS ONLY public.player_aliases DROP CONSTRAINT IF EXISTS player_aliases_pkey;
 ALTER TABLE IF EXISTS ONLY public.pff_player_seasonlogs DROP CONSTRAINT IF EXISTS pff_player_seasonlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.pff_player_seasonlogs_changelog DROP CONSTRAINT IF EXISTS pff_player_seasonlogs_changelog_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_user_careerlogs DROP CONSTRAINT IF EXISTS league_user_careerlogs_lid_userid_unique;
@@ -16216,6 +16217,14 @@ ALTER TABLE ONLY public.pff_player_seasonlogs_changelog
 
 ALTER TABLE ONLY public.pff_player_seasonlogs
     ADD CONSTRAINT pff_player_seasonlogs_pkey PRIMARY KEY (pid, year);
+
+
+--
+-- Name: player_aliases player_aliases_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_aliases
+    ADD CONSTRAINT player_aliases_pkey PRIMARY KEY (pid, formatted_alias);
 
 
 --
