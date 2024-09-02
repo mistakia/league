@@ -2,7 +2,9 @@ import * as table_constants from 'react-table/src/constants.mjs'
 
 import { bookmaker_constants } from '#libs-shared'
 import COLUMN_GROUPS from './column-groups'
-import { constants } from '@libs-shared'
+import { constants, common_column_params } from '@libs-shared'
+
+const { career_year, career_game } = common_column_params
 
 const from_betting_market = (field) => ({
   data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -38,7 +40,8 @@ export default {
         default_value: 2024,
         single: true,
         enable_multi_on_split: ['year']
-      }
+      },
+      career_year
     }
   }),
 
@@ -75,7 +78,9 @@ export default {
         values: constants.nfl_weeks,
         default_value: 1,
         single: true
-      }
+      },
+      career_year,
+      career_game
     }
   })
 }

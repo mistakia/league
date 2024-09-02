@@ -3,6 +3,8 @@ import get_table_hash from '#libs-server/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { constants } from '#libs-shared'
 
+// TODO career_year
+
 const generate_table_alias = ({ params = {} } = {}) => {
   let year = params.year || [constants.season.year]
   if (!Array.isArray(year)) {

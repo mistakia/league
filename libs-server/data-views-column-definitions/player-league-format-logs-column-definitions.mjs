@@ -4,6 +4,8 @@ import get_join_func from '#libs-server/get-join-func.mjs'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 
+// TODO career_year
+
 const league_format_player_seasonlogs_table_alias = ({ params = {} }) => {
   const {
     league_format_hash = '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b'

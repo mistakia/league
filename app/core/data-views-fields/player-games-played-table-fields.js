@@ -1,7 +1,7 @@
 import * as table_constants from 'react-table/src/constants.mjs'
 import { common_column_params } from '@libs-shared'
 
-const { year, week, year_offset } = common_column_params
+const { year, week, year_offset, career_year } = common_column_params
 
 export default {
   player_games_played: {
@@ -13,7 +13,8 @@ export default {
     column_params: {
       year,
       week,
-      year_offset
+      year_offset,
+      career_year
     },
     splits: ['year']
   }

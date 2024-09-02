@@ -4,6 +4,8 @@ import db from '#db'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 
+// TODO career_year
+
 const projections_index_table_alias = ({ params = {} }) => {
   const year = Array.isArray(params.year)
     ? params.year[0]

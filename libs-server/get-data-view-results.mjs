@@ -551,6 +551,7 @@ export const get_data_view_results_query = ({
   const rate_type_column_mapping = {}
   const data_view_options = {
     opening_days_joined: false,
+    player_seasonlogs_joined: false,
     nfl_year_week_timestamp_joined: false,
     year_coalesce_args: [],
     rate_type_tables: {}

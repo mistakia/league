@@ -3,6 +3,8 @@ import { constants } from '#libs-shared'
 import get_join_func from '#libs-server/get-join-func.mjs'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
 
+// TODO career_year
+
 const generate_table_alias = ({ type, params = {} } = {}) => {
   const { date, year, year_offset } = params
   const key = `keeptradecut_${type}_data_${date || ''}_year_${year || ''}_year_offset_${year_offset || ''}`
