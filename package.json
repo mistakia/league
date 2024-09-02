@@ -56,6 +56,7 @@
     "express-slow-down": "^2.0.2",
     "fastest-validator": "^1.18.0",
     "fetch-cheerio-object": "^1.3.0",
+    "fetch-h2": "^3.0.2",
     "form-data": "^4.0.0",
     "fs-extra": "^11.2.0",
     "gaussian": "errcw/gaussian#3b3e49cd35f278429af80e310aed85de94d1eb99",

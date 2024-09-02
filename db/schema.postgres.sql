@@ -11934,7 +11934,8 @@ CREATE TABLE public.player (
     cfbref_id character varying,
     twitter_username character varying,
     swish_id integer,
-    draftkings_id integer
+    draftkings_id integer,
+    fanduel_id character varying(20)
 );
 
 

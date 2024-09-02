@@ -87,7 +87,8 @@ export const job_types = {
   FINALIZE_WEEK: 64,
   IMPORT_PFF_GRADES: 65,
   IMPORT_SLEEPER_ADP_AND_PROJECTIONS: 66,
-  IMPORT_DRAFTKINGS_DFS_SALARIES: 67
+  IMPORT_DRAFTKINGS_DFS_SALARIES: 67,
+  IMPORT_FANDUEL_DFS_SALARIES: 68
 }
 
 export const job_title_by_id = {
@@ -157,5 +158,6 @@ export const job_title_by_id = {
   64: 'Finalize Week',
   65: 'Import PFF Grades',
   66: 'Import Sleeper ADP and Projections',
-  67: 'Import DraftKings DFS Salaries'
+  67: 'Import DraftKings DFS Salaries',
+  68: 'Import Fanduel DFS Salaries'
 }
