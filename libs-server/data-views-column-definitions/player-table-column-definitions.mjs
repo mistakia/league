@@ -103,6 +103,7 @@ export default {
     use_having: true
   },
   player_age: {
+    // TODO career_year
     table_alias: ({ splits }) => {
       if (splits.includes('year')) {
         return 'year_splits_player_age'

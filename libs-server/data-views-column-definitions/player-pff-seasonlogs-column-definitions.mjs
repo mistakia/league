@@ -2,6 +2,8 @@ import { constants } from '#libs-shared'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 
+// TODO career_year
+
 const pff_player_seasonlogs_table_alias = ({ params = {} }) => {
   let year = params.year || [constants.season.stats_season_year]
   if (!Array.isArray(year)) {

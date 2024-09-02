@@ -4,6 +4,9 @@ import { constants } from '#libs-shared'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
 import get_join_func from '#libs-server/get-join-func.mjs'
 
+// TODO career_year
+// refactor to use with/cte table to handle career_year
+
 const get_contract_year = (value) => {
   const year = Array.isArray(value) ? value[0] : value
   if (typeof year === 'string' && year.toLowerCase() === 'total') {
@@ -15,7 +18,13 @@ const get_contract_year = (value) => {
 const player_contract_table_alias = ({ params = {} } = {}) => {
   const year = get_contract_year(params.contract_year || constants.season.year)
 
-  return get_table_hash(`player_contracts_${year}`)
+  let career_year = params.career_year || []
+  if (!Array.isArray(career_year)) {
+    career_year = [career_year]
+  }
+
+  const key = `player_contracts_${year}_${career_year.join('_')}`
+  return get_table_hash(key)
 }
 
 const player_contract_join = ({

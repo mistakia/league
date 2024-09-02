@@ -33,17 +33,40 @@ const get_default_params = (params, is_game_prop) => {
     ? params.source_id[0]
     : params.source_id || bookmaker_constants.bookmakers.FANDUEL
 
-  return { year, week, market_type, time_type, source_id }
+  let career_year = params.career_year || []
+  if (!Array.isArray(career_year)) {
+    career_year = [career_year]
+  }
+
+  let career_game = params.career_game || []
+  if (!Array.isArray(career_game)) {
+    career_game = [career_game]
+  }
+
+  return {
+    year,
+    week,
+    market_type,
+    time_type,
+    source_id,
+    career_year,
+    career_game
+  }
 }
 
 const betting_markets_table_alias = ({ params = {}, is_game_prop = false }) => {
-  const { year, week, market_type, time_type, source_id } = get_default_params(
-    params,
-    is_game_prop
-  )
+  const {
+    year,
+    week,
+    market_type,
+    time_type,
+    source_id,
+    career_year,
+    career_game
+  } = get_default_params(params, is_game_prop)
 
   return get_table_hash(
-    `betting_markets_${year}_week_${week}_source_id_${source_id}_market_type_${market_type}_time_type_${time_type}`
+    `betting_markets_${year}_week_${week}_source_id_${source_id}_market_type_${market_type}_time_type_${time_type}_career_year_${career_year.join('_')}_career_game_${career_game.join('_')}`
   )
 }
 
@@ -56,10 +79,15 @@ const player_betting_market_with = ({
   splits,
   is_game_prop = false
 }) => {
-  const { year, week, market_type, time_type, source_id } = get_default_params(
-    params,
-    is_game_prop
-  )
+  const {
+    year,
+    week,
+    market_type,
+    time_type,
+    source_id,
+    career_year,
+    career_game
+  } = get_default_params(params, is_game_prop)
 
   const markets_cte = `${with_table_name}_markets`
 
@@ -71,12 +99,18 @@ const player_betting_market_with = ({
       .andWhere('prop_markets_index.year', year)
       .andWhere('source_id', source_id)
 
-    if (week) {
+    if (week || career_year.length) {
       qb.join('nfl_games', function () {
-        this.on(`nfl_games.esbid`, '=', `prop_markets_index.esbid`)
-        this.andOn(`nfl_games.year`, '=', `prop_markets_index.year`)
-        this.andOn(`nfl_games.week`, '=', db.raw('?', [week]))
+        this.on('nfl_games.esbid', '=', 'prop_markets_index.esbid')
+        this.andOn('nfl_games.year', '=', 'prop_markets_index.year')
+        if (week) {
+          this.andOn('nfl_games.week', '=', db.raw('?', [week]))
+        }
       })
+
+      if (career_year.length) {
+        qb.select('nfl_games.year', 'nfl_games.seas_type')
+      }
     }
   })
 
@@ -88,6 +122,32 @@ const player_betting_market_with = ({
           .andOn('pms.source_market_id', '=', 'm.source_market_id')
           .andOn('pms.time_type', '=', 'm.time_type')
       })
+
+    if (career_year.length) {
+      qb.join('player_seasonlogs', function () {
+        this.on('pms.selection_pid', '=', 'player_seasonlogs.pid')
+          .andOn('m.year', '=', 'player_seasonlogs.year')
+          .andOn('m.seas_type', '=', 'player_seasonlogs.seas_type')
+      })
+      qb.whereBetween('player_seasonlogs.career_year', [
+        Math.min(career_year[0], career_year[1]),
+        Math.max(career_year[0], career_year[1])
+      ])
+    }
+
+    if (career_game.length) {
+      qb.join('player_gamelogs', function () {
+        this.on('pms.selection_pid', '=', 'player_gamelogs.pid').andOn(
+          'm.esbid',
+          '=',
+          'player_gamelogs.esbid'
+        )
+      })
+      qb.whereBetween('player_gamelogs.career_game', [
+        Math.min(career_game[0], career_game[1]),
+        Math.max(career_game[0], career_game[1])
+      ])
+    }
 
     if (having_clauses) {
       for (const having_clause of having_clauses) {

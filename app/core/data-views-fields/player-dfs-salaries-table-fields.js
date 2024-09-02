@@ -2,7 +2,7 @@ import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
 import { constants, common_column_params } from '#libs-shared'
 
-const { year, week } = common_column_params
+const { year, week, career_year, career_game } = common_column_params
 
 const create_player_dfs_salaries_field = (props) => ({
   ...props,
@@ -28,9 +28,12 @@ const create_player_dfs_salaries_field = (props) => ({
       single: true,
       default_value: 'DRAFTKINGS',
       label: 'Platform'
-    }
+    },
+    career_year,
+    career_game
   },
-  splits: ['year', 'week']
+  splits: ['year', 'week'],
+  with_where: () => 'player_salaries.salary'
 })
 
 export default {
