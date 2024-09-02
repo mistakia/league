@@ -162,7 +162,8 @@ const process_matched_player = async ({
     source_competition_name: draftable?.competition?.name,
     source_player_display_name: `${draftable.firstName} ${draftable.lastName}`,
     source_contest_id: draft_group.DraftGroupId,
-    salary: draftable.salary
+    salary: draftable.salary,
+    source_id: 'DRAFTKINGS'
   }
 
   salary_inserts.push(insert)
