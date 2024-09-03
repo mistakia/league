@@ -30,7 +30,17 @@ const create_player_rankings_field = (props) => ({
       ]
     },
     ranking_source_id: {
-      values: ['FANTASYPROS', 'SLEEPER'],
+      values: [
+        'FANTASYPROS',
+        'SLEEPER',
+        'ESPN',
+        'RTS',
+        'MFL',
+        'YAHOO',
+        'NFL',
+        'CBS',
+        'UNDERDOG'
+      ],
       data_type: table_constants.TABLE_DATA_TYPES.SELECT,
       single: true,
       default_value: 'FANTASYPROS',
