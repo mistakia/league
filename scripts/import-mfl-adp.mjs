@@ -8,8 +8,8 @@ import {
   getPlayer,
   isMain,
   report_job,
-  batch_insert,
-  updatePlayer
+  batch_insert
+  // updatePlayer
 } from '#libs-server'
 import { constants } from '#libs-shared'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -96,55 +96,56 @@ const import_mfl_adp = async ({
     }
 
     // Second iteration: match remaining players by name, team, pos
-    for (const player of unmatched_players) {
-      const player_params = {
-        name: player.name,
-        pos: player.position,
-        team: player.team
-      }
+    // TODO retrieve player name, team, pos using id
+    // for (const player of unmatched_players) {
+    //   const player_params = {
+    //     name: player.name,
+    //     pos: player.position,
+    //     team: player.team
+    //   }
 
-      let player_row
-      try {
-        player_row = await getPlayer(player_params)
-      } catch (err) {
-        log(`Error getting player by name, team, pos: ${err}`)
-        log(player_params)
-        continue
-      }
+    //   let player_row
+    //   try {
+    //     player_row = await getPlayer(player_params)
+    //   } catch (err) {
+    //     log(`Error getting player by name, team, pos: ${err}`)
+    //     log(player_params)
+    //     continue
+    //   }
 
-      if (player_row) {
-        if (matched_mfl_ids.has(player.id)) {
-          log(`Player ${player.id} already matched`)
-          continue
-        }
+    //   if (player_row) {
+    //     if (matched_mfl_ids.has(player.id)) {
+    //       log(`Player ${player.id} already matched`)
+    //       continue
+    //     }
 
-        if (!player_row.mfl_id) {
-          await updatePlayer({
-            player_row,
-            update: {
-              mfl_id: player.id
-            }
-          })
-        }
+    //     if (!player_row.mfl_id) {
+    //       await updatePlayer({
+    //         player_row,
+    //         update: {
+    //           mfl_id: player.id
+    //         }
+    //       })
+    //     }
 
-        matched_mfl_ids.add(player.id)
-        adp_inserts.push({
-          pid: player_row.pid,
-          pos: player_row.pos,
-          week: 0,
-          year,
-          avg: player.average_pick,
-          min: player.min_pick,
-          max: player.max_pick,
-          source_id: 'MFL',
-          ranking_type
-        })
-      } else {
-        log(
-          `Unmatched player: ${player.name} (${player.position}, ${player.team})`
-        )
-      }
-    }
+    //     matched_mfl_ids.add(player.id)
+    //     adp_inserts.push({
+    //       pid: player_row.pid,
+    //       pos: player_row.pos,
+    //       week: 0,
+    //       year,
+    //       avg: player.average_pick,
+    //       min: player.min_pick,
+    //       max: player.max_pick,
+    //       source_id: 'MFL',
+    //       ranking_type
+    //     })
+    //   } else {
+    //     log(
+    //       `Unmatched player: ${player.name} (${player.position}, ${player.team})`
+    //     )
+    //   }
+    // }
 
     if (dry_run) {
       log(`Dry run: ${adp_inserts.length} ${ranking_type} ADP rankings`)

@@ -1379,11 +1379,21 @@ ALTER TABLE IF EXISTS ONLY public.transactions DROP CONSTRAINT IF EXISTS transac
 ALTER TABLE IF EXISTS ONLY public.teams DROP CONSTRAINT IF EXISTS teams_pkey;
 ALTER TABLE IF EXISTS ONLY public.seasons DROP CONSTRAINT IF EXISTS seasons_pkey;
 ALTER TABLE IF EXISTS ONLY public.rosters_players DROP CONSTRAINT IF EXISTS rosters_players_pkey;
+ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_swish_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_salaries DROP CONSTRAINT IF EXISTS player_salaries_pid_esbid_source_contest_id_key;
+ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_rts_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_rankings_index DROP CONSTRAINT IF EXISTS player_rankings_index_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pkey;
+ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pff_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_otc_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_mfl_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_fleaflicker_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_fanduel_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_draftkings_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pid_year_unique;
+ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_cfbref_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_cbs_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_aliases DROP CONSTRAINT IF EXISTS player_aliases_pkey;
 ALTER TABLE IF EXISTS ONLY public.pff_player_seasonlogs DROP CONSTRAINT IF EXISTS pff_player_seasonlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.pff_player_seasonlogs_changelog DROP CONSTRAINT IF EXISTS pff_player_seasonlogs_changelog_pkey;
@@ -11942,7 +11952,8 @@ CREATE TABLE public.player (
     twitter_username character varying,
     swish_id integer,
     draftkings_id integer,
-    fanduel_id character varying(20)
+    fanduel_id character varying(20),
+    rts_id integer
 );
 
 
@@ -16262,6 +16273,22 @@ ALTER TABLE ONLY public.player_aliases
 
 
 --
+-- Name: player player_cbs_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player
+    ADD CONSTRAINT player_cbs_id_unique UNIQUE (cbs_id);
+
+
+--
+-- Name: player player_cfbref_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player
+    ADD CONSTRAINT player_cfbref_id_unique UNIQUE (cfbref_id);
+
+
+--
 -- Name: player_contracts player_contracts_pid_year_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -16275,6 +16302,54 @@ ALTER TABLE ONLY public.player_contracts
 
 ALTER TABLE ONLY public.player_contracts
     ADD CONSTRAINT player_contracts_pkey PRIMARY KEY (pid, year);
+
+
+--
+-- Name: player player_draftkings_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player
+    ADD CONSTRAINT player_draftkings_id_unique UNIQUE (draftkings_id);
+
+
+--
+-- Name: player player_fanduel_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player
+    ADD CONSTRAINT player_fanduel_id_unique UNIQUE (fanduel_id);
+
+
+--
+-- Name: player player_fleaflicker_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player
+    ADD CONSTRAINT player_fleaflicker_id_unique UNIQUE (fleaflicker_id);
+
+
+--
+-- Name: player player_mfl_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player
+    ADD CONSTRAINT player_mfl_id_unique UNIQUE (mfl_id);
+
+
+--
+-- Name: player player_otc_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player
+    ADD CONSTRAINT player_otc_id_unique UNIQUE (otc_id);
+
+
+--
+-- Name: player player_pff_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player
+    ADD CONSTRAINT player_pff_id_unique UNIQUE (pff_id);
 
 
 --
@@ -16294,11 +16369,27 @@ ALTER TABLE ONLY public.player_rankings_index
 
 
 --
+-- Name: player player_rts_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player
+    ADD CONSTRAINT player_rts_id_unique UNIQUE (rts_id);
+
+
+--
 -- Name: player_salaries player_salaries_pid_esbid_source_contest_id_key; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.player_salaries
     ADD CONSTRAINT player_salaries_pid_esbid_source_contest_id_key UNIQUE (pid, esbid, source_contest_id);
+
+
+--
+-- Name: player player_swish_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player
+    ADD CONSTRAINT player_swish_id_unique UNIQUE (swish_id);
 
 
 --

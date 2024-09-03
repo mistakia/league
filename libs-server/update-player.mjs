@@ -26,7 +26,17 @@ const protected_props = [
   'espn_id',
   'fantasy_data_id',
   'yahoo_id',
-  'keeptradecut_id'
+  'keeptradecut_id',
+  'mfl_id',
+  'cbs_id',
+  'swish_id',
+  'rts_id',
+  'pff_id',
+  'otc_id',
+  'fleaflicker_id',
+  'fanduel_id',
+  'draftkings_id',
+  'cfbref_id'
 ]
 
 const nullable_props = ['injury_status']
