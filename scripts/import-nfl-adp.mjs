@@ -113,6 +113,11 @@ const import_nfl_adp = async ({
 
   // First iteration: match by nfl_id
   for (const player of players) {
+    if (!player.nfl_id) {
+      log(player)
+      continue
+    }
+
     let player_row
     try {
       player_row = await getPlayer({ nfl_id: player.nfl_id })

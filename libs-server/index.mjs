@@ -88,6 +88,7 @@ export * as fantasypros from './fantasypros.mjs'
 export * as four_for_four from './4for4.mjs'
 export * as yahoo from './yahoo.mjs'
 export * as rts from './rts.mjs'
+export { default as mergePlayer } from './merge-player.mjs'
 
 export const getChartedPlayByPlayQuery = (db) =>
   db('nfl_plays')
