@@ -276,13 +276,16 @@ router.post('/?', async (req, res) => {
         }
       }
     } else if (type === constants.waivers.POACH) {
+      const is_sanctuary_period = isSantuaryPeriod(league)
+
       // player can not be on waivers if he has no transactions
-      if (!transactions.length) {
+      if (!is_sanctuary_period && !transactions.length) {
         return res.status(400).send({ error: 'player is not on waivers' })
       }
 
       // player has been deactivated
       if (
+        !is_sanctuary_period &&
         transactions[0].type !== constants.transactions.ROSTER_DEACTIVATE &&
         transactions[0].type !== constants.transactions.PRACTICE_ADD &&
         transactions[0].type !== constants.transactions.DRAFT
@@ -290,19 +293,15 @@ router.post('/?', async (req, res) => {
         return res.status(400).send({ error: 'player is not on waivers' })
       }
 
-      // verify it is a Regular Season or Free Agency Sanctuary Period
-      if (!isSantuaryPeriod(league)) {
-        return res.status(400).send({ error: 'player is not on waivers' })
-      }
-
       // transaction should have been within the last 48 hours
       if (
-        dayjs().isAfter(
+        !is_sanctuary_period &&
+        (dayjs().isAfter(
           dayjs.unix(transactions[0].timestamp).add('48', 'hours')
         ) ||
-        dayjs().isBefore(
-          dayjs.unix(transactions[0].timestamp).add('24', 'hours')
-        )
+          dayjs().isBefore(
+            dayjs.unix(transactions[0].timestamp).add('24', 'hours')
+          ))
       ) {
         return res.status(400).send({ error: 'player is not on waivers' })
       }
