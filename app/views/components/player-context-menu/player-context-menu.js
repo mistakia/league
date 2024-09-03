@@ -395,7 +395,7 @@ export default function PlayerContextMenu({
     add({
       key: 'poach',
       onClick: handlePoach,
-      disabled: !status.eligible.poach,
+      disabled: !status.eligible.poach && !status.waiver.poach,
       label: text
     })
   } else {

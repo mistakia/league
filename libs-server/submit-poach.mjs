@@ -21,7 +21,8 @@ export default async function ({
   pid,
   teamId,
   team,
-  userId
+  userId,
+  is_waiver = false
 }) {
   // verify player and release ids
   const pids = [pid]
@@ -59,6 +60,22 @@ export default async function ({
     throw new Error('player is not in an unprotected practice squad slot')
   }
   const playerTid = slots[0].tid
+
+  // if it is not a waiver, make sure no other waivers are pending
+  if (!is_waiver) {
+    const existing_waivers = await db('waivers')
+      .where({
+        pid,
+        lid: leagueId,
+        type: constants.waivers.POACH
+      })
+      .whereNull('processed')
+      .whereNull('cancelled')
+
+    if (existing_waivers.length) {
+      throw new Error('player has existing poaching claim')
+    }
+  }
 
   // verify no existing poaches exist
   const poaches = await db('poaches').where({ pid }).whereNull('processed')
