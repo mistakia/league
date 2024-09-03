@@ -1291,11 +1291,11 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
         }
       }
     } else if (isPlayerOnPracticeSquad(state, { playerMap })) {
+      const is_sanctuary_period = isSantuaryPeriod(league)
       // make sure player is unprotected and it is not a santuary period
       if (
-        (playerSlot === constants.slots.PS ||
-          playerSlot === constants.slots.PSD) &&
-        !isSantuaryPeriod(league)
+        playerSlot === constants.slots.PS ||
+        playerSlot === constants.slots.PSD
       ) {
         const rosterInfo = getRosterInfoForPlayerId(state, {
           pid: playerId
@@ -1305,15 +1305,20 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
 
         // check if player has existing poaching claim and is after sanctuary period
         const leaguePoaches = getPoachesForCurrentLeague(state)
-        if (!leaguePoaches.has(playerId) && dayjs().isAfter(sanctuaryEnd)) {
+        if (
+          !leaguePoaches.has(playerId) &&
+          dayjs().isAfter(sanctuaryEnd) &&
+          !is_sanctuary_period
+        ) {
           status.eligible.poach = true
         }
 
         if (
-          (rosterInfo.type === constants.transactions.ROSTER_DEACTIVATE ||
+          ((rosterInfo.type === constants.transactions.ROSTER_DEACTIVATE ||
             rosterInfo.type === constants.transactions.DRAFT ||
             rosterInfo.type === constants.transactions.PRACTICE_ADD) &&
-          dayjs().isBefore(cutoff)
+            dayjs().isBefore(cutoff)) ||
+          is_sanctuary_period
         ) {
           status.waiver.poach = true
         }

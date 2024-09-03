@@ -84,7 +84,8 @@ const run = async ({ daily = false } = {}) => {
           userId: waiver.userid,
           pid: waiver.pid,
           teamId: waiver.tid,
-          team: waiver
+          team: waiver,
+          is_waiver: true
         })
 
         log(

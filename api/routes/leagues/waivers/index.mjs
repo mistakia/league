@@ -290,9 +290,9 @@ router.post('/?', async (req, res) => {
         return res.status(400).send({ error: 'player is not on waivers' })
       }
 
-      // verify it is not Regular Season or Free Agency Sanctuary Period
-      if (isSantuaryPeriod(league)) {
-        return res.status(400).send({ error: 'Santuary Period' })
+      // verify it is a Regular Season or Free Agency Sanctuary Period
+      if (!isSantuaryPeriod(league)) {
+        return res.status(400).send({ error: 'player is not on waivers' })
       }
 
       // transaction should have been within the last 48 hours
