@@ -5,6 +5,7 @@ import { promisify } from 'util'
 import fetch from 'node-fetch'
 import debug from 'debug'
 import yargs from 'yargs'
+import dayjs from 'dayjs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
@@ -114,6 +115,18 @@ const run = async ({
 } = {}) => {
   if (year < 2022) {
     throw new Error('FTN Charting data is only available from 2022 onwards')
+  }
+
+  if (year === constants.season.year && !constants.season.week) {
+    throw new Error('Season has not started yet')
+  }
+
+  if (year === constants.season.year && constants.season.week === 1) {
+    const current_day = dayjs().day()
+    if (current_day < 5) {
+      // 5 is Friday
+      throw new Error('Week 1 data is not available until Friday')
+    }
   }
 
   const filename = `ftn_charting_${year}.csv`
