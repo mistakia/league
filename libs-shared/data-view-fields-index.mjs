@@ -3,6 +3,12 @@ export default {
     "The betting line for a player's season-long prop market",
   player_game_prop_line_from_betting_markets:
     "The betting line for a player's single-game prop market",
+  player_game_prop_american_odds_from_betting_markets:
+    "The betting odds for a player's single-game prop market selection",
+  player_game_prop_decimal_odds_from_betting_markets:
+    "The betting odds for a player's single-game prop market selection",
+  player_game_prop_implied_probability_from_betting_markets:
+    "The implied probability for a player's single-game prop market selection",
 
   player_espn_open_score:
     "ESPN's Open Score for the player, measuring their ability to get open",
