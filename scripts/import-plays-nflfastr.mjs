@@ -7,6 +7,7 @@ import fetch from 'node-fetch'
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+import dayjs from 'dayjs'
 
 import { constants, fixTeam } from '#libs-shared'
 import { isMain, readCSV, getPlay, update_play, report_job } from '#libs-server'
@@ -248,6 +249,14 @@ const run = async ({
 } = {}) => {
   if (year === constants.season.year && !constants.season.week) {
     throw new Error('Season has not started yet')
+  }
+
+  if (year === constants.season.year && constants.season.week === 1) {
+    const current_day = dayjs().day()
+    if (current_day < 5) {
+      // 5 is Friday
+      throw new Error('Week 1 data is not available until Friday')
+    }
   }
 
   const filename = `play_by_play_${year}.csv`
