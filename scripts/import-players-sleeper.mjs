@@ -110,8 +110,15 @@ const run = async () => {
       log(item)
     }
 
-    // if status did not match injury status, then check nfl status
-    if (!data.injury_status) {
+    // injury status could be PUP which is an nfl status
+    if (injury_status && !data.injury_status) {
+      try {
+        data.nfl_status = format_nfl_status(injury_status)
+      } catch (err) {
+        log(err)
+        log(item)
+      }
+    } else if (!data.injury_status) {
       data.nfl_status = format_nfl_status(status)
     }
 
