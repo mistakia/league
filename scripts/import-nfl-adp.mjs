@@ -161,8 +161,9 @@ const import_nfl_adp = async ({
     }
 
     if (player_row) {
-      if (matched_nfl_ids.has(Number(player.nfl_id))) {
-        log(`Player ${player.nfl_id} already matched`)
+      if (player_row.nfl_id && matched_nfl_ids.has(Number(player_row.nfl_id))) {
+        log(`Player ${player_row.nfl_id} already matched`)
+        log(player)
         continue
       }
 

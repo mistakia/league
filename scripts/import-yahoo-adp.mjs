@@ -91,8 +91,12 @@ const import_yahoo_adp = async ({
     }
 
     if (player_row) {
-      if (matched_yahoo_ids.has(Number(player.yahoo_id))) {
-        log(`Player ${player.yahoo_id} already matched`)
+      if (
+        player_row.yahoo_id &&
+        matched_yahoo_ids.has(Number(player_row.yahoo_id))
+      ) {
+        log(`Player ${player_row.yahoo_id} already matched`)
+        log(player)
         continue
       }
 
