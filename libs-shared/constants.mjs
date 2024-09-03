@@ -1,10 +1,8 @@
 // import MockDate from 'mockdate'
 // import dayjs from 'dayjs'
 
-import * as espn from './espn-constants.mjs'
 import season_dates from './season-dates.mjs'
 import Season from './season.mjs'
-export { espn }
 
 // MockDate.set(dayjs.unix(1631127600).toDate())
 

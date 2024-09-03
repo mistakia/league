@@ -1779,7 +1779,14 @@ CREATE TYPE public.ranking_type AS ENUM (
 
 CREATE TYPE public.rankings_source_id AS ENUM (
     'FANTASYPROS',
-    'SLEEPER'
+    'SLEEPER',
+    'ESPN',
+    'RTS',
+    'MFL',
+    'YAHOO',
+    'NFL',
+    'CBS',
+    'UNDERDOG'
 );
 
 
@@ -2776,7 +2783,7 @@ CREATE TABLE public.nfl_games (
     home_score integer DEFAULT 0,
     away_score integer DEFAULT 0,
     stad character varying(45),
-    stad_nflid character varying(36),
+    stad_nfl_id character varying(36),
     site_ngsid integer,
     clock character varying(10),
     status character varying(20),
@@ -11552,15 +11559,15 @@ CREATE TABLE public.nfl_plays_year_2024 (
 CREATE TABLE public.nfl_snaps (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    "nflId" integer NOT NULL
+    gsis_it_id integer NOT NULL
 );
 
 
 --
--- Name: COLUMN nfl_snaps."nflId"; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_snaps.gsis_it_id; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_snaps."nflId" IS 'ngs nflId/gsisItId';
+COMMENT ON COLUMN public.nfl_snaps.gsis_it_id IS 'ngs nflId/gsisItId';
 
 
 --
@@ -11570,7 +11577,7 @@ COMMENT ON COLUMN public.nfl_snaps."nflId" IS 'ngs nflId/gsisItId';
 CREATE TABLE public.nfl_snaps_current_week (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    "nflId" integer NOT NULL
+    gsis_it_id integer NOT NULL
 );
 
 
@@ -11893,7 +11900,7 @@ CREATE TABLE public.player (
     posd character varying(8),
     jnum smallint,
     dcp smallint,
-    nflid integer,
+    nfl_id integer,
     esbid character varying(10),
     gsisid character varying(15),
     gsispid character varying(47),
@@ -16628,7 +16635,7 @@ CREATE INDEX "idx_24735_playId" ON public.nfl_snaps USING btree ("playId");
 -- Name: idx_24735_snap; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24735_snap ON public.nfl_snaps USING btree (esbid, "playId", "nflId");
+CREATE UNIQUE INDEX idx_24735_snap ON public.nfl_snaps USING btree (esbid, "playId", gsis_it_id);
 
 
 --
@@ -16642,7 +16649,7 @@ CREATE INDEX "idx_24738_playId" ON public.nfl_snaps_current_week USING btree ("p
 -- Name: idx_24738_snap; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24738_snap ON public.nfl_snaps_current_week USING btree ("playId", "nflId", esbid);
+CREATE UNIQUE INDEX idx_24738_snap ON public.nfl_snaps_current_week USING btree ("playId", gsis_it_id, esbid);
 
 
 --

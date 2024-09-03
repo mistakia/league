@@ -34,22 +34,22 @@ export const getCurrentPlayers = async ({
   return data
 }
 
-export const getPlayer = async ({ ignore_cache = false, nflId } = {}) => {
-  if (!nflId) {
+export const getPlayer = async ({ ignore_cache = false, gsis_it_id } = {}) => {
+  if (!gsis_it_id) {
     return
   }
 
-  const cache_key = `/ngs/player/${nflId}.json`
+  const cache_key = `/ngs/player/${gsis_it_id}.json`
   if (!ignore_cache) {
     const cache_value = await cache.get({ key: cache_key })
     if (cache_value) {
-      log(`cache hit for ngs player with nflId: ${nflId}`)
+      log(`cache hit for ngs player with gsis_it_id: ${gsis_it_id}`)
       return cache_value
     }
   }
 
-  const url = `${config.ngs_api_url}/league/player?nflId=${nflId}`
-  log(`fetching ngs player with nflId: ${nflId}`)
+  const url = `${config.ngs_api_url}/league/player?nflId=${gsis_it_id}`
+  log(`fetching ngs player with gsis_it_id: ${gsis_it_id}`)
   const res = await fetch(url, {
     headers: { referer: 'https://nextgenstats.nfl.com/' }
   })

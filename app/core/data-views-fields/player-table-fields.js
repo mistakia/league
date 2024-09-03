@@ -291,12 +291,12 @@ export default function ({ is_logged_in }) {
       column_groups: [COLUMN_GROUPS.PROSPECT, COLUMN_GROUPS.NGS]
     },
 
-    player_nflid: {
+    player_nfl_id: {
       column_title: 'NFL Player ID',
       header_label: 'NFL ID',
       size: 80,
       data_type: table_constants.TABLE_DATA_TYPES.TEXT,
-      player_value_path: 'nflid',
+      player_value_path: 'nfl_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     },
     player_esbid: {

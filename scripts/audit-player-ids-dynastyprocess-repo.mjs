@@ -63,7 +63,7 @@ const audit_player_ids_dynastyprocess_repo = async ({
         gsisid: player_data.gsis_id,
         pff_id: Number(player_data.pff_id) || null,
         sleeper_id: player_data.sleeper_id,
-        nflid: player_data.nfl_id,
+        nfl_id: player_data.nfl_id,
         espn_id: player_data.espn_id ? Number(player_data.espn_id) : null,
         yahoo_id: player_data.yahoo_id ? Number(player_data.yahoo_id) : null,
         fleaflicker_id: Number(player_data.fleaflicker_id) || null,
@@ -106,7 +106,7 @@ const audit_player_ids_dynastyprocess_repo = async ({
     'fantasy_data_id',
     'gsisid',
     'sleeper_id',
-    'nflid',
+    'nfl_id',
     'espn_id',
     'yahoo_id',
     'rotowire_id',
@@ -150,7 +150,7 @@ const audit_player_ids_dynastyprocess_repo = async ({
           player.fantasy_data_id === dp_player.fantasy_data_id) ||
         (player.gsisid && player.gsisid === dp_player.gsisid) ||
         (player.sleeper_id && player.sleeper_id === dp_player.sleeper_id) ||
-        (player.nflid && player.nflid === dp_player.nflid) ||
+        (player.nfl_id && player.nfl_id === dp_player.nfl_id) ||
         (player.espn_id && player.espn_id === dp_player.espn_id) ||
         (player.yahoo_id && player.yahoo_id === dp_player.yahoo_id) ||
         (player.rotowire_id && player.rotowire_id === dp_player.rotowire_id) ||
@@ -183,7 +183,7 @@ const audit_player_ids_dynastyprocess_repo = async ({
         key === 'height' ||
         key === 'weight' ||
         key === 'pos' || // TODO
-        key === 'nflid' ||
+        key === 'nfl_id' ||
         key === 'current_nfl_team'
     )
 

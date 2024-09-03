@@ -37,7 +37,7 @@ const generate_player_snaps_for_week = async ({
     .select(
       'nfl_snaps.esbid',
       'nfl_snaps.playId',
-      'nfl_snaps.nflId as gsis_it_id',
+      'nfl_snaps.gsis_it_id',
       'nfl_plays.off',
       'nfl_plays.def',
       'nfl_plays.play_type'

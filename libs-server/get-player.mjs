@@ -64,6 +64,12 @@ const getPlayer = async ({
   gsisItId,
   draftkings_id,
   fanduel_id,
+  cbs_id,
+  yahoo_id,
+  rts_id,
+  espn_id,
+  nfl_id,
+  mfl_id,
 
   ignore_retired = false,
   ignore_free_agent = false
@@ -97,6 +103,18 @@ const getPlayer = async ({
     query.where({ draftkings_id })
   } else if (fanduel_id) {
     query.where({ fanduel_id })
+  } else if (cbs_id) {
+    query.where({ cbs_id })
+  } else if (yahoo_id) {
+    query.where({ yahoo_id })
+  } else if (rts_id) {
+    query.where({ rts_id })
+  } else if (espn_id) {
+    query.where({ espn_id })
+  } else if (nfl_id) {
+    query.where({ nfl_id })
+  } else if (mfl_id) {
+    query.where({ mfl_id })
   } else {
     if (name) {
       const formatted = formatPlayerName(name)

@@ -245,9 +245,9 @@ export default {
     column_name: 'ngs_size_score'
   },
 
-  player_nflid: {
+  player_nfl_id: {
     table_name: 'player',
-    column_name: 'nflid'
+    column_name: 'nfl_id'
   },
   player_esbid: {
     table_name: 'player',

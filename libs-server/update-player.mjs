@@ -14,7 +14,7 @@ debug.enable('update-player')
 const excluded_props = ['pid', 'formatted', 'pos']
 
 const protected_props = [
-  'nflid',
+  'nfl_id',
   'esbid',
   'gsisid',
   'gsispid',
