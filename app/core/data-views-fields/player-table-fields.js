@@ -475,6 +475,22 @@ export default function ({ is_logged_in }) {
       player_value_path: 'swish_id',
       column_groups: [COLUMN_GROUPS.PLAYER_IDS]
     },
+    player_rts_id: {
+      column_title: 'RTS Player ID',
+      header_label: 'RTS ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      player_value_path: 'rts_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
+    player_fanduel_id: {
+      column_title: 'FanDuel Player ID',
+      header_label: 'FanDuel ID',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.TEXT,
+      player_value_path: 'fanduel_id',
+      column_groups: [COLUMN_GROUPS.PLAYER_IDS]
+    },
 
     player_contract_year_signed: contract_field({
       column_title: 'Contract Year Signed (Current)',
