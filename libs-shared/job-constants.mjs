@@ -88,7 +88,13 @@ export const job_types = {
   IMPORT_PFF_GRADES: 65,
   IMPORT_SLEEPER_ADP_AND_PROJECTIONS: 66,
   IMPORT_DRAFTKINGS_DFS_SALARIES: 67,
-  IMPORT_FANDUEL_DFS_SALARIES: 68
+  IMPORT_FANDUEL_DFS_SALARIES: 68,
+  IMPORT_ESPN_ADP: 69,
+  IMPORT_CBS_ADP: 70,
+  IMPORT_RTS_ADP: 71,
+  IMPORT_NFL_ADP: 72,
+  IMPORT_MFL_ADP: 73,
+  IMPORT_YAHOO_ADP: 74
 }
 
 export const job_title_by_id = {
@@ -159,5 +165,11 @@ export const job_title_by_id = {
   65: 'Import PFF Grades',
   66: 'Import Sleeper ADP and Projections',
   67: 'Import DraftKings DFS Salaries',
-  68: 'Import Fanduel DFS Salaries'
+  68: 'Import Fanduel DFS Salaries',
+  69: 'Import ESPN ADP',
+  70: 'Import CBS ADP',
+  71: 'Import RTS ADP',
+  72: 'Import NFL ADP',
+  73: 'Import MFL ADP',
+  74: 'Import Yahoo ADP'
 }

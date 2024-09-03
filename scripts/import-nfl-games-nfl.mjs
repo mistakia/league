@@ -64,7 +64,7 @@ const format = (item) => {
     ...(score.homePointsTotal && { home_score: score.homePointsTotal }),
     ...(score.visitorPointsTotal && { away_score: score.visitorPointsTotal }),
 
-    ...(item.venue && { stad: item.venue.name, stad_nflid: item.venue.id })
+    ...(item.venue && { stad: item.venue.name, stad_nfl_id: item.venue.id })
   }
 }
 

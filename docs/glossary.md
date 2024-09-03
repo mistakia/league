@@ -584,7 +584,7 @@
 
 | column          | name                      | description               | coverage |
 | --------------- | ------------------------- | ------------------------- | -------- |
-| nflid           | NFL ID                    | NFL ID                    | 47.67%   |
+| nfl_id          | NFL ID                    | NFL ID                    | 47.67%   |
 | gsisid          | GSIS ID                   | GSIS ID                   | 53.99%   |
 | gsispid         | GSIS Player ID            | GSIS Player ID            | 40.39%   |
 | gsisItId        | GSIS It ID                | GSIS It ID                | 28.40%   |

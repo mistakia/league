@@ -176,10 +176,10 @@ const importPlaysForWeek = async ({
       }
 
       if (play.nflIds && Array.isArray(play.nflIds)) {
-        for (const nflId of play.nflIds) {
+        for (const gsis_it_id of play.nflIds) {
           snap_inserts.push({
             esbid,
-            nflId,
+            gsis_it_id,
             playId
           })
         }
@@ -201,7 +201,7 @@ const importPlaysForWeek = async ({
           await db('nfl_snaps').where({ esbid }).del()
           await db('nfl_snaps')
             .insert(snap_inserts)
-            .onConflict(['esbid', 'playId', 'nflId'])
+            .onConflict(['esbid', 'playId', 'gsis_it_id'])
             .merge()
         } catch (err) {
           log(`Error on inserting snaps for esbid: ${game.esbid}`)
@@ -237,7 +237,7 @@ const importPlaysForWeek = async ({
           await db('nfl_snaps_current_week').where({ esbid }).del()
           await db('nfl_snaps_current_week')
             .insert(snap_inserts)
-            .onConflict(['esbid', 'playId', 'nflId'])
+            .onConflict(['esbid', 'playId', 'gsis_it_id'])
             .merge()
         } catch (err) {
           log(`Error on inserting snaps for esbid: ${game.esbid}`)

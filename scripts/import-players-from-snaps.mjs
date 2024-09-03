@@ -18,18 +18,18 @@ debug.enable(
 )
 
 const import_players_from_snaps = async () => {
-  const nfl_ids = await db('nfl_snaps')
-    .select('nfl_snaps.nflId')
-    .leftJoin('player', 'nfl_snaps.nflId', 'player.gsisItId')
+  const gsis_it_ids = await db('nfl_snaps')
+    .select('nfl_snaps.gsis_it_id')
+    .leftJoin('player', 'nfl_snaps.gsis_it_id', 'player.gsisItId')
     .whereNull('player.gsisItId')
-    .groupBy('nfl_snaps.nflId')
+    .groupBy('nfl_snaps.gsis_it_id')
 
-  log(`loaded ${nfl_ids.length} missing player ids`)
+  log(`loaded ${gsis_it_ids.length} missing player ids`)
 
   const missing = []
 
-  for (const { nflId } of nfl_ids) {
-    const data = await ngs.getPlayer({ nflId })
+  for (const { gsis_it_id } of gsis_it_ids) {
+    const data = await ngs.getPlayer({ gsis_it_id })
     if (data && data.displayName) {
       let player_row
       try {
@@ -77,7 +77,7 @@ const import_players_from_snaps = async () => {
             posd: 'INA',
             esbid: data.esbId,
             gsisid: data.gsisId,
-            gsisItId: nflId,
+            gsisItId: gsis_it_id,
             jnum: data.jerseyNumber,
             current_nfl_team: data.currentTeamAbbr
           })
@@ -93,7 +93,7 @@ const import_players_from_snaps = async () => {
       }
 
       const update = {
-        gsisItId: nflId,
+        gsisItId: gsis_it_id,
         gsisid: data.gsisId,
         esbid: data.esbId
       }

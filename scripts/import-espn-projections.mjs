@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#libs-shared'
-import { isMain, getPlayer, report_job } from '#libs-server'
+import { isMain, getPlayer, report_job, espn } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -42,8 +42,8 @@ const run = async ({
   const missing = []
   for (const item of data.players) {
     const name = item.player.fullName
-    const team = constants.espn.teamId[item.player.proTeamId]
-    const pos = constants.espn.positionId[item.player.defaultPositionId]
+    const team = espn.teamId[item.player.proTeamId]
+    const pos = espn.positionId[item.player.defaultPositionId]
     const params = {
       name,
       teams: [team],
@@ -69,7 +69,7 @@ const run = async ({
       (s) => s.scoringPeriodId === week && s.seasonId === year
     )
     if (!projections) continue
-    const data = constants.espn.stats(projections.stats)
+    const data = espn.stats(projections.stats)
 
     inserts.push({
       pid: player_row.pid,
