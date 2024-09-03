@@ -13,7 +13,7 @@ debug.enable('calculate:franchise-tags')
 
 const average = (array) => array.reduce((a, b) => a + b) / array.length
 
-const run = async ({ year = constants.season.year }) => {
+const run = async ({ year = constants.season.year, dry_run = false } = {}) => {
   const seasons = await db('seasons')
     .select('seasons.*')
     .join('leagues', 'leagues.uid', '=', 'seasons.lid')
@@ -70,7 +70,7 @@ const run = async ({ year = constants.season.year }) => {
       update[`f${pos.toLowerCase()}`] = Math.round(avg)
     }
 
-    if (argv.dry) {
+    if (dry_run) {
       log(update)
       continue
     }
@@ -86,7 +86,7 @@ export default run
 const main = async () => {
   let error
   try {
-    await run({ year: argv.year })
+    await run({ year: argv.year, dry_run: argv.dry })
   } catch (err) {
     error = err
     console.log(error)
