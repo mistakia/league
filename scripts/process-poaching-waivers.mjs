@@ -24,6 +24,19 @@ if (process.env.NODE_ENV !== 'test') {
 const run = async ({ daily = false } = {}) => {
   const timestamp = Math.round(Date.now() / 1000)
 
+  // Check if it's the first 24 hours of the regular season
+  const is_first_24_hours_of_regular_season = constants.season.now.isBetween(
+    constants.season.start.add(7, 'days'),
+    constants.season.start.add(8, 'days')
+  )
+
+  if (is_first_24_hours_of_regular_season) {
+    log(
+      `First 24 hours of regular season, a poaching sanctuary period, skipping poaching waivers`
+    )
+    return
+  }
+
   // get leagueIds with pending waivers
   const results = await db('waivers')
     .select('lid')
