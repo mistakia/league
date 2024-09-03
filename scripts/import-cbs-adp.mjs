@@ -35,23 +35,19 @@ const fetch_cbs_data = async (url) => {
   const draft_page = await response.text()
   const $ = cheerio.load(draft_page)
 
-  const cbs_ids = $('span.CellPlayerName--long > span > a')
-    .map((_, el) => {
-      const href = $(el).attr('href')
-      const parts = href.split('/')
-      return parts[parts.length - 4]
-    })
-    .get()
-
   const players = $('#TableBase > div > div > table')
     .find('tr')
-    .map((index, row) => {
+    .map((_, row) => {
       const cells = $(row).find('td')
       if (cells.length === 0) return null
-      const player_name = $(cells[1])
-        .find('.CellPlayerName--long a')
-        .text()
-        .trim()
+
+      const player_link = $(cells[1]).find('.CellPlayerName--long a')
+      const href = player_link.attr('href')
+      const cbs_id = href
+        ? Number(href.split('/')[href.split('/').length - 4])
+        : null
+
+      const player_name = player_link.text().trim()
       const pos = $(cells[1])
         .find('.CellPlayerName--long .CellPlayerName-position')
         .text()
@@ -66,7 +62,7 @@ const fetch_cbs_data = async (url) => {
       const percent_drafted = parseFloat($(cells[5]).text().trim())
 
       return {
-        cbs_id: Number(cbs_ids[index]) || null,
+        cbs_id,
         player_name,
         pos,
         team,
