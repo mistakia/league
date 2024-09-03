@@ -77,6 +77,7 @@ const player_betting_market_with = ({
   having_clauses,
   where_clauses,
   splits,
+  select_strings = [],
   is_game_prop = false
 }) => {
   const {
@@ -115,13 +116,24 @@ const player_betting_market_with = ({
   })
 
   query.with(with_table_name, (qb) => {
-    qb.select('pms.selection_pid', 'pms.selection_metric_line')
-      .from(`${markets_cte} as m`)
-      .join('prop_market_selections_index as pms', function () {
+    qb.from(`${markets_cte} as m`).join(
+      'prop_market_selections_index as pms',
+      function () {
         this.on('pms.source_id', '=', 'm.source_id')
           .andOn('pms.source_market_id', '=', 'm.source_market_id')
           .andOn('pms.time_type', '=', 'm.time_type')
-      })
+      }
+    )
+
+    const unique_select_strings = new Set([
+      'pms.selection_pid',
+      'pms.selection_metric_line',
+      ...select_strings
+    ])
+
+    for (const select_string of unique_select_strings) {
+      qb.select(db.raw(select_string))
+    }
 
     if (career_year.length) {
       qb.join('player_seasonlogs', function () {
@@ -257,11 +269,18 @@ const team_betting_market_with = ({
 const create_player_betting_market_field = ({
   column_name,
   column_alias,
-  is_game_prop
+  is_game_prop,
+  select_string,
+  with_select_alias
 }) => ({
   column_name,
   select_as: () => `${column_alias}_betting_market`,
-  with_where: () => `pms.${column_name}`,
+  with_where: () => select_string || `pms.${column_name}`,
+  with_select: () => [
+    select_string
+      ? `${select_string}${with_select_alias ? ' as ' + with_select_alias : select_string}`
+      : `pms.${column_name}`
+  ],
   table_alias: (args) => betting_markets_table_alias({ ...args, is_game_prop }),
   join: player_betting_market_join,
   with: (args) => player_betting_market_with({ ...args, is_game_prop })
@@ -288,6 +307,29 @@ export default {
     create_player_betting_market_field({
       column_name: 'selection_metric_line',
       column_alias: 'game_prop_line',
+      is_game_prop: true
+    }),
+
+  player_game_prop_american_odds_from_betting_markets:
+    create_player_betting_market_field({
+      column_name: 'odds_american',
+      column_alias: 'game_prop_american_odds',
+      is_game_prop: true
+    }),
+
+  player_game_prop_decimal_odds_from_betting_markets:
+    create_player_betting_market_field({
+      column_name: 'odds_decimal',
+      column_alias: 'game_prop_decimal_odds',
+      is_game_prop: true
+    }),
+
+  player_game_prop_implied_probability_from_betting_markets:
+    create_player_betting_market_field({
+      select_string: '1 / odds_decimal',
+      with_select_alias: 'game_prop_implied_probability',
+      column_name: 'game_prop_implied_probability',
+      column_alias: 'game_prop_implied_probability',
       is_game_prop: true
     }),
 

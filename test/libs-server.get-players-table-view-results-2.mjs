@@ -372,4 +372,29 @@ describe('LIBS SERVER get_data_view_results', () => {
     const expected_query = `with "t058c73ac39f13734c9eda890a301cfe1" as (select "pid", "player_rankings_index"."avg" AS "avg", "player_rankings_index"."overall_rank" AS "overall_rank", "player_rankings_index"."position_rank" AS "position_rank", "player_rankings_index"."min" AS "min", "player_rankings_index"."max" AS "max", "player_rankings_index"."std" AS "std" from "player_rankings_index" where "source_id" in ('FANTASYPROS') and "ranking_type" in ('PPR_REDRAFT') and "year" in (2024) and "week" in (0) and player_rankings_index.avg <= '50') select "player"."pid", "t058c73ac39f13734c9eda890a301cfe1"."avg" AS "average_rank_0", "t058c73ac39f13734c9eda890a301cfe1"."overall_rank" AS "overall_rank_0", "t058c73ac39f13734c9eda890a301cfe1"."position_rank" AS "position_rank_0", "t058c73ac39f13734c9eda890a301cfe1"."min" AS "min_rank_0", "t058c73ac39f13734c9eda890a301cfe1"."max" AS "max_rank_0", "t058c73ac39f13734c9eda890a301cfe1"."std" AS "rank_stddev_0", "player"."pos" from "player" inner join "t058c73ac39f13734c9eda890a301cfe1" on "t058c73ac39f13734c9eda890a301cfe1"."pid" = "player"."pid" group by "t058c73ac39f13734c9eda890a301cfe1"."avg", "t058c73ac39f13734c9eda890a301cfe1"."overall_rank", "t058c73ac39f13734c9eda890a301cfe1"."position_rank", "t058c73ac39f13734c9eda890a301cfe1"."min", "t058c73ac39f13734c9eda890a301cfe1"."max", "t058c73ac39f13734c9eda890a301cfe1"."std", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 2 ASC NULLS LAST, "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
   })
+
+  it('player_game_prop_implied_probability_from_betting_markets', () => {
+    const query = get_data_view_results_query({
+      sort: [
+        {
+          column_id:
+            'player_game_prop_implied_probability_from_betting_markets',
+          desc: true
+        }
+      ],
+      prefix_columns: ['player_name', 'player_position'],
+      columns: [
+        {
+          column_id:
+            'player_game_prop_implied_probability_from_betting_markets',
+          params: {
+            market_type: ['GAME_RUSHING_RECEIVING_TOUCHDOWNS']
+          }
+        }
+      ],
+      where: []
+    })
+    const expected_query = `with "t9a275176d5ee79c9beaab0e671c025ba_markets" as (select "source_id", "source_market_id", "time_type" from "prop_markets_index" inner join "nfl_games" on "nfl_games"."esbid" = "prop_markets_index"."esbid" and "nfl_games"."year" = "prop_markets_index"."year" and "nfl_games"."week" = 1 where "market_type" = 'GAME_RUSHING_RECEIVING_TOUCHDOWNS' and "time_type" = 'CLOSE' and "prop_markets_index"."year" = 2024 and "source_id" = 'FANDUEL'), "t9a275176d5ee79c9beaab0e671c025ba" as (select pms.selection_pid, pms.selection_metric_line, 1 / odds_decimal as game_prop_implied_probability from "t9a275176d5ee79c9beaab0e671c025ba_markets" as "m" inner join "prop_market_selections_index" as "pms" on "pms"."source_id" = "m"."source_id" and "pms"."source_market_id" = "m"."source_market_id" and "pms"."time_type" = "m"."time_type") select "player"."pid", player.fname, player.lname, "player"."pos" AS "pos_0", "t9a275176d5ee79c9beaab0e671c025ba"."game_prop_implied_probability" AS "game_prop_implied_probability_betting_market_0", "player"."pos" from "player" left join "t9a275176d5ee79c9beaab0e671c025ba" on "t9a275176d5ee79c9beaab0e671c025ba"."selection_pid" = "player"."pid" group by player.fname, player.lname, "player"."pos", "t9a275176d5ee79c9beaab0e671c025ba"."game_prop_implied_probability", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 5 DESC NULLS LAST, "player"."pid" asc limit 500`
+    compare_queries(query.toString(), expected_query)
+  })
 })
