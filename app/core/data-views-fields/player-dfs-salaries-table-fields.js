@@ -23,7 +23,7 @@ const create_player_dfs_salaries_field = (props) => ({
       enable_multi_on_split: ['week']
     },
     platform_source_id: {
-      values: ['DRAFTKINGS'],
+      values: ['DRAFTKINGS', 'FANDUEL'],
       data_type: table_constants.TABLE_DATA_TYPES.SELECT,
       single: true,
       default_value: 'DRAFTKINGS',

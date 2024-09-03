@@ -3,7 +3,7 @@ import get_table_hash from '#libs-server/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { constants } from '#libs-shared'
 
-const generate_table_alias = ({ params = {} } = {}) => {
+const get_params = ({ params = {} }) => {
   let year = params.year || [constants.season.year]
   if (!Array.isArray(year)) {
     year = [year]
@@ -24,7 +24,24 @@ const generate_table_alias = ({ params = {} } = {}) => {
     career_game = [career_game]
   }
 
-  const key = `player_dfs_salaries_${year.join('_')}_${week.join('_')}_${career_year.join('_')}_${career_game.join('_')}`
+  let platform_source_id = params.platform_source_id || ['DRAFTKINGS']
+  if (!Array.isArray(platform_source_id)) {
+    platform_source_id = [platform_source_id]
+  }
+
+  return {
+    year,
+    week,
+    career_year,
+    career_game,
+    platform_source_id
+  }
+}
+
+const generate_table_alias = ({ params = {} } = {}) => {
+  const { year, week, career_year, career_game, platform_source_id } =
+    get_params({ params })
+  const key = `player_dfs_salaries_${year.join('_')}_${week.join('_')}_${career_year.join('_')}_${career_game.join('_')}_${platform_source_id.join('_')}`
   return get_table_hash(key)
 }
 
@@ -34,29 +51,8 @@ const add_player_dfs_salaries_with_statement = ({
   with_table_name,
   where_clauses = []
 }) => {
-  let year = params.year || [constants.season.year]
-  if (!Array.isArray(year)) {
-    year = [year]
-  }
-
-  let week = params.week || [Math.max(constants.season.week, 1)]
-  if (!Array.isArray(week)) {
-    week = [week]
-  }
-
-  let career_year = params.career_year || []
-  if (!Array.isArray(career_year)) {
-    career_year = [career_year]
-  }
-
-  let career_game = params.career_game || []
-  if (!Array.isArray(career_game)) {
-    career_game = [career_game]
-  }
-
-  const platform_source_id = params.platform_source_id || 'DRAFTKINGS'
-
-  // need to set the source_contest_id
+  const { year, week, career_year, career_game, platform_source_id } =
+    get_params({ params })
 
   const with_query = db('player_salaries')
     .select(
@@ -68,7 +64,7 @@ const add_player_dfs_salaries_with_statement = ({
     .join('nfl_games', function () {
       this.on('player_salaries.esbid', '=', 'nfl_games.esbid')
     })
-    .where('player_salaries.source_id', platform_source_id)
+    .whereIn('player_salaries.source_id', platform_source_id)
     .whereIn('nfl_games.year', year)
     .whereIn('nfl_games.week', week)
 
