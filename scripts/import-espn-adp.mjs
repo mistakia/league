@@ -93,8 +93,12 @@ const import_espn_adp = async ({
     }
 
     if (player_row) {
-      if (matched_espn_ids.has(Number(player.espn_id))) {
+      if (
+        player_row.espn_id &&
+        matched_espn_ids.has(Number(player_row.espn_id))
+      ) {
         log(`Player ${player_row.espn_id} already matched`)
+        log(player)
         continue
       }
 

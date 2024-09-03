@@ -110,8 +110,12 @@ const import_rts_adp = async ({
       }
 
       if (player_row) {
-        if (matched_rts_ids.has(Number(player.player_id))) {
-          log(`Player ${player.player_id} already matched`)
+        if (
+          player_row.rts_id &&
+          matched_rts_ids.has(Number(player_row.rts_id))
+        ) {
+          log(`Player ${player_row.rts_id} already matched`)
+          log(player)
           continue
         }
 

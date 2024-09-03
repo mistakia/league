@@ -152,8 +152,12 @@ const import_cbs_adp = async ({
       }
 
       if (player_row) {
-        if (matched_cbs_ids.has(Number(player.cbs_id))) {
+        if (
+          player_row.cbs_id &&
+          matched_cbs_ids.has(Number(player_row.cbs_id))
+        ) {
           log(`Player ${player_row.cbs_id} already matched`)
+          log(player)
           continue
         }
 
