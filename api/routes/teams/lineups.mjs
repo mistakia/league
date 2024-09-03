@@ -126,12 +126,29 @@ router.put('/?', async (req, res) => {
           return res.status(400).send({ error: 'invalid slot' })
         }
 
-        // if during first six weeks, verify player was not Reserve to start the year
-        if (week <= 6) {
-          const offseasonRosterRow = await getRoster({ tid, week: 0, year })
-          const roster = new Roster({ roster: offseasonRosterRow, league })
-          const reserve_pids = roster.reserve.map((p) => p.pid)
-          if (reserve_pids.includes(item.pid)) {
+        // if during first six weeks, verify player was not Reserve at start of free agency period
+        if (week <= 6 && league.free_agency_period_start) {
+          const transaction_before_auction = await db('transactions')
+            .where({
+              tid,
+              year,
+              week: 0,
+              pid: item.pid
+            })
+            .where('timestamp', '<=', league.free_agency_period_start)
+            .whereIn('type', [
+              constants.transactions.RESERVE_IR,
+              constants.transactions.ROSTER_ACTIVATE
+            ])
+            .orderBy('timestamp', 'desc')
+            .first()
+
+          const was_reserved =
+            transaction_before_auction &&
+            transaction_before_auction.type ===
+              constants.transactions.RESERVE_IR
+
+          if (was_reserved) {
             return res.status(400).send({
               error: 'player ineligible to start during first six weeks'
             })
