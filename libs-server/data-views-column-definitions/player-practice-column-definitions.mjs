@@ -11,7 +11,7 @@ const get_params = ({ params = {} }) => {
     year = [year]
   }
 
-  let week = params.week || [Math.max(constants.season.week, 1)]
+  let week = params.single_week || [Math.max(constants.season.week, 1)]
   if (!Array.isArray(week)) {
     week = [week]
   }
