@@ -10,6 +10,7 @@ import import_plays_nfl_v1 from '#scripts/import-plays-nfl-v1.mjs'
 import import_plays_ngs from '#scripts/import-plays-ngs.mjs'
 import process_matchups from '#scripts/process-matchups.mjs'
 import update_stats_weekly from '#scripts/update-stats-weekly.mjs'
+import calculate_league_careerlogs from '#scripts/calculate-league-careerlogs.mjs'
 
 const log = debug('finalize-week')
 
@@ -37,7 +38,7 @@ const finalize_week = async () => {
 
   const lid = 1
   await process_matchups({ lid })
-
+  await calculate_league_careerlogs({ lid })
   await clear_live_plays()
 }
 
