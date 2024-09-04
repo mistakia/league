@@ -398,4 +398,41 @@ describe('LIBS SERVER get_data_view_results', () => {
     const expected_query = `with "t9a275176d5ee79c9beaab0e671c025ba_markets" as (select "source_id", "source_market_id", "time_type" from "prop_markets_index" inner join "nfl_games" on "nfl_games"."esbid" = "prop_markets_index"."esbid" and "nfl_games"."year" = "prop_markets_index"."year" and "nfl_games"."week" = 1 where "market_type" = 'GAME_RUSHING_RECEIVING_TOUCHDOWNS' and "time_type" = 'CLOSE' and "prop_markets_index"."year" = 2024 and "source_id" = 'FANDUEL'), "t9a275176d5ee79c9beaab0e671c025ba" as (select pms.selection_pid, pms.selection_metric_line, 1 / odds_decimal as game_prop_implied_probability from "t9a275176d5ee79c9beaab0e671c025ba_markets" as "m" inner join "prop_market_selections_index" as "pms" on "pms"."source_id" = "m"."source_id" and "pms"."source_market_id" = "m"."source_market_id" and "pms"."time_type" = "m"."time_type") select "player"."pid", player.fname, player.lname, "player"."pos" AS "pos_0", "t9a275176d5ee79c9beaab0e671c025ba"."game_prop_implied_probability" AS "game_prop_implied_probability_betting_market_0", "player"."pos" from "player" left join "t9a275176d5ee79c9beaab0e671c025ba" on "t9a275176d5ee79c9beaab0e671c025ba"."selection_pid" = "player"."pid" group by player.fname, player.lname, "player"."pos", "t9a275176d5ee79c9beaab0e671c025ba"."game_prop_implied_probability", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 5 DESC NULLS LAST, "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
   })
+
+  it('player_practice', () => {
+    const query = get_data_view_results_query({
+      columns: [
+        {
+          column_id: 'player_practice_status'
+        },
+        {
+          column_id: 'player_practice_injury'
+        },
+        {
+          column_id: 'player_practice_designation_monday'
+        },
+        {
+          column_id: 'player_practice_designation_tuesday'
+        },
+        {
+          column_id: 'player_practice_designation_wednesday'
+        },
+        {
+          column_id: 'player_practice_designation_thursday'
+        },
+        {
+          column_id: 'player_practice_designation_friday'
+        },
+        {
+          column_id: 'player_practice_designation_saturday'
+        },
+        {
+          column_id: 'player_practice_designation_sunday'
+        }
+      ],
+      sort: [{ column_id: 'player_practice_status', desc: true }]
+    })
+    const expected_query = `with "t6020611723198f73e3330ef86ab56ea2" as (select "pid", "formatted_status", "inj", "m", "tu", "w", "th", "f", "s", "su" from "practice" where "year" in (2024) and "week" in (1)) select "player"."pid", "t6020611723198f73e3330ef86ab56ea2"."formatted_status" AS "practice_status_0", "t6020611723198f73e3330ef86ab56ea2"."inj" AS "practice_injury_0", "t6020611723198f73e3330ef86ab56ea2"."m" AS "player_practice_designation_m_0", "t6020611723198f73e3330ef86ab56ea2"."tu" AS "player_practice_designation_tu_0", "t6020611723198f73e3330ef86ab56ea2"."w" AS "player_practice_designation_w_0", "t6020611723198f73e3330ef86ab56ea2"."th" AS "player_practice_designation_th_0", "t6020611723198f73e3330ef86ab56ea2"."f" AS "player_practice_designation_f_0", "t6020611723198f73e3330ef86ab56ea2"."s" AS "player_practice_designation_s_0", "t6020611723198f73e3330ef86ab56ea2"."su" AS "player_practice_designation_su_0", "player"."pos" from "player" left join "t6020611723198f73e3330ef86ab56ea2" on "t6020611723198f73e3330ef86ab56ea2"."pid" = "player"."pid" group by "t6020611723198f73e3330ef86ab56ea2"."formatted_status", "t6020611723198f73e3330ef86ab56ea2"."inj", "t6020611723198f73e3330ef86ab56ea2"."m", "t6020611723198f73e3330ef86ab56ea2"."tu", "t6020611723198f73e3330ef86ab56ea2"."w", "t6020611723198f73e3330ef86ab56ea2"."th", "t6020611723198f73e3330ef86ab56ea2"."f", "t6020611723198f73e3330ef86ab56ea2"."s", "t6020611723198f73e3330ef86ab56ea2"."su", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 2 DESC NULLS LAST, "player"."pid" asc limit 500`
+    compare_queries(query.toString(), expected_query)
+  })
 })
