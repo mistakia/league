@@ -56,12 +56,14 @@ export const year = {
     {
       dynamic_type: 'last_n_years',
       label: 'Last N Years',
-      default_value: 3
+      default_value: 3,
+      has_value_field: true
     },
     {
       dynamic_type: 'next_n_years',
       label: 'Next N Years',
-      default_value: 3
+      default_value: 3,
+      has_value_field: true
     }
   ]
 }
@@ -73,12 +75,28 @@ export const week = {
     {
       dynamic_type: 'last_n_weeks',
       label: 'Last N Weeks',
-      default_value: 3
+      default_value: 3,
+      has_value_field: true
     },
     {
       dynamic_type: 'next_n_weeks',
       label: 'Next N Weeks',
-      default_value: 3
+      default_value: 3,
+      has_value_field: true
+    }
+  ]
+}
+
+export const single_week = {
+  values: constants.nfl_weeks,
+  data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+  single: true,
+  default_value: Math.max(constants.season.week, 1),
+  enable_multi_on_split: ['week'],
+  dynamic_values: [
+    {
+      dynamic_type: 'current_week',
+      label: 'Current Week'
     }
   ]
 }

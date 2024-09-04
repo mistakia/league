@@ -78,7 +78,7 @@ const create_player_practice_field = (field, alias) => ({
   join: data_view_join_function,
   with: add_player_practice_with_statement,
   supported_splits: ['year', 'week'],
-  with_where: ({ table_name }) => `${table_name}.${field}`
+  with_where: () => field
 })
 
 const create_player_practice_designation_field = (practice_day) => ({

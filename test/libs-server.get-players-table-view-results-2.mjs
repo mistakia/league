@@ -409,7 +409,14 @@ describe('LIBS SERVER get_data_view_results', () => {
           column_id: 'player_practice_injury'
         },
         {
-          column_id: 'player_practice_designation_monday'
+          column_id: 'player_practice_designation_monday',
+          params: {
+            single_week: [
+              {
+                dynamic_type: 'current_week'
+              }
+            ]
+          }
         },
         {
           column_id: 'player_practice_designation_tuesday'

@@ -19,6 +19,7 @@ import player_contract_table_fields from './player-contract-table-fields'
 import player_pff_seasonlogs_table_fields from './player-pff-seasonlogs-table-fields'
 import player_rankings_table_fields from './player-rankings-table-fields'
 import player_dfs_salaries_table_fields from './player-dfs-salaries-table-fields'
+import practice_table_fields from './practice-table-fields'
 
 // Player Column Fields
 // header_label - string, required
@@ -91,7 +92,8 @@ export function PlayerTableFields({
     ...player_games_played_table_fields,
     ...player_contract_table_fields,
     ...player_rankings_table_fields,
-    ...player_dfs_salaries_table_fields
+    ...player_dfs_salaries_table_fields,
+    ...practice_table_fields
   }
 
   for (const [key, value] of Object.entries(fields)) {

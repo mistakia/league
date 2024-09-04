@@ -99,7 +99,9 @@ const process_dynamic_week_param = (week_param) => {
 }
 
 const process_dynamic_single_week_param = (single_week_param) => {
-  let single_week = Array.isArray(single_week_param) ? single_week_param : [single_week_param]
+  let single_week = Array.isArray(single_week_param)
+    ? single_week_param
+    : [single_week_param]
   single_week = single_week.map((week) => {
     if (typeof week === 'object') {
       if (week.dynamic_type === 'current_week') {
@@ -546,6 +548,17 @@ export const get_data_view_results_query = ({
     })
     throw new Error(error_messages.join('\n'))
   }
+
+  // filter where and remove any where clauses that have a value of null or undefined
+  where = where.filter((where_clause) => {
+    return (
+      where_clause.operator === 'IS NULL' ||
+      where_clause.operator === 'IS NOT NULL' ||
+      (where_clause.value !== null &&
+        where_clause.value !== undefined &&
+        where_clause.value !== '')
+    )
+  })
 
   // process params and convert dynamic params to static
   where = where.map((where_clause) => ({
