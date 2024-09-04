@@ -30,6 +30,12 @@ const process_dynamic_params = (params) => {
     processed_params.week = process_dynamic_week_param(params.week)
   }
 
+  if (params.single_week) {
+    processed_params.single_week = process_dynamic_single_week_param(
+      params.single_week
+    )
+  }
+
   return processed_params
 }
 
@@ -90,6 +96,19 @@ const process_dynamic_week_param = (week_param) => {
   })
 
   return [...new Set(weeks)]
+}
+
+const process_dynamic_single_week_param = (single_week_param) => {
+  let single_week = Array.isArray(single_week_param) ? single_week_param : [single_week_param]
+  single_week = single_week.map((week) => {
+    if (typeof week === 'object') {
+      if (week.dynamic_type === 'current_week') {
+        return constants.season.week
+      }
+    }
+    return week
+  })
+  return single_week
 }
 
 const get_year_range = (columns, where) => {
