@@ -7,7 +7,8 @@ export const bookmakers = {
   DRAFTKINGS: 'DRAFTKINGS',
   FANDUEL: 'FANDUEL',
   GAMBET: 'GAMBET',
-  PRIZEPICKS: 'PRIZEPICKS'
+  PRIZEPICKS: 'PRIZEPICKS',
+  PINNACLE: 'PINNACLE'
 }
 
 export const time_type = {
