@@ -5,7 +5,7 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 const Row = ({ data }) => (
   <div className='player__selected-row'>
     <div className='row__group-body'>
-      <div className='table__cell metric'>{data.year}</div>
+      <div className='refactor table__cell metric'>{data.year}</div>
       <div className='table__cell metric'>{data.week}</div>
       <div className='table__cell text'>{data.status || '-'}</div>
       <div className='table__cell text'>{data.inj || '-'}</div>
@@ -13,7 +13,7 @@ const Row = ({ data }) => (
         <div className='table__cell-text'>{data.m || '-'}</div>
       </div>
       <div className='table__cell'>
-        <div className='table__cell-text'>{data.t || '-'}</div>
+        <div className='table__cell-text'>{data.tu || '-'}</div>
       </div>
       <div className='table__cell'>
         <div className='table__cell-text'>{data.w || '-'}</div>
@@ -39,10 +39,12 @@ Row.propTypes = {
 }
 
 export default function SelectedPlayerPractice({ playerMap, load, practices }) {
+  const pid = playerMap.get('pid')
   useEffect(() => {
-    const pid = playerMap.get('pid')
-    load(pid)
-  }, [playerMap, load])
+    if (pid) {
+      load(pid)
+    }
+  }, [pid, load])
 
   const rows = []
   practices.forEach((practice, index) => {
