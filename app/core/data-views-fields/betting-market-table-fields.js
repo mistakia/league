@@ -26,6 +26,7 @@ const create_game_prop_column_params = () => ({
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     values: [
       bookmaker_constants.bookmakers.FANDUEL,
+      bookmaker_constants.bookmakers.DRAFTKINGS,
       bookmaker_constants.bookmakers.PINNACLE
     ],
     default_value: bookmaker_constants.bookmakers.FANDUEL,
