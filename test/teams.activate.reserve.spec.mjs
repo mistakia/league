@@ -285,7 +285,7 @@ describe('API /teams - activate', function () {
     it('activate player is on active roster', async () => {
       MockDate.set(start.subtract('1', 'week').toISOString())
       const player1 = await selectPlayer()
-      const player2 = await selectPlayer()
+      const player2 = await selectPlayer({ exclude_pids: [player1.pid] })
       const teamId = 1
       const leagueId = 1
       const userId = 1
