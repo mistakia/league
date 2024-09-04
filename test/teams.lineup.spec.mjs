@@ -325,12 +325,14 @@ describe('API /teams - lineups', function () {
         transaction: constants.transactions.RESERVE_IR
       })
 
-      await knex('seasons').where({
-        year: constants.season.year,
-        lid: 1
-      }).update({
-        free_agency_period_start: start.subtract('6', 'days').unix()
-      })
+      await knex('seasons')
+        .where({
+          year: constants.season.year,
+          lid: 1
+        })
+        .update({
+          free_agency_period_start: start.subtract('6', 'days').unix()
+        })
 
       MockDate.set(start.add('6', 'week').toISOString())
       await addPlayer({
