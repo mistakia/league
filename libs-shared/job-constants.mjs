@@ -94,7 +94,8 @@ export const job_types = {
   IMPORT_RTS_ADP: 71,
   IMPORT_NFL_ADP: 72,
   IMPORT_MFL_ADP: 73,
-  IMPORT_YAHOO_ADP: 74
+  IMPORT_YAHOO_ADP: 74,
+  IMPORT_PINNACLE_ODDS: 75
 }
 
 export const job_title_by_id = {
@@ -171,5 +172,6 @@ export const job_title_by_id = {
   71: 'Import RTS ADP',
   72: 'Import NFL ADP',
   73: 'Import MFL ADP',
-  74: 'Import Yahoo ADP'
+  74: 'Import Yahoo ADP',
+  75: 'Import Pinnacle Odds'
 }
