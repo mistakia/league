@@ -108,29 +108,33 @@ const where_schema = {
     props: {
       column_id: { type: 'string' },
       operator: where_operator_schema,
-      value: [
-        {
-          type: 'string',
-          pattern:
-            '^(?!.*(?:DELETE|DROP|TRUNCATE|ALTER|UPDATE|INSERT|MERGE|EXEC|;|--|\'|"|=|<|>)).*$',
-          min: 0,
-          max: 50,
-          match: /^[a-zA-Z0-9.]+$/
-        },
-        { type: 'number' },
-        {
-          type: 'array',
-          items: {
+      value: {
+        optional: true,
+        type: 'multi',
+        rules: [
+          {
             type: 'string',
             pattern:
-              '^(?!.*(?:DELETE|DROP|TRUNCATE|ALTER|UPDATE|INSERT|MERGE|EXEC|;|--|\'|"|=|<|>)).*$',
+              '^(?!.*(?:delete|drop|truncate|alter|update|insert|merge|exec|;|--|\'|"|=|<|>)).*$',
             min: 0,
             max: 50,
-            match: /^[a-zA-Z0-9.]+$/
-          }
-        },
-        { type: 'array', items: { type: 'number' } }
-      ],
+            match: /^[a-za-z0-9.]+$/
+          },
+          { type: 'number' },
+          {
+            type: 'array',
+            items: {
+              type: 'string',
+              pattern:
+                '^(?!.*(?:delete|drop|truncate|alter|update|insert|merge|exec|;|--|\'|"|=|<|>)).*$',
+              min: 0,
+              max: 50,
+              match: /^[a-za-z0-9.]+$/
+            }
+          },
+          { type: 'array', items: { type: 'number' } }
+        ]
+      },
       params: { type: 'object', optional: true }
     }
   },
