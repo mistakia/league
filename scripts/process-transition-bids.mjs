@@ -5,7 +5,7 @@ import { constants } from '#libs-shared'
 import {
   getTopTransitionBids,
   processTransitionBid,
-  isMain,
+  is_main,
   resetWaiverOrder,
   report_job
 } from '#libs-server'
@@ -153,6 +153,6 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }

@@ -2,7 +2,7 @@ import debug from 'debug'
 
 import db from '#db'
 import { constants } from '#libs-shared'
-import { getLeague, isMain, report_job } from '#libs-server'
+import { getLeague, is_main, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('set-draft-pick-number')
@@ -114,7 +114,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers'
 // import db from '#db'
 import { constants } from '#libs-shared'
 import {
-  isMain,
+  is_main,
   getPlayer,
   createPlayer,
   updatePlayer,
@@ -143,7 +143,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

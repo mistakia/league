@@ -20,7 +20,7 @@ import {
   getRoster,
   getLeague,
   getPlayerTransactions,
-  isMain,
+  is_main,
   batch_insert,
   report_job
 } from '#libs-server'
@@ -534,7 +534,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

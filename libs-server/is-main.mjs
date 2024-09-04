@@ -1,5 +1,5 @@
 import { fileURLToPath } from 'url'
 
-const isMain = (p) => process.argv[1] === fileURLToPath(p)
+const is_main = (p) => process.argv[1] === fileURLToPath(p)
 
-export default isMain
+export default is_main

@@ -6,7 +6,7 @@ import { hideBin } from 'yargs/helpers'
 
 import config from '#config'
 import { wait } from '#libs-server'
-import isMain from './is-main.mjs'
+import is_main from './is-main.mjs'
 import * as cache from './cache.mjs'
 
 const queue = new PQueue({ concurrency: 1 })
@@ -58,6 +58,6 @@ const main = async () => {
   }
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }

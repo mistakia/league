@@ -2,7 +2,7 @@ import debug from 'debug'
 
 import db from '#db'
 import { formatPlayerName } from '#libs-shared'
-import { isMain, updatePlayer, report_job } from '#libs-server'
+import { is_main, updatePlayer, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('update-formatted-names')
@@ -45,7 +45,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

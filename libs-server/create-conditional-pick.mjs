@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers'
 import { constants } from '#libs-shared'
 import { getLeague } from '#libs-server'
 import db from '#db'
-import isMain from './is-main.mjs'
+import is_main from './is-main.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 
@@ -40,7 +40,7 @@ const create_conditional_pick = async function ({ tid, league }) {
 
 export default create_conditional_pick
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   const run = async () => {
     const tid = argv.tid
     if (!tid) {

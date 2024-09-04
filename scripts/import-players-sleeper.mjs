@@ -11,7 +11,7 @@ import {
   format_nfl_injury_status
 } from '#libs-shared'
 import {
-  isMain,
+  is_main,
   getPlayer,
   updatePlayer,
   createPlayer,
@@ -225,7 +225,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

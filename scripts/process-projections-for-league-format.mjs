@@ -11,7 +11,7 @@ import {
   getRosterSize,
   groupBy
 } from '#libs-shared'
-import { isMain, batch_insert, get_league_format } from '#libs-server'
+import { is_main, batch_insert, get_league_format } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -207,7 +207,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

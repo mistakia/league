@@ -8,7 +8,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { isMain, googleDrive, downloadFile } from '#libs-server'
+import { is_main, googleDrive, downloadFile } from '#libs-server'
 import config from '#config'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -142,7 +142,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

@@ -4,7 +4,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 // import config from '#config'
-import { isMain, fanduel, getPlayer } from '#libs-server'
+import { is_main, fanduel, getPlayer } from '#libs-server'
 // import { constants } from '#libs-shared'
 // import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
@@ -253,7 +253,7 @@ async function main() {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

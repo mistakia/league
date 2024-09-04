@@ -6,7 +6,7 @@ import timezone from 'dayjs/plugin/timezone.js'
 
 import db from '#db'
 // import { constants } from '#libs-shared'
-import { isMain, getGameDayAbbreviation } from '#libs-server'
+import { is_main, getGameDayAbbreviation } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 dayjs.extend(timezone)
@@ -77,7 +77,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

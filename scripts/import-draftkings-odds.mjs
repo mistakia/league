@@ -7,7 +7,7 @@ import dayjs from 'dayjs'
 import db from '#db'
 import { constants, fixTeam } from '#libs-shared'
 import {
-  isMain,
+  is_main,
   getPlayer,
   draftkings,
   insert_prop_markets,
@@ -226,7 +226,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

@@ -2,7 +2,7 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { getPlayer, isMain, report_job, four_for_four } from '#libs-server'
+import { getPlayer, is_main, report_job, four_for_four } from '#libs-server'
 import { constants } from '#libs-shared'
 import db from '#db'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -135,7 +135,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

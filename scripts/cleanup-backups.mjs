@@ -1,6 +1,6 @@
 import debug from 'debug'
 
-import { googleDrive, isMain } from '#libs-server'
+import { googleDrive, is_main } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('cleanup-backups')
@@ -31,6 +31,6 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }

@@ -6,7 +6,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants, fixTeam, getGameDayAbbreviation } from '#libs-shared'
-import { isMain, wait, nfl, report_job } from '#libs-server'
+import { is_main, wait, nfl, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 dayjs.extend(timezone)
@@ -199,7 +199,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

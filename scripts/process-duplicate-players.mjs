@@ -6,7 +6,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { isMain, mergePlayer, readCSV } from '#libs-server'
+import { is_main, mergePlayer, readCSV } from '#libs-server'
 import { formatPlayerName } from '#libs-shared'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -316,7 +316,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

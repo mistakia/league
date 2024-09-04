@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import isMain from './is-main.mjs'
+import is_main from './is-main.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('update-player-id')
@@ -69,7 +69,7 @@ const update_player_id = async function ({ current_pid, new_pid }) {
 
 export default update_player_id
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   const main = async () => {
     await update_player_id({
       current_pid: argv.current_pid,

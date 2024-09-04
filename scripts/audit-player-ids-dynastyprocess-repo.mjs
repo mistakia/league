@@ -10,7 +10,7 @@ import readline from 'readline'
 import db from '#db'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-import { isMain, readCSV, updatePlayer } from '#libs-server'
+import { is_main, readCSV, updatePlayer } from '#libs-server'
 import { formatPlayerName, fixTeam } from '#libs-shared'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -299,7 +299,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

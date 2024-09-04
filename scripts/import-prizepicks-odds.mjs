@@ -6,7 +6,7 @@ import fs from 'fs-extra'
 import db from '#db'
 import { constants } from '#libs-shared'
 import {
-  isMain,
+  is_main,
   prizepicks,
   getPlayer,
   insert_prop_markets,
@@ -191,7 +191,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

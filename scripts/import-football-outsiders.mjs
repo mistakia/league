@@ -4,7 +4,7 @@ import debug from 'debug'
 
 import db from '#db'
 import { constants, fixTeam } from '#libs-shared'
-import { isMain, wait, report_job } from '#libs-server'
+import { is_main, wait, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('import:footballoutsiders')
@@ -261,7 +261,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 
