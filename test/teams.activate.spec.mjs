@@ -116,6 +116,8 @@ describe('API /teams - activate', function () {
       await league(knex)
     })
 
+    const exclude_pids = []
+
     it('not logged in', async () => {
       const request = chai.request(server).post('/api/teams/1/activate')
       await notLoggedIn(request)
@@ -186,6 +188,7 @@ describe('API /teams - activate', function () {
 
     it('player not on team', async () => {
       const player = await selectPlayer()
+      exclude_pids.push(player.pid)
       const request = chai
         .request(server)
         .post('/api/teams/1/activate')
@@ -199,7 +202,8 @@ describe('API /teams - activate', function () {
     })
 
     it('player not on practice squad', async () => {
-      const player = await selectPlayer()
+      const player = await selectPlayer({ exclude_pids })
+      exclude_pids.push(player.pid)
       await addPlayer({ leagueId: 1, player, teamId: 1, userId: 1 })
       const request = chai
         .request(server)
@@ -214,7 +218,7 @@ describe('API /teams - activate', function () {
     })
 
     it('player is protected', async () => {
-      const player = await selectPlayer()
+      const player = await selectPlayer({ exclude_pids })
       await addPlayer({
         leagueId: 1,
         player,
