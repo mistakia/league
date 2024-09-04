@@ -137,8 +137,8 @@ const format_market = async ({
     source_event_id: pinnacle_market.parentId,
     source_event_name: `${away_team} @ ${home_team}`,
 
-    open: pinnacle_market.status === 'open',
-    live: pinnacle_market.liveStatus === 'live',
+    open: true,
+    live: pinnacle_market.isLive,
     selection_count: market_selection_odds.length,
 
     timestamp,
