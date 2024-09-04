@@ -3,7 +3,7 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { isMain, update_play, batch_insert, report_job } from '#libs-server'
+import { is_main, update_play, batch_insert, report_job } from '#libs-server'
 import db from '#db'
 import {
   constants,
@@ -546,7 +546,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

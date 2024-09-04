@@ -2,7 +2,7 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { getLeague, sendNotifications, isMain } from '#libs-server'
+import { getLeague, sendNotifications, is_main } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('send-notification')
@@ -43,7 +43,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

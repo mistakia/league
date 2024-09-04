@@ -9,7 +9,7 @@ import {
   format_nfl_status
 } from '#libs-shared'
 import {
-  isMain,
+  is_main,
   nfl,
   getPlayer,
   updatePlayer,
@@ -191,7 +191,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

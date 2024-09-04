@@ -41,7 +41,7 @@ export { default as getPlayers } from './get-players.mjs'
 export { default as getRosters } from './get-rosters.mjs'
 export { default as getAcquisitionTransaction } from './get-acquisition-transaction.mjs'
 export { default as getPlay } from './get-play.mjs'
-export { default as isMain } from './is-main.mjs'
+export { default as is_main } from './is-main.mjs'
 export { default as createPlayer } from './create-player.mjs'
 export { default as insert_prop_markets } from './insert-prop-markets.mjs'
 export { default as generate_player_id } from './generate-player-id.mjs'
@@ -89,6 +89,7 @@ export * as four_for_four from './4for4.mjs'
 export * as yahoo from './yahoo.mjs'
 export * as rts from './rts.mjs'
 export { default as mergePlayer } from './merge-player.mjs'
+export * as pinnacle from './pinnacle.mjs'
 
 export const getChartedPlayByPlayQuery = (db) =>
   db('nfl_plays')

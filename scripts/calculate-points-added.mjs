@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers'
 import { Table } from 'console-table-printer'
 
 import db from '#db'
-import { isMain, getLeague } from '#libs-server'
+import { is_main, getLeague } from '#libs-server'
 import {
   sum,
   constants,
@@ -263,7 +263,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   debug.enable('calculate-points-added')
   main()
 }

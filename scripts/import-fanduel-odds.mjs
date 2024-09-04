@@ -7,7 +7,7 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { constants, team_aliases, fixTeam } from '#libs-shared'
 import {
-  isMain,
+  is_main,
   getPlayer,
   fanduel,
   insert_prop_markets,
@@ -287,7 +287,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

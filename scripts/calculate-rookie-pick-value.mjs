@@ -4,7 +4,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import { Table } from 'console-table-printer'
 
-import { isMain } from '#libs-server'
+import { is_main } from '#libs-server'
 import calculate_points_added from './calculate-points-added.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -55,7 +55,7 @@ const calculateRookiePickValue = async ({ year }) => {
   return result
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   debug.enable('script:calculate-points-added')
   const main = async () => {
     try {

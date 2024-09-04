@@ -7,7 +7,7 @@ import {
   format_nfl_status,
   format_nfl_injury_status
 } from '#libs-shared'
-import { isMain, getPlayer, report_job } from '#libs-server'
+import { is_main, getPlayer, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('import:practice-report')
@@ -131,7 +131,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

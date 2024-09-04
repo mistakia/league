@@ -1,6 +1,6 @@
 import debug from 'debug'
 
-import isMain from './is-main.mjs'
+import is_main from './is-main.mjs'
 
 const log = debug('generate-player-id')
 debug.enable('generate-player-id')
@@ -52,7 +52,7 @@ const generate_player_id = (player_data) => {
 
 export default generate_player_id
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   const main = () => {
     const pid = generate_player_id({
       fname: 'Francis',

@@ -2,7 +2,7 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { isMain, googleDrive, downloadFile } from '#libs-server'
+import { is_main, googleDrive, downloadFile } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('download-backup-from-drive')
@@ -39,7 +39,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

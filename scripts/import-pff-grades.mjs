@@ -2,7 +2,7 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { isMain, report_job, pff, wait, getPlayer } from '#libs-server'
+import { is_main, report_job, pff, wait, getPlayer } from '#libs-server'
 import { constants, job_constants } from '#libs-shared'
 import db from '#db'
 import diff from 'deep-diff'
@@ -256,7 +256,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

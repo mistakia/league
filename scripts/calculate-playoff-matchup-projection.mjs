@@ -4,7 +4,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#libs-shared'
-import { isMain } from '#libs-server'
+import { is_main } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('calculate-playoff-matchup-projection')
@@ -66,7 +66,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

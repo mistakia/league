@@ -8,7 +8,7 @@ import oddslib from 'oddslib'
 import db from '#db'
 import { constants, fixTeam } from '#libs-shared'
 import {
-  isMain,
+  is_main,
   getPlayer,
   insert_prop_markets,
   betonline,
@@ -199,7 +199,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

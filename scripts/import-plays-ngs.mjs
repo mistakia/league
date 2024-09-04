@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants, fixTeam } from '#libs-shared'
-import { isMain, wait, ngs, report_job } from '#libs-server'
+import { is_main, wait, ngs, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -424,7 +424,7 @@ const main = async () => {
   process.kill(process.pid)
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

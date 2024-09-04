@@ -4,7 +4,7 @@ import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'
 
 import db from '#db'
-import { isMain } from '#libs-server'
+import { is_main } from '#libs-server'
 
 const log = debug('player-coverage-report')
 debug.enable('player-coverage-report')
@@ -64,7 +64,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

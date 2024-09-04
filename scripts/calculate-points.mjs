@@ -1,5 +1,5 @@
 import db from '#db'
-import { isMain, getLeague } from '#libs-server'
+import { is_main, getLeague } from '#libs-server'
 import { constants, groupBy, calculatePoints } from '#libs-shared'
 import chalk from 'chalk'
 import { Table } from 'console-table-printer'
@@ -179,7 +179,7 @@ const main = async () => {
 }
 
 // If this script is run directly, execute the main function
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   debug.enable('calculate-points')
   main()
 }

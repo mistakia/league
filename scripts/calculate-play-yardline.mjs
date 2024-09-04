@@ -1,7 +1,7 @@
 import debug from 'debug'
 
 import db from '#db'
-import { isMain } from '#libs-server'
+import { is_main } from '#libs-server'
 
 const log = debug('calculate-play-yardline')
 debug.enable('calculate-play-yardline')
@@ -56,7 +56,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

@@ -11,7 +11,7 @@ import {
   getPlayerCountBySlot,
   getEligibleSlots
 } from '#libs-shared'
-import { getLeague, isMain } from '#libs-server'
+import { getLeague, is_main } from '#libs-server'
 import db from '#db'
 import calculate_points_added from './calculate-points-added.mjs'
 
@@ -118,7 +118,7 @@ const calculate_points_added_baseline_season = async ({ league }) => {
   return output.sort((a, b) => b.pts_added - a.pts_added)
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   const main = async () => {
     const lid = argv.lid
     if (!lid) {

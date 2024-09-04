@@ -2,7 +2,7 @@ import fetch from 'node-fetch'
 import debug from 'debug'
 
 import {
-  isMain,
+  is_main,
   getPlayer,
   wait,
   updatePlayer,
@@ -102,7 +102,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

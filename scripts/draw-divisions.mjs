@@ -5,7 +5,7 @@ import { Table } from 'console-table-printer'
 
 import db from '#db'
 import { constants, sum } from '#libs-shared'
-import { isMain, report_job } from '#libs-server'
+import { is_main, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -147,6 +147,6 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }

@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { isMain } from '#libs-server'
+import { is_main } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 import generate_league_format_player_gamelogs from './generate-league-format-player-gamelogs.mjs'
@@ -109,6 +109,6 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }

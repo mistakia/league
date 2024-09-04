@@ -4,7 +4,7 @@ import { hideBin } from 'yargs/helpers'
 import { Table } from 'console-table-printer'
 
 import { groupBy, constants } from '#libs-shared'
-import { getLeague, isMain } from '#libs-server'
+import { getLeague, is_main } from '#libs-server'
 import calculate_points_added from './calculate-points-added.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -78,7 +78,7 @@ const calculateHistoricalPositionalRankingValue = async ({ league }) => {
   return output.sort((a, b) => b.value - a.value)
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   const main = async () => {
     const lid = argv.lid
     if (!lid) {

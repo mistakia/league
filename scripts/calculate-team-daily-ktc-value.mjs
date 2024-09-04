@@ -6,7 +6,7 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { constants } from '#libs-shared'
 import {
-  isMain,
+  is_main,
   get_trades,
   get_transition_signings,
   batch_insert
@@ -377,7 +377,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

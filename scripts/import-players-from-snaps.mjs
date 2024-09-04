@@ -3,7 +3,7 @@ import dayjs from 'dayjs'
 
 import db from '#db'
 import {
-  isMain,
+  is_main,
   ngs,
   updatePlayer,
   getPlayer,
@@ -124,7 +124,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

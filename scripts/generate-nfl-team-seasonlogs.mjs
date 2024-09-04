@@ -10,7 +10,7 @@ import {
   calculatePercentiles,
   calculatePoints
 } from '#libs-shared'
-import { isMain, getLeague } from '#libs-server'
+import { is_main, getLeague } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 // const argv = yargs(hideBin(process.argv)).argv
@@ -365,7 +365,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

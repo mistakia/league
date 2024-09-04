@@ -7,7 +7,7 @@ import { JSDOM } from 'jsdom'
 import db from '#db'
 import {
   getPlayer,
-  isMain,
+  is_main,
   report_job,
   batch_insert,
   updatePlayer
@@ -239,7 +239,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 

@@ -4,7 +4,7 @@ import { hideBin } from 'yargs/helpers'
 import { constants } from '#libs-shared'
 import db from '#db'
 
-import isMain from './is-main.mjs'
+import is_main from './is-main.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 
@@ -48,7 +48,7 @@ const main = async () => {
   process.exit()
 }
 
-if (isMain(import.meta.url)) {
+if (is_main(import.meta.url)) {
   main()
 }
 
