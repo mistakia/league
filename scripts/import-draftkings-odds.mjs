@@ -5,7 +5,7 @@ import fs from 'fs-extra'
 import dayjs from 'dayjs'
 
 import db from '#db'
-import { constants, fixTeam } from '#libs-shared'
+import { constants, fixTeam, bookmaker_constants } from '#libs-shared'
 import {
   is_main,
   getPlayer,
@@ -56,6 +56,15 @@ const format_market = async ({
     )
   }
 
+  const market_type = draftkings.get_market_type({
+    offerCategoryId: offer_category.offerCategoryId,
+    subcategoryId: offer_sub_category.subcategoryId,
+    betOfferTypeId: draftkings_market.betOfferTypeId
+  })
+
+  const is_game_spread =
+    market_type === bookmaker_constants.team_game_market_types.GAME_SPREAD
+
   for (const outcome of draftkings_market.outcomes) {
     if (outcome.hidden && !outcome.oddsDecimal) {
       continue
@@ -93,6 +102,19 @@ const format_market = async ({
       }
     }
 
+    let selection_pid = player_row?.pid || null
+
+    if (is_game_spread && outcome.label) {
+      try {
+        const team_abbr = outcome.label.split(' ')[0]
+        if (team_abbr) {
+          selection_pid = fixTeam(team_abbr)
+        }
+      } catch (err) {
+        log(err)
+      }
+    }
+
     let selection_metric_line = outcome.line
 
     if (!selection_metric_line && outcome.label) {
@@ -107,7 +129,7 @@ const format_market = async ({
       source_market_id: draftkings_market.providerOfferId,
       source_selection_id: outcome.providerOutcomeId,
 
-      selection_pid: player_row?.pid || null,
+      selection_pid,
       selection_name: outcome.label,
       selection_metric_line,
       odds_decimal: outcome.oddsDecimal,
@@ -116,11 +138,7 @@ const format_market = async ({
   }
 
   return {
-    market_type: draftkings.get_market_type({
-      offerCategoryId: offer_category.offerCategoryId,
-      subcategoryId: offer_sub_category.subcategoryId,
-      betOfferTypeId: draftkings_market.betOfferTypeId
-    }),
+    market_type,
 
     source_id: 'DRAFTKINGS',
     source_market_id: draftkings_market.providerOfferId,
