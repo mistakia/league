@@ -7,6 +7,8 @@ import {
   getActiveRosterPlayerIdsForCurrentLeague,
   getInjuredReservePlayerIdsForCurrentLeague,
   getPracticeSquadPlayerIdsForCurrentLeague,
+  getPracticeSquadUnprotectedPlayerIdsForCurrentLeague,
+  getPracticeSquadProtectedPlayerIdsForCurrentLeague,
   getRosteredPlayerIdsForCurrentLeague,
   getSelectedPlayersPageView
 } from '@core/selectors'
@@ -127,6 +129,10 @@ export function getFilteredPlayers(state) {
     const rosteredPlayerIds = getRosteredPlayerIdsForCurrentLeague(state)
     const practiceSquadPlayerIds =
       getPracticeSquadPlayerIdsForCurrentLeague(state)
+    const practiceSquadUnprotectedPlayerIds =
+      getPracticeSquadUnprotectedPlayerIdsForCurrentLeague(state)
+    const practiceSquadProtectedPlayerIds =
+      getPracticeSquadProtectedPlayerIdsForCurrentLeague(state)
     const injuredReservePlayerIds =
       getInjuredReservePlayerIdsForCurrentLeague(state)
     filtered = filtered.filter((playerMap) => {
@@ -147,6 +153,20 @@ export function getFilteredPlayers(state) {
       if (
         availability.includes('PRACTICE SQUAD') &&
         practiceSquadPlayerIds.includes(playerMap.get('pid'))
+      ) {
+        return true
+      }
+
+      if (
+        availability.includes('PRACTICE SQUAD UNPROTECTED') &&
+        practiceSquadUnprotectedPlayerIds.includes(playerMap.get('pid'))
+      ) {
+        return true
+      }
+
+      if (
+        availability.includes('PRACTICE SQUAD PROTECTED') &&
+        practiceSquadProtectedPlayerIds.includes(playerMap.get('pid'))
       ) {
         return true
       }
