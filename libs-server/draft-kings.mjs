@@ -5,7 +5,7 @@ import dayjs from 'dayjs'
 import config from '#config'
 import {
   player_prop_types,
-  game_market_types
+  team_game_market_types
 } from '#libs-shared/bookmaker-constants.mjs'
 import { randomUUID as uuidv4 } from 'crypto'
 import { wait } from '#libs-server'
@@ -199,13 +199,13 @@ const get_market_type_offer_492 = ({ subcategoryId, betOfferTypeId }) => {
 
   switch (betOfferTypeId) {
     case 1:
-      return game_market_types.GAME_SPREAD
+      return team_game_market_types.GAME_SPREAD
 
     case 2:
-      return game_market_types.GAME_MONEYLINE
+      return team_game_market_types.GAME_MONEYLINE
 
     case 6:
-      return game_market_types.GAME_TOTAL
+      return team_game_market_types.GAME_TOTAL
 
     default:
       log(`unknown betOfferTypeId ${betOfferTypeId}`)

@@ -216,7 +216,8 @@ const team_betting_market_with = ({
     : params.time_type || bookmaker_constants.time_type.CLOSE
   const market_type = Array.isArray(params.market_type)
     ? params.market_type[0]
-    : params.market_type || bookmaker_constants.game_market_types.GAME_TOTAL
+    : params.market_type ||
+      bookmaker_constants.team_game_market_types.GAME_TOTAL
   const source_id = Array.isArray(params.source_id)
     ? params.source_id[0]
     : params.source_id || bookmaker_constants.bookmakers.DRAFTKINGS
@@ -335,11 +336,11 @@ export default {
 
   team_game_prop_line_from_betting_markets: create_team_betting_market_field({
     column_name: 'selection_metric_line',
-    column_alias: 'game_prop_line'
+    column_alias: 'team_game_prop_line'
   }),
 
   team_game_prop_odds_from_betting_markets: create_team_betting_market_field({
     column_name: 'selection_odds',
-    column_alias: 'game_prop_odds'
+    column_alias: 'team_game_prop_odds'
   })
 }

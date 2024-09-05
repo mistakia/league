@@ -150,7 +150,7 @@ const process_selection = async ({
   missing_selection_pids
 }) => {
   // skip game market types for now
-  if (bookmaker_constants.game_market_types[market_type]) {
+  if (bookmaker_constants.team_game_market_types[market_type]) {
     return
   }
 
