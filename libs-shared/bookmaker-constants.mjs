@@ -16,7 +16,7 @@ export const time_type = {
   CLOSE: 'CLOSE'
 }
 
-export const game_market_types = {
+export const team_game_market_types = {
   GAME_SPREAD: 'GAME_SPREAD',
   GAME_TOTAL: 'GAME_TOTAL',
   GAME_MONEYLINE: 'GAME_MONEYLINE'

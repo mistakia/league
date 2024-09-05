@@ -58,8 +58,61 @@ const create_game_prop_field = ({
     column_title,
     header_label,
     player_value_path,
-    column_groups: [COLUMN_GROUPS.BETTING_MARKETS, COLUMN_GROUPS.GAME_PROPS],
+    column_groups: [
+      COLUMN_GROUPS.BETTING_MARKETS,
+      COLUMN_GROUPS.PLAYER_GAME_PROPS
+    ],
     column_params: create_game_prop_column_params()
+  })
+
+const create_team_game_prop_column_params = () => ({
+  market_type: {
+    label: 'Market',
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    values: Object.values(bookmaker_constants.team_game_market_types),
+    default_value: bookmaker_constants.team_game_market_types.GAME_TOTAL,
+    single: true
+  },
+  source_id: {
+    label: 'Bookmaker',
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    values: [
+      bookmaker_constants.bookmakers.FANDUEL,
+      bookmaker_constants.bookmakers.DRAFTKINGS,
+      bookmaker_constants.bookmakers.PINNACLE
+    ],
+    default_value: bookmaker_constants.bookmakers.FANDUEL,
+    single: true
+  },
+  year: {
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    values: [2023, 2024],
+    default_value: 2024,
+    single: true,
+    enable_multi_on_split: ['year']
+  },
+  week: {
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    values: constants.nfl_weeks,
+    default_value: 1,
+    single: true
+  }
+})
+
+const create_team_game_prop_field = ({
+  column_title,
+  header_label,
+  player_value_path
+}) =>
+  from_betting_market({
+    column_title,
+    header_label,
+    player_value_path,
+    column_groups: [
+      COLUMN_GROUPS.BETTING_MARKETS,
+      COLUMN_GROUPS.TEAM_GAME_PROPS
+    ],
+    column_params: create_team_game_prop_column_params()
   })
 
 export default {
@@ -118,5 +171,17 @@ export default {
       column_title: 'Game Prop Implied Probability',
       header_label: 'PROB',
       player_value_path: 'game_prop_implied_probability_betting_market'
-    })
+    }),
+
+  team_game_prop_line_from_betting_markets: create_team_game_prop_field({
+    column_title: 'Team Game Prop Line',
+    header_label: 'LINE',
+    player_value_path: 'team_game_prop_line_betting_market'
+  }),
+
+  team_game_prop_odds_from_betting_markets: create_team_game_prop_field({
+    column_title: 'Team Game Prop Odds',
+    header_label: 'ODDS',
+    player_value_path: 'team_game_prop_odds_betting_market'
+  })
 }

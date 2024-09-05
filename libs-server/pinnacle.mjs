@@ -17,11 +17,11 @@ export const get_market_type = ({ type, units, category }) => {
     case 'Game Lines':
       switch (type) {
         case 'Spread':
-          return bookmaker_constants.game_market_types.GAME_SPREAD
+          return bookmaker_constants.team_game_market_types.GAME_SPREAD
         case 'Total':
-          return bookmaker_constants.game_market_types.GAME_TOTAL
+          return bookmaker_constants.team_game_market_types.GAME_TOTAL
         case 'Moneyline':
-          return bookmaker_constants.game_market_types.GAME_MONEYLINE
+          return bookmaker_constants.team_game_market_types.GAME_MONEYLINE
         default:
           log(`unknown game market type: ${type} for Game Lines`)
           return null
