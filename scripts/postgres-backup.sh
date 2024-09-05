@@ -32,6 +32,7 @@ db_user_tables="
 config
 draft
 league_cutlist
+league_divisions
 leagues
 matchups
 playoffs

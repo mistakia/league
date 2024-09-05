@@ -61,10 +61,23 @@ router.get('/?', async (req, res) => {
 
     const seasons = await db('seasons').whereIn('lid', leagueIds)
 
+    // Fetch divisions for all leagues
+    const divisions = await db('league_divisions')
+      .whereIn('lid', leagueIds)
+      .andWhere('year', constants.season.year)
+
     const seasonsByLeagueId = groupBy(seasons, 'lid')
+    const divisionsByLeagueId = groupBy(divisions, 'lid')
+
     for (const lid in seasonsByLeagueId) {
       const league = leagues.find((l) => l.uid === parseInt(lid, 10))
       league.years = seasonsByLeagueId[lid].map((s) => s.year)
+
+      // Add divisions to the league
+      const leagueDivisions = divisionsByLeagueId[lid] || []
+      leagueDivisions.forEach((div) => {
+        league[`division_${div.division_id}_name`] = div.division_name
+      })
     }
 
     const sources = await db('sources')

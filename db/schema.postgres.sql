@@ -1400,6 +1400,7 @@ ALTER TABLE IF EXISTS ONLY public.pff_player_seasonlogs_changelog DROP CONSTRAIN
 ALTER TABLE IF EXISTS ONLY public.league_user_careerlogs DROP CONSTRAINT IF EXISTS league_user_careerlogs_lid_userid_unique;
 ALTER TABLE IF EXISTS ONLY public.league_team_seasonlogs DROP CONSTRAINT IF EXISTS league_team_seasonlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.league_team_careerlogs DROP CONSTRAINT IF EXISTS league_team_careerlogs_pkey;
+ALTER TABLE IF EXISTS ONLY public.league_divisions DROP CONSTRAINT IF EXISTS league_divisions_pkey;
 ALTER TABLE IF EXISTS ONLY public.invite_codes DROP CONSTRAINT IF EXISTS invite_codes_pkey;
 ALTER TABLE IF EXISTS ONLY public.waivers DROP CONSTRAINT IF EXISTS "idx_25151_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS "idx_25127_PRIMARY";
@@ -1605,6 +1606,7 @@ DROP TABLE IF EXISTS public.league_format_player_projection_values;
 DROP TABLE IF EXISTS public.league_format_player_gamelogs;
 DROP TABLE IF EXISTS public.league_format_player_careerlogs;
 DROP TABLE IF EXISTS public.league_format_draft_pick_value;
+DROP TABLE IF EXISTS public.league_divisions;
 DROP TABLE IF EXISTS public.league_cutlist;
 DROP TABLE IF EXISTS public.league_baselines;
 DROP TABLE IF EXISTS public.keeptradecut_rankings;
@@ -2099,6 +2101,18 @@ CREATE TABLE public.league_cutlist (
     pid character varying(25),
     tid integer NOT NULL,
     "order" smallint NOT NULL
+);
+
+
+--
+-- Name: league_divisions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.league_divisions (
+    lid integer NOT NULL,
+    year smallint NOT NULL,
+    division_name character varying(50) NOT NULL,
+    division_id smallint NOT NULL
 );
 
 
@@ -16223,6 +16237,14 @@ ALTER TABLE ONLY public.waivers
 
 ALTER TABLE ONLY public.invite_codes
     ADD CONSTRAINT invite_codes_pkey PRIMARY KEY (code);
+
+
+--
+-- Name: league_divisions league_divisions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.league_divisions
+    ADD CONSTRAINT league_divisions_pkey PRIMARY KEY (lid, year, division_id);
 
 
 --
