@@ -106,7 +106,7 @@ const format_market = async ({
 
     if (is_game_spread && outcome.label) {
       try {
-        const team_abbr = outcome.label.split(' ')[0]
+        const team_abbr = outcome.label.split(' ')[1]
         if (team_abbr) {
           selection_pid = fixTeam(team_abbr)
         }

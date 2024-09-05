@@ -149,11 +149,6 @@ const process_selection = async ({
   missing_selection_lines,
   missing_selection_pids
 }) => {
-  // skip game market types for now
-  if (bookmaker_constants.team_game_market_types[market_type]) {
-    return
-  }
-
   if (!selection.selection_metric_line) {
     missing_selection_lines.set(selection.source_selection_id, {
       source_market_name: source_market.market_name,
@@ -168,7 +163,7 @@ const process_selection = async ({
     market_type === bookmaker_constants.team_game_market_types.GAME_SPREAD &&
     !selection.selection_pid
   ) {
-    const team_abbr = selection.selection_name.split(' ')[0]
+    const team_abbr = selection.selection_name.split(' ')[1]
     let team_pid
     try {
       team_pid = fixTeam(team_abbr)
@@ -350,7 +345,6 @@ const process_draftkings_markets_and_selections = async ({
       )
     })
     .leftJoin('nfl_games', 'nfl_games.esbid', 'prop_markets_index.esbid')
-
     .where('prop_markets_index.source_id', 'DRAFTKINGS')
 
   if (since_date) {
