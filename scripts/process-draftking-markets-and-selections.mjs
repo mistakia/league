@@ -4,7 +4,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { is_main, draftkings, getPlayer } from '#libs-server'
-import { bookmaker_constants } from '#libs-shared'
+import { bookmaker_constants, fixTeam } from '#libs-shared'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -161,6 +161,34 @@ const process_selection = async ({
       market_type,
       ...selection
     })
+  }
+
+  // Handle spread market types
+  if (
+    market_type === bookmaker_constants.team_game_market_types.GAME_SPREAD &&
+    !selection.selection_pid
+  ) {
+    const team_abbr = selection.selection_name.split(' ')[0]
+    let team_pid
+    try {
+      team_pid = fixTeam(team_abbr)
+    } catch (err) {
+      log(err)
+      return
+    }
+
+    await update_selection_pid({
+      selection,
+      player_row: { pid: team_pid },
+      source_market,
+      ignore_conflicts
+    })
+    return
+  }
+
+  // Skip other game market types
+  if (bookmaker_constants.team_game_market_types[market_type]) {
+    return
   }
 
   const name_string = extract_player_name({
