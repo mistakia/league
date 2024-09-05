@@ -3,14 +3,14 @@ import db from '#db'
 import get_join_func from '#libs-server/get-join-func.mjs'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
 
-const get_default_params = (params, is_game_prop) => {
+const get_default_params = (params, is_player_game_prop) => {
   const year = Array.isArray(params.year)
     ? params.year[0]
     : params.year || constants.season.year
 
   let week, market_type
 
-  if (is_game_prop) {
+  if (is_player_game_prop) {
     week = Array.isArray(params.week)
       ? params.week[0]
       : params.week || Math.max(1, constants.season.week)
@@ -54,7 +54,10 @@ const get_default_params = (params, is_game_prop) => {
   }
 }
 
-const betting_markets_table_alias = ({ params = {}, is_game_prop = false }) => {
+const betting_markets_table_alias = ({
+  params = {},
+  is_player_game_prop = false
+}) => {
   const {
     year,
     week,
@@ -63,7 +66,7 @@ const betting_markets_table_alias = ({ params = {}, is_game_prop = false }) => {
     source_id,
     career_year,
     career_game
-  } = get_default_params(params, is_game_prop)
+  } = get_default_params(params, is_player_game_prop)
 
   return get_table_hash(
     `betting_markets_${year}_week_${week}_source_id_${source_id}_market_type_${market_type}_time_type_${time_type}_career_year_${career_year.join('_')}_career_game_${career_game.join('_')}`
@@ -78,7 +81,7 @@ const player_betting_market_with = ({
   where_clauses,
   splits,
   select_strings = [],
-  is_game_prop = false
+  is_player_game_prop = false
 }) => {
   const {
     year,
@@ -88,7 +91,7 @@ const player_betting_market_with = ({
     source_id,
     career_year,
     career_game
-  } = get_default_params(params, is_game_prop)
+  } = get_default_params(params, is_player_game_prop)
 
   const markets_cte = `${with_table_name}_markets`
 
@@ -194,12 +197,20 @@ const team_betting_market_join = ({
 }) => {
   const join_func = get_join_func(join_type)
 
+  const { market_type } = get_default_params(params, false)
+
   query[join_func](table_name, function () {
-    this.on(`${table_name}.h`, '=', 'player.current_nfl_team').orOn(
-      `${table_name}.v`,
-      '=',
-      'player.current_nfl_team'
-    )
+    if (
+      market_type === bookmaker_constants.team_game_market_types.GAME_SPREAD
+    ) {
+      this.on(`${table_name}.selection_pid`, '=', 'player.current_nfl_team')
+    } else {
+      this.on(`${table_name}.h`, '=', 'player.current_nfl_team').orOn(
+        `${table_name}.v`,
+        '=',
+        'player.current_nfl_team'
+      )
+    }
   })
 }
 
@@ -270,7 +281,7 @@ const team_betting_market_with = ({
 const create_player_betting_market_field = ({
   column_name,
   column_alias,
-  is_game_prop,
+  is_player_game_prop,
   select_string,
   with_select_alias
 }) => ({
@@ -282,9 +293,10 @@ const create_player_betting_market_field = ({
       ? `${select_string}${with_select_alias ? ' as ' + with_select_alias : select_string}`
       : `pms.${column_name}`
   ],
-  table_alias: (args) => betting_markets_table_alias({ ...args, is_game_prop }),
+  table_alias: (args) =>
+    betting_markets_table_alias({ ...args, is_player_game_prop }),
   join: player_betting_market_join,
-  with: (args) => player_betting_market_with({ ...args, is_game_prop })
+  with: (args) => player_betting_market_with({ ...args, is_player_game_prop })
 })
 
 const create_team_betting_market_field = ({ column_name, column_alias }) => ({
@@ -301,28 +313,28 @@ export default {
     create_player_betting_market_field({
       column_name: 'selection_metric_line',
       column_alias: 'season_prop_line',
-      is_game_prop: false
+      is_player_game_prop: false
     }),
 
   player_game_prop_line_from_betting_markets:
     create_player_betting_market_field({
       column_name: 'selection_metric_line',
       column_alias: 'game_prop_line',
-      is_game_prop: true
+      is_player_game_prop: true
     }),
 
   player_game_prop_american_odds_from_betting_markets:
     create_player_betting_market_field({
       column_name: 'odds_american',
       column_alias: 'game_prop_american_odds',
-      is_game_prop: true
+      is_player_game_prop: true
     }),
 
   player_game_prop_decimal_odds_from_betting_markets:
     create_player_betting_market_field({
       column_name: 'odds_decimal',
       column_alias: 'game_prop_decimal_odds',
-      is_game_prop: true
+      is_player_game_prop: true
     }),
 
   player_game_prop_implied_probability_from_betting_markets:
@@ -331,7 +343,7 @@ export default {
       with_select_alias: 'game_prop_implied_probability',
       column_name: 'game_prop_implied_probability',
       column_alias: 'game_prop_implied_probability',
-      is_game_prop: true
+      is_player_game_prop: true
     }),
 
   team_game_prop_line_from_betting_markets: create_team_betting_market_field({
