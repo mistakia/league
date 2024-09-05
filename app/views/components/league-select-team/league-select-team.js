@@ -13,7 +13,8 @@ import './league-select-team.styl'
 export default function LeagueSelectTeam({
   selected_tid,
   teams,
-  historical_ranks
+  historical_ranks,
+  league
 }) {
   const { lid } = useParams()
   const navigate = useNavigate()
@@ -50,6 +51,8 @@ export default function LeagueSelectTeam({
     )
   })
 
+  const division_name = league[`division_${selected_team.div}_name`]
+
   return (
     <ClickAwayListener onClickAway={handle_click_away}>
       <div className='league-select-team-container'>
@@ -70,6 +73,7 @@ export default function LeagueSelectTeam({
                 {historical_rank.first_season_year}-
                 {historical_rank.last_season_year}
               </div>
+              {Boolean(division_name) && <div>{division_name} Division</div>}
             </div>
           </div>
         </div>
@@ -113,5 +117,6 @@ export default function LeagueSelectTeam({
 LeagueSelectTeam.propTypes = {
   selected_tid: PropTypes.number,
   teams: ImmutablePropTypes.map,
-  historical_ranks: ImmutablePropTypes.map
+  historical_ranks: ImmutablePropTypes.map,
+  league: PropTypes.object
 }

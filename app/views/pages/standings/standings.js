@@ -173,7 +173,8 @@ export default function StandingsPage({
   loadLeagueTeamStats,
   standings,
   division_teams_sorted,
-  year
+  year,
+  league
 }) {
   const navigate = useNavigate()
   const { lid } = useParams()
@@ -192,10 +193,13 @@ export default function StandingsPage({
 
   const divisions = []
   for (const [div, teams] of division_teams_sorted.entries()) {
+    const division_name = league[`division_${div}_name`]
+      ? league[`division_${div}_name`]
+      : `Division ${div}`
     divisions.push(
       <Standings
         key={div}
-        title={`Division ${div}`}
+        title={division_name}
         {...{ is_current_year, teams, year }}
       />
     )
@@ -216,5 +220,6 @@ StandingsPage.propTypes = {
   standings: PropTypes.object,
   loadLeagueTeamStats: PropTypes.func,
   year: PropTypes.number,
-  division_teams_sorted: ImmutablePropTypes.map
+  division_teams_sorted: ImmutablePropTypes.map,
+  league: PropTypes.object
 }

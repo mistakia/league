@@ -103,6 +103,11 @@ export const League = new Record({
 
   season_due_amount: null,
 
+  division_1_name: null,
+  division_2_name: null,
+  division_3_name: null,
+  division_4_name: null,
+
   isLoading: false,
   isLoaded: false
 })
@@ -208,6 +213,11 @@ export function createLeague({
 
   season_due_amount,
 
+  division_1_name,
+  division_2_name,
+  division_3_name,
+  division_4_name,
+
   isLoaded,
   isLoading
 }) {
@@ -311,6 +321,11 @@ export function createLeague({
     fleaflicker_id,
 
     season_due_amount,
+
+    division_1_name,
+    division_2_name,
+    division_3_name,
+    division_4_name,
 
     isLoading,
     isLoaded
