@@ -22,5 +22,6 @@ export default function PositionFilter({ positions, league_positions }) {
 }
 
 PositionFilter.propTypes = {
-  positions: ImmutablePropTypes.list
+  positions: ImmutablePropTypes.list,
+  league_positions: ImmutablePropTypes.list
 }

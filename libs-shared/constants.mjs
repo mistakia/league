@@ -685,6 +685,8 @@ export const starterSlots = [
 ]
 
 export const ps_slots = [slots.PS, slots.PSP, slots.PSD, slots.PSDP]
+export const ps_protected_slots = [slots.PSP, slots.PSDP]
+export const ps_unprotected_slots = [slots.PS, slots.PSD]
 export const ps_signed_slots = [slots.PS, slots.PSP]
 export const ps_drafted_slots = [slots.PSD, slots.PSDP]
 
@@ -1229,6 +1231,8 @@ export const availability = [
   'ACTIVE ROSTER',
   'FREE AGENT',
   'PRACTICE SQUAD',
+  'PRACTICE SQUAD PROTECTED',
+  'PRACTICE SQUAD UNPROTECTED',
   'INJURED RESERVE',
   'RESTRICTED FREE AGENT',
   'POTENTIAL FREE AGENT'

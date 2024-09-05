@@ -1763,6 +1763,32 @@ export const getPracticeSquadPlayerIdsForCurrentLeague = createSelector(
   }
 )
 
+export const getPracticeSquadUnprotectedPlayerIdsForCurrentLeague =
+  createSelector(getRostersForCurrentLeague, (rosters) => {
+    const pids = []
+    for (const roster of rosters.values()) {
+      roster.players.forEach(({ slot, pid }) => {
+        if (constants.ps_unprotected_slots.includes(slot)) {
+          pids.push(pid)
+        }
+      })
+    }
+    return new List(pids)
+  })
+
+export const getPracticeSquadProtectedPlayerIdsForCurrentLeague =
+  createSelector(getRostersForCurrentLeague, (rosters) => {
+    const pids = []
+    for (const roster of rosters.values()) {
+      roster.players.forEach(({ slot, pid }) => {
+        if (constants.ps_protected_slots.includes(slot)) {
+          pids.push(pid)
+        }
+      })
+    }
+    return new List(pids)
+  })
+
 export const getInjuredReservePlayerIdsForCurrentLeague = createSelector(
   getRostersForCurrentLeague,
   (rosters) => {
