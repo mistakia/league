@@ -64,7 +64,7 @@ const run = async ({ dry = false } = {}) => {
               Number($(el).find('td').eq(10).text().replace(',', '').trim()) ||
               null
             data.tdr = Number($(el).find('td').eq(11).text().trim()) || null
-          } else if (pos === 'RB') {
+          } else if (pos === 'RB' || pos === 'WR' || pos === 'TE') {
             data.ra = Number($(el).find('td').eq(4).text().trim()) || null
             data.ry =
               Number($(el).find('td').eq(5).text().replace(',', '').trim()) ||
@@ -76,24 +76,6 @@ const run = async ({ dry = false } = {}) => {
               Number($(el).find('td').eq(8).text().replace(',', '').trim()) ||
               null
             data.tdrec = Number($(el).find('td').eq(9).text().trim()) || null
-          } else if (pos === 'WR') {
-            data.rec = Number($(el).find('td').eq(4).text().trim()) || null
-            data.recy =
-              Number($(el).find('td').eq(5).text().replace(',', '').trim()) ||
-              null
-            data.tdrec = Number($(el).find('td').eq(6).text().trim()) || null
-
-            data.ra = Number($(el).find('td').eq(7).text().trim()) || null
-            data.ry =
-              Number($(el).find('td').eq(8).text().replace(',', '').trim()) ||
-              null
-            data.tdr = Number($(el).find('td').eq(9).text().trim()) || null
-          } else if (pos === 'TE') {
-            data.rec = Number($(el).find('td').eq(4).text().trim()) || null
-            data.recy =
-              Number($(el).find('td').eq(5).text().replace(',', '').trim()) ||
-              null
-            data.tdrec = Number($(el).find('td').eq(6).text().trim()) || null
           }
 
           items.push({ params, data })
