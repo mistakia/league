@@ -1,6 +1,17 @@
 import db from '#db'
 import { constants, createDefaultLeague } from '#libs-shared'
 
+async function get_league_divisions({ lid, year }) {
+  const divisions = await db('league_divisions')
+    .where({ lid, year })
+    .select('division_id', 'division_name')
+
+  return divisions.reduce((acc, div) => {
+    acc[`division_${div.division_id}_name`] = div.division_name
+    return acc
+  }, {})
+}
+
 export default async function ({ lid, year = constants.season.year } = {}) {
   lid = Number(lid)
 
@@ -9,7 +20,7 @@ export default async function ({ lid, year = constants.season.year } = {}) {
     return { uid: 0, ...league }
   }
 
-  return db('leagues')
+  const league = await db('leagues')
     .leftJoin('seasons', function () {
       this.on('leagues.uid', '=', 'seasons.lid')
       this.on(db.raw(`seasons.year = ${year} or seasons.year is null`))
@@ -26,4 +37,11 @@ export default async function ({ lid, year = constants.season.year } = {}) {
     )
     .where('leagues.uid', lid)
     .first()
+
+  if (league) {
+    const divisions = await get_league_divisions({ lid, year })
+    return { ...league, ...divisions }
+  }
+
+  return league
 }
