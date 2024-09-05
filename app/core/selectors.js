@@ -24,7 +24,8 @@ import {
   groupBy,
   fixTeam,
   is_league_post_season_week,
-  get_last_consecutive_pick
+  get_last_consecutive_pick,
+  league_has_starting_position
 } from '@libs-shared'
 import { League } from '@core/leagues'
 import { fuzzySearch } from '@core/utils'
@@ -108,6 +109,14 @@ export const isTeamConnected = createSelector(
   (state) => state.getIn(['auction', 'connected']),
   (state, { tid }) => tid,
   (connected, tid) => connected.includes(tid)
+)
+
+export const get_positions_for_current_league = createSelector(
+  getCurrentLeague,
+  (league) =>
+    constants.positions.filter((pos) =>
+      league_has_starting_position({ pos, league })
+    )
 )
 
 export const get_teams_for_current_league_and_year = createSelector(
