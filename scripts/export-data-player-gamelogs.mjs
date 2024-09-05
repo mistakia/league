@@ -17,6 +17,55 @@ const data_path = path.join(__dirname, '../data')
 const log = debug('export-data-player-gamelogs')
 debug.enable('export-data-player-gamelogs')
 
+const format_gamelog = (gamelog) => ({
+  esbid: gamelog.esbid,
+  pid: gamelog.pid,
+  opp: gamelog.opp,
+  tm: gamelog.tm,
+  pos: gamelog.pos,
+  jnum: gamelog.jnum,
+  active: gamelog.active,
+  started: gamelog.started,
+  pa: gamelog.pa,
+  pc: gamelog.pc,
+  py: gamelog.py,
+  ints: gamelog.ints,
+  tdp: gamelog.tdp,
+  ra: gamelog.ra,
+  ry: gamelog.ry,
+  tdr: gamelog.tdr,
+  fuml: gamelog.fuml,
+  trg: gamelog.trg,
+  rec: gamelog.rec,
+  recy: gamelog.recy,
+  tdrec: gamelog.tdrec,
+  twoptc: gamelog.twoptc,
+  prtd: gamelog.prtd,
+  krtd: gamelog.krtd,
+  snp: gamelog.snp,
+  fgm: gamelog.fgm,
+  fgy: gamelog.fgy,
+  fg19: gamelog.fg19,
+  fg29: gamelog.fg29,
+  fg39: gamelog.fg39,
+  fg49: gamelog.fg49,
+  fg50: gamelog.fg50,
+  xpm: gamelog.xpm,
+  dsk: gamelog.dsk,
+  dint: gamelog.dint,
+  dff: gamelog.dff,
+  drf: gamelog.drf,
+  dtno: gamelog.dtno,
+  dfds: gamelog.dfds,
+  dpa: gamelog.dpa,
+  dya: gamelog.dya,
+  dblk: gamelog.dblk,
+  dsf: gamelog.dsf,
+  dtpr: gamelog.dtpr,
+  dtd: gamelog.dtd,
+  career_game: gamelog.career_game
+})
+
 const export_data_player_gamelogs = async () => {
   const data = await db('player_gamelogs')
     .select('player_gamelogs.*')
@@ -35,7 +84,8 @@ const export_data_player_gamelogs = async () => {
       gamelogs_by_year[year] = []
     }
 
-    gamelogs_by_year[year].push(gamelog)
+    const formatted_gamelog = format_gamelog(gamelog)
+    gamelogs_by_year[year].push(formatted_gamelog)
   }
 
   for (const year of Object.keys(gamelogs_by_year)) {
