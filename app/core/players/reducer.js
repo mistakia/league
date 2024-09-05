@@ -5,14 +5,15 @@ import { createPlayer } from './player'
 import { statActions } from '@core/stats'
 import { rosterActions } from '@core/rosters'
 import { auctionActions } from '@core/auction'
+import { appActions } from '@core/app'
 import { data_view_request_actions } from '@core/data-view-request/actions'
 import DefaultPlayersViews from './default-players-views'
 
-import { constants } from '@libs-shared'
+import { constants, league_has_starting_position } from '@libs-shared'
 
 export const default_player_filter_options = {
   search: null,
-  positions: new List(['QB', 'RB', 'WR', 'TE', 'K', 'DST']),
+  positions: new List(constants.positions),
   nflTeams: new List(constants.nflTeams),
   highlight_teamIds: new List(),
   teamIds: new List(),
@@ -47,6 +48,20 @@ const initialState = new Map({
 
 export function playersReducer(state = initialState, { payload, type }) {
   switch (type) {
+    case appActions.AUTH_FULFILLED: {
+      const league = payload.data.leagues[0]
+      if (league) {
+        return state.merge({
+          positions: new List(
+            constants.positions.filter((pos) =>
+              league_has_starting_position({ pos, league })
+            )
+          )
+        })
+      }
+      return state
+    }
+
     case playerActions.SELECT_PLAYERS_PAGE_VIEW: {
       const view = state.getIn(['players_page_views', payload.view_key])
       return state.merge({
