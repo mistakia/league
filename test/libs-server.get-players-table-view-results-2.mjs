@@ -1,4 +1,4 @@
-/* global describe it */
+/* global describe it before */
 import MockDate from 'mockdate'
 
 import { get_data_view_results_query } from '#libs-server'
