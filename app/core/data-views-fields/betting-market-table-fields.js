@@ -12,67 +12,7 @@ const from_betting_market = (field) => ({
   ...field
 })
 
-const create_game_prop_column_params = () => ({
-  market_type: {
-    label: 'Market',
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-    values: Object.values(bookmaker_constants.player_game_prop_types),
-    default_value:
-      bookmaker_constants.player_game_prop_types.GAME_PASSING_YARDS,
-    single: true
-  },
-  source_id: {
-    label: 'Bookmaker',
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-    values: [
-      bookmaker_constants.bookmakers.FANDUEL,
-      bookmaker_constants.bookmakers.DRAFTKINGS,
-      bookmaker_constants.bookmakers.PINNACLE
-    ],
-    default_value: bookmaker_constants.bookmakers.FANDUEL,
-    single: true
-  },
-  year: {
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-    values: [2023, 2024],
-    default_value: 2024,
-    single: true,
-    enable_multi_on_split: ['year']
-  },
-  week: {
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-    values: constants.nfl_weeks,
-    default_value: 1,
-    single: true
-  },
-  career_year,
-  career_game
-})
-
-const create_game_prop_field = ({
-  column_title,
-  header_label,
-  player_value_path
-}) =>
-  from_betting_market({
-    column_title,
-    header_label,
-    player_value_path,
-    column_groups: [
-      COLUMN_GROUPS.BETTING_MARKETS,
-      COLUMN_GROUPS.PLAYER_GAME_PROPS
-    ],
-    column_params: create_game_prop_column_params()
-  })
-
-const create_team_game_prop_column_params = () => ({
-  market_type: {
-    label: 'Market',
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-    values: Object.values(bookmaker_constants.team_game_market_types),
-    default_value: bookmaker_constants.team_game_market_types.GAME_TOTAL,
-    single: true
-  },
+const create_base_column_params = () => ({
   source_id: {
     label: 'Bookmaker',
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
@@ -99,21 +39,56 @@ const create_team_game_prop_column_params = () => ({
   }
 })
 
-const create_team_game_prop_field = ({
-  column_title,
-  header_label,
-  player_value_path
-}) =>
-  from_betting_market({
-    column_title,
-    header_label,
-    player_value_path,
-    column_groups: [
-      COLUMN_GROUPS.BETTING_MARKETS,
-      COLUMN_GROUPS.TEAM_GAME_PROPS
-    ],
-    column_params: create_team_game_prop_column_params()
-  })
+const create_game_prop_column_params = () => ({
+  ...create_base_column_params(),
+  market_type: {
+    label: 'Market',
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    values: Object.values(bookmaker_constants.player_game_prop_types),
+    default_value:
+      bookmaker_constants.player_game_prop_types.GAME_PASSING_YARDS,
+    single: true
+  },
+  career_year,
+  career_game
+})
+
+const create_team_game_prop_column_params = () => ({
+  ...create_base_column_params(),
+  market_type: {
+    label: 'Market',
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    values: Object.values(bookmaker_constants.team_game_market_types),
+    default_value: bookmaker_constants.team_game_market_types.GAME_TOTAL,
+    single: true
+  }
+})
+
+const create_field =
+  (column_groups, column_params) =>
+  ({ column_title, header_label, player_value_path }) =>
+    from_betting_market({
+      column_title,
+      header_label,
+      player_value_path,
+      column_groups,
+      column_params
+    })
+
+const create_game_prop_field = create_field(
+  [COLUMN_GROUPS.BETTING_MARKETS, COLUMN_GROUPS.PLAYER_GAME_PROPS],
+  create_game_prop_column_params()
+)
+
+const create_team_game_prop_field = create_field(
+  [COLUMN_GROUPS.BETTING_MARKETS, COLUMN_GROUPS.TEAM_GAME_PROPS],
+  create_team_game_prop_column_params()
+)
+
+const create_team_game_implied_total_field = create_field(
+  [COLUMN_GROUPS.BETTING_MARKETS, COLUMN_GROUPS.TEAM_GAME_PROPS],
+  create_base_column_params()
+)
 
 export default {
   player_season_prop_line_from_betting_markets: from_betting_market({
@@ -183,5 +158,12 @@ export default {
     column_title: 'Team Game Prop Odds',
     header_label: 'ODDS',
     player_value_path: 'team_game_prop_odds_betting_market'
-  })
+  }),
+
+  team_game_implied_team_total_from_betting_markets:
+    create_team_game_implied_total_field({
+      column_title: 'Team Game Implied Total',
+      header_label: 'TOTAL',
+      player_value_path: 'team_game_implied_team_total_betting_market'
+    })
 }
