@@ -80,7 +80,7 @@ export { default as report_job } from './report-job.mjs'
 export {
   redis_client,
   RedisCacheAdapter,
-  data_view_cache
+  redis_cache
 } from './redis_adapter.mjs'
 export * as pff from './pff.mjs'
 export * as sleeper from './sleeper.mjs'

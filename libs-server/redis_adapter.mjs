@@ -36,9 +36,7 @@ class RedisCacheAdapter {
   }
 }
 
-// Create the data_view_cache only if redis_client exists
-const data_view_cache = redis_client
-  ? new RedisCacheAdapter(redis_client)
-  : null
+// Create the redis_cache only if redis_client exists
+const redis_cache = redis_client ? new RedisCacheAdapter(redis_client) : null
 
-export { redis_client, RedisCacheAdapter, data_view_cache }
+export { redis_client, RedisCacheAdapter, redis_cache }
