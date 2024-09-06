@@ -3,23 +3,40 @@ import db from '#db'
 import get_join_func from '#libs-server/get-join-func.mjs'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
 
-const get_default_params = (params, is_player_game_prop) => {
+const get_default_params = ({
+  params,
+  is_player_game_prop = false,
+  is_game_prop = false,
+  is_team_game_prop = false
+}) => {
+  const default_bookmaker = is_team_game_prop
+    ? bookmaker_constants.bookmakers.DRAFTKINGS
+    : bookmaker_constants.bookmakers.FANDUEL
   const year = Array.isArray(params.year)
     ? params.year[0]
     : params.year || constants.season.year
 
   let week, market_type
 
-  if (is_player_game_prop) {
+  if (is_game_prop) {
     week = Array.isArray(params.week)
       ? params.week[0]
       : params.week || Math.max(1, constants.season.week)
+  } else {
+    week = Array.isArray(params.week) ? params.week[0] : params.week || 0
+  }
+
+  if (is_player_game_prop) {
     market_type = Array.isArray(params.market_type)
       ? params.market_type[0]
       : params.market_type ||
         bookmaker_constants.player_prop_types.GAME_PASSING_YARDS
+  } else if (is_team_game_prop) {
+    market_type = Array.isArray(params.market_type)
+      ? params.market_type[0]
+      : params.market_type ||
+        bookmaker_constants.team_game_market_types.GAME_TOTAL
   } else {
-    week = Array.isArray(params.week) ? params.week[0] : params.week || 0
     market_type = Array.isArray(params.market_type)
       ? params.market_type[0]
       : params.market_type ||
@@ -31,7 +48,7 @@ const get_default_params = (params, is_player_game_prop) => {
     : params.time_type || bookmaker_constants.time_type.CLOSE
   const source_id = Array.isArray(params.source_id)
     ? params.source_id[0]
-    : params.source_id || bookmaker_constants.bookmakers.FANDUEL
+    : params.source_id || default_bookmaker
 
   let career_year = params.career_year || []
   if (!Array.isArray(career_year)) {
@@ -56,7 +73,8 @@ const get_default_params = (params, is_player_game_prop) => {
 
 const betting_markets_table_alias = ({
   params = {},
-  is_player_game_prop = false
+  is_player_game_prop = false,
+  base_table_alias = 'betting_markets'
 }) => {
   const {
     year,
@@ -66,10 +84,13 @@ const betting_markets_table_alias = ({
     source_id,
     career_year,
     career_game
-  } = get_default_params(params, is_player_game_prop)
+  } = get_default_params({
+    params,
+    is_player_game_prop
+  })
 
   return get_table_hash(
-    `betting_markets_${year}_week_${week}_source_id_${source_id}_market_type_${market_type}_time_type_${time_type}_career_year_${career_year.join('_')}_career_game_${career_game.join('_')}`
+    `${base_table_alias}_${year}_week_${week}_source_id_${source_id}_market_type_${market_type}_time_type_${time_type}_career_year_${career_year.join('_')}_career_game_${career_game.join('_')}`
   )
 }
 
@@ -91,7 +112,10 @@ const player_betting_market_with = ({
     source_id,
     career_year,
     career_game
-  } = get_default_params(params, is_player_game_prop)
+  } = get_default_params({
+    params,
+    is_player_game_prop
+  })
 
   const markets_cte = `${with_table_name}_markets`
 
@@ -197,7 +221,11 @@ const team_betting_market_join = ({
 }) => {
   const join_func = get_join_func(join_type)
 
-  const { market_type } = get_default_params(params, false)
+  const { market_type } = get_default_params({
+    params,
+    is_team_game_prop: true,
+    is_game_prop: true
+  })
 
   query[join_func](table_name, function () {
     if (
@@ -222,25 +250,11 @@ const team_betting_market_with = ({
   where_clauses,
   splits
 }) => {
-  const time_type = Array.isArray(params.time_type)
-    ? params.time_type[0]
-    : params.time_type || bookmaker_constants.time_type.CLOSE
-  const market_type = Array.isArray(params.market_type)
-    ? params.market_type[0]
-    : params.market_type ||
-      bookmaker_constants.team_game_market_types.GAME_TOTAL
-  const source_id = Array.isArray(params.source_id)
-    ? params.source_id[0]
-    : params.source_id || bookmaker_constants.bookmakers.DRAFTKINGS
-
-  const year = Array.isArray(params.year)
-    ? params.year[0]
-    : params.year || constants.season.year
-  let week = Array.isArray(params.week) ? params.week[0] : params.week
-
-  if (!week) {
-    week = Math.max(1, constants.season.week)
-  }
+  const { time_type, market_type, source_id, year, week } = get_default_params({
+    params,
+    is_team_game_prop: true,
+    is_game_prop: true
+  })
 
   const markets_cte = `${with_table_name}_markets`
 
@@ -278,6 +292,100 @@ const team_betting_market_with = ({
   })
 }
 
+const team_game_implied_team_total_with = ({
+  query,
+  params,
+  with_table_name,
+  having_clauses,
+  where_clauses,
+  splits
+}) => {
+  const { time_type, source_id, year, week } = get_default_params({
+    params,
+    is_team_game_prop: true,
+    is_game_prop: true
+  })
+
+  const spread_cte = `${with_table_name}_spread`
+  const total_cte = `${with_table_name}_total`
+
+  query.with(spread_cte, (qb) => {
+    qb.select(
+      'prop_markets_index.esbid',
+      'pms.selection_pid',
+      'pms.selection_metric_line as spread'
+    )
+      .from('prop_markets_index')
+      .join('prop_market_selections_index as pms', function () {
+        this.on('pms.source_id', '=', 'prop_markets_index.source_id')
+          .andOn(
+            'pms.source_market_id',
+            '=',
+            'prop_markets_index.source_market_id'
+          )
+          .andOn('pms.time_type', '=', 'prop_markets_index.time_type')
+      })
+      .join('nfl_games', function () {
+        this.on('nfl_games.esbid', '=', 'prop_markets_index.esbid')
+        this.andOn('nfl_games.year', '=', 'prop_markets_index.year')
+      })
+      .where(
+        'market_type',
+        bookmaker_constants.team_game_market_types.GAME_SPREAD
+      )
+      .andWhere('prop_markets_index.time_type', time_type)
+      .andWhere('prop_markets_index.year', year)
+      .andWhere('prop_markets_index.source_id', source_id)
+      .andWhere('nfl_games.week', week)
+  })
+
+  query.with(total_cte, (qb) => {
+    qb.select('prop_markets_index.esbid', 'pms.selection_metric_line as total')
+      .from('prop_markets_index')
+      .join('prop_market_selections_index as pms', function () {
+        this.on('pms.source_id', '=', 'prop_markets_index.source_id')
+          .andOn(
+            'pms.source_market_id',
+            '=',
+            'prop_markets_index.source_market_id'
+          )
+          .andOn('pms.time_type', '=', 'prop_markets_index.time_type')
+      })
+      .join('nfl_games', function () {
+        this.on('nfl_games.esbid', '=', 'prop_markets_index.esbid')
+        this.andOn('nfl_games.year', '=', 'prop_markets_index.year')
+      })
+      .where(
+        'market_type',
+        bookmaker_constants.team_game_market_types.GAME_TOTAL
+      )
+      .andWhere('prop_markets_index.time_type', time_type)
+      .andWhere('prop_markets_index.year', year)
+      .andWhere('prop_markets_index.source_id', source_id)
+      .andWhere('nfl_games.week', week)
+  })
+
+  query.with(with_table_name, (qb) => {
+    qb.select('s.esbid', 's.selection_pid')
+      .from(`${spread_cte} as s`)
+      .join(`${total_cte} as t`, 's.esbid', 't.esbid')
+      .select(db.raw('(t.total - s.spread) / 2 as implied_team_total'))
+  })
+}
+
+const team_game_implied_team_total_join = ({
+  query,
+  table_name,
+  join_type = 'LEFT',
+  params = {}
+}) => {
+  const join_func = get_join_func(join_type)
+
+  query[join_func](table_name, function () {
+    this.on(`${table_name}.selection_pid`, '=', 'player.current_nfl_team')
+  })
+}
+
 const create_player_betting_market_field = ({
   column_name,
   column_alias,
@@ -303,7 +411,12 @@ const create_team_betting_market_field = ({ column_name, column_alias }) => ({
   column_name,
   select_as: () => `${column_alias}_betting_market`,
   with_where: ({ table_name }) => `${table_name}.${column_name}`,
-  table_alias: betting_markets_table_alias,
+  table_alias: (args) =>
+    betting_markets_table_alias({
+      ...args,
+      is_team_game_prop: true,
+      is_game_prop: true
+    }),
   join: team_betting_market_join,
   with: team_betting_market_with
 })
@@ -354,5 +467,21 @@ export default {
   team_game_prop_odds_from_betting_markets: create_team_betting_market_field({
     column_name: 'selection_odds',
     column_alias: 'team_game_prop_odds'
-  })
+  }),
+
+  team_game_implied_team_total_from_betting_markets: {
+    column_name: 'implied_team_total',
+    select_as: () => 'team_game_implied_team_total_betting_market',
+    with_where: ({ table_name }) =>
+      `CASE WHEN player.current_nfl_team = ${table_name}.h THEN ${table_name}.home_implied_total ELSE ${table_name}.away_implied_total END`,
+    table_alias: (args) =>
+      betting_markets_table_alias({
+        ...args,
+        is_team_game_prop: true,
+        is_game_prop: true,
+        base_table_alias: 'team_game_implied_team_total'
+      }),
+    join: team_game_implied_team_total_join,
+    with: team_game_implied_team_total_with
+  }
 }
