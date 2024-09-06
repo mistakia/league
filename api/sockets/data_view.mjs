@@ -1,4 +1,4 @@
-import { get_data_view_results, data_view_cache } from '#libs-server'
+import { get_data_view_results, redis_cache } from '#libs-server'
 import get_table_hash from '#libs-server/get-table-hash.mjs'
 import debug from 'debug'
 
@@ -15,7 +15,7 @@ class DataViewQueue {
   async add_request({ ws, request_id, params, user_id }) {
     log('Adding request', { request_id, user_id })
     const cache_key = get_table_hash(JSON.stringify(params))
-    const cached_result = await data_view_cache.get(cache_key)
+    const cached_result = await redis_cache.get(cache_key)
 
     if (cached_result) {
       log('Cache hit', { request_id })
@@ -138,7 +138,7 @@ class DataViewQueue {
 
       if (result && result.length) {
         const cache_ttl = 1000 * 60 * 60 * 12 // 12 hours
-        await data_view_cache.set(cache_key, result, cache_ttl)
+        await redis_cache.set(cache_key, result, cache_ttl)
       }
 
       this.send_message_to_client({

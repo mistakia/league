@@ -1,6 +1,10 @@
 import express from 'express'
 
-import { getChartedPlayByPlayQuery, getPlayByPlayQuery } from '#libs-server'
+import {
+  getChartedPlayByPlayQuery,
+  getPlayByPlayQuery,
+  redis_cache
+} from '#libs-server'
 import { constants } from '#libs-shared'
 
 const router = express.Router()
@@ -13,6 +17,32 @@ router.get('/?', async (req, res) => {
     const data = await query
       .where('nfl_plays_current_week.year', constants.season.year)
       .where('nfl_plays_current_week.seas_type', 'REG')
+    res.send(data)
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
+router.get('/all', async (req, res) => {
+  const { db, logger } = req.app.locals
+  const {
+    year = constants.season.year,
+    seas_type = constants.season.nfl_seas_type
+  } = req.query
+
+  try {
+    const cache_key = `nfl_plays_all_${year}_${seas_type}`
+    let data = await redis_cache.get(cache_key)
+
+    if (!data) {
+      data = await db('nfl_plays')
+        .where('nfl_plays.year', year)
+        .where('nfl_plays.seas_type', seas_type)
+
+      await redis_cache.set(cache_key, data, 15 * 60) // Cache for 15 minutes
+    }
+
     res.send(data)
   } catch (error) {
     logger(error)
