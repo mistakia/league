@@ -18,7 +18,7 @@ const run = async () => {
     return
   }
 
-  const timestamp = new Date()
+  const timestamp = Math.floor(Date.now() / 1000)
   const week = Math.max(constants.season.week, 1)
   const year = constants.season.year
 
