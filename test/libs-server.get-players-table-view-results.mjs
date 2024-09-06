@@ -1,4 +1,4 @@
-/* global describe it */
+/* global describe it before */
 
 import chai from 'chai'
 import MockDate from 'mockdate'
