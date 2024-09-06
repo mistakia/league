@@ -1,6 +1,7 @@
 /* global describe it */
 
 import chai from 'chai'
+import MockDate from 'mockdate'
 
 import { get_data_view_results_query } from '#libs-server'
 import { constants, bookmaker_constants } from '#libs-shared'
@@ -9,6 +10,10 @@ import { compare_queries } from './utils/index.mjs'
 const { expect } = chai
 
 describe('LIBS SERVER get_data_view_results', () => {
+  before(() => {
+    MockDate.reset()
+  })
+
   it('should return a query', () => {
     const query = get_data_view_results_query()
     const expected_query =
