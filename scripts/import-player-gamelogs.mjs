@@ -102,7 +102,8 @@ const import_player_gamelogs_for_week = async ({
         pos: formatPosition(position),
         jnum: Number(jerseyNumber) || null,
         active: status !== 'NOT_ACTIVE',
-        started: status === 'STARTED'
+        started: status === 'STARTED',
+        year
       }
       player_gamelog_inserts.push(player_gamelog)
     }
@@ -142,7 +143,8 @@ const import_player_gamelogs_for_week = async ({
         pos: formatPosition(position),
         jnum: Number(jerseyNumber) || null,
         active: status !== 'NOT_ACTIVE',
-        started: status === 'STARTED'
+        started: status === 'STARTED',
+        year
       }
       player_gamelog_inserts.push(player_gamelog)
     }
@@ -152,7 +154,7 @@ const import_player_gamelogs_for_week = async ({
     try {
       await db('player_gamelogs')
         .insert(player_gamelog_inserts)
-        .onConflict(['esbid', 'pid'])
+        .onConflict(['esbid', 'pid', 'year'])
         .merge()
 
       log(`inserted ${player_gamelog_inserts.length} player gamelogs`)
