@@ -111,7 +111,7 @@ const get_play_type_nfl = (play_type_nfl) => {
   }
 }
 
-const format_gamelog = ({ esbid, pid, stats, opp, pos, tm }) => {
+const format_gamelog = ({ esbid, pid, stats, opp, pos, tm, year }) => {
   const cleanedStats = Object.keys(stats)
     .filter((key) => constants.fantasyStats.includes(key))
     .reduce((obj, key) => {
@@ -126,6 +126,7 @@ const format_gamelog = ({ esbid, pid, stats, opp, pos, tm }) => {
     pos,
     opp,
     active: true,
+    year,
     ...cleanedStats
   }
 }
@@ -308,7 +309,7 @@ const run = async ({
       save: (items) =>
         db('player_gamelogs')
           .insert(items)
-          .onConflict(['esbid', 'pid'])
+          .onConflict(['esbid', 'pid', 'year'])
           .merge(),
       batch_size: 500
     })
