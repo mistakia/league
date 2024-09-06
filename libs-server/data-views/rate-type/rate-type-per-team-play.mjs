@@ -91,6 +91,8 @@ export const add_per_team_play_cte = ({
 
   if (play_type) {
     cte_query.where('play_type', play_type)
+  } else {
+    cte_query.whereIn('play_type', ['PASS', 'RUSH'])
   }
 
   for (const split of splits) {
