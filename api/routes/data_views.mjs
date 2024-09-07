@@ -1,7 +1,7 @@
 import express from 'express'
 import crypto from 'crypto'
 import { validators, get_data_view_results, redis_cache } from '#libs-server'
-import get_table_hash from '#libs-server/get-table-hash.mjs'
+import get_data_view_hash from '#libs-server/data-views/get-data-view-hash.mjs'
 
 const router = express.Router()
 
@@ -160,55 +160,42 @@ router.post('/search/?', async (req, res) => {
   try {
     const { where, columns, sort, offset, prefix_columns, splits } = req.body
 
-    const generate_cache_key = (obj) => {
-      if (Array.isArray(obj)) {
-        return JSON.stringify(obj.map(generate_cache_key).sort())
-      } else if (typeof obj === 'object' && obj !== null) {
-        return JSON.stringify(
-          Object.keys(obj)
-            .sort()
-            .reduce((result, key) => {
-              result[key] = generate_cache_key(obj[key])
-              return result
-            }, {})
-        )
-      } else {
-        return JSON.stringify(obj)
-      }
-    }
-
-    const stringified_key = generate_cache_key({
+    const cache_key = `/data-views/${get_data_view_hash({
       where,
       columns,
       sort,
       offset,
       prefix_columns,
       splits
-    })
-    const cache_key = get_table_hash(stringified_key)
+    })}`
     const cached_result = await redis_cache.get(cache_key)
 
     if (cached_result) {
       return res.send(cached_result)
     }
 
-    const query = get_data_view_results({
-      where,
-      columns,
-      sort,
-      offset,
-      prefix_columns,
-      splits
-    })
+    const { data_view_results, data_view_metadata } =
+      await get_data_view_results({
+        where,
+        columns,
+        sort,
+        offset,
+        prefix_columns,
+        splits
+      })
 
-    const result = await query
-
-    if (result && result.length) {
-      const cache_ttl = 1000 * 60 * 60 * 12 // 12 hours
-      await redis_cache.set(cache_key, result, cache_ttl)
+    if (data_view_results && data_view_results.length) {
+      const cache_ttl = data_view_metadata.cache_ttl || 1000 * 60 * 60 * 12 // 12 hours
+      await redis_cache.set(cache_key, data_view_results, cache_ttl)
+      if (data_view_metadata.cache_expire_at) {
+        await redis_cache.expire_at(
+          cache_key,
+          data_view_metadata.cache_expire_at
+        )
+      }
     }
 
-    res.send(result)
+    res.send(data_view_results)
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })

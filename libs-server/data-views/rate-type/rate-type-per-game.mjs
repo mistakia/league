@@ -1,4 +1,4 @@
-import get_table_hash from '#libs-server/get-table-hash.mjs'
+import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import db from '#db'
 
 export const get_per_game_cte_table_name = ({ params = {} } = {}) => {

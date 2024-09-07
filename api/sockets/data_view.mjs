@@ -1,5 +1,5 @@
 import { get_data_view_results, redis_cache } from '#libs-server'
-import get_table_hash from '#libs-server/get-table-hash.mjs'
+import get_data_view_hash from '#libs-server/data-views/get-data-view-hash.mjs'
 import debug from 'debug'
 
 const log = debug('data-view-socket')
@@ -14,7 +14,7 @@ class DataViewQueue {
 
   async add_request({ ws, request_id, params, user_id }) {
     log('Adding request', { request_id, user_id })
-    const cache_key = get_table_hash(JSON.stringify(params))
+    const cache_key = `/data-views/${get_data_view_hash(params)}`
     const cached_result = await redis_cache.get(cache_key)
 
     if (cached_result) {
@@ -134,17 +134,24 @@ class DataViewQueue {
       const signed_in_timeout = 5 * 60 * 1000 // 5 minutes
       const signed_out_timeout = 40 * 1000 // 40 seconds
       const timeout = user_id ? signed_in_timeout : signed_out_timeout
-      const result = await get_data_view_results({ timeout, ...params })
+      const { data_view_results, data_view_metadata } =
+        await get_data_view_results({ timeout, ...params })
 
-      if (result && result.length) {
-        const cache_ttl = 1000 * 60 * 60 * 12 // 12 hours
-        await redis_cache.set(cache_key, result, cache_ttl)
+      if (data_view_results && data_view_results.length) {
+        const cache_ttl = data_view_metadata.cache_ttl || 1000 * 60 * 60 * 12 // 12 hours
+        await redis_cache.set(cache_key, data_view_results, cache_ttl)
+        if (data_view_metadata.cache_expire_at) {
+          await redis_cache.expire_at(
+            cache_key,
+            data_view_metadata.cache_expire_at
+          )
+        }
       }
 
       this.send_message_to_client({
         ws,
         type: 'DATA_VIEW_RESULT',
-        payload: { request_id, result }
+        payload: { request_id, result: data_view_results }
       })
       log('Request processed successfully', { request_id })
     } catch (error) {

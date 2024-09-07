@@ -4,6 +4,7 @@ import {
   add_per_game_cte,
   join_per_game_cte
 } from '#libs-server/data-views/rate-type/rate-type-per-game.mjs'
+import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
 
 const games_played_join = ({
   data_view_options,
@@ -53,6 +54,7 @@ export default {
     },
     main_where: ({ table_name }) => {
       return db.raw(`${table_name}.rate_type_total_count`)
-    }
+    },
+    get_cache_info: get_cache_info_for_fields_from_plays
   }
 }
