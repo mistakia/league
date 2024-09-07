@@ -146,7 +146,10 @@ const format_option_market = async ({
   }
 }
 
-const import_betmgm_odds = async () => {
+const import_betmgm_odds = async ({
+  write_file = false,
+  dry_run = false
+} = {}) => {
   console.time('import-betmgm-odds')
 
   const timestamp = Math.round(Date.now() / 1000)
@@ -159,6 +162,8 @@ const import_betmgm_odds = async () => {
   })
 
   const { fixtures } = await betmgm.get_markets()
+
+  log(`Found ${fixtures.length} fixtures`)
 
   for (const fixture of fixtures) {
     let nfl_game = null
@@ -207,14 +212,18 @@ const import_betmgm_odds = async () => {
     }
   }
 
-  if (argv.write) {
+  if (write_file) {
     await fs.writeFile(
       `./tmp/betmgm-markets-${timestamp}.json`,
       JSON.stringify(all_markets, null, 2)
     )
+    await fs.writeFile(
+      `./tmp/betmgm-formatted-markets-${timestamp}.json`,
+      JSON.stringify(formatted_markets, null, 2)
+    )
   }
 
-  if (argv.dry) {
+  if (dry_run) {
     log(formatted_markets[0])
     console.timeEnd('import-betmgm-odds')
     return
@@ -244,7 +253,10 @@ export const job = async () => {
 }
 
 const main = async () => {
-  await job()
+  await import_betmgm_odds({
+    write_file: argv.write,
+    dry_run: argv.dry
+  })
   process.exit()
 }
 
