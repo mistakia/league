@@ -1,6 +1,6 @@
 import debug from 'debug'
 
-import config from '#config'
+import db from '#db'
 import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 import { puppeteer, wait } from '#libs-server'
 
@@ -28,11 +28,18 @@ export const markets = {
   34346: player_prop_types.GAME_LONGEST_RUSH
 }
 
+const get_betmgm_config = async () => {
+  const config_row = await db('config').where({ key: 'betmgm_config' }).first()
+  return config_row.value
+}
+
 export const get_markets = async () => {
+  const betmgm_config = await get_betmgm_config()
+
   const { page, browser } = await puppeteer.getPage(
     'https://sports.md.betmgm.com/en/sports/football-11/betting/usa-9/nfl-35'
   )
-  const market_data_url = `${config.betmgm_api_url}/bettingoffer/fixtures?x-bwin-accessid=YmNkZjhiMzEtYWIwYS00ZDg1LWE2MWYtOGMyYjljNTdjYjFl&country=US&lang=en-us&offerMapping=All&sportIds=11&competitionIds=35`
+  const market_data_url = `${betmgm_config.api_url}/bettingoffer/fixtures?x-bwin-accessid=YmNkZjhiMzEtYWIwYS00ZDg1LWE2MWYtOGMyYjljNTdjYjFl&country=US&lang=en-us&offerMapping=All&sportIds=11&competitionIds=35`
   log(`fetching ${market_data_url}`)
   await wait(2000)
   const response = await page.goto(market_data_url)
