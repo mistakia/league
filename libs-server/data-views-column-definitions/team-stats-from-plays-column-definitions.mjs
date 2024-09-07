@@ -103,6 +103,11 @@ export default {
     select_string: `SUM(pass_yds)`,
     stat_name: 'team_pass_yds_from_plays'
   }),
+  // TODO prevent from applying rate_type to this
+  team_pass_rate_over_expected_from_plays: team_stat_from_plays({
+    select_string: `SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END) - SUM(xpass_prob)`,
+    stat_name: 'team_pass_rate_over_expected_from_plays'
+  }),
   team_pass_attempts_from_plays: team_stat_from_plays({
     select_string: `SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END)`,
     stat_name: 'team_pass_att_from_plays'
