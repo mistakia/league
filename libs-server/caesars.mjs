@@ -1,41 +1,22 @@
-import fetch from 'node-fetch'
+import { fetch as fetch_http2 } from 'fetch-h2'
 import debug from 'debug'
-import fs from 'fs-extra'
-import path, { dirname } from 'path'
-import { fileURLToPath } from 'url'
 
 import db from '#db'
+import * as cache from './cache.mjs'
+import { constants } from '#libs-shared'
+import { puppeteer, wait } from '#libs-server'
 
-import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
+import {
+  player_prop_types,
+  team_game_market_types
+} from '#libs-shared/bookmaker-constants.mjs'
 
 const log = debug('caesars')
 debug.enable('caesars')
 
-const __dirname = dirname(fileURLToPath(import.meta.url))
-const data_path = path.join(__dirname, '../tmp')
-
-const tmp_caesars_session_path = path.join(data_path, 'caesars_session.json')
-
-const get_caesars_config_from_db = async () => {
-  try {
-    const result = await db('config')
-      .select('key', 'value')
-      .where('key', 'like', 'caesars_%')
-
-    return Object.fromEntries(
-      result.map((row) => [
-        row.key,
-        typeof row.value === 'object'
-          ? row.value
-          : typeof row.value === 'string' && row.value.startsWith('{')
-            ? JSON.parse(row.value)
-            : row.value
-      ])
-    )
-  } catch (error) {
-    console.error('Error fetching Caesars config:', error)
-    throw error
-  }
+const get_caesars_config = async () => {
+  const config_row = await db('config').where('key', 'caesars_config').first()
+  return config_row.value
 }
 
 export const markets = {
@@ -61,28 +42,256 @@ export const markets = {
 // KICKING_POINTS
 // EXTRA_POINT_MADE
 
-const caesars_fetch = async (endpoint) => {
-  const config = await get_caesars_config_from_db()
-  const url = `${config.caesars_api_v3_url}${endpoint}`
-  const session_headers = await fs.readJson(tmp_caesars_session_path)
+export const get_market_type = ({
+  market_name,
+  template_name,
+  market_category
+}) => {
+  // Use template_name for more specific matching
+  if (template_name) {
+    switch (template_name) {
+      case '|Match Spread|':
+        return team_game_market_types.GAME_SPREAD
+      case '|Money Line|':
+        return team_game_market_types.GAME_MONEYLINE
+      case '|Total Points|':
+        return team_game_market_types.GAME_TOTAL
 
-  const headers = {
-    'X-App-Version': session_headers.x_app_version,
-    'X-Aws-Waf-Token': session_headers.x_aws_waf_token,
-    'X-Platform': session_headers.x_platform,
-    'X-Unique-Device-Id': session_headers.x_unique_device_id
+      case '|Most Regular Season Passing Yards|':
+        return player_prop_types.SEASON_LEADER_PASSING_YARDS
+      case '|Most Regular Season Passing Touchdowns|':
+        return player_prop_types.SEASON_LEADER_PASSING_TOUCHDOWNS
+      case '|Most Regular Season Rushing Yards|':
+        return player_prop_types.SEASON_LEADER_RUSHING_YARDS
+      case '|Most Regular Season Rushing Touchdowns|':
+        return player_prop_types.SEASON_LEADER_RUSHING_TOUCHDOWNS
+      case '|Most Regular Season Receiving Yards|':
+        return player_prop_types.SEASON_LEADER_RECEIVING_YARDS
+      case '|Total Regular Season Passing Yards|':
+        return player_prop_types.SEASON_PASSING_YARDS
+      case '|Total Regular Season Touchdown Passes|':
+        return player_prop_types.SEASON_PASSING_TOUCHDOWNS
+      case '|Total Regular Season Rushing Yards|':
+        return player_prop_types.SEASON_RUSHING_YARDS
+      case '|Total Regular Season Rushing Touchdowns|':
+        return player_prop_types.SEASON_RUSHING_TOUCHDOWNS
+      case '|Total Regular Season Receiving Yards|':
+        return player_prop_types.SEASON_RECEIVING_YARDS
+      case '|Total Regular Season Receiving Touchdowns|':
+        return player_prop_types.SEASON_RECEIVING_TOUCHDOWNS
+      case '|Total Regular Season Sacks|':
+        return player_prop_types.SEASON_DEFENSE_SACKS
+
+      case '|First Touchdown Scorer|':
+        return player_prop_types.GAME_FIRST_TOUCHDOWN_SCORER
+      case '|Anytime Touchdown Scorer|':
+        return player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
+      case '|Last Touchdown Scorer|':
+        return player_prop_types.GAME_LAST_TOUCHDOWN_SCORER
+
+      case '|Player Total Passing Touchdowns|':
+        return player_prop_types.GAME_PASSING_TOUCHDOWNS
+      case '|Player Total Passing Yards|':
+        return player_prop_types.GAME_PASSING_YARDS
+      case '|Player Total Rushing Yards|':
+        return player_prop_types.GAME_RUSHING_YARDS
+      case '|Player Total Receiving Yards|':
+        return player_prop_types.GAME_RECEIVING_YARDS
+      case '|Player Total Receptions|':
+        return player_prop_types.GAME_RECEPTIONS
+      case '|Player Total Rushing + Receiving Yards|':
+        return player_prop_types.GAME_RUSHING_RECEIVING_YARDS
+      case '|Player Total Passing Attempts|':
+        return player_prop_types.GAME_PASSING_ATTEMPTS
+      case '|Player Total Passing Completions|':
+        return player_prop_types.GAME_PASSING_COMPLETIONS
+      case '|Player Total Interceptions|':
+        return player_prop_types.GAME_PASSING_INTERCEPTIONS
+      case '|Player Longest Passing Completion|':
+        return player_prop_types.GAME_PASSING_LONGEST_COMPLETION
+      case '|Player Total Rushing Attempts|':
+        return player_prop_types.GAME_RUSHING_ATTEMPTS
+      case '|Player Longest Reception|':
+        return player_prop_types.GAME_LONGEST_RECEPTION
+      case '|Player Total Tackles + Assists|':
+        return player_prop_types.GAME_TACKLES_ASSISTS
+      case '|Alt Passing Yards|':
+        return player_prop_types.GAME_ALT_PASSING_YARDS
+      case '|Alt Rushing Yards|':
+        return player_prop_types.GAME_ALT_RUSHING_YARDS
+      case '|Alt Receiving Yards|':
+        return player_prop_types.GAME_ALT_RECEIVING_YARDS
+      case '|Alt Receptions|':
+        return player_prop_types.GAME_ALT_RECEPTIONS
+      case '|Alt Receiving + Rushing Yards|':
+        return player_prop_types.GAME_ALT_RUSHING_RECEIVING_YARDS
+      case '|Alt Longest Completion|':
+        return player_prop_types.GAME_ALT_PASSING_LONGEST_COMPLETION
+      case '|Alt Interceptions Thrown|':
+        return player_prop_types.GAME_ALT_PASSING_INTERCEPTIONS
+      case '|Alt Rushing Touchdowns|':
+        return player_prop_types.GAME_ALT_RUSHING_TOUCHDOWNS
+      case '|Alt Receiving Touchdowns|':
+        return player_prop_types.GAME_ALT_RECEIVING_TOUCHDOWNS
+      case '|Alt Passing Touchdowns|':
+        return player_prop_types.GAME_ALT_PASSING_TOUCHDOWNS
+      case '|Alt Passing Attempts|':
+        return player_prop_types.GAME_ALT_PASSING_ATTEMPTS
+      case '|Alt Passing Completions|':
+        return player_prop_types.GAME_ALT_PASSING_COMPLETIONS
+      case '|Alt Rushing Attempts|':
+        return player_prop_types.GAME_ALT_RUSHING_ATTEMPTS
+      case '|Alt Longest Rush|':
+        return player_prop_types.GAME_ALT_LONGEST_RUSH
+      case '|Alt Longest Reception|':
+        return player_prop_types.GAME_ALT_LONGEST_RECEPTION
+      case '|Player Total Passing + Rushing Yards|':
+        return player_prop_types.GAME_PASSING_RUSHING_YARDS
+      case '|Alt Tackles + Assists|':
+        return player_prop_types.GAME_ALT_TACKLES_ASSISTS
+      case '|Alt Defensive Interceptions|':
+        return player_prop_types.GAME_ALT_DEFENSE_INTERCEPTIONS
+      case '|Alt Sacks|':
+        return player_prop_types.GAME_ALT_DEFENSE_SACKS
+
+      default:
+        log(`no market_type match for template_name: ${template_name}`)
+        return null
+    }
   }
 
+  if (market_category) {
+    switch (market_category) {
+      case 'PASSING_TOUCHDOWNS':
+        return player_prop_types.GAME_PASSING_TOUCHDOWNS
+      case 'PASSING_YARDS':
+        return player_prop_types.GAME_PASSING_YARDS
+      case 'RUSHING_YARDS':
+        return player_prop_types.GAME_RUSHING_YARDS
+      case 'RECEIVING_YARDS':
+        return player_prop_types.GAME_RECEIVING_YARDS
+      case 'RECEPTIONS':
+        return player_prop_types.GAME_RECEPTIONS
+      case 'RUSHING_RECEIVING_YARDS':
+        return player_prop_types.GAME_RUSHING_RECEIVING_YARDS
+      case 'PASSING_ATTEMPTS':
+        return player_prop_types.GAME_PASSING_ATTEMPTS
+      case 'PASSING_COMPLETIONS':
+        return player_prop_types.GAME_PASSING_COMPLETIONS
+      case 'INTERCEPTIONS':
+        return player_prop_types.GAME_PASSING_INTERCEPTIONS
+      case 'LONGEST_PASSING_COMPLETION':
+        return player_prop_types.GAME_PASSING_LONGEST_COMPLETION
+      case 'RUSHING_ATTEMPTS':
+        return player_prop_types.GAME_RUSHING_ATTEMPTS
+      case 'LONGEST_RECEPTION':
+        return player_prop_types.GAME_LONGEST_RECEPTION
+      case 'TACKLES_ASSISTS':
+        return player_prop_types.GAME_TACKLES_ASSISTS
+
+      default:
+        log(`no market_type match for market_category: ${market_category}`)
+        return null
+    }
+  }
+
+  return null
+}
+
+const caesars_fetch = async (endpoint) => {
+  const config = await get_caesars_config()
+  const url = `${config.api_url}${endpoint}`
+
   log(`fetching ${url}`)
-  log(headers)
-  const res = await fetch(url, { headers })
+  log(config.headers)
+  const res = await fetch_http2(url, {
+    headers: config.headers
+  })
   return res.json()
 }
 
-export const get_schedule = async () => {
-  return caesars_fetch(
+export const get_caesars_session = async () => {
+  const config = await get_caesars_config()
+  const { page, browser } = await puppeteer.getPage(
+    'https://sportsbook.caesars.com/us/va/bet/americanfootball?id=007d7c61-07a7-4e18-bb40-15104b6eac92',
+    {
+      headless: false,
+      executable_path:
+        '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+      webdriver: true,
+      chrome: true,
+      notifications: true,
+      plugins: true,
+      languages: true,
+      random_user_agent: false,
+      random_viewport: false
+    }
+  )
+
+  let session_headers = {}
+
+  page.on('response', async (response) => {
+    const url = response.url()
+    if (url.includes('api.americanwagering.com')) {
+      log(`got response from ${url}`)
+      const headers = response.request().headers()
+      log(headers)
+      session_headers = {
+        'x-app-version': headers['x-app-version'],
+        'x-aws-waf-token': headers['x-aws-waf-token'],
+        'x-platform': headers['x-platform'],
+        'x-unique-device-id': headers['x-unique-device-id'],
+        'user-agent': headers['user-agent']
+      }
+    }
+  })
+
+  // await page.waitForResponse(
+  //   (response) => response.url().includes('api.americanwagering.com'),
+  //   { timeout: 30000 }
+  // )
+
+  await wait(10000)
+
+  await browser.close()
+
+  if (Object.keys(session_headers).length) {
+    log(session_headers)
+    const updated_config = {
+      ...config,
+      headers: { ...config.headers, ...session_headers }
+    }
+    await db('config')
+      .where({ key: 'caesars_config' })
+      .update({ value: updated_config })
+      .onConflict('key')
+      .merge()
+  } else {
+    log('No session headers found, skipping database update')
+  }
+
+  return session_headers
+}
+
+export const get_schedule = async ({ ignore_cache = false } = {}) => {
+  const cache_key = `/caesars/nfl_schedule/${constants.season.year}/${constants.season.week}.json`
+  if (!ignore_cache) {
+    const cache_value = await cache.get({ key: cache_key })
+    if (cache_value) {
+      log('cache hit for nfl schedule')
+      return cache_value
+    }
+  }
+
+  const data = await caesars_fetch(
     '/sports/americanfootball/events/schedule?competitionIds=007d7c61-07a7-4e18-bb40-15104b6eac92'
   )
+
+  if (data) {
+    await cache.set({ key: cache_key, value: data })
+  }
+
+  return data
 }
 
 export const get_futures = async () => {
@@ -91,8 +300,27 @@ export const get_futures = async () => {
   )
 }
 
-export const get_event = async (event_id) => {
-  return caesars_fetch(`/events/${event_id}`)
+export const get_event = async ({ event_id, ignore_cache = false } = {}) => {
+  if (!event_id) {
+    throw new Error('event_id is required')
+  }
+
+  const cache_key = `/caesars/event/${event_id}.json`
+  if (!ignore_cache) {
+    const cache_value = await cache.get({ key: cache_key })
+    if (cache_value) {
+      log(`cache hit for event with id: ${event_id}`)
+      return cache_value
+    }
+  }
+
+  const data = await caesars_fetch(`/events/${event_id}`)
+
+  if (data) {
+    await cache.set({ key: cache_key, value: data })
+  }
+
+  return data
 }
 
 // player prop marketIds

@@ -3,7 +3,6 @@ import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 import AnonymizeUaPlugin from 'puppeteer-extra-plugin-anonymize-ua'
 import os from 'os'
 
-puppeteer.use(StealthPlugin())
 puppeteer.use(AnonymizeUaPlugin())
 
 // Helper function to parse cookie string into an array of cookie objects
@@ -87,25 +86,24 @@ export const getPage = async (
     random_viewport = true,
     random_user_agent = true,
     cookie_string = '',
-    executable_path = ''
+    executable_path = '',
+    use_stealth = false
   } = {}
 ) => {
-  const args = [
-    '--no-sandbox',
-    '--disable-setuid-sandbox',
-    '--disable-infobars',
-    '--window-position=0,0',
-    '--ignore-certifcate-errors',
-    '--ignore-certifcate-errors-spki-list'
-  ]
-
-  if (random_user_agent) {
-    args.push(`--user-agent="${chromeUserAgent}"`)
+  if (use_stealth) {
+    puppeteer.use(StealthPlugin())
   }
 
   const browser = await puppeteer.launch({
     headless: headless ? 'new' : false,
-    args,
+    args: [
+      '--no-sandbox',
+      '--disable-setuid-sandbox',
+      '--disable-infobars',
+      '--window-position=0,0',
+      '--ignore-certifcate-errors',
+      '--ignore-certifcate-errors-spki-list'
+    ],
     timeout,
     ignoreDefaultArgs: ['--enable-automation'],
     executablePath: executable_path

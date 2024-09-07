@@ -24,7 +24,8 @@ const format_market = async ({
   caesars_market,
   timestamp,
   nfl_game,
-  event
+  event,
+  unknown_market_types
 }) => {
   const selections = []
   let player_row
@@ -115,8 +116,23 @@ const format_market = async ({
     })
   }
 
+  const market_type = caesars.get_market_type({
+    market_name: caesars_market.name,
+    template_name: caesars_market.templateName,
+    market_category: caesars_market.metadata?.marketCategory
+  })
+
+  if (!market_type) {
+    unknown_market_types.add(
+      JSON.stringify({
+        template_name: caesars_market.templateName,
+        market_category: caesars_market.metadata?.marketCategory
+      })
+    )
+  }
+
   return {
-    market_type: null, // TODO use marketCategrory and templateName to determine market_type
+    market_type,
 
     source_id: 'CAESARS',
     source_market_id: caesars_market.id,
@@ -143,23 +159,96 @@ const format_market = async ({
   }
 }
 
-const run = async () => {
+const calculate_sets = ({ market, unique_sets, groupings }) => {
+  unique_sets.template_id.add(market.templateId)
+  unique_sets.template_name.add(market.templateName)
+  unique_sets.template_type.add(market.templateType)
+  unique_sets.display_name.add(market.displayName)
+
+  if (market.metadata) {
+    unique_sets.market_category.add(market.metadata.marketCategory)
+    unique_sets.market_type.add(market.metadata.marketType)
+    unique_sets.market_code.add(market.metadata.marketCode)
+    unique_sets.market_category_name.add(market.metadata.marketCategoryName)
+
+    // Add to groupings
+    const market_code = market.metadata.marketCode
+    const market_category = market.metadata.marketCategory
+    if (market_code) {
+      if (!groupings.template_name_by_market_code[market_code]) {
+        groupings.template_name_by_market_code[market_code] = new Set()
+      }
+      groupings.template_name_by_market_code[market_code].add(
+        market.templateName
+      )
+
+      if (!groupings.market_category_by_market_code[market_code]) {
+        groupings.market_category_by_market_code[market_code] = new Set()
+      }
+      groupings.market_category_by_market_code[market_code].add(market_category)
+
+      if (!groupings.market_category_name_by_market_code[market_code]) {
+        groupings.market_category_name_by_market_code[market_code] = new Set()
+      }
+      groupings.market_category_name_by_market_code[market_code].add(
+        market.metadata.marketCategoryName
+      )
+    }
+
+    if (market_category) {
+      if (!groupings.template_name_by_market_category[market_category]) {
+        groupings.template_name_by_market_category[market_category] = new Set()
+      }
+      groupings.template_name_by_market_category[market_category].add(
+        market.templateName
+      )
+    }
+  }
+}
+
+const run = async ({
+  ignore_cache = false,
+  dry_run = false,
+  write_file = false,
+  ignore_wait = false,
+  skip_futures = false
+} = {}) => {
+  log({
+    ignore_cache,
+    dry_run,
+    write_file,
+    ignore_wait
+  })
   console.time('import-caesars-odds')
 
   const timestamp = Math.round(Date.now() / 1000)
 
+  const session_headers = await caesars.get_caesars_session()
+  log(session_headers)
+
+  const unknown_market_types = new Set()
   const missing = []
   const formatted_markets = []
   const all_markets = []
 
-  const futures = await caesars.get_futures()
+  const futures = await caesars.get_futures({ ignore_cache })
 
-  if (futures && futures.competitions && futures.competitions.length) {
+  if (
+    !skip_futures &&
+    futures &&
+    futures.competitions &&
+    futures.competitions.length
+  ) {
     for (const event of futures.competitions[0].events) {
       for (const market of event.markets) {
         all_markets.push(market)
         formatted_markets.push(
-          await format_market({ caesars_market: market, timestamp, event })
+          await format_market({
+            caesars_market: market,
+            timestamp,
+            event,
+            unknown_market_types
+          })
         )
       }
     }
@@ -169,14 +258,53 @@ const run = async () => {
     year: constants.season.year
   })
 
-  const schedule = await caesars.get_schedule()
+  const schedule = await caesars.get_schedule({ ignore_cache })
   const { events } = schedule.competitions[0]
 
-  log(`Getting odds for ${events.length} events`)
+  log(`Found ${events.length} events`)
 
-  for (const event of events) {
+  if (write_file) {
+    const file_name = `./tmp/caesars-schedule-${timestamp}.json`
+    log(`Writing schedule to ${file_name}`)
+    await fs.writeFile(file_name, JSON.stringify(schedule, null, 2))
+  }
+
+  if (!ignore_wait) {
+    await wait(10000)
+  }
+
+  // filter events to only include games that are for the current week
+  const filtered_events = events.filter((event) => {
+    const event_start = dayjs(event.startTime)
+    return event_start.isBefore(constants.season.week_end)
+  })
+
+  log(`Getting odds for ${filtered_events.length} events`)
+
+  const unique_sets = {
+    template_id: new Set(),
+    template_name: new Set(),
+    template_type: new Set(),
+    display_name: new Set(),
+    market_category: new Set(),
+    market_type: new Set(),
+    market_code: new Set(),
+    market_category_name: new Set()
+  }
+
+  const groupings = {
+    template_name_by_market_code: {},
+    market_category_by_market_code: {},
+    market_category_name_by_market_code: {},
+    template_name_by_market_category: {}
+  }
+
+  for (const event of filtered_events) {
     console.time(`caesars-event-${event.id}`)
-    const event_odds = await caesars.get_event(event.id)
+    const event_odds = await caesars.get_event({
+      event_id: event.id,
+      ignore_cache
+    })
 
     let nfl_game = null
 
@@ -202,18 +330,26 @@ const run = async () => {
     }
 
     for (const market of event_odds.markets) {
+      calculate_sets({
+        market,
+        unique_sets,
+        groupings
+      })
       all_markets.push(market)
       formatted_markets.push(
         await format_market({
           caesars_market: market,
           timestamp,
           nfl_game,
-          event
+          event,
+          unknown_market_types
         })
       )
     }
 
-    await wait(10000)
+    if (!ignore_wait) {
+      await wait(10000)
+    }
 
     console.timeEnd(`caesars-event-${event.id}`)
   }
@@ -221,14 +357,47 @@ const run = async () => {
   log(`Could not locate ${missing.length} players`)
   missing.forEach((m) => log(`could not find player: ${m.name} / ${m.team}`))
 
-  if (argv.write) {
+  // Convert Sets to Arrays for easier JSON serialization
+  const unique_sets_arrays = Object.fromEntries(
+    Object.entries(unique_sets).map(([key, value]) => [key, Array.from(value)])
+  )
+
+  const groupings_arrays = Object.fromEntries(
+    Object.entries(groupings).map(([key, value]) => [
+      key,
+      Object.fromEntries(
+        Object.entries(value).map(([k, v]) => [k, Array.from(v)])
+      )
+    ])
+  )
+
+  if (write_file) {
     await fs.writeFile(
       `./tmp/caesars-markets-${timestamp}.json`,
       JSON.stringify(all_markets, null, 2)
     )
+    await fs.writeFile(
+      `./tmp/caesars-formatted-markets-${timestamp}.json`,
+      JSON.stringify(formatted_markets, null, 2)
+    )
+
+    await fs.writeFile(
+      `./tmp/caesars-unique-sets-${timestamp}.json`,
+      JSON.stringify(unique_sets_arrays, null, 2)
+    )
+
+    await fs.writeFile(
+      `./tmp/caesars-groupings-${timestamp}.json`,
+      JSON.stringify(groupings_arrays, null, 2)
+    )
+
+    await fs.writeFile(
+      `./tmp/caesars-unknown-market-types-${timestamp}.json`,
+      JSON.stringify(Array.from(unknown_market_types).map(JSON.parse), null, 2)
+    )
   }
 
-  if (argv.dry) {
+  if (dry_run) {
     log(formatted_markets[0])
     console.timeEnd('import-caesars-odds')
     return
@@ -242,10 +411,22 @@ const run = async () => {
   console.timeEnd('import-caesars-odds')
 }
 
-export const job = async () => {
+export const job = async ({
+  ignore_cache = true,
+  dry_run = false,
+  write_file = false,
+  ignore_wait = false,
+  skip_futures = false
+}) => {
   let error
   try {
-    await run()
+    await run({
+      ignore_cache,
+      dry_run,
+      write_file,
+      ignore_wait,
+      skip_futures
+    })
   } catch (err) {
     error = err
     console.log(error)
@@ -258,7 +439,13 @@ export const job = async () => {
 }
 
 const main = async () => {
-  await job()
+  await job({
+    ignore_cache: argv.ignore_cache,
+    dry_run: argv.dry,
+    write_file: argv.write,
+    ignore_wait: argv.ignore_wait,
+    skip_futures: argv.skip_futures
+  })
   process.exit()
 }
 
