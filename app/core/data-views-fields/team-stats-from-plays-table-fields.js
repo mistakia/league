@@ -89,9 +89,15 @@ export default {
     player_value_path: 'team_explosive_play_rate_from_plays'
   }),
   team_play_count_from_plays: from_play_field({
-    column_title: 'Team Play Count (By Play)',
+    column_title: 'Team Total Play Count (By Play)',
     column_groups: [COLUMN_GROUPS.TEAM_STATS],
     header_label: 'PLAYS',
     player_value_path: 'team_play_count_from_plays'
+  }),
+  team_offensive_play_count_from_plays: from_play_field({
+    column_title: 'Team Offensive Play Count (By Play)',
+    column_groups: [COLUMN_GROUPS.TEAM_STATS],
+    header_label: 'OFF PLAYS',
+    player_value_path: 'team_offensive_play_count_from_plays'
   })
 }
