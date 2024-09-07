@@ -158,5 +158,9 @@ export default {
   team_play_count_from_plays: team_stat_from_plays({
     select_string: `COUNT(*)`,
     stat_name: 'team_play_count_from_plays'
+  }),
+  team_offensive_play_count_from_plays: team_stat_from_plays({
+    select_string: `COUNT(CASE WHEN play_type IN ('PASS', 'RUSH') THEN 1 ELSE NULL END)`,
+    stat_name: 'team_offensive_play_count_from_plays'
   })
 }

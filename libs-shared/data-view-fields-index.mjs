@@ -442,5 +442,7 @@ export default {
   team_explosive_play_rate_from_plays:
     'Team Explosive Play Rate (calculated from play-by-play data)',
   team_play_count_from_plays:
-    'Team Play Count (calculated from play-by-play data)'
+    'Team Total Play Count, includes all plays (passes, rushes, punts, field goals, extra point attempts, two point conversions, kickoffs, and free kicks)',
+  team_offensive_play_count_from_plays:
+    'Team Offensive Play Count, includes only passes and rushes'
 }
