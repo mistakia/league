@@ -440,7 +440,7 @@ export const job = async ({
 
 const main = async () => {
   await job({
-    ignore_cache: argv.ignore_cache,
+    ignore_cache: argv.ignore_cache || false,
     dry_run: argv.dry,
     write_file: argv.write,
     ignore_wait: argv.ignore_wait,
