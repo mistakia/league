@@ -1,10 +1,42 @@
 import db from '#db'
 import { constants } from '#libs-shared'
 import get_join_func from '#libs-server/get-join-func.mjs'
-import get_table_hash from '#libs-server/get-table-hash.mjs'
+import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 
 // TODO career_year
+
+const get_default_params = ({ params = {} } = {}) => {
+  let year = params.year || constants.season.year
+  if (Array.isArray(year)) {
+    year = year[0]
+  }
+  return { year: Number(year) }
+}
+
+const get_cache_info_for_scoring_format_seasonlogs = ({ params = {} } = {}) => {
+  const { year } = get_default_params({ params })
+  if (year === constants.season.year) {
+    return {
+      cache_ttl: 1000 * 60 * 60 * 6, // 6 hours
+      // TODO should expire before the next game starts
+      cache_expire_at: null
+    }
+  } else {
+    return {
+      cache_ttl: 1000 * 60 * 60 * 24 * 30, // 30 days
+      cache_expire_at: null
+    }
+  }
+}
+
+const get_cache_info_for_scoring_format_careerlogs = () => {
+  return {
+    cache_ttl: 1000 * 60 * 60 * 6, // 6 hours
+    // TODO should expire before the next game starts
+    cache_expire_at: null
+  }
+}
 
 const scoring_format_player_seasonlogs_table_alias = ({ params = {} }) => {
   let scoring_format_hash =
@@ -101,7 +133,8 @@ const create_field_from_scoring_format_player_seasonlogs = (column_name) => ({
   table_name: 'scoring_format_player_seasonlogs',
   table_alias: scoring_format_player_seasonlogs_table_alias,
   join: scoring_format_player_seasonlogs_join,
-  supported_splits: ['year']
+  supported_splits: ['year'],
+  get_cache_info: get_cache_info_for_scoring_format_seasonlogs
 })
 
 const create_field_from_scoring_format_player_careerlogs = (column_name) => ({
@@ -110,7 +143,8 @@ const create_field_from_scoring_format_player_careerlogs = (column_name) => ({
   main_where: ({ table_name }) => `${table_name}.${column_name}`,
   table_name: 'scoring_format_player_careerlogs',
   table_alias: scoring_format_player_careerlogs_table_alias,
-  join: scoring_format_player_careerlogs_join
+  join: scoring_format_player_careerlogs_join,
+  get_cache_info: get_cache_info_for_scoring_format_careerlogs
 })
 
 export default {

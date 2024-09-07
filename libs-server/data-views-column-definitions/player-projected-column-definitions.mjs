@@ -1,22 +1,12 @@
 import { constants } from '#libs-shared'
 
 import db from '#db'
-import get_table_hash from '#libs-server/get-table-hash.mjs'
+import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 
 // TODO career_year
 
-const projections_index_table_alias = ({ params = {} }) => {
-  const year = Array.isArray(params.year)
-    ? params.year[0]
-    : params.year || constants.season.year
-  const week = Array.isArray(params.week) ? params.week[0] : params.week || 0
-  return get_table_hash(`projections_index_${year}_week_${week}`)
-}
-
-const scoring_format_player_projection_points_table_alias = ({
-  params = {}
-}) => {
+const get_default_params = ({ params = {} }) => {
   const year = Array.isArray(params.year)
     ? params.year[0]
     : params.year || constants.season.year
@@ -24,17 +14,46 @@ const scoring_format_player_projection_points_table_alias = ({
   const scoring_format_hash =
     params.scoring_format_hash ||
     '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
+  const league_format_hash =
+    params.league_format_hash ||
+    '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b'
+  const league_id = params.league_id || 1
+
+  return { year, week, scoring_format_hash, league_format_hash, league_id }
+}
+
+const get_cache_info_for_player_projected_stats = ({ params = {} } = {}) => {
+  const { year } = get_default_params({ params })
+  if (year === constants.season.year) {
+    return {
+      cache_ttl: 1000 * 60 * 60 * 6, // 6 hours
+      // TODO should expire before the next game starts
+      cache_expire_at: null
+    }
+  } else {
+    return {
+      cache_ttl: 1000 * 60 * 60 * 24 * 30, // 30 days
+      cache_expire_at: null
+    }
+  }
+}
+
+const projections_index_table_alias = ({ params = {} }) => {
+  const { year, week } = get_default_params({ params })
+  return get_table_hash(`projections_index_${year}_week_${week}`)
+}
+
+const scoring_format_player_projection_points_table_alias = ({
+  params = {}
+}) => {
+  const { year, week, scoring_format_hash } = get_default_params({ params })
   return get_table_hash(
     `scoring_format_player_projection_points_${year}_week_${week}_${scoring_format_hash}`
   )
 }
 
 const league_player_projection_values_table_alias = ({ params = {} }) => {
-  const year = Array.isArray(params.year)
-    ? params.year[0]
-    : params.year || constants.season.year
-  const week = Array.isArray(params.week) ? params.week[0] : params.week || 0
-  const league_id = params.league_id || 1
+  const { year, week, league_id } = get_default_params({ params })
   return get_table_hash(
     `league_player_projection_values_${year}_week_${week}_league_${league_id}`
   )
@@ -43,13 +62,7 @@ const league_player_projection_values_table_alias = ({ params = {} }) => {
 const league_format_player_projection_values_table_alias = ({
   params = {}
 }) => {
-  const year = Array.isArray(params.year)
-    ? params.year[0]
-    : params.year || constants.season.year
-  const week = Array.isArray(params.week) ? params.week[0] : params.week || 0
-  const league_format_hash =
-    params.league_format_hash ||
-    '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b'
+  const { year, week, league_format_hash } = get_default_params({ params })
   return get_table_hash(
     `league_format_player_projection_values_${year}_week_${week}_${league_format_hash}`
   )
@@ -57,7 +70,7 @@ const league_format_player_projection_values_table_alias = ({
 
 const league_player_projection_values_join = (join_arguments) => {
   const { params = {} } = join_arguments
-  const league_id = params.league_id || 1
+  const { league_id } = get_default_params({ params })
 
   data_view_join_function({
     ...join_arguments,
@@ -76,9 +89,7 @@ const league_player_projection_values_join = (join_arguments) => {
 
 const scoring_format_player_projection_points_join = (join_arguments) => {
   const { params = {} } = join_arguments
-  const scoring_format_hash =
-    params.scoring_format_hash ||
-    '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
+  const { scoring_format_hash } = get_default_params({ params })
 
   data_view_join_function({
     ...join_arguments,
@@ -98,9 +109,7 @@ const scoring_format_player_projection_points_join = (join_arguments) => {
 
 const league_format_player_projection_values_join = (join_arguments) => {
   const { params = {} } = join_arguments
-  const league_format_hash =
-    params.league_format_hash ||
-    '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b'
+  const { league_format_hash } = get_default_params({ params })
 
   data_view_join_function({
     ...join_arguments,
@@ -258,7 +267,8 @@ const create_projected_stat = (base_object, stat_name) => {
     acc[`player_${prefix}_projected_${stat_name}`] = {
       ...base_object,
       select_as: () => `${prefix}_projected_${stat_name}`,
-      supported_splits: prefix === 'week' ? ['year', 'week'] : ['year']
+      supported_splits: prefix === 'week' ? ['year', 'week'] : ['year'],
+      get_cache_info: get_cache_info_for_player_projected_stats
     }
     return acc
   }, {})
@@ -293,7 +303,8 @@ export default {
     table_name: 'league_player_projection_values',
     table_alias: league_player_projection_values_table_alias,
     select_as: () => 'player_season_projected_inflation_adjusted_market_salary',
-    join: league_player_projection_values_join
+    join: league_player_projection_values_join,
+    get_cache_info: get_cache_info_for_player_projected_stats
   },
 
   ...projected_stat_column_defintions

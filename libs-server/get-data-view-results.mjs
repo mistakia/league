@@ -1,4 +1,5 @@
 import db from '#db'
+import debug from 'debug'
 import { constants } from '#libs-shared'
 import data_views_column_definitions from '#libs-server/data-views-column-definitions/index.mjs'
 import * as validators from '#libs-server/validators.mjs'
@@ -16,6 +17,22 @@ import {
   get_main_where_string,
   get_with_where_string
 } from '#libs-server/data-views/where-string.mjs'
+
+const log = debug('data-views')
+
+const process_cache_info = ({ cache_info, data_view_metadata }) => {
+  if (cache_info.cache_ttl < data_view_metadata.cache_ttl) {
+    data_view_metadata.cache_ttl = cache_info.cache_ttl
+  }
+
+  if (
+    cache_info.cache_expire_at &&
+    (cache_info.cache_expire_at < data_view_metadata.cache_expire_at ||
+      !data_view_metadata.cache_expire_at)
+  ) {
+    data_view_metadata.cache_expire_at = cache_info.cache_expire_at
+  }
+}
 
 const process_dynamic_params = (params) => {
   const processed_params = { ...params }
@@ -220,7 +237,8 @@ const add_clauses_for_table = ({
   year_split_join_clause,
   week_split_join_clause,
   rate_type_column_mapping = {},
-  data_view_options
+  data_view_options,
+  data_view_metadata
 }) => {
   const column_ids = []
   const with_select_strings = []
@@ -588,6 +606,10 @@ export const get_data_view_results_query = ({
     year_coalesce_args: [],
     rate_type_tables: {}
   }
+  const data_view_metadata = {
+    cache_ttl: 1000 * 60 * 60 * 24 * 7, // 1 week
+    cache_expire_at: null
+  }
 
   let year_split_join_clause
   let week_split_join_clause
@@ -653,8 +675,45 @@ export const get_data_view_results_query = ({
     })
   }
 
+  for (const where_item of where) {
+    const column_definition =
+      data_views_column_definitions[where_item.column_id]
+    if (!column_definition) {
+      log(`Column definition not found for column_id: ${where_item.column_id}`)
+      continue
+    }
+    if (!column_definition.get_cache_info) {
+      log(
+        `Column definition does not have get_cache_info method for column_id: ${where_item.column_id}`
+      )
+      continue
+    }
+    const cache_info = column_definition.get_cache_info({
+      params: where_item.params
+    })
+    process_cache_info({ cache_info, data_view_metadata })
+  }
+
   for (const [index, column] of [...prefix_columns, ...columns].entries()) {
     table_columns.push({ column, index })
+
+    const column_id = typeof column === 'string' ? column : column.column_id
+    const column_definition = data_views_column_definitions[column_id]
+    if (!column_definition) {
+      log(`Column definition not found for column_id: ${column_id}`)
+      continue
+    }
+
+    if (!column_definition.get_cache_info) {
+      log(
+        `Column definition does not have get_cache_info method for column_id: ${column_id}`
+      )
+      continue
+    }
+    const cache_info = column_definition.get_cache_info({
+      params: column.params
+    })
+    process_cache_info({ cache_info, data_view_metadata })
   }
 
   for (const [index, column] of [...prefix_columns, ...columns].entries()) {
@@ -780,7 +839,8 @@ export const get_data_view_results_query = ({
         year_split_join_clause,
         week_split_join_clause,
         rate_type_column_mapping,
-        data_view_options
+        data_view_options,
+        data_view_metadata
       })
 
       if (available_splits.includes('year')) {
@@ -962,7 +1022,10 @@ export const get_data_view_results_query = ({
   )
   players_query.limit(limit)
 
-  return players_query
+  return {
+    data_view_metadata,
+    query: players_query
+  }
 }
 
 export default async function ({
@@ -975,7 +1038,7 @@ export default async function ({
   limit = 500,
   timeout = null
 } = {}) {
-  const players_query = get_data_view_results_query({
+  const { query, data_view_metadata } = get_data_view_results_query({
     splits,
     where,
     columns,
@@ -985,17 +1048,28 @@ export default async function ({
     limit
   })
 
-  console.log(players_query.toString())
+  const data_view_query_string = query.toString()
+  console.log(data_view_query_string)
 
   if (timeout) {
-    const query_string = players_query.toString()
+    const query_string = query.toString()
     const timeout_query = `SET LOCAL statement_timeout = ${timeout};`
     const full_query = `${timeout_query} ${query_string};`
 
     const response = await db.raw(full_query)
     const data_view_results = response[1].rows
-    return data_view_results
+    return {
+      data_view_results,
+      data_view_metadata,
+      data_view_query_string
+    }
   }
 
-  return players_query
+  const data_view_results = await query
+
+  return {
+    data_view_results,
+    data_view_metadata,
+    data_view_query_string
+  }
 }

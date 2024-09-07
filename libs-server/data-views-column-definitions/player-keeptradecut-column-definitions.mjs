@@ -1,13 +1,47 @@
 import db from '#db'
 import { constants } from '#libs-shared'
 import get_join_func from '#libs-server/get-join-func.mjs'
-import get_table_hash from '#libs-server/get-table-hash.mjs'
+import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 
 // TODO career_year
 
+const get_default_params = ({ params = {} } = {}) => {
+  const date = params.date || null
+  const year = Array.isArray(params.year)
+    ? params.year[0]
+    : params.year || constants.season.year
+
+  const year_offset_single = Array.isArray(params.year_offset)
+    ? params.year_offset[0]
+    : params.year_offset || 0
+  return { date, year, year_offset_single }
+}
+
+const get_cache_info_for_keeptradecut = ({ params = {} } = {}) => {
+  const { date, year } = get_default_params({ params })
+  if (date) {
+    return {
+      cache_ttl: 1000 * 60 * 60 * 24 * 30, // 30 days
+      cache_expire_at: null
+    }
+  }
+
+  if (year === constants.season.year) {
+    return {
+      cache_ttl: 1000 * 60 * 60 * 6, // 6 hours
+      cache_expire_at: null
+    }
+  } else {
+    return {
+      cache_ttl: 1000 * 60 * 60 * 24 * 30, // 30 days
+      cache_expire_at: null
+    }
+  }
+}
+
 const generate_table_alias = ({ type, params = {} } = {}) => {
-  const { date, year, year_offset } = params
-  const key = `keeptradecut_${type}_data_${date || ''}_year_${year || ''}_year_offset_${year_offset || ''}`
+  const { date, year, year_offset_single } = get_default_params({ params })
+  const key = `keeptradecut_${type}_data_${date || ''}_year_${year || ''}_year_offset_${year_offset_single || ''}`
   return get_table_hash(key)
 }
 
@@ -23,10 +57,7 @@ const keeptradecut_join = ({
 }) => {
   // using an inner join for week splits because its much faster, not sure why
   const join_func = get_join_func(splits.includes('week') ? 'INNER' : join_type)
-  let year_offset_single = params.year_offset || 0
-  if (Array.isArray(year_offset_single)) {
-    year_offset_single = year_offset_single[0]
-  }
+  const { year_offset_single } = get_default_params({ params })
 
   if (splits.includes('year') && !data_view_options.opening_days_joined) {
     query.leftJoin('opening_days', 'opening_days.year', 'player_years.year')
@@ -117,10 +148,8 @@ const create_keeptradecut_definition = (type) => ({
       ...args
     }),
   year_select: ({ splits, table_name, column_params = {} }) => {
-    const { year_offset } = column_params
-    const year_offset_single = Array.isArray(year_offset)
-      ? year_offset[0]
-      : year_offset
+    const { year_offset_single } = get_default_params({ params: column_params })
+
     if (splits.includes('week')) {
       return `nfl_year_week_timestamp.year`
     }
@@ -129,7 +158,8 @@ const create_keeptradecut_definition = (type) => ({
       : `EXTRACT(YEAR FROM TO_TIMESTAMP(${table_name}.d))`
   },
   week_select: () => `nfl_year_week_timestamp.week`,
-  supported_splits: ['year', 'week']
+  supported_splits: ['year', 'week'],
+  get_cache_info: get_cache_info_for_keeptradecut
 })
 
 export default {

@@ -32,7 +32,23 @@ class RedisCacheAdapter {
   }
 
   async set(key, value, ttl) {
-    await this.client.set(key, JSON.stringify(value), 'EX', ttl)
+    if (ttl) {
+      await this.client.set(key, JSON.stringify(value), 'EX', ttl)
+    } else {
+      await this.client.set(key, JSON.stringify(value))
+    }
+  }
+
+  async expire(key, ttl) {
+    await this.client.expire(key, ttl)
+  }
+
+  async expire_at(key, timestamp) {
+    await this.client.expireat(key, timestamp)
+  }
+
+  async persist(key) {
+    await this.client.persist(key)
   }
 }
 

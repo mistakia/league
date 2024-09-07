@@ -1,7 +1,7 @@
 import db from '#db'
 
 import { constants } from '#libs-shared'
-import get_table_hash from '#libs-server/get-table-hash.mjs'
+import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import get_join_func from '#libs-server/get-join-func.mjs'
 
 // TODO career_year

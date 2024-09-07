@@ -1,9 +1,10 @@
 import db from '#db'
 import { nfl_plays_column_params } from '#libs-shared'
-import get_table_hash from '#libs-server/get-table-hash.mjs'
+import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { add_defensive_play_by_play_with_statement } from '#libs-server/data-views/add-defensive-play-by-play-with-statement.mjs'
 import { get_rate_type_sql } from '#libs-server/data-views/select-string.mjs'
+import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
 
 const defensive_player_table_alias = ({ pid_columns, params = {} } = {}) => {
   if (!pid_columns || !Array.isArray(pid_columns) || pid_columns.length === 0) {
@@ -85,7 +86,8 @@ const defensive_player_stat_from_plays = ({
     'per_team_def_series'
   ],
   use_having: true,
-  with: add_defensive_play_by_play_with_statement
+  with: add_defensive_play_by_play_with_statement,
+  get_cache_info: get_cache_info_for_fields_from_plays
 })
 
 export default {

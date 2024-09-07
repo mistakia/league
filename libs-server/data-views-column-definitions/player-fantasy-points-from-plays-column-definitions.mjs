@@ -1,9 +1,10 @@
 import db from '#db'
 import { nfl_plays_column_params, data_views_constants } from '#libs-shared'
-import get_table_hash from '#libs-server/get-table-hash.mjs'
+import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '../apply-play-by-play-column-params-to-query.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { get_rate_type_sql } from '#libs-server/data-views/select-string.mjs'
+import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
 
 const generate_fantasy_points_table_alias = ({ params = {} } = {}) => {
   const column_param_keys = Object.keys(nfl_plays_column_params).sort()
@@ -241,6 +242,7 @@ export default {
       'per_player_catchable_target',
       'per_player_catchable_deep_target'
     ],
-    use_having: true
+    use_having: true,
+    get_cache_info: get_cache_info_for_fields_from_plays
   }
 }

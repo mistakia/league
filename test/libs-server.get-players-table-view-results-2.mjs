@@ -1,5 +1,6 @@
 /* global describe it before */
 import MockDate from 'mockdate'
+import debug from 'debug'
 
 import { get_data_view_results_query } from '#libs-server'
 import { constants } from '#libs-shared'
@@ -8,10 +9,11 @@ import { compare_queries } from './utils/index.mjs'
 describe('LIBS SERVER get_data_view_results', () => {
   before(() => {
     MockDate.reset()
+    debug.enable('data-views')
   })
 
   it('player contract with no params', () => {
-    const query = get_data_view_results_query({
+    const { query } = get_data_view_results_query({
       columns: [
         {
           column_id: 'player_contract_base_salary'
@@ -30,7 +32,7 @@ describe('LIBS SERVER get_data_view_results', () => {
   })
 
   it('player contract with year', () => {
-    const query = get_data_view_results_query({
+    const { query } = get_data_view_results_query({
       columns: [
         {
           column_id: 'player_contract_base_salary',
@@ -57,7 +59,7 @@ describe('LIBS SERVER get_data_view_results', () => {
   })
 
   it('team stat with per_team_off_play', () => {
-    const query = get_data_view_results_query({
+    const { query } = get_data_view_results_query({
       columns: [
         {
           column_id: 'team_pass_yards_from_plays',
@@ -79,7 +81,7 @@ describe('LIBS SERVER get_data_view_results', () => {
   })
 
   it('team stat with per_team_off_pass_play', () => {
-    const query = get_data_view_results_query({
+    const { query } = get_data_view_results_query({
       columns: [
         {
           column_id: 'team_pass_yards_from_plays',
@@ -101,7 +103,7 @@ describe('LIBS SERVER get_data_view_results', () => {
   })
 
   it('team stat with per_team_off_rush_play', () => {
-    const query = get_data_view_results_query({
+    const { query } = get_data_view_results_query({
       columns: [
         {
           column_id: 'team_rush_yards_from_plays',
@@ -123,7 +125,7 @@ describe('LIBS SERVER get_data_view_results', () => {
   })
 
   it('team stat with per_team_half', () => {
-    const query = get_data_view_results_query({
+    const { query } = get_data_view_results_query({
       columns: [
         {
           column_id: 'team_pass_yards_from_plays',
@@ -145,7 +147,7 @@ describe('LIBS SERVER get_data_view_results', () => {
   })
 
   it('team stat with per_team_quarter', () => {
-    const query = get_data_view_results_query({
+    const { query } = get_data_view_results_query({
       columns: [
         {
           column_id: 'team_pass_yards_from_plays',
@@ -167,7 +169,7 @@ describe('LIBS SERVER get_data_view_results', () => {
   })
 
   it('team stat with per_team_off_drive', () => {
-    const query = get_data_view_results_query({
+    const { query } = get_data_view_results_query({
       columns: [
         {
           column_id: 'team_pass_yards_from_plays',
@@ -189,7 +191,7 @@ describe('LIBS SERVER get_data_view_results', () => {
   })
 
   it('team stat with per_team_off_series', () => {
-    const query = get_data_view_results_query({
+    const { query } = get_data_view_results_query({
       columns: [
         {
           column_id: 'team_pass_yards_from_plays',
@@ -211,7 +213,7 @@ describe('LIBS SERVER get_data_view_results', () => {
   })
 
   it('per_player_catchable_deep_target', () => {
-    const query = get_data_view_results_query({
+    const { query } = get_data_view_results_query({
       columns: [
         {
           column_id: 'player_targets_from_plays',
@@ -233,7 +235,7 @@ describe('LIBS SERVER get_data_view_results', () => {
   })
 
   it('pff_player_seasonlogs', () => {
-    const query = get_data_view_results_query({
+    const { query } = get_data_view_results_query({
       columns: [
         { column_id: 'player_pff_offense', params: { year: [2023] } },
         { column_id: 'player_pff_defense', params: { year: [2023] } },
@@ -294,7 +296,7 @@ describe('LIBS SERVER get_data_view_results', () => {
   })
 
   it('pff_player_seasonlogs with where', () => {
-    const query = get_data_view_results_query({
+    const { query } = get_data_view_results_query({
       columns: [
         'player_pff_offense_rank',
         'player_pff_offense',
@@ -328,7 +330,7 @@ describe('LIBS SERVER get_data_view_results', () => {
   })
 
   it('player_salaries with where', () => {
-    const query = get_data_view_results_query({
+    const { query } = get_data_view_results_query({
       columns: [{ column_id: 'player_dfs_salary' }],
       sort: [{ column_id: 'player_dfs_salary', desc: true }],
       where: [
@@ -345,7 +347,7 @@ describe('LIBS SERVER get_data_view_results', () => {
   })
 
   it('player_rankings', () => {
-    const query = get_data_view_results_query({
+    const { query } = get_data_view_results_query({
       columns: [
         {
           column_id: 'player_average_ranking'
@@ -380,7 +382,7 @@ describe('LIBS SERVER get_data_view_results', () => {
   })
 
   it('player_game_prop_implied_probability_from_betting_markets', () => {
-    const query = get_data_view_results_query({
+    const { query } = get_data_view_results_query({
       sort: [
         {
           column_id:
@@ -405,7 +407,7 @@ describe('LIBS SERVER get_data_view_results', () => {
   })
 
   it('player_practice', () => {
-    const query = get_data_view_results_query({
+    const { query } = get_data_view_results_query({
       columns: [
         {
           column_id: 'player_practice_status'
@@ -449,7 +451,7 @@ describe('LIBS SERVER get_data_view_results', () => {
   })
 
   it('team_game_implied_team_total_from_betting_markets', () => {
-    const query = get_data_view_results_query({
+    const { query } = get_data_view_results_query({
       columns: [
         {
           column_id: 'team_game_implied_team_total_from_betting_markets'

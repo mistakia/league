@@ -66,7 +66,11 @@ export default {
         this.andOn('rosters_players.week', '=', week)
         this.andOn('rosters_players.lid', '=', lid)
       })
-    }
+    },
+    get_cache_info: () => ({
+      cache_ttl: 1000 * 60 * 60 * 12, // 12 hours
+      cache_expire_at: null
+    })
   },
   player_league_salary: {
     column_name: 'value',
@@ -94,7 +98,12 @@ export default {
           'transactions.latest_timestamp'
         )
       })
-    }
+    },
+    get_cache_info: () => ({
+      cache_ttl: 1000 * 60 * 60 * 12, // 12 hours
+      // TODO set it to start of next offseason during the regular season and 12 hours during the offseason
+      cache_expire_at: null
+    })
   },
 
   week_opponent_abbreviation: {},

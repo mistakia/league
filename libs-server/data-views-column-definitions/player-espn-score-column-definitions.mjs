@@ -1,9 +1,34 @@
 import db from '#db'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
+import { constants } from '#libs-shared'
+
+const get_default_params = ({ params = {} } = {}) => {
+  let year = params.year || constants.season.year
+  if (Array.isArray(year)) {
+    year = year[0]
+  }
+  return { year: Number(year) }
+}
 
 const get_valid_year = (year) => {
   const parsed_year = Number(year)
   return parsed_year >= 2017 && parsed_year <= 2023 ? parsed_year : 2023
+}
+
+const get_cache_info_for_espn_score = ({ params = {} } = {}) => {
+  const { year } = get_default_params({ params })
+  if (year === constants.season.year) {
+    return {
+      cache_ttl: 1000 * 60 * 60 * 6, // 6 hours
+      // TODO should expire before the next game starts
+      cache_expire_at: null
+    }
+  } else {
+    return {
+      cache_ttl: 1000 * 60 * 60 * 24 * 30, // 30 days
+      cache_expire_at: null
+    }
+  }
 }
 
 const espn_score_join = (options) => {
@@ -41,7 +66,8 @@ const create_espn_score_columns = (column_name) => ({
   table_name: 'player_seasonlogs',
   column_name,
   join: espn_score_join,
-  supported_splits: ['year']
+  supported_splits: ['year'],
+  get_cache_info: get_cache_info_for_espn_score
 })
 
 export default {
