@@ -207,7 +207,7 @@ const importPlaysForWeek = async ({
     const timestamp = Math.round(new Date() / 1000)
 
     const play_inserts = []
-    const play_stat_inserts = []
+    let play_stat_inserts = []
 
     for (const play of data.data.viewer.gameDetail.plays) {
       const { playId } = play
@@ -271,6 +271,16 @@ const importPlaysForWeek = async ({
           .merge()
       }
     }
+
+    // Check for duplicate items in play_stat_inserts
+    const play_stat_inserts_map = new Map()
+
+    for (const play_stat of play_stat_inserts) {
+      const key = `${play_stat.esbid}-${play_stat.playId}-${play_stat.statId}-${play_stat.playerName}`
+      play_stat_inserts_map.set(key, play_stat)
+    }
+    // Remove duplicates from play_stat_inserts
+    play_stat_inserts = Array.from(play_stat_inserts_map.values())
 
     // save in current tables
     try {
