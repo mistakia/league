@@ -224,7 +224,7 @@ const importPlaysForWeek = async ({
         const { esbid, playerName, clubCode, teamid, yards } =
           getPlayStatData(playStat)
         const gsisId = esbid_to_gsis_id_index[esbid] || null
-        if (!gsisId) {
+        if (esbid && !gsisId) {
           log(
             `missing gsisId for esbid: ${esbid}, playerName: ${playerName}, clubCode: ${clubCode}`
           )
@@ -243,6 +243,16 @@ const importPlaysForWeek = async ({
         })
       }
     }
+
+    // Check for duplicate items in play_stat_inserts
+    const play_stat_inserts_map = new Map()
+
+    for (const play_stat of play_stat_inserts) {
+      const key = `${play_stat.esbid}-${play_stat.playId}-${play_stat.statId}-${play_stat.playerName}`
+      play_stat_inserts_map.set(key, play_stat)
+    }
+    // Remove duplicates from play_stat_inserts
+    play_stat_inserts = Array.from(play_stat_inserts_map.values())
 
     const end_play_exists = data.data.viewer.gameDetail.plays.find(
       (p) => p.playType === 'END_GAME'
@@ -271,16 +281,6 @@ const importPlaysForWeek = async ({
           .merge()
       }
     }
-
-    // Check for duplicate items in play_stat_inserts
-    const play_stat_inserts_map = new Map()
-
-    for (const play_stat of play_stat_inserts) {
-      const key = `${play_stat.esbid}-${play_stat.playId}-${play_stat.statId}-${play_stat.playerName}`
-      play_stat_inserts_map.set(key, play_stat)
-    }
-    // Remove duplicates from play_stat_inserts
-    play_stat_inserts = Array.from(play_stat_inserts_map.values())
 
     // save in current tables
     try {
