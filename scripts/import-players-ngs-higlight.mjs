@@ -65,7 +65,8 @@ const import_players_ngs_highlight = async ({ ignore_cache = false }) => {
     if (!player_row && ngs_player.displayName) {
       const params = {
         name: ngs_player.displayName,
-        pos: ngs_player.position
+        pos: ngs_player.position,
+        start: ngs_player.entryYear || ngs_player.rookieYear
       }
       if (ngs_player.season === constants.season.year) {
         params.team = ngs_player.teamAbbr
