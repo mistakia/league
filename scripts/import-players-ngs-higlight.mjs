@@ -42,14 +42,16 @@ const import_players_ngs_highlight = async ({ ignore_cache = false }) => {
     let player_row
 
     // try esbid
-    try {
-      player_row = await getPlayer({ esbid: ngs_player.esbId })
-    } catch (err) {
-      log(err)
+    if (ngs_player.esbId) {
+      try {
+        player_row = await getPlayer({ esbid: ngs_player.esbId })
+      } catch (err) {
+        log(err)
+      }
     }
 
     // try gsisid
-    if (!player_row) {
+    if (!player_row && ngs_player.gsisId) {
       try {
         player_row = await getPlayer({ gsisid: ngs_player.gsisId })
       } catch (err) {
@@ -60,7 +62,7 @@ const import_players_ngs_highlight = async ({ ignore_cache = false }) => {
     // TOOD skipping gsisItId as a collision was found
 
     // try name, team, position
-    if (!player_row) {
+    if (!player_row && ngs_player.displayName) {
       const params = {
         name: ngs_player.displayName,
         pos: ngs_player.position
