@@ -123,7 +123,7 @@ const run = async ({
 
   if (year === constants.season.year && constants.season.week === 1) {
     const current_day = dayjs().day()
-    if (current_day < 5) {
+    if (current_day < 5 && current_day > 1) {
       // 5 is Friday
       throw new Error('Week 1 data is not available until Friday')
     }
