@@ -125,11 +125,23 @@ const analyze_fanduel_wagers = async ({
   show_counts = false,
   show_bet_receipts = false,
   wagers_limit = Infinity,
-  wagers_lost_leg_limit = 1
+  wagers_lost_leg_limit = 1,
+  selection_filters = []
 } = {}) => {
   if (!filename) {
     throw new Error('filename is required')
   }
+
+  log({
+    filename,
+    week,
+    show_potential_gain,
+    show_counts,
+    show_bet_receipts,
+    wagers_limit,
+    wagers_lost_leg_limit,
+    selection_filters
+  })
 
   const json_file_path = `${data_path}/${filename}`
   log(`loading wagers from ${json_file_path}`)
@@ -491,7 +503,17 @@ const analyze_fanduel_wagers = async ({
       wager.legs.filter((leg) => leg.result === 'LOST').length <=
       wagers_lost_leg_limit
   )
-  for (const wager of closest_wagers
+
+  const filtered_wagers = closest_wagers.filter((wager) => {
+    if (selection_filters.length === 0) return true
+    return selection_filters.every((filter) =>
+      wager.legs.some((leg) =>
+        leg.parts[0].selectionName.toLowerCase().includes(filter.toLowerCase())
+      )
+    )
+  })
+
+  for (const wager of filtered_wagers
     .sort((a, b) => b.americanBetPrice - a.americanBetPrice)
     .slice(0, wagers_limit)) {
     const total_return = wager.betPrice
@@ -544,7 +566,8 @@ const main = async () => {
       show_counts: argv.show_counts,
       show_bet_receipts: argv.show_bet_receipts,
       wagers_limit: argv.wagers_limit,
-      wagers_lost_leg_limit: argv.wagers_lost_leg_limit
+      wagers_lost_leg_limit: argv.wagers_lost_leg_limit,
+      selection_filters: argv.filter ? argv.filter.split(',') : []
     })
   } catch (err) {
     error = err
