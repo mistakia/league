@@ -205,7 +205,7 @@ export default function AppMenu({
                   Discord
                 </a>
                 <a
-                  href='https://github.com/users/mistakia/projects/1/views/3'
+                  href='https://github.com/users/mistakia/projects/3/views/1'
                   target='_blank'
                   rel='noopener noreferrer'
                 >
