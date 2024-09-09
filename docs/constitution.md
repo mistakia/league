@@ -596,6 +596,10 @@ i. This process would be repeated until one (1) team offers a contract with a hi
 
 19. Players placed on INJURED RESERVE between the start of the Free Agency Auction and the Regular Season can not be placed in the starting lineup during the first six (6) weeks of the Regular Season.
 
+**Long Term Injured Reserve (LT-IR).**
+
+20. Each team will have an unlimited number of Long Term IR slots. Players placed on LT-IR after the start of the Free Agency Auction and during the Regular Season cannot be placed in the starting lineup for the remainder of the season.
+
 ## Article XIV
 
 > PRACTICE SQUAD
