@@ -11,13 +11,20 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-players-ngs-highlight')
 debug.enable('import-players-ngs-highlight,ngs,get-player,update-player')
 
-const format_player = (ngs_player) => ({
-  dob: dayjs(ngs_player.birthDate, 'MM/DD/YYYY').format('YYYY-MM-DD'),
-  esbid: ngs_player.esbId,
-  gsisid: ngs_player.gsisId,
-  dpos: ngs_player.draftNumber,
-  draft_team: ngs_player.draftTeam ? fixTeam(ngs_player.draftTeam) : null
-})
+const format_player = (ngs_player) => {
+  const player = {
+    esbid: ngs_player.esbId,
+    gsisid: ngs_player.gsisId,
+    dpos: ngs_player.draftNumber,
+    draft_team: ngs_player.draftTeam ? fixTeam(ngs_player.draftTeam) : null
+  }
+
+  if (ngs_player.birthDate) {
+    player.dob = dayjs(ngs_player.birthDate, 'MM/DD/YYYY').format('YYYY-MM-DD')
+  }
+
+  return player
+}
 
 const import_players_ngs_highlight = async ({ ignore_cache = false }) => {
   const { players } = await ngs.get_highlight_players({ ignore_cache })
