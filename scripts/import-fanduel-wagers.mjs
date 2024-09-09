@@ -90,7 +90,7 @@ const format_bet_count = ({ wager_type, wager }) => {
 
 const load_fanduel_wagers = async ({
   filename,
-  fanduel_states = ['va', 'md'],
+  fanduel_states = ['va', 'md', 'dc'],
   authorization,
   placed_after,
   placed_before
@@ -145,7 +145,7 @@ const import_fanduel_wagers = async ({
   user_id = 1,
   filename,
   authorization,
-  fanduel_states = ['va', 'md'],
+  fanduel_states = ['va', 'md', 'dc'],
   placed_after
 } = {}) => {
   const wagers = await load_fanduel_wagers({
