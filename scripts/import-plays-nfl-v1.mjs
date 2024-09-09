@@ -157,6 +157,8 @@ const importPlaysForWeek = async ({
 
   let skip_count = 0
 
+  const missing_esbids = new Set()
+
   for (const game of games) {
     const timeStr = `${game.date} ${game.time_est}`
     const gameStart = dayjs.tz(
@@ -225,9 +227,7 @@ const importPlaysForWeek = async ({
           getPlayStatData(playStat)
         const gsisId = esbid_to_gsis_id_index[esbid] || null
         if (esbid && !gsisId) {
-          log(
-            `missing gsisId for esbid: ${esbid}, playerName: ${playerName}, clubCode: ${clubCode}`
-          )
+          missing_esbids.add(JSON.stringify({esbid, playerName, clubCode}))
         }
 
         play_stat_inserts.push({
@@ -305,6 +305,12 @@ const importPlaysForWeek = async ({
       log('Error on inserting plays and play stats ignored')
       log(err)
     }
+  }
+
+  // Log unique missing ESBIDs
+  for (const missing_esbid of missing_esbids) {
+    const {esbid, playerName, clubCode} = JSON.parse(missing_esbid)
+    log(`missing gsisId for esbid: ${esbid}, playerName: ${playerName}, clubCode: ${clubCode}`)
   }
 
   return skip_count === games.length
