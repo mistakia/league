@@ -41,6 +41,8 @@ const import_players_ngs_highlight = async ({ ignore_cache = false }) => {
   for (const ngs_player of players) {
     let player_row
 
+    let player_changes = 0
+
     // try esbid
     if (ngs_player.esbId) {
       try {
@@ -84,11 +86,16 @@ const import_players_ngs_highlight = async ({ ignore_cache = false }) => {
       continue
     }
 
-    const player_changes = await updatePlayer({
-      player_row,
-      update: format_player(ngs_player),
-      allow_protected_props: true
-    })
+    try {
+      player_changes = await updatePlayer({
+        player_row,
+        update: format_player(ngs_player),
+        allow_protected_props: true
+      })
+    } catch (err) {
+      // TODO track which player and fields had errors updating
+      log(err)
+    }
 
     changes += player_changes
   }
