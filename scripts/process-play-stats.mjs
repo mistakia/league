@@ -135,7 +135,8 @@ const run = async ({
   week = current_week,
   year = constants.season.year,
   seas_type = constants.season.nfl_seas_type,
-  ignore_conflicts = false
+  ignore_conflicts = false,
+  dry_run = false
 } = {}) => {
   let play_update_count = 0
   let play_field_update_count = 0
@@ -205,7 +206,7 @@ const run = async ({
         ? fixTeam(playStat.v)
         : fixTeam(playStat.h)
     const stats = calculateStatsFromPlayStats(play_stats_by_gsispid[gsispid])
-    if (argv.dry) continue
+    if (dry_run) continue
 
     gamelog_gsispids.push(gsispid)
     const player_gamelog = format_gamelog({
@@ -241,7 +242,7 @@ const run = async ({
         : fixTeam(playStat.h)
 
     const stats = calculateStatsFromPlayStats(play_stats_by_gsisid[gsisid])
-    if (argv.dry) continue
+    if (dry_run) continue
 
     const player_gamelog = format_gamelog({
       pid: player_row.pid,
@@ -285,7 +286,7 @@ const run = async ({
       })
     }
     const stats = calculateDstStatsFromPlays(formattedPlays, team)
-    if (argv.dry) continue
+    if (dry_run) continue
     const player_gamelog = format_gamelog({
       pid: team,
       pos: 'DST',
@@ -465,7 +466,7 @@ const run = async ({
         }
       }
 
-      if (argv.dry) continue
+      if (dry_run) continue
 
       play_update_count += 1
 
@@ -490,6 +491,8 @@ const main = async () => {
     const year = argv.year
     const week = argv.week
     const seas_type = argv.seas_type || constants.season.nfl_seas_type
+    const dry_run = argv.dry
+    const ignore_conflicts = argv.ignore_conflicts || argv.force
 
     if (argv.all) {
       log('processing all plays')
@@ -517,7 +520,7 @@ const main = async () => {
           )
           for (const { week } of weeks) {
             log(`processing plays for week ${week} in ${year} (${seas_type})`)
-            await run({ year, week, seas_type })
+            await run({ year, week, seas_type, dry_run, ignore_conflicts })
           }
         }
       }
@@ -529,10 +532,16 @@ const main = async () => {
       log(`processing plays for ${year} ${seas_type}: ${weeks.length} weeks`)
       for (const { week } of weeks) {
         log(`processing plays for week ${week} in ${year}`)
-        await run({ year, week, seas_type })
+        await run({ year, week, seas_type, dry_run, ignore_conflicts })
       }
     } else {
-      await run({ year: argv.year, week: argv.week, seas_type: argv.seas_type })
+      await run({
+        year: argv.year,
+        week: argv.week,
+        seas_type: argv.seas_type,
+        dry_run,
+        ignore_conflicts
+      })
     }
   } catch (err) {
     error = err
