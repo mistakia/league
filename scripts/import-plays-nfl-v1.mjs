@@ -227,7 +227,7 @@ const importPlaysForWeek = async ({
           getPlayStatData(playStat)
         const gsisId = esbid_to_gsis_id_index[esbid] || null
         if (esbid && !gsisId) {
-          missing_esbids.add(JSON.stringify({esbid, playerName, clubCode}))
+          missing_esbids.add(JSON.stringify({ esbid, playerName, clubCode }))
         }
 
         play_stat_inserts.push({
@@ -309,9 +309,13 @@ const importPlaysForWeek = async ({
 
   // Log unique missing ESBIDs
   for (const missing_esbid of missing_esbids) {
-    const {esbid, playerName, clubCode} = JSON.parse(missing_esbid)
-    log(`missing gsisId for esbid: ${esbid}, playerName: ${playerName}, clubCode: ${clubCode}`)
+    const { esbid, playerName, clubCode } = JSON.parse(missing_esbid)
+    log(
+      `missing gsisId for esbid: ${esbid}, playerName: ${playerName}, clubCode: ${clubCode}`
+    )
   }
+
+  log(`missing_esbids: ${missing_esbids.size}`)
 
   return skip_count === games.length
 }
