@@ -321,11 +321,11 @@
 
 ### Game
 
-| column    | name        | description                         | coverage | since      |
-| --------- | ----------- | ----------------------------------- | -------- | ---------- |
-| week      | Week        | Week of the NFL season              | 100.00%  | 2001/01/06 |
-| year      | Year        | Year of the NFL season              | 100.00%  | 2001/01/06 |
-| seas_type | Season Type | Type of NFL season (PRE, REG, POST) | 100.00%  | 2001/01/06 |
+| column    | name        | description                                             | coverage | since      |
+| --------- | ----------- | ------------------------------------------------------- | -------- | ---------- |
+| week      | Week        | Week of the NFL season. Starts at 1 for each seas_type. | 100.00%  | 2001/01/06 |
+| year      | Year        | Year of the NFL season.                                 | 100.00%  | 2001/01/06 |
+| seas_type | Season Type | Type of NFL season (PRE, REG, POST)                     | 100.00%  | 2001/01/06 |
 
 ### Situation
 
