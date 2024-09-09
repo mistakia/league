@@ -92,3 +92,30 @@ export const getPlays = async ({ ignore_cache = false, esbid } = {}) => {
 
   return data
 }
+
+export const get_highlight_players = async ({ ignore_cache = false }) => {
+  const cache_key = `/ngs/highlight_players.json`
+  if (!ignore_cache) {
+    const cache_value = await cache.get({ key: cache_key })
+    if (cache_value) {
+      log(`cache hit for ngs highlight players`)
+      return cache_value
+    }
+  }
+
+  const url = `${config.ngs_api_url}/plays/highlight/players`
+  log(`fetching ngs highlight players`)
+  const res = await fetch(url, {
+    headers: {
+      origin: 'https://nextgenstats.nfl.com',
+      referer: 'https://nextgenstats.nfl.com/stats/game-center'
+    }
+  })
+  const data = await res.json()
+
+  if (data && data.players && data.players.length) {
+    await cache.set({ key: cache_key, value: data })
+  }
+
+  return data
+}

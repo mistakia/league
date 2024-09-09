@@ -45,7 +45,12 @@ const nullable_props = ['injury_status']
    player can be a string identifier or player db entry
 */
 
-const updatePlayer = async ({ player_row, pid, update }) => {
+const updatePlayer = async ({
+  player_row,
+  pid,
+  update,
+  allow_protected_props = false
+}) => {
   if (!player_row && (typeof pid === 'string' || pid instanceof String)) {
     const player_rows = await db('player').where({ pid })
     player_row = player_rows[0]
@@ -100,7 +105,7 @@ const updatePlayer = async ({ player_row, pid, update }) => {
       continue
     }
 
-    if (protected_props.includes(prop)) {
+    if (protected_props.includes(prop) && !allow_protected_props) {
       const exists = await db('player').where(prop, edit.rhs).limit(1)
       if (exists.length) {
         log(
