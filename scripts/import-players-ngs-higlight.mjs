@@ -1,5 +1,6 @@
 import debug from 'debug'
 import yargs from 'yargs'
+import dayjs from 'dayjs'
 import { hideBin } from 'yargs/helpers'
 
 import { is_main, report_job, ngs, getPlayer, updatePlayer } from '#libs-server'
@@ -11,10 +12,9 @@ const log = debug('import-players-ngs-highlight')
 debug.enable('import-players-ngs-highlight,ngs,get-player,update-player')
 
 const format_player = (ngs_player) => ({
-  dob: ngs_player.birthDate,
+  dob: dayjs(ngs_player.birthDate, 'MM/DD/YYYY').format('YYYY-MM-DD'),
   esbid: ngs_player.esbId,
   gsisid: ngs_player.gsisId,
-  gsisItId: ngs_player.gsisItId,
   dpos: ngs_player.draftNumber,
   draft_team: ngs_player.draftTeam ? fixTeam(ngs_player.draftTeam) : null
 })
@@ -50,14 +50,7 @@ const import_players_ngs_highlight = async ({ ignore_cache = false }) => {
       }
     }
 
-    // try gsisItId
-    if (!player_row) {
-      try {
-        player_row = await getPlayer({ gsisItId: ngs_player.gsisItId })
-      } catch (err) {
-        log(err)
-      }
-    }
+    // TOOD skipping gsisItId as a collision was found
 
     // try name, team, position
     if (!player_row) {
