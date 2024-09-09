@@ -832,3 +832,23 @@ Interpretive Note: _While the Commissioner is the dispute resolution officer of 
 3. Draft picks in possession of the decommissioned team shall be nullified.
 
 4. Draft picks for future seasons originally belonging to the decommissioned team and in possession of another team will be given a mid round position.
+
+## Article XXII
+
+> TEAM VALUE
+
+**Team Value.**
+
+1. Team Value will be determined using the Team Value Formula that assigns an integer value to all team players and draft picks. The value is based on the implied trade value of the player or pick based on recent trades made in other leagues of similar size, starting slots, and scoring.
+
+**Deposit Pool.**
+
+2. The Team Deposit Value is calculated daily as follows:
+
+```
+(Team Value / Total League Team Value) * Deposit Pool Total
+```
+
+This determines each team's share of the Deposit Pool Total based on their relative value compared to the league as a whole.
+
+3. Managers joining the league must deposit the Team Deposit Value for their team upon entry. Managers leaving the league will withdraw the Team Deposit Value for their team from the Deposit Pool upon exit. These transactions should occur on the same day to ensure that the Deposit Pool Total remains constant.
