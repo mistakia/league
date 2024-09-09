@@ -8,16 +8,27 @@ const log = debug('merge-player')
 debug.enable('merge-player,update-player-id')
 
 export default async function ({ update_player_row, remove_player_row }) {
+  // Determine which PID to use based on birthdate
+  const update_pid = determine_pid_to_use({
+    update_player: update_player_row,
+    remove_player: remove_player_row
+  })
+
+  const keep_player_row =
+    update_pid === update_player_row.pid ? update_player_row : remove_player_row
+  const discard_player_row =
+    update_pid === update_player_row.pid ? remove_player_row : update_player_row
+
   log(
-    `merging ${update_player_row.fname} ${update_player_row.lname} ${update_player_row.pid} and ${remove_player_row.fname} ${remove_player_row.lname} ${remove_player_row.pid}`
+    `merging ${keep_player_row.fname} ${keep_player_row.lname} ${keep_player_row.pid} and ${discard_player_row.fname} ${discard_player_row.lname} ${discard_player_row.pid}. Using pid ${update_pid}`
   )
 
   await update_player_id({
-    current_pid: remove_player_row.pid,
-    new_pid: update_player_row.pid
+    current_pid: discard_player_row.pid,
+    new_pid: keep_player_row.pid
   })
 
-  await db('player').where('pid', remove_player_row.pid).del()
+  await db('player').where('pid', discard_player_row.pid).del()
 
   // merge update_player_row and remove_player_row, select truthy values or longest string or largest number
   const merged_player_row = Object.keys(update_player_row).reduce(
@@ -57,4 +68,22 @@ export default async function ({ update_player_row, remove_player_row }) {
     pid: update_player_row.pid,
     update: merged_player_row
   })
+}
+
+function determine_pid_to_use({ update_player, remove_player }) {
+  const update_has_birthdate =
+    update_player.dob && update_player.dob !== '0000-00-00'
+  const remove_has_birthdate =
+    remove_player.dob && remove_player.dob !== '0000-00-00'
+
+  if (update_has_birthdate && !remove_has_birthdate) {
+    // update_player has birthdate and remove_player does not
+    return update_player.pid
+  } else if (!update_has_birthdate && remove_has_birthdate) {
+    // update_player does not have birthdate and remove_player does
+    return remove_player.pid
+  } else {
+    // If both have birthdate or both don't have birthdate, use update_player's PID
+    return update_player.pid
+  }
 }
