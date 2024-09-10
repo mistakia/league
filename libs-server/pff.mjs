@@ -30,7 +30,7 @@ export const years = Array.from(
   (_, index) => 2006 + index
 )
 
-export const get_pff_session_cookie = async () => {
+export const get_pff_session_cookie = async ({ executable_path } = {}) => {
   // Get the current config from the database
   const config_row = await db('config').where({ key: 'pff_config' }).first()
   if (!config_row) {
@@ -45,8 +45,14 @@ export const get_pff_session_cookie = async () => {
 
   // Launch a new page with Puppeteer
   const { page, browser } = await puppeteer.getPage(pff_login_config.url, {
-    headless: true,
-    cookie_string: pff_login_config.cookie
+    headless: false,
+    executable_path,
+    random_user_agent: false,
+    random_viewport: false,
+    use_stealth: true,
+    user_data_dir: './tmp/puppeteer_user_data',
+    cookie_string: pff_login_config.cookie,
+    cookie_domain: '.pff.com'
   })
 
   // Navigate to the homepage and wait for 10 seconds

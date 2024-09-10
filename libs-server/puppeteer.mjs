@@ -6,7 +6,7 @@ import os from 'os'
 puppeteer.use(AnonymizeUaPlugin())
 
 // Helper function to parse cookie string into an array of cookie objects
-function parseCookieString(cookie_string) {
+function parseCookieString({ cookie_string, cookie_domain }) {
   return cookie_string.split('; ').map((cookie) => {
     const [name, value] = cookie.split('=')
     return { name, value, domain: '.pff.com' }
@@ -86,8 +86,12 @@ export const getPage = async (
     random_viewport = true,
     random_user_agent = true,
     cookie_string = '',
+    cookie_domain,
     executable_path = '',
-    use_stealth = false
+    use_stealth = false,
+    cookies,
+    local_storage,
+    user_data_dir
   } = {}
 ) => {
   if (use_stealth) {
@@ -102,11 +106,13 @@ export const getPage = async (
       '--disable-infobars',
       '--window-position=0,0',
       '--ignore-certifcate-errors',
-      '--ignore-certifcate-errors-spki-list'
+      '--ignore-certifcate-errors-spki-list',
+      ...(user_data_dir ? [`--user-data-dir=${user_data_dir}`] : [])
     ],
     timeout,
     ignoreDefaultArgs: ['--enable-automation'],
-    executablePath: executable_path
+    executablePath: executable_path,
+    userDataDir: user_data_dir
   })
 
   const page = await browser.newPage()
@@ -233,8 +239,12 @@ export const getPage = async (
     })
   }
 
-  if (cookie_string) {
-    const cookies = parseCookieString(cookie_string)
+  if (cookie_string && cookie_domain) {
+    const cookies = parseCookieString({ cookie_string, cookie_domain })
+    await page.setCookie(...cookies)
+  }
+
+  if (cookies) {
     await page.setCookie(...cookies)
   }
 
@@ -242,6 +252,17 @@ export const getPage = async (
     maxResourceBufferSize: 1024 * 1204 * 100,
     maxTotalBufferSize: 1024 * 1204 * 200
   })
+
+  await page.goto(url)
+
+  // Restore localStorage if it exists
+  if (local_storage) {
+    await page.evaluate((storage_data) => {
+      for (const [key, value] of Object.entries(storage_data)) {
+        localStorage.setItem(key, value)
+      }
+    }, local_storage)
+  }
 
   await page.goto(url)
 

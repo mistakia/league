@@ -126,13 +126,15 @@ const runOne = async ({ week, cookie }) => {
   }
 }
 
-const run = async () => {
+const run = async ({ executable_path } = {}) => {
   // do not pull in any projections after the season has ended
   if (constants.season.week > constants.season.nflFinalWeek) {
     return
   }
 
-  const cookie = await pff.get_pff_session_cookie()
+  const cookie = await pff.get_pff_session_cookie({
+    executable_path
+  })
 
   for (
     let week = constants.season.week;
@@ -146,7 +148,9 @@ const run = async () => {
 const main = async () => {
   let error
   try {
-    await run()
+    await run({
+      executable_path: argv.executable_path
+    })
   } catch (err) {
     error = err
     console.log(error)
