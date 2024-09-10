@@ -2113,16 +2113,18 @@ export function getScoreboardByMatchupId(state, { matchupId }) {
     }
   }
 
-  const home = getScoreboardByTeamId(state, { tid: matchup.hid })
-  const away = getScoreboardByTeamId(state, { tid: matchup.aid })
+  const home = getScoreboardByTeamId(state, { tid: matchup.hid, matchupId })
+  const away = getScoreboardByTeamId(state, { tid: matchup.aid, matchupId })
 
   return { home, away }
 }
 
-export function getScoreboardByTeamId(state, { tid }) {
+export function getScoreboardByTeamId(state, { tid, matchupId }) {
   const year = state.getIn(['app', 'year'])
-  const week = state.getIn(['scoreboard', 'week'])
-  const matchup = getMatchupByTeamId(state, { tid, year, week })
+  const scoreboard_week = state.getIn(['scoreboard', 'week'])
+  const matchup = matchupId
+    ? getMatchupById(state, { matchupId })
+    : getMatchupByTeamId(state, { tid, year, week: scoreboard_week })
 
   let minutes = 0
   let projected = 0
@@ -2140,25 +2142,28 @@ export function getScoreboardByTeamId(state, { tid }) {
     })
   }
 
-  const isChampRound = week === constants.season.finalWeek
+  const isChampRound = matchup.week === constants.season.finalWeek
   let points = isChampRound
     ? getPointsByTeamId(state, { tid, week: constants.season.finalWeek - 1 })
     : 0
   const previousWeek = points
 
   // TODO - instead use matchup projected value
-  const isFuture = year === constants.year && week > constants.week
+  const isFuture = year === constants.year && matchup.week > constants.week
   const starterMaps = getStartersByTeamId(state, {
     tid,
-    week: isFuture ? constants.week : week
+    week: isFuture ? constants.week : matchup.week
   })
   for (const playerMap of starterMaps) {
-    const gamelog = getGamelogForPlayer(state, { playerMap, week })
+    const gamelog = getGamelogForPlayer(state, {
+      playerMap,
+      week: matchup.week
+    })
     if (gamelog) {
       points += gamelog.total
       const gameStatus = getGameStatusByPlayerId(state, {
         pid: playerMap.get('pid'),
-        week
+        week: matchup.week
       })
       if (gameStatus && gameStatus.lastPlay) {
         const lp = gameStatus.lastPlay
@@ -2174,7 +2179,7 @@ export function getScoreboardByTeamId(state, { tid }) {
     }
     const add = gamelog
       ? gamelog.total
-      : playerMap.getIn(['points', `${week}`, 'total'], 0)
+      : playerMap.getIn(['points', `${matchup.week}`, 'total'], 0)
 
     projected += add
   }
