@@ -97,7 +97,8 @@ export const job_types = {
   IMPORT_YAHOO_ADP: 74,
   IMPORT_PINNACLE_ODDS: 75,
 
-  IMPORT_PLAYERS_NGS_HIGHLIGHT: 76
+  IMPORT_PLAYERS_NGS_HIGHLIGHT: 76,
+  IMPORT_PLAYS_NGS_V2: 77
 }
 
 export const job_title_by_id = {
@@ -176,5 +177,6 @@ export const job_title_by_id = {
   73: 'Import MFL ADP',
   74: 'Import Yahoo ADP',
   75: 'Import Pinnacle Odds',
-  76: 'Import Players (NGS Highlight)'
+  76: 'Import Players (NGS Highlight)',
+  77: 'Import Plays (NGS V2)'
 }
