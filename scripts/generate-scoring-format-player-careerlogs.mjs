@@ -44,7 +44,11 @@ const generate_scoring_format_player_careerlogs = async ({
   }
 
   for (const pid in seasons_by_pid) {
-    const draft_class = draft_classes_query.find((i) => i.pid === pid).start
+    const draft_class = draft_classes_query.find((i) => i.pid === pid)?.start
+    if (!draft_class) {
+      log(`missing draft class for ${pid}`)
+      continue
+    }
     const seasons = seasons_by_pid[pid]
 
     const points = sum(seasons.map((s) => s.points))

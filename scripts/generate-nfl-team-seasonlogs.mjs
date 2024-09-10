@@ -214,6 +214,12 @@ const generate_seasonlogs = async ({
         seasonlogs_type
       })
       const teams = defense[position][stat_type]
+
+      if (!teams.length) {
+        log(`no teams for ${stat_key}`)
+        continue
+      }
+
       for (const { opp, tm, ...stats } of teams) {
         team_seasonlog_inserts.push({
           stat_key,
@@ -240,6 +246,12 @@ const generate_seasonlogs = async ({
         seasonlogs_type
       })
       const teams = offense[position][stat_type]
+
+      if (!teams.length) {
+        log(`no teams for ${stat_key}`)
+        continue
+      }
+
       for (const { opp, tm, ...stats } of teams) {
         team_seasonlog_inserts.push({
           stat_key,
@@ -268,7 +280,8 @@ const generate_seasonlogs = async ({
   }
 
   // calculate league specific team stats
-  const leagueIds = [0, 1]
+  // TODO add a lid column to the percentiles table
+  const leagueIds = [1]
   const league_team_seasonlog_inserts = []
 
   for (const leagueId of leagueIds) {
@@ -281,6 +294,11 @@ const generate_seasonlogs = async ({
           seasonlogs_type
         })
         const teams = defense[position][stat_type]
+
+        if (!teams.length) {
+          log(`no teams for ${stat_key}`)
+          continue
+        }
 
         const items = []
 
