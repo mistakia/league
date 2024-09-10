@@ -90,6 +90,7 @@ export * as yahoo from './yahoo.mjs'
 export * as rts from './rts.mjs'
 export { default as mergePlayer } from './merge-player.mjs'
 export * as pinnacle from './pinnacle.mjs'
+export { default as report_error } from './report-error.mjs'
 
 export const getChartedPlayByPlayQuery = (db) =>
   db('nfl_plays')
