@@ -232,12 +232,22 @@ const process_market_selection_hit_rates = async ({
 
   const player_gamelogs_by_pid = groupBy(player_gamelogs, 'pid')
 
+  const missing_gamelogs_pids = new Set()
+  const missing_gamelogs_selections = {}
+
   for (const selection of prop_selections) {
     const player_gamelogs = player_gamelogs_by_pid[selection.selection_pid]
 
     if (!player_gamelogs) {
       log(
         `No player gamelogs found for selection ${selection.source_selection_id}`
+      )
+      missing_gamelogs_pids.add(selection.selection_pid)
+      if (!missing_gamelogs_selections[selection.selection_pid]) {
+        missing_gamelogs_selections[selection.selection_pid] = new Set()
+      }
+      missing_gamelogs_selections[selection.selection_pid].add(
+        selection.source_selection_id
       )
       continue
     }
@@ -377,6 +387,18 @@ const process_market_selection_hit_rates = async ({
     unsupported_market_types.forEach((type) => log(`- ${type}`))
   } else {
     log('All market types were supported.')
+  }
+
+  if (missing_gamelogs_pids.size > 0) {
+    log('Players with missing gamelogs:')
+    missing_gamelogs_pids.forEach((pid) => {
+      const selection_ids = Array.from(missing_gamelogs_selections[pid]).join(
+        ', '
+      )
+      log(`- Player ID: ${pid}, Impacted Selection IDs: ${selection_ids}`)
+    })
+  } else {
+    log('All selections had corresponding gamelogs.')
   }
 }
 
