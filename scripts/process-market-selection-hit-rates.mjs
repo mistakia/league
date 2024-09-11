@@ -164,6 +164,10 @@ const process_market_selection_hit_rates = async ({
       'prop_market_selections_index.selection_pid',
       'prop_market_selections_index.selection_metric_line',
       'prop_market_selections_index.selection_type',
+      'prop_market_selections_index.source_id',
+      'prop_market_selections_index.source_market_id',
+      'prop_market_selections_index.source_selection_id',
+      'prop_market_selections_index.odds_american',
       'nfl_games.seas_type',
       'nfl_games.week',
       'nfl_games.year'
@@ -192,10 +196,19 @@ const process_market_selection_hit_rates = async ({
       'prop_markets_index.market_type',
       'prop_market_selections_index.selection_pid',
       'prop_market_selections_index.selection_metric_line',
-      'prop_market_selections_index.selection_type'
+      'prop_market_selections_index.selection_type',
+      'prop_market_selections_index.source_id',
+      'prop_market_selections_index.source_market_id',
+      'prop_market_selections_index.source_selection_id',
+      'prop_market_selections_index.odds_american',
+      'nfl_games.seas_type',
+      'nfl_games.week',
+      'nfl_games.year'
     )
 
   log(`Processing ${prop_selections.length} prop selections`)
+
+  const unique_pids = [...new Set(prop_selections.map((s) => s.selection_pid))]
 
   const player_gamelogs = await db('player_gamelogs')
     .select(
@@ -205,11 +218,14 @@ const process_market_selection_hit_rates = async ({
       'nfl_games.seas_type'
     )
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
-    .whereIn('nfl_games.seas_type', ['REG', 'POST']).orderByRaw(`
+    .whereIn('nfl_games.seas_type', ['REG', 'POST'])
+    .whereIn('player_gamelogs.pid', unique_pids).orderByRaw(`
       nfl_games.year,
       CASE WHEN nfl_games.seas_type = 'REG' THEN 0 ELSE 1 END,
       nfl_games.week
     `)
+
+  log(`Loaded ${player_gamelogs.length} player gamelogs`)
 
   const player_gamelogs_by_pid = groupBy(player_gamelogs, 'pid')
 
@@ -236,9 +252,22 @@ const process_market_selection_hit_rates = async ({
       (g) => g.year === selection.year - 1
     )
 
-    const implied_probability = oddslib
-      .from('moneyline', selection.odds_american)
-      .to('impliedProbability')
+    let implied_probability
+
+    try {
+      implied_probability = oddslib
+        .from('moneyline', selection.odds_american)
+        .to('impliedProbability')
+    } catch (err) {
+      log(
+        `Error calculating implied probability for selection ${selection.source_selection_id} with odds ${selection.odds_american}`
+      )
+      log(`Selection ID: ${selection.source_selection_id}`)
+      log(`Source ID: ${selection.source_id}`)
+      log(`Market ID: ${selection.source_market_id}`)
+
+      continue
+    }
 
     const calculate_rates = (gamelogs) => {
       const hits_soft = get_hits({
@@ -318,7 +347,7 @@ const process_market_selection_hit_rates = async ({
         selection_type: selection.selection_type
       })
 
-      update.wager_status = wager_status
+      update.result = wager_status
     }
 
     await db('prop_market_selections_index')
@@ -328,12 +357,9 @@ const process_market_selection_hit_rates = async ({
         source_selection_id: selection.source_selection_id,
         selection_type: selection.selection_type,
         selection_metric_line: selection.selection_metric_line,
-        market_type: selection.market_type,
         selection_pid: selection.selection_pid
       })
       .update(update)
-
-    log(`Updated hit rates for selection ${selection.source_selection_id}`)
   }
 }
 
