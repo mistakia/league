@@ -28,6 +28,12 @@ export default {
     header_label: 'ATT',
     player_value_path: 'team_pass_att_from_plays'
   }),
+  team_pass_rate_over_expected_from_plays: from_play_field({
+    column_title: 'Team Passing Rate Over Expected (By Play)',
+    column_groups: [COLUMN_GROUPS.TEAM_STATS, COLUMN_GROUPS.PASSING],
+    header_label: 'PROE',
+    player_value_path: 'team_pass_rate_over_expected_from_plays'
+  }),
   team_pass_completions_from_plays: from_play_field({
     column_title: 'Team Passing Completions (By Play)',
     column_groups: [COLUMN_GROUPS.TEAM_STATS, COLUMN_GROUPS.PASSING],
