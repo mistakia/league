@@ -12,6 +12,26 @@ const get_pinnacle_config = async () => {
   return config_row.value
 }
 
+export const format_selection_type = (selection_name) => {
+  if (!selection_name) {
+    return null
+  }
+
+  const words = selection_name.toLowerCase().split(/\s+/)
+
+  if (words.includes('over')) {
+    return 'OVER'
+  } else if (words.includes('under')) {
+    return 'UNDER'
+  } else if (words.includes('yes')) {
+    return 'YES'
+  } else if (words.includes('no')) {
+    return 'NO'
+  }
+
+  return null
+}
+
 export const get_market_type = ({ type, units, category }) => {
   switch (category) {
     case 'Game Lines':

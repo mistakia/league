@@ -111,6 +111,7 @@ const format_market = async ({
       selection_pid: player_row?.pid || null,
       selection_name,
       selection_metric_line: selection_line,
+      selection_type: caesars.format_selection_type(selection_name),
       odds_decimal: selection.price.d,
       odds_american: selection.price.a
     })

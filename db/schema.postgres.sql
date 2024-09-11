@@ -1629,6 +1629,7 @@ DROP FUNCTION IF EXISTS public.update_modified_column();
 DROP FUNCTION IF EXISTS public.player_name_search_vector_update();
 DROP TYPE IF EXISTS public.wager_status;
 DROP TYPE IF EXISTS public.time_type;
+DROP TYPE IF EXISTS public.selection_type;
 DROP TYPE IF EXISTS public.read_thrown_type;
 DROP TYPE IF EXISTS public.rankings_source_id;
 DROP TYPE IF EXISTS public.ranking_type;
@@ -1821,6 +1822,18 @@ CREATE TYPE public.read_thrown_type AS ENUM (
     'DESIGNED',
     'CHECKDOWN',
     'SCRAMBLE_DRILL'
+);
+
+
+--
+-- Name: selection_type; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.selection_type AS ENUM (
+    'OVER',
+    'UNDER',
+    'YES',
+    'NO'
 );
 
 
@@ -15487,7 +15500,8 @@ CREATE TABLE public.prop_market_selections_history (
     selection_metric_line numeric(6,1),
     odds_decimal numeric(15,3),
     odds_american integer,
-    "timestamp" integer NOT NULL
+    "timestamp" integer NOT NULL,
+    selection_type public.selection_type
 );
 
 
@@ -15506,7 +15520,28 @@ CREATE TABLE public.prop_market_selections_index (
     odds_american integer,
     result public.wager_status,
     "timestamp" integer NOT NULL,
-    time_type public.time_type NOT NULL
+    time_type public.time_type NOT NULL,
+    current_season_hit_rate_hard numeric(5,4),
+    current_season_hit_rate_soft numeric(5,4),
+    current_season_edge_hard numeric(6,5),
+    current_season_edge_soft numeric(6,5),
+    last_five_hit_rate_hard numeric(5,4),
+    last_five_hit_rate_soft numeric(5,4),
+    last_five_edge_hard numeric(6,5),
+    last_five_edge_soft numeric(6,5),
+    last_ten_hit_rate_hard numeric(5,4),
+    last_ten_hit_rate_soft numeric(5,4),
+    last_ten_edge_hard numeric(6,5),
+    last_ten_edge_soft numeric(6,5),
+    last_season_hit_rate_hard numeric(5,4),
+    last_season_hit_rate_soft numeric(5,4),
+    last_season_edge_hard numeric(6,5),
+    last_season_edge_soft numeric(6,5),
+    overall_hit_rate_hard numeric(5,4),
+    overall_hit_rate_soft numeric(5,4),
+    overall_edge_hard numeric(6,5),
+    overall_edge_soft numeric(6,5),
+    selection_type public.selection_type
 );
 
 
