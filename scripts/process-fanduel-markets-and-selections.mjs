@@ -137,6 +137,27 @@ const process_fanduel_markets_and_selections = async ({
     }
 
     for (const selection of source_market.selections) {
+      const selection_type = fanduel.format_selection_type(
+        selection.selection_name
+      )
+      if (selection_type) {
+        await db('prop_market_selections_index')
+          .where({
+            source_market_id: source_market.source_market_id,
+            source_id: source_market.source_id,
+            source_selection_id: selection.source_selection_id
+          })
+          .update({ selection_type })
+
+        await db('prop_market_selections_history')
+          .where({
+            source_market_id: source_market.source_market_id,
+            source_id: source_market.source_id,
+            source_selection_id: selection.source_selection_id
+          })
+          .update({ selection_type })
+      }
+
       if (!selection.selection_metric_line) {
         const metric = fanduel.get_selection_metric_from_selection_name(
           selection.selection_name

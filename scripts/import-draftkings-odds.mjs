@@ -131,6 +131,7 @@ const format_market = async ({
 
       selection_pid,
       selection_name: outcome.label,
+      selection_type: draftkings.format_selection_type(outcome.label),
       selection_metric_line,
       odds_decimal: outcome.oddsDecimal,
       odds_american: outcome.oddsAmerican

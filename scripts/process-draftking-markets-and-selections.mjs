@@ -149,6 +149,27 @@ const process_selection = async ({
   missing_selection_lines,
   missing_selection_pids
 }) => {
+  const selection_type = draftkings.format_selection_type(
+    selection.selection_name
+  )
+  if (selection_type) {
+    await db('prop_market_selections_index')
+      .where({
+        source_market_id: source_market.source_market_id,
+        source_id: source_market.source_id,
+        selection_id: selection.selection_id
+      })
+      .update({ selection_type })
+
+    await db('prop_market_selections_history')
+      .where({
+        source_market_id: source_market.source_market_id,
+        source_id: source_market.source_id,
+        selection_id: selection.selection_id
+      })
+      .update({ selection_type })
+  }
+
   if (!selection.selection_metric_line) {
     missing_selection_lines.set(selection.source_selection_id, {
       source_market_name: source_market.market_name,

@@ -116,6 +116,7 @@ const format_market = async ({
       selection_pid: player_row?.pid || null,
       selection_name: market_participant_name,
       selection_metric_line: selection.points,
+      selection_type: pinnacle.format_selection_type(market_participant_name),
       odds_decimal: oddslib.from('moneyline', selection.price).to('decimal'),
       odds_american: selection.price
     })
