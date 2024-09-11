@@ -19,7 +19,7 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process-play-stats')
 debug.enable('process-play-stats,update-play')
 const current_week = Math.max(
-  dayjs().day() === 2
+  dayjs().day() === 2 || dayjs().day() === 3
     ? constants.season.nfl_seas_week - 1
     : constants.season.nfl_seas_week,
   1
@@ -354,6 +354,8 @@ const run = async ({
     }
 
     const succ = is_successful_play(play)
+
+    if (dry_run) continue
 
     await update_play({
       play_row: {
