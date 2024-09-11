@@ -228,3 +228,11 @@
 
 ## Check disk space every hour
 0 * * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/check-disk-space-main-server.mjs &>> /var/log/league/league-check-disk-space-main-server.log
+
+
+
+
+# Betting Markets
+
+## Every 20 minutes
+*/20 * * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-market-selection-hit-rates.mjs --missing_only &>> /var/log/league/league-process-market-selection-hit-rates.log
