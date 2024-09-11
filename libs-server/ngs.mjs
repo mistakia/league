@@ -308,4 +308,6 @@ export const save_play_data = async ({ data, esbid }) => {
       }
     }
   }
+
+  log(`saved ${play_inserts.length} plays for esbid: ${esbid}`)
 }
