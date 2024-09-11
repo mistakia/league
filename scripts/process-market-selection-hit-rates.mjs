@@ -393,13 +393,6 @@ const process_market_selection_hit_rates = async ({
       .update(update)
   }
 
-  if (unsupported_market_types.size > 0) {
-    log('Unsupported market types encountered:')
-    unsupported_market_types.forEach((type) => log(`- ${type}`))
-  } else {
-    log('All market types were supported.')
-  }
-
   if (missing_gamelogs_pids.size > 0) {
     log('Players with missing gamelogs:')
     missing_gamelogs_pids.forEach((pid) => {
@@ -410,6 +403,13 @@ const process_market_selection_hit_rates = async ({
     })
   } else {
     log('All selections had corresponding gamelogs.')
+  }
+
+  if (unsupported_market_types.size > 0) {
+    log('Unsupported market types encountered:')
+    unsupported_market_types.forEach((type) => log(`- ${type}`))
+  } else {
+    log('All market types were supported.')
   }
 }
 
