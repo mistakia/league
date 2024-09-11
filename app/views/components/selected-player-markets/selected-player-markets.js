@@ -119,13 +119,14 @@ function create_table_data({ markets, is_alt_line, has_line }) {
 
   markets.forEach((market) => {
     market.selections.forEach((selection) => {
-      const key = `${market.source_id}_${selection.timestamp}_${market.year}_${market.week}`
+      const key = `${market.source_id}_${selection.timestamp}_${market.year}_${market.week}_${selection.selection_type || 'DEFAULT'}`
       if (!combined_data[key]) {
         const data_point = {
           source: market.source_id,
           timestamp: new Date(selection.timestamp * 1000).toLocaleString(),
           year: market.year,
           week: market.week,
+          selection_type: selection.selection_type,
           current_season_hit_rate_hard: selection.current_season_hit_rate_hard,
           current_season_edge_hard: selection.current_season_edge_hard,
           last_five_hit_rate_hard: selection.last_five_hit_rate_hard,
@@ -135,28 +136,14 @@ function create_table_data({ markets, is_alt_line, has_line }) {
           last_season_hit_rate_hard: selection.last_season_hit_rate_hard,
           last_season_edge_hard: selection.last_season_edge_hard,
           overall_hit_rate_hard: selection.overall_hit_rate_hard,
-          overall_edge_hard: selection.overall_edge_hard
+          overall_edge_hard: selection.overall_edge_hard,
+
+          line: selection.selection_metric_line,
+          odds: selection.odds_american
         }
 
         combined_data[key] = data_point
         items_for_percentiles.push(data_point)
-
-        if (has_line && !is_alt_line) {
-          combined_data[key].line = selection.selection_metric_line
-          combined_data[key].over_odds = null
-          combined_data[key].under_odds = null
-        } else {
-          combined_data[key].odds = selection.odds_american
-        }
-      }
-
-      if (has_line && !is_alt_line) {
-        const odds_type = selection.selection_name
-          .toLowerCase()
-          .includes('over')
-          ? 'over_odds'
-          : 'under_odds'
-        combined_data[key][odds_type] = selection.odds_american
       }
     })
   })
@@ -198,8 +185,7 @@ function TableHeader({ has_line, is_alt_line }) {
     has_line && !is_alt_line ? (
       <>
         <div className='table__cell'>Line</div>
-        <div className='table__cell'>Over</div>
-        <div className='table__cell'>Under</div>
+        <div className='table__cell'>Type</div>
       </>
     ) : (
       <div className='table__cell'>Odds</div>
@@ -243,8 +229,7 @@ function TableBody({ table_data, has_line, is_alt_line, percentiles }) {
     has_line && !is_alt_line ? (
       <>
         <div className='table__cell'>{row.line}</div>
-        <div className='table__cell'>{row.over_odds}</div>
-        <div className='table__cell'>{row.under_odds}</div>
+        <div className='table__cell'>{row.selection_type}</div>
       </>
     ) : (
       <div className='table__cell'>{row.odds}</div>
