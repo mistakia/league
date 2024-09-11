@@ -1,6 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
+import Immutable from 'immutable'
 
 export default function PercentileMetric({
   percentile = {},
@@ -13,12 +14,17 @@ export default function PercentileMetric({
   percentiles,
   percentile_key,
   show_positivity,
+  is_percentage = false,
   prefix = ''
 }) {
   let color
 
   if (percentile_key) {
-    percentile = percentiles.getIn([percentile_key, field], {})
+    if (Immutable.Map.isMap(percentiles)) {
+      percentile = percentiles.getIn([percentile_key, field], {})
+    } else {
+      percentile = percentiles[percentile_key][field]
+    }
   }
 
   if (value && value < percentile.p25) {
@@ -40,18 +46,23 @@ export default function PercentileMetric({
       return '-'
     }
 
-    const numeric_value = Number(value)
+    let numeric_value = Number(value)
 
     if (isNaN(numeric_value)) {
       return '-'
+    }
+
+    if (is_percentage) {
+      numeric_value *= 100
     }
 
     const is_negative = numeric_value < 0
     const sign_str = is_negative ? '-' : show_positivity ? '+' : ''
     const val = numeric_value.toFixed(fixed)
     const abs_value = Math.abs(val)
+    const percentage_suffix = is_percentage ? '%' : ''
 
-    return `${sign_str}${prefix}${abs_value}`
+    return `${sign_str}${prefix}${abs_value}${percentage_suffix}`
   }
 
   const body = children || format_value(value)
@@ -76,5 +87,6 @@ PercentileMetric.propTypes = {
   className: PropTypes.string,
   scaled: PropTypes.bool,
   fixed: PropTypes.number,
-  prefix: PropTypes.string
+  prefix: PropTypes.string,
+  is_percentage: PropTypes.bool
 }
