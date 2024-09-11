@@ -158,9 +158,10 @@ const get_hits = ({
   )
 
 const process_market_selection_hit_rates = async ({
-  year = constants.season.year
+  year = constants.season.year,
+  missing_only = false
 } = {}) => {
-  const prop_selections = await db('prop_market_selections_index')
+  const prop_selections_query = db('prop_market_selections_index')
     .select(
       'prop_markets_index.esbid',
       'prop_markets_index.market_type',
@@ -208,6 +209,16 @@ const process_market_selection_hit_rates = async ({
       'nfl_games.week',
       'nfl_games.year'
     )
+
+  if (missing_only) {
+    prop_selections_query.where(function () {
+      this.whereNull('prop_market_selections_index.result').orWhereNull(
+        'prop_market_selections_index.overall_hit_rate_hard'
+      )
+    })
+  }
+
+  const prop_selections = await prop_selections_query
 
   log(`Processing ${prop_selections.length} prop selections`)
 
@@ -405,7 +416,10 @@ const process_market_selection_hit_rates = async ({
 const main = async () => {
   let error
   try {
-    await process_market_selection_hit_rates({ year: argv.year })
+    await process_market_selection_hit_rates({
+      year: argv.year,
+      missing_only: argv.missing_only
+    })
   } catch (err) {
     error = err
     log(error)
