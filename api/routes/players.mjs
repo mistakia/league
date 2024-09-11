@@ -290,7 +290,17 @@ router.get('/:pid/markets/?', async (req, res) => {
         odds_american: row.odds_american,
         result: row.result,
         timestamp: row.selection_timestamp,
-        time_type: row.selection_time_type
+        time_type: row.selection_time_type,
+        current_season_hit_rate_hard: row.current_season_hit_rate_hard,
+        current_season_edge_hard: row.current_season_edge_hard,
+        last_five_hit_rate_hard: row.last_five_hit_rate_hard,
+        last_five_edge_hard: row.last_five_edge_hard,
+        last_ten_hit_rate_hard: row.last_ten_hit_rate_hard,
+        last_ten_edge_hard: row.last_ten_edge_hard,
+        last_season_hit_rate_hard: row.last_season_hit_rate_hard,
+        last_season_edge_hard: row.last_season_edge_hard,
+        overall_hit_rate_hard: row.overall_hit_rate_hard,
+        overall_edge_hard: row.overall_edge_hard
       })
 
       return acc
