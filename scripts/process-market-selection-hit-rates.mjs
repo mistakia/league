@@ -86,6 +86,7 @@ const get_result = ({
     case player_game_prop_types.GAME_RUSHING_ATTEMPTS:
       return compare(player_gamelog.ra, line, selection_type)
 
+    case player_game_prop_types.GAME_ALT_RUSHING_RECEIVING_YARDS:
     case player_game_prop_types.GAME_RUSHING_RECEIVING_YARDS:
       return compare(
         player_gamelog.ry + player_gamelog.recy,
@@ -133,7 +134,7 @@ const get_result = ({
 
     default:
       log(`Unknown market type: ${market_type}`)
-      return false
+      return null
   }
 }
 
