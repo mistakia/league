@@ -12,6 +12,7 @@ import { player_game_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process-market-selection-hit-rates')
 debug.enable('process-market-selection-hit-rates')
+const unsupported_market_types = new Set()
 
 const get_result = ({
   line,
@@ -134,6 +135,7 @@ const get_result = ({
 
     default:
       log(`Unknown market type: ${market_type}`)
+      unsupported_market_types.add(market_type)
       return null
   }
 }
@@ -232,6 +234,13 @@ const process_market_selection_hit_rates = async ({
 
   for (const selection of prop_selections) {
     const player_gamelogs = player_gamelogs_by_pid[selection.selection_pid]
+
+    if (!player_gamelogs) {
+      log(
+        `No player gamelogs found for selection ${selection.source_selection_id}`
+      )
+      continue
+    }
 
     const current_season_gamelogs = player_gamelogs.filter(
       (g) =>
@@ -361,6 +370,13 @@ const process_market_selection_hit_rates = async ({
         selection_pid: selection.selection_pid
       })
       .update(update)
+  }
+
+  if (unsupported_market_types.size > 0) {
+    log('Unsupported market types encountered:')
+    unsupported_market_types.forEach((type) => log(`- ${type}`))
+  } else {
+    log('All market types were supported.')
   }
 }
 
