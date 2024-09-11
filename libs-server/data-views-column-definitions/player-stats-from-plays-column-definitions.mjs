@@ -276,11 +276,12 @@ export default {
     stat_name: 'pass_atts_from_plays'
   }),
   // TODO prevent from applying rate_type to this
-  player_pass_rate_over_expected_from_plays: player_stat_from_plays({
-    pid_columns: ['psr_pid'],
-    with_select_string: `SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END) - SUM(xpass_prob)`,
-    stat_name: 'pass_rate_over_expected_from_plays'
-  }),
+  // TODO set the `qb_pid` for each play
+  // player_pass_rate_over_expected_from_plays: player_stat_from_plays({
+  //   pid_columns: ['qb_pid'],
+  //   with_select_string: `AVG(pass_oe)`,
+  //   stat_name: 'pass_rate_over_expected_from_plays'
+  // }),
   player_pass_touchdowns_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
     with_select_string: `SUM(CASE WHEN td = true THEN 1 ELSE 0 END)`,
