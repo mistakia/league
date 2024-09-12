@@ -1,7 +1,9 @@
 import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
 
-import { constants } from '@libs-shared'
+import { common_column_params } from '@libs-shared'
+
+const { single_year, single_year_offset } = common_column_params
 
 const league_format_hash_param = {
   label: 'League Format',
@@ -32,23 +34,9 @@ const from_league_format_seasonlogs = (field) => ({
   ...from_format_player_logs(field),
   column_groups: [COLUMN_GROUPS.FANTASY_LEAGUE, COLUMN_GROUPS.SEASON],
   column_params: {
-    year: {
-      values: constants.years,
-      data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-      default_value: constants.season.stats_season_year,
-      single: true,
-      enable_multi_on_split: ['year']
-    },
+    year: single_year,
     league_format_hash: league_format_hash_param,
-    year_offset: {
-      data_type: table_constants.TABLE_DATA_TYPES.RANGE,
-      label: 'Year + N',
-      min: -30,
-      max: 30,
-      default_value: 0,
-      is_single: true,
-      enable_on_splits: ['year']
-    }
+    year_offset: single_year_offset
   },
   splits: ['year']
 })

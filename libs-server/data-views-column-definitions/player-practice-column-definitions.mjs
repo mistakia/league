@@ -6,7 +6,7 @@ import { constants } from '#libs-shared'
 const valid_practice_days = ['m', 'tu', 'w', 'th', 'f', 's', 'su']
 
 const get_params = ({ params = {} }) => {
-  let year = params.year || [constants.season.year]
+  let year = params.year || [constants.season.stats_season_year]
   if (!Array.isArray(year)) {
     year = [year]
   }

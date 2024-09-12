@@ -1,21 +1,12 @@
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
-import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { add_team_stats_play_by_play_with_statement } from '#libs-server/data-views/add-team-stats-play-by-play-with-statement.mjs'
 import { get_rate_type_sql } from '#libs-server/data-views/select-string.mjs'
 import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
+import get_stats_column_param_key from '#libs-server/data-views/get-stats-column-param-key.mjs'
 
 const generate_table_alias = ({ params = {} } = {}) => {
-  const column_param_keys = Object.keys(nfl_plays_column_params).sort()
-  const key = column_param_keys
-    .map((key) => {
-      const value = params[key]
-      return Array.isArray(value)
-        ? `${key}${value.sort().join('')}`
-        : `${key}${value || ''}`
-    })
-    .join('')
-
+  const key = get_stats_column_param_key({ params })
   return get_table_hash(`team_stats_from_plays__${key}`)
 }
 

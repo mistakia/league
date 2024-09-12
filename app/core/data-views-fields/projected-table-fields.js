@@ -1,6 +1,8 @@
 import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
-import { constants } from '@libs-shared'
+import { constants, common_column_params } from '@libs-shared'
+
+const { single_year, single_week } = common_column_params
 
 const projection_years = [2020, 2021, 2022, 2023, 2024]
 
@@ -61,29 +63,19 @@ export default function ({ week }) {
       period === 'Season'
         ? {
             year: {
-              values: projection_years,
-              data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-              default_value: constants.season.year,
-              single: true,
-              enable_multi_on_split: ['year']
+              ...single_year,
+              default_value: constants.year,
+              values: projection_years
             }
           }
         : period === 'Week'
           ? {
               year: {
-                values: projection_years,
-                data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-                default_value: constants.season.year,
-                single: true,
-                enable_multi_on_split: ['year']
+                ...single_year,
+                default_value: constants.year,
+                values: projection_years
               },
-              week: {
-                values: constants.nfl_weeks,
-                data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-                default_value: constants.season.week,
-                single: true,
-                enable_multi_on_split: ['week']
-              }
+              week: single_week
             }
           : undefined
   })
