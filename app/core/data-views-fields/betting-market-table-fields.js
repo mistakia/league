@@ -24,6 +24,13 @@ const create_base_column_params = () => ({
     default_value: bookmaker_constants.bookmakers.FANDUEL,
     single: true
   },
+  time_type: {
+    label: 'Time Type',
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    values: ['OPEN', 'CLOSE'],
+    default_value: 'CLOSE',
+    single: true
+  },
   year: {
     ...single_year,
     default_value: constants.year,
@@ -32,7 +39,7 @@ const create_base_column_params = () => ({
   week: {
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     values: constants.nfl_weeks,
-    default_value: 1,
+    default_value: constants.week,
     single: true
   }
 })
