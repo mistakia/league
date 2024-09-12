@@ -104,6 +104,21 @@ class PlayerNameExpanded extends Player {
     const player_nfl_status = playerMap.get('nfl_status')
     const player_game_status = playerMap.get('game_status')
     const slot = playerMap.get('slot')
+
+    // game status should supersede nfl status
+    const player_status_label =
+      constants.nfl_player_status_abbreviations[player_game_status] ||
+      constants.nfl_player_status_abbreviations[player_nfl_status]
+    const player_status_description =
+      constants.nfl_player_status_descriptions[player_game_status] ||
+      constants.nfl_player_status_descriptions[player_nfl_status]
+    const player_has_non_active_status = Boolean(
+      (constants.nfl_player_status_abbreviations[player_nfl_status] &&
+        player_nfl_status !== constants.player_nfl_status.ACTIVE) ||
+        (constants.nfl_player_status_abbreviations[player_game_status] &&
+          player_game_status !== constants.player_nfl_status.ACTIVE)
+    )
+
     return (
       <div className={classNames.join(' ')}>
         {Boolean(isHosted && playerMap.get('pid') && !hideActions) && (
@@ -140,26 +155,11 @@ class PlayerNameExpanded extends Player {
             <Position pos={playerMap.get('pos')} />
             <NFLTeam team={playerMap.get('team')} />
             <GameStatus status={status} playerMap={playerMap} />
-            {Boolean(
-              (constants.nfl_player_status_abbreviations[player_nfl_status] &&
-                player_nfl_status !== constants.player_nfl_status.ACTIVE) ||
-                (constants.nfl_player_status_abbreviations[
-                  player_game_status
-                ] &&
-                  player_game_status !== constants.player_nfl_status.ACTIVE)
-            ) && (
+            {player_has_non_active_status && (
               <PlayerLabel
                 type='game'
-                label={
-                  constants.nfl_player_status_abbreviations[
-                    player_nfl_status
-                  ] ||
-                  constants.nfl_player_status_abbreviations[player_game_status]
-                }
-                description={
-                  constants.nfl_player_status_descriptions[player_nfl_status] ||
-                  constants.nfl_player_status_descriptions[player_game_status]
-                }
+                label={player_status_label}
+                description={player_status_description}
               />
             )}
           </div>
