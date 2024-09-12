@@ -3,7 +3,7 @@ import debug from 'debug'
 // import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-// import { constants } from '#libs-shared'
+import { constants } from '#libs-shared'
 import { is_main } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -106,6 +106,16 @@ const calculate_league_careerlogs = async ({ lid }) => {
       careerlog.pl += league_team_seasonlog.pl
       careerlog.pmax = Math.max(careerlog.pmax, league_team_seasonlog.pmax)
       careerlog.pmin = Math.min(careerlog.pmin, league_team_seasonlog.pmin)
+      careerlog.weekly_high_scores +=
+        league_team_seasonlog.weekly_high_scores || 0
+
+      if (
+        league_team_seasonlog.year === constants.season.year &&
+        constants.season.week < constants.season.finalWeek
+      ) {
+        continue
+      }
+
       careerlog.worst_regular_season_finish = Math.max(
         careerlog.worst_regular_season_finish,
         league_team_seasonlog.regular_season_finish
@@ -130,8 +140,6 @@ const calculate_league_careerlogs = async ({ lid }) => {
         careerlog.last_season_year,
         league_team_seasonlog.year
       )
-      careerlog.weekly_high_scores +=
-        league_team_seasonlog.weekly_high_scores || 0
 
       careerlog.post_seasons +=
         league_team_seasonlog.overall_finish <= 6 ? 1 : 0
