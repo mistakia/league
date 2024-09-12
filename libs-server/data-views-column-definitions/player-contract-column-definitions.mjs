@@ -7,7 +7,7 @@ import get_join_func from '#libs-server/get-join-func.mjs'
 // TODO career_year
 // refactor to use with/cte table to handle career_year
 
-const get_contract_year = (value) => {
+const get_contract_year = (value = constants.season.year) => {
   const year = Array.isArray(value) ? value[0] : value
   if (typeof year === 'string' && year.toLowerCase() === 'total') {
     return 'Total'
@@ -16,7 +16,7 @@ const get_contract_year = (value) => {
 }
 
 const player_contract_table_alias = ({ params = {} } = {}) => {
-  const year = get_contract_year(params.contract_year || constants.season.year)
+  const year = get_contract_year(params.contract_year)
 
   let career_year = params.career_year || []
   if (!Array.isArray(career_year)) {
@@ -34,7 +34,7 @@ const player_contract_join = ({
   params = {}
 } = {}) => {
   const join_func = get_join_func(join_type)
-  const year = get_contract_year(params.contract_year || constants.season.year)
+  const year = get_contract_year(params.contract_year)
 
   const join_conditions = function () {
     this.on(`${table_name}.pid`, '=', 'player.pid')

@@ -1,64 +1,7 @@
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import db from '#db'
 
-export const get_per_game_cte_table_name = ({ params = {} } = {}) => {
-  let year = params.year || []
-  if (!Array.isArray(year)) {
-    year = [year]
-  }
-
-  let week = params.week || []
-  if (!Array.isArray(week)) {
-    week = [week]
-  }
-
-  let year_offset = params.year_offset || []
-  if (!Array.isArray(year_offset)) {
-    year_offset = [year_offset]
-  }
-
-  let career_year = params.career_year || []
-  if (!Array.isArray(career_year)) {
-    career_year = [career_year]
-  }
-
-  let career_game = params.career_game || []
-  if (!Array.isArray(career_game)) {
-    career_game = [career_game]
-  }
-
-  const adjusted_years = year.flatMap((y) => {
-    const base_year = Number(y)
-    if (year_offset.length === 2) {
-      // If year_offset is a range
-      const max_offset = Math.max(...year_offset.map(Number))
-      const min_offset = Math.min(...year_offset.map(Number))
-      return Array.from(
-        { length: max_offset - min_offset + 1 },
-        (_, i) => base_year + min_offset + i
-      )
-    } else if (year_offset.length === 1) {
-      return [base_year + Number(year_offset[0])]
-    } else {
-      return [base_year]
-    }
-  })
-
-  const all_years = year.length
-    ? [...new Set([...year, ...adjusted_years])].sort((a, b) => a - b)
-    : []
-
-  return get_table_hash(
-    `games_played_years_${all_years.join('_')}_weeks_${week.join('_')}_career_year_${career_year.join('_')}_career_game_${career_game.join('_')}`
-  )
-}
-
-export const add_per_game_cte = ({
-  players_query,
-  params,
-  rate_type_table_name,
-  splits = []
-}) => {
+const get_default_params = (params = {}) => {
   let year = params.year || []
   if (!Array.isArray(year)) {
     year = [year]
@@ -105,6 +48,33 @@ export const add_per_game_cte = ({
   const all_years = year.length
     ? [...new Set([...year, ...adjusted_years])].sort((a, b) => a - b)
     : []
+
+  return {
+    year,
+    week,
+    career_year,
+    career_game,
+    all_years
+  }
+}
+
+export const get_per_game_cte_table_name = ({ params = {} } = {}) => {
+  const { week, career_year, career_game, all_years } =
+    get_default_params(params)
+
+  return get_table_hash(
+    `games_played_years_${all_years.join('_')}_weeks_${week.join('_')}_career_year_${career_year.join('_')}_career_game_${career_game.join('_')}`
+  )
+}
+
+export const add_per_game_cte = ({
+  players_query,
+  params,
+  rate_type_table_name,
+  splits = []
+}) => {
+  const { week, career_year, career_game, all_years } =
+    get_default_params(params)
 
   let cte_query = db('player_gamelogs')
     .select('player_gamelogs.pid')

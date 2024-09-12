@@ -52,6 +52,7 @@ export const career_game = {
 export const year = {
   values: constants.years,
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+  default_value: constants.season.stats_season_year,
   dynamic_values: [
     {
       dynamic_type: 'last_n_years',
@@ -66,6 +67,14 @@ export const year = {
       has_value_field: true
     }
   ]
+}
+
+export const single_year = {
+  values: constants.years,
+  data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+  single: true,
+  default_value: constants.season.stats_season_year,
+  enable_multi_on_split: ['year']
 }
 
 export const week = {
@@ -107,5 +116,15 @@ export const year_offset = {
   min: -30,
   max: 30,
   default_value: 0,
+  enable_on_splits: ['year']
+}
+
+export const single_year_offset = {
+  data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+  label: 'Year + N',
+  min: -30,
+  max: 30,
+  default_value: 0,
+  is_single: true,
   enable_on_splits: ['year']
 }

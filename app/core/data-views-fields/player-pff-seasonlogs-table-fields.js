@@ -1,6 +1,8 @@
-import { constants } from '#libs-shared'
+import { constants, common_column_params } from '@libs-shared'
 import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
+
+const { single_year } = common_column_params
 
 const pff_seasonlog_field = (props) => ({
   ...props,
@@ -9,12 +11,10 @@ const pff_seasonlog_field = (props) => ({
   data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
   column_params: {
     year: {
+      ...single_year,
       values: [...Array(constants.season.year - 2006).keys()].map(
         (i) => constants.season.year - i
-      ),
-      data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-      single: true,
-      default_value: constants.season.stats_season_year
+      )
     }
   }
 })

@@ -1,26 +1,17 @@
 import db from '#db'
-import { nfl_plays_column_params } from '#libs-shared'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { add_defensive_play_by_play_with_statement } from '#libs-server/data-views/add-defensive-play-by-play-with-statement.mjs'
 import { get_rate_type_sql } from '#libs-server/data-views/select-string.mjs'
 import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
+import get_stats_column_param_key from '#libs-server/data-views/get-stats-column-param-key.mjs'
 
 const defensive_player_table_alias = ({ pid_columns, params = {} } = {}) => {
   if (!pid_columns || !Array.isArray(pid_columns) || pid_columns.length === 0) {
     throw new Error('pid_columns must be a non-empty array')
   }
 
-  const column_param_keys = Object.keys(nfl_plays_column_params).sort()
-  const key = column_param_keys
-    .map((key) => {
-      const value = params[key]
-      return Array.isArray(value)
-        ? `${key}${value.sort().join('')}`
-        : `${key}${value || ''}`
-    })
-    .join('')
-
+  const key = get_stats_column_param_key({ params })
   const pid_columns_string = pid_columns.sort().join('_')
   return get_table_hash(`defensive_player_stats_${pid_columns_string}_${key}`)
 }

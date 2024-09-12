@@ -2,7 +2,7 @@ import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
 import { constants, common_column_params } from '#libs-shared'
 
-const { year, week } = common_column_params
+const { single_year, single_week } = common_column_params
 
 const create_player_rankings_field = (props) => ({
   ...props,
@@ -11,22 +11,18 @@ const create_player_rankings_field = (props) => ({
   data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
   column_params: {
     year: {
-      ...year,
-      single: true,
-      default_value: constants.season.year,
-      enable_multi_on_split: ['year']
+      ...single_year,
+      default_value: constants.year
     },
     week: {
-      data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-      single: true,
+      ...single_week,
       default_value: constants.season.week,
-      enable_multi_on_split: ['week'],
       values: [
         {
           value: 0,
           label: 'Season'
         },
-        ...week.values
+        ...single_week.values
       ]
     },
     ranking_source_id: {

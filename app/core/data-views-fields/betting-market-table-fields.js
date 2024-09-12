@@ -4,7 +4,7 @@ import { bookmaker_constants } from '#libs-shared'
 import COLUMN_GROUPS from './column-groups'
 import { constants, common_column_params } from '@libs-shared'
 
-const { career_year, career_game } = common_column_params
+const { career_year, career_game, single_year } = common_column_params
 
 const from_betting_market = (field) => ({
   data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
@@ -25,11 +25,9 @@ const create_base_column_params = () => ({
     single: true
   },
   year: {
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-    values: [2023, 2024],
-    default_value: 2024,
-    single: true,
-    enable_multi_on_split: ['year']
+    ...single_year,
+    default_value: constants.year,
+    values: [2023, 2024]
   },
   week: {
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
@@ -113,11 +111,9 @@ export default {
         single: true
       },
       year: {
-        data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-        values: [2023, 2024],
-        default_value: 2024,
-        single: true,
-        enable_multi_on_split: ['year']
+        ...single_year,
+        default_value: constants.year,
+        values: [2023, 2024]
       },
       career_year
     }

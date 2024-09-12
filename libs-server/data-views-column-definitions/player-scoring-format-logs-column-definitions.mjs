@@ -7,7 +7,7 @@ import data_view_join_function from '#libs-server/data-views/data-view-join-func
 // TODO career_year
 
 const get_default_params = ({ params = {} } = {}) => {
-  let year = params.year || constants.season.year
+  let year = params.year || constants.season.stats_season_year
   if (Array.isArray(year)) {
     year = year[0]
   }

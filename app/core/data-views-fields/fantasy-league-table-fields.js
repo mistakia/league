@@ -3,7 +3,9 @@ import React from 'react'
 import PlayerRowStatusColumn from '@components/player-row-status-column'
 import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
-import { constants } from '@libs-shared'
+import { common_column_params } from '@libs-shared'
+
+const { single_year, single_week } = common_column_params
 
 export default function ({ week }) {
   return {
@@ -43,18 +45,8 @@ export default function ({ week }) {
       size: 70,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_params: {
-        year: {
-          values: constants.years,
-          data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-          default_value: constants.season.stats_season_year,
-          single: true
-        },
-        week: {
-          values: constants.nfl_weeks,
-          data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-          default_value: constants.season.week,
-          single: true
-        }
+        year: single_year,
+        week: single_week
       }
     },
 
