@@ -13,7 +13,6 @@ const shared_properties = {
     date: {
       disable_on_splits: true,
       data_type: table_constants.TABLE_DATA_TYPES.DATE,
-      default_value: null,
       default_label: 'Latest',
       datepicker_props: {
         disableFuture: true
