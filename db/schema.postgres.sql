@@ -2910,7 +2910,7 @@ CREATE TABLE public.nfl_play_stats_current_week (
 CREATE TABLE public.nfl_plays (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    sequence integer,
+    sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
@@ -4278,7 +4278,7 @@ CREATE TABLE public.nfl_plays_rusher (
 CREATE TABLE public.nfl_plays_year_2000 (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    sequence integer,
+    sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
@@ -4604,7 +4604,7 @@ CREATE TABLE public.nfl_plays_year_2000 (
 CREATE TABLE public.nfl_plays_year_2001 (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    sequence integer,
+    sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
@@ -4930,7 +4930,7 @@ CREATE TABLE public.nfl_plays_year_2001 (
 CREATE TABLE public.nfl_plays_year_2002 (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    sequence integer,
+    sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
@@ -5256,7 +5256,7 @@ CREATE TABLE public.nfl_plays_year_2002 (
 CREATE TABLE public.nfl_plays_year_2003 (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    sequence integer,
+    sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
@@ -5582,7 +5582,7 @@ CREATE TABLE public.nfl_plays_year_2003 (
 CREATE TABLE public.nfl_plays_year_2004 (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    sequence integer,
+    sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
@@ -5908,7 +5908,7 @@ CREATE TABLE public.nfl_plays_year_2004 (
 CREATE TABLE public.nfl_plays_year_2005 (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    sequence integer,
+    sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
@@ -6234,7 +6234,7 @@ CREATE TABLE public.nfl_plays_year_2005 (
 CREATE TABLE public.nfl_plays_year_2006 (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    sequence integer,
+    sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
@@ -6560,7 +6560,7 @@ CREATE TABLE public.nfl_plays_year_2006 (
 CREATE TABLE public.nfl_plays_year_2007 (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    sequence integer,
+    sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
@@ -6886,7 +6886,7 @@ CREATE TABLE public.nfl_plays_year_2007 (
 CREATE TABLE public.nfl_plays_year_2008 (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    sequence integer,
+    sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
@@ -7212,7 +7212,7 @@ CREATE TABLE public.nfl_plays_year_2008 (
 CREATE TABLE public.nfl_plays_year_2009 (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    sequence integer,
+    sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
@@ -7538,7 +7538,7 @@ CREATE TABLE public.nfl_plays_year_2009 (
 CREATE TABLE public.nfl_plays_year_2010 (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    sequence integer,
+    sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
@@ -7864,7 +7864,7 @@ CREATE TABLE public.nfl_plays_year_2010 (
 CREATE TABLE public.nfl_plays_year_2011 (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    sequence integer,
+    sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
@@ -8190,7 +8190,7 @@ CREATE TABLE public.nfl_plays_year_2011 (
 CREATE TABLE public.nfl_plays_year_2012 (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    sequence integer,
+    sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
@@ -8516,7 +8516,7 @@ CREATE TABLE public.nfl_plays_year_2012 (
 CREATE TABLE public.nfl_plays_year_2013 (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    sequence integer,
+    sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
@@ -8842,7 +8842,7 @@ CREATE TABLE public.nfl_plays_year_2013 (
 CREATE TABLE public.nfl_plays_year_2014 (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    sequence integer,
+    sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
@@ -9168,7 +9168,7 @@ CREATE TABLE public.nfl_plays_year_2014 (
 CREATE TABLE public.nfl_plays_year_2015 (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    sequence integer,
+    sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
@@ -9494,7 +9494,7 @@ CREATE TABLE public.nfl_plays_year_2015 (
 CREATE TABLE public.nfl_plays_year_2016 (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    sequence integer,
+    sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
@@ -9820,7 +9820,7 @@ CREATE TABLE public.nfl_plays_year_2016 (
 CREATE TABLE public.nfl_plays_year_2017 (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    sequence integer,
+    sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
@@ -10146,7 +10146,7 @@ CREATE TABLE public.nfl_plays_year_2017 (
 CREATE TABLE public.nfl_plays_year_2018 (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    sequence integer,
+    sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
@@ -10472,7 +10472,7 @@ CREATE TABLE public.nfl_plays_year_2018 (
 CREATE TABLE public.nfl_plays_year_2019 (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    sequence integer,
+    sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
@@ -10798,7 +10798,7 @@ CREATE TABLE public.nfl_plays_year_2019 (
 CREATE TABLE public.nfl_plays_year_2020 (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    sequence integer,
+    sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
@@ -11124,7 +11124,7 @@ CREATE TABLE public.nfl_plays_year_2020 (
 CREATE TABLE public.nfl_plays_year_2021 (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    sequence integer,
+    sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
@@ -11450,7 +11450,7 @@ CREATE TABLE public.nfl_plays_year_2021 (
 CREATE TABLE public.nfl_plays_year_2022 (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    sequence integer,
+    sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
@@ -11776,7 +11776,7 @@ CREATE TABLE public.nfl_plays_year_2022 (
 CREATE TABLE public.nfl_plays_year_2023 (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    sequence integer,
+    sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
@@ -12102,7 +12102,7 @@ CREATE TABLE public.nfl_plays_year_2023 (
 CREATE TABLE public.nfl_plays_year_2024 (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    sequence integer,
+    sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
