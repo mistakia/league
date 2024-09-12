@@ -115,7 +115,6 @@ export const year_offset = {
   label: 'Year + N',
   min: -30,
   max: 30,
-  default_value: 0,
   enable_on_splits: ['year']
 }
 
