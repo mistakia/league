@@ -460,6 +460,7 @@ const create_team_betting_market_field = ({ column_name, column_alias }) => ({
   }
 })
 
+// is_player_game_prop is used to set the default params for the field
 export default {
   player_season_prop_line_from_betting_markets:
     create_player_betting_market_field({
