@@ -17,7 +17,12 @@ const format_player_ids = async () => {
   let error_count = 0
   let unchanged_count = 0
 
-  const players = await db('player').whereNot({ pos: 'DEF' })
+  const players = await db('player').whereNotIn('pos', [
+    'DEF',
+    'OFF',
+    'TM',
+    'DST'
+  ])
 
   for (const player of players) {
     let pid

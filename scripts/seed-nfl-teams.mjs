@@ -21,6 +21,8 @@ const seed_nfl_teams = async () => {
     constants.nflTeams
   )
 
+  log(`loaded ${player_rows_teams.length} player rows`)
+
   const inserts = []
 
   for (const {
@@ -37,7 +39,7 @@ const seed_nfl_teams = async () => {
     jnum
   } of player_rows_teams) {
     inserts.push({
-      pid: `${pid}_DEF`,
+      pid: `${pid}-DEF`,
       fname,
       lname: `${lname} Defense`,
       formatted: `${formatted} defense`,
@@ -51,9 +53,42 @@ const seed_nfl_teams = async () => {
       start,
       jnum
     })
+    inserts.push({
+      pid: `${pid}-OFF`,
+      fname,
+      lname: `${lname} Offense`,
+      formatted: `${formatted} offense`,
+      pname,
+      pos: 'OFF',
+      pos1: 'OFF',
+      current_nfl_team,
+      dob,
+      height,
+      weight,
+      start,
+      jnum
+    })
+    inserts.push({
+      pid: `${pid}-DST`,
+      fname,
+      lname: `${lname} Defense and Special Teams`,
+      formatted: `${formatted} defense and special teams`,
+      pname,
+      pos: 'DST',
+      pos1: 'DST',
+      current_nfl_team,
+      dob,
+      height,
+      weight,
+      start,
+      jnum
+    })
   }
 
-  await db('player').insert(inserts)
+  if (inserts.length) {
+    await db('player').insert(inserts).onConflict(['pid']).ignore()
+    log(`inserted ${inserts.length} player rows`)
+  }
 }
 
 async function main() {
