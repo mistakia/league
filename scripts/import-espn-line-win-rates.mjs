@@ -137,8 +137,6 @@ const import_espn_line_win_rates = async () => {
     }
   }
 
-  console.log(extracted_data)
-
   // Insert player win rates data
   const player_win_rate_types = {
     pass_rush: 'PASS_RUSH',
@@ -146,6 +144,9 @@ const import_espn_line_win_rates = async () => {
     run_stop: 'RUN_STOP',
     run_block: 'RUN_BLOCK'
   }
+
+  const player_history_inserts = []
+  const player_index_inserts = []
 
   for (const [data_key, win_rate_type] of Object.entries(
     player_win_rate_types
@@ -165,31 +166,40 @@ const import_espn_line_win_rates = async () => {
         year: constants.season.year
       }
 
-      await db('espn_player_win_rates_history').insert(insert_data)
-      await db('espn_player_win_rates_index')
-        .insert(insert_data)
-        .onConflict(['player_name', 'espn_id', 'espn_win_rate_type', 'year'])
-        .merge()
+      player_history_inserts.push(insert_data)
+      player_index_inserts.push(insert_data)
     }
   }
 
+  await db('espn_player_win_rates_history').insert(player_history_inserts)
+  await db('espn_player_win_rates_index')
+    .insert(player_index_inserts)
+    .onConflict(['player_name', 'espn_id', 'espn_win_rate_type', 'year'])
+    .merge()
+
+  log(`inserted ${player_history_inserts.length} player win rate rows`)
+
+  const team_history_inserts = []
+  const team_index_inserts = []
+
   for (const team of extracted_data.team) {
     const insert_data = {
-      team: team.team,
-      pass_rush_win_rate: team.pass_rush_win_rate,
-      run_stop_win_rate: team.run_stop_win_rate,
-      pass_block_win_rate: team.pass_block_win_rate,
-      run_block_win_rate: team.run_block_win_rate,
+      ...team,
       timestamp,
       year: constants.season.year
     }
 
-    await db('espn_team_win_rates_history').insert(insert_data)
-    await db('espn_team_win_rates_index')
-      .insert(insert_data)
-      .onConflict(['team', 'year'])
-      .merge()
+    team_history_inserts.push(insert_data)
+    team_index_inserts.push(insert_data)
   }
+
+  await db('espn_team_win_rates_history').insert(team_history_inserts)
+  await db('espn_team_win_rates_index')
+    .insert(team_index_inserts)
+    .onConflict(['team', 'year'])
+    .merge()
+
+  log(`inserted ${team_history_inserts.length} team win rate rows`)
 }
 
 const main = async () => {
