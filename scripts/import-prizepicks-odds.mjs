@@ -53,6 +53,7 @@ const format_market = async ({
     source_id: 'PRIZEPICKS',
     source_market_id: prizepicks_market.id,
     source_selection_id: `${prizepicks_market.id}-over`,
+    selection_type: 'OVER',
 
     selection_pid: player_row?.pid || null,
     selection_name: 'over',
@@ -66,6 +67,7 @@ const format_market = async ({
     source_id: 'PRIZEPICKS',
     source_market_id: prizepicks_market.id,
     source_selection_id: `${prizepicks_market.id}-under`,
+    selection_type: 'UNDER',
 
     selection_pid: player_row?.pid || null,
     selection_name: 'under',
@@ -76,7 +78,9 @@ const format_market = async ({
   })
 
   return {
-    market_type: null, // TODO use projection_type and stat_type
+    market_type: prizepicks.get_market_type(
+      prizepicks_market.attributes?.stat_type
+    ),
 
     source_id: 'PRIZEPICKS',
     source_market_id: prizepicks_market.id,
@@ -89,13 +93,17 @@ const format_market = async ({
     open: true,
     live: false,
     selection_count: 2,
+    year: constants.season.year,
 
     timestamp,
     selections
   }
 }
 
-const import_prizepicks_odds = async () => {
+const import_prizepicks_odds = async ({
+  dry_run = false,
+  write_file = false
+} = {}) => {
   // do not pull in reports outside of the NFL season
   if (
     !constants.season.now.isBetween(
@@ -111,6 +119,7 @@ const import_prizepicks_odds = async () => {
   const timestamp = Math.round(Date.now() / 1000)
   const formatted_markets = []
   const all_markets = []
+  const missing_market_types = new Set()
 
   const nfl_games = await db('nfl_games').where({
     week: constants.season.nfl_seas_week,
@@ -137,27 +146,36 @@ const import_prizepicks_odds = async () => {
         continue
       }
 
-      formatted_markets.push(
-        await format_market({
-          prizepicks_market: item,
-          prizepicks_player,
-          timestamp,
-          nfl_games
-        })
-      )
+      const market = await format_market({
+        prizepicks_market: item,
+        prizepicks_player,
+        timestamp,
+        nfl_games
+      })
+
+      if (!market.market_type) {
+        missing_market_types.add(item.attributes?.stat_type)
+      }
+
+      formatted_markets.push(market)
     }
 
     page += 1
   } while (!data || data.meta.current_page < data.meta.total_pages)
 
-  if (argv.write) {
+  if (write_file) {
     await fs.writeFile(
       `./tmp/prizepick-markets-${timestamp}.json`,
       JSON.stringify(all_markets, null, 2)
     )
   }
 
-  if (argv.dry) {
+  if (missing_market_types.size > 0) {
+    log('Stat types with missing market types:')
+    missing_market_types.forEach((stat_type) => log(stat_type))
+  }
+
+  if (dry_run) {
     log(formatted_markets[0])
     console.timeEnd('import-prizepicks-odds')
     return
@@ -174,7 +192,10 @@ const import_prizepicks_odds = async () => {
 export const job = async () => {
   let error
   try {
-    await import_prizepicks_odds()
+    await import_prizepicks_odds({
+      dry_run: argv.dry,
+      write_file: argv.write
+    })
   } catch (err) {
     error = err
     log(error)
