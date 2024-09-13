@@ -19,10 +19,16 @@ const create_base_column_params = () => ({
     values: [
       bookmaker_constants.bookmakers.FANDUEL,
       bookmaker_constants.bookmakers.DRAFTKINGS,
-      bookmaker_constants.bookmakers.PINNACLE
+      bookmaker_constants.bookmakers.PINNACLE,
+      bookmaker_constants.bookmakers.PRIZEPICKS
     ],
     default_value: bookmaker_constants.bookmakers.FANDUEL,
     single: true
+  },
+  selection_type: {
+    label: 'Selection Type',
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    values: ['OVER', 'UNDER', 'YES', 'NO']
   },
   time_type: {
     label: 'Time Type',
