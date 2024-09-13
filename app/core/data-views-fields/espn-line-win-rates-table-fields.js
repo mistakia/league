@@ -55,12 +55,12 @@ const create_team_espn_line_field = ({
 
 export default {
   player_espn_line_win_rate: create_espn_line_field({
-    column_title: 'ESPN Line Play Win Rate',
+    column_title: 'Player ESPN Line Play Win Rate',
     header_label: 'Win Rate',
     player_value_path: 'espn_line_win_rate'
   }),
   player_espn_line_wins: create_espn_line_field({
-    column_title: 'ESPN Line Play Wins',
+    column_title: 'Player ESPN Line Play Wins',
     header_label: 'Wins',
     player_value_path: 'espn_line_wins'
   }),
