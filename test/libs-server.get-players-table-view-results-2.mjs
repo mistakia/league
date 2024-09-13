@@ -478,7 +478,7 @@ describe('LIBS SERVER get_data_view_results', () => {
       ],
       sort: [{ column_id: 'team_espn_pass_rush_win_rate', desc: true }]
     })
-    const expected_query = `select "player"."pid", "espn_team_win_rates_index"."pass_rush_win_rate" AS "pass_rush_win_rate_0", "espn_team_win_rates_index"."pass_block_win_rate" AS "pass_block_win_rate_0", "espn_team_win_rates_index"."run_block_win_rate" AS "run_block_win_rate_0", "espn_team_win_rates_index"."run_stop_win_rate" AS "run_stop_win_rate_0", "player"."pos" from "player" left join "espn_team_win_rates_index" on "espn_team_win_rates_index"."team" = "player"."current_nfl_team" and "espn_team_win_rates_index"."year" = 2024 group by "espn_team_win_rates_index"."pass_rush_win_rate", "espn_team_win_rates_index"."pass_block_win_rate", "espn_team_win_rates_index"."run_block_win_rate", "espn_team_win_rates_index"."run_stop_win_rate", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 2 DESC NULLS LAST, "player"."pid" asc limit 500`
+    const expected_query = `select "player"."pid", "espn_team_win_rates_index"."pass_rush_win_rate" AS "espn_team_pass_rush_win_rate_0", "espn_team_win_rates_index"."pass_block_win_rate" AS "espn_team_pass_block_win_rate_0", "espn_team_win_rates_index"."run_block_win_rate" AS "espn_team_run_block_win_rate_0", "espn_team_win_rates_index"."run_stop_win_rate" AS "espn_team_run_stop_win_rate_0", "player"."pos" from "player" left join "espn_team_win_rates_index" on "espn_team_win_rates_index"."team" = "player"."current_nfl_team" and "espn_team_win_rates_index"."year" = 2024 group by "espn_team_win_rates_index"."pass_rush_win_rate", "espn_team_win_rates_index"."pass_block_win_rate", "espn_team_win_rates_index"."run_block_win_rate", "espn_team_win_rates_index"."run_stop_win_rate", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 2 DESC NULLS LAST, "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
   })
 
@@ -494,7 +494,7 @@ describe('LIBS SERVER get_data_view_results', () => {
       ],
       sort: [{ column_id: 'player_espn_line_win_rate', desc: true }]
     })
-    const expected_query = `select "player"."pid", "espn_player_win_rates_index"."win_rate" AS "win_rate_0", "player"."pos" from "player" left join "espn_player_win_rates_index" on "espn_player_win_rates_index"."pid" = "player"."pid" and "espn_player_win_rates_index"."espn_win_rate_type" = 'PASS_BLOCK' and "espn_player_win_rates_index"."year" = 2024 group by "espn_player_win_rates_index"."win_rate", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 2 DESC NULLS LAST, "player"."pid" asc limit 500`
+    const expected_query = `select "player"."pid", "espn_player_win_rates_index"."win_rate" AS "espn_line_win_rate_0", "player"."pos" from "player" left join "espn_player_win_rates_index" on "espn_player_win_rates_index"."pid" = "player"."pid" and "espn_player_win_rates_index"."espn_win_rate_type" = 'PASS_BLOCK' and "espn_player_win_rates_index"."year" = 2024 group by "espn_player_win_rates_index"."win_rate", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 2 DESC NULLS LAST, "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
   })
 })
