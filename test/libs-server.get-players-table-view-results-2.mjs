@@ -467,4 +467,34 @@ describe('LIBS SERVER get_data_view_results', () => {
     const expected_query = `with "t121851529271591f730857d3e4f98b84_spread" as (select "prop_markets_index"."esbid", "pms"."selection_pid", "pms"."selection_metric_line" as "spread" from "prop_markets_index" inner join "prop_market_selections_index" as "pms" on "pms"."source_id" = "prop_markets_index"."source_id" and "pms"."source_market_id" = "prop_markets_index"."source_market_id" and "pms"."time_type" = "prop_markets_index"."time_type" inner join "nfl_games" on "nfl_games"."esbid" = "prop_markets_index"."esbid" and "nfl_games"."year" = "prop_markets_index"."year" where "market_type" = 'GAME_SPREAD' and "prop_markets_index"."time_type" = 'CLOSE' and "prop_markets_index"."year" = ${constants.season.stats_season_year} and "prop_markets_index"."source_id" = 'DRAFTKINGS' and "nfl_games"."week" = ${constants.season.week}), "t121851529271591f730857d3e4f98b84_total" as (select "prop_markets_index"."esbid", "pms"."selection_metric_line" as "total" from "prop_markets_index" inner join "prop_market_selections_index" as "pms" on "pms"."source_id" = "prop_markets_index"."source_id" and "pms"."source_market_id" = "prop_markets_index"."source_market_id" and "pms"."time_type" = "prop_markets_index"."time_type" inner join "nfl_games" on "nfl_games"."esbid" = "prop_markets_index"."esbid" and "nfl_games"."year" = "prop_markets_index"."year" where "market_type" = 'GAME_TOTAL' and "prop_markets_index"."time_type" = 'CLOSE' and "prop_markets_index"."year" = ${constants.season.stats_season_year} and "prop_markets_index"."source_id" = 'DRAFTKINGS' and "nfl_games"."week" = ${constants.season.week}), "t121851529271591f730857d3e4f98b84" as (select "s"."esbid", "s"."selection_pid", (t.total - s.spread) / 2 as implied_team_total from "t121851529271591f730857d3e4f98b84_spread" as "s" inner join "t121851529271591f730857d3e4f98b84_total" as "t" on "s"."esbid" = "t"."esbid") select "player"."pid", "t121851529271591f730857d3e4f98b84"."implied_team_total" AS "team_game_implied_team_total_betting_market_0", "player"."pos" from "player" left join "t121851529271591f730857d3e4f98b84" on "t121851529271591f730857d3e4f98b84"."selection_pid" = "player"."current_nfl_team" group by "t121851529271591f730857d3e4f98b84"."implied_team_total", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 2 DESC NULLS LAST, "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
   })
+
+  it('team_espn_win_rates', () => {
+    const { query } = get_data_view_results_query({
+      columns: [
+        { column_id: 'team_espn_pass_rush_win_rate' },
+        { column_id: 'team_espn_pass_block_win_rate' },
+        { column_id: 'team_espn_run_block_win_rate' },
+        { column_id: 'team_espn_run_stop_win_rate' }
+      ],
+      sort: [{ column_id: 'team_espn_pass_rush_win_rate', desc: true }]
+    })
+    const expected_query = `select "player"."pid", "espn_team_win_rates_index"."pass_rush_win_rate" AS "pass_rush_win_rate_0", "espn_team_win_rates_index"."pass_block_win_rate" AS "pass_block_win_rate_0", "espn_team_win_rates_index"."run_block_win_rate" AS "run_block_win_rate_0", "espn_team_win_rates_index"."run_stop_win_rate" AS "run_stop_win_rate_0", "player"."pos" from "player" left join "espn_team_win_rates_index" on "espn_team_win_rates_index"."team" = "player"."current_nfl_team" and "espn_team_win_rates_index"."year" = 2024 group by "espn_team_win_rates_index"."pass_rush_win_rate", "espn_team_win_rates_index"."pass_block_win_rate", "espn_team_win_rates_index"."run_block_win_rate", "espn_team_win_rates_index"."run_stop_win_rate", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 2 DESC NULLS LAST, "player"."pid" asc limit 500`
+    compare_queries(query.toString(), expected_query)
+  })
+
+  it('player_espn_line_win_rate', () => {
+    const { query } = get_data_view_results_query({
+      columns: [
+        {
+          column_id: 'player_espn_line_win_rate',
+          params: {
+            win_rate_type: 'PASS_BLOCK'
+          }
+        }
+      ],
+      sort: [{ column_id: 'player_espn_line_win_rate', desc: true }]
+    })
+    const expected_query = `select "player"."pid", "espn_player_win_rates_index"."win_rate" AS "win_rate_0", "player"."pos" from "player" left join "espn_player_win_rates_index" on "espn_player_win_rates_index"."pid" = "player"."pid" and "espn_player_win_rates_index"."espn_win_rate_type" = 'PASS_BLOCK' and "espn_player_win_rates_index"."year" = 2024 group by "espn_player_win_rates_index"."win_rate", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 2 DESC NULLS LAST, "player"."pid" asc limit 500`
+    compare_queries(query.toString(), expected_query)
+  })
 })
