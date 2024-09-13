@@ -4,7 +4,7 @@ import { createSelector } from 'reselect'
 import { constants, data_view_fields_index } from '@libs-shared'
 
 import betting_market_table_fields from './betting-market-table-fields'
-import espn_table_fields from './espn-table-fields'
+import espn_score_table_fields from './espn-score-table-fields'
 import fantasy_league_table_fields from './fantasy-league-table-fields'
 import league_format_logs_table_fields from './league-format-logs-table-fields'
 import player_table_fields from './player-table-fields'
@@ -20,6 +20,7 @@ import player_pff_seasonlogs_table_fields from './player-pff-seasonlogs-table-fi
 import player_rankings_table_fields from './player-rankings-table-fields'
 import player_dfs_salaries_table_fields from './player-dfs-salaries-table-fields'
 import practice_table_fields from './practice-table-fields'
+import espn_line_win_rates_table_fields from './espn-line-win-rates-table-fields'
 
 // Player Column Fields
 // header_label - string, required
@@ -85,7 +86,7 @@ export function PlayerTableFields({
     ...league_format_logs_table_fields,
     ...player_stats_from_plays_table_fields,
     ...betting_market_table_fields,
-    ...espn_table_fields,
+    ...espn_score_table_fields,
     ...fantasy_points_from_plays_table_fields,
     ...team_stats_from_plays_table_fields,
     ...keeptradecut_table_fields,
@@ -93,7 +94,8 @@ export function PlayerTableFields({
     ...player_contract_table_fields,
     ...player_rankings_table_fields,
     ...player_dfs_salaries_table_fields,
-    ...practice_table_fields
+    ...practice_table_fields,
+    ...espn_line_win_rates_table_fields
   }
 
   for (const [key, value] of Object.entries(fields)) {
