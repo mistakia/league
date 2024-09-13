@@ -1233,6 +1233,9 @@ DROP INDEX IF EXISTS public.idx_keeptradecut_rankings_pid_qb_type_d;
 DROP INDEX IF EXISTS public.idx_invite_codes_used_by;
 DROP INDEX IF EXISTS public.idx_invite_codes_is_active;
 DROP INDEX IF EXISTS public.idx_invite_codes_created_by;
+DROP INDEX IF EXISTS public.idx_espn_team_win_rates_history_year;
+DROP INDEX IF EXISTS public.idx_espn_player_win_rates_history_year;
+DROP INDEX IF EXISTS public.idx_espn_player_win_rates_history_espn_win_rate_type;
 DROP INDEX IF EXISTS public.idx_25151_lid;
 DROP INDEX IF EXISTS public.idx_25147_waiverid_pid;
 DROP INDEX IF EXISTS public.idx_25147_waiverid;
@@ -1422,6 +1425,10 @@ ALTER TABLE IF EXISTS ONLY public.matchups DROP CONSTRAINT IF EXISTS "idx_24699_
 ALTER TABLE IF EXISTS ONLY public.league_migrations_lock DROP CONSTRAINT IF EXISTS "idx_24658_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.league_migrations DROP CONSTRAINT IF EXISTS "idx_24652_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.draft DROP CONSTRAINT IF EXISTS "idx_24608_PRIMARY";
+ALTER TABLE IF EXISTS ONLY public.espn_team_win_rates_index DROP CONSTRAINT IF EXISTS espn_team_win_rates_index_pkey;
+ALTER TABLE IF EXISTS ONLY public.espn_team_win_rates_history DROP CONSTRAINT IF EXISTS espn_team_win_rates_history_pkey;
+ALTER TABLE IF EXISTS ONLY public.espn_player_win_rates_index DROP CONSTRAINT IF EXISTS espn_player_win_rates_index_pkey;
+ALTER TABLE IF EXISTS ONLY public.espn_player_win_rates_history DROP CONSTRAINT IF EXISTS espn_player_win_rates_history_pkey;
 ALTER TABLE IF EXISTS ONLY public.config DROP CONSTRAINT IF EXISTS config_pkey;
 ALTER TABLE IF EXISTS ONLY public.config DROP CONSTRAINT IF EXISTS config_key_unique;
 ALTER TABLE IF EXISTS public.waivers ALTER COLUMN uid DROP DEFAULT;
@@ -1622,6 +1629,10 @@ DROP SEQUENCE IF EXISTS public.jobs_uid_seq;
 DROP TABLE IF EXISTS public.jobs;
 DROP TABLE IF EXISTS public.invite_codes;
 DROP TABLE IF EXISTS public.footballoutsiders;
+DROP TABLE IF EXISTS public.espn_team_win_rates_index;
+DROP TABLE IF EXISTS public.espn_team_win_rates_history;
+DROP TABLE IF EXISTS public.espn_player_win_rates_index;
+DROP TABLE IF EXISTS public.espn_player_win_rates_history;
 DROP SEQUENCE IF EXISTS public.draft_uid_seq;
 DROP TABLE IF EXISTS public.draft;
 DROP TABLE IF EXISTS public.config;
@@ -1642,6 +1653,7 @@ DROP TYPE IF EXISTS public.nfl_games_surf;
 DROP TYPE IF EXISTS public.nfl_games_roof;
 DROP TYPE IF EXISTS public.market_source_id;
 DROP TYPE IF EXISTS public.hash_position;
+DROP TYPE IF EXISTS public.espn_win_rate_type;
 DROP TYPE IF EXISTS public.dfs_source_id;
 --
 -- Name: dfs_source_id; Type: TYPE; Schema: public; Owner: -
@@ -1650,6 +1662,18 @@ DROP TYPE IF EXISTS public.dfs_source_id;
 CREATE TYPE public.dfs_source_id AS ENUM (
     'DRAFTKINGS',
     'FANDUEL'
+);
+
+
+--
+-- Name: espn_win_rate_type; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.espn_win_rate_type AS ENUM (
+    'PASS_RUSH',
+    'PASS_BLOCK',
+    'RUN_STOP',
+    'RUN_BLOCK'
 );
 
 
@@ -1946,6 +1970,74 @@ CREATE SEQUENCE public.draft_uid_seq
 --
 
 ALTER SEQUENCE public.draft_uid_seq OWNED BY public.draft.uid;
+
+
+--
+-- Name: espn_player_win_rates_history; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.espn_player_win_rates_history (
+    pid character varying(25),
+    player_name character varying(255) NOT NULL,
+    espn_id integer NOT NULL,
+    team character varying(3) NOT NULL,
+    wins integer NOT NULL,
+    plays integer NOT NULL,
+    win_rate numeric(5,4) NOT NULL,
+    double_team_pct numeric(5,4) NOT NULL,
+    espn_win_rate_type public.espn_win_rate_type NOT NULL,
+    "timestamp" bigint NOT NULL,
+    year integer NOT NULL
+);
+
+
+--
+-- Name: espn_player_win_rates_index; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.espn_player_win_rates_index (
+    pid character varying(25),
+    player_name character varying(255) NOT NULL,
+    espn_id integer NOT NULL,
+    team character varying(3) NOT NULL,
+    wins integer NOT NULL,
+    plays integer NOT NULL,
+    win_rate numeric(5,4) NOT NULL,
+    double_team_pct numeric(5,4) NOT NULL,
+    espn_win_rate_type public.espn_win_rate_type NOT NULL,
+    "timestamp" bigint NOT NULL,
+    year integer NOT NULL
+);
+
+
+--
+-- Name: espn_team_win_rates_history; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.espn_team_win_rates_history (
+    team character varying(3) NOT NULL,
+    pass_rush_win_rate numeric(5,4),
+    run_stop_win_rate numeric(5,4),
+    pass_block_win_rate numeric(5,4),
+    run_block_win_rate numeric(5,4),
+    "timestamp" bigint NOT NULL,
+    year integer NOT NULL
+);
+
+
+--
+-- Name: espn_team_win_rates_index; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.espn_team_win_rates_index (
+    team character varying(3) NOT NULL,
+    pass_rush_win_rate numeric(5,4),
+    run_stop_win_rate numeric(5,4),
+    pass_block_win_rate numeric(5,4),
+    run_block_win_rate numeric(5,4),
+    "timestamp" bigint NOT NULL,
+    year integer NOT NULL
+);
 
 
 --
@@ -12743,9 +12835,9 @@ CREATE TABLE public.play_changelog (
 CREATE TABLE public.player (
     pid character varying(25) NOT NULL,
     fname character varying(20) NOT NULL,
-    lname character varying(25) NOT NULL,
+    lname character varying(40) NOT NULL,
     pname character varying(25) NOT NULL,
-    formatted character varying(30) NOT NULL,
+    formatted character varying(50) NOT NULL,
     pos character varying(4) NOT NULL,
     pos1 character varying(4) NOT NULL,
     pos2 character varying(4),
@@ -16971,6 +17063,38 @@ ALTER TABLE ONLY public.config
 
 
 --
+-- Name: espn_player_win_rates_history espn_player_win_rates_history_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.espn_player_win_rates_history
+    ADD CONSTRAINT espn_player_win_rates_history_pkey PRIMARY KEY (player_name, espn_id, espn_win_rate_type, "timestamp");
+
+
+--
+-- Name: espn_player_win_rates_index espn_player_win_rates_index_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.espn_player_win_rates_index
+    ADD CONSTRAINT espn_player_win_rates_index_pkey PRIMARY KEY (player_name, espn_id, espn_win_rate_type, year);
+
+
+--
+-- Name: espn_team_win_rates_history espn_team_win_rates_history_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.espn_team_win_rates_history
+    ADD CONSTRAINT espn_team_win_rates_history_pkey PRIMARY KEY (team, "timestamp");
+
+
+--
+-- Name: espn_team_win_rates_index espn_team_win_rates_index_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.espn_team_win_rates_index
+    ADD CONSTRAINT espn_team_win_rates_index_pkey PRIMARY KEY (team, year);
+
+
+--
 -- Name: draft idx_24608_PRIMARY; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -18342,6 +18466,27 @@ CREATE UNIQUE INDEX idx_25147_waiverid_pid ON public.waiver_releases USING btree
 --
 
 CREATE INDEX idx_25151_lid ON public.waivers USING btree (lid);
+
+
+--
+-- Name: idx_espn_player_win_rates_history_espn_win_rate_type; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_espn_player_win_rates_history_espn_win_rate_type ON public.espn_player_win_rates_history USING btree (espn_win_rate_type);
+
+
+--
+-- Name: idx_espn_player_win_rates_history_year; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_espn_player_win_rates_history_year ON public.espn_player_win_rates_history USING btree (year);
+
+
+--
+-- Name: idx_espn_team_win_rates_history_year; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_espn_team_win_rates_history_year ON public.espn_team_win_rates_history USING btree (year);
 
 
 --
