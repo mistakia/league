@@ -59,7 +59,12 @@ waiver_releases
 waivers
 placed_wagers
 urls
-user_data_views"
+user_data_views
+league_divisions
+league_user_careerlogs
+league_team_careerlogs
+invite_codes
+"
 
 db_cache_tables="
 league_baselines
@@ -111,6 +116,16 @@ player_seasonlogs
 player_snaps_game
 pff_player_seasonlogs
 pff_player_seasonlogs_changelog
+espn_player_win_rates_history
+espn_player_win_rates_index
+espn_team_win_rates_history
+espn_team_win_rates_index
+nfl_plays_passer
+nfl_plays_player
+nfl_plays_receiver
+nfl_plays_rusher
+player_salaries
+player_rankings_index
 "
 
 db_betting_tables="
