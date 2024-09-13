@@ -3896,7 +3896,7 @@ COMMENT ON COLUMN public.nfl_plays.read_thrown IS 'The type of read thrown by th
 CREATE TABLE public.nfl_plays_current_week (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    sequence integer,
+    sequence numeric(10,1),
     state character varying(36),
     dwn integer,
     home_score smallint,
