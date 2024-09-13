@@ -16,6 +16,13 @@ export const time_type = {
   CLOSE: 'CLOSE'
 }
 
+export const selection_type = {
+  OVER: 'OVER',
+  UNDER: 'UNDER',
+  YES: 'YES',
+  NO: 'NO'
+}
+
 export const team_game_market_types = {
   GAME_SPREAD: 'GAME_SPREAD',
   GAME_TOTAL: 'GAME_TOTAL',

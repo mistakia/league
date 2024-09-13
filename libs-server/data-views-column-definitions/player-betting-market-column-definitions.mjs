@@ -60,6 +60,13 @@ const get_default_params = ({
     career_game = [career_game]
   }
 
+  let selection_type = params.selection_type || [
+    bookmaker_constants.selection_type.OVER
+  ]
+  if (!Array.isArray(selection_type)) {
+    selection_type = [selection_type]
+  }
+
   return {
     year,
     week,
@@ -67,7 +74,8 @@ const get_default_params = ({
     time_type,
     source_id,
     career_year,
-    career_game
+    career_game,
+    selection_type
   }
 }
 
@@ -83,14 +91,15 @@ const betting_markets_table_alias = ({
     time_type,
     source_id,
     career_year,
-    career_game
+    career_game,
+    selection_type
   } = get_default_params({
     params,
     is_player_game_prop
   })
 
   return get_table_hash(
-    `${base_table_alias}_${year}_week_${week}_source_id_${source_id}_market_type_${market_type}_time_type_${time_type}_career_year_${career_year.join('_')}_career_game_${career_game.join('_')}`
+    `${base_table_alias}_${year}_week_${week}_source_id_${source_id}_market_type_${market_type}_time_type_${time_type}_career_year_${career_year.join('_')}_career_game_${career_game.join('_')}_selection_type_${selection_type.join('_')}`
   )
 }
 
@@ -111,7 +120,8 @@ const player_betting_market_with = ({
     time_type,
     source_id,
     career_year,
-    career_game
+    career_game,
+    selection_type
   } = get_default_params({
     params,
     is_player_game_prop
@@ -151,6 +161,10 @@ const player_betting_market_with = ({
           .andOn('pms.time_type', '=', 'm.time_type')
       }
     )
+
+    if (selection_type.length) {
+      qb.whereIn('pms.selection_type', selection_type)
+    }
 
     const unique_select_strings = new Set([
       'pms.selection_pid',
@@ -250,11 +264,12 @@ const team_betting_market_with = ({
   where_clauses,
   splits
 }) => {
-  const { time_type, market_type, source_id, year, week } = get_default_params({
-    params,
-    is_team_game_prop: true,
-    is_game_prop: true
-  })
+  const { time_type, market_type, source_id, year, week, selection_type } =
+    get_default_params({
+      params,
+      is_team_game_prop: true,
+      is_game_prop: true
+    })
 
   const markets_cte = `${with_table_name}_markets`
 
@@ -289,6 +304,10 @@ const team_betting_market_with = ({
           .andOn('pms.source_market_id', '=', 'm.source_market_id')
           .andOn('pms.time_type', '=', 'm.time_type')
       })
+
+    if (selection_type.length) {
+      qb.whereIn('pms.selection_type', selection_type)
+    }
   })
 }
 
