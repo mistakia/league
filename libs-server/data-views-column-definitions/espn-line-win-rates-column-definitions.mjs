@@ -4,9 +4,12 @@ import { constants } from '#libs-shared'
 import get_join_func from '#libs-server/get-join-func.mjs'
 
 const get_default_params = ({ params = {} } = {}) => {
-  const year = params.year || constants.season.stats_season_year
-  const win_rate_type = params.win_rate_type || 'pass_rush'
-  return { year: Number(year), win_rate_type }
+    const year = params.year || constants.season.stats_season_year
+    let win_rate_type = params.win_rate_type || 'PASS_RUSH'
+    if (Array.isArray(win_rate_type)) {
+        win_rate_type = win_rate_type[0] || 'PASS_RUSH'
+    }
+    return { year: Number(year), win_rate_type }
 }
 
 const get_cache_info = ({ params = {} } = {}) => {
