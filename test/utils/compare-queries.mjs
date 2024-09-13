@@ -4,12 +4,16 @@ const { expect } = chai
 export default function compare_queries(actual_query, expected_query) {
   const actual_table_hashes = [
     ...new Set(
-      actual_query.match(/t([A-Za-z0-9]{32})/g).map((match) => match.slice(1))
+      (actual_query.match(/t([A-Za-z0-9]{32})/g) || []).map((match) =>
+        match.slice(1)
+      )
     )
   ]
   const expected_table_hashes = [
     ...new Set(
-      expected_query.match(/t([A-Za-z0-9]{32})/g).map((match) => match.slice(1))
+      (expected_query.match(/t([A-Za-z0-9]{32})/g) || []).map((match) =>
+        match.slice(1)
+      )
     )
   ]
 
