@@ -1,8 +1,8 @@
 ## import pff projections
-30 1 * 1,2,7-12 1,3-7 NODE_ENV=production /Users/trashman/.nvm/versions/node/v20.12.1/bin/node /Users/trashman/Projects/league/scripts/import-pff-projections.mjs >> /var/log/league/import-pff.log 2>&1
+30 1 * 1,2,7-12 1,3-7 NODE_ENV=production /Users/trashman/.nvm/versions/node/v20.12.1/bin/node /Users/trashman/Projects/league/scripts/import-pff-projections.mjs >> /Users/trashman/Library/Logs/league/import-pff.log 2>&1
 
 ## import pff grades
-15 2 * 1,2,9-12 5-3 NODE_ENV=production /Users/trashman/.nvm/versions/node/v20.12.1/bin/node /Users/trashman/Projects/league/scripts/import-pff-grades.mjs >> /var/log/league/import-pff-grades.log 2>&1
+15 2 * 1,2,9-12 5-3 NODE_ENV=production /Users/trashman/.nvm/versions/node/v20.12.1/bin/node /Users/trashman/Projects/league/scripts/import-pff-grades.mjs >> /Users/trashman/Library/Logs/league/import-pff-grades.log 2>&1
 
 ## import caesars odds
-0 */4 * * * NODE_ENV=production /Users/trashman/.nvm/versions/node/v20.12.1/bin/node /Users/trashman/Projects/league/scripts/import-caesars-odds.mjs >> /var/log/league/import-caesars-odds.log 2>&1
+0 */4 * * * NODE_ENV=production /Users/trashman/.nvm/versions/node/v20.12.1/bin/node /Users/trashman/Projects/league/scripts/import-caesars-odds.mjs >> /Users/trashman/Library/Logs/league/import-caesars-odds.log 2>&1
