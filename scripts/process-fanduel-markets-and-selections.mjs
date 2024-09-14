@@ -137,9 +137,10 @@ const process_fanduel_markets_and_selections = async ({
     }
 
     for (const selection of source_market.selections) {
-      const selection_type = fanduel.format_selection_type(
-        selection.selection_name
-      )
+      const selection_type = fanduel.format_selection_type({
+        market_type,
+        selection_name: selection.selection_name
+      })
       if (selection_type) {
         await db('prop_market_selections_index')
           .where({
