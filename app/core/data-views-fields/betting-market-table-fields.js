@@ -46,16 +46,17 @@ const create_base_column_params = () => ({
   week: single_week
 })
 
+const player_market_type_param = {
+  label: 'Market',
+  data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+  values: Object.values(bookmaker_constants.player_game_prop_types),
+  default_value: bookmaker_constants.player_game_prop_types.GAME_PASSING_YARDS,
+  single: true
+}
+
 const create_game_prop_column_params = () => ({
   ...create_base_column_params(),
-  market_type: {
-    label: 'Market',
-    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-    values: Object.values(bookmaker_constants.player_game_prop_types),
-    default_value:
-      bookmaker_constants.player_game_prop_types.GAME_PASSING_YARDS,
-    single: true
-  },
+  market_type: player_market_type_param,
   career_year,
   career_game
 })
@@ -67,6 +68,31 @@ const create_team_game_prop_column_params = () => ({
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     values: Object.values(bookmaker_constants.team_game_market_types),
     default_value: bookmaker_constants.team_game_market_types.GAME_TOTAL,
+    single: true
+  }
+})
+
+const create_historical_game_prop_column_params = () => ({
+  ...create_base_column_params(),
+  market_type: player_market_type_param,
+  hit_type: {
+    label: 'Hit Type',
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    values: ['HARD', 'SOFT'],
+    default_value: 'HARD',
+    single: true
+  },
+  historical_range: {
+    label: 'Historical Range',
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    values: [
+      'CURRENT_SEASON',
+      'LAST_FIVE',
+      'LAST_TEN',
+      'LAST_SEASON',
+      'OVERALL'
+    ],
+    default_value: 'CURRENT_SEASON',
     single: true
   }
 })
@@ -85,6 +111,11 @@ const create_field =
 const create_game_prop_field = create_field(
   [COLUMN_GROUPS.BETTING_MARKETS, COLUMN_GROUPS.PLAYER_GAME_PROPS],
   create_game_prop_column_params()
+)
+
+const create_historical_prop_field = create_field(
+  [COLUMN_GROUPS.BETTING_MARKETS, COLUMN_GROUPS.PLAYER_GAME_PROPS],
+  create_historical_game_prop_column_params()
 )
 
 const create_team_game_prop_field = create_field(
@@ -152,6 +183,18 @@ export default {
       header_label: 'PROB',
       player_value_path: 'game_prop_implied_probability_betting_market'
     }),
+
+  player_game_prop_historical_hit_rate: create_historical_prop_field({
+    column_title: 'Prop Historical Hit Rate',
+    header_label: 'HIT RATE',
+    player_value_path: 'prop_historical_hit_rate'
+  }),
+
+  player_game_prop_historical_edge: create_historical_prop_field({
+    column_title: 'Prop Historical Edge',
+    header_label: 'EDGE',
+    player_value_path: 'prop_historical_edge'
+  }),
 
   team_game_prop_line_from_betting_markets: create_team_game_prop_field({
     column_title: 'Team Game Prop Line',
