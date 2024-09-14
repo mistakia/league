@@ -134,7 +134,6 @@ const get_result = ({
     }
 
     default:
-      log(`Unknown market type: ${market_type}`)
       unsupported_market_types.add(market_type)
       return null
   }
