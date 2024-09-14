@@ -90,7 +90,8 @@ class PlayerNameExpanded extends Player {
       hideActions,
       status,
       minimize,
-      headshot_square
+      headshot_square,
+      selected_year
     } = this.props
 
     const classNames = ['player__name-expanded']
@@ -154,7 +155,9 @@ class PlayerNameExpanded extends Player {
           <div className='player__name-expanded-row'>
             <Position pos={playerMap.get('pos')} />
             <NFLTeam team={playerMap.get('team')} />
-            <GameStatus status={status} playerMap={playerMap} />
+            {selected_year === constants.year && (
+              <GameStatus status={status} playerMap={playerMap} />
+            )}
             {player_has_non_active_status && (
               <PlayerLabel
                 type='game'
