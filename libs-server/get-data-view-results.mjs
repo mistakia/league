@@ -246,7 +246,7 @@ const add_clauses_for_table = ({
   select_columns = [],
   where_clauses = [],
   table_name,
-  column_params = {},
+  group_column_params = {},
   splits = [],
   year_split_join_clause,
   week_split_join_clause,
@@ -264,7 +264,11 @@ const add_clauses_for_table = ({
   let join_func = null
   let with_func = null
 
-  for (const { column_id, column_index } of select_columns) {
+  for (const {
+    column_id,
+    column_index,
+    column_params = {}
+  } of select_columns) {
     const column_definition = data_views_column_definitions[column_id]
     const main_select_result = get_main_select_string({
       column_id,
@@ -405,7 +409,7 @@ const add_clauses_for_table = ({
     }
     with_func({
       query: players_query,
-      params: column_params,
+      params: group_column_params,
       with_table_name: table_name,
       having_clauses: with_having_clause_strings,
       where_clauses: with_where_clause_strings,
@@ -413,7 +417,8 @@ const add_clauses_for_table = ({
       splits,
       pid_columns,
       select_column_names,
-      rate_columns
+      rate_columns,
+      data_view_options
     })
     for (const select_string of select_strings) {
       players_query.select(db.raw(select_string))
@@ -442,7 +447,7 @@ const add_clauses_for_table = ({
     join_func({
       query: players_query,
       table_name,
-      params: column_params,
+      params: group_column_params,
       join_type: where_clauses.length ? 'INNER' : 'LEFT',
       splits,
       year_split_join_clause,
@@ -483,7 +488,7 @@ const get_grouped_clauses_by_table = ({
 
     if (!grouped_clauses_by_table[table_name]) {
       grouped_clauses_by_table[table_name] = {
-        column_params,
+        group_column_params: column_params,
         where_clauses: [],
         select_columns: [],
         supported_splits: column_definition.supported_splits || []
@@ -515,7 +520,7 @@ const get_grouped_clauses_by_table = ({
 
     if (!grouped_clauses_by_table[table_name]) {
       grouped_clauses_by_table[table_name] = {
-        column_params,
+        group_column_params: column_params,
         where_clauses: [],
         select_columns: [],
         supported_splits: column_definition.supported_splits || []
@@ -524,7 +529,8 @@ const get_grouped_clauses_by_table = ({
 
     grouped_clauses_by_table[table_name].select_columns.push({
       column_id,
-      column_index
+      column_index,
+      column_params
     })
   }
 
@@ -832,7 +838,7 @@ export const get_data_view_results_query = ({
 
     for (const [
       table_name,
-      { column_params = {}, where_clauses, select_columns }
+      { group_column_params = {}, where_clauses, select_columns }
     ] of sorted_tables) {
       const year_select = select_columns.find(
         (col) => data_views_column_definitions[col.column_id]?.year_select
@@ -846,7 +852,7 @@ export const get_data_view_results_query = ({
         select_columns,
         where_clauses,
         table_name,
-        column_params,
+        group_column_params,
         joined_table_index,
         with_statement_index,
         splits: available_splits,
@@ -859,10 +865,11 @@ export const get_data_view_results_query = ({
 
       if (available_splits.includes('year')) {
         const has_year_offset_range =
-          column_params.year_offset &&
-          Array.isArray(column_params.year_offset) &&
-          column_params.year_offset.length > 1 &&
-          column_params.year_offset[0] !== column_params.year_offset[1]
+          group_column_params.year_offset &&
+          Array.isArray(group_column_params.year_offset) &&
+          group_column_params.year_offset.length > 1 &&
+          group_column_params.year_offset[0] !==
+            group_column_params.year_offset[1]
         if (select_columns.length && !has_year_offset_range) {
           const column_definition =
             data_views_column_definitions[select_columns[0].column_id]
@@ -870,7 +877,7 @@ export const get_data_view_results_query = ({
             const year_select_clause = column_definition.year_select({
               table_name,
               splits,
-              column_params
+              column_params: group_column_params
             })
             if (year_select_clause) {
               data_view_options.year_coalesce_args.push(year_select_clause)
@@ -882,14 +889,18 @@ export const get_data_view_results_query = ({
 
         if (table_name !== 'player' && table_name !== 'rosters_players') {
           if (!year_split_join_clause) {
-            const year_offset = column_params.year_offset
+            const year_offset = group_column_params.year_offset
             const year_offset_single = Array.isArray(year_offset)
               ? year_offset[0]
               : year_offset
             year_split_join_clause = year_select
               ? data_views_column_definitions[
                   year_select.column_id
-                ].year_select({ table_name, splits, column_params })
+                ].year_select({
+                  table_name,
+                  splits,
+                  column_params: group_column_params
+                })
               : year_offset_single
                 ? `${table_name}.year - ${year_offset_single}`
                 : `${table_name}.year`

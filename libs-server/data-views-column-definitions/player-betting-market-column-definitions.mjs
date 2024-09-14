@@ -68,9 +68,7 @@ const get_default_params = ({
     career_game = [career_game]
   }
 
-  let selection_type = params.selection_type || [
-    bookmaker_constants.selection_type.OVER
-  ]
+  let selection_type = params.selection_type || []
   if (!Array.isArray(selection_type)) {
     selection_type = [selection_type]
   }
