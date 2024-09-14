@@ -7,7 +7,10 @@ import debug from 'debug'
 
 import db from '#db'
 import { fixTeam, constants } from '#libs-shared'
-import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
+import {
+  player_prop_types,
+  player_game_alt_prop_types
+} from '#libs-shared/bookmaker-constants.mjs'
 import { wait } from './wait.mjs'
 import * as cache from './cache.mjs'
 
@@ -28,9 +31,18 @@ const get_fanduel_dfs_config = async () => {
   return config_row.value
 }
 
-export const format_selection_type = (selection_name) => {
+export const format_selection_type = ({ market_type, selection_name }) => {
   if (!selection_name) {
     return null
+  }
+
+  const player_alt_game_market_types = Object.values(player_game_alt_prop_types)
+  if (
+    market_type &&
+    player_alt_game_market_types.includes(market_type) &&
+    selection_name.includes('+')
+  ) {
+    return 'OVER'
   }
 
   const words = selection_name.toLowerCase().split(/\s+/)

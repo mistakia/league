@@ -72,6 +72,11 @@ const format_market = async ({
     fanduel_market.marketType
   )
 
+  const market_type = fanduel.get_market_type({
+    marketName: fanduel_market.marketName,
+    marketType: fanduel_market.marketType
+  })
+
   for (const runner of fanduel_market.runners) {
     let player_row
 
@@ -120,6 +125,10 @@ const format_market = async ({
 
       selection_pid: player_row?.pid || null,
       selection_name: runner.runnerName,
+      selection_type: fanduel.format_selection_type({
+        market_type,
+        selection_name: runner.runnerName
+      }),
       selection_metric_line,
       odds_decimal:
         runner.winRunnerOdds?.trueOdds?.decimalOdds.decimalOdds || null,
@@ -129,10 +138,7 @@ const format_market = async ({
   }
 
   return {
-    market_type: fanduel.get_market_type({
-      marketName: fanduel_market.marketName,
-      marketType: fanduel_market.marketType
-    }),
+    market_type,
 
     source_id: 'FANDUEL',
     source_market_id: fanduel_market.marketId,
