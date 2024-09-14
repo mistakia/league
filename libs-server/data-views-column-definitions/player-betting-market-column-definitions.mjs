@@ -16,6 +16,14 @@ const get_default_params = ({
     ? params.year[0]
     : params.year || constants.season.year
 
+  const hit_type = Array.isArray(params.hit_type)
+    ? params.hit_type[0]
+    : params.hit_type || 'hard'
+
+  const historical_range = Array.isArray(params.historical_range)
+    ? params.historical_range[0]
+    : params.historical_range || 'current_season'
+
   let week, market_type
 
   if (is_game_prop) {
@@ -75,7 +83,9 @@ const get_default_params = ({
     source_id,
     career_year,
     career_game,
-    selection_type
+    selection_type,
+    hit_type,
+    historical_range
   }
 }
 
@@ -410,16 +420,24 @@ const create_player_betting_market_field = ({
   column_alias,
   is_player_game_prop,
   select_string,
-  with_select_alias
+  with_select_alias,
+  with_select,
+  with_where,
+  main_select,
+  main_group_by
 }) => ({
   column_name,
+  main_select,
+  main_group_by,
   select_as: () => `${column_alias}_betting_market`,
-  with_where: () => select_string || `pms.${column_name}`,
-  with_select: () => [
-    select_string
-      ? `${select_string}${with_select_alias ? ' as ' + with_select_alias : select_string}`
-      : `pms.${column_name}`
-  ],
+  with_where: with_where || (() => select_string || `pms.${column_name}`),
+  with_select:
+    with_select ||
+    (() => [
+      select_string
+        ? `${select_string}${with_select_alias ? ' as ' + with_select_alias : select_string}`
+        : `pms.${column_name}`
+    ]),
   table_alias: (args) =>
     betting_markets_table_alias({ ...args, is_player_game_prop }),
   join: player_betting_market_join,
@@ -479,6 +497,32 @@ const create_team_betting_market_field = ({ column_name, column_alias }) => ({
   }
 })
 
+const historical_main = ({ table_name, params, field_type }) => {
+  const { hit_type, historical_range } = get_default_params({
+    params,
+    is_player_game_prop: true
+  })
+  return [`${table_name}.${historical_range}_${field_type}_${hit_type}`]
+}
+
+const historical_with = ({ params, field_type }) => {
+  const { hit_type, historical_range } = get_default_params({
+    params,
+    is_player_game_prop: true
+  })
+  return [`pms.${historical_range}_${field_type}_${hit_type}`]
+}
+
+const create_historical_field = (field_type) =>
+  create_player_betting_market_field({
+    main_select: (args) => historical_main({ ...args, field_type }),
+    main_group_by: (args) => historical_main({ ...args, field_type }),
+    column_alias: `game_prop_historical_${field_type}`,
+    is_player_game_prop: true,
+    with_select: (args) => historical_with({ ...args, field_type }),
+    with_where: (args) => historical_with({ ...args, field_type })
+  })
+
 // is_player_game_prop is used to set the default params for the field
 export default {
   player_season_prop_line_from_betting_markets:
@@ -517,6 +561,9 @@ export default {
       column_alias: 'game_prop_implied_probability',
       is_player_game_prop: true
     }),
+
+  player_game_prop_historical_hit_rate: create_historical_field('hit_rate'),
+  player_game_prop_historical_edge: create_historical_field('edge'),
 
   team_game_prop_line_from_betting_markets: create_team_betting_market_field({
     column_name: 'selection_metric_line',

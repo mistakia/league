@@ -402,7 +402,7 @@ describe('LIBS SERVER get_data_view_results', () => {
       ],
       where: []
     })
-    const expected_query = `with "t63b586b7cdc6948738a62536391edfba_markets" as (select "source_id", "source_market_id", "time_type" from "prop_markets_index" where "market_type" = 'GAME_RUSHING_RECEIVING_TOUCHDOWNS' and "time_type" = 'CLOSE' and "prop_markets_index"."year" = ${constants.season.stats_season_year} and "source_id" = 'FANDUEL'), "t63b586b7cdc6948738a62536391edfba" as (select pms.selection_pid, pms.selection_metric_line, 1 / odds_decimal as game_prop_implied_probability from "t63b586b7cdc6948738a62536391edfba_markets" as "m" inner join "prop_market_selections_index" as "pms" on "pms"."source_id" = "m"."source_id" and "pms"."source_market_id" = "m"."source_market_id" and "pms"."time_type" = "m"."time_type") select "player"."pid", player.fname, player.lname, "player"."pos" AS "pos_0", "t63b586b7cdc6948738a62536391edfba"."game_prop_implied_probability" AS "game_prop_implied_probability_betting_market_0", "player"."pos" from "player" left join "t63b586b7cdc6948738a62536391edfba" on "t63b586b7cdc6948738a62536391edfba"."selection_pid" = "player"."pid" group by player.fname, player.lname, "player"."pos", "t63b586b7cdc6948738a62536391edfba"."game_prop_implied_probability", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 5 DESC NULLS LAST, "player"."pid" asc limit 500`
+    const expected_query = `with "t4f9e434d4b10f45d17d4c881b9c81356_markets" as (select "source_id", "source_market_id", "time_type" from "prop_markets_index" where "market_type" = 'GAME_RUSHING_RECEIVING_TOUCHDOWNS' and "time_type" = 'CLOSE' and "prop_markets_index"."year" = ${constants.season.year} and "source_id" = 'FANDUEL'), "t4f9e434d4b10f45d17d4c881b9c81356" as (select pms.selection_pid, pms.selection_metric_line, 1 / odds_decimal as game_prop_implied_probability from "t4f9e434d4b10f45d17d4c881b9c81356_markets" as "m" inner join "prop_market_selections_index" as "pms" on "pms"."source_id" = "m"."source_id" and "pms"."source_market_id" = "m"."source_market_id" and "pms"."time_type" = "m"."time_type" where "pms"."selection_type" in ('OVER')) select "player"."pid", player.fname, player.lname, "player"."pos" AS "pos_0", "t4f9e434d4b10f45d17d4c881b9c81356"."game_prop_implied_probability" AS "game_prop_implied_probability_betting_market_0", "player"."pos" from "player" left join "t4f9e434d4b10f45d17d4c881b9c81356" on "t4f9e434d4b10f45d17d4c881b9c81356"."selection_pid" = "player"."pid" group by player.fname, player.lname, "player"."pos", "t4f9e434d4b10f45d17d4c881b9c81356"."game_prop_implied_probability", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 5 DESC NULLS LAST, "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
   })
 
@@ -495,6 +495,57 @@ describe('LIBS SERVER get_data_view_results', () => {
       sort: [{ column_id: 'player_espn_line_win_rate', desc: true }]
     })
     const expected_query = `select "player"."pid", "espn_player_win_rates_index"."win_rate" AS "espn_line_win_rate_0", "player"."pos" from "player" left join "espn_player_win_rates_index" on "espn_player_win_rates_index"."pid" = "player"."pid" and "espn_player_win_rates_index"."espn_win_rate_type" = 'PASS_BLOCK' and "espn_player_win_rates_index"."year" = 2024 group by "espn_player_win_rates_index"."win_rate", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 2 DESC NULLS LAST, "player"."pid" asc limit 500`
+    compare_queries(query.toString(), expected_query)
+  })
+
+  it('player prop historical hit rate and edge, with where', () => {
+    const { query } = get_data_view_results_query({
+      columns: [
+        {
+          column_id: 'player_game_prop_historical_hit_rate',
+          params: {
+            historical_range: 'current_season',
+            hit_type: 'hard',
+            week: [
+              {
+                dynamic_type: 'current_week'
+              }
+            ]
+          }
+        },
+        {
+          column_id: 'player_game_prop_historical_edge',
+          params: {
+            historical_range: 'current_season',
+            hit_type: 'hard',
+            week: [
+              {
+                dynamic_type: 'current_week'
+              }
+            ]
+          }
+        }
+      ],
+      sort: [{ column_id: 'player_game_prop_historical_hit_rate', desc: true }],
+      where: [
+        {
+          column_id: 'player_game_prop_historical_edge',
+          column_index: 0,
+          operator: '>=',
+          value: 0,
+          params: {
+            historical_range: 'current_season',
+            hit_type: 'hard',
+            week: [
+              {
+                dynamic_type: 'current_week'
+              }
+            ]
+          }
+        }
+      ]
+    })
+    const expected_query = `with "te69e5120d9060e9df9c954462565a46f_markets" as (select "source_id", "source_market_id", "time_type" from "prop_markets_index" inner join "nfl_games" on "nfl_games"."esbid" = "prop_markets_index"."esbid" and "nfl_games"."year" = "prop_markets_index"."year" and "nfl_games"."week" = ${constants.season.week} where "market_type" = 'GAME_PASSING_YARDS' and "time_type" = 'CLOSE' and "prop_markets_index"."year" = ${constants.season.year} and "source_id" = 'FANDUEL'), "te69e5120d9060e9df9c954462565a46f" as (select pms.selection_pid, pms.selection_metric_line, pms.current_season_hit_rate_hard, pms.current_season_edge_hard from "te69e5120d9060e9df9c954462565a46f_markets" as "m" inner join "prop_market_selections_index" as "pms" on "pms"."source_id" = "m"."source_id" and "pms"."source_market_id" = "m"."source_market_id" and "pms"."time_type" = "m"."time_type" where "pms"."selection_type" in ('OVER') and pms.current_season_edge_hard >= '0') select "player"."pid", te69e5120d9060e9df9c954462565a46f.current_season_hit_rate_hard, te69e5120d9060e9df9c954462565a46f.current_season_edge_hard, "player"."pos" from "player" inner join "te69e5120d9060e9df9c954462565a46f" on "te69e5120d9060e9df9c954462565a46f"."selection_pid" = "player"."pid" group by te69e5120d9060e9df9c954462565a46f.current_season_hit_rate_hard, te69e5120d9060e9df9c954462565a46f.current_season_edge_hard, "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
   })
 })
