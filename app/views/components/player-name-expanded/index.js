@@ -3,13 +3,15 @@ import { createSelector } from 'reselect'
 
 import { playerActions } from '@core/players'
 import { getPlayerById, getGameStatusByPlayerId } from '@core/selectors'
+import { constants } from '#libs-shared'
 
 import PlayerNameExpanded from './player-name-expanded'
 
 const mapStateToProps = createSelector(
   getPlayerById,
   getGameStatusByPlayerId,
-  (playerMap, status) => ({ playerMap, status })
+  (state) => state.getIn(['app', 'year'], constants.year),
+  (playerMap, status, selected_year) => ({ playerMap, status, selected_year })
 )
 
 const mapDispatchToProps = {
