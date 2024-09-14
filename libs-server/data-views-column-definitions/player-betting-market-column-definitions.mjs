@@ -429,7 +429,7 @@ const create_player_betting_market_field = ({
   column_name,
   main_select,
   main_group_by,
-  select_as: () => `${column_alias}_betting_market`,
+  select_as: () => column_alias,
   with_where: with_where || (() => select_string || `pms.${column_name}`),
   with_select:
     with_select ||
@@ -465,7 +465,7 @@ const create_player_betting_market_field = ({
 
 const create_team_betting_market_field = ({ column_name, column_alias }) => ({
   column_name,
-  select_as: () => `${column_alias}_betting_market`,
+  select_as: () => column_alias,
   with_where: ({ table_name }) => `${table_name}.${column_name}`,
   table_alias: (args) =>
     betting_markets_table_alias({
@@ -530,6 +530,7 @@ const historical_with = ({ params, field_type }) => {
 
 const create_historical_field = (field_type) =>
   create_player_betting_market_field({
+    column_alias: `prop_historical_${field_type}`,
     main_select: (args) => historical_main_select({ ...args, field_type }),
     main_group_by: (args) => historical_main_group_by({ ...args, field_type }),
     is_player_game_prop: true,
@@ -542,28 +543,28 @@ export default {
   player_season_prop_line_from_betting_markets:
     create_player_betting_market_field({
       column_name: 'selection_metric_line',
-      column_alias: 'season_prop_line',
+      column_alias: 'season_prop_line_betting_market',
       is_player_game_prop: false
     }),
 
   player_game_prop_line_from_betting_markets:
     create_player_betting_market_field({
       column_name: 'selection_metric_line',
-      column_alias: 'game_prop_line',
+      column_alias: 'game_prop_line_betting_market',
       is_player_game_prop: true
     }),
 
   player_game_prop_american_odds_from_betting_markets:
     create_player_betting_market_field({
       column_name: 'odds_american',
-      column_alias: 'game_prop_american_odds',
+      column_alias: 'game_prop_american_odds_betting_market',
       is_player_game_prop: true
     }),
 
   player_game_prop_decimal_odds_from_betting_markets:
     create_player_betting_market_field({
       column_name: 'odds_decimal',
-      column_alias: 'game_prop_decimal_odds',
+      column_alias: 'game_prop_decimal_odds_betting_market',
       is_player_game_prop: true
     }),
 
@@ -572,7 +573,7 @@ export default {
       select_string: '1 / odds_decimal',
       with_select_alias: 'game_prop_implied_probability',
       column_name: 'game_prop_implied_probability',
-      column_alias: 'game_prop_implied_probability',
+      column_alias: 'game_prop_implied_probability_betting_market',
       is_player_game_prop: true
     }),
 
@@ -581,12 +582,12 @@ export default {
 
   team_game_prop_line_from_betting_markets: create_team_betting_market_field({
     column_name: 'selection_metric_line',
-    column_alias: 'team_game_prop_line'
+    column_alias: 'team_game_prop_line_betting_market'
   }),
 
   team_game_prop_odds_from_betting_markets: create_team_betting_market_field({
     column_name: 'selection_odds',
-    column_alias: 'team_game_prop_odds'
+    column_alias: 'team_game_prop_odds_betting_market'
   }),
 
   team_game_implied_team_total_from_betting_markets: {
