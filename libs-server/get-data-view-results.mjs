@@ -64,16 +64,23 @@ const process_dynamic_year_param = (year_param) => {
 
   years = years.flatMap((year) => {
     if (typeof year === 'object') {
-      if (year.dynamic_type === 'last_n_years') {
-        const n = Number(year.value || 3)
-        return Array.from({ length: n }, (_, i) =>
-          Math.max(min_year, current_year - i)
-        )
-      } else if (year.dynamic_type === 'next_n_years') {
-        const n = Number(year.value || 3)
-        return Array.from({ length: n }, (_, i) =>
-          Math.min(max_year, current_year + i + 1)
-        )
+      switch (year.dynamic_type) {
+        case 'last_n_years': {
+          const n = Number(year.value || 3)
+          return Array.from({ length: n }, (_, i) =>
+            Math.max(min_year, current_year - i)
+          )
+        }
+        case 'next_n_years': {
+          const n = Number(year.value || 3)
+          return Array.from({ length: n }, (_, i) =>
+            Math.min(max_year, current_year + i + 1)
+          )
+        }
+        case 'current_year':
+          return [current_year]
+        default:
+          return []
       }
     }
     const numeric_year = Number(year)
@@ -94,16 +101,23 @@ const process_dynamic_week_param = (week_param) => {
 
   weeks = weeks.flatMap((week) => {
     if (typeof week === 'object') {
-      if (week.dynamic_type === 'last_n_weeks') {
-        const n = Number(week.value || 3)
-        return Array.from({ length: n }, (_, i) =>
-          Math.max(min_week, current_week - i)
-        )
-      } else if (week.dynamic_type === 'next_n_weeks') {
-        const n = Number(week.value || 3)
-        return Array.from({ length: n }, (_, i) =>
-          Math.min(max_week, current_week + i + 1)
-        )
+      switch (week.dynamic_type) {
+        case 'last_n_weeks': {
+          const n = Number(week.value || 3)
+          return Array.from({ length: n }, (_, i) =>
+            Math.max(min_week, current_week - i)
+          )
+        }
+        case 'next_n_weeks': {
+          const n = Number(week.value || 3)
+          return Array.from({ length: n }, (_, i) =>
+            Math.min(max_week, current_week + i + 1)
+          )
+        }
+        case 'current_week':
+          return [current_week]
+        default:
+          return []
       }
     }
     const numeric_week = Number(week)

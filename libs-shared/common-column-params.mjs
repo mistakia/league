@@ -92,6 +92,10 @@ export const week = {
       label: 'Next N Weeks',
       default_value: 3,
       has_value_field: true
+    },
+    {
+      dynamic_type: 'current_week',
+      label: 'Current Week'
     }
   ]
 }
