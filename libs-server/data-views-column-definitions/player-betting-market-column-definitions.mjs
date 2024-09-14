@@ -17,12 +17,12 @@ const get_default_params = ({
     : params.year || constants.season.year
 
   const hit_type = Array.isArray(params.hit_type)
-    ? params.hit_type[0]
-    : params.hit_type || 'hard'
+    ? params.hit_type[0].toLowerCase()
+    : (params.hit_type || 'hard').toLowerCase()
 
   const historical_range = Array.isArray(params.historical_range)
-    ? params.historical_range[0]
-    : params.historical_range || 'current_season'
+    ? params.historical_range[0].toLowerCase()
+    : (params.historical_range || 'current_season').toLowerCase()
 
   let week, market_type
 
@@ -497,7 +497,22 @@ const create_team_betting_market_field = ({ column_name, column_alias }) => ({
   }
 })
 
-const historical_main = ({ table_name, params, field_type }) => {
+const historical_main_select = ({
+  table_name,
+  params,
+  field_type,
+  column_index
+}) => {
+  const { hit_type, historical_range } = get_default_params({
+    params,
+    is_player_game_prop: true
+  })
+  return [
+    `${table_name}.${historical_range}_${field_type}_${hit_type} as prop_historical_${field_type}_${column_index}`
+  ]
+}
+
+const historical_main_group_by = ({ table_name, params, field_type }) => {
   const { hit_type, historical_range } = get_default_params({
     params,
     is_player_game_prop: true
@@ -515,9 +530,8 @@ const historical_with = ({ params, field_type }) => {
 
 const create_historical_field = (field_type) =>
   create_player_betting_market_field({
-    main_select: (args) => historical_main({ ...args, field_type }),
-    main_group_by: (args) => historical_main({ ...args, field_type }),
-    column_alias: `game_prop_historical_${field_type}`,
+    main_select: (args) => historical_main_select({ ...args, field_type }),
+    main_group_by: (args) => historical_main_group_by({ ...args, field_type }),
     is_player_game_prop: true,
     with_select: (args) => historical_with({ ...args, field_type }),
     with_where: (args) => historical_with({ ...args, field_type })
