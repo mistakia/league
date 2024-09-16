@@ -20,6 +20,32 @@ import {
 
 const log = debug('data-views')
 
+const rename_rate_type = (rate_type) => {
+  const rate_type_mapping = {
+    per_team_def_play: 'per_team_play',
+    per_team_def_drive: 'per_team_drive',
+    per_team_def_series: 'per_team_series',
+    per_team_off_play: 'per_team_play',
+    per_team_off_pass_play: 'per_team_pass_play',
+    per_team_off_rush_play: 'per_team_rush_play',
+    per_team_off_drive: 'per_team_drive',
+    per_team_off_series: 'per_team_series'
+  }
+
+  return rate_type_mapping[rate_type] || rate_type
+}
+
+const process_rate_type_backwards_compatibility = (params) => {
+  if (params.rate_type) {
+    if (Array.isArray(params.rate_type)) {
+      params.rate_type = params.rate_type.map(rename_rate_type)
+    } else {
+      params.rate_type = rename_rate_type(params.rate_type)
+    }
+  }
+  return params
+}
+
 const process_cache_info = ({ cache_info, data_view_metadata }) => {
   if (cache_info.cache_ttl < data_view_metadata.cache_ttl) {
     data_view_metadata.cache_ttl = cache_info.cache_ttl
@@ -598,17 +624,22 @@ export const get_data_view_results_query = ({
     )
   })
 
+  // backwards compatibility for rate_type
   // process params and convert dynamic params to static
   where = where.map((where_clause) => ({
     ...where_clause,
-    params: process_dynamic_params(where_clause.params || {})
+    params: process_rate_type_backwards_compatibility(
+      process_dynamic_params(where_clause.params || {})
+    )
   }))
 
   columns = columns.map((column) => {
     if (typeof column === 'object' && column.params) {
       return {
         ...column,
-        params: process_dynamic_params(column.params || {})
+        params: process_rate_type_backwards_compatibility(
+          process_dynamic_params(column.params || {})
+        )
       }
     }
     return column
@@ -762,26 +793,30 @@ export const get_data_view_results_query = ({
       })
       const rate_type_table_name = get_rate_type_cte_table_name({
         params: column.params,
-        rate_type
+        rate_type,
+        team_unit: column_definition.team_unit
       })
       data_view_options.rate_type_tables[rate_type_table_name] = {
         params: column.params,
-        rate_type
+        rate_type,
+        team_unit: column_definition.team_unit
       }
       rate_type_column_mapping[`${column.column_id}_${column_index}`] =
         rate_type_table_name
     }
   }
 
-  for (const [rate_type_table_name, { params, rate_type }] of Object.entries(
-    data_view_options.rate_type_tables
-  )) {
+  for (const [
+    rate_type_table_name,
+    { params, rate_type, team_unit }
+  ] of Object.entries(data_view_options.rate_type_tables)) {
     add_rate_type_cte({
       players_query,
       params,
       rate_type_table_name,
       splits,
-      rate_type
+      rate_type,
+      team_unit
     })
     join_rate_type_cte({
       players_query,
@@ -789,7 +824,8 @@ export const get_data_view_results_query = ({
       rate_type_table_name,
       splits,
       year_split_join_clause,
-      rate_type
+      rate_type,
+      team_unit
     })
   }
 
@@ -910,7 +946,11 @@ export const get_data_view_results_query = ({
             week_split_join_clause = week_select
               ? data_views_column_definitions[
                   week_select.column_id
-                ].week_select({ table_name, splits })
+                ].week_select({
+                  table_name,
+                  splits,
+                  column_params: group_column_params
+                })
               : `${table_name}.week`
           }
         }

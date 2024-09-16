@@ -6,8 +6,10 @@ export const get_per_team_play_cte_table_name = ({
   params = {},
   play_type = null,
   group_by = null,
-  team_type = 'off'
+  team_unit = 'off'
 } = {}) => {
+  team_unit = params.team_unit || team_unit
+
   let year = params.year || []
   if (!Array.isArray(year)) {
     year = [year]
@@ -47,7 +49,7 @@ export const get_per_team_play_cte_table_name = ({
 
   const play_type_suffix = play_type ? `_${play_type.toLowerCase()}` : ''
   const group_by_suffix = group_by ? `_${group_by}` : ''
-  const team_type_suffix = team_type === 'def' ? '_def' : '_off'
+  const team_type_suffix = team_unit === 'def' ? '_def' : '_off'
   return get_table_hash(
     `per_team_play${play_type_suffix}${group_by_suffix}${team_type_suffix}_years_${all_years.join('_')}_weeks_${week.join('_')}`
   )
@@ -60,13 +62,15 @@ export const add_per_team_play_cte = ({
   splits,
   play_type = null,
   group_by = null,
-  team_type = 'off'
+  team_unit = 'off'
 }) => {
+  team_unit = params.team_unit || team_unit
+
   const cte_query = db('nfl_plays')
-    .select(`nfl_plays.${team_type}`)
+    .select(`nfl_plays.${team_unit}`)
     .where('nfl_plays.seas_type', 'REG')
     .whereNot('play_type', 'NOPL')
-    .groupBy(`nfl_plays.${team_type}`)
+    .groupBy(`nfl_plays.${team_unit}`)
 
   let count_expression = 'COUNT(*)'
   if (group_by) {
@@ -132,8 +136,10 @@ export const join_per_team_play_cte = ({
   splits,
   year_split_join_clause,
   group_by = null,
-  team_type = 'off'
+  team_unit = 'off'
 }) => {
+  team_unit = params.team_unit || team_unit
+
   const year_offset = params.year_offset
   const has_year_offset_range =
     year_offset &&
@@ -147,7 +153,7 @@ export const join_per_team_play_cte = ({
       typeof year_offset === 'number')
 
   players_query.leftJoin(rate_type_table_name, function () {
-    this.on(`${rate_type_table_name}.${team_type}`, 'player.current_nfl_team')
+    this.on(`${rate_type_table_name}.${team_unit}`, 'player.current_nfl_team')
 
     if (splits.includes('year') && year_split_join_clause) {
       if (has_year_offset_range) {

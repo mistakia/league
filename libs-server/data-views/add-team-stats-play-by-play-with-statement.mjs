@@ -15,8 +15,16 @@ export const add_team_stats_play_by_play_with_statement = ({
     throw new Error('with_table_name is required')
   }
 
+  const limit_to_player_active_games =
+    params.limit_to_player_active_games || false
+  const team_unit = params.team_unit || 'off'
+
   const with_query = db('nfl_plays')
-    .select('nfl_plays.off as nfl_team', 'nfl_plays.year', 'nfl_plays.week')
+    .select(
+      `nfl_plays.${team_unit} as nfl_team`,
+      'nfl_plays.year',
+      'nfl_plays.week'
+    )
     .whereNot('play_type', 'NOPL')
     .where('nfl_plays.seas_type', 'REG')
 
@@ -37,58 +45,140 @@ export const add_team_stats_play_by_play_with_statement = ({
   })
 
   // Add groupBy clause before having
-  with_query.groupBy('nfl_plays.off', 'nfl_plays.year', 'nfl_plays.week')
+  with_query.groupBy(
+    `nfl_plays.${team_unit}`,
+    'nfl_plays.year',
+    'nfl_plays.week'
+  )
 
   query.with(with_table_name, with_query)
 
-  // Add the player_team_stats with table
+  const stats_query = limit_to_player_active_games
+    ? create_player_team_stats_query({
+        with_table_name,
+        select_column_names,
+        rate_columns,
+        splits,
+        params,
+        having_clauses
+      })
+    : create_team_stats_query({
+        with_table_name,
+        select_column_names,
+        rate_columns,
+        splits,
+        params,
+        having_clauses
+      })
+
+  const with_stats_table_postfix = limit_to_player_active_games
+    ? '_player_team_stats'
+    : '_team_stats'
+  query.with(`${with_table_name}${with_stats_table_postfix}`, stats_query)
+}
+
+function create_team_stats_query({
+  with_table_name,
+  select_column_names,
+  rate_columns,
+  splits,
+  params,
+  having_clauses
+}) {
+  const team_stats_query = db(with_table_name)
+    .select(`${with_table_name}.nfl_team`)
+    .groupBy(`${with_table_name}.nfl_team`)
+
+  add_select_columns({
+    query: team_stats_query,
+    with_table_name,
+    select_column_names,
+    rate_columns
+  })
+  add_splits({ query: team_stats_query, with_table_name, splits })
+  add_year_filter({ query: team_stats_query, with_table_name, params })
+  add_having_clauses({ query: team_stats_query, having_clauses })
+
+  return team_stats_query
+}
+
+function create_player_team_stats_query({
+  with_table_name,
+  select_column_names,
+  rate_columns,
+  splits,
+  params,
+  having_clauses
+}) {
   const player_team_stats_query = db('player_gamelogs')
     .select('player_gamelogs.pid')
     .groupBy('player_gamelogs.pid')
     .join('nfl_games', 'player_gamelogs.esbid', 'nfl_games.esbid')
-    .join(with_table_name, function () {
+    .join(`${with_table_name}`, function () {
       this.on('player_gamelogs.tm', '=', `${with_table_name}.nfl_team`)
       this.andOn('nfl_games.year', '=', `${with_table_name}.year`)
       this.andOn('nfl_games.week', '=', `${with_table_name}.week`)
     })
     .where('nfl_games.seas_type', 'REG')
 
-  // where_clauses to filter stats/metrics
-  for (const having_clause of having_clauses) {
-    player_team_stats_query.havingRaw(having_clause)
-  }
+  add_select_columns({
+    query: player_team_stats_query,
+    with_table_name,
+    select_column_names,
+    rate_columns
+  })
+  add_splits({ query: player_team_stats_query, with_table_name, splits })
+  add_year_filter({ query: player_team_stats_query, with_table_name, params })
+  add_having_clauses({ query: player_team_stats_query, having_clauses })
 
+  return player_team_stats_query
+}
+
+function add_select_columns({
+  query,
+  with_table_name,
+  select_column_names,
+  rate_columns
+}) {
   const unique_select_column_names = new Set(select_column_names)
   for (const select_column_name of unique_select_column_names) {
     if (rate_columns.includes(select_column_name)) {
-      player_team_stats_query.select(
+      query.select(
         db.raw(
           `sum(${with_table_name}.${select_column_name}_numerator) / sum(${with_table_name}.${select_column_name}_denominator) as ${select_column_name}`
         )
       )
     } else {
-      player_team_stats_query.select(
+      query.select(
         db.raw(
           `sum(${with_table_name}.${select_column_name}) as ${select_column_name}`
         )
       )
     }
   }
+}
 
+function add_splits({ query, with_table_name, splits }) {
   if (splits.includes('year')) {
-    player_team_stats_query.select('nfl_games.year')
-    player_team_stats_query.groupBy('nfl_games.year')
+    query.select(`${with_table_name}.year`)
+    query.groupBy(`${with_table_name}.year`)
   }
 
   if (splits.includes('week')) {
-    player_team_stats_query.select('nfl_games.week')
-    player_team_stats_query.groupBy('nfl_games.week')
+    query.select(`${with_table_name}.week`)
+    query.groupBy(`${with_table_name}.week`)
   }
+}
 
+function add_year_filter({ query, with_table_name, params }) {
   if (params.year) {
     const year_array = Array.isArray(params.year) ? params.year : [params.year]
-    player_team_stats_query.whereIn('nfl_games.year', year_array)
+    query.whereIn(`${with_table_name}.year`, year_array)
   }
+}
 
-  query.with(`${with_table_name}_player_team_stats`, player_team_stats_query)
+function add_having_clauses({ query, having_clauses }) {
+  for (const having_clause of having_clauses) {
+    query.havingRaw(having_clause)
+  }
 }

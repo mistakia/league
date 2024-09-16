@@ -72,13 +72,14 @@ const defensive_player_stat_from_plays = ({
   supported_splits: ['year', 'week'],
   supported_rate_types: [
     'per_game',
-    'per_team_def_play',
-    'per_team_def_drive',
-    'per_team_def_series'
+    'per_team_play',
+    'per_team_drive',
+    'per_team_series'
   ],
   use_having: true,
   with: add_defensive_play_by_play_with_statement,
-  get_cache_info: get_cache_info_for_fields_from_plays
+  get_cache_info: get_cache_info_for_fields_from_plays,
+  team_unit: 'def'
 })
 
 export default {

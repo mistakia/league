@@ -17,7 +17,8 @@ export default function data_view_join_function(join_arguments) {
     join_year_on_year_split = false,
     join_week = false,
     cast_join_week_to_string = false,
-    default_year = constants.season.year
+    default_year = constants.season.year,
+    join_on_team = false
   } = join_arguments
 
   // TODO join_type should be left in some cases where year_offset range is used without a with_where
@@ -33,7 +34,11 @@ export default function data_view_join_function(join_arguments) {
   const week = params.week || 0
 
   query[join_func](join_table_clause || table_name, function () {
-    this.on(`${table_name}.pid`, '=', 'player.pid')
+    if (join_on_team) {
+      this.on(`${table_name}.nfl_team`, '=', 'player.current_nfl_team')
+    } else {
+      this.on(`${table_name}.pid`, '=', 'player.pid')
+    }
 
     if (splits.length && year_split_join_clause) {
       if (splits.includes('year')) {
