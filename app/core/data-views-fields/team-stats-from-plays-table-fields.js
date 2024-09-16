@@ -23,7 +23,7 @@ const from_play_field = (field) => ({
       single: true
     },
     limit_to_player_active_games: {
-      label: 'Player Active Games',
+      label: 'Include Only Player Active Games',
       data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
     },
     rate_type: rate_type_column_param.offensive_rate_type_param,
