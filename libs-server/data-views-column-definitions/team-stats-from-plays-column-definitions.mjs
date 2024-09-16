@@ -14,7 +14,17 @@ const team_stat_from_plays = ({
   select_string,
   stat_name,
   is_rate = false,
-  rate_with_selects
+  rate_with_selects,
+  supported_rate_types = [
+    'per_game',
+    'per_team_half',
+    'per_team_quarter',
+    'per_team_off_play',
+    'per_team_off_pass_play',
+    'per_team_off_rush_play',
+    'per_team_off_drive',
+    'per_team_off_series'
+  ]
 }) => ({
   table_alias: generate_table_alias,
   column_name: stat_name,
@@ -77,16 +87,7 @@ const team_stat_from_plays = ({
   week_select: ({ table_name }) => `${table_name}_player_team_stats.week`,
   use_having: true,
   supported_splits: ['year', 'week'],
-  supported_rate_types: [
-    'per_game',
-    'per_team_half',
-    'per_team_quarter',
-    'per_team_off_play',
-    'per_team_off_pass_play',
-    'per_team_off_rush_play',
-    'per_team_off_drive',
-    'per_team_off_series'
-  ],
+  supported_rate_types,
   is_rate,
   get_cache_info: get_cache_info_for_fields_from_plays
 })
@@ -96,10 +97,10 @@ export default {
     select_string: `SUM(pass_yds)`,
     stat_name: 'team_pass_yds_from_plays'
   }),
-  // TODO prevent from applying rate_type to this
   team_pass_rate_over_expected_from_plays: team_stat_from_plays({
     select_string: `AVG(pass_oe)`,
-    stat_name: 'team_pass_rate_over_expected_from_plays'
+    stat_name: 'team_pass_rate_over_expected_from_plays',
+    supported_rate_types: []
   }),
   team_pass_attempts_from_plays: team_stat_from_plays({
     select_string: `SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END)`,
@@ -143,7 +144,8 @@ export default {
       `COUNT(*) as team_success_rate_from_plays_denominator`
     ],
     stat_name: 'team_success_rate_from_plays',
-    is_rate: true
+    is_rate: true,
+    supported_rate_types: []
   }),
   team_explosive_play_rate_from_plays: team_stat_from_plays({
     rate_with_selects: [
@@ -151,7 +153,8 @@ export default {
       `COUNT(*) as team_explosive_play_rate_from_plays_denominator`
     ],
     stat_name: 'team_explosive_play_rate_from_plays',
-    is_rate: true
+    is_rate: true,
+    supported_rate_types: []
   }),
   team_play_count_from_plays: team_stat_from_plays({
     select_string: `COUNT(*)`,
