@@ -125,6 +125,7 @@ const analyze_fanduel_wagers = async ({
   show_counts = false,
   show_bet_receipts = false,
   wagers_limit = Infinity,
+  hide_wagers = false,
   wagers_lost_leg_limit = 1,
   selection_filters = []
 } = {}) => {
@@ -290,7 +291,7 @@ const analyze_fanduel_wagers = async ({
   props_summary.expected_hits = Number(props_summary.expected_hits.toFixed(2))
 
   const wager_table_row = {
-    current_roi: wager_summary.current_roi,
+    current_roi: '-', // wager_summary.current_roi,
     open_potential_roi:
       (
         (wager_summary.open_potential_win / wager_summary.total_risk - 1) *
@@ -496,6 +497,8 @@ const analyze_fanduel_wagers = async ({
     two_prop_table.printTable()
   }
 
+  if (hide_wagers) return
+
   console.log('\n\nTop 50 slips sorted by highest odds (<= 1 lost legs)\n\n')
 
   const closest_wagers = filtered.filter(
@@ -567,7 +570,8 @@ const main = async () => {
       show_bet_receipts: argv.show_bet_receipts,
       wagers_limit: argv.wagers_limit,
       wagers_lost_leg_limit: argv.wagers_lost_leg_limit,
-      selection_filters: argv.filter ? argv.filter.split(',') : []
+      selection_filters: argv.filter ? argv.filter.split(',') : [],
+      hide_wagers: argv.hide_wagers
     })
   } catch (err) {
     error = err
