@@ -9,11 +9,11 @@ const base_rate_type_param = {
 const offensive_rate_type_param_values = [
   { value: null, label: 'None' },
   { value: 'per_game', label: 'Per Game' },
-  { value: 'per_team_off_play', label: 'Per Team Offensive Play' },
-  { value: 'per_team_off_pass_play', label: 'Per Team Pass Play' },
-  { value: 'per_team_off_rush_play', label: 'Per Team Rush Play' },
-  { value: 'per_team_off_drive', label: 'Per Team Offensive Drive' },
-  { value: 'per_team_off_series', label: 'Per Team Offensive Series' },
+  { value: 'per_team_play', label: 'Per Team Play' },
+  { value: 'per_team_pass_play', label: 'Per Team Pass Play' },
+  { value: 'per_team_rush_play', label: 'Per Team Rush Play' },
+  { value: 'per_team_drive', label: 'Per Team Drive' },
+  { value: 'per_team_series', label: 'Per Team Series' },
   { value: 'per_team_half', label: 'Per Team Half' },
   { value: 'per_team_quarter', label: 'Per Team Quarter' }
 ]
@@ -28,9 +28,9 @@ export const defensive_rate_type_param = {
   values: [
     { value: null, label: 'None' },
     { value: 'per_game', label: 'Per Game' },
-    { value: 'per_team_def_play', label: 'Per Team Defensive Play' },
-    { value: 'per_team_def_drive', label: 'Per Team Defensive Drive' },
-    { value: 'per_team_def_series', label: 'Per Team Defensive Series' }
+    { value: 'per_team_play', label: 'Per Team Play' },
+    { value: 'per_team_drive', label: 'Per Team Drive' },
+    { value: 'per_team_series', label: 'Per Team Series' }
   ]
 }
 

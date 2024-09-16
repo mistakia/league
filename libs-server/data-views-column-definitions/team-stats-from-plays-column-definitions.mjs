@@ -19,11 +19,11 @@ const team_stat_from_plays = ({
     'per_game',
     'per_team_half',
     'per_team_quarter',
-    'per_team_off_play',
-    'per_team_off_pass_play',
-    'per_team_off_rush_play',
-    'per_team_off_drive',
-    'per_team_off_series'
+    'per_team_play',
+    'per_team_pass_play',
+    'per_team_rush_play',
+    'per_team_drive',
+    'per_team_series'
   ]
 }) => ({
   table_alias: generate_table_alias,
@@ -66,25 +66,45 @@ const team_stat_from_plays = ({
     return null
   },
   with: add_team_stats_play_by_play_with_statement,
-  join_table_name: (args) => `${args.table_name}_player_team_stats`,
-  join: (args) =>
+  join_table_name: (args) => {
+    const limit_to_player_active_games =
+      args.params?.limit_to_player_active_games || false
+    return limit_to_player_active_games
+      ? `${args.table_name}_player_team_stats`
+      : `${args.table_name}_team_stats`
+  },
+  join: (args) => {
+    const limit_to_player_active_games =
+      args.params?.limit_to_player_active_games || false
     data_view_join_function({
       ...args,
       join_year_on_year_split: true,
-      table_name: `${args.table_name}_player_team_stats`
-    }),
+      join_on_team: !limit_to_player_active_games,
+      table_name: limit_to_player_active_games
+        ? `${args.table_name}_player_team_stats`
+        : `${args.table_name}_team_stats`
+    })
+  },
   year_select: ({ table_name, column_params = {} }) => {
+    const table_suffix = column_params.limit_to_player_active_games
+      ? '_player_team_stats'
+      : '_team_stats'
     if (!column_params.year_offset) {
-      return `${table_name}_player_team_stats.year`
+      return `${table_name}${table_suffix}.year`
     }
 
     const year_offset = Array.isArray(column_params.year_offset)
       ? column_params.year_offset[0]
       : column_params.year_offset
 
-    return `${table_name}_player_team_stats.year - ${year_offset}`
+    return `${table_name}${table_suffix}.year - ${year_offset}`
   },
-  week_select: ({ table_name }) => `${table_name}_player_team_stats.week`,
+  week_select: ({ table_name, column_params = {} }) => {
+    const table_suffix = column_params.limit_to_player_active_games
+      ? '_player_team_stats'
+      : '_team_stats'
+    return `${table_name}${table_suffix}.week`
+  },
   use_having: true,
   supported_splits: ['year', 'week'],
   supported_rate_types,
