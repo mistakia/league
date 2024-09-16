@@ -6,6 +6,26 @@ import { nfl_plays_column_params, rate_type_column_param } from '@libs-shared'
 const from_play_field = (field) => ({
   data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
   column_params: {
+    team_unit: {
+      label: 'Team Unit',
+      default_value: 'off',
+      values: [
+        {
+          label: 'Offense',
+          value: 'off'
+        },
+        {
+          label: 'Defense',
+          value: 'def'
+        }
+      ],
+      data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+      single: true
+    },
+    limit_to_player_active_games: {
+      label: 'Player Active Games',
+      data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+    },
     rate_type: rate_type_column_param.offensive_rate_type_param,
     ...nfl_plays_column_params
   },
