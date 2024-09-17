@@ -291,7 +291,7 @@ const analyze_fanduel_wagers = async ({
   props_summary.expected_hits = Number(props_summary.expected_hits.toFixed(2))
 
   const wager_table_row = {
-    current_roi: '-', // wager_summary.current_roi,
+    current_roi: wager_summary.current_roi,
     open_potential_roi:
       (
         (wager_summary.open_potential_win / wager_summary.total_risk - 1) *
