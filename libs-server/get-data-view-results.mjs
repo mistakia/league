@@ -17,6 +17,7 @@ import {
   get_main_where_string,
   get_with_where_string
 } from '#libs-server/data-views/where-string.mjs'
+import { add_week_opponent_cte_tables } from '#libs-server/data-views/week-opponent-cte-tables.mjs'
 
 const log = debug('data-views')
 
@@ -655,7 +656,8 @@ export const get_data_view_results_query = ({
     player_seasonlogs_joined: false,
     nfl_year_week_timestamp_joined: false,
     year_coalesce_args: [],
-    rate_type_tables: {}
+    rate_type_tables: {},
+    matchup_opponent_types: new Set()
   }
   const data_view_metadata = {
     cache_ttl: 1000 * 60 * 60 * 24 * 7, // 1 week
@@ -664,6 +666,70 @@ export const get_data_view_results_query = ({
 
   let year_split_join_clause
   let week_split_join_clause
+
+  // Check columns for matchup_opponent_type
+  for (const column of [...prefix_columns, ...columns]) {
+    if (
+      typeof column === 'object' &&
+      column.params &&
+      column.params.matchup_opponent_type
+    ) {
+      const opponent_type = Array.isArray(column.params.matchup_opponent_type)
+        ? column.params.matchup_opponent_type[0]
+        : column.params.matchup_opponent_type
+      data_view_options.matchup_opponent_types.add(opponent_type)
+    }
+  }
+
+  // Check where clauses for matchup_opponent_type
+  for (const where_clause of where) {
+    if (where_clause.params && where_clause.params.matchup_opponent_type) {
+      const opponent_type = Array.isArray(
+        where_clause.params.matchup_opponent_type
+      )
+        ? where_clause.params.matchup_opponent_type[0]
+        : where_clause.params.matchup_opponent_type
+      data_view_options.matchup_opponent_types.add(opponent_type)
+    }
+  }
+
+  for (const opponent_type of data_view_options.matchup_opponent_types) {
+    switch (opponent_type) {
+      case 'current_week_opponent_total':
+        add_week_opponent_cte_tables({
+          players_query,
+          table_name: 'current_week_opponents',
+          week: constants.season.week,
+          year: constants.season.year
+        })
+        players_query.join(
+          'current_week_opponents',
+          'player.current_nfl_team',
+          '=',
+          'current_week_opponents.nfl_team'
+        )
+        break
+
+      case 'next_week_opponent_total':
+        add_week_opponent_cte_tables({
+          players_query,
+          table_name: 'next_week_opponents',
+          week: constants.season.week + 1,
+          year: constants.season.year
+        })
+        players_query.join(
+          'next_week_opponents',
+          'player.current_nfl_team',
+          '=',
+          'next_week_opponents.nfl_team'
+        )
+        break
+
+      default:
+        log(`Unsupported matchup_opponent_type: ${opponent_type}`)
+        break
+    }
+  }
 
   if (splits.includes('week') || splits.includes('year')) {
     const year_range = get_year_range([...prefix_columns, ...columns], where)

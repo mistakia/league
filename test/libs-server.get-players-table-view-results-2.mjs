@@ -585,4 +585,30 @@ describe('LIBS SERVER get_data_view_results', () => {
     const expected_query = `with "t72dd346e69dcc17e2e17c4083808e602" as (select "nfl_plays"."def", COUNT(*) as rate_type_total_count from "nfl_plays" where "nfl_plays"."seas_type" = 'REG' and not "play_type" = 'NOPL' and "play_type" = 'PASS' and "nfl_plays"."year" in (${constants.season.year}) group by "nfl_plays"."def"), "taa5c3680ab3ee27a83360c4448200e28" as (select "nfl_plays"."def" as "nfl_team", "nfl_plays"."year", "nfl_plays"."week", SUM(pass_yds) AS team_pass_yds_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2024) group by "nfl_plays"."def", "nfl_plays"."year", "nfl_plays"."week"), "taa5c3680ab3ee27a83360c4448200e28_player_team_stats" as (select "player_gamelogs"."pid", sum(taa5c3680ab3ee27a83360c4448200e28.team_pass_yds_from_plays) as team_pass_yds_from_plays from "player_gamelogs" inner join "nfl_games" on "player_gamelogs"."esbid" = "nfl_games"."esbid" inner join "taa5c3680ab3ee27a83360c4448200e28" on "player_gamelogs"."tm" = "taa5c3680ab3ee27a83360c4448200e28"."nfl_team" and "nfl_games"."year" = "taa5c3680ab3ee27a83360c4448200e28"."year" and "nfl_games"."week" = "taa5c3680ab3ee27a83360c4448200e28"."week" where "nfl_games"."seas_type" = 'REG' and "taa5c3680ab3ee27a83360c4448200e28"."year" in (2024) group by "player_gamelogs"."pid") select "player"."pid", CAST(taa5c3680ab3ee27a83360c4448200e28_player_team_stats.team_pass_yds_from_plays AS DECIMAL) / NULLIF(CAST(t72dd346e69dcc17e2e17c4083808e602.rate_type_total_count AS DECIMAL), 0) AS "team_pass_yds_from_plays_0", "player"."pos" from "player" left join "t72dd346e69dcc17e2e17c4083808e602" on "t72dd346e69dcc17e2e17c4083808e602"."def" = "player"."current_nfl_team" left join "taa5c3680ab3ee27a83360c4448200e28_player_team_stats" on "taa5c3680ab3ee27a83360c4448200e28_player_team_stats"."pid" = "player"."pid" group by "taa5c3680ab3ee27a83360c4448200e28_player_team_stats"."team_pass_yds_from_plays", t72dd346e69dcc17e2e17c4083808e602.rate_type_total_count, "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 2 DESC NULLS LAST, "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
   })
+
+  it('team field with matchup_opponent_type param', () => {
+    const { query } = get_data_view_results_query({
+      sort: [
+        {
+          column_id: 'team_pass_yards_from_plays',
+          desc: true
+        }
+      ],
+      prefix_columns: ['player_name', 'player_position'],
+      columns: [
+        {
+          column_id: 'team_pass_yards_from_plays',
+          params: {
+            team_unit: ['def'],
+            year: [2024],
+            rate_type: ['per_game'],
+            matchup_opponent_type: ['current_week_opponent_total']
+          }
+        }
+      ],
+      where: []
+    })
+    const expected_query = `with "current_week_opponents" as (select "h" as "nfl_team", "v" as "opponent" from "public"."nfl_games" where "year" = 2024 and "week" = 3 and "seas_type" = 'REG' union select "v" as "nfl_team", "h" as "opponent" from "public"."nfl_games" where "year" = 2024 and "week" = 3 and "seas_type" = 'REG'), "t4f71f555ce1e3fa469a3fc595eca1a52" as (select "player_gamelogs"."pid", count(*) as "rate_type_total_count" from "player_gamelogs" left join "nfl_games" on "nfl_games"."esbid" = "player_gamelogs"."esbid" where "nfl_games"."seas_type" = 'REG' and "player_gamelogs"."active" = true and "nfl_games"."year" in (2024) group by "player_gamelogs"."pid"), "taa5c3680ab3ee27a83360c4448200e28" as (select "nfl_plays"."def" as "nfl_team", "nfl_plays"."year", "nfl_plays"."week", SUM(pass_yds) AS team_pass_yds_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2024) group by "nfl_plays"."def", "nfl_plays"."year", "nfl_plays"."week"), "taa5c3680ab3ee27a83360c4448200e28_team_stats" as (select "taa5c3680ab3ee27a83360c4448200e28"."nfl_team", sum(taa5c3680ab3ee27a83360c4448200e28.team_pass_yds_from_plays) as team_pass_yds_from_plays from "taa5c3680ab3ee27a83360c4448200e28" where "taa5c3680ab3ee27a83360c4448200e28"."year" in (2024) group by "taa5c3680ab3ee27a83360c4448200e28"."nfl_team") select "player"."pid", player.fname, player.lname, "player"."pos" AS "pos_0", CAST(taa5c3680ab3ee27a83360c4448200e28_team_stats.team_pass_yds_from_plays AS DECIMAL) / NULLIF(CAST(t4f71f555ce1e3fa469a3fc595eca1a52.rate_type_total_count AS DECIMAL), 0) AS "team_pass_yds_from_plays_0", "player"."pos" from "player" inner join "current_week_opponents" on "player"."current_nfl_team" = "current_week_opponents"."nfl_team" left join "t4f71f555ce1e3fa469a3fc595eca1a52" on "t4f71f555ce1e3fa469a3fc595eca1a52"."pid" = "player"."pid" left join "taa5c3680ab3ee27a83360c4448200e28_team_stats" on "taa5c3680ab3ee27a83360c4448200e28_team_stats"."nfl_team" = "current_week_opponents"."opponent" group by player.fname, player.lname, "player"."pos", "taa5c3680ab3ee27a83360c4448200e28_team_stats"."team_pass_yds_from_plays", t4f71f555ce1e3fa469a3fc595eca1a52.rate_type_total_count, "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 5 DESC NULLS LAST, "player"."pid" asc limit 500`
+    compare_queries(query.toString(), expected_query)
+  })
 })

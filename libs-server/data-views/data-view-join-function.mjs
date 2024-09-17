@@ -1,6 +1,9 @@
+import debug from 'debug'
 import { constants } from '#libs-shared'
 import db from '#db'
 import get_join_func from '#libs-server/get-join-func.mjs'
+
+const log = debug('data-views')
 
 export default function data_view_join_function(join_arguments) {
   const {
@@ -35,7 +38,34 @@ export default function data_view_join_function(join_arguments) {
 
   query[join_func](join_table_clause || table_name, function () {
     if (join_on_team) {
-      this.on(`${table_name}.nfl_team`, '=', 'player.current_nfl_team')
+      const matchup_opponent_type = Array.isArray(params.matchup_opponent_type)
+        ? params.matchup_opponent_type[0]
+        : params.matchup_opponent_type
+      if (matchup_opponent_type) {
+        switch (matchup_opponent_type) {
+          case 'current_week_opponent_total':
+            this.on(
+              `${table_name}.nfl_team`,
+              '=',
+              'current_week_opponents.opponent'
+            )
+            break
+
+          case 'next_week_opponent_total':
+            this.on(
+              `${table_name}.nfl_team`,
+              '=',
+              'next_week_opponents.opponent'
+            )
+            break
+
+          default:
+            log(`unknown matchup_opponent_type: ${matchup_opponent_type}`)
+            break
+        }
+      } else {
+        this.on(`${table_name}.nfl_team`, '=', 'player.current_nfl_team')
+      }
     } else {
       this.on(`${table_name}.pid`, '=', 'player.pid')
     }
