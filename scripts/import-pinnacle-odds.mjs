@@ -225,6 +225,12 @@ const import_pinnacle_odds = async ({
       market_parent_id,
       ignore_cache
     })
+
+    if (!market_odds || market_odds.length === 0) {
+      log(`no market odds found for market parent id: ${market_parent_id}`)
+      continue
+    }
+
     market_selection_odds_by_parent_id[market_parent_id] = market_odds
 
     for (const market_selection_odds of market_odds) {
@@ -250,6 +256,10 @@ const import_pinnacle_odds = async ({
 
     const market_selection_odds = market.participants
       .map((participant) => {
+        if (!participant.id) {
+          log(`participant has no id: ${participant}`)
+          return null
+        }
         const selection = market_selection_by_participant_id[participant.id]
         if (!selection) {
           log(`could not find selection for participant id: ${participant.id}`)
