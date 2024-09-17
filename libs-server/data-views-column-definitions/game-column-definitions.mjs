@@ -85,9 +85,9 @@ const add_game_with_statement = ({
 export default {
   game_opponent: {
     column_name: 'game_opponent',
-    main_select: ({ table_name }) => [
-      `${table_name}.game_opponent`,
-      `${table_name}.game_is_home`
+    main_select: ({ table_name, column_index }) => [
+      `${table_name}.game_opponent as game_opponent_${column_index}`,
+      `${table_name}.game_is_home as game_is_home_${column_index}`
     ],
     main_group_by: ({ table_name }) => [
       `${table_name}.game_opponent`,
