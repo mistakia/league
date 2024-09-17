@@ -76,7 +76,7 @@ function PlayerFields({ week, state }) {
       column_header: 'Opponent',
       csv_header: 'Opponent',
       component: PlayerRowOpponent,
-      header_className: 'player__row-opponent',
+      header_className: 'game-opponent',
       getValue: (playerMap) => {
         const nfl_team = playerMap.get('team')
         const game = getGameByTeam(state, { nfl_team, week })
