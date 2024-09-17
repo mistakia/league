@@ -224,8 +224,20 @@ const run = async ({
 
   const timestamp = Math.round(Date.now() / 1000)
 
+  const session_refresh_interval = 4 * 60 * 1000 // 4 minutes in milliseconds
+  let last_session_refresh = Date.now()
   const session_headers = await caesars.get_caesars_session()
   log(session_headers)
+
+  const refresh_session_if_needed = async () => {
+    const current_time = Date.now()
+    if (current_time - last_session_refresh >= session_refresh_interval) {
+      log('Refreshing Caesars session')
+      const new_session_headers = await caesars.get_caesars_session()
+      log(new_session_headers)
+      last_session_refresh = current_time
+    }
+  }
 
   const unknown_market_types = new Set()
   const missing = []
@@ -302,6 +314,7 @@ const run = async ({
 
   for (const event of filtered_events) {
     console.time(`caesars-event-${event.id}`)
+    await refresh_session_if_needed()
     const event_odds = await caesars.get_event({
       event_id: event.id,
       ignore_cache
