@@ -26,6 +26,19 @@ const from_play_field = (field) => ({
       label: 'Include Only Player Active Games',
       data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
     },
+    matchup_opponent_type: {
+      data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+      label: 'Use Opponent',
+      single: true,
+      values: [
+        { label: "Player's Team", value: null },
+        {
+          label: 'Current Week Opponent',
+          value: 'current_week_opponent_total'
+        },
+        { label: 'Next Week Opponent', value: 'next_week_opponent_total' }
+      ]
+    },
     rate_type: rate_type_column_param.offensive_rate_type_param,
     ...nfl_plays_column_params
   },
