@@ -55,6 +55,16 @@ export default {
     main_where: ({ table_name }) => {
       return db.raw(`${table_name}.rate_type_total_count`)
     },
-    get_cache_info: get_cache_info_for_fields_from_plays
+    get_cache_info: get_cache_info_for_fields_from_plays,
+    supported_rate_types: [
+      'per_game',
+      'per_team_half',
+      'per_team_quarter',
+      'per_team_play',
+      'per_team_pass_play',
+      'per_team_rush_play',
+      'per_team_drive',
+      'per_team_series'
+    ]
   }
 }
