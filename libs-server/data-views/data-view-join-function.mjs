@@ -39,7 +39,9 @@ export default function data_view_join_function(join_arguments) {
   query[join_func](join_table_clause || table_name, function () {
     if (join_on_team) {
       const matchup_opponent_type = Array.isArray(params.matchup_opponent_type)
-        ? params.matchup_opponent_type[0]
+        ? (params.matchup_opponent_type[0] && typeof params.matchup_opponent_type[0] === 'object'
+           ? null
+           : params.matchup_opponent_type[0])
         : params.matchup_opponent_type
       if (matchup_opponent_type) {
         switch (matchup_opponent_type) {
