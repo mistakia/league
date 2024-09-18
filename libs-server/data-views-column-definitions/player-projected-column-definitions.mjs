@@ -94,7 +94,7 @@ const scoring_format_player_projection_points_join = (join_arguments) => {
   data_view_join_function({
     ...join_arguments,
     join_year: true,
-    join_week: true,
+    join_week: !join_arguments.is_rest_of_season,
     cast_join_week_to_string: true,
     join_table_clause: `scoring_format_player_projection_points as ${join_arguments.table_name}`,
     additional_conditions: function () {
@@ -103,6 +103,13 @@ const scoring_format_player_projection_points_join = (join_arguments) => {
         '=',
         db.raw('?', [scoring_format_hash])
       )
+      if (join_arguments.is_rest_of_season) {
+        this.andOn(
+          `${join_arguments.table_name}.week`,
+          '=',
+          db.raw('?', ['ros'])
+        )
+      }
     }
   })
 }
@@ -114,7 +121,7 @@ const league_format_player_projection_values_join = (join_arguments) => {
   data_view_join_function({
     ...join_arguments,
     join_year: true,
-    join_week: true,
+    join_week: !join_arguments.is_rest_of_season,
     join_table_clause: `league_format_player_projection_values as ${join_arguments.table_name}`,
     additional_conditions: function () {
       this.andOn(
@@ -122,6 +129,13 @@ const league_format_player_projection_values_join = (join_arguments) => {
         '=',
         db.raw('?', [league_format_hash])
       )
+      if (join_arguments.is_rest_of_season) {
+        this.andOn(
+          `${join_arguments.table_name}.week`,
+          '=',
+          db.raw('?', ['ros'])
+        )
+      }
     }
   })
 }
@@ -130,14 +144,18 @@ const projections_index_join = (join_arguments) => {
   data_view_join_function({
     ...join_arguments,
     join_year: true,
-    join_week: true,
-    join_table_clause: `projections_index as ${join_arguments.table_name}`,
+    join_week: !join_arguments.is_rest_of_season,
+    join_table_clause: join_arguments.is_rest_of_season
+      ? `ros_projections as ${join_arguments.table_name}`
+      : `projections_index as ${join_arguments.table_name}`,
     additional_conditions: function () {
-      this.andOn(
-        `${join_arguments.table_name}.sourceid`,
-        '=',
-        constants.sources.AVERAGE
-      )
+      if (!join_arguments.is_rest_of_season) {
+        this.andOn(
+          `${join_arguments.table_name}.sourceid`,
+          '=',
+          constants.sources.AVERAGE
+        )
+      }
     }
   })
 }
@@ -268,7 +286,12 @@ const create_projected_stat = (base_object, stat_name) => {
       ...base_object,
       select_as: () => `${prefix}_projected_${stat_name}`,
       supported_splits: prefix === 'week' ? ['year', 'week'] : ['year'],
-      get_cache_info: get_cache_info_for_player_projected_stats
+      get_cache_info: get_cache_info_for_player_projected_stats,
+      join: (join_arguments) =>
+        base_object.join({
+          ...join_arguments,
+          is_rest_of_season: prefix === 'rest_of_season'
+        })
     }
     return acc
   }, {})
