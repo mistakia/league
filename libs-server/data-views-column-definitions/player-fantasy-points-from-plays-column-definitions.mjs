@@ -240,7 +240,11 @@ export default {
       'per_player_pass_attempt',
       'per_player_target',
       'per_player_catchable_target',
-      'per_player_catchable_deep_target'
+      'per_player_catchable_deep_target',
+
+      'per_player_play',
+      'per_player_pass_play',
+      'per_player_rush_play'
     ],
     use_having: true,
     get_cache_info: get_cache_info_for_fields_from_plays

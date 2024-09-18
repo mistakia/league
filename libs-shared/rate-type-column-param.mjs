@@ -6,7 +6,7 @@ const base_rate_type_param = {
   default_value: null
 }
 
-const offensive_rate_type_param_values = [
+const base_rate_type_param_values = [
   { value: null, label: 'None' },
   { value: 'per_game', label: 'Per Game' },
   { value: 'per_team_play', label: 'Per Team Play' },
@@ -18,26 +18,27 @@ const offensive_rate_type_param_values = [
   { value: 'per_team_quarter', label: 'Per Team Quarter' }
 ]
 
+const player_rate_type_param_values = [
+  { value: 'per_player_play', label: 'Per Player Play' },
+  { value: 'per_player_pass_play', label: 'Per Player Pass Play' },
+  { value: 'per_player_rush_play', label: 'Per Player Rush Play' }
+]
+
 export const offensive_rate_type_param = {
   ...base_rate_type_param,
-  values: offensive_rate_type_param_values
+  values: base_rate_type_param_values
 }
 
-export const defensive_rate_type_param = {
+export const defensive_player_rate_type_param = {
   ...base_rate_type_param,
-  values: [
-    { value: null, label: 'None' },
-    { value: 'per_game', label: 'Per Game' },
-    { value: 'per_team_play', label: 'Per Team Play' },
-    { value: 'per_team_drive', label: 'Per Team Drive' },
-    { value: 'per_team_series', label: 'Per Team Series' }
-  ]
+  values: [...base_rate_type_param_values, ...player_rate_type_param_values]
 }
 
-export const player_rate_type_param = {
+export const offensive_player_rate_type_param = {
   ...base_rate_type_param,
   values: [
-    ...offensive_rate_type_param_values,
+    ...base_rate_type_param_values,
+    ...player_rate_type_param_values,
     { value: 'per_player_rush_attempt', label: 'Per Player Rush Attempt' },
     { value: 'per_player_pass_attempt', label: 'Per Player Pass Attempt' },
     { value: 'per_player_target', label: 'Per Player Target' },

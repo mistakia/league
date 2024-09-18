@@ -16,6 +16,12 @@ import {
   join_per_player_cte
 } from './rate-type-per-player.mjs'
 
+import {
+  get_per_player_play_cte_table_name,
+  add_per_player_play_cte,
+  join_per_player_play_cte
+} from './rate-type-per-player-play.mjs'
+
 const rate_type_handlers = {
   per_game: {
     get_cte_table_name: get_per_game_cte_table_name,
@@ -139,6 +145,30 @@ const rate_type_handlers = {
         rate_type_params: { dot: [20, 99], catchable_ball: true }
       }),
     join_cte: join_per_player_cte
+  },
+  per_player_play: {
+    get_cte_table_name: (args) =>
+      get_per_player_play_cte_table_name({ ...args }),
+    add_cte: (args) => add_per_player_play_cte({ ...args }),
+    join_cte: join_per_player_play_cte
+  },
+  per_player_pass_play: {
+    get_cte_table_name: (args) =>
+      get_per_player_play_cte_table_name({
+        ...args,
+        play_type: 'PASS'
+      }),
+    add_cte: (args) => add_per_player_play_cte({ ...args, play_type: 'PASS' }),
+    join_cte: join_per_player_play_cte
+  },
+  per_player_rush_play: {
+    get_cte_table_name: (args) =>
+      get_per_player_play_cte_table_name({
+        ...args,
+        play_type: 'RUSH'
+      }),
+    add_cte: (args) => add_per_player_play_cte({ ...args, play_type: 'RUSH' }),
+    join_cte: join_per_player_play_cte
   }
 }
 
