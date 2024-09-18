@@ -61,7 +61,7 @@ const import_players_ngs_highlight = async ({ ignore_cache = false }) => {
       }
     }
 
-    // TOOD skipping gsisItId as a collision was found
+    // TOOD skipping gsis_it_id as a collision was found
 
     // try name, team, position
     if (!player_row && ngs_player.displayName) {

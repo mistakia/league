@@ -46,7 +46,7 @@ const import_current_players_ngs = async ({
     // const dob = null
     const gsisid = player.gsisId
     const esbid = player.esbId
-    const gsisItId = player.gsisItId
+    const gsis_it_id = player.gsis_it_id
 
     let player_row
     let error
@@ -75,9 +75,9 @@ const import_current_players_ngs = async ({
       }
     }
 
-    if (!player_row && gsisItId) {
+    if (!player_row && gsis_it_id) {
       try {
-        player_row = await getPlayer({ gsisItId })
+        player_row = await getPlayer({ gsis_it_id })
       } catch (err) {
         log(err)
       }
@@ -105,7 +105,7 @@ const import_current_players_ngs = async ({
         update: {
           gsisid,
           esbid,
-          gsisItId,
+          gsis_it_id,
           col,
           dpos,
           start,
@@ -142,7 +142,7 @@ const import_current_players_ngs = async ({
 
         esbid,
         gsisid,
-        gsisItId
+        gsis_it_id
       })
       if (player_row) pids.push(player_row.pid)
     } else {

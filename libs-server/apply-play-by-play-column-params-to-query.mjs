@@ -67,7 +67,9 @@ export default function ({ query, params, table_name = 'nfl_plays' }) {
       const column_values = Array.isArray(param_value)
         ? param_value
         : [param_value]
-      query.whereIn(`${param_table}.${column_param_key}`, column_values)
+      if (column_values.length) {
+        query.whereIn(`${param_table}.${column_param_key}`, column_values)
+      }
     } else if (
       column_param_definition.data_type ===
       table_constants.TABLE_DATA_TYPES.BOOLEAN

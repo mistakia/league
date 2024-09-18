@@ -41,7 +41,7 @@ router.get('/props', async (req, res) => {
         'player.esbid as player_esbid',
         'player.gsisid as player_gsisid',
         'player.gsispid as player_gsispid',
-        'player.gsisItId as player_gsis_it_id',
+        'player.gsis_it_id as player_gsis_it_id',
         'player.sleeper_id as player_sleeper_id',
         'player.rotoworld_id as player_rotoworld_id',
         'player.rotowire_id as player_rotowire_id',
