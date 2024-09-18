@@ -675,9 +675,13 @@ export const get_data_view_results_query = ({
       column.params.matchup_opponent_type
     ) {
       const opponent_type = Array.isArray(column.params.matchup_opponent_type)
-        ? column.params.matchup_opponent_type[0]
+        ? (column.params.matchup_opponent_type[0] && typeof column.params.matchup_opponent_type[0] === 'object'
+           ? null
+           : column.params.matchup_opponent_type[0])
         : column.params.matchup_opponent_type
-      data_view_options.matchup_opponent_types.add(opponent_type)
+      if (opponent_type !== null) {
+        data_view_options.matchup_opponent_types.add(opponent_type)
+      }
     }
   }
 
@@ -687,9 +691,13 @@ export const get_data_view_results_query = ({
       const opponent_type = Array.isArray(
         where_clause.params.matchup_opponent_type
       )
-        ? where_clause.params.matchup_opponent_type[0]
+        ? (where_clause.params.matchup_opponent_type[0] && typeof where_clause.params.matchup_opponent_type[0] === 'object'
+           ? null
+           : where_clause.params.matchup_opponent_type[0])
         : where_clause.params.matchup_opponent_type
-      data_view_options.matchup_opponent_types.add(opponent_type)
+      if (opponent_type !== null) {
+        data_view_options.matchup_opponent_types.add(opponent_type)
+      }
     }
   }
 
