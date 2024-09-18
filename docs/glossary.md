@@ -587,7 +587,7 @@
 | nfl_id          | NFL ID                    | NFL ID                    | 47.67%   |
 | gsisid          | GSIS ID                   | GSIS ID                   | 53.99%   |
 | gsispid         | GSIS Player ID            | GSIS Player ID            | 40.39%   |
-| gsisItId        | GSIS It ID                | GSIS It ID                | 28.40%   |
+| gsis_it_id      | GSIS It ID                | GSIS It ID                | 28.40%   |
 | sleeper_id      | Sleeper ID                | Sleeper ID                | 29.04%   |
 | rotoworld_id    | Rotoworld ID              | Rotoworld ID              | 19.40%   |
 | rotowire_id     | Rotowire ID               | Rotowire ID               | 34.18%   |
