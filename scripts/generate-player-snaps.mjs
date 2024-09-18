@@ -24,11 +24,7 @@ const generate_player_snaps_for_week = async ({
   const esbids = nfl_game_rows.map((i) => i.esbid)
 
   const gamelogs = await db('player_gamelogs')
-    .select(
-      'player.gsisItId as gsis_it_id',
-      'player_gamelogs.tm',
-      'player_gamelogs.opp'
-    )
+    .select('player.gsis_it_id', 'player_gamelogs.tm', 'player_gamelogs.opp')
     .join('player', 'player.pid', 'player_gamelogs.pid')
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
     .where({ week, year, seas_type })
@@ -58,8 +54,8 @@ const generate_player_snaps_for_week = async ({
   const gsis_it_ids = Object.keys(nfl_snap_rows_by_gsis_it_id)
 
   const player_rows = await db('player')
-    .select('pid', 'gsisItId as gsis_it_id')
-    .whereIn('gsisItId', gsis_it_ids)
+    .select('pid', 'gsis_it_id')
+    .whereIn('gsis_it_id', gsis_it_ids)
 
   for (const gsis_it_id_key in nfl_snap_rows_by_gsis_it_id) {
     const gsis_it_id = Number(gsis_it_id_key)

@@ -18,7 +18,7 @@ const protected_props = [
   'esbid',
   'gsisid',
   'gsispid',
-  'gsisItId',
+  'gsis_it_id',
   'sleeper_id',
   'rotoworld_id',
   'rotowire_id',

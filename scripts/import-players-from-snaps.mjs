@@ -20,8 +20,8 @@ debug.enable(
 const import_players_from_snaps = async () => {
   const gsis_it_ids = await db('nfl_snaps')
     .select('nfl_snaps.gsis_it_id')
-    .leftJoin('player', 'nfl_snaps.gsis_it_id', 'player.gsisItId')
-    .whereNull('player.gsisItId')
+    .leftJoin('player', 'nfl_snaps.gsis_it_id', 'player.gsis_it_id')
+    .whereNull('player.gsis_it_id')
     .groupBy('nfl_snaps.gsis_it_id')
 
   log(`loaded ${gsis_it_ids.length} missing player ids`)
@@ -77,7 +77,7 @@ const import_players_from_snaps = async () => {
             posd: 'INA',
             esbid: data.esbId,
             gsisid: data.gsisId,
-            gsisItId: gsis_it_id,
+            gsis_it_id,
             jnum: data.jerseyNumber,
             current_nfl_team: data.currentTeamAbbr
           })
@@ -93,7 +93,7 @@ const import_players_from_snaps = async () => {
       }
 
       const update = {
-        gsisItId: gsis_it_id,
+        gsis_it_id,
         gsisid: data.gsisId,
         esbid: data.esbId
       }

@@ -304,7 +304,7 @@ export default {
   },
   player_gsis_it_id: {
     table_name: 'player',
-    column_name: 'gsisItId',
+    column_name: 'gsis_it_id',
     get_cache_info: player_table_get_cache_info
   },
   player_sleeper_id: {

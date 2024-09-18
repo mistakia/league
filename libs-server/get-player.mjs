@@ -61,7 +61,7 @@ const getPlayer = async ({
   gsisid,
   pname,
   start,
-  gsisItId,
+  gsis_it_id,
   draftkings_id,
   fanduel_id,
   cbs_id,
@@ -93,8 +93,8 @@ const getPlayer = async ({
     query.where({ esbid })
   } else if (gsisid) {
     query.where({ gsisid })
-  } else if (gsisItId) {
-    query.where({ gsisItId })
+  } else if (gsis_it_id) {
+    query.where({ gsis_it_id })
   } else if (otc_id) {
     query.where({ otc_id })
   } else if (pff_id) {
