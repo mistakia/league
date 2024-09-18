@@ -33,8 +33,7 @@ const import_pff_grades_for_position = async ({
 
   // Load existing pff seasonlogs for year and position
   const existing_logs = await db('pff_player_seasonlogs').where({
-    year,
-    position
+    year
   })
 
   const existing_logs_map = new Map(existing_logs.map((log) => [log.pid, log]))
