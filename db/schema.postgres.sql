@@ -138,6 +138,32 @@ DROP INDEX IF EXISTS public.player_gamelogs_default_tm_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_default_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_default_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.nfl_year_week_timestamp_year_week_idx;
+DROP INDEX IF EXISTS public."nfl_snaps_year_default_year_esbid_playId_gsis_it_id_idx";
+DROP INDEX IF EXISTS public."nfl_snaps_year_2024_year_esbid_playId_gsis_it_id_idx";
+DROP INDEX IF EXISTS public."nfl_snaps_year_2023_year_esbid_playId_gsis_it_id_idx";
+DROP INDEX IF EXISTS public."nfl_snaps_year_2022_year_esbid_playId_gsis_it_id_idx";
+DROP INDEX IF EXISTS public."nfl_snaps_year_2021_year_esbid_playId_gsis_it_id_idx";
+DROP INDEX IF EXISTS public."nfl_snaps_year_2020_year_esbid_playId_gsis_it_id_idx";
+DROP INDEX IF EXISTS public."nfl_snaps_year_2019_year_esbid_playId_gsis_it_id_idx";
+DROP INDEX IF EXISTS public."nfl_snaps_year_2018_year_esbid_playId_gsis_it_id_idx";
+DROP INDEX IF EXISTS public."nfl_snaps_year_2017_year_esbid_playId_gsis_it_id_idx";
+DROP INDEX IF EXISTS public."nfl_snaps_year_2016_year_esbid_playId_gsis_it_id_idx";
+DROP INDEX IF EXISTS public."nfl_snaps_year_2015_year_esbid_playId_gsis_it_id_idx";
+DROP INDEX IF EXISTS public."nfl_snaps_year_2014_year_esbid_playId_gsis_it_id_idx";
+DROP INDEX IF EXISTS public."nfl_snaps_year_2013_year_esbid_playId_gsis_it_id_idx";
+DROP INDEX IF EXISTS public."nfl_snaps_year_2012_year_esbid_playId_gsis_it_id_idx";
+DROP INDEX IF EXISTS public."nfl_snaps_year_2011_year_esbid_playId_gsis_it_id_idx";
+DROP INDEX IF EXISTS public."nfl_snaps_year_2010_year_esbid_playId_gsis_it_id_idx";
+DROP INDEX IF EXISTS public."nfl_snaps_year_2009_year_esbid_playId_gsis_it_id_idx";
+DROP INDEX IF EXISTS public."nfl_snaps_year_2008_year_esbid_playId_gsis_it_id_idx";
+DROP INDEX IF EXISTS public."nfl_snaps_year_2007_year_esbid_playId_gsis_it_id_idx";
+DROP INDEX IF EXISTS public."nfl_snaps_year_2006_year_esbid_playId_gsis_it_id_idx";
+DROP INDEX IF EXISTS public."nfl_snaps_year_2005_year_esbid_playId_gsis_it_id_idx";
+DROP INDEX IF EXISTS public."nfl_snaps_year_2004_year_esbid_playId_gsis_it_id_idx";
+DROP INDEX IF EXISTS public."nfl_snaps_year_2003_year_esbid_playId_gsis_it_id_idx";
+DROP INDEX IF EXISTS public."nfl_snaps_year_2002_year_esbid_playId_gsis_it_id_idx";
+DROP INDEX IF EXISTS public."nfl_snaps_year_2001_year_esbid_playId_gsis_it_id_idx";
+DROP INDEX IF EXISTS public."nfl_snaps_year_2000_year_esbid_playId_gsis_it_id_idx";
 DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_seas_type_week_play_type_trg_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_seas_type_week_play_type_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2024_year_seas_type_week_play_type_player_fu_idx;
@@ -1224,6 +1250,7 @@ DROP INDEX IF EXISTS public.idx_player_salaries_source_id_pid_salary_esbid;
 DROP INDEX IF EXISTS public.idx_player_pid_pos;
 DROP INDEX IF EXISTS public.idx_player_pff_id;
 DROP INDEX IF EXISTS public.idx_opening_days_year_opening_day;
+DROP INDEX IF EXISTS public.idx_nfl_snaps_partitioned;
 DROP INDEX IF EXISTS public.idx_nfl_plays_pass_location;
 DROP INDEX IF EXISTS public.idx_nfl_games_year_seas_type_week_esbid;
 DROP INDEX IF EXISTS public.idx_nfl_games_year_seas_type_esbid;
@@ -1335,8 +1362,6 @@ DROP INDEX IF EXISTS public.idx_24781_percentile_key;
 DROP INDEX IF EXISTS public.idx_24741_stat;
 DROP INDEX IF EXISTS public.idx_24738_snap;
 DROP INDEX IF EXISTS public."idx_24738_playId";
-DROP INDEX IF EXISTS public.idx_24735_snap;
-DROP INDEX IF EXISTS public."idx_24735_playId";
 DROP INDEX IF EXISTS public.idx_24722_play_stat;
 DROP INDEX IF EXISTS public."idx_24722_playId";
 DROP INDEX IF EXISTS public.idx_24719_play_stat;
@@ -1557,6 +1582,32 @@ DROP TABLE IF EXISTS public.percentiles;
 DROP MATERIALIZED VIEW IF EXISTS public.opening_days;
 DROP MATERIALIZED VIEW IF EXISTS public.nfl_year_week_timestamp;
 DROP TABLE IF EXISTS public.nfl_team_seasonlogs;
+DROP TABLE IF EXISTS public.nfl_snaps_year_default;
+DROP TABLE IF EXISTS public.nfl_snaps_year_2024;
+DROP TABLE IF EXISTS public.nfl_snaps_year_2023;
+DROP TABLE IF EXISTS public.nfl_snaps_year_2022;
+DROP TABLE IF EXISTS public.nfl_snaps_year_2021;
+DROP TABLE IF EXISTS public.nfl_snaps_year_2020;
+DROP TABLE IF EXISTS public.nfl_snaps_year_2019;
+DROP TABLE IF EXISTS public.nfl_snaps_year_2018;
+DROP TABLE IF EXISTS public.nfl_snaps_year_2017;
+DROP TABLE IF EXISTS public.nfl_snaps_year_2016;
+DROP TABLE IF EXISTS public.nfl_snaps_year_2015;
+DROP TABLE IF EXISTS public.nfl_snaps_year_2014;
+DROP TABLE IF EXISTS public.nfl_snaps_year_2013;
+DROP TABLE IF EXISTS public.nfl_snaps_year_2012;
+DROP TABLE IF EXISTS public.nfl_snaps_year_2011;
+DROP TABLE IF EXISTS public.nfl_snaps_year_2010;
+DROP TABLE IF EXISTS public.nfl_snaps_year_2009;
+DROP TABLE IF EXISTS public.nfl_snaps_year_2008;
+DROP TABLE IF EXISTS public.nfl_snaps_year_2007;
+DROP TABLE IF EXISTS public.nfl_snaps_year_2006;
+DROP TABLE IF EXISTS public.nfl_snaps_year_2005;
+DROP TABLE IF EXISTS public.nfl_snaps_year_2004;
+DROP TABLE IF EXISTS public.nfl_snaps_year_2003;
+DROP TABLE IF EXISTS public.nfl_snaps_year_2002;
+DROP TABLE IF EXISTS public.nfl_snaps_year_2001;
+DROP TABLE IF EXISTS public.nfl_snaps_year_2000;
 DROP TABLE IF EXISTS public.nfl_snaps_current_week;
 DROP TABLE IF EXISTS public.nfl_snaps;
 DROP TABLE IF EXISTS public.nfl_plays_year_2024;
@@ -12520,15 +12571,10 @@ CREATE TABLE public.nfl_plays_year_2024 (
 CREATE TABLE public.nfl_snaps (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
-    gsis_it_id integer NOT NULL
-);
-
-
---
--- Name: COLUMN nfl_snaps.gsis_it_id; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.nfl_snaps.gsis_it_id IS 'ngs nflId/gsisItId';
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
+)
+PARTITION BY RANGE (year);
 
 
 --
@@ -12539,6 +12585,318 @@ CREATE TABLE public.nfl_snaps_current_week (
     esbid integer NOT NULL,
     "playId" integer NOT NULL,
     gsis_it_id integer NOT NULL
+);
+
+
+--
+-- Name: nfl_snaps_year_2000; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_snaps_year_2000 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: nfl_snaps_year_2001; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_snaps_year_2001 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: nfl_snaps_year_2002; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_snaps_year_2002 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: nfl_snaps_year_2003; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_snaps_year_2003 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: nfl_snaps_year_2004; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_snaps_year_2004 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: nfl_snaps_year_2005; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_snaps_year_2005 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: nfl_snaps_year_2006; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_snaps_year_2006 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: nfl_snaps_year_2007; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_snaps_year_2007 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: nfl_snaps_year_2008; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_snaps_year_2008 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: nfl_snaps_year_2009; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_snaps_year_2009 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: nfl_snaps_year_2010; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_snaps_year_2010 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: nfl_snaps_year_2011; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_snaps_year_2011 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: nfl_snaps_year_2012; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_snaps_year_2012 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: nfl_snaps_year_2013; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_snaps_year_2013 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: nfl_snaps_year_2014; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_snaps_year_2014 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: nfl_snaps_year_2015; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_snaps_year_2015 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: nfl_snaps_year_2016; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_snaps_year_2016 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: nfl_snaps_year_2017; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_snaps_year_2017 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: nfl_snaps_year_2018; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_snaps_year_2018 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: nfl_snaps_year_2019; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_snaps_year_2019 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: nfl_snaps_year_2020; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_snaps_year_2020 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: nfl_snaps_year_2021; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_snaps_year_2021 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: nfl_snaps_year_2022; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_snaps_year_2022 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: nfl_snaps_year_2023; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_snaps_year_2023 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: nfl_snaps_year_2024; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_snaps_year_2024 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
+);
+
+
+--
+-- Name: nfl_snaps_year_default; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_snaps_year_default (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
 );
 
 
@@ -12865,7 +13223,7 @@ CREATE TABLE public.player (
     esbid character varying(10),
     gsisid character varying(15),
     gsispid character varying(47),
-    "gsisItId" integer,
+    gsis_it_id integer,
     status character varying(255),
     nfl_status character varying(50),
     injury_status character varying(12),
@@ -16690,6 +17048,188 @@ ALTER TABLE ONLY public.nfl_plays ATTACH PARTITION public.nfl_plays_year_2024 FO
 
 
 --
+-- Name: nfl_snaps_year_2000; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2000 FOR VALUES FROM ('2000') TO ('2001');
+
+
+--
+-- Name: nfl_snaps_year_2001; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2001 FOR VALUES FROM ('2001') TO ('2002');
+
+
+--
+-- Name: nfl_snaps_year_2002; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2002 FOR VALUES FROM ('2002') TO ('2003');
+
+
+--
+-- Name: nfl_snaps_year_2003; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2003 FOR VALUES FROM ('2003') TO ('2004');
+
+
+--
+-- Name: nfl_snaps_year_2004; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2004 FOR VALUES FROM ('2004') TO ('2005');
+
+
+--
+-- Name: nfl_snaps_year_2005; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2005 FOR VALUES FROM ('2005') TO ('2006');
+
+
+--
+-- Name: nfl_snaps_year_2006; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2006 FOR VALUES FROM ('2006') TO ('2007');
+
+
+--
+-- Name: nfl_snaps_year_2007; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2007 FOR VALUES FROM ('2007') TO ('2008');
+
+
+--
+-- Name: nfl_snaps_year_2008; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2008 FOR VALUES FROM ('2008') TO ('2009');
+
+
+--
+-- Name: nfl_snaps_year_2009; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2009 FOR VALUES FROM ('2009') TO ('2010');
+
+
+--
+-- Name: nfl_snaps_year_2010; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2010 FOR VALUES FROM ('2010') TO ('2011');
+
+
+--
+-- Name: nfl_snaps_year_2011; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2011 FOR VALUES FROM ('2011') TO ('2012');
+
+
+--
+-- Name: nfl_snaps_year_2012; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2012 FOR VALUES FROM ('2012') TO ('2013');
+
+
+--
+-- Name: nfl_snaps_year_2013; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2013 FOR VALUES FROM ('2013') TO ('2014');
+
+
+--
+-- Name: nfl_snaps_year_2014; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2014 FOR VALUES FROM ('2014') TO ('2015');
+
+
+--
+-- Name: nfl_snaps_year_2015; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2015 FOR VALUES FROM ('2015') TO ('2016');
+
+
+--
+-- Name: nfl_snaps_year_2016; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2016 FOR VALUES FROM ('2016') TO ('2017');
+
+
+--
+-- Name: nfl_snaps_year_2017; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2017 FOR VALUES FROM ('2017') TO ('2018');
+
+
+--
+-- Name: nfl_snaps_year_2018; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2018 FOR VALUES FROM ('2018') TO ('2019');
+
+
+--
+-- Name: nfl_snaps_year_2019; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2019 FOR VALUES FROM ('2019') TO ('2020');
+
+
+--
+-- Name: nfl_snaps_year_2020; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2020 FOR VALUES FROM ('2020') TO ('2021');
+
+
+--
+-- Name: nfl_snaps_year_2021; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2021 FOR VALUES FROM ('2021') TO ('2022');
+
+
+--
+-- Name: nfl_snaps_year_2022; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2022 FOR VALUES FROM ('2022') TO ('2023');
+
+
+--
+-- Name: nfl_snaps_year_2023; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2023 FOR VALUES FROM ('2023') TO ('2024');
+
+
+--
+-- Name: nfl_snaps_year_2024; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2024 FOR VALUES FROM ('2024') TO ('2025');
+
+
+--
+-- Name: nfl_snaps_year_default; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_default DEFAULT;
+
+
+--
 -- Name: player_gamelogs_default; Type: TABLE ATTACH; Schema: public; Owner: -
 --
 
@@ -17762,20 +18302,6 @@ CREATE UNIQUE INDEX idx_24722_play_stat ON public.nfl_play_stats_current_week US
 
 
 --
--- Name: idx_24735_playId; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX "idx_24735_playId" ON public.nfl_snaps USING btree ("playId");
-
-
---
--- Name: idx_24735_snap; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_24735_snap ON public.nfl_snaps USING btree (esbid, "playId", gsis_it_id);
-
-
---
 -- Name: idx_24738_playId; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -17863,7 +18389,7 @@ CREATE INDEX idx_24798_fname ON public.player USING btree (fname);
 -- Name: idx_24798_gsisItId; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX "idx_24798_gsisItId" ON public.player USING btree ("gsisItId");
+CREATE UNIQUE INDEX "idx_24798_gsisItId" ON public.player USING btree (gsis_it_id);
 
 
 --
@@ -18550,6 +19076,13 @@ CREATE INDEX idx_nfl_games_year_seas_type_week_esbid ON public.nfl_games USING b
 --
 
 CREATE INDEX idx_nfl_plays_pass_location ON ONLY public.nfl_plays USING btree (pass_location);
+
+
+--
+-- Name: idx_nfl_snaps_partitioned; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX idx_nfl_snaps_partitioned ON ONLY public.nfl_snaps USING btree (year, esbid, "playId", gsis_it_id);
 
 
 --
@@ -26152,6 +26685,188 @@ CREATE INDEX nfl_plays_year_2024_year_seas_type_week_play_type_psr_pid_idx ON pu
 --
 
 CREATE INDEX nfl_plays_year_2024_year_seas_type_week_play_type_trg_pid_idx ON public.nfl_plays_year_2024 USING btree (year, seas_type, week, play_type, trg_pid);
+
+
+--
+-- Name: nfl_snaps_year_2000_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_snaps_year_2000_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2000 USING btree (year, esbid, "playId", gsis_it_id);
+
+
+--
+-- Name: nfl_snaps_year_2001_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_snaps_year_2001_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2001 USING btree (year, esbid, "playId", gsis_it_id);
+
+
+--
+-- Name: nfl_snaps_year_2002_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_snaps_year_2002_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2002 USING btree (year, esbid, "playId", gsis_it_id);
+
+
+--
+-- Name: nfl_snaps_year_2003_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_snaps_year_2003_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2003 USING btree (year, esbid, "playId", gsis_it_id);
+
+
+--
+-- Name: nfl_snaps_year_2004_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_snaps_year_2004_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2004 USING btree (year, esbid, "playId", gsis_it_id);
+
+
+--
+-- Name: nfl_snaps_year_2005_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_snaps_year_2005_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2005 USING btree (year, esbid, "playId", gsis_it_id);
+
+
+--
+-- Name: nfl_snaps_year_2006_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_snaps_year_2006_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2006 USING btree (year, esbid, "playId", gsis_it_id);
+
+
+--
+-- Name: nfl_snaps_year_2007_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_snaps_year_2007_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2007 USING btree (year, esbid, "playId", gsis_it_id);
+
+
+--
+-- Name: nfl_snaps_year_2008_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_snaps_year_2008_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2008 USING btree (year, esbid, "playId", gsis_it_id);
+
+
+--
+-- Name: nfl_snaps_year_2009_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_snaps_year_2009_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2009 USING btree (year, esbid, "playId", gsis_it_id);
+
+
+--
+-- Name: nfl_snaps_year_2010_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_snaps_year_2010_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2010 USING btree (year, esbid, "playId", gsis_it_id);
+
+
+--
+-- Name: nfl_snaps_year_2011_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_snaps_year_2011_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2011 USING btree (year, esbid, "playId", gsis_it_id);
+
+
+--
+-- Name: nfl_snaps_year_2012_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_snaps_year_2012_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2012 USING btree (year, esbid, "playId", gsis_it_id);
+
+
+--
+-- Name: nfl_snaps_year_2013_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_snaps_year_2013_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2013 USING btree (year, esbid, "playId", gsis_it_id);
+
+
+--
+-- Name: nfl_snaps_year_2014_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_snaps_year_2014_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2014 USING btree (year, esbid, "playId", gsis_it_id);
+
+
+--
+-- Name: nfl_snaps_year_2015_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_snaps_year_2015_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2015 USING btree (year, esbid, "playId", gsis_it_id);
+
+
+--
+-- Name: nfl_snaps_year_2016_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_snaps_year_2016_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2016 USING btree (year, esbid, "playId", gsis_it_id);
+
+
+--
+-- Name: nfl_snaps_year_2017_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_snaps_year_2017_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2017 USING btree (year, esbid, "playId", gsis_it_id);
+
+
+--
+-- Name: nfl_snaps_year_2018_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_snaps_year_2018_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2018 USING btree (year, esbid, "playId", gsis_it_id);
+
+
+--
+-- Name: nfl_snaps_year_2019_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_snaps_year_2019_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2019 USING btree (year, esbid, "playId", gsis_it_id);
+
+
+--
+-- Name: nfl_snaps_year_2020_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_snaps_year_2020_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2020 USING btree (year, esbid, "playId", gsis_it_id);
+
+
+--
+-- Name: nfl_snaps_year_2021_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_snaps_year_2021_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2021 USING btree (year, esbid, "playId", gsis_it_id);
+
+
+--
+-- Name: nfl_snaps_year_2022_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_snaps_year_2022_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2022 USING btree (year, esbid, "playId", gsis_it_id);
+
+
+--
+-- Name: nfl_snaps_year_2023_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_snaps_year_2023_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2023 USING btree (year, esbid, "playId", gsis_it_id);
+
+
+--
+-- Name: nfl_snaps_year_2024_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_snaps_year_2024_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2024 USING btree (year, esbid, "playId", gsis_it_id);
+
+
+--
+-- Name: nfl_snaps_year_default_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_snaps_year_default_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_default USING btree (year, esbid, "playId", gsis_it_id);
 
 
 --
@@ -34153,6 +34868,188 @@ ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_psr_pid ATTACH 
 --
 
 ALTER INDEX public.index_nfl_plays_year_seas_type_week_play_type_trg_pid ATTACH PARTITION public.nfl_plays_year_2024_year_seas_type_week_play_type_trg_pid_idx;
+
+
+--
+-- Name: nfl_snaps_year_2000_year_esbid_playId_gsis_it_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_2000_year_esbid_playId_gsis_it_id_idx";
+
+
+--
+-- Name: nfl_snaps_year_2001_year_esbid_playId_gsis_it_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_2001_year_esbid_playId_gsis_it_id_idx";
+
+
+--
+-- Name: nfl_snaps_year_2002_year_esbid_playId_gsis_it_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_2002_year_esbid_playId_gsis_it_id_idx";
+
+
+--
+-- Name: nfl_snaps_year_2003_year_esbid_playId_gsis_it_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_2003_year_esbid_playId_gsis_it_id_idx";
+
+
+--
+-- Name: nfl_snaps_year_2004_year_esbid_playId_gsis_it_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_2004_year_esbid_playId_gsis_it_id_idx";
+
+
+--
+-- Name: nfl_snaps_year_2005_year_esbid_playId_gsis_it_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_2005_year_esbid_playId_gsis_it_id_idx";
+
+
+--
+-- Name: nfl_snaps_year_2006_year_esbid_playId_gsis_it_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_2006_year_esbid_playId_gsis_it_id_idx";
+
+
+--
+-- Name: nfl_snaps_year_2007_year_esbid_playId_gsis_it_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_2007_year_esbid_playId_gsis_it_id_idx";
+
+
+--
+-- Name: nfl_snaps_year_2008_year_esbid_playId_gsis_it_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_2008_year_esbid_playId_gsis_it_id_idx";
+
+
+--
+-- Name: nfl_snaps_year_2009_year_esbid_playId_gsis_it_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_2009_year_esbid_playId_gsis_it_id_idx";
+
+
+--
+-- Name: nfl_snaps_year_2010_year_esbid_playId_gsis_it_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_2010_year_esbid_playId_gsis_it_id_idx";
+
+
+--
+-- Name: nfl_snaps_year_2011_year_esbid_playId_gsis_it_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_2011_year_esbid_playId_gsis_it_id_idx";
+
+
+--
+-- Name: nfl_snaps_year_2012_year_esbid_playId_gsis_it_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_2012_year_esbid_playId_gsis_it_id_idx";
+
+
+--
+-- Name: nfl_snaps_year_2013_year_esbid_playId_gsis_it_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_2013_year_esbid_playId_gsis_it_id_idx";
+
+
+--
+-- Name: nfl_snaps_year_2014_year_esbid_playId_gsis_it_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_2014_year_esbid_playId_gsis_it_id_idx";
+
+
+--
+-- Name: nfl_snaps_year_2015_year_esbid_playId_gsis_it_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_2015_year_esbid_playId_gsis_it_id_idx";
+
+
+--
+-- Name: nfl_snaps_year_2016_year_esbid_playId_gsis_it_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_2016_year_esbid_playId_gsis_it_id_idx";
+
+
+--
+-- Name: nfl_snaps_year_2017_year_esbid_playId_gsis_it_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_2017_year_esbid_playId_gsis_it_id_idx";
+
+
+--
+-- Name: nfl_snaps_year_2018_year_esbid_playId_gsis_it_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_2018_year_esbid_playId_gsis_it_id_idx";
+
+
+--
+-- Name: nfl_snaps_year_2019_year_esbid_playId_gsis_it_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_2019_year_esbid_playId_gsis_it_id_idx";
+
+
+--
+-- Name: nfl_snaps_year_2020_year_esbid_playId_gsis_it_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_2020_year_esbid_playId_gsis_it_id_idx";
+
+
+--
+-- Name: nfl_snaps_year_2021_year_esbid_playId_gsis_it_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_2021_year_esbid_playId_gsis_it_id_idx";
+
+
+--
+-- Name: nfl_snaps_year_2022_year_esbid_playId_gsis_it_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_2022_year_esbid_playId_gsis_it_id_idx";
+
+
+--
+-- Name: nfl_snaps_year_2023_year_esbid_playId_gsis_it_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_2023_year_esbid_playId_gsis_it_id_idx";
+
+
+--
+-- Name: nfl_snaps_year_2024_year_esbid_playId_gsis_it_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_2024_year_esbid_playId_gsis_it_id_idx";
+
+
+--
+-- Name: nfl_snaps_year_default_year_esbid_playId_gsis_it_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_default_year_esbid_playId_gsis_it_id_idx";
 
 
 --
