@@ -122,12 +122,10 @@ export const add_per_player_play_cte = ({
 
   const { year, week } = get_default_params(params)
 
-  const filtered_params = {
-    year,
-    week,
-    year_offset: params.year_offset,
-    week_offset: params.week_offset
-  }
+  // Remove career_year and career_game from params before applying other filters
+  const filtered_params = { ...params, year, week }
+  delete filtered_params.career_year
+  delete filtered_params.career_game
 
   apply_play_by_play_column_params_to_query({
     query: cte_query,
