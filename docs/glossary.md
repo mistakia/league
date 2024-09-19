@@ -379,7 +379,7 @@
 | box_ngs             | Box NGS               | Number of defenders in the box according to Next Gen Stats                               | 98.15%   | 2016/08/11 |
 | pru_ngs             | Pass Rushers NGS      | Number of pass rushers according to Next Gen Stats                                       | 98.15%   | 2016/08/11 |
 | db                  | Defensive Backs       | Number of defensive backs involved in the play                                           | 23.42%   | 2021/09/10 |
-| box                 | Defenders in the Box  | Number of defenders in the box                                                           | 23.42%   | 2021/09/10 |
+| box_defenders       | Defenders in the Box  | Number of defenders in the box                                                           | 23.42%   | 2021/09/10 |
 | boxdb               | DBs in the Box        | Number of defensive backs in the box                                                     | -        | -          |
 | pass_rushers        | Pass Rushers          | Number of pass rushers involved in the play                                              | 83.19%   | 2021/09/10 |
 | blitzers            | Blitzers              | Number of linebackers and defensive backs blitzing                                       | 83.19%   | 2021/09/10 |

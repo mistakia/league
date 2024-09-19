@@ -71,7 +71,7 @@ const formatPlay = (play) => ({
   back: parseInt(play.back, 10) || null,
   xlm: parseInt(play.xlm, 10) || null,
   db: parseInt(play.db, 10) || null,
-  box: parseInt(play.box, 10) || null,
+  box_defenders: parseInt(play.box, 10) || null,
   boxdb: parseInt(play.boxdb, 10) || null,
   pass_rushers: parseInt(play.pru, 10) || null,
   blitzers: parseInt(play.blz, 10) || null,

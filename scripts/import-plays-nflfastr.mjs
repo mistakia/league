@@ -74,6 +74,25 @@ const format_play_direction = (direction) => {
   return null
 }
 
+const format_run_gap = ({ run_direction, run_gap }) => {
+  const formatted_run_direction = format_play_direction(run_direction)
+  if (!formatted_run_direction) return null
+
+  if (formatted_run_direction === 'MIDDLE') return 'MIDDLE'
+
+  switch (run_gap) {
+    case 'end':
+      return `${formatted_run_direction}_END`
+    case 'guard':
+      return `${formatted_run_direction}_GUARD`
+    case 'tackle':
+      return `${formatted_run_direction}_TACKLE`
+    default:
+      log(`unknown run gap: ${run_gap} for ${run_direction}`)
+      return null
+  }
+}
+
 const format_play = (play) => ({
   ydl_100: format_number(play.yardline_100),
 
@@ -131,7 +150,7 @@ const format_play = (play) => ({
   qb_spike: format_boolean(play.qb_spike),
 
   run_location: format_play_direction(play.run_location),
-  run_gap: play.run_gap || null,
+  run_gap: format_run_gap(play),
 
   pass_location: format_play_direction(play.pass_location),
 

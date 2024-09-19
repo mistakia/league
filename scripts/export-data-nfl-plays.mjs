@@ -217,7 +217,7 @@ const nfl_play_fields = [
   'back',
   'xlm',
   'db',
-  'box',
+  'box_defenders',
   'boxdb',
   'pass_rushers',
   'blitzers',
