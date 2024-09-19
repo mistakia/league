@@ -23,6 +23,7 @@ import practice_table_fields from './practice-table-fields'
 import espn_line_win_rates_table_fields from './espn-line-win-rates-table-fields'
 import game_table_fields from './game-table-fields'
 import player_snaps_table_fields from './player-snaps-table-fields'
+import player_routes_table_fields from './player-routes-table-fields'
 
 // Player Column Fields
 // header_label - string, required
@@ -99,7 +100,8 @@ export function PlayerTableFields({
     ...practice_table_fields,
     ...espn_line_win_rates_table_fields,
     ...game_table_fields,
-    ...player_snaps_table_fields
+    ...player_snaps_table_fields,
+    ...player_routes_table_fields
   }
 
   for (const [key, value] of Object.entries(fields)) {
