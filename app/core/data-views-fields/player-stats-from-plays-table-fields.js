@@ -459,6 +459,13 @@ export default {
       player_value_path: 'recv_first_down_share_from_plays',
       fixed: 1
     }),
+  player_receiving_yards_after_catch_from_plays:
+    offensive_player_from_play_field({
+      column_title: 'Receiving Yards After Catch (By Play)',
+      column_groups: [COLUMN_GROUPS.RECEIVING],
+      header_label: 'YAC',
+      player_value_path: 'rec_yds_after_catch_from_plays'
+    }),
   player_receiver_air_conversion_ratio_from_plays:
     offensive_player_from_play_field({
       column_title: 'Receiver Air Conversion Ratio (By Play)',
