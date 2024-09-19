@@ -52,7 +52,7 @@ export const get_per_player_route_cte_table_name = ({
   params = {},
   group_by = null
 } = {}) => {
-  const { all_years, week } = get_default_params(params)
+  const { all_years, week } = get_default_params({ params })
 
   const group_by_suffix = group_by ? `_${group_by}` : ''
   return get_table_hash(
@@ -111,7 +111,7 @@ export const add_per_player_route_cte = ({
     }
   }
 
-  const { year, week } = get_default_params(params)
+  const { year, week } = get_default_params({ params })
 
   // Remove career_year and career_game from params before applying other filters
   const filtered_params = { ...params, year, week }

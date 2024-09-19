@@ -1,7 +1,7 @@
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import db from '#db'
 
-const get_default_params = (params = {}) => {
+const get_default_params = ({ params = {} } = {}) => {
   let year = params.year || []
   if (!Array.isArray(year)) {
     year = [year]
@@ -59,8 +59,9 @@ const get_default_params = (params = {}) => {
 }
 
 export const get_per_game_cte_table_name = ({ params = {} } = {}) => {
-  const { week, career_year, career_game, all_years } =
-    get_default_params(params)
+  const { week, career_year, career_game, all_years } = get_default_params({
+    params
+  })
 
   return get_table_hash(
     `games_played_years_${all_years.join('_')}_weeks_${week.join('_')}_career_year_${career_year.join('_')}_career_game_${career_game.join('_')}`
@@ -73,8 +74,9 @@ export const add_per_game_cte = ({
   rate_type_table_name,
   splits = []
 }) => {
-  const { week, career_year, career_game, all_years } =
-    get_default_params(params)
+  const { week, career_year, career_game, all_years } = get_default_params({
+    params
+  })
 
   let cte_query = db('player_gamelogs')
     .select('player_gamelogs.pid')
