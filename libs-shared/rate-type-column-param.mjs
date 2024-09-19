@@ -20,6 +20,7 @@ const base_rate_type_param_values = [
 
 const player_rate_type_param_values = [
   { value: 'per_player_play', label: 'Per Player Play' },
+  { value: 'per_player_route', label: 'Per Player Route' },
   { value: 'per_player_pass_play', label: 'Per Player Pass Play' },
   { value: 'per_player_rush_play', label: 'Per Player Rush Play' }
 ]
