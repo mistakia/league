@@ -1541,7 +1541,17 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.RUSHING]
   },
   run_gap: {
-    values: ['end', 'tackle', 'guard'],
+    values: [
+      'LEFT_END',
+      'LEFT_TACKLE',
+      'LEFT_GUARD',
+      'LEFT_MIDDLE',
+      'RIGHT_GUARD',
+      'RIGHT_TACKLE',
+      'RIGHT_END',
+      'RIGHT_MIDDLE',
+      'MIDDLE'
+    ],
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.RUSHING]
   },
@@ -1683,7 +1693,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.DEFENSE]
   },
-  box: {
+  box_defenders: {
     min: 0,
     max: 11,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,

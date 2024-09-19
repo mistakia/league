@@ -1692,6 +1692,8 @@ DROP FUNCTION IF EXISTS public.player_name_search_vector_update();
 DROP TYPE IF EXISTS public.wager_status;
 DROP TYPE IF EXISTS public.time_type;
 DROP TYPE IF EXISTS public.selection_type;
+DROP TYPE IF EXISTS public.run_gap;
+DROP TYPE IF EXISTS public.receiver_separation;
 DROP TYPE IF EXISTS public.read_thrown_type;
 DROP TYPE IF EXISTS public.rankings_source_id;
 DROP TYPE IF EXISTS public.ranking_type;
@@ -1702,10 +1704,30 @@ DROP TYPE IF EXISTS public.placed_wagers_book_id;
 DROP TYPE IF EXISTS public.nfl_play_type;
 DROP TYPE IF EXISTS public.nfl_games_surf;
 DROP TYPE IF EXISTS public.nfl_games_roof;
+DROP TYPE IF EXISTS public.motion_type;
 DROP TYPE IF EXISTS public.market_source_id;
 DROP TYPE IF EXISTS public.hash_position;
 DROP TYPE IF EXISTS public.espn_win_rate_type;
 DROP TYPE IF EXISTS public.dfs_source_id;
+DROP TYPE IF EXISTS public.coverage_type;
+--
+-- Name: coverage_type; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.coverage_type AS ENUM (
+    'COVER_0',
+    'COVER_1',
+    'COVER_2',
+    'COVER_2_MAN',
+    'COVER_3',
+    'COVER_4',
+    'COVER_5',
+    'COVER_6',
+    'COVER_9',
+    'COMBINATION'
+);
+
+
 --
 -- Name: dfs_source_id; Type: TYPE; Schema: public; Owner: -
 --
@@ -1754,6 +1776,16 @@ CREATE TYPE public.market_source_id AS ENUM (
     'GAMBET',
     'PRIZEPICKS',
     'PINNACLE'
+);
+
+
+--
+-- Name: motion_type; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.motion_type AS ENUM (
+    'BEFORE_SNAP',
+    'DURING_SNAP'
 );
 
 
@@ -1897,6 +1929,36 @@ CREATE TYPE public.read_thrown_type AS ENUM (
     'DESIGNED',
     'CHECKDOWN',
     'SCRAMBLE_DRILL'
+);
+
+
+--
+-- Name: receiver_separation; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.receiver_separation AS ENUM (
+    'OPEN',
+    'TIGHT_COVERAGE',
+    'ONE_STEP_OPEN',
+    'WIDE_OPEN',
+    'CLOSING_COVERAGE'
+);
+
+
+--
+-- Name: run_gap; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.run_gap AS ENUM (
+    'LEFT_END',
+    'LEFT_TACKLE',
+    'LEFT_GUARD',
+    'LEFT_MIDDLE',
+    'RIGHT_GUARD',
+    'RIGHT_TACKLE',
+    'RIGHT_END',
+    'RIGHT_MIDDLE',
+    'MIDDLE'
 );
 
 
@@ -3162,7 +3224,7 @@ CREATE TABLE public.nfl_plays (
     back smallint,
     xlm smallint,
     db smallint,
-    box smallint,
+    box_defenders smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -3216,7 +3278,6 @@ CREATE TABLE public.nfl_plays (
     qb_kneel boolean,
     qb_spike boolean,
     run_location public.play_direction,
-    run_gap character varying(10),
     first_down_rush boolean,
     first_down_pass boolean,
     first_down_penalty boolean,
@@ -3368,7 +3429,17 @@ CREATE TABLE public.nfl_plays (
     pass_prob_non_tracking_ngs numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50)
+    qb_position_ngs character varying(50),
+    run_gap public.run_gap,
+    yards_created smallint,
+    yards_blocked smallint,
+    endzone_target boolean,
+    receiver_separation public.receiver_separation,
+    coverage_type public.coverage_type,
+    targeted_defender_gsis_id character varying(36),
+    pass_breakup boolean,
+    motion_before_snap boolean,
+    motion_during_snap boolean
 )
 PARTITION BY RANGE (year);
 
@@ -4354,7 +4425,7 @@ CREATE TABLE public.nfl_plays_receiver (
     year smallint NOT NULL,
     gsis_it_id integer NOT NULL,
     player_esbid character varying(20),
-    gsis_id character varying(20),
+    gsis_id character varying(20) NOT NULL,
     receiver_location_type character varying(50),
     cushion numeric(10,2),
     route character varying(50),
@@ -4375,7 +4446,9 @@ CREATE TABLE public.nfl_plays_receiver (
     interception boolean,
     touchdown boolean,
     distance_from_sideline numeric(10,4),
-    distance_from_endzone numeric(10,2)
+    distance_from_endzone numeric(10,2),
+    cushion_charted numeric(10,2),
+    motion_type public.motion_type
 );
 
 
@@ -4530,7 +4603,7 @@ CREATE TABLE public.nfl_plays_year_2000 (
     back smallint,
     xlm smallint,
     db smallint,
-    box smallint,
+    box_defenders smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -4584,7 +4657,6 @@ CREATE TABLE public.nfl_plays_year_2000 (
     qb_kneel boolean,
     qb_spike boolean,
     run_location public.play_direction,
-    run_gap character varying(10),
     first_down_rush boolean,
     first_down_pass boolean,
     first_down_penalty boolean,
@@ -4736,7 +4808,17 @@ CREATE TABLE public.nfl_plays_year_2000 (
     pass_prob_non_tracking_ngs numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50)
+    qb_position_ngs character varying(50),
+    run_gap public.run_gap,
+    yards_created smallint,
+    yards_blocked smallint,
+    endzone_target boolean,
+    receiver_separation public.receiver_separation,
+    coverage_type public.coverage_type,
+    targeted_defender_gsis_id character varying(36),
+    pass_breakup boolean,
+    motion_before_snap boolean,
+    motion_during_snap boolean
 );
 
 
@@ -4856,7 +4938,7 @@ CREATE TABLE public.nfl_plays_year_2001 (
     back smallint,
     xlm smallint,
     db smallint,
-    box smallint,
+    box_defenders smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -4910,7 +4992,6 @@ CREATE TABLE public.nfl_plays_year_2001 (
     qb_kneel boolean,
     qb_spike boolean,
     run_location public.play_direction,
-    run_gap character varying(10),
     first_down_rush boolean,
     first_down_pass boolean,
     first_down_penalty boolean,
@@ -5062,7 +5143,17 @@ CREATE TABLE public.nfl_plays_year_2001 (
     pass_prob_non_tracking_ngs numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50)
+    qb_position_ngs character varying(50),
+    run_gap public.run_gap,
+    yards_created smallint,
+    yards_blocked smallint,
+    endzone_target boolean,
+    receiver_separation public.receiver_separation,
+    coverage_type public.coverage_type,
+    targeted_defender_gsis_id character varying(36),
+    pass_breakup boolean,
+    motion_before_snap boolean,
+    motion_during_snap boolean
 );
 
 
@@ -5182,7 +5273,7 @@ CREATE TABLE public.nfl_plays_year_2002 (
     back smallint,
     xlm smallint,
     db smallint,
-    box smallint,
+    box_defenders smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -5236,7 +5327,6 @@ CREATE TABLE public.nfl_plays_year_2002 (
     qb_kneel boolean,
     qb_spike boolean,
     run_location public.play_direction,
-    run_gap character varying(10),
     first_down_rush boolean,
     first_down_pass boolean,
     first_down_penalty boolean,
@@ -5388,7 +5478,17 @@ CREATE TABLE public.nfl_plays_year_2002 (
     pass_prob_non_tracking_ngs numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50)
+    qb_position_ngs character varying(50),
+    run_gap public.run_gap,
+    yards_created smallint,
+    yards_blocked smallint,
+    endzone_target boolean,
+    receiver_separation public.receiver_separation,
+    coverage_type public.coverage_type,
+    targeted_defender_gsis_id character varying(36),
+    pass_breakup boolean,
+    motion_before_snap boolean,
+    motion_during_snap boolean
 );
 
 
@@ -5508,7 +5608,7 @@ CREATE TABLE public.nfl_plays_year_2003 (
     back smallint,
     xlm smallint,
     db smallint,
-    box smallint,
+    box_defenders smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -5562,7 +5662,6 @@ CREATE TABLE public.nfl_plays_year_2003 (
     qb_kneel boolean,
     qb_spike boolean,
     run_location public.play_direction,
-    run_gap character varying(10),
     first_down_rush boolean,
     first_down_pass boolean,
     first_down_penalty boolean,
@@ -5714,7 +5813,17 @@ CREATE TABLE public.nfl_plays_year_2003 (
     pass_prob_non_tracking_ngs numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50)
+    qb_position_ngs character varying(50),
+    run_gap public.run_gap,
+    yards_created smallint,
+    yards_blocked smallint,
+    endzone_target boolean,
+    receiver_separation public.receiver_separation,
+    coverage_type public.coverage_type,
+    targeted_defender_gsis_id character varying(36),
+    pass_breakup boolean,
+    motion_before_snap boolean,
+    motion_during_snap boolean
 );
 
 
@@ -5834,7 +5943,7 @@ CREATE TABLE public.nfl_plays_year_2004 (
     back smallint,
     xlm smallint,
     db smallint,
-    box smallint,
+    box_defenders smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -5888,7 +5997,6 @@ CREATE TABLE public.nfl_plays_year_2004 (
     qb_kneel boolean,
     qb_spike boolean,
     run_location public.play_direction,
-    run_gap character varying(10),
     first_down_rush boolean,
     first_down_pass boolean,
     first_down_penalty boolean,
@@ -6040,7 +6148,17 @@ CREATE TABLE public.nfl_plays_year_2004 (
     pass_prob_non_tracking_ngs numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50)
+    qb_position_ngs character varying(50),
+    run_gap public.run_gap,
+    yards_created smallint,
+    yards_blocked smallint,
+    endzone_target boolean,
+    receiver_separation public.receiver_separation,
+    coverage_type public.coverage_type,
+    targeted_defender_gsis_id character varying(36),
+    pass_breakup boolean,
+    motion_before_snap boolean,
+    motion_during_snap boolean
 );
 
 
@@ -6160,7 +6278,7 @@ CREATE TABLE public.nfl_plays_year_2005 (
     back smallint,
     xlm smallint,
     db smallint,
-    box smallint,
+    box_defenders smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -6214,7 +6332,6 @@ CREATE TABLE public.nfl_plays_year_2005 (
     qb_kneel boolean,
     qb_spike boolean,
     run_location public.play_direction,
-    run_gap character varying(10),
     first_down_rush boolean,
     first_down_pass boolean,
     first_down_penalty boolean,
@@ -6366,7 +6483,17 @@ CREATE TABLE public.nfl_plays_year_2005 (
     pass_prob_non_tracking_ngs numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50)
+    qb_position_ngs character varying(50),
+    run_gap public.run_gap,
+    yards_created smallint,
+    yards_blocked smallint,
+    endzone_target boolean,
+    receiver_separation public.receiver_separation,
+    coverage_type public.coverage_type,
+    targeted_defender_gsis_id character varying(36),
+    pass_breakup boolean,
+    motion_before_snap boolean,
+    motion_during_snap boolean
 );
 
 
@@ -6486,7 +6613,7 @@ CREATE TABLE public.nfl_plays_year_2006 (
     back smallint,
     xlm smallint,
     db smallint,
-    box smallint,
+    box_defenders smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -6540,7 +6667,6 @@ CREATE TABLE public.nfl_plays_year_2006 (
     qb_kneel boolean,
     qb_spike boolean,
     run_location public.play_direction,
-    run_gap character varying(10),
     first_down_rush boolean,
     first_down_pass boolean,
     first_down_penalty boolean,
@@ -6692,7 +6818,17 @@ CREATE TABLE public.nfl_plays_year_2006 (
     pass_prob_non_tracking_ngs numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50)
+    qb_position_ngs character varying(50),
+    run_gap public.run_gap,
+    yards_created smallint,
+    yards_blocked smallint,
+    endzone_target boolean,
+    receiver_separation public.receiver_separation,
+    coverage_type public.coverage_type,
+    targeted_defender_gsis_id character varying(36),
+    pass_breakup boolean,
+    motion_before_snap boolean,
+    motion_during_snap boolean
 );
 
 
@@ -6812,7 +6948,7 @@ CREATE TABLE public.nfl_plays_year_2007 (
     back smallint,
     xlm smallint,
     db smallint,
-    box smallint,
+    box_defenders smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -6866,7 +7002,6 @@ CREATE TABLE public.nfl_plays_year_2007 (
     qb_kneel boolean,
     qb_spike boolean,
     run_location public.play_direction,
-    run_gap character varying(10),
     first_down_rush boolean,
     first_down_pass boolean,
     first_down_penalty boolean,
@@ -7018,7 +7153,17 @@ CREATE TABLE public.nfl_plays_year_2007 (
     pass_prob_non_tracking_ngs numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50)
+    qb_position_ngs character varying(50),
+    run_gap public.run_gap,
+    yards_created smallint,
+    yards_blocked smallint,
+    endzone_target boolean,
+    receiver_separation public.receiver_separation,
+    coverage_type public.coverage_type,
+    targeted_defender_gsis_id character varying(36),
+    pass_breakup boolean,
+    motion_before_snap boolean,
+    motion_during_snap boolean
 );
 
 
@@ -7138,7 +7283,7 @@ CREATE TABLE public.nfl_plays_year_2008 (
     back smallint,
     xlm smallint,
     db smallint,
-    box smallint,
+    box_defenders smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -7192,7 +7337,6 @@ CREATE TABLE public.nfl_plays_year_2008 (
     qb_kneel boolean,
     qb_spike boolean,
     run_location public.play_direction,
-    run_gap character varying(10),
     first_down_rush boolean,
     first_down_pass boolean,
     first_down_penalty boolean,
@@ -7344,7 +7488,17 @@ CREATE TABLE public.nfl_plays_year_2008 (
     pass_prob_non_tracking_ngs numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50)
+    qb_position_ngs character varying(50),
+    run_gap public.run_gap,
+    yards_created smallint,
+    yards_blocked smallint,
+    endzone_target boolean,
+    receiver_separation public.receiver_separation,
+    coverage_type public.coverage_type,
+    targeted_defender_gsis_id character varying(36),
+    pass_breakup boolean,
+    motion_before_snap boolean,
+    motion_during_snap boolean
 );
 
 
@@ -7464,7 +7618,7 @@ CREATE TABLE public.nfl_plays_year_2009 (
     back smallint,
     xlm smallint,
     db smallint,
-    box smallint,
+    box_defenders smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -7518,7 +7672,6 @@ CREATE TABLE public.nfl_plays_year_2009 (
     qb_kneel boolean,
     qb_spike boolean,
     run_location public.play_direction,
-    run_gap character varying(10),
     first_down_rush boolean,
     first_down_pass boolean,
     first_down_penalty boolean,
@@ -7670,7 +7823,17 @@ CREATE TABLE public.nfl_plays_year_2009 (
     pass_prob_non_tracking_ngs numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50)
+    qb_position_ngs character varying(50),
+    run_gap public.run_gap,
+    yards_created smallint,
+    yards_blocked smallint,
+    endzone_target boolean,
+    receiver_separation public.receiver_separation,
+    coverage_type public.coverage_type,
+    targeted_defender_gsis_id character varying(36),
+    pass_breakup boolean,
+    motion_before_snap boolean,
+    motion_during_snap boolean
 );
 
 
@@ -7790,7 +7953,7 @@ CREATE TABLE public.nfl_plays_year_2010 (
     back smallint,
     xlm smallint,
     db smallint,
-    box smallint,
+    box_defenders smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -7844,7 +8007,6 @@ CREATE TABLE public.nfl_plays_year_2010 (
     qb_kneel boolean,
     qb_spike boolean,
     run_location public.play_direction,
-    run_gap character varying(10),
     first_down_rush boolean,
     first_down_pass boolean,
     first_down_penalty boolean,
@@ -7996,7 +8158,17 @@ CREATE TABLE public.nfl_plays_year_2010 (
     pass_prob_non_tracking_ngs numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50)
+    qb_position_ngs character varying(50),
+    run_gap public.run_gap,
+    yards_created smallint,
+    yards_blocked smallint,
+    endzone_target boolean,
+    receiver_separation public.receiver_separation,
+    coverage_type public.coverage_type,
+    targeted_defender_gsis_id character varying(36),
+    pass_breakup boolean,
+    motion_before_snap boolean,
+    motion_during_snap boolean
 );
 
 
@@ -8116,7 +8288,7 @@ CREATE TABLE public.nfl_plays_year_2011 (
     back smallint,
     xlm smallint,
     db smallint,
-    box smallint,
+    box_defenders smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -8170,7 +8342,6 @@ CREATE TABLE public.nfl_plays_year_2011 (
     qb_kneel boolean,
     qb_spike boolean,
     run_location public.play_direction,
-    run_gap character varying(10),
     first_down_rush boolean,
     first_down_pass boolean,
     first_down_penalty boolean,
@@ -8322,7 +8493,17 @@ CREATE TABLE public.nfl_plays_year_2011 (
     pass_prob_non_tracking_ngs numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50)
+    qb_position_ngs character varying(50),
+    run_gap public.run_gap,
+    yards_created smallint,
+    yards_blocked smallint,
+    endzone_target boolean,
+    receiver_separation public.receiver_separation,
+    coverage_type public.coverage_type,
+    targeted_defender_gsis_id character varying(36),
+    pass_breakup boolean,
+    motion_before_snap boolean,
+    motion_during_snap boolean
 );
 
 
@@ -8442,7 +8623,7 @@ CREATE TABLE public.nfl_plays_year_2012 (
     back smallint,
     xlm smallint,
     db smallint,
-    box smallint,
+    box_defenders smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -8496,7 +8677,6 @@ CREATE TABLE public.nfl_plays_year_2012 (
     qb_kneel boolean,
     qb_spike boolean,
     run_location public.play_direction,
-    run_gap character varying(10),
     first_down_rush boolean,
     first_down_pass boolean,
     first_down_penalty boolean,
@@ -8648,7 +8828,17 @@ CREATE TABLE public.nfl_plays_year_2012 (
     pass_prob_non_tracking_ngs numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50)
+    qb_position_ngs character varying(50),
+    run_gap public.run_gap,
+    yards_created smallint,
+    yards_blocked smallint,
+    endzone_target boolean,
+    receiver_separation public.receiver_separation,
+    coverage_type public.coverage_type,
+    targeted_defender_gsis_id character varying(36),
+    pass_breakup boolean,
+    motion_before_snap boolean,
+    motion_during_snap boolean
 );
 
 
@@ -8768,7 +8958,7 @@ CREATE TABLE public.nfl_plays_year_2013 (
     back smallint,
     xlm smallint,
     db smallint,
-    box smallint,
+    box_defenders smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -8822,7 +9012,6 @@ CREATE TABLE public.nfl_plays_year_2013 (
     qb_kneel boolean,
     qb_spike boolean,
     run_location public.play_direction,
-    run_gap character varying(10),
     first_down_rush boolean,
     first_down_pass boolean,
     first_down_penalty boolean,
@@ -8974,7 +9163,17 @@ CREATE TABLE public.nfl_plays_year_2013 (
     pass_prob_non_tracking_ngs numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50)
+    qb_position_ngs character varying(50),
+    run_gap public.run_gap,
+    yards_created smallint,
+    yards_blocked smallint,
+    endzone_target boolean,
+    receiver_separation public.receiver_separation,
+    coverage_type public.coverage_type,
+    targeted_defender_gsis_id character varying(36),
+    pass_breakup boolean,
+    motion_before_snap boolean,
+    motion_during_snap boolean
 );
 
 
@@ -9094,7 +9293,7 @@ CREATE TABLE public.nfl_plays_year_2014 (
     back smallint,
     xlm smallint,
     db smallint,
-    box smallint,
+    box_defenders smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -9148,7 +9347,6 @@ CREATE TABLE public.nfl_plays_year_2014 (
     qb_kneel boolean,
     qb_spike boolean,
     run_location public.play_direction,
-    run_gap character varying(10),
     first_down_rush boolean,
     first_down_pass boolean,
     first_down_penalty boolean,
@@ -9300,7 +9498,17 @@ CREATE TABLE public.nfl_plays_year_2014 (
     pass_prob_non_tracking_ngs numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50)
+    qb_position_ngs character varying(50),
+    run_gap public.run_gap,
+    yards_created smallint,
+    yards_blocked smallint,
+    endzone_target boolean,
+    receiver_separation public.receiver_separation,
+    coverage_type public.coverage_type,
+    targeted_defender_gsis_id character varying(36),
+    pass_breakup boolean,
+    motion_before_snap boolean,
+    motion_during_snap boolean
 );
 
 
@@ -9420,7 +9628,7 @@ CREATE TABLE public.nfl_plays_year_2015 (
     back smallint,
     xlm smallint,
     db smallint,
-    box smallint,
+    box_defenders smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -9474,7 +9682,6 @@ CREATE TABLE public.nfl_plays_year_2015 (
     qb_kneel boolean,
     qb_spike boolean,
     run_location public.play_direction,
-    run_gap character varying(10),
     first_down_rush boolean,
     first_down_pass boolean,
     first_down_penalty boolean,
@@ -9626,7 +9833,17 @@ CREATE TABLE public.nfl_plays_year_2015 (
     pass_prob_non_tracking_ngs numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50)
+    qb_position_ngs character varying(50),
+    run_gap public.run_gap,
+    yards_created smallint,
+    yards_blocked smallint,
+    endzone_target boolean,
+    receiver_separation public.receiver_separation,
+    coverage_type public.coverage_type,
+    targeted_defender_gsis_id character varying(36),
+    pass_breakup boolean,
+    motion_before_snap boolean,
+    motion_during_snap boolean
 );
 
 
@@ -9746,7 +9963,7 @@ CREATE TABLE public.nfl_plays_year_2016 (
     back smallint,
     xlm smallint,
     db smallint,
-    box smallint,
+    box_defenders smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -9800,7 +10017,6 @@ CREATE TABLE public.nfl_plays_year_2016 (
     qb_kneel boolean,
     qb_spike boolean,
     run_location public.play_direction,
-    run_gap character varying(10),
     first_down_rush boolean,
     first_down_pass boolean,
     first_down_penalty boolean,
@@ -9952,7 +10168,17 @@ CREATE TABLE public.nfl_plays_year_2016 (
     pass_prob_non_tracking_ngs numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50)
+    qb_position_ngs character varying(50),
+    run_gap public.run_gap,
+    yards_created smallint,
+    yards_blocked smallint,
+    endzone_target boolean,
+    receiver_separation public.receiver_separation,
+    coverage_type public.coverage_type,
+    targeted_defender_gsis_id character varying(36),
+    pass_breakup boolean,
+    motion_before_snap boolean,
+    motion_during_snap boolean
 );
 
 
@@ -10072,7 +10298,7 @@ CREATE TABLE public.nfl_plays_year_2017 (
     back smallint,
     xlm smallint,
     db smallint,
-    box smallint,
+    box_defenders smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -10126,7 +10352,6 @@ CREATE TABLE public.nfl_plays_year_2017 (
     qb_kneel boolean,
     qb_spike boolean,
     run_location public.play_direction,
-    run_gap character varying(10),
     first_down_rush boolean,
     first_down_pass boolean,
     first_down_penalty boolean,
@@ -10278,7 +10503,17 @@ CREATE TABLE public.nfl_plays_year_2017 (
     pass_prob_non_tracking_ngs numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50)
+    qb_position_ngs character varying(50),
+    run_gap public.run_gap,
+    yards_created smallint,
+    yards_blocked smallint,
+    endzone_target boolean,
+    receiver_separation public.receiver_separation,
+    coverage_type public.coverage_type,
+    targeted_defender_gsis_id character varying(36),
+    pass_breakup boolean,
+    motion_before_snap boolean,
+    motion_during_snap boolean
 );
 
 
@@ -10398,7 +10633,7 @@ CREATE TABLE public.nfl_plays_year_2018 (
     back smallint,
     xlm smallint,
     db smallint,
-    box smallint,
+    box_defenders smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -10452,7 +10687,6 @@ CREATE TABLE public.nfl_plays_year_2018 (
     qb_kneel boolean,
     qb_spike boolean,
     run_location public.play_direction,
-    run_gap character varying(10),
     first_down_rush boolean,
     first_down_pass boolean,
     first_down_penalty boolean,
@@ -10604,7 +10838,17 @@ CREATE TABLE public.nfl_plays_year_2018 (
     pass_prob_non_tracking_ngs numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50)
+    qb_position_ngs character varying(50),
+    run_gap public.run_gap,
+    yards_created smallint,
+    yards_blocked smallint,
+    endzone_target boolean,
+    receiver_separation public.receiver_separation,
+    coverage_type public.coverage_type,
+    targeted_defender_gsis_id character varying(36),
+    pass_breakup boolean,
+    motion_before_snap boolean,
+    motion_during_snap boolean
 );
 
 
@@ -10724,7 +10968,7 @@ CREATE TABLE public.nfl_plays_year_2019 (
     back smallint,
     xlm smallint,
     db smallint,
-    box smallint,
+    box_defenders smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -10778,7 +11022,6 @@ CREATE TABLE public.nfl_plays_year_2019 (
     qb_kneel boolean,
     qb_spike boolean,
     run_location public.play_direction,
-    run_gap character varying(10),
     first_down_rush boolean,
     first_down_pass boolean,
     first_down_penalty boolean,
@@ -10930,7 +11173,17 @@ CREATE TABLE public.nfl_plays_year_2019 (
     pass_prob_non_tracking_ngs numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50)
+    qb_position_ngs character varying(50),
+    run_gap public.run_gap,
+    yards_created smallint,
+    yards_blocked smallint,
+    endzone_target boolean,
+    receiver_separation public.receiver_separation,
+    coverage_type public.coverage_type,
+    targeted_defender_gsis_id character varying(36),
+    pass_breakup boolean,
+    motion_before_snap boolean,
+    motion_during_snap boolean
 );
 
 
@@ -11050,7 +11303,7 @@ CREATE TABLE public.nfl_plays_year_2020 (
     back smallint,
     xlm smallint,
     db smallint,
-    box smallint,
+    box_defenders smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -11104,7 +11357,6 @@ CREATE TABLE public.nfl_plays_year_2020 (
     qb_kneel boolean,
     qb_spike boolean,
     run_location public.play_direction,
-    run_gap character varying(10),
     first_down_rush boolean,
     first_down_pass boolean,
     first_down_penalty boolean,
@@ -11256,7 +11508,17 @@ CREATE TABLE public.nfl_plays_year_2020 (
     pass_prob_non_tracking_ngs numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50)
+    qb_position_ngs character varying(50),
+    run_gap public.run_gap,
+    yards_created smallint,
+    yards_blocked smallint,
+    endzone_target boolean,
+    receiver_separation public.receiver_separation,
+    coverage_type public.coverage_type,
+    targeted_defender_gsis_id character varying(36),
+    pass_breakup boolean,
+    motion_before_snap boolean,
+    motion_during_snap boolean
 );
 
 
@@ -11376,7 +11638,7 @@ CREATE TABLE public.nfl_plays_year_2021 (
     back smallint,
     xlm smallint,
     db smallint,
-    box smallint,
+    box_defenders smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -11430,7 +11692,6 @@ CREATE TABLE public.nfl_plays_year_2021 (
     qb_kneel boolean,
     qb_spike boolean,
     run_location public.play_direction,
-    run_gap character varying(10),
     first_down_rush boolean,
     first_down_pass boolean,
     first_down_penalty boolean,
@@ -11582,7 +11843,17 @@ CREATE TABLE public.nfl_plays_year_2021 (
     pass_prob_non_tracking_ngs numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50)
+    qb_position_ngs character varying(50),
+    run_gap public.run_gap,
+    yards_created smallint,
+    yards_blocked smallint,
+    endzone_target boolean,
+    receiver_separation public.receiver_separation,
+    coverage_type public.coverage_type,
+    targeted_defender_gsis_id character varying(36),
+    pass_breakup boolean,
+    motion_before_snap boolean,
+    motion_during_snap boolean
 );
 
 
@@ -11702,7 +11973,7 @@ CREATE TABLE public.nfl_plays_year_2022 (
     back smallint,
     xlm smallint,
     db smallint,
-    box smallint,
+    box_defenders smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -11756,7 +12027,6 @@ CREATE TABLE public.nfl_plays_year_2022 (
     qb_kneel boolean,
     qb_spike boolean,
     run_location public.play_direction,
-    run_gap character varying(10),
     first_down_rush boolean,
     first_down_pass boolean,
     first_down_penalty boolean,
@@ -11908,7 +12178,17 @@ CREATE TABLE public.nfl_plays_year_2022 (
     pass_prob_non_tracking_ngs numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50)
+    qb_position_ngs character varying(50),
+    run_gap public.run_gap,
+    yards_created smallint,
+    yards_blocked smallint,
+    endzone_target boolean,
+    receiver_separation public.receiver_separation,
+    coverage_type public.coverage_type,
+    targeted_defender_gsis_id character varying(36),
+    pass_breakup boolean,
+    motion_before_snap boolean,
+    motion_during_snap boolean
 );
 
 
@@ -12028,7 +12308,7 @@ CREATE TABLE public.nfl_plays_year_2023 (
     back smallint,
     xlm smallint,
     db smallint,
-    box smallint,
+    box_defenders smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -12082,7 +12362,6 @@ CREATE TABLE public.nfl_plays_year_2023 (
     qb_kneel boolean,
     qb_spike boolean,
     run_location public.play_direction,
-    run_gap character varying(10),
     first_down_rush boolean,
     first_down_pass boolean,
     first_down_penalty boolean,
@@ -12234,7 +12513,17 @@ CREATE TABLE public.nfl_plays_year_2023 (
     pass_prob_non_tracking_ngs numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50)
+    qb_position_ngs character varying(50),
+    run_gap public.run_gap,
+    yards_created smallint,
+    yards_blocked smallint,
+    endzone_target boolean,
+    receiver_separation public.receiver_separation,
+    coverage_type public.coverage_type,
+    targeted_defender_gsis_id character varying(36),
+    pass_breakup boolean,
+    motion_before_snap boolean,
+    motion_during_snap boolean
 );
 
 
@@ -12354,7 +12643,7 @@ CREATE TABLE public.nfl_plays_year_2024 (
     back smallint,
     xlm smallint,
     db smallint,
-    box smallint,
+    box_defenders smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -12408,7 +12697,6 @@ CREATE TABLE public.nfl_plays_year_2024 (
     qb_kneel boolean,
     qb_spike boolean,
     run_location public.play_direction,
-    run_gap character varying(10),
     first_down_rush boolean,
     first_down_pass boolean,
     first_down_penalty boolean,
@@ -12560,7 +12848,17 @@ CREATE TABLE public.nfl_plays_year_2024 (
     pass_prob_non_tracking_ngs numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50)
+    qb_position_ngs character varying(50),
+    run_gap public.run_gap,
+    yards_created smallint,
+    yards_blocked smallint,
+    endzone_target boolean,
+    receiver_separation public.receiver_separation,
+    coverage_type public.coverage_type,
+    targeted_defender_gsis_id character varying(36),
+    pass_breakup boolean,
+    motion_before_snap boolean,
+    motion_during_snap boolean
 );
 
 
@@ -17823,7 +18121,7 @@ ALTER TABLE ONLY public.nfl_plays_player
 --
 
 ALTER TABLE ONLY public.nfl_plays_receiver
-    ADD CONSTRAINT nfl_plays_receiver_pkey PRIMARY KEY (esbid, "playId", year, gsis_it_id);
+    ADD CONSTRAINT nfl_plays_receiver_pkey PRIMARY KEY (esbid, "playId", gsis_id);
 
 
 --

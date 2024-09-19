@@ -53,6 +53,11 @@ const update_play = async ({
       continue
     }
 
+    const is_empty_string = edit.rhs === ''
+    if (is_empty_string) {
+      continue
+    }
+
     if (excluded_props.includes(prop)) {
       log(`not allowed to update ${prop}`)
       continue
