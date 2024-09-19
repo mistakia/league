@@ -139,5 +139,17 @@ export default {
     column_groups: [COLUMN_GROUPS.TEAM_STATS],
     header_label: 'OFF PLAYS',
     player_value_path: 'team_offensive_play_count_from_plays'
+  }),
+  team_yards_created_from_plays: from_play_field({
+    column_title: 'Team Yards Created (By Play)',
+    column_groups: [COLUMN_GROUPS.TEAM_STATS, COLUMN_GROUPS.RUSHING],
+    header_label: 'YC',
+    player_value_path: 'team_yards_created_from_plays'
+  }),
+  team_yards_blocked_from_plays: from_play_field({
+    column_title: 'Team Yards Blocked (By Play)',
+    column_groups: [COLUMN_GROUPS.TEAM_STATS, COLUMN_GROUPS.RUSHING],
+    header_label: 'YB',
+    player_value_path: 'team_yards_blocked_from_plays'
   })
 }

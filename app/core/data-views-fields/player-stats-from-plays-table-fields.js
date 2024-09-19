@@ -516,5 +516,18 @@ export default {
     column_groups: [COLUMN_GROUPS.TACKLES],
     header_label: 'COMB',
     player_value_path: 'combined_tackles_from_plays'
+  }),
+
+  player_yards_created_from_plays: offensive_player_from_play_field({
+    column_title: 'Yards Created (By Play)',
+    column_groups: [COLUMN_GROUPS.RUSHING],
+    header_label: 'YC',
+    player_value_path: 'yards_created_from_plays'
+  }),
+  player_yards_blocked_from_plays: offensive_player_from_play_field({
+    column_title: 'Yards Blocked (By Play)',
+    column_groups: [COLUMN_GROUPS.RUSHING],
+    header_label: 'YB',
+    player_value_path: 'yards_blocked_from_plays'
   })
 }
