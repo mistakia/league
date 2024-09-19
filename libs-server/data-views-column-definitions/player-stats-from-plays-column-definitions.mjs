@@ -505,8 +505,8 @@ export default {
     column_name: 'rush_att_share_from_plays',
     pid_columns: ['bc_pid'],
     with_select_string:
-      'CASE WHEN SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) / NULLIF(SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) ELSE 0 END',
-    numerator_select: `SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END)`,
+      'ROUND(100.0 * COUNT(CASE WHEN nfl_plays.bc_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2)',
+    numerator_select: `COUNT(CASE WHEN nfl_plays.bc_pid = pg.pid THEN 1 ELSE NULL END)`,
     denominator_select: `SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true
   }),
