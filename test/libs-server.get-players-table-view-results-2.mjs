@@ -661,4 +661,19 @@ describe('LIBS SERVER get_data_view_results', () => {
     const expected_query = `with "t6390fca446bc57a9b7f1f93090a115af" as (select COALESCE(bc_pid, trg_pid) as pid, SUM(yards_created) as yards_created_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2024) group by COALESCE(bc_pid, trg_pid)), "t54ea67a4f02a68e409ab43dd094a089f" as (select COALESCE(bc_pid) as pid, SUM(yards_blocked) as yards_blocked_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2024) group by COALESCE(bc_pid)), "t28f933fd377f8f4ddc539b177dc89ba6" as (select "nfl_plays"."off" as "nfl_team", "nfl_plays"."year", "nfl_plays"."week", SUM(yards_blocked) AS team_yards_blocked_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2024) group by "nfl_plays"."off", "nfl_plays"."year", "nfl_plays"."week"), "t28f933fd377f8f4ddc539b177dc89ba6_team_stats" as (select "t28f933fd377f8f4ddc539b177dc89ba6"."nfl_team", sum(t28f933fd377f8f4ddc539b177dc89ba6.team_yards_blocked_from_plays) as team_yards_blocked_from_plays from "t28f933fd377f8f4ddc539b177dc89ba6" where "t28f933fd377f8f4ddc539b177dc89ba6"."year" in (2024) group by "t28f933fd377f8f4ddc539b177dc89ba6"."nfl_team") select "player"."pid", "t6390fca446bc57a9b7f1f93090a115af"."yards_created_from_plays" AS "yards_created_from_plays_0", "t54ea67a4f02a68e409ab43dd094a089f"."yards_blocked_from_plays" AS "yards_blocked_from_plays_0", "t28f933fd377f8f4ddc539b177dc89ba6_team_stats"."team_yards_blocked_from_plays" AS "team_yards_blocked_from_plays_0", "player"."pos" from "player" left join "t6390fca446bc57a9b7f1f93090a115af" on "t6390fca446bc57a9b7f1f93090a115af"."pid" = "player"."pid" left join "t54ea67a4f02a68e409ab43dd094a089f" on "t54ea67a4f02a68e409ab43dd094a089f"."pid" = "player"."pid" left join "t28f933fd377f8f4ddc539b177dc89ba6_team_stats" on "t28f933fd377f8f4ddc539b177dc89ba6_team_stats"."nfl_team" = "player"."current_nfl_team" group by "t6390fca446bc57a9b7f1f93090a115af"."yards_created_from_plays", "t54ea67a4f02a68e409ab43dd094a089f"."yards_blocked_from_plays", "t28f933fd377f8f4ddc539b177dc89ba6_team_stats"."team_yards_blocked_from_plays", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 2 DESC NULLS LAST, "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
   })
+
+  it('player routes', () => {
+    const { query } = get_data_view_results_query({
+      columns: [
+        {
+          column_id: 'player_routes',
+          params: {
+            year: [2024]
+          }
+        }
+      ],
+      sort: [{ column_id: 'player_routes', desc: true }]
+    })
+    console.log(query.toString())
+  })
 })
