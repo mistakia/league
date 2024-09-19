@@ -166,6 +166,12 @@ export default {
   motion: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
   },
+  motion_before_snap: {
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+  },
+  motion_during_snap: {
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN
+  },
 
   yards_to_go: {
     min: 0,
@@ -964,6 +970,22 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.COVERAGE]
   },
+  coverage_type: {
+    values: [
+      'COVER_0',
+      'COVER_1',
+      'COVER_2',
+      'COVER_2_MAN',
+      'COVER_3',
+      'COVER_4',
+      'COVER_5',
+      'COVER_6',
+      'COVER_9',
+      'COMBINATION'
+    ],
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.COVERAGE]
+  },
 
   drive_seq: {
     min: 1,
@@ -1409,6 +1431,10 @@ export default {
       }
     ]
   },
+  endzone_target: {
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PASSING]
+  },
   true_air_yards: {
     min: -40,
     max: 99,
@@ -1521,6 +1547,10 @@ export default {
   created_reception: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.RECEIVING]
+  },
+  pass_breakup: {
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
 
   mbt: {
