@@ -183,5 +183,14 @@ export default {
   team_offensive_play_count_from_plays: team_stat_from_plays({
     select_string: `COUNT(CASE WHEN play_type IN ('PASS', 'RUSH') THEN 1 ELSE NULL END)`,
     stat_name: 'team_offensive_play_count_from_plays'
+  }),
+
+  team_yards_created_from_plays: team_stat_from_plays({
+    select_string: `SUM(yards_created)`,
+    stat_name: 'team_yards_created_from_plays'
+  }),
+  team_yards_blocked_from_plays: team_stat_from_plays({
+    select_string: `SUM(yards_blocked)`,
+    stat_name: 'team_yards_blocked_from_plays'
   })
 }
