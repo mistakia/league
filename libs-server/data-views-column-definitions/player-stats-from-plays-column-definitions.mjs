@@ -115,6 +115,7 @@ const player_stat_from_plays = ({
     'per_player_reception',
 
     'per_player_play',
+    'per_player_route',
     'per_player_pass_play',
     'per_player_rush_play'
   ],
