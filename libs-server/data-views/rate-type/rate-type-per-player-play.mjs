@@ -53,7 +53,7 @@ export const get_per_player_play_cte_table_name = ({
   play_type = null,
   group_by = null
 } = {}) => {
-  const { all_years, week } = get_default_params(params)
+  const { all_years, week } = get_default_params({ params })
 
   const play_type_suffix = play_type ? `_${play_type.toLowerCase()}` : ''
   const group_by_suffix = group_by ? `_${group_by}` : ''
@@ -120,7 +120,7 @@ export const add_per_player_play_cte = ({
     }
   }
 
-  const { year, week } = get_default_params(params)
+  const { year, week } = get_default_params({ params })
 
   // Remove career_year and career_game from params before applying other filters
   const filtered_params = { ...params, year, week }
