@@ -730,5 +730,17 @@ export default {
       numerator_select: `SUM(CASE WHEN comp = true THEN yards_after_catch ELSE 0 END)`,
       denominator_select: `SUM(CASE WHEN comp = true THEN 1 ELSE 0 END)`,
       has_numerator_denominator: true
-    })
+    }),
+
+  player_yards_created_from_plays: player_stat_from_plays({
+    pid_columns: ['bc_pid', 'trg_pid'],
+    with_select_string: `SUM(yards_created)`,
+    stat_name: 'yards_created_from_plays'
+  }),
+
+  player_yards_blocked_from_plays: player_stat_from_plays({
+    pid_columns: ['bc_pid'],
+    with_select_string: `SUM(yards_blocked)`,
+    stat_name: 'yards_blocked_from_plays'
+  })
 }

@@ -633,4 +633,32 @@ describe('LIBS SERVER get_data_view_results', () => {
     const expected_query = `with "t99ec2031f7623f960a0210041b13ea19" as (select "nfl_snaps"."gsis_it_id", COUNT(*) as rate_type_total_count from "nfl_plays" inner join "nfl_snaps" on "nfl_plays"."esbid" = "nfl_snaps"."esbid" and "nfl_plays"."playId" = "nfl_snaps"."playId" where "nfl_plays"."seas_type" = 'REG' and not "play_type" = 'NOPL' and "play_type" in ('PASS', 'RUSH') and "nfl_plays"."year" in (${constants.season.stats_season_year}) group by "nfl_snaps"."gsis_it_id") select "player"."pid", t99ec2031f7623f960a0210041b13ea19.rate_type_total_count as player_snaps_0, "player"."pos" from "player" left join "t99ec2031f7623f960a0210041b13ea19" on "t99ec2031f7623f960a0210041b13ea19"."gsis_it_id" = "player"."gsis_it_id" group by t99ec2031f7623f960a0210041b13ea19.rate_type_total_count, "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 2 DESC NULLS LAST, "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
   })
+
+  it('player yards created and blocked + team yards blocked', () => {
+    const { query } = get_data_view_results_query({
+      columns: [
+        {
+          column_id: 'player_yards_created_from_plays',
+          params: {
+            year: [2024]
+          }
+        },
+        {
+          column_id: 'player_yards_blocked_from_plays',
+          params: {
+            year: [2024]
+          }
+        },
+        {
+          column_id: 'team_yards_blocked_from_plays',
+          params: {
+            year: [2024]
+          }
+        }
+      ],
+      sort: [{ column_id: 'player_yards_created_from_plays', desc: true }]
+    })
+    const expected_query = `with "t6390fca446bc57a9b7f1f93090a115af" as (select COALESCE(bc_pid, trg_pid) as pid, SUM(yards_created) as yards_created_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2024) group by COALESCE(bc_pid, trg_pid)), "t54ea67a4f02a68e409ab43dd094a089f" as (select COALESCE(bc_pid) as pid, SUM(yards_blocked) as yards_blocked_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2024) group by COALESCE(bc_pid)), "t28f933fd377f8f4ddc539b177dc89ba6" as (select "nfl_plays"."off" as "nfl_team", "nfl_plays"."year", "nfl_plays"."week", SUM(yards_blocked) AS team_yards_blocked_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2024) group by "nfl_plays"."off", "nfl_plays"."year", "nfl_plays"."week"), "t28f933fd377f8f4ddc539b177dc89ba6_team_stats" as (select "t28f933fd377f8f4ddc539b177dc89ba6"."nfl_team", sum(t28f933fd377f8f4ddc539b177dc89ba6.team_yards_blocked_from_plays) as team_yards_blocked_from_plays from "t28f933fd377f8f4ddc539b177dc89ba6" where "t28f933fd377f8f4ddc539b177dc89ba6"."year" in (2024) group by "t28f933fd377f8f4ddc539b177dc89ba6"."nfl_team") select "player"."pid", "t6390fca446bc57a9b7f1f93090a115af"."yards_created_from_plays" AS "yards_created_from_plays_0", "t54ea67a4f02a68e409ab43dd094a089f"."yards_blocked_from_plays" AS "yards_blocked_from_plays_0", "t28f933fd377f8f4ddc539b177dc89ba6_team_stats"."team_yards_blocked_from_plays" AS "team_yards_blocked_from_plays_0", "player"."pos" from "player" left join "t6390fca446bc57a9b7f1f93090a115af" on "t6390fca446bc57a9b7f1f93090a115af"."pid" = "player"."pid" left join "t54ea67a4f02a68e409ab43dd094a089f" on "t54ea67a4f02a68e409ab43dd094a089f"."pid" = "player"."pid" left join "t28f933fd377f8f4ddc539b177dc89ba6_team_stats" on "t28f933fd377f8f4ddc539b177dc89ba6_team_stats"."nfl_team" = "player"."current_nfl_team" group by "t6390fca446bc57a9b7f1f93090a115af"."yards_created_from_plays", "t54ea67a4f02a68e409ab43dd094a089f"."yards_blocked_from_plays", "t28f933fd377f8f4ddc539b177dc89ba6_team_stats"."team_yards_blocked_from_plays", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 2 DESC NULLS LAST, "player"."pid" asc limit 500`
+    compare_queries(query.toString(), expected_query)
+  })
 })
