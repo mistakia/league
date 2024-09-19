@@ -66,7 +66,10 @@ const run = async ({
     }
 
     const projections = item.player.stats.find(
-      (s) => s.scoringPeriodId === week && s.seasonId === year
+      (s) =>
+        s.scoringPeriodId === week &&
+        s.seasonId === year &&
+        (season_totals || s.statSplitTypeId === 1)
     )
     if (!projections) continue
     const data = espn.stats(projections.stats)
