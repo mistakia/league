@@ -951,6 +951,17 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.RECEIVING]
   },
+  targeted_receiver_separation: {
+    values: [
+      'OPEN',
+      'TIGHT_COVERAGE',
+      'ONE_STEP_OPEN',
+      'WIDE_OPEN',
+      'CLOSING_COVERAGE'
+    ],
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.RECEIVING]
+  },
   man_zone_ngs: {
     values: ['MAN_COVERAGE', 'ZONE_COVERAGE'],
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
