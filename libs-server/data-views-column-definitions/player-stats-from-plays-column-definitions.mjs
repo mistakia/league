@@ -691,6 +691,11 @@ export default {
     denominator_select: `SUM(CASE WHEN nfl_plays.first_down THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true
   }),
+  player_receiving_yards_after_catch_from_plays: player_stat_from_plays({
+    pid_columns: ['trg_pid'],
+    with_select_string: `SUM(CASE WHEN comp = true THEN yards_after_catch ELSE 0 END)`,
+    stat_name: 'rec_yds_after_catch_from_plays'
+  }),
 
   // receiving yards / air yards
   player_receiver_air_conversion_ratio_from_plays: player_stat_from_plays({
