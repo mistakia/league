@@ -146,6 +146,12 @@ const rate_type_handlers = {
       }),
     join_cte: join_per_player_cte
   },
+  per_player_reception: {
+    get_cte_table_name: (args) =>
+      get_per_player_cte_table_name({ ...args, stat_type: 'reception' }),
+    add_cte: (args) => add_per_player_cte({ ...args, stat_type: 'reception' }),
+    join_cte: join_per_player_cte
+  },
   per_player_play: {
     get_cte_table_name: (args) =>
       get_per_player_play_cte_table_name({ ...args }),

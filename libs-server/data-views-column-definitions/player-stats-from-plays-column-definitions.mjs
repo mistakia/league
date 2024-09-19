@@ -112,6 +112,7 @@ const player_stat_from_plays = ({
     'per_player_target',
     'per_player_catchable_target',
     'per_player_catchable_deep_target',
+    'per_player_reception',
 
     'per_player_play',
     'per_player_pass_play',

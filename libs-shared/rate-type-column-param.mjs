@@ -50,6 +50,7 @@ export const offensive_player_rate_type_param = {
     {
       value: 'per_player_catchable_deep_target',
       label: 'Per Player Catchable Deep Target'
-    }
+    },
+    { value: 'per_player_reception', label: 'Per Player Reception' }
   ]
 }

@@ -83,6 +83,11 @@ export const add_per_player_cte = ({
       cte_query.select('nfl_plays.trg_pid as pid')
       cte_query.groupBy('nfl_plays.trg_pid')
       break
+    case 'reception':
+      count_expression = `SUM(CASE WHEN trg_pid IS NOT NULL AND comp = true THEN 1 ELSE 0 END)`
+      cte_query.select('nfl_plays.trg_pid as pid')
+      cte_query.groupBy('nfl_plays.trg_pid')
+      break
   }
 
   cte_query.select(db.raw(`${count_expression} as rate_type_total_count`))
