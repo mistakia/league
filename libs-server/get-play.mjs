@@ -18,7 +18,8 @@ export default async function ({
   play_type,
   ydl_num,
   ydl_side,
-  ydl_100
+  ydl_100,
+  sec_rem_qtr
 }) {
   const query = db('nfl_plays')
 
@@ -76,6 +77,10 @@ export default async function ({
 
   if (yards_to_go) {
     query.where({ yards_to_go })
+  }
+
+  if (sec_rem_qtr) {
+    query.where({ sec_rem_qtr })
   }
 
   const plays = await query
