@@ -68,6 +68,13 @@ export default {
     header_label: 'PROE',
     player_value_path: 'team_pass_rate_over_expected_from_plays'
   }),
+  // TODO prevent showing rate_type param for this field
+  team_completion_percentage_over_expected_from_plays: from_play_field({
+    column_title: 'Team Completion Percentage Over Expected (By Play)',
+    column_groups: [COLUMN_GROUPS.TEAM_STATS, COLUMN_GROUPS.PASSING],
+    header_label: 'CPOE',
+    player_value_path: 'team_completion_percentage_over_expected_from_plays'
+  }),
   team_pass_completions_from_plays: from_play_field({
     column_title: 'Team Passing Completions (By Play)',
     column_groups: [COLUMN_GROUPS.TEAM_STATS, COLUMN_GROUPS.PASSING],
