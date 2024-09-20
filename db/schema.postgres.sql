@@ -1360,8 +1360,6 @@ DROP INDEX IF EXISTS public.idx_24785_userid;
 DROP INDEX IF EXISTS public.idx_24785_placed_at;
 DROP INDEX IF EXISTS public.idx_24781_percentile_key;
 DROP INDEX IF EXISTS public.idx_24741_stat;
-DROP INDEX IF EXISTS public.idx_24738_snap;
-DROP INDEX IF EXISTS public."idx_24738_playId";
 DROP INDEX IF EXISTS public.idx_24722_play_stat;
 DROP INDEX IF EXISTS public."idx_24722_playId";
 DROP INDEX IF EXISTS public.idx_24719_play_stat;
@@ -1608,7 +1606,6 @@ DROP TABLE IF EXISTS public.nfl_snaps_year_2003;
 DROP TABLE IF EXISTS public.nfl_snaps_year_2002;
 DROP TABLE IF EXISTS public.nfl_snaps_year_2001;
 DROP TABLE IF EXISTS public.nfl_snaps_year_2000;
-DROP TABLE IF EXISTS public.nfl_snaps_current_week;
 DROP TABLE IF EXISTS public.nfl_snaps;
 DROP TABLE IF EXISTS public.nfl_plays_year_2024;
 DROP TABLE IF EXISTS public.nfl_plays_year_2023;
@@ -12896,17 +12893,6 @@ PARTITION BY RANGE (year);
 
 
 --
--- Name: nfl_snaps_current_week; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.nfl_snaps_current_week (
-    esbid integer NOT NULL,
-    "playId" integer NOT NULL,
-    gsis_it_id integer NOT NULL
-);
-
-
---
 -- Name: nfl_snaps_year_2000; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -18617,20 +18603,6 @@ CREATE INDEX "idx_24722_playId" ON public.nfl_play_stats_current_week USING btre
 --
 
 CREATE UNIQUE INDEX idx_24722_play_stat ON public.nfl_play_stats_current_week USING btree (esbid, "playId", "statId", "playerName");
-
-
---
--- Name: idx_24738_playId; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX "idx_24738_playId" ON public.nfl_snaps_current_week USING btree ("playId");
-
-
---
--- Name: idx_24738_snap; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_24738_snap ON public.nfl_snaps_current_week USING btree ("playId", gsis_it_id, esbid);
 
 
 --

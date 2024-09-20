@@ -16,7 +16,6 @@ const log = debug('finalize-week')
 
 const clear_live_plays = async () => {
   await db('nfl_plays_current_week').del()
-  await db('nfl_snaps_current_week').del()
   await db('nfl_play_stats_current_week').del()
 }
 

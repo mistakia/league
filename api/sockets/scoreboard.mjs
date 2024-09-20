@@ -48,16 +48,9 @@ export default class Scoreboard {
     const playStats = await db('nfl_play_stats_current_week')
       .whereIn('esbid', esbids)
       .where('valid', 1)
-    const playSnaps = await db('nfl_snaps_current_week').whereIn(
-      'esbid',
-      esbids
-    )
 
     for (const play of plays) {
       play.playStats = playStats.filter(
-        (p) => p.playId === play.playId && p.esbid === play.esbid
-      )
-      play.playSnaps = playSnaps.filter(
         (p) => p.playId === play.playId && p.esbid === play.esbid
       )
     }
