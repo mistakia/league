@@ -47,6 +47,7 @@ const generate_player_career_game_counts = async () => {
       opp: game.opp,
       tm: game.tm,
       pos: game.pos,
+      year: game.year,
       career_game: player_career_games[game.pid]
     })
 
@@ -73,7 +74,7 @@ const generate_player_career_game_counts = async () => {
       save: async (batch) => {
         await db('player_gamelogs')
           .insert(batch)
-          .onConflict(['pid', 'esbid'])
+          .onConflict(['pid', 'esbid', 'year'])
           .merge(['career_game'])
       },
       batch_size: 1000
