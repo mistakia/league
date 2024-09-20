@@ -48,13 +48,6 @@ const processPlayerSeasonlogs = async ({
   }
 
   if (inserts.length) {
-    const pids = inserts.map((p) => p.pid)
-    const deleted_count = await db('player_seasonlogs')
-      .where({ year, seas_type })
-      .whereNotIn('pid', pids)
-      .del()
-    log(`Deleted ${deleted_count} excess player seasonlogs`)
-
     log(`updating ${inserts.length} player seasonlogs for ${year} ${seas_type}`)
     await db('player_seasonlogs')
       .insert(inserts)
