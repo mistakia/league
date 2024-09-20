@@ -569,9 +569,9 @@ export default {
   }),
   player_successful_rush_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['bc_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN succ = true THEN 1 ELSE 0 END) / SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END`,
+    with_select_string: `CASE WHEN SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN successful_play = true THEN 1 ELSE 0 END) / SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END`,
     stat_name: 'succ_rush_pct_from_plays',
-    numerator_select: `SUM(CASE WHEN succ = true THEN 1 ELSE 0 END)`,
+    numerator_select: `SUM(CASE WHEN successful_play = true THEN 1 ELSE 0 END)`,
     denominator_select: `SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true
   }),

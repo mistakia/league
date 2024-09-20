@@ -118,7 +118,7 @@ const nfl_play_fields = [
   'fuml',
   'int',
   'sk',
-  'succ',
+  'successful_play',
   'comp',
   'incomp',
   'trick_play',

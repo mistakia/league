@@ -105,7 +105,7 @@ export const getChartedPlayByPlayQuery = (db) =>
       'nfl_plays.recv_yds',
       'nfl_plays.yds_gained',
       'nfl_plays.first_down',
-      'nfl_plays.succ',
+      'nfl_plays.successful_play',
       'nfl_plays.psr_pid',
       'nfl_plays.trg_pid',
       'nfl_plays.intp_pid',

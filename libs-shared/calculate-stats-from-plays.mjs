@@ -53,8 +53,8 @@ const calculateStatsFromPlays = (plays) => {
           addStat(play.bc_pid, 'first_down', 1)
           addStat(play.bc_pid, 'rfd', 1)
         }
-        if (play.succ) {
-          addStat(play.bc_pid, 'succ', 1)
+        if (play.successful_play) {
+          addStat(play.bc_pid, 'successful_play', 1)
           addStat(play.bc_pid, 'rasucc', 1)
         }
         if (play.mbt) addStat(play.bc_pid, 'mbt', play.mbt)
@@ -67,9 +67,9 @@ const calculateStatsFromPlays = (plays) => {
       case 'PASS': {
         // passer
         playerToTeam[play.psr_pid] = play.off
-        if (play.succ) {
+        if (play.successful_play) {
           addStat(play.psr_pid, 'psucc', 1)
-          addStat(play.psr_pid, 'succ', 1)
+          addStat(play.psr_pid, 'successful_play', 1)
         }
         if (play.dot) {
           addStat(play.psr_pid, 'pdot', play.dot)
@@ -118,7 +118,7 @@ const calculateStatsFromPlays = (plays) => {
           if (play.yards_after_catch)
             addStat(play.psr_pid, 'pyac', play.yards_after_catch)
 
-          if (play.succ) addStat(play.trg_pid, 'succ', 1)
+          if (play.successful_play) addStat(play.trg_pid, 'successful_play', 1)
           if (play.first_down) {
             addStat(play.psr_pid, 'first_down', 1)
             addStat(play.trg_pid, 'first_down', 1)

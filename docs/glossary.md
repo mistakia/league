@@ -302,7 +302,7 @@
 | fuml               | Fumble Lost        | Indicator if the fumble was lost to the opposing team         | 71.59%   | 2001/01/06 |
 | int                | Interception       | Indicator if an interception occurred during the play         | 84.26%   | 2001/01/06 |
 | sk                 | Sack               | Indicator if a sack occurred during the play                  | 97.94%   | 2001/01/06 |
-| succ               | Successful Play    | Indicator if the play was successful                          | 23.42%   | 2021/09/10 |
+| successful_play    | Successful Play    | Indicator if the play was successful                          | 23.42%   | 2021/09/10 |
 | comp               | Completion         | Indicator if the pass was completed                           | 99.99%   | 2001/01/06 |
 | incomp             | Incompletion       | Indicator if the pass was incomplete                          | 55.59%   | 2001/09/09 |
 | safety             | Safety             | Indicator if a safety occurred                                | 55.59%   | 2001/09/09 |
