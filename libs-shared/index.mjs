@@ -60,6 +60,7 @@ export * as rate_type_column_param from './rate-type-column-param.mjs'
 export * as job_constants from './job-constants.mjs'
 export { default as data_view_fields_index } from './data-view-fields-index.mjs'
 export { default as league_has_starting_position } from './league-has-starting-position.mjs'
+export { default as nfl_plays_team_column_params } from './nfl-plays-team-column-params.mjs'
 
 export const uniqBy = (a, key) => {
   const seen = new Set()
