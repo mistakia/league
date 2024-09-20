@@ -540,7 +540,7 @@ export default {
 
   player_successful_passing_play_percentage_from_plays:
     offensive_player_from_play_field({
-      column_title: 'Successful Passing Play Percentage (By Play)',
+      column_title: 'Passing Successful Play Percentage (By Play)',
       column_groups: [COLUMN_GROUPS.PASSING, COLUMN_GROUPS.ADVANCED],
       header_label: 'SUCC%',
       player_value_path: 'successful_passing_play_pct_from_plays',
@@ -550,7 +550,7 @@ export default {
   player_successful_rushing_and_receiving_play_percentage_from_plays:
     offensive_player_from_play_field({
       column_title:
-        'Successful Rushing and Receiving Play Percentage (By Play)',
+        'Rushing and Receiving Successful Play Percentage (By Play)',
       column_groups: [COLUMN_GROUPS.ADVANCED],
       header_label: 'SUCC%',
       player_value_path: 'successful_rushing_and_receiving_play_pct_from_plays',
