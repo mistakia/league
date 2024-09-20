@@ -4,9 +4,11 @@ import { add_team_stats_play_by_play_with_statement } from '#libs-server/data-vi
 import { get_rate_type_sql } from '#libs-server/data-views/select-string.mjs'
 import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
 import get_stats_column_param_key from '#libs-server/data-views/get-stats-column-param-key.mjs'
+import { nfl_plays_team_column_params } from '#libs-shared'
 
 const generate_table_alias = ({ params = {} } = {}) => {
-  const key = get_stats_column_param_key({ params })
+  const additional_keys = Object.keys(nfl_plays_team_column_params).sort()
+  const key = get_stats_column_param_key({ params, additional_keys })
   return get_table_hash(`team_stats_from_plays__${key}`)
 }
 
