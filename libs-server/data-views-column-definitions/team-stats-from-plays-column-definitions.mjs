@@ -192,5 +192,15 @@ export default {
   team_yards_blocked_from_plays: team_stat_from_plays({
     select_string: `SUM(yards_blocked)`,
     stat_name: 'team_yards_blocked_from_plays'
+  }),
+
+  team_series_conversion_rate_from_plays: team_stat_from_plays({
+    rate_with_selects: [
+      `COUNT(DISTINCT CASE WHEN series_result IN ('FIRST_DOWN', 'TOUCHDOWN') THEN CONCAT(esbid, '_', series_seq) END) as team_series_conversion_rate_from_plays_numerator`,
+      `COUNT(DISTINCT CASE WHEN series_result NOT IN ('QB_KNEEL', 'END_OF_HALF') THEN CONCAT(esbid, '_', series_seq) END) as team_series_conversion_rate_from_plays_denominator`
+    ],
+    stat_name: 'team_series_conversion_rate_from_plays',
+    is_rate: true,
+    supported_rate_types: []
   })
 }

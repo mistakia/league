@@ -1138,10 +1138,10 @@ export default {
   },
   series_result: {
     values: [
-      'END_HALF',
+      'END_OF_HALF',
       'FIELD_GOAL',
       'FIRST_DOWN',
-      'MISSED_FG',
+      'MISSED_FIELD_GOAL',
       'OPP_TOUCHDOWN',
       'PUNT',
       'QB_KNEEL',
