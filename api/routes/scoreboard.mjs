@@ -27,16 +27,9 @@ router.get('/?', async (req, res) => {
       'esbid',
       esbids
     )
-    const playSnaps = await db('nfl_snaps_current_week').whereIn(
-      'esbid',
-      esbids
-    )
 
     for (const play of plays) {
       play.playStats = playStats.filter(
-        (p) => p.playId === play.playId && p.esbid === play.esbid
-      )
-      play.playSnaps = playSnaps.filter(
         (p) => p.playId === play.playId && p.esbid === play.esbid
       )
     }
