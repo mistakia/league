@@ -229,7 +229,8 @@ export const save_play_data = async ({ data, esbid }) => {
         snap_inserts.push({
           esbid,
           gsis_it_id,
-          playId
+          playId,
+          year
         })
       }
     }
@@ -277,19 +278,6 @@ export const save_play_data = async ({ data, esbid }) => {
   const is_current_week =
     year === constants.season.year && week === constants.season.nfl_seas_week
   if (is_current_week) {
-    if (snap_inserts.length) {
-      try {
-        await db('nfl_snaps_current_week').where({ esbid }).del()
-        await db('nfl_snaps_current_week')
-          .insert(snap_inserts)
-          .onConflict(['esbid', 'playId', 'gsis_it_id'])
-          .merge()
-      } catch (err) {
-        log(`Error on inserting snaps for esbid: ${esbid}`)
-        log(err)
-      }
-    }
-
     if (play_inserts.length) {
       try {
         if (play_stat_inserts.length) {
