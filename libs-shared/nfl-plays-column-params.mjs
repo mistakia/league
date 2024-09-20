@@ -1254,7 +1254,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
-  succ: {
+  successful_play: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },

@@ -498,7 +498,7 @@ export const fullStats = [
   'first_down',
 
   // successful plays
-  'succ',
+  'successful_play',
 
   // first down percentage
   'fd_pct',

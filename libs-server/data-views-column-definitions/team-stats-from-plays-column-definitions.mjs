@@ -164,7 +164,7 @@ export default {
   }),
   team_success_rate_from_plays: team_stat_from_plays({
     rate_with_selects: [
-      `SUM(CASE WHEN succ = true THEN 1 ELSE 0 END) as team_success_rate_from_plays_numerator`,
+      `SUM(CASE WHEN successful_play = true THEN 1 ELSE 0 END) as team_success_rate_from_plays_numerator`,
       `COUNT(*) as team_success_rate_from_plays_denominator`
     ],
     stat_name: 'team_success_rate_from_plays',
