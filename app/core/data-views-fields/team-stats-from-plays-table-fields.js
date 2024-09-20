@@ -157,5 +157,12 @@ export default {
     column_groups: [COLUMN_GROUPS.TEAM_STATS, COLUMN_GROUPS.RUSHING],
     header_label: 'YB',
     player_value_path: 'team_yards_blocked_from_plays'
+  }),
+
+  team_series_conversion_rate_from_plays: from_play_field({
+    column_title: 'Team Series Conversion Rate (By Play)',
+    column_groups: [COLUMN_GROUPS.TEAM_STATS, COLUMN_GROUPS.EFFICIENCY],
+    header_label: 'SCR',
+    player_value_path: 'team_series_conversion_rate_from_plays'
   })
 }
