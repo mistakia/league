@@ -86,6 +86,12 @@ export default {
     header_label: 'AY',
     player_value_path: 'team_pass_air_yds_from_plays'
   }),
+  team_yards_after_catch_from_plays: from_play_field({
+    column_title: 'Team Yards After Catch (By Play)',
+    column_groups: [COLUMN_GROUPS.TEAM_STATS, COLUMN_GROUPS.RECEIVING],
+    header_label: 'YAC',
+    player_value_path: 'team_yards_after_catch_from_plays'
+  }),
   team_rush_yards_from_plays: from_play_field({
     column_title: 'Team Rushing Yards (By Play)',
     column_groups: [COLUMN_GROUPS.TEAM_STATS, COLUMN_GROUPS.RUSHING],

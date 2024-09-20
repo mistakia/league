@@ -138,6 +138,10 @@ export default {
     select_string: `SUM(dot)`,
     stat_name: 'team_pass_air_yds_from_plays'
   }),
+  team_yards_after_catch_from_plays: team_stat_from_plays({
+    select_string: `SUM(yards_after_catch)`,
+    stat_name: 'team_yards_after_catch_from_plays'
+  }),
   team_rush_yards_from_plays: team_stat_from_plays({
     select_string: `SUM(rush_yds)`,
     stat_name: 'team_rush_yds_from_plays'
