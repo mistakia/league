@@ -93,6 +93,38 @@ const format_run_gap = ({ run_direction, run_gap }) => {
   }
 }
 
+const format_series_result = (result) => {
+  if (!result) return null
+
+  switch (result.toUpperCase()) {
+    case 'END OF HALF':
+      return 'END_OF_HALF'
+    case 'FIELD GOAL':
+      return 'FIELD_GOAL'
+    case 'FIRST DOWN':
+      return 'FIRST_DOWN'
+    case 'MISSED FIELD GOAL':
+      return 'MISSED_FIELD_GOAL'
+    case 'OPP TOUCHDOWN':
+      return 'OPP_TOUCHDOWN'
+    case 'PUNT':
+      return 'PUNT'
+    case 'QB KNEEL':
+      return 'QB_KNEEL'
+    case 'SAFETY':
+      return 'SAFETY'
+    case 'TOUCHDOWN':
+      return 'TOUCHDOWN'
+    case 'TURNOVER':
+      return 'TURNOVER'
+    case 'TURNOVER ON DOWNS':
+      return 'TURNOVER_ON_DOWNS'
+    default:
+      log(`unknown series result: ${result}`)
+      return null
+  }
+}
+
 const format_play = (play) => ({
   ydl_100: format_number(play.yardline_100),
 
@@ -117,7 +149,7 @@ const format_play = (play) => ({
 
   series_seq: format_number(play.series),
   series_suc: format_boolean(play.series_success),
-  series_result: play.series_result || null,
+  series_result: format_series_result(play.series_result),
 
   game_clock_end: play.end_clock_time || null,
   sec_rem_qtr: format_number(play.quarter_seconds_remaining),
