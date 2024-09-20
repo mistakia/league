@@ -303,6 +303,13 @@ export default {
     denominator_select: `SUM(CASE WHEN sk is null or sk = false THEN 1 ELSE 0 END)`,
     has_numerator_denominator: true
   }),
+  player_completion_percentage_over_expected_from_plays: player_stat_from_plays(
+    {
+      pid_columns: ['psr_pid'],
+      with_select_string: `AVG(cpoe)`,
+      stat_name: 'pass_comp_pct_over_expected_from_plays'
+    }
+  ),
   player_pass_touchdown_percentage_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
     with_select_string: `CASE WHEN SUM(CASE WHEN td = true THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN td = true THEN 1 ELSE 0 END) / SUM(CASE WHEN sk is null or sk = false THEN 1 ELSE 0 END), 2) ELSE 0 END`,

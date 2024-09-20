@@ -122,6 +122,11 @@ export default {
     stat_name: 'team_pass_rate_over_expected_from_plays',
     supported_rate_types: []
   }),
+  team_completion_percentage_over_expected_from_plays: team_stat_from_plays({
+    select_string: `AVG(cpoe)`,
+    stat_name: 'team_completion_percentage_over_expected_from_plays',
+    supported_rate_types: []
+  }),
   team_pass_attempts_from_plays: team_stat_from_plays({
     select_string: `SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END)`,
     stat_name: 'team_pass_att_from_plays'
