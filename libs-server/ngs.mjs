@@ -248,7 +248,7 @@ export const save_play_data = async ({ data, esbid }) => {
         await db('nfl_snaps').where({ esbid }).del()
         await db('nfl_snaps')
           .insert(snap_inserts)
-          .onConflict(['esbid', 'playId', 'gsis_it_id'])
+          .onConflict(['esbid', 'playId', 'gsis_it_id', 'year'])
           .merge()
       } catch (err) {
         log(`Error on inserting snaps for esbid: ${esbid}`)
