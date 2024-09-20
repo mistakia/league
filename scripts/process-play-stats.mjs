@@ -334,7 +334,7 @@ const run = async ({
       'nfl_plays.yds_gained',
       'nfl_plays.yards_to_go',
       'nfl_plays.dwn',
-      'nfl_plays.succ'
+      'nfl_plays.successful_play'
     )
     .join('nfl_games', 'nfl_plays.esbid', '=', 'nfl_games.esbid')
     .where('nfl_plays.year', year)
@@ -353,7 +353,7 @@ const run = async ({
       continue
     }
 
-    const succ = is_successful_play(play)
+    const successful_play = is_successful_play(play)
 
     if (dry_run) continue
 
@@ -364,13 +364,13 @@ const run = async ({
         play_type: play.play_type,
         esbid: play.esbid,
         playId: play.playId,
-        succ: play.succ
+        successful_play: play.successful_play
       },
       update: {
         off,
         def,
         play_type,
-        succ
+        successful_play
       },
       ignore_conflicts
     })
