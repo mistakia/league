@@ -156,6 +156,7 @@ const import_fanduel_wagers = async ({
   })
 
   const wager_inserts = []
+  const book_wager_id_set = new Set()
   const market_selection_index = {}
   const wager_legs = wagers.map((wager) => wager.legs).flat()
   const wager_parts = wager_legs.map((legs) => legs.parts).flat()
@@ -339,6 +340,13 @@ const import_fanduel_wagers = async ({
           leg.result
         )
       }
+
+      if (book_wager_id_set.has(wager_item.book_wager_id)) {
+        log(`skipping duplicate book_wager_id: ${wager_item.book_wager_id}`)
+        continue
+      }
+
+      book_wager_id_set.add(wager_item.book_wager_id)
 
       wager_inserts.push(wager_item)
     } catch (err) {
