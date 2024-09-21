@@ -13,7 +13,8 @@ import {
   is_main,
   fanduel,
   getPlayer,
-  encode_market_selection_id
+  encode_market_selection_id,
+  batch_insert
 } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -363,10 +364,16 @@ const import_fanduel_wagers = async ({
 
   if (wager_inserts.length) {
     log(`inserting ${wager_inserts.length} wagers`)
-    await db('placed_wagers')
-      .insert(wager_inserts)
-      .onConflict(['book_wager_id'])
-      .merge()
+    await batch_insert({
+      items: wager_inserts,
+      save: async (batch) => {
+        await db('placed_wagers')
+          .insert(batch)
+          .onConflict(['book_wager_id'])
+          .merge()
+      },
+      batch_size: 1000
+    })
   }
 }
 
