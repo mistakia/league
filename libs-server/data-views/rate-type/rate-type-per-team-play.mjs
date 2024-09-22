@@ -153,7 +153,34 @@ export const join_per_team_play_cte = ({
       typeof year_offset === 'number')
 
   players_query.leftJoin(rate_type_table_name, function () {
-    this.on(`${rate_type_table_name}.${team_unit}`, 'player.current_nfl_team')
+    const matchup_opponent_type = Array.isArray(params.matchup_opponent_type)
+      ? params.matchup_opponent_type[0] &&
+        typeof params.matchup_opponent_type[0] === 'object'
+        ? null
+        : params.matchup_opponent_type[0]
+      : params.matchup_opponent_type
+    if (matchup_opponent_type) {
+      switch (matchup_opponent_type) {
+        case 'current_week_opponent_total':
+          this.on(
+            `${rate_type_table_name}.${team_unit}`,
+            'current_week_opponents.opponent'
+          )
+          break
+        case 'next_week_opponent_total':
+          this.on(
+            `${rate_type_table_name}.${team_unit}`,
+            'next_week_opponents.opponent'
+          )
+          break
+
+        default:
+          console.log(`Unknown matchup_opponent_type: ${matchup_opponent_type}`)
+          break
+      }
+    } else {
+      this.on(`${rate_type_table_name}.${team_unit}`, 'player.current_nfl_team')
+    }
 
     if (splits.includes('year') && year_split_join_clause) {
       if (has_year_offset_range) {
