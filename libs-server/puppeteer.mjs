@@ -107,6 +107,7 @@ export const getPage = async (
       '--window-position=0,0',
       '--ignore-certifcate-errors',
       '--ignore-certifcate-errors-spki-list',
+      '--max-http-header-size=16384',
       ...(user_data_dir ? [`--user-data-dir=${user_data_dir}`] : [])
     ],
     timeout,
