@@ -42,9 +42,9 @@ export default {
         (year.length === 1 && year[0] !== constants.season.year) ||
         splits.length
       ) {
-        return [`${table_name}.teams`]
+        return [`${table_name}.teams as player_nfl_teams_${column_index}`]
       }
-      return ['player.current_nfl_team']
+      return [`player.current_nfl_team as player_nfl_teams_${column_index}`]
     },
     main_where: ({ table_name, params, column_index, splits }) => {
       const { year } = get_default_params({ params })
