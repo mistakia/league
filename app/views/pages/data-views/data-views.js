@@ -124,7 +124,11 @@ export default function DataViewsPage({
     player.className = get_string_from_object(class_params)
   }
 
-  const new_prefix_columns = ['player_name', 'player_position']
+  const new_prefix_columns = [
+    'player_name',
+    'player_nfl_teams',
+    'player_position'
+  ]
   if (isLoggedIn && leagueId) {
     new_prefix_columns.push('player_league_roster_status')
   }
