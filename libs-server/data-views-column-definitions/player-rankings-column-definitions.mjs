@@ -5,17 +5,27 @@ import { constants } from '#libs-shared'
 
 // TODO career_year
 
+const get_default_params = ({ params = {} } = {}) => {
+  const default_params = {
+    year: [constants.season.year],
+    week: [constants.season.week],
+    ranking_source_id: ['FANTASYPROS'],
+    ranking_type: ['PPR_REDRAFT']
+  }
+
+  for (const [key, default_value] of Object.entries(default_params)) {
+    let value = params[key] || default_value
+    if (!Array.isArray(value)) {
+      value = [value]
+    }
+    default_params[key] = value
+  }
+
+  return default_params
+}
+
 const generate_table_alias = ({ params = {} } = {}) => {
-  let year = params.year || [constants.season.year]
-  if (!Array.isArray(year)) {
-    year = [year]
-  }
-
-  let week = params.week || [constants.season.week]
-  if (!Array.isArray(week)) {
-    week = [week]
-  }
-
+  const { year, week } = get_default_params({ params })
   const key = `player_rankings_${year.join('_')}_${week.join('_')}`
   return get_table_hash(key)
 }
@@ -27,25 +37,9 @@ const add_player_rankings_with_statement = ({
   where_clauses = [],
   select_strings = []
 }) => {
-  let year = params.year || [constants.season.year]
-  if (!Array.isArray(year)) {
-    year = [year]
-  }
-
-  let week = params.week || [constants.season.week]
-  if (!Array.isArray(week)) {
-    week = [week]
-  }
-
-  let ranking_source_id = params.ranking_source_id || ['FANTASYPROS']
-  if (!Array.isArray(ranking_source_id)) {
-    ranking_source_id = [ranking_source_id]
-  }
-
-  let ranking_type = params.ranking_type || 'PPR_REDRAFT'
-  if (!Array.isArray(ranking_type)) {
-    ranking_type = [ranking_type]
-  }
+  const { year, week, ranking_source_id, ranking_type } = get_default_params({
+    params
+  })
 
   const with_query = db('player_rankings_index')
     .select('pid')

@@ -64,19 +64,49 @@ const process_cache_info = ({ cache_info, data_view_metadata }) => {
 const process_dynamic_params = (params) => {
   const processed_params = { ...params }
 
+  // Helper function to process individual param
+  const process_param = (param) => {
+    if (Array.isArray(param)) {
+      return param.map((item) =>
+        typeof item === 'object' &&
+        item !== null &&
+        !item.dynamic_type &&
+        item.value !== undefined &&
+        item.value !== null
+          ? item.value
+          : item
+      )
+    }
+    if (
+      typeof param === 'object' &&
+      param !== null &&
+      !param.dynamic_type &&
+      param.value !== undefined &&
+      param.value !== null
+    ) {
+      return param.value
+    }
+    return param
+  }
+
+  // Process all params
+  for (const key in processed_params) {
+    processed_params[key] = process_param(processed_params[key])
+  }
+
   // Process year parameter
-  if (params.year) {
-    processed_params.year = process_dynamic_year_param(params.year)
+  if (processed_params.year) {
+    processed_params.year = process_dynamic_year_param(processed_params.year)
   }
 
   // Process week parameter
-  if (params.week) {
-    processed_params.week = process_dynamic_week_param(params.week)
+  if (processed_params.week) {
+    processed_params.week = process_dynamic_week_param(processed_params.week)
   }
 
-  if (params.single_week) {
+  if (processed_params.single_week) {
     processed_params.single_week = process_dynamic_single_week_param(
-      params.single_week
+      processed_params.single_week
     )
   }
 
