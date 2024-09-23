@@ -195,7 +195,7 @@ export const join_per_player_play_cte = ({
     }
 
     if (splits.includes('week')) {
-      this.on(`${rate_type_table_name}.week`, '=', 'player_weeks.week')
+      this.on(`${rate_type_table_name}.week`, '=', 'player_years_weeks.week')
     }
 
     if (group_by) {
