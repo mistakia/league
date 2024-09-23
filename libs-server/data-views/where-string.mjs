@@ -34,23 +34,27 @@ const get_where_string = ({
   if (where_func && !where_column) return ''
 
   let where_string = ''
+  const is_array_column = column_definition.is_array_column
 
   if (where_clause.operator === 'IS NULL') {
     where_string = `${where_column} IS NULL`
   } else if (where_clause.operator === 'IS NOT NULL') {
     where_string = `${where_column} IS NOT NULL`
   } else if (where_clause.operator === 'IN') {
-    where_string = `${where_column} IN ('${where_clause.value.join("', '")}')`
+    where_string = is_array_column
+      ? `${where_column}::text[] && ARRAY['${where_clause.value.join("', '")}']::text[]`
+      : `${where_column} IN ('${where_clause.value.join("', '")}')`
   } else if (where_clause.operator === 'NOT IN') {
-    where_string = `${where_column} NOT IN ('${where_clause.value.join("', '")}')`
-  } else if (where_clause.operator === 'ILIKE') {
-    where_string = `${where_column} ILIKE '%${where_clause.value}%'`
-  } else if (where_clause.operator === 'LIKE') {
-    where_string = `${where_column} LIKE '%${where_clause.value}%'`
-  } else if (where_clause.operator === 'NOT LIKE') {
-    where_string = `${where_column} NOT LIKE '%${where_clause.value}%'`
+    where_string = is_array_column
+      ? `NOT (${where_column}::text[] && ARRAY['${where_clause.value.join("', '")}']::text[])`
+      : `${where_column} NOT IN ('${where_clause.value.join("', '")}')`
+  } else if (['ILIKE', 'LIKE', 'NOT LIKE'].includes(where_clause.operator)) {
+    const cast_to_text = is_array_column ? '::text' : ''
+    where_string = `${where_column}${cast_to_text} ${where_clause.operator} '%${where_clause.value}%'`
   } else if (where_clause.value || where_clause.value === 0) {
-    where_string = `${where_column} ${where_clause.operator} '${where_clause.value}'`
+    where_string = is_array_column
+      ? `'${where_clause.value}'::text = ANY(${where_column}::text[])`
+      : `${where_column} ${where_clause.operator} '${where_clause.value}'`
   }
 
   return where_string

@@ -82,6 +82,7 @@ export const add_per_game_cte = ({
     .select('player_gamelogs.pid')
     .leftJoin('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
     .count('* as rate_type_total_count')
+    .select(db.raw('array_agg(distinct player_gamelogs.tm) as teams'))
     .where('nfl_games.seas_type', 'REG')
     .where('player_gamelogs.active', true)
 
