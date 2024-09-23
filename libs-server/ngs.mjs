@@ -185,6 +185,7 @@ export const save_play_data = async ({ data, esbid }) => {
   const timestamp = Math.round(Date.now() / 1000)
   const play_inserts = []
   const play_stat_inserts = []
+  const play_stat_index = new Set()
   const snap_inserts = []
 
   const seas_type = data.plays.find((play) => play.seasonType)?.seasonType
@@ -214,6 +215,13 @@ export const save_play_data = async ({ data, esbid }) => {
     if (play.playStats && Array.isArray(play.playStats)) {
       for (const playStat of play.playStats) {
         const play_stat_data = format_play_stat_data(playStat)
+        const play_stat_key = `${esbid}:${playId}:${playStat.statId}:${playStat.playerName}`
+        if (play_stat_index.has(play_stat_key)) {
+          continue
+        }
+
+        play_stat_index.add(play_stat_key)
+
         play_stat_inserts.push({
           playId,
           esbid,
