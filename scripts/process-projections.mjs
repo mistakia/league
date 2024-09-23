@@ -152,14 +152,19 @@ const process_scoring_format = async ({
     .where({ scoring_format_hash })
     .first()
 
-  const pointsInserts = []
+  const points_inserts = []
+  const current_week =
+    year === constants.season.year ? constants.season.week : 0
 
   for (const player_row of player_rows) {
-    let week = year === constants.season.year ? constants.season.week : 0
-    for (; week <= constants.season.nflFinalWeek; week++) {
+    for (
+      let week = current_week;
+      week <= constants.season.nflFinalWeek;
+      week++
+    ) {
       const projection = player_row.projection[week]
 
-      pointsInserts.push({
+      points_inserts.push({
         pid: player_row.pid,
         year: constants.season.year,
         scoring_format_hash,
@@ -172,7 +177,7 @@ const process_scoring_format = async ({
       })
     }
 
-    pointsInserts.push({
+    points_inserts.push({
       pid: player_row.pid,
       year: constants.season.year,
       scoring_format_hash,
@@ -185,17 +190,26 @@ const process_scoring_format = async ({
     })
   }
 
-  if (pointsInserts.length) {
+  if (points_inserts.length) {
+    // Delete only current week, future weeks, and ROS projections
     await db('scoring_format_player_projection_points')
-      .del()
       .where({ scoring_format_hash, year })
+      .where(function () {
+        this.where('week', 'ros').orWhere(function () {
+          this.whereNot('week', 'ros').andWhere(
+            db.raw('CAST(week AS INTEGER) >= ?', [current_week])
+          )
+        })
+      })
+      .del()
+
     await batch_insert({
-      items: pointsInserts,
+      items: points_inserts,
       save: (items) =>
         db('scoring_format_player_projection_points').insert(items),
       batch_size: 100
     })
-    log(`processed and saved ${pointsInserts.length} player points`)
+    log(`processed and saved ${points_inserts.length} player points`)
   }
 }
 
