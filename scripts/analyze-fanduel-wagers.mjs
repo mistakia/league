@@ -127,6 +127,7 @@ const analyze_fanduel_wagers = async ({
   wagers_limit = Infinity,
   hide_wagers = false,
   wagers_lost_leg_limit = 1,
+  filter_wagers_min_legs = 0,
   selection_filters = []
 } = {}) => {
   if (!filename) {
@@ -155,8 +156,8 @@ const analyze_fanduel_wagers = async ({
   }
 
   const filtered = wagers.filter((wager) => {
-    // filter out wagers that do not have multiple legs
-    if (wager.legs.length < 2) {
+    // filter out wagers with less than the minimum number of legs
+    if (wager.legs.length < filter_wagers_min_legs) {
       return false
     }
 
@@ -571,7 +572,8 @@ const main = async () => {
       wagers_limit: argv.wagers_limit,
       wagers_lost_leg_limit: argv.wagers_lost_leg_limit,
       selection_filters: argv.filter ? argv.filter.split(',') : [],
-      hide_wagers: argv.hide_wagers
+      hide_wagers: argv.hide_wagers,
+      filter_wagers_min_legs: argv.min_legs
     })
   } catch (err) {
     error = err
