@@ -281,7 +281,7 @@ export default {
   player_receiving_first_down_share_from_plays:
     "The player's share of team receiving first downs (calculated from play-by-play data)",
   player_receiver_air_conversion_ratio_from_plays:
-    'The ratio of receiving yards to air yards (calculated from play-by-play data)',
+    'The ratio of receiving yards to air yards, popularized by Josh Hermsmeyer (calculated from play-by-play data)',
   player_receiving_yards_per_reception_from_plays:
     'The average receiving yards per reception (calculated from play-by-play data)',
   player_receiving_yards_per_target_from_plays:

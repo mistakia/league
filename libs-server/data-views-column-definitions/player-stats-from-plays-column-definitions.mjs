@@ -735,10 +735,10 @@ export default {
   // receiving yards / air yards
   player_receiver_air_conversion_ratio_from_plays: player_stat_from_plays({
     pid_columns: ['trg_pid'],
-    with_select_string: `CASE WHEN SUM(CASE WHEN comp = true THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END) / SUM(CASE WHEN comp = true THEN 1 ELSE 0 END), 4) ELSE 0 END`,
+    with_select_string: `CASE WHEN SUM(dot) > 0 THEN ROUND(100.0 * SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END) / NULLIF(SUM(dot), 0), 4) ELSE 0 END`,
     stat_name: 'rec_air_conv_ratio_from_plays',
     numerator_select: `SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END)`,
-    denominator_select: `SUM(CASE WHEN comp = true THEN 1 ELSE 0 END)`,
+    denominator_select: `SUM(dot)`,
     has_numerator_denominator: true,
     supported_rate_types: []
   }),
