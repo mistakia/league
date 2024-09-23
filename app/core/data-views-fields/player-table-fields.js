@@ -44,6 +44,22 @@ export default function ({ is_logged_in }) {
         table_constants.TABLE_OPERATORS.NOT_IN
       ]
     },
+    player_nfl_teams: {
+      column_title: 'Player NFL Teams',
+      header_label: 'Teams',
+      size: 70,
+      data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+      player_value_path: 'player_nfl_teams',
+      component: React.memo(PlayerRowNFLTeam),
+      column_groups: [COLUMN_GROUPS.NFL_TEAM],
+      operators: [
+        table_constants.TABLE_OPERATORS.IN,
+        table_constants.TABLE_OPERATORS.NOT_IN,
+        table_constants.TABLE_OPERATORS.IS_NULL,
+        table_constants.TABLE_OPERATORS.IS_NOT_NULL
+      ],
+      column_values: ['INA', ...constants.nflTeams]
+    },
     player_height: {
       column_title: 'Height',
       header_label: 'IN"',
