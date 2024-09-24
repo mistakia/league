@@ -4,7 +4,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants, groupBy } from '#libs-shared'
-import { is_main } from '#libs-server'
+import { is_main, batch_insert } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -366,10 +366,16 @@ const generate_player_snaps_for_week = async ({
 
   if (player_snap_inserts.length) {
     log(`inserting ${player_snap_inserts.length} player snaps`)
-    await db('player_gamelogs')
-      .insert(player_snap_inserts)
-      .onConflict(['esbid', 'pid', 'year'])
-      .merge()
+    await batch_insert({
+      items: player_snap_inserts,
+      save: async (batch) => {
+        await db('player_gamelogs')
+          .insert(batch)
+          .onConflict(['esbid', 'pid', 'year'])
+          .merge()
+      },
+      batch_size: 500
+    })
   }
 }
 
