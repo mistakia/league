@@ -520,8 +520,7 @@ export default {
   player_weighted_opportunity_from_plays: player_stat_from_plays({
     pid_columns: ['bc_pid', 'trg_pid'],
     with_select_string: `ROUND(SUM(CASE WHEN nfl_plays.ydl_100 <= 20 AND bc_pid IS NOT NULL THEN 1.30 WHEN nfl_plays.ydl_100 <= 20 AND trg_pid IS NOT NULL THEN 2.25 WHEN nfl_plays.ydl_100 > 20 AND bc_pid IS NOT NULL THEN 0.48 WHEN nfl_plays.ydl_100 > 20 AND trg_pid IS NOT NULL THEN 1.43 ELSE 0 END), 2)`,
-    stat_name: 'weighted_opportunity_from_plays',
-    supported_rate_types: []
+    stat_name: 'weighted_opportunity_from_plays'
   }),
   player_high_value_touches_from_plays: player_stat_from_plays({
     pid_columns: ['bc_pid', 'trg_pid'],
