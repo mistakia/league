@@ -1334,7 +1334,6 @@ DROP INDEX IF EXISTS public.idx_24910_tid;
 DROP INDEX IF EXISTS public.idx_24910_lid;
 DROP INDEX IF EXISTS public.idx_24905_status;
 DROP INDEX IF EXISTS public.idx_24905_pid;
-DROP INDEX IF EXISTS public.idx_24902_pid;
 DROP INDEX IF EXISTS public.idx_24855_pid;
 DROP INDEX IF EXISTS public.idx_24804_alias;
 DROP INDEX IF EXISTS public.idx_24798_yahoo_id;
@@ -1533,7 +1532,6 @@ DROP TABLE IF EXISTS public.poaches;
 DROP TABLE IF EXISTS public.poach_releases;
 DROP TABLE IF EXISTS public.playoffs;
 DROP TABLE IF EXISTS public.players_status;
-DROP TABLE IF EXISTS public.player_snaps_game;
 DROP TABLE IF EXISTS public.player_seasonlogs;
 DROP TABLE IF EXISTS public.player_salaries;
 DROP TABLE IF EXISTS public.player_rankings_index;
@@ -16656,56 +16654,6 @@ CREATE TABLE public.player_seasonlogs (
 
 
 --
--- Name: player_snaps_game; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.player_snaps_game (
-    esbid integer NOT NULL,
-    pid character varying(25) NOT NULL,
-    snaps_off smallint,
-    snaps_def smallint,
-    snaps_st smallint,
-    snaps_pass smallint,
-    snaps_run smallint
-);
-
-
---
--- Name: COLUMN player_snaps_game.snaps_off; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.player_snaps_game.snaps_off IS 'Offensive snaps';
-
-
---
--- Name: COLUMN player_snaps_game.snaps_def; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.player_snaps_game.snaps_def IS 'Defensive snaps';
-
-
---
--- Name: COLUMN player_snaps_game.snaps_st; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.player_snaps_game.snaps_st IS 'Special teams snaps';
-
-
---
--- Name: COLUMN player_snaps_game.snaps_pass; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.player_snaps_game.snaps_pass IS 'Passing snaps (Pass attempts, sacks, scrambles)';
-
-
---
--- Name: COLUMN player_snaps_game.snaps_run; Type: COMMENT; Schema: public; Owner: -
---
-
-COMMENT ON COLUMN public.player_snaps_game.snaps_run IS 'Rushing snaps';
-
-
---
 -- Name: players_status; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -19804,13 +19752,6 @@ CREATE UNIQUE INDEX idx_24804_alias ON public.player_aliases USING btree (pid, f
 --
 
 CREATE UNIQUE INDEX idx_24855_pid ON public.player_seasonlogs USING btree (pid, year, seas_type);
-
-
---
--- Name: idx_24902_pid; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_24902_pid ON public.player_snaps_game USING btree (pid, esbid);
 
 
 --
