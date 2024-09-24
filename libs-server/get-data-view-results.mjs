@@ -900,12 +900,14 @@ export const get_data_view_results_query = ({
       const rate_type_table_name = get_rate_type_cte_table_name({
         params: column.params,
         rate_type,
-        team_unit: column_definition.team_unit
+        team_unit: column_definition.team_unit,
+        is_team: column_definition.is_team
       })
       data_view_options.rate_type_tables[rate_type_table_name] = {
         params: column.params,
         rate_type,
-        team_unit: column_definition.team_unit
+        team_unit: column_definition.team_unit,
+        is_team: column_definition.is_team
       }
       rate_type_column_mapping[`${column.column_id}_${column_index}`] =
         rate_type_table_name
@@ -914,7 +916,7 @@ export const get_data_view_results_query = ({
 
   for (const [
     rate_type_table_name,
-    { params, rate_type, team_unit }
+    { params, rate_type, team_unit, is_team }
   ] of Object.entries(data_view_options.rate_type_tables)) {
     add_rate_type_cte({
       players_query,
@@ -922,7 +924,8 @@ export const get_data_view_results_query = ({
       rate_type_table_name,
       splits,
       rate_type,
-      team_unit
+      team_unit,
+      is_team
     })
     join_rate_type_cte({
       players_query,
@@ -931,7 +934,8 @@ export const get_data_view_results_query = ({
       splits,
       year_split_join_clause,
       rate_type,
-      team_unit
+      team_unit,
+      is_team
     })
   }
 

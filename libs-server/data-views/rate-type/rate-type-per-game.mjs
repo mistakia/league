@@ -58,17 +58,22 @@ const get_default_params = ({ params = {} } = {}) => {
   }
 }
 
-export const get_per_game_cte_table_name = ({ params = {} } = {}) => {
+export const get_per_game_cte_table_name = ({
+  params = {},
+  is_team = false
+} = {}) => {
   const { week, career_year, career_game, all_years } = get_default_params({
     params
   })
 
+  const prefix = is_team ? 'team' : 'player'
+
   return get_table_hash(
-    `games_played_years_${all_years.join('_')}_weeks_${week.join('_')}_career_year_${career_year.join('_')}_career_game_${career_game.join('_')}`
+    `${prefix}_games_played_years_${all_years.join('_')}_weeks_${week.join('_')}_career_year_${career_year.join('_')}_career_game_${career_game.join('_')}`
   )
 }
 
-export const add_per_game_cte = ({
+const add_player_per_game_cte = ({
   players_query,
   params,
   rate_type_table_name,
@@ -132,12 +137,75 @@ export const add_per_game_cte = ({
   players_query.with(rate_type_table_name, cte_query)
 }
 
-export const join_per_game_cte = ({
+const add_team_per_game_cte = ({
+  players_query,
+  params,
+  rate_type_table_name,
+  splits = []
+}) => {
+  const { week, all_years } = get_default_params({
+    params
+  })
+
+  const cte_query = db('nfl_plays')
+    .select('nfl_plays.off as team')
+    .countDistinct('nfl_plays.esbid as rate_type_total_count')
+    .where('nfl_plays.seas_type', 'REG')
+
+  if (all_years.length) {
+    cte_query.whereIn('nfl_plays.year', all_years)
+  }
+
+  if (week.length) {
+    cte_query.whereIn('nfl_plays.week', week)
+  }
+
+  for (const split of splits) {
+    if (split === 'year') {
+      cte_query.select('nfl_plays.year')
+    }
+  }
+
+  cte_query.groupBy('nfl_plays.off')
+
+  if (splits.includes('year')) {
+    cte_query.groupBy('nfl_plays.year')
+  }
+
+  players_query.with(rate_type_table_name, cte_query)
+}
+
+export const add_per_game_cte = ({
+  players_query,
+  params,
+  rate_type_table_name,
+  splits = [],
+  is_team = false
+}) => {
+  if (is_team) {
+    add_team_per_game_cte({
+      players_query,
+      params,
+      rate_type_table_name,
+      splits
+    })
+  } else {
+    add_player_per_game_cte({
+      players_query,
+      params,
+      rate_type_table_name,
+      splits
+    })
+  }
+}
+
+export const join_player_per_game_cte = ({
   players_query,
   rate_type_table_name,
   splits,
   year_split_join_clause,
-  params
+  params,
+  is_team = false
 }) => {
   const year_offset = params.year_offset
   const has_year_offset_range =
@@ -190,4 +258,118 @@ export const join_per_game_cte = ({
       }
     }
   })
+}
+
+export const join_team_per_game_cte = ({
+  players_query,
+  rate_type_table_name,
+  splits,
+  year_split_join_clause,
+  params
+}) => {
+  const year_offset = params.year_offset
+  const has_year_offset_range =
+    year_offset &&
+    Array.isArray(year_offset) &&
+    year_offset.length > 1 &&
+    year_offset[0] !== year_offset[1]
+  const has_single_year_offset =
+    year_offset &&
+    ((Array.isArray(year_offset) &&
+      (year_offset.length === 1 || year_offset[0] === year_offset[1])) ||
+      typeof year_offset === 'number')
+
+  players_query.leftJoin(rate_type_table_name, function () {
+    const matchup_opponent_type = Array.isArray(params.matchup_opponent_type)
+      ? params.matchup_opponent_type[0] &&
+        typeof params.matchup_opponent_type[0] === 'object'
+        ? null
+        : params.matchup_opponent_type[0]
+      : params.matchup_opponent_type
+
+    if (matchup_opponent_type) {
+      switch (matchup_opponent_type) {
+        case 'current_week_opponent_total':
+          this.on(
+            `${rate_type_table_name}.team`,
+            'current_week_opponents.opponent'
+          )
+          break
+        case 'next_week_opponent_total':
+          this.on(
+            `${rate_type_table_name}.team`,
+            'next_week_opponents.opponent'
+          )
+          break
+        default:
+          console.log(`Unknown matchup_opponent_type: ${matchup_opponent_type}`)
+          break
+      }
+    } else {
+      this.on(`${rate_type_table_name}.team`, 'player.current_nfl_team')
+    }
+
+    if (splits.includes('year') && year_split_join_clause) {
+      if (has_year_offset_range) {
+        const min_offset = Math.min(year_offset[0], year_offset[1])
+        const max_offset = Math.max(year_offset[0], year_offset[1])
+        this.on(
+          db.raw(
+            `${rate_type_table_name}.year BETWEEN player_years.year + ? AND player_years.year + ?`,
+            [min_offset, max_offset]
+          )
+        )
+      } else if (has_single_year_offset) {
+        const offset = Array.isArray(year_offset) ? year_offset[0] : year_offset
+        this.on(
+          db.raw(`${rate_type_table_name}.year = player_years.year + ?`, [
+            offset
+          ])
+        )
+      } else {
+        const single_year_param_set =
+          params.year &&
+          (Array.isArray(params.year) ? params.year.length === 1 : true)
+        if (single_year_param_set) {
+          const specific_year = Array.isArray(params.year)
+            ? params.year[0]
+            : params.year
+          this.andOn(
+            `${rate_type_table_name}.year`,
+            '=',
+            db.raw('?', [specific_year])
+          )
+        } else {
+          this.on(`${rate_type_table_name}.year`, year_split_join_clause)
+        }
+      }
+    }
+  })
+}
+
+export const join_per_game_cte = ({
+  players_query,
+  rate_type_table_name,
+  splits,
+  year_split_join_clause,
+  params,
+  is_team = false
+}) => {
+  if (is_team) {
+    join_team_per_game_cte({
+      players_query,
+      rate_type_table_name,
+      splits,
+      year_split_join_clause,
+      params
+    })
+  } else {
+    join_player_per_game_cte({
+      players_query,
+      rate_type_table_name,
+      splits,
+      year_split_join_clause,
+      params
+    })
+  }
 }
