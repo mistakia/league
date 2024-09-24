@@ -318,10 +318,10 @@ export default function SelectedPlayer({
           defaultValue={0}
         >
           <TabsList>
-            <Tab>Projections</Tab>
             <Tab>Games</Tab>
             <Tab>Seasons</Tab>
             <Tab>Schedule</Tab>
+            <Tab>Projections</Tab>
             {/* <Tab>Team Splits</Tab> */}
             {/* <Tab>Efficiency</Tab> */}
             <Tab>Practice</Tab>
@@ -335,16 +335,16 @@ export default function SelectedPlayer({
             )}
           </TabsList>
           <TabPanel value={0}>
-            <SelectedPlayerProjections />
-          </TabPanel>
-          <TabPanel value={1}>
             <SelectedPlayerGamelogs />
           </TabPanel>
-          <TabPanel value={2}>
+          <TabPanel value={1}>
             <SelectedPlayerSeasonStats pos={pos} />
           </TabPanel>
-          <TabPanel value={3}>
+          <TabPanel value={2}>
             <SelectedPlayerSchedule />
+          </TabPanel>
+          <TabPanel value={3}>
+            <SelectedPlayerProjections />
           </TabPanel>
           {/* <TabPanel value={4}>
               <SelectedPlayerTeamStats />
