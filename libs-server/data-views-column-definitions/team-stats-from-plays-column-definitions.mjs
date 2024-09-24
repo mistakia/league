@@ -111,7 +111,8 @@ const team_stat_from_plays = ({
   supported_splits: ['year', 'week'],
   supported_rate_types,
   is_rate,
-  get_cache_info: get_cache_info_for_fields_from_plays
+  get_cache_info: get_cache_info_for_fields_from_plays,
+  is_team: true
 })
 
 export default {
