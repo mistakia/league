@@ -113,7 +113,6 @@ players_status
 practice
 player_rankings
 player_seasonlogs
-player_snaps_game
 pff_player_seasonlogs
 pff_player_seasonlogs_changelog
 espn_player_win_rates_history
