@@ -2,6 +2,8 @@ import puppeteer from 'puppeteer-extra'
 import StealthPlugin from 'puppeteer-extra-plugin-stealth'
 import AnonymizeUaPlugin from 'puppeteer-extra-plugin-anonymize-ua'
 import os from 'os'
+import child_process from 'child_process'
+import fs from 'fs'
 
 puppeteer.use(AnonymizeUaPlugin())
 
@@ -91,30 +93,41 @@ export const getPage = async (
     use_stealth = false,
     cookies,
     local_storage,
-    user_data_dir
+    user_data_dir,
+    connect = false,
+    remote_debugging_port = 9222
   } = {}
 ) => {
   if (use_stealth) {
     puppeteer.use(StealthPlugin())
   }
 
-  const browser = await puppeteer.launch({
-    headless: headless ? 'new' : false,
-    args: [
-      '--no-sandbox',
-      '--disable-setuid-sandbox',
-      '--disable-infobars',
-      '--window-position=0,0',
-      '--ignore-certifcate-errors',
-      '--ignore-certifcate-errors-spki-list',
-      '--max-http-header-size=16384',
-      ...(user_data_dir ? [`--user-data-dir=${user_data_dir}`] : [])
-    ],
-    timeout,
-    ignoreDefaultArgs: ['--enable-automation'],
-    executablePath: executable_path,
-    userDataDir: user_data_dir
-  })
+  let browser
+  if (connect) {
+    browser = await connectToChrome({
+      remote_debugging_port,
+      executable_path,
+      user_data_dir
+    })
+  } else {
+    browser = await puppeteer.launch({
+      headless: headless ? 'new' : false,
+      args: [
+        '--no-sandbox',
+        '--disable-setuid-sandbox',
+        '--disable-infobars',
+        '--window-position=0,0',
+        '--ignore-certifcate-errors',
+        '--ignore-certifcate-errors-spki-list',
+        '--max-http-header-size=16384',
+        ...(user_data_dir ? [`--user-data-dir=${user_data_dir}`] : [])
+      ],
+      timeout,
+      ignoreDefaultArgs: ['--enable-automation'],
+      executablePath: executable_path,
+      userDataDir: user_data_dir
+    })
+  }
 
   const page = await browser.newPage()
 
@@ -268,4 +281,62 @@ export const getPage = async (
   await page.goto(url)
 
   return { page, browser }
+}
+
+async function connectToChrome({
+  remote_debugging_port,
+  executable_path,
+  user_data_dir
+}) {
+  try {
+    // Try to connect to an existing Chrome instance
+    return await puppeteer.connect({
+      browserURL: `http://localhost:${remote_debugging_port}`,
+      defaultViewport: null
+    })
+  } catch (error) {
+    console.log('No existing Chrome instance found. Launching a new one...')
+
+    // Launch a new Chrome instance with remote debugging enabled
+    const chrome_args = [
+      `--remote-debugging-port=${remote_debugging_port}`,
+      '--no-first-run',
+      '--no-default-browser-check',
+      ...(user_data_dir ? [`--user-data-dir=${user_data_dir}`] : [])
+    ]
+
+    const chrome_process = child_process.spawn(
+      executable_path || findChromePath(),
+      chrome_args,
+      { detached: true, stdio: 'ignore' }
+    )
+    chrome_process.unref()
+
+    // Wait for Chrome to start and then connect
+    await new Promise((resolve) => setTimeout(resolve, 1000))
+    return await puppeteer.connect({
+      browserURL: `http://localhost:${remote_debugging_port}`,
+      defaultViewport: null
+    })
+  }
+}
+
+function findChromePath() {
+  const possible_paths = [
+    '/usr/bin/google-chrome',
+    '/usr/bin/chromium-browser',
+    '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome',
+    'C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe',
+    'C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe'
+  ]
+
+  for (const path of possible_paths) {
+    if (fs.existsSync(path)) {
+      return path
+    }
+  }
+
+  throw new Error(
+    'Chrome executable not found. Please specify the path manually.'
+  )
 }
