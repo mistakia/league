@@ -51,6 +51,22 @@ const get_stat_fields = (pos) => {
   }
 }
 
+const get_snaps_fields = (pos) => {
+  switch (pos) {
+    case 'DST':
+    case 'K':
+      return ['snaps_def', 'snaps_st']
+    case 'QB':
+      return ['snaps_off', 'snaps_pass', 'snaps_rush']
+    case 'RB':
+    case 'WR':
+    case 'TE':
+      return ['snaps_off', 'snaps_pass', 'snaps_rush', 'snaps_st']
+    default:
+      return []
+  }
+}
+
 export default function PlayerSelectedRow({
   title,
   stats,
@@ -63,7 +79,8 @@ export default function PlayerSelectedRow({
   percentile_key,
   percentiles = {},
   header,
-  fixed = 0
+  fixed = 0,
+  snaps
 }) {
   useEffect(() => {
     if (percentile_key) {
@@ -112,11 +129,29 @@ export default function PlayerSelectedRow({
       )
     }
   })
+
+  const snaps_items = []
+  if (snaps) {
+    const snaps_fields = get_snaps_fields(pos)
+    snaps_fields.forEach((field) => {
+      snaps_items.push(
+        <div key={field} className='table__cell metric'>
+          {stats[field]}
+        </div>
+      )
+    })
+  }
+
   return (
     <div className={class_names.join(' ')}>
       {lead || <div className='table__cell text'>{title}</div>}
       {games && <div className='table__cell metric'>{games}</div>}
       {items}
+      {snaps && (
+        <div className='row__group'>
+          <div className='row__group-body'>{snaps_items}</div>
+        </div>
+      )}
       {action}
     </div>
   )
@@ -134,5 +169,6 @@ PlayerSelectedRow.propTypes = {
   percentiles: PropTypes.object,
   percentile_key: PropTypes.string,
   header: PropTypes.bool,
-  fixed: PropTypes.number
+  fixed: PropTypes.number,
+  snaps: PropTypes.bool
 }
