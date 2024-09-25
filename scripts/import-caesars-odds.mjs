@@ -139,7 +139,7 @@ const format_market = async ({
     source_market_id: caesars_market.id,
     source_market_name: `${event?.name.replaceAll('|', '')} - ${
       caesars_market.name ? caesars_market.name.replaceAll('|', '') : ''
-    } — ${caesars_market.templateName.replaceAll('|', '')} — ${
+    } — ${caesars_market.templateName ? caesars_market.templateName.replaceAll('|', '') : ''} — ${
       caesars_market.metadata?.marketCategory || ''
     }`,
 
