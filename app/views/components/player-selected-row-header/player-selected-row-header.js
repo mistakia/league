@@ -95,7 +95,27 @@ const rushing_receiving = ({ snaps }) => [
   Boolean(snaps) && snaps_header(['OFF', 'PASS', 'RUSH', 'ST'])
 ]
 
-const receiving_rushing = rushing_receiving
+const receiving_rushing = ({ snaps }) => [
+  <div className='row__group' key={0}>
+    <div className='row__group-head'>Receiving</div>
+    <div className='row__group-body'>
+      <div className='table__cell'>TAR</div>
+      <div className='table__cell'>REC</div>
+      <div className='table__cell'>YDS</div>
+      <div className='table__cell'>TD</div>
+    </div>
+  </div>,
+  <div className='row__group' key={1}>
+    <div className='row__group-head'>Rushing</div>
+    <div className='row__group-body'>
+      <div className='table__cell'>ATT</div>
+      <div className='table__cell'>YDS</div>
+      <div className='table__cell'>TD</div>
+      <div className='table__cell'>FUM</div>
+    </div>
+  </div>,
+  Boolean(snaps) && snaps_header(['OFF', 'REC', 'RUSH', 'ST'])
+]
 
 export default function PlayerSelectedRowHeader({ pos, snaps }) {
   switch (pos) {
@@ -116,5 +136,6 @@ export default function PlayerSelectedRowHeader({ pos, snaps }) {
 }
 
 PlayerSelectedRowHeader.propTypes = {
-  pos: PropTypes.string
+  pos: PropTypes.string,
+  snaps: PropTypes.bool
 }
