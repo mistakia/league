@@ -22,6 +22,12 @@ const get_default_params = ({ params = {} } = {}) => {
 
   team_unit = team_unit.toUpperCase()
 
+  if (team_unit === 'OFF') {
+    team_unit = 'OFFENSE'
+  } else if (team_unit === 'DEF') {
+    team_unit = 'DEFENSE'
+  }
+
   if (!acceptable_team_units.includes(team_unit)) {
     team_unit = 'OFFENSE'
   }
@@ -54,9 +60,13 @@ const get_cache_info = ({ params = {} } = {}) => {
 }
 
 const dvoa_team_unit_seasonlogs_table_alias = ({ params = {} } = {}) => {
-  const { year, matchup_opponent_type } = get_default_params({ params })
+  const { year, matchup_opponent_type, team_unit } = get_default_params({
+    params
+  })
   const suffix = matchup_opponent_type ? `_${matchup_opponent_type}` : ''
-  return get_table_hash(`dvoa_team_unit_seasonlogs_${year.join('_')}${suffix}`)
+  return get_table_hash(
+    `dvoa_team_unit_seasonlogs_${team_unit}_${year.join('_')}${suffix}`
+  )
 }
 
 const dvoa_team_unit_seasonlogs_join = (join_arguments) => {
