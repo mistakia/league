@@ -515,7 +515,7 @@ const process_qb_pass_by_dir = async (worksheet, { dry_run, timestamp }) => {
       player: row[2],
       gsis_id: row[3],
       full_name: row[4],
-      nfl_team: fixTeam(row[5]),
+      nfl_team: row[5],
       pass_left_dyar: row[6],
       pass_left_dvoa: row[7],
       pass_left_attempts: row[8],
@@ -814,8 +814,21 @@ const process_defense_dvoa = async (worksheet, { dry_run, timestamp }) => {
       }
     })
 
+  const unit_formatted_data = formatted_data.map((row) => ({
+    year: row.year,
+    week: row.week,
+    nfl_team: row.nfl_team,
+    team_unit: 'DEFENSE',
+    pass_dvoa: row.pass_defense_dvoa,
+    pass_dvoa_rank: row.pass_defense_dvoa_rank,
+    rush_dvoa: row.rush_defense_dvoa,
+    rush_dvoa_rank: row.rush_defense_dvoa_rank,
+    timestamp: row.timestamp
+  }))
+
   if (dry_run) {
     log(formatted_data[0])
+    log(unit_formatted_data[0])
   }
 
   if (!dry_run && formatted_data.length) {
@@ -827,6 +840,16 @@ const process_defense_dvoa = async (worksheet, { dry_run, timestamp }) => {
     await db('dvoa_team_seasonlogs_history')
       .insert(formatted_data)
       .onConflict(['year', 'nfl_team', 'week'])
+      .merge()
+
+    await db('dvoa_team_unit_seasonlogs_index')
+      .insert(unit_formatted_data)
+      .onConflict(['year', 'nfl_team', 'team_unit'])
+      .merge()
+
+    await db('dvoa_team_unit_seasonlogs_history')
+      .insert(unit_formatted_data)
+      .onConflict(['year', 'nfl_team', 'team_unit', 'week'])
       .merge()
   }
 }
@@ -863,8 +886,21 @@ const process_offense_dvoa = async (worksheet, { dry_run, timestamp }) => {
       }
     })
 
+  const unit_formatted_data = formatted_data.map((row) => ({
+    year: row.year,
+    week: row.week,
+    nfl_team: row.nfl_team,
+    team_unit: 'OFFENSE',
+    pass_dvoa: row.pass_offense_dvoa,
+    pass_dvoa_rank: row.pass_offense_dvoa_rank,
+    rush_dvoa: row.rush_offense_dvoa,
+    rush_dvoa_rank: row.rush_offense_dvoa_rank,
+    timestamp: row.timestamp
+  }))
+
   if (dry_run) {
     log(formatted_data[0])
+    log(unit_formatted_data[0])
   }
 
   if (!dry_run && formatted_data.length) {
@@ -876,6 +912,16 @@ const process_offense_dvoa = async (worksheet, { dry_run, timestamp }) => {
     await db('dvoa_team_seasonlogs_history')
       .insert(formatted_data)
       .onConflict(['year', 'nfl_team', 'week'])
+      .merge()
+
+    await db('dvoa_team_unit_seasonlogs_index')
+      .insert(unit_formatted_data)
+      .onConflict(['year', 'nfl_team', 'team_unit'])
+      .merge()
+
+    await db('dvoa_team_unit_seasonlogs_history')
+      .insert(unit_formatted_data)
+      .onConflict(['year', 'nfl_team', 'team_unit', 'week'])
       .merge()
   }
 }

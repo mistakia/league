@@ -2505,7 +2505,10 @@ CREATE TABLE public.dvoa_team_unit_seasonlogs_history (
     team_rush_left_tackle_pct numeric,
     team_rush_mid_guard_pct numeric,
     team_rush_right_tackle_pct numeric,
-    team_rush_right_end_pct numeric
+    team_rush_right_end_pct numeric,
+    pass_dvoa numeric,
+    rush_dvoa numeric,
+    rush_dvoa_rank smallint
 );
 
 
@@ -2689,7 +2692,10 @@ CREATE TABLE public.dvoa_team_unit_seasonlogs_index (
     team_rush_left_tackle_pct numeric,
     team_rush_mid_guard_pct numeric,
     team_rush_right_tackle_pct numeric,
-    team_rush_right_end_pct numeric
+    team_rush_right_end_pct numeric,
+    pass_dvoa numeric,
+    rush_dvoa numeric,
+    rush_dvoa_rank smallint
 );
 
 
