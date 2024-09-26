@@ -101,7 +101,8 @@ export const job_types = {
   IMPORT_PLAYS_NGS_V2: 77,
   PROCESS_MARKET_HIT_RATES: 78,
   IMPORT_ESPN_LINE_WIN_RATES: 79,
-  IMPORT_PLAYS_PLAYERPROFILER: 80
+  IMPORT_PLAYS_PLAYERPROFILER: 80,
+  IMPORT_DVOA_SHEETS: 81
 }
 
 export const job_title_by_id = {
@@ -184,5 +185,6 @@ export const job_title_by_id = {
   77: 'Import Plays (NGS V2)',
   78: 'Process Market Hit Rates',
   79: 'Import ESPN Line Win Rates',
-  80: 'Import Plays (PlayerProfiler)'
+  80: 'Import Plays (PlayerProfiler)',
+  81: 'Import DVOA Sheets'
 }
