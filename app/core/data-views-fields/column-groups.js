@@ -26,7 +26,7 @@ const COLUMN_GROUPS = {
   REST_OF_SEASON_PROJECTION: { priority: 2 },
   FANTASY_POINTS: { priority: 3 },
   FANTASY_LEAGUE: { priority: 3 },
-  OPPURTUNITY: { priority: 3 },
+  OPPORTUNITY: { priority: 3 },
   PASSING: { priority: 3 },
   RUSHING: { priority: 3 },
   RECEIVING: { priority: 3 },

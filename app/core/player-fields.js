@@ -812,7 +812,7 @@ function PlayerFields({ week, state }) {
       percentile_field: 'dryprecy'
     },
     'stats.trg': {
-      category: 'oppurtunity',
+      category: 'opportunity',
       column_header: 'TAR',
       csv_header: 'Targets',
       player_value_path: 'stats.trg',
@@ -820,7 +820,7 @@ function PlayerFields({ week, state }) {
       percentile_field: 'trg'
     },
     'stats.dptrg_pct': {
-      category: 'oppurtunity',
+      category: 'opportunity',
       column_header: 'DEEP%',
       csv_header: 'Percentage of Targets Traveling >= 20 Air Yards',
       player_value_path: 'stats.dptrg_pct',
@@ -828,7 +828,7 @@ function PlayerFields({ week, state }) {
       percentile_field: 'dptrg_pct'
     },
     'stats._ayptrg': {
-      category: 'oppurtunity',
+      category: 'opportunity',
       column_header: 'DOT',
       csv_header: 'Depth Of Target',
       player_value_path: 'stats._ayptrg',
@@ -836,7 +836,7 @@ function PlayerFields({ week, state }) {
       percentile_field: '_ayptrg'
     },
     'stats.rdot': {
-      category: 'oppurtunity',
+      category: 'opportunity',
       column_header: 'AY',
       csv_header: 'Air Yards',
       player_value_path: 'stats.rdot',
@@ -844,7 +844,7 @@ function PlayerFields({ week, state }) {
       percentile_field: 'rdot'
     },
     'stats._stray': {
-      category: 'oppurtunity',
+      category: 'opportunity',
       column_header: 'AY%',
       csv_header: "Share of Team's Air Yards",
       player_value_path: 'stats._stray',
@@ -852,7 +852,7 @@ function PlayerFields({ week, state }) {
       percentile_field: '_stray'
     },
     'stats._sttrg': {
-      category: 'oppurtunity',
+      category: 'opportunity',
       column_header: 'TAR%',
       csv_header: "Share of Team's Targets",
       player_value_path: 'stats._sttrg',
@@ -860,7 +860,7 @@ function PlayerFields({ week, state }) {
       percentile_field: '_sttrg'
     },
     'stats._wopr': {
-      category: 'oppurtunity',
+      category: 'opportunity',
       column_header: 'WOPR',
       csv_header: 'Weighted Opportunity Rating',
       player_value_path: 'stats._wopr',

@@ -821,7 +821,7 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should create a query with prospect columns, weighted oppurtunity, and oppurtunity share', () => {
+  it('should create a query with prospect columns, weighted opportunity, and opportunity share', () => {
     const { query, data_view_metadata } = get_data_view_results_query({
       columns: [
         {

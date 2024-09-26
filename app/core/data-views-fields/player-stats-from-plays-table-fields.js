@@ -273,14 +273,14 @@ export default {
     }),
   player_weighted_opportunity_from_plays: offensive_player_from_play_field({
     column_title: 'Weighted Opportunity (By Play)',
-    column_groups: [COLUMN_GROUPS.OPPURTUNITY],
+    column_groups: [COLUMN_GROUPS.OPPORTUNITY],
     header_label: 'WO',
     player_value_path: 'weighted_opportunity_from_plays',
     fixed: 2
   }),
   player_high_value_touches_from_plays: offensive_player_from_play_field({
     column_title: 'High Value Touches (HVT) (By Play)',
-    column_groups: [COLUMN_GROUPS.RUSHING, COLUMN_GROUPS.OPPURTUNITY],
+    column_groups: [COLUMN_GROUPS.RUSHING, COLUMN_GROUPS.OPPORTUNITY],
     header_label: 'HVT',
     player_value_path: 'high_value_touches_from_plays'
   }),
@@ -307,7 +307,7 @@ export default {
   }),
   player_opportunity_share_from_plays: offensive_player_from_share_field({
     column_title: 'Share of Team Opportunities (By Play)',
-    column_groups: [COLUMN_GROUPS.OPPURTUNITY],
+    column_groups: [COLUMN_GROUPS.OPPORTUNITY],
     header_label: 'OPP%',
     player_value_path: 'opportunity_share_from_plays',
     fixed: 1
