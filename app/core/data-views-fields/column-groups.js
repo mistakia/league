@@ -16,6 +16,7 @@ const COLUMN_GROUPS = {
   RANKINGS_ADP: { priority: 1 },
   PRACTICE: { priority: 1 },
   NFL_GAME: { priority: 1 },
+  DVOA: { priority: 1 },
   NFL: { priority: 2 },
   NGS: { priority: 2 },
   SEASON_PROPS: { priority: 2 },
