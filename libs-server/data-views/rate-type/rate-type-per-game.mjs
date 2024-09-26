@@ -68,8 +68,13 @@ export const get_per_game_cte_table_name = ({
 
   const prefix = is_team ? 'team' : 'player'
 
+  const matchup_opponent_type = params.matchup_opponent_type || null
+  const matchup_opponent_suffix = matchup_opponent_type
+    ? `_${matchup_opponent_type}`
+    : ''
+
   return get_table_hash(
-    `${prefix}_games_played_years_${all_years.join('_')}_weeks_${week.join('_')}_career_year_${career_year.join('_')}_career_game_${career_game.join('_')}`
+    `${prefix}_games_played${matchup_opponent_suffix}_years_${all_years.join('_')}_weeks_${week.join('_')}_career_year_${career_year.join('_')}_career_game_${career_game.join('_')}`
   )
 }
 
