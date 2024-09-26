@@ -21,6 +21,11 @@ export const data_views_actions = {
     }
   }),
 
+  RESET_DATA_VIEW_CACHE: 'RESET_DATA_VIEW_CACHE',
+  reset_data_view_cache: () => ({
+    type: data_views_actions.RESET_DATA_VIEW_CACHE
+  }),
+
   DELETE_DATA_VIEW: 'DELETE_DATA_VIEW',
   delete_data_view: (data_view_id) => ({
     type: data_views_actions.DELETE_DATA_VIEW,
