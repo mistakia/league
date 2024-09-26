@@ -23,6 +23,7 @@ import game_column_definitions from './game-column-definitions.mjs'
 import player_snaps_column_definitions from './player-snaps-column-definitions.mjs'
 import player_routes_column_definitions from './player-routes-column-definitions.mjs'
 import player_team_column_definition from './player-team-column-definition.mjs'
+import team_dvoa_column_definitions from './team-dvoa-column-definitions.mjs'
 
 const player_league_roster_status_select = `CASE WHEN rosters_players.slot = ${constants.slots.IR} THEN 'injured_reserve' WHEN rosters_players.slot = ${constants.slots.PS} THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END`
 
@@ -49,6 +50,7 @@ export default {
   ...player_snaps_column_definitions,
   ...player_routes_column_definitions,
   ...player_team_column_definition,
+  ...team_dvoa_column_definitions,
 
   player_league_roster_status: {
     table_name: 'rosters_players',

@@ -6,6 +6,7 @@ import xlsx from 'node-xlsx'
 import { is_main, report_job } from '#libs-server'
 import db from '#db'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { fixTeam } from '#libs-shared'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-dvoa-sheets')
@@ -22,45 +23,45 @@ const process_team_def_vs_rec = async (worksheet, { dry_run, timestamp }) => {
       return {
         year: row[0],
         week: row[1],
-        team: row[2],
+        nfl_team: fixTeam(row[2]),
         team_unit: 'DEFENSE',
-        pass_rank: row[4],
-        pass_dvoa_wr1: row[5],
-        pass_rank_wr1: row[6],
+        pass_dvoa_rank: row[4],
+        pass_wr1_dvoa: row[5],
+        pass_wr1_dvoa_rank: row[6],
         pass_points_allowed_per_game_wr1: row[7],
         pass_yards_allowed_per_game_wr1: row[8],
-        pass_dvoa_wr2: row[9],
-        pass_rank_wr2: row[10],
+        pass_wr2_dvoa: row[9],
+        pass_wr2_dvoa_rank: row[10],
         pass_points_allowed_per_game_wr2: row[11],
         pass_yards_allowed_per_game_wr2: row[12],
-        pass_dvoa_wr3: row[13],
-        pass_rank_wr3: row[14],
+        pass_wr3_dvoa: row[13],
+        pass_wr3_dvoa_rank: row[14],
         pass_points_allowed_per_game_wr3: row[15],
         pass_yards_allowed_per_game_wr3: row[16],
-        pass_dvoa_te: row[17],
-        pass_rank_te: row[18],
+        pass_te_dvoa: row[17],
+        pass_te_dvoa_rank: row[18],
         pass_points_allowed_per_game_te: row[19],
         pass_yards_allowed_per_game_te: row[20],
-        pass_dvoa_rb: row[21],
-        pass_rank_rb: row[22],
+        pass_rb_dvoa: row[21],
+        pass_rb_dvoa_rank: row[22],
         pass_points_allowed_per_game_rb: row[23],
         pass_yards_allowed_per_game_rb: row[24],
-        pass_dvoa_left: row[25],
-        pass_rank_left: row[26],
-        pass_dvoa_middle: row[27],
-        pass_rank_middle: row[28],
-        pass_dvoa_right: row[29],
-        pass_rank_right: row[30],
-        pass_dvoa_deep: row[31],
-        pass_rank_deep: row[32],
-        pass_dvoa_short: row[33],
-        pass_rank_short: row[34],
-        pass_dvoa_deep_left: row[35],
-        pass_dvoa_deep_middle: row[36],
-        pass_dvoa_deep_right: row[37],
-        pass_dvoa_short_left: row[38],
-        pass_dvoa_short_middle: row[39],
-        pass_dvoa_short_right: row[40],
+        pass_left_dvoa: row[25],
+        pass_left_dvoa_rank: row[26],
+        pass_middle_dvoa: row[27],
+        pass_middle_dvoa_rank: row[28],
+        pass_right_dvoa: row[29],
+        pass_right_dvoa_rank: row[30],
+        pass_deep_dvoa: row[31],
+        pass_deep_dvoa_rank: row[32],
+        pass_short_dvoa: row[33],
+        pass_short_dvoa_rank: row[34],
+        pass_deep_left_dvoa: row[35],
+        pass_deep_middle_dvoa: row[36],
+        pass_deep_right_dvoa: row[37],
+        pass_short_left_dvoa: row[38],
+        pass_short_middle_dvoa: row[39],
+        pass_short_right_dvoa: row[40],
         timestamp
       }
     })
@@ -72,12 +73,12 @@ const process_team_def_vs_rec = async (worksheet, { dry_run, timestamp }) => {
   if (!dry_run && formatted_data.length) {
     await db('dvoa_team_unit_seasonlogs_index')
       .insert(formatted_data)
-      .onConflict(['year', 'team', 'team_unit'])
+      .onConflict(['year', 'nfl_team', 'team_unit'])
       .merge()
 
     await db('dvoa_team_unit_seasonlogs_history')
       .insert(formatted_data)
-      .onConflict(['year', 'team', 'team_unit', 'week'])
+      .onConflict(['year', 'nfl_team', 'team_unit', 'week'])
       .merge()
   }
 }
@@ -96,7 +97,7 @@ const process_team_directional_rushing = async (
       return {
         year: row[0],
         week: row[1],
-        team: row[2],
+        nfl_team: fixTeam(row[2]),
         team_unit: row[3] === 'O' ? 'OFFENSE' : 'DEFENSE',
         team_adjusted_line_yards: row[4],
         team_adjusted_line_yards_rank: row[5],
@@ -128,12 +129,12 @@ const process_team_directional_rushing = async (
   if (!dry_run && formatted_data.length) {
     await db('dvoa_team_unit_seasonlogs_index')
       .insert(formatted_data)
-      .onConflict(['year', 'team', 'team_unit'])
+      .onConflict(['year', 'nfl_team', 'team_unit'])
       .merge()
 
     await db('dvoa_team_unit_seasonlogs_history')
       .insert(formatted_data)
-      .onConflict(['year', 'team', 'team_unit', 'week'])
+      .onConflict(['year', 'nfl_team', 'team_unit', 'week'])
       .merge()
   }
 }
@@ -149,7 +150,7 @@ const process_team_line_yards = async (worksheet, { dry_run, timestamp }) => {
       return {
         year: row[0],
         week: row[1],
-        team: row[2],
+        nfl_team: fixTeam(row[2]),
         team_unit: row[3] === 'O' ? 'OFFENSE' : 'DEFENSE',
         team_adjusted_line_yards: row[4],
         team_adjusted_line_yards_rank: row[5],
@@ -177,12 +178,12 @@ const process_team_line_yards = async (worksheet, { dry_run, timestamp }) => {
   if (!dry_run && formatted_data.length) {
     await db('dvoa_team_unit_seasonlogs_index')
       .insert(formatted_data)
-      .onConflict(['year', 'team', 'team_unit'])
+      .onConflict(['year', 'nfl_team', 'team_unit'])
       .merge()
 
     await db('dvoa_team_unit_seasonlogs_history')
       .insert(formatted_data)
-      .onConflict(['year', 'team', 'team_unit', 'week'])
+      .onConflict(['year', 'nfl_team', 'team_unit', 'week'])
       .merge()
   }
 }
@@ -213,12 +214,12 @@ const process_team_run_pass_week = async (
     }
 
     if (row[0] && row[0] !== 'NFL') {
-      const team = row[0]
+      const nfl_team = fixTeam(row[0])
       for (let week = 1; week <= week_count; week++) {
         const dvoa_value = row[week]
         if (dvoa_value !== '') {
           const entry = {
-            team,
+            nfl_team,
             week,
             timestamp,
             year
@@ -235,7 +236,7 @@ const process_team_run_pass_week = async (
           }
 
           const existing_entry = formatted_data.find(
-            (item) => item.team === team && item.week === week
+            (item) => item.nfl_team === nfl_team && item.week === week
           )
 
           if (existing_entry) {
@@ -255,7 +256,7 @@ const process_team_run_pass_week = async (
   if (!dry_run && formatted_data.length) {
     await db('dvoa_team_gamelogs')
       .insert(formatted_data)
-      .onConflict(['year', 'team', 'week'])
+      .onConflict(['year', 'nfl_team', 'week'])
       .merge()
   }
 }
@@ -271,7 +272,7 @@ const process_team_home_road = async (worksheet, { dry_run, timestamp }) => {
       return {
         year: row[0],
         week: row[1],
-        team: row[2],
+        nfl_team: fixTeam(row[2]),
         team_unit: row[3] === 'O' ? 'OFFENSE' : 'DEFENSE',
         home_dvoa: row[4],
         home_dvoa_rank: row[5],
@@ -290,12 +291,12 @@ const process_team_home_road = async (worksheet, { dry_run, timestamp }) => {
   if (!dry_run && formatted_data.length) {
     await db('dvoa_team_unit_seasonlogs_index')
       .insert(formatted_data)
-      .onConflict(['year', 'team', 'team_unit'])
+      .onConflict(['year', 'nfl_team', 'team_unit'])
       .merge()
 
     await db('dvoa_team_unit_seasonlogs_history')
       .insert(formatted_data)
-      .onConflict(['year', 'team', 'team_unit', 'week'])
+      .onConflict(['year', 'nfl_team', 'team_unit', 'week'])
       .merge()
   }
 }
@@ -311,28 +312,28 @@ const process_team_down_dist = async (worksheet, { dry_run, timestamp }) => {
       return {
         year: row[0],
         week: row[1],
-        team: row[2],
+        nfl_team: fixTeam(row[2]),
         team_unit: row[3] === 'O' ? 'OFFENSE' : 'DEFENSE',
         all_first_down_dvoa: row[4],
-        all_first_down_rank: row[5],
+        all_first_down_dvoa_rank: row[5],
         second_and_short_dvoa: row[6],
-        second_and_short_rank: row[7],
+        second_and_short_dvoa_rank: row[7],
         second_and_mid_dvoa: row[8],
-        second_and_mid_rank: row[9],
+        second_and_mid_dvoa_rank: row[9],
         second_and_long_dvoa: row[10],
-        second_and_long_rank: row[11],
+        second_and_long_dvoa_rank: row[11],
         all_second_down_dvoa: row[12],
-        all_second_down_rank: row[13],
+        all_second_down_dvoa_rank: row[13],
         third_and_short_dvoa: row[14],
-        third_and_short_rank: row[15],
+        third_and_short_dvoa_rank: row[15],
         third_and_mid_dvoa: row[16],
-        third_and_mid_rank: row[17],
+        third_and_mid_dvoa_rank: row[17],
         third_and_long_dvoa: row[18],
-        third_and_long_rank: row[19],
+        third_and_long_dvoa_rank: row[19],
         all_third_down_dvoa: row[20],
-        all_third_down_rank: row[21],
+        all_third_down_dvoa_rank: row[21],
         all_plays_dvoa: row[22],
-        all_plays_rank: row[23],
+        all_plays_dvoa_rank: row[23],
         timestamp
       }
     })
@@ -344,12 +345,12 @@ const process_team_down_dist = async (worksheet, { dry_run, timestamp }) => {
   if (!dry_run && formatted_data.length) {
     await db('dvoa_team_unit_seasonlogs_index')
       .insert(formatted_data)
-      .onConflict(['year', 'team', 'team_unit'])
+      .onConflict(['year', 'nfl_team', 'team_unit'])
       .merge()
 
     await db('dvoa_team_unit_seasonlogs_history')
       .insert(formatted_data)
-      .onConflict(['year', 'team', 'team_unit', 'week'])
+      .onConflict(['year', 'nfl_team', 'team_unit', 'week'])
       .merge()
   }
 }
@@ -365,24 +366,24 @@ const process_team_by_zone = async (worksheet, { dry_run, timestamp }) => {
       return {
         year: row[0],
         week: row[1],
-        team: row[2],
+        nfl_team: fixTeam(row[2]),
         team_unit: row[3] === 'O' ? 'OFFENSE' : 'DEFENSE',
         back_zone_dvoa: row[4],
-        back_zone_rank: row[5],
+        back_zone_dvoa_rank: row[5],
         deep_zone_dvoa: row[6],
-        deep_zone_rank: row[7],
+        deep_zone_dvoa_rank: row[7],
         front_zone_dvoa: row[8],
-        front_zone_rank: row[9],
+        front_zone_dvoa_rank: row[9],
         mid_zone_dvoa: row[10],
-        mid_zone_rank: row[11],
+        mid_zone_dvoa_rank: row[11],
         red_zone_dvoa: row[12],
-        red_zone_rank: row[13],
+        red_zone_dvoa_rank: row[13],
         red_zone_pass_dvoa: row[14],
-        red_zone_pass_rank: row[15],
+        red_zone_pass_dvoa_rank: row[15],
         red_zone_rush_dvoa: row[16],
-        red_zone_rush_rank: row[17],
+        red_zone_rush_dvoa_rank: row[17],
         goal_to_go_dvoa: row[18],
-        goal_to_go_rank: row[19],
+        goal_to_go_dvoa_rank: row[19],
         total_dvoa: row[20],
         total_dvoa_rank: row[21],
         timestamp
@@ -396,12 +397,12 @@ const process_team_by_zone = async (worksheet, { dry_run, timestamp }) => {
   if (!dry_run && formatted_data.length) {
     await db('dvoa_team_unit_seasonlogs_index')
       .insert(formatted_data)
-      .onConflict(['year', 'team', 'team_unit'])
+      .onConflict(['year', 'nfl_team', 'team_unit'])
       .merge()
 
     await db('dvoa_team_unit_seasonlogs_history')
       .insert(formatted_data)
-      .onConflict(['year', 'team', 'team_unit', 'week'])
+      .onConflict(['year', 'nfl_team', 'team_unit', 'week'])
       .merge()
   }
 }
@@ -417,18 +418,18 @@ const process_team_score_gap = async (worksheet, { dry_run, timestamp }) => {
       return {
         year: row[0],
         week: row[1],
-        team: row[2],
+        nfl_team: fixTeam(row[2]),
         team_unit: row[3] === 'O' ? 'OFFENSE' : 'DEFENSE',
         losing_9_plus_dvoa: row[4],
-        losing_9_plus_rank: row[5],
+        losing_9_plus_dvoa_rank: row[5],
         tie_or_losing_1_to_8_dvoa: row[6],
-        tie_or_losing_1_to_8_rank: row[7],
+        tie_or_losing_1_to_8_dvoa_rank: row[7],
         winning_1_to_8_dvoa: row[8],
-        winning_1_to_8_rank: row[9],
+        winning_1_to_8_dvoa_rank: row[9],
         winning_9_plus_dvoa: row[10],
-        winning_9_plus_rank: row[11],
+        winning_9_plus_dvoa_rank: row[11],
         late_and_close_dvoa: row[12],
-        late_and_close_rank: row[13],
+        late_and_close_dvoa_rank: row[13],
         total_dvoa: row[14],
         total_dvoa_rank: row[15],
         timestamp
@@ -442,12 +443,12 @@ const process_team_score_gap = async (worksheet, { dry_run, timestamp }) => {
   if (!dry_run && formatted_data.length) {
     await db('dvoa_team_unit_seasonlogs_index')
       .insert(formatted_data)
-      .onConflict(['year', 'team', 'team_unit'])
+      .onConflict(['year', 'nfl_team', 'team_unit'])
       .merge()
 
     await db('dvoa_team_unit_seasonlogs_history')
       .insert(formatted_data)
-      .onConflict(['year', 'team', 'team_unit', 'week'])
+      .onConflict(['year', 'nfl_team', 'team_unit', 'week'])
       .merge()
   }
 }
@@ -463,22 +464,22 @@ const process_team_qtr = async (worksheet, { dry_run, timestamp }) => {
       return {
         year: row[0],
         week: row[1],
-        team: row[2],
+        nfl_team: fixTeam(row[2]),
         team_unit: row[3] === 'O' ? 'OFFENSE' : 'DEFENSE',
         first_quarter_dvoa: row[4],
-        first_quarter_rank: row[5],
+        first_quarter_dvoa_rank: row[5],
         second_quarter_dvoa: row[6],
-        second_quarter_rank: row[7],
+        second_quarter_dvoa_rank: row[7],
         third_quarter_dvoa: row[8],
-        third_quarter_rank: row[9],
+        third_quarter_dvoa_rank: row[9],
         fourth_quarter_ot_dvoa: row[10],
-        fourth_quarter_ot_rank: row[11],
+        fourth_quarter_ot_dvoa_rank: row[11],
         first_half_dvoa: row[12],
-        first_half_rank: row[13],
+        first_half_dvoa_rank: row[13],
         second_half_dvoa: row[14],
-        second_half_rank: row[15],
+        second_half_dvoa_rank: row[15],
         late_and_close_dvoa: row[16],
-        late_and_close_rank: row[17],
+        late_and_close_dvoa_rank: row[17],
         total_dvoa: row[18],
         total_dvoa_rank: row[19],
         timestamp
@@ -492,12 +493,12 @@ const process_team_qtr = async (worksheet, { dry_run, timestamp }) => {
   if (!dry_run && formatted_data.length) {
     await db('dvoa_team_unit_seasonlogs_index')
       .insert(formatted_data)
-      .onConflict(['year', 'team', 'team_unit'])
+      .onConflict(['year', 'nfl_team', 'team_unit'])
       .merge()
 
     await db('dvoa_team_unit_seasonlogs_history')
       .insert(formatted_data)
-      .onConflict(['year', 'team', 'team_unit', 'week'])
+      .onConflict(['year', 'nfl_team', 'team_unit', 'week'])
       .merge()
   }
 }
@@ -514,7 +515,7 @@ const process_qb_pass_by_dir = async (worksheet, { dry_run, timestamp }) => {
       player: row[2],
       gsis_id: row[3],
       full_name: row[4],
-      team: row[5],
+      nfl_team: fixTeam(row[5]),
       pass_left_dyar: row[6],
       pass_left_dvoa: row[7],
       pass_left_attempts: row[8],
@@ -559,7 +560,7 @@ const process_shotgun = async (worksheet, { dry_run, timestamp }) => {
       return {
         year: row[0],
         week: row[1],
-        team: row[2],
+        nfl_team: fixTeam(row[2]),
         team_unit: row[3] === 'O' ? 'OFFENSE' : 'DEFENSE',
         shotgun_dvoa: row[4],
         shotgun_dvoa_rank: row[5],
@@ -569,8 +570,8 @@ const process_shotgun = async (worksheet, { dry_run, timestamp }) => {
         not_shotgun_dvoa_rank: row[9],
         not_shotgun_yards: row[10],
         not_shotgun_yards_rank: row[11],
-        shotgun_dvoa_difference: row[12],
-        shotgun_dvoa_difference_rank: row[13],
+        shotgun_difference_dvoa: row[12],
+        shotgun_difference_dvoa_rank: row[13],
         shotgun_yards_difference: row[14],
         shotgun_yards_difference_rank: row[15],
         shotgun_percentage: row[16],
@@ -586,12 +587,12 @@ const process_shotgun = async (worksheet, { dry_run, timestamp }) => {
   if (!dry_run && formatted_data.length) {
     await db('dvoa_team_unit_seasonlogs_index')
       .insert(formatted_data)
-      .onConflict(['year', 'team', 'team_unit'])
+      .onConflict(['year', 'nfl_team', 'team_unit'])
       .merge()
 
     await db('dvoa_team_unit_seasonlogs_history')
       .insert(formatted_data)
-      .onConflict(['year', 'team', 'team_unit', 'week'])
+      .onConflict(['year', 'nfl_team', 'team_unit', 'week'])
       .merge()
   }
 }
@@ -607,32 +608,32 @@ const process_team_down_play = async (worksheet, { dry_run, timestamp }) => {
       return {
         year: row[0],
         week: row[1],
-        team: row[2],
+        nfl_team: fixTeam(row[2]),
         team_unit: row[3] === 'O' ? 'OFFENSE' : 'DEFENSE',
         first_down_pass_dvoa: row[4],
-        first_down_pass_rank: row[5],
+        first_down_pass_dvoa_rank: row[5],
         first_down_rush_dvoa: row[6],
-        first_down_rush_rank: row[7],
+        first_down_rush_dvoa_rank: row[7],
         first_down_all_dvoa: row[8],
-        first_down_all_rank: row[9],
+        first_down_all_dvoa_rank: row[9],
         second_down_pass_dvoa: row[10],
-        second_down_pass_rank: row[11],
+        second_down_pass_dvoa_rank: row[11],
         second_down_rush_dvoa: row[12],
-        second_down_rush_rank: row[13],
+        second_down_rush_dvoa_rank: row[13],
         second_down_all_dvoa: row[14],
-        second_down_all_rank: row[15],
+        second_down_all_dvoa_rank: row[15],
         third_fourth_down_pass_dvoa: row[16],
-        third_fourth_down_pass_rank: row[17],
+        third_fourth_down_pass_dvoa_rank: row[17],
         third_fourth_down_rush_dvoa: row[18],
-        third_fourth_down_rush_rank: row[19],
+        third_fourth_down_rush_dvoa_rank: row[19],
         third_fourth_down_all_dvoa: row[20],
-        third_fourth_down_all_rank: row[21],
+        third_fourth_down_all_dvoa_rank: row[21],
         all_downs_pass_dvoa: row[22],
-        all_downs_pass_rank: row[23],
+        all_downs_pass_dvoa_rank: row[23],
         all_downs_rush_dvoa: row[24],
-        all_downs_rush_rank: row[25],
+        all_downs_rush_dvoa_rank: row[25],
         all_downs_dvoa: row[26],
-        all_downs_rank: row[27],
+        all_downs_dvoa_rank: row[27],
         timestamp
       }
     })
@@ -644,12 +645,12 @@ const process_team_down_play = async (worksheet, { dry_run, timestamp }) => {
   if (!dry_run && formatted_data.length) {
     await db('dvoa_team_unit_seasonlogs_index')
       .insert(formatted_data)
-      .onConflict(['year', 'team', 'team_unit'])
+      .onConflict(['year', 'nfl_team', 'team_unit'])
       .merge()
 
     await db('dvoa_team_unit_seasonlogs_history')
       .insert(formatted_data)
-      .onConflict(['year', 'team', 'team_unit', 'week'])
+      .onConflict(['year', 'nfl_team', 'team_unit', 'week'])
       .merge()
   }
 }
@@ -679,12 +680,12 @@ const process_week_by_week = async (
     }
 
     if (row[0] && row[0] !== 'NFL') {
-      const team = row[0]
+      const nfl_team = fixTeam(row[0])
       for (let week = 1; week <= week_count; week++) {
         const dvoa_value = row[week]
         if (dvoa_value !== '') {
           const entry = {
-            team,
+            nfl_team,
             week,
             year,
             timestamp
@@ -701,7 +702,7 @@ const process_week_by_week = async (
           }
 
           const existing_entry = formatted_data.find(
-            (item) => item.team === team && item.week === week
+            (item) => item.nfl_team === nfl_team && item.week === week
           )
 
           if (existing_entry) {
@@ -721,7 +722,7 @@ const process_week_by_week = async (
   if (!dry_run && formatted_data.length) {
     await db('dvoa_team_gamelogs')
       .insert(formatted_data)
-      .onConflict(['year', 'team', 'week'])
+      .onConflict(['year', 'nfl_team', 'week'])
       .merge()
   }
 }
@@ -743,7 +744,7 @@ const process_special_dvoa = async (worksheet, { dry_run, timestamp }) => {
         year: row[0],
         week: row[1],
         special_teams_dvoa_rank: row[2],
-        team: row[3],
+        nfl_team: fixTeam(row[3]),
         special_teams_dvoa: row[4],
         last_week_special_teams_dvoa: row[5],
         special_teams_weighted_dvoa: row[6],
@@ -771,12 +772,12 @@ const process_special_dvoa = async (worksheet, { dry_run, timestamp }) => {
   if (!dry_run && formatted_data.length) {
     await db('dvoa_team_seasonlogs_index')
       .insert(formatted_data)
-      .onConflict(['year', 'team'])
+      .onConflict(['year', 'nfl_team'])
       .merge()
 
     await db('dvoa_team_seasonlogs_history')
       .insert(formatted_data)
-      .onConflict(['year', 'team', 'week'])
+      .onConflict(['year', 'nfl_team', 'week'])
       .merge()
   }
 }
@@ -793,7 +794,7 @@ const process_defense_dvoa = async (worksheet, { dry_run, timestamp }) => {
         year: row[0],
         week: row[1],
         defense_dvoa_rank: row[2],
-        team: row[3],
+        nfl_team: fixTeam(row[3]),
         defense_dvoa: row[4],
         last_week_defense_dvoa: row[5],
         defense_weighted_dvoa: row[6],
@@ -820,12 +821,12 @@ const process_defense_dvoa = async (worksheet, { dry_run, timestamp }) => {
   if (!dry_run && formatted_data.length) {
     await db('dvoa_team_seasonlogs_index')
       .insert(formatted_data)
-      .onConflict(['year', 'team'])
+      .onConflict(['year', 'nfl_team'])
       .merge()
 
     await db('dvoa_team_seasonlogs_history')
       .insert(formatted_data)
-      .onConflict(['year', 'team', 'week'])
+      .onConflict(['year', 'nfl_team', 'week'])
       .merge()
   }
 }
@@ -842,7 +843,7 @@ const process_offense_dvoa = async (worksheet, { dry_run, timestamp }) => {
         year: row[0],
         week: row[1],
         offense_dvoa_rank: row[2],
-        team: row[3],
+        nfl_team: fixTeam(row[3]),
         offense_dvoa: row[4],
         last_week_offense_dvoa: row[5],
         offense_weighted_dvoa: row[6],
@@ -869,12 +870,12 @@ const process_offense_dvoa = async (worksheet, { dry_run, timestamp }) => {
   if (!dry_run && formatted_data.length) {
     await db('dvoa_team_seasonlogs_index')
       .insert(formatted_data)
-      .onConflict(['year', 'team'])
+      .onConflict(['year', 'nfl_team'])
       .merge()
 
     await db('dvoa_team_seasonlogs_history')
       .insert(formatted_data)
-      .onConflict(['year', 'team', 'week'])
+      .onConflict(['year', 'nfl_team', 'week'])
       .merge()
   }
 }
@@ -891,7 +892,7 @@ const process_total_dvoa = async (worksheet, { dry_run, timestamp }) => {
         year: row[0],
         week: row[1],
         total_dvoa_rank: row[2],
-        team: row[3],
+        nfl_team: fixTeam(row[3]),
         total_dvoa: row[4],
         last_week_dvoa: row[5],
         non_adjusted_total_voa: row[6],
@@ -926,12 +927,12 @@ const process_total_dvoa = async (worksheet, { dry_run, timestamp }) => {
   if (!dry_run && formatted_data.length) {
     await db('dvoa_team_seasonlogs_index')
       .insert(formatted_data)
-      .onConflict(['year', 'team'])
+      .onConflict(['year', 'nfl_team'])
       .merge()
 
     await db('dvoa_team_seasonlogs_history')
       .insert(formatted_data)
-      .onConflict(['year', 'team', 'week'])
+      .onConflict(['year', 'nfl_team', 'week'])
       .merge()
   }
 }
