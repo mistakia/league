@@ -187,7 +187,10 @@ const process_team_line_yards = async (worksheet, { dry_run, timestamp }) => {
   }
 }
 
-const process_team_run_pass_week = (worksheet, { dry_run }) => {
+const process_team_run_pass_week = async (
+  worksheet,
+  { dry_run, timestamp, year }
+) => {
   log(`Processing teamRunPassWeek worksheet`)
 
   const data = worksheet.data
@@ -216,7 +219,9 @@ const process_team_run_pass_week = (worksheet, { dry_run }) => {
         if (dvoa_value !== '') {
           const entry = {
             team,
-            week
+            week,
+            timestamp,
+            year
           }
 
           if (current_category === 'PASSING OFFENSE') {
@@ -243,8 +248,15 @@ const process_team_run_pass_week = (worksheet, { dry_run }) => {
     }
   }
 
-  if (!dry_run) {
-    log('Inserting data into database (not implemented)')
+  if (dry_run) {
+    log(formatted_data[0])
+  }
+
+  if (!dry_run && formatted_data.length) {
+    await db('dvoa_team_gamelogs')
+      .insert(formatted_data)
+      .onConflict(['year', 'team', 'week'])
+      .merge()
   }
 }
 
@@ -962,7 +974,11 @@ const import_dvoa_sheets = async ({ dry_run = false, filepath } = {}) => {
         // skip
         break
       case 'teamRunPassWeek':
-        await process_team_run_pass_week(worksheet, { dry_run, timestamp })
+        await process_team_run_pass_week(worksheet, {
+          dry_run,
+          timestamp,
+          year
+        })
         break
       case 'teamHomeRoad':
         await process_team_home_road(worksheet, { dry_run, timestamp })
