@@ -12,16 +12,20 @@ class DataViewQueue {
     log('DataViewQueue initialized')
   }
 
-  async add_request({ ws, request_id, params, user_id }) {
+  async add_request({ ws, request_id, params, user_id, ignore_cache = false }) {
     log('Adding request', { request_id, user_id })
     const cache_key = `/data-views/${get_data_view_hash(params)}`
     const cached_result = await redis_cache.get(cache_key)
 
-    if (cached_result) {
+    if (cached_result && !ignore_cache) {
       log('Cache hit', { request_id })
       this.send_cached_result({ ws, request_id, result: cached_result })
     } else {
-      log('Cache miss', { request_id })
+      if (ignore_cache) {
+        log('Ignoring cache', { request_id })
+      } else {
+        log('Cache miss', { request_id })
+      }
       if (!user_id) {
         this.handle_non_auth_request({ ws, request_id, params, cache_key })
       } else {
@@ -185,9 +189,15 @@ export default function handle_data_view_socket(wss) {
       const message = JSON.parse(msg)
 
       if (message.type === 'DATA_VIEW_REQUEST') {
-        const { request_id, params } = message.payload
+        const { request_id, params, ignore_cache } = message.payload
         log('Received DATA_VIEW_REQUEST', { request_id, user_id })
-        data_view_queue.add_request({ ws, request_id, params, user_id })
+        data_view_queue.add_request({
+          ws,
+          request_id,
+          params,
+          user_id,
+          ignore_cache
+        })
       }
     })
 
