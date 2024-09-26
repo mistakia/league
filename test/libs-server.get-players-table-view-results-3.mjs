@@ -65,4 +65,35 @@ describe('LIBS SERVER get_data_view_results', () => {
     const expected_query = `with "base_years" as (SELECT unnest(ARRAY[2020,2021,2022,2023,2024]) as year), "player_years" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), "td6be67d9d166e9f60060dd53d9c6596e" as (select "player_gamelogs"."pid", count(*) as "rate_type_total_count", array_agg(distinct player_gamelogs.tm) as teams, "nfl_games"."year" from "player_gamelogs" left join "nfl_games" on "nfl_games"."esbid" = "player_gamelogs"."esbid" where "nfl_games"."seas_type" = 'REG' and "player_gamelogs"."active" = true group by "nfl_games"."year", "player_gamelogs"."pid"), "t4e422f08bd5e7b8923d45ecc3da571f1" as (select COALESCE(trg_pid) as pid, "nfl_plays"."year", SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END) as rec_yds_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2020, 2021, 2022, 2023, 2024) group by "nfl_plays"."year", COALESCE(trg_pid)) select "player"."pid", td6be67d9d166e9f60060dd53d9c6596e.teams as player_nfl_teams_0, "t4e422f08bd5e7b8923d45ecc3da571f1"."rec_yds_from_plays" AS "rec_yds_from_plays_0", "player_years"."year", "player"."pos" from "player_years" inner join "player" on "player"."pid" = "player_years"."pid" left join "td6be67d9d166e9f60060dd53d9c6596e" on "td6be67d9d166e9f60060dd53d9c6596e"."pid" = "player"."pid" and "td6be67d9d166e9f60060dd53d9c6596e"."year" = "player_years"."year" left join "t4e422f08bd5e7b8923d45ecc3da571f1" on "t4e422f08bd5e7b8923d45ecc3da571f1"."pid" = "player"."pid" and t4e422f08bd5e7b8923d45ecc3da571f1.year = player_years.year and t4e422f08bd5e7b8923d45ecc3da571f1.year IN (2020,2021,2022,2023,2024) where td6be67d9d166e9f60060dd53d9c6596e.teams::text[] && ARRAY['CIN']::text[] group by td6be67d9d166e9f60060dd53d9c6596e.teams, "t4e422f08bd5e7b8923d45ecc3da571f1"."rec_yds_from_plays", "player_years"."year", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 3 DESC NULLS LAST, "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
   })
+
+  it('team dova', () => {
+    const { query } = get_data_view_results_query({
+      columns: [
+        {
+          column_id: 'team_unit_adjusted_line_yards',
+          params: {
+            year: [2024],
+            team_unit: ['offense'],
+            matchup_opponent_type: ['current_week_opponent_total']
+          }
+        },
+        {
+          column_id: 'team_unit_dvoa',
+          params: {
+            year: [2024],
+            team_unit: ['defense'],
+            dvoa_type: 'pass_wr3_dvoa'
+          }
+        }
+      ],
+      sort: [
+        {
+          column_id: 'team_unit_adjusted_line_yards',
+          desc: true
+        }
+      ]
+    })
+    const expected_query = `with "current_week_opponents" as (select "h" as "nfl_team", "v" as "opponent" from "public"."nfl_games" where "year" = 2024 and "week" = 4 and "seas_type" = 'REG' union select "v" as "nfl_team", "h" as "opponent" from "public"."nfl_games" where "year" = 2024 and "week" = 4 and "seas_type" = 'REG') select "player"."pid", "t846b41b625d26d4df5280dfbd91f8f1c"."team_adjusted_line_yards" AS "team_adjusted_line_yards_0", t9bdecec612944eb629734ea53f388331.pass_wr3_dvoa, "player"."pos" from "player" inner join "current_week_opponents" on "player"."current_nfl_team" = "current_week_opponents"."nfl_team" left join "dvoa_team_unit_seasonlogs_index" as "t846b41b625d26d4df5280dfbd91f8f1c" on "t846b41b625d26d4df5280dfbd91f8f1c"."nfl_team" = "current_week_opponents"."opponent" and "t846b41b625d26d4df5280dfbd91f8f1c"."year" = 2024 and "t846b41b625d26d4df5280dfbd91f8f1c"."team_unit" = 'OFFENSE' left join "dvoa_team_unit_seasonlogs_index" as "t9bdecec612944eb629734ea53f388331" on "t9bdecec612944eb629734ea53f388331"."nfl_team" = "player"."current_nfl_team" and "t9bdecec612944eb629734ea53f388331"."year" = 2024 and "t9bdecec612944eb629734ea53f388331"."team_unit" = 'DEFENSE' group by "t846b41b625d26d4df5280dfbd91f8f1c"."team_adjusted_line_yards", t9bdecec612944eb629734ea53f388331.pass_wr3_dvoa, "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 2 DESC NULLS LAST, "player"."pid" asc limit 500`
+    compare_queries(query.toString(), expected_query)
+  })
 })
