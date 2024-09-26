@@ -36,7 +36,8 @@ export default function DataViewsPage({
   save_data_view,
   load_data_views,
   user_username,
-  data_view_request
+  data_view_request,
+  reset_data_view_cache
 }) {
   const location = useLocation()
 
@@ -211,6 +212,7 @@ export default function DataViewsPage({
         new_view_prefix_columns={new_prefix_columns}
         shorten_url={shorten_url}
         table_username={user_username}
+        reset_cache={reset_data_view_cache}
       />
     </div>
   )
@@ -238,5 +240,6 @@ DataViewsPage.propTypes = {
   save_data_view: PropTypes.func,
   load_data_views: PropTypes.func,
   user_username: PropTypes.string,
-  data_view_request: PropTypes.object
+  data_view_request: PropTypes.object,
+  reset_data_view_cache: PropTypes.func
 }

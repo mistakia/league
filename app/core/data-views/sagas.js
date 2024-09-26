@@ -14,19 +14,7 @@ import {
 import { data_view_request_actions } from '@core/data-view-request/actions'
 import { notificationActions } from '@core/notifications/actions'
 
-export function* data_view_changed({ payload }) {
-  const { view_change_params = {} } = payload
-  const { view_state_changed, view_metadata_changed } = view_change_params
-
-  if (view_metadata_changed) {
-    yield fork(save_data_view, { payload })
-  }
-
-  if (!view_state_changed) {
-    return
-  }
-
-  const data_view = yield select(get_selected_data_view)
+function* handle_data_view_request({ data_view, ignore_cache = false }) {
   const { columns } = data_view.table_state
 
   if (!columns.length) {
@@ -41,15 +29,34 @@ export function* data_view_changed({ payload }) {
   yield call(send, {
     type: 'DATA_VIEW_REQUEST',
     payload: {
-      // TODO maybe use something unique
       request_id: data_view.view_id,
-      params: opts
+      params: opts,
+      ignore_cache
     }
   })
 
   console.log(`Sending data view request: ${opts.view_id}`)
 
   yield put(data_view_request_actions.data_view_request(opts))
+}
+
+export function* data_view_changed({ payload }) {
+  const { view_change_params = {} } = payload
+  const { view_state_changed, view_metadata_changed } = view_change_params
+
+  if (view_metadata_changed) {
+    yield fork(save_data_view, { payload })
+  }
+
+  if (view_state_changed) {
+    const data_view = yield select(get_selected_data_view)
+    yield call(handle_data_view_request, { data_view })
+  }
+}
+
+export function* reset_data_view_cache() {
+  const data_view = yield select(get_selected_data_view)
+  yield call(handle_data_view_request, { data_view, ignore_cache: true })
 }
 
 export function* save_data_view({ payload }) {
@@ -170,6 +177,13 @@ export function* watch_delete_data_view() {
   yield takeLatest(data_views_actions.DELETE_DATA_VIEW, handle_delete_data_view)
 }
 
+export function* watch_reset_data_view_cache() {
+  yield takeLatest(
+    data_views_actions.RESET_DATA_VIEW_CACHE,
+    reset_data_view_cache
+  )
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -181,5 +195,6 @@ export const data_views_sagas = [
   fork(watch_load_data_views),
   fork(watch_post_data_view_fulfilled),
   fork(watch_delete_data_view),
-  fork(watch_delete_data_view_fulfilled)
+  fork(watch_delete_data_view_fulfilled),
+  fork(watch_reset_data_view_cache)
 ]
