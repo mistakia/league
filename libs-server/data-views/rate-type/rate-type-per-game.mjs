@@ -130,6 +130,11 @@ const add_player_per_game_cte = ({
       cte_query.select('nfl_games.year')
       cte_query.groupBy('nfl_games.year')
     }
+
+    if (split === 'week') {
+      cte_query.select('nfl_games.week')
+      cte_query.groupBy('nfl_games.week')
+    }
   }
 
   cte_query.groupBy('player_gamelogs.pid')
@@ -164,12 +169,20 @@ const add_team_per_game_cte = ({
     if (split === 'year') {
       cte_query.select('nfl_plays.year')
     }
+
+    if (split === 'week') {
+      cte_query.select('nfl_plays.week')
+    }
   }
 
   cte_query.groupBy('nfl_plays.off')
 
   if (splits.includes('year')) {
     cte_query.groupBy('nfl_plays.year')
+  }
+
+  if (splits.includes('week')) {
+    cte_query.groupBy('nfl_plays.week')
   }
 
   players_query.with(rate_type_table_name, cte_query)
@@ -257,6 +270,11 @@ export const join_player_per_game_cte = ({
         }
       }
     }
+
+    // Add week join condition if 'week' split is enabled
+    if (splits.includes('week')) {
+      this.andOn(`${rate_type_table_name}.week`, '=', 'player_years_weeks.week')
+    }
   })
 }
 
@@ -343,6 +361,11 @@ export const join_team_per_game_cte = ({
           this.on(`${rate_type_table_name}.year`, year_split_join_clause)
         }
       }
+    }
+
+    // Add week join condition if 'week' split is enabled
+    if (splits.includes('week')) {
+      this.andOn(`${rate_type_table_name}.week`, '=', 'player_years_weeks.week')
     }
   })
 }
