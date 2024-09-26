@@ -91,9 +91,9 @@ const get_dvoa_column_name = ({ params }) => {
 
 const create_dvoa_team_unit_dvoa_field = () => ({
   ...create_dvoa_team_unit_field('total_dvoa'),
-  main_select: ({ params, table_name }) => {
+  main_select: ({ params, table_name, column_index }) => {
     const column_name = get_dvoa_column_name({ params })
-    return [`${table_name}.${column_name}`]
+    return [`${table_name}.${column_name} as team_unit_dvoa_${column_index}`]
   },
   main_group_by: ({ params, table_name }) => {
     const column_name = get_dvoa_column_name({ params })
