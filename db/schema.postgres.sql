@@ -1412,6 +1412,33 @@ ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pff_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_otc_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_mfl_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2024 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2024_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2023 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2023_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2022 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2022_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2021 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2021_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2020 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2020_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2019 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2019_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2018 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2018_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2017 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2017_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2016 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2016_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2015 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2015_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2014 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2014_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2013 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2013_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2012 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2012_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2011 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2011_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2010 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2010_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2009 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2009_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2008 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2008_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2007 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2007_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2006 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2006_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2005 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2005_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2004 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2004_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2003 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2003_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2002 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2002_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2001 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2001_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2000 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2000_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_gamelogs_default DROP CONSTRAINT IF EXISTS player_gamelogs_default_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_gamelogs DROP CONSTRAINT IF EXISTS player_gamelogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_fleaflicker_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_fanduel_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_draftkings_id_unique;
@@ -2187,9 +2214,7 @@ CREATE TABLE public.dvoa_team_seasonlogs_history (
     defense_weighted_dvoa numeric(5,1),
     defense_weighted_dvoa_rank smallint,
     pass_defense_dvoa numeric(5,1),
-    pass_defense_rank smallint,
     rush_defense_dvoa numeric(5,1),
-    rush_defense_rank smallint,
     non_adjusted_total_defense numeric(5,1),
     non_adjusted_pass_defense numeric(5,1),
     non_adjusted_rush_defense numeric(5,1),
@@ -2266,9 +2291,7 @@ CREATE TABLE public.dvoa_team_seasonlogs_index (
     defense_weighted_dvoa numeric(5,1),
     defense_weighted_dvoa_rank smallint,
     pass_defense_dvoa numeric(5,1),
-    pass_defense_rank smallint,
     rush_defense_dvoa numeric(5,1),
-    rush_defense_rank smallint,
     non_adjusted_total_defense numeric(5,1),
     non_adjusted_pass_defense numeric(5,1),
     non_adjusted_rush_defense numeric(5,1),
@@ -14603,7 +14626,7 @@ COMMENT ON COLUMN public.player_contracts.option_bonus IS 'Option bonus in milli
 
 CREATE TABLE public.player_gamelogs (
     esbid integer NOT NULL,
-    pid character varying(25),
+    pid character varying(25) NOT NULL,
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
@@ -14697,7 +14720,7 @@ PARTITION BY RANGE (year);
 
 CREATE TABLE public.player_gamelogs_default (
     esbid integer NOT NULL,
-    pid character varying(25),
+    pid character varying(25) NOT NULL,
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
@@ -14790,7 +14813,7 @@ CREATE TABLE public.player_gamelogs_default (
 
 CREATE TABLE public.player_gamelogs_year_2000 (
     esbid integer NOT NULL,
-    pid character varying(25),
+    pid character varying(25) NOT NULL,
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
@@ -14883,7 +14906,7 @@ CREATE TABLE public.player_gamelogs_year_2000 (
 
 CREATE TABLE public.player_gamelogs_year_2001 (
     esbid integer NOT NULL,
-    pid character varying(25),
+    pid character varying(25) NOT NULL,
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
@@ -14976,7 +14999,7 @@ CREATE TABLE public.player_gamelogs_year_2001 (
 
 CREATE TABLE public.player_gamelogs_year_2002 (
     esbid integer NOT NULL,
-    pid character varying(25),
+    pid character varying(25) NOT NULL,
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
@@ -15069,7 +15092,7 @@ CREATE TABLE public.player_gamelogs_year_2002 (
 
 CREATE TABLE public.player_gamelogs_year_2003 (
     esbid integer NOT NULL,
-    pid character varying(25),
+    pid character varying(25) NOT NULL,
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
@@ -15162,7 +15185,7 @@ CREATE TABLE public.player_gamelogs_year_2003 (
 
 CREATE TABLE public.player_gamelogs_year_2004 (
     esbid integer NOT NULL,
-    pid character varying(25),
+    pid character varying(25) NOT NULL,
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
@@ -15255,7 +15278,7 @@ CREATE TABLE public.player_gamelogs_year_2004 (
 
 CREATE TABLE public.player_gamelogs_year_2005 (
     esbid integer NOT NULL,
-    pid character varying(25),
+    pid character varying(25) NOT NULL,
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
@@ -15348,7 +15371,7 @@ CREATE TABLE public.player_gamelogs_year_2005 (
 
 CREATE TABLE public.player_gamelogs_year_2006 (
     esbid integer NOT NULL,
-    pid character varying(25),
+    pid character varying(25) NOT NULL,
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
@@ -15441,7 +15464,7 @@ CREATE TABLE public.player_gamelogs_year_2006 (
 
 CREATE TABLE public.player_gamelogs_year_2007 (
     esbid integer NOT NULL,
-    pid character varying(25),
+    pid character varying(25) NOT NULL,
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
@@ -15534,7 +15557,7 @@ CREATE TABLE public.player_gamelogs_year_2007 (
 
 CREATE TABLE public.player_gamelogs_year_2008 (
     esbid integer NOT NULL,
-    pid character varying(25),
+    pid character varying(25) NOT NULL,
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
@@ -15627,7 +15650,7 @@ CREATE TABLE public.player_gamelogs_year_2008 (
 
 CREATE TABLE public.player_gamelogs_year_2009 (
     esbid integer NOT NULL,
-    pid character varying(25),
+    pid character varying(25) NOT NULL,
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
@@ -15720,7 +15743,7 @@ CREATE TABLE public.player_gamelogs_year_2009 (
 
 CREATE TABLE public.player_gamelogs_year_2010 (
     esbid integer NOT NULL,
-    pid character varying(25),
+    pid character varying(25) NOT NULL,
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
@@ -15813,7 +15836,7 @@ CREATE TABLE public.player_gamelogs_year_2010 (
 
 CREATE TABLE public.player_gamelogs_year_2011 (
     esbid integer NOT NULL,
-    pid character varying(25),
+    pid character varying(25) NOT NULL,
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
@@ -15906,7 +15929,7 @@ CREATE TABLE public.player_gamelogs_year_2011 (
 
 CREATE TABLE public.player_gamelogs_year_2012 (
     esbid integer NOT NULL,
-    pid character varying(25),
+    pid character varying(25) NOT NULL,
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
@@ -15999,7 +16022,7 @@ CREATE TABLE public.player_gamelogs_year_2012 (
 
 CREATE TABLE public.player_gamelogs_year_2013 (
     esbid integer NOT NULL,
-    pid character varying(25),
+    pid character varying(25) NOT NULL,
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
@@ -16092,7 +16115,7 @@ CREATE TABLE public.player_gamelogs_year_2013 (
 
 CREATE TABLE public.player_gamelogs_year_2014 (
     esbid integer NOT NULL,
-    pid character varying(25),
+    pid character varying(25) NOT NULL,
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
@@ -16185,7 +16208,7 @@ CREATE TABLE public.player_gamelogs_year_2014 (
 
 CREATE TABLE public.player_gamelogs_year_2015 (
     esbid integer NOT NULL,
-    pid character varying(25),
+    pid character varying(25) NOT NULL,
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
@@ -16278,7 +16301,7 @@ CREATE TABLE public.player_gamelogs_year_2015 (
 
 CREATE TABLE public.player_gamelogs_year_2016 (
     esbid integer NOT NULL,
-    pid character varying(25),
+    pid character varying(25) NOT NULL,
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
@@ -16371,7 +16394,7 @@ CREATE TABLE public.player_gamelogs_year_2016 (
 
 CREATE TABLE public.player_gamelogs_year_2017 (
     esbid integer NOT NULL,
-    pid character varying(25),
+    pid character varying(25) NOT NULL,
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
@@ -16464,7 +16487,7 @@ CREATE TABLE public.player_gamelogs_year_2017 (
 
 CREATE TABLE public.player_gamelogs_year_2018 (
     esbid integer NOT NULL,
-    pid character varying(25),
+    pid character varying(25) NOT NULL,
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
@@ -16557,7 +16580,7 @@ CREATE TABLE public.player_gamelogs_year_2018 (
 
 CREATE TABLE public.player_gamelogs_year_2019 (
     esbid integer NOT NULL,
-    pid character varying(25),
+    pid character varying(25) NOT NULL,
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
@@ -16650,7 +16673,7 @@ CREATE TABLE public.player_gamelogs_year_2019 (
 
 CREATE TABLE public.player_gamelogs_year_2020 (
     esbid integer NOT NULL,
-    pid character varying(25),
+    pid character varying(25) NOT NULL,
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
@@ -16743,7 +16766,7 @@ CREATE TABLE public.player_gamelogs_year_2020 (
 
 CREATE TABLE public.player_gamelogs_year_2021 (
     esbid integer NOT NULL,
-    pid character varying(25),
+    pid character varying(25) NOT NULL,
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
@@ -16836,7 +16859,7 @@ CREATE TABLE public.player_gamelogs_year_2021 (
 
 CREATE TABLE public.player_gamelogs_year_2022 (
     esbid integer NOT NULL,
-    pid character varying(25),
+    pid character varying(25) NOT NULL,
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
@@ -16929,7 +16952,7 @@ CREATE TABLE public.player_gamelogs_year_2022 (
 
 CREATE TABLE public.player_gamelogs_year_2023 (
     esbid integer NOT NULL,
-    pid character varying(25),
+    pid character varying(25) NOT NULL,
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
@@ -17022,7 +17045,7 @@ CREATE TABLE public.player_gamelogs_year_2023 (
 
 CREATE TABLE public.player_gamelogs_year_2024 (
     esbid integer NOT NULL,
-    pid character varying(25),
+    pid character varying(25) NOT NULL,
     opp character varying(3) NOT NULL,
     tm character varying(3) DEFAULT ''::character varying NOT NULL,
     pos character varying(4) NOT NULL,
@@ -19800,6 +19823,222 @@ ALTER TABLE ONLY public.player
 
 ALTER TABLE ONLY public.player
     ADD CONSTRAINT player_fleaflicker_id_unique UNIQUE (fleaflicker_id);
+
+
+--
+-- Name: player_gamelogs player_gamelogs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs
+    ADD CONSTRAINT player_gamelogs_pkey PRIMARY KEY (esbid, pid, year);
+
+
+--
+-- Name: player_gamelogs_default player_gamelogs_default_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs_default
+    ADD CONSTRAINT player_gamelogs_default_pkey PRIMARY KEY (esbid, pid, year);
+
+
+--
+-- Name: player_gamelogs_year_2000 player_gamelogs_year_2000_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs_year_2000
+    ADD CONSTRAINT player_gamelogs_year_2000_pkey PRIMARY KEY (esbid, pid, year);
+
+
+--
+-- Name: player_gamelogs_year_2001 player_gamelogs_year_2001_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs_year_2001
+    ADD CONSTRAINT player_gamelogs_year_2001_pkey PRIMARY KEY (esbid, pid, year);
+
+
+--
+-- Name: player_gamelogs_year_2002 player_gamelogs_year_2002_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs_year_2002
+    ADD CONSTRAINT player_gamelogs_year_2002_pkey PRIMARY KEY (esbid, pid, year);
+
+
+--
+-- Name: player_gamelogs_year_2003 player_gamelogs_year_2003_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs_year_2003
+    ADD CONSTRAINT player_gamelogs_year_2003_pkey PRIMARY KEY (esbid, pid, year);
+
+
+--
+-- Name: player_gamelogs_year_2004 player_gamelogs_year_2004_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs_year_2004
+    ADD CONSTRAINT player_gamelogs_year_2004_pkey PRIMARY KEY (esbid, pid, year);
+
+
+--
+-- Name: player_gamelogs_year_2005 player_gamelogs_year_2005_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs_year_2005
+    ADD CONSTRAINT player_gamelogs_year_2005_pkey PRIMARY KEY (esbid, pid, year);
+
+
+--
+-- Name: player_gamelogs_year_2006 player_gamelogs_year_2006_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs_year_2006
+    ADD CONSTRAINT player_gamelogs_year_2006_pkey PRIMARY KEY (esbid, pid, year);
+
+
+--
+-- Name: player_gamelogs_year_2007 player_gamelogs_year_2007_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs_year_2007
+    ADD CONSTRAINT player_gamelogs_year_2007_pkey PRIMARY KEY (esbid, pid, year);
+
+
+--
+-- Name: player_gamelogs_year_2008 player_gamelogs_year_2008_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs_year_2008
+    ADD CONSTRAINT player_gamelogs_year_2008_pkey PRIMARY KEY (esbid, pid, year);
+
+
+--
+-- Name: player_gamelogs_year_2009 player_gamelogs_year_2009_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs_year_2009
+    ADD CONSTRAINT player_gamelogs_year_2009_pkey PRIMARY KEY (esbid, pid, year);
+
+
+--
+-- Name: player_gamelogs_year_2010 player_gamelogs_year_2010_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs_year_2010
+    ADD CONSTRAINT player_gamelogs_year_2010_pkey PRIMARY KEY (esbid, pid, year);
+
+
+--
+-- Name: player_gamelogs_year_2011 player_gamelogs_year_2011_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs_year_2011
+    ADD CONSTRAINT player_gamelogs_year_2011_pkey PRIMARY KEY (esbid, pid, year);
+
+
+--
+-- Name: player_gamelogs_year_2012 player_gamelogs_year_2012_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs_year_2012
+    ADD CONSTRAINT player_gamelogs_year_2012_pkey PRIMARY KEY (esbid, pid, year);
+
+
+--
+-- Name: player_gamelogs_year_2013 player_gamelogs_year_2013_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs_year_2013
+    ADD CONSTRAINT player_gamelogs_year_2013_pkey PRIMARY KEY (esbid, pid, year);
+
+
+--
+-- Name: player_gamelogs_year_2014 player_gamelogs_year_2014_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs_year_2014
+    ADD CONSTRAINT player_gamelogs_year_2014_pkey PRIMARY KEY (esbid, pid, year);
+
+
+--
+-- Name: player_gamelogs_year_2015 player_gamelogs_year_2015_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs_year_2015
+    ADD CONSTRAINT player_gamelogs_year_2015_pkey PRIMARY KEY (esbid, pid, year);
+
+
+--
+-- Name: player_gamelogs_year_2016 player_gamelogs_year_2016_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs_year_2016
+    ADD CONSTRAINT player_gamelogs_year_2016_pkey PRIMARY KEY (esbid, pid, year);
+
+
+--
+-- Name: player_gamelogs_year_2017 player_gamelogs_year_2017_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs_year_2017
+    ADD CONSTRAINT player_gamelogs_year_2017_pkey PRIMARY KEY (esbid, pid, year);
+
+
+--
+-- Name: player_gamelogs_year_2018 player_gamelogs_year_2018_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs_year_2018
+    ADD CONSTRAINT player_gamelogs_year_2018_pkey PRIMARY KEY (esbid, pid, year);
+
+
+--
+-- Name: player_gamelogs_year_2019 player_gamelogs_year_2019_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs_year_2019
+    ADD CONSTRAINT player_gamelogs_year_2019_pkey PRIMARY KEY (esbid, pid, year);
+
+
+--
+-- Name: player_gamelogs_year_2020 player_gamelogs_year_2020_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs_year_2020
+    ADD CONSTRAINT player_gamelogs_year_2020_pkey PRIMARY KEY (esbid, pid, year);
+
+
+--
+-- Name: player_gamelogs_year_2021 player_gamelogs_year_2021_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs_year_2021
+    ADD CONSTRAINT player_gamelogs_year_2021_pkey PRIMARY KEY (esbid, pid, year);
+
+
+--
+-- Name: player_gamelogs_year_2022 player_gamelogs_year_2022_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs_year_2022
+    ADD CONSTRAINT player_gamelogs_year_2022_pkey PRIMARY KEY (esbid, pid, year);
+
+
+--
+-- Name: player_gamelogs_year_2023 player_gamelogs_year_2023_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs_year_2023
+    ADD CONSTRAINT player_gamelogs_year_2023_pkey PRIMARY KEY (esbid, pid, year);
+
+
+--
+-- Name: player_gamelogs_year_2024 player_gamelogs_year_2024_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_gamelogs_year_2024
+    ADD CONSTRAINT player_gamelogs_year_2024_pkey PRIMARY KEY (esbid, pid, year);
 
 
 --
@@ -36934,6 +37173,13 @@ ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player
 
 
 --
+-- Name: player_gamelogs_default_pkey; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_default_pkey;
+
+
+--
 -- Name: player_gamelogs_default_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -36959,6 +37205,13 @@ ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION publi
 --
 
 ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2000_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2000_pkey; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2000_pkey;
 
 
 --
@@ -36990,6 +37243,13 @@ ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player
 
 
 --
+-- Name: player_gamelogs_year_2001_pkey; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2001_pkey;
+
+
+--
 -- Name: player_gamelogs_year_2001_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -37015,6 +37275,13 @@ ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION publi
 --
 
 ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2002_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2002_pkey; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2002_pkey;
 
 
 --
@@ -37046,6 +37313,13 @@ ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player
 
 
 --
+-- Name: player_gamelogs_year_2003_pkey; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2003_pkey;
+
+
+--
 -- Name: player_gamelogs_year_2003_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -37071,6 +37345,13 @@ ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION publi
 --
 
 ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2004_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2004_pkey; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2004_pkey;
 
 
 --
@@ -37102,6 +37383,13 @@ ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player
 
 
 --
+-- Name: player_gamelogs_year_2005_pkey; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2005_pkey;
+
+
+--
 -- Name: player_gamelogs_year_2005_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -37127,6 +37415,13 @@ ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION publi
 --
 
 ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2006_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2006_pkey; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2006_pkey;
 
 
 --
@@ -37158,6 +37453,13 @@ ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player
 
 
 --
+-- Name: player_gamelogs_year_2007_pkey; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2007_pkey;
+
+
+--
 -- Name: player_gamelogs_year_2007_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -37183,6 +37485,13 @@ ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION publi
 --
 
 ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2008_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2008_pkey; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2008_pkey;
 
 
 --
@@ -37214,6 +37523,13 @@ ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player
 
 
 --
+-- Name: player_gamelogs_year_2009_pkey; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2009_pkey;
+
+
+--
 -- Name: player_gamelogs_year_2009_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -37239,6 +37555,13 @@ ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION publi
 --
 
 ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2010_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2010_pkey; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2010_pkey;
 
 
 --
@@ -37270,6 +37593,13 @@ ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player
 
 
 --
+-- Name: player_gamelogs_year_2011_pkey; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2011_pkey;
+
+
+--
 -- Name: player_gamelogs_year_2011_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -37295,6 +37625,13 @@ ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION publi
 --
 
 ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2012_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2012_pkey; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2012_pkey;
 
 
 --
@@ -37326,6 +37663,13 @@ ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player
 
 
 --
+-- Name: player_gamelogs_year_2013_pkey; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2013_pkey;
+
+
+--
 -- Name: player_gamelogs_year_2013_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -37351,6 +37695,13 @@ ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION publi
 --
 
 ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2014_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2014_pkey; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2014_pkey;
 
 
 --
@@ -37382,6 +37733,13 @@ ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player
 
 
 --
+-- Name: player_gamelogs_year_2015_pkey; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2015_pkey;
+
+
+--
 -- Name: player_gamelogs_year_2015_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -37407,6 +37765,13 @@ ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION publi
 --
 
 ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2016_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2016_pkey; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2016_pkey;
 
 
 --
@@ -37438,6 +37803,13 @@ ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player
 
 
 --
+-- Name: player_gamelogs_year_2017_pkey; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2017_pkey;
+
+
+--
 -- Name: player_gamelogs_year_2017_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -37463,6 +37835,13 @@ ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION publi
 --
 
 ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2018_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2018_pkey; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2018_pkey;
 
 
 --
@@ -37494,6 +37873,13 @@ ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player
 
 
 --
+-- Name: player_gamelogs_year_2019_pkey; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2019_pkey;
+
+
+--
 -- Name: player_gamelogs_year_2019_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -37519,6 +37905,13 @@ ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION publi
 --
 
 ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2020_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2020_pkey; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2020_pkey;
 
 
 --
@@ -37550,6 +37943,13 @@ ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player
 
 
 --
+-- Name: player_gamelogs_year_2021_pkey; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2021_pkey;
+
+
+--
 -- Name: player_gamelogs_year_2021_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -37575,6 +37975,13 @@ ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION publi
 --
 
 ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2022_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2022_pkey; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2022_pkey;
 
 
 --
@@ -37606,6 +38013,13 @@ ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player
 
 
 --
+-- Name: player_gamelogs_year_2023_pkey; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2023_pkey;
+
+
+--
 -- Name: player_gamelogs_year_2023_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -37631,6 +38045,13 @@ ALTER INDEX public.index_player_gamelogs_esbid_active_pid ATTACH PARTITION publi
 --
 
 ALTER INDEX public.index_player_gamelogs_esbid_tm ATTACH PARTITION public.player_gamelogs_year_2024_esbid_tm_idx;
+
+
+--
+-- Name: player_gamelogs_year_2024_pkey; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2024_pkey;
 
 
 --
