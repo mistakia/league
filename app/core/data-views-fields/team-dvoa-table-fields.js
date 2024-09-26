@@ -58,12 +58,12 @@ export default {
     player_value_path: 'team_stuffed_rate'
   }),
   team_unit_rushing_second_level_yards: create_dvoa_field({
-    column_title: 'Team Second Level Yards',
+    column_title: 'Team Second Level Rushing Yards',
     header_label: 'Second Level Yards',
     player_value_path: 'team_second_level_yards'
   }),
   team_unit_rushing_open_field_yards: create_dvoa_field({
-    column_title: 'Team Open Field Yards',
+    column_title: 'Team Open Field Rushing Yards',
     header_label: 'Open Field Yards',
     player_value_path: 'team_open_field_yards'
   }),
