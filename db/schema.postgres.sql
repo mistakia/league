@@ -1451,6 +1451,11 @@ ALTER TABLE IF EXISTS ONLY public.espn_team_win_rates_index DROP CONSTRAINT IF E
 ALTER TABLE IF EXISTS ONLY public.espn_team_win_rates_history DROP CONSTRAINT IF EXISTS espn_team_win_rates_history_pkey;
 ALTER TABLE IF EXISTS ONLY public.espn_player_win_rates_index DROP CONSTRAINT IF EXISTS espn_player_win_rates_index_pkey;
 ALTER TABLE IF EXISTS ONLY public.espn_player_win_rates_history DROP CONSTRAINT IF EXISTS espn_player_win_rates_history_pkey;
+ALTER TABLE IF EXISTS ONLY public.dvoa_team_unit_seasonlogs_index DROP CONSTRAINT IF EXISTS dvoa_team_unit_seasonlogs_index_year_team_team_unit_key;
+ALTER TABLE IF EXISTS ONLY public.dvoa_team_unit_seasonlogs_history DROP CONSTRAINT IF EXISTS dvoa_team_unit_seasonlogs_his_year_team_team_unit_week_key;
+ALTER TABLE IF EXISTS ONLY public.dvoa_team_seasonlogs_index DROP CONSTRAINT IF EXISTS dvoa_team_seasonlogs_index_pkey;
+ALTER TABLE IF EXISTS ONLY public.dvoa_team_seasonlogs_history DROP CONSTRAINT IF EXISTS dvoa_team_seasonlogs_history_year_team_week_key;
+ALTER TABLE IF EXISTS ONLY public.dvoa_team_gamelogs DROP CONSTRAINT IF EXISTS dvoa_team_gamelogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.config DROP CONSTRAINT IF EXISTS config_pkey;
 ALTER TABLE IF EXISTS ONLY public.config DROP CONSTRAINT IF EXISTS config_key_unique;
 ALTER TABLE IF EXISTS public.waivers ALTER COLUMN uid DROP DEFAULT;
@@ -1679,6 +1684,11 @@ DROP TABLE IF EXISTS public.espn_team_win_rates_index;
 DROP TABLE IF EXISTS public.espn_team_win_rates_history;
 DROP TABLE IF EXISTS public.espn_player_win_rates_index;
 DROP TABLE IF EXISTS public.espn_player_win_rates_history;
+DROP TABLE IF EXISTS public.dvoa_team_unit_seasonlogs_index;
+DROP TABLE IF EXISTS public.dvoa_team_unit_seasonlogs_history;
+DROP TABLE IF EXISTS public.dvoa_team_seasonlogs_index;
+DROP TABLE IF EXISTS public.dvoa_team_seasonlogs_history;
+DROP TABLE IF EXISTS public.dvoa_team_gamelogs;
 DROP SEQUENCE IF EXISTS public.draft_uid_seq;
 DROP TABLE IF EXISTS public.draft;
 DROP TABLE IF EXISTS public.config;
@@ -1686,6 +1696,7 @@ DROP FUNCTION IF EXISTS public.update_modified_column();
 DROP FUNCTION IF EXISTS public.player_name_search_vector_update();
 DROP TYPE IF EXISTS public.wager_status;
 DROP TYPE IF EXISTS public.time_type;
+DROP TYPE IF EXISTS public.team_unit;
 DROP TYPE IF EXISTS public.series_result;
 DROP TYPE IF EXISTS public.selection_type;
 DROP TYPE IF EXISTS public.run_gap;
@@ -1990,6 +2001,17 @@ CREATE TYPE public.series_result AS ENUM (
 
 
 --
+-- Name: team_unit; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.team_unit AS ENUM (
+    'OFFENSE',
+    'DEFENSE',
+    'SPECIAL_TEAMS'
+);
+
+
+--
 -- Name: time_type; Type: TYPE; Schema: public; Owner: -
 --
 
@@ -2098,6 +2120,550 @@ CREATE SEQUENCE public.draft_uid_seq
 --
 
 ALTER SEQUENCE public.draft_uid_seq OWNED BY public.draft.uid;
+
+
+--
+-- Name: dvoa_team_gamelogs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.dvoa_team_gamelogs (
+    year integer NOT NULL,
+    week integer NOT NULL,
+    team character varying(3) NOT NULL,
+    total_dvoa numeric(5,1),
+    offense_dvoa numeric(5,1),
+    defense_dvoa numeric(5,1),
+    special_teams_dvoa numeric(5,1),
+    "timestamp" integer NOT NULL
+);
+
+
+--
+-- Name: dvoa_team_seasonlogs_history; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.dvoa_team_seasonlogs_history (
+    year smallint NOT NULL,
+    week smallint NOT NULL,
+    team character varying(3) NOT NULL,
+    total_dvoa_rank smallint,
+    total_dvoa numeric(5,1),
+    last_week_dvoa numeric(5,1),
+    non_adjusted_total_voa numeric(5,1),
+    offense_dvoa numeric(5,1),
+    defense_dvoa numeric(5,1),
+    special_teams_dvoa numeric(5,1),
+    offense_voa_unadjusted numeric(5,1),
+    defense_voa_unadjusted numeric(5,1),
+    special_voa_unadjusted numeric(5,1),
+    estimated_wins numeric(3,1),
+    estimated_wins_rank smallint,
+    total_weighted_dvoa numeric(5,1),
+    total_weighted_dvoa_rank smallint,
+    past_schedule numeric(5,1),
+    past_schedule_rank smallint,
+    future_schedule numeric(5,1),
+    future_schedule_rank smallint,
+    total_variance numeric(5,1),
+    total_variance_rank smallint,
+    "timestamp" integer NOT NULL,
+    offense_weighted_dvoa numeric(5,1),
+    offense_weighted_dvoa_rank smallint,
+    pass_offense_dvoa numeric(5,1),
+    rush_offense_dvoa numeric(5,1),
+    non_adjusted_total_offense numeric(5,1),
+    non_adjusted_pass_offense numeric(5,1),
+    non_adjusted_rush_offense numeric(5,1),
+    offense_variance numeric(5,1),
+    offense_variance_rank smallint,
+    offense_schedule numeric(5,1),
+    offense_schedule_rank smallint,
+    defense_dvoa_rank smallint,
+    last_week_defense_dvoa numeric(5,1),
+    defense_weighted_dvoa numeric(5,1),
+    defense_weighted_dvoa_rank smallint,
+    pass_defense_dvoa numeric(5,1),
+    pass_defense_rank smallint,
+    rush_defense_dvoa numeric(5,1),
+    rush_defense_rank smallint,
+    non_adjusted_total_defense numeric(5,1),
+    non_adjusted_pass_defense numeric(5,1),
+    non_adjusted_rush_defense numeric(5,1),
+    defense_variance numeric(5,1),
+    defense_variance_rank smallint,
+    defense_schedule numeric(5,1),
+    defense_schedule_rank smallint,
+    special_teams_dvoa_rank smallint,
+    last_week_special_teams_dvoa numeric(5,1),
+    special_teams_weighted_dvoa numeric(5,1),
+    special_teams_weighted_dvoa_rank smallint,
+    fg_xp_dvoa numeric(5,1),
+    kick_dvoa numeric(5,1),
+    kick_return_dvoa numeric(5,1),
+    punt_dvoa numeric(5,1),
+    punt_return_dvoa numeric(5,1),
+    no_weather_dvoa numeric(5,1),
+    variance numeric(5,1),
+    variance_rank smallint,
+    hidden_points numeric(5,1),
+    hidden_points_rank smallint,
+    weather_points numeric(5,1),
+    weather_points_rank smallint,
+    last_week_offense_dvoa numeric,
+    pass_defense_dvoa_rank smallint,
+    rush_defense_dvoa_rank smallint,
+    offense_dvoa_rank smallint,
+    pass_offense_dvoa_rank smallint,
+    rush_offense_dvoa_rank smallint
+);
+
+
+--
+-- Name: dvoa_team_seasonlogs_index; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.dvoa_team_seasonlogs_index (
+    year smallint NOT NULL,
+    week smallint NOT NULL,
+    team character varying(3) NOT NULL,
+    total_dvoa_rank smallint,
+    total_dvoa numeric(5,1),
+    last_week_dvoa numeric(5,1),
+    non_adjusted_total_voa numeric(5,1),
+    offense_dvoa numeric(5,1),
+    defense_dvoa numeric(5,1),
+    special_teams_dvoa numeric(5,1),
+    offense_voa_unadjusted numeric(5,1),
+    defense_voa_unadjusted numeric(5,1),
+    special_voa_unadjusted numeric(5,1),
+    estimated_wins numeric(3,1),
+    estimated_wins_rank smallint,
+    total_weighted_dvoa numeric(5,1),
+    total_weighted_dvoa_rank smallint,
+    past_schedule numeric(5,1),
+    past_schedule_rank smallint,
+    future_schedule numeric(5,1),
+    future_schedule_rank smallint,
+    total_variance numeric(5,1),
+    total_variance_rank smallint,
+    offense_weighted_dvoa numeric(5,1),
+    offense_weighted_dvoa_rank smallint,
+    pass_offense_dvoa numeric(5,1),
+    rush_offense_dvoa numeric(5,1),
+    non_adjusted_total_offense numeric(5,1),
+    non_adjusted_pass_offense numeric(5,1),
+    non_adjusted_rush_offense numeric(5,1),
+    offense_variance numeric(5,1),
+    offense_variance_rank smallint,
+    offense_schedule numeric(5,1),
+    offense_schedule_rank smallint,
+    defense_dvoa_rank smallint,
+    last_week_defense_dvoa numeric(5,1),
+    defense_weighted_dvoa numeric(5,1),
+    defense_weighted_dvoa_rank smallint,
+    pass_defense_dvoa numeric(5,1),
+    pass_defense_rank smallint,
+    rush_defense_dvoa numeric(5,1),
+    rush_defense_rank smallint,
+    non_adjusted_total_defense numeric(5,1),
+    non_adjusted_pass_defense numeric(5,1),
+    non_adjusted_rush_defense numeric(5,1),
+    defense_variance numeric(5,1),
+    defense_variance_rank smallint,
+    defense_schedule numeric(5,1),
+    defense_schedule_rank smallint,
+    special_teams_dvoa_rank smallint,
+    last_week_special_teams_dvoa numeric(5,1),
+    special_teams_weighted_dvoa numeric(5,1),
+    special_teams_weighted_dvoa_rank smallint,
+    fg_xp_dvoa numeric(5,1),
+    kick_dvoa numeric(5,1),
+    kick_return_dvoa numeric(5,1),
+    punt_dvoa numeric(5,1),
+    punt_return_dvoa numeric(5,1),
+    no_weather_dvoa numeric(5,1),
+    variance numeric(5,1),
+    variance_rank smallint,
+    hidden_points numeric(5,1),
+    hidden_points_rank smallint,
+    weather_points numeric(5,1),
+    weather_points_rank smallint,
+    "timestamp" integer NOT NULL,
+    last_week_offense_dvoa numeric,
+    pass_defense_dvoa_rank smallint,
+    rush_defense_dvoa_rank smallint,
+    offense_dvoa_rank smallint,
+    pass_offense_dvoa_rank smallint,
+    rush_offense_dvoa_rank smallint
+);
+
+
+--
+-- Name: dvoa_team_unit_seasonlogs_history; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.dvoa_team_unit_seasonlogs_history (
+    year integer NOT NULL,
+    week smallint NOT NULL,
+    team character varying(3) NOT NULL,
+    team_unit public.team_unit NOT NULL,
+    "timestamp" integer NOT NULL,
+    total_dvoa_rank integer,
+    total_dvoa numeric,
+    pass_rank integer,
+    pass_dvoa_wr1 numeric,
+    pass_rank_wr1 integer,
+    pass_points_allowed_per_game_wr1 numeric,
+    pass_yards_allowed_per_game_wr1 numeric,
+    pass_dvoa_wr2 numeric,
+    pass_rank_wr2 integer,
+    pass_points_allowed_per_game_wr2 numeric,
+    pass_yards_allowed_per_game_wr2 numeric,
+    pass_dvoa_wr3 numeric,
+    pass_rank_wr3 integer,
+    pass_points_allowed_per_game_wr3 numeric,
+    pass_yards_allowed_per_game_wr3 numeric,
+    pass_dvoa_te numeric,
+    pass_rank_te integer,
+    pass_points_allowed_per_game_te numeric,
+    pass_yards_allowed_per_game_te numeric,
+    pass_dvoa_rb numeric,
+    pass_rank_rb integer,
+    pass_points_allowed_per_game_rb numeric,
+    pass_yards_allowed_per_game_rb numeric,
+    pass_dvoa_left numeric,
+    pass_rank_left integer,
+    pass_dvoa_middle numeric,
+    pass_rank_middle integer,
+    pass_dvoa_right numeric,
+    pass_rank_right integer,
+    pass_dvoa_deep numeric,
+    pass_rank_deep integer,
+    pass_dvoa_short numeric,
+    pass_rank_short integer,
+    pass_dvoa_deep_left numeric,
+    pass_dvoa_deep_middle numeric,
+    pass_dvoa_deep_right numeric,
+    pass_dvoa_short_left numeric,
+    pass_dvoa_short_middle numeric,
+    pass_dvoa_short_right numeric,
+    team_adjusted_line_yards numeric,
+    team_adjusted_line_yards_rank integer,
+    team_rb_yards numeric,
+    team_rb_yards_rank integer,
+    team_power_success numeric,
+    team_power_success_rank integer,
+    team_stuffed_rate numeric,
+    team_stuffed_rate_rank integer,
+    team_second_level_yards numeric,
+    team_second_level_yards_rank integer,
+    team_open_field_yards numeric,
+    team_open_field_yards_rank integer,
+    team_sacks numeric,
+    team_sacks_rank integer,
+    team_adjusted_sack_rate numeric,
+    home_dvoa numeric,
+    home_dvoa_rank integer,
+    road_dvoa numeric,
+    road_dvoa_rank integer,
+    all_first_down_dvoa numeric,
+    all_first_down_rank integer,
+    second_and_short_dvoa numeric,
+    second_and_short_rank integer,
+    second_and_mid_dvoa numeric,
+    second_and_mid_rank integer,
+    second_and_long_dvoa numeric,
+    second_and_long_rank integer,
+    all_second_down_dvoa numeric,
+    all_second_down_rank integer,
+    third_and_short_dvoa numeric,
+    third_and_short_rank integer,
+    third_and_mid_dvoa numeric,
+    third_and_mid_rank integer,
+    third_and_long_dvoa numeric,
+    third_and_long_rank integer,
+    all_third_down_dvoa numeric,
+    all_third_down_rank integer,
+    all_plays_dvoa numeric,
+    all_plays_rank integer,
+    back_zone_dvoa numeric,
+    back_zone_rank integer,
+    deep_zone_dvoa numeric,
+    deep_zone_rank integer,
+    front_zone_dvoa numeric,
+    front_zone_rank integer,
+    mid_zone_dvoa numeric,
+    mid_zone_rank integer,
+    red_zone_dvoa numeric,
+    red_zone_rank integer,
+    red_zone_pass_dvoa numeric,
+    red_zone_pass_rank integer,
+    red_zone_rush_dvoa numeric,
+    red_zone_rush_rank integer,
+    goal_to_go_dvoa numeric,
+    goal_to_go_rank integer,
+    losing_9_plus_dvoa numeric,
+    losing_9_plus_rank integer,
+    tie_or_losing_1_to_8_dvoa numeric,
+    tie_or_losing_1_to_8_rank integer,
+    winning_1_to_8_dvoa numeric,
+    winning_1_to_8_rank integer,
+    winning_9_plus_dvoa numeric,
+    winning_9_plus_rank integer,
+    late_and_close_dvoa numeric,
+    late_and_close_rank integer,
+    first_quarter_dvoa numeric,
+    first_quarter_rank integer,
+    second_quarter_dvoa numeric,
+    second_quarter_rank integer,
+    third_quarter_dvoa numeric,
+    third_quarter_rank integer,
+    fourth_quarter_ot_dvoa numeric,
+    fourth_quarter_ot_rank integer,
+    first_half_dvoa numeric,
+    first_half_rank integer,
+    second_half_dvoa numeric,
+    second_half_rank integer,
+    shotgun_dvoa numeric,
+    shotgun_dvoa_rank integer,
+    shotgun_yards numeric,
+    shotgun_yards_rank integer,
+    not_shotgun_dvoa numeric,
+    not_shotgun_dvoa_rank integer,
+    not_shotgun_yards numeric,
+    not_shotgun_yards_rank integer,
+    shotgun_dvoa_difference numeric,
+    shotgun_dvoa_difference_rank integer,
+    shotgun_yards_difference numeric,
+    shotgun_yards_difference_rank integer,
+    shotgun_percentage numeric,
+    shotgun_percentage_rank integer,
+    first_down_pass_dvoa numeric,
+    first_down_pass_rank integer,
+    first_down_rush_dvoa numeric,
+    first_down_rush_rank integer,
+    first_down_all_dvoa numeric,
+    first_down_all_rank integer,
+    second_down_pass_dvoa numeric,
+    second_down_pass_rank integer,
+    second_down_rush_dvoa numeric,
+    second_down_rush_rank integer,
+    second_down_all_dvoa numeric,
+    second_down_all_rank integer,
+    third_fourth_down_pass_dvoa numeric,
+    third_fourth_down_pass_rank integer,
+    third_fourth_down_rush_dvoa numeric,
+    third_fourth_down_rush_rank integer,
+    third_fourth_down_all_dvoa numeric,
+    third_fourth_down_all_rank integer,
+    all_downs_pass_dvoa numeric,
+    all_downs_pass_rank integer,
+    all_downs_rush_dvoa numeric,
+    all_downs_rush_rank integer,
+    all_downs_dvoa numeric,
+    all_downs_rank integer,
+    team_rush_left_end_dvoa numeric,
+    team_rush_left_end_dvoa_rank integer,
+    team_rush_left_tackle_dvoa numeric,
+    team_rush_left_tackle_dvoa_rank integer,
+    team_rush_mid_guard_dvoa numeric,
+    team_rush_mid_guard_dvoa_rank integer,
+    team_rush_right_tackle_dvoa numeric,
+    team_rush_right_tackle_dvoa_rank integer,
+    team_rush_right_end_dvoa numeric,
+    team_rush_right_end_dvoa_rank integer,
+    team_running_back_carries numeric,
+    team_running_back_carries_rank integer,
+    team_rush_left_end_pct numeric,
+    team_rush_left_tackle_pct numeric,
+    team_rush_mid_guard_pct numeric,
+    team_rush_right_tackle_pct numeric,
+    team_rush_right_end_pct numeric
+);
+
+
+--
+-- Name: dvoa_team_unit_seasonlogs_index; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.dvoa_team_unit_seasonlogs_index (
+    year integer NOT NULL,
+    week smallint NOT NULL,
+    team character varying(3) NOT NULL,
+    team_unit public.team_unit NOT NULL,
+    "timestamp" integer NOT NULL,
+    total_dvoa_rank integer,
+    total_dvoa numeric,
+    pass_rank integer,
+    pass_dvoa_wr1 numeric,
+    pass_rank_wr1 integer,
+    pass_points_allowed_per_game_wr1 numeric,
+    pass_yards_allowed_per_game_wr1 numeric,
+    pass_dvoa_wr2 numeric,
+    pass_rank_wr2 integer,
+    pass_points_allowed_per_game_wr2 numeric,
+    pass_yards_allowed_per_game_wr2 numeric,
+    pass_dvoa_wr3 numeric,
+    pass_rank_wr3 integer,
+    pass_points_allowed_per_game_wr3 numeric,
+    pass_yards_allowed_per_game_wr3 numeric,
+    pass_dvoa_te numeric,
+    pass_rank_te integer,
+    pass_points_allowed_per_game_te numeric,
+    pass_yards_allowed_per_game_te numeric,
+    pass_dvoa_rb numeric,
+    pass_rank_rb integer,
+    pass_points_allowed_per_game_rb numeric,
+    pass_yards_allowed_per_game_rb numeric,
+    pass_dvoa_left numeric,
+    pass_rank_left integer,
+    pass_dvoa_middle numeric,
+    pass_rank_middle integer,
+    pass_dvoa_right numeric,
+    pass_rank_right integer,
+    pass_dvoa_deep numeric,
+    pass_rank_deep integer,
+    pass_dvoa_short numeric,
+    pass_rank_short integer,
+    pass_dvoa_deep_left numeric,
+    pass_dvoa_deep_middle numeric,
+    pass_dvoa_deep_right numeric,
+    pass_dvoa_short_left numeric,
+    pass_dvoa_short_middle numeric,
+    pass_dvoa_short_right numeric,
+    team_adjusted_line_yards numeric,
+    team_adjusted_line_yards_rank integer,
+    team_rb_yards numeric,
+    team_rb_yards_rank integer,
+    team_power_success numeric,
+    team_power_success_rank integer,
+    team_stuffed_rate numeric,
+    team_stuffed_rate_rank integer,
+    team_second_level_yards numeric,
+    team_second_level_yards_rank integer,
+    team_open_field_yards numeric,
+    team_open_field_yards_rank integer,
+    team_sacks numeric,
+    team_sacks_rank integer,
+    team_adjusted_sack_rate numeric,
+    home_dvoa numeric,
+    home_dvoa_rank integer,
+    road_dvoa numeric,
+    road_dvoa_rank integer,
+    all_first_down_dvoa numeric,
+    all_first_down_rank integer,
+    second_and_short_dvoa numeric,
+    second_and_short_rank integer,
+    second_and_mid_dvoa numeric,
+    second_and_mid_rank integer,
+    second_and_long_dvoa numeric,
+    second_and_long_rank integer,
+    all_second_down_dvoa numeric,
+    all_second_down_rank integer,
+    third_and_short_dvoa numeric,
+    third_and_short_rank integer,
+    third_and_mid_dvoa numeric,
+    third_and_mid_rank integer,
+    third_and_long_dvoa numeric,
+    third_and_long_rank integer,
+    all_third_down_dvoa numeric,
+    all_third_down_rank integer,
+    all_plays_dvoa numeric,
+    all_plays_rank integer,
+    back_zone_dvoa numeric,
+    back_zone_rank integer,
+    deep_zone_dvoa numeric,
+    deep_zone_rank integer,
+    front_zone_dvoa numeric,
+    front_zone_rank integer,
+    mid_zone_dvoa numeric,
+    mid_zone_rank integer,
+    red_zone_dvoa numeric,
+    red_zone_rank integer,
+    red_zone_pass_dvoa numeric,
+    red_zone_pass_rank integer,
+    red_zone_rush_dvoa numeric,
+    red_zone_rush_rank integer,
+    goal_to_go_dvoa numeric,
+    goal_to_go_rank integer,
+    losing_9_plus_dvoa numeric,
+    losing_9_plus_rank integer,
+    tie_or_losing_1_to_8_dvoa numeric,
+    tie_or_losing_1_to_8_rank integer,
+    winning_1_to_8_dvoa numeric,
+    winning_1_to_8_rank integer,
+    winning_9_plus_dvoa numeric,
+    winning_9_plus_rank integer,
+    late_and_close_dvoa numeric,
+    late_and_close_rank integer,
+    first_quarter_dvoa numeric,
+    first_quarter_rank integer,
+    second_quarter_dvoa numeric,
+    second_quarter_rank integer,
+    third_quarter_dvoa numeric,
+    third_quarter_rank integer,
+    fourth_quarter_ot_dvoa numeric,
+    fourth_quarter_ot_rank integer,
+    first_half_dvoa numeric,
+    first_half_rank integer,
+    second_half_dvoa numeric,
+    second_half_rank integer,
+    shotgun_dvoa numeric,
+    shotgun_dvoa_rank integer,
+    shotgun_yards numeric,
+    shotgun_yards_rank integer,
+    not_shotgun_dvoa numeric,
+    not_shotgun_dvoa_rank integer,
+    not_shotgun_yards numeric,
+    not_shotgun_yards_rank integer,
+    shotgun_dvoa_difference numeric,
+    shotgun_dvoa_difference_rank integer,
+    shotgun_yards_difference numeric,
+    shotgun_yards_difference_rank integer,
+    shotgun_percentage numeric,
+    shotgun_percentage_rank integer,
+    first_down_pass_dvoa numeric,
+    first_down_pass_rank integer,
+    first_down_rush_dvoa numeric,
+    first_down_rush_rank integer,
+    first_down_all_dvoa numeric,
+    first_down_all_rank integer,
+    second_down_pass_dvoa numeric,
+    second_down_pass_rank integer,
+    second_down_rush_dvoa numeric,
+    second_down_rush_rank integer,
+    second_down_all_dvoa numeric,
+    second_down_all_rank integer,
+    third_fourth_down_pass_dvoa numeric,
+    third_fourth_down_pass_rank integer,
+    third_fourth_down_rush_dvoa numeric,
+    third_fourth_down_rush_rank integer,
+    third_fourth_down_all_dvoa numeric,
+    third_fourth_down_all_rank integer,
+    all_downs_pass_dvoa numeric,
+    all_downs_pass_rank integer,
+    all_downs_rush_dvoa numeric,
+    all_downs_rush_rank integer,
+    all_downs_dvoa numeric,
+    all_downs_rank integer,
+    team_rush_left_end_dvoa numeric,
+    team_rush_left_end_dvoa_rank integer,
+    team_rush_left_tackle_dvoa numeric,
+    team_rush_left_tackle_dvoa_rank integer,
+    team_rush_mid_guard_dvoa numeric,
+    team_rush_mid_guard_dvoa_rank integer,
+    team_rush_right_tackle_dvoa numeric,
+    team_rush_right_tackle_dvoa_rank integer,
+    team_rush_right_end_dvoa numeric,
+    team_rush_right_end_dvoa_rank integer,
+    team_running_back_carries numeric,
+    team_running_back_carries_rank integer,
+    team_rush_left_end_pct numeric,
+    team_rush_left_tackle_pct numeric,
+    team_rush_mid_guard_pct numeric,
+    team_rush_right_tackle_pct numeric,
+    team_rush_right_end_pct numeric
+);
 
 
 --
@@ -18878,6 +19444,46 @@ ALTER TABLE ONLY public.config
 
 ALTER TABLE ONLY public.config
     ADD CONSTRAINT config_pkey PRIMARY KEY (key);
+
+
+--
+-- Name: dvoa_team_gamelogs dvoa_team_gamelogs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.dvoa_team_gamelogs
+    ADD CONSTRAINT dvoa_team_gamelogs_pkey PRIMARY KEY (year, week, team);
+
+
+--
+-- Name: dvoa_team_seasonlogs_history dvoa_team_seasonlogs_history_year_team_week_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.dvoa_team_seasonlogs_history
+    ADD CONSTRAINT dvoa_team_seasonlogs_history_year_team_week_key UNIQUE (year, team, week);
+
+
+--
+-- Name: dvoa_team_seasonlogs_index dvoa_team_seasonlogs_index_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.dvoa_team_seasonlogs_index
+    ADD CONSTRAINT dvoa_team_seasonlogs_index_pkey PRIMARY KEY (year, team);
+
+
+--
+-- Name: dvoa_team_unit_seasonlogs_history dvoa_team_unit_seasonlogs_his_year_team_team_unit_week_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.dvoa_team_unit_seasonlogs_history
+    ADD CONSTRAINT dvoa_team_unit_seasonlogs_his_year_team_team_unit_week_key UNIQUE (year, team, team_unit, week);
+
+
+--
+-- Name: dvoa_team_unit_seasonlogs_index dvoa_team_unit_seasonlogs_index_year_team_team_unit_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.dvoa_team_unit_seasonlogs_index
+    ADD CONSTRAINT dvoa_team_unit_seasonlogs_index_year_team_team_unit_key UNIQUE (year, team, team_unit);
 
 
 --

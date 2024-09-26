@@ -11353,6 +11353,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"node-xlsx@npm:^0.24.0":
+  version: 0.24.0
+  resolution: "node-xlsx@npm:0.24.0"
+  dependencies:
+    xlsx: "https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
+  bin:
+    node-xlsx: dist/bin/cli.js
+  checksum: 605fa713c5853f40297b05875a492f517cd16795ed5bae276567b4f3cd72c034cafbf1a637c2d629a98a6df3a616693135ab0168436e850886fb11631c2fd0a7
+  languageName: node
+  linkType: hard
+
 "nopt@npm:^5.0.0":
   version: 5.0.0
   resolution: "nopt@npm:5.0.0"
@@ -13873,6 +13884,7 @@ __metadata:
     node-cron: ^3.0.3
     node-fetch: ^3.3.2
     node-schedule: ^2.1.1
+    node-xlsx: ^0.24.0
     normalize.css: ^8.0.1
     oddslib: ^2.1.1
     p-queue: ^8.0.1
@@ -16354,6 +16366,15 @@ __metadata:
     utf-8-validate:
       optional: true
   checksum: 91d4d35bc99ff6df483bdf029b9ea4bfd7af1f16fc91231a96777a63d263e1eabf486e13a2353970efc534f9faa43bdbf9ee76525af22f4752cbc5ebda333975
+  languageName: node
+  linkType: hard
+
+"xlsx@https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz":
+  version: 0.20.2
+  resolution: "xlsx@https://cdn.sheetjs.com/xlsx-0.20.2/xlsx-0.20.2.tgz"
+  bin:
+    xlsx: ./bin/xlsx.njs
+  checksum: d6a7cce81cdf5f832311feaef08c8918cb51cdaac235efd29c7f6caf881f7aa797aa51cdbcb583a491ba82d1e7c2b97f92ed082eda754de05731a4558768e68d
   languageName: node
   linkType: hard
 
