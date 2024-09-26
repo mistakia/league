@@ -36,7 +36,7 @@ export default function ({ is_logged_in }) {
       header_label: 'Pos',
       size: 50,
       data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-      column_values: constants.positions,
+      column_values: ['TEAM', ...constants.positions],
       player_value_path: 'pos',
       component: React.memo(PlayerRowPositionColumn),
       operators: [

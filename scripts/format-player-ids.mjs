@@ -20,7 +20,7 @@ const format_player_ids = async () => {
   const players = await db('player').whereNotIn('pos', [
     'DEF',
     'OFF',
-    'TM',
+    'TEAM',
     'DST'
   ])
 
