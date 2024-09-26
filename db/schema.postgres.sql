@@ -2134,7 +2134,11 @@ CREATE TABLE public.dvoa_team_gamelogs (
     offense_dvoa numeric(5,1),
     defense_dvoa numeric(5,1),
     special_teams_dvoa numeric(5,1),
-    "timestamp" integer NOT NULL
+    "timestamp" integer NOT NULL,
+    pass_offense_dvoa numeric(5,1),
+    pass_defense_dvoa numeric(5,1),
+    rush_offense_dvoa numeric(5,1),
+    rush_defense_dvoa numeric(5,1)
 );
 
 
