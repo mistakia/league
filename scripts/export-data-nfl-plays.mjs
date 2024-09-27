@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 // import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, convertToCSV } from '#libs-shared'
+import { constants, convert_to_csv } from '#libs-shared'
 import { is_main } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -358,7 +358,7 @@ const export_data_nfl_plays = async ({
 
   const csv_data = [header, ...data]
   const csv_data_string = JSON.stringify(csv_data)
-  const csv = convertToCSV(csv_data_string)
+  const csv = convert_to_csv(csv_data_string)
 
   await fs.ensureDir(`${data_path}/nfl/plays/${year}`)
 

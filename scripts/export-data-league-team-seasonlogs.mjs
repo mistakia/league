@@ -6,7 +6,7 @@ import { fileURLToPath } from 'url'
 // import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { convertToCSV } from '#libs-shared'
+import { convert_to_csv } from '#libs-shared'
 import { is_main } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -29,7 +29,7 @@ const export_league_league_team_seasonlogs = async () => {
   }
   const csv_data = [header, ...data]
   const csv_data_string = JSON.stringify(csv_data)
-  const csv = convertToCSV(csv_data_string)
+  const csv = convert_to_csv(csv_data_string)
 
   const json_file_path = `${data_path}/league/league_team_seasonlogs.json`
   const csv_file_path = `${data_path}/league/league_team_seasonlogs.csv`

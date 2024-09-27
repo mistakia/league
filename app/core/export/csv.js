@@ -1,6 +1,6 @@
 /* global Blob */
 
-import { convertToCSV } from '@libs-shared'
+import { convert_to_csv } from '@libs-shared'
 
 export function csv({ headers, data, fileName = 'xo-football-export.csv' }) {
   if (headers) {
@@ -9,7 +9,7 @@ export function csv({ headers, data, fileName = 'xo-football-export.csv' }) {
 
   // Convert Object to JSON
   const jsonObject = JSON.stringify(data)
-  const csv = convertToCSV(jsonObject)
+  const csv = convert_to_csv(jsonObject)
   const exportedFilenmae = fileName + '.csv'
   const blob = new Blob([csv], { type: 'text/csvcharset=utf-8' })
   if (navigator.msSaveBlob) {
