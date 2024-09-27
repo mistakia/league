@@ -279,14 +279,20 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
     const file_name = `${view.view_name}-${timestamp}`
 
     switch (export_format) {
-      case 'csv':
-        formatted_results = convert_to_csv(data_view_results)
+      case 'csv': {
+        const header = {}
+        for (const field of Object.keys(data_view_results[0])) {
+          header[field] = field
+        }
+        const csv_data = [header, ...data_view_results]
+        formatted_results = convert_to_csv(csv_data)
         res.setHeader('Content-Type', 'text/csv')
         res.setHeader(
           'Content-Disposition',
           `attachment filename=${file_name}.csv`
         )
         break
+      }
       case 'json':
         formatted_results = JSON.stringify(data_view_results)
         res.setHeader('Content-Type', 'application/json')
