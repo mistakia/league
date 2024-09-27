@@ -7,8 +7,8 @@ import { common_column_params } from '@libs-shared'
 
 const { single_year, single_week } = common_column_params
 
-export default function ({ week }) {
-  return {
+export default function ({ week, is_logged_in }) {
+  const fields = {
     player_league_roster_status: {
       column_title: 'Roster Status',
       header_label: '',
@@ -103,4 +103,12 @@ export default function ({ week }) {
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER
     }
   }
+
+  if (!is_logged_in) {
+    Object.keys(fields).forEach((key) => {
+      fields[key].hidden = true
+    })
+  }
+
+  return fields
 }
