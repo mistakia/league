@@ -268,8 +268,6 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
           )
         }
       }
-    } else {
-      data_view_results = JSON.parse(data_view_results)
     }
 
     // Format the results based on export_format
