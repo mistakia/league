@@ -225,8 +225,7 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
       return res.status(400).send({ error: 'invalid export_format' })
     }
 
-    // Parse table_state
-    const table_state = JSON.parse(view.table_state)
+    const { table_state } = view
 
     // Generate cache key
     const cache_key = `/data-views/${get_data_view_hash({
