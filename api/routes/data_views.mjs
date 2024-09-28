@@ -263,7 +263,7 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
         const cache_ttl = data_view_metadata.cache_ttl || 1000 * 60 * 60 * 12 // 12 hours
         await redis_cache.set(
           cache_key,
-          JSON.stringify(data_view_results),
+          data_view_results,
           cache_ttl
         )
         if (data_view_metadata.cache_expire_at) {
