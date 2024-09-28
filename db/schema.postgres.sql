@@ -1317,7 +1317,6 @@ DROP INDEX IF EXISTS public.idx_24967_joint_hist_rate;
 DROP INDEX IF EXISTS public.idx_24967_hist_rate_soft;
 DROP INDEX IF EXISTS public.idx_24967_hist_edge_soft;
 DROP INDEX IF EXISTS public.idx_24967_highest_payout;
-DROP INDEX IF EXISTS public.idx_24964_pairing_prop;
 DROP INDEX IF EXISTS public.idx_24959_market;
 DROP INDEX IF EXISTS public.idx_24954_market;
 DROP INDEX IF EXISTS public.idx_24949_market;
@@ -1404,6 +1403,7 @@ ALTER TABLE IF EXISTS ONLY public.transactions DROP CONSTRAINT IF EXISTS transac
 ALTER TABLE IF EXISTS ONLY public.teams DROP CONSTRAINT IF EXISTS teams_pkey;
 ALTER TABLE IF EXISTS ONLY public.seasons DROP CONSTRAINT IF EXISTS seasons_pkey;
 ALTER TABLE IF EXISTS ONLY public.rosters_players DROP CONSTRAINT IF EXISTS rosters_players_pkey;
+ALTER TABLE IF EXISTS ONLY public.prop_pairing_props DROP CONSTRAINT IF EXISTS prop_pairing_props_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_swish_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_salaries DROP CONSTRAINT IF EXISTS player_salaries_pid_esbid_source_contest_id_key;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_rts_id_unique;
@@ -1483,6 +1483,7 @@ ALTER TABLE IF EXISTS ONLY public.dvoa_team_unit_seasonlogs_history DROP CONSTRA
 ALTER TABLE IF EXISTS ONLY public.dvoa_team_seasonlogs_index DROP CONSTRAINT IF EXISTS dvoa_team_seasonlogs_index_pkey;
 ALTER TABLE IF EXISTS ONLY public.dvoa_team_seasonlogs_history DROP CONSTRAINT IF EXISTS dvoa_team_seasonlogs_history_year_team_week_key;
 ALTER TABLE IF EXISTS ONLY public.dvoa_team_gamelogs DROP CONSTRAINT IF EXISTS dvoa_team_gamelogs_pkey;
+ALTER TABLE IF EXISTS ONLY public.current_week_prop_market_selections_index DROP CONSTRAINT IF EXISTS current_week_prop_market_selections_index_pkey;
 ALTER TABLE IF EXISTS ONLY public.config DROP CONSTRAINT IF EXISTS config_pkey;
 ALTER TABLE IF EXISTS ONLY public.config DROP CONSTRAINT IF EXISTS config_key_unique;
 ALTER TABLE IF EXISTS public.waivers ALTER COLUMN uid DROP DEFAULT;
@@ -1718,6 +1719,7 @@ DROP TABLE IF EXISTS public.dvoa_team_seasonlogs_history;
 DROP TABLE IF EXISTS public.dvoa_team_gamelogs;
 DROP SEQUENCE IF EXISTS public.draft_uid_seq;
 DROP TABLE IF EXISTS public.draft;
+DROP TABLE IF EXISTS public.current_week_prop_market_selections_index;
 DROP TABLE IF EXISTS public.config;
 DROP FUNCTION IF EXISTS public.update_modified_column();
 DROP FUNCTION IF EXISTS public.player_name_search_vector_update();
@@ -2108,6 +2110,52 @@ CREATE TABLE public.config (
     key character varying(255) NOT NULL,
     value jsonb,
     updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+--
+-- Name: current_week_prop_market_selections_index; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.current_week_prop_market_selections_index (
+    source_id public.market_source_id NOT NULL,
+    source_market_id character varying(255) NOT NULL,
+    source_selection_id character varying(255) NOT NULL,
+    selection_pid character varying(25),
+    current_season_hits_soft integer,
+    current_season_hit_weeks_soft jsonb,
+    current_season_hits_hard integer,
+    current_season_hit_weeks_hard jsonb,
+    current_season_weeks_played jsonb,
+    last_five_hits_soft integer,
+    last_five_hit_weeks_soft jsonb,
+    last_five_hits_hard integer,
+    last_five_hit_weeks_hard jsonb,
+    last_five_weeks_played jsonb,
+    last_ten_hits_soft integer,
+    last_ten_hit_weeks_soft jsonb,
+    last_ten_hits_hard integer,
+    last_ten_hit_weeks_hard jsonb,
+    last_ten_weeks_played jsonb,
+    last_season_hits_soft integer,
+    last_season_hit_weeks_soft jsonb,
+    last_season_hits_hard integer,
+    last_season_hit_weeks_hard jsonb,
+    last_season_weeks_played jsonb,
+    overall_hits_soft integer,
+    overall_hit_weeks_soft jsonb,
+    overall_hits_hard integer,
+    overall_hit_weeks_hard jsonb,
+    overall_weeks_played jsonb,
+    current_season_hits_opp integer,
+    current_season_opp_hit_weeks jsonb,
+    current_season_opp_weeks_played jsonb,
+    name character varying(255),
+    team character varying(3),
+    pos character varying(4),
+    opp character varying(3),
+    market_type character varying(50),
+    esbid bigint
 );
 
 
@@ -17916,8 +17964,9 @@ CREATE TABLE public.prop_markets_index (
 --
 
 CREATE TABLE public.prop_pairing_props (
-    pairing_id character varying(30) NOT NULL,
-    prop_id bigint NOT NULL
+    pairing_id character varying(150) NOT NULL,
+    source_market_id character varying(255) NOT NULL,
+    source_selection_id character varying(255) NOT NULL
 );
 
 
@@ -17926,7 +17975,7 @@ CREATE TABLE public.prop_pairing_props (
 --
 
 CREATE TABLE public.prop_pairings (
-    pairing_id character varying(30) NOT NULL,
+    pairing_id character varying(150) NOT NULL,
     source_id public.market_source_id NOT NULL,
     name character varying(150),
     team character varying(3),
@@ -17935,23 +17984,36 @@ CREATE TABLE public.prop_pairings (
     market_prob numeric(5,4),
     risk_total numeric(6,3),
     payout_total numeric(7,3),
-    hist_rate_soft numeric(5,4),
-    hist_rate_hard numeric(5,4),
-    opp_allow_rate numeric(5,4),
-    total_games smallint,
-    week_last_hit smallint,
-    week_first_hit smallint,
-    joint_hist_rate numeric(5,4),
-    joint_games smallint,
-    hist_edge_soft numeric(6,5),
-    hist_edge_hard numeric(6,5),
-    is_pending smallint,
-    is_success smallint,
+    current_season_hist_rate_soft numeric(5,4),
+    current_season_hist_rate_hard numeric(5,4),
+    current_season_opp_allow_rate numeric(5,4),
+    current_season_total_games smallint,
+    current_season_week_last_hit smallint,
+    current_season_week_first_hit smallint,
+    current_season_joint_hist_rate_soft numeric(5,4),
+    current_season_joint_games smallint,
+    current_season_hist_edge_soft numeric(6,5),
+    current_season_hist_edge_hard numeric(6,5),
     highest_payout integer,
     lowest_payout integer,
     second_lowest_payout integer,
-    sum_hist_rate_soft numeric(5,4),
-    sum_hist_rate_hard numeric(5,4)
+    current_season_sum_hist_rate_soft numeric(5,4),
+    current_season_sum_hist_rate_hard numeric(5,4),
+    last_five_hist_rate_soft numeric(5,4),
+    last_five_hist_rate_hard numeric(5,4),
+    last_five_joint_hist_rate_soft numeric(5,4),
+    last_five_hist_edge_soft numeric(6,5),
+    last_five_hist_edge_hard numeric(6,5),
+    last_ten_hist_rate_soft numeric(5,4),
+    last_ten_hist_rate_hard numeric(5,4),
+    last_ten_joint_hist_rate_soft numeric(5,4),
+    last_ten_hist_edge_soft numeric(6,5),
+    last_ten_hist_edge_hard numeric(6,5),
+    last_season_hist_rate_soft numeric(5,4),
+    last_season_hist_rate_hard numeric(5,4),
+    last_season_joint_hist_rate_soft numeric(5,4),
+    last_season_hist_edge_soft numeric(6,5),
+    last_season_hist_edge_hard numeric(6,5)
 );
 
 
@@ -19480,6 +19542,14 @@ ALTER TABLE ONLY public.config
 
 
 --
+-- Name: current_week_prop_market_selections_index current_week_prop_market_selections_index_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.current_week_prop_market_selections_index
+    ADD CONSTRAINT current_week_prop_market_selections_index_pkey PRIMARY KEY (source_id, source_market_id, source_selection_id);
+
+
+--
 -- Name: dvoa_team_gamelogs dvoa_team_gamelogs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -20112,6 +20182,14 @@ ALTER TABLE ONLY public.player
 
 
 --
+-- Name: prop_pairing_props prop_pairing_props_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.prop_pairing_props
+    ADD CONSTRAINT prop_pairing_props_unique UNIQUE (pairing_id, source_market_id, source_selection_id);
+
+
+--
 -- Name: rosters_players rosters_players_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -20722,13 +20800,6 @@ CREATE UNIQUE INDEX idx_24959_market ON public.prop_markets_index USING btree (s
 
 
 --
--- Name: idx_24964_pairing_prop; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE UNIQUE INDEX idx_24964_pairing_prop ON public.prop_pairing_props USING btree (pairing_id, prop_id);
-
-
---
 -- Name: idx_24967_highest_payout; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -20739,21 +20810,21 @@ CREATE INDEX idx_24967_highest_payout ON public.prop_pairings USING btree (highe
 -- Name: idx_24967_hist_edge_soft; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_24967_hist_edge_soft ON public.prop_pairings USING btree (hist_edge_soft);
+CREATE INDEX idx_24967_hist_edge_soft ON public.prop_pairings USING btree (current_season_hist_edge_soft);
 
 
 --
 -- Name: idx_24967_hist_rate_soft; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_24967_hist_rate_soft ON public.prop_pairings USING btree (hist_rate_soft);
+CREATE INDEX idx_24967_hist_rate_soft ON public.prop_pairings USING btree (current_season_hist_rate_soft);
 
 
 --
 -- Name: idx_24967_joint_hist_rate; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_24967_joint_hist_rate ON public.prop_pairings USING btree (joint_hist_rate);
+CREATE INDEX idx_24967_joint_hist_rate ON public.prop_pairings USING btree (current_season_joint_hist_rate_soft);
 
 
 --
@@ -20774,7 +20845,7 @@ CREATE INDEX idx_24967_market_prob ON public.prop_pairings USING btree (market_p
 -- Name: idx_24967_opp_allow_rate; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_24967_opp_allow_rate ON public.prop_pairings USING btree (opp_allow_rate);
+CREATE INDEX idx_24967_opp_allow_rate ON public.prop_pairings USING btree (current_season_opp_allow_rate);
 
 
 --
@@ -20809,7 +20880,7 @@ CREATE INDEX idx_24967_team ON public.prop_pairings USING btree (team);
 -- Name: idx_24967_total_games; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_24967_total_games ON public.prop_pairings USING btree (total_games);
+CREATE INDEX idx_24967_total_games ON public.prop_pairings USING btree (current_season_total_games);
 
 
 --

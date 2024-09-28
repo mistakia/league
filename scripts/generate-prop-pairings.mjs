@@ -1,6 +1,7 @@
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+import * as oddslib from 'oddslib'
 
 import db from '#db'
 import { constants, groupBy } from '#libs-shared'
@@ -14,136 +15,105 @@ debug.enable('generate-prop-pairings')
 
 const get_prop_pairing_id = (props) =>
   props
-    .sort((a, b) => a.prop_id - b.prop_id)
-    .map((p) => p.prop_id)
+    .sort((a, b) => {
+      // Sort by source_market_id first, then by source_selection_id
+      if (a.source_market_id !== b.source_market_id) {
+        return a.source_market_id.localeCompare(b.source_market_id)
+      }
+      return a.source_selection_id - b.source_selection_id
+    })
+    .map((p) => `${p.source_market_id}:${p.source_selection_id}`)
     .join('/')
 
-/* const PASS_ALT_LINES = [199.5, 224.5, 249.5, 274.5, 299.5, 324.5, 349.5]
- * const RUSH_RECV_ALT_LINES = [
- *   24.5, 39.5, 49.5, 59.5, 69.5, 79.5, 89.5, 99.5, 109.5, 124.5, 149.5
- * ]
- *  */
-
-/* const generate_player_props = (active_player) => {
- *   const prop_rows = []
- *   const base = {
- *     ...active_player,
- *     o: null,
- *     u: null,
- *     o_am: null,
- *     u_am: null,
- *     source_id: 0,
- *     timestamp: 0,
- *     time_type: 0
- *   }
- *
- *   if (active_player.pos === 'QB') {
- *     for (const line of PASS_ALT_LINES) {
- *       prop_rows.push({
- *         ln: line,
- *         prop_type: player_prop_types.GAME_ALT_PASSING_YARDS,
- *         ...base
- *       })
- *     }
- *   }
- *
- *   if (active_player.pos === 'RB') {
- *     for (const line of RUSH_RECV_ALT_LINES) {
- *       prop_rows.push({
- *         ln: line,
- *         prop_type: player_prop_types.GAME_ALT_RUSHING_YARDS,
- *         ...base
- *       })
- *     }
- *   }
- *
- *   if (active_player.pos === 'WR' || active_player.pos === 'RB') {
- *     for (const line of RUSH_RECV_ALT_LINES) {
- *       prop_rows.push({
- *         ln: line,
- *         prop_type: player_prop_types.GAME_ALT_RECEIVING_YARDS,
- *         ...base
- *       })
- *     }
- *   }
- *
- *   return prop_rows
- * }
- *
- * const generate_props = ({ prop_rows, active_players }) => {
- *   const props_index = {}
- *   for (const prop_row of prop_rows) {
- *     props_index[`${prop_row.pid}_${prop_row.prop_type}_${prop_row.ln}`] = true
- *   }
- *
- *   for (const active_player of active_players) {
- *     const active_player_props = generate_player_props(active_player)
- *     for (const prop_row of active_player_props) {
- *       if (
- *         !props_index[`${prop_row.pid}_${prop_row.prop_type}_${prop_row.ln}`]
- *       ) {
- *         prop_rows.push(prop_row)
- *       }
- *     }
- *   }
- *
- *   return prop_rows
- * }
- *  */
+const extract_week = (week_string) => {
+  const parts = week_string.split('/')
+  return parseInt(parts[parts.length - 1], 10)
+}
 
 const get_stats_for_props = async ({ props, week }) => {
-  let joint_weeks = []
-  const weeks_index = {}
-  const hits_index_soft = {}
-  const hits_index_hard = {}
-  const opponent_weeks_index = {}
-  const opponent_hits_index = {}
-  for (const prop of props) {
-    if (prop.hit_weeks_soft)
-      prop.hit_weeks_soft.forEach((week) => (hits_index_soft[week] = true))
-    if (prop.hit_weeks_hard)
-      prop.hit_weeks_hard.forEach((week) => (hits_index_hard[week] = true))
-    if (prop.opp_hit_weeks)
-      prop.opp_hit_weeks.forEach((week) => (opponent_hits_index[week] = true))
-    if (prop.all_weeks)
-      prop.all_weeks.forEach((week) => (weeks_index[week] = true))
-    if (prop.opp_weeks)
-      prop.opp_weeks.forEach((week) => (opponent_weeks_index[week] = true))
+  const periods = ['last_five', 'last_ten', 'current_season', 'last_season']
+  const stats = {}
 
-    if (joint_weeks.length) {
-      joint_weeks = joint_weeks.filter((week) =>
-        (prop.all_weeks || []).includes(week)
-      )
-    } else {
-      joint_weeks = prop.all_weeks || []
+  for (const period of periods) {
+    let joint_weeks = []
+    const weeks_index = {}
+    const hits_index_soft = {}
+    const hits_index_hard = {}
+    const opponent_weeks_index = {}
+    const opponent_hits_index = {}
+
+    for (const prop of props) {
+      if (prop[`${period}_hit_weeks_soft`])
+        prop[`${period}_hit_weeks_soft`].forEach(
+          (week) => (hits_index_soft[week] = true)
+        )
+      if (prop[`${period}_hit_weeks_hard`])
+        prop[`${period}_hit_weeks_hard`].forEach(
+          (week) => (hits_index_hard[week] = true)
+        )
+      if (prop[`${period}_opp_hit_weeks`])
+        prop[`${period}_opp_hit_weeks`].forEach(
+          (week) => (opponent_hits_index[week] = true)
+        )
+
+      if (prop[`${period}_weeks_played`]) {
+        prop[`${period}_weeks_played`].forEach(
+          (week) => (weeks_index[week] = true)
+        )
+      }
+
+      if (prop[`${period}_opp_weeks_played`]) {
+        prop[`${period}_opp_weeks_played`].forEach(
+          (week) => (opponent_weeks_index[week] = true)
+        )
+      }
+
+      if (joint_weeks.length) {
+        joint_weeks = joint_weeks.filter((week) =>
+          prop[`${period}_weeks_played`].includes(week)
+        )
+      } else {
+        joint_weeks = prop[`${period}_weeks_played`] || []
+      }
+    }
+
+    const weeks = Object.keys(weeks_index)
+    const hits_soft = Object.keys(hits_index_soft)
+    const hits_hard = Object.keys(hits_index_hard)
+    const joint_week_soft_hits = hits_soft.filter((week) =>
+      joint_weeks.includes(week)
+    )
+
+    const opponent_weeks = Object.keys(opponent_weeks_index)
+    const opponent_hits = Object.keys(opponent_hits_index)
+
+    stats[period] = {
+      hist_rate_soft: hits_soft.length / weeks.length || 0,
+      hist_rate_hard: hits_hard.length / weeks.length || 0,
+      opp_allow_rate: opponent_hits.length / opponent_weeks.length || 0,
+      total_games: weeks.length,
+      week_last_hit: hits_soft.length
+        ? Math.max(...hits_soft.map(extract_week))
+        : null,
+      week_first_hit: hits_soft.length
+        ? Math.min(...hits_soft.map(extract_week))
+        : null,
+      joint_hist_rate_soft:
+        joint_week_soft_hits.length / joint_weeks.length || 0,
+      joint_games: joint_weeks.length
     }
   }
 
-  const weeks = Object.keys(weeks_index).map((i) => Number(i))
-  const hits_soft = Object.keys(hits_index_soft).map((i) => Number(i))
-  const hits_hard = Object.keys(hits_index_hard).map((i) => Number(i))
-  const joint_week_hits = hits_soft.filter((week) => joint_weeks.includes(week))
-
-  const opponent_weeks = Object.keys(opponent_weeks_index).map((i) => Number(i))
-  const opponent_hits = Object.keys(opponent_hits_index).map((i) => Number(i))
-
-  return {
-    hist_rate_soft: hits_soft.length / weeks.length || 0,
-    hist_rate_hard: hits_hard.length / weeks.length || 0,
-    opp_allow_rate: opponent_hits.length / opponent_weeks.length || 0,
-    total_games: weeks.length,
-    week_last_hit: hits_soft.length ? Math.max(...hits_soft) : null,
-    week_first_hit: hits_soft.length ? Math.min(...hits_soft) : null,
-
-    joint_hist_rate: joint_week_hits.length / joint_weeks.length || 0,
-    joint_games: joint_weeks.length
-    // joint_week_last_hit: Math.max(...joint_week_hits),
-    // joint_week_first_hit: Math.min(...joint_week_hits)
-  }
+  return stats
 }
 
 const format_prop_pairing = ({ props, prop_stats, week, team, source }) => {
-  const prop_odds_array = props.map((p) => 1 - p.market_prob)
+  const prop_odds_array = props.map((p) => {
+    const implied_probability = oddslib
+      .from('moneyline', p.odds_american)
+      .to('impliedProbability')
+    return 1 - implied_probability
+  })
   const prop_odds_combined = prop_odds_array.reduce((a, b) => a * b, 1)
   const market_prob = 1 - prop_odds_combined
 
@@ -159,22 +129,23 @@ const format_prop_pairing = ({ props, prop_stats, week, team, source }) => {
   )
 
   const prop_names = props.map((p) => p.name)
-  const is_pending = props
-    .map((p) => p.is_pending)
-    .every((pending) => Boolean(pending) === true)
-  const is_success = props
-    .map((p) => p.is_success)
-    .some((success) => Boolean(success) === true)
-
-  const status = is_pending ? 'pending' : is_success ? 'hit' : 'miss'
+  // TODO fix
+  // const is_pending = props
+  //   .map((p) => p.is_pending)
+  //   .every((pending) => Boolean(pending) === true)
+  // const is_success = props
+  //   .map((p) => p.is_success)
+  //   .some((success) => Boolean(success) === true)
+  // const status = is_pending ? 'pending' : is_success ? 'hit' : 'miss'
+  const status = 'pending'
   const pairing_id = get_prop_pairing_id(props)
-  const sorted_payouts = props.map((p) => p.o_am).sort((a, b) => a - b)
+  const sorted_payouts = props.map((p) => p.odds_american).sort((a, b) => a - b)
   const sum_hist_rate_soft = props.reduce(
-    (accumulator, prop) => accumulator + prop.hist_rate_soft,
+    (accumulator, prop) => accumulator + prop.current_season_hit_rate_soft,
     0
   )
   const sum_hist_rate_hard = props.reduce(
-    (accumulator, prop) => accumulator + prop.hist_rate_hard,
+    (accumulator, prop) => accumulator + prop.current_season_hit_rate_hard,
     0
   )
   const pairing = {
@@ -185,22 +156,49 @@ const format_prop_pairing = ({ props, prop_stats, week, team, source }) => {
     week,
     market_prob,
     ...props_totals,
-    ...prop_stats,
+    current_season_hist_rate_soft: prop_stats.current_season.hist_rate_soft,
+    current_season_hist_rate_hard: prop_stats.current_season.hist_rate_hard,
+    current_season_opp_allow_rate: prop_stats.current_season.opp_allow_rate,
+    current_season_total_games: prop_stats.current_season.total_games,
+    current_season_week_last_hit: prop_stats.current_season.week_last_hit,
+    current_season_week_first_hit: prop_stats.current_season.week_first_hit,
+    current_season_joint_hist_rate_soft:
+      prop_stats.current_season.joint_hist_rate_soft,
+    current_season_joint_games: prop_stats.current_season.joint_games,
     size: props.length,
-    hist_edge_soft: prop_stats.hist_rate_soft - market_prob,
-    hist_edge_hard: prop_stats.hist_rate_hard - market_prob,
-    is_pending,
-    is_success,
+    current_season_hist_edge_soft:
+      prop_stats.current_season.hist_rate_soft - market_prob,
+    current_season_hist_edge_hard:
+      prop_stats.current_season.hist_rate_hard - market_prob,
+    // TODO fix
+    // is_pending,
+    // is_success,
     highest_payout: sorted_payouts[sorted_payouts.length - 1],
     lowest_payout: sorted_payouts[0],
     second_lowest_payout: sorted_payouts[1],
-    sum_hist_rate_soft,
-    sum_hist_rate_hard
+    current_season_sum_hist_rate_soft: sum_hist_rate_soft,
+    current_season_sum_hist_rate_hard: sum_hist_rate_hard
+  }
+
+  // Add stats for other periods
+  for (const period of ['last_five', 'last_ten', 'last_season']) {
+    pairing[`${period}_hist_rate_soft`] = prop_stats[period].hist_rate_soft
+    pairing[`${period}_hist_rate_hard`] = prop_stats[period].hist_rate_hard
+    pairing[`${period}_joint_hist_rate_soft`] =
+      prop_stats[period].joint_hist_rate_soft
+    pairing[`${period}_hist_edge_soft`] =
+      prop_stats[period].hist_rate_soft - market_prob
+    pairing[`${period}_hist_edge_hard`] =
+      prop_stats[period].hist_rate_hard - market_prob
   }
 
   return {
     pairing,
-    pairing_props: props.map((p) => ({ pairing_id, prop_id: p.prop_id }))
+    pairing_props: props.map((p) => ({
+      pairing_id,
+      source_market_id: p.source_market_id,
+      source_selection_id: p.source_selection_id
+    }))
   }
 }
 
@@ -208,18 +206,42 @@ const generate_prop_pairings = async ({
   week = constants.season.nfl_seas_week,
   year = constants.season.year,
   seas_type = constants.season.nfl_seas_type,
-  source = 'FANDUEL'
+  source = 'FANDUEL',
+  dry_run = false
 } = {}) => {
   console.time('generate_prop_pairings')
 
-  const prop_rows = await db('props_index')
-    .select('props_index.*')
-    .join('nfl_games', 'nfl_games.esbid', 'props_index.esbid')
-    .whereNotNull('hist_edge_soft')
-    .where('hits_soft', '>', 1)
-    .where('o_am', '<', 1000)
-    .where('o_am', '>', -350)
-    .whereIn('prop_type', [
+  const prop_rows = await db('current_week_prop_market_selections_index')
+    .select(
+      'current_week_prop_market_selections_index.*',
+      'prop_market_selections_index.*',
+      'nfl_games.year',
+      'nfl_games.week',
+      'nfl_games.seas_type'
+    )
+    .join('prop_market_selections_index', function () {
+      this.on(
+        'prop_market_selections_index.source_id',
+        '=',
+        'current_week_prop_market_selections_index.source_id'
+      )
+        .andOn(
+          'prop_market_selections_index.source_market_id',
+          '=',
+          'current_week_prop_market_selections_index.source_market_id'
+        )
+        .andOn(
+          'prop_market_selections_index.source_selection_id',
+          '=',
+          'current_week_prop_market_selections_index.source_selection_id'
+        )
+    })
+    .join('nfl_games', 'nfl_games.esbid', 'current_week_prop_market_selections_index.esbid')
+    .whereNotNull('current_season_hits_soft')
+    .where('current_season_hits_soft', '>', 1)
+    .where('prop_market_selections_index.odds_american', '<', 1000)
+    .where('prop_market_selections_index.odds_american', '>', -350)
+    .whereIn('current_week_prop_market_selections_index.market_type', [
       player_prop_types.GAME_ALT_PASSING_YARDS,
       player_prop_types.GAME_ALT_RECEIVING_YARDS,
       player_prop_types.GAME_ALT_RUSHING_YARDS,
@@ -246,31 +268,15 @@ const generate_prop_pairings = async ({
       player_prop_types.GAME_ALT_RUSHING_ATTEMPTS,
       player_prop_types.GAME_ALT_RECEPTIONS
     ])
-    .where('time_type', 'CLOSE')
-    .where('source_id', source)
-    // .whereNot('source_id', constants.sources.PRIZEPICKS)
+    .where('prop_market_selections_index.time_type', 'CLOSE')
+    .where('prop_market_selections_index.source_id', source)
     .where('nfl_games.week', week)
     .where('nfl_games.year', year)
     .where('nfl_games.seas_type', seas_type)
 
   log(`loaded ${prop_rows.length} props`)
 
-  /* const prop_pid_query = await db('props_index')
-   *   .select('pid')
-   *   .where({ year: constants.season.year, week: week - 1 })
-   *   .groupBy('pid')
-   * const prop_pids = prop_pid_query.map((p) => p.pid)
-
-   * const active_players = await db('player')
-   *   .select('fname', 'lname', 'pid', 'current_nfl_team', 'pos')
-   *   .whereIn('pos', ['QB', 'RB', 'WR', 'TE'])
-   *   .whereNot('current_nfl_team', 'INA')
-   *   .where('nfl_status', constants.player_nfl_status.ACTIVE)
-   *   .whereIn('pid', prop_pids)
-
-   * log(`loaded ${active_players.length} active players`)
-   */
-  const all_props = prop_rows // generate_props({ prop_rows, active_players })
+  const all_props = prop_rows
 
   log(`generated ${all_props.length} props`)
 
@@ -280,7 +286,7 @@ const generate_prop_pairings = async ({
   const props_by_team = groupBy(all_props, 'team')
   for (const tm of Object.keys(props_by_team)) {
     const tm_props = props_by_team[tm]
-    const props_by_pid = groupBy(tm_props, 'pid')
+    const props_by_pid = groupBy(tm_props, 'selection_pid')
 
     const pids = Object.keys(props_by_pid)
     for (let i = 0; i < pids.length; i++) {
@@ -372,8 +378,39 @@ const generate_prop_pairings = async ({
 
   log(`generated ${prop_pairing_inserts.length} prop pairings`)
 
+  if (dry_run) {
+    // Log props with the same pairing_id
+    const pairing_id_counts = {}
+    prop_pairing_inserts.forEach((pairing) => {
+      if (pairing_id_counts[pairing.pairing_id]) {
+        pairing_id_counts[pairing.pairing_id]++
+      } else {
+        pairing_id_counts[pairing.pairing_id] = 1
+      }
+    })
+
+    const duplicate_pairings = Object.entries(pairing_id_counts).filter(
+      ([_, count]) => count > 1
+    )
+
+    if (duplicate_pairings.length > 0) {
+      log(`Found ${duplicate_pairings.length} pairing_ids with multiple props:`)
+      duplicate_pairings.forEach(([pairing_id, count]) => {
+        log(`pairing_id: ${pairing_id}, count: ${count}`)
+        const duplicates = prop_pairing_inserts.filter(
+          (p) => p.pairing_id === pairing_id
+        )
+        log(duplicates)
+      })
+    } else {
+      log('No duplicate pairing_ids found.')
+    }
+    log(prop_pairing_inserts[0])
+    return
+  }
+
   if (prop_pairing_inserts.length) {
-    const chunk_size = 10000
+    const chunk_size = 1000
     for (let i = 0; i < prop_pairing_inserts.length; i += chunk_size) {
       const chunk = prop_pairing_inserts.slice(i, i + chunk_size)
       await db('prop_pairings').insert(chunk).onConflict('pairing_id').merge()
@@ -384,7 +421,7 @@ const generate_prop_pairings = async ({
         const chunk = prop_pairing_props_inserts.slice(i, i + chunk_size)
         await db('prop_pairing_props')
           .insert(chunk)
-          .onConflict(['pairing_id', 'prop_id'])
+          .onConflict(['pairing_id', 'source_market_id', 'source_selection_id'])
           .merge()
       }
     }
@@ -402,7 +439,8 @@ const main = async () => {
     const year = argv.year
     const seas_type = argv.seas_type
     const source = argv.source
-    await generate_prop_pairings({ week, year, seas_type, source })
+    const dry_run = argv.dry
+    await generate_prop_pairings({ week, year, seas_type, source, dry_run })
   } catch (err) {
     error = err
     log(error)
