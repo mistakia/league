@@ -1,13 +1,11 @@
-// TODO remove this file - not used anymore
 import debug from 'debug'
-import oddslib from 'oddslib'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#libs-shared'
 import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
-import { is_main } from '#libs-server'
+import { is_main, batch_insert } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -42,13 +40,13 @@ const prop_desc = {
   [player_prop_types.GAME_ALT_RUSHING_ATTEMPTS]: 'rush atts'
 }
 
-const get_hits = ({ line, prop_type, player_gamelogs, strict }) =>
+const get_hits = ({ line, market_type, player_gamelogs, strict }) =>
   player_gamelogs.filter((player_gamelog) =>
-    is_hit({ line, prop_type, player_gamelog, strict })
+    is_hit({ line, market_type, player_gamelog, strict })
   )
 
-const is_hit = ({ line, prop_type, player_gamelog, strict = false }) => {
-  switch (prop_type) {
+const is_hit = ({ line, market_type, player_gamelog, strict = false }) => {
+  switch (market_type) {
     case player_prop_types.GAME_PASSING_YARDS:
     case player_prop_types.GAME_ALT_PASSING_YARDS:
       if (strict) {
@@ -144,160 +142,160 @@ const format_prop_row = ({
   opponent,
   player_row,
   esbid,
-  seas_type
+  seas_type,
+  year
 }) => {
-  const formatted_prop_row = {
-    pid: prop_row.selection_pid,
-    esbid: prop_row.esbid,
-    week: prop_row.week,
-    year: prop_row.year,
-    prop_type: prop_row.market_type,
-    ln: prop_row.selection_metric_line,
-    o: prop_row.odds_decimal,
-    o_am: prop_row.odds_american,
-    source_id: prop_row.source_id,
-    timestamp: prop_row.timestamp,
-    time_type: prop_row.time_type
+  const player_gamelogs = all_player_gamelogs.filter(
+    (p) => p.pid === prop_row.selection_pid
+  )
+
+  const current_season_opponent_player_gamelogs = all_player_gamelogs.filter(
+    (p) => {
+      if (p.opp !== opponent) {
+        return false
+      }
+      if (p.pos !== player_row.pos) {
+        return false
+      }
+
+      if (p.year !== year) {
+        return false
+      }
+
+      if (seas_type === 'REG' && p.seas_type === 'POST') {
+        return false
+      }
+
+      if (seas_type === p.seas_type && p.week >= week) {
+        return false
+      }
+
+      return true
+    }
+  )
+
+  const format_week = (year, seas_type, week) => `/${year}/${seas_type}/${week}`
+
+  const current_season_gamelogs = player_gamelogs.filter(
+    (p) => p.year === year && p.seas_type === seas_type
+  )
+  const last_season_gamelogs = player_gamelogs.filter(
+    (p) => p.year === year - 1
+  )
+  const last_five_gamelogs = player_gamelogs.slice(-5)
+  const last_ten_gamelogs = player_gamelogs.slice(-10)
+
+  const get_hit_data = (gamelogs) => {
+    const hits_soft = get_hits({
+      line: prop_row.selection_metric_line,
+      prop_type: prop_row.market_type,
+      player_gamelogs: gamelogs
+    })
+    const hits_hard = get_hits({
+      line: prop_row.selection_metric_line,
+      prop_type: prop_row.market_type,
+      player_gamelogs: gamelogs,
+      strict: true
+    })
+    return {
+      hits_soft: hits_soft.length,
+      hit_weeks_soft: hits_soft.length
+        ? JSON.stringify(
+            hits_soft
+              .map((p) => format_week(p.year, p.seas_type, p.week))
+              .sort()
+          )
+        : null,
+      hits_hard: hits_hard.length,
+      hit_weeks_hard: hits_hard.length
+        ? JSON.stringify(
+            hits_hard
+              .map((p) => format_week(p.year, p.seas_type, p.week))
+              .sort()
+          )
+        : null,
+      weeks_played: JSON.stringify(
+        gamelogs.map((p) => format_week(p.year, p.seas_type, p.week)).sort()
+      )
+    }
   }
 
-  // prop_row properties
-  // - pid
-  // - esbid
-  // - week
-  // - year
-  // - prop_type
-  // - ln
-  // - o
-  // - u
-  // - o_am
-  // - u_am
-  // - source_id
-  // - timestamp
-  // - time_type
+  const current_season_data = get_hit_data(current_season_gamelogs)
+  const last_season_data = get_hit_data(last_season_gamelogs)
+  const last_five_data = get_hit_data(last_five_gamelogs)
+  const last_ten_data = get_hit_data(last_ten_gamelogs)
+  const overall_data = get_hit_data(player_gamelogs)
 
-  const odds = formatted_prop_row.o_am
-    ? oddslib.from('moneyline', formatted_prop_row.o_am)
-    : null
-  const market_prob = formatted_prop_row.o_am
-    ? odds.to('impliedProbability')
-    : null
-
-  const player_gamelogs = all_player_gamelogs.filter(
-    (p) => p.pid === formatted_prop_row.pid
-  )
-  const all_weeks = player_gamelogs.map((p) => p.week)
-  const current_week = player_gamelogs.find((p) => p.esbid === esbid)
-  const previous_weeks = player_gamelogs.filter((p) => {
-    if (seas_type === 'POST' && p.seas_type === 'REG') {
-      return true
-    }
-
-    if (seas_type === p.seas_type && p.week < week) {
-      return true
-    }
-
-    return false
-  })
-  const is_success = current_week
-    ? is_hit({
-        line: formatted_prop_row.ln,
-        prop_type: formatted_prop_row.prop_type,
-        player_gamelog: current_week,
-        strict: true
-      })
-    : null
-
-  const hits_soft = get_hits({
-    line: formatted_prop_row.ln,
-    prop_type: formatted_prop_row.prop_type,
-    player_gamelogs: previous_weeks
-  })
-  const hits_hard = get_hits({
-    line: formatted_prop_row.ln,
-    prop_type: formatted_prop_row.prop_type,
-    player_gamelogs: previous_weeks,
-    strict: true
-  })
-
-  const opponent_player_gamelogs = all_player_gamelogs.filter((p) => {
-    if (p.opp !== opponent) {
-      return false
-    }
-    if (p.pos !== player_row.pos) {
-      return false
-    }
-
-    if (seas_type === 'REG' && p.seas_type === 'POST') {
-      return false
-    }
-
-    if (seas_type === p.seas_type && p.week >= week) {
-      return false
-    }
-
-    return true
-  })
-  const opponent_total_weeks = [
-    ...new Set(opponent_player_gamelogs.map((p) => p.week))
-  ]
   const opponent_allowed_hits = get_hits({
-    line: formatted_prop_row.ln,
-    prop_type: formatted_prop_row.prop_type,
-    player_gamelogs: opponent_player_gamelogs
+    line: prop_row.selection_metric_line,
+    prop_type: prop_row.market_type,
+    player_gamelogs: current_season_opponent_player_gamelogs
   })
   const opponent_hit_weeks = [
-    ...new Set(opponent_allowed_hits.map((p) => p.week))
+    ...new Set(
+      opponent_allowed_hits.map((p) => format_week(p.year, p.seas_type, p.week))
+    )
+  ]
+  const opponent_weeks_played = [
+    ...new Set(
+      current_season_opponent_player_gamelogs.map((p) =>
+        format_week(p.year, p.seas_type, p.week)
+      )
+    )
   ]
 
-  const hist_rate_soft = hits_soft.length / player_gamelogs.length || 0
-  const hist_rate_hard = hits_hard.length / player_gamelogs.length || 0
-  let risk = formatted_prop_row.o_am ? 1 / odds.to('hongKong') : null
-  if (risk > 100) {
-    risk = null
-  }
-  const is_pending = !current_week
-
   return {
-    ...formatted_prop_row,
-    name: `${player_row.fname} ${player_row.lname} ${formatted_prop_row.ln} ${
-      prop_desc[formatted_prop_row.prop_type]
+    source_id: prop_row.source_id,
+    source_market_id: prop_row.source_market_id,
+    source_selection_id: prop_row.source_selection_id,
+    market_type: prop_row.market_type,
+    esbid: prop_row.esbid,
+    selection_pid: prop_row.selection_pid,
+
+    name: `${player_row.fname} ${player_row.lname} ${prop_row.selection_metric_line} ${
+      prop_desc[prop_row.market_type]
     }`,
     team: player_row.current_nfl_team,
     opp: opponent,
-    esbid,
     pos: player_row.pos,
 
-    hits_soft: hits_soft.length,
-    hit_weeks_soft: hits_soft.length
-      ? JSON.stringify(hits_soft.map((p) => p.week).sort())
-      : null,
-    hits_hard: hits_hard.length,
-    hit_weeks_hard: hits_hard.length
-      ? JSON.stringify(hits_hard.map((p) => p.week).sort())
-      : null,
-    hits_opp: opponent_hit_weeks.length,
-    opp_hit_weeks: opponent_hit_weeks.length
+    current_season_hits_soft: current_season_data.hits_soft,
+    current_season_hit_weeks_soft: current_season_data.hit_weeks_soft,
+    current_season_hits_hard: current_season_data.hits_hard,
+    current_season_hit_weeks_hard: current_season_data.hit_weeks_hard,
+    current_season_weeks_played: current_season_data.weeks_played,
+
+    last_five_hits_soft: last_five_data.hits_soft,
+    last_five_hit_weeks_soft: last_five_data.hit_weeks_soft,
+    last_five_hits_hard: last_five_data.hits_hard,
+    last_five_hit_weeks_hard: last_five_data.hit_weeks_hard,
+    last_five_weeks_played: last_five_data.weeks_played,
+
+    last_ten_hits_soft: last_ten_data.hits_soft,
+    last_ten_hit_weeks_soft: last_ten_data.hit_weeks_soft,
+    last_ten_hits_hard: last_ten_data.hits_hard,
+    last_ten_hit_weeks_hard: last_ten_data.hit_weeks_hard,
+    last_ten_weeks_played: last_ten_data.weeks_played,
+
+    last_season_hits_soft: last_season_data.hits_soft,
+    last_season_hit_weeks_soft: last_season_data.hit_weeks_soft,
+    last_season_hits_hard: last_season_data.hits_hard,
+    last_season_hit_weeks_hard: last_season_data.hit_weeks_hard,
+    last_season_weeks_played: last_season_data.weeks_played,
+
+    overall_hits_soft: overall_data.hits_soft,
+    overall_hit_weeks_soft: overall_data.hit_weeks_soft,
+    overall_hits_hard: overall_data.hits_hard,
+    overall_hit_weeks_hard: overall_data.hit_weeks_hard,
+    overall_weeks_played: overall_data.weeks_played,
+
+    current_season_hits_opp: opponent_hit_weeks.length,
+    current_season_opp_hit_weeks: opponent_hit_weeks.length
       ? JSON.stringify(opponent_hit_weeks.sort())
       : null,
-
-    hist_rate_soft,
-    hist_rate_hard,
-    opp_allow_rate:
-      opponent_hit_weeks.length / opponent_total_weeks.length || 0,
-
-    hist_edge_soft: hist_rate_soft - market_prob,
-    hist_edge_hard: hist_rate_hard - market_prob,
-    market_prob,
-
-    is_pending,
-    is_success,
-    risk,
-    payout: is_pending ? 0 : is_success ? 1 : -risk,
-
-    all_weeks: all_weeks.length ? JSON.stringify(all_weeks.sort()) : null,
-    opp_weeks: opponent_total_weeks.length
-      ? JSON.stringify(opponent_total_weeks.sort())
-      : null
+    current_season_opp_weeks_played: JSON.stringify(
+      opponent_weeks_played.sort()
+    )
   }
 }
 
@@ -305,7 +303,8 @@ const process_props_index = async ({
   prop_rows,
   seas_type = constants.season.nfl_seas_type,
   week = constants.season.nfl_seas_week,
-  year = constants.season.year
+  year = constants.season.year,
+  dry_run = false
 } = {}) => {
   log(`processing ${prop_rows.length} prop rows`)
 
@@ -322,16 +321,25 @@ const process_props_index = async ({
     `loaded ${nfl_games.length} nfl games for week ${week} ${constants.season.year}`
   )
 
+  const current_year = year
+  const previous_year = year - 1
+
   const all_player_gamelogs = await db('player_gamelogs')
     .select(
       'player_gamelogs.*',
       'nfl_games.esbid',
       'nfl_games.week',
-      'nfl_games.seas_type'
+      'nfl_games.seas_type',
+      'nfl_games.year'
     )
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
-    .where('nfl_games.year', year)
+    .whereIn('nfl_games.year', [current_year, previous_year])
     .whereNot('nfl_games.seas_type', 'PRE')
+    .orderBy([
+      { column: 'nfl_games.year', order: 'asc' },
+      { column: 'nfl_games.seas_type', order: 'desc' },
+      { column: 'nfl_games.week', order: 'asc' }
+    ])
 
   log(`loaded ${all_player_gamelogs.length} gamelogs`)
 
@@ -378,31 +386,30 @@ const process_props_index = async ({
       opponent,
       player_row,
       esbid: nfl_game.esbid,
-      seas_type
+      seas_type,
+      year
     })
 
     props_index_inserts.push(formatted_prop_row)
   }
 
-  if (argv.dry) {
-    log(props_index_inserts[0])
+  if (dry_run) {
+    console.log(props_index_inserts[0])
     return
   }
 
   if (props_index_inserts.length) {
     log(`saving ${props_index_inserts.length} prop rows`)
-    await db('props_index')
-      .insert(props_index_inserts)
-      .onConflict([
-        'source_id',
-        'pid',
-        'week',
-        'year',
-        'prop_type',
-        'ln',
-        'time_type'
-      ])
-      .merge()
+    await batch_insert({
+      items: props_index_inserts,
+      save: async (chunk) => {
+        await db('current_week_prop_market_selections_index')
+          .insert(chunk)
+          .onConflict(['source_id', 'source_market_id', 'source_selection_id'])
+          .merge()
+      },
+      batch_size: 500
+    })
   }
 }
 
@@ -413,7 +420,7 @@ const main = async () => {
     const year = argv.year || constants.season.year
     const seas_type = argv.seas_type || constants.season.nfl_seas_type
     const source = argv.source || 'FANDUEL'
-
+    const dry_run = argv.dry || false
     log({
       week,
       year,
@@ -475,7 +482,6 @@ const main = async () => {
       ])
       .where('prop_markets_index.time_type', 'CLOSE')
       .where('prop_markets_index.source_id', source)
-      // .whereNot('prop_markets_index.source_id', constants.sources.PRIZEPICKS)
       .where('nfl_games.week', week)
       .where('nfl_games.seas_type', seas_type)
       .where('nfl_games.year', year)
@@ -485,7 +491,7 @@ const main = async () => {
 
     const prop_rows = await prop_rows_query
 
-    await process_props_index({ prop_rows, week, year, seas_type })
+    await process_props_index({ prop_rows, week, year, seas_type, dry_run })
   } catch (err) {
     error = err
     log(error)
