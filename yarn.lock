@@ -5646,13 +5646,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"copy-text-to-clipboard@npm:^3.1.0":
-  version: 3.2.0
-  resolution: "copy-text-to-clipboard@npm:3.2.0"
-  checksum: df7115c197a166d51f59e4e20ab2a68a855ae8746d25ff149b5465c694d9a405c7e6684b73a9f87ba8d653070164e229c15dfdb9fd77c30be1ff0da569661060
-  languageName: node
-  linkType: hard
-
 "core-js-compat@npm:^3.31.0, core-js-compat@npm:^3.36.1":
   version: 3.37.0
   resolution: "core-js-compat@npm:3.37.0"
@@ -13165,16 +13158,15 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-table@mistakia/react-table#e8b90337a4083797c6a9f02f0f9fed8d004b1630":
+"react-table@mistakia/react-table#4dc402ee24fac0b3c0a33a9bfd537de842da098f":
   version: 0.0.1
-  resolution: "react-table@https://github.com/mistakia/react-table.git#commit=e8b90337a4083797c6a9f02f0f9fed8d004b1630"
+  resolution: "react-table@https://github.com/mistakia/react-table.git#commit=4dc402ee24fac0b3c0a33a9bfd537de842da098f"
   dependencies:
     "@dnd-kit/core": ^6.0.8
     "@dnd-kit/modifiers": ^6.0.1
     "@dnd-kit/sortable": ^7.0.2
     "@tanstack/react-table": ^8.8.5
     "@tanstack/react-virtual": 3.0.0-beta.54
-    copy-text-to-clipboard: ^3.1.0
   peerDependencies:
     "@emotion/react": ^11.10.6
     "@emotion/styled": ^11.10.6
@@ -13186,7 +13178,7 @@ __metadata:
     prop-types: ^15.8.1
     react: ^18.2.0
     react-dom: ^18.2.0
-  checksum: 63b0993fbd254325761859a45ac91a22744709fda91b57bd8070249ac7f105b67b8a642be16b1cb991cb984d0942bfd4ab88d4d39af5368feaa02746eef957bb
+  checksum: abd88ed1e0994d4ba4fb4aab82d25237686bdaa3f01c0f2b6ce3bed89b061fa9e59d32c321916a2d798a306385218a9447fce20ba6f3ebcb944da8705af63b44
   languageName: node
   linkType: hard
 
@@ -13906,7 +13898,7 @@ __metadata:
     react-router: ^6.23.0
     react-router-dom: ^6.23.0
     react-sortable-hoc: ^1.11.0
-    react-table: "mistakia/react-table#e8b90337a4083797c6a9f02f0f9fed8d004b1630"
+    react-table: "mistakia/react-table#4dc402ee24fac0b3c0a33a9bfd537de842da098f"
     react-virtualized: ^9.22.5
     redux: ^4.2.1
     redux-first-history: ^5.2.0
