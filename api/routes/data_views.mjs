@@ -207,6 +207,7 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
   const { logger, db } = req.app.locals
   try {
     const { view_id, export_format } = req.params
+    const { ignore_cache } = req.query
 
     // Validate view_id exists
     const view = await db('user_data_views')
@@ -237,11 +238,15 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
       splits: table_state.splits
     })}`
 
-    let data_view_results = await redis_cache.get(cache_key)
+    let data_view_results
     let data_view_metadata
 
+    if (!ignore_cache) {
+      data_view_results = await redis_cache.get(cache_key)
+    }
+
     if (!data_view_results) {
-      // If not cached, get the results
+      // If not cached or ignore_cache is true, get the results
       const result = await get_data_view_results({
         where: table_state.where,
         columns: table_state.columns,
