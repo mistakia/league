@@ -141,7 +141,6 @@ const format_prop_row = ({
   week,
   opponent,
   player_row,
-  esbid,
   seas_type,
   year
 }) => {
@@ -188,12 +187,12 @@ const format_prop_row = ({
   const get_hit_data = (gamelogs) => {
     const hits_soft = get_hits({
       line: prop_row.selection_metric_line,
-      prop_type: prop_row.market_type,
+      market_type: prop_row.market_type,
       player_gamelogs: gamelogs
     })
     const hits_hard = get_hits({
       line: prop_row.selection_metric_line,
-      prop_type: prop_row.market_type,
+      market_type: prop_row.market_type,
       player_gamelogs: gamelogs,
       strict: true
     })
@@ -228,7 +227,7 @@ const format_prop_row = ({
 
   const opponent_allowed_hits = get_hits({
     line: prop_row.selection_metric_line,
-    prop_type: prop_row.market_type,
+    market_type: prop_row.market_type,
     player_gamelogs: current_season_opponent_player_gamelogs
   })
   const opponent_hit_weeks = [
@@ -385,7 +384,6 @@ const process_props_index = async ({
       week,
       opponent,
       player_row,
-      esbid: nfl_game.esbid,
       seas_type,
       year
     })
