@@ -236,7 +236,11 @@ const generate_prop_pairings = async ({
           'current_week_prop_market_selections_index.source_selection_id'
         )
     })
-    .join('nfl_games', 'nfl_games.esbid', 'current_week_prop_market_selections_index.esbid')
+    .join(
+      'nfl_games',
+      'nfl_games.esbid',
+      'current_week_prop_market_selections_index.esbid'
+    )
     .whereNotNull('current_season_hits_soft')
     .where('current_season_hits_soft', '>', 1)
     .where('prop_market_selections_index.odds_american', '<', 1000)
