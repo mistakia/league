@@ -11,10 +11,15 @@ import Loading from '@components/loading'
 import { Team } from '@core/teams'
 import { get_string_from_object } from '@libs-shared'
 import { shorten_url } from '@core/utils'
+import { API_URL } from '@core/constants'
 
 import './data-views.styl'
 
 const fetch_more = () => {}
+
+const get_export_api_url = ({ view_id, export_format }) => {
+  return `${API_URL}/data-views/export/${view_id}/${export_format}`
+}
 
 export default function DataViewsPage({
   players,
@@ -213,6 +218,7 @@ export default function DataViewsPage({
         shorten_url={shorten_url}
         table_username={user_username}
         reset_cache={reset_data_view_cache}
+        get_export_api_url={get_export_api_url}
       />
     </div>
   )
