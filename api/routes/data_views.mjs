@@ -207,7 +207,7 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
   const { logger, db } = req.app.locals
   try {
     const { view_id, export_format } = req.params
-    const { ignore_cache } = req.query
+    const ignore_cache = req.query.ignore_cache === 'true'
 
     // Validate view_id exists
     const view = await db('user_data_views')
