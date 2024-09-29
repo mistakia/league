@@ -22,9 +22,9 @@ describe('LIBS SERVER get_data_view_results', () => {
   })
 
   it('should return a query', () => {
-    const { query, data_view_metadata } = get_data_view_results_query()
+    const { query, data_view_metadata } = get_data_view_results_query({ limit: 1000 })
     const expected_query =
-      'select "player"."pid", "player"."pos" from "player" group by "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by "player"."pid" asc limit 500'
+      'select "player"."pid", "player"."pos" from "player" group by "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by "player"."pid" asc limit 1000'
     expect(query.toString()).to.equal(expected_query)
     expect(data_view_metadata.cache_ttl).to.equal(one_week)
     expect(data_view_metadata.cache_expire_at).to.equal(null)
