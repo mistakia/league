@@ -153,6 +153,16 @@ const offset_schema = {
 }
 export const offset_validator = v.compile(offset_schema)
 
+const limit_schema = {
+  type: 'number',
+  optional: true,
+  integer: true,
+  min: 1,
+  max: 2000,
+  $$root: true
+}
+export const limit_validator = v.compile(limit_schema)
+
 const splits_schema = {
   type: 'array',
   items: {
@@ -164,6 +174,7 @@ const splits_schema = {
 
 const table_state_schema = {
   offset: offset_schema,
+  limit: limit_schema,
   sort: sort_schema,
   columns: columns_schema,
   where: where_schema,

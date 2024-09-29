@@ -208,6 +208,7 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
   try {
     const { view_id, export_format } = req.params
     const ignore_cache = req.query.ignore_cache === 'true'
+    const limit = req.query.limit ? Number(req.query.limit) || null : null
 
     // Validate view_id exists
     const view = await db('user_data_views')
@@ -253,13 +254,14 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
         sort: table_state.sort,
         offset: table_state.offset,
         prefix_columns: table_state.prefix_columns,
-        splits: table_state.splits
+        splits: table_state.splits,
+        limit
       })
       data_view_results = result.data_view_results
       data_view_metadata = result.data_view_metadata
 
       // Cache the unformatted results
-      if (data_view_results && data_view_results.length) {
+      if (data_view_results && data_view_results.length && !limit) {
         const cache_ttl = data_view_metadata.cache_ttl || 1000 * 60 * 60 * 12 // 12 hours
         await redis_cache.set(cache_key, data_view_results, cache_ttl)
         if (data_view_metadata.cache_expire_at) {
