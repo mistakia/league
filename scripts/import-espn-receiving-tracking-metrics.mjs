@@ -16,11 +16,12 @@ debug.enable('import-espn-receiving-tracking-metrics')
 
 const import_espn_receiving_tracking_metrics = async ({
   force_download = false,
-  dry = false
+  dry = false,
+  file_path = null
 } = {}) => {
   const url = 'https://nfl-player-metrics.s3.amazonaws.com/rtm/rtm_data.json'
   const filename = 'rtm_data.json'
-  const path = `${os.tmpdir()}/${filename}`
+  const path = file_path || `${os.tmpdir()}/${filename}`
 
   let json_data
   if (force_download || !fs.existsSync(path)) {
@@ -43,6 +44,7 @@ const import_espn_receiving_tracking_metrics = async ({
 
   const players = await db('player').select('pid', 'gsisid', 'pos')
   const player_seasonlogs_inserts = []
+  const timestamp = Math.round(Date.now() / 1000)
 
   for (const item of single_season_data) {
     const player = players.find((p) => p.gsisid === item.gsis_id)
@@ -82,6 +84,12 @@ const import_espn_receiving_tracking_metrics = async ({
       .insert(player_seasonlogs_inserts)
       .onConflict(['pid', 'year', 'seas_type'])
       .merge()
+
+    await db('espn_receiving_metrics_history')
+      .insert(player_seasonlogs_inserts.map((i) => ({ ...i, timestamp })))
+      .onConflict(['pid', 'year', 'seas_type', 'timestamp'])
+      .merge()
+
     log('completed')
   }
 }
@@ -91,7 +99,8 @@ const main = async () => {
   try {
     await import_espn_receiving_tracking_metrics({
       force_download: argv.force_download,
-      dry: argv.dry
+      dry: argv.dry,
+      file_path: argv.file_path
     })
   } catch (err) {
     error = err
