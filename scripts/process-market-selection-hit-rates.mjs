@@ -158,7 +158,8 @@ const get_hits = ({
 
 const process_market_selection_hit_rates = async ({
   year = constants.season.year,
-  missing_only = false
+  missing_only = false,
+  current_week_only = false
 } = {}) => {
   const prop_selections_query = db('prop_market_selections_index')
     .select(
@@ -215,6 +216,10 @@ const process_market_selection_hit_rates = async ({
         'prop_market_selections_index.overall_hit_rate_hard'
       )
     })
+  }
+
+  if (current_week_only) {
+    prop_selections_query.where('nfl_games.week', constants.season.week)
   }
 
   const prop_selections = await prop_selections_query
@@ -417,7 +422,8 @@ const main = async () => {
   try {
     await process_market_selection_hit_rates({
       year: argv.year,
-      missing_only: argv.missing_only
+      missing_only: argv.missing_only,
+      current_week_only: argv.current_week_only
     })
   } catch (err) {
     error = err
