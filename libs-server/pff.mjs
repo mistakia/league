@@ -52,7 +52,9 @@ export const get_pff_session_cookie = async ({ executable_path } = {}) => {
     use_stealth: true,
     user_data_dir: './tmp/puppeteer_user_data',
     cookie_string: pff_login_config.cookie,
-    cookie_domain: '.pff.com'
+    cookie_domain: '.pff.com',
+    connect: true,
+    remote_debugging_port: 9222
   })
 
   // Navigate to the homepage and wait for 10 seconds
