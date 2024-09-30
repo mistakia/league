@@ -250,6 +250,8 @@ const process_market_selection_hit_rates = async ({
   const missing_gamelogs_pids = new Set()
   const missing_gamelogs_selections = {}
 
+  const market_updates = {}
+
   for (const selection of prop_selections) {
     const player_gamelogs = player_gamelogs_by_pid[selection.selection_pid]
 
@@ -287,21 +289,21 @@ const process_market_selection_hit_rates = async ({
       (g) => g.year === selection.year - 1
     )
 
-    let implied_probability
+    let implied_probability = null
 
-    try {
-      implied_probability = oddslib
-        .from('moneyline', selection.odds_american)
-        .to('impliedProbability')
-    } catch (err) {
-      log(
-        `Error calculating implied probability for selection ${selection.source_selection_id} with odds ${selection.odds_american}`
-      )
-      log(`Selection ID: ${selection.source_selection_id}`)
-      log(`Source ID: ${selection.source_id}`)
-      log(`Market ID: ${selection.source_market_id}`)
-
-      continue
+    if (selection.odds_american) {
+      try {
+        implied_probability = oddslib
+          .from('moneyline', selection.odds_american)
+          .to('impliedProbability')
+      } catch (err) {
+        log(
+          `Error calculating implied probability for selection ${selection.source_selection_id} with odds ${selection.odds_american}`
+        )
+        log(`Selection ID: ${selection.source_selection_id}`)
+        log(`Source ID: ${selection.source_id}`)
+        log(`Market ID: ${selection.source_market_id}`)
+      }
     }
 
     const calculate_rates = (gamelogs) => {
@@ -321,19 +323,24 @@ const process_market_selection_hit_rates = async ({
         selection_type: selection.selection_type
       })
 
+      const hit_rate_soft = calculate_hit_rate(
+        hits_soft.length,
+        gamelogs.length
+      )
+      const hit_rate_hard = calculate_hit_rate(
+        hits_hard.length,
+        gamelogs.length
+      )
+
       return {
-        hit_rate_soft: calculate_hit_rate(hits_soft.length, gamelogs.length),
-        hit_rate_hard: calculate_hit_rate(hits_hard.length, gamelogs.length),
-        edge_soft:
-          gamelogs.length > 0
-            ? calculate_hit_rate(hits_soft.length, gamelogs.length) -
-              implied_probability
-            : 0,
-        edge_hard:
-          gamelogs.length > 0
-            ? calculate_hit_rate(hits_hard.length, gamelogs.length) -
-              implied_probability
-            : 0
+        hit_rate_soft,
+        hit_rate_hard,
+        edge_soft: implied_probability
+          ? hit_rate_soft - implied_probability
+          : null,
+        edge_hard: implied_probability
+          ? hit_rate_hard - implied_probability
+          : null
       }
     }
 
@@ -377,12 +384,33 @@ const process_market_selection_hit_rates = async ({
       const wager_status = get_result({
         line: selection.selection_metric_line,
         market_type: selection.market_type,
-        player_gamelog: [selection_gamelog],
+        player_gamelog: selection_gamelog,
         strict: true,
         selection_type: selection.selection_type
       })
 
       update.result = wager_status
+
+      const market_key = `${selection.source_id}:${selection.source_market_id}`
+      if (!market_updates[market_key]) {
+        market_updates[market_key] = {
+          source_id: selection.source_id,
+          source_market_id: selection.source_market_id,
+          winning_selection_id: null,
+          metric_result_value: null
+        }
+      }
+
+      const metric_result_value = get_metric_result_value(
+        selection_gamelog,
+        selection.market_type
+      )
+      market_updates[market_key].metric_result_value = metric_result_value
+
+      if (wager_status === 'WON') {
+        market_updates[market_key].winning_selection_id =
+          selection.source_selection_id
+      }
     }
 
     await db('prop_market_selections_index')
@@ -395,6 +423,18 @@ const process_market_selection_hit_rates = async ({
         selection_pid: selection.selection_pid
       })
       .update(update)
+  }
+
+  for (const market_update of Object.values(market_updates)) {
+    await db('prop_markets_index')
+      .where({
+        source_id: market_update.source_id,
+        source_market_id: market_update.source_market_id
+      })
+      .update({
+        winning_selection_id: market_update.winning_selection_id,
+        metric_result_value: market_update.metric_result_value
+      })
   }
 
   if (missing_gamelogs_pids.size > 0) {
@@ -414,6 +454,64 @@ const process_market_selection_hit_rates = async ({
     unsupported_market_types.forEach((type) => log(`- ${type}`))
   } else {
     log('All market types were supported.')
+  }
+}
+
+const get_metric_result_value = (player_gamelog, market_type) => {
+  switch (market_type) {
+    case player_game_prop_types.GAME_PASSING_YARDS:
+    case player_game_prop_types.GAME_ALT_PASSING_YARDS:
+      return player_gamelog.py
+
+    case player_game_prop_types.GAME_RUSHING_YARDS:
+    case player_game_prop_types.GAME_ALT_RUSHING_YARDS:
+      return player_gamelog.ry
+
+    case player_game_prop_types.GAME_RECEIVING_YARDS:
+    case player_game_prop_types.GAME_ALT_RECEIVING_YARDS:
+      return player_gamelog.recy
+
+    case player_game_prop_types.GAME_ALT_PASSING_COMPLETIONS:
+    case player_game_prop_types.GAME_PASSING_COMPLETIONS:
+      return player_gamelog.pc
+
+    case player_game_prop_types.GAME_ALT_PASSING_TOUCHDOWNS:
+    case player_game_prop_types.GAME_PASSING_TOUCHDOWNS:
+      return player_gamelog.tdp
+
+    case player_game_prop_types.GAME_ALT_RECEPTIONS:
+    case player_game_prop_types.GAME_RECEPTIONS:
+      return player_gamelog.rec
+
+    case player_game_prop_types.GAME_PASSING_INTERCEPTIONS:
+      return player_gamelog.ints
+
+    case player_game_prop_types.GAME_ALT_RUSHING_ATTEMPTS:
+    case player_game_prop_types.GAME_RUSHING_ATTEMPTS:
+      return player_gamelog.ra
+
+    case player_game_prop_types.GAME_ALT_RUSHING_RECEIVING_YARDS:
+    case player_game_prop_types.GAME_RUSHING_RECEIVING_YARDS:
+      return player_gamelog.ry + player_gamelog.recy
+
+    case player_game_prop_types.GAME_RECEIVING_TOUCHDOWNS:
+      return player_gamelog.tdrec
+
+    case player_game_prop_types.GAME_RUSHING_TOUCHDOWNS:
+      return player_gamelog.tdr
+
+    case player_game_prop_types.GAME_PASSING_ATTEMPTS:
+      return player_gamelog.pa
+
+    case player_game_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS:
+      return player_gamelog.tdr + player_gamelog.tdrec
+
+    case player_game_prop_types.GAME_PASSING_RUSHING_YARDS:
+      return player_gamelog.py + player_gamelog.ry
+
+    default:
+      log(`Unsupported market type: ${market_type}`)
+      return null
   }
 }
 
