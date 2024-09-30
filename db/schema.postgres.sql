@@ -1261,6 +1261,7 @@ DROP INDEX IF EXISTS public.idx_invite_codes_used_by;
 DROP INDEX IF EXISTS public.idx_invite_codes_is_active;
 DROP INDEX IF EXISTS public.idx_invite_codes_created_by;
 DROP INDEX IF EXISTS public.idx_espn_team_win_rates_history_year;
+DROP INDEX IF EXISTS public.idx_espn_receiving_metrics_history;
 DROP INDEX IF EXISTS public.idx_espn_player_win_rates_history_year;
 DROP INDEX IF EXISTS public.idx_espn_player_win_rates_history_espn_win_rate_type;
 DROP INDEX IF EXISTS public.idx_25151_lid;
@@ -1710,6 +1711,7 @@ DROP TABLE IF EXISTS public.invite_codes;
 DROP TABLE IF EXISTS public.footballoutsiders;
 DROP TABLE IF EXISTS public.espn_team_win_rates_index;
 DROP TABLE IF EXISTS public.espn_team_win_rates_history;
+DROP TABLE IF EXISTS public.espn_receiving_metrics_history;
 DROP TABLE IF EXISTS public.espn_player_win_rates_index;
 DROP TABLE IF EXISTS public.espn_player_win_rates_history;
 DROP TABLE IF EXISTS public.dvoa_team_unit_seasonlogs_index;
@@ -2782,6 +2784,26 @@ CREATE TABLE public.espn_player_win_rates_index (
     espn_win_rate_type public.espn_win_rate_type NOT NULL,
     "timestamp" bigint NOT NULL,
     year integer NOT NULL
+);
+
+
+--
+-- Name: espn_receiving_metrics_history; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.espn_receiving_metrics_history (
+    pid character varying(25) NOT NULL,
+    year smallint NOT NULL,
+    pos character varying(4) NOT NULL,
+    seas_type character varying(3) NOT NULL,
+    espn_rtm_routes integer,
+    espn_rtm_targets integer,
+    espn_rtm_recv_yds integer,
+    espn_overall_score integer,
+    espn_open_score integer,
+    espn_catch_score integer,
+    espn_yac_score integer,
+    "timestamp" bigint
 );
 
 
@@ -21189,6 +21211,13 @@ CREATE INDEX idx_espn_player_win_rates_history_espn_win_rate_type ON public.espn
 --
 
 CREATE INDEX idx_espn_player_win_rates_history_year ON public.espn_player_win_rates_history USING btree (year);
+
+
+--
+-- Name: idx_espn_receiving_metrics_history; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_espn_receiving_metrics_history ON public.espn_receiving_metrics_history USING btree (pid, year, seas_type, "timestamp");
 
 
 --
