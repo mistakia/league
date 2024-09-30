@@ -2,5 +2,5 @@
 	path = data
 	url = git@github.com:mistakia/league-data.git
 [submodule "private-scripts"]
-	path = private-scripts
-	url = git@github.com:mistakia/league-private-scripts.git
+	path = private
+	url = git@github.com:mistakia/league-private.git
