@@ -128,7 +128,8 @@ const analyze_fanduel_wagers = async ({
   hide_wagers = false,
   wagers_lost_leg_limit = 1,
   filter_wagers_min_legs = 0,
-  selection_filters = []
+  include_selections = [],
+  exclude_selections = []
 } = {}) => {
   if (!filename) {
     throw new Error('filename is required')
@@ -142,7 +143,8 @@ const analyze_fanduel_wagers = async ({
     show_bet_receipts,
     wagers_limit,
     wagers_lost_leg_limit,
-    selection_filters
+    include_selections,
+    exclude_selections
   })
 
   const json_file_path = `${data_path}/${filename}`
@@ -508,16 +510,37 @@ const analyze_fanduel_wagers = async ({
       wagers_lost_leg_limit
   )
 
-  const filtered_wagers = closest_wagers.filter((wager) => {
-    if (selection_filters.length === 0) return true
-    return selection_filters.every((filter) =>
-      wager.legs.some((leg) =>
-        leg.parts[0].selectionName.toLowerCase().includes(filter.toLowerCase())
+  const display_wagers = closest_wagers.filter((wager) => {
+    // Filter out wagers that include any of the excluded selections
+    if (exclude_selections.length > 0) {
+      if (
+        wager.legs.some((leg) =>
+          exclude_selections.some((filter) =>
+            leg.parts[0].selectionName
+              .toLowerCase()
+              .includes(filter.toLowerCase())
+          )
+        )
+      ) {
+        return false
+      }
+    }
+
+    // Filter to only include wagers that have all of the included selections
+    if (include_selections.length > 0) {
+      return include_selections.every((filter) =>
+        wager.legs.some((leg) =>
+          leg.parts[0].selectionName
+            .toLowerCase()
+            .includes(filter.toLowerCase())
+        )
       )
-    )
+    }
+
+    return true
   })
 
-  for (const wager of filtered_wagers
+  for (const wager of display_wagers
     .sort((a, b) => b.americanBetPrice - a.americanBetPrice)
     .slice(0, wagers_limit)) {
     const total_return = wager.betPrice
@@ -562,6 +585,7 @@ const analyze_fanduel_wagers = async ({
 
 const main = async () => {
   let error
+  console.log(argv.include)
   try {
     await analyze_fanduel_wagers({
       filename: argv.file,
@@ -571,7 +595,16 @@ const main = async () => {
       show_bet_receipts: argv.show_bet_receipts,
       wagers_limit: argv.wagers_limit,
       wagers_lost_leg_limit: argv.wagers_lost_leg_limit,
-      selection_filters: argv.filter ? argv.filter.split(',') : [],
+      include_selections: Array.isArray(argv.include)
+        ? argv.include
+        : argv.include
+          ? [argv.include]
+          : [],
+      exclude_selections: Array.isArray(argv.exclude)
+        ? argv.exclude
+        : argv.exclude
+          ? [argv.exclude]
+          : [],
       hide_wagers: argv.hide_wagers,
       filter_wagers_min_legs: argv.min_legs
     })
