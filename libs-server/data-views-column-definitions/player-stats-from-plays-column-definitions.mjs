@@ -807,5 +807,11 @@ export default {
       pid_columns: ['bc_pid', 'trg_pid'],
       with_select_string: `SUM(expected_points_added)`,
       stat_name: 'rushing_and_receiving_expected_points_added_from_plays'
-    })
+    }),
+
+  player_quarterback_pressures_from_plays: player_stat_from_plays({
+    pid_columns: ['psr_pid'],
+    with_select_string: `SUM(CASE WHEN qb_pressure_ngs = true OR qb_pressure = true THEN 1 ELSE 0 END)`,
+    stat_name: 'quarterback_pressures_from_plays'
+  })
 }
