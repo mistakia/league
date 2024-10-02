@@ -13956,7 +13956,7 @@ CREATE TABLE public.nfl_team_gamelogs (
     def_avg_get_off numeric(5,2),
     def_blitz_rate numeric(5,2),
     def_yards_after_catch_over_expected numeric(5,2),
-    def_avg_target_spearation numeric(5,2),
+    def_avg_target_separation numeric(5,2),
     def_tight_window_pct numeric(5,2),
     def_run_plays smallint,
     def_run_pct numeric(5,2),
@@ -13974,7 +13974,8 @@ CREATE TABLE public.nfl_team_gamelogs (
     def_rush_attempts_inside_tackles_pct numeric(5,2),
     def_rush_attempts_outside_tackles_pct numeric(5,2),
     def_rush_attempts_light_box_pct numeric(5,2),
-    def_rush_attempts_stacked_box_pct numeric(5,2)
+    def_rush_attempts_stacked_box_pct numeric(5,2),
+    def_yards_after_catch numeric(5,2)
 );
 
 
@@ -14818,7 +14819,7 @@ CREATE TABLE public.player_defender_gamelogs (
     hustle_stops smallint,
     pressures_generated smallint,
     pressures_generated_rate numeric(5,2),
-    sacks smallint,
+    sacks numeric(5,2),
     coverage_snaps_nearest_defender smallint,
     targets_nearest_defender smallint,
     recs_nearest_defender smallint,
