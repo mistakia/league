@@ -1,6 +1,6 @@
 import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
-import { common_column_params } from '@libs-shared'
+import { common_column_params, constants } from '@libs-shared'
 
 const { career_year, single_year } = common_column_params
 
@@ -15,7 +15,10 @@ function create_espn_score_field({ score_type, label }) {
     column_params: {
       year: {
         ...single_year,
-        values: [2023, 2022, 2021, 2020, 2019, 2018, 2017]
+        values: Array.from(
+          { length: constants.season.stats_season_year - 2016 },
+          (_, i) => constants.season.stats_season_year - i
+        )
       },
       career_year
     },
