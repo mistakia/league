@@ -23,6 +23,14 @@ const import_fanduel_salaries = async ({ dry_run = false } = {}) => {
   // get slates
   const fanduel_slate_data = await fanduel.get_dfs_fixtures()
 
+  if (
+    !fanduel_slate_data ||
+    !fanduel_slate_data.fixture_lists ||
+    !fanduel_slate_data.fixture_lists.length
+  ) {
+    throw new Error('No fanduel slates found')
+  }
+
   const game_description_names = ['NFL Main', 'NFL Single Game']
   const filtered_fanduel_slates = fanduel_slate_data.fixture_lists.filter(
     (fixture) =>
