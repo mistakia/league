@@ -95,29 +95,43 @@ const mapStateToProps = createSelector(
       }
 
       items.push({
+        salary: value,
         savings,
         market_salary,
         rookie_tag_savings,
         franchise_tag_savings,
         market_salary_adj: p.get('market_salary_adj', 0),
         projected_salary: p.getIn(['market_salary', projectionType], 0),
+        pts_added: p.getIn(['pts_added', projectionType], 0),
+        projected_starts: p.getIn(['lineups', 'starts'], 0),
         salary_adj_pts_added: p.getIn(
           ['salary_adj_pts_added', projectionType],
           0
-        )
+        ),
+        extendedSalary,
+        points_added: p.get('points_added', 0),
+        points_added_rnk: p.get('points_added_rnk'),
+        points_added_pos_rnk: p.get('points_added_pos_rnk')
       })
     })
 
     const percentiles = calculatePercentiles({
       items,
       stats: [
+        'salary',
         'savings',
         'market_salary',
         'rookie_tag_savings',
         'franchise_tag_savings',
         'market_salary_adj',
         'projected_salary',
-        'salary_adj_pts_added'
+        'pts_added',
+        'projected_starts',
+        'salary_adj_pts_added',
+        'extended_salary',
+        'points_added',
+        'points_added_rnk',
+        'points_added_pos_rnk'
       ]
     })
 

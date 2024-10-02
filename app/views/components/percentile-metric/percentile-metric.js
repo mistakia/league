@@ -15,10 +15,9 @@ export default function PercentileMetric({
   percentile_key,
   show_positivity,
   is_percentage = false,
-  prefix = ''
+  prefix = '',
+  invert_order = false
 }) {
-  let color
-
   if (percentile_key) {
     if (Immutable.Map.isMap(percentiles)) {
       percentile = percentiles.getIn([percentile_key, field], {})
@@ -27,19 +26,30 @@ export default function PercentileMetric({
     }
   }
 
-  if (value && value < percentile.p25) {
-    const maxPercent =
-      (percentile.p25 - value) / (percentile.p25 - percentile.min) / 1.5 || 0
-    color = `rgba(253, 162, 145, ${maxPercent}`
-  } else if (scaled) {
-    const percent =
-      (value - percentile.p25) / (percentile.max - percentile.p25) || 0
-    color = `rgba(46, 163, 221, ${percent}`
-  } else {
-    const maxPercent =
-      (value - percentile.p75) / (percentile.max - percentile.p75) / 1.5 || 0
-    color = `rgba(46, 163, 221, ${maxPercent}`
+  const calculate_color = (value, percentile) => {
+    const blue_color = 'rgba(46, 163, 221,'
+    const red_color = 'rgba(253, 162, 145,'
+
+    if (value && value < percentile.p25) {
+      const max_percent =
+        (percentile.p25 - value) / (percentile.p25 - percentile.min) / 1.5 || 0
+      return invert_order
+        ? `${blue_color}${max_percent}`
+        : `${red_color}${max_percent}`
+    } else if (scaled) {
+      const percent =
+        (value - percentile.p25) / (percentile.max - percentile.p25) || 0
+      return invert_order ? `${red_color}${percent}` : `${blue_color}${percent}`
+    } else {
+      const max_percent =
+        (value - percentile.p75) / (percentile.max - percentile.p75) / 1.5 || 0
+      return invert_order
+        ? `${red_color}${max_percent}`
+        : `${blue_color}${max_percent}`
+    }
   }
+
+  const color = calculate_color(value, percentile)
 
   const format_value = (value) => {
     if (!value) {
@@ -88,5 +98,6 @@ PercentileMetric.propTypes = {
   scaled: PropTypes.bool,
   fixed: PropTypes.number,
   prefix: PropTypes.string,
-  is_percentage: PropTypes.bool
+  is_percentage: PropTypes.bool,
+  invert_order: PropTypes.bool
 }
