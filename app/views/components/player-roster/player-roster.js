@@ -89,7 +89,7 @@ class PlayerRoster extends Player {
     )
     const week = Math.max(constants.week, 1)
     const weekPoints = playerMap.getIn(['points', `${week}`, 'total'], 0)
-    const starts = playerMap.getIn(['lineups', 'starts'], 0)
+    const projected_starts = playerMap.getIn(['lineups', 'starts'], 0)
     const startPoints = playerMap.getIn(['lineups', 'sp'], 0)
     const benchPoints = playerMap.getIn(['lineups', 'bp'], 0)
     const points_added = playerMap.get('points_added', 0)
@@ -185,18 +185,20 @@ class PlayerRoster extends Player {
           <div className='row__group'>
             <div className='row__group-body'>
               {!isTransition && (
-                <div className='metric table__cell'>
-                  {isPoach
-                    ? value + 2 || '-'
-                    : typeof salary === 'number'
-                      ? `$${salary}`
-                      : '-'}
-                </div>
+                <PercentileMetric
+                  scaled
+                  value={isPoach ? value + 2 : salary}
+                  percentile={percentiles.salary}
+                  prefix='$'
+                />
               )}
               {!isPoach && isOffseason && isBeforeExtensionDeadline && (
-                <div className='metric table__cell'>
-                  {extendedSalary ? `$${extendedSalary}` : '-'}
-                </div>
+                <PercentileMetric
+                  scaled
+                  value={extendedSalary}
+                  percentile={percentiles.extended_salary}
+                  prefix='$'
+                />
               )}
               {/* {!isPoach && isOffseason && (
               <PercentileMetric
@@ -247,17 +249,25 @@ class PlayerRoster extends Player {
         {!isOffseason && (
           <div className='row__group'>
             <div className='row__group-body'>
-              <div className='metric table__cell'>
-                {points_added ? points_added.toFixed(1) : '-'}
-              </div>
-              <div className='metric table__cell'>
-                {`${points_added_rnk || '-'}`}
-              </div>
-              <div className='metric table__cell'>
-                {`${points_added_pos_rnk ? pos : ''}${
-                  points_added_pos_rnk || '-'
-                }`}
-              </div>
+              <PercentileMetric
+                scaled
+                value={points_added}
+                percentile={percentiles.points_added}
+                decimals={1}
+              />
+              <PercentileMetric
+                scaled
+                value={points_added_rnk}
+                percentile={percentiles.points_added_rnk}
+                invert_order
+              />
+              <PercentileMetric
+                scaled
+                value={points_added_pos_rnk}
+                percentile={percentiles.points_added_pos_rnk}
+                prefix={points_added_pos_rnk ? pos : ''}
+                invert_order
+              />
             </div>
           </div>
         )}
@@ -276,7 +286,11 @@ class PlayerRoster extends Player {
                 percentile={percentiles.salary_adj_pts_added}
               />
             )}
-            <div className='metric table__cell'>{starts || '-'}</div>
+            <PercentileMetric
+              scaled
+              value={projected_starts}
+              percentile={percentiles.projected_starts}
+            />
           </div>
         </div>
         {isRegularSeason && (

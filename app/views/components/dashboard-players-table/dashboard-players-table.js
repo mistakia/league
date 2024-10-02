@@ -228,7 +228,7 @@ export default class DashboardPlayersTable extends React.Component {
                   <div className='table__cell'>
                     <PlayerRosterHeader
                       tooltip='Rank among all players in points produced above baseline starter'
-                      title='Rank'
+                      title='Ovr Rank'
                     />
                   </div>
                   <div className='table__cell'>
