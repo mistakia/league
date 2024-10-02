@@ -6,3 +6,6 @@
 
 ## import caesars odds
 0 */4 * * * NODE_ENV=production /Users/trashman/.nvm/versions/node/v20.12.1/bin/node /Users/trashman/Projects/league/scripts/import-caesars-odds.mjs --ignore_cache >> /Users/trashman/Library/Logs/league/import-caesars-odds.log 2>&1
+
+## Every Wednesday at 2:20PM
+20 14 * * 3 NODE_ENV=production /Users/trashman/.nvm/versions/node/v20.12.1/bin/node /Users/trashman/Projects/league/scripts/import-fanduel-salaries.mjs --ignore_cache &>> /Users/trashman/Library/Logs/league/league-import-fanduel-salaries.log
