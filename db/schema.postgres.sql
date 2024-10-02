@@ -1407,10 +1407,13 @@ ALTER TABLE IF EXISTS ONLY public.rosters_players DROP CONSTRAINT IF EXISTS rost
 ALTER TABLE IF EXISTS ONLY public.prop_pairing_props DROP CONSTRAINT IF EXISTS prop_pairing_props_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_swish_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_salaries DROP CONSTRAINT IF EXISTS player_salaries_pid_esbid_source_contest_id_key;
+ALTER TABLE IF EXISTS ONLY public.player_rushing_gamelogs DROP CONSTRAINT IF EXISTS player_rushing_gamelogs_esbid_pid_year_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_rts_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player_receiving_gamelogs DROP CONSTRAINT IF EXISTS player_receiving_gamelogs_esbid_pid_year_unique;
 ALTER TABLE IF EXISTS ONLY public.player_rankings_index DROP CONSTRAINT IF EXISTS player_rankings_index_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pff_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player_passing_gamelogs DROP CONSTRAINT IF EXISTS player_passing_gamelogs_esbid_pid_year_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_otc_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_mfl_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2024 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2024_pkey;
@@ -1443,6 +1446,7 @@ ALTER TABLE IF EXISTS ONLY public.player_gamelogs DROP CONSTRAINT IF EXISTS play
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_fleaflicker_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_fanduel_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_draftkings_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player_defender_gamelogs DROP CONSTRAINT IF EXISTS player_defender_gamelogs_esbid_pid_year_unique;
 ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pid_year_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_cfbref_id_unique;
@@ -1450,6 +1454,7 @@ ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_cbs_id
 ALTER TABLE IF EXISTS ONLY public.player_aliases DROP CONSTRAINT IF EXISTS player_aliases_pkey;
 ALTER TABLE IF EXISTS ONLY public.pff_player_seasonlogs DROP CONSTRAINT IF EXISTS pff_player_seasonlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.pff_player_seasonlogs_changelog DROP CONSTRAINT IF EXISTS pff_player_seasonlogs_changelog_pkey;
+ALTER TABLE IF EXISTS ONLY public.nfl_team_gamelogs DROP CONSTRAINT IF EXISTS nfl_team_gamelogs_esbid_pid_year_unique;
 ALTER TABLE IF EXISTS ONLY public.nfl_plays_rusher DROP CONSTRAINT IF EXISTS nfl_plays_rusher_pkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_plays_receiver DROP CONSTRAINT IF EXISTS nfl_plays_receiver_pkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_plays_player DROP CONSTRAINT IF EXISTS nfl_plays_player_pkey;
@@ -1568,8 +1573,11 @@ DROP TABLE IF EXISTS public.playoffs;
 DROP TABLE IF EXISTS public.players_status;
 DROP TABLE IF EXISTS public.player_seasonlogs;
 DROP TABLE IF EXISTS public.player_salaries;
+DROP TABLE IF EXISTS public.player_rushing_gamelogs;
+DROP TABLE IF EXISTS public.player_receiving_gamelogs;
 DROP TABLE IF EXISTS public.player_rankings_index;
 DROP TABLE IF EXISTS public.player_rankings;
+DROP TABLE IF EXISTS public.player_passing_gamelogs;
 DROP TABLE IF EXISTS public.player_gamelogs_year_2024;
 DROP TABLE IF EXISTS public.player_gamelogs_year_2023;
 DROP TABLE IF EXISTS public.player_gamelogs_year_2022;
@@ -1597,6 +1605,7 @@ DROP TABLE IF EXISTS public.player_gamelogs_year_2001;
 DROP TABLE IF EXISTS public.player_gamelogs_year_2000;
 DROP TABLE IF EXISTS public.player_gamelogs_default;
 DROP TABLE IF EXISTS public.player_gamelogs;
+DROP TABLE IF EXISTS public.player_defender_gamelogs;
 DROP TABLE IF EXISTS public.player_contracts;
 DROP SEQUENCE IF EXISTS public.player_changelog_uid_seq;
 DROP TABLE IF EXISTS public.player_changelog;
@@ -1612,6 +1621,7 @@ DROP TABLE IF EXISTS public.percentiles;
 DROP MATERIALIZED VIEW IF EXISTS public.opening_days;
 DROP MATERIALIZED VIEW IF EXISTS public.nfl_year_week_timestamp;
 DROP TABLE IF EXISTS public.nfl_team_seasonlogs;
+DROP TABLE IF EXISTS public.nfl_team_gamelogs;
 DROP TABLE IF EXISTS public.nfl_snaps_year_default;
 DROP TABLE IF EXISTS public.nfl_snaps_year_2024;
 DROP TABLE IF EXISTS public.nfl_snaps_year_2023;
@@ -1745,6 +1755,7 @@ DROP TYPE IF EXISTS public.nfl_games_roof;
 DROP TYPE IF EXISTS public.motion_type;
 DROP TYPE IF EXISTS public.market_source_id;
 DROP TYPE IF EXISTS public.hash_position;
+DROP TYPE IF EXISTS public.game_result;
 DROP TYPE IF EXISTS public.espn_win_rate_type;
 DROP TYPE IF EXISTS public.dfs_source_id;
 DROP TYPE IF EXISTS public.coverage_type;
@@ -1785,6 +1796,17 @@ CREATE TYPE public.espn_win_rate_type AS ENUM (
     'PASS_BLOCK',
     'RUN_STOP',
     'RUN_BLOCK'
+);
+
+
+--
+-- Name: game_result; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.game_result AS ENUM (
+    'WIN',
+    'LOSS',
+    'TIE'
 );
 
 
@@ -13872,6 +13894,91 @@ CREATE TABLE public.nfl_snaps_year_default (
 
 
 --
+-- Name: nfl_team_gamelogs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_team_gamelogs (
+    esbid integer NOT NULL,
+    nfl_team character varying(3) NOT NULL,
+    year smallint NOT NULL,
+    off_pass_plays smallint,
+    off_pass_pct numeric(5,2),
+    off_pass_tds smallint,
+    off_pass_yds smallint,
+    off_pass_yds_per_play numeric(5,2),
+    off_pass_epa numeric(5,2),
+    off_pass_epa_per_play numeric(5,2),
+    off_pass_atts smallint,
+    off_avg_time_to_throw numeric(5,2),
+    off_sack_yds smallint,
+    off_sacks smallint,
+    off_sack_rate numeric(5,2),
+    off_pressures smallint,
+    off_pressure_rate numeric(5,2),
+    off_avg_time_to_pressure numeric(5,2),
+    off_blitz_rate numeric(5,2),
+    off_play_action_pct numeric(5,2),
+    off_yards_after_catch numeric(5,2),
+    off_yarsd_after_catch_over_expected numeric(5,2),
+    off_avg_target_separation numeric(5,2),
+    off_run_plays smallint,
+    off_run_pct numeric(5,2),
+    off_rush_tds smallint,
+    off_rush_yds smallint,
+    off_rush_yards_per_play numeric(5,2),
+    off_rush_epa numeric(5,2),
+    off_rush_epa_per_play numeric(5,2),
+    off_rush_success_pct numeric(5,2),
+    off_rush_yards_over_expected numeric(5,2),
+    off_rush_yards_over_expected_per_attempt numeric(5,2),
+    off_rush_yards_before_contact_per_attempt numeric(5,2),
+    off_rush_yards_after_contact_per_attempt numeric(5,2),
+    off_rush_attempts_inside_tackles_pct numeric(5,2),
+    off_rush_attempts_outside_tackles_pct numeric(5,2),
+    off_rush_attempts_light_box_pct numeric(5,2),
+    off_rush_attempts_stacked_box_pct numeric(5,2),
+    off_rush_attempts_stuffed_pct numeric(5,2),
+    off_rush_yards_10_plus smallint,
+    def_pass_plays smallint,
+    def_pass_pct numeric(5,2),
+    def_pass_yds smallint,
+    def_pass_yds_per_play numeric(5,2),
+    def_pass_tds smallint,
+    def_pass_epa numeric(5,2),
+    def_pass_epa_per_play numeric(5,2),
+    def_avg_time_to_throw numeric(5,2),
+    def_sack_yds smallint,
+    def_sacks smallint,
+    def_sack_pct numeric(5,2),
+    def_pressures smallint,
+    def_pressure_rate numeric(5,2),
+    def_avg_time_to_pressure numeric(5,2),
+    def_avg_get_off numeric(5,2),
+    def_blitz_rate numeric(5,2),
+    def_yards_after_catch_over_expected numeric(5,2),
+    def_avg_target_spearation numeric(5,2),
+    def_tight_window_pct numeric(5,2),
+    def_run_plays smallint,
+    def_run_pct numeric(5,2),
+    def_rush_tds smallint,
+    def_rush_yds smallint,
+    def_rush_yds_per_play numeric(5,2),
+    def_rush_yds_10_plus smallint,
+    def_rush_stuffed_pct numeric(5,2),
+    def_rush_epa numeric(5,2),
+    def_rush_epa_per_play numeric(5,2),
+    def_rush_yards_over_expected numeric(5,2),
+    def_rush_yards_over_expected_per_attempt numeric(5,2),
+    def_rush_yards_before_contact_per_attempt numeric(5,2),
+    def_rush_yards_after_contact_per_attempt numeric(5,2),
+    def_rush_attempts_inside_tackles_pct numeric(5,2),
+    def_rush_attempts_outside_tackles_pct numeric(5,2),
+    def_rush_attempts_light_box_pct numeric(5,2),
+    def_rush_attempts_stacked_box_pct numeric(5,2)
+);
+
+
+--
 -- Name: nfl_team_seasonlogs; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -14694,6 +14801,46 @@ COMMENT ON COLUMN public.player_contracts.per_game_roster_bonus IS 'Per-game ros
 --
 
 COMMENT ON COLUMN public.player_contracts.option_bonus IS 'Option bonus in millions';
+
+
+--
+-- Name: player_defender_gamelogs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_defender_gamelogs (
+    esbid integer NOT NULL,
+    pid character varying(25) NOT NULL,
+    year smallint NOT NULL,
+    pass_rush_snaps smallint,
+    pass_coverage_snaps smallint,
+    tackles smallint,
+    tackle_stops smallint,
+    hustle_stops smallint,
+    pressures_generated smallint,
+    pressures_generated_rate numeric(5,2),
+    sacks smallint,
+    coverage_snaps_nearest_defender smallint,
+    targets_nearest_defender smallint,
+    recs_nearest_defender smallint,
+    recv_yards_nearest_defender smallint,
+    recv_tds_nearest_defender smallint,
+    passer_rating_nearest_defender numeric(5,2),
+    catch_rate_nearest_defender numeric(5,2),
+    catch_rate_over_expected_nearest_defender numeric(5,2),
+    target_epa_nearest_defender numeric(5,2),
+    target_rate_nearest_defender numeric(5,2),
+    yards_per_reception_nearest_defender numeric(5,2),
+    avg_target_separation_allowed numeric(5,2),
+    tight_window_forced_pct numeric(5,2),
+    ball_hawk_pct numeric(5,2),
+    ints smallint,
+    time_to_sack numeric(5,2),
+    quick_sacks smallint,
+    time_to_pressure numeric(5,2),
+    quick_pressures smallint,
+    pass_rush_get_off numeric(5,2),
+    pressure_turnovers smallint
+);
 
 
 --
@@ -17209,6 +17356,43 @@ CREATE TABLE public.player_gamelogs_year_2024 (
 
 
 --
+-- Name: player_passing_gamelogs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_passing_gamelogs (
+    esbid integer NOT NULL,
+    pid character varying(25) NOT NULL,
+    year smallint NOT NULL,
+    pass_rating numeric(5,1),
+    pass_yards_per_attempt numeric(4,2),
+    pass_comp_pct numeric(5,2),
+    sacks smallint,
+    expected_pass_comp numeric(5,2),
+    cpoe numeric(5,2),
+    dropbacks smallint,
+    pass_epa numeric(5,2),
+    pass_epa_per_db numeric(5,2),
+    avg_time_to_throw numeric(4,2),
+    avg_time_to_pressure numeric(4,2),
+    avg_time_to_sack numeric(4,2),
+    pressures_against smallint,
+    pressure_rate_against numeric(5,2),
+    blitz_rate numeric(5,2),
+    pass_drops smallint,
+    drop_rate numeric(5,2),
+    pass_completed_air_yards numeric(5,2),
+    pass_yards_after_catch numeric(5,2),
+    expected_pass_yards_after_catch numeric(5,1),
+    pass_yards_after_catch_pct numeric(5,2),
+    air_yards_per_pass_att numeric(4,2),
+    avg_target_separation numeric(4,2),
+    deep_pass_att_pct numeric(5,2),
+    tight_window_pct numeric(5,2),
+    play_action_pct numeric(5,2)
+);
+
+
+--
 -- Name: player_rankings; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -17246,6 +17430,73 @@ CREATE TABLE public.player_rankings_index (
     position_rank integer,
     source_id public.rankings_source_id NOT NULL,
     ranking_type public.ranking_type NOT NULL
+);
+
+
+--
+-- Name: player_receiving_gamelogs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_receiving_gamelogs (
+    esbid integer NOT NULL,
+    pid character varying(25) NOT NULL,
+    year smallint NOT NULL,
+    routes smallint,
+    receiving_passer_rating numeric(5,2),
+    catch_rate numeric(5,2),
+    expected_catch_rate numeric(5,2),
+    catch_rate_over_expected numeric(5,2),
+    recv_yards_per_reception numeric(5,2),
+    recv_yards_per_route numeric(5,2),
+    recv_epa numeric(5,2),
+    recv_epa_per_target numeric(5,2),
+    recv_epa_per_route numeric(5,2),
+    recv_drops smallint,
+    recv_drop_rate numeric(5,2),
+    recv_yards_after_catch smallint,
+    expected_recv_yards_after_catch numeric(5,2),
+    recv_yards_after_catch_over_expected numeric(5,2),
+    recv_yards_after_catch_per_reception numeric(5,2),
+    recv_avg_target_separation numeric(5,2),
+    recv_air_yards numeric(5,2),
+    recv_air_yards_per_target numeric(5,2),
+    target_rate numeric(5,2),
+    avg_route_depth numeric(5,2),
+    endzone_targets smallint,
+    endzone_recs smallint,
+    team_target_share numeric(5,2),
+    team_air_yard_share numeric(5,2),
+    recv_deep_target_pct numeric(5,2),
+    recv_tight_window_pct numeric(5,2)
+);
+
+
+--
+-- Name: player_rushing_gamelogs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_rushing_gamelogs (
+    esbid integer NOT NULL,
+    pid character varying(25) NOT NULL,
+    year smallint NOT NULL,
+    rush_epa numeric(5,2),
+    rush_epa_per_attempt numeric(5,2),
+    expected_rush_yards numeric(5,2),
+    expected_rush_yards_per_attempt numeric(5,2),
+    rush_yards_over_expected numeric(5,2),
+    rush_yards_over_expected_per_attempt numeric(5,2),
+    rush_yards_after_contact numeric(5,2),
+    rush_yards_after_contact_per_attempt numeric(5,2),
+    rush_yards_before_contact numeric(5,2),
+    rush_yards_before_contact_per_attempt numeric(5,2),
+    rush_success_rate numeric(5,2),
+    rush_attempts_yards_10_plus smallint,
+    rush_attempts_speed_15_plus_mph smallint,
+    rush_attempts_speed_20_plus_mph smallint,
+    rush_avg_time_to_line_of_scrimmage numeric(5,2),
+    rush_attempts_inside_tackles_pct numeric(5,2),
+    rush_attempts_stacked_box_pct numeric(5,2),
+    rush_attempts_under_center_pct numeric(5,2)
 );
 
 
@@ -19844,6 +20095,14 @@ ALTER TABLE ONLY public.nfl_plays_rusher
 
 
 --
+-- Name: nfl_team_gamelogs nfl_team_gamelogs_esbid_pid_year_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_team_gamelogs
+    ADD CONSTRAINT nfl_team_gamelogs_esbid_pid_year_unique UNIQUE (esbid, nfl_team, year);
+
+
+--
 -- Name: pff_player_seasonlogs_changelog pff_player_seasonlogs_changelog_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -19897,6 +20156,14 @@ ALTER TABLE ONLY public.player_contracts
 
 ALTER TABLE ONLY public.player_contracts
     ADD CONSTRAINT player_contracts_pkey PRIMARY KEY (pid, year);
+
+
+--
+-- Name: player_defender_gamelogs player_defender_gamelogs_esbid_pid_year_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_defender_gamelogs
+    ADD CONSTRAINT player_defender_gamelogs_esbid_pid_year_unique UNIQUE (esbid, pid, year);
 
 
 --
@@ -20156,6 +20423,14 @@ ALTER TABLE ONLY public.player
 
 
 --
+-- Name: player_passing_gamelogs player_passing_gamelogs_esbid_pid_year_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_passing_gamelogs
+    ADD CONSTRAINT player_passing_gamelogs_esbid_pid_year_unique UNIQUE (esbid, pid, year);
+
+
+--
 -- Name: player player_pff_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -20180,11 +20455,27 @@ ALTER TABLE ONLY public.player_rankings_index
 
 
 --
+-- Name: player_receiving_gamelogs player_receiving_gamelogs_esbid_pid_year_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_receiving_gamelogs
+    ADD CONSTRAINT player_receiving_gamelogs_esbid_pid_year_unique UNIQUE (esbid, pid, year);
+
+
+--
 -- Name: player player_rts_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
 ALTER TABLE ONLY public.player
     ADD CONSTRAINT player_rts_id_unique UNIQUE (rts_id);
+
+
+--
+-- Name: player_rushing_gamelogs player_rushing_gamelogs_esbid_pid_year_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_rushing_gamelogs
+    ADD CONSTRAINT player_rushing_gamelogs_esbid_pid_year_unique UNIQUE (esbid, pid, year);
 
 
 --
@@ -21217,7 +21508,7 @@ CREATE INDEX idx_espn_player_win_rates_history_year ON public.espn_player_win_ra
 -- Name: idx_espn_receiving_metrics_history; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_espn_receiving_metrics_history ON public.espn_receiving_metrics_history USING btree (pid, year, seas_type, "timestamp");
+CREATE UNIQUE INDEX idx_espn_receiving_metrics_history ON public.espn_receiving_metrics_history USING btree (pid, year, seas_type, "timestamp");
 
 
 --
