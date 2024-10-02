@@ -19,9 +19,12 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-fanduel-salaries')
 debug.enable('import-fanduel-salaries,get-player,fanduel,update-player')
 
-const import_fanduel_salaries = async ({ dry_run = false } = {}) => {
+const import_fanduel_salaries = async ({
+  dry_run = false,
+  ignore_cache = false
+} = {}) => {
   // get slates
-  const fanduel_slate_data = await fanduel.get_dfs_fixtures()
+  const fanduel_slate_data = await fanduel.get_dfs_fixtures({ ignore_cache })
 
   if (
     !fanduel_slate_data ||
@@ -54,7 +57,8 @@ const import_fanduel_salaries = async ({ dry_run = false } = {}) => {
     const unmatched_players = []
 
     const data = await fanduel.get_dfs_fixture_players({
-      fixture_id: fanduel_slate.id
+      fixture_id: fanduel_slate.id,
+      ignore_cache
     })
 
     log(
@@ -222,7 +226,10 @@ const process_matched_player = async ({
 const main = async () => {
   let error
   try {
-    await import_fanduel_salaries({ dry_run: argv.dry })
+    await import_fanduel_salaries({
+      dry_run: argv.dry,
+      ignore_cache: argv.ignore_cache
+    })
   } catch (err) {
     error = err
     log(error)
