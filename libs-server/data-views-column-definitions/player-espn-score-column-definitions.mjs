@@ -12,7 +12,10 @@ const get_default_params = ({ params = {} } = {}) => {
 
 const get_valid_year = (year) => {
   const parsed_year = Number(year)
-  return parsed_year >= 2017 && parsed_year <= 2023 ? parsed_year : 2023
+  return parsed_year >= 2017 &&
+    parsed_year <= constants.season.stats_season_year
+    ? parsed_year
+    : constants.season.stats_season_year
 }
 
 const get_cache_info_for_espn_score = ({ params = {} } = {}) => {
