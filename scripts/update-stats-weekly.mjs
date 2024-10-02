@@ -21,6 +21,7 @@ import generate_league_format_player_seasonlogs from './generate-league-format-p
 import generate_nfl_team_seasonlogs from './generate-nfl-team-seasonlogs.mjs'
 import process_player_seasonlogs from './process-player-seasonlogs.mjs'
 import generate_player_career_game_counts from './generate-player-career-game-counts.mjs'
+import generate_player_snaps_for_week from './generate-player-snaps.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('update-stats-weekly')
@@ -102,6 +103,7 @@ const update_stats_weekly = async ({ week } = {}) => {
   await generate_nfl_team_seasonlogs()
   await process_player_seasonlogs()
   await generate_player_career_game_counts()
+  await generate_player_snaps_for_week({ week })
 }
 
 const main = async () => {
