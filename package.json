@@ -36,7 +36,8 @@
     "#libs-shared/*": "./libs-shared/*",
     "#scripts/*": "./scripts/*",
     "#jobs/*": "./jobs/*",
-    "#league-import/*": "./league-import/*"
+    "#league-import/*": "./league-import/*",
+    "#private/libs-server": "./private/libs-server/index.mjs"
   },
   "dependencies": {
     "@mui/x-date-pickers": "^7.11.0",

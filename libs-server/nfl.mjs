@@ -9,7 +9,7 @@ import * as cache from './cache.mjs'
 const log = debug('nfl')
 debug.enable('nfl')
 
-const generate_guid = () => {
+export const generate_guid = () => {
   let e = new Date().getTime()
   return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (x) {
     const r = (e + 16 * Math.random()) % 16 | 0
