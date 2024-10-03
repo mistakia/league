@@ -25,7 +25,17 @@ const get_cache_info = () => ({
 
 export default {
   player_nfl_teams: {
-    is_array_column: true,
+    is_where_column_array: ({ params = {}, splits = [] } = {}) => {
+      const { year } = get_default_params({ params })
+      if (
+        (year.length === 1 && year[0] !== constants.season.year) ||
+        splits.length
+      ) {
+        return true
+      }
+
+      return false
+    },
     table_alias: ({ params = {}, splits = [] } = {}) => {
       const { year } = get_default_params({ params })
       if (
