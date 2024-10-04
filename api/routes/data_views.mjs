@@ -43,6 +43,29 @@ router.get('/?', async (req, res) => {
   }
 })
 
+router.get('/:data_view_id', async (req, res) => {
+  const { logger, db } = req.app.locals
+  try {
+    const { data_view_id } = req.params
+    const view = await db('user_data_views')
+      .select('user_data_views.*', 'users.username as view_username')
+      .leftJoin('users', 'user_data_views.user_id', 'users.id')
+      .where({
+        view_id: data_view_id
+      })
+      .first()
+
+    if (!view) {
+      return res.status(400).send({ error: 'invalid data_view_id' })
+    }
+
+    res.status(200).send(view)
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
 router.post('/?', async (req, res) => {
   const { logger, db } = req.app.locals
   try {
