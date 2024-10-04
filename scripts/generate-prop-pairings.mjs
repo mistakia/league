@@ -2,6 +2,7 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import * as oddslib from 'oddslib'
+import { blake2b } from 'blakejs'
 
 import db from '#db'
 import { constants, groupBy } from '#libs-shared'
@@ -13,8 +14,8 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('generate-prop-pairings')
 debug.enable('generate-prop-pairings')
 
-const get_prop_pairing_id = (props) =>
-  props
+const get_prop_pairing_id = (props) => {
+  const sorted_props = props
     .sort((a, b) => {
       // Sort by source_market_id first, then by source_selection_id
       if (a.source_market_id !== b.source_market_id) {
@@ -24,6 +25,12 @@ const get_prop_pairing_id = (props) =>
     })
     .map((p) => `${p.source_market_id}:${p.source_selection_id}`)
     .join('/')
+
+  const hash = Array.from(blake2b(sorted_props, null, 16))
+    .map((b) => b.toString(16).padStart(2, '0'))
+    .join('')
+  return `p${hash}`
+}
 
 const extract_week = (week_string) => {
   const parts = week_string.split('/')
@@ -209,6 +216,13 @@ const generate_prop_pairings = async ({
   source = 'FANDUEL',
   dry_run = false
 } = {}) => {
+  log({
+    week,
+    year,
+    seas_type,
+    source,
+    dry_run
+  })
   console.time('generate_prop_pairings')
 
   const prop_rows = await db('current_week_prop_market_selections_index')

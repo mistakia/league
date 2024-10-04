@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { constants } from '#libs-shared'
 import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
-import { is_main, batch_insert } from '#libs-server'
+import { is_main, batch_insert, selection_result } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -40,100 +40,22 @@ const prop_desc = {
   [player_prop_types.GAME_ALT_RUSHING_ATTEMPTS]: 'rush atts'
 }
 
-const get_hits = ({ line, market_type, player_gamelogs, strict }) =>
+const get_hits = ({
+  line,
+  market_type,
+  player_gamelogs,
+  strict,
+  selection_type = 'OVER'
+}) =>
   player_gamelogs.filter((player_gamelog) =>
-    is_hit({ line, market_type, player_gamelog, strict })
+    selection_result.is_hit({
+      line,
+      market_type,
+      player_gamelog,
+      strict,
+      selection_type
+    })
   )
-
-const is_hit = ({ line, market_type, player_gamelog, strict = false }) => {
-  switch (market_type) {
-    case player_prop_types.GAME_PASSING_YARDS:
-    case player_prop_types.GAME_ALT_PASSING_YARDS:
-      if (strict) {
-        return player_gamelog.py >= line
-      } else {
-        const cushion = Math.min(Math.round(line * 0.06), 16)
-        return player_gamelog.py >= line - cushion
-      }
-
-    case player_prop_types.GAME_RUSHING_YARDS:
-    case player_prop_types.GAME_ALT_RUSHING_YARDS: {
-      if (strict) {
-        return player_gamelog.ry >= line
-      } else {
-        const cushion = Math.min(Math.round(line * 0.12), 9)
-        return player_gamelog.ry >= line - cushion
-      }
-    }
-
-    case player_prop_types.GAME_RECEIVING_YARDS:
-    case player_prop_types.GAME_ALT_RECEIVING_YARDS:
-      if (strict) {
-        return player_gamelog.recy >= line
-      } else {
-        const cushion = Math.min(Math.round(line * 0.12), 9)
-        return player_gamelog.recy >= line - cushion
-      }
-
-    case player_prop_types.GAME_ALT_PASSING_COMPLETIONS:
-    case player_prop_types.GAME_PASSING_COMPLETIONS:
-      return player_gamelog.pc >= (strict ? line : line - 1)
-
-    case player_prop_types.GAME_ALT_PASSING_TOUCHDOWNS:
-    case player_prop_types.GAME_PASSING_TOUCHDOWNS:
-      return player_gamelog.tdp >= (strict ? line : line)
-
-    case player_prop_types.GAME_ALT_RECEPTIONS:
-    case player_prop_types.GAME_RECEPTIONS: {
-      if (strict) {
-        return player_gamelog.rec >= line
-      } else {
-        const cushion = Math.round(line * 0.15)
-        return player_gamelog.rec >= line - cushion
-      }
-    }
-
-    case player_prop_types.GAME_PASSING_INTERCEPTIONS:
-      return player_gamelog.ints >= (strict ? line : line)
-
-    case player_prop_types.GAME_ALT_RUSHING_ATTEMPTS:
-    case player_prop_types.GAME_RUSHING_ATTEMPTS:
-      return player_gamelog.ra >= (strict ? line : line - 1)
-
-    case player_prop_types.GAME_RUSHING_RECEIVING_YARDS:
-      return (
-        player_gamelog.ry + player_gamelog.recy >= (strict ? line : line - 14)
-      )
-
-    case player_prop_types.GAME_RECEIVING_TOUCHDOWNS:
-      return player_gamelog.tdrec >= (strict ? line : line)
-
-    case player_prop_types.GAME_RUSHING_TOUCHDOWNS:
-      return player_gamelog.tdr >= (strict ? line : line)
-
-    case player_prop_types.GAME_PASSING_ATTEMPTS:
-      return player_gamelog.pa >= (strict ? line : line - 2)
-
-    // player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
-    // player_prop_types.GAME_LONGEST_RECEPTION,
-
-    case player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS:
-      return player_gamelog.tdr + player_gamelog.tdrec >= (strict ? line : line)
-
-    // player_prop_types.GAME_LONGEST_RUSH,
-
-    case player_prop_types.GAME_PASSING_RUSHING_YARDS: {
-      if (strict) {
-        return player_gamelog.py + player_gamelog.ry >= line
-      } else {
-        const cushion = Math.min(Math.round(line * 0.06), 20)
-        return player_gamelog.py + player_gamelog.ry >= line - cushion
-      }
-    }
-  }
-
-  return false
-}
 
 const format_prop_row = ({
   prop_row,
@@ -188,13 +110,15 @@ const format_prop_row = ({
     const hits_soft = get_hits({
       line: prop_row.selection_metric_line,
       market_type: prop_row.market_type,
-      player_gamelogs: gamelogs
+      player_gamelogs: gamelogs,
+      selection_type: prop_row.selection_type
     })
     const hits_hard = get_hits({
       line: prop_row.selection_metric_line,
       market_type: prop_row.market_type,
       player_gamelogs: gamelogs,
-      strict: true
+      strict: true,
+      selection_type: prop_row.selection_type
     })
     return {
       hits_soft: hits_soft.length,
@@ -228,7 +152,8 @@ const format_prop_row = ({
   const opponent_allowed_hits = get_hits({
     line: prop_row.selection_metric_line,
     market_type: prop_row.market_type,
-    player_gamelogs: current_season_opponent_player_gamelogs
+    player_gamelogs: current_season_opponent_player_gamelogs,
+    selection_type: prop_row.selection_type
   })
   const opponent_hit_weeks = [
     ...new Set(
@@ -253,7 +178,7 @@ const format_prop_row = ({
 
     name: `${player_row.fname} ${player_row.lname} ${prop_row.selection_metric_line} ${
       prop_desc[prop_row.market_type]
-    }`,
+    } ${prop_row.selection_type || 'OVER'}`,
     team: player_row.current_nfl_team,
     opp: opponent,
     pos: player_row.pos,
@@ -483,7 +408,6 @@ const main = async () => {
       .where('nfl_games.week', week)
       .where('nfl_games.seas_type', seas_type)
       .where('nfl_games.year', year)
-      .whereRaw('LOWER(selection_name) NOT LIKE ?', ['%under%'])
 
     // log(prop_rows_query.toString())
 
