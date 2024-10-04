@@ -37,6 +37,8 @@ export const format_selection_type = (selection_name) => {
     return 'YES'
   } else if (words.includes('no')) {
     return 'NO'
+  } else if (/^\d+\+$/.test(selection_name)) {
+    return 'OVER'
   }
 
   return null
