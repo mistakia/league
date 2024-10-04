@@ -157,7 +157,7 @@ const process_selection = async ({
       .where({
         source_market_id: source_market.source_market_id,
         source_id: source_market.source_id,
-        selection_id: selection.selection_id
+        selection_id: selection.source_selection_id
       })
       .update({ selection_type })
 
@@ -165,7 +165,7 @@ const process_selection = async ({
       .where({
         source_market_id: source_market.source_market_id,
         source_id: source_market.source_id,
-        selection_id: selection.selection_id
+        selection_id: selection.source_selection_id
       })
       .update({ selection_type })
   }
@@ -274,7 +274,7 @@ const update_selection_pid = async ({
           .where({
             source_market_id: source_market.source_market_id,
             source_id: source_market.source_id,
-            selection_id: selection.selection_id
+            selection_id: selection.source_selection_id
           })
           .update({
             selection_pid: player_row.pid
