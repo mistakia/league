@@ -129,6 +129,8 @@ const filter_prop_pairings = async ({
   log(opts)
   log({ week, year, seas_type, source, filter_by_allowed_over_average })
 
+  await db.raw('SET statement_timeout = 0')
+
   const prop_pairing_query = db('prop_pairings')
     .where('source_id', source)
     .where('week', week)
@@ -326,7 +328,7 @@ const filter_prop_pairings = async ({
       'prop_pairing_props.pairing_id',
       'prop_market_selections_index.*'
     )
-    .join('current_week_prop_market_selections_index', function () {
+    .innerJoin('current_week_prop_market_selections_index', function () {
       this.on(
         'current_week_prop_market_selections_index.source_market_id',
         '=',
@@ -337,7 +339,7 @@ const filter_prop_pairings = async ({
         'prop_pairing_props.source_selection_id'
       )
     })
-    .join('prop_market_selections_index', function () {
+    .innerJoin('prop_market_selections_index', function () {
       this.on(
         'prop_market_selections_index.source_market_id',
         '=',
