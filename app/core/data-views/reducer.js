@@ -28,6 +28,18 @@ export function data_views_reducer(
         })
       })
 
+    case data_views_actions.GET_DATA_VIEW_FULFILLED:
+      return state.withMutations((state) => {
+        state.set(
+          payload.data.view_id,
+          new Map({
+            ...payload.data,
+            table_state: payload.data.table_state,
+            saved_table_state: payload.data.table_state
+          })
+        )
+      })
+
     case data_views_actions.POST_DATA_VIEW_FULFILLED:
       return state.withMutations((state) => {
         state.set(

@@ -95,7 +95,8 @@ import { get_league_team_daily_values_actions } from '@core/league-team-daily-va
 import {
   post_data_view_actions,
   delete_data_view_actions,
-  get_data_views_actions
+  get_data_views_actions,
+  get_data_view_actions
 } from '@core/data-views/actions'
 import { get_league_careerlogs_actions } from '@core/league-careerlogs/actions'
 
@@ -437,6 +438,12 @@ export const get_data_views = fetch.bind(
   null,
   api.get_data_views,
   get_data_views_actions
+)
+
+export const get_data_view = fetch.bind(
+  null,
+  api.get_data_view,
+  get_data_view_actions
 )
 
 export const post_restricted_free_agent_nomination = fetch.bind(

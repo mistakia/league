@@ -57,6 +57,7 @@ const Routes = ({ app }) => {
       {app.userId && <Route path='/lineups' element={<LineupsPage />} />}
       {app.userId && <Route path='/trade' element={<TradePage />} />}
       <Route path='/data-views' element={<DataViewsPage />} />
+      <Route path='/data-views/:view_id' element={<DataViewsPage />} />
       <Route path='/leagues/:lid'>
         <Route path='/leagues/:lid/players' element={<PlayersPage />} />
         <Route

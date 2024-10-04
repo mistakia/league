@@ -129,7 +129,8 @@ const mapDispatchToProps = {
   delete_data_view: data_views_actions.delete_data_view,
   save_data_view: data_views_actions.save_data_view,
   load_data_views: data_views_actions.load_data_views,
-  reset_data_view_cache: data_views_actions.reset_data_view_cache
+  reset_data_view_cache: data_views_actions.reset_data_view_cache,
+  load_data_view: data_views_actions.load_data_view
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(DataViewsPage)

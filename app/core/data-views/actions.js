@@ -5,6 +5,7 @@ export const data_views_actions = {
   ...create_api_action_types('GET_DATA_VIEWS'),
   ...create_api_action_types('DELETE_DATA_VIEW'),
   ...create_api_action_types('POST_DATA_VIEW'),
+  ...create_api_action_types('GET_DATA_VIEW'),
 
   DATA_VIEW_CHANGED: 'DATA_VIEW_CHANGED',
   data_view_changed: (data_view, view_change_params) => ({
@@ -42,9 +43,16 @@ export const data_views_actions = {
   load_data_views: ({ user_id, username } = {}) => ({
     type: data_views_actions.LOAD_DATA_VIEWS,
     payload: { user_id, username }
+  }),
+
+  LOAD_DATA_VIEW: 'LOAD_DATA_VIEW',
+  load_data_view: (data_view_id) => ({
+    type: data_views_actions.LOAD_DATA_VIEW,
+    payload: { data_view_id }
   })
 }
 
 export const get_data_views_actions = create_api_actions('GET_DATA_VIEWS')
 export const delete_data_view_actions = create_api_actions('DELETE_DATA_VIEW')
 export const post_data_view_actions = create_api_actions('POST_DATA_VIEW')
+export const get_data_view_actions = create_api_actions('GET_DATA_VIEW')
