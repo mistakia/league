@@ -2,7 +2,12 @@ import { takeLatest, fork, call, select, put } from 'redux-saga/effects'
 
 import { data_views_actions } from './actions'
 import { default_data_views } from './default-data-views'
-import { post_data_view, get_data_views, delete_data_view } from '@core/api'
+import {
+  post_data_view,
+  get_data_views,
+  delete_data_view,
+  get_data_view
+} from '@core/api'
 import { send } from '@core/ws'
 import {
   get_app,
@@ -112,6 +117,11 @@ export function* load_data_views({ payload }) {
   yield call(get_data_views, { user_id, username })
 }
 
+export function* load_data_view({ payload }) {
+  const { data_view_id } = payload
+  yield call(get_data_view, { data_view_id })
+}
+
 export function* post_data_view_fulfilled_notification() {
   yield put(
     notificationActions.show({
@@ -137,6 +147,11 @@ export function* handle_delete_data_view_fulfilled({ payload }) {
       severity: 'success'
     })
   )
+}
+
+export function* handle_get_data_view_fulfilled({ payload }) {
+  yield put(data_views_actions.set_selected_data_view(payload.data.view_id))
+  yield call(handle_data_view_request, { data_view: payload.data })
 }
 
 //= ====================================
@@ -184,6 +199,17 @@ export function* watch_reset_data_view_cache() {
   )
 }
 
+export function* watch_load_data_view() {
+  yield takeLatest(data_views_actions.LOAD_DATA_VIEW, load_data_view)
+}
+
+export function* watch_get_data_view_fulfilled() {
+  yield takeLatest(
+    data_views_actions.GET_DATA_VIEW_FULFILLED,
+    handle_get_data_view_fulfilled
+  )
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -196,5 +222,7 @@ export const data_views_sagas = [
   fork(watch_post_data_view_fulfilled),
   fork(watch_delete_data_view),
   fork(watch_delete_data_view_fulfilled),
-  fork(watch_reset_data_view_cache)
+  fork(watch_reset_data_view_cache),
+  fork(watch_load_data_view),
+  fork(watch_get_data_view_fulfilled)
 ]

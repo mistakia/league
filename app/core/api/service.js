@@ -371,6 +371,10 @@ export const api = {
     if (params.toString()) url += `?${params.toString()}`
     return { url }
   },
+  get_data_view({ data_view_id }) {
+    const url = `${API_URL}/data-views/${data_view_id}`
+    return { url }
+  },
   post_restricted_free_agent_nomination({ teamId, ...data }) {
     const url = `${API_URL}/teams/${teamId}/tag/transition/nominate`
     return { url, ...POST(data) }

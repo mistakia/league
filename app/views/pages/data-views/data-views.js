@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import PropTypes from 'prop-types'
-import { useLocation, NavLink } from 'react-router-dom'
+import { useLocation, NavLink, useParams } from 'react-router-dom'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import Table from 'react-table/index.js'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
@@ -42,63 +42,70 @@ export default function DataViewsPage({
   load_data_views,
   user_username,
   data_view_request,
-  reset_data_view_cache
+  reset_data_view_cache,
+  load_data_view
 }) {
   const location = useLocation()
+  const { view_id } = useParams()
 
   useEffect(() => {
     load_data_views()
-  }, [load_data_views])
+    if (view_id) {
+      load_data_view(view_id)
+    }
+  }, [load_data_views, load_data_view, view_id])
 
   useEffect(() => {
-    const search_params = new URLSearchParams(location.search)
-    const columns = JSON.parse(search_params.get('columns') || 'null') || []
-    const sort = JSON.parse(search_params.get('sort') || 'null') || []
-    const where = JSON.parse(search_params.get('where') || 'null') || []
-    const prefix_columns =
-      JSON.parse(search_params.get('prefix_columns') || 'null') || []
-    const splits = JSON.parse(search_params.get('splits') || 'null') || []
-    const view_name = search_params.get('view_name') || ''
-    const view_search_column_id =
-      search_params.get('view_search_column_id') || ''
-    const view_description = search_params.get('view_description') || ''
+    if (!view_id) {
+      const search_params = new URLSearchParams(location.search)
+      const columns = JSON.parse(search_params.get('columns') || 'null') || []
+      const sort = JSON.parse(search_params.get('sort') || 'null') || []
+      const where = JSON.parse(search_params.get('where') || 'null') || []
+      const prefix_columns =
+        JSON.parse(search_params.get('prefix_columns') || 'null') || []
+      const splits = JSON.parse(search_params.get('splits') || 'null') || []
+      const view_name = search_params.get('view_name') || ''
+      const view_search_column_id =
+        search_params.get('view_search_column_id') || ''
+      const view_description = search_params.get('view_description') || ''
 
-    const has_table_state =
-      columns.length || where.length || (prefix_columns.length && sort.length)
+      const has_table_state =
+        columns.length || where.length || (prefix_columns.length && sort.length)
 
-    if (has_table_state) {
-      data_view_changed(
-        {
-          // generate a new view_id to make sure it doesn't conflict with a saved view
-          view_id: generate_view_id(),
-          view_name,
-          view_search_column_id,
-          view_description,
-          table_state: {
-            columns,
-            sort,
-            where,
-            prefix_columns,
-            splits
+      if (has_table_state) {
+        data_view_changed(
+          {
+            // generate a new view_id to make sure it doesn't conflict with a saved view
+            view_id: generate_view_id(),
+            view_name,
+            view_search_column_id,
+            view_description,
+            table_state: {
+              columns,
+              sort,
+              where,
+              prefix_columns,
+              splits
+            },
+            saved_table_state: {
+              columns,
+              sort,
+              where,
+              prefix_columns,
+              splits
+            }
           },
-          saved_table_state: {
-            columns,
-            sort,
-            where,
-            prefix_columns,
-            splits
+          {
+            view_state_changed: true
           }
-        },
-        {
+        )
+      } else {
+        data_view_changed(selected_data_view, {
           view_state_changed: true
-        }
-      )
-    } else {
-      data_view_changed(selected_data_view, {
-        view_state_changed: true
-      })
+        })
+      }
     }
-  }, [location, data_view_changed]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [location, data_view_changed, view_id]) // eslint-disable-line react-hooks/exhaustive-deps
 
   useEffect(() => {
     for (const column of selected_data_view.table_state.columns) {
@@ -178,7 +185,9 @@ export default function DataViewsPage({
     return null
   }
 
-  const body = isPending ? (
+  const is_view_loading =
+    isPending || (view_id && selected_data_view.view_id !== view_id)
+  const body = is_view_loading ? (
     <Loading loading />
   ) : (
     <div className='players__table'>
@@ -247,5 +256,6 @@ DataViewsPage.propTypes = {
   load_data_views: PropTypes.func,
   user_username: PropTypes.string,
   data_view_request: PropTypes.object,
-  reset_data_view_cache: PropTypes.func
+  reset_data_view_cache: PropTypes.func,
+  load_data_view: PropTypes.func
 }
