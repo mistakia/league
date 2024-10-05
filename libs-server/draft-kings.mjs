@@ -351,22 +351,32 @@ export const get_websocket_connection = ({ authorization } = {}) =>
       return reject(new Error('missing authorization'))
     }
 
-    const wss = new WebSocket(
-      `${config.draftkings_wss_url}?jwt=${authorization}`,
-      {
-        headers: {
-          Origin: 'https://sportsbook.draftkings.com',
-          'User-Agent': config.user_agent
-        }
-      }
-    )
+    get_draftkings_config()
+      .then((draftkings_config) => {
+        const wss = new WebSocket(
+          `${draftkings_config.draftkings_wss_url}?jwt=${authorization}`,
+          {
+            headers: {
+              origin: 'https://sportsbook.draftkings.com',
+              user_agent: draftkings_config.user_agent
+            }
+          }
+        )
 
-    log(wss)
+        log(wss)
 
-    wss.on('open', () => {
-      log('wss connection opened')
-      resolve(wss)
-    })
+        wss.on('open', () => {
+          log('wss connection opened')
+          resolve(wss)
+        })
+
+        wss.on('error', (error) => {
+          reject(error)
+        })
+      })
+      .catch((error) => {
+        reject(error)
+      })
   })
 
 export const get_wagers = ({
@@ -444,7 +454,14 @@ export const get_wagers = ({
       if (bets.length) {
         if (has_entered_range) {
           const last_wager = bets[bets.length - 1]
-          if (placed_after_cutoff && placed_before_cutoff) {
+          log({
+            last_wager,
+            placed_after_cutoff,
+            placed_before_cutoff
+          })
+          if (bets.length < limit) {
+            has_more = false
+          } else if (placed_after_cutoff && placed_before_cutoff) {
             has_more =
               dayjs(last_wager.placementDate).isAfter(placed_after_cutoff) &&
               dayjs(last_wager.placementDate).isBefore(placed_before_cutoff)
@@ -456,11 +473,11 @@ export const get_wagers = ({
             has_more = dayjs(last_wager.placementDate).isBefore(
               placed_before_cutoff
             )
-          } else if (bets.length < limit) {
-            has_more = false
           } else {
             has_more = true
           }
+        } else if (bets.length < limit) {
+          has_more = false
         } else {
           has_more = true
         }

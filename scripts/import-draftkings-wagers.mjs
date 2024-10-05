@@ -115,10 +115,10 @@ const import_draftkings_wagers = async ({
         placed_at: dayjs(wager.placementDate).unix(),
         bet_count: wager.numberOfBets,
         selection_count: wager.numberOfSelections,
-        wager_stauts: format_wager_status(wager.settlementStatus),
+        wager_status: format_wager_status(wager.settlementStatus),
         bet_wager_amount: Number(wager.stake / wager.numberOfBets),
         total_wager_amount: wager.stake,
-        wager_returned_amount: wager.returns,
+        wager_returned_amount: wager.returns || wager.potentialReturns,
         book_id: 'DRAFTKINGS',
         book_wager_id: wager.betId
       }
@@ -128,8 +128,10 @@ const import_draftkings_wagers = async ({
       }
 
       wager.selections.forEach((selection, index) => {
-        wager_item[`selection${index + 1}_id`] = selection.selectionId
-        wager_item[`selection${index + 1}_odds`] = Number(selection.displayOdds)
+        wager_item[`selection_${index + 1}_id`] = selection.selectionId
+        wager_item[`selection_${index + 1}_odds`] = Number(
+          selection.displayOdds.replace('−', '-')
+        )
 
         // TODO check and add any missing markets and selections
         // selection_inserts.push({
@@ -177,7 +179,9 @@ const main = async () => {
     const placed_before = argv.placed_before
       ? dayjs(argv.placed_before, 'YYYY-MM-DD')
       : null
+    const filename = argv.filename
     await import_draftkings_wagers({
+      filename,
       authorization: auth,
       placed_after,
       placed_before

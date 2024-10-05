@@ -71,7 +71,7 @@ const get_wagers_summary = ({ wagers, props = [] }) =>
         return selection.settlementStatus === 'Lost'
       }).length
 
-      const is_settled = wager.settlementStatus === 'Settled'
+      const is_settled = wager.status === 'Settled'
 
       const is_won = is_settled && lost_legs === 0
       const is_lost = is_settled && lost_legs > 0
@@ -128,7 +128,8 @@ const analyze_draftkings_wagers = async ({
   filename,
   week,
   show_counts = false,
-  show_potential_gain = false
+  show_potential_gain = false,
+  hide_wagers = false
 } = {}) => {
   if (!filename) {
     throw new Error('filename is required')
@@ -145,14 +146,14 @@ const analyze_draftkings_wagers = async ({
   }
 
   const filtered = wagers.filter((wager) => {
-    if (wager.type === 'RoundRobin') {
-      return false
-    }
+    // if (wager.type === 'RoundRobin') {
+    //   return false
+    // }
 
     // filter out wagers that do not have multiple selections
-    if (wager.selections.length < 2) {
-      return false
-    }
+    // if (wager.selections.length < 2) {
+    //   return false
+    // }
 
     if (week) {
       return wager.week === week
@@ -376,6 +377,10 @@ const analyze_draftkings_wagers = async ({
     two_prop_table.printTable()
   }
 
+  if (hide_wagers) {
+    return
+  }
+
   console.log('\n\nTop 50 slips sorted by highest odds (<= 2 lost legs)\n\n')
 
   const closest_wagers = filtered.filter(
@@ -414,7 +419,11 @@ const main = async () => {
     const filename = argv.filename
     const week = argv.week ? Number(argv.week) : null
 
-    await analyze_draftkings_wagers({ filename, week })
+    await analyze_draftkings_wagers({
+      filename,
+      week,
+      hide_wagers: argv.hide_wagers
+    })
   } catch (err) {
     error = err
     log(error)
