@@ -20,9 +20,9 @@ const __dirname = dirname(fileURLToPath(import.meta.url))
 const data_path = path.join(__dirname, '../tmp')
 
 const is_prop_equal = (prop_a, prop_b) =>
-  prop_a.eventId === prop_b.eventId &&
-  prop_a.marketId === prop_b.marketId &&
-  prop_a.selectionId === prop_b.selectionId
+  prop_a.event_id === prop_b.event_id &&
+  prop_a.market_id === prop_b.market_id &&
+  prop_a.selection_id === prop_b.selection_id
 
 const get_props_summary = (props) =>
   props.reduce(
@@ -64,6 +64,9 @@ const get_wagers_summary = ({ wagers, props = [] }) =>
       const is_lost = is_settled && lost_legs > 0
 
       return {
+        won_wagers: is_won
+          ? [...accumulator.won_wagers, wager]
+          : accumulator.won_wagers,
         wagers: accumulator.wagers + 1,
         wagers_won: is_won
           ? accumulator.wagers_won + 1
@@ -103,6 +106,7 @@ const get_wagers_summary = ({ wagers, props = [] }) =>
       }
     },
     {
+      won_wagers: [],
       wagers: 0,
       wagers_won: 0,
       wagers_loss: 0,
@@ -211,12 +215,17 @@ const standardize_wager = ({ wager, source }) => {
         name: format_fanduel_selection_name({ selection: leg.parts[0], week }),
         event_id: leg.parts[0].eventId,
         market_id: leg.parts[0].marketId,
+        source_id: 'FANDUEL',
         selection_id: leg.parts[0].selectionId,
-        parsed_odds: leg.parts[0].americanPrice,
+        parsed_odds: Number(leg.parts[0].americanPrice),
         is_won: leg.result === 'WON',
         is_lost: leg.result === 'LOST'
       })),
-      parsed_odds: wager.americanBetPrice,
+      bet_receipt_id: wager.betReceiptId.replace(
+        /(\d{4})(\d{4})(\d{4})(\d{4})/,
+        '$1-$2-$3-$4'
+      ),
+      parsed_odds: Number(wager.americanBetPrice),
       is_settled: wager.isSettled,
       is_won: wager.result === 'WON',
       potential_win: wager.betPrice * wager.currentSize,
@@ -232,12 +241,15 @@ const standardize_wager = ({ wager, source }) => {
         event_id: selection.eventId,
         market_id: selection.marketId,
         selection_id: selection.selectionId,
+        bet_receipt_id: wager.betReceiptId,
+        source_id: 'DRAFTKINGS',
         parsed_odds: selection.displayOdds
           ? Number(selection.displayOdds.replace(/—|-|−/g, '-'))
           : null,
         is_won: selection.settlementStatus === 'Won',
         is_lost: selection.settlementStatus === 'Lost'
       })),
+      bet_receipt_id: wager.receiptId,
       parsed_odds: Number(wager.displayOdds.replace(/—|-|−/g, '-')),
       is_settled: wager.status === 'Settled',
       is_won: wager.settlementStatus === 'Won',
@@ -369,36 +381,50 @@ const analyze_wagers = async ({
 
   const props_summary = get_props_summary(unique_selections)
   const wager_summary_table = new Table({ title: 'Execution Summary' })
-  const wager_table_row = {
-    current_roi: wager_summary.current_roi,
-    open_potential_roi:
-      (
-        (wager_summary.open_potential_win / wager_summary.total_risk - 1) *
-        100
-      ).toFixed(0) + '%',
-    max_potential_roi:
-      (
-        (wager_summary.max_potential_win / wager_summary.total_risk - 1) *
-        100
-      ).toFixed(0) + '%',
-    ...props_summary
+
+  const add_row = (label, value) => {
+    if (typeof value === 'number') {
+      if (label.includes('Potential Win')) {
+        value = value.toLocaleString('en-US', { maximumFractionDigits: 2 })
+      } else if (label === 'Expected Hits') {
+        value = value.toFixed(2)
+      }
+    }
+    wager_summary_table.addRow({ Metric: label, Value: value })
+  }
+
+  add_row('Current ROI', wager_summary.current_roi)
+  add_row(
+    'Open Potential ROI',
+    `${((wager_summary.open_potential_win / wager_summary.total_risk - 1) * 100).toFixed(0)}%`
+  )
+  add_row(
+    'Max Potential ROI',
+    `${((wager_summary.max_potential_win / wager_summary.total_risk - 1) * 100).toFixed(0)}%`
+  )
+
+  // Add rows for props_summary
+  for (const [key, value] of Object.entries(props_summary)) {
+    add_row(
+      key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+      value
+    )
   }
 
   if (show_counts) {
-    wager_table_row.wagers = wager_summary.wagers
-    wager_table_row.total_won = wager_summary.total_won
-    // wager_table_row.wagers_won = wager_summary.wagers_won
-    // wager_table_row.wagers_loss = wager_summary.wagers_loss
-    wager_table_row.wagers_open = wager_summary.wagers_open
-    wager_table_row.total_risk_units = wager_summary.total_risk
+    add_row('Wagers', wager_summary.wagers)
+    add_row('Total Won', wager_summary.total_won)
+    // add_row('Wagers Won', wager_summary.wagers_won)
+    // add_row('Wagers Loss', wager_summary.wagers_loss)
+    add_row('Wagers Open', wager_summary.wagers_open)
+    add_row('Total Risk Units', wager_summary.total_risk)
   }
 
   if (show_potential_gain) {
-    wager_table_row.open_potential_win = wager_summary.open_potential_win
-    wager_table_row.max_potential_win = wager_summary.max_potential_win
+    add_row('Open Potential Win', wager_summary.open_potential_win)
+    add_row('Max Potential Win', wager_summary.max_potential_win)
   }
 
-  wager_summary_table.addRow(wager_table_row)
   wager_summary_table.printTable()
 
   if (show_counts) {
@@ -525,6 +551,163 @@ const analyze_wagers = async ({
         event_table.addRow(row)
       })
     event_table.printTable()
+  }
+
+  const one_prop = []
+  const two_props = []
+
+  const lost_props = unique_selections.filter((prop) => prop.is_lost)
+
+  for (let i = 0; i < lost_props.length; i++) {
+    const prop_a = lost_props[i]
+
+    const one_prop_summary = get_wagers_summary({
+      wagers: filtered,
+      props: [prop_a]
+    })
+    const potential_gain = one_prop_summary.total_won - wager_summary.total_won
+    const potential_wins =
+      one_prop_summary.wagers_won - wager_summary.wagers_won
+    const potential_roi_added =
+      (potential_gain / wager_summary.total_risk) * 100
+
+    if (potential_gain) {
+      one_prop.push({
+        name: prop_a.name,
+        potential_gain,
+        potential_wins,
+        potential_roi_added
+      })
+    }
+
+    for (let j = i + 1; j < lost_props.length; j++) {
+      const prop_b = lost_props[j]
+
+      const two_prop_summary = get_wagers_summary({
+        wagers: filtered,
+        props: [prop_a, prop_b]
+      })
+      const potential_gain =
+        two_prop_summary.total_won - wager_summary.total_won
+      const potential_wins =
+        two_prop_summary.wagers_won - wager_summary.wagers_won
+      const potential_roi_added =
+        (potential_gain / wager_summary.total_risk) * 100
+
+      if (potential_gain) {
+        two_props.push({
+          name: `${prop_a.name} / ${prop_b.name}`,
+          potential_gain,
+          potential_wins,
+          potential_roi_added
+        })
+      }
+    }
+  }
+
+  if (one_prop.length) {
+    const one_prop_table = new Table({ title: 'One Leg Away' })
+    for (const prop of one_prop.sort(
+      (a, b) => b.potential_gain - a.potential_gain
+    )) {
+      one_prop_table.addRow({
+        name: prop.name,
+        potential_roi_added: `${prop.potential_roi_added.toFixed(2)}%`,
+        potential_gain: prop.potential_gain.toFixed(2),
+        potential_wins: prop.potential_wins
+      })
+    }
+    one_prop_table.printTable()
+  }
+
+  if (two_props.length) {
+    const two_prop_table = new Table({ title: 'Two Legs Away' })
+    for (const prop of two_props.sort(
+      (a, b) => b.potential_gain - a.potential_gain
+    )) {
+      two_prop_table.addRow({
+        name: prop.name,
+        potential_roi_added: `${prop.potential_roi_added.toFixed(2)}%`,
+        potential_gain: prop.potential_gain.toFixed(2),
+        potential_wins: prop.potential_wins
+      })
+    }
+    two_prop_table.printTable()
+  }
+
+  if (!hide_wagers) {
+    console.log(
+      '\n\nTop 50 slips sorted by highest odds (<= specified lost legs)\n\n'
+    )
+
+    const filtered_wagers = filtered.filter((wager) => {
+      const lost_legs = wager.selections.filter(
+        (selection) => selection.is_lost
+      ).length
+      return lost_legs <= wagers_lost_leg_limit
+    })
+
+    log(`filtered_wagers: ${filtered_wagers.length}`)
+
+    const display_wagers = filtered_wagers.filter((wager) => {
+      // Filter out wagers that include any of the excluded selections
+      if (exclude_selections.length > 0) {
+        if (
+          wager.selections.some((selection) =>
+            exclude_selections.some((filter) =>
+              selection.name.toLowerCase().includes(filter.toLowerCase())
+            )
+          )
+        ) {
+          return false
+        }
+      }
+
+      // Filter to only include wagers that have all of the included selections
+      if (include_selections.length > 0) {
+        return include_selections.every((filter) =>
+          wager.selections.some((selection) =>
+            selection.name.toLowerCase().includes(filter.toLowerCase())
+          )
+        )
+      }
+
+      return true
+    })
+
+    log(`display_wagers: ${display_wagers.length}`)
+
+    for (const wager of display_wagers
+      // .sort((a, b) => b.potential_win - a.potential_win)
+      .sort((a, b) => b.parsed_odds - a.parsed_odds)
+      .slice(0, wagers_limit)) {
+      const potential_roi_gain =
+        (wager.potential_win / wager_summary.total_risk) * 100
+      const num_of_legs = wager.selections.length
+      let wager_table_title = `[${num_of_legs} leg parlay] American odds: ${
+        wager.parsed_odds > 0 ? '+' : ''
+      }${wager.parsed_odds} / ${potential_roi_gain.toFixed(2)}% roi`
+
+      if (show_potential_gain) {
+        wager_table_title += ` ($${wager.potential_win.toFixed(2)})`
+      }
+
+      if (show_bet_receipts && wager.bet_receipt_id) {
+        wager_table_title += ` / Bet Receipt: ${wager.bet_receipt_id}`
+      }
+
+      wager_table_title += ` [Week ${wager.week}]`
+
+      const wager_table = new Table({ title: wager_table_title })
+      for (const selection of wager.selections) {
+        wager_table.addRow({
+          selection: selection.name,
+          odds: selection.parsed_odds,
+          result: selection.is_won ? 'WON' : selection.is_lost ? 'LOST' : 'OPEN'
+        })
+      }
+      wager_table.printTable()
+    }
   }
 }
 
