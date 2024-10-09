@@ -113,6 +113,32 @@ const player_stat_from_plays = ({
     }
     return null
   },
+  main_where_group_by: ({
+    params,
+    table_name,
+    column_id,
+    column_index,
+    rate_type_column_mapping
+  }) => {
+    if (should_use_main_where({ params, has_numerator_denominator })) {
+      const group_by = []
+      const rate_type_table_name =
+        rate_type_column_mapping[`${column_id}_${column_index}`]
+      if (rate_type_table_name) {
+        group_by.push(`${rate_type_table_name}.rate_type_total_count`)
+      }
+
+      if (has_numerator_denominator) {
+        group_by.push(`SUM(${table_name}.${stat_name}_numerator)`)
+        group_by.push(`SUM(${table_name}.${stat_name}_denominator)`)
+      } else {
+        group_by.push(`${table_name}.${stat_name}`)
+      }
+
+      return group_by
+    }
+    return []
+  },
   pid_columns,
   with: add_player_stats_play_by_play_with_statement,
   join: (args) =>
