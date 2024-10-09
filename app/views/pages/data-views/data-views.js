@@ -1,6 +1,6 @@
 import React, { useEffect } from 'react'
 import PropTypes from 'prop-types'
-import { useLocation, NavLink, useParams } from 'react-router-dom'
+import { useLocation, NavLink, useParams, useNavigate } from 'react-router-dom'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import Table from 'react-table/index.js'
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined'
@@ -46,6 +46,7 @@ export default function DataViewsPage({
   load_data_view
 }) {
   const location = useLocation()
+  const navigate = useNavigate()
   const { view_id } = useParams()
 
   useEffect(() => {
@@ -153,6 +154,13 @@ export default function DataViewsPage({
     data_view_changed(data_view, view_change_params)
   }
 
+  const on_select_view = (args) => {
+    if (view_id) {
+      navigate('/data-views')
+    }
+    set_selected_data_view(args)
+  }
+
   const render_request_status = () => {
     if (!data_view_request.current_request) return null
 
@@ -208,7 +216,7 @@ export default function DataViewsPage({
         saved_table_state={selected_data_view.saved_table_state}
         all_columns={data_views_fields}
         selected_view={selected_data_view}
-        select_view={set_selected_data_view}
+        select_view={on_select_view}
         fetch_more={fetch_more} // TODO
         total_rows_fetched={players.size}
         total_row_count={players.size} // TODO get from server
