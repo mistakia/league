@@ -245,3 +245,9 @@
 
 ## Every Tuesday at 2:40PM
 40 14 * * 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-espn-receiving-tracking-metrics.mjs &>> /var/log/league/league-import-espn-receiving-tracking-metrics.log
+
+## Every Tuesday at 9:20PM
+20 21 * * 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-espn-line-win-rates.mjs &>> /var/log/league/league-import-espn-line-win-rates.log
+
+## Every Tuesday at 9:40PM
+40 14 * * 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-espn-receiving-tracking-metrics.mjs &>> /var/log/league/league-import-espn-receiving-tracking-metrics.log
