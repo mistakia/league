@@ -633,6 +633,11 @@ export default {
     with_select_string: `SUM(CASE WHEN comp = true AND td = true THEN 1 ELSE 0 END)`,
     stat_name: 'rec_tds_from_plays'
   }),
+  player_receiving_or_rushing_touchdowns_from_plays: player_stat_from_plays({
+    pid_columns: ['trg_pid', 'bc_pid'],
+    with_select_string: `SUM(CASE WHEN td = true THEN 1 ELSE 0 END)`,
+    stat_name: 'rec_or_rush_tds_from_plays'
+  }),
   player_drops_from_plays: player_stat_from_plays({
     pid_columns: ['trg_pid'],
     with_select_string: `SUM(CASE WHEN dropped_pass = true THEN 1 ELSE 0 END)`,
