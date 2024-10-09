@@ -587,14 +587,22 @@ const analyze_wagers = async ({
         wagers: filtered,
         props: [prop_a, prop_b]
       })
+
+      const prop_b_summary = get_wagers_summary({
+        wagers: filtered,
+        props: [prop_b]
+      })
+
       const potential_gain =
-        two_prop_summary.total_won - wager_summary.total_won
+        two_prop_summary.total_won -
+        Math.max(one_prop_summary.total_won, prop_b_summary.total_won)
       const potential_wins =
-        two_prop_summary.wagers_won - wager_summary.wagers_won
+        two_prop_summary.wagers_won -
+        Math.max(one_prop_summary.wagers_won, prop_b_summary.wagers_won)
       const potential_roi_added =
         (potential_gain / wager_summary.total_risk) * 100
 
-      if (potential_gain) {
+      if (potential_gain > 0) {
         two_props.push({
           name: `${prop_a.name} / ${prop_b.name}`,
           potential_gain,
