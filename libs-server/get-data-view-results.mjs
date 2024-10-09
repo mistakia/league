@@ -264,7 +264,10 @@ const get_column_index = ({ column_id, index, columns }) => {
   const columns_with_same_id = columns.filter(
     ({ column: c }) => (typeof c === 'string' ? c : c.column_id) === column_id
   )
-  return columns_with_same_id.findIndex(({ index: i }) => i === index)
+  const found_index = columns_with_same_id.findIndex(
+    ({ index: i }) => i === index
+  )
+  return found_index !== -1 ? found_index : 0
 }
 
 const find_sort_column = ({ column_id, column_index = 0, columns }) => {
@@ -443,7 +446,10 @@ const add_clauses_for_table = ({
         const main_where_group_by_string =
           column_definition.main_where_group_by({
             params: where_clause.params,
-            table_name
+            table_name,
+            column_id: where_clause.column_id,
+            column_index: 0,
+            rate_type_column_mapping
           })
         if (main_where_group_by_string) {
           group_by_strings.push(main_where_group_by_string)
@@ -873,7 +879,11 @@ export const get_data_view_results_query = ({
     process_cache_info({ cache_info, data_view_metadata })
   }
 
-  for (const [index, column] of [...prefix_columns, ...columns].entries()) {
+  for (const [index, column] of [
+    ...prefix_columns,
+    ...columns,
+    ...where
+  ].entries()) {
     if (
       typeof column === 'object' &&
       column.params &&
