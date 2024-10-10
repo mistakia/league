@@ -26,7 +26,10 @@ export const selection_type = {
 export const team_game_market_types = {
   GAME_SPREAD: 'GAME_SPREAD',
   GAME_TOTAL: 'GAME_TOTAL',
-  GAME_MONEYLINE: 'GAME_MONEYLINE'
+  GAME_MONEYLINE: 'GAME_MONEYLINE',
+
+  GAME_ALT_SPREAD: 'GAME_ALT_SPREAD',
+  GAME_ALT_TOTAL: 'GAME_ALT_TOTAL'
 }
 
 export const player_season_prop_types = {
