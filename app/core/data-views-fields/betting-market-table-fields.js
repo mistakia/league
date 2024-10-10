@@ -202,11 +202,20 @@ export default {
     player_value_path: 'team_game_prop_line_betting_market'
   }),
 
-  team_game_prop_odds_from_betting_markets: create_team_game_prop_field({
-    column_title: 'Team Game Prop Odds',
-    header_label: 'ODDS',
-    player_value_path: 'team_game_prop_odds_betting_market'
-  }),
+  team_game_prop_american_odds_from_betting_markets:
+    create_team_game_prop_field({
+      column_title: 'Team Game Prop American Odds',
+      header_label: 'ODDS',
+      player_value_path: 'team_game_prop_american_odds_betting_market'
+    }),
+
+  team_game_prop_decimal_odds_from_betting_markets: create_team_game_prop_field(
+    {
+      column_title: 'Team Game Prop Decimal Odds',
+      header_label: 'ODDS',
+      player_value_path: 'team_game_prop_decimal_odds_betting_market'
+    }
+  ),
 
   team_game_implied_team_total_from_betting_markets:
     create_team_game_implied_total_field({
