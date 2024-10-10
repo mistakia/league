@@ -11,9 +11,30 @@ import { randomUUID as uuidv4 } from 'crypto'
 import { wait } from '#libs-server'
 import WebSocket from 'ws'
 import db from '#db'
+import { fixTeam } from '#libs-shared'
 
 const log = debug('draft-kings')
 // debug.enable('draft-kings')
+
+export const get_team_from_participant = ({ participant, participantType }) => {
+  if (participantType !== 'Team') {
+    return null
+  }
+
+  if (!participant) {
+    return null
+  }
+
+  let team
+
+  try {
+    team = fixTeam(participant)
+  } catch (err) {
+    log(err)
+  }
+
+  return team
+}
 
 const get_draftkings_config = async () => {
   const config_row = await db('config')

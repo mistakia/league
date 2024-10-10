@@ -102,7 +102,15 @@ const format_market = async ({
       }
     }
 
-    let selection_pid = player_row?.pid || null
+    let team
+    if (outcome.participantType === 'Team') {
+      team = draftkings.get_team_from_participant({
+        participant: outcome.participant,
+        participantType: outcome.participantType
+      })
+    }
+
+    let selection_pid = player_row?.pid || team || null
 
     if (is_game_spread && outcome.label) {
       try {

@@ -181,7 +181,9 @@ const process_selection = async ({
 
   // Handle spread market types
   if (
-    market_type === bookmaker_constants.team_game_market_types.GAME_SPREAD &&
+    (market_type === bookmaker_constants.team_game_market_types.GAME_SPREAD ||
+      market_type ===
+        bookmaker_constants.team_game_market_types.GAME_ALT_SPREAD) &&
     !selection.selection_pid
   ) {
     const team_abbr = selection.selection_name.split(' ')[1]
