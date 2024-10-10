@@ -229,6 +229,12 @@ const get_market_type_offer_492 = ({ subcategoryId, betOfferTypeId }) => {
     case 6:
       return team_game_market_types.GAME_TOTAL
 
+    case 13195:
+      return team_game_market_types.GAME_ALT_SPREAD
+
+    case 13196:
+      return team_game_market_types.GAME_ALT_TOTAL
+
     default:
       log(`unknown betOfferTypeId ${betOfferTypeId}`)
       return null
