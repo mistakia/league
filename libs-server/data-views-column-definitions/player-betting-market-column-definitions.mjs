@@ -251,7 +251,8 @@ const team_betting_market_join = ({
 
   query[join_func](table_name, function () {
     if (
-      market_type === bookmaker_constants.team_game_market_types.GAME_SPREAD
+      market_type === bookmaker_constants.team_game_market_types.GAME_SPREAD ||
+      market_type === bookmaker_constants.team_game_market_types.GAME_ALT_SPREAD
     ) {
       this.on(`${table_name}.selection_pid`, '=', 'player.current_nfl_team')
     } else {
@@ -268,6 +269,7 @@ const team_betting_market_with = ({
   query,
   params,
   with_table_name,
+  select_strings = [],
   having_clauses,
   where_clauses,
   splits
@@ -305,7 +307,7 @@ const team_betting_market_with = ({
   })
 
   query.with(with_table_name, (qb) => {
-    qb.select('pms.selection_pid', 'pms.selection_metric_line', 'm.h', 'm.v')
+    qb.select('pms.selection_pid', 'm.h', 'm.v')
       .from(`${markets_cte} as m`)
       .join('prop_market_selections_index as pms', function () {
         this.on('pms.source_id', '=', 'm.source_id')
@@ -315,6 +317,25 @@ const team_betting_market_with = ({
 
     if (selection_type.length) {
       qb.whereIn('pms.selection_type', selection_type)
+    }
+
+    // Add any additional select strings
+    for (const select_string of select_strings) {
+      qb.select(db.raw(select_string))
+    }
+
+    // Add any having clauses
+    if (having_clauses) {
+      for (const having_clause of having_clauses) {
+        qb.havingRaw(having_clause)
+      }
+    }
+
+    // Add any where clauses
+    if (where_clauses) {
+      for (const where_clause of where_clauses) {
+        qb.whereRaw(where_clause)
+      }
     }
   })
 }
@@ -464,6 +485,7 @@ const create_player_betting_market_field = ({
 const create_team_betting_market_field = ({ column_name, column_alias }) => ({
   column_name,
   select_as: () => column_alias,
+  with_select: () => [`pms.${column_name}`],
   with_where: ({ table_name }) => `${table_name}.${column_name}`,
   table_alias: (args) =>
     betting_markets_table_alias({
@@ -583,10 +605,17 @@ export default {
     column_alias: 'team_game_prop_line_betting_market'
   }),
 
-  team_game_prop_odds_from_betting_markets: create_team_betting_market_field({
-    column_name: 'selection_odds',
-    column_alias: 'team_game_prop_odds_betting_market'
-  }),
+  team_game_prop_american_odds_from_betting_markets:
+    create_team_betting_market_field({
+      column_name: 'odds_american',
+      column_alias: 'team_game_prop_american_odds_betting_market'
+    }),
+
+  team_game_prop_decimal_odds_from_betting_markets:
+    create_team_betting_market_field({
+      column_name: 'odds_decimal',
+      column_alias: 'team_game_prop_decimal_odds_betting_market'
+    }),
 
   team_game_implied_team_total_from_betting_markets: {
     column_name: 'implied_team_total',
