@@ -215,30 +215,38 @@ export const get_market_type_offer_1342 = (subcategoryId) => {
 }
 
 const get_market_type_offer_492 = ({ subcategoryId, betOfferTypeId }) => {
-  if (subcategoryId !== 4518 || !betOfferTypeId) {
-    return null
+  if (subcategoryId === 4518 && betOfferTypeId) {
+    switch (betOfferTypeId) {
+      case 1:
+        return team_game_market_types.GAME_SPREAD
+
+      case 2:
+        return team_game_market_types.GAME_MONEYLINE
+
+      case 6:
+        return team_game_market_types.GAME_TOTAL
+
+      case 13195:
+        return team_game_market_types.GAME_ALT_SPREAD
+
+      case 13196:
+        return team_game_market_types.GAME_ALT_TOTAL
+
+      default:
+        log(`unknown betOfferTypeId ${betOfferTypeId}`)
+        return null
+    }
   }
 
-  switch (betOfferTypeId) {
-    case 1:
-      return team_game_market_types.GAME_SPREAD
-
-    case 2:
-      return team_game_market_types.GAME_MONEYLINE
-
-    case 6:
-      return team_game_market_types.GAME_TOTAL
-
-    case 13195:
-      return team_game_market_types.GAME_ALT_SPREAD
-
-    case 13196:
-      return team_game_market_types.GAME_ALT_TOTAL
-
-    default:
-      log(`unknown betOfferTypeId ${betOfferTypeId}`)
-      return null
+  if (subcategoryId === 13195 && betOfferTypeId === 1) {
+    return team_game_market_types.GAME_ALT_SPREAD
   }
+
+  if (subcategoryId === 13196 && betOfferTypeId === 6) {
+    return team_game_market_types.GAME_ALT_TOTAL
+  }
+
+  return null
 }
 
 export const get_market_type = ({
