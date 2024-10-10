@@ -251,3 +251,10 @@
 
 ## Every Tuesday at 9:40PM
 40 14 * * 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-espn-receiving-tracking-metrics.mjs &>> /var/log/league/league-import-espn-receiving-tracking-metrics.log
+
+
+
+# PlayerProfiler
+
+## At 02:20 on Wednesday, Thursday, and Friday in January, February, and every month from September through December.
+20 2 * * 1,2,9-12 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/private/scripts/import-plays-playerprofiler.mjs &>> /var/log/league/league-import-plays-playerprofiler.log
