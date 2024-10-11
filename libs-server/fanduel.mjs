@@ -61,6 +61,7 @@ export const format_selection_type = ({ market_type, selection_name }) => {
 }
 
 export const tabs = [
+  'quarter-props',
   'passing-props',
   'receiving-props',
   'rushing-props',
@@ -107,154 +108,160 @@ export const leader_market_names = {
     player_prop_types.SUNDAY_LEADER_RUSHING_YARDS
 }
 
-export const alt_line_markets = {
-  'PLAYER_A_-_ALT_PASSING_YARDS': player_prop_types.GAME_ALT_PASSING_YARDS,
-  'PLAYER_B_-_ALT_PASSING_YARDS': player_prop_types.GAME_ALT_PASSING_YARDS,
-  'PLAYER_C_-_ALT_PASSING_YARDS': player_prop_types.GAME_ALT_PASSING_YARDS,
-  'PLAYER_D_-_ALT_PASSING_YARDS': player_prop_types.GAME_ALT_PASSING_YARDS,
+const create_player_regex = (suffix) =>
+  new RegExp(`^PLAYER_[A-Z](_-_|_)${suffix}$`)
 
-  'PLAYER_A_-_ALT_RUSH_YARDS': player_prop_types.GAME_ALT_RUSHING_YARDS,
-  'PLAYER_B_-_ALT_RUSH_YARDS': player_prop_types.GAME_ALT_RUSHING_YARDS,
-  'PLAYER_C_-_ALT_RUSH_YARDS': player_prop_types.GAME_ALT_RUSHING_YARDS,
-  'PLAYER_D_-_ALT_RUSH_YARDS': player_prop_types.GAME_ALT_RUSHING_YARDS,
-  'PLAYER_E_-_ALT_RUSH_YARDS': player_prop_types.GAME_ALT_RUSHING_YARDS,
-  'PLAYER_F_-_ALT_RUSH_YARDS': player_prop_types.GAME_ALT_RUSHING_YARDS,
-  'PLAYER_G_-_ALT_RUSH_YARDS': player_prop_types.GAME_ALT_RUSHING_YARDS,
-  'PLAYER_H_-_ALT_RUSH_YARDS': player_prop_types.GAME_ALT_RUSHING_YARDS,
-  'PLAYER_I_-_ALT_RUSH_YARDS': player_prop_types.GAME_ALT_RUSHING_YARDS,
-  'PLAYER_J_-_ALT_RUSH_YARDS': player_prop_types.GAME_ALT_RUSHING_YARDS,
-  'PLAYER_K_-_ALT_RUSH_YARDS': player_prop_types.GAME_ALT_RUSHING_YARDS,
-  'PLAYER_L_-_ALT_RUSH_YARDS': player_prop_types.GAME_ALT_RUSHING_YARDS,
-  'PLAYER_M_-_ALT_RUSH_YARDS': player_prop_types.GAME_ALT_RUSHING_YARDS,
+const alt_quarter_markets = [
+  [
+    create_player_regex('1ST_QTR_RUSHING_YDS'),
+    player_prop_types.GAME_FIRST_QUARTER_ALT_RUSHING_YARDS
+  ],
+  [
+    create_player_regex('1ST_QTR_RECEIVING_YDS'),
+    player_prop_types.GAME_FIRST_QUARTER_ALT_RECEIVING_YARDS
+  ],
+  [
+    create_player_regex('1ST_QTR_PASSING_YDS'),
+    player_prop_types.GAME_FIRST_QUARTER_ALT_PASSING_YARDS
+  ]
+]
 
-  'PLAYER_A_-_ALT_RECEIVING_YARDS': player_prop_types.GAME_ALT_RECEIVING_YARDS,
-  'PLAYER_B_-_ALT_RECEIVING_YARDS': player_prop_types.GAME_ALT_RECEIVING_YARDS,
-  'PLAYER_C_-_ALT_RECEIVING_YARDS': player_prop_types.GAME_ALT_RECEIVING_YARDS,
-  'PLAYER_D_-_ALT_RECEIVING_YARDS': player_prop_types.GAME_ALT_RECEIVING_YARDS,
-  'PLAYER_E_-_ALT_RECEIVING_YARDS': player_prop_types.GAME_ALT_RECEIVING_YARDS,
-  'PLAYER_F_-_ALT_RECEIVING_YARDS': player_prop_types.GAME_ALT_RECEIVING_YARDS,
-  'PLAYER_G_-_ALT_RECEIVING_YARDS': player_prop_types.GAME_ALT_RECEIVING_YARDS,
-  'PLAYER_H_-_ALT_RECEIVING_YARDS': player_prop_types.GAME_ALT_RECEIVING_YARDS,
-  'PLAYER_I_-_ALT_RECEIVING_YARDS': player_prop_types.GAME_ALT_RECEIVING_YARDS,
-  'PLAYER_J_-_ALT_RECEIVING_YARDS': player_prop_types.GAME_ALT_RECEIVING_YARDS,
-  'PLAYER_K_-_ALT_RECEIVING_YARDS': player_prop_types.GAME_ALT_RECEIVING_YARDS,
-  'PLAYER_L_-_ALT_RECEIVING_YARDS': player_prop_types.GAME_ALT_RECEIVING_YARDS,
-  'PLAYER_M_-_ALT_RECEIVING_YARDS': player_prop_types.GAME_ALT_RECEIVING_YARDS,
+const player_game_alt_line_markets = [
+  [
+    create_player_regex('ALT_PASSING_YARDS'),
+    player_prop_types.GAME_ALT_PASSING_YARDS
+  ],
+  [
+    create_player_regex('ALT_PASSING_TDS'),
+    player_prop_types.GAME_ALT_PASSING_TOUCHDOWNS
+  ],
+  [
+    create_player_regex('ALT_RUSH_YARDS'),
+    player_prop_types.GAME_ALT_RUSHING_YARDS
+  ],
+  [
+    create_player_regex('ALT_RECEIVING_YARDS'),
+    player_prop_types.GAME_ALT_RECEIVING_YARDS
+  ],
+  [
+    create_player_regex('ALT_RECEPTIONS'),
+    player_prop_types.GAME_ALT_RECEPTIONS
+  ],
+  [
+    create_player_regex('ALT_PASSING_\\+_RUSHING_YDS'),
+    player_prop_types.GAME_ALT_PASSING_RUSHING_YARDS
+  ],
+  [
+    create_player_regex('ALT_RUSHING_\\+_RECEIVING_YDS'),
+    player_prop_types.GAME_ALT_RUSHING_RECEIVING_YARDS
+  ],
+  ...alt_quarter_markets
+]
 
-  'PLAYER_A_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS,
-  'PLAYER_B_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS,
-  'PLAYER_C_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS,
-  'PLAYER_D_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS,
-  'PLAYER_E_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS,
-  'PLAYER_F_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS,
-  'PLAYER_G_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS,
-  'PLAYER_H_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS,
-  'PLAYER_I_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS,
-  'PLAYER_J_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS,
-  'PLAYER_K_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS,
-  'PLAYER_L_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS,
-  'PLAYER_M_-_ALT_RECEPTIONS': player_prop_types.GAME_ALT_RECEPTIONS
-}
+const quarter_markets = [
+  [
+    create_player_regex('1ST_QTR_TOTAL_RUSH_YDS'),
+    player_prop_types.GAME_FIRST_QUARTER_RUSHING_YARDS
+  ],
+  [
+    create_player_regex('1ST_QTR_TOTAL_REC_YDS'),
+    player_prop_types.GAME_FIRST_QUARTER_RECEIVING_YARDS
+  ],
+  [
+    create_player_regex('1ST_QTR_TOTAL_PASS_YDS'),
+    player_prop_types.GAME_FIRST_QUARTER_PASSING_YARDS
+  ]
+]
 
-export const markets = {
-  PLAYER_A_TOTAL_PASSING_YARDS: player_prop_types.GAME_PASSING_YARDS,
-  PLAYER_B_TOTAL_PASSING_YARDS: player_prop_types.GAME_PASSING_YARDS,
+const player_game_markets = [
+  [
+    create_player_regex('TOTAL_PASSING_YARDS'),
+    player_prop_types.GAME_PASSING_YARDS
+  ],
+  [
+    create_player_regex('TOTAL_PASSING_\\+_RUSHING_YDS'),
+    player_prop_types.GAME_PASSING_RUSHING_YARDS
+  ],
+  [
+    create_player_regex('LONGEST_PASS_COMPLETION'),
+    player_prop_types.GAME_PASSING_LONGEST_COMPLETION
+  ],
+  [
+    create_player_regex('TOTAL_PASS_COMPLETIONS'),
+    player_prop_types.GAME_PASSING_COMPLETIONS
+  ],
+  [
+    create_player_regex('TOTAL_RUSHING_\\+_RECEIVING_YDS'),
+    player_prop_types.GAME_RUSHING_RECEIVING_YARDS
+  ],
+  [
+    create_player_regex('PASS_ATTEMPTS'),
+    player_prop_types.GAME_PASSING_ATTEMPTS
+  ],
+  [
+    create_player_regex('TOTAL_PASSING_TOUCHDOWNS'),
+    player_prop_types.GAME_PASSING_TOUCHDOWNS
+  ],
+  [
+    create_player_regex('TOTAL_RECEIVING_YARDS'),
+    player_prop_types.GAME_RECEIVING_YARDS
+  ],
+  [create_player_regex('TOTAL_RECEPTIONS'), player_prop_types.GAME_RECEPTIONS],
+  [
+    create_player_regex('LONGEST_RECEPTION'),
+    player_prop_types.GAME_LONGEST_RECEPTION
+  ],
+  [
+    create_player_regex('TOTAL_RUSHING_YARDS'),
+    player_prop_types.GAME_RUSHING_YARDS
+  ],
+  [
+    create_player_regex('TOTAL_RUSH_ATTEMPTS'),
+    player_prop_types.GAME_RUSHING_ATTEMPTS
+  ],
+  [create_player_regex('LONGEST_RUSH'), player_prop_types.GAME_LONGEST_RUSH],
+  [
+    /^PLAYER_[A-Z]_TOTAL_TACKLES_\+_ASSISTS$/,
+    player_prop_types.GAME_TACKLES_ASSISTS
+  ],
+  [
+    /^ANY_TIME_TOUCHDOWN_SCORER$/,
+    player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
+  ],
+  ...quarter_markets
+]
 
-  PLAYER_A_LONGEST_PASS_COMPLETION:
-    player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
-  PLAYER_B_LONGEST_PASS_COMPLETION:
-    player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
-  PLAYER_C_LONGEST_PASS_COMPLETION:
-    player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
+// Combine alt_line_markets and markets
+const combined_markets = [
+  ...player_game_alt_line_markets,
+  ...player_game_markets
+]
 
-  PLAYER_A_PASS_ATTEMPTS: player_prop_types.GAME_PASSING_ATTEMPTS,
-  PLAYER_B_PASS_ATTEMPTS: player_prop_types.GAME_PASSING_ATTEMPTS,
-  PLAYER_C_PASS_ATTEMPTS: player_prop_types.GAME_PASSING_ATTEMPTS,
+export const get_market_type = ({ marketType, marketName }) => {
+  for (const [regex, prop_type] of combined_markets) {
+    if (regex.test(marketType)) {
+      return prop_type
+    }
+  }
 
-  PLAYER_A_TOTAL_PASSING_TOUCHDOWNS: player_prop_types.GAME_PASSING_TOUCHDOWNS,
-  PLAYER_B_TOTAL_PASSING_TOUCHDOWNS: player_prop_types.GAME_PASSING_TOUCHDOWNS,
+  switch (marketType) {
+    case 'REGULAR_SEASON_PROPS_-_QUARTERBACKS':
+    case 'QUARTERBACK_REGULAR_SEASON_PROPS':
+      return get_market_type_for_quarterback_season_props({ marketName })
 
-  PLAYER_A_TOTAL_RECEIVING_YARDS: player_prop_types.GAME_RECEIVING_YARDS,
-  PLAYER_B_TOTAL_RECEIVING_YARDS: player_prop_types.GAME_RECEIVING_YARDS,
-  PLAYER_C_TOTAL_RECEIVING_YARDS: player_prop_types.GAME_RECEIVING_YARDS,
-  PLAYER_D_TOTAL_RECEIVING_YARDS: player_prop_types.GAME_RECEIVING_YARDS,
-  PLAYER_E_TOTAL_RECEIVING_YARDS: player_prop_types.GAME_RECEIVING_YARDS,
-  PLAYER_F_TOTAL_RECEIVING_YARDS: player_prop_types.GAME_RECEIVING_YARDS,
-  PLAYER_G_TOTAL_RECEIVING_YARDS: player_prop_types.GAME_RECEIVING_YARDS,
-  PLAYER_H_TOTAL_RECEIVING_YARDS: player_prop_types.GAME_RECEIVING_YARDS,
-  PLAYER_I_TOTAL_RECEIVING_YARDS: player_prop_types.GAME_RECEIVING_YARDS,
-  PLAYER_J_TOTAL_RECEIVING_YARDS: player_prop_types.GAME_RECEIVING_YARDS,
-  PLAYER_K_TOTAL_RECEIVING_YARDS: player_prop_types.GAME_RECEIVING_YARDS,
-  PLAYER_L_TOTAL_RECEIVING_YARDS: player_prop_types.GAME_RECEIVING_YARDS,
-  PLAYER_M_TOTAL_RECEIVING_YARDS: player_prop_types.GAME_RECEIVING_YARDS,
+    case 'REGULAR_SEASON_PROPS_-_WIDE_RECEIVERS':
+    case 'WIDE_RECEIVER_REGULAR_SEASON_PROPS':
+      return get_market_type_for_wide_receiver_season_props({ marketName })
 
-  PLAYER_A_TOTAL_RECEPTIONS: player_prop_types.GAME_RECEPTIONS,
-  PLAYER_B_TOTAL_RECEPTIONS: player_prop_types.GAME_RECEPTIONS,
-  PLAYER_C_TOTAL_RECEPTIONS: player_prop_types.GAME_RECEPTIONS,
-  PLAYER_D_TOTAL_RECEPTIONS: player_prop_types.GAME_RECEPTIONS,
-  PLAYER_E_TOTAL_RECEPTIONS: player_prop_types.GAME_RECEPTIONS,
-  PLAYER_F_TOTAL_RECEPTIONS: player_prop_types.GAME_RECEPTIONS,
-  PLAYER_G_TOTAL_RECEPTIONS: player_prop_types.GAME_RECEPTIONS,
-  PLAYER_H_TOTAL_RECEPTIONS: player_prop_types.GAME_RECEPTIONS,
-  PLAYER_I_TOTAL_RECEPTIONS: player_prop_types.GAME_RECEPTIONS,
-  PLAYER_J_TOTAL_RECEPTIONS: player_prop_types.GAME_RECEPTIONS,
-  PLAYER_K_TOTAL_RECEPTIONS: player_prop_types.GAME_RECEPTIONS,
-  PLAYER_L_TOTAL_RECEPTIONS: player_prop_types.GAME_RECEPTIONS,
-  PLAYER_M_TOTAL_RECEPTIONS: player_prop_types.GAME_RECEPTIONS,
+    case 'REGULAR_SEASON_PROPS_-_RUNNING_BACKS':
+    case 'RUNNING_BACK_REGULAR_SEASON_PROPS':
+      return get_market_type_for_running_back_season_props({ marketName })
 
-  PLAYER_A_LONGEST_RECEPTION: player_prop_types.GAME_LONGEST_RECEPTION,
-  PLAYER_B_LONGEST_RECEPTION: player_prop_types.GAME_LONGEST_RECEPTION,
-  PLAYER_C_LONGEST_RECEPTION: player_prop_types.GAME_LONGEST_RECEPTION,
-  PLAYER_D_LONGEST_RECEPTION: player_prop_types.GAME_LONGEST_RECEPTION,
-  PLAYER_E_LONGEST_RECEPTION: player_prop_types.GAME_LONGEST_RECEPTION,
-  PLAYER_F_LONGEST_RECEPTION: player_prop_types.GAME_LONGEST_RECEPTION,
-  PLAYER_G_LONGEST_RECEPTION: player_prop_types.GAME_LONGEST_RECEPTION,
-  PLAYER_H_LONGEST_RECEPTION: player_prop_types.GAME_LONGEST_RECEPTION,
-  PLAYER_I_LONGEST_RECEPTION: player_prop_types.GAME_LONGEST_RECEPTION,
-  PLAYER_J_LONGEST_RECEPTION: player_prop_types.GAME_LONGEST_RECEPTION,
-  PLAYER_K_LONGEST_RECEPTION: player_prop_types.GAME_LONGEST_RECEPTION,
-  PLAYER_L_LONGEST_RECEPTION: player_prop_types.GAME_LONGEST_RECEPTION,
-  PLAYER_M_LONGEST_RECEPTION: player_prop_types.GAME_LONGEST_RECEPTION,
+    case 'MOST_RUSHING_YARDS':
+      return get_market_type_for_most_rushing_yards({ marketName })
+  }
 
-  PLAYER_A_TOTAL_RUSHING_YARDS: player_prop_types.GAME_RUSHING_YARDS,
-  PLAYER_B_TOTAL_RUSHING_YARDS: player_prop_types.GAME_RUSHING_YARDS,
-  PLAYER_C_TOTAL_RUSHING_YARDS: player_prop_types.GAME_RUSHING_YARDS,
-  PLAYER_D_TOTAL_RUSHING_YARDS: player_prop_types.GAME_RUSHING_YARDS,
-  PLAYER_E_TOTAL_RUSHING_YARDS: player_prop_types.GAME_RUSHING_YARDS,
-  PLAYER_F_TOTAL_RUSHING_YARDS: player_prop_types.GAME_RUSHING_YARDS,
-
-  PLAYER_A_TOTAL_RUSH_ATTEMPTS: player_prop_types.GAME_RUSHING_ATTEMPTS,
-  PLAYER_B_TOTAL_RUSH_ATTEMPTS: player_prop_types.GAME_RUSHING_ATTEMPTS,
-  PLAYER_C_TOTAL_RUSH_ATTEMPTS: player_prop_types.GAME_RUSHING_ATTEMPTS,
-  PLAYER_D_TOTAL_RUSH_ATTEMPTS: player_prop_types.GAME_RUSHING_ATTEMPTS,
-  PLAYER_E_TOTAL_RUSH_ATTEMPTS: player_prop_types.GAME_RUSHING_ATTEMPTS,
-  PLAYER_F_TOTAL_RUSH_ATTEMPTS: player_prop_types.GAME_RUSHING_ATTEMPTS,
-
-  PLAYER_A_LONGEST_RUSH: player_prop_types.GAME_LONGEST_RUSH,
-  PLAYER_B_LONGEST_RUSH: player_prop_types.GAME_LONGEST_RUSH,
-  PLAYER_C_LONGEST_RUSH: player_prop_types.GAME_LONGEST_RUSH,
-  PLAYER_D_LONGEST_RUSH: player_prop_types.GAME_LONGEST_RUSH,
-
-  'PLAYER_A_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_B_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_C_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_D_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_E_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_F_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_G_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_H_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_I_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_J_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_K_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_L_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_M_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_N_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_O_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
-  'PLAYER_P_TOTAL_TACKLES_+_ASSISTS': player_prop_types.GAME_TACKLES_ASSISTS,
-
-  ...alt_line_markets,
-
-  ANY_TIME_TOUCHDOWN_SCORER: player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
+  return null
 }
 
 export const get_market_type_for_quarterback_season_props = ({
@@ -356,32 +363,6 @@ export const get_market_type_for_most_rushing_yards = ({ marketName }) => {
 
   if (market_name_lower.includes('regular season')) {
     return player_prop_types.SEASON_LEADER_RUSHING_YARDS
-  }
-
-  return null
-}
-
-export const get_market_type = ({ marketName, marketType }) => {
-  const market_type_match = markets[marketType]
-  if (market_type_match) {
-    return market_type_match
-  }
-
-  switch (marketType) {
-    case 'REGULAR_SEASON_PROPS_-_QUARTERBACKS':
-    case 'QUARTERBACK_REGULAR_SEASON_PROPS':
-      return get_market_type_for_quarterback_season_props({ marketName })
-
-    case 'REGULAR_SEASON_PROPS_-_WIDE_RECEIVERS':
-    case 'WIDE_RECEIVER_REGULAR_SEASON_PROPS':
-      return get_market_type_for_wide_receiver_season_props({ marketName })
-
-    case 'REGULAR_SEASON_PROPS_-_RUNNING_BACKS':
-    case 'RUNNING_BACK_REGULAR_SEASON_PROPS':
-      return get_market_type_for_running_back_season_props({ marketName })
-
-    case 'MOST_RUSHING_YARDS':
-      return get_market_type_for_most_rushing_yards({ marketName })
   }
 
   return null
