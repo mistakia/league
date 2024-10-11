@@ -8,7 +8,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 // import { constants } from '#libs-shared'
-import { is_main, draftkings } from '#libs-server'
+import { is_main, draftkings, format_market_selection_id } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -104,6 +104,7 @@ const import_draftkings_wagers = async ({
   })
 
   const wager_inserts = []
+  const selection_details_index = {}
 
   for (const wager of wagers) {
     let wager_item
@@ -127,8 +128,19 @@ const import_draftkings_wagers = async ({
         throw new Error(`wager ${wager.betId} has more than 10 selections`)
       }
 
-      wager.selections.forEach((selection, index) => {
-        wager_item[`selection_${index + 1}_id`] = selection.selectionId
+      for (let index = 0; index < wager.selections.length; index++) {
+        const selection = wager.selections[index]
+        if (!selection_details_index[selection.selectionId]) {
+          const selection_id = await format_market_selection_id({
+            source_id: 'DRAFTKINGS',
+            source_market_id: selection.marketId,
+            source_selection_id: selection.selectionId
+          })
+          selection_details_index[selection.selectionId] = selection_id
+        }
+        wager_item[`selection_${index + 1}_id`] =
+          selection_details_index[selection.selectionId] ||
+          selection.selectionId
         wager_item[`selection_${index + 1}_odds`] = Number(
           selection.displayOdds.replace('−', '-')
         )
@@ -144,7 +156,7 @@ const import_draftkings_wagers = async ({
         //   odds: Number(selection.displayOdds),
         //   time_type: 'OTHER'
         // })
-      })
+      }
     } catch (err) {
       log(err)
     }

@@ -301,6 +301,7 @@ const import_fanduel_wagers = async ({
           metric_name,
           metric_line,
           selection_name,
+          selection_type,
           start_time,
           market_type
         } = fanduel.get_market_details_from_wager(leg.parts[0])
@@ -325,6 +326,7 @@ const import_fanduel_wagers = async ({
           nfl_team,
           metric_name,
           metric_line,
+          selection_type,
           selection_name,
           start_time
         })
