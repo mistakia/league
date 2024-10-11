@@ -91,7 +91,7 @@ export default function encode_market_selection_id({
         log_error('selection_type is required for PLAYER_SEASON_PROPS')
       }
 
-      return `/PLAYER_SEASON_PROPS/${constants.season.year}/${esbid}/${pid}/${selection_type}/${metric_name}/${metric_line}`
+      return `/PLAYER_SEASON_PROPS/${constants.season.year}/${pid}/${selection_type}/${metric_name}/${metric_line}`
 
     default:
       throw new Error(`Invalid market_type: ${market_type}`)

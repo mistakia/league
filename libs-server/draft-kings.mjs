@@ -188,6 +188,9 @@ export const get_market_type_offer_1003 = (subcategoryId) => {
     case 11819:
       return player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
 
+    case 11820:
+      return player_prop_types.GAME_FIRST_TEAM_TOUCHDOWN_SCORER
+
     default:
       log(`unknown offercategoryId 1003 subcategoryId ${subcategoryId}`)
       return null

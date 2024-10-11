@@ -228,6 +228,10 @@ const player_game_markets = [
     /^ANY_TIME_TOUCHDOWN_SCORER$/,
     player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
   ],
+  [
+    /^1ST_TEAM_TOUCHDOWN_SCORER$/,
+    player_prop_types.GAME_FIRST_TEAM_TOUCHDOWN_SCORER
+  ],
   ...quarter_markets
 ]
 
