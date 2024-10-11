@@ -92,6 +92,7 @@ export { default as mergePlayer } from './merge-player.mjs'
 export * as pinnacle from './pinnacle.mjs'
 export { default as report_error } from './report-error.mjs'
 export * as selection_result from './selection-result.mjs'
+export { default as format_market_selection_id } from './format-market-selection-id.mjs'
 
 export const getChartedPlayByPlayQuery = (db) =>
   db('nfl_plays')

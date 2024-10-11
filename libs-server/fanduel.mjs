@@ -578,6 +578,10 @@ export const get_market_details_from_wager = (wager_leg) => {
     metric_name,
     metric_line,
     selection_name,
+    selection_type: format_selection_type({
+      market_type: wager_leg.marketType,
+      selection_name: wager_leg.selectionName
+    }),
     event_description: wager_leg.eventDescription,
     start_time: dayjs(wager_leg.startTime)
   }

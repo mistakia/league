@@ -8,6 +8,7 @@ export default function encode_market_selection_id({
   metric_name,
   metric_line,
   selection_name,
+  selection_type,
   start_time
 }) {
   const log_error = (msg) => {
@@ -18,7 +19,7 @@ export default function encode_market_selection_id({
       nfl_team,
       metric_name,
       metric_line,
-      selection_name,
+      selection_type,
       start_time
     })
     throw new Error(msg)
@@ -30,10 +31,10 @@ export default function encode_market_selection_id({
         log_error('esbid is required for GAME_PROPS')
       }
 
-      if (!metric_name) {
-        return `/GAME_PROPS/${esbid}/${selection_name}`
+      if (selection_type && metric_name) {
+        return `/GAME_PROPS/${esbid}/${selection_type}/${metric_name}/${metric_line}`
       } else {
-        return `/GAME_PROPS/${esbid}/${selection_name}/${metric_name}/${metric_line}`
+        return `/GAME_PROPS/${esbid}/${selection_name}`
       }
     }
 
@@ -46,10 +47,10 @@ export default function encode_market_selection_id({
         log_error('nfl_team is required for TEAM_GAME_PROPS')
       }
 
-      if (!metric_name) {
-        return `/TEAM_GAME_PROPS/${esbid}/${nfl_team}/${selection_name}`
+      if (selection_type && metric_name) {
+        return `/TEAM_GAME_PROPS/${esbid}/${nfl_team}/${selection_type}/${metric_name}/${metric_line}`
       } else {
-        return `/TEAM_GAME_PROPS/${esbid}/${nfl_team}/${selection_name}/${metric_name}/${metric_line}`
+        return `/TEAM_GAME_PROPS/${esbid}/${nfl_team}/${selection_name}`
       }
     }
 
@@ -62,10 +63,10 @@ export default function encode_market_selection_id({
         log_error('pid is required for PLAYER_GAME_PROPS')
       }
 
-      if (!metric_name) {
-        return `/PLAYER_GAME_PROPS/${esbid}/${pid}/${selection_name}`
+      if (selection_type && metric_name) {
+        return `/PLAYER_GAME_PROPS/${esbid}/${pid}/${selection_type}/${metric_name}/${metric_line}`
       } else {
-        return `/PLAYER_GAME_PROPS/${esbid}/${pid}/${selection_name}/${metric_name}/${metric_line}`
+        return `/PLAYER_GAME_PROPS/${esbid}/${pid}/${selection_name}`
       }
     }
 
@@ -78,7 +79,19 @@ export default function encode_market_selection_id({
         log_error('pid is required for PLAYER_SEASON_PROPS')
       }
 
-      return `/PLAYER_SEASON_PROPS/${constants.season.year}/${esbid}/${pid}/${selection_name}/${metric_name}/${metric_line}`
+      if (!metric_name) {
+        log_error('metric_name is required for PLAYER_SEASON_PROPS')
+      }
+
+      if (!metric_line) {
+        log_error('metric_line is required for PLAYER_SEASON_PROPS')
+      }
+
+      if (!selection_type) {
+        log_error('selection_type is required for PLAYER_SEASON_PROPS')
+      }
+
+      return `/PLAYER_SEASON_PROPS/${constants.season.year}/${esbid}/${pid}/${selection_type}/${metric_name}/${metric_line}`
 
     default:
       throw new Error(`Invalid market_type: ${market_type}`)
