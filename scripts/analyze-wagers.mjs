@@ -243,6 +243,7 @@ const standardize_wager = ({ wager, source }) => {
         selection_id: selection.selectionId,
         bet_receipt_id: wager.betReceiptId,
         source_id: 'DRAFTKINGS',
+        result: selection.settlementStatus.toUpperCase(),
         parsed_odds: selection.displayOdds
           ? Number(selection.displayOdds.replace(/—|-|−/g, '-'))
           : null,
@@ -417,7 +418,7 @@ const analyze_wagers = async ({
     // add_row('Wagers Won', wager_summary.wagers_won)
     // add_row('Wagers Loss', wager_summary.wagers_loss)
     add_row('Wagers Open', wager_summary.wagers_open)
-    add_row('Total Risk Units', wager_summary.total_risk)
+    add_row('Total Risk', wager_summary.total_risk)
   }
 
   if (show_potential_gain) {
