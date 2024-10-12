@@ -829,14 +829,14 @@ export default {
 
   player_passing_expected_points_added_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    with_select_string: `SUM(expected_points_added)`,
+    with_select_string: `SUM(epa)`,
     stat_name: 'passing_expected_points_added_from_plays'
   }),
 
   player_rushing_and_receiving_expected_points_added_from_plays:
     player_stat_from_plays({
       pid_columns: ['bc_pid', 'trg_pid'],
-      with_select_string: `SUM(expected_points_added)`,
+      with_select_string: `SUM(epa)`,
       stat_name: 'rushing_and_receiving_expected_points_added_from_plays'
     }),
 
