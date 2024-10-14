@@ -274,7 +274,8 @@ const analyze_wagers = async ({
   wagers_lost_leg_limit = 1,
   filter_wagers_min_legs = 0,
   include_selections = [],
-  exclude_selections = []
+  exclude_selections = [],
+  sort_by = 'odds'
 } = {}) => {
   if (!fanduel_filename && !draftkings_filename) {
     throw new Error('At least one filename (FanDuel or DraftKings) is required')
@@ -290,7 +291,8 @@ const analyze_wagers = async ({
     wagers_limit,
     wagers_lost_leg_limit,
     include_selections,
-    exclude_selections
+    exclude_selections,
+    sort_by
   })
 
   let wagers = []
@@ -686,10 +688,14 @@ const analyze_wagers = async ({
 
     log(`display_wagers: ${display_wagers.length}`)
 
-    for (const wager of display_wagers
-      // .sort((a, b) => b.potential_win - a.potential_win)
-      .sort((a, b) => b.parsed_odds - a.parsed_odds)
-      .slice(0, wagers_limit)) {
+    const sorted_wagers = display_wagers.sort((a, b) => {
+      if (sort_by === 'payout') {
+        return b.potential_win - a.potential_win
+      }
+      return b.parsed_odds - a.parsed_odds
+    })
+
+    for (const wager of sorted_wagers.slice(0, wagers_limit)) {
       const potential_roi_gain =
         (wager.potential_win / wager_summary.total_risk) * 100
       const num_of_legs = wager.selections.length
@@ -743,7 +749,8 @@ const main = async () => {
           ? [argv.exclude]
           : [],
       hide_wagers: argv.hide_wagers,
-      filter_wagers_min_legs: argv.min_legs
+      filter_wagers_min_legs: argv.min_legs,
+      sort_by: argv.sort_by || 'odds'
     })
   } catch (err) {
     error = err
