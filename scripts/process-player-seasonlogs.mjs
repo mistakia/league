@@ -4,7 +4,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#libs-shared'
-import { is_main } from '#libs-server'
+import { is_main, batch_insert } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -49,10 +49,16 @@ const processPlayerSeasonlogs = async ({
 
   if (inserts.length) {
     log(`updating ${inserts.length} player seasonlogs for ${year} ${seas_type}`)
-    await db('player_seasonlogs')
-      .insert(inserts)
-      .onConflict(['pid', 'year', 'seas_type'])
-      .merge()
+    await batch_insert({
+      items: inserts,
+      save: async (batch) => {
+        await db('player_seasonlogs')
+          .insert(batch)
+          .onConflict(['pid', 'year', 'seas_type'])
+          .merge()
+      },
+      batch_size: 500
+    })
   }
 }
 
