@@ -92,7 +92,7 @@ const generate_player_career_game_counts = async () => {
           .onConflict(['pid', 'year', 'seas_type'])
           .merge(['career_year'])
       },
-      batch_size: 1000
+      batch_size: 500
     })
 
     log(
