@@ -262,6 +262,133 @@ const standardize_wager = ({ wager, source }) => {
   throw new Error(`Unknown wager source: ${source}`)
 }
 
+const analyze_prop_combinations = (lost_props, filtered, wager_summary) => {
+  const one_prop = []
+  const two_props = []
+  const three_props = []
+
+  const prop_summaries = new Map()
+
+  const get_prop_summary = (props) => {
+    const key = props
+      .map((p) => p.name)
+      .sort()
+      .join('|')
+    if (!prop_summaries.has(key)) {
+      prop_summaries.set(
+        key,
+        get_wagers_summary({
+          wagers: filtered,
+          props
+        })
+      )
+    }
+    return prop_summaries.get(key)
+  }
+
+  const calculate_potential_gain = (summary) => {
+    return {
+      potential_gain: summary.total_won - wager_summary.total_won,
+      potential_wins: summary.wagers_won - wager_summary.wagers_won,
+      potential_roi_added:
+        ((summary.total_won - wager_summary.total_won) /
+          wager_summary.total_risk) *
+        100
+    }
+  }
+
+  // Single prop analysis
+  for (const prop of lost_props) {
+    const summary = get_prop_summary([prop])
+    const { potential_gain, potential_wins, potential_roi_added } =
+      calculate_potential_gain(summary)
+
+    if (potential_gain > 0) {
+      one_prop.push({
+        name: prop.name,
+        potential_gain,
+        potential_wins,
+        potential_roi_added
+      })
+    }
+  }
+
+  const processed_combinations = new Set()
+
+  for (let i = 0; i < lost_props.length - 1; i++) {
+    for (let j = i + 1; j < lost_props.length; j++) {
+      const two_prop_key = [lost_props[i].name, lost_props[j].name]
+        .sort()
+        .join('|')
+      const individual_gains = [
+        get_prop_summary([lost_props[i]]).total_won,
+        get_prop_summary([lost_props[j]]).total_won
+      ]
+
+      if (!processed_combinations.has(two_prop_key)) {
+        processed_combinations.add(two_prop_key)
+        const two_prop_summary = get_prop_summary([
+          lost_props[i],
+          lost_props[j]
+        ])
+        const { potential_gain, potential_wins, potential_roi_added } =
+          calculate_potential_gain(two_prop_summary)
+
+        if (
+          potential_gain > 0 &&
+          two_prop_summary.total_won > Math.max(...individual_gains)
+        ) {
+          two_props.push({
+            name: `${lost_props[i].name} / ${lost_props[j].name}`,
+            potential_gain,
+            potential_wins,
+            potential_roi_added
+          })
+        }
+      }
+
+      // Three prop combinations
+      for (let k = j + 1; k < lost_props.length; k++) {
+        const three_prop_key = [
+          lost_props[i].name,
+          lost_props[j].name,
+          lost_props[k].name
+        ]
+          .sort()
+          .join('|')
+        if (!processed_combinations.has(three_prop_key)) {
+          processed_combinations.add(three_prop_key)
+          const three_prop_summary = get_prop_summary([
+            lost_props[i],
+            lost_props[j],
+            lost_props[k]
+          ])
+          const three_prop_result = calculate_potential_gain(three_prop_summary)
+
+          const two_prop_gains = [
+            get_prop_summary([lost_props[i], lost_props[j]]).total_won,
+            get_prop_summary([lost_props[i], lost_props[k]]).total_won,
+            get_prop_summary([lost_props[j], lost_props[k]]).total_won
+          ]
+
+          if (
+            three_prop_result.potential_gain > 0 &&
+            three_prop_summary.total_won >
+              Math.max(...two_prop_gains, ...individual_gains)
+          ) {
+            three_props.push({
+              name: `${lost_props[i].name} / ${lost_props[j].name} / ${lost_props[k].name}`,
+              ...three_prop_result
+            })
+          }
+        }
+      }
+    }
+  }
+
+  return { one_prop, two_props, three_props }
+}
+
 const analyze_wagers = async ({
   fanduel_filename,
   draftkings_filename,
@@ -556,95 +683,34 @@ const analyze_wagers = async ({
     event_table.printTable()
   }
 
-  const one_prop = []
-  const two_props = []
-
   const lost_props = unique_selections.filter((prop) => prop.is_lost)
+  const { one_prop, two_props, three_props } = analyze_prop_combinations(
+    lost_props,
+    filtered,
+    wager_summary
+  )
 
-  for (let i = 0; i < lost_props.length; i++) {
-    const prop_a = lost_props[i]
-
-    const one_prop_summary = get_wagers_summary({
-      wagers: filtered,
-      props: [prop_a]
-    })
-    const potential_gain = one_prop_summary.total_won - wager_summary.total_won
-    const potential_wins =
-      one_prop_summary.wagers_won - wager_summary.wagers_won
-    const potential_roi_added =
-      (potential_gain / wager_summary.total_risk) * 100
-
-    if (potential_gain) {
-      one_prop.push({
-        name: prop_a.name,
-        potential_gain,
-        potential_wins,
-        potential_roi_added
-      })
-    }
-
-    for (let j = i + 1; j < lost_props.length; j++) {
-      const prop_b = lost_props[j]
-
-      const two_prop_summary = get_wagers_summary({
-        wagers: filtered,
-        props: [prop_a, prop_b]
-      })
-
-      const prop_b_summary = get_wagers_summary({
-        wagers: filtered,
-        props: [prop_b]
-      })
-
-      const potential_gain =
-        two_prop_summary.total_won -
-        Math.max(one_prop_summary.total_won, prop_b_summary.total_won)
-      const potential_wins =
-        two_prop_summary.wagers_won -
-        Math.max(one_prop_summary.wagers_won, prop_b_summary.wagers_won)
-      const potential_roi_added =
-        (potential_gain / wager_summary.total_risk) * 100
-
-      if (potential_gain > 0) {
-        two_props.push({
-          name: `${prop_a.name} / ${prop_b.name}`,
-          potential_gain,
-          potential_wins,
-          potential_roi_added
+  // Display results
+  const display_prop_table = (props, title) => {
+    if (props.length) {
+      const table = new Table({ title })
+      for (const prop of props.sort(
+        (a, b) => b.potential_gain - a.potential_gain
+      )) {
+        table.addRow({
+          name: prop.name,
+          potential_roi_added: `${prop.potential_roi_added.toFixed(2)}%`,
+          potential_gain: prop.potential_gain.toFixed(2),
+          potential_wins: prop.potential_wins
         })
       }
+      table.printTable()
     }
   }
 
-  if (one_prop.length) {
-    const one_prop_table = new Table({ title: 'One Leg Away' })
-    for (const prop of one_prop.sort(
-      (a, b) => b.potential_gain - a.potential_gain
-    )) {
-      one_prop_table.addRow({
-        name: prop.name,
-        potential_roi_added: `${prop.potential_roi_added.toFixed(2)}%`,
-        potential_gain: prop.potential_gain.toFixed(2),
-        potential_wins: prop.potential_wins
-      })
-    }
-    one_prop_table.printTable()
-  }
-
-  if (two_props.length) {
-    const two_prop_table = new Table({ title: 'Two Legs Away' })
-    for (const prop of two_props.sort(
-      (a, b) => b.potential_gain - a.potential_gain
-    )) {
-      two_prop_table.addRow({
-        name: prop.name,
-        potential_roi_added: `${prop.potential_roi_added.toFixed(2)}%`,
-        potential_gain: prop.potential_gain.toFixed(2),
-        potential_wins: prop.potential_wins
-      })
-    }
-    two_prop_table.printTable()
-  }
+  display_prop_table(one_prop, 'One Leg Away')
+  display_prop_table(two_props, 'Two Legs Away')
+  display_prop_table(three_props, 'Three Legs Away')
 
   if (!hide_wagers) {
     console.log(
