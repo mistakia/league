@@ -13158,9 +13158,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-table@mistakia/react-table#4dc402ee24fac0b3c0a33a9bfd537de842da098f":
+"react-table@mistakia/react-table#0e87f2d44510402f89e7c3cc39a744309d29eb50":
   version: 0.0.1
-  resolution: "react-table@https://github.com/mistakia/react-table.git#commit=4dc402ee24fac0b3c0a33a9bfd537de842da098f"
+  resolution: "react-table@https://github.com/mistakia/react-table.git#commit=0e87f2d44510402f89e7c3cc39a744309d29eb50"
   dependencies:
     "@dnd-kit/core": ^6.0.8
     "@dnd-kit/modifiers": ^6.0.1
@@ -13175,10 +13175,12 @@ __metadata:
     "@mui/material": ^5.13.4
     "@mui/x-date-pickers": ^7.11.0
     dayjs: 1.11.11
+    highcharts: ^11.4.1
+    highcharts-react-official: 3.2.1
     prop-types: ^15.8.1
     react: ^18.2.0
     react-dom: ^18.2.0
-  checksum: abd88ed1e0994d4ba4fb4aab82d25237686bdaa3f01c0f2b6ce3bed89b061fa9e59d32c321916a2d798a306385218a9447fce20ba6f3ebcb944da8705af63b44
+  checksum: ef09cb5fdc80dcc2496e4308e279eed2337586bd4d8bb4a4d5c8b0eaa7597df6b0f618787a7f1c4c7318f11a76f786b80c4dd157ab3fc5f3bfaab911128bb714
   languageName: node
   linkType: hard
 
@@ -13898,7 +13900,7 @@ __metadata:
     react-router: ^6.23.0
     react-router-dom: ^6.23.0
     react-sortable-hoc: ^1.11.0
-    react-table: "mistakia/react-table#4dc402ee24fac0b3c0a33a9bfd537de842da098f"
+    react-table: "mistakia/react-table#0e87f2d44510402f89e7c3cc39a744309d29eb50"
     react-virtualized: ^9.22.5
     redux: ^4.2.1
     redux-first-history: ^5.2.0
