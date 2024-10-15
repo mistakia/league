@@ -20,11 +20,7 @@ export const add_team_stats_play_by_play_with_statement = ({
   const team_unit = params.team_unit || 'off'
 
   const with_query = db('nfl_plays')
-    .select(
-      `nfl_plays.${team_unit} as nfl_team`,
-      'nfl_plays.year',
-      'nfl_plays.week'
-    )
+    .select(`nfl_plays.${team_unit} as nfl_team`)
     .whereNot('play_type', 'NOPL')
     .where('nfl_plays.seas_type', 'REG')
 
@@ -45,11 +41,17 @@ export const add_team_stats_play_by_play_with_statement = ({
   })
 
   // Add groupBy clause before having
-  with_query.groupBy(
-    `nfl_plays.${team_unit}`,
-    'nfl_plays.year',
-    'nfl_plays.week'
-  )
+  with_query.groupBy(`nfl_plays.${team_unit}`)
+
+  if (splits.includes('year')) {
+    with_query.select('nfl_plays.year')
+    with_query.groupBy('nfl_plays.year')
+  }
+
+  if (splits.includes('week')) {
+    with_query.select('nfl_plays.week')
+    with_query.groupBy('nfl_plays.week')
+  }
 
   query.with(with_table_name, with_query)
 
@@ -96,7 +98,6 @@ function create_team_stats_query({
     rate_columns
   })
   add_splits({ query: team_stats_query, with_table_name, splits })
-  add_year_filter({ query: team_stats_query, with_table_name, params })
   add_having_clauses({ query: team_stats_query, having_clauses })
 
   return team_stats_query
@@ -128,7 +129,6 @@ function create_player_team_stats_query({
     rate_columns
   })
   add_splits({ query: player_team_stats_query, with_table_name, splits })
-  add_year_filter({ query: player_team_stats_query, with_table_name, params })
   add_having_clauses({ query: player_team_stats_query, having_clauses })
 
   return player_team_stats_query
@@ -170,13 +170,7 @@ function add_splits({ query, with_table_name, splits }) {
   }
 }
 
-function add_year_filter({ query, with_table_name, params }) {
-  if (params.year) {
-    const year_array = Array.isArray(params.year) ? params.year : [params.year]
-    query.whereIn(`${with_table_name}.year`, year_array)
-  }
-}
-
+// TODO not sure if this is needed
 function add_having_clauses({ query, having_clauses }) {
   for (const having_clause of having_clauses) {
     query.havingRaw(having_clause)
