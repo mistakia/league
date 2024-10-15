@@ -110,7 +110,12 @@ export default {
       '@emotion/react': path.resolve(
         __dirname,
         '../node_modules/@emotion/react'
-      )
+      ),
+      'highcharts-react-official': path.resolve(
+        __dirname,
+        '../node_modules/highcharts-react-official'
+      ),
+      highcharts: path.resolve(__dirname, '../node_modules/highcharts')
     }
   },
 

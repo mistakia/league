@@ -21,6 +21,10 @@ const get_export_api_url = ({ view_id, export_format }) => {
   return `${API_URL}/data-views/export/${view_id}/${export_format}`
 }
 
+const get_scatter_point_label = (row) => {
+  return `${row.fname} ${row.lname}`
+}
+
 export default function DataViewsPage({
   players,
   data_views_fields,
@@ -236,6 +240,7 @@ export default function DataViewsPage({
         table_username={user_username}
         reset_cache={reset_data_view_cache}
         get_export_api_url={get_export_api_url}
+        get_scatter_point_label={get_scatter_point_label}
       />
     </div>
   )
