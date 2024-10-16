@@ -258,3 +258,14 @@
 
 ## At 02:20 on Wednesday, Thursday, and Friday in January, February, and every month from September through December.
 20 2 * 1,2,9-12 3-5 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/private/scripts/import-plays-playerprofiler.mjs &>> /var/log/league/league-import-plays-playerprofiler.log
+
+
+
+# DVOA Sheets
+
+## At 12:40 on Monday and Tuesday in January, February, and every month from September through December.
+40 12 * 1,2,9-12 1,2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-dvoa-sheets.mjs &>> /var/log/league/league-import-dvoa-sheets.log
+
+
+## At 6:40 on Monday, Tuesday, and Wednesday in January, February, and every month from September through December.
+40 6 * 1,2,9-12 1,2,3 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-dvoa-sheets.mjs &>> /var/log/league/league-import-dvoa-sheets.log
