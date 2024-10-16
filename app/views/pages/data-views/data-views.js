@@ -25,6 +25,28 @@ const get_scatter_point_label = (row) => {
   return `${row.fname} ${row.lname}`
 }
 
+const get_scatter_point_image = ({ row, total_rows }) => {
+  if (row.player_nfl_teams_0) {
+    const size = total_rows < 50 ? 48 : 18
+    return {
+      url: `https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/${row.player_nfl_teams_0}.png&h=${size * 4}&w=${size * 4}`,
+      width: size,
+      height: size
+    }
+  }
+  return null
+}
+
+const is_scatter_plot_point_label_enabled = ({ rows }) => {
+  if (!rows.length) return true
+
+  const all_pids_are_team_abbreviations = rows.every((row) => {
+    return row.pid && row.pid.length !== 25
+  })
+
+  return !all_pids_are_team_abbreviations
+}
+
 export default function DataViewsPage({
   players,
   data_views_fields,
@@ -241,6 +263,10 @@ export default function DataViewsPage({
         reset_cache={reset_data_view_cache}
         get_export_api_url={get_export_api_url}
         get_scatter_point_label={get_scatter_point_label}
+        get_scatter_point_image={get_scatter_point_image}
+        is_scatter_plot_point_label_enabled={
+          is_scatter_plot_point_label_enabled
+        }
       />
     </div>
   )
