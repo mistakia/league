@@ -17471,7 +17471,9 @@ CREATE TABLE public.player_receiving_gamelogs (
     team_target_share numeric(5,2),
     team_air_yard_share numeric(5,2),
     recv_deep_target_pct numeric(5,2),
-    recv_tight_window_pct numeric(5,2)
+    recv_tight_window_pct numeric(5,2),
+    longest_reception smallint,
+    recv_yards_15_plus_rate numeric(5,4)
 );
 
 
@@ -17500,7 +17502,10 @@ CREATE TABLE public.player_rushing_gamelogs (
     rush_avg_time_to_line_of_scrimmage numeric(5,2),
     rush_attempts_inside_tackles_pct numeric(5,2),
     rush_attempts_stacked_box_pct numeric(5,2),
-    rush_attempts_under_center_pct numeric(5,2)
+    rush_attempts_under_center_pct numeric(5,2),
+    longest_rush smallint,
+    rush_yards_per_attempt numeric(5,2),
+    rush_yards_10_plus_rate numeric(5,4)
 );
 
 
