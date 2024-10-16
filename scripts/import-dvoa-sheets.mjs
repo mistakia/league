@@ -2,11 +2,17 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import xlsx from 'node-xlsx'
+import fs from 'fs'
+import os from 'os'
+import { pipeline } from 'stream'
+import { promisify } from 'util'
+import fetch from 'node-fetch'
+import dayjs from 'dayjs'
 
 import { is_main, report_job } from '#libs-server'
 import db from '#db'
 import { job_types } from '#libs-shared/job-constants.mjs'
-import { fixTeam } from '#libs-shared'
+import { fixTeam, constants } from '#libs-shared'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-dvoa-sheets')
@@ -983,9 +989,38 @@ const process_total_dvoa = async (worksheet, { dry_run, timestamp }) => {
   }
 }
 
+const get_dvoa_config = async () => {
+  const config_row = await db('config').where({ key: 'dvoa_config' }).first()
+  return config_row?.value
+}
+
 const import_dvoa_sheets = async ({ dry_run = false, filepath } = {}) => {
   if (!filepath) {
-    throw new Error('filepath is required')
+    const dvoa_config = await get_dvoa_config()
+    const { dvoa_base_url } = dvoa_config
+    if (!dvoa_base_url) {
+      throw new Error('missing dvoa_base_url in dvoa_config')
+    }
+
+    const current_date = dayjs()
+    const year = current_date.year()
+    const month = current_date.format('MM')
+    const week_of_month = Math.ceil(current_date.date() / 7)
+
+    const dvoa_url = `${dvoa_base_url}/${year}/${month}/${year}-Premium-Splits-v8.0-${week_of_month}.xlsx`
+
+    const filename = `dvoa_sheets_${constants.season.year}.xlsx`
+    filepath = `${os.tmpdir()}/${filename}`
+
+    log(`downloading ${dvoa_url}`)
+    const stream_pipeline = promisify(pipeline)
+    const response = await fetch(dvoa_url)
+    if (!response.ok) {
+      throw new Error(`unexpected response ${response.statusText}`)
+    }
+
+    await stream_pipeline(response.body, fs.createWriteStream(filepath))
+    log(`downloaded to ${filepath}`)
   }
 
   const timestamp = Math.floor(Date.now() / 1000)
