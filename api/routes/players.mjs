@@ -134,6 +134,10 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
   try {
     const { pid } = req.params
     const leagueId = Number(req.query.leagueId || 0) || 0
+    const include_rushing = req.query.rushing === 'true'
+    const include_passing = req.query.passing === 'true'
+    const include_receiving = req.query.receiving === 'true'
+
     if (!pid) {
       return res.status(400).send({ error: 'missing pid' })
     }
@@ -196,6 +200,46 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
           league.league_format_hash
         ).orWhereNull('league_format_player_gamelogs.league_format_hash')
       })
+
+    if (include_rushing) {
+      query
+        .leftJoin('player_rushing_gamelogs', function () {
+          this.on(
+            'player_rushing_gamelogs.pid',
+            '=',
+            'player_gamelogs.pid'
+          ).andOn('player_rushing_gamelogs.esbid', '=', 'player_gamelogs.esbid')
+        })
+        .select('player_rushing_gamelogs.*')
+    }
+
+    if (include_passing) {
+      query
+        .leftJoin('player_passing_gamelogs', function () {
+          this.on(
+            'player_passing_gamelogs.pid',
+            '=',
+            'player_gamelogs.pid'
+          ).andOn('player_passing_gamelogs.esbid', '=', 'player_gamelogs.esbid')
+        })
+        .select('player_passing_gamelogs.*')
+    }
+
+    if (include_receiving) {
+      query
+        .leftJoin('player_receiving_gamelogs', function () {
+          this.on(
+            'player_receiving_gamelogs.pid',
+            '=',
+            'player_gamelogs.pid'
+          ).andOn(
+            'player_receiving_gamelogs.esbid',
+            '=',
+            'player_gamelogs.esbid'
+          )
+        })
+        .select('player_receiving_gamelogs.*')
+    }
 
     const data = await query
     res.send(data)
