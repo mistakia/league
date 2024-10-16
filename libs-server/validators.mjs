@@ -38,7 +38,7 @@ const view_name_schema = {
   $$root: true,
   type: 'string',
   min: 1,
-  max: 30
+  max: 255
 }
 export const view_name_validator = v.compile(view_name_schema)
 
@@ -46,7 +46,7 @@ const view_description_schema = {
   $$root: true,
   type: 'string',
   min: 1,
-  max: 400
+  max: 1000
 }
 export const view_description_validator = v.compile(view_description_schema)
 

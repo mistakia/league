@@ -1243,8 +1243,10 @@ DROP INDEX IF EXISTS public.idx_scoring_format_player_seasonlogs_pid_year_hash;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_gamelogs_pid_esbid_hash;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_careerlogs_pid_hash;
 DROP INDEX IF EXISTS public.idx_rosters_players_year_week_lid_pid;
+DROP INDEX IF EXISTS public.idx_prop_pairing_props_composite;
 DROP INDEX IF EXISTS public.idx_prop_markets_index_market_time_year;
 DROP INDEX IF EXISTS public.idx_prop_market_selections_index_composite;
+DROP INDEX IF EXISTS public.idx_prop_market_selections_composite;
 DROP INDEX IF EXISTS public.idx_player_seasonlogs_year_seas_type_career_year_pid;
 DROP INDEX IF EXISTS public.idx_player_salaries_source_id_pid_salary_esbid;
 DROP INDEX IF EXISTS public.idx_player_pid_pos;
@@ -1264,6 +1266,7 @@ DROP INDEX IF EXISTS public.idx_espn_team_win_rates_history_year;
 DROP INDEX IF EXISTS public.idx_espn_receiving_metrics_history;
 DROP INDEX IF EXISTS public.idx_espn_player_win_rates_history_year;
 DROP INDEX IF EXISTS public.idx_espn_player_win_rates_history_espn_win_rate_type;
+DROP INDEX IF EXISTS public.idx_current_week_prop_market_selections_composite;
 DROP INDEX IF EXISTS public.idx_25151_lid;
 DROP INDEX IF EXISTS public.idx_25147_waiverid_pid;
 DROP INDEX IF EXISTS public.idx_25147_waiverid;
@@ -18958,7 +18961,7 @@ CREATE TABLE public.urls (
 
 CREATE TABLE public.user_data_views (
     view_id character varying(36) NOT NULL,
-    view_name character varying(30) NOT NULL,
+    view_name character varying(255) NOT NULL,
     view_description text,
     table_state json,
     created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
@@ -21492,6 +21495,13 @@ CREATE INDEX idx_25151_lid ON public.waivers USING btree (lid);
 
 
 --
+-- Name: idx_current_week_prop_market_selections_composite; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_current_week_prop_market_selections_composite ON public.current_week_prop_market_selections_index USING btree (source_id, source_market_id, source_selection_id);
+
+
+--
 -- Name: idx_espn_player_win_rates_history_espn_win_rate_type; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -21625,6 +21635,13 @@ CREATE INDEX idx_player_seasonlogs_year_seas_type_career_year_pid ON public.play
 
 
 --
+-- Name: idx_prop_market_selections_composite; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_prop_market_selections_composite ON public.prop_market_selections_index USING btree (source_id, source_market_id, source_selection_id, time_type);
+
+
+--
 -- Name: idx_prop_market_selections_index_composite; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -21636,6 +21653,13 @@ CREATE INDEX idx_prop_market_selections_index_composite ON public.prop_market_se
 --
 
 CREATE INDEX idx_prop_markets_index_market_time_year ON public.prop_markets_index USING btree (market_type, time_type, year);
+
+
+--
+-- Name: idx_prop_pairing_props_composite; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_prop_pairing_props_composite ON public.prop_pairing_props USING btree (source_market_id, source_selection_id);
 
 
 --
