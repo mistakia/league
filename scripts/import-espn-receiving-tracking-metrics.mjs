@@ -7,8 +7,8 @@ import fetch from 'node-fetch'
 
 import db from '#db'
 // import { constants } from '#libs-shared'
-import { is_main } from '#libs-server'
-// import { job_types } from '#libs-shared/job-constants.mjs'
+import { is_main, report_job } from '#libs-server'
+import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-espn-receiving-tracking-metrics')
@@ -106,6 +106,11 @@ const main = async () => {
     error = err
     log(error)
   }
+
+  await report_job({
+    job_type: job_types.IMPORT_ESPN_RECEIVING_TRACKING_METRICS,
+    error
+  })
 
   process.exit()
 }

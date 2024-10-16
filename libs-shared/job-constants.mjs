@@ -103,7 +103,8 @@ export const job_types = {
   IMPORT_ESPN_LINE_WIN_RATES: 79,
   IMPORT_PLAYS_PLAYERPROFILER: 80,
   IMPORT_DVOA_SHEETS: 81,
-  IMPORT_NFL_GAMELOGS: 82
+  IMPORT_NFL_GAMELOGS: 82,
+  IMPORT_ESPN_RECEIVING_TRACKING_METRICS: 83
 }
 
 export const job_title_by_id = {
@@ -188,5 +189,6 @@ export const job_title_by_id = {
   79: 'Import ESPN Line Win Rates',
   80: 'Import Plays (PlayerProfiler)',
   81: 'Import DVOA Sheets',
-  82: 'Import NFL Game Logs'
+  82: 'Import NFL Game Logs',
+  83: 'Import ESPN Receiving Tracking Metrics'
 }
