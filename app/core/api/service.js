@@ -324,8 +324,10 @@ export const api = {
     const url = `${API_URL}/projections/${pid}`
     return { url }
   },
-  getPlayerGamelogs({ pid, leagueId }) {
-    const url = `${API_URL}/players/${pid}/gamelogs?leagueId=${leagueId}`
+  getPlayerGamelogs({ pid, params }) {
+    const url = `${API_URL}/players/${pid}/gamelogs?${queryString.stringify(
+      params
+    )}`
     return { url }
   },
   getPlayerPractices({ pid }) {

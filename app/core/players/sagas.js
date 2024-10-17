@@ -266,9 +266,24 @@ export function* fetchPlayerProjections({ payload }) {
 }
 
 export function* loadPlayerGamelogs({ payload }) {
-  const { pid } = payload
+  const { pid, position } = payload
   const { leagueId } = yield select(get_app)
-  yield call(getPlayerGamelogs, { pid, leagueId })
+  const params = { leagueId }
+  switch (position) {
+    case 'QB':
+      params.passing = true
+      params.rushing = true
+      break
+    case 'RB':
+      params.rushing = true
+      params.receiving = true
+      break
+    case 'WR':
+    case 'TE':
+      params.receiving = true
+      break
+  }
+  yield call(getPlayerGamelogs, { pid, params })
 }
 
 export function* loadPlayerPractices({ payload }) {
