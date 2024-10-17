@@ -233,6 +233,7 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
         .select('player_receiving_gamelogs.*')
     }
 
+    // Add select for player_gamelogs and nfl_games last to override any left joins
     query.select(
       'player_gamelogs.*',
       'nfl_games.day',

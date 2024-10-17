@@ -14,6 +14,9 @@ router.get('/gamelogs/players', async (req, res) => {
     const nfl_team = req.query.nfl_team
     const opponent = req.query.opponent
     let position = req.query.position
+    const include_rushing = req.query.rushing === 'true'
+    const include_passing = req.query.passing === 'true'
+    const include_receiving = req.query.receiving === 'true'
 
     if (!position) {
       position = constants.positions
@@ -22,14 +25,6 @@ router.get('/gamelogs/players', async (req, res) => {
     }
 
     const query = db('player_gamelogs')
-      .select(
-        'player_gamelogs.*',
-        'nfl_games.week',
-        'nfl_games.day',
-        'nfl_games.date',
-        'nfl_games.seas_type',
-        'nfl_games.timestamp'
-      )
       .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
       .where('nfl_games.year', year)
       .where('nfl_games.seas_type', 'REG')
@@ -45,6 +40,33 @@ router.get('/gamelogs/players', async (req, res) => {
 
     if (opponent) {
       query.where('player_gamelogs.opp', opponent)
+    }
+
+    if (include_rushing) {
+      query
+        .leftJoin('player_rushing_gamelogs', function () {
+          this.on('player_rushing_gamelogs.pid', '=', 'player_gamelogs.pid')
+            .andOn('player_rushing_gamelogs.esbid', '=', 'player_gamelogs.esbid')
+        })
+        .select('player_rushing_gamelogs.*')
+    }
+
+    if (include_passing) {
+      query
+        .leftJoin('player_passing_gamelogs', function () {
+          this.on('player_passing_gamelogs.pid', '=', 'player_gamelogs.pid')
+            .andOn('player_passing_gamelogs.esbid', '=', 'player_gamelogs.esbid')
+        })
+        .select('player_passing_gamelogs.*')
+    }
+
+    if (include_receiving) {
+      query
+        .leftJoin('player_receiving_gamelogs', function () {
+          this.on('player_receiving_gamelogs.pid', '=', 'player_gamelogs.pid')
+            .andOn('player_receiving_gamelogs.esbid', '=', 'player_gamelogs.esbid')
+        })
+        .select('player_receiving_gamelogs.*')
     }
 
     if (leagueId) {
@@ -95,6 +117,16 @@ router.get('/gamelogs/players', async (req, res) => {
           ).orWhereNull('league_format_player_gamelogs.league_format_hash')
         })
     }
+
+    // Add select for player_gamelogs and nfl_games last to override any left joins
+    query.select(
+      'player_gamelogs.*',
+      'nfl_games.week',
+      'nfl_games.day',
+      'nfl_games.date',
+      'nfl_games.seas_type',
+      'nfl_games.timestamp'
+    )
 
     const data = await query
     res.send(data)
