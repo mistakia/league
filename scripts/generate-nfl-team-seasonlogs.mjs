@@ -135,13 +135,14 @@ const rate_stats = [
   'recv_yards_after_catch_per_reception',
   'recv_air_yards_per_target',
   'target_rate',
+  'avg_route_depth',
   'recv_deep_target_pct',
   'recv_tight_window_pct',
   'recv_yards_15_plus_rate'
 ]
 
 const copy = ({ opp, tm }) => ({ opp, tm })
-const sum = (items = [], keys = []) => {
+const sum = (items = [], keys = [], fixed_weight) => {
   const r = copy(items[0])
   const counts = {}
 
@@ -167,7 +168,11 @@ const sum = (items = [], keys = []) => {
         }
 
         if (item[key] !== null && item[key] !== undefined) {
-          r[key] += item[key] * weight
+          if (fixed_weight) {
+            r[key] += item[key]
+          } else {
+            r[key] += item[key] * weight
+          }
           counts[key] += weight
         }
       } else {
@@ -178,7 +183,9 @@ const sum = (items = [], keys = []) => {
 
   // Calculate weighted average for rate stats
   for (const key of rate_stats) {
-    if (counts[key] > 0) {
+    if (fixed_weight) {
+      r[key] = r[key] / fixed_weight
+    } else if (counts[key] > 0) {
       r[key] = r[key] / counts[key]
     }
   }
@@ -189,7 +196,9 @@ const sum = (items = [], keys = []) => {
 const avg = (item, props, num) => {
   const obj = copy(item)
   for (const prop of props) {
-    if (!rate_stats.includes(prop)) {
+    if (rate_stats.includes(prop)) {
+      obj[prop] = item[prop]
+    } else {
       obj[prop] = item[prop] / num
     }
   }
