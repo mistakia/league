@@ -68,41 +68,6 @@ export const default_data_views = {
       ]
     }
   },
-  // WEEK_PROJECTIONS: {
-  //   view_id: 'WEEK_PROJECTIONS',
-  //   view_username: 'system',
-  //   name: 'Week Projections',
-  //   order_by: 'player_week_projected_points_added',
-  //   fields: [
-  //     'opponent',
-  //     'opponent_strength',
-  //     'player_week_projected_points_added',
-  //     'player_week_projected_points',
-  //     'player_week_projected_pass_yds',
-  //     'player_week_projected_pass_tds',
-  //     'player_week_projected_pass_ints',
-  //     'opponent_pass_pa',
-  //     'opponent_pass_pc',
-  //     'opponent_pass_py',
-  //     'opponent_pass_tdp',
-  //     'opponent_pass_ints',
-  //     'player_week_projected_rush_atts',
-  //     'player_week_projected_rush_yds',
-  //     'player_week_projected_rush_tds',
-  //     'player_week_projected_fumbles_lost',
-  //     'opponent_rush_ra',
-  //     'opponent_rush_ry',
-  //     'opponent_rush_tdr',
-  //     'player_week_projected_targets',
-  //     'player_week_projected_recs',
-  //     'player_week_projected_rec_yds',
-  //     'player_week_projected_rec_tds',
-  //     'opponent_recv_trg',
-  //     'opponent_recv_rec',
-  //     'opponent_recv_recy',
-  //     'opponent_recv_tdrec'
-  //   ]
-  // },
   PASSING_STATS_BY_PLAY: {
     view_id: 'PASSING_STATS_BY_PLAY',
     view_username: 'system',

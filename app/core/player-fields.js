@@ -990,6 +990,196 @@ function PlayerFields({ week, state }) {
       csv_header: 'Opponent recv tds over average',
       percentile_field: 'tdrec',
       ...opponent_field('tdrec')
+    },
+
+    opponent_pass_rating: {
+      category: 'passing efficiency matchup',
+      column_header: 'PSR',
+      csv_header: 'Opponent passer rating over average',
+      percentile_field: 'pass_rating',
+      ...opponent_field('pass_rating')
+    },
+    opponent_pass_yards_per_attempt: {
+      category: 'passing efficiency matchup',
+      column_header: 'Y/A',
+      csv_header: 'Opponent pass yards per attempt over average',
+      percentile_field: 'pass_yards_per_attempt',
+      ...opponent_field('pass_yards_per_attempt')
+    },
+    opponent_pass_comp_pct: {
+      category: 'passing efficiency matchup',
+      column_header: 'COMP%',
+      csv_header: 'Opponent pass completion percentage over average',
+      percentile_field: 'pass_comp_pct',
+      ...opponent_field('pass_comp_pct')
+    },
+    opponent_completion_percentage_over_expectation: {
+      category: 'passing efficiency matchup',
+      column_header: 'CPOE',
+      csv_header: 'Opponent completion percentage over expectation',
+      percentile_field: 'cpoe',
+      ...opponent_field('cpoe')
+    },
+    opponent_pass_epa_per_dropback: {
+      category: 'passing efficiency matchup',
+      column_header: 'EPA/ATT',
+      csv_header: 'Opponent pass EPA per dropback over average',
+      percentile_field: 'pass_epa_per_db',
+      ...opponent_field('pass_epa_per_db')
+    },
+    opponent_avg_time_to_throw: {
+      category: 'passing usage matchup',
+      column_header: 'TTT',
+      csv_header: 'Opponent average time to throw over average',
+      percentile_field: 'avg_time_to_throw',
+      ...opponent_field('avg_time_to_throw')
+    },
+    opponent_avg_time_to_pressure: {
+      category: 'passing usage matchup',
+      column_header: 'TTP',
+      csv_header: 'Opponent average time to pressure over average',
+      percentile_field: 'avg_time_to_pressure',
+      ...opponent_field('avg_time_to_pressure')
+    },
+    opponent_avg_time_to_sack: {
+      category: 'passing usage matchup',
+      column_header: 'TTS',
+      csv_header: 'Opponent average time to sack over average',
+      percentile_field: 'avg_time_to_sack',
+      ...opponent_field('avg_time_to_sack')
+    },
+    opponent_pressure_rate_against: {
+      category: 'passing usage matchup',
+      column_header: 'PRSS%',
+      csv_header: 'Opponent pressure rate against over average',
+      percentile_field: 'pressure_rate_against',
+      ...opponent_field('pressure_rate_against')
+    },
+    opponent_blitz_rate: {
+      category: 'passing usage matchup',
+      column_header: 'BLZ%',
+      csv_header: 'Opponent blitz rate over average',
+      percentile_field: 'blitz_rate',
+      ...opponent_field('blitz_rate')
+    },
+    opponent_air_yards_per_pass_att: {
+      category: 'passing usage matchup',
+      column_header: 'AY/PA',
+      csv_header: 'Opponent air yards per pass attempt over average',
+      percentile_field: 'air_yards_per_pass_att',
+      ...opponent_field('air_yards_per_pass_att')
+    },
+    opponent_avg_target_separation: {
+      category: 'passing usage matchup',
+      column_header: 'TSEP',
+      csv_header: 'Opponent average target separation over average',
+      percentile_field: 'avg_target_separation',
+      ...opponent_field('avg_target_separation')
+    },
+    opponent_deep_pass_att_pct: {
+      category: 'passing usage matchup',
+      column_header: 'DP%',
+      csv_header: 'Opponent deep pass attempts percentage over average',
+      percentile_field: 'deep_pass_att_pct',
+      ...opponent_field('deep_pass_att_pct')
+    },
+    opponent_tight_window_pct: {
+      category: 'passing usage matchup',
+      column_header: 'TW%',
+      csv_header: 'Opponent tight window passes percentage over average',
+      percentile_field: 'tight_window_pct',
+      ...opponent_field('tight_window_pct')
+    },
+    opponent_play_action_pct: {
+      category: 'passing usage matchup',
+      column_header: 'PA%',
+      csv_header: 'Opponent play action passes percentage over average',
+      percentile_field: 'play_action_pct',
+      ...opponent_field('play_action_pct')
+    },
+    opponent_receiving_passer_rating: {
+      category: 'receiving efficiency matchup',
+      column_header: 'PSR',
+      csv_header: 'Opponent receiver passer rating over average',
+      percentile_field: 'receiving_passer_rating',
+      ...opponent_field('receiving_passer_rating')
+    },
+    opponent_catch_rate_over_expectation: {
+      category: 'receiving efficiency matchup',
+      column_header: 'CROE',
+      csv_header: 'Opponent catch rate over expectation',
+      percentile_field: 'cpoe',
+      ...opponent_field('cpoe')
+    },
+    opponent_recv_yards_per_reception: {
+      category: 'receiving efficiency matchup',
+      column_header: 'Y/R',
+      csv_header: 'Opponent receiving yards per reception over average',
+      percentile_field: 'recv_yards_per_reception',
+      ...opponent_field('recv_yards_per_reception')
+    },
+    opponent_recv_yards_per_route: {
+      category: 'receiving efficiency matchup',
+      column_header: 'Y/RTE',
+      csv_header: 'Opponent receiving yards per route over average',
+      percentile_field: 'recv_yards_per_route',
+      ...opponent_field('recv_yards_per_route')
+    },
+    opponent_receiving_epa_per_target: {
+      category: 'receiving efficiency matchup',
+      column_header: 'EPA/TGT',
+      csv_header: 'Opponent receiving EPA per target over average',
+      percentile_field: 'receiving_epa_per_target',
+      ...opponent_field('receiving_epa_per_target')
+    },
+    opponent_receiving_epa_per_route: {
+      category: 'receiving efficiency matchup',
+      column_header: 'EPA/RTE',
+      csv_header: 'Opponent receiving EPA per route over average',
+      percentile_field: 'receiving_epa_per_route',
+      ...opponent_field('receiving_epa_per_route')
+    },
+    opponent_receiving_yards_after_catch_over_expected: {
+      category: 'receiving efficiency matchup',
+      column_header: 'YAC/E',
+      csv_header: 'Opponent receiving yards after catch over expected',
+      percentile_field: 'receiving_yards_after_catch_over_expected',
+      ...opponent_field('receiving_yards_after_catch_over_expected')
+    },
+    opponent_rushing_yards_over_expectation: {
+      category: 'rushing efficiency matchup',
+      column_header: 'RYOE',
+      csv_header: 'Opponent rushing yards over expectation',
+      percentile_field: 'rush_yards_over_expected',
+      ...opponent_field('rush_yards_over_expected')
+    },
+    opponent_rushing_yards_over_expectation_per_attempt: {
+      category: 'rushing efficiency matchup',
+      column_header: 'RYOE/A',
+      csv_header: 'Opponent rushing yards over expectation per attempt',
+      percentile_field: 'rush_yards_over_expected_per_attempt',
+      ...opponent_field('rush_yards_over_expected_per_attempt')
+    },
+    opponent_rushing_yards_after_contact_per_attempt: {
+      category: 'rushing efficiency matchup',
+      column_header: 'YAC/A',
+      csv_header: 'Opponent rushing yards after contact per attempt',
+      percentile_field: 'rush_yards_after_contact_per_attempt',
+      ...opponent_field('rush_yards_after_contact_per_attempt')
+    },
+    opponent_rushing_success_rate: {
+      category: 'rushing efficiency matchup',
+      column_header: 'SUCC%',
+      csv_header: 'Opponent rush success rate over average',
+      percentile_field: 'rush_success_rate',
+      ...opponent_field('rush_success_rate')
+    },
+    opponent_rushing_yards_per_attempt: {
+      category: 'rushing efficiency matchup',
+      column_header: 'Y/A',
+      csv_header: 'Opponent rushing yards per attempt over average',
+      percentile_field: 'rush_yards_per_attempt',
+      ...opponent_field('rush_yards_per_attempt')
     }
   }
 
