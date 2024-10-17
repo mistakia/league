@@ -9,12 +9,12 @@ import './selected-player-gamelogs.styl'
 
 export default function SelectedPlayerGamelogs({ playerMap, load, years }) {
   const pid = playerMap.get('pid')
+  const position = playerMap.get('pos')
 
   useEffect(() => {
-    load(pid)
-  }, [pid, load])
+    load({ pid, position })
+  }, [pid, position, load])
 
-  const position = playerMap.get('pos')
   const rows = []
   const sorted_years = Object.keys(years).sort((a, b) => b - a)
   sorted_years.forEach((year, yearIndex) => {

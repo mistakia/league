@@ -204,10 +204,11 @@ export const playerActions = {
     }
   }),
   LOAD_PLAYER_GAMELOGS: 'LOAD_PLAYER_GAMELOGS',
-  loadPlayerGamelogs: (pid) => ({
+  loadPlayerGamelogs: ({ pid, position }) => ({
     type: playerActions.LOAD_PLAYER_GAMELOGS,
     payload: {
-      pid
+      pid,
+      position
     }
   }),
   ...create_api_action_types('GET_PLAYER_GAMELOGS'),

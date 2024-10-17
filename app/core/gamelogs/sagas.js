@@ -10,6 +10,29 @@ export function* load({ payload }) {
   const { leagueId } = yield select(get_app)
   const { year, week, nfl_team, opponent, position } = payload
 
+  const params = {
+    leagueId,
+    year,
+    week,
+    nfl_team,
+    position
+  }
+
+  switch (position) {
+    case 'QB':
+      params.passing = true
+      params.rushing = true
+      break
+    case 'RB':
+      params.rushing = true
+      params.receiving = true
+      break
+    case 'WR':
+    case 'TE':
+      params.receiving = true
+      break
+  }
+
   // load last week gamelogs as well when its the final week of the championship round
   if (week === constants.season.finalWeek && week === constants.season.week) {
     yield call(load, {
@@ -42,14 +65,7 @@ export function* load({ payload }) {
   }_${opponent || 'X'}_${position || 'X'}`
 
   if (!request_history.has(key)) {
-    yield call(getPlayersGamelogs, {
-      leagueId,
-      year,
-      week,
-      nfl_team,
-      opponent,
-      position
-    })
+    yield call(getPlayersGamelogs, params)
   }
 }
 

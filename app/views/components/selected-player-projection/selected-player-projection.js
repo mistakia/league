@@ -3,83 +3,85 @@ import PropTypes from 'prop-types'
 
 import Icon from '@components/icon'
 import Source from '@components/source'
-import PlayerSelectedRow from '@components/player-selected-row'
-import PlayerSelectedRowHeader from '@components/player-selected-row-header'
+import SelectedPlayerProjectionRow from '@components/selected-player-projection-row'
+import SelectedPlayerProjectionRowHeader from '@components/selected-player-projection-row-header'
 import { constants } from '@libs-shared'
 
-export default class SelectedPlayerProjection extends React.Component {
-  handleClearClick = () => {
-    const { pid, week } = this.props
-    this.props.delete({ pid, week })
+export default function SelectedPlayerProjection({
+  pid,
+  week,
+  projections,
+  projection,
+  pos,
+  delete_projection
+}) {
+  const handle_clear_click = () => {
+    delete_projection({ pid, week })
   }
 
-  render = () => {
-    const { week, projections, projection, pos } = this.props
-
-    const rows = []
-    projections.forEach((p, index) => {
-      const isUser = !p.sourceid
-      const title = isUser ? 'User' : <Source sourceId={p.sourceid} />
-      const action = (
-        <div className='row__action'>
-          {isUser && (
-            <div onClick={this.handleClearClick}>
-              <Icon name='clear' />
-            </div>
-          )}
+  const rows = []
+  let has_action = false
+  projections.forEach((p, index) => {
+    const isUser = !p.sourceid
+    const title = isUser ? 'User' : <Source sourceId={p.sourceid} />
+    const action = isUser && (
+      <div className='row__action'>
+        <div onClick={handle_clear_click}>
+          <Icon name='clear' />
         </div>
-      )
-
-      const item = (
-        <PlayerSelectedRow
-          key={index}
-          stats={p}
-          title={title}
-          action={action}
-          pos={pos}
-          fixed={1}
-        />
-      )
-      rows.push(item)
-    })
-
-    if (projection) {
-      rows.push(
-        <PlayerSelectedRow
-          className='average__row'
-          key='average'
-          stats={projection}
-          title='Average'
-          pos={pos}
-          fixed={1}
-          action={<div className='row__action' />}
-        />
-      )
-    }
-
-    return (
-      <div className='selected__section'>
-        <div className='selected__table-header sticky__column'>
-          <div className='row__group-head'>
-            {week === 0
-              ? `${constants.year} Regular Season Projections`
-              : `Week ${week} Projections`}
-          </div>
-        </div>
-        <div className='selected__table-header'>
-          <div className='table__cell text'>Source</div>
-          <PlayerSelectedRowHeader pos={pos} />
-          <div className='row__action' />
-        </div>
-        {rows}
       </div>
     )
+    has_action = Boolean(has_action || action)
+
+    const item = (
+      <SelectedPlayerProjectionRow
+        key={index}
+        stats={p}
+        title={title}
+        action={action}
+        pos={pos}
+        fixed={1}
+      />
+    )
+    rows.push(item)
+  })
+
+  if (projection) {
+    rows.push(
+      <SelectedPlayerProjectionRow
+        className='average__row'
+        key='average'
+        stats={projection}
+        title='Average'
+        pos={pos}
+        fixed={1}
+        action={has_action ? <div className='row__action' /> : null}
+      />
+    )
   }
+
+  return (
+    <div className='selected__section'>
+      <div className='selected__table-header sticky__column'>
+        <div className='row__group-head'>
+          {week === 0
+            ? `${constants.year} Regular Season Projections`
+            : `Week ${week} Projections`}
+        </div>
+      </div>
+      <div className='selected__table-header'>
+        <div className='table__cell text'>Source</div>
+        <SelectedPlayerProjectionRowHeader pos={pos} />
+        {has_action ? <div className='row__action' /> : null}
+      </div>
+      {rows}
+    </div>
+  )
 }
 
 SelectedPlayerProjection.propTypes = {
   pid: PropTypes.string,
-  delete: PropTypes.func,
+  delete_projection: PropTypes.func,
   pos: PropTypes.string,
   week: PropTypes.number,
   projections: PropTypes.array,

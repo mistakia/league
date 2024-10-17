@@ -50,7 +50,7 @@ const mapStateToProps = createSelector(
       })
 
     const nfl_team_against_seasonlogs = []
-    const types = { avg: 'Average', adj: 'Over Expected' }
+    const types = { avg: 'Average', adj: 'Over Average' }
     for (const [type, title] of Object.entries(types)) {
       const stat_key = `${position}_against_${type}`.toUpperCase()
       const stats = seasonlogs.getIn(['nfl_teams', opponent, stat_key])

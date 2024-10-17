@@ -45,8 +45,11 @@ router.get('/gamelogs/players', async (req, res) => {
     if (include_rushing) {
       query
         .leftJoin('player_rushing_gamelogs', function () {
-          this.on('player_rushing_gamelogs.pid', '=', 'player_gamelogs.pid')
-            .andOn('player_rushing_gamelogs.esbid', '=', 'player_gamelogs.esbid')
+          this.on(
+            'player_rushing_gamelogs.pid',
+            '=',
+            'player_gamelogs.pid'
+          ).andOn('player_rushing_gamelogs.esbid', '=', 'player_gamelogs.esbid')
         })
         .select('player_rushing_gamelogs.*')
     }
@@ -54,8 +57,11 @@ router.get('/gamelogs/players', async (req, res) => {
     if (include_passing) {
       query
         .leftJoin('player_passing_gamelogs', function () {
-          this.on('player_passing_gamelogs.pid', '=', 'player_gamelogs.pid')
-            .andOn('player_passing_gamelogs.esbid', '=', 'player_gamelogs.esbid')
+          this.on(
+            'player_passing_gamelogs.pid',
+            '=',
+            'player_gamelogs.pid'
+          ).andOn('player_passing_gamelogs.esbid', '=', 'player_gamelogs.esbid')
         })
         .select('player_passing_gamelogs.*')
     }
@@ -63,8 +69,15 @@ router.get('/gamelogs/players', async (req, res) => {
     if (include_receiving) {
       query
         .leftJoin('player_receiving_gamelogs', function () {
-          this.on('player_receiving_gamelogs.pid', '=', 'player_gamelogs.pid')
-            .andOn('player_receiving_gamelogs.esbid', '=', 'player_gamelogs.esbid')
+          this.on(
+            'player_receiving_gamelogs.pid',
+            '=',
+            'player_gamelogs.pid'
+          ).andOn(
+            'player_receiving_gamelogs.esbid',
+            '=',
+            'player_gamelogs.esbid'
+          )
         })
         .select('player_receiving_gamelogs.*')
     }
