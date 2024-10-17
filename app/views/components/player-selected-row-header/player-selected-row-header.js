@@ -54,7 +54,7 @@ const categories = {
   ],
   receiving_explosiveness: ['LNG', '15+%'],
   receiving_opportunities: ['RTE', 'RTE%', 'TGT%', 'AY%', 'WOPR'],
-  receiving_usage: ['AY', 'AY/TGT', 'aDOT', 'DT%', 'TW%'],
+  receiving_usage: ['AY', 'AY/TGT', 'DEP/RTE', 'DT%', 'TW%'],
   receiving_redzone: ['RZ TGT', 'EZ TGT'],
   defense: [
     'PA',
