@@ -72,7 +72,7 @@ export default function SelectedPlayerSchedule({
   labels.splice(bye_week - 1, 0, bye_item)
 
   return (
-    <div className='selected__player-schedule'>
+    <div className='selected__table'>
       <Tabs
         value={selected_week}
         onChange={handleChange}
