@@ -114,7 +114,7 @@ export default function SelectedPlayerMatchupTable({
           {position}s vs {opponent} Gamelogs
         </div>
       </div>
-      <div className='selected__table-header'>
+      <div className='selected__table-header sticky'>
         <div className='table__cell sticky__column metric game__week'>Wk</div>
         <div className='table__cell sticky__column sticky__two text'>
           Player
