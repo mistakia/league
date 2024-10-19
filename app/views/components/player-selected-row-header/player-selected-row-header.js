@@ -39,7 +39,7 @@ const categories = {
   rushing_opportunities: ['xYDS', 'RSH%', 'WO'],
   rushing_efficiency: ['RYOE', 'RYOE/A', 'YAC/A', 'SR%', 'Y/A'],
   rushing_explosiveness: ['LNG', '10+', '15+MPH', '20+MPH'],
-  rushing_redzone: ['RZ ATT', 'GL CAR'],
+  rushing_redzone: ['RZ ATT', 'GL ATT'],
   receiving_production: ['TAR', 'REC', 'YDS', 'TD', 'EPA'],
   receiving_efficiency: [
     'RTG',
