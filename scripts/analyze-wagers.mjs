@@ -159,46 +159,134 @@ const format_fanduel_selection_name = ({ selection, week }) => {
 }
 
 const format_draftkings_selection_name = ({ selection }) => {
-  const market_display_name = selection.marketDisplayName || ''
-  const selection_display_name = selection.selectionDisplayName || ''
+  const format_single_selection = (sel) => {
+    const market_display_name = sel.marketDisplayName || ''
+    const selection_display_name = sel.selectionDisplayName || ''
 
-  // List of stat names to check for
-  const stat_names = [
-    'Rushing Yards',
-    'Receiving Yards',
-    'Passing Yards',
-    'Receptions',
-    'Touchdowns'
-  ]
+    // List of stat names to check for
+    const stat_names = [
+      'Rushing Yards',
+      'Receiving Yards',
+      'Passing Yards',
+      'Receptions',
+      'Touchdowns'
+    ]
 
-  // Extract player name
-  const player_name = stat_names.reduce((name, stat) => {
-    if (name) return name
-    const index = market_display_name.indexOf(stat)
-    return index !== -1 ? market_display_name.slice(0, index).trim() : ''
-  }, '')
+    // Extract player name
+    const player_name = stat_names.reduce((name, stat) => {
+      if (name) return name
+      const index = market_display_name.indexOf(stat)
+      return index !== -1 ? market_display_name.slice(0, index).trim() : ''
+    }, '')
 
-  if (player_name) {
-    // Handle specific stats
-    if (market_display_name.includes('Rushing Yards')) {
-      return `${player_name} ${selection_display_name} Rush Yds`
+    if (player_name) {
+      // Handle specific stats
+      if (market_display_name.includes('Rushing Yards')) {
+        return `${player_name} ${selection_display_name} Rush Yds`
+      }
+      if (market_display_name.includes('Receiving Yards')) {
+        return `${player_name} ${selection_display_name} Recv Yds`
+      }
+      if (market_display_name.includes('Passing Yards')) {
+        return `${player_name} ${selection_display_name} Pass Yds`
+      }
+      if (market_display_name.includes('Receptions')) {
+        return `${player_name} ${selection_display_name} Recs`
+      }
+      if (market_display_name.includes('Touchdowns')) {
+        return `${player_name} ${selection_display_name} TDs`
+      }
     }
-    if (market_display_name.includes('Receiving Yards')) {
-      return `${player_name} ${selection_display_name} Recv Yds`
-    }
-    if (market_display_name.includes('Passing Yards')) {
-      return `${player_name} ${selection_display_name} Pass Yds`
-    }
-    if (market_display_name.includes('Receptions')) {
-      return `${player_name} ${selection_display_name} Recs`
-    }
-    if (market_display_name.includes('Touchdowns')) {
-      return `${player_name} ${selection_display_name} TDs`
-    }
+
+    // Default to original format if no specific case is matched
+    return `${market_display_name} (${selection_display_name})`
   }
 
-  // Default to original format if no specific case is matched
-  return `${market_display_name} (${selection_display_name})`
+  if (selection.nestedSGPSelections) {
+    // Handle nested SGP selections
+    const formatted_selections = selection.nestedSGPSelections.map(
+      format_single_selection
+    )
+    return formatted_selections.join(' / ')
+  } else {
+    // Handle single selection
+    return format_single_selection(selection)
+  }
+}
+
+// Helper function to generate combinations
+const generate_round_robin_combinations = (arr, r) => {
+  const combinations = []
+  const combine = (start, combo) => {
+    if (combo.length === r) {
+      combinations.push(combo)
+      return
+    }
+    for (let i = start; i < arr.length; i++) {
+      combine(i + 1, [...combo, arr[i]])
+    }
+  }
+  combine(0, [])
+  return combinations
+}
+
+const calculate_fanduel_round_robin_wager = ({ wager }) => {
+  const num_selections = Number(wager.betType.slice(3))
+  const legs = wager.legs
+
+  // Generate all possible combinations
+  const all_combinations = generate_round_robin_combinations(legs, num_selections)
+
+  // Filter combinations to include only one selection per market and event
+  const valid_combinations = all_combinations.filter((combination) => {
+    const markets = new Set()
+    const events = new Set()
+    for (const leg of combination) {
+      const market_id = leg.parts[0].marketId
+      const event_id = leg.parts[0].eventId
+      if (markets.has(market_id) || events.has(event_id)) {
+        return false
+      }
+      markets.add(market_id)
+      events.add(event_id)
+    }
+    return true
+  })
+
+  // Calculate potential win for each combination
+  const stake_per_combination = wager.currentSize / valid_combinations.length
+  const round_robin_wagers = valid_combinations.map((combination) => {
+    const odds_product = combination.reduce((product, leg) => {
+      return product * (1 + Number(leg.parts[0].price) - 1)
+    }, 1)
+    const potential_win = stake_per_combination * odds_product
+
+    return {
+      stake: stake_per_combination,
+      potential_win,
+      parsed_odds: (odds_product - 1) * 100, // Convert to American odds
+      selections: combination.map((leg) => ({
+        ...leg.parts[0],
+        name: format_fanduel_selection_name({
+          selection: leg.parts[0],
+          week: wager.week
+        }),
+        event_id: leg.parts[0].eventId,
+        market_id: leg.parts[0].marketId,
+        source_id: 'FANDUEL',
+        selection_id: leg.parts[0].selectionId,
+        parsed_odds: Number(leg.parts[0].americanPrice),
+        is_won: leg.result === 'WON',
+        is_lost: leg.result === 'LOST'
+      })),
+      bet_receipt_id: `${wager.betReceiptId}-${combination.map((leg) => leg.parts[0].selectionId).join('-')}`,
+      is_settled: wager.isSettled,
+      is_won: combination.every((leg) => leg.result === 'WON'),
+      source_id: 'FANDUEL'
+    }
+  })
+
+  return round_robin_wagers
 }
 
 const standardize_wager = ({ wager, source }) => {
@@ -206,6 +294,22 @@ const standardize_wager = ({ wager, source }) => {
     const week = dayjs(wager.settledDate)
       .subtract('2', 'day')
       .diff(constants.season.start, 'weeks')
+
+    // check if the wager is a round robin
+    if (wager.numLines > 1) {
+      const round_robin_wagers = calculate_fanduel_round_robin_wager({
+        wager: { ...wager, week }
+      })
+      if (round_robin_wagers.length !== wager.numLines) {
+        log({
+          round_robin_wagers: round_robin_wagers[0],
+          total_combinations: round_robin_wagers.length,
+          numLines: wager.numLines
+        })
+        process.exit()
+      }
+      return round_robin_wagers
+    }
 
     return {
       ...wager,
@@ -233,30 +337,98 @@ const standardize_wager = ({ wager, source }) => {
       source_id: 'FANDUEL'
     }
   } else if (source === 'draftkings') {
-    return {
-      ...wager,
-      selections: wager.selections.map((selection) => ({
-        ...selection,
-        name: format_draftkings_selection_name({ selection }),
-        event_id: selection.eventId,
-        market_id: selection.marketId,
-        selection_id: selection.selectionId,
-        bet_receipt_id: wager.betReceiptId,
-        source_id: 'DRAFTKINGS',
-        result: selection.settlementStatus.toUpperCase(),
-        parsed_odds: selection.displayOdds
-          ? Number(selection.displayOdds.replace(/—|-|−/g, '-'))
+    if (wager.type === 'RoundRobin') {
+      return wager.combinations.map((combination) => {
+        const selections = combination.selectionsMapped.map((selectionId) => {
+          const selection =
+            wager.selections.find((s) => s.selectionId === selectionId) ||
+            wager.selections.find(
+              (s) =>
+                s.nestedSGPSelections &&
+                s.nestedSGPSelections.some(
+                  (ns) => ns.selectionId === selectionId
+                )
+            )
+
+          if (!selection) {
+            throw new Error(`Selection not found for ID: ${selectionId}`)
+          }
+
+          const standardized_selection = {
+            name: format_draftkings_selection_name({
+              selection: selection.nestedSGPSelections ? selection : selection
+            }),
+            event_id: selection.eventId,
+            market_id: selection.marketId,
+            selection_id: selection.selectionId,
+            bet_receipt_id: wager.receiptId,
+            source_id: 'DRAFTKINGS',
+            result: selection.settlementStatus.toUpperCase(),
+            parsed_odds: selection.displayOdds
+              ? Number(selection.displayOdds.replace(/—|-|−/g, '-'))
+              : null,
+            is_won: selection.settlementStatus === 'Won',
+            is_lost: selection.settlementStatus === 'Lost'
+          }
+
+          if (selection.nestedSGPSelections) {
+            standardized_selection.nested_selections =
+              selection.nestedSGPSelections.map((ns) => ({
+                ...ns,
+                name: format_draftkings_selection_name({ selection: ns }),
+                parsed_odds: ns.displayOdds
+                  ? Number(ns.displayOdds.replace(/—|-|−/g, '-'))
+                  : null,
+                is_won: ns.settlementStatus === 'Won',
+                is_lost: ns.settlementStatus === 'Lost'
+              }))
+          }
+
+          return standardized_selection
+        })
+
+        const stake = wager.stake / wager.numberOfBets
+
+        return {
+          ...wager,
+          selections,
+          bet_receipt_id: `${wager.receiptId}-${combination.id}`,
+          parsed_odds: Number(combination.displayOdds.replace(/\+/g, '')),
+          is_settled: wager.status === 'Settled',
+          is_won: combination.status === 'Won',
+          potential_win: wager.potentialReturns,
+          stake,
+          source_id: 'DRAFTKINGS'
+        }
+      })
+    } else {
+      return {
+        ...wager,
+        selections: wager.selections.map((selection) => ({
+          ...selection,
+          name: format_draftkings_selection_name({ selection }),
+          event_id: selection.eventId,
+          market_id: selection.marketId,
+          selection_id: selection.selectionId,
+          bet_receipt_id: wager.betReceiptId,
+          source_id: 'DRAFTKINGS',
+          result: selection.settlementStatus.toUpperCase(),
+          parsed_odds: selection.displayOdds
+            ? Number(selection.displayOdds.replace(/—|-|−/g, '-'))
+            : null,
+          is_won: selection.settlementStatus === 'Won',
+          is_lost: selection.settlementStatus === 'Lost'
+        })),
+        bet_receipt_id: wager.receiptId,
+        parsed_odds: wager.displayOdds
+          ? Number(wager.displayOdds.replace(/—|-|−/g, '-'))
           : null,
-        is_won: selection.settlementStatus === 'Won',
-        is_lost: selection.settlementStatus === 'Lost'
-      })),
-      bet_receipt_id: wager.receiptId,
-      parsed_odds: Number(wager.displayOdds.replace(/—|-|−/g, '-')),
-      is_settled: wager.status === 'Settled',
-      is_won: wager.settlementStatus === 'Won',
-      potential_win: wager.potentialReturns,
-      stake: wager.stake,
-      source_id: 'DRAFTKINGS'
+        is_settled: wager.status === 'Settled',
+        is_won: wager.settlementStatus === 'Won',
+        potential_win: wager.potentialReturns,
+        stake: wager.stake,
+        source_id: 'DRAFTKINGS'
+      }
     }
   }
   throw new Error(`Unknown wager source: ${source}`)
@@ -427,7 +599,7 @@ const analyze_wagers = async ({
   if (fanduel_filename) {
     const fanduel_wagers = await fs.readJson(`${data_path}/${fanduel_filename}`)
     wagers = wagers.concat(
-      fanduel_wagers.map((wager) =>
+      fanduel_wagers.flatMap((wager) =>
         standardize_wager({ wager, source: 'fanduel' })
       )
     )
@@ -438,9 +610,13 @@ const analyze_wagers = async ({
       `${data_path}/${draftkings_filename}`
     )
     wagers = wagers.concat(
-      draftkings_wagers.map((wager) =>
-        standardize_wager({ wager, source: 'draftkings' })
-      )
+      draftkings_wagers.flatMap((wager) => {
+        const standardized_wager = standardize_wager({
+          wager,
+          source: 'draftkings'
+        })
+        return standardized_wager
+      })
     )
   }
 
