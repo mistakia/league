@@ -148,11 +148,11 @@ const format_fanduel_selection_name = ({ selection, week }) => {
     stat_type === '2+ TDs' ||
     stat_type === '1st Team TD'
   ) {
-    name = `${selection.selectionName} ${stat_type} [week ${week}]`
+    name = `${selection.selectionName} ${stat_type}`
   } else if (stat_type === 'Alternate Spread') {
-    name = `${selection.selectionName} [week ${week}]`
+    name = `${selection.selectionName}`
   } else {
-    name = `${player_name} ${handicap}+ ${stat_type} [week ${week}]`
+    name = `${player_name} ${handicap}+ ${stat_type}`
   }
 
   return name
@@ -202,16 +202,7 @@ const format_draftkings_selection_name = ({ selection }) => {
     return `${market_display_name} (${selection_display_name})`
   }
 
-  if (selection.nestedSGPSelections) {
-    // Handle nested SGP selections
-    const formatted_selections = selection.nestedSGPSelections.map(
-      format_single_selection
-    )
-    return formatted_selections.join(' / ')
-  } else {
-    // Handle single selection
-    return format_single_selection(selection)
-  }
+  return format_single_selection(selection)
 }
 
 // Helper function to generate combinations
@@ -235,7 +226,10 @@ const calculate_fanduel_round_robin_wager = ({ wager }) => {
   const legs = wager.legs
 
   // Generate all possible combinations
-  const all_combinations = generate_round_robin_combinations(legs, num_selections)
+  const all_combinations = generate_round_robin_combinations(
+    legs,
+    num_selections
+  )
 
   // Filter combinations to include only one selection per market and event
   const valid_combinations = all_combinations.filter((combination) => {
@@ -280,8 +274,10 @@ const calculate_fanduel_round_robin_wager = ({ wager }) => {
         is_lost: leg.result === 'LOST'
       })),
       bet_receipt_id: `${wager.betReceiptId}-${combination.map((leg) => leg.parts[0].selectionId).join('-')}`,
-      is_settled: wager.isSettled,
+      is_settled:
+        wager.isSettled || combination.some((leg) => leg.result === 'LOST'),
       is_won: combination.every((leg) => leg.result === 'WON'),
+      is_lost: combination.some((leg) => leg.result === 'LOST'),
       source_id: 'FANDUEL'
     }
   })
@@ -300,14 +296,6 @@ const standardize_wager = ({ wager, source }) => {
       const round_robin_wagers = calculate_fanduel_round_robin_wager({
         wager: { ...wager, week }
       })
-      if (round_robin_wagers.length !== wager.numLines) {
-        log({
-          round_robin_wagers: round_robin_wagers[0],
-          total_combinations: round_robin_wagers.length,
-          numLines: wager.numLines
-        })
-        process.exit()
-      }
       return round_robin_wagers
     }
 
@@ -321,6 +309,7 @@ const standardize_wager = ({ wager, source }) => {
         market_id: leg.parts[0].marketId,
         source_id: 'FANDUEL',
         selection_id: leg.parts[0].selectionId,
+        result: leg.result || 'OPEN',
         parsed_odds: Number(leg.parts[0].americanPrice),
         is_won: leg.result === 'WON',
         is_lost: leg.result === 'LOST'
@@ -339,63 +328,63 @@ const standardize_wager = ({ wager, source }) => {
   } else if (source === 'draftkings') {
     if (wager.type === 'RoundRobin') {
       return wager.combinations.map((combination) => {
-        const selections = combination.selectionsMapped.map((selectionId) => {
-          const selection =
-            wager.selections.find((s) => s.selectionId === selectionId) ||
-            wager.selections.find(
-              (s) =>
-                s.nestedSGPSelections &&
-                s.nestedSGPSelections.some(
-                  (ns) => ns.selectionId === selectionId
-                )
-            )
+        const selections = combination.selectionsMapped.flatMap(
+          (selectionId) => {
+            const selection =
+              wager.selections.find((s) => s.selectionId === selectionId) ||
+              wager.selections.find(
+                (s) =>
+                  s.nestedSGPSelections &&
+                  s.nestedSGPSelections.some(
+                    (ns) => ns.selectionId === selectionId
+                  )
+              )
 
-          if (!selection) {
-            throw new Error(`Selection not found for ID: ${selectionId}`)
+            if (!selection) {
+              throw new Error(`Selection not found for ID: ${selectionId}`)
+            }
+
+            const standardize_selection = (sel) => ({
+              name: format_draftkings_selection_name({
+                selection: sel
+              }),
+              event_id: sel.eventId,
+              market_id: sel.marketId,
+              selection_id: sel.selectionId,
+              bet_receipt_id: wager.receiptId,
+              source_id: 'DRAFTKINGS',
+              result: sel.settlementStatus.toUpperCase(),
+              parsed_odds: sel.displayOdds
+                ? Number(sel.displayOdds.replace(/—|-|−/g, '-'))
+                : null,
+              is_won: sel.settlementStatus === 'Won',
+              is_lost: sel.settlementStatus === 'Lost'
+            })
+
+            if (selection.nestedSGPSelections) {
+              return selection.nestedSGPSelections.map(standardize_selection)
+            } else {
+              return [standardize_selection(selection)]
+            }
           }
-
-          const standardized_selection = {
-            name: format_draftkings_selection_name({
-              selection: selection.nestedSGPSelections ? selection : selection
-            }),
-            event_id: selection.eventId,
-            market_id: selection.marketId,
-            selection_id: selection.selectionId,
-            bet_receipt_id: wager.receiptId,
-            source_id: 'DRAFTKINGS',
-            result: selection.settlementStatus.toUpperCase(),
-            parsed_odds: selection.displayOdds
-              ? Number(selection.displayOdds.replace(/—|-|−/g, '-'))
-              : null,
-            is_won: selection.settlementStatus === 'Won',
-            is_lost: selection.settlementStatus === 'Lost'
-          }
-
-          if (selection.nestedSGPSelections) {
-            standardized_selection.nested_selections =
-              selection.nestedSGPSelections.map((ns) => ({
-                ...ns,
-                name: format_draftkings_selection_name({ selection: ns }),
-                parsed_odds: ns.displayOdds
-                  ? Number(ns.displayOdds.replace(/—|-|−/g, '-'))
-                  : null,
-                is_won: ns.settlementStatus === 'Won',
-                is_lost: ns.settlementStatus === 'Lost'
-              }))
-          }
-
-          return standardized_selection
-        })
+        )
 
         const stake = wager.stake / wager.numberOfBets
+        const parsed_odds = combination.displayOdds
+          ? Number(combination.displayOdds.replace(/\+/g, ''))
+          : combination.trueOdds
+
+        const is_won = combination.status === 'Won'
+        const is_lost = combination.status === 'Lost'
 
         return {
           ...wager,
           selections,
           bet_receipt_id: `${wager.receiptId}-${combination.id}`,
-          parsed_odds: Number(combination.displayOdds.replace(/\+/g, '')),
-          is_settled: wager.status === 'Settled',
-          is_won: combination.status === 'Won',
+          parsed_odds,
+          is_settled: wager.status === 'Settled' || is_lost || is_won,
+          is_won,
+          is_lost,
           potential_win: wager.potentialReturns,
           stake,
           source_id: 'DRAFTKINGS'
@@ -440,118 +429,191 @@ const analyze_prop_combinations = (lost_props, filtered, wager_summary) => {
   const three_props = []
 
   const prop_summaries = new Map()
+  const wager_indices = new Map()
+  const props_by_source = new Map()
+  const wagers_by_source = new Map()
 
-  const get_prop_summary = (props) => {
-    const key = props
-      .map((p) => p.name)
-      .sort()
-      .join('|')
-    if (!prop_summaries.has(key)) {
-      prop_summaries.set(
-        key,
-        get_wagers_summary({
-          wagers: filtered,
-          props
-        })
+  // Index wagers and props by source_id
+  filtered.forEach((wager, index) => {
+    if (!wagers_by_source.has(wager.source_id)) {
+      wagers_by_source.set(wager.source_id, [])
+    }
+    wagers_by_source.get(wager.source_id).push(wager)
+
+    wager.selections.forEach((selection) => {
+      const key = `${wager.source_id}:${selection.selection_id}`
+      if (!wager_indices.has(key)) {
+        wager_indices.set(key, new Set())
+      }
+      wager_indices.get(key).add(index)
+    })
+  })
+
+  // Pre-calculate summaries for individual props
+  const calculate_summary = (source_id, prop_ids) => {
+    // Get the set of wager indices for the first prop
+    const first_prop_key = `${source_id}:${prop_ids[0]}`
+    let relevant_wager_indices = new Set(
+      wager_indices.get(first_prop_key) || []
+    )
+
+    // Intersect with the indices of the remaining props
+    for (let i = 1; i < prop_ids.length; i++) {
+      const prop_key = `${source_id}:${prop_ids[i]}`
+      const prop_indices = wager_indices.get(prop_key) || []
+      relevant_wager_indices = new Set(
+        [...relevant_wager_indices].filter((index) => prop_indices.has(index))
       )
+    }
+
+    const relevant_wagers = Array.from(relevant_wager_indices).map(
+      (index) => filtered[index]
+    )
+
+    return get_wagers_summary({
+      wagers: relevant_wagers,
+      props: prop_ids.map((id) =>
+        lost_props.find(
+          (p) => p.selection_id === id && p.source_id === source_id
+        )
+      )
+    })
+  }
+
+  const get_prop_summary = (source_id, prop_ids) => {
+    const key = `${source_id}:${prop_ids.sort().join('|')}`
+    if (!prop_summaries.has(key)) {
+      prop_summaries.set(key, calculate_summary(source_id, prop_ids))
     }
     return prop_summaries.get(key)
   }
 
-  const calculate_potential_gain = (summary) => {
-    return {
-      potential_gain: summary.total_won - wager_summary.total_won,
-      potential_wins: summary.wagers_won - wager_summary.wagers_won,
-      potential_roi_added:
-        ((summary.total_won - wager_summary.total_won) /
-          wager_summary.total_risk) *
-        100
+  const calculate_potential_gain = (summary) => ({
+    potential_gain: summary.total_won - wager_summary.total_won,
+    potential_wins: summary.wagers_won - wager_summary.wagers_won,
+    potential_roi_added:
+      ((summary.total_won - wager_summary.total_won) /
+        wager_summary.total_risk) *
+      100
+  })
+
+  lost_props.forEach((prop) => {
+    if (!props_by_source.has(prop.source_id)) {
+      props_by_source.set(prop.source_id, [])
     }
-  }
+    props_by_source.get(prop.source_id).push(prop)
+    const summary = calculate_summary(prop.source_id, [prop.selection_id])
+    prop_summaries.set(prop.selection_id, summary)
+  })
 
-  // Single prop analysis
-  for (const prop of lost_props) {
-    const summary = get_prop_summary([prop])
-    const { potential_gain, potential_wins, potential_roi_added } =
-      calculate_potential_gain(summary)
-
-    if (potential_gain > 0) {
-      one_prop.push({
-        name: prop.name,
-        potential_gain,
-        potential_wins,
-        potential_roi_added
-      })
-    }
-  }
-
+  // Use a Set for faster lookups
   const processed_combinations = new Set()
 
-  for (let i = 0; i < lost_props.length - 1; i++) {
-    for (let j = i + 1; j < lost_props.length; j++) {
-      const two_prop_key = [lost_props[i].name, lost_props[j].name]
-        .sort()
-        .join('|')
-      const individual_gains = [
-        get_prop_summary([lost_props[i]]).total_won,
-        get_prop_summary([lost_props[j]]).total_won
-      ]
+  // Analyze combinations for each source_id
+  for (const [source_id, source_props] of props_by_source.entries()) {
+    // Single prop analysis
+    source_props.forEach((prop) => {
+      const summary = get_prop_summary(source_id, [prop.selection_id])
+      const { potential_gain, potential_wins, potential_roi_added } =
+        calculate_potential_gain(summary)
 
-      if (!processed_combinations.has(two_prop_key)) {
-        processed_combinations.add(two_prop_key)
-        const two_prop_summary = get_prop_summary([
-          lost_props[i],
-          lost_props[j]
-        ])
-        const { potential_gain, potential_wins, potential_roi_added } =
-          calculate_potential_gain(two_prop_summary)
-
-        if (
-          potential_gain > 0 &&
-          two_prop_summary.total_won > Math.max(...individual_gains)
-        ) {
-          two_props.push({
-            name: `${lost_props[i].name} / ${lost_props[j].name}`,
-            potential_gain,
-            potential_wins,
-            potential_roi_added
-          })
-        }
+      if (potential_gain > 0) {
+        one_prop.push({
+          name: prop.name,
+          selection_id: prop.selection_id,
+          source_id,
+          potential_gain,
+          potential_wins,
+          potential_roi_added
+        })
       }
+    })
 
-      // Three prop combinations
-      for (let k = j + 1; k < lost_props.length; k++) {
-        const three_prop_key = [
-          lost_props[i].name,
-          lost_props[j].name,
-          lost_props[k].name
+    // Two-prop and three-prop combinations
+    for (let i = 0; i < source_props.length - 1; i++) {
+      for (let j = i + 1; j < source_props.length; j++) {
+        const two_prop_ids = [
+          source_props[i].selection_id,
+          source_props[j].selection_id
         ]
-          .sort()
-          .join('|')
-        if (!processed_combinations.has(three_prop_key)) {
-          processed_combinations.add(three_prop_key)
-          const three_prop_summary = get_prop_summary([
-            lost_props[i],
-            lost_props[j],
-            lost_props[k]
-          ])
-          const three_prop_result = calculate_potential_gain(three_prop_summary)
+        const two_prop_key = `${source_id}:${two_prop_ids.sort().join('|')}`
 
-          const two_prop_gains = [
-            get_prop_summary([lost_props[i], lost_props[j]]).total_won,
-            get_prop_summary([lost_props[i], lost_props[k]]).total_won,
-            get_prop_summary([lost_props[j], lost_props[k]]).total_won
+        if (!processed_combinations.has(two_prop_key)) {
+          processed_combinations.add(two_prop_key)
+          const two_prop_summary = get_prop_summary(source_id, two_prop_ids)
+          const { potential_gain, potential_wins, potential_roi_added } =
+            calculate_potential_gain(two_prop_summary)
+
+          const individual_gains = [
+            get_prop_summary(source_id, [source_props[i].selection_id])
+              .total_won,
+            get_prop_summary(source_id, [source_props[j].selection_id])
+              .total_won
           ]
 
           if (
-            three_prop_result.potential_gain > 0 &&
-            three_prop_summary.total_won >
-              Math.max(...two_prop_gains, ...individual_gains)
+            potential_gain > 0 &&
+            two_prop_summary.total_won > Math.max(...individual_gains)
           ) {
-            three_props.push({
-              name: `${lost_props[i].name} / ${lost_props[j].name} / ${lost_props[k].name}`,
-              ...three_prop_result
+            two_props.push({
+              name: [source_props[i].name, source_props[j].name].join(' / '),
+              selection_ids: two_prop_ids,
+              source_id,
+              potential_gain,
+              potential_wins,
+              potential_roi_added
             })
+          }
+
+          // Three-prop combinations
+          for (let k = j + 1; k < source_props.length; k++) {
+            const three_prop_ids = [
+              ...two_prop_ids,
+              source_props[k].selection_id
+            ]
+            const three_prop_key = `${source_id}:${three_prop_ids.sort().join('|')}`
+
+            if (!processed_combinations.has(three_prop_key)) {
+              processed_combinations.add(three_prop_key)
+              const three_prop_summary = get_prop_summary(
+                source_id,
+                three_prop_ids
+              )
+              const three_prop_result =
+                calculate_potential_gain(three_prop_summary)
+
+              const two_prop_gains = [
+                get_prop_summary(source_id, [
+                  source_props[i].selection_id,
+                  source_props[j].selection_id
+                ]).total_won,
+                get_prop_summary(source_id, [
+                  source_props[i].selection_id,
+                  source_props[k].selection_id
+                ]).total_won,
+                get_prop_summary(source_id, [
+                  source_props[j].selection_id,
+                  source_props[k].selection_id
+                ]).total_won
+              ]
+
+              if (
+                three_prop_result.potential_gain > 0 &&
+                three_prop_summary.total_won >
+                  Math.max(...two_prop_gains, ...individual_gains)
+              ) {
+                three_props.push({
+                  name: [
+                    source_props[i].name,
+                    source_props[j].name,
+                    source_props[k].name
+                  ].join(' / '),
+                  selection_ids: three_prop_ids,
+                  source_id,
+                  ...three_prop_result
+                })
+              }
+            }
           }
         }
       }
@@ -943,7 +1005,7 @@ const analyze_wagers = async ({
       const num_of_legs = wager.selections.length
       let wager_table_title = `[${num_of_legs} leg parlay] American odds: ${
         wager.parsed_odds > 0 ? '+' : ''
-      }${wager.parsed_odds} / ${potential_roi_gain.toFixed(2)}% roi`
+      }${Number(wager.parsed_odds).toFixed(0)} / ${potential_roi_gain.toFixed(2)}% roi`
 
       if (show_potential_gain) {
         wager_table_title += ` ($${wager.potential_win.toFixed(2)})`
@@ -953,7 +1015,7 @@ const analyze_wagers = async ({
         wager_table_title += ` / Bet Receipt: ${wager.bet_receipt_id}`
       }
 
-      wager_table_title += ` [Week ${wager.week}]`
+      // wager_table_title += ` [Week ${wager.week}]`
 
       const wager_table = new Table({ title: wager_table_title })
       for (const selection of wager.selections) {
