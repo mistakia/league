@@ -5,11 +5,11 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { sum, groupBy, constants } from '#libs-shared'
 import { is_main, getLeague } from '#libs-server'
-// import { job_types } from '#libs-shared/job-constants.mjs'
+import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
-const log = debug('generate-league-format-player-seasonslogs')
-debug.enable('generate-league-format-player-seasonslogs')
+const log = debug('generate-league-format-player-seasonlogs')
+debug.enable('generate-league-format-player-seasonlogs')
 
 const generate_league_format_player_seasonlogs = async ({
   year = constants.season.year,
@@ -118,7 +118,7 @@ const generate_league_format_player_seasonlogs = async ({
       .del()
     log(`Deleted ${deleted_count} excess player seasonlogs`)
 
-    log(`updated ${inserts.length} player regular seasons`)
+    log(`Updating ${inserts.length} player regular seasons`)
     await db('league_format_player_seasonlogs')
       .insert(inserts)
       .onConflict(['pid', 'year', 'league_format_hash'])
@@ -133,42 +133,27 @@ const main = async () => {
     const league = await getLeague({ lid })
     const { league_format_hash } = league
 
-    if (argv.all) {
-      const results = await db('league_format_player_gamelogs')
-        .join(
-          'nfl_games',
-          'nfl_games.esbid',
-          'league_format_player_gamelogs.esbid'
-        )
-        .select('nfl_games.year')
-        .where('nfl_games.seas_type', 'REG')
-        .where(
-          'league_format_player_gamelogs.league_format_hash',
-          league_format_hash
-        )
-        .groupBy('nfl_games.year')
-        .orderBy('nfl_games.year', 'asc')
-
-      let years = results.map((r) => r.year)
-      if (argv.start) {
-        years = years.filter((year) => year >= argv.start)
-      }
-
-      log(`generating player seasonlogs for ${years.length} years`)
-
-      for (const year of years) {
-        await generate_league_format_player_seasonlogs({
-          year,
-          league_format_hash
-        })
-      }
-    } else {
-      await generate_league_format_player_seasonlogs({
-        year: argv.year,
-        league_format_hash,
-        dry: argv.dry
-      })
-    }
+    await handle_season_args_for_script({
+      argv,
+      script_name: 'generate-league-format-player-seasonlogs',
+      script_function: generate_league_format_player_seasonlogs,
+      year_query: ({ seas_type = 'REG' }) =>
+        db('league_format_player_gamelogs')
+          .join(
+            'nfl_games',
+            'nfl_games.esbid',
+            'league_format_player_gamelogs.esbid'
+          )
+          .select('nfl_games.year')
+          .where('nfl_games.seas_type', seas_type)
+          .where(
+            'league_format_player_gamelogs.league_format_hash',
+            league_format_hash
+          )
+          .groupBy('nfl_games.year')
+          .orderBy('nfl_games.year', 'asc'),
+      script_args: { league_format_hash, dry: argv.dry }
+    })
   } catch (err) {
     error = err
     log(error)
