@@ -15,7 +15,7 @@ export default async function handle_season_args_for_script({
   post_all_function = null,
   seas_type = 'REG'
 }) {
-  const process_season_type = async ({ year, week, current_seas_type }) => {
+  const process_year_week = async ({ year, week, current_seas_type }) => {
     await script_function({
       year,
       week,
@@ -30,13 +30,13 @@ export default async function handle_season_args_for_script({
         for (const type of ['PRE', 'REG', 'POST']) {
           const weeks = await week_query({ year, seas_type: type })
           for (const { week } of weeks) {
-            await process_season_type({ year, week, current_seas_type: type })
+            await process_year_week({ year, week, current_seas_type: type })
           }
         }
       } else {
         const weeks = await week_query({ year, seas_type })
         for (const { week } of weeks) {
-          await process_season_type({
+          await process_year_week({
             year,
             week,
             current_seas_type: seas_type
@@ -46,14 +46,14 @@ export default async function handle_season_args_for_script({
     } else {
       if (seas_type === 'ALL') {
         for (const type of ['PRE', 'REG', 'POST']) {
-          await process_season_type({
+          await process_year_week({
             year,
             week: null,
             current_seas_type: type
           })
         }
       } else {
-        await process_season_type({
+        await process_year_week({
           year,
           week: null,
           current_seas_type: seas_type
@@ -82,32 +82,14 @@ export default async function handle_season_args_for_script({
     for (const year of years) {
       await process_year({ year })
     }
-
-    if (post_all_function) {
-      await post_all_function({ seas_type, ...script_args })
-    }
   } else if (argv.year) {
     await process_year({ year: argv.year })
-
-    if (post_all_function) {
-      await post_all_function({ seas_type, ...script_args })
-    }
   } else if (argv.week) {
-    if (seas_type === 'ALL') {
-      for (const type of ['PRE', 'REG', 'POST']) {
-        await process_season_type({
-          year: default_year,
-          week: argv.week,
-          current_seas_type: type
-        })
-      }
-    } else {
-      await process_season_type({
-        year: default_year,
-        week: argv.week,
-        current_seas_type: seas_type
-      })
-    }
+    await process_year_week({
+      year: default_year,
+      week: argv.week,
+      current_seas_type: seas_type
+    })
 
     if (post_year_function) {
       await post_year_function({
@@ -116,25 +98,23 @@ export default async function handle_season_args_for_script({
         ...script_args
       })
     }
-
-    if (post_all_function) {
-      await post_all_function({ seas_type, ...script_args })
-    }
   } else {
-    if (seas_type === 'ALL') {
-      for (const type of ['PRE', 'REG', 'POST']) {
-        await process_season_type({
-          year: default_year,
-          week: null,
-          current_seas_type: type
-        })
-      }
-    } else {
-      await process_season_type({
+    await process_year_week({
+      year: default_year,
+      week: null,
+      current_seas_type: seas_type
+    })
+
+    if (post_year_function) {
+      await post_year_function({
         year: default_year,
-        week: null,
-        current_seas_type: seas_type
+        seas_type,
+        ...script_args
       })
     }
+  }
+
+  if (post_all_function) {
+    await post_all_function({ ...script_args })
   }
 }

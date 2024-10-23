@@ -17,7 +17,7 @@ const generate_league_format_player_gamelogs = async ({
   league_format_hash,
   year = constants.season.year,
   week,
-  dry
+  dry = false
 }) => {
   if (!league_format_hash) {
     throw new Error('league_format_hash is required')
