@@ -9,6 +9,7 @@ export default async function handle_season_args_for_script({
   script_function,
   year_query,
   default_year = constants.season.year,
+  default_week = constants.season.week,
   script_args = {},
   week_query = null,
   post_year_function = null,
@@ -24,45 +25,26 @@ export default async function handle_season_args_for_script({
     })
   }
 
-  const process_year = async ({ year }) => {
-    if (week_query) {
-      if (seas_type === 'ALL') {
-        for (const type of ['PRE', 'REG', 'POST']) {
-          const weeks = await week_query({ year, seas_type: type })
-          for (const { week } of weeks) {
-            await process_year_week({ year, week, current_seas_type: type })
-          }
-        }
-      } else {
-        const weeks = await week_query({ year, seas_type })
-        for (const { week } of weeks) {
-          await process_year_week({
-            year,
-            week,
-            current_seas_type: seas_type
-          })
-        }
-      }
-    } else {
-      if (seas_type === 'ALL') {
-        for (const type of ['PRE', 'REG', 'POST']) {
-          await process_year_week({
-            year,
-            week: null,
-            current_seas_type: type
-          })
-        }
-      } else {
-        await process_year_week({
-          year,
-          week: null,
-          current_seas_type: seas_type
-        })
-      }
+  const process_year = async ({ year, current_seas_type }) => {
+    if (!week_query) {
+      throw new Error('week_query is required')
+    }
+
+    const weeks = await week_query({ year, seas_type: current_seas_type })
+    for (const { week } of weeks) {
+      await process_year_week({
+        year,
+        week,
+        current_seas_type
+      })
     }
 
     if (post_year_function) {
-      await post_year_function({ year, seas_type, ...script_args })
+      await post_year_function({
+        year,
+        seas_type: current_seas_type,
+        ...script_args
+      })
     }
   }
 
@@ -80,7 +62,13 @@ export default async function handle_season_args_for_script({
     log(`${script_name}: processing ${years.length} years`)
 
     for (const year of years) {
-      await process_year({ year })
+      if (seas_type === 'ALL') {
+        for (const type of ['PRE', 'REG', 'POST']) {
+          await process_year({ year, current_seas_type: type })
+        }
+      } else {
+        await process_year({ year, current_seas_type: seas_type })
+      }
     }
   } else if (argv.year) {
     await process_year({ year: argv.year })
@@ -101,7 +89,7 @@ export default async function handle_season_args_for_script({
   } else {
     await process_year_week({
       year: default_year,
-      week: null,
+      week: default_week,
       current_seas_type: seas_type
     })
 
