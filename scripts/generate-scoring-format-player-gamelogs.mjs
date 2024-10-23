@@ -16,9 +16,9 @@ debug.enable('generate-scoring-format-player-gamelogs')
 const generate_scoring_format_player_gamelogs = async ({
   scoring_format_hash,
   year = constants.season.year,
-  week,
+  week = constants.season.week,
   dry = false
-}) => {
+} = {}) => {
   if (!scoring_format_hash) {
     throw new Error('scoring_format_hash is required')
   }
