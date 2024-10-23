@@ -70,6 +70,14 @@ router.get('/?', async (req, res) => {
       team.division_odds = forecast.division_odds
       team.bye_odds = forecast.bye_odds
       team.championship_odds = forecast.championship_odds
+      team.playoff_odds_with_win = forecast.playoff_odds_with_win
+      team.division_odds_with_win = forecast.division_odds_with_win
+      team.bye_odds_with_win = forecast.bye_odds_with_win
+      team.championship_odds_with_win = forecast.championship_odds_with_win
+      team.playoff_odds_with_loss = forecast.playoff_odds_with_loss
+      team.division_odds_with_loss = forecast.division_odds_with_loss
+      team.bye_odds_with_loss = forecast.bye_odds_with_loss
+      team.championship_odds_with_loss = forecast.championship_odds_with_loss
     }
 
     if (req.auth && req.auth.userId) {
