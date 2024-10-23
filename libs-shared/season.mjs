@@ -75,8 +75,17 @@ export default class Season {
     return week > 0 && week <= this.finalWeek
   }
 
+  // TODO rename to last_year_with_stats
   get stats_season_year() {
     return this.week === 0 ? this.year - 1 : this.year
+  }
+
+  get last_week_with_stats() {
+    const week = this.nfl_seas_week
+    const day_of_week = this.now.day()
+    const completed_week =
+      day_of_week === 2 || day_of_week === 3 ? week - 1 : week
+    return Math.max(completed_week, 1)
   }
 
   get isWaiverPeriod() {

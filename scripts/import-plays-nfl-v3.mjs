@@ -86,17 +86,14 @@ const importPlaysForWeek = async ({
   force_update = false,
   token
 } = {}) => {
-  const current_week = Math.max(
-    dayjs().day() === 2 ? constants.season.week - 1 : constants.season.week,
-    1
-  )
-
-  week = week || current_week
-  const isCurrentWeek =
-    !force_update && year === constants.season.year && week === current_week
+  week = week || constants.season.last_week_with_stats
+  const is_current_week =
+    !force_update &&
+    year === constants.season.year &&
+    week === constants.season.last_week_with_stats
 
   log(
-    `importing plays for week ${week} ${year} ${seas_type} (force_update: ${force_update}, ignore_cache: ${ignore_cache}, isCurrentWeek: ${isCurrentWeek})`
+    `importing plays for week ${week} ${year} ${seas_type} (force_update: ${force_update}, ignore_cache: ${ignore_cache}, is_current_week: ${is_current_week})`
   )
 
   const games = await db('nfl_games').where({
