@@ -16,7 +16,7 @@ debug.enable('generate-league-format-player-gamelogs')
 const generate_league_format_player_gamelogs = async ({
   league_format_hash,
   year = constants.season.year,
-  week,
+  week = constants.season.week,
   dry = false
 }) => {
   if (!league_format_hash) {
