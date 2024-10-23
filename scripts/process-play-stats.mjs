@@ -1,138 +1,24 @@
-import dayjs from 'dayjs'
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { is_main, update_play, batch_insert, report_job } from '#libs-server'
+import { is_main, update_play, report_job } from '#libs-server'
 import db from '#db'
-import {
-  constants,
-  groupBy,
-  fixTeam,
-  calculateStatsFromPlayStats,
-  calculateDstStatsFromPlays,
-  getPlayFromPlayStats
-} from '#libs-shared'
+import { constants, groupBy, getPlayFromPlayStats } from '#libs-shared'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import {
+  get_play_stats,
+  get_play_type_ngs,
+  get_play_type_nfl,
+  is_successful_play
+} from '#libs-server/play-stats-utils.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process-play-stats')
 debug.enable('process-play-stats,update-play')
-const current_week = Math.max(
-  dayjs().day() === 2 || dayjs().day() === 3
-    ? constants.season.nfl_seas_week - 1
-    : constants.season.nfl_seas_week,
-  1
-)
 
-const is_successful_play = ({ yds_gained, yards_to_go, dwn }) => {
-  if (!dwn || !yards_to_go || !yds_gained) return null
-
-  if (dwn === 1) {
-    return yds_gained >= 0.4 * yards_to_go
-  } else if (dwn === 2) {
-    return yds_gained >= 0.6 * yards_to_go
-  } else if (dwn === 3 || dwn === 4) {
-    return yds_gained >= yards_to_go
-  }
-
-  return null
-}
-
-// TODO - add KNEE, SPKE
-const get_play_type_ngs = (play_type_ngs) => {
-  switch (play_type_ngs) {
-    case 'play_type_field_goal':
-    case 'play_type_xp':
-      return 'FGXP'
-
-    case 'play_type_kickoff':
-      return 'KOFF'
-
-    case 'play_type_pass':
-    case 'play_type_sack':
-      return 'PASS'
-
-    case 'play_type_punt':
-      return 'PUNT'
-
-    case 'play_type_rush':
-      return 'RUSH'
-
-    case 'play_type_two_point_conversion':
-      return 'CONV'
-
-    // penalty or timeout
-    case 'play_type_unknown':
-      return 'NOPL'
-
-    default:
-      return null
-  }
-}
-
-const get_play_type_nfl = (play_type_nfl) => {
-  switch (play_type_nfl) {
-    case 'FIELD_GOAL':
-    case 'XP_KICK':
-      return 'FGXP'
-
-    case 'KICK_OFF':
-      return 'KOFF'
-
-    case 'PASS':
-    case 'SACK':
-    case 'INTERCEPTION':
-      return 'PASS'
-
-    case 'PUNT':
-      return 'PUNT'
-
-    case 'RUSH':
-      return 'RUSH'
-
-    case 'PAT2':
-      return 'CONV'
-
-    case 'FREE_KICK':
-      return 'FREE'
-
-    case 'TIMEOUT':
-    case 'UNSPECFIED':
-    case 'PENALTY':
-    case 'COMMENT':
-    case 'GAME_START':
-    case 'END_GAME':
-    case 'END_QUARTER':
-      return 'NOPL'
-
-    default:
-      return null
-  }
-}
-
-const format_gamelog = ({ esbid, pid, stats, opp, pos, tm, year }) => {
-  const cleanedStats = Object.keys(stats)
-    .filter((key) => constants.fantasyStats.includes(key))
-    .reduce((obj, key) => {
-      obj[key] = stats[key]
-      return obj
-    }, {})
-
-  return {
-    esbid,
-    tm,
-    pid,
-    pos,
-    opp,
-    active: true,
-    year,
-    ...cleanedStats
-  }
-}
-
-const run = async ({
-  week = current_week,
+const process_play_stats = async ({
+  week = constants.season.last_week_with_stats,
   year = constants.season.year,
   seas_type = constants.season.nfl_seas_type,
   ignore_conflicts = false,
@@ -141,181 +27,7 @@ const run = async ({
   let play_update_count = 0
   let play_field_update_count = 0
 
-  const playStats = await db('nfl_play_stats')
-    .select(
-      'nfl_play_stats.*',
-      'nfl_plays.drive_play_count',
-      'nfl_plays.play_type_ngs',
-      'nfl_plays.play_type_nfl',
-      'nfl_plays.pos_team',
-      'nfl_games.h',
-      'nfl_games.v',
-      'nfl_games.esbid',
-      'nfl_games.year'
-    )
-    .join('nfl_games', 'nfl_play_stats.esbid', '=', 'nfl_games.esbid')
-    .join('nfl_plays', function () {
-      this.on('nfl_plays.esbid', '=', 'nfl_play_stats.esbid')
-      this.andOn('nfl_plays.playId', '=', 'nfl_play_stats.playId')
-    })
-    .where('nfl_plays.year', year)
-    .where('nfl_plays.week', week)
-    .where('nfl_play_stats.valid', true)
-    .where('nfl_plays.seas_type', seas_type)
-
-  const unique_esbids = [...new Set(playStats.map((p) => p.esbid))]
-  log(`loaded play stats for ${unique_esbids.length} games`)
-  log(unique_esbids.join(', '))
-
-  const player_gamelog_inserts = []
-  const missing = []
-
-  const play_stats_by_gsispid = groupBy(playStats, 'gsispid')
-  const gsispids = Object.keys(play_stats_by_gsispid)
-  const player_gsispid_rows = await db('player').whereIn('gsispid', gsispids)
-
-  log(
-    `loaded play stats for ${Object.keys(play_stats_by_gsispid).length} gsispid players`
-  )
-
-  const play_stats_by_gsisid = groupBy(playStats, 'gsisId')
-  const gsisids = Object.keys(play_stats_by_gsisid)
-  const player_gsisid_rows = await db('player').whereIn('gsisid', gsisids)
-
-  log(
-    `loaded play stats for ${Object.keys(play_stats_by_gsisid).length} gsisid players`
-  )
-
-  // track generated gamelogs by gsispids
-  const gamelog_gsispids = []
-
-  // generate player gamelogs
-  for (const gsispid of Object.keys(play_stats_by_gsispid)) {
-    if (gsispid === 'null') continue
-
-    const player_row = player_gsispid_rows.find((p) => p.gsispid === gsispid)
-    if (!player_row) {
-      log(`missing player for gsispid: ${gsispid}`)
-      continue
-    }
-
-    const playStat = play_stats_by_gsispid[gsispid].find((p) => p.clubCode)
-    if (!playStat) continue
-    const opp =
-      fixTeam(playStat.clubCode) === fixTeam(playStat.h)
-        ? fixTeam(playStat.v)
-        : fixTeam(playStat.h)
-    const stats = calculateStatsFromPlayStats(play_stats_by_gsispid[gsispid])
-    if (dry_run) continue
-
-    gamelog_gsispids.push(gsispid)
-    const player_gamelog = format_gamelog({
-      pid: player_row.pid,
-      pos: player_row.pos,
-      tm: fixTeam(playStat.clubCode),
-      opp,
-      esbid: playStat.esbid,
-      year: playStat.year,
-      stats
-    })
-    player_gamelog_inserts.push(player_gamelog)
-  }
-
-  for (const gsisid of Object.keys(play_stats_by_gsisid)) {
-    if (gsisid === 'null') continue
-
-    const player_row = player_gsisid_rows.find((p) => p.gsisid === gsisid)
-    if (!player_row) {
-      log(`missing player for gsisid: ${gsisid}`)
-      continue
-    }
-
-    // check to see if gamelog was already generated using gsispid
-    if (player_row.gsispid && gamelog_gsispids.includes(player_row.gsispid))
-      continue
-
-    const playStat = play_stats_by_gsisid[gsisid].find((p) => p.clubCode)
-    if (!playStat) continue
-    const opp =
-      fixTeam(playStat.clubCode) === fixTeam(playStat.h)
-        ? fixTeam(playStat.v)
-        : fixTeam(playStat.h)
-
-    const stats = calculateStatsFromPlayStats(play_stats_by_gsisid[gsisid])
-    if (dry_run) continue
-
-    const player_gamelog = format_gamelog({
-      pid: player_row.pid,
-      pos: player_row.pos,
-      tm: fixTeam(playStat.clubCode),
-      opp,
-      esbid: playStat.esbid,
-      year: playStat.year,
-      stats
-    })
-    player_gamelog_inserts.push(player_gamelog)
-  }
-
-  // generate defense gamelogs
-  for (const team of constants.nflTeams) {
-    const opponentPlays = playStats.filter((p) => {
-      if (fixTeam(p.h) !== team && fixTeam(p.v) !== team) {
-        return false
-      }
-
-      return (
-        (Boolean(p.pos_team) && fixTeam(p.pos_team) !== team) ||
-        p.play_type_nfl === 'PUNT' ||
-        p.play_type_nfl === 'KICK_OFF' ||
-        p.play_type_nfl === 'XP_KICK'
-      )
-    })
-    if (!opponentPlays.length) continue
-    const play = opponentPlays[0]
-    const opp = fixTeam(play.h) === team ? play.v : play.h
-    const groupedPlays = groupBy(opponentPlays, 'playId')
-    const formattedPlays = []
-    for (const playId in groupedPlays) {
-      const playStats = groupedPlays[playId]
-      const p = playStats[0]
-      formattedPlays.push({
-        pos_team: p.pos_team,
-        drive_play_count: p.drive_play_count,
-        play_type_nfl: p.play_type_nfl,
-        playStats
-      })
-    }
-    const stats = calculateDstStatsFromPlays(formattedPlays, team)
-    if (dry_run) continue
-    const player_gamelog = format_gamelog({
-      pid: team,
-      pos: 'DST',
-      tm: team,
-      esbid: play.esbid,
-      year: play.year,
-      opp: fixTeam(opp),
-      stats
-    })
-    player_gamelog_inserts.push(player_gamelog)
-  }
-
-  log(`Could not locate ${missing.length} players`)
-  missing.forEach((m) =>
-    log(`could not find player: ${m.pname} / ${m.current_nfl_team}`)
-  )
-
-  if (player_gamelog_inserts.length) {
-    await batch_insert({
-      items: player_gamelog_inserts,
-      save: (items) =>
-        db('player_gamelogs')
-          .insert(items)
-          .onConflict(['esbid', 'pid', 'year'])
-          .merge(),
-      batch_size: 500
-    })
-    log(`Updated ${player_gamelog_inserts.length} gamelogs`)
-  }
+  const playStats = await get_play_stats({ year, week, seas_type })
 
   log('Updating play row columns: off, def')
 
@@ -340,6 +52,7 @@ const run = async ({
     .where('nfl_plays.year', year)
     .where('nfl_plays.week', week)
     .where('nfl_plays.seas_type', seas_type)
+
   for (const play of plays) {
     const off = play.pos_team
     if (!off) continue
@@ -375,6 +88,10 @@ const run = async ({
       ignore_conflicts
     })
   }
+
+  const play_stats_by_gsisid = groupBy(playStats, 'gsisId')
+  const gsisids = Object.keys(play_stats_by_gsisid)
+  const player_gsisid_rows = await db('player').whereIn('gsisid', gsisids)
 
   log('Updating play row pid columns')
   const playStatsByEsbid = groupBy(playStats, 'esbid')
@@ -522,7 +239,13 @@ const main = async () => {
           )
           for (const { week } of weeks) {
             log(`processing plays for week ${week} in ${year} (${seas_type})`)
-            await run({ year, week, seas_type, dry_run, ignore_conflicts })
+            await process_play_stats({
+              year,
+              week,
+              seas_type,
+              dry_run,
+              ignore_conflicts
+            })
           }
         }
       }
@@ -534,10 +257,16 @@ const main = async () => {
       log(`processing plays for ${year} ${seas_type}: ${weeks.length} weeks`)
       for (const { week } of weeks) {
         log(`processing plays for week ${week} in ${year}`)
-        await run({ year, week, seas_type, dry_run, ignore_conflicts })
+        await process_play_stats({
+          year,
+          week,
+          seas_type,
+          dry_run,
+          ignore_conflicts
+        })
       }
     } else {
-      await run({
+      await process_play_stats({
         year: argv.year,
         week: argv.week,
         seas_type: argv.seas_type,
@@ -562,4 +291,4 @@ if (is_main(import.meta.url)) {
   main()
 }
 
-export default run
+export default process_play_stats

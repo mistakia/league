@@ -20,19 +20,14 @@ const importPlaysForWeek = async ({
   ignore_cache = false,
   throttle = 0
 } = {}) => {
-  const current_week = Math.max(
-    dayjs().day() === 2 ? constants.season.week - 1 : constants.season.week,
-    1
-  )
-
   if (week === null || week === undefined) {
-    week = current_week
+    week = constants.season.last_week_with_stats
   }
-  const isCurrentWeek =
+  const is_current_week =
     year === constants.season.year && week === constants.season.nfl_seas_week
 
   log(
-    `importing plays for week ${week} ${year} ${seas_type} (force_update: ${force_update}, isCurrentWeek: ${isCurrentWeek})`
+    `importing plays for week ${week} ${year} ${seas_type} (force_update: ${force_update}, is_current_week: ${is_current_week})`
   )
 
   // get list of games for this week
@@ -72,7 +67,7 @@ const importPlaysForWeek = async ({
 
     const data = await ngs.getPlays({
       esbid,
-      ignore_cache: isCurrentWeek || ignore_cache
+      ignore_cache: is_current_week || ignore_cache
     })
 
     if (!data || !data.plays) {
