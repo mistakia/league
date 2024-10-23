@@ -32,7 +32,7 @@ jobs:
 
       - name: yarn install
         run: |
-          yarn install
+          YARN_CHECKSUM_BEHAVIOR=update yarn install
 
       - name: yarn test
         env:
