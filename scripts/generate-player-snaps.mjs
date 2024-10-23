@@ -6,6 +6,7 @@ import db from '#db'
 import { constants, groupBy } from '#libs-shared'
 import { is_main, batch_insert } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
+import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('generate-player-snaps')
@@ -379,112 +380,28 @@ const generate_player_snaps_for_week = async ({
   }
 }
 
-const generate_player_snaps_for_year = async ({
-  year = constants.season.year,
-  seas_type = 'REG',
-  dry_run = false
-} = {}) => {
-  const weeks = await db('nfl_games')
-    .select('week')
-    .where({ year, seas_type })
-    .groupBy('week')
-    .orderBy('week', 'asc')
-
-  log(`processing plays for ${weeks.length} weeks in ${year} (${seas_type})`)
-  for (const { week } of weeks) {
-    log(`loading plays for week: ${week} (${seas_type})`)
-    await generate_player_snaps_for_week({
-      year,
-      week,
-      seas_type,
-      dry_run
-    })
-  }
-}
-
-const generate_all_player_snaps = async ({
-  start,
-  end,
-  seas_type = 'ALL',
-  dry_run = false
-} = {}) => {
-  const nfl_games_result = await db('nfl_games')
-    .select('year')
-    .groupBy('year')
-    .orderBy('year', 'asc')
-
-  let years = nfl_games_result.map((i) => i.year)
-  if (start) {
-    years = years.filter((year) => year >= start)
-  }
-  if (end) {
-    years = years.filter((year) => year <= end)
-  }
-
-  for (const year of years) {
-    const is_seas_type_all = seas_type.toLowerCase() === 'all'
-    log(`loading plays for year: ${year}, seas_type: ${seas_type}`)
-
-    if (is_seas_type_all || seas_type.toLowerCase() === 'pre') {
-      await generate_player_snaps_for_year({
-        year,
-        seas_type: 'PRE',
-        dry_run
-      })
-    }
-
-    if (is_seas_type_all || seas_type.toLowerCase() === 'reg') {
-      await generate_player_snaps_for_year({
-        year,
-        seas_type: 'REG',
-        dry_run
-      })
-    }
-
-    if (is_seas_type_all || seas_type.toLowerCase() === 'post') {
-      await generate_player_snaps_for_year({
-        year,
-        seas_type: 'POST'
-      })
-    }
-  }
-}
-
 const main = async () => {
   let error
   try {
-    if (argv.all) {
-      await generate_all_player_snaps({
-        start: argv.start,
-        end: argv.end,
-        seas_type: argv.seas_type,
-        dry_run: argv.dry
-      })
-    } else if (argv.year) {
-      if (argv.week) {
-        await generate_player_snaps_for_week({
-          year: argv.year,
-          week: argv.week,
-          seas_type: argv.seas_type,
-          dry_run: argv.dry
-        })
-      } else {
-        await generate_player_snaps_for_year({
-          year: argv.year,
-          seas_type: argv.seas_type,
-          dry_run: argv.dry
-        })
-      }
-    } else {
-      log('start')
-      await generate_player_snaps_for_week({
-        year: argv.year,
-        week: argv.week,
-        seas_type: argv.seas_type,
-        dry_run: argv.dry
-      })
-      log('end')
-    }
+    await handle_season_args_for_script({
+      argv,
+      script_name: 'generate-player-snaps',
+      script_function: generate_player_snaps_for_week,
+      year_query: ({ seas_type = 'REG' }) =>
+        db('nfl_games')
+          .select('year')
+          .where({ seas_type })
+          .groupBy('year')
+          .orderBy('year', 'asc'),
+      week_query: ({ year, seas_type = 'REG' }) =>
+        db('nfl_games')
+          .select('week')
+          .where({ year, seas_type })
+          .groupBy('week')
+          .orderBy('week', 'asc'),
+      script_args: { dry_run: argv.dry },
+      seas_type: argv.seas_type || 'ALL'
+    })
   } catch (err) {
     error = err
     log(error)

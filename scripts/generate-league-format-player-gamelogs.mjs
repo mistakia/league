@@ -5,6 +5,7 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { constants } from '#libs-shared'
 import { is_main, getLeague, get_league_format } from '#libs-server'
+import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
 import calculate_points_added from './calculate-points-added.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -89,47 +90,31 @@ const generate_league_format_player_gamelogs = async ({
 const main = async () => {
   let error
   try {
-    const lid = argv.lid
+    const lid = argv.lid || 1
     const league = await getLeague({ lid })
     const { league_format_hash } = league
 
-    if (argv.all) {
-      const results = await db('player_gamelogs')
-        .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
-        .select('nfl_games.year')
-        .where('nfl_games.seas_type', 'REG')
-        .groupBy('nfl_games.year')
-        .orderBy('nfl_games.year', 'asc')
-
-      let years = results.map((r) => r.year)
-      if (argv.start) {
-        years = years.filter((year) => year >= argv.start)
-      }
-
-      for (const year of years) {
-        const weeks = await db('player_gamelogs')
+    await handle_season_args_for_script({
+      argv,
+      script_name: 'generate-league-format-player-gamelogs',
+      script_function: generate_league_format_player_gamelogs,
+      year_query: ({ seas_type = 'REG' }) =>
+        db('player_gamelogs')
+          .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
+          .select('nfl_games.year')
+          .where('nfl_games.seas_type', seas_type)
+          .groupBy('nfl_games.year')
+          .orderBy('nfl_games.year', 'asc'),
+      week_query: ({ year, seas_type = 'REG' }) =>
+        db('player_gamelogs')
           .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
           .select('nfl_games.week')
-          .where('nfl_games.seas_type', 'REG')
+          .where('nfl_games.seas_type', seas_type)
           .where('nfl_games.year', year)
           .groupBy('nfl_games.week')
-          .orderBy('nfl_games.week', 'asc')
-        for (const { week } of weeks) {
-          await generate_league_format_player_gamelogs({
-            league_format_hash,
-            year,
-            week
-          })
-        }
-      }
-    } else {
-      await generate_league_format_player_gamelogs({
-        league_format_hash,
-        year: argv.year,
-        week: argv.week,
-        dry: argv.dry
-      })
-    }
+          .orderBy('nfl_games.week', 'asc'),
+      script_args: { league_format_hash, dry: argv.dry }
+    })
   } catch (err) {
     error = err
     log(error)
