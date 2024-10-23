@@ -2,21 +2,24 @@
 
 #### Table of Contents
 
+- [Terminology](#terminology)
+- [Overview](#overview)
 - [Create New View](#create-new-view)
-  - [Examples Views](#examples-views)
-    - [Total targets on first series of a drive in 2023](#total-targets-on-first-series-of-a-drive-in-2023)
-    - [Total targets on third and fourth down in 2022 and 2023](#total-targets-on-third-and-fourth-down-in-2022-and-2023)
-    - [Receiving Yards from 1 WR Formations in 2023](#receiving-yards-from-1-wr-formations-in-2023)
-    - [Career Receiving Yards & Age of players under 23 years old](#career-receiving-yards--age-of-players-under-23-years-old)
-    - [Receiving Yards in Week 1 (Column for Each Year between 2019-2023)](#receiving-yards-in-week-1-column-for-each-year-between-2019-2023)
-    - [Total Receiving Yards from Week 1-3 Between 2021-2023](#total-receiving-yards-from-week-1-3-between-2021-2023)
-    - [Most Receptions over 60 yards since 2021](#most-receptions-over-60-yards-since-2021)
-    - [Receiving Yards & Touchdowns from players with an overall ESPN open score over 80 in 2023](#receiving-yards--touchdowns-from-players-with-an-overall-espn-open-score-over-80-in-2023)
-    - [Players with over 80 receiving yards in Week 1 and 1200+ receiving yards in 2023](#players-with-over-80-receiving-yards-in-week-1-and-1200-receiving-yards-in-2023)
-    - [Receiving yards from non first read targets](#receiving-yards-from-non-first-read-targets)
-    - [Receiving yards in the first quarter in 2023](#receiving-yards-in-the-first-quarter-in-2023)
-    - [Passing yards while the winning percentage is less than 75% in 2022 and 2023](#passing-yards-while-the-winning-percentage-is-less-than-75-in-2022-and-2023)
-- [Share / Export View](#share--export-view)
+- [Share View](#share-view)
+- [Export View](#export-view)
+- [Examples Views](#examples-views)
+  - [Total targets on first series of a drive in 2023](#total-targets-on-first-series-of-a-drive-in-2023)
+  - [Total targets on third and fourth down in 2022 and 2023](#total-targets-on-third-and-fourth-down-in-2022-and-2023)
+  - [Receiving Yards from 1 WR Formations in 2023](#receiving-yards-from-1-wr-formations-in-2023)
+  - [Career Receiving Yards & Age of players under 23 years old](#career-receiving-yards--age-of-players-under-23-years-old)
+  - [Receiving Yards in Week 1 (Column for Each Year between 2019-2023)](#receiving-yards-in-week-1-column-for-each-year-between-2019-2023)
+  - [Total Receiving Yards from Week 1-3 Between 2021-2023](#total-receiving-yards-from-week-1-3-between-2021-2023)
+  - [Most Receptions over 60 yards since 2021](#most-receptions-over-60-yards-since-2021)
+  - [Receiving Yards & Touchdowns from players with an overall ESPN open score over 80 in 2023](#receiving-yards--touchdowns-from-players-with-an-overall-espn-open-score-over-80-in-2023)
+  - [Players with over 80 receiving yards in Week 1 and 1200+ receiving yards in 2023](#players-with-over-80-receiving-yards-in-week-1-and-1200-receiving-yards-in-2023)
+  - [Receiving yards from non first read targets](#receiving-yards-from-non-first-read-targets)
+  - [Receiving yards in the first quarter in 2023](#receiving-yards-in-the-first-quarter-in-2023)
+  - [Passing yards while the winning percentage is less than 75% in 2022 and 2023](#passing-yards-while-the-winning-percentage-is-less-than-75-in-2022-and-2023)
 
 </div>
 
@@ -26,19 +29,47 @@ Start off by familiarizing yourself with the available metrics and play by play 
 
 If there's something you'd like to see, or if coverage for a data point is lacking, let us know on [Discord](https://discord.gg/xo) or [submit a stat or improvement on Github](https://github.com/mistakia/league/issues/new?assignees=&labels=kind%2Fstat%2C+status%2Fready&projects=&template=submit-a-stat.md&title=Add+stat%3A+%3CSTAT+NAME%3E).
 
+## Terminology
+
+| Term                 | Definition                                                                                                                                                                             |
+| -------------------- | -------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `View`               | A collection of fields (columns), filters, and sorting options.                                                                                                                        |
+| `Field`              | A data point or metric. Shown as a column in the view.                                                                                                                                 |
+| `Field Parameters`   | Additional options that modify how a field is calculated or displayed.                                                                                                                 |
+| `Filter`             | A condition that narrows down the rows in the view. Can be confused with `Field Parameters`. Filters narrow down the rows whereas field parameters narrow down the values in a column. |
+| `View Controller`    | Lists the current view, search for views, and allows you to add/remove views.                                                                                                          |
+| `Columns Controller` | Lists the current fields (columns) used in the view and allows you to add/remove fields.                                                                                               |
+| `Filters Controller` | Lists the current fields used in the view as filters and allows you to add/remove filters.                                                                                             |
+| `View Menu`          | Contains options for sharing and exporting data from the view.                                                                                                                         |
+
+## Overview
+
+- Each row in the view is a player or a team. To filter to just teams, select `Team` or `DST` in the `Position` field in the `Filters Controller`.
+- Each column in the view is a `Field`. To change the columns displayed in the view, open the `Columns Controller` and add or remove `Fields`. To modify the value shown in a given column, expand the `Field` in the `Columns Controller` and modify the field parameters.
+
 ## Create New View
 
-1. Create a view by clicking on the view controller that lists the current view (top left) and selecting `+ Add View`.
-2. Define the columns and/or filters for your new view.
-   1. Add columns by opening the columns controller.
-      1. Columns & Filters will be organized into categories.
-      2. Hover over a column you'd like to add and click `+`.
-      3. Play by Play columns will have additional parameters you can modify.
-         1. Hover over the selected column under the `shown in table` section (at the top) and click the down arrow to expand and view the available parameters.
-      4. Columns in the `shown in table` section can be dragged and dropped to reorder the columns.
-   2. As you add/remove columns and/or filters, select `Apply` to update the view and display results.
+1. Create a view by clicking on the `View Controller` that lists the current view (top left) and selecting `+ Add View`.
+2. Add columns by opening the `Columns Controller`.
+3. Hover over a `Field` you'd like to add and click `+`.
+4. Fields calculated from play by play data will have additional parameters you can modify.
+   1. Hover over the selected field under the `shown in table` section (at the top) and click the down arrow to expand and view the available parameters.
+5. Fields in the `shown in table` section can be dragged and dropped to reorder the columns.
+6. As you make changes, select `Apply` to update the view and display results.
 
-### Examples Views
+## Share View
+
+For logged out users, you can obtain a link to the current state of a view by opening the `View Menu` (ellipsis (`...`) button in the top left) and selecting `Copy Link`. This link can be shared with anyone, allowing them to view the same view in its current state. If you make any changes, you'll have to grab a new link.
+
+For logged in users, you can save the current view by clicking `save` in the top right corner of the table.
+
+## Export View
+
+You can download the data from a view in either CSV or JSON format. You can directly download the data by opening the `View Menu` (ellipsis (`...`) button in the top left) and selecting `Export CSV` or `Export JSON`.
+
+Alternatively for any saved views, you can grab a API URL endpoint that will return the data for the view in CSV or JSON format. The links will be available in the `View Menu`.
+
+## Examples Views
 
 #### Total targets on first series of a drive in 2023
 
@@ -47,7 +78,7 @@ If there's something you'd like to see, or if coverage for a data point is lacki
 ```
 - add view
 - open columns controller
-- filter for `targets`, scroll and select `Targets (By Play)` it will be under the `Receiving` category
+- search for `targets` or scroll and select `Targets (By Play)` it will be under the `Receiving` category
 - once selected the column will appear in the `shown in table` section at the top of the columns controller
 - hover over `Targets (By Play)` in the `shown in the table` section to expand it and display available parameters
 - set the column parameters
@@ -64,7 +95,7 @@ If there's something you'd like to see, or if coverage for a data point is lacki
 ```
 - add view
 - open columns controller
-- filter for `targets`, scroll and select `Targets (By Play)` it will be under the `Receiving` category
+- search for `targets`, scroll and select `Targets (By Play)` it will be under the `Receiving` category
 - once selected the column will appear in the `shown in table` section at the top of the columns controller
 - hover over `Targets (By Play)` in the `shown in the table` section to expand it and display available parameters
 - set column parameters
@@ -85,13 +116,13 @@ TODO
 ```
 - add view
 - open columns controller
-- filter for `receiving yards`, scroll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
-- filter for `age`, scroll and select `Age`
+- search for `receiving yards`, scroll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
+- search for `age`, scroll and select `Age`
 - once selected the column will appear in the `shown in table` section at the top of the columns controller
 - select apply (apply the column to the view)
 - hit `esc` or click away from the columns controller to close it
 - open filters controller
-- filter for `Age`, scrolle and select `Age`
+- search for `Age`, scrolle and select `Age`
   - set the operator to `Less than or equal`
   - set the value to `23`
 - select apply (apply the filter to the view)
@@ -105,7 +136,7 @@ TODO
 ```
 - add view
 - open columns controller
-- filter for `receiving yards`, scroll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
+- search for `receiving yards`, scroll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
   - add the column 5 times by repeatedly clicking the `+` button
 - once selected the column will appear in the `shown in table` section at the top of the columns controller
   - there should be 5 `Receiving Yards (By Play)` columns
@@ -115,7 +146,7 @@ TODO
   - `Week` to `1`
 - repeat the above for the other 4 columns, setting the year to `2022`, `2021`, `2020`, `2019`
 - additionally add another column for cumulative receiving yards across those years from week 1 games
-- filter for `receiving yards`, scroll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
+- search for `receiving yards`, scroll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
 - hover over the newly added `Receiving Yards (By Play)` in the `shown in the table` section to expand it and display available parameters
 - set column parameters
   - `Year` to `2019`, `2020`, `2021`, `2022`, `2023`
@@ -132,7 +163,7 @@ TODO
 ```
 - add view
 - open columns controller
-- filter for `receiving yards`, scroll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
+- search for `receiving yards`, scroll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
 - once selected the column will appear in the `shown in table` section at the top of the columns controller
 - hover over the `Receiving Yards (By Play)` in the `shown in the table` section to expand it and display available parameters
 - set column parameters
@@ -149,7 +180,7 @@ TODO
 ```
 - add view
 - open columns controller
-- filter for `receptions`, scroll and select `Receptions (By Play)` it will be under the `Receiving` category
+- search for `receptions`, scroll and select `Receptions (By Play)` it will be under the `Receiving` category
 - once selected the column will appear in the `shown in table` section at the top of the columns controller
 - hover over the `Receptions (By Play)` in the `shown in the table` section to expand it and display available parameters
 - set column parameters
@@ -166,23 +197,23 @@ TODO
 ```
 - add view
 - open columns controller
-- filter for `receiving yards`, scroll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
+- search for `receiving yards`, scroll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
 - once selected the column will appear in the `shown in table` section at the top of the columns controller
 - hover over `Receiving Yards (By Play)` in the `shown in the table` section to expand it and display available parameters
 - set column parameters
   - `Year` to `2023`
-- filter for `receiving touchdowns`, scroll and select `Receiving Touchdowns (By Play)` it will be under the `Receiving` category
+- search for `receiving touchdowns`, scroll and select `Receiving Touchdowns (By Play)` it will be under the `Receiving` category
 - hover over `Receiving Touchdowns (By Play)` in the `shown in the table` section to expand it and display available parameters
 - set column parameters
   - `Year` to `2023`
-- filter for `espn open score`, scroll and select `ESPN Open Score` it will be under the `ESPN` category
+- search for `espn open score`, scroll and select `ESPN Open Score` it will be under the `ESPN` category
 - hover over `ESPN Open Score` in the `shown in the table` section to expand it and display available parameters
 - set column parameters
   - `Year` to `2023`
 - apply changes
 - hit `esc` or click away from the columns controller to close it
 - open filter controller
-- filter for `espn open score`, scroll and select `ESPN Open Score` it will be under the `ESPN` category
+- search for `espn open score`, scroll and select `ESPN Open Score` it will be under the `ESPN` category
   - set the operator to `Greater Than or Equal`
   - set the value to `80`
   - expand filter to view available parameters
@@ -199,20 +230,20 @@ TODO
 ```
 - add view
 - open columns controller
-- filter for `receiving yards`, scroll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
+- search for `receiving yards`, scroll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
 - once selected the column will appear in the `shown in table` section at the top of the columns controller
 - hover over the `Receiving Yards (By Play)` in the `shown in the table` section to expand it and display available parameters
 - set column parameters
   - `Year` to `2023`
   - `Week` to `1`
-- filter for `receiving yards`, scoll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
+- search for `receiving yards`, scoll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
 - hover over the new `Receiving Yards (By Play)` (second one) in the `shown in the table` section to expand it and display available parameters
 - set column parameters
   - `Year` to `2023`
 - apply changes
 - hit `esc` or click away from the columns controller to close it
 - open filters controller
-- filter for `receiving yards`, scroll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
+- search for `receiving yards`, scroll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
   - set the operator to `Greater Than or Equal`
   - set the value to `80`
   - expand filter to view available parameters
@@ -220,7 +251,7 @@ TODO
     - `Year` to `2023`
     - `Week` to `1`
   - `Recv Yds` to `80` to `99`
-- add another filter for `receiving yards`, scroll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
+- add another search for `receiving yards`, scroll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
   - set the operator to `Greater Than or Equal`
   - set the value to `1200`
   - expand filter to view available parameters
@@ -241,7 +272,7 @@ TODO
 ```
 - add view
 - open columns controller
-- filter for `receiving yards`, scroll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
+- search for `receiving yards`, scroll and select `Receiving Yards (By Play)` it will be under the `Receiving` category
 - once selected the column will appear in the `shown in table` section at the top of the columns controller
 - hover over the new `Receiving Yards (By Play)` (second one) in the `shown in the table` section to expand it and display available parameters
 - set column parameters
@@ -254,11 +285,5 @@ TODO
 #### Passing yards while the winning percentage is less than 75% in 2022 and 2023
 
 TODO
-
-## Share / Export View
-
-For logged out users, you can obtain a link to the current state of a view by clicking on the ellipsis (`...`) button in the top right corner of the table and selecting `Copy Link`. This link can be shared with anyone, allowing them to view the same view in its current state. If you make any changes, you'll have to grab a new link.
-
-For logged in users, you can save the current view by clicking `save` in the top right corner of the table.
 
 </div>
