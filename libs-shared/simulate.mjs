@@ -4,7 +4,13 @@ import groupBy from './group-by.mjs'
 
 const SIMULATIONS = 10000
 
-export default function simulate({ teams, matchups, rosters }) {
+export default function simulate({
+  teams,
+  matchups,
+  rosters,
+  force_win_tid = null,
+  force_loss_tid = null
+}) {
   const result = {}
 
   for (const tid in rosters) {
@@ -77,6 +83,26 @@ export default function simulate({ teams, matchups, rosters }) {
         // tie
         standings[matchup.hid].ties += 1
         standings[matchup.aid].ties += 1
+      }
+    }
+
+    // Modify the first matchup if force_win_tid or force_loss_tid is provided
+    if (force_win_tid || force_loss_tid) {
+      const first_matchup = matchups[0]
+      if (force_win_tid) {
+        standings[force_win_tid].wins += 1
+        standings[
+          force_win_tid === first_matchup.hid
+            ? first_matchup.aid
+            : first_matchup.hid
+        ].losses += 1
+      } else if (force_loss_tid) {
+        standings[force_loss_tid].losses += 1
+        standings[
+          force_loss_tid === first_matchup.hid
+            ? first_matchup.aid
+            : first_matchup.hid
+        ].wins += 1
       }
     }
 
