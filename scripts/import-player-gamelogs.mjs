@@ -254,6 +254,7 @@ const import_all_player_gamelogs = async ({
 const main = async () => {
   let error
   try {
+    // TODO update and use handle_season_args_for_script
     if (argv.all) {
       await import_all_player_gamelogs({
         start: argv.start,

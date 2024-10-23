@@ -5,6 +5,7 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { constants } from '#libs-shared'
 import { is_main, getLeague } from '#libs-server'
+import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
 import calculate_points from './calculate-points.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -15,9 +16,9 @@ debug.enable('generate-scoring-format-player-gamelogs')
 const generate_scoring_format_player_gamelogs = async ({
   scoring_format_hash,
   year = constants.season.year,
-  week = constants.season.week,
+  week,
   dry = false
-} = {}) => {
+}) => {
   if (!scoring_format_hash) {
     throw new Error('scoring_format_hash is required')
   }
@@ -27,7 +28,6 @@ const generate_scoring_format_player_gamelogs = async ({
     week,
     scoring_format_hash
   })
-
   const inserts = []
   for (const pid in result.players) {
     const player = result.players[pid]
@@ -77,6 +77,7 @@ const generate_scoring_format_player_gamelogs = async ({
     log(
       `Deleted ${deleted_count} excess player gamelogs for scoring_format ${scoring_format_hash} in week ${week} ${year}`
     )
+
     await db('scoring_format_player_gamelogs')
       .insert(inserts)
       .onConflict(['pid', 'esbid', 'scoring_format_hash'])
@@ -102,43 +103,28 @@ const main = async () => {
       throw new Error('scoring_format_hash is required')
     }
 
-    if (argv.all) {
-      const results = await db('player_gamelogs')
-        .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
-        .select('nfl_games.year')
-        .where('nfl_games.seas_type', 'REG')
-        .groupBy('nfl_games.year')
-        .orderBy('nfl_games.year', 'asc')
-
-      let years = results.map((r) => r.year)
-      if (argv.start) {
-        years = years.filter((year) => year >= argv.start)
-      }
-
-      for (const year of years) {
-        const weeks = await db('player_gamelogs')
+    await handle_season_args_for_script({
+      argv,
+      script_name: 'generate-scoring-format-player-gamelogs',
+      script_function: generate_scoring_format_player_gamelogs,
+      year_query: ({ seas_type = 'REG' }) =>
+        db('player_gamelogs')
+          .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
+          .select('nfl_games.year')
+          .where('nfl_games.seas_type', seas_type)
+          .groupBy('nfl_games.year')
+          .orderBy('nfl_games.year', 'asc'),
+      week_query: ({ year, seas_type = 'REG' }) =>
+        db('player_gamelogs')
           .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
           .select('nfl_games.week')
-          .where('nfl_games.seas_type', 'REG')
+          .where('nfl_games.seas_type', seas_type)
           .where('nfl_games.year', year)
           .groupBy('nfl_games.week')
-          .orderBy('nfl_games.week', 'asc')
-        for (const { week } of weeks) {
-          await generate_scoring_format_player_gamelogs({
-            scoring_format_hash,
-            year,
-            week
-          })
-        }
-      }
-    } else {
-      await generate_scoring_format_player_gamelogs({
-        scoring_format_hash,
-        year: argv.year,
-        week: argv.week,
-        dry: argv.dry
-      })
-    }
+          .orderBy('nfl_games.week', 'asc'),
+      script_args: { scoring_format_hash, dry: argv.dry },
+      seas_type: 'REG'
+    })
   } catch (err) {
     error = err
     log(error)
