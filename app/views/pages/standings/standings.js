@@ -7,6 +7,7 @@ import Toolbar from '@mui/material/Toolbar'
 import SelectYear from '@components/select-year'
 import { toPercent, constants } from '@libs-shared'
 import PageLayout from '@layouts/page'
+import ProbabilityLeverageChart from '@components/probability-leverage-chart/probability-leverage-chart'
 
 function Divider({ title }) {
   return <div className='table__row table__divider sticky__column'>{title}</div>
@@ -92,7 +93,7 @@ function Standings({ teams, title, year, is_current_year }) {
           {is_current_year && (
             <div className='table__cell metric'>Champ Odds</div>
           )}
-          <div className='table__cell metric'>DOI</div>
+          <div className='table__cell metric'>Draft Index</div>
         </div>
         {overallRows}
       </div>
@@ -210,6 +211,9 @@ export default function StandingsPage({
       <SelectYear />
       <Overall {...{ standings, year, is_current_year }} />
       {divisions}
+      {is_current_year && (
+        <ProbabilityLeverageChart teams={standings.teams.toList()} />
+      )}
     </div>
   )
 
