@@ -43,6 +43,14 @@ router.get('/?', async (req, res) => {
         'bye_odds',
         'division_odds',
         'championship_odds',
+        'playoff_odds_with_win',
+        'division_odds_with_win',
+        'bye_odds_with_win',
+        'championship_odds_with_win',
+        'playoff_odds_with_loss',
+        'division_odds_with_loss',
+        'bye_odds_with_loss',
+        'championship_odds_with_loss',
         'tid'
       )
       .from(sub_query)

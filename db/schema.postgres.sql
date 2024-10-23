@@ -3460,7 +3460,15 @@ CREATE TABLE public.league_team_forecast (
     division_odds numeric(5,4) NOT NULL,
     bye_odds numeric(5,4) NOT NULL,
     championship_odds numeric(5,4) NOT NULL,
-    "timestamp" integer NOT NULL
+    "timestamp" integer NOT NULL,
+    playoff_odds_with_win numeric(5,4),
+    division_odds_with_win numeric(5,4),
+    bye_odds_with_win numeric(5,4),
+    championship_odds_with_win numeric(5,4),
+    playoff_odds_with_loss numeric(5,4),
+    division_odds_with_loss numeric(5,4),
+    bye_odds_with_loss numeric(5,4),
+    championship_odds_with_loss numeric(5,4)
 );
 
 

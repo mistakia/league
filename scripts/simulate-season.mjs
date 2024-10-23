@@ -54,16 +54,31 @@ const simulate_season = async (lid) => {
       constants.createFantasyTeamStats()
   }
 
-  const result = simulate({
+  const base_result = simulate({
     teams,
     matchups,
     rosters
   })
 
   const forecastInserts = []
-  for (const forecast of Object.values(result)) {
-    const { playoff_odds, division_odds, bye_odds, championship_odds, tid } =
+  for (const [tid, forecast] of Object.entries(base_result)) {
+    const { playoff_odds, division_odds, bye_odds, championship_odds } =
       forecast
+
+    const win_result = simulate({
+      teams,
+      matchups,
+      rosters,
+      force_win_tid: tid
+    })
+
+    const loss_result = simulate({
+      teams,
+      matchups,
+      rosters,
+      force_loss_tid: tid
+    })
+
     forecastInserts.push({
       tid,
       lid,
@@ -76,6 +91,16 @@ const simulate_season = async (lid) => {
       division_odds,
       bye_odds,
       championship_odds,
+
+      playoff_odds_with_win: win_result[tid].playoff_odds,
+      division_odds_with_win: win_result[tid].division_odds,
+      bye_odds_with_win: win_result[tid].bye_odds,
+      championship_odds_with_win: win_result[tid].championship_odds,
+
+      playoff_odds_with_loss: loss_result[tid].playoff_odds,
+      division_odds_with_loss: loss_result[tid].division_odds,
+      bye_odds_with_loss: loss_result[tid].bye_odds,
+      championship_odds_with_loss: loss_result[tid].championship_odds,
 
       timestamp
     })
