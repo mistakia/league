@@ -8,6 +8,8 @@ export const get_play_stats = async ({ year, week, seas_type }) => {
       'nfl_plays.play_type_ngs',
       'nfl_plays.play_type_nfl',
       'nfl_plays.pos_team',
+      'nfl_plays.ydl_100',
+      'nfl_plays.dot',
       'nfl_games.h',
       'nfl_games.v',
       'nfl_games.esbid',

@@ -5,6 +5,10 @@ const calculateStatsFromPlayStats = (playStats) => {
 
   stats._fga = []
   stats._fgm = []
+  stats.passing_air_yards = 0
+  stats.targeted_air_yards = 0
+  stats.longest_reception = 0
+  stats.redzone_targets = 0
 
   for (const playStat of playStats) {
     switch (playStat.statId) {
@@ -100,6 +104,10 @@ const calculateStatsFromPlayStats = (playStats) => {
         // receiving yards
         stats.rec += 1
         stats.recy += playStat.yards
+        stats.longest_reception = Math.max(
+          stats.longest_reception,
+          playStat.yards
+        )
         break
 
       case 22:
@@ -107,6 +115,10 @@ const calculateStatsFromPlayStats = (playStats) => {
         stats.rec += 1
         stats.tdrec += 1
         stats.recy += playStat.yards
+        stats.longest_reception = Math.max(
+          stats.longest_reception,
+          playStat.yards
+        )
         break
 
       case 23:
@@ -449,10 +461,12 @@ const calculateStatsFromPlayStats = (playStats) => {
         break
 
       case 111:
+        stats.passing_air_yards += playStat.yards
         // completed air yard passing
         break
 
       case 112:
+        stats.passing_air_yards += playStat.yards
         // incomplete air yard passing
         break
 
@@ -463,6 +477,10 @@ const calculateStatsFromPlayStats = (playStats) => {
       case 115:
         // target player
         stats.trg += 1
+        stats.targeted_air_yards += playStat.dot
+        if (playStat.ydl_100 <= 20) {
+          stats.redzone_targets += 1
+        }
         break
 
       case 120:
