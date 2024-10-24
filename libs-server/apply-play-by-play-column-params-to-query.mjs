@@ -1,4 +1,6 @@
-import nfl_plays_column_params, { nfl_games_params } from '#libs-shared/nfl-plays-column-params.mjs'
+import nfl_plays_column_params, {
+  nfl_games_params
+} from '#libs-shared/nfl-plays-column-params.mjs'
 import * as table_constants from 'react-table/src/constants.mjs'
 import { constants } from '#libs-shared'
 
