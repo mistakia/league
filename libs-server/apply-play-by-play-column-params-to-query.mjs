@@ -1,9 +1,13 @@
-import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
+import nfl_plays_column_params, { nfl_games_params } from '#libs-shared/nfl-plays-column-params.mjs'
 import * as table_constants from 'react-table/src/constants.mjs'
 import { constants } from '#libs-shared'
 
+const nfl_games_param_keys = Object.keys(nfl_games_params)
+
 export default function ({ query, params, table_name = 'nfl_plays' }) {
   const column_param_keys = Object.keys(nfl_plays_column_params)
+  let nfl_games_joined = false
+
   for (const column_param_key of column_param_keys) {
     if (column_param_key === 'year_offset') {
       continue
@@ -44,10 +48,21 @@ export default function ({ query, params, table_name = 'nfl_plays' }) {
     }
 
     const column_param_definition = nfl_plays_column_params[column_param_key]
-    const param_table = column_param_definition.table || table_name
+    const is_nfl_games_param = nfl_games_param_keys.includes(column_param_key)
+    const param_table = is_nfl_games_param
+      ? 'nfl_games'
+      : column_param_definition.table || table_name
     const is_range =
       column_param_definition.data_type ===
       table_constants.TABLE_DATA_TYPES.RANGE
+
+    if (is_nfl_games_param) {
+      if (!nfl_games_joined) {
+        query.join('nfl_games', 'nfl_games.esbid', '=', `${table_name}.esbid`)
+        nfl_games_joined = true
+      }
+    }
+
     if (is_range) {
       const param_value_0 = Number(param_value[0])
       const param_value_1 = Number(param_value[1])

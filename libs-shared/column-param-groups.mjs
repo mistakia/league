@@ -1,5 +1,6 @@
 export const COLUMN_PARAM_GROUPS = {
   WEATHER: 'Weather',
+  GAME: 'Game',
   PASSING: 'Passing',
   RECEIVING: 'Receiving',
   RUSHING: 'Rushing',
@@ -19,5 +20,6 @@ export const COLUMN_PARAM_GROUPS = {
   PENALTY: 'Penalty',
   FORMATION_PERSONNEL: 'Formation / Personnel',
   SPECIAL_TEAMS: 'Special Teams',
-  PRESSURE: 'Pressure'
+  PRESSURE: 'Pressure',
+  BETTING_MARKETS: 'Betting Markets'
 }
