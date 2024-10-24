@@ -86,7 +86,7 @@ const receiving_opportunities = [
   'route_share',
   'team_target_share',
   'team_air_yard_share',
-  'wopr'
+  'weighted_opportunity_rating'
 ]
 const receiving_usage = [
   'recv_air_yards',
@@ -95,7 +95,7 @@ const receiving_usage = [
   'recv_deep_target_pct',
   'recv_tight_window_pct'
 ]
-const receiving_redzone = ['rz_tgt', 'ez_tgt']
+const receiving_redzone = ['redzone_targets', 'endzone_targets']
 
 const get_stat_fields = (pos) => {
   switch (pos) {

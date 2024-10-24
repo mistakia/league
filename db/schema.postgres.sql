@@ -17557,7 +17557,10 @@ CREATE TABLE public.player_receiving_gamelogs (
     recv_deep_target_pct numeric(5,2),
     recv_tight_window_pct numeric(5,2),
     longest_reception smallint,
-    recv_yards_15_plus_rate numeric(5,4)
+    recv_yards_15_plus_rate numeric(5,4),
+    weighted_opportunity_rating numeric(5,2),
+    redzone_targets smallint,
+    route_share numeric(5,2)
 );
 
 
