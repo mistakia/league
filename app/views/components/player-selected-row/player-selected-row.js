@@ -53,7 +53,11 @@ const passing_usage = [
   'play_action_pct'
 ]
 const rushing_production = ['ra', 'ry', 'tdr', 'fuml', 'rush_epa']
-const rushing_opportunities = ['expected_rush_yards', 'rush_share', 'wo']
+const rushing_opportunities = [
+  'expected_rush_yards',
+  'rush_share',
+  'weighted_opportunity'
+]
 const rushing_efficiency = [
   'rush_yards_over_expected',
   'rush_yards_over_expected_per_attempt',
@@ -67,7 +71,7 @@ const rushing_explosiveness = [
   'rush_attempts_speed_15_plus_mph',
   'rush_attempts_speed_20_plus_mph'
 ]
-const rushing_redzone = ['rz_ra', 'gl_carries']
+const rushing_redzone = ['rush_attempts_redzone', 'rush_attempts_goaline']
 const receiving_production = ['trg', 'rec', 'recy', 'tdrec', 'recv_epa']
 const receiving_efficiency = [
   'receiving_passer_rating',
@@ -80,7 +84,10 @@ const receiving_efficiency = [
   'recv_epa_per_route',
   'recv_yards_after_catch_over_expected'
 ]
-const receiving_explosiveness = ['longest_reception', 'recv_yards_15_plus_rate']
+const receiving_explosiveness = [
+  'longest_reception',
+  'recv_yards_15_plus_count'
+]
 const receiving_opportunities = [
   'routes',
   'route_share',

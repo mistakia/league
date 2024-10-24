@@ -17560,7 +17560,8 @@ CREATE TABLE public.player_receiving_gamelogs (
     recv_yards_15_plus_rate numeric(5,4),
     weighted_opportunity_rating numeric(5,2),
     redzone_targets smallint,
-    route_share numeric(5,2)
+    route_share numeric(5,2),
+    recv_yards_15_plus_count smallint
 );
 
 
@@ -17592,7 +17593,11 @@ CREATE TABLE public.player_rushing_gamelogs (
     rush_attempts_under_center_pct numeric(5,2),
     longest_rush smallint,
     rush_yards_per_attempt numeric(5,2),
-    rush_yards_10_plus_rate numeric(5,4)
+    rush_yards_10_plus_rate numeric(5,4),
+    rush_share numeric(5,2),
+    weighted_opportunity numeric(5,2),
+    rush_attempts_redzone smallint,
+    rush_attempts_goaline smallint
 );
 
 
