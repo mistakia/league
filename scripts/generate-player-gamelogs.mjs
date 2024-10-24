@@ -46,11 +46,9 @@ const format_player_gamelog = ({ esbid, pid, stats, opp, pos, tm, year }) => {
 }
 
 const format_receiving_gamelog = ({ esbid, pid, stats, year, team_stats }) => {
-  const team_target_share = team_stats.trg
-    ? (stats.trg / team_stats.trg) * 100
-    : 0
+  const team_target_share = team_stats.trg ? stats.trg / team_stats.trg : 0
   const team_air_yard_share = team_stats.passing_air_yards
-    ? (stats.targeted_air_yards / team_stats.passing_air_yards) * 100
+    ? stats.targeted_air_yards / team_stats.passing_air_yards
     : 0
 
   return {
@@ -58,11 +56,34 @@ const format_receiving_gamelog = ({ esbid, pid, stats, year, team_stats }) => {
     pid,
     year,
     longest_reception: stats.longest_reception,
-    team_target_share,
-    team_air_yard_share,
+    recv_yards_15_plus_count: stats.recv_yards_15_plus_count,
+    team_target_share: team_target_share * 100,
+    team_air_yard_share: team_air_yard_share * 100,
     redzone_targets: stats.redzone_targets,
     weighted_opportunity_rating:
       1.5 * team_target_share + 0.7 * team_air_yard_share
+  }
+}
+
+const format_rushing_gamelog = ({ esbid, pid, stats, year, team_stats }) => {
+  const rush_share = team_stats.ra ? (stats.ra / team_stats.ra) * 100 : 0
+  const weighted_opportunity =
+    1.3 * stats.rush_attempts_redzone +
+    2.25 * stats.redzone_targets +
+    0.48 * (stats.ra - stats.rush_attempts_redzone) +
+    1.43 * (stats.trg - stats.redzone_targets)
+  const rush_yards_per_attempt = stats.ry / stats.ra
+
+  return {
+    esbid,
+    pid,
+    year,
+    longest_rush: stats.longest_rush,
+    rush_share,
+    weighted_opportunity,
+    rush_yards_per_attempt,
+    rush_attempts_redzone: stats.rush_attempts_redzone,
+    rush_attempts_goaline: stats.rush_attempts_goaline
   }
 }
 
@@ -92,6 +113,28 @@ const generate_receiving_gamelog = ({
   }
 }
 
+const generate_rushing_gamelog = ({
+  player_gamelog,
+  stats,
+  team_gamelog_inserts,
+  player_rushing_gamelog_inserts
+}) => {
+  if (player_gamelog.ra > 0) {
+    const team_gamelog = team_gamelog_inserts.find(
+      (t) =>
+        t.tm === fixTeam(player_gamelog.tm) && t.esbid === player_gamelog.esbid
+    )
+    const rushing_gamelog = format_rushing_gamelog({
+      pid: player_gamelog.pid,
+      esbid: player_gamelog.esbid,
+      year: player_gamelog.year,
+      stats,
+      team_stats: team_gamelog
+    })
+    player_rushing_gamelog_inserts.push(rushing_gamelog)
+  }
+}
+
 const generate_player_gamelogs = async ({
   week = constants.season.last_week_with_stats,
   year = constants.season.year,
@@ -108,6 +151,7 @@ const generate_player_gamelogs = async ({
 
   const player_gamelog_inserts = []
   const player_receiving_gamelog_inserts = []
+  const player_rushing_gamelog_inserts = []
   const team_gamelog_inserts = []
   const missing = []
 
@@ -190,6 +234,13 @@ const generate_player_gamelogs = async ({
       team_gamelog_inserts,
       player_receiving_gamelog_inserts
     })
+
+    generate_rushing_gamelog({
+      player_gamelog,
+      stats,
+      team_gamelog_inserts,
+      player_rushing_gamelog_inserts
+    })
   }
 
   for (const gsisid of Object.keys(play_stats_by_gsisid)) {
@@ -230,6 +281,13 @@ const generate_player_gamelogs = async ({
       stats,
       team_gamelog_inserts,
       player_receiving_gamelog_inserts
+    })
+
+    generate_rushing_gamelog({
+      player_gamelog,
+      stats,
+      team_gamelog_inserts,
+      player_rushing_gamelog_inserts
     })
   }
 
@@ -283,9 +341,10 @@ const generate_player_gamelogs = async ({
   if (dry_run) {
     log(player_gamelog_inserts[0])
     log(player_receiving_gamelog_inserts[0])
+    log(player_rushing_gamelog_inserts[0])
     log(team_gamelog_inserts[0])
     log(
-      `Generated ${player_gamelog_inserts.length} player gamelogs, ${player_receiving_gamelog_inserts.length} receiving gamelogs, and ${team_gamelog_inserts.length} team gamelogs for ${year} week ${week}`
+      `Generated ${player_gamelog_inserts.length} player gamelogs, ${player_receiving_gamelog_inserts.length} receiving gamelogs, ${player_rushing_gamelog_inserts.length} rushing gamelogs, and ${team_gamelog_inserts.length} team gamelogs for ${year} week ${week}`
     )
     return
   }
@@ -316,6 +375,20 @@ const generate_player_gamelogs = async ({
       batch_size: 500
     })
     log(`Updated ${player_receiving_gamelog_inserts.length} receiving gamelogs`)
+  }
+
+  if (player_rushing_gamelog_inserts.length) {
+    await batch_insert({
+      items: player_rushing_gamelog_inserts,
+      save: async (batch) => {
+        await db('player_rushing_gamelogs')
+          .insert(batch)
+          .onConflict(['esbid', 'pid', 'year'])
+          .merge()
+      },
+      batch_size: 500
+    })
+    log(`Updated ${player_rushing_gamelog_inserts.length} rushing gamelogs`)
   }
 
   // Insert team gamelogs

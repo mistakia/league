@@ -9,6 +9,10 @@ const calculateStatsFromPlayStats = (playStats) => {
   stats.targeted_air_yards = 0
   stats.longest_reception = 0
   stats.redzone_targets = 0
+  stats.recv_yards_15_plus_count = 0
+  stats.longest_rush = 0
+  stats.rush_attempts_redzone = 0
+  stats.rush_attempts_goaline = 0
 
   for (const playStat of playStats) {
     switch (playStat.statId) {
@@ -48,6 +52,13 @@ const calculateStatsFromPlayStats = (playStats) => {
         // rushing attempt w/ yards
         stats.ra += 1
         stats.ry += playStat.yards
+        stats.longest_rush = Math.max(stats.longest_rush, playStat.yards)
+        if (playStat.ydl_100 <= 20) {
+          stats.rush_attempts_redzone += 1
+        }
+        if (playStat.ydl_100 <= 5) {
+          stats.rush_attempts_goaline += 1
+        }
         break
 
       case 11:
@@ -108,6 +119,9 @@ const calculateStatsFromPlayStats = (playStats) => {
           stats.longest_reception,
           playStat.yards
         )
+        if (playStat.yards >= 15) {
+          stats.recv_yards_15_plus_count += 1
+        }
         break
 
       case 22:
@@ -119,6 +133,9 @@ const calculateStatsFromPlayStats = (playStats) => {
           stats.longest_reception,
           playStat.yards
         )
+        if (playStat.yards >= 15) {
+          stats.recv_yards_15_plus_count += 1
+        }
         break
 
       case 23:
