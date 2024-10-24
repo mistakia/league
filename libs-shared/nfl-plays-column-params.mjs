@@ -53,6 +53,192 @@ const score_diff_preset_values = [
   }
 ]
 
+export const nfl_games_params = {
+  roof: {
+    values: ['dome', 'outdoors', 'closed', 'open'],
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.GAME]
+  },
+  surf: {
+    values: [
+      'grass',
+      'astroturf',
+      'fieldturf',
+      'dessograss',
+      'astroplay',
+      'matrixturf',
+      'sportturf',
+      'a_turf'
+    ],
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.GAME]
+  },
+  wind: {
+    min: 0,
+    max: 100,
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WEATHER]
+  },
+  temp: {
+    min: -30,
+    max: 109,
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.WEATHER]
+  },
+  referee: {
+    values: [
+      'Bruce Hermansen',
+      'Jeff Triplette',
+      'Ed Hochuli',
+      'Bernie Kukar',
+      'John Parry',
+      'Bill Vinovich',
+      'Brad Allen',
+      'Al Hynes',
+      'Gerald Austin',
+      'Ronald Torbert',
+      'Donald King',
+      'Alberto Riveron',
+      'Tony Corrente',
+      'Walt Anderson',
+      'Terry McAulay',
+      'Land Clark',
+      'Clete Blakeman',
+      'Bill Vinocich',
+      'Scott Novak',
+      'Randall Beesley',
+      'Bill Athan',
+      'Al Riveron',
+      'Michael Carey',
+      'Larry Nemmers',
+      'Ken Roan',
+      'Gene Stetatore',
+      'Bradley Rogers',
+      'Gene Steratore',
+      'Walt Coleman',
+      'Ron Torbert',
+      'Shawn Smith',
+      'Wayne Elliott',
+      'Shawn Hochuli',
+      'Bill Carollo',
+      'Matt Nicks',
+      'Brad Rogers',
+      'Peter Morelli',
+      'Carl Cheffers',
+      'Ernie Briggs',
+      'Bill Etzler',
+      'Tom Corrente',
+      'Adrian Hall',
+      'Wayne McKreight',
+      'Perry Havener',
+      'Aster Sizemore',
+      'Larry Mallam',
+      'Jerry Frump',
+      'Riley Johnson',
+      'Dick Hantag',
+      'Tony Steratore',
+      'Mike Carey',
+      'Scott Green',
+      'Phil Luckett',
+      'John Perry',
+      'Jerry Hughes',
+      'Gerry Austin',
+      'Mike Garth',
+      'Donovan Briggans',
+      'Tom White',
+      'Adrian Hill',
+      'Paul Labenne',
+      'John Smith',
+      'Alex Kemp',
+      'Mike Shepherd',
+      'David Scott',
+      'Bill Leavy',
+      'Bob McElwee',
+      'Robert Dalton',
+      'Robert Frazer',
+      'Johnny Grier',
+      'Billy Leavy',
+      'Judson Mitchell',
+      'Craig Wrolstad',
+      'Joseph Rider',
+      'Jerome Boger',
+      'Jim Core',
+      'Ron Winter',
+      'Jim Sprenger',
+      'Tra Blake',
+      'Mack Gentry',
+      'Gerald Wright',
+      'Alan Eck',
+      'Ron Blum',
+      'Dick Hantak',
+      'David White',
+      'Bill Blum',
+      'Don Carey',
+      'Bill Carolo',
+      'John Hussey',
+      'Clay Martin'
+    ],
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.GAME]
+  },
+  day: {
+    values: [
+      'SAT',
+      'FRI',
+      'MN',
+      'SUN',
+      'THU',
+      'SN',
+      'PRO',
+      'WED',
+      'TUE',
+      'HOF',
+      'DIV',
+      'CONF',
+      'SB',
+      'WC',
+      'PRE'
+    ],
+    data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+    groups: [COLUMN_PARAM_GROUPS.GAME]
+  },
+  ot: {
+    data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
+    groups: [COLUMN_PARAM_GROUPS.GAME]
+  },
+  away_rest: {
+    min: 4,
+    max: 21,
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.GAME]
+  },
+  home_rest: {
+    min: 4,
+    max: 21,
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.GAME]
+  },
+  home_moneyline: {
+    min: -10000,
+    max: 3000,
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.BETTING_MARKETS]
+  },
+  away_moneyline: {
+    min: -10000,
+    max: 3000,
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.BETTING_MARKETS]
+  },
+  total_line: {
+    min: 25,
+    max: 65,
+    step: 0.5,
+    data_type: table_constants.TABLE_DATA_TYPES.RANGE,
+    groups: [COLUMN_PARAM_GROUPS.BETTING_MARKETS]
+  }
+}
+
 export default {
   career_year,
   career_game,
@@ -65,6 +251,8 @@ export default {
   //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
   // },
   week,
+
+  ...nfl_games_params,
 
   dwn: {
     values: constants.downs,
