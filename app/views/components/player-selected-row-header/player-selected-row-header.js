@@ -52,7 +52,7 @@ const categories = {
     'EPA/RTE',
     'YACOE'
   ],
-  receiving_explosiveness: ['LNG', '15+%'],
+  receiving_explosiveness: ['LNG', '15+'],
   receiving_opportunities: ['RTE', 'RTE%', 'TGT%', 'AY%', 'WOPR'],
   receiving_usage: ['AY', 'AY/TGT', 'DEP/RTE', 'DT%', 'TW%'],
   receiving_redzone: ['RZ TGT', 'EZ TGT'],

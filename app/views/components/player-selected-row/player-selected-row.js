@@ -189,7 +189,10 @@ const field_fixed_values = {
   recv_yards_per_route: 2,
   recv_epa_per_target: 2,
   recv_epa_per_route: 2,
-  recv_yards_after_catch_over_expected: 2
+  recv_yards_after_catch_over_expected: 2,
+  weighted_opportunity_rating: 2,
+  recv_deep_target_pct: 2,
+  recv_tight_window_pct: 2
 }
 
 export default function PlayerSelectedRow({
