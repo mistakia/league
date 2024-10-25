@@ -659,26 +659,55 @@ const analyze_wagers = async ({
   let wagers = []
 
   if (fanduel_filename) {
-    const fanduel_wagers = await fs.readJson(`${data_path}/${fanduel_filename}`)
-    wagers = wagers.concat(
-      fanduel_wagers.flatMap((wager) =>
-        standardize_wager({ wager, source: 'fanduel' })
+    try {
+      const fanduel_wagers = await fs.readJson(
+        `${data_path}/${fanduel_filename}`
       )
-    )
+      wagers = wagers.concat(
+        fanduel_wagers.flatMap((wager) =>
+          standardize_wager({ wager, source: 'fanduel' })
+        )
+      )
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        console.warn(
+          `Warning: FanDuel file '${fanduel_filename}' not found. Skipping FanDuel wagers.`
+        )
+      } else {
+        throw error // Re-throw if it's not a file not found error
+      }
+    }
   }
 
   if (draftkings_filename) {
-    const draftkings_wagers = await fs.readJson(
-      `${data_path}/${draftkings_filename}`
-    )
-    wagers = wagers.concat(
-      draftkings_wagers.flatMap((wager) => {
-        const standardized_wager = standardize_wager({
-          wager,
-          source: 'draftkings'
+    try {
+      const draftkings_wagers = await fs.readJson(
+        `${data_path}/${draftkings_filename}`
+      )
+      wagers = wagers.concat(
+        draftkings_wagers.flatMap((wager) => {
+          const standardized_wager = standardize_wager({
+            wager,
+            source: 'draftkings'
+          })
+          return standardized_wager
         })
-        return standardized_wager
-      })
+      )
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        console.warn(
+          `Warning: DraftKings file '${draftkings_filename}' not found. Skipping DraftKings wagers.`
+        )
+      } else {
+        throw error // Re-throw if it's not a file not found error
+      }
+    }
+  }
+
+  // After both file reads, check if we have any wagers
+  if (wagers.length === 0) {
+    throw new Error(
+      'No wagers found. Please check the filenames and try again.'
     )
   }
 
