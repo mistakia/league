@@ -117,6 +117,60 @@ const opponent_allowed_for_prop_is_negative = ({
   }
 }
 
+const batch_size = 10000 // Adjust this value based on your database's capabilities
+
+const fetch_prop_pairing_props = async (pairing_ids) => {
+  const batches = []
+  for (let i = 0; i < pairing_ids.length; i += batch_size) {
+    batches.push(pairing_ids.slice(i, i + batch_size))
+  }
+
+  let all_prop_pairing_props = []
+
+  for (const batch of batches) {
+    const prop_pairing_props = await db('prop_pairing_props')
+      .select(
+        'current_week_prop_market_selections_index.*',
+        'prop_pairing_props.pairing_id',
+        'prop_market_selections_index.*'
+      )
+      .innerJoin('current_week_prop_market_selections_index', function () {
+        this.on(
+          'current_week_prop_market_selections_index.source_market_id',
+          '=',
+          'prop_pairing_props.source_market_id'
+        ).andOn(
+          'current_week_prop_market_selections_index.source_selection_id',
+          '=',
+          'prop_pairing_props.source_selection_id'
+        )
+      })
+      .innerJoin('prop_market_selections_index', function () {
+        this.on(
+          'prop_market_selections_index.source_market_id',
+          '=',
+          'prop_pairing_props.source_market_id'
+        )
+          .andOn(
+            'prop_market_selections_index.source_selection_id',
+            '=',
+            'prop_pairing_props.source_selection_id'
+          )
+          .andOn(
+            'prop_market_selections_index.source_id',
+            '=',
+            'current_week_prop_market_selections_index.source_id'
+          )
+      })
+      .where('prop_market_selections_index.time_type', 'CLOSE')
+      .whereIn('pairing_id', batch)
+
+    all_prop_pairing_props = all_prop_pairing_props.concat(prop_pairing_props)
+  }
+
+  return all_prop_pairing_props
+}
+
 const filter_prop_pairings = async ({
   week = constants.season.nfl_seas_week,
   year = constants.season.year,
@@ -322,42 +376,7 @@ const filter_prop_pairings = async ({
   log(`loading ${prop_pairing_rows.length} prop pairings for week ${week}`)
 
   const pairing_ids = prop_pairing_rows.map((p) => p.pairing_id)
-  const prop_pairing_props = await db('prop_pairing_props')
-    .select(
-      'current_week_prop_market_selections_index.*',
-      'prop_pairing_props.pairing_id',
-      'prop_market_selections_index.*'
-    )
-    .innerJoin('current_week_prop_market_selections_index', function () {
-      this.on(
-        'current_week_prop_market_selections_index.source_market_id',
-        '=',
-        'prop_pairing_props.source_market_id'
-      ).andOn(
-        'current_week_prop_market_selections_index.source_selection_id',
-        '=',
-        'prop_pairing_props.source_selection_id'
-      )
-    })
-    .innerJoin('prop_market_selections_index', function () {
-      this.on(
-        'prop_market_selections_index.source_market_id',
-        '=',
-        'prop_pairing_props.source_market_id'
-      )
-        .andOn(
-          'prop_market_selections_index.source_selection_id',
-          '=',
-          'prop_pairing_props.source_selection_id'
-        )
-        .andOn(
-          'prop_market_selections_index.source_id',
-          '=',
-          'current_week_prop_market_selections_index.source_id'
-        )
-    })
-    .where('prop_market_selections_index.time_type', 'CLOSE')
-    .whereIn('pairing_id', pairing_ids)
+  const prop_pairing_props = await fetch_prop_pairing_props(pairing_ids)
 
   log(`loaded ${prop_pairing_props.length} props for week ${week}`)
 
