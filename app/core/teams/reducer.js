@@ -24,13 +24,17 @@ export function teamsReducer(state = initialState, { payload, type }) {
                 state.getIn([year, t.uid]).mergeDeep(createTeam(t))
               )
             } else {
-              const new_team = state.getIn([year, t.uid]).merge(createTeam(t))
-              // TODO dont think this is needed anymore
-              // const existing_stats = state.getIn([year, t.uid]).get('stats')
-              // for (const [year, stats] of existing_stats.entrySeq()) {
-              //   new_team = new_team.setIn(['stats', Number(year)], stats)
-              // }
+              let new_team = state.getIn([year, t.uid]).merge(createTeam(t))
+              const existing_stats = state.getIn([year, t.uid]).get('stats')
+              const new_stats = new_team.get('stats')
 
+              // Merge existing stats with new stats, using truthy values
+              const merged_stats = existing_stats.mergeWith(
+                (existing, new_val) => existing || new_val,
+                new_stats
+              )
+
+              new_team = new_team.set('stats', merged_stats)
               state.setIn([year, t.uid], new_team)
             }
           } else {
