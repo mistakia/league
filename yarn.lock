@@ -13158,9 +13158,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"react-table@mistakia/react-table#396d47493510fac5da2d1683117d2c2588147820":
+"react-table@mistakia/react-table#efab379e7aa26c72b00c49462d820029d7a717f8":
   version: 0.0.1
-  resolution: "react-table@https://github.com/mistakia/react-table.git#commit=396d47493510fac5da2d1683117d2c2588147820"
+  resolution: "react-table@https://github.com/mistakia/react-table.git#commit=efab379e7aa26c72b00c49462d820029d7a717f8"
   dependencies:
     "@dnd-kit/core": "npm:^6.0.8"
     "@dnd-kit/modifiers": "npm:^6.0.1"
@@ -13180,7 +13180,7 @@ __metadata:
     prop-types: ^15.8.1
     react: ^18.2.0
     react-dom: ^18.2.0
-  checksum: 10/e5a1fd0e6d8fb0be878de740990a06d19428b20b7dc1b007b781184ca599acd9329277edd5b84000b83122f89f3fafec1425d5c17e7c4d2819ed5c8b864cf753
+  checksum: 10/15855bbef8d409c21f2108413c9e0f73ff5020322e53c4376143443140cb2c1ed7b6edeb29646d86c5edcad8dcc76c07ff4ec5f53048dd17f6d89400cd0c9f24
   languageName: node
   linkType: hard
 
@@ -13900,7 +13900,7 @@ __metadata:
     react-router: "npm:^6.23.0"
     react-router-dom: "npm:^6.23.0"
     react-sortable-hoc: "npm:^1.11.0"
-    react-table: "mistakia/react-table#396d47493510fac5da2d1683117d2c2588147820"
+    react-table: "mistakia/react-table#efab379e7aa26c72b00c49462d820029d7a717f8"
     react-virtualized: "npm:^9.22.5"
     redux: "npm:^4.2.1"
     redux-first-history: "npm:^5.2.0"
