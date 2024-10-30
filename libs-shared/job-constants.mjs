@@ -105,7 +105,8 @@ export const job_types = {
   IMPORT_DVOA_SHEETS: 81,
   IMPORT_NFL_GAMELOGS: 82,
   IMPORT_ESPN_RECEIVING_TRACKING_METRICS: 83,
-  GENERATE_PLAYER_GAMELOGS: 84
+  GENERATE_PLAYER_GAMELOGS: 84,
+  IMPORT_FANATICS_ODDS: 85
 }
 
 export const job_title_by_id = {
@@ -192,5 +193,6 @@ export const job_title_by_id = {
   81: 'Import DVOA Sheets',
   82: 'Import NFL Game Logs',
   83: 'Import ESPN Receiving Tracking Metrics',
-  84: 'Generate Player Game Logs'
+  84: 'Generate Player Game Logs',
+  85: 'Import Fanatics Odds'
 }
