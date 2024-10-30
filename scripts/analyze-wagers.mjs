@@ -636,7 +636,8 @@ const analyze_wagers = async ({
   filter_wagers_min_legs = 0,
   include_selections = [],
   exclude_selections = [],
-  sort_by = 'odds'
+  sort_by = 'odds',
+  show_wager_roi = false
 } = {}) => {
   if (!fanduel_filename && !draftkings_filename) {
     throw new Error('At least one filename (FanDuel or DraftKings) is required')
@@ -1034,7 +1035,11 @@ const analyze_wagers = async ({
       const num_of_legs = wager.selections.length
       let wager_table_title = `[${num_of_legs} leg parlay] American odds: ${
         wager.parsed_odds > 0 ? '+' : ''
-      }${Number(wager.parsed_odds).toFixed(0)} / ${potential_roi_gain.toFixed(2)}% roi`
+      }${Number(wager.parsed_odds).toFixed(0)}`
+
+      if (show_wager_roi) {
+        wager_table_title += ` / ${potential_roi_gain.toFixed(2)}% roi`
+      }
 
       if (show_potential_gain) {
         wager_table_title += ` ($${wager.potential_win.toFixed(2)})`
@@ -1083,7 +1088,8 @@ const main = async () => {
           : [],
       hide_wagers: argv.hide_wagers,
       filter_wagers_min_legs: argv.min_legs,
-      sort_by: argv.sort_by || 'odds'
+      sort_by: argv.sort_by || 'odds',
+      show_wager_roi: argv.show_wager_roi
     })
   } catch (err) {
     error = err
