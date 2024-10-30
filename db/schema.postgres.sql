@@ -1838,7 +1838,8 @@ CREATE TYPE public.market_source_id AS ENUM (
     'FANDUEL',
     'GAMBET',
     'PRIZEPICKS',
-    'PINNACLE'
+    'PINNACLE',
+    'FANATICS'
 );
 
 
