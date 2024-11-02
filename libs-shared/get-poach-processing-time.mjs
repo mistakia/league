@@ -13,7 +13,7 @@ export default function (submitted) {
   // if submitted between thursday 6pm and sunday 3pm — set to tuesday at 3pm
   const { now } = constants.season
   const start_window = (
-    now.day() < 3 ? now.subtract('1', 'week').day(5) : now.day(5)
+    now.day() < 4 ? now.subtract('1', 'week').day(4) : now.day(4)
   )
     .startOf('day')
     .hour(18)
