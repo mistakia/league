@@ -14055,7 +14055,7 @@ CREATE TABLE public.nfl_team_seasonlogs (
     drop_rate numeric(5,2) DEFAULT NULL::numeric,
     pass_completed_air_yards numeric(6,2) DEFAULT NULL::numeric,
     pass_yards_after_catch numeric(6,2) DEFAULT NULL::numeric,
-    expected_pass_yards_after_catch numeric(5,2) DEFAULT NULL::numeric,
+    expected_pass_yards_after_catch numeric(6,2) DEFAULT NULL::numeric,
     pass_yards_after_catch_pct numeric(5,2) DEFAULT NULL::numeric,
     air_yards_per_pass_att numeric(5,2) DEFAULT NULL::numeric,
     avg_target_separation numeric(5,2) DEFAULT NULL::numeric,
