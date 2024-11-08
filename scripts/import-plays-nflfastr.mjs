@@ -180,6 +180,7 @@ const format_play = (play) => ({
   qb_dropback: format_boolean(play.qb_dropback),
   qb_kneel: format_boolean(play.qb_kneel),
   qb_spike: format_boolean(play.qb_spike),
+  qb_scramble: format_boolean(play.qb_scramble),
 
   run_location: format_play_direction(play.run_location),
   run_gap: format_run_gap(play),
