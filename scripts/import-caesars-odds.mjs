@@ -32,10 +32,20 @@ const format_market = async ({
   let market_line
 
   if (caesars_market.metadata?.player) {
-    const team = fixTeam(caesars_market.metadata.teamName.replaceAll('|', ''))
+    const teams = []
+    if (caesars_market.metadata.teamName) {
+      const team = fixTeam(caesars_market.metadata.teamName.replaceAll('|', ''))
+      teams.push(team)
+    }
+
+    if (!teams.length && nfl_game) {
+      teams.push(nfl_game.h)
+      teams.push(nfl_game.v)
+    }
+
     const params = {
       name: caesars_market.metadata.player,
-      team,
+      teams,
       ignore_free_agent: true,
       ignore_retired: true
     }
