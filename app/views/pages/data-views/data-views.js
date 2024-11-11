@@ -159,7 +159,7 @@ export default function DataViewsPage({
 
     if (highlight_team_ids.includes(player.tid)) {
       const team = teams.get(player.tid, new Team())
-      class_params[`draft-order-${team.get('do')}`] = true
+      class_params[`draft-order-${team.get('draft_order')}`] = true
     }
     player.className = get_string_from_object(class_params)
   }
