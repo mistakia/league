@@ -7,7 +7,7 @@ import WaiverProcessedFilter from './waiver-processed-filter'
 
 const mapStateToProps = createSelector(getWaivers, (waivers) => ({
   processed: waivers.get('processed'),
-  processingTimes: waivers.get('processingTimes')
+  processing_times: waivers.get('processingTimes')
 }))
 
 export default connect(mapStateToProps)(WaiverProcessedFilter)
