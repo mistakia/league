@@ -114,6 +114,17 @@ export default function LeagueTeam({
     )
   }
 
+  const reserveIRLongTermItems = []
+  for (const playerMap of players.ir_long_term) {
+    if (!playerMap.get('pid')) continue
+    reserveIRLongTermItems.push(
+      <PlayerRoster
+        key={playerMap.get('pid')}
+        {...{ playerMap, percentiles }}
+      />
+    )
+  }
+
   const reserveCOVItems = []
   for (const playerMap of players.cov) {
     if (!playerMap.get('pid')) continue
@@ -234,6 +245,15 @@ export default function LeagueTeam({
               items={reserveIRItems}
               title='Reserve/IR'
               space={roster.availableReserveSpace}
+              {...{ percentiles, is_team_manager }}
+            />
+          )}
+        </div>
+        <div className='league-team-main-section'>
+          {Boolean(reserveIRLongTermItems.length) && (
+            <DashboardPlayersTable
+              items={reserveIRLongTermItems}
+              title='Reserve/IR (Long Term)'
               {...{ percentiles, is_team_manager }}
             />
           )}

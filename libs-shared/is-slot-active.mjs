@@ -6,7 +6,8 @@ const exclude = [
   constants.slots.PSP,
   constants.slots.PSD,
   constants.slots.PSDP,
-  constants.slots.COV
+  constants.slots.COV,
+  constants.slots.IR_LONG_TERM
 ]
 
 const isSlotActive = (slot) => {

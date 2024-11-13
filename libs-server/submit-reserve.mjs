@@ -22,7 +22,11 @@ export default async function ({
 }) {
   const data = []
 
-  const slots = [constants.slots.IR, constants.slots.COV]
+  const slots = [
+    constants.slots.IR,
+    constants.slots.COV,
+    constants.slots.IR_LONG_TERM
+  ]
   if (!slots.includes(slot)) {
     throw new Error('invalid slot')
   }
@@ -103,8 +107,9 @@ export default async function ({
     throw new Error('not eligible, locked starter')
   }
 
+  // can not activate long term IR player
   let activate_player_row
-  if (activate_pid) {
+  if (activate_pid && slot !== constants.slots.IR_LONG_TERM) {
     const player_rows = await db('player').where('pid', activate_pid)
     activate_player_row = player_rows[0]
 
@@ -177,7 +182,9 @@ export default async function ({
   const type =
     slot === constants.slots.IR
       ? constants.transactions.RESERVE_IR
-      : constants.transactions.RESERVE_COV
+      : slot === constants.slots.IR_LONG_TERM
+        ? constants.transactions.RESERVE_IR_LONG_TERM
+        : constants.transactions.RESERVE_COV
   await db('rosters_players').update({ slot }).where({
     rid: rosterRow.uid,
     pid: reserve_pid

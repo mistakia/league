@@ -20,7 +20,8 @@ export default function RostersPage({
   teams,
   ps_drafted_count_max,
   ps_signed_count_max,
-  bench_count_max
+  bench_count_max,
+  ir_long_term_count_max
 }) {
   const { lid } = useParams()
   const navigate = useNavigate()
@@ -171,6 +172,14 @@ export default function RostersPage({
         </div>
       )
     }
+
+    for (let i = 0; i < ir_long_term_count_max; i++) {
+      labels.push(
+        <div key={`${i}IRLT`} className='roster__item'>
+          IR LT
+        </div>
+      )
+    }
   }
 
   const items = []
@@ -183,7 +192,8 @@ export default function RostersPage({
           roster,
           ps_drafted_count_max,
           ps_signed_count_max,
-          bench_count_max
+          bench_count_max,
+          ir_long_term_count_max
         }}
       />
     )
@@ -220,6 +230,7 @@ RostersPage.propTypes = {
   ps_drafted_count_max: PropTypes.number,
   ps_signed_count_max: PropTypes.number,
   bench_count_max: PropTypes.number,
+  ir_long_term_count_max: PropTypes.number,
   loadLeaguePlayers: PropTypes.func,
   loadRosters: PropTypes.func
 }

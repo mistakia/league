@@ -668,7 +668,8 @@ export const slots = {
   COV: 14,
   PSP: 15, // practice squad - signed and protected
   PSD: 16, // practice squad - drafted
-  PSDP: 17 // practice squad - drafted and protected
+  PSDP: 17, // practice squad - drafted and protected
+  IR_LONG_TERM: 18
 }
 
 export const starterSlots = [
@@ -707,7 +708,8 @@ export const slotName = {
   [slots.COV]: 'COV',
   [slots.PSP]: 'PS (P)',
   [slots.PSD]: 'PSD',
-  [slots.PSDP]: 'PSD (P)'
+  [slots.PSDP]: 'PSD (P)',
+  [slots.IR_LONG_TERM]: 'IR (LT)'
 }
 
 export const matchups = {
@@ -803,7 +805,8 @@ export const transactions = {
 
   RESERVE_IR: 15,
   RESERVE_COV: 16,
-  PRACTICE_PROTECTED: 17
+  PRACTICE_PROTECTED: 17,
+  RESERVE_IR_LONG_TERM: 18
 }
 
 export const tags = {
@@ -843,7 +846,8 @@ export const transactionsDetail = {
   13: 'Signed (PS)',
   15: 'Reserve (IR)',
   16: 'Reserve (COV)',
-  17: 'Protected (PS)'
+  17: 'Protected (PS)',
+  18: 'Reserve (IR LT)'
 }
 
 export const nflTeams = [

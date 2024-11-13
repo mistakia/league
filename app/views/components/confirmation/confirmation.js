@@ -8,6 +8,7 @@ import DialogContentText from '@mui/material/DialogContentText'
 import DialogTitle from '@mui/material/DialogTitle'
 
 import ReserveConfirmation from '@components/reserve-confirmation'
+import ReserveLongTermConfirmation from '@components/reserve-long-term-confirmation'
 import ActivateConfirmation from '@components/activate-confirmation'
 import DeactivateConfirmation from '@components/deactivate-confirmation'
 import WaiverConfirmation from '@components/waiver-confirmation'
@@ -40,6 +41,8 @@ export default class Confirmation extends React.Component {
         switch (id) {
           case 'RESERVE':
             return ReserveConfirmation
+          case 'RESERVE_IR_LONG_TERM':
+            return ReserveLongTermConfirmation
           case 'ACTIVATE':
             return ActivateConfirmation
           case 'DEACTIVATE':

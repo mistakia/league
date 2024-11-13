@@ -28,6 +28,7 @@ export default function PlayerContextMenu({
   nominate_restricted_free_agent,
   unnominate_restricted_free_agent
 }) {
+  console.log({ status })
   const handleDeactivate = () => {
     showConfirmation({
       id: 'DEACTIVATE',
@@ -119,6 +120,16 @@ export default function PlayerContextMenu({
   const handleReserveIR = () => {
     showConfirmation({
       id: 'RESERVE',
+      data: {
+        playerMap
+      }
+    })
+    hide()
+  }
+
+  const handleReserveIRLongTerm = () => {
+    showConfirmation({
+      id: 'RESERVE_IR_LONG_TERM',
       data: {
         playerMap
       }
@@ -351,6 +362,15 @@ export default function PlayerContextMenu({
       disabled: !status.reserve.ir || (status.locked && status.starter),
       label: 'Move to Reserve/IR'
     })
+
+    if (status.reserve.ir_long_term) {
+      add({
+        key: 'ir_long_term',
+        onClick: handleReserveIRLongTerm,
+        disabled: status.locked && status.starter,
+        label: 'Move to Reserve/IR (Long Term)'
+      })
+    }
 
     add({
       key: 'cov',

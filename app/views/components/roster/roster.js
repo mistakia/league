@@ -16,7 +16,8 @@ export default class Roster extends React.Component {
       teamId,
       ps_drafted_count_max,
       ps_signed_count_max,
-      bench_count_max
+      bench_count_max,
+      ir_long_term_count_max
     } = this.props
 
     if (!roster) {
@@ -231,6 +232,18 @@ export default class Roster extends React.Component {
           />
         )
       }
+
+      const long_term_players = r.ir_long_term
+      for (let i = 0; i < ir_long_term_count_max; i++) {
+        const { pid } = long_term_players[i] || {}
+        rows.push(
+          <PlayerRosterRow
+            key={`${slot}${i}`}
+            reserve
+            {...{ pid, roster, showBid }}
+          />
+        )
+      }
     }
 
     return (
@@ -251,5 +264,6 @@ Roster.propTypes = {
   teamId: PropTypes.number,
   ps_signed_count_max: PropTypes.number,
   ps_drafted_count_max: PropTypes.number,
-  bench_count_max: PropTypes.number
+  bench_count_max: PropTypes.number,
+  ir_long_term_count_max: PropTypes.number
 }
