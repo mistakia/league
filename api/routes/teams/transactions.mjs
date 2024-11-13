@@ -32,7 +32,10 @@ router.get('/reserve', async (req, res) => {
     const { week, year } = constants.season
 
     const reserve_roster_rows = await db('rosters_players')
-      .where('rosters_players.slot', constants.slots.IR)
+      .whereIn('rosters_players.slot', [
+        constants.slots.IR,
+        constants.slots.IR_LONG_TERM
+      ])
       .where({ tid, year, week })
 
     let data = []

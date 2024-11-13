@@ -20,6 +20,7 @@ const mapStateToProps = createSelector(
     let ps_drafted_count_max = 0
     let ps_signed_count_max = 0
     let bench_count_max = 0
+    let ir_long_term_count_max = 0
     for (const roster of rosters.values()) {
       const ps_drafted_count = roster.players.filter((r) =>
         constants.ps_drafted_slots.includes(r.slot)
@@ -38,6 +39,14 @@ const mapStateToProps = createSelector(
         (r) => r.slot === constants.slots.BENCH
       )
       bench_count_max = Math.max(bench_count.size, bench_count_max)
+
+      const ir_long_term_count = roster.players.filter(
+        (r) => r.slot === constants.slots.IR_LONG_TERM
+      )
+      ir_long_term_count_max = Math.max(
+        ir_long_term_count.size,
+        ir_long_term_count_max
+      )
     }
 
     return {
@@ -46,7 +55,8 @@ const mapStateToProps = createSelector(
       teams,
       ps_drafted_count_max,
       ps_signed_count_max,
-      bench_count_max
+      bench_count_max,
+      ir_long_term_count_max
     }
   }
 )

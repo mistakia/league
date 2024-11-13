@@ -6,6 +6,7 @@ import isSlotActive from './is-slot-active.mjs'
 
 const nonStarterSlots = [
   constants.slots.IR,
+  constants.slots.IR_LONG_TERM,
   constants.slots.BENCH,
   constants.slots.COV,
   ...constants.ps_slots
@@ -152,6 +153,12 @@ export default class Roster {
     )
   }
 
+  get ir_long_term() {
+    return Array.from(this._players.values()).filter(
+      (p) => p.slot === constants.slots.IR_LONG_TERM
+    )
+  }
+
   get cov() {
     return Array.from(this._players.values()).filter(
       (p) => p.slot === constants.slots.COV
@@ -159,7 +166,11 @@ export default class Roster {
   }
 
   get reserve() {
-    const slots = [constants.slots.IR, constants.slots.COV]
+    const slots = [
+      constants.slots.IR,
+      constants.slots.COV,
+      constants.slots.IR_LONG_TERM
+    ]
     return Array.from(this._players.values()).filter((p) =>
       slots.includes(p.slot)
     )
@@ -224,6 +235,8 @@ export default class Roster {
   isEligibleForSlot({ slot, pos }) {
     if (slot === constants.slots.IR) {
       return this.hasOpenInjuredReserveSlot()
+    } else if (slot === constants.slots.IR_LONG_TERM) {
+      return true
     } else if (slot === constants.slots.BENCH) {
       return this.hasOpenBenchSlot(pos)
     } else if (slot === constants.slots.PS || slot === constants.slots.PSP) {

@@ -25,6 +25,7 @@ import player_routes_column_definitions from './player-routes-column-definitions
 import player_team_column_definition from './player-team-column-definition.mjs'
 import team_dvoa_column_definitions from './team-dvoa-column-definitions.mjs'
 
+// TODO include IR_LONG_TERM
 const player_league_roster_status_select = `CASE WHEN rosters_players.slot = ${constants.slots.IR} THEN 'injured_reserve' WHEN rosters_players.slot = ${constants.slots.PS} THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END`
 
 export default {
