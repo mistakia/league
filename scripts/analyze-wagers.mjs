@@ -385,7 +385,7 @@ const standardize_wager = ({ wager, source }) => {
           is_settled: wager.status === 'Settled' || is_lost || is_won,
           is_won,
           is_lost,
-          potential_win: wager.potentialReturns,
+          potential_win: combination.potentialReturns,
           stake,
           source_id: 'DRAFTKINGS'
         }
