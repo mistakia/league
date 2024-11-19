@@ -18,6 +18,9 @@ const generate_player_snaps_for_week = async ({
   seas_type = constants.season.nfl_seas_type,
   dry_run = false
 }) => {
+  log(
+    `generating player snaps for week ${week} year ${year} seas_type ${seas_type} (dry_run: ${dry_run})`
+  )
   const player_snap_inserts = []
 
   const nfl_game_rows = await db('nfl_games')
@@ -37,6 +40,8 @@ const generate_player_snaps_for_week = async ({
     .where('nfl_games.year', year)
     .where('nfl_games.week', week)
     .where('nfl_games.seas_type', seas_type)
+
+  await db.raw('SET statement_timeout = 0')
 
   const nfl_snap_rows = await db('nfl_snaps')
     .select(
