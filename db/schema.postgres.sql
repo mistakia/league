@@ -3585,7 +3585,8 @@ CREATE TABLE public.league_team_seasonlogs (
     regular_season_finish smallint,
     post_season_finish smallint,
     overall_finish smallint,
-    weekly_high_scores smallint DEFAULT 0
+    weekly_high_scores smallint DEFAULT 0,
+    "pSlot18" numeric(6,2)
 );
 
 
@@ -14064,7 +14065,7 @@ CREATE TABLE public.nfl_team_seasonlogs (
     play_action_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_epa numeric(5,2) DEFAULT NULL::numeric,
     rush_epa_per_attempt numeric(5,2) DEFAULT NULL::numeric,
-    expected_rush_yards numeric(5,2) DEFAULT NULL::numeric,
+    expected_rush_yards numeric(6,2) DEFAULT NULL::numeric,
     expected_rush_yards_per_attempt numeric(5,2) DEFAULT NULL::numeric,
     rush_yards_over_expected numeric(5,2) DEFAULT NULL::numeric,
     rush_yards_over_expected_per_attempt numeric(5,2) DEFAULT NULL::numeric,
@@ -14083,7 +14084,7 @@ CREATE TABLE public.nfl_team_seasonlogs (
     longest_rush numeric(5,2) DEFAULT NULL::numeric,
     rush_yards_per_attempt numeric(5,2) DEFAULT NULL::numeric,
     rush_yards_10_plus_rate numeric(5,4) DEFAULT NULL::numeric,
-    routes numeric(5,2) DEFAULT NULL::numeric,
+    routes numeric(6,2) DEFAULT NULL::numeric,
     receiving_passer_rating numeric(6,2) DEFAULT NULL::numeric,
     catch_rate numeric(5,2) DEFAULT NULL::numeric,
     expected_catch_rate numeric(5,2) DEFAULT NULL::numeric,

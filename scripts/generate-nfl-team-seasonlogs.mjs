@@ -138,7 +138,11 @@ const rate_stats = [
   'avg_route_depth',
   'recv_deep_target_pct',
   'recv_tight_window_pct',
-  'recv_yards_15_plus_rate'
+  'recv_yards_15_plus_rate',
+  'longest_reception',
+  'longest_rush',
+  'team_air_yard_share',
+  'team_target_share'
 ]
 
 const copy = ({ opp, tm }) => ({ opp, tm })
@@ -489,6 +493,7 @@ const generate_seasonlogs = async ({
 
   if (team_seasonlog_inserts.length) {
     log(`inserting ${team_seasonlog_inserts.length} team stats`)
+
     await batch_insert({
       items: team_seasonlog_inserts,
       save: async (batch) => {
