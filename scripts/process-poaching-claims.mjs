@@ -32,11 +32,7 @@ const run = async () => {
 
   if (constants.season.isRegularSeason) {
     // check if currently between Saturday 6pm and Tuesday 3pm (EST)
-    const start_window = (
-      now.day() < 6 ? now.day(6) : now.add('1', 'week').day(6)
-    )
-      .startOf('day')
-      .hour(18)
+    const start_window = now.day(6).startOf('day').hour(18)
     const end_window = (
       now.day() < 2 ? now.day(2) : now.add('1', 'week').day(2)
     )
