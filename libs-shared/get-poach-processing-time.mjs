@@ -13,16 +13,16 @@ export default function (submitted) {
   // if submitted between thursday 6pm and sunday 3pm — set to tuesday at 3pm
   const { now } = constants.season
   const start_window = (
-    now.day() < 4 ? now.subtract('1', 'week').day(4) : now.day(4)
+    now.day() < 2 ? now.subtract('1', 'week').day(4) : now.day(4)
   )
     .startOf('day')
     .hour(18)
-  const end_window = (now.day() < 3 ? now.day(0) : now.add('1', 'week').day(0))
+  const end_window = (now.day() < 2 ? now.day(0) : now.add('1', 'week').day(0))
     .startOf('day')
     .hour(15)
 
   if (submitted_timestamp.isBetween(start_window, end_window)) {
-    return (now.day() < 3 ? now.day(2) : now.add('1', 'week').day(2))
+    return (now.day() < 2 ? now.day(2) : now.add('1', 'week').day(2))
       .startOf('day')
       .hour(15)
   } else {
