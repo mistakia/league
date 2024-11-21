@@ -107,6 +107,12 @@ export default {
     header_label: 'SR',
     player_value_path: 'team_success_rate_from_plays'
   }),
+  team_expected_points_success_rate_from_plays: from_play_field({
+    column_title: 'Team Expected Points Success Rate (By Play)',
+    column_groups: [COLUMN_GROUPS.TEAM_STATS, COLUMN_GROUPS.ADVANCED],
+    header_label: 'EPSR',
+    player_value_path: 'team_expected_points_success_rate_from_plays'
+  }),
   team_explosive_play_rate_from_plays: from_play_field({
     column_title: 'Team Explosive Play Rate (By Play)',
     column_groups: [COLUMN_GROUPS.TEAM_STATS, COLUMN_GROUPS.ADVANCED],
