@@ -179,6 +179,15 @@ export default {
     is_rate: true,
     supported_rate_types: []
   }),
+  team_expected_points_success_rate_from_plays: team_stat_from_plays({
+    rate_with_selects: [
+      `SUM(CASE WHEN ep_succ = true THEN 1 ELSE 0 END) as team_expected_points_success_rate_from_plays_numerator`,
+      `COUNT(*) as team_expected_points_success_rate_from_plays_denominator`
+    ],
+    stat_name: 'team_expected_points_success_rate_from_plays',
+    is_rate: true,
+    supported_rate_types: []
+  }),
   team_explosive_play_rate_from_plays: team_stat_from_plays({
     rate_with_selects: [
       `SUM(CASE WHEN pass_yds >= 20 OR rush_yds >= 10 THEN 1 ELSE 0 END) as team_explosive_play_rate_from_plays_numerator`,
