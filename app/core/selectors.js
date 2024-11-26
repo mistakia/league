@@ -2053,7 +2053,11 @@ export const getGroupedPlayersByTeamId = createSelector(
       r.cov.map(({ pid }) => player_items.get(pid, new Map()))
     )
 
-    const players = active.concat(practice).concat(ir).concat(cov)
+    const players = active
+      .concat(practice)
+      .concat(ir)
+      .concat(cov)
+      .concat(ir_long_term)
 
     return {
       active,
