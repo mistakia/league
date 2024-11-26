@@ -284,7 +284,11 @@ const generate_prop_pairings = async ({
       player_prop_types.GAME_ALT_PASSING_TOUCHDOWNS,
       player_prop_types.GAME_ALT_PASSING_COMPLETIONS,
       player_prop_types.GAME_ALT_RUSHING_ATTEMPTS,
-      player_prop_types.GAME_ALT_RECEPTIONS
+      player_prop_types.GAME_ALT_RECEPTIONS,
+
+      player_prop_types.GAME_FIRST_QUARTER_ALT_PASSING_YARDS,
+      player_prop_types.GAME_FIRST_QUARTER_ALT_RUSHING_YARDS,
+      player_prop_types.GAME_FIRST_QUARTER_ALT_RECEIVING_YARDS
     ])
     .where('prop_market_selections_index.time_type', 'CLOSE')
     .where('prop_market_selections_index.source_id', source)

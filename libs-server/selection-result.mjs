@@ -120,6 +120,57 @@ export const get_selection_result = ({
       }
     }
 
+    case player_game_prop_types.GAME_FIRST_QUARTER_ALT_PASSING_YARDS: {
+      if (strict) {
+        return compare(
+          player_gamelog.first_quarter_stats?.passing_yards,
+          line,
+          selection_type
+        )
+      } else {
+        const cushion = Math.min(Math.round(line * 0.06), 8)
+        return compare(
+          player_gamelog.first_quarter_stats?.passing_yards,
+          line - cushion,
+          selection_type
+        )
+      }
+    }
+
+    case player_game_prop_types.GAME_FIRST_QUARTER_ALT_RUSHING_YARDS: {
+      if (strict) {
+        return compare(
+          player_gamelog.first_quarter_stats?.rushing_yards,
+          line,
+          selection_type
+        )
+      } else {
+        const cushion = Math.min(Math.round(line * 0.12), 5)
+        return compare(
+          player_gamelog.first_quarter_stats?.rushing_yards,
+          line - cushion,
+          selection_type
+        )
+      }
+    }
+
+    case player_game_prop_types.GAME_FIRST_QUARTER_ALT_RECEIVING_YARDS: {
+      if (strict) {
+        return compare(
+          player_gamelog.first_quarter_stats?.receiving_yards,
+          line,
+          selection_type
+        )
+      } else {
+        const cushion = Math.min(Math.round(line * 0.12), 5)
+        return compare(
+          player_gamelog.first_quarter_stats?.receiving_yards,
+          line - cushion,
+          selection_type
+        )
+      }
+    }
+
     default:
       unsupported_market_types.add(market_type)
       return null

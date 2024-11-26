@@ -37,7 +37,10 @@ const prop_desc = {
   [player_prop_types.GAME_ALT_PASSING_COMPLETIONS]: 'comps',
   [player_prop_types.GAME_ALT_PASSING_TOUCHDOWNS]: 'pass tds',
   [player_prop_types.GAME_ALT_RECEPTIONS]: 'recs',
-  [player_prop_types.GAME_ALT_RUSHING_ATTEMPTS]: 'rush atts'
+  [player_prop_types.GAME_ALT_RUSHING_ATTEMPTS]: 'rush atts',
+  [player_prop_types.GAME_FIRST_QUARTER_ALT_PASSING_YARDS]: '1q pass',
+  [player_prop_types.GAME_FIRST_QUARTER_ALT_RUSHING_YARDS]: '1q rush',
+  [player_prop_types.GAME_FIRST_QUARTER_ALT_RECEIVING_YARDS]: '1q recv'
 }
 
 const get_hits = ({
@@ -64,33 +67,76 @@ const format_prop_row = ({
   opponent,
   player_row,
   seas_type,
-  year
+  year,
+  all_plays = []
 }) => {
   const player_gamelogs = all_player_gamelogs.filter(
     (p) => p.pid === prop_row.selection_pid
   )
 
+  // Group plays by game and calculate quarter stats
+  const quarter_gamelogs = Object.values(
+    all_plays
+      .filter(
+        (p) =>
+          p.psr_pid === prop_row.selection_pid ||
+          p.bc_pid === prop_row.selection_pid ||
+          p.trg_pid === prop_row.selection_pid
+      )
+      .reduce((acc, play) => {
+        if (!acc[play.esbid]) {
+          acc[play.esbid] = {
+            esbid: play.esbid,
+            pid: prop_row.selection_pid,
+            year: play.year,
+            week: play.week,
+            seas_type: play.seas_type,
+            pos: player_row.pos,
+            first_quarter_stats: {
+              passing_yards: 0,
+              rushing_yards: 0,
+              receiving_yards: 0
+            }
+          }
+        }
+
+        if (play.qtr === 1) {
+          if (play.psr_pid === prop_row.selection_pid) {
+            acc[play.esbid].first_quarter_stats.passing_yards +=
+              play.pass_yds || 0
+          }
+          if (play.bc_pid === prop_row.selection_pid) {
+            acc[play.esbid].first_quarter_stats.rushing_yards +=
+              play.rush_yds || 0
+          }
+          if (
+            play.trg_pid === prop_row.selection_pid &&
+            play.bc_pid === prop_row.selection_pid
+          ) {
+            acc[play.esbid].first_quarter_stats.receiving_yards +=
+              play.recv_yds || 0
+          }
+        }
+
+        return acc
+      }, {})
+  )
+
+  // Sort quarter gamelogs to match the order of regular gamelogs
+  quarter_gamelogs.sort((a, b) => {
+    if (a.year !== b.year) return a.year - b.year
+    if (a.seas_type !== b.seas_type)
+      return b.seas_type.localeCompare(a.seas_type)
+    return a.week - b.week
+  })
+
   const current_season_opponent_player_gamelogs = all_player_gamelogs.filter(
     (p) => {
-      if (p.opp !== opponent) {
-        return false
-      }
-      if (p.pos !== player_row.pos) {
-        return false
-      }
-
-      if (p.year !== year) {
-        return false
-      }
-
-      if (seas_type === 'REG' && p.seas_type === 'POST') {
-        return false
-      }
-
-      if (seas_type === p.seas_type && p.week >= week) {
-        return false
-      }
-
+      if (p.opp !== opponent) return false
+      if (p.pos !== player_row.pos) return false
+      if (p.year !== year) return false
+      if (seas_type === 'REG' && p.seas_type === 'POST') return false
+      if (seas_type === p.seas_type && p.week >= week) return false
       return true
     }
   )
@@ -100,26 +146,43 @@ const format_prop_row = ({
   const current_season_gamelogs = player_gamelogs.filter(
     (p) => p.year === year && p.seas_type === seas_type
   )
+  const current_season_quarter_gamelogs = quarter_gamelogs.filter(
+    (p) => p.year === year && p.seas_type === seas_type
+  )
+
   const last_season_gamelogs = player_gamelogs.filter(
     (p) => p.year === year - 1
   )
-  const last_five_gamelogs = player_gamelogs.slice(-5)
-  const last_ten_gamelogs = player_gamelogs.slice(-10)
+  const last_season_quarter_gamelogs = quarter_gamelogs.filter(
+    (p) => p.year === year - 1
+  )
 
-  const get_hit_data = (gamelogs) => {
+  const last_five_gamelogs = player_gamelogs.slice(-5)
+  const last_five_quarter_gamelogs = quarter_gamelogs.slice(-5)
+
+  const last_ten_gamelogs = player_gamelogs.slice(-10)
+  const last_ten_quarter_gamelogs = quarter_gamelogs.slice(-10)
+
+  const get_hit_data = (gamelogs, quarter_gamelogs = []) => {
+    const merged_gamelogs = gamelogs.map((g) => ({
+      ...(quarter_gamelogs.find((q) => q.esbid === g.esbid) || {}),
+      ...g
+    }))
+
     const hits_soft = get_hits({
       line: prop_row.selection_metric_line,
       market_type: prop_row.market_type,
-      player_gamelogs: gamelogs,
+      player_gamelogs: merged_gamelogs,
       selection_type: prop_row.selection_type
     })
     const hits_hard = get_hits({
       line: prop_row.selection_metric_line,
       market_type: prop_row.market_type,
-      player_gamelogs: gamelogs,
+      player_gamelogs: merged_gamelogs,
       strict: true,
       selection_type: prop_row.selection_type
     })
+
     return {
       hits_soft: hits_soft.length,
       hit_weeks_soft: hits_soft.length
@@ -138,16 +201,30 @@ const format_prop_row = ({
           )
         : null,
       weeks_played: JSON.stringify(
-        gamelogs.map((p) => format_week(p.year, p.seas_type, p.week)).sort()
+        merged_gamelogs
+          .map((p) => format_week(p.year, p.seas_type, p.week))
+          .sort()
       )
     }
   }
 
-  const current_season_data = get_hit_data(current_season_gamelogs)
-  const last_season_data = get_hit_data(last_season_gamelogs)
-  const last_five_data = get_hit_data(last_five_gamelogs)
-  const last_ten_data = get_hit_data(last_ten_gamelogs)
-  const overall_data = get_hit_data(player_gamelogs)
+  const current_season_data = get_hit_data(
+    current_season_gamelogs,
+    current_season_quarter_gamelogs
+  )
+  const last_season_data = get_hit_data(
+    last_season_gamelogs,
+    last_season_quarter_gamelogs
+  )
+  const last_five_data = get_hit_data(
+    last_five_gamelogs,
+    last_five_quarter_gamelogs
+  )
+  const last_ten_data = get_hit_data(
+    last_ten_gamelogs,
+    last_ten_quarter_gamelogs
+  )
+  const overall_data = get_hit_data(player_gamelogs, quarter_gamelogs)
 
   const opponent_allowed_hits = get_hits({
     line: prop_row.selection_metric_line,
@@ -276,6 +353,29 @@ const process_props_index = async ({
 
   const props_index_inserts = []
 
+  const nfl_plays = await db('nfl_plays')
+    .select(
+      'esbid',
+      'week',
+      'year',
+      'seas_type',
+      'qtr',
+      'pass_yds',
+      'recv_yds',
+      'rush_yds',
+      'psr_pid',
+      'trg_pid',
+      'bc_pid'
+    )
+    .where({
+      year,
+      seas_type
+    })
+    .whereNot('play_type', 'NOPL')
+    .orderBy('esbid')
+
+  log(`loaded ${nfl_plays.length} plays`)
+
   for (const prop_row of prop_rows) {
     if (!prop_row.selection_pid) {
       continue
@@ -310,7 +410,8 @@ const process_props_index = async ({
       opponent,
       player_row,
       seas_type,
-      year
+      year,
+      all_plays: nfl_plays || []
     })
 
     props_index_inserts.push(formatted_prop_row)
@@ -401,7 +502,10 @@ const main = async () => {
         player_prop_types.GAME_ALT_PASSING_TOUCHDOWNS,
         player_prop_types.GAME_ALT_PASSING_COMPLETIONS,
         player_prop_types.GAME_ALT_RUSHING_ATTEMPTS,
-        player_prop_types.GAME_ALT_RECEPTIONS
+        player_prop_types.GAME_ALT_RECEPTIONS,
+        player_prop_types.GAME_FIRST_QUARTER_ALT_PASSING_YARDS,
+        player_prop_types.GAME_FIRST_QUARTER_ALT_RUSHING_YARDS,
+        player_prop_types.GAME_FIRST_QUARTER_ALT_RECEIVING_YARDS
       ])
       .where('prop_markets_index.time_type', 'CLOSE')
       .where('prop_markets_index.source_id', source)
