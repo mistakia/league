@@ -266,7 +266,9 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
     let data_view_metadata
 
     if (!ignore_cache) {
-      data_view_results = await redis_cache.get(cache_key)
+      const cache_value = await redis_cache.get(cache_key)
+      data_view_results = cache_value.data_view_results
+      data_view_metadata = cache_value.data_view_metadata
     }
 
     if (!data_view_results) {
@@ -286,7 +288,15 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
       // Cache the unformatted results
       if (data_view_results && data_view_results.length && !limit) {
         const cache_ttl = data_view_metadata.cache_ttl || 1000 * 60 * 60 * 12 // 12 hours
-        await redis_cache.set(cache_key, data_view_results, cache_ttl)
+        await redis_cache.set(
+          cache_key,
+          {
+            data_view_results,
+            data_view_metadata
+          },
+          cache_ttl
+        )
+
         if (data_view_metadata.cache_expire_at) {
           await redis_cache.expire_at(
             cache_key,
