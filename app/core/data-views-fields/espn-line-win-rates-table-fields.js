@@ -1,8 +1,12 @@
 import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
-import { common_column_params } from '@libs-shared'
+import {
+  common_column_params,
+  nfl_plays_team_column_params
+} from '@libs-shared'
 
 const { single_year, career_year } = common_column_params
+const { matchup_opponent_type } = nfl_plays_team_column_params
 
 const create_espn_line_field = ({
   column_title,
@@ -48,6 +52,7 @@ const create_team_espn_line_field = ({
       ...single_year,
       values: [2024]
     },
+    matchup_opponent_type,
     career_year
   },
   splits: ['year']

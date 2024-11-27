@@ -117,4 +117,36 @@ describe('LIBS SERVER get_data_view_results', () => {
     const expected_query = `with "tf76584443fc9aa886e48d5d8d650d996" as (select COALESCE(trg_pid) as pid, SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END) as rec_yds_from_plays from "nfl_plays" inner join "nfl_games" on "nfl_games"."esbid" = "nfl_plays"."esbid" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2024) and "nfl_games"."day" in ('MN') group by COALESCE(trg_pid)) select "player"."pid", "tf76584443fc9aa886e48d5d8d650d996"."rec_yds_from_plays" AS "rec_yds_from_plays_0", "player"."pos" from "player" left join "tf76584443fc9aa886e48d5d8d650d996" on "tf76584443fc9aa886e48d5d8d650d996"."pid" = "player"."pid" group by "tf76584443fc9aa886e48d5d8d650d996"."rec_yds_from_plays", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 2 DESC NULLS LAST, "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
   })
+
+  it('team espn line win rates with matchup_opponent_type param', () => {
+    const { query } = get_data_view_results_query({
+      view_id: 'ef18d7a8-f02a-440b-a375-0e7ae0e9f5d1',
+      columns: [
+        {
+          column_id: 'team_espn_run_block_win_rate',
+          params: {
+            matchup_opponent_type: 'current_week_opponent_total',
+            year: [2024]
+          }
+        }
+      ],
+      sort: [
+        {
+          column_id: 'team_espn_run_block_win_rate',
+          desc: true
+        }
+      ],
+      where: [
+        {
+          column_id: 'player_position',
+          params: {},
+          value: ['TEAM'],
+          operator: 'IN'
+        }
+      ],
+      splits: []
+    })
+    const expected_query = `with "current_week_opponents" as (select "h" as "nfl_team", "v" as "opponent" from "public"."nfl_games" where "year" = 2024 and "week" = 13 and "seas_type" = 'REG' union select "v" as "nfl_team", "h" as "opponent" from "public"."nfl_games" where "year" = 2024 and "week" = 13 and "seas_type" = 'REG') select "player"."pid", "espn_team_win_rates_index"."run_block_win_rate" AS "espn_team_run_block_win_rate_0", "player"."pos" from "player" inner join "current_week_opponents" on "player"."current_nfl_team" = "current_week_opponents"."nfl_team" left join "espn_team_win_rates_index" on "espn_team_win_rates_index"."team" = "current_week_opponents"."opponent" and "espn_team_win_rates_index"."year" = 2024 where player.pos IN ('TEAM') group by "espn_team_win_rates_index"."run_block_win_rate", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 2 DESC NULLS LAST, "player"."pid" asc limit 500`
+    compare_queries(query.toString(), expected_query)
+  })
 })
