@@ -8,7 +8,7 @@ import { constants } from '#libs-shared'
 import {
   is_main,
   prizepicks,
-  getPlayer,
+  find_player_row,
   insert_prop_markets,
   report_job
 } from '#libs-server'
@@ -36,7 +36,7 @@ const format_market = async ({
   }
 
   try {
-    player_row = await getPlayer(params)
+    player_row = await find_player_row(params)
   } catch (err) {
     log(err)
   }
@@ -130,7 +130,7 @@ const import_prizepicks_odds = async ({
   let page = 1
   let data
   do {
-    data = await prizepicks.getPlayerProps({ page })
+    data = await prizepicks.find_player_rowProps({ page })
 
     for (const item of data.data) {
       all_markets.push(item)

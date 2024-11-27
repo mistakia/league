@@ -11,7 +11,7 @@ import {
 import {
   is_main,
   nfl,
-  getPlayer,
+  find_player_row,
   updatePlayer,
   createPlayer
 } from '#libs-server'
@@ -46,7 +46,7 @@ const importPlayersNFL = async ({
     let error
     if (gsisid) {
       try {
-        player_row = await getPlayer({ gsisid })
+        player_row = await find_player_row({ gsisid })
       } catch (err) {
         log(err)
       }
@@ -54,7 +54,7 @@ const importPlayersNFL = async ({
 
     if (!player_row && esbid) {
       try {
-        player_row = await getPlayer({ esbid })
+        player_row = await find_player_row({ esbid })
       } catch (err) {
         log(err)
       }
@@ -62,7 +62,7 @@ const importPlayersNFL = async ({
 
     if (!player_row) {
       try {
-        player_row = await getPlayer({ name, dob })
+        player_row = await find_player_row({ name, dob })
       } catch (err) {
         error = err
         log(err)

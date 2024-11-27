@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { is_main, draftkings, getPlayer } from '#libs-server'
+import { is_main, draftkings, find_player_row } from '#libs-server'
 import { bookmaker_constants, fixTeam } from '#libs-shared'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -231,7 +231,7 @@ const process_selection = async ({
 
   let player_row
   try {
-    player_row = await getPlayer(params)
+    player_row = await find_player_row(params)
   } catch (err) {
     log(err)
     return

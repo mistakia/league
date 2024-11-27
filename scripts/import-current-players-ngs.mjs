@@ -11,7 +11,7 @@ import {
 import {
   is_main,
   ngs,
-  getPlayer,
+  find_player_row,
   updatePlayer,
   createPlayer
 } from '#libs-server'
@@ -52,7 +52,7 @@ const import_current_players_ngs = async ({
     let error
     if (gsisid) {
       try {
-        player_row = await getPlayer({ gsisid })
+        player_row = await find_player_row({ gsisid })
       } catch (err) {
         log(err)
       }
@@ -60,7 +60,7 @@ const import_current_players_ngs = async ({
 
     if (!player_row && esbid) {
       try {
-        player_row = await getPlayer({ esbid })
+        player_row = await find_player_row({ esbid })
       } catch (err) {
         log(err)
       }
@@ -68,7 +68,7 @@ const import_current_players_ngs = async ({
 
     if (!player_row) {
       try {
-        player_row = await getPlayer({ name })
+        player_row = await find_player_row({ name })
       } catch (err) {
         error = err
         log(err)
@@ -77,7 +77,7 @@ const import_current_players_ngs = async ({
 
     if (!player_row && gsis_it_id) {
       try {
-        player_row = await getPlayer({ gsis_it_id })
+        player_row = await find_player_row({ gsis_it_id })
       } catch (err) {
         log(err)
       }

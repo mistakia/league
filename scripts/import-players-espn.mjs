@@ -4,7 +4,7 @@ import debug from 'debug'
 
 import db from '#db'
 // import { constants } from '#libs-shared'
-import { is_main, espn, getPlayer, updatePlayer } from '#libs-server'
+import { is_main, espn, find_player_row, updatePlayer } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 // const argv = yargs(hideBin(process.argv)).argv
@@ -45,7 +45,7 @@ const importPlayersESPN = async () => {
 
         let player_row
         try {
-          player_row = await getPlayer({ name, pos, team })
+          player_row = await find_player_row({ name, pos, team })
         } catch (err) {
           log(err)
           log({ name, pos, team, espn_id })

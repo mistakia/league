@@ -10,7 +10,7 @@ import {
   is_main,
   betmgm,
   insert_prop_markets,
-  getPlayer,
+  find_player_row,
   report_job
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -85,7 +85,7 @@ const format_option_market = async ({
       ignore_retired: true
     }
     try {
-      player_row = await getPlayer(params)
+      player_row = await find_player_row(params)
     } catch (err) {
       log(err)
     }

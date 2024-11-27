@@ -11,7 +11,12 @@ import fetch from 'node-fetch'
 
 import db from '#db'
 import { fixTeam } from '#libs-shared'
-import { is_main, getPlayer, updatePlayer, report_job } from '#libs-server'
+import {
+  is_main,
+  find_player_row,
+  updatePlayer,
+  report_job
+} from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -60,14 +65,14 @@ const format_contract_row = (row) => ({
 const process_row = async ({ row }) => {
   let player_row
   try {
-    player_row = await getPlayer({ otc_id: row.otc_id })
+    player_row = await find_player_row({ otc_id: row.otc_id })
   } catch (error) {
     log(error)
   }
 
   if (!player_row) {
     try {
-      player_row = await getPlayer({
+      player_row = await find_player_row({
         name: row.player,
         start: row.draft_year,
         dob: row.date_of_birth

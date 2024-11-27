@@ -11,7 +11,7 @@ import {
   insert_prop_markets,
   betrivers,
   wait,
-  getPlayer,
+  find_player_row,
   report_job
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -38,7 +38,7 @@ const format_market = async ({
     }
 
     try {
-      player_row = await getPlayer(params)
+      player_row = await find_player_row(params)
     } catch (err) {
       log(err)
     }

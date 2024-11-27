@@ -4,7 +4,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#libs-shared'
-import { is_main, pfr, updatePlayer, getPlayer } from '#libs-server'
+import { is_main, pfr, updatePlayer, find_player_row } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -38,7 +38,7 @@ const import_player_draft_position_pfr = async ({
           team: draft_player.team,
           start: year
         }
-        player_row = await getPlayer(params)
+        player_row = await find_player_row(params)
       } catch (err) {
         log(err)
       }

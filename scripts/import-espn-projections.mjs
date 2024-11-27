@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#libs-shared'
-import { is_main, getPlayer, report_job, espn } from '#libs-server'
+import { is_main, find_player_row, report_job, espn } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -54,7 +54,7 @@ const run = async ({
 
     // TODO cleanup
     try {
-      player_row = await getPlayer(params)
+      player_row = await find_player_row(params)
       if (!player_row) {
         missing.push(params)
         continue

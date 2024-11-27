@@ -12,7 +12,7 @@ import { constants, fixTeam, Errors } from '#libs-shared'
 import {
   is_main,
   fanduel,
-  getPlayer,
+  find_player_row,
   encode_market_selection_id,
   batch_insert
 } from '#libs-server'
@@ -226,13 +226,13 @@ const import_fanduel_wagers = async ({
 
       if (player_name) {
         try {
-          player_row = await getPlayer({
+          player_row = await find_player_row({
             name: player_name
           })
         } catch (err) {
           if (err instanceof Errors.MatchedMultiplePlayers) {
             try {
-              player_row = await getPlayer({
+              player_row = await find_player_row({
                 name: player_name,
                 teams: [nfl_game.h, nfl_game.v]
               })

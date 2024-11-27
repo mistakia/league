@@ -4,7 +4,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#libs-shared'
-import { is_main, fantasylife, getPlayer } from '#libs-server'
+import { is_main, fantasylife, find_player_row } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -69,7 +69,7 @@ const import_fantasylife_projections = async ({
       }
 
       try {
-        player_row = await getPlayer(params)
+        player_row = await find_player_row(params)
         if (!player_row) {
           missing.push(params)
           continue

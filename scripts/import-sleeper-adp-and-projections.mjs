@@ -6,7 +6,7 @@ import {
   is_main,
   report_job,
   sleeper,
-  getPlayer,
+  find_player_row,
   batch_insert
 } from '#libs-server'
 import { constants } from '#libs-shared'
@@ -149,7 +149,7 @@ const import_sleeper_adp_and_projections = async ({
 
     let player_row
     try {
-      player_row = await getPlayer({ sleeper_id: projection.player_id })
+      player_row = await find_player_row({ sleeper_id: projection.player_id })
     } catch (err) {
       log(`Error getting player by sleeper_id: ${err}`)
       unmatched_projections.push(projection)
@@ -179,7 +179,7 @@ const import_sleeper_adp_and_projections = async ({
 
     let player_row
     try {
-      player_row = await getPlayer(player_params)
+      player_row = await find_player_row(player_params)
     } catch (err) {
       log(`Error getting player by name, team, pos: ${err}`)
       log(player_params)

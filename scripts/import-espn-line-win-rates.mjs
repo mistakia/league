@@ -5,7 +5,7 @@ import { fetch as fetch_http2 } from 'fetch-h2'
 import * as cheerio from 'cheerio'
 
 import db from '#db'
-import { is_main, report_job, espn, getPlayer } from '#libs-server'
+import { is_main, report_job, espn, find_player_row } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { constants, fixTeam } from '#libs-shared'
 
@@ -52,7 +52,7 @@ const import_espn_line_win_rates = async () => {
       let player_row
       if (player_data.espn_id) {
         try {
-          player_row = await getPlayer({ espn_id: player_data.espn_id })
+          player_row = await find_player_row({ espn_id: player_data.espn_id })
         } catch (err) {
           log(`Error getting player by espn_id: ${err}`)
         }
@@ -60,7 +60,7 @@ const import_espn_line_win_rates = async () => {
 
       if (!player_row) {
         try {
-          player_row = await getPlayer({
+          player_row = await find_player_row({
             name: player_data.player_name,
             team: player_data.team
           })

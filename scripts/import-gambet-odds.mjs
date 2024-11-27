@@ -11,7 +11,7 @@ import {
   is_main,
   gambet,
   wait,
-  getPlayer,
+  find_player_row,
   insert_prop_markets,
   report_job
 } from '#libs-server'
@@ -58,7 +58,7 @@ const format_market = async ({ gambet_market, timestamp, event, nfl_game }) => {
     }
 
     try {
-      player_row = await getPlayer(params)
+      player_row = await find_player_row(params)
     } catch (err) {
       log(err)
     }

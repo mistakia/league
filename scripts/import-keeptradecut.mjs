@@ -9,7 +9,7 @@ import db from '#db'
 import { constants } from '#libs-shared'
 import {
   is_main,
-  getPlayer,
+  find_player_row,
   updatePlayer,
   wait,
   report_job
@@ -52,9 +52,9 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
     }
 
     try {
-      player_row = await getPlayer({ keeptradecut_id: item.playerID })
+      player_row = await find_player_row({ keeptradecut_id: item.playerID })
       if (!player_row) {
-        player_row = await getPlayer({
+        player_row = await find_player_row({
           name: keeptradecut_player.playerName,
           pos: keeptradecut_player.position,
           team: keeptradecut_player.team,

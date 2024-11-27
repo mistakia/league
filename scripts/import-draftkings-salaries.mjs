@@ -8,7 +8,7 @@ import {
   is_main,
   report_job,
   draftkings,
-  getPlayer,
+  find_player_row,
   updatePlayer
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -41,7 +41,7 @@ const import_draftkings_salaries = async ({ dry_run = false } = {}) => {
       let player_row
 
       try {
-        player_row = await getPlayer({
+        player_row = await find_player_row({
           draftkings_id: draftable.playerDkId
         })
       } catch (err) {
@@ -72,7 +72,7 @@ const import_draftkings_salaries = async ({ dry_run = false } = {}) => {
       let player_row
 
       try {
-        player_row = await getPlayer({
+        player_row = await find_player_row({
           name: `${draftable.firstName} ${draftable.lastName}`,
           pos: draftable.position,
           team: draftable.teamAbbreviation

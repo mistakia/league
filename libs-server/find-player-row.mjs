@@ -46,7 +46,7 @@ const format_position = (pos) => {
   }
 }
 
-const getPlayer = async ({
+const find_player_row = async ({
   name,
   pos,
   team,
@@ -192,7 +192,7 @@ const getPlayer = async ({
   return player_rows[0]
 }
 
-export default getPlayer
+export default find_player_row
 
 const main = async () => {
   let error
@@ -206,7 +206,7 @@ const main = async () => {
       ignore_free_agent: argv.ignore_free_agent
     }
     log(options)
-    const player_row = await getPlayer(options)
+    const player_row = await find_player_row(options)
     log(player_row)
   } catch (err) {
     error = err

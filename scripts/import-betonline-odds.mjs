@@ -9,7 +9,7 @@ import db from '#db'
 import { constants, fixTeam } from '#libs-shared'
 import {
   is_main,
-  getPlayer,
+  find_player_row,
   insert_prop_markets,
   betonline,
   wait,
@@ -136,7 +136,7 @@ const run = async () => {
             }
 
             try {
-              player_row = await getPlayer(params)
+              player_row = await find_player_row(params)
             } catch (err) {
               log(err)
             }

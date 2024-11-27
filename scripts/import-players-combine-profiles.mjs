@@ -6,7 +6,7 @@ import { hideBin } from 'yargs/helpers'
 import { constants } from '#libs-shared'
 import {
   is_main,
-  getPlayer,
+  find_player_row,
   createPlayer,
   updatePlayer,
   nfl
@@ -38,7 +38,7 @@ const import_players_from_combine_profiles_for_year = async ({
   for (const profile of data.combineProfiles) {
     let player_row
     try {
-      player_row = await getPlayer({ esbid: profile.person.esbId })
+      player_row = await find_player_row({ esbid: profile.person.esbId })
     } catch (err) {
       log(err)
       continue
