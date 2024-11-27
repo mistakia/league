@@ -696,6 +696,7 @@ export const get_data_view_results_query = ({
     matchup_opponent_types: new Set()
   }
   const data_view_metadata = {
+    created_at: Date.now(),
     cache_ttl: 1000 * 60 * 60 * 24 * 7, // 1 week
     cache_expire_at: null
   }

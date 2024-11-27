@@ -15,11 +15,16 @@ class DataViewQueue {
   async add_request({ ws, request_id, params, user_id, ignore_cache = false }) {
     log('Adding request', { request_id, user_id })
     const cache_key = `/data-views/${get_data_view_hash(params)}`
-    const cached_result = await redis_cache.get(cache_key)
+    const cached_value = await redis_cache.get(cache_key)
 
-    if (cached_result && !ignore_cache) {
+    if (cached_value && !ignore_cache) {
       log('Cache hit', { request_id })
-      this.send_cached_result({ ws, request_id, result: cached_result })
+      this.send_cached_result({
+        ws,
+        request_id,
+        result: cached_value.data_view_results,
+        metadata: cached_value.data_view_metadata
+      })
     } else {
       if (ignore_cache) {
         log('Ignoring cache', { request_id })
@@ -80,11 +85,11 @@ class DataViewQueue {
     })
   }
 
-  send_cached_result({ ws, request_id, result }) {
+  send_cached_result({ ws, request_id, result, metadata }) {
     ws.send(
       JSON.stringify({
         type: 'DATA_VIEW_RESULT',
-        payload: { request_id, result }
+        payload: { request_id, result, metadata }
       })
     )
   }
@@ -143,7 +148,15 @@ class DataViewQueue {
 
       if (data_view_results && data_view_results.length) {
         const cache_ttl = data_view_metadata.cache_ttl || 1000 * 60 * 60 * 12 // 12 hours
-        await redis_cache.set(cache_key, data_view_results, cache_ttl)
+        await redis_cache.set(
+          cache_key,
+          {
+            data_view_results,
+            data_view_metadata
+          },
+          cache_ttl
+        )
+
         if (data_view_metadata.cache_expire_at) {
           await redis_cache.expire_at(
             cache_key,
@@ -155,7 +168,11 @@ class DataViewQueue {
       this.send_message_to_client({
         ws,
         type: 'DATA_VIEW_RESULT',
-        payload: { request_id, result: data_view_results }
+        payload: {
+          request_id,
+          result: data_view_results,
+          metadata: data_view_metadata
+        }
       })
       log('Request processed successfully', { request_id })
     } catch (error) {
