@@ -62,7 +62,27 @@ const team_espn_line_join = ({
   const join_func = get_join_func(join_type)
 
   query[join_func](table_name, function () {
-    this.on(`${table_name}.team`, '=', 'player.current_nfl_team')
+    const matchup_opponent_type = Array.isArray(params.matchup_opponent_type)
+      ? params.matchup_opponent_type[0]
+      : params.matchup_opponent_type
+
+    if (matchup_opponent_type) {
+      switch (matchup_opponent_type) {
+        case 'current_week_opponent_total':
+          this.on(`${table_name}.team`, '=', 'current_week_opponents.opponent')
+          break
+
+        case 'next_week_opponent_total':
+          this.on(`${table_name}.team`, '=', 'next_week_opponents.opponent')
+          break
+
+        default:
+          this.on(`${table_name}.team`, '=', 'player.current_nfl_team')
+          break
+      }
+    } else {
+      this.on(`${table_name}.team`, '=', 'player.current_nfl_team')
+    }
 
     if (!splits.includes('year')) {
       this.andOn(`${table_name}.year`, '=', db.raw('?', [year]))
