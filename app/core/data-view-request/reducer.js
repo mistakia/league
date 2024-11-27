@@ -7,6 +7,7 @@ const initial_state = fromJS({
   position: null,
   status: null,
   result: List(),
+  metadata: null,
   error: null
 })
 
@@ -20,7 +21,8 @@ export function data_view_request_reducer(
         current_request: payload.view_id,
         position: null,
         status: 'pending',
-        result: List()
+        result: List(),
+        metadata: null
       })
 
     case data_views_actions.SET_SELECTED_DATA_VIEW: {
@@ -29,7 +31,8 @@ export function data_view_request_reducer(
           current_request: payload.data_view_id,
           position: null,
           status: 'pending',
-          result: List()
+          result: List(),
+          metadata: null
         })
       }
 
@@ -42,7 +45,8 @@ export function data_view_request_reducer(
           current_request: payload.data_view.view_id,
           position: null,
           status: 'pending',
-          result: List()
+          result: List(),
+          metadata: null
         })
       }
 
@@ -58,7 +62,8 @@ export function data_view_request_reducer(
     case data_view_request_actions.DATA_VIEW_RESULT:
       return state.merge({
         status: 'completed',
-        result: List(payload.result)
+        result: List(payload.result),
+        metadata: payload.metadata
       })
 
     case data_view_request_actions.DATA_VIEW_ERROR:

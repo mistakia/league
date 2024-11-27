@@ -236,6 +236,7 @@ export default function DataViewsPage({
       <Table
         style={{ fontFamily: "'IBM Plex Mono', monospace" }}
         data={players}
+        metadata={data_view_request.metadata}
         on_view_change={on_view_change}
         on_save_view={save_data_view}
         table_state={selected_data_view.table_state}
