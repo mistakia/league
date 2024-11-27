@@ -6,7 +6,7 @@ import { JSDOM } from 'jsdom'
 
 import db from '#db'
 import {
-  getPlayer,
+  find_player_row,
   is_main,
   report_job,
   batch_insert,
@@ -120,7 +120,7 @@ const import_nfl_adp = async ({
 
     let player_row
     try {
-      player_row = await getPlayer({ nfl_id: player.nfl_id })
+      player_row = await find_player_row({ nfl_id: player.nfl_id })
     } catch (err) {
       log(`Error getting player by nfl_id: ${err}`)
       unmatched_players.push(player)
@@ -153,7 +153,7 @@ const import_nfl_adp = async ({
 
     let player_row
     try {
-      player_row = await getPlayer(player_params)
+      player_row = await find_player_row(player_params)
     } catch (err) {
       log(`Error getting player by name, team, pos: ${err}`)
       log(player_params)

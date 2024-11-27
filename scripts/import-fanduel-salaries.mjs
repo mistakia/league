@@ -8,7 +8,7 @@ import {
   is_main,
   report_job,
   fanduel,
-  getPlayer,
+  find_player_row,
   updatePlayer,
   wait
 } from '#libs-server'
@@ -79,7 +79,7 @@ const import_fanduel_salaries = async ({
       let player_row
 
       try {
-        player_row = await getPlayer({
+        player_row = await find_player_row({
           fanduel_id: fanduel_player.id
         })
       } catch (err) {
@@ -116,7 +116,7 @@ const import_fanduel_salaries = async ({
 
       try {
         const team_id = fanduel_player.team?._members?.[0]
-        player_row = await getPlayer({
+        player_row = await find_player_row({
           name: `${fanduel_player.first_name} ${fanduel_player.last_name}`,
           pos: fanduel_player.position,
           team: teams_index[team_id]?.code

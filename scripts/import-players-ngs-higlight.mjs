@@ -3,7 +3,13 @@ import yargs from 'yargs'
 import dayjs from 'dayjs'
 import { hideBin } from 'yargs/helpers'
 
-import { is_main, report_job, ngs, getPlayer, updatePlayer } from '#libs-server'
+import {
+  is_main,
+  report_job,
+  ngs,
+  find_player_row,
+  updatePlayer
+} from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { fixTeam, constants } from '#libs-shared'
 
@@ -46,7 +52,7 @@ const import_players_ngs_highlight = async ({ ignore_cache = false }) => {
     // try esbid
     if (ngs_player.esbId) {
       try {
-        player_row = await getPlayer({ esbid: ngs_player.esbId })
+        player_row = await find_player_row({ esbid: ngs_player.esbId })
       } catch (err) {
         log(err)
       }
@@ -55,7 +61,7 @@ const import_players_ngs_highlight = async ({ ignore_cache = false }) => {
     // try gsisid
     if (!player_row && ngs_player.gsisId) {
       try {
-        player_row = await getPlayer({ gsisid: ngs_player.gsisId })
+        player_row = await find_player_row({ gsisid: ngs_player.gsisId })
       } catch (err) {
         log(err)
       }
@@ -74,7 +80,7 @@ const import_players_ngs_highlight = async ({ ignore_cache = false }) => {
         params.team = ngs_player.teamAbbr
       }
       try {
-        player_row = await getPlayer(params)
+        player_row = await find_player_row(params)
       } catch (err) {
         log(err)
       }

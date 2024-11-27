@@ -6,7 +6,7 @@ import {
   is_main,
   ngs,
   updatePlayer,
-  getPlayer,
+  find_player_row,
   wait,
   createPlayer
 } from '#libs-server'
@@ -34,11 +34,11 @@ const import_players_from_snaps = async () => {
       let player_row
       try {
         if (data.gsisId) {
-          player_row = await getPlayer({ gsisid: data.gsisId })
+          player_row = await find_player_row({ gsisid: data.gsisId })
         }
 
         if (!player_row && data.esbId) {
-          player_row = await getPlayer({ esbid: data.esbId })
+          player_row = await find_player_row({ esbid: data.esbId })
         }
 
         if (!player_row) {
@@ -53,11 +53,11 @@ const import_players_from_snaps = async () => {
           //   options.start = data.entryYear
           // }
 
-          player_row = await getPlayer(options)
+          player_row = await find_player_row(options)
 
           if (!player_row) {
             options.name = data.displayName
-            player_row = await getPlayer(options)
+            player_row = await find_player_row(options)
           }
         }
 

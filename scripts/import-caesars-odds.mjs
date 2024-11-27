@@ -8,7 +8,7 @@ import db from '#db'
 import { constants, fixTeam } from '#libs-shared'
 import {
   is_main,
-  getPlayer,
+  find_player_row,
   caesars,
   insert_prop_markets,
   wait,
@@ -51,7 +51,7 @@ const format_market = async ({
     }
 
     try {
-      player_row = await getPlayer(params)
+      player_row = await find_player_row(params)
     } catch (err) {
       log(err)
     }
@@ -103,7 +103,7 @@ const format_market = async ({
 
     // if (!player_row) {
     //   try {
-    //     player_row = await getPlayer({
+    //     player_row = await find_player_row({
     //       name: selection.name.replaceAll('|', ''),
     //       ignore_free_agent: true,
     //       ignore_retired: true

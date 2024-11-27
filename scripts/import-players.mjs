@@ -3,7 +3,7 @@ import debug from 'debug'
 
 import {
   is_main,
-  getPlayer,
+  find_player_row,
   wait,
   updatePlayer,
   nfl,
@@ -55,7 +55,7 @@ const run = async () => {
       const teamAbbr = fixTeam(rosterData.abbr)
 
       const name = `${item.firstName} ${item.lastName}`
-      const player_row = await getPlayer({ name, team: teamAbbr })
+      const player_row = await find_player_row({ name, team: teamAbbr })
 
       if (!player_row) {
         missing.push(item)

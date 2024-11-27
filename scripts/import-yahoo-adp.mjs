@@ -4,7 +4,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import {
-  getPlayer,
+  find_player_row,
   is_main,
   report_job,
   batch_insert,
@@ -51,7 +51,7 @@ const import_yahoo_adp = async ({
   for (const player of players) {
     let player_row
     try {
-      player_row = await getPlayer({ yahoo_id: player.yahoo_id })
+      player_row = await find_player_row({ yahoo_id: player.yahoo_id })
     } catch (err) {
       log(`Error getting player by yahoo_id: ${err}`)
       unmatched_players.push(player)
@@ -83,7 +83,7 @@ const import_yahoo_adp = async ({
 
     let player_row
     try {
-      player_row = await getPlayer(player_params)
+      player_row = await find_player_row(player_params)
     } catch (err) {
       log(`Error getting player by name, team, pos: ${err}`)
       log(player_params)

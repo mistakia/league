@@ -4,7 +4,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants, fixTeam, formatPosition } from '#libs-shared'
-import { is_main, nfl, wait, getPlayer } from '#libs-server'
+import { is_main, nfl, wait, find_player_row } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -78,7 +78,7 @@ const import_player_gamelogs_for_week = async ({
             name: `${item.firstName} ${item.lastName}`,
             pos: formatPosition(item.position)
           }
-          player = await getPlayer(params)
+          player = await find_player_row(params)
         } catch (err) {
           log(err)
         }
@@ -119,7 +119,7 @@ const import_player_gamelogs_for_week = async ({
             name: `${item.firstName} ${item.lastName}`,
             pos: formatPosition(item.position)
           }
-          player = await getPlayer(params)
+          player = await find_player_row(params)
         } catch (err) {
           log(err)
         }

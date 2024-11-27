@@ -4,7 +4,13 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#libs-shared'
-import { is_main, getPlayer, wait, report_job, fantasypros } from '#libs-server'
+import {
+  is_main,
+  find_player_row,
+  wait,
+  report_job,
+  fantasypros
+} from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -84,7 +90,7 @@ const import_single_fantasypros_draft_rankings = async ({
 
     let player_row
     try {
-      player_row = await getPlayer(params)
+      player_row = await find_player_row(params)
       if (!player_row) {
         missing.push(params)
         continue

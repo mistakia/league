@@ -4,7 +4,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 // import config from '#config'
-import { is_main, fanduel, getPlayer } from '#libs-server'
+import { is_main, fanduel, find_player_row } from '#libs-server'
 // import { constants } from '#libs-shared'
 // import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
@@ -201,7 +201,7 @@ const process_fanduel_markets_and_selections = async ({
       }
 
       try {
-        player_row = await getPlayer(params)
+        player_row = await find_player_row(params)
       } catch (err) {
         log(selection)
         log(params)

@@ -8,7 +8,7 @@ import db from '#db'
 import { constants, fixTeam } from '#libs-shared'
 import {
   is_main,
-  getPlayer,
+  find_player_row,
   insert_prop_markets,
   wait,
   report_job,
@@ -71,7 +71,7 @@ const format_market = async ({
 
     if (player_name) {
       try {
-        player_row = await getPlayer({
+        player_row = await find_player_row({
           name: player_name,
           teams,
           ignore_free_agent: true,

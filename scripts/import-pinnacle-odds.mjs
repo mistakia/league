@@ -8,7 +8,7 @@ import db from '#db'
 import { constants, fixTeam } from '#libs-shared'
 import {
   is_main,
-  getPlayer,
+  find_player_row,
   pinnacle,
   insert_prop_markets,
   wait,
@@ -62,7 +62,7 @@ const format_market = async ({
   if (special_category === 'Player Props' && special_description) {
     const player_name_string = special_description.split('(')[0].trim()
     try {
-      player_row = await getPlayer({
+      player_row = await find_player_row({
         name: player_name_string,
         teams,
         ignore_free_agent: true,
@@ -98,7 +98,7 @@ const format_market = async ({
       }
 
       try {
-        player_row = await getPlayer(params)
+        player_row = await find_player_row(params)
       } catch (err) {
         log(err)
       }

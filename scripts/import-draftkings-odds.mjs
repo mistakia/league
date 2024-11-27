@@ -8,7 +8,7 @@ import db from '#db'
 import { constants, fixTeam, bookmaker_constants } from '#libs-shared'
 import {
   is_main,
-  getPlayer,
+  find_player_row,
   draftkings,
   insert_prop_markets,
   wait,
@@ -88,7 +88,7 @@ const format_market = async ({
       }
 
       try {
-        player_row = await getPlayer(params)
+        player_row = await find_player_row(params)
       } catch (err) {
         log(err)
       }

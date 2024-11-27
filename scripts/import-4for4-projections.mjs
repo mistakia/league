@@ -2,7 +2,12 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { getPlayer, is_main, report_job, four_for_four } from '#libs-server'
+import {
+  find_player_row,
+  is_main,
+  report_job,
+  four_for_four
+} from '#libs-server'
 import { constants } from '#libs-shared'
 import db from '#db'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -65,7 +70,7 @@ const run = async ({
 
     let player_row
     try {
-      player_row = await getPlayer(params)
+      player_row = await find_player_row(params)
       if (!player_row) {
         missing.push(params)
         continue

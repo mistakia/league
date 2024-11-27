@@ -2,7 +2,7 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { is_main, report_job, pff, wait, getPlayer } from '#libs-server'
+import { is_main, report_job, pff, wait, find_player_row } from '#libs-server'
 import { constants, job_constants } from '#libs-shared'
 import db from '#db'
 import diff from 'deep-diff'
@@ -43,7 +43,7 @@ const import_pff_grades_for_position = async ({
 
     // Try to get player id using pff_id
     try {
-      const player_row = await getPlayer({ pff_id: player.id })
+      const player_row = await find_player_row({ pff_id: player.id })
       if (player_row) {
         pid = player_row.pid
       }
@@ -54,7 +54,7 @@ const import_pff_grades_for_position = async ({
     // If pff_id lookup fails, try matching using name, team, and position
     if (!pid) {
       try {
-        const player_row = await getPlayer({
+        const player_row = await find_player_row({
           name: player.name,
           team: player.team_name,
           pos: player.position.toUpperCase()

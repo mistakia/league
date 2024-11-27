@@ -13,7 +13,7 @@ import {
   is_main,
   readCSV,
   update_nfl_game,
-  getPlayer,
+  find_player_row,
   report_job
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -133,7 +133,9 @@ const import_nfl_games_nflverse_nfldata = async ({
       const game = format_game(item)
 
       if (item.away_qb_id) {
-        const away_qb_player = await getPlayer({ gsisid: item.away_qb_id })
+        const away_qb_player = await find_player_row({
+          gsisid: item.away_qb_id
+        })
 
         if (away_qb_player) {
           game.away_qb_pid = away_qb_player.pid
@@ -143,7 +145,9 @@ const import_nfl_games_nflverse_nfldata = async ({
       }
 
       if (item.home_qb_id) {
-        const home_qb_player = await getPlayer({ gsisid: item.home_qb_id })
+        const home_qb_player = await find_player_row({
+          gsisid: item.home_qb_id
+        })
 
         if (home_qb_player) {
           game.home_qb_pid = home_qb_player.pid

@@ -12,7 +12,7 @@ import {
 } from '#libs-shared'
 import {
   is_main,
-  getPlayer,
+  find_player_row,
   updatePlayer,
   createPlayer,
   report_job
@@ -47,9 +47,9 @@ const run = async () => {
 
     let player_row
     try {
-      player_row = await getPlayer({ sleeper_id })
+      player_row = await find_player_row({ sleeper_id })
       if (!player_row) {
-        player_row = await getPlayer({
+        player_row = await find_player_row({
           name,
           pos,
           teams: [team, 'INA'],

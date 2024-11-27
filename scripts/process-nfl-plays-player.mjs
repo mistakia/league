@@ -1,7 +1,7 @@
 import debug from 'debug'
 
 import db from '#db'
-import { is_main, getPlayer, updatePlayer } from '#libs-server'
+import { is_main, find_player_row, updatePlayer } from '#libs-server'
 import { constants } from '#libs-shared'
 
 const log = debug('process-nfl-plays-player')
@@ -64,7 +64,9 @@ const process_nfl_plays_player = async () => {
     // first try to match using gsis_id
     if (nfl_plays_player_row.gsis_id) {
       try {
-        player_row = await getPlayer({ gsisid: nfl_plays_player_row.gsis_id })
+        player_row = await find_player_row({
+          gsisid: nfl_plays_player_row.gsis_id
+        })
       } catch (err) {
         log(`Error matching player using gsis_id: ${err.message}`)
       }
@@ -73,7 +75,7 @@ const process_nfl_plays_player = async () => {
     // next try to match using player_esbid
     if (!player_row && nfl_plays_player_row.player_esbid) {
       try {
-        player_row = await getPlayer({
+        player_row = await find_player_row({
           esbid: nfl_plays_player_row.player_esbid
         })
       } catch (err) {
@@ -88,7 +90,7 @@ const process_nfl_plays_player = async () => {
       nfl_plays_player_row.last_name
     ) {
       try {
-        player_row = await getPlayer({
+        player_row = await find_player_row({
           name: `${nfl_plays_player_row.first_name} ${nfl_plays_player_row.last_name}`,
           teams: [
             nfl_plays_player_row.off,
