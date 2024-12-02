@@ -26,7 +26,8 @@ schedule.scheduleJob('0 0 * 1,2,9-12 3', finalize_week)
 // thursday
 schedule.scheduleJob('*/1 12-23 * 1,2,9-12 4', import_live_plays)
 
-// TODO black friday game
+// friday after thanksgiving
+schedule.scheduleJob('*/1 9-23 * 11 5', import_live_plays)
 
 // saturday in December
 schedule.scheduleJob('*/1 9-23 * 12 6', import_live_plays)
