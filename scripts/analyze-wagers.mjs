@@ -623,6 +623,167 @@ const analyze_prop_combinations = (lost_props, filtered, wager_summary) => {
   return { one_prop, two_props, three_props }
 }
 
+const format_round_robin_display = (wager) => {
+  // Group selections by event_id
+  const selections_by_event = wager.legs.reduce((acc, leg) => {
+    const selection = leg.parts[0]
+    if (!acc[selection.eventId]) {
+      acc[selection.eventId] = []
+    }
+    acc[selection.eventId].push(selection)
+    return acc
+  }, {})
+
+  // Format each event's selections
+  const formatted_lines = Object.values(selections_by_event).map(
+    (event_selections) => {
+      // Group selections by player name
+      const selections_by_player = event_selections.reduce((acc, selection) => {
+        // Extract player name from eventMarketDescription
+        const player_name = selection.eventMarketDescription.split(' - ')[0]
+        if (!acc[player_name]) {
+          acc[player_name] = []
+        }
+        acc[player_name].push(selection)
+        return acc
+      }, {})
+
+      // Format each player's selections
+      const player_lines = Object.entries(selections_by_player).map(
+        ([player_name, player_selections]) => {
+          // Group by stat type and quarter
+          const grouped_by_stat = player_selections.reduce((acc, selection) => {
+            const is_q1 = selection.eventMarketDescription.includes('1st Qtr')
+            const stat_type = selection.eventMarketDescription
+              .split(' - ')[1]
+              .replace('Alt ', '')
+              .replace('1st Qtr ', '')
+              .replace('Receptions', 'recs')
+              .replace('Receiving Yds', 'recv')
+              .replace('Rushing Yds', 'rush')
+              .replace('Passing Yds', 'pass')
+
+            const key = is_q1 ? `q1_${stat_type}` : stat_type
+            if (!acc[key]) {
+              acc[key] = []
+            }
+            acc[key].push(selection)
+            return acc
+          }, {})
+
+          // Format each stat type group
+          const stat_lines = Object.entries(grouped_by_stat).map(
+            ([stat_key, stat_selections]) => {
+              const thresholds = stat_selections
+                .map((selection) => {
+                  const match =
+                    selection.selectionName.match(/(\d+)\+ ?(Yards?)?/)
+                  return match ? match[1] : null
+                })
+                .filter(Boolean)
+                .sort((a, b) => Number(a) - Number(b))
+                .map((threshold) => `${threshold}+`)
+                .join(' / ')
+
+              const is_q1 = stat_key.startsWith('q1_')
+              const stat_type = is_q1 ? stat_key.replace('q1_', '') : stat_key
+
+              return `${thresholds} ${is_q1 ? 'q1 ' : ''}${stat_type}`
+            }
+          )
+
+          return `${player_name} ${stat_lines.join(' / ')}`
+        }
+      )
+
+      return player_lines.join(' / ')
+    }
+  )
+
+  return formatted_lines.join('\n')
+}
+
+const analyze_round_robin_selections = (wagers) => {
+  // Track selection usage and combinations
+  const selection_stats = new Map()
+
+  wagers.forEach((wager) => {
+    // Group selections by event for this wager
+    const selections_by_event = wager.legs.reduce((acc, leg) => {
+      const selection = leg.parts[0]
+      if (!acc[selection.eventId]) {
+        acc[selection.eventId] = []
+      }
+      acc[selection.eventId].push(selection)
+      return acc
+    }, {})
+
+    // Process each selection
+    Object.entries(selections_by_event).forEach(
+      ([event_id, event_selections]) => {
+        event_selections.forEach((selection) => {
+          const is_q1 = selection.eventMarketDescription.includes('1st Qtr')
+          const stat_type = selection.eventMarketDescription
+            .split(' - ')[1]
+            .replace('Alt ', '')
+            .replace('1st Qtr ', '')
+            .replace('Receiving Yds', 'rec')
+            .replace('Rushing Yds', 'rush')
+            .replace('Passing Yds', 'pass')
+
+          const player_name = selection.eventMarketDescription.split(' - ')[0]
+          const threshold =
+            selection.selectionName.match(/(\d+)\+ ?(Yards?)?/)[1]
+
+          const selection_key = `${player_name} ${threshold}+ ${is_q1 ? 'q1 ' : ''}${stat_type}`
+
+          if (!selection_stats.has(selection_key)) {
+            selection_stats.set(selection_key, {
+              count: 0,
+              combinations: []
+            })
+          }
+
+          const stat = selection_stats.get(selection_key)
+          stat.count++
+
+          // Add the other selections from this round robin, grouped by game
+          const other_selections = Object.entries(selections_by_event)
+            .filter(([other_event_id]) => other_event_id !== event_id)
+            .map(([_, game_selections]) => {
+              // Format the selections for this game
+              const formatted_selections = format_round_robin_display({
+                legs: game_selections.map((sel) => ({ parts: [sel] }))
+              })
+              return formatted_selections
+            })
+
+          if (other_selections.length > 0) {
+            stat.combinations.push(other_selections)
+          }
+        })
+      }
+    )
+  })
+
+  // Sort by usage count and format output
+  const sorted_selections = Array.from(selection_stats.entries()).sort(
+    (a, b) => b[1].count - a[1].count
+  )
+
+  console.log('\n\nSelection Analysis:\n')
+  sorted_selections.forEach(([selection_key, stats]) => {
+    console.log(`${selection_key} (${stats.count} round robins)`)
+    stats.combinations.forEach((combination, index) => {
+      console.log(`  Round Robin ${index + 1}:`)
+      combination.forEach((game_selections) => {
+        console.log(`    ${game_selections}`)
+      })
+    })
+    console.log()
+  })
+}
+
 const analyze_wagers = async ({
   fanduel_filename,
   draftkings_filename,
@@ -637,7 +798,9 @@ const analyze_wagers = async ({
   include_selections = [],
   exclude_selections = [],
   sort_by = 'odds',
-  show_wager_roi = false
+  show_wager_roi = false,
+  show_only_open_round_robins = false,
+  show_round_robins = false
 } = {}) => {
   if (!fanduel_filename && !draftkings_filename) {
     throw new Error('At least one filename (FanDuel or DraftKings) is required')
@@ -658,6 +821,7 @@ const analyze_wagers = async ({
   })
 
   let wagers = []
+  let fanduel_round_robin_wagers = []
 
   if (fanduel_filename) {
     try {
@@ -669,6 +833,13 @@ const analyze_wagers = async ({
           standardize_wager({ wager, source: 'fanduel' })
         )
       )
+      fanduel_round_robin_wagers = fanduel_wagers.filter((wager) => {
+        const is_round_robin = wager.numLines > 1
+        if (show_only_open_round_robins) {
+          return is_round_robin && wager.potentialWin > 0
+        }
+        return is_round_robin
+      })
     } catch (error) {
       if (error.code === 'ENOENT') {
         console.warn(
@@ -811,7 +982,7 @@ const analyze_wagers = async ({
 
   if (show_counts) {
     add_row('Wagers', wager_summary.wagers)
-    add_row('Total Won', wager_summary.total_won)
+    add_row('Total Won', wager_summary.total_won.toFixed(2))
     // add_row('Wagers Won', wager_summary.wagers_won)
     // add_row('Wagers Loss', wager_summary.wagers_loss)
     add_row('Wagers Open', wager_summary.wagers_open)
@@ -824,6 +995,20 @@ const analyze_wagers = async ({
   }
 
   wager_summary_table.printTable()
+
+  if (show_round_robins) {
+    console.log(
+      `\n\nTotal FanDuel Round Robins: ${fanduel_round_robin_wagers.length}\n`
+    )
+
+    fanduel_round_robin_wagers.forEach((wager) => {
+      const formatted_display = format_round_robin_display(wager)
+      console.log(formatted_display)
+      console.log('---')
+    })
+
+    analyze_round_robin_selections(fanduel_round_robin_wagers)
+  }
 
   if (show_counts) {
     const lost_by_legs_summary_table = new Table({
@@ -1089,7 +1274,9 @@ const main = async () => {
       hide_wagers: argv.hide_wagers,
       filter_wagers_min_legs: argv.min_legs,
       sort_by: argv.sort_by || 'odds',
-      show_wager_roi: argv.show_wager_roi
+      show_wager_roi: argv.show_wager_roi,
+      show_only_open_round_robins: argv.show_only_open_round_robins,
+      show_round_robins: argv.show_round_robins
     })
   } catch (err) {
     error = err
