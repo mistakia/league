@@ -188,8 +188,7 @@
     "yargs": "17.7.2"
   },
   "resolutions": {
-    "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest",
-    "react-table": "portal:/Users/trashman/Projects/react-table"
+    "@mui/styled-engine": "npm:@mui/styled-engine-sc@latest"
   },
   "packageManager": "yarn@4.5.1"
 }
