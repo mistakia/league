@@ -130,7 +130,7 @@ const import_prizepicks_odds = async ({
   let page = 1
   let data
   do {
-    data = await prizepicks.find_player_rowProps({ page })
+    data = await prizepicks.getPlayerProps({ page })
 
     for (const item of data.data) {
       all_markets.push(item)
