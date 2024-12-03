@@ -12,17 +12,21 @@ export default function (submitted) {
 
   // if submitted between thursday 6pm and sunday 3pm — set to tuesday at 3pm
   const { now } = constants.season
+  const cutoff = now.day(2).startOf('day').hour(15)
+  const is_before_cutoff = now.isBefore(cutoff)
   const start_window = (
-    now.day() < 2 ? now.subtract('1', 'week').day(4) : now.day(4)
+    is_before_cutoff ? now.subtract('1', 'week').day(4) : now.day(4)
   )
     .startOf('day')
     .hour(18)
-  const end_window = (now.day() < 2 ? now.day(0) : now.add('1', 'week').day(0))
+  const end_window = (
+    is_before_cutoff ? now.day(0) : now.add('1', 'week').day(0)
+  )
     .startOf('day')
     .hour(15)
 
   if (submitted_timestamp.isBetween(start_window, end_window)) {
-    return (now.day() < 2 ? now.day(2) : now.add('1', 'week').day(2))
+    return (is_before_cutoff ? now.day(2) : now.add('1', 'week').day(2))
       .startOf('day')
       .hour(15)
   } else {
