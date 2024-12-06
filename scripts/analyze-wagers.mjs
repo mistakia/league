@@ -429,6 +429,7 @@ const analyze_prop_combinations = (lost_props, filtered, wager_summary) => {
   const three_props = []
 
   const prop_summaries = new Map()
+  const actual_prop_summaries = new Map()
   const wager_indices = new Map()
   const props_by_source = new Map()
   const wagers_by_source = new Map()
@@ -450,7 +451,7 @@ const analyze_prop_combinations = (lost_props, filtered, wager_summary) => {
   })
 
   // Pre-calculate summaries for individual props
-  const calculate_summary = (source_id, prop_ids) => {
+  const calculate_summary = ({ source_id, prop_ids, actual = false }) => {
     // Get the set of wager indices for the first prop
     const first_prop_key = `${source_id}:${prop_ids[0]}`
     let relevant_wager_indices = new Set(
@@ -472,27 +473,32 @@ const analyze_prop_combinations = (lost_props, filtered, wager_summary) => {
 
     return get_wagers_summary({
       wagers: relevant_wagers,
-      props: prop_ids.map((id) =>
-        lost_props.find(
-          (p) => p.selection_id === id && p.source_id === source_id
-        )
-      )
+      props: actual
+        ? []
+        : prop_ids.map((id) =>
+            lost_props.find(
+              (p) => p.selection_id === id && p.source_id === source_id
+            )
+          )
     })
   }
 
-  const get_prop_summary = (source_id, prop_ids) => {
-    const key = `${source_id}:${prop_ids.sort().join('|')}`
+  const get_prop_summary = ({ source_id, prop_ids = [], actual = false }) => {
+    const key = `${source_id}:${prop_ids.sort().join('|')}${actual ? ':actual' : ''}`
     if (!prop_summaries.has(key)) {
-      prop_summaries.set(key, calculate_summary(source_id, prop_ids))
+      prop_summaries.set(
+        key,
+        calculate_summary({ source_id, prop_ids, actual })
+      )
     }
     return prop_summaries.get(key)
   }
 
-  const calculate_potential_gain = (summary) => ({
-    potential_gain: summary.total_won - wager_summary.total_won,
-    potential_wins: summary.wagers_won - wager_summary.wagers_won,
+  const calculate_potential_gain = ({ actual_summary, prop_summary }) => ({
+    potential_gain: prop_summary.total_won - actual_summary.total_won,
+    potential_wins: prop_summary.wagers_won - actual_summary.wagers_won,
     potential_roi_added:
-      ((summary.total_won - wager_summary.total_won) /
+      ((prop_summary.total_won - actual_summary.total_won) /
         wager_summary.total_risk) *
       100
   })
@@ -502,8 +508,17 @@ const analyze_prop_combinations = (lost_props, filtered, wager_summary) => {
       props_by_source.set(prop.source_id, [])
     }
     props_by_source.get(prop.source_id).push(prop)
-    const summary = calculate_summary(prop.source_id, [prop.selection_id])
+    const summary = calculate_summary({
+      source_id: prop.source_id,
+      prop_ids: [prop.selection_id]
+    })
+    const actual_summary = calculate_summary({
+      source_id: prop.source_id,
+      prop_ids: [prop.selection_id],
+      actual: true
+    })
     prop_summaries.set(prop.selection_id, summary)
+    actual_prop_summaries.set(prop.selection_id, actual_summary)
   })
 
   // Use a Set for faster lookups
@@ -513,9 +528,23 @@ const analyze_prop_combinations = (lost_props, filtered, wager_summary) => {
   for (const [source_id, source_props] of props_by_source.entries()) {
     // Single prop analysis
     source_props.forEach((prop) => {
-      const summary = get_prop_summary(source_id, [prop.selection_id])
+      const actual_summary = get_prop_summary({
+        source_id,
+        prop_ids: [prop.selection_id],
+        actual: true
+      })
+      const summary = get_prop_summary({
+        source_id,
+        prop_ids: [prop.selection_id]
+      })
       const { potential_gain, potential_wins, potential_roi_added } =
-        calculate_potential_gain(summary)
+        calculate_potential_gain({ actual_summary, prop_summary: summary })
+
+      if (prop.selectionName.includes('Justin Herbert 200+')) {
+        console.log(actual_summary)
+        console.log(summary)
+        console.log(prop)
+      }
 
       if (potential_gain > 0) {
         one_prop.push({
@@ -540,15 +569,30 @@ const analyze_prop_combinations = (lost_props, filtered, wager_summary) => {
 
         if (!processed_combinations.has(two_prop_key)) {
           processed_combinations.add(two_prop_key)
-          const two_prop_summary = get_prop_summary(source_id, two_prop_ids)
+          const actual_summary = get_prop_summary({
+            source_id,
+            prop_ids: two_prop_ids,
+            actual: true
+          })
+          const two_prop_summary = get_prop_summary({
+            source_id,
+            prop_ids: two_prop_ids
+          })
           const { potential_gain, potential_wins, potential_roi_added } =
-            calculate_potential_gain(two_prop_summary)
+            calculate_potential_gain({
+              actual_summary,
+              prop_summary: two_prop_summary
+            })
 
           const individual_gains = [
-            get_prop_summary(source_id, [source_props[i].selection_id])
-              .total_won,
-            get_prop_summary(source_id, [source_props[j].selection_id])
-              .total_won
+            get_prop_summary({
+              source_id,
+              prop_ids: [source_props[i].selection_id]
+            }).total_won,
+            get_prop_summary({
+              source_id,
+              prop_ids: [source_props[j].selection_id]
+            }).total_won
           ]
 
           if (
@@ -575,26 +619,42 @@ const analyze_prop_combinations = (lost_props, filtered, wager_summary) => {
 
             if (!processed_combinations.has(three_prop_key)) {
               processed_combinations.add(three_prop_key)
-              const three_prop_summary = get_prop_summary(
+              const actual_summary = get_prop_summary({
                 source_id,
-                three_prop_ids
-              )
-              const three_prop_result =
-                calculate_potential_gain(three_prop_summary)
+                prop_ids: three_prop_ids,
+                actual: true
+              })
+              const three_prop_summary = get_prop_summary({
+                source_id,
+                prop_ids: three_prop_ids
+              })
+              const three_prop_result = calculate_potential_gain({
+                actual_summary,
+                prop_summary: three_prop_summary
+              })
 
               const two_prop_gains = [
-                get_prop_summary(source_id, [
-                  source_props[i].selection_id,
-                  source_props[j].selection_id
-                ]).total_won,
-                get_prop_summary(source_id, [
-                  source_props[i].selection_id,
-                  source_props[k].selection_id
-                ]).total_won,
-                get_prop_summary(source_id, [
-                  source_props[j].selection_id,
-                  source_props[k].selection_id
-                ]).total_won
+                get_prop_summary({
+                  source_id,
+                  prop_ids: [
+                    source_props[i].selection_id,
+                    source_props[j].selection_id
+                  ]
+                }).total_won,
+                get_prop_summary({
+                  source_id,
+                  prop_ids: [
+                    source_props[i].selection_id,
+                    source_props[k].selection_id
+                  ]
+                }).total_won,
+                get_prop_summary({
+                  source_id,
+                  prop_ids: [
+                    source_props[j].selection_id,
+                    source_props[k].selection_id
+                  ]
+                }).total_won
               ]
 
               if (
