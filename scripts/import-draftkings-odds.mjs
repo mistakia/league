@@ -217,7 +217,11 @@ const run = async () => {
       `./tmp/draftking-markets-${timestamp}.json`,
       JSON.stringify(all_markets, null, 2)
     )
-    return
+
+    await fs.writeFile(
+      `./tmp/draftking-markets-formatted-${timestamp}.json`,
+      JSON.stringify(formatted_markets, null, 2)
+    )
   }
 
   if (argv.dry) {
