@@ -2,7 +2,7 @@ import debug from 'debug'
 
 import {
   formatHeight,
-  formatPlayerName,
+  format_player_name,
   fixTeam,
   formatPosition,
   format_nfl_status
@@ -91,7 +91,7 @@ const createPlayer = async (playerData) => {
     .match(/[a-zA-Z]/)
     .pop()
     .toUpperCase()}.${playerData.lname}`
-  playerData.formatted = formatPlayerName(
+  playerData.formatted = format_player_name(
     `${playerData.fname} ${playerData.lname}`
   )
   playerData.height = formatHeight(playerData.height)

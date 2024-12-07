@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { formatPlayerName } from '#libs-shared'
+import { format_player_name } from '#libs-shared'
 import { is_main, pfr } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -46,7 +46,7 @@ const import_pro_football_reference_player_ids = async ({
         pfr_player.positions.push('RB')
       }
 
-      const formatted = formatPlayerName(pfr_player.name)
+      const formatted = format_player_name(pfr_player.name)
       const matched_players = all_players.filter(
         (p) =>
           p.formatted === formatted &&

@@ -1,7 +1,7 @@
 import debug from 'debug'
 
 import db from '#db'
-import { formatPlayerName } from '#libs-shared'
+import { format_player_name } from '#libs-shared'
 import { is_main, updatePlayer, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -14,7 +14,7 @@ const updateFormattedNames = async () => {
   let count = 0
   for (const player_row of player_rows) {
     try {
-      const formatted = formatPlayerName(
+      const formatted = format_player_name(
         `${player_row.fname} ${player_row.lname}`
       )
       const changes = await updatePlayer({ player_row, update: { formatted } })
