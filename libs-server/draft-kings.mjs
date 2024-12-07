@@ -122,6 +122,7 @@ export const get_market_type_offer_1000 = (subcategoryId) => {
 
     case 12093:
     case 14119:
+    case 16569:
       return player_prop_types.GAME_ALT_PASSING_YARDS
 
     default:
