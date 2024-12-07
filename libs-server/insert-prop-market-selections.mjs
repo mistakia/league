@@ -195,7 +195,7 @@ export default async function ({
       })
       results.push(result)
 
-      if (!market.live) {
+      if (!market.live && existing_market && existing_market.source_market_id) {
         // remove any missing selections from `prop_market_selections_index`
         const existing_selections = await db('prop_market_selections_index')
           .where({
@@ -213,13 +213,15 @@ export default async function ({
         const missing_selection_ids = existing_selection_ids.filter(
           (id) => !new_selection_ids.includes(id)
         )
-        await db('prop_market_selections_index')
-          .where({
-            source_market_id: existing_market.source_market_id,
-            time_type: 'CLOSE'
-          })
-          .whereIn('source_selection_id', missing_selection_ids)
-          .del()
+        if (missing_selection_ids.length) {
+          await db('prop_market_selections_index')
+            .where({
+              source_market_id: existing_market.source_market_id,
+              time_type: 'CLOSE'
+            })
+            .whereIn('source_selection_id', missing_selection_ids)
+            .del()
+        }
       }
     } catch (err) {
       log(selection)
