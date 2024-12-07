@@ -65,6 +65,13 @@ const calculateStatsFromPlayStats = (playStats) => {
         // rushing touchdown
         stats.ra += 1
         stats.ry += playStat.yards
+        stats.longest_rush = Math.max(stats.longest_rush, playStat.yards)
+        if (playStat.ydl_100 <= 20) {
+          stats.rush_attempts_redzone += 1
+        }
+        if (playStat.ydl_100 <= 5) {
+          stats.rush_attempts_goaline += 1
+        }
         stats.tdr += 1
         break
 
@@ -72,12 +79,14 @@ const calculateStatsFromPlayStats = (playStats) => {
         // lateral rush
         // stats.ra += 1
         stats.ry += playStat.yards
+        stats.longest_rush = Math.max(stats.longest_rush, playStat.yards)
         break
 
       case 13:
         // lateral rushing touchdown
         // stats.ra += 1
         stats.ry += playStat.yards
+        stats.longest_rush = Math.max(stats.longest_rush, playStat.yards)
         stats.tdr += 1
         break
 
