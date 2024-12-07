@@ -9,7 +9,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { constants, format_player_name } from '#libs-shared'
 import { is_main } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -158,51 +158,52 @@ const format_fanduel_selection_name = ({ selection, week }) => {
   return name
 }
 
+const extract_draftkings_player_name = (market_display_name) => {
+  // List of stat names to check for
+  const stat_names = [
+    'Rushing Yards',
+    'Receiving Yards',
+    'Passing Yards',
+    'Receptions',
+    'Touchdowns'
+  ]
+
+  // Extract player name
+  const player_name = stat_names.reduce((name, stat) => {
+    if (name) return name
+    const index = market_display_name.indexOf(stat)
+    return index !== -1 ? market_display_name.slice(0, index).trim() : ''
+  }, '')
+
+  return player_name
+}
+
 const format_draftkings_selection_name = ({ selection }) => {
-  const format_single_selection = (sel) => {
-    const market_display_name = sel.marketDisplayName || ''
-    const selection_display_name = sel.selectionDisplayName || ''
+  const market_display_name = selection.marketDisplayName || ''
+  const selection_display_name = selection.selectionDisplayName || ''
 
-    // List of stat names to check for
-    const stat_names = [
-      'Rushing Yards',
-      'Receiving Yards',
-      'Passing Yards',
-      'Receptions',
-      'Touchdowns'
-    ]
-
-    // Extract player name
-    const player_name = stat_names.reduce((name, stat) => {
-      if (name) return name
-      const index = market_display_name.indexOf(stat)
-      return index !== -1 ? market_display_name.slice(0, index).trim() : ''
-    }, '')
-
-    if (player_name) {
-      // Handle specific stats
-      if (market_display_name.includes('Rushing Yards')) {
-        return `${player_name} ${selection_display_name} Rush Yds`
-      }
-      if (market_display_name.includes('Receiving Yards')) {
-        return `${player_name} ${selection_display_name} Recv Yds`
-      }
-      if (market_display_name.includes('Passing Yards')) {
-        return `${player_name} ${selection_display_name} Pass Yds`
-      }
-      if (market_display_name.includes('Receptions')) {
-        return `${player_name} ${selection_display_name} Recs`
-      }
-      if (market_display_name.includes('Touchdowns')) {
-        return `${player_name} ${selection_display_name} TDs`
-      }
+  const player_name = extract_draftkings_player_name(market_display_name)
+  if (player_name) {
+    // Handle specific stats
+    if (market_display_name.includes('Rushing Yards')) {
+      return `${player_name} ${selection_display_name} Rush Yds`
     }
-
-    // Default to original format if no specific case is matched
-    return `${market_display_name} (${selection_display_name})`
+    if (market_display_name.includes('Receiving Yards')) {
+      return `${player_name} ${selection_display_name} Recv Yds`
+    }
+    if (market_display_name.includes('Passing Yards')) {
+      return `${player_name} ${selection_display_name} Pass Yds`
+    }
+    if (market_display_name.includes('Receptions')) {
+      return `${player_name} ${selection_display_name} Recs`
+    }
+    if (market_display_name.includes('Touchdowns')) {
+      return `${player_name} ${selection_display_name} TDs`
+    }
   }
 
-  return format_single_selection(selection)
+  // Default to original format if no specific case is matched
+  return `${market_display_name} (${selection_display_name})`
 }
 
 // Helper function to generate combinations
@@ -265,6 +266,7 @@ const calculate_fanduel_round_robin_wager = ({ wager }) => {
           selection: leg.parts[0],
           week: wager.week
         }),
+        player_name: format_fanduel_player_name({ selection: leg.parts[0] }),
         event_id: leg.parts[0].eventId,
         market_id: leg.parts[0].marketId,
         source_id: 'FANDUEL',
@@ -283,6 +285,19 @@ const calculate_fanduel_round_robin_wager = ({ wager }) => {
   })
 
   return round_robin_wagers
+}
+
+const format_fanduel_player_name = ({ selection }) => {
+  const player_name = selection.eventMarketDescription.split(' - ')[0]
+  return format_player_name(player_name)
+}
+
+const format_draftkings_player_name = ({ selection }) => {
+  const market_display_name = selection.marketDisplayName || ''
+
+  const player_name = extract_draftkings_player_name(market_display_name)
+
+  return format_player_name(player_name)
 }
 
 const standardize_wager = ({ wager, source }) => {
@@ -305,6 +320,7 @@ const standardize_wager = ({ wager, source }) => {
       selections: wager.legs.map((leg) => ({
         ...leg.parts[0],
         name: format_fanduel_selection_name({ selection: leg.parts[0], week }),
+        player_name: format_fanduel_player_name({ selection: leg.parts[0] }),
         event_id: leg.parts[0].eventId,
         market_id: leg.parts[0].marketId,
         source_id: 'FANDUEL',
@@ -348,6 +364,7 @@ const standardize_wager = ({ wager, source }) => {
               name: format_draftkings_selection_name({
                 selection: sel
               }),
+              player_name: format_draftkings_player_name({ selection: sel }),
               event_id: sel.eventId,
               market_id: sel.marketId,
               selection_id: sel.selectionId,
@@ -396,6 +413,7 @@ const standardize_wager = ({ wager, source }) => {
         selections: wager.selections.map((selection) => ({
           ...selection,
           name: format_draftkings_selection_name({ selection }),
+          player_name: format_draftkings_player_name({ selection }),
           event_id: selection.eventId,
           market_id: selection.marketId,
           selection_id: selection.selectionId,
@@ -1008,6 +1026,47 @@ const analyze_wagers = async ({
     })
     .sort((a, b) => b.exposure_count - a.exposure_count)
 
+  // Add player summary table
+  const player_summary = unique_selections.reduce((acc, selection) => {
+    if (!selection.player_name) return acc
+
+    if (!acc[selection.player_name]) {
+      acc[selection.player_name] = {
+        exposure_count: 0,
+        open_wagers: 0,
+        open_potential_payout: 0,
+        max_potential_payout: 0,
+        props_count: 0
+      }
+    }
+
+    acc[selection.player_name].exposure_count += selection.exposure_count
+    acc[selection.player_name].open_wagers += selection.open_wagers
+    acc[selection.player_name].open_potential_payout +=
+      selection.open_potential_payout
+    acc[selection.player_name].max_potential_payout +=
+      selection.max_potential_payout
+    acc[selection.player_name].props_count += 1
+
+    return acc
+  }, {})
+
+  const player_summary_table = new Table({ title: 'Player Exposure Summary' })
+  Object.entries(player_summary)
+    .map(([player_name, stats]) => ({
+      player_name,
+      props_count: stats.props_count,
+      exposure_count: stats.exposure_count,
+      exposure_rate: `${((stats.exposure_count / filtered.length) * 100).toFixed(2)}%`,
+      open_wagers: stats.open_wagers,
+      open_potential_roi: `${((stats.open_potential_payout / wager_summary.total_risk) * 100).toFixed(0)}%`,
+      max_potential_roi: `${((stats.max_potential_payout / wager_summary.total_risk) * 100).toFixed(0)}%`
+    }))
+    .sort((a, b) => b.exposure_count - a.exposure_count)
+    .forEach((player) => player_summary_table.addRow(player))
+
+  player_summary_table.printTable()
+
   const props_summary = get_props_summary(unique_selections)
   const wager_summary_table = new Table({ title: 'Execution Summary' })
 
@@ -1130,10 +1189,12 @@ const analyze_wagers = async ({
     .whereIn('source_event_id', Array.from(fanduel_event_ids))
     .where('source_id', 'FANDUEL')
     .select('source_event_id', 'esbid')
+    .distinct()
   const draftkings_esbid_mapping = await db('prop_markets_index')
     .whereIn('source_event_id', Array.from(draftkings_event_ids))
     .where('source_id', 'DRAFTKINGS')
     .select('source_event_id', 'esbid')
+    .distinct()
 
   // Create a combined mapping
   const event_id_to_esbid = new Map([
