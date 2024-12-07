@@ -2,48 +2,48 @@
 
 import chai from 'chai'
 
-import { formatPlayerName } from '#libs-shared'
+import { format_player_name } from '#libs-shared'
 
 chai.should()
 const expect = chai.expect
 
-describe('LIBS-SHARED formatPlayerName', function () {
+describe('LIBS-SHARED format_player_name', function () {
   it('lower', () => {
-    expect(formatPlayerName('Nick Chubb')).to.equal('nick chubb')
+    expect(format_player_name('Nick Chubb')).to.equal('nick chubb')
   })
 
   it('suffixes', () => {
-    expect(formatPlayerName('Odell Beckham Jr.')).to.equal('odell beckham')
-    expect(formatPlayerName("Le'Veon Bell Sr.")).to.equal('leveon bell')
-    expect(formatPlayerName('Keelan Cole Sr.')).to.equal('keelan cole')
-    expect(formatPlayerName('Allen Robinson II')).to.equal('allen robinson')
-    expect(formatPlayerName('Chris Herndon IV')).to.equal('chris herndon')
-    expect(formatPlayerName('D.J. Chark Jr.')).to.equal('dj chark')
-    expect(formatPlayerName('Henry Ruggs III')).to.equal('henry ruggs')
-    expect(formatPlayerName('JJ Arcega-Whiteside')).to.equal(
+    expect(format_player_name('Odell Beckham Jr.')).to.equal('odell beckham')
+    expect(format_player_name("Le'Veon Bell Sr.")).to.equal('leveon bell')
+    expect(format_player_name('Keelan Cole Sr.')).to.equal('keelan cole')
+    expect(format_player_name('Allen Robinson II')).to.equal('allen robinson')
+    expect(format_player_name('Chris Herndon IV')).to.equal('chris herndon')
+    expect(format_player_name('D.J. Chark Jr.')).to.equal('dj chark')
+    expect(format_player_name('Henry Ruggs III')).to.equal('henry ruggs')
+    expect(format_player_name('JJ Arcega-Whiteside')).to.equal(
       'jj arcega-whiteside'
     )
   })
 
   it('periods', () => {
-    expect(formatPlayerName('A.J. Green')).to.equal('aj green')
+    expect(format_player_name('A.J. Green')).to.equal('aj green')
   })
 
   it('whitespace', () => {
-    expect(formatPlayerName('          A.J.    Green ')).to.equal('aj green')
+    expect(format_player_name('          A.J.    Green ')).to.equal('aj green')
   })
 
   describe('errors', function () {
     it('integer', () => {
-      expect(formatPlayerName(-2)).to.equal(null)
+      expect(format_player_name(-2)).to.equal(null)
     })
 
     it('null', () => {
-      expect(formatPlayerName(null)).to.equal(null)
+      expect(format_player_name(null)).to.equal(null)
     })
 
     it('undefined', () => {
-      expect(formatPlayerName(undefined)).to.equal(null)
+      expect(format_player_name(undefined)).to.equal(null)
     })
   })
 })

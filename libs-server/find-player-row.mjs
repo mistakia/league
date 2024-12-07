@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers'
 import is_main from './is-main.mjs'
 import {
   fixTeam,
-  formatPlayerName,
+  format_player_name,
   Errors,
   team_aliases,
   constants
@@ -117,7 +117,7 @@ const find_player_row = async ({
     query.where({ mfl_id })
   } else {
     if (name) {
-      const formatted = formatPlayerName(name)
+      const formatted = format_player_name(name)
 
       query.leftJoin('player_aliases', 'player.pid', 'player_aliases.pid')
 

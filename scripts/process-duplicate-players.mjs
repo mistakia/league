@@ -7,7 +7,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { is_main, mergePlayer, readCSV } from '#libs-server'
-import { formatPlayerName } from '#libs-shared'
+import { format_player_name } from '#libs-shared'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -149,8 +149,8 @@ const unresolvable_differences = (a, b) => {
 
     if (compare_diff_props.includes(difference.path[0])) {
       // normalize names, compare and check for shortening
-      const lhs = formatPlayerName(difference.lhs)
-      const rhs = formatPlayerName(difference.rhs)
+      const lhs = format_player_name(difference.lhs)
+      const rhs = format_player_name(difference.rhs)
 
       if (lhs === rhs) {
         return false

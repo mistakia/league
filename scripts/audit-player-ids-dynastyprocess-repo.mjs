@@ -11,7 +11,7 @@ import db from '#db'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 import { is_main, readCSV, updatePlayer } from '#libs-server'
-import { formatPlayerName, fixTeam } from '#libs-shared'
+import { format_player_name, fixTeam } from '#libs-shared'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('audit-player-ids-dynastyprocess-repo')
@@ -82,7 +82,7 @@ const audit_player_ids_dynastyprocess_repo = async ({
         fantasy_data_id: player_data.fantasy_data_id
           ? Number(player_data.fantasy_data_id)
           : null,
-        formatted: formatPlayerName(player_data.name),
+        formatted: format_player_name(player_data.name),
         pos: player_data.position,
         current_nfl_team: fixTeam(player_data.team),
         dob: player_data.birthdate,
