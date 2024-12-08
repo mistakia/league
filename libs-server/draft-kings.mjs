@@ -156,12 +156,14 @@ export const get_market_type_offer_1001 = (subcategoryId) => {
 
     case 12094:
     case 14118:
+    case 16571:
       return player_prop_types.GAME_ALT_RUSHING_YARDS
 
     case 12095:
       return player_prop_types.GAME_ALT_RECEIVING_YARDS
 
     case 12096:
+    case 16572:
       return player_prop_types.GAME_ALT_RUSHING_RECEIVING_YARDS
 
     case 14126:
@@ -219,6 +221,7 @@ export const get_market_type_offer_1342 = (subcategoryId) => {
   switch (subcategoryId) {
     case 14113:
     case 14117:
+    case 16570:
       return player_prop_types.GAME_ALT_RECEIVING_YARDS
 
     case 14114:
