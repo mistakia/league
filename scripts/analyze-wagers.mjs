@@ -732,14 +732,17 @@ const format_round_robin_display = (wager) => {
           // Group by stat type and quarter
           const grouped_by_stat = player_selections.reduce((acc, selection) => {
             const is_q1 = selection.eventMarketDescription.includes('1st Qtr')
-            const stat_type = selection.eventMarketDescription
-              .split(' - ')[1]
-              .replace('Alt ', '')
-              .replace('1st Qtr ', '')
-              .replace('Receptions', 'recs')
-              .replace('Receiving Yds', 'recv')
-              .replace('Rushing Yds', 'rush')
-              .replace('Passing Yds', 'pass')
+            const parts = selection.eventMarketDescription.split(' - ')
+            const stat_type =
+              parts.length > 1
+                ? parts[1]
+                    .replace('Alt ', '')
+                    .replace('1st Qtr ', '')
+                    .replace('Receptions', 'recs')
+                    .replace('Receiving Yds', 'recv')
+                    .replace('Rushing Yds', 'rush')
+                    .replace('Passing Yds', 'pass')
+                : ''
 
             const key = is_q1 ? `q1_${stat_type}` : stat_type
             if (!acc[key]) {
@@ -801,17 +804,19 @@ const analyze_round_robin_selections = (wagers) => {
       ([event_id, event_selections]) => {
         event_selections.forEach((selection) => {
           const is_q1 = selection.eventMarketDescription.includes('1st Qtr')
-          const stat_type = selection.eventMarketDescription
-            .split(' - ')[1]
-            .replace('Alt ', '')
-            .replace('1st Qtr ', '')
-            .replace('Receiving Yds', 'rec')
-            .replace('Rushing Yds', 'rush')
-            .replace('Passing Yds', 'pass')
+          const market_parts = selection.eventMarketDescription.split(' - ')
+          const stat_type = market_parts[1]
+            ? market_parts[1]
+                .replace('Alt ', '')
+                .replace('1st Qtr ', '')
+                .replace('Receiving Yds', 'rec')
+                .replace('Rushing Yds', 'rush')
+                .replace('Passing Yds', 'pass')
+            : ''
 
           const player_name = selection.eventMarketDescription.split(' - ')[0]
-          const threshold =
-            selection.selectionName.match(/(\d+)\+ ?(Yards?)?/)[1]
+          const match = selection.selectionName.match(/(\d+)\+ ?(Yards?)?/)
+          const threshold = match ? match[1] : null
 
           const selection_key = `${player_name} ${threshold}+ ${is_q1 ? 'q1 ' : ''}${stat_type}`
 
