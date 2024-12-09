@@ -1194,12 +1194,11 @@ const analyze_wagers = async ({
     .whereIn('source_event_id', Array.from(fanduel_event_ids))
     .where('source_id', 'FANDUEL')
     .select('source_event_id', 'esbid')
-    .distinct()
+
   const draftkings_esbid_mapping = await db('prop_markets_index')
     .whereIn('source_event_id', Array.from(draftkings_event_ids))
     .where('source_id', 'DRAFTKINGS')
     .select('source_event_id', 'esbid')
-    .distinct()
 
   // Create a combined mapping
   const event_id_to_esbid = new Map([
