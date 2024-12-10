@@ -1408,6 +1408,7 @@ ALTER TABLE IF EXISTS ONLY public.teams DROP CONSTRAINT IF EXISTS teams_pkey;
 ALTER TABLE IF EXISTS ONLY public.seasons DROP CONSTRAINT IF EXISTS seasons_pkey;
 ALTER TABLE IF EXISTS ONLY public.rosters_players DROP CONSTRAINT IF EXISTS rosters_players_pkey;
 ALTER TABLE IF EXISTS ONLY public.prop_pairing_props DROP CONSTRAINT IF EXISTS prop_pairing_props_unique;
+ALTER TABLE IF EXISTS ONLY public.playoffs DROP CONSTRAINT IF EXISTS playoffs_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_swish_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_salaries DROP CONSTRAINT IF EXISTS player_salaries_pid_esbid_source_contest_id_key;
 ALTER TABLE IF EXISTS ONLY public.player_rushing_gamelogs DROP CONSTRAINT IF EXISTS player_rushing_gamelogs_esbid_pid_year_unique;
@@ -17710,7 +17711,7 @@ CREATE TABLE public.playoffs (
     uid integer NOT NULL,
     tid integer NOT NULL,
     lid integer NOT NULL,
-    year smallint,
+    year smallint NOT NULL,
     week smallint NOT NULL,
     points numeric(7,2),
     points_manual numeric(7,2),
@@ -20595,6 +20596,14 @@ ALTER TABLE ONLY public.player_salaries
 
 ALTER TABLE ONLY public.player
     ADD CONSTRAINT player_swish_id_unique UNIQUE (swish_id);
+
+
+--
+-- Name: playoffs playoffs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.playoffs
+    ADD CONSTRAINT playoffs_pkey PRIMARY KEY (uid, tid, year, week);
 
 
 --
