@@ -47,7 +47,10 @@ const calculate_playoff_matchup_projection = async ({
 
   if (playoff_updates.length) {
     log(`Updating ${playoff_updates.length} playoffs in lid ${lid} for ${year}`)
-    await db('playoffs').insert(playoff_updates).onConflict('uid').merge()
+    await db('playoffs')
+      .insert(playoff_updates)
+      .onConflict(['uid', 'tid', 'year', 'week'])
+      .merge()
   }
 }
 
