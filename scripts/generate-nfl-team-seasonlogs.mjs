@@ -106,6 +106,7 @@ const rate_stats = [
   'pass_rating',
   'pass_yards_per_attempt',
   'pass_comp_pct',
+  'expected_pass_comp',
   'pass_epa_per_db',
   'pressure_rate_against',
   'blitz_rate',
