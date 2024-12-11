@@ -131,3 +131,10 @@ export const single_year_offset = {
   is_single: true,
   enable_on_splits: ['year']
 }
+
+export const single_position = {
+  data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+  single: true,
+  values: constants.positions,
+  default_value: 'QB'
+}

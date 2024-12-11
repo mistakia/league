@@ -25,6 +25,7 @@ const COLUMN_GROUPS = {
   WEEK_PROJECTION: { priority: 2 },
   SEASON_PROJECTION: { priority: 2 },
   REST_OF_SEASON_PROJECTION: { priority: 2 },
+  NFL_TEAM_SEASON_STATS: { priority: 3 },
   FANTASY_POINTS: { priority: 3 },
   FANTASY_LEAGUE: { priority: 3 },
   OPPORTUNITY: { priority: 3 },
