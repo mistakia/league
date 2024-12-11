@@ -175,4 +175,51 @@ describe('LIBS SERVER get_data_view_results', () => {
     const expected_query = `with "t2fd39fbbbad053a3f99d693c6702789e" as (select "nfl_plays"."off" as "nfl_team", COUNT(DISTINCT CONCAT(esbid, '_', drive_seq)) AS team_drive_count_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2024) and "nfl_plays"."week" in (1) and "nfl_plays"."qtr" in (1) group by "nfl_plays"."off"), "t2fd39fbbbad053a3f99d693c6702789e_team_stats" as (select "t2fd39fbbbad053a3f99d693c6702789e"."nfl_team", sum(t2fd39fbbbad053a3f99d693c6702789e.team_drive_count_from_plays) as team_drive_count_from_plays from "t2fd39fbbbad053a3f99d693c6702789e" group by "t2fd39fbbbad053a3f99d693c6702789e"."nfl_team") select "player"."pid", "t2fd39fbbbad053a3f99d693c6702789e_team_stats"."team_drive_count_from_plays" AS "team_drive_count_from_plays_0", "player"."pos" from "player" left join "t2fd39fbbbad053a3f99d693c6702789e_team_stats" on "t2fd39fbbbad053a3f99d693c6702789e_team_stats"."nfl_team" = "player"."current_nfl_team" where player.pos IN ('TEAM') group by "t2fd39fbbbad053a3f99d693c6702789e_team_stats"."team_drive_count_from_plays", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
   })
+
+  it('nfl team seasonlogs fields', () => {
+    const { query } = get_data_view_results_query({
+      columns: [
+        {
+          column_id: 'nfl_team_seasonlogs_ry',
+          params: {
+            year: [2024],
+            matchup_opponent_type: 'current_week_opponent_total',
+            single_position: 'RB',
+            stat_type: 'AGAINST_ADJ',
+            time_type: 'LAST_FOUR'
+          }
+        },
+        {
+          column_id: 'nfl_team_seasonlogs_ry',
+          params: {
+            year: [2024],
+            matchup_opponent_type: 'current_week_opponent_total',
+            single_position: 'RB',
+            stat_type: 'AGAINST_ADJ',
+            time_type: 'LAST_EIGHT'
+          }
+        },
+        {
+          column_id: 'nfl_team_seasonlogs_ry',
+          params: {
+            year: [2024],
+            matchup_opponent_type: 'current_week_opponent_total',
+            single_position: 'RB',
+            stat_type: 'AGAINST_ADJ',
+            time_type: 'SEASON'
+          }
+        }
+      ],
+      where: [
+        {
+          column_id: 'player_position',
+          params: {},
+          value: ['RB'],
+          operator: 'IN'
+        }
+      ]
+    })
+    const expected_query = `with "current_week_opponents" as (select "h" as "nfl_team", "v" as "opponent" from "public"."nfl_games" where "year" = ${constants.season.year} and "week" = ${constants.season.week} and "seas_type" = 'REG' union select "v" as "nfl_team", "h" as "opponent" from "public"."nfl_games" where "year" = ${constants.season.year} and "week" = ${constants.season.week} and "seas_type" = 'REG') select "player"."pid", "tfe39a39a1a74e9d64bdca028581d049a"."ry" AS "nfl_team_seasonlogs_ry_0", "te2f90d96f7d058a1982c3a4ce34985a6"."ry" AS "nfl_team_seasonlogs_ry_1", "td7a35b3921d39bc4e736321320190682"."ry" AS "nfl_team_seasonlogs_ry_2", "player"."pos" from "player" inner join "current_week_opponents" on "player"."current_nfl_team" = "current_week_opponents"."nfl_team" left join "nfl_team_seasonlogs" as "tfe39a39a1a74e9d64bdca028581d049a" on "tfe39a39a1a74e9d64bdca028581d049a"."tm" = "current_week_opponents"."opponent" and "tfe39a39a1a74e9d64bdca028581d049a"."year" = 2024 and "tfe39a39a1a74e9d64bdca028581d049a"."stat_key" = 'RB_AGAINST_ADJ_LAST_FOUR' left join "nfl_team_seasonlogs" as "te2f90d96f7d058a1982c3a4ce34985a6" on "te2f90d96f7d058a1982c3a4ce34985a6"."tm" = "current_week_opponents"."opponent" and "te2f90d96f7d058a1982c3a4ce34985a6"."year" = 2024 and "te2f90d96f7d058a1982c3a4ce34985a6"."stat_key" = 'RB_AGAINST_ADJ_LAST_EIGHT' left join "nfl_team_seasonlogs" as "td7a35b3921d39bc4e736321320190682" on "td7a35b3921d39bc4e736321320190682"."tm" = "current_week_opponents"."opponent" and "td7a35b3921d39bc4e736321320190682"."year" = 2024 and "td7a35b3921d39bc4e736321320190682"."stat_key" = 'RB_AGAINST_ADJ' where player.pos IN ('RB') group by "tfe39a39a1a74e9d64bdca028581d049a"."ry", "te2f90d96f7d058a1982c3a4ce34985a6"."ry", "td7a35b3921d39bc4e736321320190682"."ry", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by "player"."pid" asc limit 500`
+    compare_queries(query.toString(), expected_query)
+  })
 })

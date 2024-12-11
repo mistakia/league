@@ -21,7 +21,8 @@ export default function data_view_join_function(join_arguments) {
     join_week = false,
     cast_join_week_to_string = false,
     default_year = constants.season.year,
-    join_on_team = false
+    join_on_team = false,
+    join_table_team_field = 'nfl_team'
   } = join_arguments
 
   // TODO join_type should be left in some cases where year_offset range is used without a with_where
@@ -48,7 +49,7 @@ export default function data_view_join_function(join_arguments) {
         switch (matchup_opponent_type) {
           case 'current_week_opponent_total':
             this.on(
-              `${table_name}.nfl_team`,
+              `${table_name}.${join_table_team_field}`,
               '=',
               'current_week_opponents.opponent'
             )
@@ -56,7 +57,7 @@ export default function data_view_join_function(join_arguments) {
 
           case 'next_week_opponent_total':
             this.on(
-              `${table_name}.nfl_team`,
+              `${table_name}.${join_table_team_field}`,
               '=',
               'next_week_opponents.opponent'
             )
@@ -67,7 +68,11 @@ export default function data_view_join_function(join_arguments) {
             break
         }
       } else {
-        this.on(`${table_name}.nfl_team`, '=', 'player.current_nfl_team')
+        this.on(
+          `${table_name}.${join_table_team_field}`,
+          '=',
+          'player.current_nfl_team'
+        )
       }
     } else {
       this.on(`${table_name}.pid`, '=', 'player.pid')
