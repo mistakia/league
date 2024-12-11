@@ -201,6 +201,14 @@ export default {
     select_string: `COUNT(*)`,
     stat_name: 'team_play_count_from_plays'
   }),
+  team_series_count_from_plays: team_stat_from_plays({
+    select_string: `COUNT(DISTINCT CONCAT(esbid, '_', series_seq))`,
+    stat_name: 'team_series_count_from_plays'
+  }),
+  team_drive_count_from_plays: team_stat_from_plays({
+    select_string: `COUNT(DISTINCT CONCAT(esbid, '_', drive_seq))`,
+    stat_name: 'team_drive_count_from_plays'
+  }),
   team_offensive_play_count_from_plays: team_stat_from_plays({
     select_string: `COUNT(CASE WHEN play_type IN ('PASS', 'RUSH') THEN 1 ELSE NULL END)`,
     stat_name: 'team_offensive_play_count_from_plays'

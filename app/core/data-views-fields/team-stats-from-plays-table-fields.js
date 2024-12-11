@@ -125,6 +125,18 @@ export default {
     header_label: 'PLAYS',
     player_value_path: 'team_play_count_from_plays'
   }),
+  team_series_count_from_plays: from_play_field({
+    column_title: 'Team Series Count (By Play)',
+    column_groups: [COLUMN_GROUPS.TEAM_STATS],
+    header_label: 'SERIES',
+    player_value_path: 'team_series_count_from_plays'
+  }),
+  team_drive_count_from_plays: from_play_field({
+    column_title: 'Team Drive Count (By Play)',
+    column_groups: [COLUMN_GROUPS.TEAM_STATS],
+    header_label: 'DRIVES',
+    player_value_path: 'team_drive_count_from_plays'
+  }),
   team_offensive_play_count_from_plays: from_play_field({
     column_title: 'Team Offensive Play Count (By Play)',
     column_groups: [COLUMN_GROUPS.TEAM_STATS],
