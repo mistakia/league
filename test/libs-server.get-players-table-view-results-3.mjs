@@ -146,7 +146,33 @@ describe('LIBS SERVER get_data_view_results', () => {
       ],
       splits: []
     })
-    const expected_query = `with "current_week_opponents" as (select "h" as "nfl_team", "v" as "opponent" from "public"."nfl_games" where "year" = 2024 and "week" = 13 and "seas_type" = 'REG' union select "v" as "nfl_team", "h" as "opponent" from "public"."nfl_games" where "year" = 2024 and "week" = 13 and "seas_type" = 'REG') select "player"."pid", "espn_team_win_rates_index"."run_block_win_rate" AS "espn_team_run_block_win_rate_0", "player"."pos" from "player" inner join "current_week_opponents" on "player"."current_nfl_team" = "current_week_opponents"."nfl_team" left join "espn_team_win_rates_index" on "espn_team_win_rates_index"."team" = "current_week_opponents"."opponent" and "espn_team_win_rates_index"."year" = 2024 where player.pos IN ('TEAM') group by "espn_team_win_rates_index"."run_block_win_rate", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 2 DESC NULLS LAST, "player"."pid" asc limit 500`
+    const expected_query = `with "current_week_opponents" as (select "h" as "nfl_team", "v" as "opponent" from "public"."nfl_games" where "year" = 2024 and "week" = ${constants.season.week} and "seas_type" = 'REG' union select "v" as "nfl_team", "h" as "opponent" from "public"."nfl_games" where "year" = 2024 and "week" = ${constants.season.week} and "seas_type" = 'REG') select "player"."pid", "espn_team_win_rates_index"."run_block_win_rate" AS "espn_team_run_block_win_rate_0", "player"."pos" from "player" inner join "current_week_opponents" on "player"."current_nfl_team" = "current_week_opponents"."nfl_team" left join "espn_team_win_rates_index" on "espn_team_win_rates_index"."team" = "current_week_opponents"."opponent" and "espn_team_win_rates_index"."year" = 2024 where player.pos IN ('TEAM') group by "espn_team_win_rates_index"."run_block_win_rate", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 2 DESC NULLS LAST, "player"."pid" asc limit 500`
+    compare_queries(query.toString(), expected_query)
+  })
+
+  it('team drive count from plays', () => {
+    const { query } = get_data_view_results_query({
+      columns: [
+        {
+          column_id: 'team_drive_count_from_plays',
+          params: {
+            year: [2024],
+            week: [1],
+            qtr: [1]
+          }
+        }
+      ],
+      where: [
+        {
+          column_id: 'player_position',
+          params: {},
+          value: ['TEAM'],
+          operator: 'IN'
+        }
+      ],
+      splits: []
+    })
+    const expected_query = `with "t2fd39fbbbad053a3f99d693c6702789e" as (select "nfl_plays"."off" as "nfl_team", COUNT(DISTINCT CONCAT(esbid, '_', drive_seq)) AS team_drive_count_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2024) and "nfl_plays"."week" in (1) and "nfl_plays"."qtr" in (1) group by "nfl_plays"."off"), "t2fd39fbbbad053a3f99d693c6702789e_team_stats" as (select "t2fd39fbbbad053a3f99d693c6702789e"."nfl_team", sum(t2fd39fbbbad053a3f99d693c6702789e.team_drive_count_from_plays) as team_drive_count_from_plays from "t2fd39fbbbad053a3f99d693c6702789e" group by "t2fd39fbbbad053a3f99d693c6702789e"."nfl_team") select "player"."pid", "t2fd39fbbbad053a3f99d693c6702789e_team_stats"."team_drive_count_from_plays" AS "team_drive_count_from_plays_0", "player"."pos" from "player" left join "t2fd39fbbbad053a3f99d693c6702789e_team_stats" on "t2fd39fbbbad053a3f99d693c6702789e_team_stats"."nfl_team" = "player"."current_nfl_team" where player.pos IN ('TEAM') group by "t2fd39fbbbad053a3f99d693c6702789e_team_stats"."team_drive_count_from_plays", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
   })
 })
