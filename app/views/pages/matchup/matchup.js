@@ -31,12 +31,12 @@ export default function MatchupPage({
   selectYear,
   select_matchup
 }) {
-  const isHeadToHead = matchup.type === constants.matchups.H2H
+  const is_head_to_head = matchup.type === constants.matchups.H2H
   const navigate = useNavigate()
   const [show_bench, set_show_bench] = useState(false)
   const { lid, seas_year, seas_week, matchupId } = useParams()
   const [selected_tid, set_selected_tid] = useState(
-    isHeadToHead ? matchup.hid : matchup.getIn(['tids', '0'])
+    is_head_to_head ? matchup.hid : matchup.getIn(['tids', '0'])
   )
 
   useEffect(() => {
@@ -83,14 +83,16 @@ export default function MatchupPage({
   }, [year, week, seas_week, seas_year, loadMatchups])
 
   useEffect(() => {
-    set_selected_tid(isHeadToHead ? matchup.hid : matchup.getIn(['tids', '0']))
+    set_selected_tid(
+      is_head_to_head ? matchup.hid : matchup.getIn(['tids', '0'])
+    )
     if (matchup.uid) {
       navigate(
         `/leagues/${matchup.lid}/matchups/${matchup.year}/${matchup.week}/${matchup.uid}`
       )
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [matchup, isHeadToHead])
+  }, [matchup, is_head_to_head])
 
   let matchup_body
   if (is_loading) {
@@ -101,18 +103,18 @@ export default function MatchupPage({
     matchup_body = (
       <>
         <Grid item xs={12}>
-          {isHeadToHead && <ScoreboardScores />}
+          {is_head_to_head && <ScoreboardScores />}
         </Grid>
         <Grid container item xs={12} spacing={0}>
           <Grid item xs={12} md={9}>
-            {!isHeadToHead && (
+            {!is_head_to_head && (
               <ScoreboardTeams
                 onClick={set_selected_tid}
                 selected_tid={selected_tid}
               />
             )}
             <div className='scoreboard__main'>
-              {isHeadToHead && (
+              {is_head_to_head && (
                 <ScoreboardTeam
                   tid={matchup.aid}
                   week={matchup.week}
