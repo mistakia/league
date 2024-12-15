@@ -899,7 +899,7 @@ export function getMatchupByTeamId(state, { tid, year, week }) {
     return (
       playoffs.find(
         (m) => m.year === year && m.week === week && m.tids.includes(tid)
-      ) || createMatchup()
+      ) || playoff_matchup
     )
   }
 
