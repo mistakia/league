@@ -20,6 +20,24 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-keeptradecut')
 debug.enable('import-keeptradecut,get-player,update-player')
 
+const parse_keeptradecut_date = (date_str) => {
+  const formatted_date =
+    '20' +
+    date_str.substring(0, 2) +
+    '-' +
+    date_str.substring(2, 4) +
+    '-' +
+    date_str.substring(4, 6)
+  return dayjs(formatted_date, 'YYYY-MM-DD').unix()
+}
+
+const parse_compressed_value = (compressed_str) => {
+  return {
+    d: parse_keeptradecut_date(compressed_str),
+    v: Number(compressed_str.substring(6))
+  }
+}
+
 const get_keeptradecut_config = async () => {
   const config_row = await db('config')
     .where('key', 'keeptradecut_config')
@@ -45,7 +63,8 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
 
   const data = await fetch(keeptradecut_config.dynasty_rankings_url, {
     method: 'POST',
-    headers: { 'Content-Type': 'application/json' }
+    headers: keeptradecut_config.dynasty_rankings_headers,
+    body: null
   }).then((res) => res.json())
 
   log(`Processing ${data.length} players`)
@@ -156,22 +175,24 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
         })
       })
     } else {
-      item.oneQB?.valueHistory?.forEach((i) => {
+      item.oneQB?.valueHistory?.forEach((compressed_str) => {
+        const { d, v } = parse_compressed_value(compressed_str)
         inserts.push({
           qb: 1,
           pid,
-          d: dayjs(i.d, 'YYYY-MM-DD').unix(),
-          v: i.v,
+          d,
+          v,
           type: constants.KEEPTRADECUT.VALUE
         })
       })
 
-      item.superflex?.valueHistory?.forEach((i) => {
+      item.superflex?.valueHistory?.forEach((compressed_str) => {
+        const { d, v } = parse_compressed_value(compressed_str)
         inserts.push({
           qb: 2,
           pid,
-          d: dayjs(i.d, 'YYYY-MM-DD').unix(),
-          v: i.v,
+          d,
+          v,
           type: constants.KEEPTRADECUT.VALUE
         })
       })
