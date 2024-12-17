@@ -38,7 +38,7 @@ const processPlayoffs = async ({ lid, year }) => {
         tid,
         lid,
         year,
-        week: 14 // wildcard round week
+        week: 15 // wildcard round week
       })
     }
 
@@ -129,7 +129,7 @@ const processPlayoffs = async ({ lid, year }) => {
       overall_finish: 5
     })
 
-    // combine championship round week 15 and 16 points
+    // combine championship round week 16 and 17 points
     const championship_round_matchups = playoffs.filter((p) => p.uid > 1)
     const championship_round_points = {}
     for (const matchup of championship_round_matchups) {
@@ -191,9 +191,9 @@ const processPlayoffs = async ({ lid, year }) => {
   }
 
   const is_championship_round =
-    constants.season.year === year && constants.season.week >= 15
+    constants.season.year === year && constants.season.week >= 16
   const missing_championship_matchups = !playoffs.some(
-    (p) => p.uid === 2 && p.week === 15
+    (p) => p.uid === 2 && p.week === 16
   )
   if (missing_championship_matchups && is_championship_round) {
     log(`creating championship round matchups for lid ${lid} year ${year}`)
@@ -209,7 +209,7 @@ const processPlayoffs = async ({ lid, year }) => {
       .map((t) => t.tid)
 
     const wildcard_teams = playoffs
-      .filter((p) => p.uid === 1 && p.week === 14)
+      .filter((p) => p.uid === 1 && p.week === 15)
       .sort((a, b) => b.points - a.points)
       .slice(0, 2)
       .map((p) => p.tid)
@@ -222,7 +222,7 @@ const processPlayoffs = async ({ lid, year }) => {
         tid,
         lid,
         year,
-        week: 15 // championship round week
+        week: 16 // championship round week
       })
 
       championship_inserts.push({
@@ -230,9 +230,17 @@ const processPlayoffs = async ({ lid, year }) => {
         tid,
         lid,
         year,
-        week: 16 // championship round week
+        week: 17 // championship round week
       })
     }
+
+    await db('playoffs')
+      .insert(championship_inserts)
+      .onConflict(['tid', 'uid', 'year'])
+      .merge()
+    log(
+      `inserted ${championship_inserts.length} championship round matchups for lid ${lid}`
+    )
   }
 }
 
