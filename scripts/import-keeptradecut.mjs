@@ -20,6 +20,13 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-keeptradecut')
 debug.enable('import-keeptradecut,get-player,update-player')
 
+const get_keeptradecut_config = async () => {
+  const config_row = await db('config')
+    .where('key', 'keeptradecut_config')
+    .first()
+  return config_row.value
+}
+
 const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
   const dynasty_rankings_html = await fetch(
     'https://keeptradecut.com/dynasty-rankings'
@@ -34,8 +41,9 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
     players_index[player.playerID] = player
   }
 
-  const url = 'https://keeptradecut.com/dynasty-rankings/history'
-  const data = await fetch(url, {
+  const keeptradecut_config = await get_keeptradecut_config()
+
+  const data = await fetch(keeptradecut_config.dynasty_rankings_url, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' }
   }).then((res) => res.json())
