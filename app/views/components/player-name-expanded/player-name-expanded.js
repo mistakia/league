@@ -52,18 +52,21 @@ function GameStatus({ status, playerMap }) {
       : `@${status.game.h}`
 
   if (!status.lastPlay) {
-    const gameTime = dayjs
-      .tz(
-        `${status.game.date} ${status.game.time_est}`,
-        'YYYY/MM/DD HH:mm:SS',
-        'America/New_York'
-      )
-      .local()
-      .format('ddd, h:mmA')
+    let game_time = 'TBD'
+    if (status.game.date && status.game.time_est) {
+      game_time = dayjs
+        .tz(
+          `${status.game.date} ${status.game.time_est}`,
+          'YYYY/MM/DD HH:mm:SS',
+          'America/New_York'
+        )
+        .local()
+        .format('ddd, h:mmA')
+    }
 
     return (
       <div className='player__name-expanded-game'>
-        {gameTime} {opponent}
+        {game_time} {opponent}
       </div>
     )
   }
