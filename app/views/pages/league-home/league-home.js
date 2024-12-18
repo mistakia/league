@@ -145,7 +145,7 @@ export default function LeagueHomePage({
     }
   })
 
-  for (const playerMap of players.ir) {
+  for (const playerMap of [...players.ir, ...players.ir_long_term]) {
     if (!playerMap.get('pid')) continue
 
     if (
