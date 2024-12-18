@@ -139,7 +139,7 @@ export default function LeagueTeam({
   const notice_items = []
 
   // Add reserve notices
-  for (const playerMap of players.ir) {
+  for (const playerMap of [...players.ir, ...players.ir_long_term]) {
     if (!playerMap.get('pid')) continue
 
     if (
