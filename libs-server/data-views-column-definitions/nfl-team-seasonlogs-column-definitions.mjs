@@ -3,6 +3,9 @@ import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import db from '#db'
 
+// TODO should use scoring_format_hash instead of league_id 
+const default_league_id = 1
+
 const get_default_params = ({ params = {} } = {}) => {
   let year = params.year || [constants.season.stats_season_year]
   if (!Array.isArray(year)) {
@@ -26,6 +29,11 @@ const get_default_params = ({ params = {} } = {}) => {
     ? params.time_type[0]
     : params.time_type
 
+  const league_id =
+    (Array.isArray(params.league_id)
+      ? params.league_id[0]
+      : params.league_id) || default_league_id
+
   const stat_key = get_stat_key({
     single_position,
     team_unit,
@@ -33,7 +41,7 @@ const get_default_params = ({ params = {} } = {}) => {
     time_type
   })
 
-  return { year, stat_key, matchup_opponent_type }
+  return { year, stat_key, matchup_opponent_type, league_id }
 }
 
 const get_stat_key = ({
@@ -47,6 +55,13 @@ const get_stat_key = ({
 const nfl_team_seasonlogs_table_alias = ({ params = {} }) => {
   const { year, stat_key } = get_default_params({ params })
   return get_table_hash(`nfl_team_seasonlogs_${year.join('_')}_${stat_key}`)
+}
+
+const league_nfl_team_seasonlogs_table_alias = ({ params = {} }) => {
+  const { year, stat_key, league_id } = get_default_params({ params })
+  return get_table_hash(
+    `league_nfl_team_seasonlogs_${year.join('_')}_${stat_key}_${league_id}`
+  )
 }
 
 const nfl_team_seasonlogs_join = (join_arguments) => {
@@ -72,6 +87,31 @@ const nfl_team_seasonlogs_join = (join_arguments) => {
   })
 }
 
+const league_nfl_team_seasonlogs_join = (join_arguments) => {
+  const { params = {} } = join_arguments
+  const { league_id, stat_key } = get_default_params({ params })
+
+  data_view_join_function({
+    ...join_arguments,
+    join_year: true,
+    default_year: constants.season.stats_season_year,
+    join_table_clause: `league_nfl_team_seasonlogs as ${join_arguments.table_name}`,
+    join_on_team: true,
+    join_table_team_field: 'tm',
+    additional_conditions: function () {
+      this.andOn(
+        `${join_arguments.table_name}.lid`,
+        '=',
+        db.raw('?', [league_id])
+      ).andOn(
+        `${join_arguments.table_name}.stat_key`,
+        '=',
+        db.raw('?', [stat_key])
+      )
+    }
+  })
+}
+
 const create_field_from_nfl_team_seasonlogs = (column_name) => ({
   column_name,
   select_as: () => `nfl_team_seasonlogs_${column_name}`,
@@ -81,7 +121,20 @@ const create_field_from_nfl_team_seasonlogs = (column_name) => ({
   supported_splits: ['year']
 })
 
+const create_field_from_league_nfl_team_seasonlogs = (column_name) => ({
+  column_name,
+  select_as: () => `league_nfl_team_seasonlogs_${column_name}`,
+  table_name: 'league_nfl_team_seasonlogs',
+  table_alias: league_nfl_team_seasonlogs_table_alias,
+  join: league_nfl_team_seasonlogs_join,
+  supported_splits: ['year']
+})
+
 export default {
+  league_nfl_team_seasonlogs_points:
+    create_field_from_league_nfl_team_seasonlogs('pts'),
+  league_nfl_team_seasonlogs_rank:
+    create_field_from_league_nfl_team_seasonlogs('rnk'),
   nfl_team_seasonlogs_pa: create_field_from_nfl_team_seasonlogs('pa'),
   nfl_team_seasonlogs_pc: create_field_from_nfl_team_seasonlogs('pc'),
   nfl_team_seasonlogs_py: create_field_from_nfl_team_seasonlogs('py'),

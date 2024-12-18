@@ -222,4 +222,50 @@ describe('LIBS SERVER get_data_view_results', () => {
     const expected_query = `with "current_week_opponents" as (select "h" as "nfl_team", "v" as "opponent" from "public"."nfl_games" where "year" = ${constants.season.year} and "week" = ${constants.season.week} and "seas_type" = 'REG' union select "v" as "nfl_team", "h" as "opponent" from "public"."nfl_games" where "year" = ${constants.season.year} and "week" = ${constants.season.week} and "seas_type" = 'REG') select "player"."pid", "tfe39a39a1a74e9d64bdca028581d049a"."ry" AS "nfl_team_seasonlogs_ry_0", "te2f90d96f7d058a1982c3a4ce34985a6"."ry" AS "nfl_team_seasonlogs_ry_1", "td7a35b3921d39bc4e736321320190682"."ry" AS "nfl_team_seasonlogs_ry_2", "player"."pos" from "player" inner join "current_week_opponents" on "player"."current_nfl_team" = "current_week_opponents"."nfl_team" left join "nfl_team_seasonlogs" as "tfe39a39a1a74e9d64bdca028581d049a" on "tfe39a39a1a74e9d64bdca028581d049a"."tm" = "current_week_opponents"."opponent" and "tfe39a39a1a74e9d64bdca028581d049a"."year" = 2024 and "tfe39a39a1a74e9d64bdca028581d049a"."stat_key" = 'RB_AGAINST_ADJ_LAST_FOUR' left join "nfl_team_seasonlogs" as "te2f90d96f7d058a1982c3a4ce34985a6" on "te2f90d96f7d058a1982c3a4ce34985a6"."tm" = "current_week_opponents"."opponent" and "te2f90d96f7d058a1982c3a4ce34985a6"."year" = 2024 and "te2f90d96f7d058a1982c3a4ce34985a6"."stat_key" = 'RB_AGAINST_ADJ_LAST_EIGHT' left join "nfl_team_seasonlogs" as "td7a35b3921d39bc4e736321320190682" on "td7a35b3921d39bc4e736321320190682"."tm" = "current_week_opponents"."opponent" and "td7a35b3921d39bc4e736321320190682"."year" = 2024 and "td7a35b3921d39bc4e736321320190682"."stat_key" = 'RB_AGAINST_ADJ' where player.pos IN ('RB') group by "tfe39a39a1a74e9d64bdca028581d049a"."ry", "te2f90d96f7d058a1982c3a4ce34985a6"."ry", "td7a35b3921d39bc4e736321320190682"."ry", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
   })
+
+  it('nfl team league seasonlogs fields', () => {
+    const { query } = get_data_view_results_query({
+      columns: [
+        {
+          column_id: 'league_nfl_team_seasonlogs_points',
+          params: {
+            year: [2024],
+            matchup_opponent_type: 'current_week_opponent_total',
+            single_position: 'DST',
+            stat_type: 'AGAINST_ADJ',
+            time_type: 'LAST_FOUR'
+          }
+        },
+        {
+          column_id: 'league_nfl_team_seasonlogs_points',
+          params: {
+            year: [2024],
+            matchup_opponent_type: 'current_week_opponent_total',
+            single_position: 'DST',
+            stat_type: 'AGAINST_ADJ',
+            time_type: 'LAST_EIGHT'
+          }
+        },
+        {
+          column_id: 'league_nfl_team_seasonlogs_points',
+          params: {
+            year: [2024],
+            matchup_opponent_type: 'current_week_opponent_total',
+            single_position: 'DST',
+            stat_type: 'AGAINST_ADJ',
+            time_type: 'SEASON'
+          }
+        }
+      ],
+      where: [
+        {
+          column_id: 'player_position',
+          params: {},
+          value: ['DST'],
+          operator: 'IN'
+        }
+      ]
+    })
+    console.log(query.toString())
+  })
 })
