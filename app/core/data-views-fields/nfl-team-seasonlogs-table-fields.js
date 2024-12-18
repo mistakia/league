@@ -80,6 +80,16 @@ const create_seasonlog_field = ({
 })
 
 export default {
+  league_nfl_team_seasonlogs_rank: create_seasonlog_field({
+    column_title: 'Fantasy Points Rank Generated/Allowed By Position',
+    header_label: 'Rank',
+    player_value_path: 'league_nfl_team_seasonlogs_rnk'
+  }),
+  league_nfl_team_seasonlogs_points: create_seasonlog_field({
+    column_title: 'Fantasy Points Generated/Allowed By Position',
+    header_label: 'Pts',
+    player_value_path: 'league_nfl_team_seasonlogs_pts'
+  }),
   // Passing Stats
   nfl_team_seasonlogs_pa: create_seasonlog_field({
     column_title: 'Pass Attempts Generated/Allowed By Position',

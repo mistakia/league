@@ -3,7 +3,7 @@ import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import db from '#db'
 
-// TODO should use scoring_format_hash instead of league_id 
+// TODO should use scoring_format_hash instead of league_id
 const default_league_id = 1
 
 const get_default_params = ({ params = {} } = {}) => {
