@@ -56,6 +56,12 @@ export default {
     header_label: 'INT',
     player_value_path: 'pass_ints_from_plays'
   }),
+  player_pass_first_downs_from_plays: offensive_player_from_play_field({
+    column_title: 'Passing First Downs (By Play)',
+    column_groups: [COLUMN_GROUPS.PASSING],
+    header_label: 'FD',
+    player_value_path: 'pass_first_downs_from_plays'
+  }),
   player_dropped_passing_yards_from_plays: offensive_player_from_play_field({
     column_title: 'Dropped Passing Yards (By Play)',
     column_groups: [COLUMN_GROUPS.PASSING],

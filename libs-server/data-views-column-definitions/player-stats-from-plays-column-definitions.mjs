@@ -317,6 +317,11 @@ export default {
     with_select_string: `SUM(CASE WHEN int = true THEN 1 ELSE 0 END)`,
     stat_name: 'pass_ints_from_plays'
   }),
+  player_pass_first_downs_from_plays: player_stat_from_plays({
+    pid_columns: ['psr_pid'],
+    with_select_string: `SUM(CASE WHEN first_down = true THEN 1 ELSE 0 END)`,
+    stat_name: 'pass_first_downs_from_plays'
+  }),
   player_dropped_passing_yards_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
     with_select_string: `SUM(CASE WHEN dropped_pass = true THEN dot ELSE 0 END)`,
