@@ -1163,8 +1163,8 @@ const analyze_wagers = async ({
 
     if (show_potential_gain) {
       result.open_potential_payout = prop.open_potential_payout.toFixed(2)
+      result.open_potential_roi = prop.open_potential_roi
     }
-    result.open_potential_roi = prop.open_potential_roi
     result.max_potential_roi = prop.max_potential_roi
 
     if (show_potential_gain) {
