@@ -17,6 +17,7 @@ export const Matchup = new Record({
   home_projection: null,
 
   points: new List(),
+  points_manual: new List(),
   projections: new List()
 })
 
@@ -37,6 +38,7 @@ export function createMatchup({
   home_projection,
 
   points = [],
+  points_manual = [],
   projections = []
 } = {}) {
   return new Matchup({
@@ -54,6 +56,7 @@ export function createMatchup({
     home_projection,
 
     points: new List(points),
+    points_manual: new List(points_manual),
     projections: new List(projections)
   })
 }

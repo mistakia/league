@@ -59,6 +59,7 @@ export function matchupsReducer(state = initialState, { payload, type }) {
         for (const gid in playoffs) {
           const tids = playoffs[gid].map((p) => p.tid)
           const points = playoffs[gid].map((p) => p.points)
+          const points_manual = playoffs[gid].map((p) => p.points_manual)
           const projections = playoffs[gid].map((p) => p.projection)
           state.updateIn(['playoffs'], (arr) =>
             arr.push(
@@ -67,6 +68,7 @@ export function matchupsReducer(state = initialState, { payload, type }) {
                 tids,
                 type: constants.matchups.TOURNAMENT,
                 points,
+                points_manual,
                 projections
               })
             )
