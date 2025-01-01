@@ -108,6 +108,9 @@ export const League = new Record({
   division_3_name: null,
   division_4_name: null,
 
+  wildcard_round: null,
+  championship_round: new List(),
+
   isLoading: false,
   isLoaded: false
 })
@@ -218,6 +221,9 @@ export function createLeague({
   division_3_name,
   division_4_name,
 
+  wildcard_round,
+  championship_round,
+
   isLoaded,
   isLoading
 }) {
@@ -326,6 +332,9 @@ export function createLeague({
     division_2_name,
     division_3_name,
     division_4_name,
+
+    wildcard_round,
+    championship_round: new List(championship_round),
 
     isLoading,
     isLoaded

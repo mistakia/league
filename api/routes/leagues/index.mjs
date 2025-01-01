@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { getLeague } from '#libs-server'
+import { getLeague, validators } from '#libs-server'
 import {
   constants,
   generate_league_format_hash,
@@ -283,6 +283,33 @@ router.get('/:leagueId/?', async (req, res) => {
 
     const seasons = await db('seasons').where('lid', leagueId)
     league.years = seasons.map((s) => s.year)
+    res.send(league)
+  } catch (err) {
+    logger(err)
+    res.status(500).send({ error: err.toString() })
+  }
+})
+
+router.get('/:leagueId/seasons/:year', async (req, res) => {
+  const { logger } = req.app.locals
+  try {
+    const { leagueId, year } = req.params
+
+    const league_id_check = validators.league_id_validator(Number(leagueId))
+    if (league_id_check !== true) {
+      return res.status(400).send({ error: 'invalid leagueId' })
+    }
+
+    const year_check = validators.year_validator(Number(year))
+    if (year_check !== true) {
+      return res.status(400).send({ error: 'invalid year' })
+    }
+
+    const league = await getLeague({ lid: leagueId, year })
+    if (!league) {
+      return res.status(400).send({ error: 'league not found' })
+    }
+
     res.send(league)
   } catch (err) {
     logger(err)

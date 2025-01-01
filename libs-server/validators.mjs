@@ -4,6 +4,14 @@ import { constants } from '#libs-shared'
 
 const v = new Validator({ haltOnFirstError: true })
 
+const league_id_schema = {
+  type: 'number',
+  integer: true,
+  positive: true,
+  $$root: true
+}
+export const league_id_validator = v.compile(league_id_schema)
+
 const year_schema = {
   type: 'number',
   integer: true,
