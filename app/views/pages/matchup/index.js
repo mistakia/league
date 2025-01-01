@@ -7,6 +7,7 @@ import { matchupsActions } from '@core/matchups'
 import { playerActions } from '@core/players'
 import { scoreboardActions } from '@core/scoreboard'
 import { rosterActions } from '@core/rosters'
+import { seasons_actions } from '@core/seasons'
 
 import MatchupPage from './matchup'
 
@@ -29,7 +30,8 @@ const mapDispatchToProps = {
   loadLeaguePlayers: playerActions.loadLeaguePlayers,
   selectYear: appActions.selectYear,
   select_matchup: matchupsActions.select_matchup,
-  selectWeek: scoreboardActions.selectWeek
+  selectWeek: scoreboardActions.selectWeek,
+  load_season: seasons_actions.load_season
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(MatchupPage)

@@ -85,5 +85,6 @@ export {
   get_player_betting_markets,
   get_league_careerlogs,
   get_data_views,
-  get_data_view
+  get_data_view,
+  get_season
 } from './sagas'

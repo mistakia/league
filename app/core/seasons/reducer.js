@@ -1,20 +1,11 @@
-import { Map, Record } from 'immutable'
+import { Map } from 'immutable'
 
 import { appActions } from '@core/app'
 import { leagueActions } from '@core/leagues/actions'
+import { seasons_actions } from './actions'
+import { create_season } from './season'
 
 const initial_state = new Map()
-
-const Season = new Record({
-  wildcard_round: null,
-  championship_round: null
-})
-
-const create_season = ({ wildcard_round, championship_round }) =>
-  new Season({
-    wildcard_round,
-    championship_round
-  })
 
 export function seasons_reducer(state = initial_state, { payload, type }) {
   switch (type) {
@@ -26,6 +17,13 @@ export function seasons_reducer(state = initial_state, { payload, type }) {
       })
 
     case leagueActions.GET_LEAGUE_FULFILLED: {
+      return state.setIn(
+        [payload.data.uid, payload.data.year],
+        create_season(payload.data)
+      )
+    }
+
+    case seasons_actions.GET_SEASON_FULFILLED: {
       return state.setIn(
         [payload.data.uid, payload.data.year],
         create_season(payload.data)

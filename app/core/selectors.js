@@ -36,6 +36,7 @@ import { Roster as RosterRecord } from '@core/rosters/roster'
 import { createScoreboard } from '@core/scoreboard'
 import { Team } from '@core/teams'
 import { createTrade } from '@core/trade'
+import { Season } from '@core/seasons'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -85,6 +86,8 @@ export const getGamelogByPlayerId = (
 ) => state.getIn(['gamelogs', 'players', `${year}/REG/${week}/${pid}`])
 export const getPoachesForCurrentLeague = (state) =>
   state.getIn(['poaches', state.getIn(['app', 'leagueId'])], new Map())
+export const get_league_season = (state, { leagueId, year }) =>
+  state.getIn(['seasons', leagueId, year], new Season())
 
 export const getLeagues = (state) => state.get('leagues').toList()
 export const getCurrentLeague = createSelector(
@@ -2151,6 +2154,7 @@ export function getScoreboardByMatchupId(state, { matchupId }) {
 
 export function getScoreboardByTeamId(state, { tid, matchupId }) {
   const year = state.getIn(['app', 'year'])
+  const leagueId = state.getIn(['app', 'leagueId'])
   const scoreboard_week = state.getIn(['scoreboard', 'week'])
   const matchup = matchupId
     ? getMatchupById(state, { matchupId })
@@ -2159,8 +2163,15 @@ export function getScoreboardByTeamId(state, { tid, matchupId }) {
   let minutes = 0
   let projected = 0
 
-  // TODO - this should check against a final_week param for the given season (different seasons have different final weeks)
-  const is_championship_round = matchup.week === constants.season.finalWeek
+  const season = get_league_season(state, { leagueId, year })
+
+  const championship_round_final_week =
+    Math.max(...season.get('championship_round', [])) ||
+    constants.season.finalWeek
+  const championship_round_first_week =
+    Math.min(...season.get('championship_round', [])) ||
+    constants.season.finalWeek - 1
+  const is_championship_round = matchup.week === championship_round_final_week
 
   // TODO - set flag for processed matchup
   // check matchup points to see if it has any truthy values (means it has been processed)
@@ -2175,7 +2186,7 @@ export function getScoreboardByTeamId(state, { tid, matchupId }) {
       const previous_matchup = getMatchupByTeamId(state, {
         tid,
         year,
-        week: constants.season.finalWeek - 1
+        week: championship_round_first_week
       })
       const previous_team_index = previous_matchup.tids.indexOf(tid)
       if (previous_team_index >= 0) {
@@ -2197,7 +2208,7 @@ export function getScoreboardByTeamId(state, { tid, matchupId }) {
   }
 
   let points = is_championship_round
-    ? getPointsByTeamId(state, { tid, week: constants.season.finalWeek - 1 })
+    ? getPointsByTeamId(state, { tid, week: championship_round_first_week })
     : 0
   const previousWeek = points
 
