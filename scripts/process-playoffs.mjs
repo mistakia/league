@@ -11,7 +11,12 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process-playoffs')
 debug.enable('process-playoffs')
 
-const processPlayoffs = async ({ lid, year }) => {
+const process_playoffs = async ({ lid, year }) => {
+  // skip if processing current season and it is before the wildcard round
+  if (year === constants.season.year && constants.season.week < 15) {
+    return
+  }
+
   const league = await getLeague({ lid })
   const playoffs = await db('playoffs').where({ lid, year })
   const league_team_seasonlogs = await db('league_team_seasonlogs').where({
@@ -259,7 +264,7 @@ const main = async () => {
       return
     }
 
-    await processPlayoffs({ lid, year })
+    await process_playoffs({ lid, year })
   } catch (err) {
     error = err
     log(error)
@@ -277,4 +282,4 @@ if (is_main(import.meta.url)) {
   main()
 }
 
-export default processPlayoffs
+export default process_playoffs
