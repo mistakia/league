@@ -2159,21 +2159,44 @@ export function getScoreboardByTeamId(state, { tid, matchupId }) {
   let minutes = 0
   let projected = 0
 
+  // TODO - this should check against a final_week param for the given season (different seasons have different final weeks)
+  const is_championship_round = matchup.week === constants.season.finalWeek
+
   // TODO - set flag for processed matchup
-  // check matchup points to see if it has any truthy values
-  if (matchup.points.some((p) => Boolean(p))) {
-    const index = matchup.tids.indexOf(tid)
+  // check matchup points to see if it has any truthy values (means it has been processed)
+  // check if matchup tids includes tid, tid might belong to a team not in the matchup (wildcard round and championship round)
+  const team_index = matchup.tids.indexOf(tid)
+  if (matchup.points.some((p) => Boolean(p)) && team_index >= 0) {
+    let points =
+      matchup.points_manual.get(team_index) || matchup.points.get(team_index)
+    let projected_points = matchup.projections.get(team_index)
+
+    if (is_championship_round) {
+      const previous_matchup = getMatchupByTeamId(state, {
+        tid,
+        year,
+        week: constants.season.finalWeek - 1
+      })
+      const previous_team_index = previous_matchup.tids.indexOf(tid)
+      if (previous_team_index >= 0) {
+        points +=
+          previous_matchup.points_manual.get(previous_team_index) ||
+          previous_matchup.points.get(previous_team_index)
+        projected_points +=
+          previous_matchup.projections.get(previous_team_index)
+      }
+    }
+
     return createScoreboard({
       tid,
-      points: matchup.points.get(index),
-      projected: matchup.projections.get(index),
+      points,
+      projected: projected_points,
       minutes,
       matchup
     })
   }
 
-  const isChampRound = matchup.week === constants.season.finalWeek
-  let points = isChampRound
+  let points = is_championship_round
     ? getPointsByTeamId(state, { tid, week: constants.season.finalWeek - 1 })
     : 0
   const previousWeek = points

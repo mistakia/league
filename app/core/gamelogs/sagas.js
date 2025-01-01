@@ -33,8 +33,8 @@ export function* load({ payload }) {
       break
   }
 
-  // load last week gamelogs as well when its the final week of the championship round
-  if (week === constants.season.finalWeek && week === constants.season.week) {
+  // TODO this should check against a final_week param for the given season (different seasons have different final weeks)
+  if (week === constants.season.finalWeek) {
     yield call(load, {
       payload: {
         leagueId,
