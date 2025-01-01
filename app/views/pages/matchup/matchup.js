@@ -29,7 +29,8 @@ export default function MatchupPage({
   load_rosters_for_year,
   selectWeek,
   selectYear,
-  select_matchup
+  select_matchup,
+  load_season
 }) {
   const is_head_to_head = matchup.type === constants.matchups.H2H
   const navigate = useNavigate()
@@ -67,6 +68,7 @@ export default function MatchupPage({
 
     loadLeaguePlayers()
     load_rosters_for_year({ lid, year: seas_year })
+    load_season()
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [lid, loadLeaguePlayers, load_rosters_for_year])
 
@@ -179,5 +181,6 @@ MatchupPage.propTypes = {
   loadMatchups: PropTypes.func,
   select_matchup: PropTypes.func,
   load_rosters_for_year: PropTypes.func,
-  loadLeaguePlayers: PropTypes.func
+  loadLeaguePlayers: PropTypes.func,
+  load_season: PropTypes.func
 }

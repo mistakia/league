@@ -99,6 +99,7 @@ import {
   get_data_view_actions
 } from '@core/data-views/actions'
 import { get_league_careerlogs_actions } from '@core/league-careerlogs/actions'
+import { get_season_actions } from '@core/seasons/actions'
 
 function* fetchAPI(apiFunction, actions, opts = {}) {
   const { token } = yield select(get_app)
@@ -469,3 +470,5 @@ export const get_league_careerlogs = fetch.bind(
   api.get_league_careerlogs,
   get_league_careerlogs_actions
 )
+
+export const get_season = fetch.bind(null, api.get_season, get_season_actions)

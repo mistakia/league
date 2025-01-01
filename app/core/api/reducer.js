@@ -9,7 +9,7 @@ import { playerActions } from '@core/players/actions'
 import { teamActions } from '@core/teams/actions'
 import { data_views_actions } from '@core/data-views/actions'
 import { league_team_daily_values_actions } from '@core/league-team-daily-values/actions'
-
+import { seasons_actions } from '@core/seasons/actions'
 const initialState = new Map({
   request_history: new Map()
 })
@@ -134,6 +134,21 @@ export function apiReducer(state = initialState, { payload, type }) {
         ],
         true
       )
+
+    case seasons_actions.GET_SEASON_PENDING:
+      return state.setIn(
+        [
+          'request_history',
+          `GET_SEASON_LEAGUE_${payload.opts.leagueId}_${payload.opts.year}`
+        ],
+        true
+      )
+
+    case seasons_actions.GET_SEASON_FAILED:
+      return state.deleteIn([
+        'request_history',
+        `GET_SEASON_LEAGUE_${payload.opts.leagueId}_${payload.opts.year}`
+      ])
 
     default:
       return state

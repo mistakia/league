@@ -388,6 +388,10 @@ export const api = {
   get_league_careerlogs({ leagueId }) {
     const url = `${API_URL}/leagues/${leagueId}/careerlogs`
     return { url }
+  },
+  get_season({ leagueId, year }) {
+    const url = `${API_URL}/leagues/${leagueId}/seasons/${year}`
+    return { url }
   }
 }
 
