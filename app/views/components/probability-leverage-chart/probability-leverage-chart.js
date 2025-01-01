@@ -30,8 +30,6 @@ const ProbabilityLeverageChart = ({ teams }) => {
 
   const current_data = chart_data[chart_type]
 
-  console.log(teams.toJS())
-
   const series_data = teams
     .map((team) => ({
       name: team.get('name'),
