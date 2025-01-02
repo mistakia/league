@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import PropTypes from 'prop-types'
 import { useLocation, NavLink, useParams, useNavigate } from 'react-router-dom'
 import ImmutablePropTypes from 'react-immutable-proptypes'
@@ -219,6 +219,20 @@ export default function DataViewsPage({
     return null
   }
 
+  // adjust the table state to remove the player_league_roster_status column if the leagueId is not set
+  const filtered_table_state = useMemo(() => {
+    if (leagueId && leagueId > 0) {
+      return selected_data_view.table_state
+    }
+
+    return {
+      ...selected_data_view.table_state,
+      prefix_columns: selected_data_view.table_state.prefix_columns.filter(
+        (column) => column !== 'player_league_roster_status'
+      )
+    }
+  }, [selected_data_view.table_state, leagueId])
+
   const is_view_loading =
     isPending || (view_id && selected_data_view.view_id !== view_id)
   const body = is_view_loading ? (
@@ -239,7 +253,7 @@ export default function DataViewsPage({
         metadata={data_view_request.metadata}
         on_view_change={on_view_change}
         on_save_view={save_data_view}
-        table_state={selected_data_view.table_state}
+        table_state={filtered_table_state}
         saved_table_state={selected_data_view.saved_table_state}
         all_columns={data_views_fields}
         selected_view={selected_data_view}
