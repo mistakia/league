@@ -115,7 +115,8 @@ export default {
         __dirname,
         '../node_modules/highcharts-react-official'
       ),
-      highcharts: path.resolve(__dirname, '../node_modules/highcharts')
+      highcharts: path.resolve(__dirname, '../node_modules/highcharts'),
+      'timeago.js': path.resolve(__dirname, '../node_modules/timeago.js')
     }
   },
 
