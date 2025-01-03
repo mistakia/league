@@ -110,7 +110,20 @@ const percentage_fields = [
   'rush_share',
   'rush_success_rate',
   'team_target_share',
-  'team_air_yard_share'
+  'team_air_yard_share',
+  'catch_rate_over_expected',
+  'pass_comp_pct',
+  'expected_pass_comp',
+  'cpoe',
+  'pressure_rate_against',
+  'blitz_rate',
+  'drop_rate',
+  'pass_yards_after_catch_pct',
+  'deep_pass_att_pct',
+  'tight_window_pct',
+  'play_action_pct',
+  'recv_deep_target_pct',
+  'recv_tight_window_pct'
 ]
 
 const get_stat_fields = (pos) => {
