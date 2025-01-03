@@ -57,8 +57,8 @@ const format_receiving_gamelog = ({ esbid, pid, stats, year, team_stats }) => {
     year,
     longest_reception: stats.longest_reception,
     recv_yards_15_plus_count: stats.recv_yards_15_plus_count,
-    team_target_share: team_target_share * 100,
-    team_air_yard_share: team_air_yard_share * 100,
+    team_target_share,
+    team_air_yard_share,
     redzone_targets: stats.redzone_targets,
     weighted_opportunity_rating:
       1.5 * team_target_share + 0.7 * team_air_yard_share
@@ -66,7 +66,7 @@ const format_receiving_gamelog = ({ esbid, pid, stats, year, team_stats }) => {
 }
 
 const format_rushing_gamelog = ({ esbid, pid, stats, year, team_stats }) => {
-  const rush_share = team_stats.ra ? (stats.ra / team_stats.ra) * 100 : 0
+  const rush_share = team_stats.ra ? stats.ra / team_stats.ra : null
   const weighted_opportunity =
     1.3 * stats.rush_attempts_redzone +
     2.25 * stats.redzone_targets +
