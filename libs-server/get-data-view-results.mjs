@@ -271,6 +271,23 @@ const get_column_index = ({ column_id, index, columns }) => {
 }
 
 const find_sort_column = ({ column_id, column_index = 0, columns }) => {
+  // Special handling for split columns
+  if (column_id === 'year') {
+    return {
+      column_id,
+      table_name: 'player_years',
+      is_split: true
+    }
+  }
+
+  if (column_id === 'week') {
+    return {
+      column_id,
+      table_name: 'player_years_weeks',
+      is_split: true
+    }
+  }
+
   const item = columns.find(({ column, index }) => {
     const c_id = typeof column === 'string' ? column : column.column_id
     return (
@@ -1079,7 +1096,7 @@ export const get_data_view_results_query = ({
     }
   }
 
-  // Add a coalesce select for each split
+  // Add a select and group by for each split
   for (const split of splits) {
     if (split === 'year') {
       players_query.select('player_years.year')
@@ -1087,39 +1104,8 @@ export const get_data_view_results_query = ({
     }
 
     if (split === 'week') {
-      const coalesce_args = Object.entries(grouped_clauses_by_table)
-        .filter(
-          ([_, table_info]) =>
-            table_info.supported_splits &&
-            table_info.supported_splits.includes(split)
-        )
-        .map(([table_alias, table_info]) => {
-          // Check if select_columns is not empty and week_select is defined
-          if (
-            table_info.select_columns &&
-            table_info.select_columns.length > 0
-          ) {
-            const column_definition =
-              data_views_column_definitions[
-                table_info.select_columns[0].column_id
-              ]
-            if (column_definition && column_definition.week_select) {
-              return column_definition.week_select({
-                table_name: table_alias,
-                splits
-              })
-            }
-          }
-          // Default to standard week column if no custom week_select is available
-          return `${table_alias}.week`
-        })
-        .filter(Boolean) // Remove any undefined entries
-        .join(', ')
-
-      if (coalesce_args) {
-        players_query.select(db.raw(`COALESCE(${coalesce_args}) AS week`))
-        players_query.groupBy(db.raw(`COALESCE(${coalesce_args})`))
-      }
+      players_query.select('player_years_weeks.week')
+      players_query.groupBy('player_years_weeks.week')
     }
   }
 
@@ -1138,11 +1124,24 @@ export const get_data_view_results_query = ({
       continue
     }
 
+    // Special handling for split columns
+    if (column.is_split) {
+      const sort_direction =
+        sort_clause.desc === true || sort_clause.desc === 'true'
+          ? 'DESC'
+          : 'ASC'
+      players_query.orderByRaw(
+        `${column.table_name}.${column.column_id} ${sort_direction} NULLS LAST`
+      )
+      continue
+    }
+
     const column_id = typeof column === 'string' ? column : column.column_id
     const column_params = typeof column === 'string' ? {} : column.params
     const column_definition = data_views_column_definitions[column_id]
 
     if (!column_definition) {
+      console.warn(`Column definition not found for column_id: ${column_id}`)
       continue
     }
 
