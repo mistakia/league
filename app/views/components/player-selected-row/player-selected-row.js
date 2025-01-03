@@ -104,6 +104,15 @@ const receiving_usage = [
 ]
 const receiving_redzone = ['redzone_targets', 'endzone_targets']
 
+const percentage_fields = [
+  'expected_catch_rate',
+  'catch_rate',
+  'rush_share',
+  'rush_success_rate',
+  'team_target_share',
+  'team_air_yard_share'
+]
+
 const get_stat_fields = (pos) => {
   switch (pos) {
     case 'DST':
@@ -239,6 +248,7 @@ export default function PlayerSelectedRow({
                 : fixed
             }
             field={group_field}
+            is_percentage={percentage_fields.includes(group_field)}
           />
         )
       }
@@ -261,6 +271,7 @@ export default function PlayerSelectedRow({
               : fixed
           }
           field={field}
+          is_percentage={percentage_fields.includes(field)}
         />
       )
     }

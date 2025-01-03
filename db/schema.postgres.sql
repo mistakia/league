@@ -17555,8 +17555,6 @@ CREATE TABLE public.player_receiving_gamelogs (
     avg_route_depth numeric(5,2),
     endzone_targets smallint,
     endzone_recs smallint,
-    team_target_share numeric(5,2),
-    team_air_yard_share numeric(5,2),
     recv_deep_target_pct numeric(5,2),
     recv_tight_window_pct numeric(5,2),
     longest_reception smallint,
@@ -17564,7 +17562,9 @@ CREATE TABLE public.player_receiving_gamelogs (
     weighted_opportunity_rating numeric(5,2),
     redzone_targets smallint,
     route_share numeric(5,2),
-    recv_yards_15_plus_count smallint
+    recv_yards_15_plus_count smallint,
+    team_target_share numeric(5,4),
+    team_air_yard_share numeric(5,4)
 );
 
 
@@ -17597,10 +17597,10 @@ CREATE TABLE public.player_rushing_gamelogs (
     longest_rush smallint,
     rush_yards_per_attempt numeric(5,2),
     rush_yards_10_plus_rate numeric(5,4),
-    rush_share numeric(5,2),
     weighted_opportunity numeric(5,2),
     rush_attempts_redzone smallint,
-    rush_attempts_goaline smallint
+    rush_attempts_goaline smallint,
+    rush_share numeric(5,4)
 );
 
 
@@ -18796,7 +18796,9 @@ CREATE TABLE public.seasons (
     ext3 integer DEFAULT 20,
     ext4 integer DEFAULT 35,
     season_due_amount bigint,
-    free_agency_live_auction_end bigint
+    free_agency_live_auction_end bigint,
+    wildcard_round smallint,
+    championship_round integer[]
 );
 
 
