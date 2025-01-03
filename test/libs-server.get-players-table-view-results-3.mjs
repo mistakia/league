@@ -266,6 +266,45 @@ describe('LIBS SERVER get_data_view_results', () => {
         }
       ]
     })
-    console.log(query.toString())
+    const expected_query = `with "current_week_opponents" as (select "h" as "nfl_team", "v" as "opponent" from "public"."nfl_games" where "year" = 2024 and "week" = 18 and "seas_type" = 'REG' union select "v" as "nfl_team", "h" as "opponent" from "public"."nfl_games" where "year" = 2024 and "week" = 18 and "seas_type" = 'REG') select "player"."pid", "tf8de8b452c5328170f28af2fd3c5b6f2"."pts" AS "league_nfl_team_seasonlogs_pts_0", "t9bd8dc189b8b6a0b23b50f09f6fe0bb7"."pts" AS "league_nfl_team_seasonlogs_pts_1", "ta091f9b442e5ed6ba3af81ee23a2e319"."pts" AS "league_nfl_team_seasonlogs_pts_2", "player"."pos" from "player" inner join "current_week_opponents" on "player"."current_nfl_team" = "current_week_opponents"."nfl_team" left join "league_nfl_team_seasonlogs" as "tf8de8b452c5328170f28af2fd3c5b6f2" on "tf8de8b452c5328170f28af2fd3c5b6f2"."tm" = "current_week_opponents"."opponent" and "tf8de8b452c5328170f28af2fd3c5b6f2"."year" = 2024 and "tf8de8b452c5328170f28af2fd3c5b6f2"."lid" = 1 and "tf8de8b452c5328170f28af2fd3c5b6f2"."stat_key" = 'DST_AGAINST_ADJ_LAST_FOUR' left join "league_nfl_team_seasonlogs" as "t9bd8dc189b8b6a0b23b50f09f6fe0bb7" on "t9bd8dc189b8b6a0b23b50f09f6fe0bb7"."tm" = "current_week_opponents"."opponent" and "t9bd8dc189b8b6a0b23b50f09f6fe0bb7"."year" = 2024 and "t9bd8dc189b8b6a0b23b50f09f6fe0bb7"."lid" = 1 and "t9bd8dc189b8b6a0b23b50f09f6fe0bb7"."stat_key" = 'DST_AGAINST_ADJ_LAST_EIGHT' left join "league_nfl_team_seasonlogs" as "ta091f9b442e5ed6ba3af81ee23a2e319" on "ta091f9b442e5ed6ba3af81ee23a2e319"."tm" = "current_week_opponents"."opponent" and "ta091f9b442e5ed6ba3af81ee23a2e319"."year" = 2024 and "ta091f9b442e5ed6ba3af81ee23a2e319"."lid" = 1 and "ta091f9b442e5ed6ba3af81ee23a2e319"."stat_key" = 'DST_AGAINST_ADJ' where player.pos IN ('DST') group by "tf8de8b452c5328170f28af2fd3c5b6f2"."pts", "t9bd8dc189b8b6a0b23b50f09f6fe0bb7"."pts", "ta091f9b442e5ed6ba3af81ee23a2e319"."pts", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by "player"."pid" asc limit 500`
+    compare_queries(query.toString(), expected_query)
+  })
+
+  it('sort by splits year', () => {
+    const { query } = get_data_view_results_query({
+      columns: [
+        {
+          column_id: 'player_weighted_opportunity_from_plays',
+          params: {
+            year: [2024],
+            rate_type: [null]
+          }
+        }
+      ],
+      sort: [
+        {
+          column_id: 'week',
+          desc: true
+        }
+      ],
+      where: [
+        {
+          column_id: 'player_nfl_teams',
+          params: {},
+          value: 'TB',
+          operator: '='
+        },
+        {
+          column_id: 'player_position',
+          params: {},
+          value: ['RB'],
+          operator: 'IN'
+        }
+      ],
+      prefix_columns: ['player_name', 'player_nfl_teams', 'player_position'],
+      splits: ['week', 'year']
+    })
+    const expected_query = `with "base_years" as (SELECT unnest(ARRAY[2024]) as year), "player_years" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), "player_years_weeks" as (SELECT player_years.pid, nfl_year_week_timestamp.year, nfl_year_week_timestamp.week FROM player_years INNER JOIN nfl_year_week_timestamp ON player_years.year = nfl_year_week_timestamp.year), "tf851d676fddeb70ff3d41e0198712cb9" as (select "player_gamelogs"."pid", count(*) as "rate_type_total_count", array_agg(distinct player_gamelogs.tm) as teams, "nfl_games"."week", "nfl_games"."year" from "player_gamelogs" left join "nfl_games" on "nfl_games"."esbid" = "player_gamelogs"."esbid" where "nfl_games"."seas_type" = 'REG' and "player_gamelogs"."active" = true group by "nfl_games"."week", "nfl_games"."year", "player_gamelogs"."pid"), "t5525969ee1c8752b8face9cbcb02ceb7" as (select COALESCE(bc_pid, trg_pid) as pid, "nfl_plays"."week", "nfl_plays"."year", ROUND(SUM(CASE WHEN nfl_plays.ydl_100 <= 20 AND bc_pid IS NOT NULL THEN 1.30 WHEN nfl_plays.ydl_100 <= 20 AND trg_pid IS NOT NULL THEN 2.25 WHEN nfl_plays.ydl_100 > 20 AND bc_pid IS NOT NULL THEN 0.48 WHEN nfl_plays.ydl_100 > 20 AND trg_pid IS NOT NULL THEN 1.43 ELSE 0 END), 2) as weighted_opportunity_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2024) group by "nfl_plays"."week", "nfl_plays"."year", COALESCE(bc_pid, trg_pid)) select "player"."pid", player.fname, player.lname, "player"."pos" AS "pos_0", tf851d676fddeb70ff3d41e0198712cb9.teams as player_nfl_teams_0, "t5525969ee1c8752b8face9cbcb02ceb7"."weighted_opportunity_from_plays" AS "weighted_opportunity_from_plays_0", "player_years_weeks"."week", "player_years"."year", "player"."pos" from "player_years_weeks" inner join "player" on "player"."pid" = "player_years_weeks"."pid" inner join "player_years" on "player_years"."pid" = "player"."pid" and "player_years"."year" = "player_years_weeks"."year" left join "tf851d676fddeb70ff3d41e0198712cb9" on "tf851d676fddeb70ff3d41e0198712cb9"."pid" = "player"."pid" and "tf851d676fddeb70ff3d41e0198712cb9"."year" = "player_years_weeks"."year" and "tf851d676fddeb70ff3d41e0198712cb9"."week" = "player_years_weeks"."week" left join "t5525969ee1c8752b8face9cbcb02ceb7" on "t5525969ee1c8752b8face9cbcb02ceb7"."pid" = "player"."pid" and "t5525969ee1c8752b8face9cbcb02ceb7"."year" = 2024 and t5525969ee1c8752b8face9cbcb02ceb7.week = player_years_weeks.week where player.pos IN ('RB') and 'TB'::text = ANY(tf851d676fddeb70ff3d41e0198712cb9.teams::text[]) group by player.fname, player.lname, "player"."pos", tf851d676fddeb70ff3d41e0198712cb9.teams, "t5525969ee1c8752b8face9cbcb02ceb7"."weighted_opportunity_from_plays", "player_years_weeks"."week", "player_years"."year", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by player_years_weeks.week DESC NULLS LAST, "player"."pid" asc limit 500`
+    compare_queries(query.toString(), expected_query)
   })
 })
