@@ -252,7 +252,7 @@ export const job = async () => {
 
   if (!argv.dry) {
     await report_job({
-      job_type: job_types.FANATICS_ODDS,
+      job_type: job_types.IMPORT_FANATICS_ODDS,
       error
     })
   }

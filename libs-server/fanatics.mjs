@@ -82,7 +82,7 @@ export const get_league_info = async ({ ignore_cache = false } = {}) => {
   }
 
   const fanatics_config = await get_fanatics_config()
-  const url = `${fanatics_config.api_url}/page/league/364897?channel=AMELCO_DC_MASTER&segment=AMELCO_DC&stateCode=DC&tab=schedule&dma=511`
+  const url = `${fanatics_config.api_url}/page/league/364899?channel=AMELCO_DC_MASTER&segment=AMELCO_DC&stateCode=DC&tab=schedule&dma=511`
   const res = await fetch_http2(url)
   const data = await res.json()
 
