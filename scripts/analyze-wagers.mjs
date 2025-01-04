@@ -10,7 +10,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants, format_player_name } from '#libs-shared'
-import { is_main } from '#libs-server'
+import { is_main, fanatics } from '#libs-server'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('analyze-wagers')
@@ -437,6 +437,33 @@ const standardize_wager = ({ wager, source }) => {
         source_id: 'DRAFTKINGS'
       }
     }
+  } else if (source === 'fanatics') {
+    const parlay_legs = wager.parlayLegs || []
+
+    return {
+      ...wager,
+      selections: parlay_legs.map((leg) => ({
+        name: `${leg.title} ${leg.subtitle}`,
+        player_name: leg.title.split(' ')[0] + ' ' + leg.title.split(' ')[1],
+        event_id: leg.metaData.eventId,
+        market_id: leg.metaData.marketId,
+        source_id: 'FANATICS',
+        selection_id: leg.metaData.selectionId,
+        result: leg.betStatus,
+        parsed_odds: Number(leg.oddsData.americanDisplay.replace(/[+-]/g, '')),
+        is_won: leg.betStatus === 'WON',
+        is_lost: leg.betStatus === 'LOST'
+      })),
+      bet_receipt_id: wager.betMetaData.betId,
+      parsed_odds: Number(wager.header.oddsData.americanDisplay),
+      is_settled:
+        wager.header.betStatus !== 'OPEN' &&
+        wager.header.betStatus !== 'NOT_SET',
+      is_won: wager.header.betStatus === 'WON',
+      potential_win: fanatics.format_wager_payout(wager.header.payout),
+      stake: Number(wager.header.wager.replace('$', '')),
+      source_id: 'FANATICS'
+    }
   }
   throw new Error(`Unknown wager source: ${source}`)
 }
@@ -784,7 +811,7 @@ const format_round_robin_display = (wager) => {
   return formatted_lines.join('\n')
 }
 
-const analyze_round_robin_selections = (wagers) => {
+const analyze_fanduel_round_robin_selections = (wagers) => {
   // Track selection usage and combinations
   const selection_stats = new Map()
 
@@ -867,9 +894,237 @@ const analyze_round_robin_selections = (wagers) => {
   })
 }
 
+const validate_combinations = (wagers, consolidated_selections) => {
+  // Create a map of all actual combinations that exist in wagers
+  const actual_combinations = new Set()
+
+  wagers.forEach((wager) => {
+    const wager_selections = wager.selections.map((s) => s.name)
+    actual_combinations.add(wager_selections.sort().join('|'))
+  })
+
+  // For each event's alternative selections, check if all combinations exist
+  const selection_groups = consolidated_selections.map((sel) =>
+    sel.split(' / ')
+  )
+
+  // Generate all possible combinations
+  const check_combinations = (index, current_combo = []) => {
+    if (index === selection_groups.length) {
+      // Check if this combination exists in any wager
+      const combo_exists = Array.from(actual_combinations).some(
+        (actual_combo) => {
+          return current_combo.every((sel) => actual_combo.includes(sel))
+        }
+      )
+      return combo_exists
+    }
+
+    // Try each alternative for this position
+    return selection_groups[index].every((selection) => {
+      return check_combinations(index + 1, [...current_combo, selection])
+    })
+  }
+
+  return check_combinations(0)
+}
+
+const split_invalid_combinations = (set) => {
+  const result_sets = []
+  let current_wagers = set.wagers
+
+  while (current_wagers.length > 0) {
+    // Get all selections grouped by event for these wagers
+    const selections_by_event = new Map()
+    current_wagers.forEach((wager) => {
+      wager.selections.forEach((selection) => {
+        if (!selections_by_event.has(selection.event_id)) {
+          selections_by_event.set(selection.event_id, new Set())
+        }
+        selections_by_event.get(selection.event_id).add(selection.name)
+      })
+    })
+
+    // Create consolidated selections
+    const consolidated = Array.from(selections_by_event.entries()).map(
+      ([_, selections]) => {
+        const selections_array = Array.from(selections)
+        return selections_array.length > 1
+          ? selections_array.sort().join(' / ')
+          : selections_array[0]
+      }
+    )
+
+    // Check if all combinations exist
+    if (validate_combinations(current_wagers, consolidated)) {
+      // This is a valid set
+      result_sets.push({
+        wagers: current_wagers,
+        consolidated_selections: consolidated
+      })
+      break
+    } else {
+      // Find the largest valid subset
+      const event_selections = Array.from(selections_by_event.entries())
+      let best_subset = []
+
+      for (const [event_id, selections] of event_selections) {
+        if (selections.size > 1) {
+          // Try removing each selection
+          for (const selection of selections) {
+            const subset = current_wagers.filter(
+              (wager) =>
+                !wager.selections.some(
+                  (s) => s.event_id === event_id && s.name === selection
+                )
+            )
+            if (subset.length > best_subset.length) {
+              best_subset = subset
+            }
+          }
+        }
+      }
+
+      if (best_subset.length > 0) {
+        // Add this subset as a valid set
+        const subset_consolidated = create_consolidated_selections(best_subset)
+        result_sets.push({
+          wagers: best_subset,
+          consolidated_selections: subset_consolidated
+        })
+        // Continue with remaining wagers
+        current_wagers = current_wagers.filter((w) => !best_subset.includes(w))
+      } else {
+        // Fallback: create individual sets
+        current_wagers.forEach((wager) => {
+          result_sets.push({
+            wagers: [wager],
+            consolidated_selections: wager.selections.map((s) => s.name)
+          })
+        })
+        break
+      }
+    }
+  }
+
+  return result_sets
+}
+
+const create_consolidated_selections = (wagers) => {
+  const selections_by_event = new Map()
+  wagers.forEach((wager) => {
+    wager.selections.forEach((selection) => {
+      if (!selections_by_event.has(selection.event_id)) {
+        selections_by_event.set(selection.event_id, new Set())
+      }
+      selections_by_event.get(selection.event_id).add(selection.name)
+    })
+  })
+
+  return Array.from(selections_by_event.values()).map((selections) => {
+    const selections_array = Array.from(selections)
+    return selections_array.length > 1
+      ? selections_array.sort().join(' / ')
+      : selections_array[0]
+  })
+}
+
+const analyze_fanatics_wager_sets = (wagers) => {
+  const selection_sets = new Map()
+
+  wagers.forEach((wager) => {
+    const selections_by_event = wager.selections.reduce((acc, selection) => {
+      if (!acc[selection.event_id]) {
+        acc[selection.event_id] = []
+      }
+      acc[selection.event_id].push({
+        name: selection.name,
+        eventId: selection.event_id
+      })
+      return acc
+    }, {})
+
+    Object.entries(selections_by_event).forEach(
+      ([event_id, event_selections]) => {
+        event_selections.forEach((selection) => {
+          const metric_match = selection.name.match(/(\d+)\+/)
+          const metric_amount = metric_match ? metric_match[1] : ''
+          const selection_key = `${selection.name.split(' ')[0]} ${selection.name.split(' ')[1]} ${metric_amount}+ ${selection.name.split(' ').slice(-2).join(' ')}`
+
+          if (!selection_sets.has(selection_key)) {
+            selection_sets.set(selection_key, {
+              count: 0,
+              total_stake: 0,
+              potential_win: 0,
+              wagers: [],
+              combinations: new Map()
+            })
+          }
+
+          const set = selection_sets.get(selection_key)
+          set.count++
+          set.total_stake += wager.stake
+          set.potential_win += wager.potential_win
+          set.wagers.push(wager)
+
+          const other_selections = Object.entries(selections_by_event)
+            .filter(([other_event_id]) => other_event_id !== event_id)
+            .map(([_, selections]) => ({
+              name: selections.map((s) => s.name).join(' & '),
+              eventId: selections[0].eventId
+            }))
+
+          if (other_selections.length > 0) {
+            const combo_key = other_selections
+              .map((s) => `${s.eventId}:${s.name}`)
+              .sort()
+              .join('|')
+            if (!set.combinations.has(combo_key)) {
+              set.combinations.set(combo_key, {
+                count: 0,
+                selections: other_selections
+              })
+            }
+            set.combinations.get(combo_key).count++
+          }
+        })
+      }
+    )
+  })
+
+  const sorted_sets = Array.from(selection_sets.entries()).sort(
+    (a, b) => b[1].potential_win - a[1].potential_win
+  )
+
+  console.log('\n\nFanatics Wager Sets Analysis:\n')
+  sorted_sets.forEach(([selection_key, stats]) => {
+    const split_sets = split_invalid_combinations(stats)
+
+    split_sets.forEach((set, index) => {
+      const set_label = split_sets.length > 1 ? ` (Set ${index + 1})` : ''
+      console.log(`${selection_key}${set_label}:`)
+      console.log(`  Total Parlays: ${set.wagers.length}`)
+      console.log(
+        `  Total Stake: $${set.wagers.reduce((sum, w) => sum + w.stake, 0).toFixed(2)}`
+      )
+      console.log(
+        `  Total Potential Win: $${set.wagers.reduce((sum, w) => sum + w.potential_win, 0).toFixed(2)}`
+      )
+
+      console.log('\n  Combinations:')
+      console.log(`    Used ${set.wagers.length} times:`)
+      set.consolidated_selections.forEach((sel) => {
+        console.log(`      ${sel}`)
+      })
+      console.log()
+    })
+  })
+}
+
 const analyze_wagers = async ({
   fanduel_filename,
   draftkings_filename,
+  fanatics_filename,
   week,
   show_potential_gain = false,
   show_counts = false,
@@ -883,15 +1138,19 @@ const analyze_wagers = async ({
   sort_by = 'odds',
   show_wager_roi = false,
   show_only_open_round_robins = false,
-  show_round_robins = false
+  show_round_robins = false,
+  show_fanatics_sets = false
 } = {}) => {
-  if (!fanduel_filename && !draftkings_filename) {
-    throw new Error('At least one filename (FanDuel or DraftKings) is required')
+  if (!fanduel_filename && !draftkings_filename && !fanatics_filename) {
+    throw new Error(
+      'At least one filename (FanDuel, DraftKings or Fanatics) is required'
+    )
   }
 
   log({
     fanduel_filename,
     draftkings_filename,
+    fanatics_filename,
     week,
     show_potential_gain,
     show_counts,
@@ -955,6 +1214,27 @@ const analyze_wagers = async ({
         )
       } else {
         throw error // Re-throw if it's not a file not found error
+      }
+    }
+  }
+
+  if (fanatics_filename) {
+    try {
+      const fanatics_wagers = await fs.readJson(
+        `${data_path}/${fanatics_filename}`
+      )
+      wagers = wagers.concat(
+        fanatics_wagers.flatMap((wager) =>
+          standardize_wager({ wager, source: 'fanatics' })
+        )
+      )
+    } catch (error) {
+      if (error.code === 'ENOENT') {
+        console.warn(
+          `Warning: Fanatics file '${fanatics_filename}' not found. Skipping Fanatics wagers.`
+        )
+      } else {
+        throw error
       }
     }
   }
@@ -1131,7 +1411,7 @@ const analyze_wagers = async ({
       console.log('---')
     })
 
-    analyze_round_robin_selections(fanduel_round_robin_wagers)
+    analyze_fanduel_round_robin_selections(fanduel_round_robin_wagers)
   }
 
   if (show_counts) {
@@ -1372,6 +1652,11 @@ const analyze_wagers = async ({
       wager_table.printTable()
     }
   }
+
+  if (show_fanatics_sets) {
+    const fanatics_wagers = wagers.filter((w) => w.source_id === 'FANATICS')
+    analyze_fanatics_wager_sets(fanatics_wagers)
+  }
 }
 
 const main = async () => {
@@ -1380,6 +1665,7 @@ const main = async () => {
     await analyze_wagers({
       fanduel_filename: argv.fanduel,
       draftkings_filename: argv.draftkings,
+      fanatics_filename: argv.fanatics,
       week: argv.week,
       show_potential_gain: argv.show_potential_gain,
       show_counts: argv.show_counts,
@@ -1401,7 +1687,8 @@ const main = async () => {
       sort_by: argv.sort_by || 'odds',
       show_wager_roi: argv.show_wager_roi,
       show_only_open_round_robins: argv.show_only_open_round_robins,
-      show_round_robins: argv.show_round_robins
+      show_round_robins: argv.show_round_robins,
+      show_fanatics_sets: argv.show_fanatics_sets
     })
   } catch (err) {
     error = err

@@ -18,6 +18,14 @@ const get_fanatics_config = async () => {
   return config_row.value
 }
 
+export const format_wager_payout = (payout) => {
+  const amount = Number(payout.replace(/[$,]/g, ''))
+  if (isNaN(amount)) {
+    throw new Error(`invalid payout amount ${payout}, formmated ${amount}`)
+  }
+  return amount
+}
+
 export const format_market_type = ({ market_type }) => {
   switch (market_type) {
     case 'AMERICAN_FOOTBALL:FT:PROPPSYDSTG':
@@ -120,4 +128,102 @@ export const get_event_info = async ({
   }
 
   return data
+}
+
+const get_wagers_info = async ({
+  session_token,
+  channel = 'AMELCO_DC_MASTER',
+  segment = 'AMELCO_DC',
+  stateCode = 'DC',
+  dma = '511'
+}) => {
+  const fanatics_config = await get_fanatics_config()
+  const url = `${fanatics_config.api_url}/page/mybets?channel=${channel}&segment=${segment}&stateCode=${stateCode}&dma=${dma}`
+  const res = await fetch_http2(url, {
+    headers: {
+      sessionToken: session_token
+    }
+  })
+  const data = await res.json()
+  return data
+}
+
+export const get_open_wagers = async ({
+  session_token,
+  channel = 'AMELCO_DC_MASTER',
+  segment = 'AMELCO_DC',
+  stateCode = 'DC',
+  dma = '511'
+}) => {
+  const wagers_info = await get_wagers_info({
+    session_token,
+    channel,
+    segment,
+    stateCode,
+    dma
+  })
+
+  if (!wagers_info || !wagers_info.tabs) {
+    log(`no open wagers card pack found`)
+    return []
+  }
+
+  const open_wagers_card_pack_id = wagers_info.tabs.find(
+    (tab) => tab.title === 'Open'
+  ).cardPackId
+  const open_wagers_card_pack = wagers_info.cardPack
+
+  if (!open_wagers_card_pack) {
+    log(`no open wagers card pack found`)
+    return []
+  }
+
+  if (open_wagers_card_pack.id !== open_wagers_card_pack_id) {
+    log(
+      `open wagers card pack id mismatch: ${open_wagers_card_pack.id} !== ${open_wagers_card_pack_id}`
+    )
+    return []
+  }
+
+  return open_wagers_card_pack.cards
+}
+
+export const get_settled_wagers = async ({
+  session_token,
+  channel = 'AMELCO_DC_MASTER',
+  segment = 'AMELCO_DC',
+  stateCode = 'DC',
+  dma = '511'
+}) => {
+  const wagers_info = await get_wagers_info({
+    session_token,
+    channel,
+    segment,
+    stateCode,
+    dma
+  })
+
+  const settled_wagers_card_pack_id = wagers_info.tabs.find(
+    (tab) => tab.title === 'All'
+  ).cardPackId
+
+  if (!settled_wagers_card_pack_id) {
+    log(`no settled wagers card pack found`)
+    return []
+  }
+
+  const fanatics_config = await get_fanatics_config()
+  const url = `${fanatics_config.api_url}/cardpack/${settled_wagers_card_pack_id}?channel=${channel}&segment=${segment}&stateCode=${stateCode}`
+  const res = await fetch_http2(url, {
+    headers: {
+      sessionToken: session_token
+    }
+  })
+  const card_pack_data = await res.json()
+  if (!card_pack_data) {
+    log(`no card pack data found`)
+    return []
+  }
+
+  return card_pack_data.cards
 }
