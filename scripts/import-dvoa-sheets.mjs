@@ -996,6 +996,13 @@ const get_dvoa_config = async () => {
 
 const import_dvoa_sheets = async ({ dry_run = false, filepath } = {}) => {
   if (!filepath) {
+    if (constants.season.nfl_seas_type !== 'REG') {
+      log(
+        `Skipping import of DVOA sheets for ${constants.season.nfl_seas_type} season`
+      )
+      return
+    }
+
     const dvoa_config = await get_dvoa_config()
     const { dvoa_base_url } = dvoa_config
     if (!dvoa_base_url) {
