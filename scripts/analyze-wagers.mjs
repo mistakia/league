@@ -585,12 +585,6 @@ const analyze_prop_combinations = (lost_props, filtered, wager_summary) => {
       const { potential_gain, potential_wins, potential_roi_added } =
         calculate_potential_gain({ actual_summary, prop_summary: summary })
 
-      if (prop.selectionName.includes('Justin Herbert 200+')) {
-        console.log(actual_summary)
-        console.log(summary)
-        console.log(prop)
-      }
-
       if (potential_gain > 0) {
         one_prop.push({
           name: prop.name,
