@@ -159,6 +159,9 @@ const league_format_player_projection_values_join = (join_arguments) => {
 
 // TODO add support for seas_type
 const projections_index_join = (join_arguments) => {
+  const { params = {} } = join_arguments
+  const { seas_type } = get_default_params({ params })
+
   data_view_join_function({
     ...join_arguments,
     join_year: true,
@@ -172,6 +175,11 @@ const projections_index_join = (join_arguments) => {
           `${join_arguments.table_name}.sourceid`,
           '=',
           constants.sources.AVERAGE
+        )
+        this.andOn(
+          `${join_arguments.table_name}.seas_type`,
+          '=',
+          db.raw('?', [seas_type])
         )
       }
     }

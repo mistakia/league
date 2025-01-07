@@ -2,7 +2,7 @@ import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
 import { constants, common_column_params } from '@libs-shared'
 
-const { single_year, single_week } = common_column_params
+const { single_year, single_week, single_seas_type } = common_column_params
 
 const projection_years = [2020, 2021, 2022, 2023, 2024]
 
@@ -75,7 +75,8 @@ export default function ({ week }) {
                 default_value: constants.year,
                 values: projection_years
               },
-              week: single_week
+              week: single_week,
+              seas_type: single_seas_type
             }
           : undefined
   })

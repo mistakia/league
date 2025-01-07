@@ -12,8 +12,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     debug.enable('data-views')
   })
 
-  it('player contract with no params', () => {
-    const { query } = get_data_view_results_query({
+  it('player contract with no params', async () => {
+    const { query } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'player_contract_base_salary'
@@ -31,8 +31,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     compare_queries(query.toString(), expected_query)
   })
 
-  it('player contract with year', () => {
-    const { query } = get_data_view_results_query({
+  it('player contract with year', async () => {
+    const { query } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'player_contract_base_salary',
@@ -58,8 +58,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     compare_queries(query.toString(), expected_query)
   })
 
-  it('team stat with per_team_play', () => {
-    const { query } = get_data_view_results_query({
+  it('team stat with per_team_play', async () => {
+    const { query } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'team_pass_yards_from_plays',
@@ -80,8 +80,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     compare_queries(query.toString(), expected_query)
   })
 
-  it('team stat with per_team_pass_play', () => {
-    const { query } = get_data_view_results_query({
+  it('team stat with per_team_pass_play', async () => {
+    const { query } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'team_pass_yards_from_plays',
@@ -102,8 +102,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     compare_queries(query.toString(), expected_query)
   })
 
-  it('team stat with per_team_rush_play', () => {
-    const { query } = get_data_view_results_query({
+  it('team stat with per_team_rush_play', async () => {
+    const { query } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'team_rush_yards_from_plays',
@@ -124,8 +124,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     compare_queries(query.toString(), expected_query)
   })
 
-  it('team stat with per_team_half', () => {
-    const { query } = get_data_view_results_query({
+  it('team stat with per_team_half', async () => {
+    const { query } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'team_pass_yards_from_plays',
@@ -146,8 +146,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     compare_queries(query.toString(), expected_query)
   })
 
-  it('team stat with per_team_quarter', () => {
-    const { query } = get_data_view_results_query({
+  it('team stat with per_team_quarter', async () => {
+    const { query } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'team_pass_yards_from_plays',
@@ -168,8 +168,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     compare_queries(query.toString(), expected_query)
   })
 
-  it('team stat with per_team_drive', () => {
-    const { query } = get_data_view_results_query({
+  it('team stat with per_team_drive', async () => {
+    const { query } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'team_pass_yards_from_plays',
@@ -190,8 +190,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     compare_queries(query.toString(), expected_query)
   })
 
-  it('team stat with per_team_series', () => {
-    const { query } = get_data_view_results_query({
+  it('team stat with per_team_series', async () => {
+    const { query } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'team_pass_yards_from_plays',
@@ -212,8 +212,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     compare_queries(query.toString(), expected_query)
   })
 
-  it('per_player_catchable_deep_target', () => {
-    const { query } = get_data_view_results_query({
+  it('per_player_catchable_deep_target', async () => {
+    const { query } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'player_targets_from_plays',
@@ -234,8 +234,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     compare_queries(query.toString(), expected_query)
   })
 
-  it('pff_player_seasonlogs', () => {
-    const { query } = get_data_view_results_query({
+  it('pff_player_seasonlogs', async () => {
+    const { query } = await get_data_view_results_query({
       columns: [
         { column_id: 'player_pff_offense', params: { year: [2023] } },
         { column_id: 'player_pff_defense', params: { year: [2023] } },
@@ -295,8 +295,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     compare_queries(query.toString(), expected_query)
   })
 
-  it('pff_player_seasonlogs with where', () => {
-    const { query } = get_data_view_results_query({
+  it('pff_player_seasonlogs with where', async () => {
+    const { query } = await get_data_view_results_query({
       columns: [
         'player_pff_offense_rank',
         'player_pff_offense',
@@ -325,12 +325,12 @@ describe('LIBS SERVER get_data_view_results', () => {
       ],
       splits: []
     })
-    const expected_query = `select "player"."pid", "ta90cad343257940bfecf8a1ded1f3615"."offense_rank" AS "pff_offense_rank_0", "ta90cad343257940bfecf8a1ded1f3615"."offense" AS "pff_offense_0", "ta90cad343257940bfecf8a1ded1f3615"."offense_snaps" AS "pff_offense_snaps_0", "ta90cad343257940bfecf8a1ded1f3615"."offense_ranked" AS "pff_offense_ranked_0", player.fname, player.lname, "player"."pos" AS "pos_0", CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, "player"."pos" from "player" inner join "pff_player_seasonlogs" as "ta90cad343257940bfecf8a1ded1f3615" on "ta90cad343257940bfecf8a1ded1f3615"."pid" = "player"."pid" and "ta90cad343257940bfecf8a1ded1f3615"."year" = ${constants.season.stats_season_year} left join "rosters_players" on "rosters_players"."pid" = "player"."pid" and "rosters_players"."year" = ${constants.season.year} and "rosters_players"."week" = ${constants.season.week} and "rosters_players"."lid" = 1 where ta90cad343257940bfecf8a1ded1f3615.offense_snaps >= '200' group by "ta90cad343257940bfecf8a1ded1f3615"."offense_rank", "ta90cad343257940bfecf8a1ded1f3615"."offense", "ta90cad343257940bfecf8a1ded1f3615"."offense_snaps", "ta90cad343257940bfecf8a1ded1f3615"."offense_ranked", player.fname, player.lname, "player"."pos", rosters_players.slot, rosters_players.tid, rosters_players.tag, "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 3 DESC NULLS LAST, "player"."pid" asc limit 500`
+    const expected_query = `select "player"."pid", "ta90cad343257940bfecf8a1ded1f3615"."offense_rank" AS "pff_offense_rank_0", "ta90cad343257940bfecf8a1ded1f3615"."offense" AS "pff_offense_0", "ta90cad343257940bfecf8a1ded1f3615"."offense_snaps" AS "pff_offense_snaps_0", "ta90cad343257940bfecf8a1ded1f3615"."offense_ranked" AS "pff_offense_ranked_0", player.fname, player.lname, "player"."pos" AS "pos_0", CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, "player"."pos" from "player" inner join "pff_player_seasonlogs" as "ta90cad343257940bfecf8a1ded1f3615" on "ta90cad343257940bfecf8a1ded1f3615"."pid" = "player"."pid" and "ta90cad343257940bfecf8a1ded1f3615"."year" = ${constants.season.stats_season_year} left join "rosters_players" on "rosters_players"."pid" = "player"."pid" and "rosters_players"."year" = ${constants.season.year} and "rosters_players"."week" = ${Math.min(constants.season.week, constants.season.finalWeek)} and "rosters_players"."lid" = 1 where ta90cad343257940bfecf8a1ded1f3615.offense_snaps >= '200' group by "ta90cad343257940bfecf8a1ded1f3615"."offense_rank", "ta90cad343257940bfecf8a1ded1f3615"."offense", "ta90cad343257940bfecf8a1ded1f3615"."offense_snaps", "ta90cad343257940bfecf8a1ded1f3615"."offense_ranked", player.fname, player.lname, "player"."pos", rosters_players.slot, rosters_players.tid, rosters_players.tag, "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 3 DESC NULLS LAST, "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
   })
 
-  it('player_salaries with where', () => {
-    const { query } = get_data_view_results_query({
+  it('player_salaries with where', async () => {
+    const { query } = await get_data_view_results_query({
       columns: [{ column_id: 'player_dfs_salary' }],
       sort: [{ column_id: 'player_dfs_salary', desc: true }],
       where: [
@@ -346,8 +346,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     compare_queries(query.toString(), expected_query)
   })
 
-  it('player_rankings', () => {
-    const { query } = get_data_view_results_query({
+  it('player_rankings', async () => {
+    const { query } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'player_average_ranking'
@@ -381,8 +381,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     compare_queries(query.toString(), expected_query)
   })
 
-  it('player_game_prop_implied_probability_from_betting_markets', () => {
-    const { query } = get_data_view_results_query({
+  it('player_game_prop_implied_probability_from_betting_markets', async () => {
+    const { query } = await get_data_view_results_query({
       sort: [
         {
           column_id:
@@ -406,8 +406,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     compare_queries(query.toString(), expected_query)
   })
 
-  it('player_practice', () => {
-    const { query } = get_data_view_results_query({
+  it('player_practice', async () => {
+    const { query } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'player_practice_status'
@@ -450,8 +450,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     compare_queries(query.toString(), expected_query)
   })
 
-  it('team_game_implied_team_total_from_betting_markets', () => {
-    const { query } = get_data_view_results_query({
+  it('team_game_implied_team_total_from_betting_markets', async () => {
+    const { query } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'team_game_implied_team_total_from_betting_markets'
@@ -468,8 +468,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     compare_queries(query.toString(), expected_query)
   })
 
-  it('team_espn_win_rates', () => {
-    const { query } = get_data_view_results_query({
+  it('team_espn_win_rates', async () => {
+    const { query } = await get_data_view_results_query({
       columns: [
         { column_id: 'team_espn_pass_rush_win_rate' },
         { column_id: 'team_espn_pass_block_win_rate' },
@@ -482,8 +482,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     compare_queries(query.toString(), expected_query)
   })
 
-  it('player_espn_line_win_rate', () => {
-    const { query } = get_data_view_results_query({
+  it('player_espn_line_win_rate', async () => {
+    const { query } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'player_espn_line_win_rate',
@@ -498,8 +498,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     compare_queries(query.toString(), expected_query)
   })
 
-  it('player prop historical hit rate and edge, with where', () => {
-    const { query } = get_data_view_results_query({
+  it('player prop historical hit rate and edge, with where', async () => {
+    const { query } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'player_game_prop_historical_hit_rate',
@@ -549,8 +549,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     compare_queries(query.toString(), expected_query)
   })
 
-  it('team stat with def unit and rate type', () => {
-    const { query } = get_data_view_results_query({
+  it('team stat with def unit and rate type', async () => {
+    const { query } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'team_pass_yards_from_plays',
@@ -567,8 +567,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     compare_queries(query.toString(), expected_query)
   })
 
-  it('team stat with def unit and rate type, limit to player active', () => {
-    const { query } = get_data_view_results_query({
+  it('team stat with def unit and rate type, limit to player active', async () => {
+    const { query } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'team_pass_yards_from_plays',
@@ -586,8 +586,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     compare_queries(query.toString(), expected_query)
   })
 
-  it('team field with matchup_opponent_type param', () => {
-    const { query } = get_data_view_results_query({
+  it('team field with matchup_opponent_type param', async () => {
+    const { query } = await get_data_view_results_query({
       sort: [
         {
           column_id: 'team_pass_yards_from_plays',
@@ -621,12 +621,12 @@ describe('LIBS SERVER get_data_view_results', () => {
         }
       ]
     })
-    const expected_query = `with "current_week_opponents" as (select "h" as "nfl_team", "v" as "opponent" from "public"."nfl_games" where "year" = 2024 and "week" = ${constants.season.week} and "seas_type" = 'REG' union select "v" as "nfl_team", "h" as "opponent" from "public"."nfl_games" where "year" = 2024 and "week" = ${constants.season.week} and "seas_type" = 'REG'), "t8eab6ab582cefa683d25edd23d775e72" as (select "nfl_plays"."off" as "team", count(distinct "nfl_plays"."esbid") as "rate_type_total_count" from "nfl_plays" where "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2024) group by "nfl_plays"."off"), "t21688413952ededbdad717469034208c" as (select "year", "week", v as nfl_team, h as game_opponent, true as game_is_home from "nfl_games" where "year" in (2024) and "week" in (${constants.season.week}) and "seas_type" = 'REG' and h IN ('WAS', 'ARI', 'LAR') union select "year", "week", h as nfl_team, v as game_opponent, false as game_is_home from "nfl_games" where "year" in (2024) and "week" in (${constants.season.week}) and "seas_type" = 'REG' and v IN ('WAS', 'ARI', 'LAR')), "t2499920d348f58d2e046bda75243c5e0" as (select "nfl_plays"."def" as "nfl_team", SUM(pass_yds) AS team_pass_yds_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2024) group by "nfl_plays"."def"), "t2499920d348f58d2e046bda75243c5e0_team_stats" as (select "t2499920d348f58d2e046bda75243c5e0"."nfl_team", sum(t2499920d348f58d2e046bda75243c5e0.team_pass_yds_from_plays) as team_pass_yds_from_plays from "t2499920d348f58d2e046bda75243c5e0" group by "t2499920d348f58d2e046bda75243c5e0"."nfl_team") select "player"."pid", player.fname, player.lname, "player"."pos" AS "pos_0", CAST(t2499920d348f58d2e046bda75243c5e0_team_stats.team_pass_yds_from_plays AS DECIMAL) / NULLIF(CAST(t8eab6ab582cefa683d25edd23d775e72.rate_type_total_count AS DECIMAL), 0) AS "team_pass_yds_from_plays_0", "player"."pos" from "player" inner join "current_week_opponents" on "player"."current_nfl_team" = "current_week_opponents"."nfl_team" left join "t8eab6ab582cefa683d25edd23d775e72" on "t8eab6ab582cefa683d25edd23d775e72"."team" = "current_week_opponents"."opponent" inner join "t21688413952ededbdad717469034208c" on "t21688413952ededbdad717469034208c"."nfl_team" = "player"."current_nfl_team" left join "t2499920d348f58d2e046bda75243c5e0_team_stats" on "t2499920d348f58d2e046bda75243c5e0_team_stats"."nfl_team" = "current_week_opponents"."opponent" group by player.fname, player.lname, "player"."pos", "t2499920d348f58d2e046bda75243c5e0_team_stats"."team_pass_yds_from_plays", t8eab6ab582cefa683d25edd23d775e72.rate_type_total_count, "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 5 DESC NULLS LAST, "player"."pid" asc limit 500`
+    const expected_query = `with "current_week_opponents" as (select "h" as "nfl_team", "v" as "opponent" from "public"."nfl_games" where "year" = 2024 and "week" = ${constants.season.nfl_seas_week} and "seas_type" = '${constants.season.nfl_seas_type}' union select "v" as "nfl_team", "h" as "opponent" from "public"."nfl_games" where "year" = 2024 and "week" = ${constants.season.nfl_seas_week} and "seas_type" = '${constants.season.nfl_seas_type}'), "t8eab6ab582cefa683d25edd23d775e72" as (select "nfl_plays"."off" as "team", count(distinct "nfl_plays"."esbid") as "rate_type_total_count" from "nfl_plays" where "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2024) group by "nfl_plays"."off"), "t21688413952ededbdad717469034208c" as (select "year", "week", v as nfl_team, h as game_opponent, true as game_is_home from "nfl_games" where "year" in (2024) and "week" in (${constants.season.week}) and "seas_type" = '${constants.season.nfl_seas_type}' and h IN ('WAS', 'ARI', 'LAR') union select "year", "week", h as nfl_team, v as game_opponent, false as game_is_home from "nfl_games" where "year" in (2024) and "week" in (${constants.season.week}) and "seas_type" = '${constants.season.nfl_seas_type}' and v IN ('WAS', 'ARI', 'LAR')), "t2499920d348f58d2e046bda75243c5e0" as (select "nfl_plays"."def" as "nfl_team", SUM(pass_yds) AS team_pass_yds_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2024) group by "nfl_plays"."def"), "t2499920d348f58d2e046bda75243c5e0_team_stats" as (select "t2499920d348f58d2e046bda75243c5e0"."nfl_team", sum(t2499920d348f58d2e046bda75243c5e0.team_pass_yds_from_plays) as team_pass_yds_from_plays from "t2499920d348f58d2e046bda75243c5e0" group by "t2499920d348f58d2e046bda75243c5e0"."nfl_team") select "player"."pid", player.fname, player.lname, "player"."pos" AS "pos_0", CAST(t2499920d348f58d2e046bda75243c5e0_team_stats.team_pass_yds_from_plays AS DECIMAL) / NULLIF(CAST(t8eab6ab582cefa683d25edd23d775e72.rate_type_total_count AS DECIMAL), 0) AS "team_pass_yds_from_plays_0", "player"."pos" from "player" inner join "current_week_opponents" on "player"."current_nfl_team" = "current_week_opponents"."nfl_team" left join "t8eab6ab582cefa683d25edd23d775e72" on "t8eab6ab582cefa683d25edd23d775e72"."team" = "current_week_opponents"."opponent" inner join "t21688413952ededbdad717469034208c" on "t21688413952ededbdad717469034208c"."nfl_team" = "player"."current_nfl_team" left join "t2499920d348f58d2e046bda75243c5e0_team_stats" on "t2499920d348f58d2e046bda75243c5e0_team_stats"."nfl_team" = "current_week_opponents"."opponent" group by player.fname, player.lname, "player"."pos", "t2499920d348f58d2e046bda75243c5e0_team_stats"."team_pass_yds_from_plays", t8eab6ab582cefa683d25edd23d775e72.rate_type_total_count, "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 5 DESC NULLS LAST, "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
   })
 
-  it('player_snaps', () => {
-    const { query } = get_data_view_results_query({
+  it('player_snaps', async () => {
+    const { query } = await get_data_view_results_query({
       columns: [{ column_id: 'player_snaps' }],
       sort: [{ column_id: 'player_snaps', desc: true }]
     })
@@ -634,8 +634,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     compare_queries(query.toString(), expected_query)
   })
 
-  it('player yards created and blocked + team yards blocked', () => {
-    const { query } = get_data_view_results_query({
+  it('player yards created and blocked + team yards blocked', async () => {
+    const { query } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'player_yards_created_from_plays',
@@ -662,8 +662,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     compare_queries(query.toString(), expected_query)
   })
 
-  it('player routes', () => {
-    const { query } = get_data_view_results_query({
+  it('player routes', async () => {
+    const { query } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'player_routes',

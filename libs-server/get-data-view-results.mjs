@@ -318,7 +318,7 @@ const add_sort_clause = ({
   players_query.orderByRaw(`${select_position} ${sort_direction} NULLS LAST`)
 }
 
-const add_clauses_for_table = ({
+const add_clauses_for_table = async ({
   players_query,
   select_columns = [],
   where_clauses = [],
@@ -524,7 +524,7 @@ const add_clauses_for_table = ({
 
   // join table if needed
   if (join_func) {
-    join_func({
+    await join_func({
       query: players_query,
       table_name,
       params: group_column_params,
@@ -638,7 +638,7 @@ const group_tables_by_supported_splits = (grouped_clauses_by_table, splits) => {
   return grouped_by_splits
 }
 
-export const get_data_view_results_query = ({
+export const get_data_view_results_query = async ({
   splits = [],
   where = [],
   columns = [],
@@ -763,7 +763,7 @@ export const get_data_view_results_query = ({
         add_week_opponent_cte_tables({
           players_query,
           table_name: 'current_week_opponents',
-          week: constants.season.week,
+          week: constants.season.nfl_seas_week,
           year: constants.season.year,
           seas_type: constants.season.nfl_seas_type
         })
@@ -1027,7 +1027,7 @@ export const get_data_view_results_query = ({
         (col) => data_views_column_definitions[col.column_id]?.week_select
       )
 
-      add_clauses_for_table({
+      await add_clauses_for_table({
         players_query,
         select_columns,
         where_clauses,
@@ -1229,7 +1229,7 @@ export default async function ({
   limit = 500,
   timeout = null
 } = {}) {
-  const { query, data_view_metadata } = get_data_view_results_query({
+  const { query, data_view_metadata } = await get_data_view_results_query({
     splits,
     where,
     columns,
