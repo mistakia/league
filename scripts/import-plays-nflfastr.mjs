@@ -3,7 +3,6 @@ import fs from 'fs'
 import os from 'os'
 import { pipeline } from 'stream'
 import { promisify } from 'util'
-import fetch from 'node-fetch'
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
@@ -15,13 +14,14 @@ import {
   readCSV,
   getPlay,
   update_play,
-  report_job
+  report_job,
+  fetch_with_retry
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-nflfastr-plays')
-debug.enable('import-nflfastr-plays,update-play')
+debug.enable('import-nflfastr-plays,update-play,fetch')
 
 /* const unzip = (source, destination) =>
  *   new Promise((resolve, reject) => {
@@ -326,7 +326,7 @@ const run = async ({
 
     log(`downloading ${url}`)
     const streamPipeline = promisify(pipeline)
-    const response = await fetch(url)
+    const response = await fetch_with_retry({ url })
     if (!response.ok)
       throw new Error(`unexpected response ${response.statusText}`)
 

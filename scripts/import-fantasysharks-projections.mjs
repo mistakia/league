@@ -1,16 +1,20 @@
-import fetch from 'node-fetch'
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#libs-shared'
-import { is_main, find_player_row, report_job } from '#libs-server'
+import {
+  is_main,
+  find_player_row,
+  report_job,
+  fetch_with_retry
+} from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import:projections')
-debug.enable('import:projections,get-player')
+debug.enable('import:projections,get-player,fetch')
 
 const URL = argv.season
   ? 'https://www.fantasysharks.com/apps/Projections/SeasonProjections.php?pos=ALL&format=json&l=2'
@@ -26,7 +30,7 @@ const run = async () => {
   }
 
   log(URL)
-  const data = await fetch(URL).then((res) => res.json())
+  const data = await fetch_with_retry({ url: URL, response_type: 'json' })
   const missing = []
 
   const createEntry = (item) => ({

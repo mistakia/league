@@ -1,16 +1,21 @@
-import fetch from 'node-fetch'
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#libs-shared'
-import { is_main, find_player_row, report_job, espn } from '#libs-server'
+import {
+  is_main,
+  find_player_row,
+  report_job,
+  espn,
+  fetch_with_retry
+} from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import:projections')
-debug.enable('import:projections,get-player')
+debug.enable('import:projections,get-player,fetch')
 
 const timestamp = Math.round(Date.now() / 1000)
 
@@ -37,7 +42,11 @@ const run = async ({
   }
   log(headers)
 
-  const data = await fetch(URL, { headers }).then((res) => res.json())
+  const data = await fetch_with_retry({
+    url: URL,
+    headers,
+    response_type: 'json'
+  })
   const inserts = []
   const missing = []
   for (const item of data.players) {

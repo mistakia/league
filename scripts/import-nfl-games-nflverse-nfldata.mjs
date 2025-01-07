@@ -2,7 +2,6 @@ import fs from 'fs'
 import os from 'os'
 import { pipeline } from 'stream'
 import { promisify } from 'util'
-import fetch from 'node-fetch'
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
@@ -14,13 +13,14 @@ import {
   readCSV,
   update_nfl_game,
   find_player_row,
-  report_job
+  report_job,
+  fetch_with_retry
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-nfl-games-nflverse')
-debug.enable('import-nfl-games-nflverse,update-nfl-game,get-player')
+debug.enable('import-nfl-games-nflverse,update-nfl-game,get-player,fetch')
 
 const format_number = (num) => {
   if (num === null || num === undefined || num === '') {
@@ -87,7 +87,7 @@ const import_nfl_games_nflverse_nfldata = async ({
   if (force_download || !fs.existsSync(path)) {
     log(`downloading ${url}`)
     const stream_pipeline = promisify(pipeline)
-    const response = await fetch(url)
+    const response = await fetch_with_retry({ url })
     if (!response.ok)
       throw new Error(`unexpected response ${response.statusText}`)
 

@@ -15,7 +15,7 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import:rankings:weekly')
-debug.enable('import:rankings:weekly,get-player')
+debug.enable('import:rankings:weekly,get-player,fetch')
 
 const timestamp = Math.round(Date.now() / 1000)
 

@@ -1,4 +1,3 @@
-import fetch from 'node-fetch'
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
@@ -15,18 +14,21 @@ import {
   find_player_row,
   updatePlayer,
   createPlayer,
-  report_job
+  report_job,
+  fetch_with_retry
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-players-sleeper')
-debug.enable('import-players-sleeper,update-player,create-player,get-player')
+debug.enable(
+  'import-players-sleeper,update-player,create-player,get-player,fetch'
+)
 const timestamp = Math.round(Date.now() / 1000)
 
 const run = async () => {
   const URL = 'https://api.sleeper.app/v1/players/nfl'
-  const result = await fetch(URL).then((res) => res.json())
+  const result = await fetch_with_retry({ url: URL, response_type: 'json' })
 
   const statuses = []
   const fields = {}

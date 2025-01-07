@@ -15,7 +15,7 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-fantasypros-dynasty')
-debug.enable('import-fantasypros-dynasty,get-player,fantasypros')
+debug.enable('import-fantasypros-dynasty,get-player,fantasypros,fetch')
 
 const timestamp = Math.round(Date.now() / 1000)
 
