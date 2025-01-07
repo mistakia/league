@@ -775,10 +775,9 @@ export const get_data_view_results_query = ({
         )
         break
 
-      case 'next_week_opponent_total':
-        const { seas_type: next_week_seas_type, week: next_week } = constants.season.calculate_week(
-          constants.season.now.add(1, 'week')
-        )
+      case 'next_week_opponent_total': {
+        const { seas_type: next_week_seas_type, week: next_week } =
+          constants.season.calculate_week(constants.season.now.add(1, 'week'))
 
         add_week_opponent_cte_tables({
           players_query,
@@ -794,6 +793,7 @@ export const get_data_view_results_query = ({
           'next_week_opponents.nfl_team'
         )
         break
+      }
 
       default:
         log(`Unsupported matchup_opponent_type: ${opponent_type}`)
