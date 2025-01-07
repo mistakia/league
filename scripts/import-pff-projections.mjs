@@ -14,7 +14,7 @@ debug.enable('import:projections,get-player,pff')
 const timestamp = Math.round(Date.now() / 1000)
 const year = constants.season.year
 
-const runOne = async ({ week, cookie }) => {
+const runOne = async ({ pff_week, cookie, dry = false, seas_type = 'REG' }) => {
   const missing = []
 
   const config_row = await db('config').where({ key: 'pff_config' }).first()
@@ -24,7 +24,8 @@ const runOne = async ({ week, cookie }) => {
     throw new Error('PFF config not found')
   }
 
-  const URL = `${pff_config.projections_url}?scoring=preset_ppr&weeks=${week}`
+  const URL = `${pff_config.projections_url}?scoring=preset_ppr&weeks=${pff_week}`
+  log(`fetching ${URL}`)
   const result = await fetch(URL, {
     headers: {
       cookie
@@ -38,6 +39,7 @@ const runOne = async ({ week, cookie }) => {
   log(`loaded ${result.player_projections.length} projections`)
 
   const inserts = []
+  const week = seas_type === 'POST' ? constants.season.nfl_seas_week : pff_week
   for (const item of result.player_projections) {
     const name = item.player_name
     const team = item.team_name
@@ -91,7 +93,7 @@ const runOne = async ({ week, cookie }) => {
       pid: player_row.pid,
       week,
       year,
-      seas_type: 'REG',
+      seas_type,
       sourceid: constants.sources.PFF,
       ...data
     })
@@ -102,7 +104,7 @@ const runOne = async ({ week, cookie }) => {
     log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`)
   )
 
-  if (argv.dry) {
+  if (dry) {
     log(`${inserts.length} projections`)
     log(inserts[0])
     return
@@ -111,7 +113,7 @@ const runOne = async ({ week, cookie }) => {
   if (inserts.length) {
     // remove any existing projections in index not included in this set
     await db('projections_index')
-      .where({ year, week, sourceid: constants.sources.PFF, seas_type: 'REG' })
+      .where({ year, week, sourceid: constants.sources.PFF, seas_type })
       .whereNotIn(
         'pid',
         inserts.map((i) => i.pid)
@@ -127,9 +129,10 @@ const runOne = async ({ week, cookie }) => {
   }
 }
 
-const run = async ({ executable_path } = {}) => {
+const run = async ({ executable_path, dry_run = false } = {}) => {
   // do not pull in any projections after the season has ended
-  if (constants.season.week > constants.season.nflFinalWeek) {
+  if (constants.season.now.isAfter(constants.season.end)) {
+    log('Season has ended, skipping')
     return
   }
 
@@ -137,12 +140,19 @@ const run = async ({ executable_path } = {}) => {
     executable_path
   })
 
-  for (
-    let week = constants.season.week;
-    week <= constants.season.nflFinalWeek;
-    week++
-  ) {
-    await runOne({ week, cookie })
+  const seas_type = constants.season.nfl_seas_type === 'POST' ? 'POST' : 'REG'
+
+  if (seas_type === 'POST') {
+    const week = pff.get_pff_week()
+    await runOne({ pff_week: week, cookie, dry: dry_run, seas_type: 'POST' })
+  } else {
+    for (
+      let week = constants.season.week;
+      week <= constants.season.nflFinalWeek;
+      week++
+    ) {
+      await runOne({ pff_week: week, cookie, dry: dry_run, seas_type: 'REG' })
+    }
   }
 }
 
@@ -150,7 +160,8 @@ const main = async () => {
   let error
   try {
     await run({
-      executable_path: argv.executable_path
+      executable_path: argv.executable_path,
+      dry_run: argv.dry
     })
   } catch (err) {
     error = err
