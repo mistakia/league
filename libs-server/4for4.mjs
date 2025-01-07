@@ -17,20 +17,25 @@ export const get_4for4_projections = async ({
   ignore_cache = false,
   year = constants.season.year,
   week = 0,
+  seas_type = constants.season.nfl_seas_type,
   is_regular_season_projection = true
 } = {}) => {
   const four_for_four_config = await get_4for4_config()
 
-  const cache_key = `/4for4/projections/${year}/${week}.json`
+  const cache_key = `/4for4/projections/${year}/${seas_type}/${week}.json`
   if (!ignore_cache) {
     const cache_value = await cache.get({ key: cache_key })
     if (cache_value) {
-      log(`cache hit for 4for4 projections for year: ${year}, week: ${week}`)
+      log(
+        `cache hit for 4for4 projections for year: ${year}, seas_type: ${seas_type}, week: ${week}`
+      )
       return cache_value
     }
   }
 
-  log(`fetching 4for4 projections for year: ${year}, week: ${week}`)
+  log(
+    `fetching 4for4 projections for year: ${year}, seas_type: ${seas_type}, week: ${week}`
+  )
   const url = is_regular_season_projection
     ? four_for_four_config.season_projections_url
     : four_for_four_config.weekly_projections_url
