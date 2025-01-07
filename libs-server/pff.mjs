@@ -30,6 +30,20 @@ export const years = Array.from(
   (_, index) => 2006 + index
 )
 
+export const get_pff_week = () => {
+  if (constants.season.nfl_seas_type === 'POST') {
+    const week = constants.season.nfl_seas_week
+    switch (week) {
+      case 1:
+        return 28
+      default:
+        throw new Error(`Unknown pff week: ${week}`)
+    }
+  }
+
+  return constants.season.nfl_seas_week
+}
+
 export const get_pff_session_cookie = async ({ executable_path } = {}) => {
   // Get the current config from the database
   const config_row = await db('config').where({ key: 'pff_config' }).first()
