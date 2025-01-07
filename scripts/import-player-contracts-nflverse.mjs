@@ -7,7 +7,6 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import { asyncBufferFromFile, parquetRead } from 'hyparquet'
 import dayjs from 'dayjs'
-import fetch from 'node-fetch'
 
 import db from '#db'
 import { fixTeam } from '#libs-shared'
@@ -15,13 +14,14 @@ import {
   is_main,
   find_player_row,
   updatePlayer,
-  report_job
+  report_job,
+  fetch_with_retry
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-player-contracts-nflverse')
-debug.enable('import-player-contracts-nflverse,get-player,update-player')
+debug.enable('import-player-contracts-nflverse,get-player,update-player,fetch')
 
 const format_row = (row) => ({
   otc_id: row.otc_id,
@@ -143,7 +143,7 @@ const import_player_contracts_nflverse = async ({ force_download = false }) => {
   if (force_download || !fs.existsSync(path)) {
     log(`downloading ${url}`)
     const stream_pipeline = promisify(pipeline)
-    const response = await fetch(url)
+    const response = await fetch_with_retry({ url })
     if (!response.ok)
       throw new Error(`unexpected response ${response.statusText}`)
 

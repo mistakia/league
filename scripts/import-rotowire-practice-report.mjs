@@ -1,4 +1,3 @@
-import fetch from 'node-fetch'
 import debug from 'debug'
 
 import db from '#db'
@@ -7,11 +6,16 @@ import {
   format_nfl_status,
   format_nfl_injury_status
 } from '#libs-shared'
-import { is_main, find_player_row, report_job } from '#libs-server'
+import {
+  is_main,
+  find_player_row,
+  report_job,
+  fetch_with_retry
+} from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('import:practice-report')
-debug.enable('import:practice-report,get-player')
+debug.enable('import:practice-report,get-player,fetch')
 
 const url = 'https://www.rotowire.com/football/tables/practice-report.php?team='
 const { week, year } = constants.season
@@ -58,7 +62,7 @@ const run = async () => {
     return
   }
 
-  const data = await fetch(url).then((res) => res.json())
+  const data = await fetch_with_retry({ url, response_type: 'json' })
 
   const missing = []
   for (const item of data) {

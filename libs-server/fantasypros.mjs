@@ -1,9 +1,9 @@
-import fetch from 'node-fetch'
 import debug from 'debug'
 
 import db from '#db'
 import * as cache from './cache.mjs'
 import { constants } from '#libs-shared'
+import fetch_with_retry from './fetch-with-retry.mjs'
 
 const log = debug('fantasypros')
 
@@ -40,7 +40,8 @@ export const get_fantasypros_rankings = async ({
   )
   const url = `${fantasypros_config.api_url}/${year}/consensus-rankings?type=${ranking_type}&scoring=${fantasypros_scoring_type}&position=${fantasypros_position_type}&week=${week}&experts=available`
   log(`Fetching ${url}`)
-  const res = await fetch(url, {
+  const res = await fetch_with_retry({
+    url,
     headers: fantasypros_config.headers
   })
   const data = await res.json()

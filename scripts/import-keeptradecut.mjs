@@ -12,13 +12,14 @@ import {
   find_player_row,
   updatePlayer,
   wait,
-  report_job
+  report_job,
+  fetch_with_retry
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-keeptradecut')
-debug.enable('import-keeptradecut,get-player,update-player')
+debug.enable('import-keeptradecut,get-player,update-player,fetch')
 
 const parse_keeptradecut_date = (date_str) => {
   const formatted_date =
@@ -46,9 +47,10 @@ const get_keeptradecut_config = async () => {
 }
 
 const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
-  const dynasty_rankings_html = await fetch(
-    'https://keeptradecut.com/dynasty-rankings'
-  ).then((res) => res.text())
+  const dynasty_rankings_html = await fetch_with_retry({
+    url: 'https://keeptradecut.com/dynasty-rankings',
+    response_type: 'text'
+  })
   const dynasty_rankings_dom = new JSDOM(dynasty_rankings_html, {
     runScripts: 'dangerously'
   })
@@ -110,9 +112,10 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
 
     if (full) {
       const slug = keeptradecut_player.slug
-      const html = await fetch(
-        `https://keeptradecut.com/dynasty-rankings/players/${slug}`
-      ).then((res) => res.text())
+      const html = await fetch_with_retry({
+        url: `https://keeptradecut.com/dynasty-rankings/players/${slug}`,
+        response_type: 'text'
+      })
 
       const dom = new JSDOM(html, { runScripts: 'dangerously' })
       dom.window.playerOneQB.overallValue.forEach((i) => {

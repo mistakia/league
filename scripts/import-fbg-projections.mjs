@@ -1,16 +1,20 @@
-import fetch from 'node-fetch'
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#libs-shared'
-import { is_main, find_player_row, report_job } from '#libs-server'
+import {
+  is_main,
+  find_player_row,
+  report_job,
+  fetch_with_retry
+} from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import:projections')
-debug.enable('import:projections,get-player')
+debug.enable('import:projections,get-player,fetch')
 const week = Math.max(constants.season.week, 1)
 
 const format_projection = (stats) => ({
@@ -54,11 +58,17 @@ const run = async ({ dry_run = false } = {}) => {
   // fetch players
   const players_url = `${fbg_config.data_url}/NFLPlayers.json`
   log(`fetching players from ${players_url}`)
-  const fbg_players = await fetch(players_url).then((res) => res.json())
+  const fbg_players = await fetch_with_retry({
+    url: players_url,
+    response_type: 'json'
+  })
 
   const projections_url = `${fbg_config.data_url}/WeeklyProjections-${constants.season.year}-${constants.season.week}.json`
   log(`fetching projections from ${projections_url}`)
-  const data = await fetch(projections_url).then((res) => res.json())
+  const data = await fetch_with_retry({
+    url: projections_url,
+    response_type: 'json'
+  })
 
   // if no projections or 404 exit
   const projectors = {
