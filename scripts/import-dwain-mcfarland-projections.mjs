@@ -80,6 +80,7 @@ const import_dwain_mcfarland_projections = async ({
         year: constants.season.year,
         week: 0,
         sourceid: constants.sources.FANTASYLIFE_DWAIN_MCFARLAND,
+        seas_type: 'REG',
         ...data
       })
     }
@@ -99,7 +100,7 @@ const import_dwain_mcfarland_projections = async ({
     log(`Inserting ${inserts.length} projections into database`)
     await db('projections_index')
       .insert(inserts)
-      .onConflict(['sourceid', 'pid', 'userid', 'week', 'year'])
+      .onConflict(['sourceid', 'pid', 'userid', 'week', 'year', 'seas_type'])
       .merge()
     await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
   }

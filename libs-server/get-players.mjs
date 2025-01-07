@@ -308,7 +308,7 @@ export default async function ({
     .where('year', constants.season.year)
     .where('week', '>=', constants.season.week)
     .whereIn('pid', returnedPlayerIds)
-
+    .where('seas_type', 'REG')
   const rosProjections = await db('ros_projections')
     .where('sourceid', constants.sources.AVERAGE)
     .where('year', constants.season.year)

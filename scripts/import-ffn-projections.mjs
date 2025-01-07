@@ -89,6 +89,7 @@ const run = async () => {
         pid: player_row.pid,
         year: constants.season.year,
         week,
+        seas_type: 'REG',
         sourceid: 12,
         ...proj
       })
@@ -109,7 +110,7 @@ const run = async () => {
   log(`Inserting ${inserts.length} projections into database`)
   await db('projections_index')
     .insert(inserts)
-    .onConflict(['sourceid', 'pid', 'userid', 'week', 'year'])
+    .onConflict(['sourceid', 'pid', 'userid', 'week', 'year', 'seas_type'])
     .merge()
   await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
 }

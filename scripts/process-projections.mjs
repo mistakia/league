@@ -37,9 +37,9 @@ debug.enable(
 
 const timestamp = Math.round(Date.now() / 1000)
 
-const process_average_projections = async ({ year }) => {
+const process_average_projections = async ({ year, seas_type = 'REG' }) => {
   // get projections for current week
-  const projections = await getProjections({ year })
+  const projections = await getProjections({ year, seas_type })
 
   const projections_by_pid = groupBy(projections, 'pid')
   const projection_pids = Object.keys(projections_by_pid)
@@ -67,6 +67,7 @@ const process_average_projections = async ({ year }) => {
       projectionInserts.push({
         pid: player_row.pid,
         sourceid: constants.sources.AVERAGE,
+        seas_type,
         year: constants.season.year,
         week,
         ...projection
@@ -104,7 +105,14 @@ const process_average_projections = async ({ year }) => {
       save: (items) =>
         db('projections_index')
           .insert(items)
-          .onConflict(['sourceid', 'pid', 'userid', 'week', 'year'])
+          .onConflict([
+            'sourceid',
+            'pid',
+            'userid',
+            'week',
+            'year',
+            'seas_type'
+          ])
           .merge(),
       batch_size: 100
     })
@@ -119,7 +127,8 @@ const process_average_projections = async ({ year }) => {
             'userid',
             'timestamp',
             'week',
-            'year'
+            'year',
+            'seas_type'
           ])
           .merge(),
       batch_size: 100

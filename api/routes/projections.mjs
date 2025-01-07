@@ -15,11 +15,13 @@ router.get('/?', async (req, res) => {
      * res.set('Surrogate-Control', null)
      */
     let projections = cache.get('projections')
+    const seas_type = constants.season.nfl_seas_type === 'POST' ? 'POST' : 'REG'
     if (!projections) {
       projections = await db('projections_index')
         .where('sourceid', constants.sources.AVERAGE)
         .where('year', constants.season.year)
         .where('week', '>=', constants.season.week)
+        .where('seas_type', seas_type)
       cache.set('projections', projections, 14400) // 4 hours
     }
 
@@ -32,6 +34,7 @@ router.get('/?', async (req, res) => {
         .whereNot('player.current_nfl_team', 'INA')
         .where({
           year: constants.season.year,
+          seas_type,
           userid: req.auth.userId
         })
     }
@@ -68,7 +71,7 @@ router.put(
     try {
       let { value } = req.body
       const { pid } = req.params
-      const { type, week } = req.body
+      const { type, week, seas_type = 'REG' } = req.body
       const { userId } = req.auth
 
       // TODO validate pid
@@ -102,7 +105,8 @@ router.put(
           userid: userId,
           pid,
           week,
-          year: constants.season.year
+          year: constants.season.year,
+          seas_type
         })
         .first()
 
@@ -115,7 +119,8 @@ router.put(
             userid: userId,
             pid,
             week,
-            year: constants.season.year
+            year: constants.season.year,
+            seas_type
           })
 
         await db('projections').insert({
@@ -129,7 +134,8 @@ router.put(
           userid: userId,
           pid,
           week,
-          year: constants.season.year
+          year: constants.season.year,
+          seas_type
         }
         await db('projections_index').insert(insert)
 
@@ -160,7 +166,7 @@ router.delete(
     try {
       const { userId } = req.auth
       const { pid } = req.params
-      const { week } = req.body
+      const { week, seas_type = 'REG' } = req.body
 
       // TODO validate pid
 
@@ -168,7 +174,8 @@ router.delete(
         userid: userId,
         pid,
         week,
-        year: constants.season.year
+        year: constants.season.year,
+        seas_type
       })
 
       res.send({ success: true, week, pid })

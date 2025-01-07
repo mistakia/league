@@ -110,6 +110,7 @@ const process_matched_player = ({
     pid: player_row.pid,
     year: constants.season.year,
     week: 0,
+    seas_type: 'REG',
     sourceid: constants.sources.SLEEPER,
     ...proj
   })
@@ -272,7 +273,14 @@ const import_sleeper_adp_and_projections = async ({
       save: async (batch) => {
         await db('projections_index')
           .insert(batch)
-          .onConflict(['sourceid', 'pid', 'userid', 'week', 'year'])
+          .onConflict([
+            'sourceid',
+            'pid',
+            'userid',
+            'week',
+            'year',
+            'seas_type'
+          ])
           .merge()
       }
     })

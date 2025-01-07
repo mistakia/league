@@ -99,7 +99,8 @@ const process_projections_for_scoring_format = async ({
     // Get averaged projections for the given year
     const projections = await db('projections_index').where({
       year: process_year,
-      sourceid: constants.sources.AVERAGE // Assuming this is 18
+      sourceid: constants.sources.AVERAGE,
+      seas_type: 'REG'
     })
 
     const projections_by_pid = groupBy(projections, 'pid')

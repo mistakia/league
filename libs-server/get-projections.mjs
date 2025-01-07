@@ -4,6 +4,7 @@ import db from '#db'
 export default async function ({
   year = constants.season.year,
   week = constants.season.week,
+  seas_type = 'REG',
   pids = []
 } = {}) {
   if (!pids.length) {
@@ -19,7 +20,8 @@ export default async function ({
     .whereIn('pid', pids)
     .where({
       year,
-      userid: 0
+      userid: 0,
+      seas_type
     })
     .whereNot('sourceid', constants.sources.AVERAGE)
     .where('week', '>=', week)
