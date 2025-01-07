@@ -3,7 +3,7 @@ import db from '#db'
 
 export default async function ({
   year = constants.season.year,
-  week = constants.season.week,
+  week = constants.season.nfl_seas_week,
   seas_type = 'REG',
   pids = []
 } = {}) {

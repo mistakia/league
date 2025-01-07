@@ -38,9 +38,9 @@ debug.enable(
 const timestamp = Math.round(Date.now() / 1000)
 
 const process_average_projections = async ({ year, seas_type = 'REG' }) => {
-  // get projections for current week
+  log(`processing projections for year ${year} and seas_type ${seas_type}`)
   const projections = await getProjections({ year, seas_type })
-
+  log(`fetched ${projections.length} projections`)
   const projections_by_pid = groupBy(projections, 'pid')
   const projection_pids = Object.keys(projections_by_pid)
 
@@ -53,6 +53,29 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
     const projections = projections_by_pid[player_row.pid] || []
     player_row.projection = {}
 
+    // For POST season, only process the current playoff week
+    if (seas_type === 'POST') {
+      const week = constants.season.nfl_seas_week
+      player_row.projection[week] = {}
+
+      const projection = weightProjections({
+        projections,
+        week
+      })
+
+      player_row.projection[week] = projection
+      projectionInserts.push({
+        pid: player_row.pid,
+        sourceid: constants.sources.AVERAGE,
+        seas_type,
+        year: constants.season.year,
+        week,
+        ...projection
+      })
+      continue
+    }
+
+    // Regular season processing
     let week = year === constants.season.year ? constants.season.week : 0
     for (; week <= constants.season.nflFinalWeek; week++) {
       player_row.projection[week] = {}
@@ -74,31 +97,36 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
       })
     }
 
-    // calculate ros projection
-    const ros = constants.createStats()
-    let projWks = 0
-    for (const [week, projection] of Object.entries(player_row.projection)) {
-      if (week && week !== '0' && week >= constants.season.week) {
-        projWks += 1
-        for (const [key, value] of Object.entries(projection)) {
-          ros[key] += value
+    // Only calculate ROS projections for regular season
+    if (seas_type === 'REG') {
+      // calculate ros projection
+      const ros = constants.createStats()
+      let proj_wks = 0
+      for (const [week, projection] of Object.entries(player_row.projection)) {
+        if (week && week !== '0' && week >= constants.season.week) {
+          proj_wks += 1
+          for (const [key, value] of Object.entries(projection)) {
+            ros[key] += value
+          }
         }
       }
+
+      player_row.proj_wks = proj_wks
+      player_row.projection.ros = ros
+
+      rosProjectionInserts.push({
+        pid: player_row.pid,
+        sourceid: constants.sources.AVERAGE,
+        year: constants.season.year,
+        timestamp: 0, // must be set at zero for unique key
+        ...ros
+      })
     }
-
-    player_row.projWks = projWks
-    player_row.projection.ros = ros
-
-    rosProjectionInserts.push({
-      pid: player_row.pid,
-      sourceid: constants.sources.AVERAGE,
-      year: constants.season.year,
-      timestamp: 0, // must be set at zero for unique key
-      ...ros
-    })
   }
 
   if (projectionInserts.length) {
+    log(`processing ${projectionInserts.length} projections`)
+
     const timestamp = 0 // must be set at zero for unique key
     await batch_insert({
       items: projectionInserts,
@@ -137,6 +165,8 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
   }
 
   if (rosProjectionInserts.length) {
+    log(`processing ${rosProjectionInserts.length} ros projections`)
+
     await batch_insert({
       items: rosProjectionInserts,
       save: (items) =>
@@ -506,6 +536,13 @@ const run = async ({ year = constants.season.year } = {}) => {
   const scoring_formats = {}
   const lids = [0, 1]
   const leagues_cache = {}
+
+  const seas_type = constants.season.nfl_seas_type === 'POST' ? 'POST' : 'REG'
+
+  if (seas_type === 'POST') {
+    await process_average_projections({ year, seas_type })
+    return
+  }
 
   const player_rows = await process_average_projections({ year })
   const projection_pids = player_rows.map((p) => p.pid)
