@@ -13,7 +13,7 @@ import db from '#db'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('import:projections')
-debug.enable('import:projections,get-player')
+debug.enable('import:projections,get-player,4for4')
 
 const timestamp = Math.floor(Date.now() / 1000)
 const argv = yargs(hideBin(process.argv)).argv
@@ -44,22 +44,37 @@ const run = async ({
   dry_run = false
 }) => {
   // do not pull in any projections after the season has ended
-  if (constants.season.week > constants.season.nflFinalWeek) {
+  if (constants.season.now.isAfter(constants.season.end)) {
+    log('Season has ended, skipping')
     return
   }
 
   const year = constants.season.year
-  const week = is_regular_season_projection ? 0 : constants.season.week
+  const week = is_regular_season_projection ? 0 : constants.season.nfl_seas_week
+  const seas_type =
+    week === 0
+      ? 'REG'
+      : constants.season.nfl_seas_type === 'POST'
+        ? 'POST'
+        : 'REG'
 
   const data = await four_for_four.get_4for4_projections({
     year,
     week,
+    seas_type,
     is_regular_season_projection,
     ignore_cache: true
   })
 
   const inserts = []
   const missing = []
+
+  const first_item = data[0]
+
+  if (!first_item.Week) {
+    log('No Week column found in data')
+    return
+  }
 
   for (const item of data) {
     const params = {
@@ -86,7 +101,7 @@ const run = async ({
       pid: player_row.pid,
       year,
       week,
-      seas_type: 'REG',
+      seas_type,
       sourceid: constants.sources['4FOR4'],
       ...proj
     })
@@ -110,7 +125,7 @@ const run = async ({
         year,
         week,
         sourceid: constants.sources['4FOR4'],
-        seas_type: 'REG'
+        seas_type
       })
       .whereNotIn(
         'pid',
