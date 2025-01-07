@@ -75,9 +75,12 @@ export default {
       let week = params.week
       if (!week) {
         const league = await getLeague({ lid, year })
+        const championship_round = Array.isArray(league.championship_round)
+          ? Math.max(...league.championship_round)
+          : league.championship_round
         week = Math.min(
           constants.season.week,
-          league.championship_round || constants.season.finalWeek
+          championship_round || constants.season.finalWeek
         )
       }
 
