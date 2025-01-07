@@ -138,3 +138,10 @@ export const single_position = {
   values: constants.positions,
   default_value: 'QB'
 }
+
+export const single_seas_type = {
+  data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+  single: true,
+  values: constants.seas_types,
+  default_value: constants.season.nfl_seas_type
+}

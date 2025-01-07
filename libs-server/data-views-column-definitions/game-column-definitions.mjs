@@ -14,15 +14,18 @@ const get_params = ({ params = {} }) => {
     week = [week]
   }
 
+  const seas_type = params.seas_type || constants.season.nfl_seas_type
+
   return {
     year,
-    week
+    week,
+    seas_type
   }
 }
 
 const generate_table_alias = ({ params = {} } = {}) => {
-  const { year, week } = get_params({ params })
-  const key = `game_${year.join('_')}_${week.join('_')}`
+  const { year, week, seas_type } = get_params({ params })
+  const key = `game_${year.join('_')}_${week.join('_')}_${seas_type}`
   return get_table_hash(key)
 }
 
@@ -32,7 +35,7 @@ const add_game_with_statement = ({
   with_table_name,
   where_clauses = []
 }) => {
-  const { year, week } = get_params({ params })
+  const { year, week, seas_type } = get_params({ params })
 
   const with_query = db('nfl_games')
     .select(
@@ -44,7 +47,7 @@ const add_game_with_statement = ({
     )
     .whereIn('year', year)
     .whereIn('week', week)
-    .where('seas_type', 'REG')
+    .where('seas_type', seas_type)
     .union(function () {
       this.select(
         'year',
@@ -56,7 +59,7 @@ const add_game_with_statement = ({
         .from('nfl_games')
         .whereIn('year', year)
         .whereIn('week', week)
-        .where('seas_type', 'REG')
+        .where('seas_type', seas_type)
 
       if (where_clauses.length) {
         for (const where_clause of where_clauses) {
