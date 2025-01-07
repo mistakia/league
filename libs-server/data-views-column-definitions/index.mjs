@@ -1,4 +1,5 @@
 import { constants } from '#libs-shared'
+import { getLeague } from '#libs-server'
 
 import db from '#db'
 import player_projected_column_definitions from './player-projected-column-definitions.mjs'
@@ -69,12 +70,17 @@ export default {
       'rosters_players.tid',
       'rosters_players.tag'
     ],
-    join: ({ query, params = {} }) => {
-      const {
-        year = constants.season.year,
-        week = constants.season.week,
-        lid = 1
-      } = params
+    join: async ({ query, params = {} }) => {
+      const { year = constants.season.year, lid = 1 } = params
+      let week = params.week
+      if (!week) {
+        const league = await getLeague({ lid, year })
+        week = Math.min(
+          constants.season.week,
+          league.championship_round || constants.season.finalWeek
+        )
+      }
+
       query.leftJoin('rosters_players', function () {
         this.on('rosters_players.pid', '=', 'player.pid')
         this.andOn('rosters_players.year', '=', year)

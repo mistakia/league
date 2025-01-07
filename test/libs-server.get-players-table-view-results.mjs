@@ -21,8 +21,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     debug.enable('data-views')
   })
 
-  it('should return a query', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should return a query', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       limit: 1000
     })
     const expected_query =
@@ -32,8 +32,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should handle player_target_share_from_plays', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should handle player_target_share_from_plays', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       prefix_columns: ['player_name'],
       columns: [
         {
@@ -66,8 +66,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should handle player_target_share_from_plays — duplicates', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should handle player_target_share_from_plays — duplicates', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       prefix_columns: ['player_name'],
       columns: [
         {
@@ -114,8 +114,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should handle player_target_share_from_plays - different params', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should handle player_target_share_from_plays - different params', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       prefix_columns: ['player_name'],
       columns: [
         {
@@ -155,8 +155,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should handle player_air_yards_share_from_plays', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should handle player_air_yards_share_from_plays', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       prefix_columns: ['player_name'],
       columns: [
         {
@@ -189,8 +189,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should handle player_target_share_from_plays with a where clause', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should handle player_target_share_from_plays with a where clause', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       prefix_columns: ['player_name'],
       columns: [
         {
@@ -239,8 +239,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should create a split query — year', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should create a split query — year', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       splits: ['year'],
       prefix_columns: ['player_name'],
       columns: [
@@ -262,8 +262,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should create a splits query — year', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should create a splits query — year', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       splits: ['year'],
       prefix_columns: ['player_name'],
       columns: [
@@ -296,8 +296,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should create a splits query - year', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should create a splits query - year', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'player_weighted_opportunity_rating_from_plays',
@@ -336,8 +336,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should create a splits query with espn open scores', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should create a splits query with espn open scores', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       splits: ['year'],
       prefix_columns: ['player_name'],
       columns: [
@@ -361,8 +361,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should create a query with fantasy points from seasonlogs', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should create a query with fantasy points from seasonlogs', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       prefix_columns: ['player_name'],
       columns: [
         {
@@ -403,8 +403,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should create a query with fantasy points from careerlogs', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should create a query with fantasy points from careerlogs', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       prefix_columns: ['player_name'],
       columns: [
         'player_fantasy_points_from_careerlogs',
@@ -428,8 +428,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should create a query with fields from league format seasonlogs and careerlogs', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should create a query with fields from league format seasonlogs and careerlogs', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       prefix_columns: ['player_name'],
       columns: [
         'player_startable_games_from_seasonlogs',
@@ -462,8 +462,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should create a query with fields from season prop betting markets', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should create a query with fields from season prop betting markets', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       prefix_columns: ['player_name'],
       columns: [
         {
@@ -502,8 +502,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should create a query with field from player game prop betting markets', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should create a query with field from player game prop betting markets', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       prefix_columns: ['player_name'],
       columns: [
         {
@@ -529,8 +529,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should create a query showing career gamelogs with a where filter on first game receiving yards', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should create a query showing career gamelogs with a where filter on first game receiving yards', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       prefix_columns: ['player_name'],
       columns: [
         'player_fantasy_top_1_seasons_from_careerlogs',
@@ -563,8 +563,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should create a query for season projected stats', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should create a query for season projected stats', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       sort: [
         {
           column_id: 'player_season_projected_points_added',
@@ -588,14 +588,16 @@ describe('LIBS SERVER get_data_view_results', () => {
         'player_season_projected_rec_tds'
       ]
     })
-    const expected_query = `select "player"."pid", player.fname, player.lname, CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, "t265b999c74514c26d03e1e5bf72bbcca"."pts_added" AS "season_projected_points_added_0", "t07887d1cc826d9aef7d20e96e08343f1"."total" AS "season_projected_points_0", "t6f54c05eac6ba296f8748f9026c2d01f"."py" AS "season_projected_pass_yds_0", "t6f54c05eac6ba296f8748f9026c2d01f"."tdp" AS "season_projected_pass_tds_0", "t6f54c05eac6ba296f8748f9026c2d01f"."ints" AS "season_projected_pass_ints_0", "t6f54c05eac6ba296f8748f9026c2d01f"."ra" AS "season_projected_rush_atts_0", "t6f54c05eac6ba296f8748f9026c2d01f"."ry" AS "season_projected_rush_yds_0", "t6f54c05eac6ba296f8748f9026c2d01f"."tdr" AS "season_projected_rush_tds_0", "t6f54c05eac6ba296f8748f9026c2d01f"."fuml" AS "season_projected_fumbles_lost_0", "t6f54c05eac6ba296f8748f9026c2d01f"."trg" AS "season_projected_targets_0", "t6f54c05eac6ba296f8748f9026c2d01f"."rec" AS "season_projected_recs_0", "t6f54c05eac6ba296f8748f9026c2d01f"."recy" AS "season_projected_rec_yds_0", "t6f54c05eac6ba296f8748f9026c2d01f"."tdrec" AS "season_projected_rec_tds_0", "player"."pos" from "player" left join "rosters_players" on "rosters_players"."pid" = "player"."pid" and "rosters_players"."year" = ${constants.season.year} and "rosters_players"."week" = ${constants.season.week} and "rosters_players"."lid" = 1 left join "league_format_player_projection_values" as "t265b999c74514c26d03e1e5bf72bbcca" on "t265b999c74514c26d03e1e5bf72bbcca"."pid" = "player"."pid" and "t265b999c74514c26d03e1e5bf72bbcca"."year" = 2024 and "t265b999c74514c26d03e1e5bf72bbcca"."week" = '0' and "t265b999c74514c26d03e1e5bf72bbcca"."league_format_hash" = '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b' left join "scoring_format_player_projection_points" as "t07887d1cc826d9aef7d20e96e08343f1" on "t07887d1cc826d9aef7d20e96e08343f1"."pid" = "player"."pid" and "t07887d1cc826d9aef7d20e96e08343f1"."year" = 2024 and "t07887d1cc826d9aef7d20e96e08343f1"."week" = '0' and "t07887d1cc826d9aef7d20e96e08343f1"."scoring_format_hash" = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d' left join "projections_index" as "t6f54c05eac6ba296f8748f9026c2d01f" on "t6f54c05eac6ba296f8748f9026c2d01f"."pid" = "player"."pid" and "t6f54c05eac6ba296f8748f9026c2d01f"."year" = 2024 and "t6f54c05eac6ba296f8748f9026c2d01f"."week" = '0' and "t6f54c05eac6ba296f8748f9026c2d01f"."sourceid" = 18 group by player.fname, player.lname, rosters_players.slot, rosters_players.tid, rosters_players.tag, "t265b999c74514c26d03e1e5bf72bbcca"."pts_added", "t07887d1cc826d9aef7d20e96e08343f1"."total", "t6f54c05eac6ba296f8748f9026c2d01f"."py", "t6f54c05eac6ba296f8748f9026c2d01f"."tdp", "t6f54c05eac6ba296f8748f9026c2d01f"."ints", "t6f54c05eac6ba296f8748f9026c2d01f"."ra", "t6f54c05eac6ba296f8748f9026c2d01f"."ry", "t6f54c05eac6ba296f8748f9026c2d01f"."tdr", "t6f54c05eac6ba296f8748f9026c2d01f"."fuml", "t6f54c05eac6ba296f8748f9026c2d01f"."trg", "t6f54c05eac6ba296f8748f9026c2d01f"."rec", "t6f54c05eac6ba296f8748f9026c2d01f"."recy", "t6f54c05eac6ba296f8748f9026c2d01f"."tdrec", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 8 DESC NULLS LAST, "player"."pid" asc limit 500`
+    const expected_query = `select "player"."pid", player.fname, player.lname, CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, "t265b999c74514c26d03e1e5bf72bbcca"."pts_added" AS "season_projected_points_added_0", "t07887d1cc826d9aef7d20e96e08343f1"."total" AS "season_projected_points_0", "t6f54c05eac6ba296f8748f9026c2d01f"."py" AS "season_projected_pass_yds_0", "t6f54c05eac6ba296f8748f9026c2d01f"."tdp" AS "season_projected_pass_tds_0", "t6f54c05eac6ba296f8748f9026c2d01f"."ints" AS "season_projected_pass_ints_0", "t6f54c05eac6ba296f8748f9026c2d01f"."ra" AS "season_projected_rush_atts_0", "t6f54c05eac6ba296f8748f9026c2d01f"."ry" AS "season_projected_rush_yds_0", "t6f54c05eac6ba296f8748f9026c2d01f"."tdr" AS "season_projected_rush_tds_0", "t6f54c05eac6ba296f8748f9026c2d01f"."fuml" AS "season_projected_fumbles_lost_0", "t6f54c05eac6ba296f8748f9026c2d01f"."trg" AS "season_projected_targets_0", "t6f54c05eac6ba296f8748f9026c2d01f"."rec" AS "season_projected_recs_0", "t6f54c05eac6ba296f8748f9026c2d01f"."recy" AS "season_projected_rec_yds_0", "t6f54c05eac6ba296f8748f9026c2d01f"."tdrec" AS "season_projected_rec_tds_0", "player"."pos" from "player" left join "rosters_players" on "rosters_players"."pid" = "player"."pid" and "rosters_players"."year" = ${constants.season.year} and "rosters_players"."week" = ${Math.min(constants.season.week, constants.season.finalWeek)} and "rosters_players"."lid" = 1 left join "league_format_player_projection_values" as "t265b999c74514c26d03e1e5bf72bbcca" on "t265b999c74514c26d03e1e5bf72bbcca"."pid" = "player"."pid" and "t265b999c74514c26d03e1e5bf72bbcca"."year" = 2024 and "t265b999c74514c26d03e1e5bf72bbcca"."week" = '0' and "t265b999c74514c26d03e1e5bf72bbcca"."league_format_hash" = '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b' left join "scoring_format_player_projection_points" as "t07887d1cc826d9aef7d20e96e08343f1" on "t07887d1cc826d9aef7d20e96e08343f1"."pid" = "player"."pid" and "t07887d1cc826d9aef7d20e96e08343f1"."year" = 2024 and "t07887d1cc826d9aef7d20e96e08343f1"."week" = '0' and "t07887d1cc826d9aef7d20e96e08343f1"."scoring_format_hash" = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d' left join "projections_index" as "t6f54c05eac6ba296f8748f9026c2d01f" on "t6f54c05eac6ba296f8748f9026c2d01f"."pid" = "player"."pid" and "t6f54c05eac6ba296f8748f9026c2d01f"."year" = 2024 and "t6f54c05eac6ba296f8748f9026c2d01f"."week" = '0' and "t6f54c05eac6ba296f8748f9026c2d01f"."sourceid" = 18 and "t6f54c05eac6ba296f8748f9026c2d01f"."seas_type" = 'REG' group by player.fname, player.lname, rosters_players.slot, rosters_players.tid, rosters_players.tag, "t265b999c74514c26d03e1e5bf72bbcca"."pts_added", "t07887d1cc826d9aef7d20e96e08343f1"."total", "t6f54c05eac6ba296f8748f9026c2d01f"."py", "t6f54c05eac6ba296f8748f9026c2d01f"."tdp", "t6f54c05eac6ba296f8748f9026c2d01f"."ints", "t6f54c05eac6ba296f8748f9026c2d01f"."ra", "t6f54c05eac6ba296f8748f9026c2d01f"."ry", "t6f54c05eac6ba296f8748f9026c2d01f"."tdr", "t6f54c05eac6ba296f8748f9026c2d01f"."fuml", "t6f54c05eac6ba296f8748f9026c2d01f"."trg", "t6f54c05eac6ba296f8748f9026c2d01f"."rec", "t6f54c05eac6ba296f8748f9026c2d01f"."recy", "t6f54c05eac6ba296f8748f9026c2d01f"."tdrec", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 8 DESC NULLS LAST, "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
-    expect(data_view_metadata.cache_ttl).to.equal(six_hours)
+    const cache_ttl =
+      constants.season.nfl_seas_type === 'POST' ? twelve_hours : six_hours
+    expect(data_view_metadata.cache_ttl).to.equal(cache_ttl)
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should create a query for season projected stats', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should create a query for season projected stats', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       sort: [
         {
           column_id: 'player_season_projected_points_added',
@@ -684,14 +686,14 @@ describe('LIBS SERVER get_data_view_results', () => {
         }
       ]
     })
-    const expected_query = `select "player"."pid", player.fname, player.lname, CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, "t26d9d9efaab14f81317e0aab19bb619c"."pts_added" AS "season_projected_points_added_0", "t0dfe1f40a872fb6aad6963492077913c"."total" AS "season_projected_points_0", "t06adaa2b44f8b40e476affee9748a3c5"."py" AS "season_projected_pass_yds_0", "t06adaa2b44f8b40e476affee9748a3c5"."tdp" AS "season_projected_pass_tds_0", "t06adaa2b44f8b40e476affee9748a3c5"."ints" AS "season_projected_pass_ints_0", "t06adaa2b44f8b40e476affee9748a3c5"."ra" AS "season_projected_rush_atts_0", "t06adaa2b44f8b40e476affee9748a3c5"."ry" AS "season_projected_rush_yds_0", "t06adaa2b44f8b40e476affee9748a3c5"."tdr" AS "season_projected_rush_tds_0", "t06adaa2b44f8b40e476affee9748a3c5"."fuml" AS "season_projected_fumbles_lost_0", "t06adaa2b44f8b40e476affee9748a3c5"."trg" AS "season_projected_targets_0", "t06adaa2b44f8b40e476affee9748a3c5"."rec" AS "season_projected_recs_0", "t06adaa2b44f8b40e476affee9748a3c5"."recy" AS "season_projected_rec_yds_0", "t06adaa2b44f8b40e476affee9748a3c5"."tdrec" AS "season_projected_rec_tds_0", "player"."pos" from "player" left join "rosters_players" on "rosters_players"."pid" = "player"."pid" and "rosters_players"."year" = ${constants.season.year} and "rosters_players"."week" = ${constants.season.week} and "rosters_players"."lid" = 1 left join "league_format_player_projection_values" as "t26d9d9efaab14f81317e0aab19bb619c" on "t26d9d9efaab14f81317e0aab19bb619c"."pid" = "player"."pid" and "t26d9d9efaab14f81317e0aab19bb619c"."year" = 2023 and "t26d9d9efaab14f81317e0aab19bb619c"."week" = '0' and "t26d9d9efaab14f81317e0aab19bb619c"."league_format_hash" = '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b' left join "scoring_format_player_projection_points" as "t0dfe1f40a872fb6aad6963492077913c" on "t0dfe1f40a872fb6aad6963492077913c"."pid" = "player"."pid" and "t0dfe1f40a872fb6aad6963492077913c"."year" = 2023 and "t0dfe1f40a872fb6aad6963492077913c"."week" = '0' and "t0dfe1f40a872fb6aad6963492077913c"."scoring_format_hash" = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d' left join "projections_index" as "t06adaa2b44f8b40e476affee9748a3c5" on "t06adaa2b44f8b40e476affee9748a3c5"."pid" = "player"."pid" and "t06adaa2b44f8b40e476affee9748a3c5"."year" = 2023 and "t06adaa2b44f8b40e476affee9748a3c5"."week" = '0' and "t06adaa2b44f8b40e476affee9748a3c5"."sourceid" = 18 group by player.fname, player.lname, rosters_players.slot, rosters_players.tid, rosters_players.tag, "t26d9d9efaab14f81317e0aab19bb619c"."pts_added", "t0dfe1f40a872fb6aad6963492077913c"."total", "t06adaa2b44f8b40e476affee9748a3c5"."py", "t06adaa2b44f8b40e476affee9748a3c5"."tdp", "t06adaa2b44f8b40e476affee9748a3c5"."ints", "t06adaa2b44f8b40e476affee9748a3c5"."ra", "t06adaa2b44f8b40e476affee9748a3c5"."ry", "t06adaa2b44f8b40e476affee9748a3c5"."tdr", "t06adaa2b44f8b40e476affee9748a3c5"."fuml", "t06adaa2b44f8b40e476affee9748a3c5"."trg", "t06adaa2b44f8b40e476affee9748a3c5"."rec", "t06adaa2b44f8b40e476affee9748a3c5"."recy", "t06adaa2b44f8b40e476affee9748a3c5"."tdrec", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 8 DESC NULLS LAST, "player"."pid" asc limit 500`
+    const expected_query = `select "player"."pid", player.fname, player.lname, CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, "t26d9d9efaab14f81317e0aab19bb619c"."pts_added" AS "season_projected_points_added_0", "t0dfe1f40a872fb6aad6963492077913c"."total" AS "season_projected_points_0", "t06adaa2b44f8b40e476affee9748a3c5"."py" AS "season_projected_pass_yds_0", "t06adaa2b44f8b40e476affee9748a3c5"."tdp" AS "season_projected_pass_tds_0", "t06adaa2b44f8b40e476affee9748a3c5"."ints" AS "season_projected_pass_ints_0", "t06adaa2b44f8b40e476affee9748a3c5"."ra" AS "season_projected_rush_atts_0", "t06adaa2b44f8b40e476affee9748a3c5"."ry" AS "season_projected_rush_yds_0", "t06adaa2b44f8b40e476affee9748a3c5"."tdr" AS "season_projected_rush_tds_0", "t06adaa2b44f8b40e476affee9748a3c5"."fuml" AS "season_projected_fumbles_lost_0", "t06adaa2b44f8b40e476affee9748a3c5"."trg" AS "season_projected_targets_0", "t06adaa2b44f8b40e476affee9748a3c5"."rec" AS "season_projected_recs_0", "t06adaa2b44f8b40e476affee9748a3c5"."recy" AS "season_projected_rec_yds_0", "t06adaa2b44f8b40e476affee9748a3c5"."tdrec" AS "season_projected_rec_tds_0", "player"."pos" from "player" left join "rosters_players" on "rosters_players"."pid" = "player"."pid" and "rosters_players"."year" = ${constants.season.year} and "rosters_players"."week" = ${Math.min(constants.season.week, constants.season.finalWeek)} and "rosters_players"."lid" = 1 left join "league_format_player_projection_values" as "t26d9d9efaab14f81317e0aab19bb619c" on "t26d9d9efaab14f81317e0aab19bb619c"."pid" = "player"."pid" and "t26d9d9efaab14f81317e0aab19bb619c"."year" = 2023 and "t26d9d9efaab14f81317e0aab19bb619c"."week" = '0' and "t26d9d9efaab14f81317e0aab19bb619c"."league_format_hash" = '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b' left join "scoring_format_player_projection_points" as "t0dfe1f40a872fb6aad6963492077913c" on "t0dfe1f40a872fb6aad6963492077913c"."pid" = "player"."pid" and "t0dfe1f40a872fb6aad6963492077913c"."year" = 2023 and "t0dfe1f40a872fb6aad6963492077913c"."week" = '0' and "t0dfe1f40a872fb6aad6963492077913c"."scoring_format_hash" = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d' left join "projections_index" as "t06adaa2b44f8b40e476affee9748a3c5" on "t06adaa2b44f8b40e476affee9748a3c5"."pid" = "player"."pid" and "t06adaa2b44f8b40e476affee9748a3c5"."year" = 2023 and "t06adaa2b44f8b40e476affee9748a3c5"."week" = '0' and "t06adaa2b44f8b40e476affee9748a3c5"."sourceid" = 18 and "t06adaa2b44f8b40e476affee9748a3c5"."seas_type" = 'REG' group by player.fname, player.lname, rosters_players.slot, rosters_players.tid, rosters_players.tag, "t26d9d9efaab14f81317e0aab19bb619c"."pts_added", "t0dfe1f40a872fb6aad6963492077913c"."total", "t06adaa2b44f8b40e476affee9748a3c5"."py", "t06adaa2b44f8b40e476affee9748a3c5"."tdp", "t06adaa2b44f8b40e476affee9748a3c5"."ints", "t06adaa2b44f8b40e476affee9748a3c5"."ra", "t06adaa2b44f8b40e476affee9748a3c5"."ry", "t06adaa2b44f8b40e476affee9748a3c5"."tdr", "t06adaa2b44f8b40e476affee9748a3c5"."fuml", "t06adaa2b44f8b40e476affee9748a3c5"."trg", "t06adaa2b44f8b40e476affee9748a3c5"."rec", "t06adaa2b44f8b40e476affee9748a3c5"."recy", "t06adaa2b44f8b40e476affee9748a3c5"."tdrec", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 8 DESC NULLS LAST, "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
     expect(data_view_metadata.cache_ttl).to.equal(twelve_hours)
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should create a query for week projected stats', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should create a query for week projected stats', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       sort: [
         {
           column_id: 'player_week_projected_pass_yds',
@@ -710,14 +712,14 @@ describe('LIBS SERVER get_data_view_results', () => {
       ],
       where: []
     })
-    const expected_query = `select "player"."pid", player.fname, player.lname, CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, "tdaa3548559fc3de994ece727a3d03fa9"."py" AS "week_projected_pass_yds_0", "player"."pos" from "player" left join "rosters_players" on "rosters_players"."pid" = "player"."pid" and "rosters_players"."year" = ${constants.season.year} and "rosters_players"."week" = ${constants.season.week} and "rosters_players"."lid" = 1 left join "projections_index" as "tdaa3548559fc3de994ece727a3d03fa9" on "tdaa3548559fc3de994ece727a3d03fa9"."pid" = "player"."pid" and "tdaa3548559fc3de994ece727a3d03fa9"."year" = 2023 and "tdaa3548559fc3de994ece727a3d03fa9"."week" = '2' and "tdaa3548559fc3de994ece727a3d03fa9"."sourceid" = 18 group by player.fname, player.lname, rosters_players.slot, rosters_players.tid, rosters_players.tag, "tdaa3548559fc3de994ece727a3d03fa9"."py", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 8 DESC NULLS LAST, "player"."pid" asc limit 500`
+    const expected_query = `select "player"."pid", player.fname, player.lname, CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, "tdaa3548559fc3de994ece727a3d03fa9"."py" AS "week_projected_pass_yds_0", "player"."pos" from "player" left join "rosters_players" on "rosters_players"."pid" = "player"."pid" and "rosters_players"."year" = ${constants.season.year} and "rosters_players"."week" = ${Math.min(constants.season.week, constants.season.finalWeek)} and "rosters_players"."lid" = 1 left join "projections_index" as "tdaa3548559fc3de994ece727a3d03fa9" on "tdaa3548559fc3de994ece727a3d03fa9"."pid" = "player"."pid" and "tdaa3548559fc3de994ece727a3d03fa9"."year" = 2023 and "tdaa3548559fc3de994ece727a3d03fa9"."week" = '2' and "tdaa3548559fc3de994ece727a3d03fa9"."sourceid" = 18 and "tdaa3548559fc3de994ece727a3d03fa9"."seas_type" = 'REG' group by player.fname, player.lname, rosters_players.slot, rosters_players.tid, rosters_players.tag, "tdaa3548559fc3de994ece727a3d03fa9"."py", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 8 DESC NULLS LAST, "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
     expect(data_view_metadata.cache_ttl).to.equal(twelve_hours)
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should create a query for season projected stats - split', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should create a query for season projected stats - split', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'player_season_projected_rush_atts',
@@ -744,14 +746,14 @@ describe('LIBS SERVER get_data_view_results', () => {
       prefix_columns: ['player_name'],
       splits: ['year']
     })
-    const expected_query = `with "base_years" as (SELECT unnest(ARRAY[2020,2021,2022,2023]) as year), "player_years" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), "t1206dd6a0185f87789312514d524dfa0" as (select COALESCE(bc_pid) as pid, "nfl_plays"."year", COUNT(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE NULL END) as rush_atts_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' group by "nfl_plays"."year", COALESCE(bc_pid)) select "player"."pid", player.fname, player.lname, "t06adaa2b44f8b40e476affee9748a3c5"."ra" AS "season_projected_rush_atts_0", "t6f54c05eac6ba296f8748f9026c2d01f"."ry" AS "season_projected_rush_yds_0", "t1206dd6a0185f87789312514d524dfa0"."rush_atts_from_plays" AS "rush_atts_from_plays_0", "player_years"."year", "player"."pos" from "player_years" inner join "player" on "player"."pid" = "player_years"."pid" left join "projections_index" as "t06adaa2b44f8b40e476affee9748a3c5" on "t06adaa2b44f8b40e476affee9748a3c5"."pid" = "player"."pid" and t06adaa2b44f8b40e476affee9748a3c5.year = player_years.year and t06adaa2b44f8b40e476affee9748a3c5.year IN (2023,2022,2021,2020) and "t06adaa2b44f8b40e476affee9748a3c5"."week" = '0' and "t06adaa2b44f8b40e476affee9748a3c5"."sourceid" = 18 left join "projections_index" as "t6f54c05eac6ba296f8748f9026c2d01f" on "t6f54c05eac6ba296f8748f9026c2d01f"."pid" = "player"."pid" and t6f54c05eac6ba296f8748f9026c2d01f.year = player_years.year and "t6f54c05eac6ba296f8748f9026c2d01f"."week" = '0' and "t6f54c05eac6ba296f8748f9026c2d01f"."sourceid" = 18 left join "t1206dd6a0185f87789312514d524dfa0" on "t1206dd6a0185f87789312514d524dfa0"."pid" = "player"."pid" and t1206dd6a0185f87789312514d524dfa0.year = player_years.year where player.pos IN ('RB') group by player.fname, player.lname, "t06adaa2b44f8b40e476affee9748a3c5"."ra", "t6f54c05eac6ba296f8748f9026c2d01f"."ry", "t1206dd6a0185f87789312514d524dfa0"."rush_atts_from_plays", "player_years"."year", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 4 DESC NULLS LAST, "player"."pid" asc limit 500`
+    const expected_query = `with "base_years" as (SELECT unnest(ARRAY[2020,2021,2022,2023]) as year), "player_years" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), "t1206dd6a0185f87789312514d524dfa0" as (select COALESCE(bc_pid) as pid, "nfl_plays"."year", COUNT(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE NULL END) as rush_atts_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' group by "nfl_plays"."year", COALESCE(bc_pid)) select "player"."pid", player.fname, player.lname, "t06adaa2b44f8b40e476affee9748a3c5"."ra" AS "season_projected_rush_atts_0", "t6f54c05eac6ba296f8748f9026c2d01f"."ry" AS "season_projected_rush_yds_0", "t1206dd6a0185f87789312514d524dfa0"."rush_atts_from_plays" AS "rush_atts_from_plays_0", "player_years"."year", "player"."pos" from "player_years" inner join "player" on "player"."pid" = "player_years"."pid" left join "projections_index" as "t06adaa2b44f8b40e476affee9748a3c5" on "t06adaa2b44f8b40e476affee9748a3c5"."pid" = "player"."pid" and t06adaa2b44f8b40e476affee9748a3c5.year = player_years.year and t06adaa2b44f8b40e476affee9748a3c5.year IN (2023,2022,2021,2020) and "t06adaa2b44f8b40e476affee9748a3c5"."week" = '0' and "t06adaa2b44f8b40e476affee9748a3c5"."sourceid" = 18 and "t06adaa2b44f8b40e476affee9748a3c5"."seas_type" = 'REG' left join "projections_index" as "t6f54c05eac6ba296f8748f9026c2d01f" on "t6f54c05eac6ba296f8748f9026c2d01f"."pid" = "player"."pid" and t6f54c05eac6ba296f8748f9026c2d01f.year = player_years.year and "t6f54c05eac6ba296f8748f9026c2d01f"."week" = '0' and "t6f54c05eac6ba296f8748f9026c2d01f"."sourceid" = 18 and "t6f54c05eac6ba296f8748f9026c2d01f"."seas_type" = 'REG' left join "t1206dd6a0185f87789312514d524dfa0" on "t1206dd6a0185f87789312514d524dfa0"."pid" = "player"."pid" and t1206dd6a0185f87789312514d524dfa0.year = player_years.year where player.pos IN ('RB') group by player.fname, player.lname, "t06adaa2b44f8b40e476affee9748a3c5"."ra", "t6f54c05eac6ba296f8748f9026c2d01f"."ry", "t1206dd6a0185f87789312514d524dfa0"."rush_atts_from_plays", "player_years"."year", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 4 DESC NULLS LAST, "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
     expect(data_view_metadata.cache_ttl).to.equal(six_hours)
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should create a query with an N+1 column', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should create a query with an N+1 column', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'player_receiving_first_down_share_from_plays',
@@ -823,8 +825,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should create a query with prospect columns, weighted opportunity, and opportunity share', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should create a query with prospect columns, weighted opportunity, and opportunity share', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'player_weighted_opportunity_from_plays',
@@ -864,8 +866,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should create a query with player metrics, weighted opportunity, and roster status — sorted by bmi', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should create a query with player metrics, weighted opportunity, and roster status — sorted by bmi', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       sort: [
         {
           column_id: 'player_body_mass_index',
@@ -884,14 +886,14 @@ describe('LIBS SERVER get_data_view_results', () => {
       ],
       where: []
     })
-    const expected_query = `with "tb3e36120a917f58fcbf72b163549f606" as (select COALESCE(bc_pid, trg_pid) as pid, ROUND(SUM(CASE WHEN nfl_plays.ydl_100 <= 20 AND bc_pid IS NOT NULL THEN 1.30 WHEN nfl_plays.ydl_100 <= 20 AND trg_pid IS NOT NULL THEN 2.25 WHEN nfl_plays.ydl_100 > 20 AND bc_pid IS NOT NULL THEN 0.48 WHEN nfl_plays.ydl_100 > 20 AND trg_pid IS NOT NULL THEN 1.43 ELSE 0 END), 2) as weighted_opportunity_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' group by COALESCE(bc_pid, trg_pid)), "td2b8e0d3ac807cd59229c712aefce1fd" as (select "pg"."pid", ROUND(100.0 * (COUNT(CASE WHEN nfl_plays.bc_pid = pg.pid THEN 1 ELSE NULL END) + COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END)) / NULLIF(SUM(CASE WHEN nfl_plays.bc_pid IS NOT NULL OR nfl_plays.trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as opportunity_share_from_plays from "nfl_plays" inner join "player_gamelogs" as "pg" on "nfl_plays"."esbid" = "pg"."esbid" and "nfl_plays"."off" = "pg"."tm" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and ("bc_pid" is not null or "trg_pid" is not null) group by "pg"."pid") select "player"."pid", player.fname, player.lname, CASE WHEN player.height > 0 THEN ROUND(CAST((player.weight::float / NULLIF(player.height::float * player.height::float, 0)) * 703 AS NUMERIC), 2) ELSE NULL END as bmi_0, CASE WHEN player.forty > 0 THEN ROUND((player.weight * 200.0) / NULLIF(POWER(player.forty, 4), 0), 2) ELSE NULL END as speed_score_0, CASE WHEN player.pos IN ('WR', 'TE') AND player.forty > 0 THEN ROUND(((player.weight * 200.0) / NULLIF(POWER(player.forty, 4), 0)) * (player.height / CASE WHEN player.pos = 'TE' THEN 76.4 ELSE 73.0 END), 2) ELSE NULL END as height_adjusted_speed_score_0, ROUND(COALESCE(player.shuttle, 0) + COALESCE(player.cone, 0), 2) as agility_score_0, ROUND(COALESCE(player.vertical, 0) + (COALESCE(player.broad, 0) / 12.0), 2) as burst_score_0, CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, "tb3e36120a917f58fcbf72b163549f606"."weighted_opportunity_from_plays" AS "weighted_opportunity_from_plays_0", "td2b8e0d3ac807cd59229c712aefce1fd"."opportunity_share_from_plays" AS "opportunity_share_from_plays_0", "player"."pos" from "player" left join "rosters_players" on "rosters_players"."pid" = "player"."pid" and "rosters_players"."year" = ${constants.season.year} and "rosters_players"."week" = ${constants.season.week} and "rosters_players"."lid" = 1 left join "tb3e36120a917f58fcbf72b163549f606" on "tb3e36120a917f58fcbf72b163549f606"."pid" = "player"."pid" left join "td2b8e0d3ac807cd59229c712aefce1fd" on "td2b8e0d3ac807cd59229c712aefce1fd"."pid" = "player"."pid" group by player.fname, player.lname, player.weight, player.height, player.weight, player.forty, player.weight, player.forty, player.height, player.pos, player.shuttle, player.cone, player.vertical, player.broad, rosters_players.slot, rosters_players.tid, rosters_players.tag, "tb3e36120a917f58fcbf72b163549f606"."weighted_opportunity_from_plays", "td2b8e0d3ac807cd59229c712aefce1fd"."opportunity_share_from_plays", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 4 DESC NULLS LAST, "player"."pid" asc limit 500`
+    const expected_query = `with "tb3e36120a917f58fcbf72b163549f606" as (select COALESCE(bc_pid, trg_pid) as pid, ROUND(SUM(CASE WHEN nfl_plays.ydl_100 <= 20 AND bc_pid IS NOT NULL THEN 1.30 WHEN nfl_plays.ydl_100 <= 20 AND trg_pid IS NOT NULL THEN 2.25 WHEN nfl_plays.ydl_100 > 20 AND bc_pid IS NOT NULL THEN 0.48 WHEN nfl_plays.ydl_100 > 20 AND trg_pid IS NOT NULL THEN 1.43 ELSE 0 END), 2) as weighted_opportunity_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' group by COALESCE(bc_pid, trg_pid)), "td2b8e0d3ac807cd59229c712aefce1fd" as (select "pg"."pid", ROUND(100.0 * (COUNT(CASE WHEN nfl_plays.bc_pid = pg.pid THEN 1 ELSE NULL END) + COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END)) / NULLIF(SUM(CASE WHEN nfl_plays.bc_pid IS NOT NULL OR nfl_plays.trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as opportunity_share_from_plays from "nfl_plays" inner join "player_gamelogs" as "pg" on "nfl_plays"."esbid" = "pg"."esbid" and "nfl_plays"."off" = "pg"."tm" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and ("bc_pid" is not null or "trg_pid" is not null) group by "pg"."pid") select "player"."pid", player.fname, player.lname, CASE WHEN player.height > 0 THEN ROUND(CAST((player.weight::float / NULLIF(player.height::float * player.height::float, 0)) * 703 AS NUMERIC), 2) ELSE NULL END as bmi_0, CASE WHEN player.forty > 0 THEN ROUND((player.weight * 200.0) / NULLIF(POWER(player.forty, 4), 0), 2) ELSE NULL END as speed_score_0, CASE WHEN player.pos IN ('WR', 'TE') AND player.forty > 0 THEN ROUND(((player.weight * 200.0) / NULLIF(POWER(player.forty, 4), 0)) * (player.height / CASE WHEN player.pos = 'TE' THEN 76.4 ELSE 73.0 END), 2) ELSE NULL END as height_adjusted_speed_score_0, ROUND(COALESCE(player.shuttle, 0) + COALESCE(player.cone, 0), 2) as agility_score_0, ROUND(COALESCE(player.vertical, 0) + (COALESCE(player.broad, 0) / 12.0), 2) as burst_score_0, CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, "tb3e36120a917f58fcbf72b163549f606"."weighted_opportunity_from_plays" AS "weighted_opportunity_from_plays_0", "td2b8e0d3ac807cd59229c712aefce1fd"."opportunity_share_from_plays" AS "opportunity_share_from_plays_0", "player"."pos" from "player" left join "rosters_players" on "rosters_players"."pid" = "player"."pid" and "rosters_players"."year" = ${constants.season.year} and "rosters_players"."week" = ${Math.min(constants.season.week, constants.season.finalWeek)} and "rosters_players"."lid" = 1 left join "tb3e36120a917f58fcbf72b163549f606" on "tb3e36120a917f58fcbf72b163549f606"."pid" = "player"."pid" left join "td2b8e0d3ac807cd59229c712aefce1fd" on "td2b8e0d3ac807cd59229c712aefce1fd"."pid" = "player"."pid" group by player.fname, player.lname, player.weight, player.height, player.weight, player.forty, player.weight, player.forty, player.height, player.pos, player.shuttle, player.cone, player.vertical, player.broad, rosters_players.slot, rosters_players.tid, rosters_players.tag, "tb3e36120a917f58fcbf72b163549f606"."weighted_opportunity_from_plays", "td2b8e0d3ac807cd59229c712aefce1fd"."opportunity_share_from_plays", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 4 DESC NULLS LAST, "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
     expect(data_view_metadata.cache_ttl).to.equal(six_hours)
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should generate query for fantasy points by plays — split by year 2022 to 2023', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should generate query for fantasy points by plays — split by year 2022 to 2023', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'player_fantasy_points_from_plays',
@@ -922,8 +924,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should generate a fantasy points by play with per_game rate_type query', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should generate a fantasy points by play with per_game rate_type query', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       sort: [
         {
           column_id: 'player_fantasy_points_from_plays',
@@ -942,14 +944,14 @@ describe('LIBS SERVER get_data_view_results', () => {
       ],
       where: []
     })
-    const expected_query = `with "tb972f2cc9e2375df01dce515be38a32b" as (select "player_gamelogs"."pid", count(*) as "rate_type_total_count", array_agg(distinct player_gamelogs.tm) as teams from "player_gamelogs" left join "nfl_games" on "nfl_games"."esbid" = "player_gamelogs"."esbid" where "nfl_games"."seas_type" = 'REG' and "player_gamelogs"."active" = true and "nfl_games"."year" in (2023) group by "player_gamelogs"."pid"), "t378d2a86ff3b4bed1f59e8c2a301e6f7" as (select fantasy_points_plays.pid, ROUND(SUM(CASE WHEN pid_type = 'trg' AND comp = true THEN 1 ELSE 0 END + CASE WHEN pid_type IN ('bc', 'trg') THEN COALESCE(rush_yds, 0) + COALESCE(recv_yds, 0) ELSE 0 END * 0.1 + CASE WHEN pid_type = 'psr' THEN COALESCE(pass_yds, 0) ELSE 0 END * 0.04 + CASE WHEN pid_type = 'bc' AND rush_td = true THEN 6 WHEN pid_type = 'trg' AND pass_td = true THEN 6 WHEN pid_type = 'psr' AND pass_td = true THEN 4 ELSE 0 END + CASE WHEN pid_type = 'psr' AND int = true THEN -1 ELSE 0 END + CASE WHEN pid_type = 'fuml' THEN -1 ELSE 0 END), 2) as fantasy_points_from_plays from (select bc_pid as pid, 'bc' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "bc_pid" is not null union all select psr_pid as pid, 'psr' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "psr_pid" is not null union all select trg_pid as pid, 'trg' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "trg_pid" is not null union all select player_fuml_pid as pid, 'fuml' as pid_type, NULL as rush_yds, NULL as recv_yds, NULL as rush_td, NULL as td, NULL as comp, NULL as int, NULL as pass_yds, NULL as pass_td, play_type, seas_type, year from "nfl_plays" where "player_fuml_pid" is not null) as "fantasy_points_plays" where not "play_type" = 'NOPL' and "fantasy_points_plays"."seas_type" = 'REG' and "fantasy_points_plays"."year" in (2023) group by "fantasy_points_plays"."pid") select "player"."pid", player.fname, player.lname, CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, CAST(t378d2a86ff3b4bed1f59e8c2a301e6f7.fantasy_points_from_plays AS DECIMAL) / NULLIF(CAST(tb972f2cc9e2375df01dce515be38a32b.rate_type_total_count AS DECIMAL), 0) AS "fantasy_points_from_plays_0", "player"."pos" from "player" left join "tb972f2cc9e2375df01dce515be38a32b" on "tb972f2cc9e2375df01dce515be38a32b"."pid" = "player"."pid" left join "rosters_players" on "rosters_players"."pid" = "player"."pid" and "rosters_players"."year" = ${constants.season.year} and "rosters_players"."week" = ${constants.season.week} and "rosters_players"."lid" = 1 left join "t378d2a86ff3b4bed1f59e8c2a301e6f7" on "t378d2a86ff3b4bed1f59e8c2a301e6f7"."pid" = "player"."pid" group by player.fname, player.lname, rosters_players.slot, rosters_players.tid, rosters_players.tag, "t378d2a86ff3b4bed1f59e8c2a301e6f7"."fantasy_points_from_plays", tb972f2cc9e2375df01dce515be38a32b.rate_type_total_count, "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 8 DESC NULLS LAST, "player"."pid" asc limit 500`
+    const expected_query = `with "tb972f2cc9e2375df01dce515be38a32b" as (select "player_gamelogs"."pid", count(*) as "rate_type_total_count", array_agg(distinct player_gamelogs.tm) as teams from "player_gamelogs" left join "nfl_games" on "nfl_games"."esbid" = "player_gamelogs"."esbid" where "nfl_games"."seas_type" = 'REG' and "player_gamelogs"."active" = true and "nfl_games"."year" in (2023) group by "player_gamelogs"."pid"), "t378d2a86ff3b4bed1f59e8c2a301e6f7" as (select fantasy_points_plays.pid, ROUND(SUM(CASE WHEN pid_type = 'trg' AND comp = true THEN 1 ELSE 0 END + CASE WHEN pid_type IN ('bc', 'trg') THEN COALESCE(rush_yds, 0) + COALESCE(recv_yds, 0) ELSE 0 END * 0.1 + CASE WHEN pid_type = 'psr' THEN COALESCE(pass_yds, 0) ELSE 0 END * 0.04 + CASE WHEN pid_type = 'bc' AND rush_td = true THEN 6 WHEN pid_type = 'trg' AND pass_td = true THEN 6 WHEN pid_type = 'psr' AND pass_td = true THEN 4 ELSE 0 END + CASE WHEN pid_type = 'psr' AND int = true THEN -1 ELSE 0 END + CASE WHEN pid_type = 'fuml' THEN -1 ELSE 0 END), 2) as fantasy_points_from_plays from (select bc_pid as pid, 'bc' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "bc_pid" is not null union all select psr_pid as pid, 'psr' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "psr_pid" is not null union all select trg_pid as pid, 'trg' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "trg_pid" is not null union all select player_fuml_pid as pid, 'fuml' as pid_type, NULL as rush_yds, NULL as recv_yds, NULL as rush_td, NULL as td, NULL as comp, NULL as int, NULL as pass_yds, NULL as pass_td, play_type, seas_type, year from "nfl_plays" where "player_fuml_pid" is not null) as "fantasy_points_plays" where not "play_type" = 'NOPL' and "fantasy_points_plays"."seas_type" = 'REG' and "fantasy_points_plays"."year" in (2023) group by "fantasy_points_plays"."pid") select "player"."pid", player.fname, player.lname, CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, CAST(t378d2a86ff3b4bed1f59e8c2a301e6f7.fantasy_points_from_plays AS DECIMAL) / NULLIF(CAST(tb972f2cc9e2375df01dce515be38a32b.rate_type_total_count AS DECIMAL), 0) AS "fantasy_points_from_plays_0", "player"."pos" from "player" left join "tb972f2cc9e2375df01dce515be38a32b" on "tb972f2cc9e2375df01dce515be38a32b"."pid" = "player"."pid" left join "rosters_players" on "rosters_players"."pid" = "player"."pid" and "rosters_players"."year" = ${constants.season.year} and "rosters_players"."week" = ${Math.min(constants.season.week, constants.season.finalWeek)} and "rosters_players"."lid" = 1 left join "t378d2a86ff3b4bed1f59e8c2a301e6f7" on "t378d2a86ff3b4bed1f59e8c2a301e6f7"."pid" = "player"."pid" group by player.fname, player.lname, rosters_players.slot, rosters_players.tid, rosters_players.tag, "t378d2a86ff3b4bed1f59e8c2a301e6f7"."fantasy_points_from_plays", tb972f2cc9e2375df01dce515be38a32b.rate_type_total_count, "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 8 DESC NULLS LAST, "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
     expect(data_view_metadata.cache_ttl).to.equal(twelve_hours)
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should generate a tackle columns query', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should generate a tackle columns query', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'player_solo_tackles_from_plays',
@@ -971,8 +973,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should generate a tackle assist columns query', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should generate a tackle assist columns query', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'player_combined_tackles_from_plays',
@@ -994,8 +996,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should filter by active rosters', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should filter by active rosters', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       prefix_columns: ['player_name', 'player_league_roster_status'],
       columns: [
         'player_receptions_from_plays',
@@ -1027,14 +1029,14 @@ describe('LIBS SERVER get_data_view_results', () => {
         }
       ]
     })
-    const expected_query = `with "td98f174615a5189ee284dbdaa246b629" as (select COALESCE(trg_pid) as pid, SUM(CASE WHEN comp = true THEN 1 ELSE 0 END) as recs_from_plays, SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END) as rec_yds_from_plays, SUM(CASE WHEN comp = true AND td = true THEN 1 ELSE 0 END) as rec_tds_from_plays, SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) as trg_from_plays, SUM(CASE WHEN dot >= 20 THEN 1 ELSE 0 END) as deep_trg_from_plays, CASE WHEN SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN dot >= 20 THEN 1 ELSE 0 END) / SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END as deep_trg_pct_from_plays, CASE WHEN SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(dot)::decimal / SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as air_yds_per_trg_from_plays, SUM(dot) as air_yds_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' group by COALESCE(trg_pid)), "tf2edbb4d60cbde2082301ca18895bcfc" as (select "pg"."pid", CASE WHEN SUM(nfl_plays.dot) > 0 THEN ROUND(100.0 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0), 2) ELSE 0 END as air_yds_share_from_plays from "nfl_plays" inner join "player_gamelogs" as "pg" on "nfl_plays"."esbid" = "pg"."esbid" and "nfl_plays"."off" = "pg"."tm" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and ("trg_pid" is not null) group by "pg"."pid") select "player"."pid", player.fname, player.lname, CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, "td98f174615a5189ee284dbdaa246b629"."recs_from_plays" AS "recs_from_plays_0", "td98f174615a5189ee284dbdaa246b629"."rec_yds_from_plays" AS "rec_yds_from_plays_0", "td98f174615a5189ee284dbdaa246b629"."rec_tds_from_plays" AS "rec_tds_from_plays_0", "td98f174615a5189ee284dbdaa246b629"."trg_from_plays" AS "trg_from_plays_0", "td98f174615a5189ee284dbdaa246b629"."deep_trg_from_plays" AS "deep_trg_from_plays_0", "td98f174615a5189ee284dbdaa246b629"."deep_trg_pct_from_plays" AS "deep_trg_pct_from_plays_0", "td98f174615a5189ee284dbdaa246b629"."air_yds_per_trg_from_plays" AS "air_yds_per_trg_from_plays_0", "td98f174615a5189ee284dbdaa246b629"."air_yds_from_plays" AS "air_yds_from_plays_0", "tf2edbb4d60cbde2082301ca18895bcfc"."air_yds_share_from_plays" AS "air_yds_share_from_plays_0", "player"."pos" from "player" left join "rosters_players" on "rosters_players"."pid" = "player"."pid" and "rosters_players"."year" = ${constants.season.year} and "rosters_players"."week" = ${constants.season.week} and "rosters_players"."lid" = 1 left join "td98f174615a5189ee284dbdaa246b629" on "td98f174615a5189ee284dbdaa246b629"."pid" = "player"."pid" left join "tf2edbb4d60cbde2082301ca18895bcfc" on "tf2edbb4d60cbde2082301ca18895bcfc"."pid" = "player"."pid" where player.pos IN ('WR') and CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END = 'active_roster' group by player.fname, player.lname, rosters_players.slot, rosters_players.tid, rosters_players.tag, "td98f174615a5189ee284dbdaa246b629"."recs_from_plays", "td98f174615a5189ee284dbdaa246b629"."rec_yds_from_plays", "td98f174615a5189ee284dbdaa246b629"."rec_tds_from_plays", "td98f174615a5189ee284dbdaa246b629"."trg_from_plays", "td98f174615a5189ee284dbdaa246b629"."deep_trg_from_plays", "td98f174615a5189ee284dbdaa246b629"."deep_trg_pct_from_plays", "td98f174615a5189ee284dbdaa246b629"."air_yds_per_trg_from_plays", "td98f174615a5189ee284dbdaa246b629"."air_yds_from_plays", "tf2edbb4d60cbde2082301ca18895bcfc"."air_yds_share_from_plays", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 12 DESC NULLS LAST, "player"."pid" asc limit 500`
+    const expected_query = `with "td98f174615a5189ee284dbdaa246b629" as (select COALESCE(trg_pid) as pid, SUM(CASE WHEN comp = true THEN 1 ELSE 0 END) as recs_from_plays, SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END) as rec_yds_from_plays, SUM(CASE WHEN comp = true AND td = true THEN 1 ELSE 0 END) as rec_tds_from_plays, SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) as trg_from_plays, SUM(CASE WHEN dot >= 20 THEN 1 ELSE 0 END) as deep_trg_from_plays, CASE WHEN SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN dot >= 20 THEN 1 ELSE 0 END) / SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 2) ELSE 0 END as deep_trg_pct_from_plays, CASE WHEN SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(SUM(dot)::decimal / SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 2) AS decimal) ELSE 0 END as air_yds_per_trg_from_plays, SUM(dot) as air_yds_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' group by COALESCE(trg_pid)), "tf2edbb4d60cbde2082301ca18895bcfc" as (select "pg"."pid", CASE WHEN SUM(nfl_plays.dot) > 0 THEN ROUND(100.0 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0), 2) ELSE 0 END as air_yds_share_from_plays from "nfl_plays" inner join "player_gamelogs" as "pg" on "nfl_plays"."esbid" = "pg"."esbid" and "nfl_plays"."off" = "pg"."tm" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and ("trg_pid" is not null) group by "pg"."pid") select "player"."pid", player.fname, player.lname, CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, "td98f174615a5189ee284dbdaa246b629"."recs_from_plays" AS "recs_from_plays_0", "td98f174615a5189ee284dbdaa246b629"."rec_yds_from_plays" AS "rec_yds_from_plays_0", "td98f174615a5189ee284dbdaa246b629"."rec_tds_from_plays" AS "rec_tds_from_plays_0", "td98f174615a5189ee284dbdaa246b629"."trg_from_plays" AS "trg_from_plays_0", "td98f174615a5189ee284dbdaa246b629"."deep_trg_from_plays" AS "deep_trg_from_plays_0", "td98f174615a5189ee284dbdaa246b629"."deep_trg_pct_from_plays" AS "deep_trg_pct_from_plays_0", "td98f174615a5189ee284dbdaa246b629"."air_yds_per_trg_from_plays" AS "air_yds_per_trg_from_plays_0", "td98f174615a5189ee284dbdaa246b629"."air_yds_from_plays" AS "air_yds_from_plays_0", "tf2edbb4d60cbde2082301ca18895bcfc"."air_yds_share_from_plays" AS "air_yds_share_from_plays_0", "player"."pos" from "player" left join "rosters_players" on "rosters_players"."pid" = "player"."pid" and "rosters_players"."year" = ${constants.season.year} and "rosters_players"."week" = ${Math.min(constants.season.week, constants.season.finalWeek)} and "rosters_players"."lid" = 1 left join "td98f174615a5189ee284dbdaa246b629" on "td98f174615a5189ee284dbdaa246b629"."pid" = "player"."pid" left join "tf2edbb4d60cbde2082301ca18895bcfc" on "tf2edbb4d60cbde2082301ca18895bcfc"."pid" = "player"."pid" where player.pos IN ('WR') and CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END = 'active_roster' group by player.fname, player.lname, rosters_players.slot, rosters_players.tid, rosters_players.tag, "td98f174615a5189ee284dbdaa246b629"."recs_from_plays", "td98f174615a5189ee284dbdaa246b629"."rec_yds_from_plays", "td98f174615a5189ee284dbdaa246b629"."rec_tds_from_plays", "td98f174615a5189ee284dbdaa246b629"."trg_from_plays", "td98f174615a5189ee284dbdaa246b629"."deep_trg_from_plays", "td98f174615a5189ee284dbdaa246b629"."deep_trg_pct_from_plays", "td98f174615a5189ee284dbdaa246b629"."air_yds_per_trg_from_plays", "td98f174615a5189ee284dbdaa246b629"."air_yds_from_plays", "tf2edbb4d60cbde2082301ca18895bcfc"."air_yds_share_from_plays", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 12 DESC NULLS LAST, "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
     expect(data_view_metadata.cache_ttl).to.equal(six_hours)
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should generate a query with a team stat column', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should generate a query with a team stat column', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       prefix_columns: ['player_name'],
       columns: [
         {
@@ -1063,8 +1065,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should create a keeptradecut query', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should create a keeptradecut query', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       prefix_columns: ['player_name'],
       columns: [
         {
@@ -1114,8 +1116,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should create a keeptradecut query with splits', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should create a keeptradecut query with splits', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       prefix_columns: ['player_name'],
       columns: [
         {
@@ -1139,8 +1141,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should create a rushing yards split by week', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should create a rushing yards split by week', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       splits: ['year', 'week'],
       prefix_columns: ['player_name'],
       columns: [
@@ -1164,14 +1166,14 @@ describe('LIBS SERVER get_data_view_results', () => {
         }
       ]
     })
-    const expected_query = `with "base_years" as (SELECT unnest(ARRAY[2020,2021,2022,2023]) as year), "player_years" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), "player_years_weeks" as (SELECT player_years.pid, nfl_year_week_timestamp.year, nfl_year_week_timestamp.week FROM player_years INNER JOIN nfl_year_week_timestamp ON player_years.year = nfl_year_week_timestamp.year), "tc0ee781f18fbe4c151e8557943c287a6" as (select COALESCE(bc_pid) as pid, "nfl_plays"."week", "nfl_plays"."year", SUM(rush_yds) as rush_yds_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2020, 2021, 2022, 2023) group by "nfl_plays"."week", "nfl_plays"."year", COALESCE(bc_pid)), "tfb6d1616d9c41cb60691248d604e4dbe" as (select "nfl_plays"."off" as "nfl_team", SUM(rush_yds) AS team_rush_yds_from_plays, "nfl_plays"."year", "nfl_plays"."week" from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2020, 2021, 2022, 2023) group by "nfl_plays"."off", "nfl_plays"."year", "nfl_plays"."week"), "tfb6d1616d9c41cb60691248d604e4dbe_team_stats" as (select "tfb6d1616d9c41cb60691248d604e4dbe"."nfl_team", sum(tfb6d1616d9c41cb60691248d604e4dbe.team_rush_yds_from_plays) as team_rush_yds_from_plays, "tfb6d1616d9c41cb60691248d604e4dbe"."year", "tfb6d1616d9c41cb60691248d604e4dbe"."week" from "tfb6d1616d9c41cb60691248d604e4dbe" group by "tfb6d1616d9c41cb60691248d604e4dbe"."nfl_team", "tfb6d1616d9c41cb60691248d604e4dbe"."year", "tfb6d1616d9c41cb60691248d604e4dbe"."week") select "player"."pid", player.fname, player.lname, "tc0ee781f18fbe4c151e8557943c287a6"."rush_yds_from_plays" AS "rush_yds_from_plays_0", "tf0b1e8f00d3f5ec618c9b50a239c6c22"."ry" AS "week_projected_rush_yds_0", "tfb6d1616d9c41cb60691248d604e4dbe_team_stats"."team_rush_yds_from_plays" AS "team_rush_yds_from_plays_0", "player_years"."year", "player_years_weeks"."week", "player"."pos" from "player_years_weeks" inner join "player" on "player"."pid" = "player_years_weeks"."pid" inner join "player_years" on "player_years"."pid" = "player"."pid" and "player_years"."year" = "player_years_weeks"."year" left join "tc0ee781f18fbe4c151e8557943c287a6" on "tc0ee781f18fbe4c151e8557943c287a6"."pid" = "player"."pid" and tc0ee781f18fbe4c151e8557943c287a6.year = player_years_weeks.year and tc0ee781f18fbe4c151e8557943c287a6.year IN (2020,2021,2022,2023) and tc0ee781f18fbe4c151e8557943c287a6.week = player_years_weeks.week left join "projections_index" as "tf0b1e8f00d3f5ec618c9b50a239c6c22" on "tf0b1e8f00d3f5ec618c9b50a239c6c22"."pid" = "player"."pid" and tf0b1e8f00d3f5ec618c9b50a239c6c22.year = player_years_weeks.year and tf0b1e8f00d3f5ec618c9b50a239c6c22.year IN (2020,2021,2022,2023) and tf0b1e8f00d3f5ec618c9b50a239c6c22.week = player_years_weeks.week and "tf0b1e8f00d3f5ec618c9b50a239c6c22"."sourceid" = 18 left join "tfb6d1616d9c41cb60691248d604e4dbe_team_stats" on "tfb6d1616d9c41cb60691248d604e4dbe_team_stats"."nfl_team" = "player"."current_nfl_team" and tfb6d1616d9c41cb60691248d604e4dbe_team_stats.year = player_years_weeks.year and tfb6d1616d9c41cb60691248d604e4dbe_team_stats.year IN (2020,2021,2022,2023) and tfb6d1616d9c41cb60691248d604e4dbe_team_stats.week = player_years_weeks.week group by player.fname, player.lname, "tc0ee781f18fbe4c151e8557943c287a6"."rush_yds_from_plays", "tf0b1e8f00d3f5ec618c9b50a239c6c22"."ry", "tfb6d1616d9c41cb60691248d604e4dbe_team_stats"."team_rush_yds_from_plays", "player_years"."year", "player_years_weeks"."week", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 4 DESC NULLS LAST, "player"."pid" asc limit 500`
+    const expected_query = `with "base_years" as (SELECT unnest(ARRAY[2020,2021,2022,2023]) as year), "player_years" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), "player_years_weeks" as (SELECT player_years.pid, nfl_year_week_timestamp.year, nfl_year_week_timestamp.week FROM player_years INNER JOIN nfl_year_week_timestamp ON player_years.year = nfl_year_week_timestamp.year), "tc0ee781f18fbe4c151e8557943c287a6" as (select COALESCE(bc_pid) as pid, "nfl_plays"."week", "nfl_plays"."year", SUM(rush_yds) as rush_yds_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2020, 2021, 2022, 2023) group by "nfl_plays"."week", "nfl_plays"."year", COALESCE(bc_pid)), "tfb6d1616d9c41cb60691248d604e4dbe" as (select "nfl_plays"."off" as "nfl_team", SUM(rush_yds) AS team_rush_yds_from_plays, "nfl_plays"."year", "nfl_plays"."week" from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2020, 2021, 2022, 2023) group by "nfl_plays"."off", "nfl_plays"."year", "nfl_plays"."week"), "tfb6d1616d9c41cb60691248d604e4dbe_team_stats" as (select "tfb6d1616d9c41cb60691248d604e4dbe"."nfl_team", sum(tfb6d1616d9c41cb60691248d604e4dbe.team_rush_yds_from_plays) as team_rush_yds_from_plays, "tfb6d1616d9c41cb60691248d604e4dbe"."year", "tfb6d1616d9c41cb60691248d604e4dbe"."week" from "tfb6d1616d9c41cb60691248d604e4dbe" group by "tfb6d1616d9c41cb60691248d604e4dbe"."nfl_team", "tfb6d1616d9c41cb60691248d604e4dbe"."year", "tfb6d1616d9c41cb60691248d604e4dbe"."week") select "player"."pid", player.fname, player.lname, "tc0ee781f18fbe4c151e8557943c287a6"."rush_yds_from_plays" AS "rush_yds_from_plays_0", "tf0b1e8f00d3f5ec618c9b50a239c6c22"."ry" AS "week_projected_rush_yds_0", "tfb6d1616d9c41cb60691248d604e4dbe_team_stats"."team_rush_yds_from_plays" AS "team_rush_yds_from_plays_0", "player_years"."year", "player_years_weeks"."week", "player"."pos" from "player_years_weeks" inner join "player" on "player"."pid" = "player_years_weeks"."pid" inner join "player_years" on "player_years"."pid" = "player"."pid" and "player_years"."year" = "player_years_weeks"."year" left join "tc0ee781f18fbe4c151e8557943c287a6" on "tc0ee781f18fbe4c151e8557943c287a6"."pid" = "player"."pid" and tc0ee781f18fbe4c151e8557943c287a6.year = player_years_weeks.year and tc0ee781f18fbe4c151e8557943c287a6.year IN (2020,2021,2022,2023) and tc0ee781f18fbe4c151e8557943c287a6.week = player_years_weeks.week left join "projections_index" as "tf0b1e8f00d3f5ec618c9b50a239c6c22" on "tf0b1e8f00d3f5ec618c9b50a239c6c22"."pid" = "player"."pid" and tf0b1e8f00d3f5ec618c9b50a239c6c22.year = player_years_weeks.year and tf0b1e8f00d3f5ec618c9b50a239c6c22.year IN (2020,2021,2022,2023) and tf0b1e8f00d3f5ec618c9b50a239c6c22.week = player_years_weeks.week and "tf0b1e8f00d3f5ec618c9b50a239c6c22"."sourceid" = 18 and "tf0b1e8f00d3f5ec618c9b50a239c6c22"."seas_type" = 'REG' left join "tfb6d1616d9c41cb60691248d604e4dbe_team_stats" on "tfb6d1616d9c41cb60691248d604e4dbe_team_stats"."nfl_team" = "player"."current_nfl_team" and tfb6d1616d9c41cb60691248d604e4dbe_team_stats.year = player_years_weeks.year and tfb6d1616d9c41cb60691248d604e4dbe_team_stats.year IN (2020,2021,2022,2023) and tfb6d1616d9c41cb60691248d604e4dbe_team_stats.week = player_years_weeks.week group by player.fname, player.lname, "tc0ee781f18fbe4c151e8557943c287a6"."rush_yds_from_plays", "tf0b1e8f00d3f5ec618c9b50a239c6c22"."ry", "tfb6d1616d9c41cb60691248d604e4dbe_team_stats"."team_rush_yds_from_plays", "player_years"."year", "player_years_weeks"."week", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 4 DESC NULLS LAST, "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
     expect(data_view_metadata.cache_ttl).to.equal(one_week)
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should create a query with player current age', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should create a query with player current age', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       prefix_columns: ['player_name'],
       columns: [
         'player_age',
@@ -1195,8 +1197,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should create a year splits query with player age at time of split', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should create a year splits query with player age at time of split', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       sort: [
         {
           column_id: 'player_receiving_yards_from_plays',
@@ -1222,8 +1224,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should create a query for player keeptradecut value and fantasy points from plays for wide receivers with year splits', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should create a query for player keeptradecut value and fantasy points from plays for wide receivers with year splits', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       columns: [
         'player_keeptradecut_value',
         'player_fantasy_points_from_plays'
@@ -1250,8 +1252,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('week and year split with keeptradecut and fantasypoints from plays with per_game rate_type — should sanitize', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('week and year split with keeptradecut and fantasypoints from plays with per_game rate_type — should sanitize', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       columns: [
         'player_keeptradecut_value',
         {
@@ -1283,8 +1285,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should create a query for fantasy points from plays with specific route, weeks, rate type, and player filters', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should create a query for fantasy points from plays with specific route, weeks, rate type, and player filters', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'player_fantasy_points_from_plays',
@@ -1321,8 +1323,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('year split query with player age and ktc value, tests the order in which year split tables are joined', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('year split query with player age and ktc value, tests the order in which year split tables are joined', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       columns: [
         'player_age',
         {
@@ -1363,8 +1365,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('year splits with sort by age', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('year splits with sort by age', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       columns: [
         'player_age',
         'player_ngs_draft_grade',
@@ -1398,8 +1400,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should query WR fantasy stats with year splits and sort by points per game, seasonlogs, careerlogs, plays, and keeptradecut', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should query WR fantasy stats with year splits and sort by points per game, seasonlogs, careerlogs, plays, and keeptradecut', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'player_fantasy_points_per_game_from_seasonlogs',
@@ -1444,8 +1446,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('test condition for scoring_format_hash param, multiple fantasy points from play', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('test condition for scoring_format_hash param, multiple fantasy points from play', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'player_fantasy_points_per_game_from_seasonlogs',
@@ -1512,8 +1514,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('year split with multiple rate type with statements', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('year split with multiple rate type with statements', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       columns: [
         'player_fantasy_points_per_game_from_seasonlogs',
         {
@@ -1556,8 +1558,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('keeptradecut and fantasy points from plays with year and week split', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('keeptradecut and fantasy points from plays with year and week split', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       columns: [
         'player_keeptradecut_value',
         {
@@ -1590,8 +1592,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('should adjust specified year params when year_offset is specified', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('should adjust specified year params when year_offset is specified', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'player_targets_from_plays',
@@ -1668,8 +1670,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('team pass attempts from plays using dst', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('team pass attempts from plays using dst', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       sort: [
         {
           column_id: 'team_pass_attempts_from_plays',
@@ -1693,14 +1695,14 @@ describe('LIBS SERVER get_data_view_results', () => {
         }
       ]
     })
-    const expected_query = `with "t36bf0474d4db796322b4fe1d9755f770" as (select "nfl_plays"."off" as "nfl_team", SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END) AS team_pass_att_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2023) group by "nfl_plays"."off"), "t36bf0474d4db796322b4fe1d9755f770_team_stats" as (select "t36bf0474d4db796322b4fe1d9755f770"."nfl_team", sum(t36bf0474d4db796322b4fe1d9755f770.team_pass_att_from_plays) as team_pass_att_from_plays from "t36bf0474d4db796322b4fe1d9755f770" group by "t36bf0474d4db796322b4fe1d9755f770"."nfl_team") select "player"."pid", player.fname, player.lname, CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, "t36bf0474d4db796322b4fe1d9755f770_team_stats"."team_pass_att_from_plays" AS "team_pass_att_from_plays_0", "player"."pos" from "player" left join "rosters_players" on "rosters_players"."pid" = "player"."pid" and "rosters_players"."year" = ${constants.season.year} and "rosters_players"."week" = ${constants.season.week} and "rosters_players"."lid" = 1 left join "t36bf0474d4db796322b4fe1d9755f770_team_stats" on "t36bf0474d4db796322b4fe1d9755f770_team_stats"."nfl_team" = "player"."current_nfl_team" where player.pos IN ('DST') group by player.fname, player.lname, rosters_players.slot, rosters_players.tid, rosters_players.tag, "t36bf0474d4db796322b4fe1d9755f770_team_stats"."team_pass_att_from_plays", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 8 DESC NULLS LAST, "player"."pid" asc limit 500`
+    const expected_query = `with "t36bf0474d4db796322b4fe1d9755f770" as (select "nfl_plays"."off" as "nfl_team", SUM(CASE WHEN psr_pid IS NOT NULL AND (sk IS NULL OR sk = false) THEN 1 ELSE 0 END) AS team_pass_att_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2023) group by "nfl_plays"."off"), "t36bf0474d4db796322b4fe1d9755f770_team_stats" as (select "t36bf0474d4db796322b4fe1d9755f770"."nfl_team", sum(t36bf0474d4db796322b4fe1d9755f770.team_pass_att_from_plays) as team_pass_att_from_plays from "t36bf0474d4db796322b4fe1d9755f770" group by "t36bf0474d4db796322b4fe1d9755f770"."nfl_team") select "player"."pid", player.fname, player.lname, CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, "t36bf0474d4db796322b4fe1d9755f770_team_stats"."team_pass_att_from_plays" AS "team_pass_att_from_plays_0", "player"."pos" from "player" left join "rosters_players" on "rosters_players"."pid" = "player"."pid" and "rosters_players"."year" = ${constants.season.year} and "rosters_players"."week" = ${Math.min(constants.season.week, constants.season.finalWeek)} and "rosters_players"."lid" = 1 left join "t36bf0474d4db796322b4fe1d9755f770_team_stats" on "t36bf0474d4db796322b4fe1d9755f770_team_stats"."nfl_team" = "player"."current_nfl_team" where player.pos IN ('DST') group by player.fname, player.lname, rosters_players.slot, rosters_players.tid, rosters_players.tag, "t36bf0474d4db796322b4fe1d9755f770_team_stats"."team_pass_att_from_plays", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 8 DESC NULLS LAST, "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
     expect(data_view_metadata.cache_ttl).to.equal(twelve_hours)
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('fantasy points query with career_year param and per_game rate type', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('fantasy points query with career_year param and per_game rate type', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       columns: [
         'player_starting_nfl_year',
         'player_draft_position',
@@ -1761,14 +1763,14 @@ describe('LIBS SERVER get_data_view_results', () => {
       prefix_columns: ['player_name', 'player_league_roster_status'],
       splits: []
     })
-    const expected_query = `with "t11480a4a21f5c9c4c3e08e798a963c66" as (select "player_gamelogs"."pid", count(*) as "rate_type_total_count", array_agg(distinct player_gamelogs.tm) as teams from "player_gamelogs" left join "nfl_games" on "nfl_games"."esbid" = "player_gamelogs"."esbid" left join "player_seasonlogs" on "player_seasonlogs"."pid" = "player_gamelogs"."pid" and "player_seasonlogs"."year" = "nfl_games"."year" and "player_seasonlogs"."seas_type" = "nfl_games"."seas_type" where "nfl_games"."seas_type" = 'REG' and "player_gamelogs"."active" = true and "player_seasonlogs"."career_year" between 1 and 3 group by "player_gamelogs"."pid"), "t4f52b9e49e88a8b1c74847efaec99a50" as (select fantasy_points_plays.pid, ROUND(SUM(CASE WHEN pid_type = 'trg' AND comp = true THEN 1 ELSE 0 END + CASE WHEN pid_type IN ('bc', 'trg') THEN COALESCE(rush_yds, 0) + COALESCE(recv_yds, 0) ELSE 0 END * 0.1 + CASE WHEN pid_type = 'psr' THEN COALESCE(pass_yds, 0) ELSE 0 END * 0.04 + CASE WHEN pid_type = 'bc' AND rush_td = true THEN 6 WHEN pid_type = 'trg' AND pass_td = true THEN 6 WHEN pid_type = 'psr' AND pass_td = true THEN 4 ELSE 0 END + CASE WHEN pid_type = 'psr' AND int = true THEN -1 ELSE 0 END + CASE WHEN pid_type = 'fuml' THEN -1 ELSE 0 END), 2) as fantasy_points_from_plays from (select bc_pid as pid, 'bc' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "bc_pid" is not null union all select psr_pid as pid, 'psr' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "psr_pid" is not null union all select trg_pid as pid, 'trg' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "trg_pid" is not null union all select player_fuml_pid as pid, 'fuml' as pid_type, NULL as rush_yds, NULL as recv_yds, NULL as rush_td, NULL as td, NULL as comp, NULL as int, NULL as pass_yds, NULL as pass_td, play_type, seas_type, year from "nfl_plays" where "player_fuml_pid" is not null) as "fantasy_points_plays" inner join "player_seasonlogs" on "fantasy_points_plays"."pid" = "player_seasonlogs"."pid" and "fantasy_points_plays"."year" = "player_seasonlogs"."year" and "fantasy_points_plays"."seas_type" = "player_seasonlogs"."seas_type" where not "play_type" = 'NOPL' and "fantasy_points_plays"."seas_type" = 'REG' and "player_seasonlogs"."career_year" between 1 and 3 group by "fantasy_points_plays"."pid") select "player"."pid", player.fname, player.lname, "player"."start" AS "start_0", "player"."dpos" AS "dpos_0", "player"."ngs_draft_grade" AS "ngs_draft_grade_0", "player"."ngs_production_score" AS "ngs_production_score_0", "player"."ngs_athleticism_score" AS "ngs_athleticism_score_0", "player"."ngs_size_score" AS "ngs_size_score_0", "player"."height" AS "height_0", CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, "t0984699909800a4c1372fbe19abf07af"."top_3" AS "top_3_from_careerlogs_0", "t0984699909800a4c1372fbe19abf07af"."top_12" AS "top_12_from_careerlogs_0", "t0984699909800a4c1372fbe19abf07af"."top_24" AS "top_24_from_careerlogs_0", "t0984699909800a4c1372fbe19abf07af"."top_3" AS "top_3_from_careerlogs_1", "t0984699909800a4c1372fbe19abf07af"."top_12" AS "top_12_from_careerlogs_1", "t0984699909800a4c1372fbe19abf07af"."top_24" AS "top_24_from_careerlogs_1", CAST(t4f52b9e49e88a8b1c74847efaec99a50.fantasy_points_from_plays AS DECIMAL) / NULLIF(CAST(t11480a4a21f5c9c4c3e08e798a963c66.rate_type_total_count AS DECIMAL), 0) AS "fantasy_points_from_plays_0", "player"."pos" from "player" left join "t11480a4a21f5c9c4c3e08e798a963c66" on "t11480a4a21f5c9c4c3e08e798a963c66"."pid" = "player"."pid" left join "rosters_players" on "rosters_players"."pid" = "player"."pid" and "rosters_players"."year" = ${constants.season.year} and "rosters_players"."week" = ${constants.season.week} and "rosters_players"."lid" = 1 left join "scoring_format_player_careerlogs" as "t0984699909800a4c1372fbe19abf07af" on "t0984699909800a4c1372fbe19abf07af"."pid" = "player"."pid" and t0984699909800a4c1372fbe19abf07af.scoring_format_hash = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d' left join "t4f52b9e49e88a8b1c74847efaec99a50" on "t4f52b9e49e88a8b1c74847efaec99a50"."pid" = "player"."pid" where player.start >= '2015' AND player.pos IN ('WR') AND player.height <= '71' group by player.fname, player.lname, "player"."start", "player"."dpos", "player"."ngs_draft_grade", "player"."ngs_production_score", "player"."ngs_athleticism_score", "player"."ngs_size_score", "player"."height", rosters_players.slot, rosters_players.tid, rosters_players.tag, "t0984699909800a4c1372fbe19abf07af"."top_3", "t0984699909800a4c1372fbe19abf07af"."top_12", "t0984699909800a4c1372fbe19abf07af"."top_24", "t0984699909800a4c1372fbe19abf07af"."top_3", "t0984699909800a4c1372fbe19abf07af"."top_12", "t0984699909800a4c1372fbe19abf07af"."top_24", "t4f52b9e49e88a8b1c74847efaec99a50"."fantasy_points_from_plays", t11480a4a21f5c9c4c3e08e798a963c66.rate_type_total_count, "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 17 DESC NULLS LAST, 16 DESC NULLS LAST, 15 DESC NULLS LAST, "player"."pid" asc limit 500`
+    const expected_query = `with "t11480a4a21f5c9c4c3e08e798a963c66" as (select "player_gamelogs"."pid", count(*) as "rate_type_total_count", array_agg(distinct player_gamelogs.tm) as teams from "player_gamelogs" left join "nfl_games" on "nfl_games"."esbid" = "player_gamelogs"."esbid" left join "player_seasonlogs" on "player_seasonlogs"."pid" = "player_gamelogs"."pid" and "player_seasonlogs"."year" = "nfl_games"."year" and "player_seasonlogs"."seas_type" = "nfl_games"."seas_type" where "nfl_games"."seas_type" = 'REG' and "player_gamelogs"."active" = true and "player_seasonlogs"."career_year" between 1 and 3 group by "player_gamelogs"."pid"), "t4f52b9e49e88a8b1c74847efaec99a50" as (select fantasy_points_plays.pid, ROUND(SUM(CASE WHEN pid_type = 'trg' AND comp = true THEN 1 ELSE 0 END + CASE WHEN pid_type IN ('bc', 'trg') THEN COALESCE(rush_yds, 0) + COALESCE(recv_yds, 0) ELSE 0 END * 0.1 + CASE WHEN pid_type = 'psr' THEN COALESCE(pass_yds, 0) ELSE 0 END * 0.04 + CASE WHEN pid_type = 'bc' AND rush_td = true THEN 6 WHEN pid_type = 'trg' AND pass_td = true THEN 6 WHEN pid_type = 'psr' AND pass_td = true THEN 4 ELSE 0 END + CASE WHEN pid_type = 'psr' AND int = true THEN -1 ELSE 0 END + CASE WHEN pid_type = 'fuml' THEN -1 ELSE 0 END), 2) as fantasy_points_from_plays from (select bc_pid as pid, 'bc' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "bc_pid" is not null union all select psr_pid as pid, 'psr' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "psr_pid" is not null union all select trg_pid as pid, 'trg' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "trg_pid" is not null union all select player_fuml_pid as pid, 'fuml' as pid_type, NULL as rush_yds, NULL as recv_yds, NULL as rush_td, NULL as td, NULL as comp, NULL as int, NULL as pass_yds, NULL as pass_td, play_type, seas_type, year from "nfl_plays" where "player_fuml_pid" is not null) as "fantasy_points_plays" inner join "player_seasonlogs" on "fantasy_points_plays"."pid" = "player_seasonlogs"."pid" and "fantasy_points_plays"."year" = "player_seasonlogs"."year" and "fantasy_points_plays"."seas_type" = "player_seasonlogs"."seas_type" where not "play_type" = 'NOPL' and "fantasy_points_plays"."seas_type" = 'REG' and "player_seasonlogs"."career_year" between 1 and 3 group by "fantasy_points_plays"."pid") select "player"."pid", player.fname, player.lname, "player"."start" AS "start_0", "player"."dpos" AS "dpos_0", "player"."ngs_draft_grade" AS "ngs_draft_grade_0", "player"."ngs_production_score" AS "ngs_production_score_0", "player"."ngs_athleticism_score" AS "ngs_athleticism_score_0", "player"."ngs_size_score" AS "ngs_size_score_0", "player"."height" AS "height_0", CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, "t0984699909800a4c1372fbe19abf07af"."top_3" AS "top_3_from_careerlogs_0", "t0984699909800a4c1372fbe19abf07af"."top_12" AS "top_12_from_careerlogs_0", "t0984699909800a4c1372fbe19abf07af"."top_24" AS "top_24_from_careerlogs_0", "t0984699909800a4c1372fbe19abf07af"."top_3" AS "top_3_from_careerlogs_1", "t0984699909800a4c1372fbe19abf07af"."top_12" AS "top_12_from_careerlogs_1", "t0984699909800a4c1372fbe19abf07af"."top_24" AS "top_24_from_careerlogs_1", CAST(t4f52b9e49e88a8b1c74847efaec99a50.fantasy_points_from_plays AS DECIMAL) / NULLIF(CAST(t11480a4a21f5c9c4c3e08e798a963c66.rate_type_total_count AS DECIMAL), 0) AS "fantasy_points_from_plays_0", "player"."pos" from "player" left join "t11480a4a21f5c9c4c3e08e798a963c66" on "t11480a4a21f5c9c4c3e08e798a963c66"."pid" = "player"."pid" left join "rosters_players" on "rosters_players"."pid" = "player"."pid" and "rosters_players"."year" = ${constants.season.year} and "rosters_players"."week" = ${Math.min(constants.season.week, constants.season.finalWeek)} and "rosters_players"."lid" = 1 left join "scoring_format_player_careerlogs" as "t0984699909800a4c1372fbe19abf07af" on "t0984699909800a4c1372fbe19abf07af"."pid" = "player"."pid" and t0984699909800a4c1372fbe19abf07af.scoring_format_hash = '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d' left join "t4f52b9e49e88a8b1c74847efaec99a50" on "t4f52b9e49e88a8b1c74847efaec99a50"."pid" = "player"."pid" where player.start >= '2015' AND player.pos IN ('WR') AND player.height <= '71' group by player.fname, player.lname, "player"."start", "player"."dpos", "player"."ngs_draft_grade", "player"."ngs_production_score", "player"."ngs_athleticism_score", "player"."ngs_size_score", "player"."height", rosters_players.slot, rosters_players.tid, rosters_players.tag, "t0984699909800a4c1372fbe19abf07af"."top_3", "t0984699909800a4c1372fbe19abf07af"."top_12", "t0984699909800a4c1372fbe19abf07af"."top_24", "t0984699909800a4c1372fbe19abf07af"."top_3", "t0984699909800a4c1372fbe19abf07af"."top_12", "t0984699909800a4c1372fbe19abf07af"."top_24", "t4f52b9e49e88a8b1c74847efaec99a50"."fantasy_points_from_plays", t11480a4a21f5c9c4c3e08e798a963c66.rate_type_total_count, "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 17 DESC NULLS LAST, 16 DESC NULLS LAST, 15 DESC NULLS LAST, "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
     expect(data_view_metadata.cache_ttl).to.equal(six_hours)
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('year_offset range with where filters', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('year_offset range with where filters', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       sort: [
         {
           column_id: 'player_fantasy_points_from_plays',
@@ -1837,8 +1839,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('player_rush_yards_after_contact_per_attempt_from_plays year_offset range', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('player_rush_yards_after_contact_per_attempt_from_plays year_offset range', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       prefix_columns: ['player_name'],
       columns: [
         {
@@ -1877,8 +1879,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('year_offset range with rate_type and where filter', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('year_offset range with rate_type and where filter', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       sort: [
         {
           column_id: 'player_fantasy_points_from_plays',
@@ -1941,8 +1943,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('single year_offset with rate_type', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('single year_offset with rate_type', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'player_keeptradecut_value',
@@ -1998,14 +2000,14 @@ describe('LIBS SERVER get_data_view_results', () => {
       prefix_columns: ['player_name', 'player_league_roster_status'],
       splits: ['year']
     })
-    const expected_query = `with "base_years" as (SELECT unnest(ARRAY[2020,2021,2022,2023,2024]) as year), "player_years" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), "t1dbf22c1937bec7c71654579572c42ca" as (select "player_gamelogs"."pid", count(*) as "rate_type_total_count", array_agg(distinct player_gamelogs.tm) as teams, "nfl_games"."year" from "player_gamelogs" left join "nfl_games" on "nfl_games"."esbid" = "player_gamelogs"."esbid" where "nfl_games"."seas_type" = 'REG' and "player_gamelogs"."active" = true and "nfl_games"."year" in (2020, 2021, 2022, 2023) group by "nfl_games"."year", "player_gamelogs"."pid"), "t73744802b0ac3caa4590c0b0bf651d15" as (select "player_gamelogs"."pid", count(*) as "rate_type_total_count", array_agg(distinct player_gamelogs.tm) as teams, "nfl_games"."year" from "player_gamelogs" left join "nfl_games" on "nfl_games"."esbid" = "player_gamelogs"."esbid" where "nfl_games"."seas_type" = 'REG' and "player_gamelogs"."active" = true and "nfl_games"."year" in (2020, 2021, 2022, 2023, 2024) group by "nfl_games"."year", "player_gamelogs"."pid"), "teb1a3a3f8fba95b1c24f7de5791bf1c8" as (select COALESCE(bc_pid, trg_pid) as pid, "nfl_plays"."year", ROUND(SUM(CASE WHEN nfl_plays.ydl_100 <= 20 AND bc_pid IS NOT NULL THEN 1.30 WHEN nfl_plays.ydl_100 <= 20 AND trg_pid IS NOT NULL THEN 2.25 WHEN nfl_plays.ydl_100 > 20 AND bc_pid IS NOT NULL THEN 0.48 WHEN nfl_plays.ydl_100 > 20 AND trg_pid IS NOT NULL THEN 1.43 ELSE 0 END), 2) as weighted_opportunity_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2020, 2021, 2022, 2023) group by "nfl_plays"."year", COALESCE(bc_pid, trg_pid)), "t35e2b83a964bf6fb14c995f79eb0c911" as (select fantasy_points_plays.pid, ROUND(SUM(CASE WHEN pid_type = 'trg' AND comp = true THEN 1 ELSE 0 END + CASE WHEN pid_type IN ('bc', 'trg') THEN COALESCE(rush_yds, 0) + COALESCE(recv_yds, 0) ELSE 0 END * 0.1 + CASE WHEN pid_type = 'psr' THEN COALESCE(pass_yds, 0) ELSE 0 END * 0.04 + CASE WHEN pid_type = 'bc' AND rush_td = true THEN 6 WHEN pid_type = 'trg' AND pass_td = true THEN 6 WHEN pid_type = 'psr' AND pass_td = true THEN 4 ELSE 0 END + CASE WHEN pid_type = 'psr' AND int = true THEN -1 ELSE 0 END + CASE WHEN pid_type = 'fuml' THEN -1 ELSE 0 END), 2) as fantasy_points_from_plays, "fantasy_points_plays"."year" from (select bc_pid as pid, 'bc' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "bc_pid" is not null union all select psr_pid as pid, 'psr' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "psr_pid" is not null union all select trg_pid as pid, 'trg' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "trg_pid" is not null union all select player_fuml_pid as pid, 'fuml' as pid_type, NULL as rush_yds, NULL as recv_yds, NULL as rush_td, NULL as td, NULL as comp, NULL as int, NULL as pass_yds, NULL as pass_td, play_type, seas_type, year from "nfl_plays" where "player_fuml_pid" is not null) as "fantasy_points_plays" where not "play_type" = 'NOPL' and "fantasy_points_plays"."seas_type" = 'REG' and "fantasy_points_plays"."year" in (2020, 2021, 2022, 2023) group by "fantasy_points_plays"."year", "fantasy_points_plays"."pid"), "t0c7bc1a8d2cb95b34c757cbb4f98810e" as (select COALESCE(bc_pid, trg_pid) as pid, "nfl_plays"."year", ROUND(SUM(CASE WHEN nfl_plays.ydl_100 <= 20 AND bc_pid IS NOT NULL THEN 1.30 WHEN nfl_plays.ydl_100 <= 20 AND trg_pid IS NOT NULL THEN 2.25 WHEN nfl_plays.ydl_100 > 20 AND bc_pid IS NOT NULL THEN 0.48 WHEN nfl_plays.ydl_100 > 20 AND trg_pid IS NOT NULL THEN 1.43 ELSE 0 END), 2) as weighted_opportunity_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2020, 2021, 2022, 2023, 2024) group by "nfl_plays"."year", COALESCE(bc_pid, trg_pid)), "tdc2df159a562cbbc806616f329a24ef6" as (select fantasy_points_plays.pid, ROUND(SUM(CASE WHEN pid_type = 'trg' AND comp = true THEN 1 ELSE 0 END + CASE WHEN pid_type IN ('bc', 'trg') THEN COALESCE(rush_yds, 0) + COALESCE(recv_yds, 0) ELSE 0 END * 0.1 + CASE WHEN pid_type = 'psr' THEN COALESCE(pass_yds, 0) ELSE 0 END * 0.04 + CASE WHEN pid_type = 'bc' AND rush_td = true THEN 6 WHEN pid_type = 'trg' AND pass_td = true THEN 6 WHEN pid_type = 'psr' AND pass_td = true THEN 4 ELSE 0 END + CASE WHEN pid_type = 'psr' AND int = true THEN -1 ELSE 0 END + CASE WHEN pid_type = 'fuml' THEN -1 ELSE 0 END), 2) as fantasy_points_from_plays, "fantasy_points_plays"."year" from (select bc_pid as pid, 'bc' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "bc_pid" is not null union all select psr_pid as pid, 'psr' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "psr_pid" is not null union all select trg_pid as pid, 'trg' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "trg_pid" is not null union all select player_fuml_pid as pid, 'fuml' as pid_type, NULL as rush_yds, NULL as recv_yds, NULL as rush_td, NULL as td, NULL as comp, NULL as int, NULL as pass_yds, NULL as pass_td, play_type, seas_type, year from "nfl_plays" where "player_fuml_pid" is not null) as "fantasy_points_plays" where not "play_type" = 'NOPL' and "fantasy_points_plays"."seas_type" = 'REG' and "fantasy_points_plays"."year" in (2020, 2021, 2022, 2023, 2024) group by "fantasy_points_plays"."year", "fantasy_points_plays"."pid") select "player"."pid", player.fname, player.lname, CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, "te70f12f316e28f29e682d081b42501b8"."v" AS "player_keeptradecut_value_0", CAST(teb1a3a3f8fba95b1c24f7de5791bf1c8.weighted_opportunity_from_plays AS DECIMAL) / NULLIF(CAST(t1dbf22c1937bec7c71654579572c42ca.rate_type_total_count AS DECIMAL), 0) AS "weighted_opportunity_from_plays_0", CAST(t35e2b83a964bf6fb14c995f79eb0c911.fantasy_points_from_plays AS DECIMAL) / NULLIF(CAST(t1dbf22c1937bec7c71654579572c42ca.rate_type_total_count AS DECIMAL), 0) AS "fantasy_points_from_plays_0", CAST(t0c7bc1a8d2cb95b34c757cbb4f98810e.weighted_opportunity_from_plays AS DECIMAL) / NULLIF(CAST(t73744802b0ac3caa4590c0b0bf651d15.rate_type_total_count AS DECIMAL), 0) AS "weighted_opportunity_from_plays_1", CAST(tdc2df159a562cbbc806616f329a24ef6.fantasy_points_from_plays AS DECIMAL) / NULLIF(CAST(t73744802b0ac3caa4590c0b0bf651d15.rate_type_total_count AS DECIMAL), 0) AS "fantasy_points_from_plays_1", "player_years"."year", "player"."pos" from "player_years" inner join "player" on "player"."pid" = "player_years"."pid" left join "t1dbf22c1937bec7c71654579572c42ca" on "t1dbf22c1937bec7c71654579572c42ca"."pid" = "player"."pid" and "t1dbf22c1937bec7c71654579572c42ca"."year" = "player_years"."year" left join "t73744802b0ac3caa4590c0b0bf651d15" on "t73744802b0ac3caa4590c0b0bf651d15"."pid" = "player"."pid" and t73744802b0ac3caa4590c0b0bf651d15.year = player_years.year + 1 left join "rosters_players" on "rosters_players"."pid" = "player"."pid" and "rosters_players"."year" = 2024 and "rosters_players"."week" = ${constants.season.week} and "rosters_players"."lid" = 1 left join "opening_days" on "opening_days"."year" = "player_years"."year" left join "keeptradecut_rankings" as "te70f12f316e28f29e682d081b42501b8" on "te70f12f316e28f29e682d081b42501b8"."pid" = "player"."pid" and "te70f12f316e28f29e682d081b42501b8"."qb" = 2 and "te70f12f316e28f29e682d081b42501b8"."type" = 1 and "te70f12f316e28f29e682d081b42501b8"."d" = EXTRACT(EPOCH FROM (date_trunc('day', opening_days.opening_day) + interval '0 year'))::integer and opening_days.year = (player_years.year) left join "teb1a3a3f8fba95b1c24f7de5791bf1c8" on "teb1a3a3f8fba95b1c24f7de5791bf1c8"."pid" = "player"."pid" and teb1a3a3f8fba95b1c24f7de5791bf1c8.year = player_years.year and teb1a3a3f8fba95b1c24f7de5791bf1c8.year IN (2020,2021,2022,2023) left join "t35e2b83a964bf6fb14c995f79eb0c911" on "t35e2b83a964bf6fb14c995f79eb0c911"."pid" = "player"."pid" and t35e2b83a964bf6fb14c995f79eb0c911.year = player_years.year and t35e2b83a964bf6fb14c995f79eb0c911.year IN (2020,2021,2022,2023) left join "t0c7bc1a8d2cb95b34c757cbb4f98810e" on "t0c7bc1a8d2cb95b34c757cbb4f98810e"."pid" = "player"."pid" and t0c7bc1a8d2cb95b34c757cbb4f98810e.year = player_years.year + 1 left join "tdc2df159a562cbbc806616f329a24ef6" on "tdc2df159a562cbbc806616f329a24ef6"."pid" = "player"."pid" and tdc2df159a562cbbc806616f329a24ef6.year = player_years.year + 1 where player.pos IN ('RB') group by player.fname, player.lname, rosters_players.slot, rosters_players.tid, rosters_players.tag, "te70f12f316e28f29e682d081b42501b8"."v", "teb1a3a3f8fba95b1c24f7de5791bf1c8"."weighted_opportunity_from_plays", t1dbf22c1937bec7c71654579572c42ca.rate_type_total_count, "t35e2b83a964bf6fb14c995f79eb0c911"."fantasy_points_from_plays", t1dbf22c1937bec7c71654579572c42ca.rate_type_total_count, "t0c7bc1a8d2cb95b34c757cbb4f98810e"."weighted_opportunity_from_plays", t73744802b0ac3caa4590c0b0bf651d15.rate_type_total_count, "tdc2df159a562cbbc806616f329a24ef6"."fantasy_points_from_plays", t73744802b0ac3caa4590c0b0bf651d15.rate_type_total_count, "player_years"."year", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 12 DESC NULLS LAST, "player"."pid" asc limit 500`
+    const expected_query = `with "base_years" as (SELECT unnest(ARRAY[2020,2021,2022,2023,2024]) as year), "player_years" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), "t1dbf22c1937bec7c71654579572c42ca" as (select "player_gamelogs"."pid", count(*) as "rate_type_total_count", array_agg(distinct player_gamelogs.tm) as teams, "nfl_games"."year" from "player_gamelogs" left join "nfl_games" on "nfl_games"."esbid" = "player_gamelogs"."esbid" where "nfl_games"."seas_type" = 'REG' and "player_gamelogs"."active" = true and "nfl_games"."year" in (2020, 2021, 2022, 2023) group by "nfl_games"."year", "player_gamelogs"."pid"), "t73744802b0ac3caa4590c0b0bf651d15" as (select "player_gamelogs"."pid", count(*) as "rate_type_total_count", array_agg(distinct player_gamelogs.tm) as teams, "nfl_games"."year" from "player_gamelogs" left join "nfl_games" on "nfl_games"."esbid" = "player_gamelogs"."esbid" where "nfl_games"."seas_type" = 'REG' and "player_gamelogs"."active" = true and "nfl_games"."year" in (2020, 2021, 2022, 2023, 2024) group by "nfl_games"."year", "player_gamelogs"."pid"), "teb1a3a3f8fba95b1c24f7de5791bf1c8" as (select COALESCE(bc_pid, trg_pid) as pid, "nfl_plays"."year", ROUND(SUM(CASE WHEN nfl_plays.ydl_100 <= 20 AND bc_pid IS NOT NULL THEN 1.30 WHEN nfl_plays.ydl_100 <= 20 AND trg_pid IS NOT NULL THEN 2.25 WHEN nfl_plays.ydl_100 > 20 AND bc_pid IS NOT NULL THEN 0.48 WHEN nfl_plays.ydl_100 > 20 AND trg_pid IS NOT NULL THEN 1.43 ELSE 0 END), 2) as weighted_opportunity_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2020, 2021, 2022, 2023) group by "nfl_plays"."year", COALESCE(bc_pid, trg_pid)), "t35e2b83a964bf6fb14c995f79eb0c911" as (select fantasy_points_plays.pid, ROUND(SUM(CASE WHEN pid_type = 'trg' AND comp = true THEN 1 ELSE 0 END + CASE WHEN pid_type IN ('bc', 'trg') THEN COALESCE(rush_yds, 0) + COALESCE(recv_yds, 0) ELSE 0 END * 0.1 + CASE WHEN pid_type = 'psr' THEN COALESCE(pass_yds, 0) ELSE 0 END * 0.04 + CASE WHEN pid_type = 'bc' AND rush_td = true THEN 6 WHEN pid_type = 'trg' AND pass_td = true THEN 6 WHEN pid_type = 'psr' AND pass_td = true THEN 4 ELSE 0 END + CASE WHEN pid_type = 'psr' AND int = true THEN -1 ELSE 0 END + CASE WHEN pid_type = 'fuml' THEN -1 ELSE 0 END), 2) as fantasy_points_from_plays, "fantasy_points_plays"."year" from (select bc_pid as pid, 'bc' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "bc_pid" is not null union all select psr_pid as pid, 'psr' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "psr_pid" is not null union all select trg_pid as pid, 'trg' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "trg_pid" is not null union all select player_fuml_pid as pid, 'fuml' as pid_type, NULL as rush_yds, NULL as recv_yds, NULL as rush_td, NULL as td, NULL as comp, NULL as int, NULL as pass_yds, NULL as pass_td, play_type, seas_type, year from "nfl_plays" where "player_fuml_pid" is not null) as "fantasy_points_plays" where not "play_type" = 'NOPL' and "fantasy_points_plays"."seas_type" = 'REG' and "fantasy_points_plays"."year" in (2020, 2021, 2022, 2023) group by "fantasy_points_plays"."year", "fantasy_points_plays"."pid"), "t0c7bc1a8d2cb95b34c757cbb4f98810e" as (select COALESCE(bc_pid, trg_pid) as pid, "nfl_plays"."year", ROUND(SUM(CASE WHEN nfl_plays.ydl_100 <= 20 AND bc_pid IS NOT NULL THEN 1.30 WHEN nfl_plays.ydl_100 <= 20 AND trg_pid IS NOT NULL THEN 2.25 WHEN nfl_plays.ydl_100 > 20 AND bc_pid IS NOT NULL THEN 0.48 WHEN nfl_plays.ydl_100 > 20 AND trg_pid IS NOT NULL THEN 1.43 ELSE 0 END), 2) as weighted_opportunity_from_plays from "nfl_plays" where not "play_type" = 'NOPL' and "nfl_plays"."seas_type" = 'REG' and "nfl_plays"."year" in (2020, 2021, 2022, 2023, 2024) group by "nfl_plays"."year", COALESCE(bc_pid, trg_pid)), "tdc2df159a562cbbc806616f329a24ef6" as (select fantasy_points_plays.pid, ROUND(SUM(CASE WHEN pid_type = 'trg' AND comp = true THEN 1 ELSE 0 END + CASE WHEN pid_type IN ('bc', 'trg') THEN COALESCE(rush_yds, 0) + COALESCE(recv_yds, 0) ELSE 0 END * 0.1 + CASE WHEN pid_type = 'psr' THEN COALESCE(pass_yds, 0) ELSE 0 END * 0.04 + CASE WHEN pid_type = 'bc' AND rush_td = true THEN 6 WHEN pid_type = 'trg' AND pass_td = true THEN 6 WHEN pid_type = 'psr' AND pass_td = true THEN 4 ELSE 0 END + CASE WHEN pid_type = 'psr' AND int = true THEN -1 ELSE 0 END + CASE WHEN pid_type = 'fuml' THEN -1 ELSE 0 END), 2) as fantasy_points_from_plays, "fantasy_points_plays"."year" from (select bc_pid as pid, 'bc' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "bc_pid" is not null union all select psr_pid as pid, 'psr' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "psr_pid" is not null union all select trg_pid as pid, 'trg' as pid_type, rush_yds, recv_yds, rush_td, td, comp, int, pass_yds, pass_td, play_type, seas_type, year from "nfl_plays" where "trg_pid" is not null union all select player_fuml_pid as pid, 'fuml' as pid_type, NULL as rush_yds, NULL as recv_yds, NULL as rush_td, NULL as td, NULL as comp, NULL as int, NULL as pass_yds, NULL as pass_td, play_type, seas_type, year from "nfl_plays" where "player_fuml_pid" is not null) as "fantasy_points_plays" where not "play_type" = 'NOPL' and "fantasy_points_plays"."seas_type" = 'REG' and "fantasy_points_plays"."year" in (2020, 2021, 2022, 2023, 2024) group by "fantasy_points_plays"."year", "fantasy_points_plays"."pid") select "player"."pid", player.fname, player.lname, CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, "te70f12f316e28f29e682d081b42501b8"."v" AS "player_keeptradecut_value_0", CAST(teb1a3a3f8fba95b1c24f7de5791bf1c8.weighted_opportunity_from_plays AS DECIMAL) / NULLIF(CAST(t1dbf22c1937bec7c71654579572c42ca.rate_type_total_count AS DECIMAL), 0) AS "weighted_opportunity_from_plays_0", CAST(t35e2b83a964bf6fb14c995f79eb0c911.fantasy_points_from_plays AS DECIMAL) / NULLIF(CAST(t1dbf22c1937bec7c71654579572c42ca.rate_type_total_count AS DECIMAL), 0) AS "fantasy_points_from_plays_0", CAST(t0c7bc1a8d2cb95b34c757cbb4f98810e.weighted_opportunity_from_plays AS DECIMAL) / NULLIF(CAST(t73744802b0ac3caa4590c0b0bf651d15.rate_type_total_count AS DECIMAL), 0) AS "weighted_opportunity_from_plays_1", CAST(tdc2df159a562cbbc806616f329a24ef6.fantasy_points_from_plays AS DECIMAL) / NULLIF(CAST(t73744802b0ac3caa4590c0b0bf651d15.rate_type_total_count AS DECIMAL), 0) AS "fantasy_points_from_plays_1", "player_years"."year", "player"."pos" from "player_years" inner join "player" on "player"."pid" = "player_years"."pid" left join "t1dbf22c1937bec7c71654579572c42ca" on "t1dbf22c1937bec7c71654579572c42ca"."pid" = "player"."pid" and "t1dbf22c1937bec7c71654579572c42ca"."year" = "player_years"."year" left join "t73744802b0ac3caa4590c0b0bf651d15" on "t73744802b0ac3caa4590c0b0bf651d15"."pid" = "player"."pid" and t73744802b0ac3caa4590c0b0bf651d15.year = player_years.year + 1 left join "rosters_players" on "rosters_players"."pid" = "player"."pid" and "rosters_players"."year" = 2024 and "rosters_players"."week" = ${Math.min(constants.season.week, constants.season.finalWeek)} and "rosters_players"."lid" = 1 left join "opening_days" on "opening_days"."year" = "player_years"."year" left join "keeptradecut_rankings" as "te70f12f316e28f29e682d081b42501b8" on "te70f12f316e28f29e682d081b42501b8"."pid" = "player"."pid" and "te70f12f316e28f29e682d081b42501b8"."qb" = 2 and "te70f12f316e28f29e682d081b42501b8"."type" = 1 and "te70f12f316e28f29e682d081b42501b8"."d" = EXTRACT(EPOCH FROM (date_trunc('day', opening_days.opening_day) + interval '0 year'))::integer and opening_days.year = (player_years.year) left join "teb1a3a3f8fba95b1c24f7de5791bf1c8" on "teb1a3a3f8fba95b1c24f7de5791bf1c8"."pid" = "player"."pid" and teb1a3a3f8fba95b1c24f7de5791bf1c8.year = player_years.year and teb1a3a3f8fba95b1c24f7de5791bf1c8.year IN (2020,2021,2022,2023) left join "t35e2b83a964bf6fb14c995f79eb0c911" on "t35e2b83a964bf6fb14c995f79eb0c911"."pid" = "player"."pid" and t35e2b83a964bf6fb14c995f79eb0c911.year = player_years.year and t35e2b83a964bf6fb14c995f79eb0c911.year IN (2020,2021,2022,2023) left join "t0c7bc1a8d2cb95b34c757cbb4f98810e" on "t0c7bc1a8d2cb95b34c757cbb4f98810e"."pid" = "player"."pid" and t0c7bc1a8d2cb95b34c757cbb4f98810e.year = player_years.year + 1 left join "tdc2df159a562cbbc806616f329a24ef6" on "tdc2df159a562cbbc806616f329a24ef6"."pid" = "player"."pid" and tdc2df159a562cbbc806616f329a24ef6.year = player_years.year + 1 where player.pos IN ('RB') group by player.fname, player.lname, rosters_players.slot, rosters_players.tid, rosters_players.tag, "te70f12f316e28f29e682d081b42501b8"."v", "teb1a3a3f8fba95b1c24f7de5791bf1c8"."weighted_opportunity_from_plays", t1dbf22c1937bec7c71654579572c42ca.rate_type_total_count, "t35e2b83a964bf6fb14c995f79eb0c911"."fantasy_points_from_plays", t1dbf22c1937bec7c71654579572c42ca.rate_type_total_count, "t0c7bc1a8d2cb95b34c757cbb4f98810e"."weighted_opportunity_from_plays", t73744802b0ac3caa4590c0b0bf651d15.rate_type_total_count, "tdc2df159a562cbbc806616f329a24ef6"."fantasy_points_from_plays", t73744802b0ac3caa4590c0b0bf651d15.rate_type_total_count, "player_years"."year", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 12 DESC NULLS LAST, "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
     expect(data_view_metadata.cache_ttl).to.equal(twelve_hours)
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('year splits with a column set to a specific year', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('year splits with a column set to a specific year', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       view_id: '3db1cf6f-3f14-44a1-9a80-60ca32ed32d7',
       columns: [
         {
@@ -2052,8 +2054,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('dynamic year param', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('dynamic year param', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       sort: [
         {
           column_id: 'player_receiving_yards_from_plays',
@@ -2084,8 +2086,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('games played', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('games played', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'player_games_played',
@@ -2107,8 +2109,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('games played with multiple rate types', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('games played with multiple rate types', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'player_games_played',
@@ -2145,8 +2147,8 @@ describe('LIBS SERVER get_data_view_results', () => {
     expect(data_view_metadata.cache_expire_at).to.equal(null)
   })
 
-  it('team success rate from plays', () => {
-    const { query, data_view_metadata } = get_data_view_results_query({
+  it('team success rate from plays', async () => {
+    const { query, data_view_metadata } = await get_data_view_results_query({
       columns: [
         {
           column_id: 'team_success_rate_from_plays',
@@ -2179,9 +2181,9 @@ describe('LIBS SERVER get_data_view_results', () => {
   })
 
   describe('errors', () => {
-    it('should throw an error if where value is missing', () => {
+    it('should throw an error if where value is missing', async () => {
       try {
-        get_data_view_results_query({
+        await get_data_view_results_query({
           prefix_columns: ['player_name'],
           columns: [
             {
