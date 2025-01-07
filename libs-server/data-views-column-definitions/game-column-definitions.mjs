@@ -14,7 +14,9 @@ const get_params = ({ params = {} }) => {
     week = [week]
   }
 
-  const seas_type = params.seas_type || constants.season.nfl_seas_type
+  const seas_type = Array.isArray(params.seas_type)
+    ? params.seas_type[0]
+    : params.seas_type || constants.season.nfl_seas_type
 
   return {
     year,
