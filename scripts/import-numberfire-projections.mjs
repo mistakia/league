@@ -77,6 +77,7 @@ const run = async () => {
       pid: player_row.pid,
       year,
       week,
+      seas_type: 'REG',
       sourceid: constants.sources.NUMBERFIRE,
       ...data
     })
@@ -96,7 +97,12 @@ const run = async () => {
   if (inserts.length) {
     // remove any existing projections in index not included in this set
     await db('projections_index')
-      .where({ year, week, sourceid: constants.sources.NUMBERFIRE })
+      .where({
+        year,
+        week,
+        sourceid: constants.sources.NUMBERFIRE,
+        seas_type: 'REG'
+      })
       .whereNotIn(
         'pid',
         inserts.map((i) => i.pid)
@@ -106,7 +112,7 @@ const run = async () => {
     log(`Inserting ${inserts.length} projections into database`)
     await db('projections_index')
       .insert(inserts)
-      .onConflict(['sourceid', 'pid', 'userid', 'week', 'year'])
+      .onConflict(['sourceid', 'pid', 'userid', 'week', 'year', 'seas_type'])
       .merge()
     await db('projections').insert(inserts.map((i) => ({ ...i, timestamp })))
   }

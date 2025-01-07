@@ -20,17 +20,17 @@ SET search_path = public;
 ALTER TABLE IF EXISTS ONLY public.invite_codes DROP CONSTRAINT IF EXISTS invite_codes_created_by_fkey;
 DROP TRIGGER IF EXISTS update_config_modtime ON public.config;
 DROP TRIGGER IF EXISTS player_name_search_vector_update ON public.player;
-DROP INDEX IF EXISTS public.projections_index_y2024_sourceid_pid_userid_week_year_idx;
+DROP INDEX IF EXISTS public.projections_index_y2024_sourceid_pid_userid_week_year_seas_type;
 DROP INDEX IF EXISTS public.projections_index_y2024_pid_idx;
-DROP INDEX IF EXISTS public.projections_index_y2023_sourceid_pid_userid_week_year_idx;
+DROP INDEX IF EXISTS public.projections_index_y2023_sourceid_pid_userid_week_year_seas_type;
 DROP INDEX IF EXISTS public.projections_index_y2023_pid_idx;
-DROP INDEX IF EXISTS public.projections_index_y2022_sourceid_pid_userid_week_year_idx;
+DROP INDEX IF EXISTS public.projections_index_y2022_sourceid_pid_userid_week_year_seas_type;
 DROP INDEX IF EXISTS public.projections_index_y2022_pid_idx;
-DROP INDEX IF EXISTS public.projections_index_y2021_sourceid_pid_userid_week_year_idx;
+DROP INDEX IF EXISTS public.projections_index_y2021_sourceid_pid_userid_week_year_seas_type;
 DROP INDEX IF EXISTS public.projections_index_y2021_pid_idx;
-DROP INDEX IF EXISTS public.projections_index_y2020_sourceid_pid_userid_week_year_idx;
+DROP INDEX IF EXISTS public.projections_index_y2020_sourceid_pid_userid_week_year_seas_type;
 DROP INDEX IF EXISTS public.projections_index_y2020_pid_idx;
-DROP INDEX IF EXISTS public.projections_index_default_sourceid_pid_userid_week_year_idx;
+DROP INDEX IF EXISTS public.projections_index_default_sourceid_pid_userid_week_year_seas_ty;
 DROP INDEX IF EXISTS public.projections_index_default_pid_idx;
 DROP INDEX IF EXISTS public.player_name_search_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2024_year_esbid_pid_idx;
@@ -1192,7 +1192,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2000_assisted_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public."nfl_plays_current_week_playId";
 DROP INDEX IF EXISTS public."nfl_plays_current_week_esbid_playId";
 DROP INDEX IF EXISTS public.nfl_plays_current_week_esbid;
-DROP INDEX IF EXISTS public.index_projections_index_sourceid_pid_userid_week_year;
+DROP INDEX IF EXISTS public.index_projections_index_sourceid_pid_userid_week_year_seas_type;
 DROP INDEX IF EXISTS public.index_projections_index_pid;
 DROP INDEX IF EXISTS public.index_player_gamelogs_year_esbid_pid;
 DROP INDEX IF EXISTS public.index_player_gamelogs_esbid_tm_pid;
@@ -1744,6 +1744,7 @@ DROP TYPE IF EXISTS public.time_type;
 DROP TYPE IF EXISTS public.team_unit;
 DROP TYPE IF EXISTS public.series_result;
 DROP TYPE IF EXISTS public.selection_type;
+DROP TYPE IF EXISTS public.seas_type;
 DROP TYPE IF EXISTS public.run_gap;
 DROP TYPE IF EXISTS public.receiver_separation;
 DROP TYPE IF EXISTS public.read_thrown_type;
@@ -1904,7 +1905,8 @@ CREATE TYPE public.nfl_play_type AS ENUM (
 
 CREATE TYPE public.placed_wagers_book_id AS ENUM (
     'DRAFTKINGS',
-    'FANDUEL'
+    'FANDUEL',
+    'FANATICS'
 );
 
 
@@ -2024,6 +2026,17 @@ CREATE TYPE public.run_gap AS ENUM (
     'RIGHT_END',
     'RIGHT_MIDDLE',
     'MIDDLE'
+);
+
+
+--
+-- Name: seas_type; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.seas_type AS ENUM (
+    'PRE',
+    'REG',
+    'POST'
 );
 
 
@@ -17834,7 +17847,8 @@ CREATE TABLE public.projections (
     dtpr numeric(4,1),
     dtd numeric(4,1),
     krtd numeric(4,1),
-    prtd numeric(4,1)
+    prtd numeric(4,1),
+    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL
 );
 
 
@@ -17935,7 +17949,8 @@ CREATE TABLE public.projections_index (
     dtpr numeric(4,1),
     dtd numeric(4,1),
     krtd numeric(4,1),
-    prtd numeric(4,1)
+    prtd numeric(4,1),
+    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL
 )
 PARTITION BY RANGE (year);
 
@@ -17986,7 +18001,8 @@ CREATE TABLE public.projections_index_default (
     dtpr numeric(4,1),
     dtd numeric(4,1),
     krtd numeric(4,1),
-    prtd numeric(4,1)
+    prtd numeric(4,1),
+    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL
 );
 
 
@@ -18036,7 +18052,8 @@ CREATE TABLE public.projections_index_y2020 (
     dtpr numeric(4,1),
     dtd numeric(4,1),
     krtd numeric(4,1),
-    prtd numeric(4,1)
+    prtd numeric(4,1),
+    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL
 );
 
 
@@ -18086,7 +18103,8 @@ CREATE TABLE public.projections_index_y2021 (
     dtpr numeric(4,1),
     dtd numeric(4,1),
     krtd numeric(4,1),
-    prtd numeric(4,1)
+    prtd numeric(4,1),
+    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL
 );
 
 
@@ -18136,7 +18154,8 @@ CREATE TABLE public.projections_index_y2022 (
     dtpr numeric(4,1),
     dtd numeric(4,1),
     krtd numeric(4,1),
-    prtd numeric(4,1)
+    prtd numeric(4,1),
+    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL
 );
 
 
@@ -18186,7 +18205,8 @@ CREATE TABLE public.projections_index_y2023 (
     dtpr numeric(4,1),
     dtd numeric(4,1),
     krtd numeric(4,1),
-    prtd numeric(4,1)
+    prtd numeric(4,1),
+    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL
 );
 
 
@@ -18236,7 +18256,8 @@ CREATE TABLE public.projections_index_y2024 (
     dtpr numeric(4,1),
     dtd numeric(4,1),
     krtd numeric(4,1),
-    prtd numeric(4,1)
+    prtd numeric(4,1),
+    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL
 );
 
 
@@ -21181,7 +21202,7 @@ CREATE INDEX idx_24926_pid ON public.projections USING btree (pid);
 -- Name: idx_24926_projection; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_24926_projection ON public.projections USING btree (sourceid, pid, userid, "timestamp", week, year);
+CREATE UNIQUE INDEX idx_24926_projection ON public.projections USING btree (sourceid, pid, userid, "timestamp", week, year, seas_type);
 
 
 --
@@ -22123,10 +22144,10 @@ CREATE INDEX index_projections_index_pid ON ONLY public.projections_index USING 
 
 
 --
--- Name: index_projections_index_sourceid_pid_userid_week_year; Type: INDEX; Schema: public; Owner: -
+-- Name: index_projections_index_sourceid_pid_userid_week_year_seas_type; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX index_projections_index_sourceid_pid_userid_week_year ON ONLY public.projections_index USING btree (sourceid, pid, userid, week, year);
+CREATE UNIQUE INDEX index_projections_index_sourceid_pid_userid_week_year_seas_type ON ONLY public.projections_index USING btree (sourceid, pid, userid, week, year, seas_type);
 
 
 --
@@ -30257,10 +30278,10 @@ CREATE INDEX projections_index_default_pid_idx ON public.projections_index_defau
 
 
 --
--- Name: projections_index_default_sourceid_pid_userid_week_year_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: projections_index_default_sourceid_pid_userid_week_year_seas_ty; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_default_sourceid_pid_userid_week_year_idx ON public.projections_index_default USING btree (sourceid, pid, userid, week, year);
+CREATE UNIQUE INDEX projections_index_default_sourceid_pid_userid_week_year_seas_ty ON public.projections_index_default USING btree (sourceid, pid, userid, week, year, seas_type);
 
 
 --
@@ -30271,10 +30292,10 @@ CREATE INDEX projections_index_y2020_pid_idx ON public.projections_index_y2020 U
 
 
 --
--- Name: projections_index_y2020_sourceid_pid_userid_week_year_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: projections_index_y2020_sourceid_pid_userid_week_year_seas_type; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_y2020_sourceid_pid_userid_week_year_idx ON public.projections_index_y2020 USING btree (sourceid, pid, userid, week, year);
+CREATE UNIQUE INDEX projections_index_y2020_sourceid_pid_userid_week_year_seas_type ON public.projections_index_y2020 USING btree (sourceid, pid, userid, week, year, seas_type);
 
 
 --
@@ -30285,10 +30306,10 @@ CREATE INDEX projections_index_y2021_pid_idx ON public.projections_index_y2021 U
 
 
 --
--- Name: projections_index_y2021_sourceid_pid_userid_week_year_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: projections_index_y2021_sourceid_pid_userid_week_year_seas_type; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_y2021_sourceid_pid_userid_week_year_idx ON public.projections_index_y2021 USING btree (sourceid, pid, userid, week, year);
+CREATE UNIQUE INDEX projections_index_y2021_sourceid_pid_userid_week_year_seas_type ON public.projections_index_y2021 USING btree (sourceid, pid, userid, week, year, seas_type);
 
 
 --
@@ -30299,10 +30320,10 @@ CREATE INDEX projections_index_y2022_pid_idx ON public.projections_index_y2022 U
 
 
 --
--- Name: projections_index_y2022_sourceid_pid_userid_week_year_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: projections_index_y2022_sourceid_pid_userid_week_year_seas_type; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_y2022_sourceid_pid_userid_week_year_idx ON public.projections_index_y2022 USING btree (sourceid, pid, userid, week, year);
+CREATE UNIQUE INDEX projections_index_y2022_sourceid_pid_userid_week_year_seas_type ON public.projections_index_y2022 USING btree (sourceid, pid, userid, week, year, seas_type);
 
 
 --
@@ -30313,10 +30334,10 @@ CREATE INDEX projections_index_y2023_pid_idx ON public.projections_index_y2023 U
 
 
 --
--- Name: projections_index_y2023_sourceid_pid_userid_week_year_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: projections_index_y2023_sourceid_pid_userid_week_year_seas_type; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_y2023_sourceid_pid_userid_week_year_idx ON public.projections_index_y2023 USING btree (sourceid, pid, userid, week, year);
+CREATE UNIQUE INDEX projections_index_y2023_sourceid_pid_userid_week_year_seas_type ON public.projections_index_y2023 USING btree (sourceid, pid, userid, week, year, seas_type);
 
 
 --
@@ -30327,10 +30348,10 @@ CREATE INDEX projections_index_y2024_pid_idx ON public.projections_index_y2024 U
 
 
 --
--- Name: projections_index_y2024_sourceid_pid_userid_week_year_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: projections_index_y2024_sourceid_pid_userid_week_year_seas_type; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX projections_index_y2024_sourceid_pid_userid_week_year_idx ON public.projections_index_y2024 USING btree (sourceid, pid, userid, week, year);
+CREATE UNIQUE INDEX projections_index_y2024_sourceid_pid_userid_week_year_seas_type ON public.projections_index_y2024 USING btree (sourceid, pid, userid, week, year, seas_type);
 
 
 --
@@ -38608,10 +38629,10 @@ ALTER INDEX public.index_projections_index_pid ATTACH PARTITION public.projectio
 
 
 --
--- Name: projections_index_default_sourceid_pid_userid_week_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: projections_index_default_sourceid_pid_userid_week_year_seas_ty; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.index_projections_index_sourceid_pid_userid_week_year ATTACH PARTITION public.projections_index_default_sourceid_pid_userid_week_year_idx;
+ALTER INDEX public.index_projections_index_sourceid_pid_userid_week_year_seas_type ATTACH PARTITION public.projections_index_default_sourceid_pid_userid_week_year_seas_ty;
 
 
 --
@@ -38622,10 +38643,10 @@ ALTER INDEX public.index_projections_index_pid ATTACH PARTITION public.projectio
 
 
 --
--- Name: projections_index_y2020_sourceid_pid_userid_week_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: projections_index_y2020_sourceid_pid_userid_week_year_seas_type; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.index_projections_index_sourceid_pid_userid_week_year ATTACH PARTITION public.projections_index_y2020_sourceid_pid_userid_week_year_idx;
+ALTER INDEX public.index_projections_index_sourceid_pid_userid_week_year_seas_type ATTACH PARTITION public.projections_index_y2020_sourceid_pid_userid_week_year_seas_type;
 
 
 --
@@ -38636,10 +38657,10 @@ ALTER INDEX public.index_projections_index_pid ATTACH PARTITION public.projectio
 
 
 --
--- Name: projections_index_y2021_sourceid_pid_userid_week_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: projections_index_y2021_sourceid_pid_userid_week_year_seas_type; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.index_projections_index_sourceid_pid_userid_week_year ATTACH PARTITION public.projections_index_y2021_sourceid_pid_userid_week_year_idx;
+ALTER INDEX public.index_projections_index_sourceid_pid_userid_week_year_seas_type ATTACH PARTITION public.projections_index_y2021_sourceid_pid_userid_week_year_seas_type;
 
 
 --
@@ -38650,10 +38671,10 @@ ALTER INDEX public.index_projections_index_pid ATTACH PARTITION public.projectio
 
 
 --
--- Name: projections_index_y2022_sourceid_pid_userid_week_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: projections_index_y2022_sourceid_pid_userid_week_year_seas_type; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.index_projections_index_sourceid_pid_userid_week_year ATTACH PARTITION public.projections_index_y2022_sourceid_pid_userid_week_year_idx;
+ALTER INDEX public.index_projections_index_sourceid_pid_userid_week_year_seas_type ATTACH PARTITION public.projections_index_y2022_sourceid_pid_userid_week_year_seas_type;
 
 
 --
@@ -38664,10 +38685,10 @@ ALTER INDEX public.index_projections_index_pid ATTACH PARTITION public.projectio
 
 
 --
--- Name: projections_index_y2023_sourceid_pid_userid_week_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: projections_index_y2023_sourceid_pid_userid_week_year_seas_type; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.index_projections_index_sourceid_pid_userid_week_year ATTACH PARTITION public.projections_index_y2023_sourceid_pid_userid_week_year_idx;
+ALTER INDEX public.index_projections_index_sourceid_pid_userid_week_year_seas_type ATTACH PARTITION public.projections_index_y2023_sourceid_pid_userid_week_year_seas_type;
 
 
 --
@@ -38678,10 +38699,10 @@ ALTER INDEX public.index_projections_index_pid ATTACH PARTITION public.projectio
 
 
 --
--- Name: projections_index_y2024_sourceid_pid_userid_week_year_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: projections_index_y2024_sourceid_pid_userid_week_year_seas_type; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.index_projections_index_sourceid_pid_userid_week_year ATTACH PARTITION public.projections_index_y2024_sourceid_pid_userid_week_year_idx;
+ALTER INDEX public.index_projections_index_sourceid_pid_userid_week_year_seas_type ATTACH PARTITION public.projections_index_y2024_sourceid_pid_userid_week_year_seas_type;
 
 
 --

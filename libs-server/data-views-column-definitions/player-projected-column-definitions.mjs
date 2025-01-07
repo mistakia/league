@@ -11,6 +11,9 @@ const get_default_params = ({ params = {} }) => {
     ? params.year[0]
     : params.year || constants.season.year
   const week = Array.isArray(params.week) ? params.week[0] : params.week || 0
+  const seas_type = Array.isArray(params.seas_type)
+    ? params.seas_type[0]
+    : params.seas_type || 'REG'
   const scoring_format_hash =
     params.scoring_format_hash ||
     '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
@@ -19,12 +22,22 @@ const get_default_params = ({ params = {} }) => {
     '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b'
   const league_id = params.league_id || 1
 
-  return { year, week, scoring_format_hash, league_format_hash, league_id }
+  return {
+    year,
+    week,
+    seas_type,
+    scoring_format_hash,
+    league_format_hash,
+    league_id
+  }
 }
 
 const get_cache_info_for_player_projected_stats = ({ params = {} } = {}) => {
-  const { year } = get_default_params({ params })
-  if (year === constants.season.year) {
+  const { year, seas_type } = get_default_params({ params })
+  if (
+    year === constants.season.year &&
+    seas_type === constants.season.nfl_seas_type
+  ) {
     return {
       cache_ttl: 1000 * 60 * 60 * 6, // 6 hours
       // TODO should expire before the next game starts
@@ -39,32 +52,36 @@ const get_cache_info_for_player_projected_stats = ({ params = {} } = {}) => {
 }
 
 const projections_index_table_alias = ({ params = {} }) => {
-  const { year, week } = get_default_params({ params })
-  return get_table_hash(`projections_index_${year}_week_${week}`)
+  const { year, week, seas_type } = get_default_params({ params })
+  return get_table_hash(`projections_index_${year}_week_${week}_${seas_type}`)
 }
 
 const scoring_format_player_projection_points_table_alias = ({
   params = {}
 }) => {
-  const { year, week, scoring_format_hash } = get_default_params({ params })
+  const { year, week, seas_type, scoring_format_hash } = get_default_params({
+    params
+  })
   return get_table_hash(
-    `scoring_format_player_projection_points_${year}_week_${week}_${scoring_format_hash}`
+    `scoring_format_player_projection_points_${year}_week_${week}_${seas_type}_${scoring_format_hash}`
   )
 }
 
 const league_player_projection_values_table_alias = ({ params = {} }) => {
-  const { year, week, league_id } = get_default_params({ params })
+  const { year, week, seas_type, league_id } = get_default_params({ params })
   return get_table_hash(
-    `league_player_projection_values_${year}_week_${week}_league_${league_id}`
+    `league_player_projection_values_${year}_week_${week}_${seas_type}_league_${league_id}`
   )
 }
 
 const league_format_player_projection_values_table_alias = ({
   params = {}
 }) => {
-  const { year, week, league_format_hash } = get_default_params({ params })
+  const { year, week, seas_type, league_format_hash } = get_default_params({
+    params
+  })
   return get_table_hash(
-    `league_format_player_projection_values_${year}_week_${week}_${league_format_hash}`
+    `league_format_player_projection_values_${year}_week_${week}_${seas_type}_${league_format_hash}`
   )
 }
 
@@ -140,6 +157,7 @@ const league_format_player_projection_values_join = (join_arguments) => {
   })
 }
 
+// TODO add support for seas_type
 const projections_index_join = (join_arguments) => {
   data_view_join_function({
     ...join_arguments,
