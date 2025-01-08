@@ -139,9 +139,15 @@ export const single_position = {
   default_value: 'QB'
 }
 
+export const seas_type = {
+  values: constants.seas_types,
+  data_type: table_constants.TABLE_DATA_TYPES.SELECT,
+  default_value: 'REG'
+}
+
 export const single_seas_type = {
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
   single: true,
   values: constants.seas_types,
-  default_value: constants.season.nfl_seas_type
+  default_value: 'REG'
 }
