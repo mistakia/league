@@ -133,13 +133,14 @@ router.get('/charted', async (req, res) => {
     }
 
     let query = getChartedPlayByPlayQuery(db)
-
     query = query.where('nfl_games.seas_type', 'REG')
+    let cache_key = `nfl_plays_charted_year_${years.join('_')}`
 
     if (pid) {
       const player_rows = await db('player').where({ pid }).limit(1)
       const player_row = player_rows[0]
       query = query.where('nfl_plays.off', player_row.current_nfl_team)
+      cache_key = `${cache_key}_pid_${pid}`
     }
 
     if (years.length) {
@@ -148,21 +149,40 @@ router.get('/charted', async (req, res) => {
 
     if (weeks.length) {
       query = query.whereIn('nfl_games.week', weeks)
+      cache_key = `${cache_key}_weeks_${weeks.join('_')}`
     }
 
     if (days.length) {
       query = query.whereIn('nfl_games.day', days)
+      cache_key = `${cache_key}_days_${days.join('_')}`
     }
 
     if (quarters.length) {
       query = query.whereIn('nfl_plays.qtr', quarters)
+      cache_key = `${cache_key}_quarters_${quarters.join('_')}`
     }
 
     if (downs.length) {
       query = query.whereIn('nfl_plays.dwn', downs)
+      cache_key = `${cache_key}_downs_${downs.join('_')}`
+    }
+
+    const cache_data = await redis_cache.get(cache_key)
+
+    if (cache_data) {
+      return res.send(cache_data)
     }
 
     const data = await query
+
+    const current_seas_type = constants.season.nfl_seas_type
+    const cache_ttl_one_day = 24 * 60 * 60
+    const cache_ttl_one_week = 7 * 24 * 60 * 60
+    const cache_duration =
+      current_seas_type === 'REG' ? cache_ttl_one_day : cache_ttl_one_week
+
+    await redis_cache.set(cache_key, data, cache_duration)
+
     res.send(data)
   } catch (error) {
     logger(error)
