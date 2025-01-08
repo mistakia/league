@@ -512,7 +512,8 @@ describe('LIBS SERVER get_data_view_results', () => {
             market_type:
               bookmaker_constants.player_prop_types.GAME_PASSING_YARDS,
             year: 2023,
-            week: 1
+            week: 1,
+            seas_type: 'REG'
           }
         }
       ],
@@ -523,7 +524,7 @@ describe('LIBS SERVER get_data_view_results', () => {
         }
       ]
     })
-    const expected_query = `with "t134cedd36b06cf89d1febbcc60149100_markets" as (select "source_id", "source_market_id", "time_type" from "prop_markets_index" inner join "nfl_games" on "nfl_games"."esbid" = "prop_markets_index"."esbid" and "nfl_games"."year" = "prop_markets_index"."year" and "nfl_games"."week" = 1 where "market_type" = 'GAME_PASSING_YARDS' and "time_type" = 'CLOSE' and "prop_markets_index"."year" = 2023 and "source_id" = 'FANDUEL'), "t134cedd36b06cf89d1febbcc60149100" as (select pms.selection_pid, pms.selection_metric_line from "t134cedd36b06cf89d1febbcc60149100_markets" as "m" inner join "prop_market_selections_index" as "pms" on "pms"."source_id" = "m"."source_id" and "pms"."source_market_id" = "m"."source_market_id" and "pms"."time_type" = "m"."time_type") select "player"."pid", player.fname, player.lname, "t134cedd36b06cf89d1febbcc60149100"."selection_metric_line" AS "game_prop_line_betting_market_0", "player"."pos" from "player" left join "t134cedd36b06cf89d1febbcc60149100" on "t134cedd36b06cf89d1febbcc60149100"."selection_pid" = "player"."pid" group by player.fname, player.lname, "t134cedd36b06cf89d1febbcc60149100"."selection_metric_line", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 4 DESC NULLS LAST, "player"."pid" asc limit 500`
+    const expected_query = `with "t134cedd36b06cf89d1febbcc60149100_markets" as (select "source_id", "source_market_id", "time_type" from "prop_markets_index" inner join "nfl_games" on "nfl_games"."esbid" = "prop_markets_index"."esbid" and "nfl_games"."year" = "prop_markets_index"."year" and "nfl_games"."seas_type" = "REG" and "nfl_games"."week" = 1 where "market_type" = 'GAME_PASSING_YARDS' and "time_type" = 'CLOSE' and "prop_markets_index"."year" = 2023 and "source_id" = 'FANDUEL'), "t134cedd36b06cf89d1febbcc60149100" as (select pms.selection_pid, pms.selection_metric_line from "t134cedd36b06cf89d1febbcc60149100_markets" as "m" inner join "prop_market_selections_index" as "pms" on "pms"."source_id" = "m"."source_id" and "pms"."source_market_id" = "m"."source_market_id" and "pms"."time_type" = "m"."time_type") select "player"."pid", player.fname, player.lname, "t134cedd36b06cf89d1febbcc60149100"."selection_metric_line" AS "game_prop_line_betting_market_0", "player"."pos" from "player" left join "t134cedd36b06cf89d1febbcc60149100" on "t134cedd36b06cf89d1febbcc60149100"."selection_pid" = "player"."pid" group by player.fname, player.lname, "t134cedd36b06cf89d1febbcc60149100"."selection_metric_line", "player"."pid", "player"."lname", "player"."fname", "player"."pos" order by 4 DESC NULLS LAST, "player"."pid" asc limit 500`
     compare_queries(query.toString(), expected_query)
     expect(data_view_metadata.cache_ttl).to.equal(one_week)
     expect(data_view_metadata.cache_expire_at).to.equal(null)

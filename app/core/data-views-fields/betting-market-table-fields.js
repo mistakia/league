@@ -4,7 +4,7 @@ import { bookmaker_constants } from '#libs-shared'
 import COLUMN_GROUPS from './column-groups'
 import { constants, common_column_params } from '@libs-shared'
 
-const { career_year, career_game, single_year, single_week } =
+const { career_year, career_game, single_year, single_week, single_seas_type } =
   common_column_params
 
 const from_betting_market = (field) => ({
@@ -58,7 +58,8 @@ const create_game_prop_column_params = () => ({
   ...create_base_column_params(),
   market_type: player_market_type_param,
   career_year,
-  career_game
+  career_game,
+  seas_type: single_seas_type
 })
 
 const create_team_game_prop_column_params = () => ({

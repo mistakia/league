@@ -15,6 +15,9 @@ const get_default_params = ({
   const year = Array.isArray(params.year)
     ? params.year[0]
     : params.year || constants.season.year
+  const seas_type = Array.isArray(params.seas_type)
+    ? params.seas_type[0]
+    : params.seas_type || constants.season.nfl_seas_type
 
   const hit_type = Array.isArray(params.hit_type)
     ? params.hit_type[0].toLowerCase()
@@ -29,7 +32,7 @@ const get_default_params = ({
   if (is_game_prop) {
     week = Array.isArray(params.week)
       ? params.week[0]
-      : params.week || Math.max(1, constants.season.week)
+      : params.week || Math.max(1, constants.season.nfl_seas_week)
   } else {
     week = Array.isArray(params.week) ? params.week[0] : params.week || 0
   }
@@ -76,6 +79,7 @@ const get_default_params = ({
   return {
     year,
     week,
+    seas_type,
     market_type,
     time_type,
     source_id,
@@ -95,6 +99,7 @@ const betting_markets_table_alias = ({
   const {
     year,
     week,
+    seas_type,
     market_type,
     time_type,
     source_id,
@@ -107,7 +112,7 @@ const betting_markets_table_alias = ({
   })
 
   return get_table_hash(
-    `${base_table_alias}_${year}_week_${week}_source_id_${source_id}_market_type_${market_type}_time_type_${time_type}_career_year_${career_year.join('_')}_career_game_${career_game.join('_')}_selection_type_${selection_type.join('_')}`
+    `${base_table_alias}_${year}_seas_type_${seas_type}_week_${week}_source_id_${source_id}_market_type_${market_type}_time_type_${time_type}_career_year_${career_year.join('_')}_career_game_${career_game.join('_')}_selection_type_${selection_type.join('_')}`
   )
 }
 
@@ -124,6 +129,7 @@ const player_betting_market_with = ({
   const {
     year,
     week,
+    seas_type,
     market_type,
     time_type,
     source_id,
@@ -149,6 +155,7 @@ const player_betting_market_with = ({
       qb.join('nfl_games', function () {
         this.on('nfl_games.esbid', '=', 'prop_markets_index.esbid')
         this.andOn('nfl_games.year', '=', 'prop_markets_index.year')
+        this.andOn('nfl_games.seas_type', '=', seas_type)
         if (week) {
           this.andOn('nfl_games.week', '=', db.raw('?', [week]))
         }
@@ -274,12 +281,19 @@ const team_betting_market_with = ({
   where_clauses,
   splits
 }) => {
-  const { time_type, market_type, source_id, year, week, selection_type } =
-    get_default_params({
-      params,
-      is_team_game_prop: true,
-      is_game_prop: true
-    })
+  const {
+    time_type,
+    market_type,
+    source_id,
+    year,
+    week,
+    seas_type,
+    selection_type
+  } = get_default_params({
+    params,
+    is_team_game_prop: true,
+    is_game_prop: true
+  })
 
   const markets_cte = `${with_table_name}_markets`
 
@@ -302,6 +316,7 @@ const team_betting_market_with = ({
         this.on(`nfl_games.esbid`, '=', `prop_markets_index.esbid`)
         this.andOn(`nfl_games.year`, '=', `prop_markets_index.year`)
         this.andOn(`nfl_games.week`, '=', db.raw('?', [week]))
+        this.andOn(`nfl_games.seas_type`, '=', seas_type)
       })
     }
   })
@@ -348,7 +363,7 @@ const team_game_implied_team_total_with = ({
   where_clauses,
   splits
 }) => {
-  const { time_type, source_id, year, week } = get_default_params({
+  const { time_type, source_id, year, week, seas_type } = get_default_params({
     params,
     is_team_game_prop: true,
     is_game_prop: true
@@ -385,6 +400,7 @@ const team_game_implied_team_total_with = ({
       .andWhere('prop_markets_index.year', year)
       .andWhere('prop_markets_index.source_id', source_id)
       .andWhere('nfl_games.week', week)
+      .andWhere('nfl_games.seas_type', seas_type)
   })
 
   query.with(total_cte, (qb) => {
@@ -411,6 +427,7 @@ const team_game_implied_team_total_with = ({
       .andWhere('prop_markets_index.year', year)
       .andWhere('prop_markets_index.source_id', source_id)
       .andWhere('nfl_games.week', week)
+      .andWhere('nfl_games.seas_type', seas_type)
   })
 
   query.with(with_table_name, (qb) => {
