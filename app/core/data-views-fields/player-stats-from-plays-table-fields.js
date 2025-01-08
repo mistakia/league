@@ -54,7 +54,8 @@ export default {
     column_title: 'Passing Interceptions (By Play)',
     column_groups: [COLUMN_GROUPS.PASSING],
     header_label: 'INT',
-    player_value_path: 'pass_ints_from_plays'
+    player_value_path: 'pass_ints_from_plays',
+    reverse_percentiles: true
   }),
   player_pass_first_downs_from_plays: offensive_player_from_play_field({
     column_title: 'Passing First Downs (By Play)',
@@ -98,7 +99,8 @@ export default {
       column_groups: [COLUMN_GROUPS.PASSING, COLUMN_GROUPS.EFFICIENCY],
       header_label: 'INT%',
       player_value_path: 'pass_int_pct_from_plays',
-      fixed: 1
+      fixed: 1,
+      reverse_percentiles: true
     }),
   player_pass_interception_worthy_percentage_from_plays:
     offensive_player_from_play_field({
@@ -106,7 +108,8 @@ export default {
       column_groups: [COLUMN_GROUPS.PASSING, COLUMN_GROUPS.EFFICIENCY],
       header_label: 'BAD%',
       player_value_path: 'pass_int_worthy_pct_from_plays',
-      fixed: 1
+      fixed: 1,
+      reverse_percentiles: true
     }),
   player_pass_yards_after_catch_from_plays: offensive_player_from_play_field({
     column_title: 'Passing Yards After Catch (By Play)',
@@ -171,20 +174,23 @@ export default {
     column_title: 'Sacks (By Play)',
     column_groups: [COLUMN_GROUPS.PASSING],
     header_label: 'SK',
-    player_value_path: 'sacked_from_plays'
+    player_value_path: 'sacked_from_plays',
+    reverse_percentiles: true
   }),
   player_sacked_yards_from_plays: offensive_player_from_play_field({
     column_title: 'Sack Yards (By Play)',
     column_groups: [COLUMN_GROUPS.PASSING],
     header_label: 'SK YDS',
-    player_value_path: 'sacked_yds_from_plays'
+    player_value_path: 'sacked_yds_from_plays',
+    reverse_percentiles: true
   }),
   player_sacked_percentage_from_plays: offensive_player_from_play_field({
     column_title: 'Sack Percentage (By Play)',
     column_groups: [COLUMN_GROUPS.PASSING],
     header_label: 'SK%',
     player_value_path: 'sacked_pct_from_plays',
-    fixed: 1
+    fixed: 1,
+    reverse_percentiles: true
   }),
   player_quarterback_hits_percentage_from_plays:
     offensive_player_from_play_field({
@@ -192,7 +198,8 @@ export default {
       column_groups: [COLUMN_GROUPS.PASSING],
       header_label: 'HIT%',
       player_value_path: 'qb_hit_pct_from_plays',
-      fixed: 1
+      fixed: 1,
+      reverse_percentiles: true
     }),
   player_quarterback_pressures_percentage_from_plays:
     offensive_player_from_play_field({
@@ -200,7 +207,8 @@ export default {
       column_groups: [COLUMN_GROUPS.PASSING],
       header_label: 'PRSS%',
       player_value_path: 'qb_press_pct_from_plays',
-      fixed: 1
+      fixed: 1,
+      reverse_percentiles: true
     }),
   player_quarterback_hurries_percentage_from_plays:
     offensive_player_from_play_field({
@@ -208,7 +216,8 @@ export default {
       column_groups: [COLUMN_GROUPS.PASSING],
       header_label: 'HRRY%',
       player_value_path: 'qb_hurry_pct_from_plays',
-      fixed: 1
+      fixed: 1,
+      reverse_percentiles: true
     }),
   player_pass_net_yards_per_attempt_from_plays:
     offensive_player_from_play_field({
@@ -322,20 +331,23 @@ export default {
     column_title: 'Fumbles (By Play)',
     column_groups: [COLUMN_GROUPS.RUSHING],
     header_label: 'FMB',
-    player_value_path: 'fumbles_from_plays'
+    player_value_path: 'fumbles_from_plays',
+    reverse_percentiles: true
   }),
   player_fumbles_lost_from_plays: offensive_player_from_play_field({
     column_title: 'Fumbles Lost (By Play)',
     column_groups: [COLUMN_GROUPS.RUSHING],
     header_label: 'FL',
-    player_value_path: 'fumbles_lost_from_plays'
+    player_value_path: 'fumbles_lost_from_plays',
+    reverse_percentiles: true
   }),
   player_fumble_percentage_from_plays: offensive_player_from_play_field({
     column_title: 'Fumble Percentage (By Play)',
     column_groups: [COLUMN_GROUPS.RUSHING],
     header_label: 'FUM%',
     player_value_path: 'fumble_pct_from_plays',
-    fixed: 1
+    fixed: 1,
+    reverse_percentiles: true
   }),
   player_positive_rush_percentage_from_plays: offensive_player_from_play_field({
     column_title: 'Positive Rushing Yardage Percentage (By Play)',
@@ -388,7 +400,8 @@ export default {
     column_title: 'Drops (By Play)',
     column_groups: [COLUMN_GROUPS.RECEIVING],
     header_label: 'DRP',
-    player_value_path: 'drops_from_plays'
+    player_value_path: 'drops_from_plays',
+    reverse_percentiles: true
   }),
   player_dropped_receiving_yards_from_plays: offensive_player_from_play_field({
     column_title: 'Dropped Receiving Yards (By Play)',

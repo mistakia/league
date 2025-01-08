@@ -39,12 +39,14 @@ export default {
     ...shared_properties,
     column_title: 'KeepTradeCut Overall Rank',
     header_label: 'OVR',
-    player_value_path: 'player_keeptradecut_overall_rank'
+    player_value_path: 'player_keeptradecut_overall_rank',
+    reverse_percentiles: true
   },
   player_keeptradecut_position_rank: {
     ...shared_properties,
     column_title: 'KeepTradeCut Position Rank',
     header_label: 'Pos',
-    player_value_path: 'player_keeptradecut_position_rank'
+    player_value_path: 'player_keeptradecut_position_rank',
+    reverse_percentiles: true
   }
 }

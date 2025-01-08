@@ -4,7 +4,8 @@ const calculatePercentiles = ({
   items,
   stats,
   qualifiers = {},
-  prefix = ''
+  prefix = '',
+  reverse_percentile_stats = {}
 }) => {
   const percentiles = {}
 
@@ -30,7 +31,13 @@ const calculatePercentiles = ({
         max: null
       }
     } else {
-      const result = percentile([25, 50, 75, 90, 95, 98, 99, 0, 100], values)
+      const reverse_percentiles = reverse_percentile_stats[stat] || false
+      const percentile_points = reverse_percentiles 
+        ? [75, 50, 25, 10, 5, 2, 1, 100, 0]
+        : [25, 50, 75, 90, 95, 98, 99, 0, 100]
+
+      const result = percentile(percentile_points, values)
+
       percentiles[`${prefix}${stat}`] = {
         p25: result[0],
         p50: result[1],

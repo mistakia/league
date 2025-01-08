@@ -76,31 +76,37 @@ export default {
   player_average_ranking: create_player_rankings_field({
     column_title: 'Average Ranking / Draft Position (ADP)',
     header_label: 'Avg',
-    player_value_path: 'average_rank'
+    player_value_path: 'average_rank',
+    reverse_percentiles: true
   }),
   player_overall_ranking: create_player_rankings_field({
     column_title: 'Overall Ranking',
     header_label: 'Overall Rank',
-    player_value_path: 'overall_rank'
+    player_value_path: 'overall_rank',
+    reverse_percentiles: true
   }),
   player_position_ranking: create_player_rankings_field({
     column_title: 'Position Ranking',
     header_label: 'Pos Rank',
-    player_value_path: 'position_rank'
+    player_value_path: 'position_rank',
+    reverse_percentiles: true
   }),
   player_min_ranking: create_player_rankings_field({
     column_title: 'Minimum Ranking',
     header_label: 'Min Rank',
-    player_value_path: 'min_rank'
+    player_value_path: 'min_rank',
+    reverse_percentiles: true
   }),
   player_max_ranking: create_player_rankings_field({
     column_title: 'Maximum Ranking',
     header_label: 'Max Rank',
-    player_value_path: 'max_rank'
+    player_value_path: 'max_rank',
+    reverse_percentiles: true
   }),
   player_ranking_standard_deviation: create_player_rankings_field({
     column_title: 'Ranking Standard Deviation',
     header_label: 'Rank StdDev',
-    player_value_path: 'rank_stddev'
+    player_value_path: 'rank_stddev',
+    reverse_percentiles: true
   })
 }
