@@ -10,6 +10,8 @@ import { teamActions } from '@core/teams/actions'
 import { data_views_actions } from '@core/data-views/actions'
 import { league_team_daily_values_actions } from '@core/league-team-daily-values/actions'
 import { seasons_actions } from '@core/seasons/actions'
+import { playActions } from '@core/plays/actions'
+import { statActions } from '@core/stats/actions'
 const initialState = new Map({
   request_history: new Map()
 })
@@ -148,6 +150,27 @@ export function apiReducer(state = initialState, { payload, type }) {
       return state.deleteIn([
         'request_history',
         `GET_SEASON_LEAGUE_${payload.opts.leagueId}_${payload.opts.year}`
+      ])
+
+    case playActions.GET_PLAYS_PENDING:
+      return state.setIn(['request_history', 'GET_PLAYS'], true)
+
+    case playActions.GET_PLAYS_FAILED:
+      return state.deleteIn(['request_history', 'GET_PLAYS'])
+
+    case statActions.GET_CHARTED_PLAYS_PENDING:
+      return state.setIn(
+        [
+          'request_history',
+          `GET_CHARTED_PLAYS_${payload.opts.years.join('_')}`
+        ],
+        true
+      )
+
+    case statActions.GET_CHARTED_PLAYS_FAILED:
+      return state.deleteIn([
+        'request_history',
+        `GET_CHARTED_PLAYS_${payload.opts.years.join('_')}`
       ])
 
     default:

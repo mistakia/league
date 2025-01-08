@@ -4,6 +4,11 @@ const { create_api_actions, create_api_action_types } = actions_utils
 export const statActions = {
   ...create_api_action_types('GET_CHARTED_PLAYS'),
 
+  INIT_CHARTED_PLAYS: 'INIT_CHARTED_PLAYS',
+  init_charted_plays: () => ({
+    type: statActions.INIT_CHARTED_PLAYS
+  }),
+
   SET_TEAM_STATS_PERCENTILES: 'SET_TEAM_STATS_PERCENTILES',
   setTeamStatsPercentiles: (percentiles) => ({
     type: statActions.SET_TEAM_STATS_PERCENTILES,

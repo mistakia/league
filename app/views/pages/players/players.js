@@ -55,7 +55,8 @@ export default function PlayersPage({
   orderBy,
   is_player_filter_options_changed,
   loadRosters,
-  loadAllPlayers
+  loadAllPlayers,
+  init_charted_plays
 }) {
   const { lid } = useParams()
   const navigate = useNavigate()
@@ -67,7 +68,8 @@ export default function PlayersPage({
 
   useEffect(() => {
     loadAllPlayers()
-  }, [loadAllPlayers])
+    init_charted_plays()
+  }, [loadAllPlayers, init_charted_plays])
 
   useEffect(() => {
     for (const field_key of selected_players_page_view.fields) {
@@ -320,5 +322,6 @@ PlayersPage.propTypes = {
   reset_player_filter_options: PropTypes.func,
   is_player_filter_options_changed: PropTypes.bool,
   loadRosters: PropTypes.func,
-  loadAllPlayers: PropTypes.func
+  loadAllPlayers: PropTypes.func,
+  init_charted_plays: PropTypes.func
 }

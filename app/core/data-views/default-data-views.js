@@ -1,6 +1,84 @@
 import { constants } from '@libs-shared'
 
+const is_regular_season_finished =
+  constants.season.week > constants.season.finalWeek
+
+export const default_data_view_view_id = is_regular_season_finished
+  ? 'SEASON_FANTASY_POINTS'
+  : 'SEASON_PROJECTIONS'
+
 export const default_data_views = {
+  SEASON_FANTASY_POINTS: {
+    view_id: 'SEASON_FANTASY_POINTS',
+    view_username: 'system',
+    view_name: 'Season Fantasy Points',
+    view_description: 'Fantasy points and value metrics for the season',
+    view_search_column_id: 'player_name',
+    table_state: {
+      sort: [
+        {
+          column_id: 'player_points_added_from_seasonlogs',
+          desc: true
+        }
+      ],
+      prefix_columns: ['player_name', 'player_nfl_teams', 'player_position'],
+      columns: [
+        {
+          column_id: 'player_points_added_from_seasonlogs',
+          params: {
+            year: [constants.season.year]
+          }
+        },
+        {
+          column_id: 'player_points_added_rank_from_seasonlogs',
+          params: {
+            year: [constants.season.year]
+          }
+        },
+        {
+          column_id: 'player_points_added_position_rank_from_seasonlogs',
+          params: {
+            year: [constants.season.year]
+          }
+        },
+        {
+          column_id: 'player_fantasy_points_from_plays',
+          params: {
+            year: [constants.season.year],
+            seas_type: ['REG']
+          }
+        },
+        {
+          column_id: 'player_fantasy_points_rank_from_seasonlogs',
+          params: {
+            year: [constants.season.year]
+          }
+        },
+        {
+          column_id: 'player_fantasy_points_position_rank_from_seasonlogs',
+          params: {
+            year: [constants.season.year]
+          }
+        },
+        {
+          column_id: 'player_fantasy_points_from_plays',
+          params: {
+            year: [constants.season.year],
+            seas_type: ['REG'],
+            rate_type: ['per_player_play']
+          }
+        },
+        {
+          column_id: 'player_fantasy_points_from_plays',
+          params: {
+            year: [constants.season.year],
+            seas_type: ['REG'],
+            rate_type: ['per_team_drive']
+          }
+        }
+      ]
+    }
+  },
   SEASON_PROJECTIONS: {
     view_id: 'SEASON_PROJECTIONS',
     view_username: 'system',

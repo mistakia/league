@@ -7,7 +7,7 @@ import { constants, uuidv4 } from '@libs-shared'
 import { rosterActions } from '@core/rosters'
 import { teamActions } from '@core/teams'
 import { matchupsActions } from '@core/matchups'
-import { data_views_actions, default_data_views } from '@core/data-views'
+import { data_views_actions, default_data_view_view_id } from '@core/data-views'
 import { create_user_record, User } from './user'
 
 const initialState = new Record({
@@ -23,8 +23,7 @@ const initialState = new Record({
   authError: null,
   teamIds: new List(),
   leagueIds: new List([constants.DEFAULTS.LEAGUE_ID]),
-
-  selected_data_view_id: default_data_views.SEASON_PROJECTIONS.view_id,
+  selected_data_view_id: default_data_view_view_id,
 
   isLoadingRosters: null,
   isLoadedRosters: null

@@ -9,6 +9,7 @@ import {
 import { getPlayerFields } from '@core/player-fields'
 import { playerActions } from '@core/players'
 import { rosterActions } from '@core/rosters'
+import { statActions } from '@core/stats'
 import {
   getSelectedViewGroupedFields,
   getFilteredPlayers
@@ -70,7 +71,8 @@ const mapDispatchToProps = {
   search: playerActions.search,
   reset_player_filter_options: playerActions.reset_player_filter_options,
   loadRosters: rosterActions.loadRosters,
-  loadAllPlayers: playerActions.loadAllPlayers
+  loadAllPlayers: playerActions.loadAllPlayers,
+  init_charted_plays: statActions.init_charted_plays
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlayersPage)

@@ -3,7 +3,8 @@ import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 import {
   getSelectedPlayersPageView,
   getCurrentLeague,
-  getStats
+  getStats,
+  get_request_history
 } from '@core/selectors'
 import { playerActions } from '@core/players'
 import { statActions } from './actions'
@@ -14,9 +15,18 @@ export function* loadChartedPlays() {
   const should_load = selected_players_page_view.fields.find((field) =>
     field.includes('stats.')
   )
+
   if (should_load) {
+    const request_history = yield select(get_request_history)
     const stats = yield select(getStats)
     const { years } = stats.toJS()
+
+    const request_key = `GET_CHARTED_PLAYS_${years.join('_')}`
+
+    if (request_history.has(request_key)) {
+      return
+    }
+
     yield call(getChartedPlays, { years })
   }
 }
@@ -70,6 +80,10 @@ export function* calculateStats() {
 //  WATCHERS
 // -------------------------------------
 
+export function* watch_init_charted_plays() {
+  yield takeLatest(statActions.INIT_CHARTED_PLAYS, loadChartedPlays)
+}
+
 export function* watchSetPlayersView() {
   yield takeLatest(playerActions.SELECT_PLAYERS_PAGE_VIEW, loadChartedPlays)
 }
@@ -96,6 +110,7 @@ export function* watchFilterStatsYardline() {
 
 export const statSagas = [
   fork(watchSetPlayersView),
+  fork(watch_init_charted_plays),
   fork(watchGetChartedPlaysFulfilled),
   fork(watchFilterStats),
   fork(watchFilterStatsYardline),
