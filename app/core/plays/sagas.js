@@ -1,10 +1,16 @@
-import { fork, takeLatest, call } from 'redux-saga/effects'
+import { fork, takeLatest, call, select } from 'redux-saga/effects'
 
 import { playerActions } from '@core/players'
 import { getPlays, getPlayStats } from '@core/api'
 import { constants } from '@libs-shared'
-
+import { get_request_history } from '@core/selectors'
 export function* loadPlays() {
+  const request_history = yield select(get_request_history)
+
+  if (request_history.has('GET_PLAYS')) {
+    return
+  }
+
   yield call(getPlays)
   yield call(getPlayStats)
 }

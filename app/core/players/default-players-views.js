@@ -1,101 +1,98 @@
 import { constants } from '@libs-shared'
 
+const is_regular_season_finished =
+  constants.season.week > constants.season.finalWeek
+
+const season_projections_view = {
+  name: constants.season.isOffseason
+    ? 'Season Projections'
+    : 'Rest of Season Projections',
+  order_by: constants.season.isOffseason ? 'pts_added.0' : 'pts_added.ros',
+  fields: [
+    // TODO player salary
+    // TODO player points+
+    // TODO player market salary
+    // TODO player market adjusted salary
+    constants.season.isOffseason ? 'pts_added.0' : 'pts_added.ros',
+    constants.season.isOffseason ? 'points.0.total' : 'points.ros.total',
+    constants.season.isOffseason ? 'projection.0.pa' : 'projection.ros.pa',
+    constants.season.isOffseason ? 'projection.0.py' : 'projection.ros.py',
+    constants.season.isOffseason ? 'projection.0.tdp' : 'projection.ros.tdp',
+    constants.season.isOffseason ? 'projection.0.ints' : 'projection.ros.ints',
+    constants.season.isOffseason ? 'projection.0.ra' : 'projection.ros.ra',
+    constants.season.isOffseason ? 'projection.0.ry' : 'projection.ros.ry',
+    constants.season.isOffseason ? 'projection.0.tdr' : 'projection.ros.tdr',
+    constants.season.isOffseason ? 'projection.0.fuml' : 'projection.ros.fuml',
+    constants.season.isOffseason ? 'projection.0.trg' : 'projection.ros.trg',
+    constants.season.isOffseason ? 'projection.0.rec' : 'projection.ros.rec',
+    constants.season.isOffseason ? 'projection.0.recy' : 'projection.ros.recy',
+    constants.season.isOffseason ? 'projection.0.tdrec' : 'projection.ros.tdrec'
+  ]
+}
+
+const week_projections_view = {
+  name: 'Week Projections',
+  order_by: 'pts_added.week',
+  fields: [
+    'opponent',
+    'opponent_strength',
+    'pts_added.week',
+    'points.week.total',
+    'projection.week.pa',
+    'projection.week.py',
+    'projection.week.tdp',
+    'projection.week.ints',
+    'opponent_pass_pa',
+    'opponent_pass_pc',
+    'opponent_pass_py',
+    'opponent_pass_tdp',
+    'opponent_pass_ints',
+    'opponent_pass_rating',
+    'opponent_pass_yards_per_attempt',
+    'opponent_pass_comp_pct',
+    'opponent_completion_percentage_over_expectation',
+    'opponent_pass_epa_per_dropback',
+    'opponent_avg_time_to_throw',
+    'opponent_avg_time_to_pressure',
+    'opponent_avg_time_to_sack',
+    'opponent_pressure_rate_against',
+    'opponent_blitz_rate',
+    'opponent_air_yards_per_pass_att',
+    'opponent_avg_target_separation',
+    'opponent_deep_pass_att_pct',
+    'opponent_tight_window_pct',
+    'opponent_play_action_pct',
+    'projection.week.ra',
+    'projection.week.ry',
+    'projection.week.tdr',
+    'projection.week.fuml',
+    'opponent_rush_ra',
+    'opponent_rush_ry',
+    'opponent_rush_tdr',
+    'opponent_rushing_yards_per_attempt',
+    'opponent_rushing_success_rate',
+    'opponent_rushing_yards_after_contact_per_attempt',
+    'opponent_rushing_yards_over_expectation',
+    'opponent_rushing_yards_over_expectation_per_attempt',
+    'projection.week.trg',
+    'projection.week.rec',
+    'projection.week.recy',
+    'projection.week.tdrec',
+    'opponent_recv_trg',
+    'opponent_recv_rec',
+    'opponent_recv_recy',
+    'opponent_recv_tdrec',
+    'opponent_receiving_passer_rating',
+    'opponent_catch_rate_over_expectation',
+    'opponent_recv_yards_per_reception',
+    'opponent_recv_yards_per_route',
+    'opponent_receiving_epa_per_target',
+    'opponent_receiving_epa_per_route',
+    'opponent_receiving_yards_after_catch_over_expected'
+  ]
+}
+
 const views = {
-  season_projections: {
-    name: constants.season.isOffseason
-      ? 'Season Projections'
-      : 'Rest of Season Projections',
-    order_by: constants.season.isOffseason ? 'pts_added.0' : 'pts_added.ros',
-    fields: [
-      // TODO player salary
-      // TODO player points+
-      // TODO player market salary
-      // TODO player market adjusted salary
-      constants.season.isOffseason ? 'pts_added.0' : 'pts_added.ros',
-      constants.season.isOffseason ? 'points.0.total' : 'points.ros.total',
-      constants.season.isOffseason ? 'projection.0.pa' : 'projection.ros.pa',
-      constants.season.isOffseason ? 'projection.0.py' : 'projection.ros.py',
-      constants.season.isOffseason ? 'projection.0.tdp' : 'projection.ros.tdp',
-      constants.season.isOffseason
-        ? 'projection.0.ints'
-        : 'projection.ros.ints',
-      constants.season.isOffseason ? 'projection.0.ra' : 'projection.ros.ra',
-      constants.season.isOffseason ? 'projection.0.ry' : 'projection.ros.ry',
-      constants.season.isOffseason ? 'projection.0.tdr' : 'projection.ros.tdr',
-      constants.season.isOffseason
-        ? 'projection.0.fuml'
-        : 'projection.ros.fuml',
-      constants.season.isOffseason ? 'projection.0.trg' : 'projection.ros.trg',
-      constants.season.isOffseason ? 'projection.0.rec' : 'projection.ros.rec',
-      constants.season.isOffseason
-        ? 'projection.0.recy'
-        : 'projection.ros.recy',
-      constants.season.isOffseason
-        ? 'projection.0.tdrec'
-        : 'projection.ros.tdrec'
-    ]
-  },
-  week_projections: {
-    name: 'Week Projections',
-    order_by: 'pts_added.week',
-    fields: [
-      'opponent',
-      'opponent_strength',
-      'pts_added.week',
-      'points.week.total',
-      'projection.week.pa',
-      'projection.week.py',
-      'projection.week.tdp',
-      'projection.week.ints',
-      'opponent_pass_pa',
-      'opponent_pass_pc',
-      'opponent_pass_py',
-      'opponent_pass_tdp',
-      'opponent_pass_ints',
-      'opponent_pass_rating',
-      'opponent_pass_yards_per_attempt',
-      'opponent_pass_comp_pct',
-      'opponent_completion_percentage_over_expectation',
-      'opponent_pass_epa_per_dropback',
-      'opponent_avg_time_to_throw',
-      'opponent_avg_time_to_pressure',
-      'opponent_avg_time_to_sack',
-      'opponent_pressure_rate_against',
-      'opponent_blitz_rate',
-      'opponent_air_yards_per_pass_att',
-      'opponent_avg_target_separation',
-      'opponent_deep_pass_att_pct',
-      'opponent_tight_window_pct',
-      'opponent_play_action_pct',
-      'projection.week.ra',
-      'projection.week.ry',
-      'projection.week.tdr',
-      'projection.week.fuml',
-      'opponent_rush_ra',
-      'opponent_rush_ry',
-      'opponent_rush_tdr',
-      'opponent_rushing_yards_per_attempt',
-      'opponent_rushing_success_rate',
-      'opponent_rushing_yards_after_contact_per_attempt',
-      'opponent_rushing_yards_over_expectation',
-      'opponent_rushing_yards_over_expectation_per_attempt',
-      'projection.week.trg',
-      'projection.week.rec',
-      'projection.week.recy',
-      'projection.week.tdrec',
-      'opponent_recv_trg',
-      'opponent_recv_rec',
-      'opponent_recv_recy',
-      'opponent_recv_tdrec',
-      'opponent_receiving_passer_rating',
-      'opponent_catch_rate_over_expectation',
-      'opponent_recv_yards_per_reception',
-      'opponent_recv_yards_per_route',
-      'opponent_receiving_epa_per_target',
-      'opponent_receiving_epa_per_route',
-      'opponent_receiving_yards_after_catch_over_expected'
-    ]
-  },
   passing_stats_by_play: {
     name: 'Passing Stats by Play',
     order_by: 'stats.py',
@@ -173,8 +170,21 @@ const views = {
   }
 }
 
+if (!is_regular_season_finished) {
+  views.season_projections = season_projections_view
+  views.week_projections = week_projections_view
+}
+
 for (const key of Object.keys(views)) {
   views[key].key = key
 }
 
 export default views
+
+export const default_players_view_key = is_regular_season_finished
+  ? 'passing_stats_by_play'
+  : 'season_projections'
+
+export const default_players_view_order_by = is_regular_season_finished
+  ? views.passing_stats_by_play.order_by
+  : views.season_projections.order_by

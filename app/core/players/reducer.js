@@ -7,7 +7,10 @@ import { rosterActions } from '@core/rosters'
 import { auctionActions } from '@core/auction'
 import { appActions } from '@core/app'
 import { data_view_request_actions } from '@core/data-view-request/actions'
-import DefaultPlayersViews from './default-players-views'
+import DefaultPlayersViews, {
+  default_players_view_key,
+  default_players_view_order_by
+} from './default-players-views'
 
 import { constants, league_has_starting_position } from '@libs-shared'
 
@@ -35,9 +38,9 @@ const initialState = new Map({
   week: new List([constants.fantasy_season_week]),
   items: new Map(),
   order: 'desc',
-  selected_players_page_view: DefaultPlayersViews.season_projections.key,
+  selected_players_page_view: default_players_view_key,
   players_page_views: new Map(DefaultPlayersViews),
-  orderBy: DefaultPlayersViews.season_projections.order_by,
+  orderBy: default_players_view_order_by,
   watchlist: new Set(),
   watchlistOnly: false,
   cutlist: new List(),

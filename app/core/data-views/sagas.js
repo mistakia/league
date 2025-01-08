@@ -1,7 +1,9 @@
 import { takeLatest, fork, call, select, put } from 'redux-saga/effects'
 
 import { data_views_actions } from './actions'
-import { default_data_views } from './default-data-views'
+import {
+  default_data_view_view_id
+} from './default-data-views'
 import {
   post_data_view,
   get_data_views,
@@ -135,9 +137,7 @@ export function* handle_delete_data_view_fulfilled({ payload }) {
   const selected_view_id = yield select(get_selected_data_view_id)
   if (payload.opts.view_id === selected_view_id) {
     yield put(
-      data_views_actions.set_selected_data_view(
-        default_data_views.SEASON_PROJECTIONS.view_id
-      )
+      data_views_actions.set_selected_data_view(default_data_view_view_id)
     )
   }
 
