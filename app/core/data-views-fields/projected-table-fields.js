@@ -51,6 +51,7 @@ export default function ({ week }) {
     header_label: label,
     player_value_path: `${period.toLowerCase().replaceAll('-', '_')}_projected_${base_name}`,
     ...(options.fixed && { fixed: options.fixed }),
+    ...(options.reverse_percentiles && { reverse_percentiles: true }),
     size: 70,
     splits:
       period === 'Season'
@@ -120,7 +121,7 @@ export default function ({ week }) {
       title: 'Interceptions',
       groups: [COLUMN_GROUPS.PASSING],
       label: 'INT',
-      options: { fixed: 1 }
+      options: { fixed: 1, reverse_percentiles: true }
     }),
     ...create_field({
       base_name: 'rush_atts',
@@ -146,7 +147,7 @@ export default function ({ week }) {
       title: 'Fumbles',
       groups: [COLUMN_GROUPS.RUSHING],
       label: 'FUM',
-      options: { fixed: 1 }
+      options: { fixed: 1, reverse_percentiles: true }
     }),
     ...create_field({
       base_name: 'targets',

@@ -40,7 +40,8 @@ router.get('/all', async (req, res) => {
         .where('nfl_plays.year', year)
         .where('nfl_plays.seas_type', seas_type)
 
-      await redis_cache.set(cache_key, data, 15 * 60) // Cache for 15 minutes
+      // Cache for 15 minutes
+      await redis_cache.set(cache_key, data, 15 * 60)
     }
 
     res.send(data)

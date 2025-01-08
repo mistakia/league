@@ -73,13 +73,15 @@ export default {
   player_points_added_rank_from_seasonlogs: from_league_format_seasonlogs({
     column_title: 'Points Added Rank (Season)',
     header_label: 'Pts+ Rnk',
-    player_value_path: 'points_added_rnk_from_seasonlogs'
+    player_value_path: 'points_added_rnk_from_seasonlogs',
+    reverse_percentiles: true
   }),
   player_points_added_position_rank_from_seasonlogs:
     from_league_format_seasonlogs({
       column_title: 'Points Added Position Rank (Season)',
       header_label: 'Pts+ Pos Rnk',
-      player_value_path: 'points_added_pos_rnk_from_seasonlogs'
+      player_value_path: 'points_added_pos_rnk_from_seasonlogs',
+      reverse_percentiles: true
     }),
 
   player_startable_games_from_careerlogs: from_league_format_careerlogs({
@@ -148,6 +150,7 @@ export default {
   player_draft_rank_from_careerlogs: from_league_format_careerlogs({
     column_title: 'Draft Class Rank',
     header_label: 'Draft Rnk',
-    player_value_path: 'draft_rank_from_careerlogs'
+    player_value_path: 'draft_rank_from_careerlogs',
+    reverse_percentiles: true
   })
 }

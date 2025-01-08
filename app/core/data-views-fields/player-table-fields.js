@@ -128,7 +128,8 @@ export default function ({ is_logged_in }) {
       header_label: 'Age',
       player_value_path: 'age',
       size: 60,
-      data_type: table_constants.TABLE_DATA_TYPES.NUMBER
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      reverse_percentiles: true
     },
     player_forty_yard_dash: {
       column_title: '40 Yard Dash',
@@ -136,7 +137,8 @@ export default function ({ is_logged_in }) {
       size: 60,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_groups: [COLUMN_GROUPS.MEASURABLES],
-      player_value_path: 'forty'
+      player_value_path: 'forty',
+      reverse_percentiles: true
     },
     player_bench_press: {
       column_title: 'Bench Press',
@@ -168,7 +170,8 @@ export default function ({ is_logged_in }) {
       size: 60,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_groups: [COLUMN_GROUPS.MEASURABLES],
-      player_value_path: 'shuttle'
+      player_value_path: 'shuttle',
+      reverse_percentiles: true
     },
     player_three_cone_drill: {
       column_title: 'Three Cone Drill',
@@ -176,7 +179,8 @@ export default function ({ is_logged_in }) {
       size: 60,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_groups: [COLUMN_GROUPS.MEASURABLES],
-      player_value_path: 'cone'
+      player_value_path: 'cone',
+      reverse_percentiles: true
     },
     player_arm_length: {
       column_title: 'Arm Length',
@@ -200,7 +204,8 @@ export default function ({ is_logged_in }) {
       size: 50,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_groups: [COLUMN_GROUPS.DRAFT],
-      player_value_path: 'dpos'
+      player_value_path: 'dpos',
+      reverse_percentiles: true
     },
     player_draft_round: {
       column_title: 'Draft Round',
@@ -208,7 +213,8 @@ export default function ({ is_logged_in }) {
       size: 50,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_groups: [COLUMN_GROUPS.DRAFT],
-      player_value_path: 'round'
+      player_value_path: 'round',
+      reverse_percentiles: true
     },
     player_college: {
       column_title: 'College',

@@ -21,6 +21,7 @@ const get_players_percentiles = createSelector(
   get_data_views_fields,
   (data_view_items, selected_data_view, data_views_fields) => {
     const percentile_stat_keys = []
+    const reverse_percentile_stats = {}
     const table_state_columns = []
     for (const [
       index,
@@ -59,13 +60,18 @@ const get_players_percentiles = createSelector(
       )
 
       if (field.data_type === table_constants.TABLE_DATA_TYPES.NUMBER) {
-        percentile_stat_keys.push(`${field.player_value_path}_${column_index}`)
+        const stat_key = `${field.player_value_path}_${column_index}`
+        percentile_stat_keys.push(stat_key)
+        if (field.reverse_percentiles) {
+          reverse_percentile_stats[stat_key] = true
+        }
       }
     }
 
     const percentiles = calculatePercentiles({
       items: data_view_items.toJS(),
-      stats: percentile_stat_keys
+      stats: percentile_stat_keys,
+      reverse_percentile_stats
     })
 
     return percentiles

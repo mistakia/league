@@ -29,7 +29,8 @@ export default function ({ is_logged_in }) {
     player_pff_defense_rank: pff_seasonlog_field({
       column_title: 'PFF Defense Rank',
       header_label: 'Def Rank',
-      player_value_path: 'pff_defense_rank'
+      player_value_path: 'pff_defense_rank',
+      reverse_percentiles: true
     }),
     player_pff_grade_position: pff_seasonlog_field({
       column_title: 'PFF Grade Position',
@@ -70,7 +71,8 @@ export default function ({ is_logged_in }) {
     player_pff_punter_rank: pff_seasonlog_field({
       column_title: 'PFF Punter Rank',
       header_label: 'Punt Rank',
-      player_value_path: 'pff_punter_rank'
+      player_value_path: 'pff_punter_rank',
+      reverse_percentiles: true
     }),
     player_pff_pass_rush: pff_seasonlog_field({
       column_title: 'PFF Pass Rush Grade',
@@ -95,7 +97,8 @@ export default function ({ is_logged_in }) {
     player_pff_offense_ranked: pff_seasonlog_field({
       column_title: 'PFF Offense Ranked',
       header_label: 'Off Ranked',
-      player_value_path: 'pff_offense_ranked'
+      player_value_path: 'pff_offense_ranked',
+      reverse_percentiles: true
     }),
     player_pff_defense_snaps: pff_seasonlog_field({
       column_title: 'PFF Defense Snaps',
@@ -135,7 +138,8 @@ export default function ({ is_logged_in }) {
     player_pff_defense_ranked: pff_seasonlog_field({
       column_title: 'PFF Defense Ranked',
       header_label: 'Def Ranked',
-      player_value_path: 'pff_defense_ranked'
+      player_value_path: 'pff_defense_ranked',
+      reverse_percentiles: true
     }),
     player_pff_pass_rush_snaps: pff_seasonlog_field({
       column_title: 'PFF Pass Rush Snaps',
@@ -155,7 +159,8 @@ export default function ({ is_logged_in }) {
     player_pff_special_teams_rank: pff_seasonlog_field({
       column_title: 'PFF Special Teams Rank',
       header_label: 'ST Rank',
-      player_value_path: 'pff_special_teams_rank'
+      player_value_path: 'pff_special_teams_rank',
+      reverse_percentiles: true
     }),
     player_pff_run_snaps: pff_seasonlog_field({
       column_title: 'PFF Run Snaps',
@@ -185,7 +190,8 @@ export default function ({ is_logged_in }) {
     player_pff_offense_rank: pff_seasonlog_field({
       column_title: 'PFF Offense Rank',
       header_label: 'Off Rank',
-      player_value_path: 'pff_offense_rank'
+      player_value_path: 'pff_offense_rank',
+      reverse_percentiles: true
     })
   }
 
