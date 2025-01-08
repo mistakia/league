@@ -7,7 +7,8 @@ import {
   career_game,
   year,
   week,
-  year_offset
+  year_offset,
+  seas_type
 } from './common-column-params.mjs'
 
 const score_diff_preset_values = [
@@ -251,6 +252,7 @@ export default {
   //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
   // },
   week,
+  seas_type,
 
   ...nfl_games_params,
 
