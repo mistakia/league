@@ -155,7 +155,7 @@ const player_betting_market_with = ({
       qb.join('nfl_games', function () {
         this.on('nfl_games.esbid', '=', 'prop_markets_index.esbid')
         this.andOn('nfl_games.year', '=', 'prop_markets_index.year')
-        this.andOn('nfl_games.seas_type', '=', seas_type)
+        this.andOn('nfl_games.seas_type', '=', db.raw('?', [seas_type]))
         if (week) {
           this.andOn('nfl_games.week', '=', db.raw('?', [week]))
         }
@@ -316,7 +316,7 @@ const team_betting_market_with = ({
         this.on(`nfl_games.esbid`, '=', `prop_markets_index.esbid`)
         this.andOn(`nfl_games.year`, '=', `prop_markets_index.year`)
         this.andOn(`nfl_games.week`, '=', db.raw('?', [week]))
-        this.andOn(`nfl_games.seas_type`, '=', seas_type)
+        this.andOn(`nfl_games.seas_type`, '=', db.raw('?', [seas_type]))
       })
     }
   })
@@ -400,7 +400,7 @@ const team_game_implied_team_total_with = ({
       .andWhere('prop_markets_index.year', year)
       .andWhere('prop_markets_index.source_id', source_id)
       .andWhere('nfl_games.week', week)
-      .andWhere('nfl_games.seas_type', seas_type)
+      .andWhere('nfl_games.seas_type', db.raw('?', [seas_type]))
   })
 
   query.with(total_cte, (qb) => {
@@ -427,7 +427,7 @@ const team_game_implied_team_total_with = ({
       .andWhere('prop_markets_index.year', year)
       .andWhere('prop_markets_index.source_id', source_id)
       .andWhere('nfl_games.week', week)
-      .andWhere('nfl_games.seas_type', seas_type)
+      .andWhere('nfl_games.seas_type', db.raw('?', [seas_type]))
   })
 
   query.with(with_table_name, (qb) => {
