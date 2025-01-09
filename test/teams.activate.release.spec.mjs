@@ -1,6 +1,6 @@
 /* global describe before beforeEach it */
-import chai from 'chai'
-import chaiHTTP from 'chai-http'
+import * as chai from 'chai'
+import { default as chai_http, request as chai_request } from 'chai-http'
 import MockDate from 'mockdate'
 
 import server from '#api'
@@ -19,7 +19,7 @@ import {
 process.env.NODE_ENV = 'test'
 
 chai.should()
-chai.use(chaiHTTP)
+chai.use(chai_http)
 const expect = chai.expect
 const { start } = constants.season
 
@@ -55,8 +55,7 @@ describe('API /teams - activate', function () {
       const player1 = players.find((p) => p.slot === constants.slots.IR)
       const player2 = players.find((p) => p.slot === constants.slots.BENCH)
 
-      const res = await chai
-        .request(server)
+      const res = await chai_request.execute(server)
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -143,8 +142,7 @@ describe('API /teams - activate', function () {
         value
       })
 
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -173,8 +171,7 @@ describe('API /teams - activate', function () {
         value
       })
 
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -204,8 +201,7 @@ describe('API /teams - activate', function () {
         (p) => p.slot === constants.slots.IR && p.pid !== player1.pid
       )
 
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -244,8 +240,7 @@ describe('API /teams - activate', function () {
         value
       })
 
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({

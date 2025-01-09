@@ -1,8 +1,7 @@
 /* global describe before beforeEach it */
-import chai from 'chai'
-import chaiHTTP from 'chai-http'
+import * as chai from 'chai'
+import { default as chai_http, request as chai_request } from 'chai-http'
 import MockDate from 'mockdate'
-import dirtyChai from 'dirty-chai'
 
 import server from '#api'
 import knex from '#db'
@@ -13,8 +12,7 @@ import league from '#db/seeds/league.mjs'
 
 chai.should()
 process.env.NODE_ENV = 'test'
-chai.use(chaiHTTP)
-chai.use(dirtyChai)
+chai.use(chai_http)
 const expect = chai.expect
 const { start } = constants.season
 
@@ -62,19 +60,18 @@ describe('API /poaches - process', function () {
       await knex('poaches').insert(poach)
 
       // Process the poach
-      const res = await chai
-        .request(server)
+      const res = await chai_request.execute(server)
         .post(`/api/leagues/${leagueId}/poaches/${poach.uid}/process`)
         .set('Authorization', `Bearer ${user1}`)
 
       // Check response
-      res.should.have.status(200)
-      res.body.should.have.property('processed').not.null()
+      expect(res.status).to.equal(200)
+      expect(res.body.processed).to.not.equal(null)
 
       // Check poaches table
       const updatedPoach = await knex('poaches').where('uid', poach.uid).first()
-      updatedPoach.should.have.property('succ', true)
-      updatedPoach.should.have.property('processed').not.null()
+      expect(updatedPoach.succ).to.equal(true)
+      expect(updatedPoach.processed).to.not.equal(null)
 
       // Check rosters
       const poacherRoster = await knex('rosters_players')
@@ -86,8 +83,8 @@ describe('API /poaches - process', function () {
         .andWhere('pid', poach.pid)
         .first()
 
-      expect(poacherRoster).to.be.not.undefined()
-      expect(poachedRoster).to.be.undefined()
+      expect(poacherRoster).to.not.equal(undefined)
+      expect(poachedRoster).to.equal(undefined)
     })
   })
 })

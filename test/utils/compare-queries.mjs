@@ -1,4 +1,4 @@
-import chai from 'chai'
+import * as chai from 'chai'
 const { expect } = chai
 
 export default function compare_queries(actual_query, expected_query) {

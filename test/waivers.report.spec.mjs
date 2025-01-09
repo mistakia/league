@@ -1,6 +1,6 @@
 /* global describe before it beforeEach */
-import chai from 'chai'
-import chaiHTTP from 'chai-http'
+import * as chai from 'chai'
+import { default as chai_http, request as chai_request } from 'chai-http'
 import MockDate from 'mockdate'
 
 import knex from '#db'
@@ -12,7 +12,7 @@ process.env.NODE_ENV = 'test'
 
 const { start } = constants.season
 chai.should()
-chai.use(chaiHTTP)
+chai.use(chai_http)
 
 describe('API /waivers -report', function () {
   before(async function () {

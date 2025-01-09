@@ -1,6 +1,6 @@
 /* global describe, before, it */
-import chai from 'chai'
-import chaiHTTP from 'chai-http'
+import * as chai from 'chai'
+import { default as chai_http, request as chai_request } from 'chai-http'
 
 import server from '#api'
 import knex from '#db'
@@ -8,7 +8,7 @@ import users from '#db/seeds/users.mjs'
 import { error } from './utils/index.mjs'
 
 process.env.NODE_ENV = 'test'
-chai.use(chaiHTTP)
+chai.use(chai_http)
 chai.should()
 
 describe('API /auth', function () {
@@ -20,7 +20,7 @@ describe('API /auth', function () {
 
   describe('POST /api/auth/login', () => {
     it('should login successfully with email', async () => {
-      const res = await chai.request(server).post('/api/auth/login').send({
+      const res = await chai_request.execute(server).post('/api/auth/login').send({
         email_or_username: 'user1@email.com',
         password: 'password1'
       })
@@ -31,7 +31,7 @@ describe('API /auth', function () {
     })
 
     it('should login successfully with username', async () => {
-      const res = await chai.request(server).post('/api/auth/login').send({
+      const res = await chai_request.execute(server).post('/api/auth/login').send({
         email_or_username: 'user1',
         password: 'password1'
       })
@@ -42,8 +42,7 @@ describe('API /auth', function () {
     })
 
     it('should return error for missing email or username', async () => {
-      const res = chai
-        .request(server)
+      const res = chai_request.execute(server)
         .post('/api/auth/login')
         .send({ password: 'password1' })
 
@@ -51,8 +50,7 @@ describe('API /auth', function () {
     })
 
     it('should return error for missing password', async () => {
-      const res = chai
-        .request(server)
+      const res = chai_request.execute(server)
         .post('/api/auth/login')
         .send({ email_or_username: 'user1@email.com' })
 
@@ -60,7 +58,7 @@ describe('API /auth', function () {
     })
 
     it('should return error for invalid credentials', async () => {
-      const res = chai.request(server).post('/api/auth/login').send({
+      const res = chai_request.execute(server).post('/api/auth/login').send({
         email_or_username: 'user1@email.com',
         password: 'wrongpassword'
       })
@@ -81,7 +79,7 @@ describe('API /auth', function () {
         uses_count: 0
       })
 
-      const res = await chai.request(server).post('/api/auth/register').send({
+      const res = await chai_request.execute(server).post('/api/auth/register').send({
         email: 'newuser@email.com',
         password: 'newpassword123',
         username: 'newuser',
@@ -118,7 +116,7 @@ describe('API /auth', function () {
     })
 
     it('should return error for missing password', async () => {
-      const res = chai.request(server).post('/api/auth/register').send({
+      const res = chai_request.execute(server).post('/api/auth/register').send({
         email: 'newuser2@email.com',
         username: 'newuser2',
         invite_code: 'validinvitecode'
@@ -128,7 +126,7 @@ describe('API /auth', function () {
     })
 
     it('should return error for invalid email', async () => {
-      const res = chai.request(server).post('/api/auth/register').send({
+      const res = chai_request.execute(server).post('/api/auth/register').send({
         email: 'invalidemail',
         password: 'password123',
         username: 'newuser3',
@@ -139,7 +137,7 @@ describe('API /auth', function () {
     })
 
     it('should return error for existing email', async () => {
-      const res = chai.request(server).post('/api/auth/register').send({
+      const res = chai_request.execute(server).post('/api/auth/register').send({
         email: 'user1@email.com',
         password: 'password123',
         username: 'newuser4',
@@ -150,7 +148,7 @@ describe('API /auth', function () {
     })
 
     it('should return error for invalid username', async () => {
-      const res = chai.request(server).post('/api/auth/register').send({
+      const res = chai_request.execute(server).post('/api/auth/register').send({
         email: 'newuser5@email.com',
         password: 'password123',
         username: 'in valid',
@@ -164,7 +162,7 @@ describe('API /auth', function () {
     })
 
     it('should return error for existing username', async () => {
-      const res = chai.request(server).post('/api/auth/register').send({
+      const res = chai_request.execute(server).post('/api/auth/register').send({
         email: 'newuser6@email.com',
         password: 'password123',
         username: 'user1',
@@ -175,7 +173,7 @@ describe('API /auth', function () {
     })
 
     it('should return error for missing invite code', async () => {
-      const res = chai.request(server).post('/api/auth/register').send({
+      const res = chai_request.execute(server).post('/api/auth/register').send({
         email: 'newuser7@email.com',
         password: 'password123',
         username: 'newuser7'
@@ -185,7 +183,7 @@ describe('API /auth', function () {
     })
 
     it('should return error for invalid invite code', async () => {
-      const res = chai.request(server).post('/api/auth/register').send({
+      const res = chai_request.execute(server).post('/api/auth/register').send({
         email: 'newuser8@email.com',
         password: 'password123',
         username: 'newuser8',
@@ -210,7 +208,7 @@ describe('API /auth', function () {
         expires_at: past_date
       })
 
-      const res = await chai.request(server).post('/api/auth/register').send({
+      const res = await chai_request.execute(server).post('/api/auth/register').send({
         email: 'expireduser@email.com',
         password: 'password123',
         username: 'expireduser',
@@ -235,7 +233,7 @@ describe('API /auth', function () {
         max_uses: 5
       })
 
-      const res = await chai.request(server).post('/api/auth/register').send({
+      const res = await chai_request.execute(server).post('/api/auth/register').send({
         email: 'maxusesuser@email.com',
         password: 'password123',
         username: 'maxusesuser',

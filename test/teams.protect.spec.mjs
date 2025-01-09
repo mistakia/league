@@ -1,6 +1,6 @@
 /* global describe before it */
-import chai from 'chai'
-import chaiHTTP from 'chai-http'
+import * as chai from 'chai'
+import { default as chai_http, request as chai_request } from 'chai-http'
 import MockDate from 'mockdate'
 
 import server from '#api'
@@ -21,7 +21,7 @@ import {
 process.env.NODE_ENV = 'test'
 
 chai.should()
-chai.use(chaiHTTP)
+chai.use(chai_http)
 
 describe('API /teams - protect', function () {
   before(async function () {
@@ -48,13 +48,12 @@ describe('API /teams - protect', function () {
 
   describe('errors', function () {
     it('not logged in', async () => {
-      const request = chai.request(server).post('/api/teams/1/protect')
+      const request = chai_request.execute(server).post('/api/teams/1/protect')
       await notLoggedIn(request)
     })
 
     it('missing pid', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/protect')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -65,8 +64,7 @@ describe('API /teams - protect', function () {
     })
 
     it('missing leagueId', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/protect')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -77,8 +75,7 @@ describe('API /teams - protect', function () {
     })
 
     it('teamId does not belong to userId', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/protect')
         .set('Authorization', `Bearer ${user2}`)
         .send({
@@ -91,8 +88,7 @@ describe('API /teams - protect', function () {
 
     it('player not on team', async () => {
       const player = await selectPlayer()
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/protect')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -112,8 +108,7 @@ describe('API /teams - protect', function () {
         userId: 1,
         slot: constants.slots.PSP
       })
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/protect')
         .set('Authorization', `Bearer ${user1}`)
         .send({

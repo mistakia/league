@@ -32,7 +32,7 @@ const calculatePercentiles = ({
       }
     } else {
       const reverse_percentiles = reverse_percentile_stats[stat] || false
-      const percentile_points = reverse_percentiles 
+      const percentile_points = reverse_percentiles
         ? [75, 50, 25, 10, 5, 2, 1, 100, 0]
         : [25, 50, 75, 90, 95, 98, 99, 0, 100]
 

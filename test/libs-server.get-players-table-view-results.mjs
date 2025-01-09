@@ -1,6 +1,6 @@
 /* global describe it before */
 
-import chai from 'chai'
+import * as chai from 'chai'
 import MockDate from 'mockdate'
 import debug from 'debug'
 

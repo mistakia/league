@@ -2,13 +2,10 @@ import React, { useState } from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
-import HighchartsMore from 'highcharts/highcharts-more'
+import 'highcharts/highcharts-more'
 import { ToggleButtonGroup, ToggleButton } from '@mui/material'
 
 import './probability-leverage-chart.styl'
-
-// Initialize HighchartsMore
-HighchartsMore(Highcharts)
 
 const ProbabilityLeverageChart = ({ teams }) => {
   const [chart_type, set_chart_type] = useState('playoffs')

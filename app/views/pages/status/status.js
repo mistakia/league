@@ -5,7 +5,7 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import { green, red } from '@mui/material/colors'
 import List from '@mui/material/List'
-import ListItem from '@mui/material/ListItem'
+import ListItemButton from '@mui/material/ListItemButton'
 import ListItemSecondaryAction from '@mui/material/ListItemSecondaryAction'
 import ListItemText from '@mui/material/ListItemText'
 import CheckCircleOutlineIcon from '@mui/icons-material/CheckCircleOutline'
@@ -46,13 +46,13 @@ const StatusItem = ({ status_item, index }) => {
   }
 
   return (
-    <ListItem key={index} button onClick={handle_click}>
+    <ListItemButton key={index} onClick={handle_click}>
       <ListItemText
         primary={job_title_by_id[status_item.type]}
         secondary={expanded ? message : secondary}
       />
       <ListItemSecondaryAction>{icon}</ListItemSecondaryAction>
-    </ListItem>
+    </ListItemButton>
   )
 }
 

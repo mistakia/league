@@ -2,7 +2,7 @@ import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 import List from '@mui/material/List'
-import ListItem from '@mui/material/ListItem'
+import ListItemButton from '@mui/material/ListItemButton'
 import MenuItem from '@mui/material/MenuItem'
 import Menu from '@mui/material/Menu'
 
@@ -48,13 +48,13 @@ export default class TradeSelectTeam extends React.Component {
     return (
       <div>
         <List component='nav'>
-          <ListItem
+          <ListItemButton
             button
             disabled={Boolean(trade.uid)}
             onClick={this.handleOpen}
           >
             <TeamName tid={trade.accept_tid} /> Sends
-          </ListItem>
+          </ListItemButton>
         </List>
         <Menu
           anchorEl={anchorEl}

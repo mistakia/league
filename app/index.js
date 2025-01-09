@@ -6,7 +6,7 @@ import 'whatwg-fetch'
 import Root from '@views/root'
 import { constants } from '@libs-shared'
 
-import 'react-virtualized/styles.css'
+import 'react-virtualized-compat/styles.css'
 
 document.addEventListener('DOMContentLoaded', () => {
   const rootElement = document.getElementById('root')

@@ -1,6 +1,6 @@
 /* global describe before beforeEach it */
-import chai from 'chai'
-import chaiHTTP from 'chai-http'
+import * as chai from 'chai'
+import { default as chai_http, request as chai_request } from 'chai-http'
 import MockDate from 'mockdate'
 
 import server from '#api'
@@ -22,7 +22,7 @@ import {
 process.env.NODE_ENV = 'test'
 
 chai.should()
-chai.use(chaiHTTP)
+chai.use(chai_http)
 const expect = chai.expect
 const { start } = constants.season
 
@@ -65,8 +65,7 @@ describe('API /teams - restricted free agency', function () {
         userId
       })
 
-      const res = await chai
-        .request(server)
+      const res = await chai_request.execute(server)
         .post('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -144,8 +143,7 @@ describe('API /teams - restricted free agency', function () {
         userId: 2
       })
 
-      const res1 = await chai
-        .request(server)
+      const res1 = await chai_request.execute(server)
         .post('/api/teams/2/tag/transition')
         .set('Authorization', `Bearer ${user2}`)
         .send({
@@ -157,8 +155,7 @@ describe('API /teams - restricted free agency', function () {
 
       res1.should.have.status(200)
 
-      const res2 = await chai
-        .request(server)
+      const res2 = await chai_request.execute(server)
         .post('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -224,8 +221,7 @@ describe('API /teams - restricted free agency', function () {
 
       await fillRoster({ leagueId, teamId, excludeIR: true, exclude_pids })
 
-      const res1 = await chai
-        .request(server)
+      const res1 = await chai_request.execute(server)
         .post('/api/teams/1/cutlist')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -235,8 +231,7 @@ describe('API /teams - restricted free agency', function () {
 
       res1.should.have.status(200)
 
-      const res2 = await chai
-        .request(server)
+      const res2 = await chai_request.execute(server)
         .post('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -290,8 +285,7 @@ describe('API /teams - restricted free agency', function () {
         .where({ lid: leagueId, year: constants.season.year })
         .update({ tran_end: Math.floor(Date.now() / 1000) - 86400 }) // 1 day ago
 
-      const res = await chai
-        .request(server)
+      const res = await chai_request.execute(server)
         .post('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -327,8 +321,7 @@ describe('API /teams - restricted free agency', function () {
       })
 
       // Create initial RFA bid
-      const initial_bid_res = await chai
-        .request(server)
+      const initial_bid_res = await chai_request.execute(server)
         .post(`/api/teams/${original_team_id}/tag/transition`)
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -351,8 +344,7 @@ describe('API /teams - restricted free agency', function () {
         .update({ processed: Math.round(Date.now() / 1000) })
 
       // Attempt to create a competing bid
-      const competing_bid_res = await chai
-        .request(server)
+      const competing_bid_res = await chai_request.execute(server)
         .post(`/api/teams/${competing_team_id}/tag/transition`)
         .set('Authorization', `Bearer ${user2}`)
         .send({
@@ -390,8 +382,7 @@ describe('API /teams - restricted free agency', function () {
       })
 
       // Create initial RFA bid
-      const res1 = await chai
-        .request(server)
+      const res1 = await chai_request.execute(server)
         .post('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -404,8 +395,7 @@ describe('API /teams - restricted free agency', function () {
       res1.should.have.status(200)
 
       // Update the bid
-      const res2 = await chai
-        .request(server)
+      const res2 = await chai_request.execute(server)
         .put('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -441,8 +431,7 @@ describe('API /teams - restricted free agency', function () {
       await addPlayer({ leagueId, player: releasePlayer2, teamId, userId })
 
       // Create initial RFA bid with one release player
-      const res1 = await chai
-        .request(server)
+      const res1 = await chai_request.execute(server)
         .post('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -456,8 +445,7 @@ describe('API /teams - restricted free agency', function () {
       res1.should.have.status(200)
 
       // Update the release players
-      const res2 = await chai
-        .request(server)
+      const res2 = await chai_request.execute(server)
         .put('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -479,8 +467,7 @@ describe('API /teams - restricted free agency', function () {
 
     it('error - invalid player', async () => {
       const invalidPid = 'invalid_pid'
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .put('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -515,8 +502,7 @@ describe('API /teams - restricted free agency', function () {
       })
 
       // Create initial transition bid
-      const res1 = await chai
-        .request(server)
+      const res1 = await chai_request.execute(server)
         .post('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -529,8 +515,7 @@ describe('API /teams - restricted free agency', function () {
       res1.should.have.status(200)
 
       // Nominate the player
-      const res2 = await chai
-        .request(server)
+      const res2 = await chai_request.execute(server)
         .post('/api/teams/1/tag/transition/nominate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -568,8 +553,7 @@ describe('API /teams - restricted free agency', function () {
       })
 
       // Create initial RFA bid
-      const res1 = await chai
-        .request(server)
+      const res1 = await chai_request.execute(server)
         .post('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -582,8 +566,7 @@ describe('API /teams - restricted free agency', function () {
       res1.should.have.status(200)
 
       // Nominate the player
-      const res2 = await chai
-        .request(server)
+      const res2 = await chai_request.execute(server)
         .post('/api/teams/1/tag/transition/nominate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -594,8 +577,7 @@ describe('API /teams - restricted free agency', function () {
       res2.should.have.status(200)
 
       // Remove the nomination
-      const res3 = await chai
-        .request(server)
+      const res3 = await chai_request.execute(server)
         .delete('/api/teams/1/tag/transition/nominate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -617,8 +599,7 @@ describe('API /teams - restricted free agency', function () {
 
     it('error - nominate non-existent RFA bid', async () => {
       const player = await selectPlayer()
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/tag/transition/nominate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -644,8 +625,7 @@ describe('API /teams - restricted free agency', function () {
       })
 
       // Create initial RFA bid
-      const res1 = await chai
-        .request(server)
+      const res1 = await chai_request.execute(server)
         .post('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -663,8 +643,7 @@ describe('API /teams - restricted free agency', function () {
         .update({ processed: Math.floor(Date.now() / 1000) })
 
       // Attempt to nominate the processed bid
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/tag/transition/nominate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -677,8 +656,7 @@ describe('API /teams - restricted free agency', function () {
 
     it('error - remove nomination for non-existent RFA bid', async () => {
       const player = await selectPlayer()
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .delete('/api/teams/1/tag/transition/nominate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -704,8 +682,7 @@ describe('API /teams - restricted free agency', function () {
       })
 
       // Create initial RFA bid
-      const res1 = await chai
-        .request(server)
+      const res1 = await chai_request.execute(server)
         .post('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -723,8 +700,7 @@ describe('API /teams - restricted free agency', function () {
         .update({ processed: Math.floor(Date.now() / 1000) })
 
       // Attempt to remove nomination for the processed bid
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .delete('/api/teams/1/tag/transition/nominate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -742,13 +718,12 @@ describe('API /teams - restricted free agency', function () {
     })
 
     it('not logged in', async () => {
-      const request = chai.request(server).post('/api/teams/1/tag/transition')
+      const request = chai_request.execute(server).post('/api/teams/1/tag/transition')
       await notLoggedIn(request)
     })
 
     it('missing pid', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -761,8 +736,7 @@ describe('API /teams - restricted free agency', function () {
     })
 
     it('missing leagueId', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -775,8 +749,7 @@ describe('API /teams - restricted free agency', function () {
     })
 
     it('missing playerTid', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -789,8 +762,7 @@ describe('API /teams - restricted free agency', function () {
     })
 
     it('invalid bid - negative', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -804,8 +776,7 @@ describe('API /teams - restricted free agency', function () {
     })
 
     it('invalid player - does not exist', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -834,8 +805,7 @@ describe('API /teams - restricted free agency', function () {
         userId
       })
 
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post(`/api/teams/${teamId}/tag/transition`)
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -850,8 +820,7 @@ describe('API /teams - restricted free agency', function () {
     })
 
     it('invalid leagueId - does not exist', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -865,8 +834,7 @@ describe('API /teams - restricted free agency', function () {
     })
 
     it('teamId does not belong to userId', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user2}`)
         .send({
@@ -881,8 +849,7 @@ describe('API /teams - restricted free agency', function () {
 
     it('player not on team', async () => {
       const player = await selectPlayer()
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -897,8 +864,7 @@ describe('API /teams - restricted free agency', function () {
 
     it('competing bid - non-existent original transition bid', async () => {
       const player = await selectPlayer()
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -935,8 +901,7 @@ describe('API /teams - restricted free agency', function () {
       })
 
       // original team bid
-      const res1 = await chai
-        .request(server)
+      const res1 = await chai_request.execute(server)
         .post(`/api/teams/${originalTeamId}/tag/transition`)
         .set('Authorization', `Bearer ${user2}`)
         .send({
@@ -949,8 +914,7 @@ describe('API /teams - restricted free agency', function () {
       res1.should.have.status(200)
 
       // competing team bid
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post(`/api/teams/${competingTeamId}/tag/transition`)
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -990,7 +954,7 @@ describe('API /teams - restricted free agency', function () {
      *   })
 
      *   const request = chai
-     *     .request(server)
+     *     .chai_request.execute(server)
      *     .post(`/api/teams/${teamId}/tag/transition`)
      *     .set('Authorization', `Bearer ${user1}`)
      *     .send({
@@ -1042,7 +1006,7 @@ describe('API /teams - restricted free agency', function () {
      *   })
 
      *   const res1 = await chai
-     *     .request(server)
+     *     .chai_request.execute(server)
      *     .post('/api/teams/1/cutlist')
      *     .set('Authorization', `Bearer ${user1}`)
      *     .send({
@@ -1053,7 +1017,7 @@ describe('API /teams - restricted free agency', function () {
      *   res1.should.have.status(200)
 
      *   const request = chai
-     *     .request(server)
+     *     .chai_request.execute(server)
      *     .post(`/api/teams/${teamId}/tag/transition`)
      *     .set('Authorization', `Bearer ${user1}`)
      *     .send({
@@ -1105,7 +1069,7 @@ describe('API /teams - restricted free agency', function () {
      *   })
 
      *   const request = chai
-     *     .request(server)
+     *     .chai_request.execute(server)
      *     .post(`/api/teams/${teamId}/tag/transition`)
      *     .set('Authorization', `Bearer ${user1}`)
      *     .send({
@@ -1145,7 +1109,7 @@ describe('API /teams - restricted free agency', function () {
      *   })
 
      *   const request = chai
-     *     .request(server)
+     *     .chai_request.execute(server)
      *     .post(`/api/teams/${teamId}/tag/transition`)
      *     .set('Authorization', `Bearer ${user1}`)
      *     .send({
@@ -1203,8 +1167,7 @@ describe('API /teams - restricted free agency', function () {
           tran_end: Math.floor(Date.now() / 1000) - 86400
         })
 
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -1232,8 +1195,7 @@ describe('API /teams - restricted free agency', function () {
       })
 
       // Create initial RFA bid
-      const res1 = await chai
-        .request(server)
+      const res1 = await chai_request.execute(server)
         .post('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -1251,8 +1213,7 @@ describe('API /teams - restricted free agency', function () {
         .update({ processed: Math.floor(Date.now() / 1000) })
 
       // Attempt to delete the processed bid
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .delete('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -1278,8 +1239,7 @@ describe('API /teams - restricted free agency', function () {
       })
 
       // Create initial RFA bid
-      const res1 = await chai
-        .request(server)
+      const res1 = await chai_request.execute(server)
         .post('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -1297,8 +1257,7 @@ describe('API /teams - restricted free agency', function () {
         .update({ announced: Math.floor(Date.now() / 1000) })
 
       // Attempt to delete the announced bid
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .delete('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -1324,8 +1283,7 @@ describe('API /teams - restricted free agency', function () {
       })
 
       // Create initial RFA bid
-      const res1 = await chai
-        .request(server)
+      const res1 = await chai_request.execute(server)
         .post('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -1343,8 +1301,7 @@ describe('API /teams - restricted free agency', function () {
         .update({ processed: Math.floor(Date.now() / 1000) })
 
       // Attempt to update the processed bid
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .put('/api/teams/1/tag/transition')
         .set('Authorization', `Bearer ${user1}`)
         .send({

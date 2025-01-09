@@ -1,4 +1,4 @@
-import chai from 'chai'
+import * as chai from 'chai'
 
 import { getRoster, getLeague } from '#libs-server'
 import { Roster } from '#libs-shared'

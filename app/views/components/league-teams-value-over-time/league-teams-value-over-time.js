@@ -6,14 +6,12 @@ import ToggleButton from '@mui/material/ToggleButton'
 
 import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
-import HighchartsSeriesLabel from 'highcharts/modules/series-label'
+import 'highcharts/modules/series-label'
 
 import { constants } from '#libs-shared'
 import { Team } from '@core/teams'
 
 import './league-teams-value-over-time.styl'
-
-HighchartsSeriesLabel(Highcharts)
 
 export default function LeagueTeamsValueOverTime({
   load_league_team_daily_values,

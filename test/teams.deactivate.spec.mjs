@@ -1,6 +1,6 @@
 /* global describe before beforeEach it */
-import chai from 'chai'
-import chaiHTTP from 'chai-http'
+import * as chai from 'chai'
+import { default as chai_http, request as chai_request } from 'chai-http'
 import MockDate from 'mockdate'
 
 import server from '#api'
@@ -22,7 +22,7 @@ import run from '#scripts/process-waivers-free-agency-active.mjs'
 process.env.NODE_ENV = 'test'
 
 chai.should()
-chai.use(chaiHTTP)
+chai.use(chai_http)
 const expect = chai.expect
 const { start } = constants.season
 
@@ -55,8 +55,7 @@ describe('API /teams - deactivate', function () {
         value
       })
 
-      const res = await chai
-        .request(server)
+      const res = await chai_request.execute(server)
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -131,8 +130,7 @@ describe('API /teams - deactivate', function () {
 
       expect(error).to.equal(undefined)
 
-      const res = await chai
-        .request(server)
+      const res = await chai_request.execute(server)
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -212,13 +210,12 @@ describe('API /teams - deactivate', function () {
     })
 
     it('not logged in', async () => {
-      const request = chai.request(server).post('/api/teams/1/deactivate')
+      const request = chai_request.execute(server).post('/api/teams/1/deactivate')
       await notLoggedIn(request)
     })
 
     it('missing deactivate_pid', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -229,8 +226,7 @@ describe('API /teams - deactivate', function () {
     })
 
     it('missing leagueId', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -241,8 +237,7 @@ describe('API /teams - deactivate', function () {
     })
 
     it('teamId does not belong to userId', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user2}`)
         .send({
@@ -255,8 +250,7 @@ describe('API /teams - deactivate', function () {
 
     it('player not on team', async () => {
       const player = await selectPlayer()
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -276,8 +270,7 @@ describe('API /teams - deactivate', function () {
         userId: 1,
         slot: constants.slots.PS
       })
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -311,8 +304,7 @@ describe('API /teams - deactivate', function () {
         value: 2
       })
 
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -352,8 +344,7 @@ describe('API /teams - deactivate', function () {
         value: 2
       })
 
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -424,8 +415,7 @@ describe('API /teams - deactivate', function () {
 
       expect(err).to.equal(undefined)
 
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
