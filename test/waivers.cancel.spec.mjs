@@ -1,6 +1,6 @@
 /* global describe before it */
-import chai from 'chai'
-import chaiHTTP from 'chai-http'
+import * as chai from 'chai'
+import { default as chai_http, request as chai_request } from 'chai-http'
 import MockDate from 'mockdate'
 
 import server from '#api'
@@ -15,7 +15,7 @@ import { notLoggedIn, missing, invalid } from './utils/index.mjs'
 process.env.NODE_ENV = 'test'
 
 chai.should()
-chai.use(chaiHTTP)
+chai.use(chai_http)
 const { start } = constants.season
 
 describe('API /waivers - cancel', function () {
@@ -49,8 +49,7 @@ describe('API /waivers - cancel', function () {
     const player_row = player_rows[0]
     pid = player_row.pid
 
-    await chai
-      .request(server)
+    await chai_request.execute(server)
       .post('/api/leagues/1/draft')
       .set('Authorization', `Bearer ${user1}`)
       .send({
@@ -69,8 +68,7 @@ describe('API /waivers - cancel', function () {
 
     // submit poaching waiver
     const teamId = 2
-    const submitRes = await chai
-      .request(server)
+    const submitRes = await chai_request.execute(server)
       .post('/api/leagues/1/waivers')
       .set('Authorization', `Bearer ${user2}`)
       .send({
@@ -82,8 +80,7 @@ describe('API /waivers - cancel', function () {
 
     waiverId = submitRes.body.uid
 
-    const res = await chai
-      .request(server)
+    const res = await chai_request.execute(server)
       .post(`/api/leagues/1/waivers/${waiverId}/cancel`)
       .set('Authorization', `Bearer ${user2}`)
       .send({
@@ -105,8 +102,7 @@ describe('API /waivers - cancel', function () {
     // submit poaching waiver
     const teamId = 2
     const leagueId = 1
-    const submitRes = await chai
-      .request(server)
+    const submitRes = await chai_request.execute(server)
       .post('/api/leagues/1/waivers')
       .set('Authorization', `Bearer ${user2}`)
       .send({
@@ -118,8 +114,7 @@ describe('API /waivers - cancel', function () {
 
     const waiverId = submitRes.body.uid
 
-    const res = await chai
-      .request(server)
+    const res = await chai_request.execute(server)
       .post(`/api/leagues/1/waivers/${waiverId}/cancel`)
       .set('Authorization', `Bearer ${user2}`)
       .send({
@@ -143,15 +138,13 @@ describe('API /waivers - cancel', function () {
 
   describe('errors', function () {
     it('not logged in', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post(`/api/leagues/1/waivers/${waiverId}/cancel`)
       await notLoggedIn(request)
     })
 
     it('missing teamId', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post(`/api/leagues/1/waivers/${waiverId}/cancel`)
         .set('Authorization', `Bearer ${user2}`)
         .send({
@@ -162,8 +155,7 @@ describe('API /waivers - cancel', function () {
     })
 
     it('missing leagueId', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post(`/api/leagues/1/waivers/${waiverId}/cancel`)
         .set('Authorization', `Bearer ${user2}`)
         .send({
@@ -174,8 +166,7 @@ describe('API /waivers - cancel', function () {
     })
 
     it('invalid teamId', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post(`/api/leagues/1/waivers/${waiverId}/cancel`)
         .set('Authorization', `Bearer ${user2}`)
         .send({
@@ -187,8 +178,7 @@ describe('API /waivers - cancel', function () {
     })
 
     it('invalid leagueId', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post(`/api/leagues/1/waivers/${waiverId}/cancel`)
         .set('Authorization', `Bearer ${user2}`)
         .send({
@@ -200,8 +190,7 @@ describe('API /waivers - cancel', function () {
     })
 
     it('teamId does not belong to userId', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post(`/api/leagues/1/waivers/${waiverId}/cancel`)
         .set('Authorization', `Bearer ${user2}`)
         .send({
@@ -213,8 +202,7 @@ describe('API /waivers - cancel', function () {
     })
 
     it('waiverId does not belong to teamId', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post(`/api/leagues/1/waivers/${waiverId}/cancel`)
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -226,8 +214,7 @@ describe('API /waivers - cancel', function () {
     })
 
     it('waiver already cancelled', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post(`/api/leagues/1/waivers/${waiverId}/cancel`)
         .set('Authorization', `Bearer ${user2}`)
         .send({

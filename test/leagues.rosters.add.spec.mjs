@@ -1,6 +1,6 @@
 /* global describe before it beforeEach */
-import chai from 'chai'
-import chaiHTTP from 'chai-http'
+import * as chai from 'chai'
+import { default as chai_http, request as chai_request } from 'chai-http'
 import MockDate from 'mockdate'
 
 import server from '#api'
@@ -13,7 +13,7 @@ import { selectPlayer, missing, invalid, notLoggedIn } from './utils/index.mjs'
 
 process.env.NODE_ENV = 'test'
 chai.should()
-chai.use(chaiHTTP)
+chai.use(chai_http)
 const expect = chai.expect
 const { start } = constants.season
 
@@ -34,8 +34,7 @@ describe('API /leagues/rosters - add', function () {
       const leagueId = 1
       const teamId = 2
       const value = 10
-      const res = await chai
-        .request(server)
+      const res = await chai_request.execute(server)
         .post('/api/leagues/1/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -83,13 +82,12 @@ describe('API /leagues/rosters - add', function () {
     })
 
     it('not logged in', async () => {
-      const request = chai.request(server).post('/api/leagues/1/rosters')
+      const request = chai_request.execute(server).post('/api/leagues/1/rosters')
       await notLoggedIn(request)
     })
 
     it('missing pid', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/leagues/1/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -101,8 +99,7 @@ describe('API /leagues/rosters - add', function () {
     })
 
     it('missing teamId', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/leagues/1/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -114,8 +111,7 @@ describe('API /leagues/rosters - add', function () {
     })
 
     it('missing leagueId', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/leagues/1/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -128,8 +124,7 @@ describe('API /leagues/rosters - add', function () {
 
     it('invalid leagueId', async () => {
       const player = await selectPlayer()
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/leagues/2/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -142,8 +137,7 @@ describe('API /leagues/rosters - add', function () {
     })
 
     it('invalid player - does not exist', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/leagues/2/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -157,8 +151,7 @@ describe('API /leagues/rosters - add', function () {
 
     it('invalid value', async () => {
       const player = await selectPlayer()
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/leagues/2/rosters')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -173,8 +166,7 @@ describe('API /leagues/rosters - add', function () {
 
     it('user is not commish', async () => {
       const player = await selectPlayer()
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/leagues/1/rosters')
         .set('Authorization', `Bearer ${user2}`)
         .send({

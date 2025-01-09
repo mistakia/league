@@ -1,7 +1,7 @@
 import React, { useEffect, useRef } from 'react'
 import PropTypes from 'prop-types'
-import AutoSizer from 'react-virtualized/dist/es/AutoSizer'
-import List from 'react-virtualized/dist/es/List'
+import AutoSizer from 'react-virtualized-compat/dist/es/AutoSizer'
+import List from 'react-virtualized-compat/dist/es/List'
 
 import { constants, bookmaker_constants } from '@libs-shared'
 import PlayerName from '@components/player-name'

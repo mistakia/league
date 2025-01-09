@@ -1,7 +1,4 @@
 import React from 'react'
-import DragIndicatorIcon from '@mui/icons-material/DragIndicator'
-import { sortableHandle } from 'react-sortable-hoc'
-
 import { constants, getExtensionAmount } from '@libs-shared'
 import PlayerName from '@components/player-name'
 import IconButton from '@components/icon-button'
@@ -10,19 +7,13 @@ import PlayerHeadshotGroup from '@components/player-headshot-group'
 import TeamName from '@components/team-name'
 import PercentileMetric from '@components/percentile-metric'
 
-const DragHandle = sortableHandle(() => (
-  <div className='player__item-action reorder table__cell'>
-    <DragIndicatorIcon />
-  </div>
-))
-
 class PlayerRoster extends Player {
   render() {
     const {
       playerMap,
       selected,
       claim,
-      reorder,
+      dragHandle,
       waiverId,
       poachId,
       isHosted,
@@ -128,7 +119,7 @@ class PlayerRoster extends Player {
 
     return (
       <div className={classNames.join(' ')}>
-        {reorder && <DragHandle />}
+        {dragHandle}
         <div className='table__cell text sticky__column lead-cell'>
           <PlayerName
             pid={playerMap.get('pid')}

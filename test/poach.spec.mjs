@@ -1,6 +1,6 @@
 /* global describe before it beforeEach */
-import chai from 'chai'
-import chaiHTTP from 'chai-http'
+import * as chai from 'chai'
+import { default as chai_http, request as chai_request } from 'chai-http'
 import MockDate from 'mockdate'
 
 import server from '#api'
@@ -11,7 +11,7 @@ import { addPlayer, selectPlayer, error } from './utils/index.mjs'
 import { user1 } from './fixtures/token.mjs'
 
 process.env.NODE_ENV = 'test'
-chai.use(chaiHTTP)
+chai.use(chai_http)
 const { start } = constants.season
 
 describe('API /poaches', function () {
@@ -61,8 +61,7 @@ describe('API /poaches', function () {
 
       MockDate.set(start.add('1', 'week').add('3', 'day').toISOString())
 
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .post('/api/leagues/1/poaches')
         .set('Authorization', `Bearer ${user1}`)
         .send({

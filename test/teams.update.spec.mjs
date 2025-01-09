@@ -1,6 +1,6 @@
 /* global describe before it */
-import chai from 'chai'
-import chaiHTTP from 'chai-http'
+import * as chai from 'chai'
+import { default as chai_http, request as chai_request } from 'chai-http'
 
 import server from '#api'
 import knex from '#db'
@@ -12,7 +12,7 @@ import { constants } from '#libs-shared'
 process.env.NODE_ENV = 'test'
 
 chai.should()
-chai.use(chaiHTTP)
+chai.use(chai_http)
 const expect = chai.expect
 
 describe('API /teams - update', function () {
@@ -26,8 +26,7 @@ describe('API /teams - update', function () {
   describe('put', function () {
     it('teamtext', async () => {
       const value = false
-      const res = await chai
-        .request(server)
+      const res = await chai_request.execute(server)
         .put('/api/teams/1')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -51,8 +50,7 @@ describe('API /teams - update', function () {
 
     it('teamvoice', async () => {
       const value = false
-      const res = await chai
-        .request(server)
+      const res = await chai_request.execute(server)
         .put('/api/teams/1')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -76,8 +74,7 @@ describe('API /teams - update', function () {
 
     it('name', async () => {
       const value = 'TEST TEAM'
-      const res = await chai
-        .request(server)
+      const res = await chai_request.execute(server)
         .put('/api/teams/1')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -100,8 +97,7 @@ describe('API /teams - update', function () {
 
     it('name - commish', async () => {
       const value = 'TEST TEAM 2'
-      const res = await chai
-        .request(server)
+      const res = await chai_request.execute(server)
         .put('/api/teams/2')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -124,8 +120,7 @@ describe('API /teams - update', function () {
 
     it('image', async () => {
       const value = 'https://example.com/image.png'
-      const res = await chai
-        .request(server)
+      const res = await chai_request.execute(server)
         .put('/api/teams/1')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -148,8 +143,7 @@ describe('API /teams - update', function () {
 
     it('abbrv', async () => {
       const value = 'TT'
-      const res = await chai
-        .request(server)
+      const res = await chai_request.execute(server)
         .put('/api/teams/1')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -181,13 +175,12 @@ describe('API /teams - update', function () {
 
   describe('errors', function () {
     it('not logged in', async () => {
-      const request = chai.request(server).put('/api/teams/1')
+      const request = chai_request.execute(server).put('/api/teams/1')
       await notLoggedIn(request)
     })
 
     it('missing value', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .put('/api/teams/1')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -197,8 +190,7 @@ describe('API /teams - update', function () {
     })
 
     it('missing field', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .put('/api/teams/1')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -208,8 +200,7 @@ describe('API /teams - update', function () {
     })
 
     it('invalid field - does not exist', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .put('/api/teams/1')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -220,8 +211,7 @@ describe('API /teams - update', function () {
     })
 
     it('teamId does not belong to userId', async () => {
-      const request = chai
-        .request(server)
+      const request = chai_request.execute(server)
         .put('/api/teams/1')
         .set('Authorization', `Bearer ${user2}`)
         .send({

@@ -1,6 +1,6 @@
 /* global describe it */
 
-import chai from 'chai'
+import * as chai from 'chai'
 
 import { getSchedule } from '#libs-server'
 import { constants } from '#libs-shared'

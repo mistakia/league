@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
-import HighchartsBrokenAxis from 'highcharts/modules/broken-axis'
+import 'highcharts/modules/broken-axis'
 import Autocomplete from '@mui/material/Autocomplete'
 import TextField from '@mui/material/TextField'
 import Select from '@mui/material/Select'
@@ -15,8 +15,6 @@ import PercentileMetric from '@components/percentile-metric'
 import { calculatePercentiles } from '@libs-shared'
 
 import './selected-player-markets.styl'
-
-HighchartsBrokenAxis(Highcharts)
 
 function MarketCard({ market_name, markets }) {
   const is_alt_line = market_name.includes('ALT')

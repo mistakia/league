@@ -1,5 +1,5 @@
 /* global describe it */
-import chai from 'chai'
+import * as chai from 'chai'
 
 import { constants, Roster } from '#libs-shared'
 

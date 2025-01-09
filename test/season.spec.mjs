@@ -1,6 +1,6 @@
 /* global describe, it, after */
 
-import chai from 'chai'
+import * as chai from 'chai'
 import MockDate from 'mockdate'
 import dayjs from 'dayjs'
 

@@ -1,10 +1,10 @@
 import React, { useEffect, useMemo } from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import CellMeasurer from 'react-virtualized/dist/es/CellMeasurer'
-import CellMeasurerCache from 'react-virtualized/dist/es/CellMeasurer/CellMeasurerCache'
-import AutoSizer from 'react-virtualized/dist/es/AutoSizer'
-import List from 'react-virtualized/dist/es/List'
+import CellMeasurer from 'react-virtualized-compat/dist/es/CellMeasurer'
+import CellMeasurerCache from 'react-virtualized-compat/dist/es/CellMeasurer/CellMeasurerCache'
+import AutoSizer from 'react-virtualized-compat/dist/es/AutoSizer'
+import List from 'react-virtualized-compat/dist/es/List'
 
 import ScoreboardPlay from '@components/scoreboard-play'
 

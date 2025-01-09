@@ -1,6 +1,6 @@
 /* global describe it */
 
-import chai from 'chai'
+import * as chai from 'chai'
 import { getApiKey, getCookies, getLeagues } from '#league-import/espn.mjs'
 
 const should = chai.should()

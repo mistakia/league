@@ -1,6 +1,6 @@
 /* global describe it */
 
-import chai from 'chai'
+import * as chai from 'chai'
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone.js'
 

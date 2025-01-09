@@ -2,11 +2,9 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
-import HighchartsMore from 'highcharts/highcharts-more'
+import 'highcharts/highcharts-more'
 
 import { constants, nth } from '@libs-shared'
-
-HighchartsMore(Highcharts)
 
 export default function DashboardTeamValue({
   summary,

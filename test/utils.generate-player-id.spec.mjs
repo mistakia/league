@@ -1,5 +1,5 @@
 /* global describe it */
-import chai from 'chai'
+import * as chai from 'chai'
 
 import { generate_player_id } from '#libs-server'
 

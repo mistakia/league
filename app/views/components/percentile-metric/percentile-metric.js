@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
-import Immutable from 'immutable'
+import { Map } from 'immutable'
 
 export default function PercentileMetric({
   percentile = {},
@@ -19,7 +19,7 @@ export default function PercentileMetric({
   invert_order = false
 }) {
   if (percentile_key) {
-    if (Immutable.Map.isMap(percentiles)) {
+    if (Map.isMap(percentiles)) {
       percentile = percentiles.getIn([percentile_key, field], {})
     } else {
       percentile = percentiles[percentile_key][field]
