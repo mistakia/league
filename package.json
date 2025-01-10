@@ -84,9 +84,6 @@
     "puppeteer-extra": "^3.3.6",
     "puppeteer-extra-plugin-anonymize-ua": "^2.4.6",
     "puppeteer-extra-plugin-stealth": "^2.11.2",
-    "react": "^19.0.0",
-    "react-dom": "^19.0.0",
-    "react-sortable-hoc": "^1.11.0",
     "serve-favicon": "^2.5.0",
     "simple-statistics": "^7.8.7",
     "ws": "^7.5.10"
@@ -158,6 +155,8 @@
     "percentile": "1.6.0",
     "prettier": "3.4.2",
     "query-string": "^9.1.1",
+    "react": "18.3.1",
+    "react-dom": "18.3.1",
     "react-draggable": "^4.4.6",
     "react-hot-loader": "^4.13.1",
     "react-immutable-proptypes": "^2.2.0",
@@ -185,7 +184,6 @@
     "webpack-cli": "^6.0.1",
     "webpack-dev-server": "5.2.0",
     "webpack-merge": "^6.0.1",
-    "webpack-visualizer-plugin2": "^1.1.0",
     "whatwg-fetch": "3.6.20",
     "workerize-loader": "mistakia/workerize-loader#464a90a7ccdd4853d1afaf10cef78588899e11d4",
     "yargs": "17.7.2"

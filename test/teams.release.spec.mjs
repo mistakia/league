@@ -1,6 +1,6 @@
 /* global describe before beforeEach it */
 import * as chai from 'chai'
-import { default as chai_http, request as chai_request } from 'chai-http'
+import chai_http, { request as chai_request } from 'chai-http'
 import MockDate from 'mockdate'
 
 import server from '#api'
@@ -54,7 +54,8 @@ describe('API /teams - release', function () {
         slot: constants.slots.PS
       })
 
-      const res = await chai_request.execute(server)
+      const res = await chai_request
+        .execute(server)
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -109,7 +110,8 @@ describe('API /teams - release', function () {
         slot: constants.slots.PS
       })
 
-      const res = await chai_request.execute(server)
+      const res = await chai_request
+        .execute(server)
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -164,7 +166,8 @@ describe('API /teams - release', function () {
         slot: constants.slots.BENCH
       })
 
-      const res = await chai_request.execute(server)
+      const res = await chai_request
+        .execute(server)
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -219,7 +222,8 @@ describe('API /teams - release', function () {
         slot: constants.slots.BENCH
       })
 
-      const res = await chai_request.execute(server)
+      const res = await chai_request
+        .execute(server)
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -274,7 +278,8 @@ describe('API /teams - release', function () {
         slot: constants.slots.IR
       })
 
-      const res = await chai_request.execute(server)
+      const res = await chai_request
+        .execute(server)
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -329,7 +334,8 @@ describe('API /teams - release', function () {
         slot: constants.slots.IR
       })
 
-      const res = await chai_request.execute(server)
+      const res = await chai_request
+        .execute(server)
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -391,7 +397,8 @@ describe('API /teams - release', function () {
     })
 
     it('missing pid', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -403,7 +410,8 @@ describe('API /teams - release', function () {
     })
 
     it('missing teamId', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -415,7 +423,8 @@ describe('API /teams - release', function () {
     })
 
     it('missing leagueId', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -427,7 +436,8 @@ describe('API /teams - release', function () {
     })
 
     it('teamId does not belong to userId', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user2}`)
         .send({
@@ -446,7 +456,8 @@ describe('API /teams - release', function () {
       const leagueId = 1
       const player = await selectPlayer()
 
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -482,7 +493,8 @@ describe('API /teams - release', function () {
         player_tid: teamId
       })
 
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -504,7 +516,8 @@ describe('API /teams - release', function () {
         userId: 1,
         slot: constants.slots.PSP
       })
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/release')
         .set('Authorization', `Bearer ${user1}`)
         .send({

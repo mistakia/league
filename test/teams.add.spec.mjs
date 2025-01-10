@@ -1,6 +1,6 @@
 /* global describe before it beforeEach */
 import * as chai from 'chai'
-import { default as chai_http, request as chai_request } from 'chai-http'
+import chai_http, { request as chai_request } from 'chai-http'
 import MockDate from 'mockdate'
 
 import server from '#api'
@@ -44,7 +44,8 @@ describe('API /teams - add', function () {
       const teamId = 1
       const leagueId = 1
       const userId = 1
-      const res = await chai_request.execute(server)
+      const res = await chai_request
+        .execute(server)
         .post('/api/teams/1/add')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -111,7 +112,8 @@ describe('API /teams - add', function () {
 
       const teamId = 1
       const userId = 1
-      const res = await chai_request.execute(server)
+      const res = await chai_request
+        .execute(server)
         .post('/api/teams/1/add')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -181,7 +183,8 @@ describe('API /teams - add', function () {
     })
 
     it('missing pid', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/add')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -194,7 +197,8 @@ describe('API /teams - add', function () {
     })
 
     it('missing leagueId', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/add')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -207,7 +211,8 @@ describe('API /teams - add', function () {
     })
 
     it('missing slot', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/add')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -220,7 +225,8 @@ describe('API /teams - add', function () {
     })
 
     it('missing teamId', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/add')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -233,7 +239,8 @@ describe('API /teams - add', function () {
     })
 
     it('invalid slot', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/add')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -247,7 +254,8 @@ describe('API /teams - add', function () {
     })
 
     it('teamId does not belong to userId', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/add')
         .set('Authorization', `Bearer ${user2}`)
         .send({
@@ -264,7 +272,8 @@ describe('API /teams - add', function () {
       const player = await selectPlayer()
       await addPlayer({ leagueId: 1, player, teamId: 2, userId: 2 })
 
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/add')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -280,7 +289,8 @@ describe('API /teams - add', function () {
     it('add veteran free agent to active roster - offseason', async () => {
       MockDate.set(start.subtract('1', 'week').toISOString())
       const player = await selectPlayer({ rookie: false })
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/add')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -311,7 +321,8 @@ describe('API /teams - add', function () {
         type: constants.waivers.FREE_AGENCY
       })
 
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/add')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -343,7 +354,8 @@ describe('API /teams - add', function () {
       })
 
       const player = await selectPlayer()
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/add')
         .set('Authorization', `Bearer ${user1}`)
         .send({

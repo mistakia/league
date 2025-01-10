@@ -1,6 +1,6 @@
 /* global describe before beforeEach it */
 import * as chai from 'chai'
-import { default as chai_http, request as chai_request } from 'chai-http'
+import chai_http, { request as chai_request } from 'chai-http'
 import MockDate from 'mockdate'
 
 import server from '#api'
@@ -50,7 +50,8 @@ describe('API /teams - cutlist', function () {
         slot: constants.slots.BENCH
       })
 
-      const res = await chai_request.execute(server)
+      const res = await chai_request
+        .execute(server)
         .post('/api/teams/1/cutlist')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -95,7 +96,8 @@ describe('API /teams - cutlist', function () {
       })
 
       const pids = [player1.pid, player2.pid]
-      const res = await chai_request.execute(server)
+      const res = await chai_request
+        .execute(server)
         .post('/api/teams/1/cutlist')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -142,7 +144,8 @@ describe('API /teams - cutlist', function () {
         slot: constants.slots.BENCH
       })
 
-      const res1 = await chai_request.execute(server)
+      const res1 = await chai_request
+        .execute(server)
         .post('/api/teams/1/cutlist')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -155,7 +158,8 @@ describe('API /teams - cutlist', function () {
       res1.should.be.json
 
       const pids = [player1.pid, player2.pid]
-      const res2 = await chai_request.execute(server)
+      const res2 = await chai_request
+        .execute(server)
         .post('/api/teams/1/cutlist')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -198,7 +202,8 @@ describe('API /teams - cutlist', function () {
         slot: constants.slots.BENCH
       })
 
-      const res1 = await chai_request.execute(server)
+      const res1 = await chai_request
+        .execute(server)
         .post('/api/teams/1/cutlist')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -210,7 +215,8 @@ describe('API /teams - cutlist', function () {
       // eslint-disable-next-line
       res1.should.be.json
 
-      const res2 = await chai_request.execute(server)
+      const res2 = await chai_request
+        .execute(server)
         .post('/api/teams/1/cutlist')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -236,7 +242,8 @@ describe('API /teams - cutlist', function () {
     })
 
     it('missing pids', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/cutlist')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -247,7 +254,8 @@ describe('API /teams - cutlist', function () {
     })
 
     it('missing leagueId', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/cutlist')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -258,7 +266,8 @@ describe('API /teams - cutlist', function () {
     })
 
     it('invalid player - does not exist', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/cutlist')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -274,7 +283,8 @@ describe('API /teams - cutlist', function () {
     })
 
     it('invalid leagueId - does not exist', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/cutlist')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -286,7 +296,8 @@ describe('API /teams - cutlist', function () {
     })
 
     it('teamId does not belong to userId', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/cutlist')
         .set('Authorization', `Bearer ${user2}`)
         .send({
@@ -299,7 +310,8 @@ describe('API /teams - cutlist', function () {
 
     it('player not on team', async () => {
       const player = await selectPlayer()
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/cutlist')
         .set('Authorization', `Bearer ${user1}`)
         .send({

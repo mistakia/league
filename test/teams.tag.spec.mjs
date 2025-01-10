@@ -1,6 +1,6 @@
 /* global describe before it */
 import * as chai from 'chai'
-import { default as chai_http, request as chai_request } from 'chai-http'
+import chai_http, { request as chai_request } from 'chai-http'
 
 import server from '#api'
 import knex from '#db'
@@ -75,7 +75,8 @@ describe('API /teams - tag', function () {
         slot: constants.slots.BENCH
       })
 
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/tag')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -87,7 +88,8 @@ describe('API /teams - tag', function () {
     })
 
     it('missing pid', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/tag')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -99,7 +101,8 @@ describe('API /teams - tag', function () {
     })
 
     it('missing leagueId', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/tag')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -111,7 +114,8 @@ describe('API /teams - tag', function () {
     })
 
     it('invalid player - does not exist', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/tag')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -136,7 +140,8 @@ describe('API /teams - tag', function () {
         slot: constants.slots.BENCH
       })
 
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/tag')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -149,7 +154,8 @@ describe('API /teams - tag', function () {
     })
 
     it('invalid leagueId - does not exist', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/tag')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -162,7 +168,8 @@ describe('API /teams - tag', function () {
     })
 
     it('teamId does not belong to userId', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/tag')
         .set('Authorization', `Bearer ${user2}`)
         .send({
@@ -176,7 +183,8 @@ describe('API /teams - tag', function () {
 
     it('player not on team', async () => {
       const player = await selectPlayer({ exclude_pids })
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/tag')
         .set('Authorization', `Bearer ${user1}`)
         .send({

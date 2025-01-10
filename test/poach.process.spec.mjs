@@ -1,6 +1,6 @@
 /* global describe before beforeEach it */
 import * as chai from 'chai'
-import { default as chai_http, request as chai_request } from 'chai-http'
+import chai_http, { request as chai_request } from 'chai-http'
 import MockDate from 'mockdate'
 
 import server from '#api'
@@ -60,7 +60,8 @@ describe('API /poaches - process', function () {
       await knex('poaches').insert(poach)
 
       // Process the poach
-      const res = await chai_request.execute(server)
+      const res = await chai_request
+        .execute(server)
         .post(`/api/leagues/${leagueId}/poaches/${poach.uid}/process`)
         .set('Authorization', `Bearer ${user1}`)
 

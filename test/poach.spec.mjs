@@ -1,6 +1,6 @@
 /* global describe before it beforeEach */
 import * as chai from 'chai'
-import { default as chai_http, request as chai_request } from 'chai-http'
+import chai_http, { request as chai_request } from 'chai-http'
 import MockDate from 'mockdate'
 
 import server from '#api'
@@ -61,7 +61,8 @@ describe('API /poaches', function () {
 
       MockDate.set(start.add('1', 'week').add('3', 'day').toISOString())
 
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/leagues/1/poaches')
         .set('Authorization', `Bearer ${user1}`)
         .send({

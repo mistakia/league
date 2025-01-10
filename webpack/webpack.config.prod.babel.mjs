@@ -3,7 +3,7 @@ import webpack from 'webpack'
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
 import MiniCssExtractPlugin from 'mini-css-extract-plugin'
 import CssMinimizerPlugin from 'css-minimizer-webpack-plugin'
-import Visualizer from 'webpack-visualizer-plugin2'
+// import Visualizer from 'webpack-visualizer-plugin2'
 import HtmlWebpackPlugin from 'html-webpack-plugin'
 import HtmlWebpackInlineSourcePlugin from 'html-webpack-inline-source-plugin'
 import { merge } from 'webpack-merge'
@@ -111,8 +111,8 @@ export default merge(baseConfig, {
       analyzerMode:
         process.env.OPEN_ANALYZER === 'true' ? 'server' : 'disabled',
       openAnalyzer: process.env.OPEN_ANALYZER === 'true'
-    }),
-    new Visualizer()
+    })
+    // new Visualizer()
     /* new BugsnagSourceMapUploaderPlugin({
      *   apiKey: '183fca706d9f94c00a661167bf8cfc5d',
      *   appVersion: VERSION

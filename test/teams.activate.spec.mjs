@@ -1,6 +1,6 @@
 /* global describe before beforeEach it */
 import * as chai from 'chai'
-import { default as chai_http, request as chai_request } from 'chai-http'
+import chai_http, { request as chai_request } from 'chai-http'
 import MockDate from 'mockdate'
 
 import server from '#api'
@@ -53,7 +53,8 @@ describe('API /teams - activate', function () {
         value
       })
 
-      const res = await chai_request.execute(server)
+      const res = await chai_request
+        .execute(server)
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -123,7 +124,8 @@ describe('API /teams - activate', function () {
     })
 
     it('missing pid', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -134,7 +136,8 @@ describe('API /teams - activate', function () {
     })
 
     it('missing leagueId', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -145,7 +148,8 @@ describe('API /teams - activate', function () {
     })
 
     it('invalid player - does not exist', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -157,7 +161,8 @@ describe('API /teams - activate', function () {
     })
 
     it('invalid leagueId - does not exist', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -169,7 +174,8 @@ describe('API /teams - activate', function () {
     })
 
     it('teamId does not belong to userId', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user2}`)
         .send({
@@ -183,7 +189,8 @@ describe('API /teams - activate', function () {
     it('player not on team', async () => {
       const player = await selectPlayer()
       exclude_pids.push(player.pid)
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -198,7 +205,8 @@ describe('API /teams - activate', function () {
       const player = await selectPlayer({ exclude_pids })
       exclude_pids.push(player.pid)
       await addPlayer({ leagueId: 1, player, teamId: 1, userId: 1 })
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -218,7 +226,8 @@ describe('API /teams - activate', function () {
         userId: 1,
         slot: constants.slots.PSP
       })
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({

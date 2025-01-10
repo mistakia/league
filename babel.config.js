@@ -22,7 +22,7 @@ module.exports = (api) => {
     presets: [
       // @babel/preset-env will automatically target browserslist (package.json) targets
       require('@babel/preset-env'),
-      [require('@babel/preset-react'), { development }]
+      [require('@babel/preset-react'), { development, runtime: 'automatic' }]
     ],
     plugins: [
       require('@babel/plugin-transform-runtime'),
