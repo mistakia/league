@@ -1,6 +1,6 @@
 /* global describe before it beforeEach */
 import * as chai from 'chai'
-import { default as chai_http, request as chai_request } from 'chai-http'
+import chai_http, { request as chai_request } from 'chai-http'
 import MockDate from 'mockdate'
 
 import server from '#api'
@@ -67,7 +67,8 @@ describe('API /trades', function () {
 
       // TODO - get trading player values
 
-      const proposeRes = await chai_request.execute(server)
+      const proposeRes = await chai_request
+        .execute(server)
         .post('/api/leagues/1/trades')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -95,7 +96,8 @@ describe('API /trades', function () {
 
       const tradeid = proposeRes.body.uid
 
-      const acceptRes = await chai_request.execute(server)
+      const acceptRes = await chai_request
+        .execute(server)
         .post(`/api/leagues/1/trades/${tradeid}/accept`)
         .set('Authorization', `Bearer ${user2}`)
 
@@ -184,7 +186,8 @@ describe('API /trades', function () {
 
       const proposingTeamPlayers = [player1.pid]
       const acceptingTeamPlayers = [player2.pid]
-      const proposeRes = await chai_request.execute(server)
+      const proposeRes = await chai_request
+        .execute(server)
         .post('/api/leagues/1/trades')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -212,7 +215,8 @@ describe('API /trades', function () {
 
       const tradeid = proposeRes.body.uid
 
-      const acceptRes = await chai_request.execute(server)
+      const acceptRes = await chai_request
+        .execute(server)
         .post(`/api/leagues/1/trades/${tradeid}/accept`)
         .set('Authorization', `Bearer ${user2}`)
 
@@ -242,7 +246,8 @@ describe('API /trades', function () {
       proposingRow.pid.should.equal(acceptingTeamPlayers[0])
       acceptingRow.pid.should.equal(proposingTeamPlayers[0])
 
-      const res = await chai_request.execute(server)
+      const res = await chai_request
+        .execute(server)
         .post('/api/teams/1/deactivate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -365,7 +370,8 @@ describe('API /trades', function () {
 
       const proposingTeamPlayers = [player1.pid]
       const acceptingTeamPlayers = [player2.pid]
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/leagues/1/trades')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -381,7 +387,8 @@ describe('API /trades', function () {
 
     it('deadline has passed', async function () {
       MockDate.set(constants.season.start.add('13', 'weeks').toISOString())
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/leagues/1/trades')
         .set('Authorization', `Bearer ${user1}`)
         .send({

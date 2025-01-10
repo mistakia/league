@@ -1,6 +1,6 @@
 /* global describe before beforeEach it */
-import * as chai from 'chai'
-import { default as chai_http, request as chai_request } from 'chai-http'
+// import * as chai from 'chai'
+// import chai_http, { request as chai_request } from 'chai-http'
 import knex from '#db'
 import MockDate from 'mockdate'
 
@@ -9,7 +9,7 @@ import { constants } from '#libs-shared'
 
 process.env.NODE_ENV = 'test'
 const { start } = constants.season
-chai.use(chai_http)
+// chai.use(chai_http)
 
 describe('API /poaches - update', function () {
   before(async function () {

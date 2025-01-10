@@ -1,6 +1,6 @@
 /* global describe, before it */
 import * as chai from 'chai'
-import { default as chai_http, request as chai_request } from 'chai-http'
+import chai_http, { request as chai_request } from 'chai-http'
 
 import server from '#api'
 import knex from '#db'
@@ -22,7 +22,8 @@ describe('API /me', function () {
 
   describe('GET /api/me', async () => {
     it('should return user information', async () => {
-      const res = await chai_request.execute(server)
+      const res = await chai_request
+        .execute(server)
         .get('/api/me')
         .set('Authorization', `Bearer ${user1}`)
       res.should.have.status(200)
@@ -41,7 +42,8 @@ describe('API /me', function () {
   describe('PUT /api/me', function () {
     it('should change username successfully', async () => {
       const new_username = 'new_user1'
-      const res = await chai_request.execute(server)
+      const res = await chai_request
+        .execute(server)
         .put('/api/me')
         .set('Authorization', `Bearer ${user1}`)
         .send({ type: 'username', value: new_username })
@@ -71,7 +73,8 @@ describe('API /me', function () {
       ]
 
       for (const [index, invalid_username] of invalid_usernames.entries()) {
-        const res = chai_request.execute(server)
+        const res = chai_request
+          .execute(server)
           .put('/api/me')
           .set('Authorization', `Bearer ${user1}`)
           .send({ type: 'username', value: invalid_username })
@@ -90,7 +93,8 @@ describe('API /me', function () {
       })
 
       // Try to change user1's username to the existing username
-      const res = chai_request.execute(server)
+      const res = chai_request
+        .execute(server)
         .put('/api/me')
         .set('Authorization', `Bearer ${user1}`)
         .send({ type: 'username', value: existing_username })
@@ -100,7 +104,8 @@ describe('API /me', function () {
 
     it('should allow changing email to a valid email address', async () => {
       const new_email = 'new_email@example.com'
-      const res = await chai_request.execute(server)
+      const res = await chai_request
+        .execute(server)
         .put('/api/me')
         .set('Authorization', `Bearer ${user1}`)
         .send({ type: 'email', value: new_email })
@@ -123,7 +128,8 @@ describe('API /me', function () {
       ]
 
       for (const invalid_email of invalid_emails) {
-        const res = await chai_request.execute(server)
+        const res = await chai_request
+          .execute(server)
           .put('/api/me')
           .set('Authorization', `Bearer ${user1}`)
           .send({ type: 'email', value: invalid_email })

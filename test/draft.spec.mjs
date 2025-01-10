@@ -1,6 +1,6 @@
 /* global describe before it after */
 import * as chai from 'chai'
-import { default as chai_http, request as chai_request } from 'chai-http'
+import chai_http, { request as chai_request } from 'chai-http'
 import MockDate from 'mockdate'
 
 import server from '#api'
@@ -45,7 +45,8 @@ describe('API /draft', function () {
     const leagueId = 1
     const teamId = 1
     const player = await selectPlayer({ rookie: true })
-    const res = await chai_request.execute(server)
+    const res = await chai_request
+      .execute(server)
       .post('/api/leagues/1/draft')
       .set('Authorization', `Bearer ${user1}`)
       .send({
@@ -92,7 +93,8 @@ describe('API /draft', function () {
     })
 
     it('missing teamId', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/leagues/1/draft')
         .set('Authorization', `Bearer ${user2}`)
         .send({ pid: 'xx', pickId: 1 })
@@ -101,7 +103,8 @@ describe('API /draft', function () {
     })
 
     it('missing pid', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/leagues/1/draft')
         .set('Authorization', `Bearer ${user2}`)
         .send({ teamId: 2, pickId: 1 })
@@ -110,7 +113,8 @@ describe('API /draft', function () {
     })
 
     it('missing pickId', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/leagues/1/draft')
         .set('Authorization', `Bearer ${user2}`)
         .send({ pid: 'xx', teamId: 2 })
@@ -119,7 +123,8 @@ describe('API /draft', function () {
     })
 
     it('invalid teamId', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/leagues/1/draft')
         .set('Authorization', `Bearer ${user2}`)
         .send({ pid: 'xx', pickId: 2, teamId: 'a' })
@@ -129,7 +134,8 @@ describe('API /draft', function () {
 
     it('invalid pid - does not exist', async () => {
       MockDate.set(start.subtract('1', 'month').add('1', 'day').toISOString())
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/leagues/1/draft')
         .set('Authorization', `Bearer ${user2}`)
         .send({ pid: 'xx', pickId: 2, teamId: 2 })
@@ -142,7 +148,8 @@ describe('API /draft', function () {
     })
 
     it('invalid leagueId', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/leagues/0/draft')
         .set('Authorization', `Bearer ${user2}`)
         .send({ pid: 'xx', pickId: 2, teamId: 2 })
@@ -155,7 +162,8 @@ describe('API /draft', function () {
         .where('start', constants.season.year - 1)
         .limit(1)
       const player = players[0]
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/leagues/1/draft')
         .set('Authorization', `Bearer ${user2}`)
         .send({
@@ -168,7 +176,8 @@ describe('API /draft', function () {
     })
 
     it('teamId does not belong to userId', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/leagues/1/draft')
         .set('Authorization', `Bearer ${user3}`)
         .send({ pid: 'xx', pickId: 2, teamId: 2 })
@@ -180,7 +189,8 @@ describe('API /draft', function () {
       MockDate.set(
         start.subtract('1', 'month').subtract('1', 'day').toISOString()
       )
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/leagues/1/draft')
         .set('Authorization', `Bearer ${user2}`)
         .send({
@@ -197,7 +207,8 @@ describe('API /draft', function () {
       MockDate.set(
         start.subtract('1', 'month').add('1', 'minute').toISOString()
       )
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/leagues/1/draft')
         .set('Authorization', `Bearer ${user3}`)
         .send({
@@ -213,7 +224,8 @@ describe('API /draft', function () {
       MockDate.set(
         start.subtract('1', 'month').add('1', 'minute').toISOString()
       )
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/leagues/1/draft')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -229,7 +241,8 @@ describe('API /draft', function () {
       MockDate.set(
         start.subtract('1', 'month').add('1', 'minute').toISOString()
       )
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/leagues/1/draft')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -245,7 +258,8 @@ describe('API /draft', function () {
       const picks = await knex('draft').where({ uid: 1 }).limit(1)
       const { pid } = picks[0]
       MockDate.set(start.subtract('1', 'month').add('2', 'day').toISOString())
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/leagues/1/draft')
         .set('Authorization', `Bearer ${user2}`)
         .send({
@@ -260,7 +274,8 @@ describe('API /draft', function () {
     it('selection after draft has ended', async () => {
       MockDate.set(start.add('1', 'month').add('1', 'day').toISOString())
       const player = await selectPlayer({ rookie: true })
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/leagues/1/draft')
         .set('Authorization', `Bearer ${user2}`)
         .send({

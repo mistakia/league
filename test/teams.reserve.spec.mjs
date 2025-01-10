@@ -1,6 +1,6 @@
 /* global describe before it beforeEach */
 import * as chai from 'chai'
-import { default as chai_http, request as chai_request } from 'chai-http'
+import chai_http, { request as chai_request } from 'chai-http'
 import MockDate from 'mockdate'
 
 import server from '#api'
@@ -63,7 +63,8 @@ describe('API /teams - reserve', function () {
           pid: player.pid
         })
 
-      const res = await chai_request.execute(server)
+      const res = await chai_request
+        .execute(server)
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -129,7 +130,8 @@ describe('API /teams - reserve', function () {
     })
 
     it('missing reserve_pid', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -141,7 +143,8 @@ describe('API /teams - reserve', function () {
     })
 
     it('missing leagueId', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -153,7 +156,8 @@ describe('API /teams - reserve', function () {
     })
 
     it('missing slot', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -165,7 +169,8 @@ describe('API /teams - reserve', function () {
     })
 
     it('invalid slot', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -178,7 +183,8 @@ describe('API /teams - reserve', function () {
     })
 
     it('invalid player - non-existant', async () => {
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -192,7 +198,8 @@ describe('API /teams - reserve', function () {
 
     it('invalid player - not on active roster', async () => {
       const player = await selectPlayer()
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -206,7 +213,8 @@ describe('API /teams - reserve', function () {
 
     it('teamId does not belong to userId', async () => {
       const player = await selectPlayer()
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user2}`)
         .send({
@@ -233,7 +241,8 @@ describe('API /teams - reserve', function () {
         transaction: constants.transactions.DRAFT,
         value
       })
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -260,7 +269,8 @@ describe('API /teams - reserve', function () {
         transaction: constants.transactions.DRAFT,
         value
       })
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -288,7 +298,8 @@ describe('API /teams - reserve', function () {
         transaction: constants.transactions.DRAFT,
         value
       })
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -315,7 +326,8 @@ describe('API /teams - reserve', function () {
         transaction: constants.transactions.DRAFT,
         value
       })
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -350,7 +362,8 @@ describe('API /teams - reserve', function () {
         .where({
           pid: player.pid
         })
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -386,7 +399,8 @@ describe('API /teams - reserve', function () {
         .where({
           pid
         })
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -418,7 +432,8 @@ describe('API /teams - reserve', function () {
         .where({
           pid: player.pid
         })
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -455,7 +470,8 @@ describe('API /teams - reserve', function () {
           pid: player.pid
         })
 
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({

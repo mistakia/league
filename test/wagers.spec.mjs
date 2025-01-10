@@ -1,6 +1,6 @@
 /* global describe, before, it */
 import * as chai from 'chai'
-import { default as chai_http, request as chai_request } from 'chai-http'
+import chai_http, { request as chai_request } from 'chai-http'
 
 import server from '#api'
 import knex from '#db'
@@ -38,7 +38,9 @@ describe('API /wagers', function () {
     })
 
     it('out of range limit', async () => {
-      const res = await chai_request.execute(server).get('/api/wagers/1?limit=1001')
+      const res = await chai_request
+        .execute(server)
+        .get('/api/wagers/1?limit=1001')
       res.should.have.status(400)
       // eslint-disable-next-line no-unused-expressions
       res.should.be.json
@@ -48,7 +50,9 @@ describe('API /wagers', function () {
     })
 
     it('out of range offset', async () => {
-      const res = await chai_request.execute(server).get('/api/wagers/1?offset=-1')
+      const res = await chai_request
+        .execute(server)
+        .get('/api/wagers/1?offset=-1')
       res.should.have.status(400)
       // eslint-disable-next-line no-unused-expressions
       res.should.be.json
@@ -58,7 +62,8 @@ describe('API /wagers', function () {
     })
 
     it('invalid wager_type', async () => {
-      const res = await chai_request.execute(server)
+      const res = await chai_request
+        .execute(server)
         .get('/api/wagers/1?wager_type=INVALID')
       res.should.have.status(400)
       // eslint-disable-next-line no-unused-expressions
@@ -69,7 +74,8 @@ describe('API /wagers', function () {
     })
 
     it('out of range min_selection_count', async () => {
-      const res = await chai_request.execute(server)
+      const res = await chai_request
+        .execute(server)
         .get('/api/wagers/1?min_selection_count=13')
       res.should.have.status(400)
       // eslint-disable-next-line no-unused-expressions
@@ -80,7 +86,8 @@ describe('API /wagers', function () {
     })
 
     it('out of range max_selection_count', async () => {
-      const res = await chai_request.execute(server)
+      const res = await chai_request
+        .execute(server)
         .get('/api/wagers/1?max_selection_count=13')
       res.should.have.status(400)
       // eslint-disable-next-line no-unused-expressions
@@ -91,7 +98,8 @@ describe('API /wagers', function () {
     })
 
     it('out of range min_selection_lost_count', async () => {
-      const res = await chai_request.execute(server)
+      const res = await chai_request
+        .execute(server)
         .get('/api/wagers/1?min_selection_lost_count=13')
       res.should.have.status(400)
       // eslint-disable-next-line no-unused-expressions
@@ -102,7 +110,8 @@ describe('API /wagers', function () {
     })
 
     it('out of range max_selection_lost_count', async () => {
-      const res = await chai_request.execute(server)
+      const res = await chai_request
+        .execute(server)
         .get('/api/wagers/1?max_selection_lost_count=13')
       res.should.have.status(400)
       // eslint-disable-next-line no-unused-expressions
@@ -113,7 +122,8 @@ describe('API /wagers', function () {
     })
 
     it('invalid wager_status', async () => {
-      const res = await chai_request.execute(server)
+      const res = await chai_request
+        .execute(server)
         .get('/api/wagers/1?wager_status=INVALID')
       res.should.have.status(400)
       // eslint-disable-next-line no-unused-expressions

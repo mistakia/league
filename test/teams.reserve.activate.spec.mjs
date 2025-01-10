@@ -1,6 +1,6 @@
 /* global describe before it beforeEach */
 import * as chai from 'chai'
-import { default as chai_http, request as chai_request } from 'chai-http'
+import chai_http, { request as chai_request } from 'chai-http'
 import MockDate from 'mockdate'
 
 import server from '#api'
@@ -71,7 +71,8 @@ describe('API /teams - reserve', function () {
           pid: player1.pid
         })
 
-      const res = await chai_request.execute(server)
+      const res = await chai_request
+        .execute(server)
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -162,7 +163,8 @@ describe('API /teams - reserve', function () {
           pid: player1.pid
         })
 
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -201,7 +203,8 @@ describe('API /teams - reserve', function () {
           pid: player1.pid
         })
 
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -250,7 +253,8 @@ describe('API /teams - reserve', function () {
           pid: player1.pid
         })
 
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({
@@ -299,7 +303,8 @@ describe('API /teams - reserve', function () {
           pid: player1.pid
         })
 
-      const request = chai_request.execute(server)
+      const request = chai_request
+        .execute(server)
         .post('/api/teams/1/reserve')
         .set('Authorization', `Bearer ${user1}`)
         .send({

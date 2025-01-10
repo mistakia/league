@@ -1,6 +1,6 @@
 /* global describe, before, it */
 import * as chai from 'chai'
-import { default as chai_http, request as chai_request } from 'chai-http'
+import chai_http, { request as chai_request } from 'chai-http'
 
 import server from '#api'
 import knex from '#db'
@@ -20,10 +20,13 @@ describe('API /auth', function () {
 
   describe('POST /api/auth/login', () => {
     it('should login successfully with email', async () => {
-      const res = await chai_request.execute(server).post('/api/auth/login').send({
-        email_or_username: 'user1@email.com',
-        password: 'password1'
-      })
+      const res = await chai_request
+        .execute(server)
+        .post('/api/auth/login')
+        .send({
+          email_or_username: 'user1@email.com',
+          password: 'password1'
+        })
 
       res.should.have.status(200)
       res.body.should.have.property('token')
@@ -31,10 +34,13 @@ describe('API /auth', function () {
     })
 
     it('should login successfully with username', async () => {
-      const res = await chai_request.execute(server).post('/api/auth/login').send({
-        email_or_username: 'user1',
-        password: 'password1'
-      })
+      const res = await chai_request
+        .execute(server)
+        .post('/api/auth/login')
+        .send({
+          email_or_username: 'user1',
+          password: 'password1'
+        })
 
       res.should.have.status(200)
       res.body.should.have.property('token')
@@ -42,7 +48,8 @@ describe('API /auth', function () {
     })
 
     it('should return error for missing email or username', async () => {
-      const res = chai_request.execute(server)
+      const res = chai_request
+        .execute(server)
         .post('/api/auth/login')
         .send({ password: 'password1' })
 
@@ -50,7 +57,8 @@ describe('API /auth', function () {
     })
 
     it('should return error for missing password', async () => {
-      const res = chai_request.execute(server)
+      const res = chai_request
+        .execute(server)
         .post('/api/auth/login')
         .send({ email_or_username: 'user1@email.com' })
 
@@ -79,12 +87,15 @@ describe('API /auth', function () {
         uses_count: 0
       })
 
-      const res = await chai_request.execute(server).post('/api/auth/register').send({
-        email: 'newuser@email.com',
-        password: 'newpassword123',
-        username: 'newuser',
-        invite_code
-      })
+      const res = await chai_request
+        .execute(server)
+        .post('/api/auth/register')
+        .send({
+          email: 'newuser@email.com',
+          password: 'newpassword123',
+          username: 'newuser',
+          invite_code
+        })
 
       res.should.have.status(200)
       res.body.should.have.property('token')
@@ -208,12 +219,15 @@ describe('API /auth', function () {
         expires_at: past_date
       })
 
-      const res = await chai_request.execute(server).post('/api/auth/register').send({
-        email: 'expireduser@email.com',
-        password: 'password123',
-        username: 'expireduser',
-        invite_code: expired_invite_code
-      })
+      const res = await chai_request
+        .execute(server)
+        .post('/api/auth/register')
+        .send({
+          email: 'expireduser@email.com',
+          password: 'password123',
+          username: 'expireduser',
+          invite_code: expired_invite_code
+        })
 
       await error(res, 'invite code has expired')
 
@@ -233,12 +247,15 @@ describe('API /auth', function () {
         max_uses: 5
       })
 
-      const res = await chai_request.execute(server).post('/api/auth/register').send({
-        email: 'maxusesuser@email.com',
-        password: 'password123',
-        username: 'maxusesuser',
-        invite_code: max_uses_invite_code
-      })
+      const res = await chai_request
+        .execute(server)
+        .post('/api/auth/register')
+        .send({
+          email: 'maxusesuser@email.com',
+          password: 'password123',
+          username: 'maxusesuser',
+          invite_code: max_uses_invite_code
+        })
 
       await error(res, 'invite code has reached maximum uses')
 

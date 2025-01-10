@@ -1,6 +1,6 @@
 /* global describe before beforeEach it */
 import * as chai from 'chai'
-import { default as chai_http, request as chai_request } from 'chai-http'
+// import chai_http, { request as chai_request } from 'chai-http'
 import MockDate from 'mockdate'
 
 import knex from '#db'
@@ -13,7 +13,7 @@ import run from '#scripts/process-poaching-claims.mjs'
 process.env.NODE_ENV = 'test'
 
 chai.should()
-chai.use(chai_http)
+// chai.use(chai_http)
 const expect = chai.expect
 const { start } = constants.season
 
