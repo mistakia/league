@@ -99,7 +99,14 @@ const process_market_selection_hit_rates = async ({
   }
 
   if (current_week_only) {
-    prop_selections_query.where('nfl_games.week', constants.season.week)
+    prop_selections_query.where(
+      'nfl_games.week',
+      constants.season.nfl_seas_week
+    )
+    prop_selections_query.where(
+      'nfl_games.seas_type',
+      constants.season.nfl_seas_type
+    )
   }
 
   const prop_selections = await prop_selections_query
@@ -113,7 +120,8 @@ const process_market_selection_hit_rates = async ({
       'player_gamelogs.*',
       'nfl_games.week',
       'nfl_games.year',
-      'nfl_games.seas_type'
+      'nfl_games.seas_type',
+      'nfl_games.esbid'
     )
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
     .whereIn('nfl_games.seas_type', ['REG', 'POST'])
@@ -125,7 +133,65 @@ const process_market_selection_hit_rates = async ({
 
   log(`Loaded ${player_gamelogs.length} player gamelogs`)
 
-  const player_gamelogs_by_pid = groupBy(player_gamelogs, 'pid')
+  const nfl_plays = await db('nfl_plays')
+    .select(
+      'esbid',
+      'qtr',
+      'pass_yds',
+      'recv_yds',
+      'rush_yds',
+      'psr_pid',
+      'trg_pid',
+      'bc_pid'
+    )
+    .whereIn(
+      'esbid',
+      player_gamelogs.map((g) => g.esbid)
+    )
+    .where('nfl_plays.qtr', 1)
+    .whereNot('play_type', 'NOPL')
+    .orderBy('esbid')
+
+  const first_quarter_stats_by_game = nfl_plays.reduce((acc, play) => {
+    if (!acc[play.esbid]) {
+      acc[play.esbid] = {}
+    }
+
+    ;[play.psr_pid, play.bc_pid, play.trg_pid].forEach((pid) => {
+      if (!pid) return
+      if (!acc[play.esbid][pid]) {
+        acc[play.esbid][pid] = {
+          passing_yards: 0,
+          rushing_yards: 0,
+          receiving_yards: 0
+        }
+      }
+    })
+
+    if (play.psr_pid) {
+      acc[play.esbid][play.psr_pid].passing_yards += play.pass_yds || 0
+    }
+    if (play.bc_pid) {
+      acc[play.esbid][play.bc_pid].rushing_yards += play.rush_yds || 0
+    }
+    if (play.trg_pid) {
+      acc[play.esbid][play.trg_pid].receiving_yards += play.recv_yds || 0
+    }
+
+    return acc
+  }, {})
+
+  const enhanced_player_gamelogs = player_gamelogs.map((gamelog) => ({
+    ...gamelog,
+    first_quarter_stats: first_quarter_stats_by_game[`${gamelog.esbid}`]?.[
+      gamelog.pid
+    ] || {
+      passing_yards: 0,
+      rushing_yards: 0,
+      receiving_yards: 0
+    }
+  }))
+  const player_gamelogs_by_pid = groupBy(enhanced_player_gamelogs, 'pid')
 
   const missing_gamelogs_pids = new Set()
   const missing_gamelogs_selections = {}
