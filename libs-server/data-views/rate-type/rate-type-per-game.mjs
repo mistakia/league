@@ -1,4 +1,5 @@
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
+import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 import db from '#db'
 
 const get_default_params = ({ params = {} } = {}) => {
@@ -87,13 +88,14 @@ const add_player_per_game_cte = ({
   const { week, career_year, career_game, all_years } = get_default_params({
     params
   })
+  const { seas_type } = get_play_by_play_default_params({ params })
 
   let cte_query = db('player_gamelogs')
     .select('player_gamelogs.pid')
     .leftJoin('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
     .count('* as rate_type_total_count')
     .select(db.raw('array_agg(distinct player_gamelogs.tm) as teams'))
-    .where('nfl_games.seas_type', 'REG')
+    .whereIn('nfl_games.seas_type', seas_type)
     .where('player_gamelogs.active', true)
 
   if (career_year.length) {
@@ -156,11 +158,12 @@ const add_team_per_game_cte = ({
   const { week, all_years } = get_default_params({
     params
   })
+  const { seas_type } = get_play_by_play_default_params({ params })
 
   const cte_query = db('nfl_plays')
     .select('nfl_plays.off as team')
     .countDistinct('nfl_plays.esbid as rate_type_total_count')
-    .where('nfl_plays.seas_type', 'REG')
+    .whereIn('nfl_plays.seas_type', seas_type)
 
   if (all_years.length) {
     cte_query.whereIn('nfl_plays.year', all_years)

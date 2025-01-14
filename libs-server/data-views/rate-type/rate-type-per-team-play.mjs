@@ -1,7 +1,7 @@
 import db from '#db'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
-
+import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 export const get_per_team_play_cte_table_name = ({
   params = {},
   play_type = null,
@@ -71,9 +71,10 @@ export const add_per_team_play_cte = ({
 }) => {
   team_unit = params.team_unit || team_unit
 
+  const { seas_type } = get_play_by_play_default_params({ params })
+
   const cte_query = db('nfl_plays')
     .select(`nfl_plays.${team_unit}`)
-    .where('nfl_plays.seas_type', 'REG')
     .whereNot('play_type', 'NOPL')
     .groupBy(`nfl_plays.${team_unit}`)
 
@@ -121,7 +122,8 @@ export const add_per_team_play_cte = ({
     year: params.year,
     week: params.week,
     year_offset: params.year_offset,
-    week_offset: params.week_offset
+    week_offset: params.week_offset,
+    seas_type
   }
   // delete filtered_params.career_year
   // delete filtered_params.career_game

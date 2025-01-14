@@ -246,11 +246,6 @@ export default {
 
   year,
   year_offset,
-  // TODO
-  // seas_type: {
-  //   values: constants.seas_types,
-  //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
-  // },
   week,
   seas_type,
 

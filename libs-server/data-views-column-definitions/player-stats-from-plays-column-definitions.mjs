@@ -7,6 +7,7 @@ import { add_player_stats_play_by_play_with_statement } from '#libs-server/data-
 import { get_rate_type_sql } from '#libs-server/data-views/select-string.mjs'
 import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
 import get_stats_column_param_key from '#libs-server/data-views/get-stats-column-param-key.mjs'
+import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 
 const should_use_main_where = ({ params, has_numerator_denominator }) => {
   return (
@@ -166,6 +167,8 @@ const create_team_share_stat = ({
     having_clauses = [],
     splits = []
   }) => {
+    const { seas_type } = get_play_by_play_default_params({ params })
+
     const with_query = db('nfl_plays')
       .select('pg.pid')
       .join('player_gamelogs as pg', function () {
@@ -176,7 +179,6 @@ const create_team_share_stat = ({
         )
       })
       .whereNot('play_type', 'NOPL')
-      .where('nfl_plays.seas_type', 'REG')
       .where(function () {
         for (const pid_column of pid_columns) {
           this.orWhereNotNull(pid_column)
@@ -235,7 +237,7 @@ const create_team_share_stat = ({
     }
 
     // Remove career_year and career_game from params before applying other filters
-    const filtered_params = { ...params }
+    const filtered_params = { ...params, seas_type }
     delete filtered_params.career_year
     delete filtered_params.career_game
 

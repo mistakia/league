@@ -5,6 +5,7 @@ import apply_play_by_play_column_params_to_query from '../apply-play-by-play-col
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { get_rate_type_sql } from '#libs-server/data-views/select-string.mjs'
 import { get_cache_info_for_fields_from_plays } from '#libs-server/data-views/get-cache-info-for-fields-from-plays.mjs'
+import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 
 const generate_fantasy_points_table_alias = ({ params = {} } = {}) => {
   const column_param_keys = Object.keys(nfl_plays_column_params).sort()
@@ -32,6 +33,7 @@ const fantasy_points_from_plays_with = ({
   having_clauses = [],
   splits = []
 }) => {
+  const { seas_type } = get_play_by_play_default_params({ params })
   const base_columns = new Set(['play_type', 'seas_type', 'year'])
   const stat_columns = new Set([
     'rush_yds',
@@ -111,7 +113,6 @@ const fantasy_points_from_plays_with = ({
         .as('fantasy_points_plays')
     })
     .whereNot('play_type', 'NOPL')
-    .where('fantasy_points_plays.seas_type', 'REG')
 
   // Add splits
   for (const split of splits) {
@@ -156,7 +157,7 @@ const fantasy_points_from_plays_with = ({
   }
 
   // Remove career_year and career_game from params before applying other filters
-  const filtered_params = { ...params }
+  const filtered_params = { ...params, seas_type }
   delete filtered_params.career_year
   delete filtered_params.career_game
 
