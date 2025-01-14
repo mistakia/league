@@ -1,6 +1,7 @@
 import db from '#db'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 import { nfl_plays_column_params, data_views_constants } from '#libs-shared'
+import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 
 export const add_defensive_play_by_play_with_statement = ({
   query,
@@ -63,7 +64,6 @@ export const add_defensive_play_by_play_with_statement = ({
       this.as('defensive_plays')
     })
     .whereNot('play_type', 'NOPL')
-    .where('seas_type', 'REG')
 
   const unique_select_strings = new Set(select_strings)
 
@@ -110,7 +110,7 @@ export const add_defensive_play_by_play_with_statement = ({
   }
 
   // Remove career_year and career_game from params before applying other filters
-  const filtered_params = { ...params }
+  const filtered_params = get_play_by_play_default_params({ params })
   delete filtered_params.career_year
   delete filtered_params.career_game
 

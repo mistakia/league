@@ -2,7 +2,7 @@ import db from '#db'
 import { constants } from '#libs-shared'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
-
+import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 export const get_default_params = ({ params = {} } = {}) => {
   let year = params.year || [constants.season.stats_season_year]
   if (!Array.isArray(year)) {
@@ -67,6 +67,8 @@ export const add_per_player_route_cte = ({
   splits,
   group_by = null
 }) => {
+  const { seas_type } = get_play_by_play_default_params({ params })
+
   const cte_query = db('nfl_plays_receiver')
     .select('nfl_plays_receiver.gsis_id')
     .join('nfl_plays', function () {
@@ -76,7 +78,6 @@ export const add_per_player_route_cte = ({
         'nfl_plays.playId'
       )
     })
-    .where('nfl_plays.seas_type', 'REG')
     .where('play_type', 'PASS')
     .groupBy('nfl_plays_receiver.gsis_id')
 
@@ -114,7 +115,7 @@ export const add_per_player_route_cte = ({
   const { year, week } = get_default_params({ params })
 
   // Remove career_year and career_game from params before applying other filters
-  const filtered_params = { ...params, year, week }
+  const filtered_params = { ...params, year, week, seas_type }
   delete filtered_params.career_year
   delete filtered_params.career_game
 

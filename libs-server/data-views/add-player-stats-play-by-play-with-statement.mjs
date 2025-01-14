@@ -2,6 +2,7 @@ import db from '#db'
 import { data_views_constants } from '#libs-shared'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
+import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 
 export const add_player_stats_play_by_play_with_statement = ({
   query,
@@ -16,6 +17,8 @@ export const add_player_stats_play_by_play_with_statement = ({
     throw new Error('with_table_name is required')
   }
 
+  const default_params = get_play_by_play_default_params({ params })
+
   const ordered_pid_columns_string = pid_columns.includes('player_fuml_pid')
     ? [
         'player_fuml_pid',
@@ -26,7 +29,6 @@ export const add_player_stats_play_by_play_with_statement = ({
   const with_query = db('nfl_plays')
     .select(db.raw(`COALESCE(${ordered_pid_columns_string}) as pid`))
     .whereNot('play_type', 'NOPL')
-    .where('nfl_plays.seas_type', 'REG')
   // TODO this could be helpful for performance
   // .where(function () {
   //   for (const pid_column of pid_columns) {
@@ -82,7 +84,7 @@ export const add_player_stats_play_by_play_with_statement = ({
   }
 
   // Remove career_year and career_game from params before applying other filters
-  const filtered_params = { ...params }
+  const filtered_params = default_params
   delete filtered_params.career_year
   delete filtered_params.career_game
 

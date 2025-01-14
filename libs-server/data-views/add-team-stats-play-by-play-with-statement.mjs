@@ -1,5 +1,6 @@
 import db from '#db'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
+import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 
 export const add_team_stats_play_by_play_with_statement = ({
   query,
@@ -22,7 +23,6 @@ export const add_team_stats_play_by_play_with_statement = ({
   const with_query = db('nfl_plays')
     .select(`nfl_plays.${team_unit} as nfl_team`)
     .whereNot('play_type', 'NOPL')
-    .where('nfl_plays.seas_type', 'REG')
 
   const unique_select_strings = new Set(select_strings)
 
@@ -31,7 +31,7 @@ export const add_team_stats_play_by_play_with_statement = ({
   }
 
   // Remove career_year and career_game from params before applying other filters
-  const filtered_params = { ...params }
+  const filtered_params = get_play_by_play_default_params({ params })
   delete filtered_params.career_year
   delete filtered_params.career_game
 
@@ -111,6 +111,7 @@ function create_player_team_stats_query({
   params,
   having_clauses
 }) {
+  const { seas_type } = get_play_by_play_default_params({ params })
   const player_team_stats_query = db('player_gamelogs')
     .select('player_gamelogs.pid')
     .groupBy('player_gamelogs.pid')
@@ -120,7 +121,7 @@ function create_player_team_stats_query({
       this.andOn('nfl_games.year', '=', `${with_table_name}.year`)
       this.andOn('nfl_games.week', '=', `${with_table_name}.week`)
     })
-    .where('nfl_games.seas_type', 'REG')
+    .whereIn('nfl_games.seas_type', seas_type)
 
   add_select_columns({
     query: player_team_stats_query,
