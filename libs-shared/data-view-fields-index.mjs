@@ -212,6 +212,8 @@ export default {
     'The average rushing yards per attempt (calculated from play-by-play data)',
   player_rush_attempts_from_plays:
     'The number of rushing attempts by the player (calculated from play-by-play data)',
+  player_average_box_defenders_per_rush_attempt_from_plays:
+    'The average number of box defenders per rush attempt (calculated from play-by-play data)',
   player_rush_first_downs_from_plays:
     'The number of first downs gained by rushing (calculated from play-by-play data)',
   player_positive_rush_attempts_from_plays:

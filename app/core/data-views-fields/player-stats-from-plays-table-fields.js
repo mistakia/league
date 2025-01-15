@@ -252,6 +252,14 @@ export default {
     header_label: 'ATT',
     player_value_path: 'rush_atts_from_plays'
   }),
+  player_average_box_defenders_per_rush_attempt_from_plays:
+    offensive_player_from_play_field({
+      column_title: 'Average Box Defenders Per Rush Attempt (By Play)',
+      column_groups: [COLUMN_GROUPS.RUSHING],
+      header_label: 'AVG BOX #',
+      player_value_path: 'average_box_defenders_per_rush_att_from_plays',
+      fixed: 1
+    }),
   player_rush_first_downs_from_plays: offensive_player_from_play_field({
     column_title: 'Rushing First Downs (By Play)',
     column_groups: [COLUMN_GROUPS.RUSHING],
