@@ -519,9 +519,9 @@ export default {
   player_average_box_defenders_per_rush_attempt_from_plays:
     player_stat_from_plays({
       pid_columns: ['bc_pid'],
-      with_select_string: `CASE WHEN SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END) > 0 THEN CAST(ROUND(AVG(box_ngs)::decimal, 2) AS decimal) ELSE 0 END`,
+      with_select_string: `CAST(ROUND(AVG(CASE WHEN bc_pid IS NOT NULL THEN box_ngs ELSE NULL END)::decimal, 2) AS decimal)`,
       stat_name: 'average_box_defenders_per_rush_att_from_plays',
-      numerator_select: `SUM(box_ngs)`,
+      numerator_select: `AVG(CASE WHEN bc_pid IS NOT NULL THEN box_ngs ELSE NULL END)`,
       denominator_select: `SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END)`,
       has_numerator_denominator: true,
       supported_rate_types: []
