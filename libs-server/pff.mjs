@@ -36,6 +36,8 @@ export const get_pff_week = () => {
     switch (week) {
       case 1:
         return 28
+      case 2:
+        return 29
       default:
         throw new Error(`Unknown pff week: ${week}`)
     }
