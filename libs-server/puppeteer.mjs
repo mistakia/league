@@ -291,7 +291,7 @@ async function connectToChrome({
   try {
     // Try to connect to an existing Chrome instance
     return await puppeteer.connect({
-      browserURL: `http://localhost:${remote_debugging_port}`,
+      browserURL: `http://127.0.0.1:${remote_debugging_port}`,
       defaultViewport: null
     })
   } catch (error) {
@@ -315,7 +315,7 @@ async function connectToChrome({
     // Wait for Chrome to start and then connect
     await new Promise((resolve) => setTimeout(resolve, 1000))
     return await puppeteer.connect({
-      browserURL: `http://localhost:${remote_debugging_port}`,
+      browserURL: `http://127.0.0.1:${remote_debugging_port}`,
       defaultViewport: null
     })
   }
