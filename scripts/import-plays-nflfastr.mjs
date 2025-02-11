@@ -305,15 +305,21 @@ const run = async ({
   force_import = false,
   force_download = false
 } = {}) => {
-  if (year === constants.season.year && !constants.season.week) {
-    throw new Error('Season has not started yet')
+  if (
+    year === constants.season.year &&
+    (!constants.season.week ||
+      constants.season.now.isAfter(constants.season.end))
+  ) {
+    log(`${year} season has not started yet`)
+    return
   }
 
   if (year === constants.season.year && constants.season.week === 1) {
     const current_day = dayjs().day()
     if (current_day < 5 && current_day > 1) {
       // 5 is Friday
-      throw new Error('Week 1 data is not available until Friday')
+      log(`${year} week 1 data is not available until Friday`)
+      return
     }
   }
 
