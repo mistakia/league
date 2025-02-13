@@ -15,7 +15,10 @@ const twelve_hours = 43200000
 const six_hours = 21600000
 const one_hour = 3600000
 
-const all_years = Array.from({ length: constants.season.year - 1999 }, (_, i) => i + 2000)
+const all_years = Array.from(
+  { length: constants.season.year - 1999 },
+  (_, i) => i + 2000
+)
 
 describe('LIBS SERVER get_data_view_results', () => {
   before(() => {
