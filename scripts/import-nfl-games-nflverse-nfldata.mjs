@@ -102,30 +102,65 @@ const import_nfl_games_nflverse_nfldata = async ({
   })
 
   for (const item of data) {
-    let db_game = await db('nfl_games')
-      .where({
-        year: item.season,
-        week: item.week,
-        seas_type: item.game_type,
-        v: fixTeam(item.away_team),
-        h: fixTeam(item.home_team),
-        esbid: item.old_game_id
-      })
-      .first()
+    if (!item.season) {
+      log(
+        `skipping item (${item.old_game_id} / ${item.game_id}) — missing season`
+      )
+      continue
+    }
 
-    if (!db_game) {
+    if (!item.week) {
+      log(
+        `skipping item (${item.old_game_id} / ${item.game_id}) — missing week`
+      )
+      continue
+    }
+
+    if (!item.game_type) {
+      log(
+        `skipping item (${item.old_game_id} / ${item.game_id}) — missing game_type`
+      )
+      continue
+    }
+
+    if (!item.away_team) {
+      log(
+        `skipping item (${item.old_game_id} / ${item.game_id}) — missing away_team`
+      )
+      continue
+    }
+
+    if (!item.home_team) {
+      log(
+        `skipping item (${item.old_game_id} / ${item.game_id}) — missing home_team`
+      )
+      continue
+    }
+
+    const game_params = {
+      year: item.season,
+      week: item.week,
+      seas_type: item.game_type,
+      v: fixTeam(item.away_team),
+      h: fixTeam(item.home_team)
+    }
+
+    let db_game
+
+    if (item.old_game_id) {
       db_game = await db('nfl_games')
         .where({
-          year: item.season,
-          week: item.week,
-          seas_type: item.game_type,
-          v: fixTeam(item.away_team),
-          h: fixTeam(item.home_team)
+          ...game_params,
+          esbid: item.old_game_id
         })
         .first()
     }
 
     if (!db_game) {
+      db_game = await db('nfl_games').where(game_params).first()
+    }
+
+    if (!db_game && item.old_game_id) {
       db_game = await db('nfl_games').where({ esbid: item.old_game_id }).first()
     }
 
