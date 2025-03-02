@@ -1706,6 +1706,8 @@ DROP TABLE IF EXISTS public.nfl_play_stats_current_week;
 DROP TABLE IF EXISTS public.nfl_play_stats;
 DROP TABLE IF EXISTS public.nfl_games_changelog;
 DROP TABLE IF EXISTS public.nfl_games;
+DROP TABLE IF EXISTS public.nfl_draft_rankings_index;
+DROP TABLE IF EXISTS public.nfl_draft_rankings_history;
 DROP SEQUENCE IF EXISTS public.matchups_uid_seq;
 DROP TABLE IF EXISTS public.matchups;
 DROP SEQUENCE IF EXISTS public.leagues_uid_seq;
@@ -1776,10 +1778,12 @@ DROP TYPE IF EXISTS public.nfl_play_type;
 DROP TYPE IF EXISTS public.nfl_games_surf;
 DROP TYPE IF EXISTS public.nfl_games_roof;
 DROP TYPE IF EXISTS public.motion_type;
+DROP TYPE IF EXISTS public.mock_draft_source_id;
 DROP TYPE IF EXISTS public.market_source_id;
 DROP TYPE IF EXISTS public.hash_position;
 DROP TYPE IF EXISTS public.game_result;
 DROP TYPE IF EXISTS public.espn_win_rate_type;
+DROP TYPE IF EXISTS public.draft_ranking_type;
 DROP TYPE IF EXISTS public.dfs_source_id;
 DROP TYPE IF EXISTS public.coverage_type;
 --
@@ -1807,6 +1811,16 @@ CREATE TYPE public.coverage_type AS ENUM (
 CREATE TYPE public.dfs_source_id AS ENUM (
     'DRAFTKINGS',
     'FANDUEL'
+);
+
+
+--
+-- Name: draft_ranking_type; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.draft_ranking_type AS ENUM (
+    'BIG_BOARD',
+    'MOCK_DRAFT'
 );
 
 
@@ -1860,6 +1874,38 @@ CREATE TYPE public.market_source_id AS ENUM (
     'PRIZEPICKS',
     'PINNACLE',
     'FANATICS'
+);
+
+
+--
+-- Name: mock_draft_source_id; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.mock_draft_source_id AS ENUM (
+    'NFLMOCKDRAFTDATABASE_CONSENSUS',
+    '33RD_TEAM',
+    'BLEACHER_REPORT',
+    'NFL_DRAFT_BUZZ',
+    'CBS',
+    'DRAFTTEK',
+    'ESPN',
+    'PFF',
+    'TANKATHON',
+    'USA',
+    'WALTER_FOOTBALL',
+    'GRINDINGTHEMOCKS',
+    'FOX',
+    'THE_DRAFT_NETWORK',
+    'NBC_ROTOWORLD',
+    'NFL',
+    'PRO_FOOTBALL_FOCUS',
+    'PRO_FOOTBALL_NETWORK',
+    'THE_RINGER',
+    'SB_NATION',
+    'SPORTS_ILLUSTRATED',
+    'SPORTS_INFO_SOLUTIONS',
+    'USA_DRAFT_WIRE',
+    'YAHOO'
 );
 
 
@@ -3748,6 +3794,38 @@ CREATE SEQUENCE public.matchups_uid_seq
 --
 
 ALTER SEQUENCE public.matchups_uid_seq OWNED BY public.matchups.uid;
+
+
+--
+-- Name: nfl_draft_rankings_history; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_draft_rankings_history (
+    pid character varying(25) NOT NULL,
+    source_id public.mock_draft_source_id NOT NULL,
+    year smallint NOT NULL,
+    overall_rank integer,
+    position_rank integer,
+    "position" character varying(4),
+    "timestamp" bigint NOT NULL,
+    draft_ranking_type public.draft_ranking_type DEFAULT 'BIG_BOARD'::public.draft_ranking_type NOT NULL
+);
+
+
+--
+-- Name: nfl_draft_rankings_index; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_draft_rankings_index (
+    pid character varying(25) NOT NULL,
+    source_id public.mock_draft_source_id NOT NULL,
+    year smallint NOT NULL,
+    overall_rank integer,
+    position_rank integer,
+    "position" character varying(4),
+    "timestamp" bigint NOT NULL,
+    draft_ranking_type public.draft_ranking_type DEFAULT 'BIG_BOARD'::public.draft_ranking_type NOT NULL
+);
 
 
 --
