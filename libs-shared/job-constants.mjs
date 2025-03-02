@@ -116,7 +116,8 @@ export const job_types = {
   IMPORT_PLAYS_SPORTRADAR: 91,
   IMPORT_GAMEDAY_ROSTERS: 92,
   UPDATE_PLAYER_GAMELOG_RULED_OUT_STATUS: 93,
-  COMBINATION_ODDS: 94
+  COMBINATION_ODDS: 94,
+  IMPORT_NFLMOCKDRAFTDATABASE: 96
 }
 
 export const job_title_by_id = {
@@ -214,5 +215,6 @@ export const job_title_by_id = {
   91: 'Import NFL Plays (Sportradar)',
   92: 'Import Gameday Rosters',
   93: 'Update Player Gamelog Ruled Out Status',
-  94: 'Collect Combination Odds'
+  94: 'Collect Combination Odds',
+  96: 'Import NFL Mock Draft Database'
 }
