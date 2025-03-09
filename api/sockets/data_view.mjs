@@ -23,7 +23,8 @@ class DataViewQueue {
         ws,
         request_id,
         result: cached_value.data_view_results,
-        metadata: cached_value.data_view_metadata
+        metadata: cached_value.data_view_metadata,
+        append_results: params.append_results
       })
     } else {
       if (ignore_cache) {
@@ -85,11 +86,11 @@ class DataViewQueue {
     })
   }
 
-  send_cached_result({ ws, request_id, result, metadata }) {
+  send_cached_result({ ws, request_id, result, metadata, append_results }) {
     ws.send(
       JSON.stringify({
         type: 'DATA_VIEW_RESULT',
-        payload: { request_id, result, metadata }
+        payload: { request_id, result, metadata, append_results }
       })
     )
   }
@@ -143,8 +144,17 @@ class DataViewQueue {
       const signed_in_timeout = 5 * 60 * 1000 // 5 minutes
       const signed_out_timeout = 40 * 1000 // 40 seconds
       const timeout = user_id ? signed_in_timeout : signed_out_timeout
+
+      // Only calculate total count on initial requests (not pagination)
+      const is_pagination_request = params.offset > 0 && params.append_results
+      const calculate_total_count = !is_pagination_request
+
       const { data_view_results, data_view_metadata } =
-        await get_data_view_results({ timeout, ...params })
+        await get_data_view_results({
+          timeout,
+          ...params,
+          calculate_total_count
+        })
 
       if (data_view_results && data_view_results.length) {
         const cache_ttl = data_view_metadata.cache_ttl || 1000 * 60 * 60 * 12 // 12 hours
@@ -171,7 +181,8 @@ class DataViewQueue {
         payload: {
           request_id,
           result: data_view_results,
-          metadata: data_view_metadata
+          metadata: data_view_metadata,
+          append_results: params.append_results
         }
       })
       log('Request processed successfully', { request_id })
