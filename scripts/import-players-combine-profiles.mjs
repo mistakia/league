@@ -2,7 +2,7 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-// import db from '#db'
+import db from '#db'
 import { constants } from '#libs-shared'
 import {
   is_main,
@@ -19,23 +19,58 @@ debug.enable(
   'import-players-combine-profiles,get-player,create-player,update-player,nfl'
 )
 
+// Function to update NGS prospect scores in the new tables
+const update_ngs_prospect_scores = async ({ pid, ngs_data, timestamp }) => {
+  try {
+    // Insert into index table with ON CONFLICT DO UPDATE
+    await db('ngs_prospect_scores_index')
+      .insert({
+        pid,
+        ...ngs_data,
+        updated_at: timestamp
+      })
+      .onConflict('pid')
+      .merge({
+        ...ngs_data,
+        updated_at: timestamp
+      })
+
+    // Insert a new record in the history table
+    await db('ngs_prospect_scores_history')
+      .insert({
+        pid,
+        ...ngs_data,
+        recorded_at: timestamp
+      })
+      .onConflict(['pid', 'recorded_at'])
+      .ignore()
+
+    log(`Updated NGS prospect scores for player ${pid}`)
+  } catch (err) {
+    log(`Error updating NGS prospect scores: ${err.message}`)
+  }
+}
+
 const import_players_from_combine_profiles_for_year = async ({
   year = constants.season.year,
   token,
-  ignore_cache = false
+  ignore_cache = false,
+  current_timestamp = Math.floor(Date.now() / 1000)
 } = {}) => {
-  let changeCount = 0
-  let createCount = 0
+  let change_count = 0
+  let create_count = 0
 
-  const data = await nfl.get_combine_profiles({
+  const profiles_data = await nfl.get_combine_profiles({
     ignore_cache,
     year,
     token
   })
 
-  log(`got ${data.combineProfiles.length} combine profiles for ${year}`)
+  log(
+    `got ${profiles_data.combineProfiles.length} combine profiles for ${year}`
+  )
 
-  for (const profile of data.combineProfiles) {
+  for (const profile of profiles_data.combineProfiles) {
     let player_row
     try {
       player_row = await find_player_row({ esbid: profile.person.esbId })
@@ -44,24 +79,29 @@ const import_players_from_combine_profiles_for_year = async ({
       continue
     }
 
-    // add combine metrics
-    const data = {
-      forty: profile.fortyYardDash ? profile.fortyYardDash.seconds : null,
-      bench: profile.benchPress ? profile.benchPress.repetitions : null,
-      vertical: profile.verticalJump ? profile.verticalJump.inches : null,
-      broad: profile.broadJump ? profile.broadJump.inches : null,
-      shuttle: profile.twentyYardShuttle
-        ? profile.twentyYardShuttle.seconds
-        : null,
-      cone: profile.threeConeDrill ? profile.threeConeDrill.seconds : null,
-      arm: profile.armLength || null,
-      hand: profile.handSize || null,
+    // Extract NGS prospect scores
+    const ngs_data = {
       ngs_athleticism_score: profile.athleticismScore || null,
       ngs_draft_grade: profile.draftGrade || null,
       nfl_grade: profile.grade || null,
       ngs_production_score: profile.productionScore || null,
       ngs_size_score: profile.sizeScore || null
     }
+
+    // Extract combine metrics
+    const combine_data = {
+      forty: profile.fortyYardDash?.seconds || null,
+      bench: profile.benchPress?.repetitions || null,
+      vertical: profile.verticalJump?.inches || null,
+      broad: profile.broadJump?.inches || null,
+      shuttle: profile.twentyYardShuttle?.seconds || null,
+      cone: profile.threeConeDrill?.seconds || null,
+      arm: profile.armLength || null,
+      hand: profile.handSize || null,
+      ...ngs_data
+    }
+
+    const has_ngs_data = Object.values(ngs_data).some((value) => value !== null)
 
     if (!player_row) {
       try {
@@ -80,29 +120,51 @@ const import_players_from_combine_profiles_for_year = async ({
           esbid: profile.person.esbId,
           jnum: 0,
           dob: '0000-00-00', // TODO - ideally required
-          ...data
+          ...combine_data
         })
-        if (player_row) createCount += 1
+
+        if (player_row) {
+          create_count += 1
+
+          // Update NGS prospect scores tables for new player
+          if (has_ngs_data) {
+            await update_ngs_prospect_scores({
+              pid: player_row.pid,
+              ngs_data,
+              timestamp: current_timestamp
+            })
+          }
+        }
       } catch (err) {
         log(err)
       }
     } else {
       const changes = await updatePlayer({
         player_row,
-        update: data
+        update: combine_data
       })
-      changeCount += changes
+      change_count += changes
+
+      // Update NGS prospect scores tables for existing player
+      if (has_ngs_data) {
+        await update_ngs_prospect_scores({
+          pid: player_row.pid,
+          ngs_data,
+          timestamp: current_timestamp
+        })
+      }
     }
   }
 
-  log(`updated ${changeCount} player fields`)
-  log(`created ${createCount} players`)
+  log(`updated ${change_count} player fields`)
+  log(`created ${create_count} players`)
 }
 
 const import_all_players_from_combine_profiles = async ({
   start,
   end,
-  ignore_cache = false
+  ignore_cache = false,
+  current_timestamp = Math.floor(Date.now() / 1000)
 }) => {
   const token = await nfl.get_session_token_v3()
   const min_year = 2006
@@ -115,7 +177,8 @@ const import_all_players_from_combine_profiles = async ({
     await import_players_from_combine_profiles_for_year({
       year,
       token,
-      ignore_cache
+      ignore_cache,
+      current_timestamp
     })
   }
 }

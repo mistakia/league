@@ -6,6 +6,7 @@
 -- Dumped by pg_dump version 16.3 (Ubuntu 16.3-1.pgdg20.04+1)
 
 SET statement_timeout = 0;
+SET search_path = public;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
 SET client_encoding = 'UTF8';
@@ -15,8 +16,9 @@ SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
 SET row_security = off;
-SET search_path = public;
 
+ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_index DROP CONSTRAINT IF EXISTS ngs_prospect_scores_index_pid_fkey;
+ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_history DROP CONSTRAINT IF EXISTS ngs_prospect_scores_history_pid_fkey;
 ALTER TABLE IF EXISTS ONLY public.invite_codes DROP CONSTRAINT IF EXISTS invite_codes_created_by_fkey;
 DROP TRIGGER IF EXISTS update_config_modtime ON public.config;
 DROP TRIGGER IF EXISTS player_name_search_vector_update ON public.player;
@@ -137,6 +139,7 @@ DROP INDEX IF EXISTS public.player_gamelogs_default_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_default_tm_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_default_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_default_esbid_pid_active_idx;
+DROP INDEX IF EXISTS public.ngs_prospect_scores_history_pid_idx;
 DROP INDEX IF EXISTS public.nfl_year_week_timestamp_year_week_idx;
 DROP INDEX IF EXISTS public."nfl_snaps_year_default_year_esbid_playId_gsis_it_id_idx";
 DROP INDEX IF EXISTS public."nfl_snaps_year_2024_year_esbid_playId_gsis_it_id_idx";
@@ -1458,6 +1461,8 @@ ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_cbs_id
 ALTER TABLE IF EXISTS ONLY public.player_aliases DROP CONSTRAINT IF EXISTS player_aliases_pkey;
 ALTER TABLE IF EXISTS ONLY public.pff_player_seasonlogs DROP CONSTRAINT IF EXISTS pff_player_seasonlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.pff_player_seasonlogs_changelog DROP CONSTRAINT IF EXISTS pff_player_seasonlogs_changelog_pkey;
+ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_index DROP CONSTRAINT IF EXISTS ngs_prospect_scores_index_pkey;
+ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_history DROP CONSTRAINT IF EXISTS ngs_prospect_scores_history_pid_timestamp_key;
 ALTER TABLE IF EXISTS ONLY public.nfl_team_gamelogs DROP CONSTRAINT IF EXISTS nfl_team_gamelogs_esbid_pid_year_unique;
 ALTER TABLE IF EXISTS ONLY public.nfl_plays_rusher DROP CONSTRAINT IF EXISTS nfl_plays_rusher_pkey;
 ALTER TABLE IF EXISTS ONLY public.nfl_plays_receiver DROP CONSTRAINT IF EXISTS nfl_plays_receiver_pkey;
@@ -1623,6 +1628,8 @@ DROP SEQUENCE IF EXISTS public.pff_player_seasonlogs_changelog_uid_seq;
 DROP TABLE IF EXISTS public.pff_player_seasonlogs;
 DROP TABLE IF EXISTS public.percentiles;
 DROP MATERIALIZED VIEW IF EXISTS public.opening_days;
+DROP TABLE IF EXISTS public.ngs_prospect_scores_index;
+DROP TABLE IF EXISTS public.ngs_prospect_scores_history;
 DROP MATERIALIZED VIEW IF EXISTS public.nfl_year_week_timestamp;
 DROP TABLE IF EXISTS public.nfl_team_seasonlogs;
 DROP TABLE IF EXISTS public.nfl_team_gamelogs;
@@ -14151,6 +14158,36 @@ CREATE MATERIALIZED VIEW public.nfl_year_week_timestamp AS
 
 
 --
+-- Name: ngs_prospect_scores_history; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.ngs_prospect_scores_history (
+    pid character varying(25),
+    ngs_athleticism_score numeric(5,2),
+    ngs_draft_grade numeric(5,2),
+    nfl_grade numeric(4,2),
+    ngs_production_score numeric(5,2),
+    ngs_size_score numeric(5,2),
+    recorded_at integer DEFAULT (EXTRACT(epoch FROM now()))::integer
+);
+
+
+--
+-- Name: ngs_prospect_scores_index; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.ngs_prospect_scores_index (
+    pid character varying(25) NOT NULL,
+    ngs_athleticism_score numeric(5,2),
+    ngs_draft_grade numeric(5,2),
+    nfl_grade numeric(4,2),
+    ngs_production_score numeric(5,2),
+    ngs_size_score numeric(5,2),
+    updated_at integer DEFAULT (EXTRACT(epoch FROM now()))::integer
+);
+
+
+--
 -- Name: opening_days; Type: MATERIALIZED VIEW; Schema: public; Owner: -
 --
 
@@ -20227,6 +20264,22 @@ ALTER TABLE ONLY public.nfl_plays_rusher
 
 ALTER TABLE ONLY public.nfl_team_gamelogs
     ADD CONSTRAINT nfl_team_gamelogs_esbid_pid_year_unique UNIQUE (esbid, nfl_team, year);
+
+
+--
+-- Name: ngs_prospect_scores_history ngs_prospect_scores_history_pid_timestamp_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ngs_prospect_scores_history
+    ADD CONSTRAINT ngs_prospect_scores_history_pid_timestamp_key UNIQUE (pid, recorded_at);
+
+
+--
+-- Name: ngs_prospect_scores_index ngs_prospect_scores_index_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ngs_prospect_scores_index
+    ADD CONSTRAINT ngs_prospect_scores_index_pkey PRIMARY KEY (pid);
 
 
 --
@@ -29536,6 +29589,13 @@ CREATE INDEX nfl_year_week_timestamp_year_week_idx ON public.nfl_year_week_times
 
 
 --
+-- Name: ngs_prospect_scores_history_pid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX ngs_prospect_scores_history_pid_idx ON public.ngs_prospect_scores_history USING btree (pid);
+
+
+--
 -- Name: player_gamelogs_default_esbid_pid_active_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -38725,6 +38785,22 @@ CREATE TRIGGER update_config_modtime BEFORE UPDATE ON public.config FOR EACH ROW
 
 ALTER TABLE ONLY public.invite_codes
     ADD CONSTRAINT invite_codes_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(id);
+
+
+--
+-- Name: ngs_prospect_scores_history ngs_prospect_scores_history_pid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ngs_prospect_scores_history
+    ADD CONSTRAINT ngs_prospect_scores_history_pid_fkey FOREIGN KEY (pid) REFERENCES public.player(pid);
+
+
+--
+-- Name: ngs_prospect_scores_index ngs_prospect_scores_index_pid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.ngs_prospect_scores_index
+    ADD CONSTRAINT ngs_prospect_scores_index_pid_fkey FOREIGN KEY (pid) REFERENCES public.player(pid);
 
 
 --
