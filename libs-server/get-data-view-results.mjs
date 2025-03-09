@@ -1227,7 +1227,8 @@ export default async function ({
   sort = [],
   offset = 0,
   limit = 500,
-  timeout = null
+  timeout = null,
+  calculate_total_count = true
 } = {}) {
   const { query, data_view_metadata } = await get_data_view_results_query({
     splits,
@@ -1242,6 +1243,35 @@ export default async function ({
   const data_view_query_string = query.toString()
   console.log(data_view_query_string)
 
+  let total_count = null
+
+  // Only calculate total count if requested
+  if (calculate_total_count) {
+    // Create a count query to get the total number of rows
+    const count_query = query.clone()
+    // Remove limit and offset from count query
+    count_query._statements = count_query._statements.filter(
+      (statement) =>
+        statement.grouping !== 'limit' && statement.grouping !== 'offset'
+    )
+    // Wrap the query in a count
+    const count_wrapper_query = db.raw(
+      `SELECT COUNT(*) as total_count FROM (${count_query.toString()}) as count_query`
+    )
+
+    if (timeout) {
+      // Execute count query with timeout
+      const count_timeout_query = `SET LOCAL statement_timeout = ${timeout};`
+      const full_count_query = `${count_timeout_query} ${count_wrapper_query.toString()};`
+      const count_response = await db.raw(full_count_query)
+      total_count = parseInt(count_response[1].rows[0].total_count, 10)
+    } else {
+      // Execute count query
+      const count_result = await count_wrapper_query
+      total_count = parseInt(count_result.rows[0].total_count, 10)
+    }
+  }
+
   if (timeout) {
     const query_string = query.toString()
     const timeout_query = `SET LOCAL statement_timeout = ${timeout};`
@@ -1249,9 +1279,13 @@ export default async function ({
 
     const response = await db.raw(full_query)
     const data_view_results = response[1].rows
+
     return {
       data_view_results,
-      data_view_metadata,
+      data_view_metadata: {
+        ...data_view_metadata,
+        ...(total_count !== null ? { total_count } : {})
+      },
       data_view_query_string
     }
   }
@@ -1260,7 +1294,10 @@ export default async function ({
 
   return {
     data_view_results,
-    data_view_metadata,
+    data_view_metadata: {
+      ...data_view_metadata,
+      ...(total_count !== null ? { total_count } : {})
+    },
     data_view_query_string
   }
 }
