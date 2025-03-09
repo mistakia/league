@@ -1250,10 +1250,7 @@ export default async function ({
     // Create a count query to get the total number of rows
     const count_query = query.clone()
     // Remove limit and offset from count query
-    count_query._statements = count_query._statements.filter(
-      (statement) =>
-        statement.grouping !== 'limit' && statement.grouping !== 'offset'
-    )
+    count_query.clear('limit').clear('offset')
     // Wrap the query in a count
     const count_wrapper_query = db.raw(
       `SELECT COUNT(*) as total_count FROM (${count_query.toString()}) as count_query`
