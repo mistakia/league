@@ -21,8 +21,8 @@ export function data_view_request_reducer(
         current_request: payload.view_id,
         position: null,
         status: 'pending',
-        result: List(),
-        metadata: null
+        result: payload.append_results ? state.get('result') : List(),
+        metadata: payload.append_results ? state.get('metadata') : null
       })
 
     case data_views_actions.SET_SELECTED_DATA_VIEW: {
@@ -31,8 +31,12 @@ export function data_view_request_reducer(
           current_request: payload.data_view_id,
           position: null,
           status: 'pending',
-          result: List(),
-          metadata: null
+          result: payload.view_change_params.append_results
+            ? state.get('result')
+            : List(),
+          metadata: payload.view_change_params.append_results
+            ? state.get('metadata')
+            : null
         })
       }
 
@@ -45,8 +49,12 @@ export function data_view_request_reducer(
           current_request: payload.data_view.view_id,
           position: null,
           status: 'pending',
-          result: List(),
-          metadata: null
+          result: payload.view_change_params.append_results
+            ? state.get('result')
+            : List(),
+          metadata: payload.view_change_params.append_results
+            ? state.get('metadata')
+            : null
         })
       }
 
@@ -59,12 +67,36 @@ export function data_view_request_reducer(
     case data_view_request_actions.DATA_VIEW_STATUS:
       return state.set('status', payload.status)
 
-    case data_view_request_actions.DATA_VIEW_RESULT:
+    case data_view_request_actions.DATA_VIEW_RESULT: {
+      const current_request = state.get('current_request')
+      const is_append =
+        payload.append_results ||
+        (payload.request_id === current_request &&
+          state.get('result') &&
+          state.get('result').size > 0)
+
+      const current_metadata = state.get('metadata')
+      console.log('current_metadata', current_metadata)
+      const new_metadata = payload.metadata || {}
+      // When appending results, keep existing total_count if new response doesn't have one
+      // This handles pagination requests which don't calculate total_count
+      const merged_metadata =
+        is_append && current_metadata
+          ? {
+              ...new_metadata,
+              total_count:
+                new_metadata.total_count || current_metadata.total_count
+            }
+          : new_metadata
+
       return state.merge({
         status: 'completed',
-        result: List(payload.result),
-        metadata: payload.metadata
+        result: is_append
+          ? state.get('result').concat(List(payload.result))
+          : List(payload.result),
+        metadata: merged_metadata
       })
+    }
 
     case data_view_request_actions.DATA_VIEW_ERROR:
       return state.merge({

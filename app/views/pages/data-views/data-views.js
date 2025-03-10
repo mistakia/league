@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect, useMemo, useCallback } from 'react'
 import PropTypes from 'prop-types'
 import { useLocation, NavLink, useParams, useNavigate } from 'react-router-dom'
 import ImmutablePropTypes from 'react-immutable-proptypes'
@@ -14,8 +14,6 @@ import { shorten_url } from '@core/utils'
 import { API_URL } from '@core/constants'
 
 import './data-views.styl'
-
-const fetch_more = () => {}
 
 const get_export_api_url = ({ view_id, export_format }) => {
   return `${API_URL}/data-views/export/${view_id}/${export_format}`
@@ -233,8 +231,57 @@ export default function DataViewsPage({
     }
   }, [selected_data_view.table_state, leagueId])
 
+  const fetch_more = useCallback(() => {
+    // Don't fetch more if we're already loading or fetching more
+    const is_fetching =
+      data_view_request.status === 'pending' ||
+      data_view_request.status === 'processing'
+    const has_offset = Boolean(selected_data_view.table_state.offset)
+
+    // If we're already fetching more data (not initial load), don't fetch again
+    if (is_fetching && has_offset) {
+      return
+    }
+
+    const current_offset = selected_data_view.table_state.offset || 0
+    const current_limit = selected_data_view.table_state.limit || 500
+    const new_offset = current_offset + current_limit
+
+    // Check if we've already fetched all data
+    const total_count = data_view_request.metadata?.total_count || 0
+    if (total_count > 0 && new_offset >= total_count) {
+      return // Don't fetch more if we've reached the total count
+    }
+
+    // Update the data view with new offset
+    const updated_data_view = {
+      ...selected_data_view,
+      table_state: {
+        ...selected_data_view.table_state,
+        offset: new_offset
+      }
+    }
+
+    data_view_changed(updated_data_view, {
+      view_state_changed: true,
+      append_results: true // Flag to indicate we should append results instead of replacing
+    })
+  }, [selected_data_view, data_view_request, data_view_changed])
+
   const is_view_loading =
     isPending || (view_id && selected_data_view.view_id !== view_id)
+
+  const is_fetching_more =
+    data_view_request.status === 'pending' ||
+    data_view_request.status === 'processing'
+      ? Boolean(selected_data_view.table_state.offset)
+      : false
+
+  const is_loading =
+    (data_view_request.status === 'pending' ||
+      data_view_request.status === 'processing') &&
+    !selected_data_view.table_state.offset
+
   const body = is_view_loading ? (
     <Loading loading />
   ) : (
@@ -258,11 +305,13 @@ export default function DataViewsPage({
         all_columns={data_views_fields}
         selected_view={selected_data_view}
         select_view={on_select_view}
-        fetch_more={fetch_more} // TODO
-        total_rows_fetched={players.size}
-        total_row_count={players.size} // TODO get from server
-        is_fetching_more={selected_data_view.is_fetching} // TODO
-        is_loading={selected_data_view.is_fetching}
+        fetch_more={fetch_more}
+        total_rows_fetched={players.length}
+        total_row_count={
+          data_view_request.metadata?.total_count || players.length
+        }
+        is_fetching_more={is_fetching_more}
+        is_loading={is_loading}
         is_selected_view_editable={
           isLoggedIn && selected_data_view.user_id === user_id
         }

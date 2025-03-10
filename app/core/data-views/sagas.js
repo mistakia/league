@@ -19,7 +19,11 @@ import {
 import { data_view_request_actions } from '@core/data-view-request/actions'
 import { notificationActions } from '@core/notifications/actions'
 
-function* handle_data_view_request({ data_view, ignore_cache = false }) {
+function* handle_data_view_request({
+  data_view,
+  ignore_cache = false,
+  append_results = false
+}) {
   const { columns } = data_view.table_state
 
   if (!columns.length) {
@@ -28,7 +32,8 @@ function* handle_data_view_request({ data_view, ignore_cache = false }) {
 
   const opts = {
     view_id: data_view.view_id,
-    ...data_view.table_state
+    ...data_view.table_state,
+    append_results
   }
 
   yield call(send, {
@@ -47,7 +52,8 @@ function* handle_data_view_request({ data_view, ignore_cache = false }) {
 
 export function* data_view_changed({ payload }) {
   const { view_change_params = {} } = payload
-  const { view_state_changed, view_metadata_changed } = view_change_params
+  const { view_state_changed, view_metadata_changed, append_results } =
+    view_change_params
 
   if (view_metadata_changed) {
     yield fork(save_data_view, { payload })
@@ -55,7 +61,7 @@ export function* data_view_changed({ payload }) {
 
   if (view_state_changed) {
     const data_view = yield select(get_selected_data_view)
-    yield call(handle_data_view_request, { data_view })
+    yield call(handle_data_view_request, { data_view, append_results })
   }
 }
 
