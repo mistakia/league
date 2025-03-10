@@ -49,10 +49,11 @@ const generate_league_season_teams = async ({
   ]
 
   const team_inserts = []
+  const users_teams_inserts = []
 
   for (let i = 0; i < draft_order.length; i++) {
-    const tid = draft_order[i]
-    const team = teams.find((t) => t.uid === tid)
+    const team_id = draft_order[i]
+    const team = teams.find((t) => t.uid === team_id)
 
     team_inserts.push({
       ...team,
@@ -65,14 +66,39 @@ const generate_league_season_teams = async ({
       cap: league.cap,
       faab: league.faab
     })
+
+    // Get user associations for this team from previous year
+    const previous_users_teams = await db('users_teams').where({
+      tid: team_id,
+      year: previous_year
+    })
+
+    // Create new users_teams entries for the new year
+    for (const user_team of previous_users_teams) {
+      users_teams_inserts.push({
+        userid: user_team.userid,
+        tid: team_id,
+        teamtext: user_team.teamtext,
+        teamvoice: user_team.teamvoice,
+        leaguetext: user_team.leaguetext,
+        year
+      })
+    }
   }
 
   if (team_inserts.length) {
-    await db('teams')
-      .insert(team_inserts)
-      .onConflict(['lid', 'year', 'tid'])
-      .merge()
+    await db('teams').insert(team_inserts).onConflict(['year', 'uid']).merge()
     log(`generated ${team_inserts.length} teams for lid ${lid} year ${year}`)
+  }
+
+  if (users_teams_inserts.length) {
+    await db('users_teams')
+      .insert(users_teams_inserts)
+      .onConflict(['userid', 'tid', 'year'])
+      .merge()
+    log(
+      `generated ${users_teams_inserts.length} users_teams associations for lid ${lid} year ${year}`
+    )
   }
 }
 
