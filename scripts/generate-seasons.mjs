@@ -14,6 +14,8 @@ const generate_seasons = async () => {
     .where({ hosted: 1 })
     .whereNull('archived_at')
 
+  log(`Found ${leagues.length} active hosted leagues`)
+
   for (const league of leagues) {
     const { uid: lid } = league
 
