@@ -6,7 +6,6 @@
 -- Dumped by pg_dump version 16.3 (Ubuntu 16.3-1.pgdg20.04+1)
 
 SET statement_timeout = 0;
-SET search_path = public;
 SET lock_timeout = 0;
 SET idle_in_transaction_session_timeout = 0;
 SET client_encoding = 'UTF8';
@@ -15,6 +14,7 @@ SELECT pg_catalog.set_config('search_path', '', false);
 SET check_function_bodies = false;
 SET xmloption = content;
 SET client_min_messages = warning;
+SET search_path = public;
 SET row_security = off;
 
 ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_index DROP CONSTRAINT IF EXISTS ngs_prospect_scores_index_pid_fkey;
