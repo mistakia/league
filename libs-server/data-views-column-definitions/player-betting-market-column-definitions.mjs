@@ -32,7 +32,7 @@ const get_default_params = ({
   if (is_game_prop) {
     week = Array.isArray(params.week)
       ? params.week[0]
-      : params.week || Math.max(1, constants.season.nfl_seas_week)
+      : params.week || constants.season.nfl_seas_week
   } else {
     week = Array.isArray(params.week) ? params.week[0] : params.week || 0
   }
