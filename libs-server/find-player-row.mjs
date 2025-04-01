@@ -70,6 +70,7 @@ const find_player_row = async ({
   espn_id,
   nfl_id,
   mfl_id,
+  sis_id,
 
   ignore_retired = false,
   ignore_free_agent = false
@@ -115,6 +116,8 @@ const find_player_row = async ({
     query.where({ nfl_id })
   } else if (mfl_id) {
     query.where({ mfl_id })
+  } else if (sis_id) {
+    query.where({ sis_id })
   } else {
     if (name) {
       const formatted = format_player_name(name)
