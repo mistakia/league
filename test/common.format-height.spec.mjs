@@ -31,6 +31,12 @@ describe('LIBS-SHARED formatHeight', function () {
     expect(formatHeight('6 \' 0"')).to.equal(target)
   })
 
+  it('fractions', () => {
+    expect(formatHeight('33 1/4"')).to.equal(33.25)
+    expect(formatHeight('33 1/2"')).to.equal(33.5)
+    expect(formatHeight('33 3/4"')).to.equal(33.75)
+  })
+
   describe('errors', function () {
     it('negative', () => {
       expect(formatHeight(-2)).to.equal(null)

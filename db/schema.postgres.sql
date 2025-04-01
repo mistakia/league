@@ -1242,6 +1242,7 @@ DROP INDEX IF EXISTS public.index_nfl_plays_bc_pid;
 DROP INDEX IF EXISTS public.index_nfl_plays_assisted_tackle_2_pid;
 DROP INDEX IF EXISTS public.index_nfl_plays_assisted_tackle_1_pid;
 DROP INDEX IF EXISTS public.idx_users_invite_code;
+DROP INDEX IF EXISTS public.idx_sis_id;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_seasonlogs_pid_year_hash;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_gamelogs_pid_esbid_hash;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_careerlogs_pid_hash;
@@ -1252,8 +1253,12 @@ DROP INDEX IF EXISTS public.idx_prop_market_selections_index_composite;
 DROP INDEX IF EXISTS public.idx_prop_market_selections_composite;
 DROP INDEX IF EXISTS public.idx_player_seasonlogs_year_seas_type_career_year_pid;
 DROP INDEX IF EXISTS public.idx_player_salaries_source_id_pid_salary_esbid;
+DROP INDEX IF EXISTS public.idx_player_prospect_profile_sis_id;
 DROP INDEX IF EXISTS public.idx_player_pid_pos;
 DROP INDEX IF EXISTS public.idx_player_pff_id;
+DROP INDEX IF EXISTS public.idx_player_college_seasonlogs_season;
+DROP INDEX IF EXISTS public.idx_player_college_seasonlogs_pid;
+DROP INDEX IF EXISTS public.idx_player_college_careerlogs_pid;
 DROP INDEX IF EXISTS public.idx_opening_days_year_opening_day;
 DROP INDEX IF EXISTS public.idx_nfl_snaps_partitioned;
 DROP INDEX IF EXISTS public.idx_nfl_plays_pass_location;
@@ -1418,6 +1423,7 @@ ALTER TABLE IF EXISTS ONLY public.player_rushing_gamelogs DROP CONSTRAINT IF EXI
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_rts_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_receiving_gamelogs DROP CONSTRAINT IF EXISTS player_receiving_gamelogs_esbid_pid_year_unique;
 ALTER TABLE IF EXISTS ONLY public.player_rankings_index DROP CONSTRAINT IF EXISTS player_rankings_index_unique;
+ALTER TABLE IF EXISTS ONLY public.player_prospect_profile DROP CONSTRAINT IF EXISTS player_prospect_profile_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pff_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_passing_gamelogs DROP CONSTRAINT IF EXISTS player_passing_gamelogs_esbid_pid_year_unique;
@@ -1456,6 +1462,8 @@ ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_draftk
 ALTER TABLE IF EXISTS ONLY public.player_defender_gamelogs DROP CONSTRAINT IF EXISTS player_defender_gamelogs_esbid_pid_year_unique;
 ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_contracts DROP CONSTRAINT IF EXISTS player_contracts_pid_year_unique;
+ALTER TABLE IF EXISTS ONLY public.player_college_seasonlogs DROP CONSTRAINT IF EXISTS player_college_seasonlogs_pid_season_unique;
+ALTER TABLE IF EXISTS ONLY public.player_college_careerlogs DROP CONSTRAINT IF EXISTS player_college_careerlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_cfbref_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_cbs_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_aliases DROP CONSTRAINT IF EXISTS player_aliases_pkey;
@@ -1586,6 +1594,7 @@ DROP TABLE IF EXISTS public.player_rushing_gamelogs;
 DROP TABLE IF EXISTS public.player_receiving_gamelogs;
 DROP TABLE IF EXISTS public.player_rankings_index;
 DROP TABLE IF EXISTS public.player_rankings;
+DROP TABLE IF EXISTS public.player_prospect_profile;
 DROP TABLE IF EXISTS public.player_passing_gamelogs;
 DROP TABLE IF EXISTS public.player_gamelogs_year_2024;
 DROP TABLE IF EXISTS public.player_gamelogs_year_2023;
@@ -1616,6 +1625,8 @@ DROP TABLE IF EXISTS public.player_gamelogs_default;
 DROP TABLE IF EXISTS public.player_gamelogs;
 DROP TABLE IF EXISTS public.player_defender_gamelogs;
 DROP TABLE IF EXISTS public.player_contracts;
+DROP TABLE IF EXISTS public.player_college_seasonlogs;
+DROP TABLE IF EXISTS public.player_college_careerlogs;
 DROP SEQUENCE IF EXISTS public.player_changelog_uid_seq;
 DROP TABLE IF EXISTS public.player_changelog;
 DROP TABLE IF EXISTS public.player_aliases;
@@ -14482,7 +14493,11 @@ CREATE TABLE public.player (
     draftkings_id integer,
     fanduel_id character varying(20),
     rts_id integer,
-    draft_team character varying(3) DEFAULT NULL::character varying
+    draft_team character varying(3) DEFAULT NULL::character varying,
+    sis_id integer,
+    sis_prospect_grade numeric(10,3),
+    sis_prospect_pos_rank integer,
+    sis_prospect_overall_rank integer
 );
 
 
@@ -14815,6 +14830,441 @@ CREATE SEQUENCE public.player_changelog_uid_seq
 --
 
 ALTER SEQUENCE public.player_changelog_uid_seq OWNED BY public.player_changelog.uid;
+
+
+--
+-- Name: player_college_careerlogs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_college_careerlogs (
+    pid character varying(25) NOT NULL,
+    team_name text,
+    games integer,
+    games_started integer,
+    snaps integer,
+    td integer,
+    position_name text,
+    height numeric,
+    height_is_pro_day boolean,
+    weight numeric,
+    weight_is_pro_day boolean,
+    arms numeric,
+    arms_is_pro_day boolean,
+    hands numeric,
+    hands_is_pro_day boolean,
+    forty_yd_dash numeric,
+    forty_yd_dash_is_pro_day boolean,
+    three_cone numeric,
+    three_cone_is_pro_day boolean,
+    bench numeric,
+    bench_is_pro_day boolean,
+    broad_jump numeric,
+    broad_jump_is_pro_day boolean,
+    vert_jump numeric,
+    vert_jump_is_pro_day boolean,
+    shuttle numeric,
+    shuttle_is_pro_day boolean,
+    completions integer,
+    comp_pct numeric,
+    adot numeric,
+    "int" integer,
+    receptions integer,
+    targets integer,
+    pass_block_points numeric,
+    pass_block_points_rating numeric,
+    blown_block_pct_pass numeric,
+    blown_block_pct_run numeric,
+    blown_blocks integer,
+    blown_blocks_pressure integer,
+    blown_blocks_run integer,
+    blown_blocks_sack integer,
+    false_start_pen integer,
+    gap_blocking_pct numeric,
+    holding_pen integer,
+    pass_snaps integer,
+    run_block_points numeric,
+    run_block_points_rating numeric,
+    run_snaps integer,
+    zone_blocking_pct numeric,
+    adjusted_tackle_depth_plus numeric,
+    blitz_pct numeric,
+    bounce_pct_run_behind numeric,
+    bounce_pct_when_run_at numeric,
+    box_pct numeric,
+    broken_missed_tackle_pct numeric,
+    broken_missed_tackles integer,
+    broken_tackle_pct numeric,
+    broken_tackles integer,
+    defensive_end_pct numeric,
+    defensive_tackle_pct numeric,
+    dropped_int integer,
+    epa numeric,
+    epa_per_attempt_run_behind numeric,
+    forced_fumbles integer,
+    hand_on_ball_pct numeric,
+    hits integer,
+    holding_pen_drawn integer,
+    hurries integer,
+    knockdowns integer,
+    man_coverage_pct numeric,
+    missed_tackle_pct numeric,
+    missed_tackles integer,
+    nose_tackle_pct numeric,
+    pass_breakups integer,
+    pass_cov_points numeric,
+    pass_cov_points_press numeric,
+    pass_cov_points_slot numeric,
+    pass_cov_points_wide numeric,
+    pass_cov_points_rating numeric,
+    pass_deflections integer,
+    pass_rush_pct numeric,
+    pass_rush_points numeric,
+    pass_rush_points_rating numeric,
+    pos_pct numeric,
+    pos_pct_gap numeric,
+    pos_pct_man numeric,
+    pos_pct_man_alt numeric,
+    pos_pct_run_behind numeric,
+    pos_pct_vs_man numeric,
+    pos_pct_vs_zone numeric,
+    pos_pct_when_run_at numeric,
+    pos_pct_zone numeric,
+    press_coverage_pct numeric,
+    pressure_pct numeric,
+    pressure_pct_plus_minus numeric,
+    pressures integer,
+    pressure_share numeric,
+    quick_pressure_pct numeric,
+    run_behind_pct numeric,
+    run_def_points numeric,
+    run_def_points_rating numeric,
+    sack_epa numeric,
+    sack_pct numeric,
+    sacks numeric,
+    tackle_for_loss_epa numeric,
+    tackles integer,
+    tackles_for_loss integer,
+    tackle_share numeric,
+    targets_man integer,
+    targets_secondary_defender integer,
+    three_point_stance_pct numeric,
+    true_pressure_pct numeric,
+    broken_missed_tackles_per_reception numeric,
+    catchable_catch_pct numeric,
+    completed_air_yards numeric,
+    deep_route_pct numeric,
+    deserved_catch_pct numeric,
+    drops integer,
+    rec_epa_per_target numeric,
+    on_target_catch_pct numeric,
+    receiver_points numeric,
+    receiver_points_slot numeric,
+    receiver_points_split numeric,
+    receiver_points_tight numeric,
+    receiver_points_wide numeric,
+    receiver_points_rating numeric,
+    receiver_rating numeric,
+    routes_run integer,
+    slot_pct numeric,
+    targets_above_expectation numeric,
+    target_share numeric,
+    unique_routes integer,
+    rec_yards numeric,
+    yards_after_catch numeric,
+    yards_after_catch_per_completion numeric,
+    yards_after_catch_per_reception numeric,
+    yards_before_contact_per_attempt_run_behind numeric,
+    yards_per_attempt_gap numeric,
+    yards_per_attempt_run_behind numeric,
+    yards_per_attempt_zone numeric,
+    yards_per_coverage_snap numeric,
+    yards_per_coverage_snap_man numeric,
+    yards_per_coverage_snap_zone numeric,
+    yards_per_route_run numeric,
+    yards_per_target numeric,
+    yards_per_target_man numeric,
+    blocking_points numeric,
+    blocking_points_rating numeric,
+    pass_pro_snaps_per_game numeric,
+    total_points numeric,
+    total_points_rating numeric,
+    three_cone_is_unofficial boolean,
+    forty_yd_dash_is_unofficial boolean,
+    adjusted_net_yards_per_attempt numeric,
+    adoc numeric,
+    arms_is_unofficial boolean,
+    bench_is_unofficial boolean,
+    boom_pct numeric,
+    broad_jump_is_unofficial boolean,
+    broken_missed_tackles_per_100db numeric,
+    broken_tackles_per_100touches numeric,
+    bust_pct numeric,
+    catchable_pct numeric,
+    epa_per_dropback numeric,
+    fumbles_per_100touches numeric,
+    hands_is_unofficial boolean,
+    heavy_box_pct numeric,
+    height_is_unofficial boolean,
+    iqr numeric,
+    iqr_deep numeric,
+    iqr_intermediate numeric,
+    iqr_no_pressure numeric,
+    iqr_pressure numeric,
+    iqr_short numeric,
+    iqr_vs_man numeric,
+    iqr_vs_zone numeric,
+    missed_tackles_per_100touches numeric,
+    on_target_pct numeric,
+    pass_attempts integer,
+    passer_points numeric,
+    passer_points_rating numeric,
+    pass_td integer,
+    pass_yards numeric,
+    pass_yards_per_attempt numeric,
+    p_comp_pct numeric,
+    p_comp_pct_plus_minus numeric,
+    pos_pct_hit_at_line numeric,
+    pos_pct_inside numeric,
+    pos_pct_outside numeric,
+    qb_rating numeric,
+    rec_epa numeric,
+    rec_td integer,
+    rush_attempts integer,
+    rush_epa numeric,
+    rush_epa_per_attempt numeric,
+    rusher_points numeric,
+    rusher_points_rating numeric,
+    rush_yards numeric,
+    rush_yards_per_attempt numeric,
+    scrambles integer,
+    shuttle_is_unofficial boolean,
+    snap_to_throw_plus_minus numeric,
+    split_out_pct numeric,
+    throw_air_time_plus_minus numeric,
+    vert_jump_is_unofficial boolean,
+    weight_is_unofficial boolean,
+    yards_after_contact_per_attempt numeric,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+);
+
+
+--
+-- Name: player_college_seasonlogs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_college_seasonlogs (
+    pid character varying(25) NOT NULL,
+    year integer NOT NULL,
+    team_name text,
+    games integer,
+    games_started integer,
+    snaps integer,
+    td integer,
+    position_name text,
+    height numeric,
+    height_is_pro_day boolean,
+    weight numeric,
+    weight_is_pro_day boolean,
+    arms numeric,
+    arms_is_pro_day boolean,
+    hands numeric,
+    hands_is_pro_day boolean,
+    forty_yd_dash numeric,
+    forty_yd_dash_is_pro_day boolean,
+    three_cone numeric,
+    three_cone_is_pro_day boolean,
+    bench numeric,
+    bench_is_pro_day boolean,
+    broad_jump numeric,
+    broad_jump_is_pro_day boolean,
+    vert_jump numeric,
+    vert_jump_is_pro_day boolean,
+    shuttle numeric,
+    shuttle_is_pro_day boolean,
+    completions integer,
+    comp_pct numeric,
+    adot numeric,
+    "int" integer,
+    receptions integer,
+    targets integer,
+    pass_block_points numeric,
+    pass_block_points_rating numeric,
+    blown_block_pct_pass numeric,
+    blown_block_pct_run numeric,
+    blown_blocks integer,
+    blown_blocks_pressure integer,
+    blown_blocks_run integer,
+    blown_blocks_sack integer,
+    false_start_pen integer,
+    gap_blocking_pct numeric,
+    holding_pen integer,
+    pass_snaps integer,
+    run_block_points numeric,
+    run_block_points_rating numeric,
+    run_snaps integer,
+    zone_blocking_pct numeric,
+    adjusted_tackle_depth_plus numeric,
+    blitz_pct numeric,
+    bounce_pct_run_behind numeric,
+    bounce_pct_when_run_at numeric,
+    box_pct numeric,
+    broken_missed_tackle_pct numeric,
+    broken_missed_tackles integer,
+    broken_tackle_pct numeric,
+    broken_tackles integer,
+    defensive_end_pct numeric,
+    defensive_tackle_pct numeric,
+    dropped_int integer,
+    epa numeric,
+    epa_per_attempt_run_behind numeric,
+    forced_fumbles integer,
+    hand_on_ball_pct numeric,
+    hits integer,
+    holding_pen_drawn integer,
+    hurries integer,
+    knockdowns integer,
+    man_coverage_pct numeric,
+    missed_tackle_pct numeric,
+    missed_tackles integer,
+    nose_tackle_pct numeric,
+    pass_breakups integer,
+    pass_cov_points numeric,
+    pass_cov_points_press numeric,
+    pass_cov_points_slot numeric,
+    pass_cov_points_wide numeric,
+    pass_cov_points_rating numeric,
+    pass_deflections integer,
+    pass_rush_pct numeric,
+    pass_rush_points numeric,
+    pass_rush_points_rating numeric,
+    pos_pct numeric,
+    pos_pct_gap numeric,
+    pos_pct_man numeric,
+    pos_pct_man_alt numeric,
+    pos_pct_run_behind numeric,
+    pos_pct_vs_man numeric,
+    pos_pct_vs_zone numeric,
+    pos_pct_when_run_at numeric,
+    pos_pct_zone numeric,
+    press_coverage_pct numeric,
+    pressure_pct numeric,
+    pressure_pct_plus_minus numeric,
+    pressures integer,
+    pressure_share numeric,
+    quick_pressure_pct numeric,
+    run_behind_pct numeric,
+    run_def_points numeric,
+    run_def_points_rating numeric,
+    sack_epa numeric,
+    sack_pct numeric,
+    sacks numeric,
+    tackle_for_loss_epa numeric,
+    tackles integer,
+    tackles_for_loss integer,
+    tackle_share numeric,
+    targets_man integer,
+    targets_secondary_defender integer,
+    three_point_stance_pct numeric,
+    true_pressure_pct numeric,
+    broken_missed_tackles_per_reception numeric,
+    catchable_catch_pct numeric,
+    completed_air_yards numeric,
+    deep_route_pct numeric,
+    deserved_catch_pct numeric,
+    drops integer,
+    rec_epa_per_target numeric,
+    on_target_catch_pct numeric,
+    receiver_points numeric,
+    receiver_points_slot numeric,
+    receiver_points_split numeric,
+    receiver_points_tight numeric,
+    receiver_points_wide numeric,
+    receiver_points_rating numeric,
+    receiver_rating numeric,
+    routes_run integer,
+    slot_pct numeric,
+    targets_above_expectation numeric,
+    target_share numeric,
+    unique_routes integer,
+    rec_yards numeric,
+    yards_after_catch numeric,
+    yards_after_catch_per_completion numeric,
+    yards_after_catch_per_reception numeric,
+    yards_before_contact_per_attempt_run_behind numeric,
+    yards_per_attempt_gap numeric,
+    yards_per_attempt_run_behind numeric,
+    yards_per_attempt_zone numeric,
+    yards_per_coverage_snap numeric,
+    yards_per_coverage_snap_man numeric,
+    yards_per_coverage_snap_zone numeric,
+    yards_per_route_run numeric,
+    yards_per_target numeric,
+    yards_per_target_man numeric,
+    blocking_points numeric,
+    blocking_points_rating numeric,
+    pass_pro_snaps_per_game numeric,
+    total_points numeric,
+    total_points_rating numeric,
+    three_cone_is_unofficial boolean,
+    forty_yd_dash_is_unofficial boolean,
+    adjusted_net_yards_per_attempt numeric,
+    adoc numeric,
+    arms_is_unofficial boolean,
+    bench_is_unofficial boolean,
+    boom_pct numeric,
+    broad_jump_is_unofficial boolean,
+    broken_missed_tackles_per_100db numeric,
+    broken_tackles_per_100touches numeric,
+    bust_pct numeric,
+    catchable_pct numeric,
+    epa_per_dropback numeric,
+    fumbles_per_100touches numeric,
+    hands_is_unofficial boolean,
+    heavy_box_pct numeric,
+    height_is_unofficial boolean,
+    iqr numeric,
+    iqr_deep numeric,
+    iqr_intermediate numeric,
+    iqr_no_pressure numeric,
+    iqr_pressure numeric,
+    iqr_short numeric,
+    iqr_vs_man numeric,
+    iqr_vs_zone numeric,
+    missed_tackles_per_100touches numeric,
+    on_target_pct numeric,
+    pass_attempts integer,
+    passer_points numeric,
+    passer_points_rating numeric,
+    pass_td integer,
+    pass_yards numeric,
+    pass_yards_per_attempt numeric,
+    p_comp_pct numeric,
+    p_comp_pct_plus_minus numeric,
+    pos_pct_hit_at_line numeric,
+    pos_pct_inside numeric,
+    pos_pct_outside numeric,
+    qb_rating numeric,
+    rec_epa numeric,
+    rec_td integer,
+    rush_attempts integer,
+    rush_epa numeric,
+    rush_epa_per_attempt numeric,
+    rusher_points numeric,
+    rusher_points_rating numeric,
+    rush_yards numeric,
+    rush_yards_per_attempt numeric,
+    scrambles integer,
+    shuttle_is_unofficial boolean,
+    snap_to_throw_plus_minus numeric,
+    split_out_pct numeric,
+    throw_air_time_plus_minus numeric,
+    vert_jump_is_unofficial boolean,
+    weight_is_unofficial boolean,
+    yards_after_contact_per_attempt numeric,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
+);
 
 
 --
@@ -17530,6 +17980,239 @@ CREATE TABLE public.player_passing_gamelogs (
     deep_pass_att_pct numeric(5,4),
     tight_window_pct numeric(5,4),
     play_action_pct numeric(5,4)
+);
+
+
+--
+-- Name: player_prospect_profile; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_prospect_profile (
+    pid character varying(25) NOT NULL,
+    sis_id integer,
+    name text,
+    "position" text,
+    jersey_number text,
+    class text,
+    weight numeric,
+    height numeric,
+    hometown text,
+    summary text,
+    overall_grade numeric,
+    overall_pick integer,
+    picked_by_team text,
+    draft_class text,
+    overall_rank integer,
+    position_rank integer,
+    has_been_drafted boolean,
+    draft_round integer,
+    draft_round_pick integer,
+    headshot_url text,
+    team_name text,
+    team_abbr text,
+    team_sis_id integer,
+    strengths jsonb,
+    weaknesses jsonb,
+    scouting_report text,
+    pass_game_report text,
+    run_game_report text,
+    last_word_report text,
+    scout_name text,
+    critical_factor_blocking_ability numeric,
+    critical_factor_receiving_ability numeric,
+    critical_factor_fbi numeric,
+    critical_factor_vision numeric,
+    critical_factor_contact_balance numeric,
+    critical_factor_passing_game_impact numeric,
+    critical_factor_pass_coverage numeric,
+    critical_factor_play_speed numeric,
+    critical_factor_fbi_instincts numeric,
+    critical_factor_hands numeric,
+    critical_factor_separation numeric,
+    critical_factor_run_after_catch numeric,
+    critical_factor_accuracy numeric,
+    critical_factor_decision_making_mental numeric,
+    critical_factor_clutch_performance numeric,
+    critical_factor_3_level_impact numeric,
+    critical_factor_anchor_play_strength numeric,
+    critical_factor_mismatch numeric,
+    critical_factor_body_control numeric,
+    critical_factor_reactive_athleticism numeric,
+    critical_factor_ball_skills numeric,
+    critical_factor_3_down_ability numeric,
+    critical_factor_1st_step_explosion numeric,
+    critical_factor_play_strength numeric,
+    critical_factor_pass_rush numeric,
+    critical_factor_poa_set_edge numeric,
+    positional_factor_run_block numeric,
+    positional_factor_pass_block numeric,
+    positional_factor_play_strength numeric,
+    positional_factor_play_speed numeric,
+    positional_factor_mismatch numeric,
+    positional_factor_release numeric,
+    positional_factor_catching_skills numeric,
+    positional_factor_catching_skill numeric,
+    positional_factor_separation numeric,
+    positional_factor_run_after_catch numeric,
+    positional_factor_clutch_performance numeric,
+    positional_factor_toughness numeric,
+    positional_factor_st_value numeric,
+    positional_factor_elusiveness numeric,
+    positional_factor_power numeric,
+    positional_factor_playmaker numeric,
+    positional_factor_pass_pro numeric,
+    positional_factor_ball_security numeric,
+    positional_factor_3_level_impact numeric,
+    positional_factor_qb_defense numeric,
+    positional_factor_man_coverage numeric,
+    positional_factor_zone_coverage numeric,
+    positional_factor_range numeric,
+    positional_factor_blitz numeric,
+    positional_factor_stoutness numeric,
+    positional_factor_shed_ability numeric,
+    positional_factor_navigate_trash numeric,
+    positional_factor_tackling numeric,
+    positional_factor_route_running numeric,
+    positional_factor_route_savvy numeric,
+    positional_factor_contested_catch numeric,
+    positional_factor_tracking numeric,
+    positional_factor_body_control numeric,
+    positional_factor_blocking numeric,
+    positional_factor_short_accuracy numeric,
+    positional_factor_deep_accuracy numeric,
+    positional_factor_pocket_awareness numeric,
+    positional_factor_footwork numeric,
+    positional_factor_under_pressure numeric,
+    positional_factor_mobility numeric,
+    positional_factor_arm_strength numeric,
+    positional_factor_awkward_throw numeric,
+    positional_factor_eye_discipline numeric,
+    positional_factor_leadership numeric,
+    positional_factor_body_comp numeric,
+    positional_factor_ball_skills_tracking numeric,
+    positional_factor_physicality numeric,
+    positional_factor_communication numeric,
+    positional_factor_pass_rush numeric,
+    positional_factor_on_ball_impact numeric,
+    positional_factor_disruption numeric,
+    positional_factor_hand_use numeric,
+    positional_factor_fbi numeric,
+    positional_factor_stamina numeric,
+    positional_factor_awareness numeric,
+    positional_factor_2nd_level numeric,
+    positional_factor_sustain numeric,
+    positional_factor_finish numeric,
+    positional_factor_flexibility numeric,
+    positional_factor_off_man numeric,
+    positional_factor_press_man numeric,
+    positional_factor_slot_coverage numeric,
+    positional_factor_transition numeric,
+    positional_factor_closing_speed numeric,
+    positional_factor_mental_toughness numeric,
+    positional_factor_open_field_tackling numeric,
+    positional_factor_run_support numeric,
+    positional_factor_agility numeric,
+    positional_factor_discipline numeric,
+    positional_factor_motor numeric,
+    positional_factor_pass_rush_repertoire numeric,
+    positional_factor_bend numeric,
+    positional_factor_flat_coverage numeric,
+    combine_height numeric,
+    combine_weight numeric,
+    combine_arm_length numeric,
+    combine_hand_size numeric,
+    combine_forty_yd_dash numeric,
+    combine_bench numeric,
+    combine_vert_jump numeric,
+    combine_broad_jump numeric,
+    combine_three_cone numeric,
+    combine_shuttle numeric,
+    combine_height_percentile numeric,
+    combine_weight_percentile numeric,
+    combine_arm_length_percentile numeric,
+    combine_hand_size_percentile numeric,
+    combine_forty_yd_dash_percentile numeric,
+    combine_bench_percentile numeric,
+    combine_vert_jump_percentile numeric,
+    combine_broad_jump_percentile numeric,
+    combine_three_cone_percentile numeric,
+    combine_shuttle_percentile numeric,
+    combine_height_is_pro_day boolean,
+    combine_weight_is_pro_day boolean,
+    combine_arm_length_is_pro_day boolean,
+    combine_hand_size_is_pro_day boolean,
+    combine_forty_yd_dash_is_pro_day boolean,
+    combine_bench_is_pro_day boolean,
+    combine_vert_jump_is_pro_day boolean,
+    combine_broad_jump_is_pro_day boolean,
+    combine_three_cone_is_pro_day boolean,
+    combine_shuttle_is_pro_day boolean,
+    stat_tpts_per_game numeric,
+    stat_tpts_per_game_pass_cover numeric,
+    stat_yards_per_route numeric,
+    stat_tpts_rating_overall numeric,
+    stat_tpts_rating_receiving numeric,
+    stat_tpts_rating_blocking numeric,
+    stat_blown_block_pct_pass numeric,
+    stat_blown_block_pct_rush numeric,
+    stat_catchable_catch_pct numeric,
+    stat_target_share numeric,
+    stat_yards_after_catch_per_game numeric,
+    stat_broken_missed_tackle_per_reception numeric,
+    stat_tpts_rating_rushing numeric,
+    stat_tpts_pass_block numeric,
+    stat_positive_pct numeric,
+    stat_boom_pct numeric,
+    stat_broken_tackle_per_100_touch numeric,
+    stat_missed_tackle_per_100_touch numeric,
+    stat_yards_after_catch_per_attempt numeric,
+    stat_tpts_rating_pass_cover numeric,
+    stat_tpts_rating_run_defense numeric,
+    stat_tpts_rating_pass_rush numeric,
+    stat_hob_pct numeric,
+    stat_atd_plus numeric,
+    stat_broken_missed_tackle_pct numeric,
+    stat_tackle_share numeric,
+    stat_tpts_per_game_slot numeric,
+    stat_tpts_per_game_wide numeric,
+    stat_target_pct_plus_minus numeric,
+    stat_deep_route_pct numeric,
+    stat_unique_routes numeric,
+    stat_yards_after_catch_per_reception numeric,
+    stat_tpts_rating_passing numeric,
+    stat_iqr numeric,
+    stat_snap_throw_plus_minus numeric,
+    stat_air_time_plus_minus numeric,
+    stat_catchable_pct numeric,
+    stat_on_target_pct numeric,
+    stat_adjusted_net_yards_per_attempt numeric,
+    stat_deserved_catch_pct numeric,
+    stat_slot_pct numeric,
+    stat_box_pct numeric,
+    stat_tpts_rating_pass_block numeric,
+    stat_tpts_rating_run_block numeric,
+    stat_blown_block_pct numeric,
+    stat_run_behind_pct numeric,
+    stat_pos_pct_run_behind numeric,
+    stat_bounce_pct numeric,
+    stat_yards_before_contact_per_attempt numeric,
+    stat_tpts_per_game_press_cover numeric,
+    stat_yards_per_coverage_snap numeric,
+    stat_yards_per_snap_man numeric,
+    stat_yards_per_snap_zone numeric,
+    stat_tackles_for_loss_per_game numeric,
+    stat_pressure_pct_plus_minus numeric,
+    stat_true_pressure_pct numeric,
+    stat_quick_pressure_pct numeric,
+    stat_pressure_share numeric,
+    stat_tpts_per_game_rank integer,
+    stat_tpts_per_game_pass_cover_rank integer,
+    stat_yards_per_route_rank integer,
+    stat_tpts_rating_overall_rank integer,
+    stat_tpts_rating_receiving_rank integer,
+    stat_tpts_rating_blocking_rank integer,
+    created_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP,
+    updated_at timestamp with time zone DEFAULT CURRENT_TIMESTAMP
 );
 
 
@@ -20323,6 +21006,22 @@ ALTER TABLE ONLY public.player
 
 
 --
+-- Name: player_college_careerlogs player_college_careerlogs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_college_careerlogs
+    ADD CONSTRAINT player_college_careerlogs_pkey PRIMARY KEY (pid);
+
+
+--
+-- Name: player_college_seasonlogs player_college_seasonlogs_pid_season_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_college_seasonlogs
+    ADD CONSTRAINT player_college_seasonlogs_pid_season_unique UNIQUE (pid, year);
+
+
+--
 -- Name: player_contracts player_contracts_pid_year_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -20624,6 +21323,14 @@ ALTER TABLE ONLY public.player
 
 ALTER TABLE ONLY public.player
     ADD CONSTRAINT player_pkey PRIMARY KEY (pid);
+
+
+--
+-- Name: player_prospect_profile player_prospect_profile_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_prospect_profile
+    ADD CONSTRAINT player_prospect_profile_pkey PRIMARY KEY (pid);
 
 
 --
@@ -21791,6 +22498,27 @@ CREATE INDEX idx_opening_days_year_opening_day ON public.opening_days USING btre
 
 
 --
+-- Name: idx_player_college_careerlogs_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_college_careerlogs_pid ON public.player_college_careerlogs USING btree (pid);
+
+
+--
+-- Name: idx_player_college_seasonlogs_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_college_seasonlogs_pid ON public.player_college_seasonlogs USING btree (pid);
+
+
+--
+-- Name: idx_player_college_seasonlogs_season; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_college_seasonlogs_season ON public.player_college_seasonlogs USING btree (year);
+
+
+--
 -- Name: idx_player_pff_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -21802,6 +22530,13 @@ CREATE INDEX idx_player_pff_id ON public.player USING btree (pff_id);
 --
 
 CREATE INDEX idx_player_pid_pos ON public.player USING btree (pid, pos);
+
+
+--
+-- Name: idx_player_prospect_profile_sis_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_prospect_profile_sis_id ON public.player_prospect_profile USING btree (sis_id);
 
 
 --
@@ -21872,6 +22607,13 @@ CREATE UNIQUE INDEX idx_scoring_format_player_gamelogs_pid_esbid_hash ON public.
 --
 
 CREATE UNIQUE INDEX idx_scoring_format_player_seasonlogs_pid_year_hash ON public.scoring_format_player_seasonlogs USING btree (pid, year, scoring_format_hash);
+
+
+--
+-- Name: idx_sis_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_sis_id ON public.player USING btree (sis_id);
 
 
 --
