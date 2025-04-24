@@ -14,6 +14,7 @@ import {
   get_with_select_string
 } from '#libs-server/data-views/select-string.mjs'
 import {
+  get_where_string,
   get_main_where_string,
   get_with_where_string
 } from '#libs-server/data-views/where-string.mjs'
@@ -804,23 +805,59 @@ export const get_data_view_results_query = async ({
   if (splits.includes('week') || splits.includes('year')) {
     const year_range = get_year_range([...prefix_columns, ...columns], where)
 
+    // Create base_years CTE
     players_query.with(
       'base_years',
       db.raw(`SELECT unnest(ARRAY[${year_range.join(',')}]) as year`)
     )
-    players_query.with(
-      'player_years',
-      db.raw(
-        'SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years'
-      )
+
+    // Find position filter if it exists
+    const position_filter = where.find(
+      (clause) =>
+        clause.column_id === 'player_position' &&
+        (Array.isArray(clause.value)
+          ? clause.value.length > 0
+          : Boolean(clause.value))
     )
+
+    // Create player_years CTE with optional position filter
+    const base_query =
+      'SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years'
+
+    if (position_filter) {
+      const column_definition = data_views_column_definitions.player_position
+      const position_where_string = get_where_string({
+        where_clause: position_filter,
+        column_definition,
+        table_name: 'player',
+        column_index: 0,
+        is_main_select: false,
+        params: position_filter.params || {}
+      })
+
+      players_query.with(
+        'player_years',
+        db.raw(`${base_query} WHERE ${position_where_string}`)
+      )
+    } else {
+      players_query.with('player_years', db.raw(base_query))
+    }
   }
 
   if (splits.includes('week')) {
+    // Extract year filter directly from the year_range
+    const year_range = get_year_range([...prefix_columns, ...columns], where)
+    const single_year_filter = year_range.length === 1 ? year_range[0] : null
+
+    // Create player_years_weeks CTE with optional year filter
+    const year_filter_clause = single_year_filter
+      ? ` WHERE nfl_year_week_timestamp.year = ${single_year_filter}`
+      : ''
+
     players_query.with(
       'player_years_weeks',
       db.raw(
-        `SELECT player_years.pid, nfl_year_week_timestamp.year, nfl_year_week_timestamp.week FROM player_years INNER JOIN nfl_year_week_timestamp ON player_years.year = nfl_year_week_timestamp.year`
+        `SELECT player_years.pid, nfl_year_week_timestamp.year, nfl_year_week_timestamp.week FROM player_years INNER JOIN nfl_year_week_timestamp ON player_years.year = nfl_year_week_timestamp.year${year_filter_clause}`
       )
     )
 

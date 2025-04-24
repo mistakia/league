@@ -1,4 +1,3 @@
-import fetch from 'node-fetch'
 import debug from 'debug'
 import dayjs from 'dayjs'
 
