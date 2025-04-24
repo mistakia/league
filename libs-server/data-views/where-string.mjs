@@ -1,5 +1,5 @@
 // TODO update to return an object containing the where_string and values for parameterized query
-const get_where_string = ({
+export const get_where_string = ({
   where_clause,
   column_definition,
   table_name,

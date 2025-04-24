@@ -73,6 +73,11 @@ export default function data_view_join_function(join_arguments) {
           '=',
           'player.current_nfl_team'
         )
+
+        // Add week join condition for team stats tables when week split is enabled
+        if (splits.includes('week') && table_name.includes('_team_stats')) {
+          this.andOn(`${table_name}.week`, '=', 'player_years_weeks.week')
+        }
       }
     } else {
       this.on(`${table_name}.pid`, '=', 'player.pid')

@@ -90,17 +90,23 @@ const add_player_per_game_cte = ({
   })
   const { seas_type } = get_play_by_play_default_params({ params })
 
-  let cte_query = db('player_gamelogs')
-    .select('player_gamelogs.pid')
-    .leftJoin('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
+  // Use year-specific player_gamelogs table if a single year is specified
+  const single_year = all_years && all_years.length === 1 ? all_years[0] : null
+  const player_gamelogs_table = single_year
+    ? `player_gamelogs_year_${single_year}`
+    : 'player_gamelogs'
+
+  let cte_query = db(player_gamelogs_table)
+    .select(`${player_gamelogs_table}.pid`)
+    .leftJoin('nfl_games', 'nfl_games.esbid', `${player_gamelogs_table}.esbid`)
     .count('* as rate_type_total_count')
-    .select(db.raw('array_agg(distinct player_gamelogs.tm) as teams'))
+    .select(db.raw(`array_agg(distinct ${player_gamelogs_table}.tm) as teams`))
     .whereIn('nfl_games.seas_type', seas_type)
-    .where('player_gamelogs.active', true)
+    .where(`${player_gamelogs_table}.active`, true)
 
   if (career_year.length) {
     cte_query = cte_query.leftJoin('player_seasonlogs', function () {
-      this.on('player_seasonlogs.pid', 'player_gamelogs.pid')
+      this.on('player_seasonlogs.pid', `${player_gamelogs_table}.pid`)
       this.andOn('player_seasonlogs.year', 'nfl_games.year')
       this.andOn('player_seasonlogs.seas_type', 'nfl_games.seas_type')
     })
@@ -126,7 +132,7 @@ const add_player_per_game_cte = ({
   if (career_game.length === 2) {
     const min_career_game = Math.min(...career_game.map(Number))
     const max_career_game = Math.max(...career_game.map(Number))
-    cte_query.whereBetween('player_gamelogs.career_game', [
+    cte_query.whereBetween(`${player_gamelogs_table}.career_game`, [
       min_career_game,
       max_career_game
     ])
@@ -144,7 +150,7 @@ const add_player_per_game_cte = ({
     }
   }
 
-  cte_query.groupBy('player_gamelogs.pid')
+  cte_query.groupBy(`${player_gamelogs_table}.pid`)
 
   players_query.with(rate_type_table_name, cte_query)
 }
