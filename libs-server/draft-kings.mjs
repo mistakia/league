@@ -12,6 +12,7 @@ import { wait } from '#libs-server'
 import WebSocket from 'ws'
 import db from '#db'
 import { fixTeam } from '#libs-shared'
+import { fetch_with_proxy } from '#libs-server/proxy-manager.mjs'
 
 const log = debug('draft-kings')
 // debug.enable('draft-kings')
@@ -321,7 +322,7 @@ export const get_offers = async ({ offerCategoryId, subcategoryId }) => {
   const url = `${config.draftkings_api_v6_url}/eventgroups/88808/categories/${offerCategoryId}/subcategories/${subcategoryId}?format=json`
 
   // log(`fetching ${url}`)
-  const res = await fetch(url, { method: 'POST' })
+  const res = await fetch_with_proxy({ url, options: { method: 'POST' } })
   const data = await res.json()
 
   if (data && data.eventGroup && data.eventGroup.offerCategories) {
@@ -355,7 +356,7 @@ export const get_eventgroup_offer_categories = async () => {
   const url = `${config.draftkings_api_v6_url}/eventgroups/88808?format=json`
 
   // log(`fetching ${url}`)
-  const res = await fetch(url, { method: 'POST' })
+  const res = await fetch_with_proxy({ url, options: { method: 'POST' } })
   const data = await res.json()
 
   if (data && data.eventGroup && data.eventGroup.offerCategories) {
@@ -371,7 +372,7 @@ export const get_eventgroup_offer_subcategories = async ({
   const url = `${config.draftkings_api_v6_url}/eventgroups/88808/categories/${offerCategoryId}?format=json`
 
   // log(`fetching ${url}`)
-  const res = await fetch(url, { method: 'POST' })
+  const res = await fetch_with_proxy({ url, options: { method: 'POST' } })
   const data = await res.json()
 
   if (data && data.eventGroup && data.eventGroup.offerCategories) {
@@ -576,7 +577,7 @@ const get_draftkings_contests = async () => {
   const draftkings_config = await get_draftkings_config()
   const url = draftkings_config.draftkings_contests_url
   log(`fetching ${url}`)
-  const data = await fetch(url).then((res) => res.json())
+  const data = await fetch_with_proxy({ url }).then((res) => res.json())
   return data
 }
 
@@ -598,6 +599,6 @@ export const get_draftkings_draft_group_draftables = async ({
   const draftkings_config = await get_draftkings_config()
   const url = `${draftkings_config.draftkings_salary_url}/${draft_group_id}/draftables`
   log(`fetching ${url}`)
-  const data = await fetch(url).then((res) => res.json())
+  const data = await fetch_with_proxy({ url }).then((res) => res.json())
   return data
 }
