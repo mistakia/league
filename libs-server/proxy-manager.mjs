@@ -44,7 +44,7 @@ class ProxyManager {
 
     try {
       const proxy_config = await db('config')
-        .where({ key: 'proxy_list' })
+        .where({ key: 'proxy_config' })
         .first()
 
       if (proxy_config && proxy_config.value) {
