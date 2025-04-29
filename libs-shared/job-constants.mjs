@@ -106,7 +106,8 @@ export const job_types = {
   IMPORT_NFL_GAMELOGS: 82,
   IMPORT_ESPN_RECEIVING_TRACKING_METRICS: 83,
   GENERATE_PLAYER_GAMELOGS: 84,
-  IMPORT_FANATICS_ODDS: 85
+  IMPORT_FANATICS_ODDS: 85,
+  CREATE_SEASON_PARTITIONS: 86
 }
 
 export const job_title_by_id = {
@@ -194,5 +195,6 @@ export const job_title_by_id = {
   82: 'Import NFL Game Logs',
   83: 'Import ESPN Receiving Tracking Metrics',
   84: 'Generate Player Game Logs',
-  85: 'Import Fanatics Odds'
+  85: 'Import Fanatics Odds',
+  86: 'Create Season Partition Tables'
 }
