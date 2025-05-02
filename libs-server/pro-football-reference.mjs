@@ -1679,6 +1679,7 @@ export const get_draft = async ({
   if (!ignore_cache) {
     const cache_value = await cache.get({ key: cache_key })
     if (cache_value) {
+      log(`cache hit for ${cache_key}`)
       return cache_value
     }
   }
@@ -1710,6 +1711,25 @@ export const get_draft = async ({
       ? player_link.getAttribute('href').split('/').pop().replace('.htm', '')
       : null
     const draft_position = row.querySelector('[data-stat="pos"]').textContent
+    const all_pro_first_team_selections = Number(
+      row.querySelector('[data-stat="all_pros_first_team"]')?.textContent || 0
+    )
+    const pro_bowl_selections = Number(
+      row.querySelector('[data-stat="pro_bowls"]')?.textContent || 0
+    )
+    const years_as_primary_starter = Number(
+      row.querySelector('[data-stat="years_as_primary_starter"]')
+        ?.textContent || 0
+    )
+    const pfr_weighted_career_approximate_value = Number(
+      row.querySelector('[data-stat="career_av"]')?.textContent || 0
+    )
+    const pfr_weighted_career_approximate_value_drafted_team = Number(
+      row.querySelector('[data-stat="draft_av"]')?.textContent || 0
+    )
+
+    const college_link = row.querySelector('[data-stat="college_id"] a')
+    const college_team = college_link ? college_link.textContent : null
 
     draft_players.push({
       round,
@@ -1717,7 +1737,13 @@ export const get_draft = async ({
       team,
       player_name,
       pfr_id,
-      draft_position
+      draft_position,
+      all_pro_first_team_selections,
+      pro_bowl_selections,
+      years_as_primary_starter,
+      pfr_weighted_career_approximate_value,
+      pfr_weighted_career_approximate_value_drafted_team,
+      college_team
     })
   }
 
