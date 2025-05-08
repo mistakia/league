@@ -108,6 +108,7 @@ export default {
         `ROUND(COALESCE(player.vertical, 0) + (COALESCE(player.broad, 0) / 12.0), 2) as burst_score_${column_index}`
       )
     ],
+    sort_column_name: 'burst_score',
     main_where: () =>
       db.raw(
         `ROUND(COALESCE(player.vertical, 0) + (COALESCE(player.broad, 0) / 12.0), 2)`

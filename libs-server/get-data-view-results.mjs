@@ -306,6 +306,34 @@ const get_table_name = ({ column_definition, column_params, splits }) => {
     : column_definition.table_name
 }
 
+const get_column_name_from_main_select = (column_definition, column_index) => {
+  if (!column_definition.main_select) return null
+
+  try {
+    // Try to extract the column name from main_select
+    const main_select_result = column_definition.main_select({ column_index })
+    if (
+      !main_select_result ||
+      !main_select_result[0] ||
+      !main_select_result[0].sql
+    )
+      return null
+
+    const select_string = main_select_result[0].sql
+
+    // Most column definitions follow the pattern: `... as something_${column_index}`
+    const match = select_string.match(
+      /\s+as\s+([a-zA-Z0-9_]+)_\$\{column_index\}/
+    )
+    if (match && match[1]) {
+      return match[1]
+    }
+    return null
+  } catch (error) {
+    return null
+  }
+}
+
 const add_sort_clause = ({
   players_query,
   sort_clause,
@@ -1194,32 +1222,76 @@ export const get_data_view_results_query = async ({
       splits
     })
 
-    // Find the select position for the sort column
-    const column_name = column_definition.select_as
-      ? column_definition.select_as({ params: column_params })
-      : column_definition.column_name
+    // Find column name for sorting through various methods
+    let column_name = null
+    let select_position = 0
 
-    const column_name_with_index = `${column_name}_${sort_clause.column_index || 0}`
-
-    // Find the select position for the sort column
-    const select_position =
-      players_query._statements
-        .filter((statement) => statement.grouping === 'columns')
-        .findIndex((statement) => {
-          if (Array.isArray(statement.value)) {
-            return statement.value.some((value) => {
-              const is_string =
-                typeof value.sql === 'string' || typeof value === 'string'
-              const query_string = is_string
-                ? value.toString()
-                : value?.sql?.sql
-                  ? value.sql.sql
-                  : ''
-              return query_string.includes(column_name_with_index)
+    // Method 1: Check for explicit sort_column_name in the column definition
+    // This provides a direct way for column definitions to specify how they should be sorted
+    if (column_definition.sort_column_name) {
+      // sort_column_name can be a string or a function that returns a string
+      column_name =
+        typeof column_definition.sort_column_name === 'function'
+          ? column_definition.sort_column_name({
+              column_index: sort_clause.column_index || 0,
+              params: column_params
             })
-          }
-          return false
-        }) + 1 // Add 1 because SQL positions are 1-indexed
+          : column_definition.sort_column_name
+    }
+    // Method 2: Use select_as if defined
+    else if (column_definition.select_as) {
+      column_name = column_definition.select_as({ params: column_params })
+    }
+    // Method 3: Use direct column_name if defined
+    else if (column_definition.column_name) {
+      column_name = column_definition.column_name
+    }
+    // Method 4: Extract from main_select
+    else if (column_definition.main_select) {
+      column_name = get_column_name_from_main_select(
+        column_definition,
+        sort_clause.column_index || 0
+      )
+    }
+
+    // Format the column name with index if we have one
+    const column_name_with_index = column_name
+      ? `${column_name}_${sort_clause.column_index || 0}`
+      : null
+
+    // Default search by column name with index
+    if (column_name_with_index) {
+      select_position = find_column_position(
+        players_query,
+        column_name_with_index
+      )
+    }
+    // Fallback to SQL pattern search
+    else if (column_definition.main_select) {
+      try {
+        const main_select = column_definition.main_select({
+          column_index: sort_clause.column_index || 0
+        })
+        if (main_select && main_select[0] && main_select[0].sql) {
+          const sql_pattern = main_select[0].sql
+          const pattern_without_as = sql_pattern.replace(
+            /\s+as\s+[a-zA-Z0-9_]+_\$\{column_index\}/,
+            ''
+          )
+          const resolved_pattern = pattern_without_as.replace(
+            /\$\{column_index\}/g,
+            sort_clause.column_index || 0
+          )
+
+          select_position = find_column_position(
+            players_query,
+            resolved_pattern
+          )
+        }
+      } catch (error) {
+        // Ignore extraction errors
+      }
+    }
 
     if (select_position > 0) {
       add_sort_clause({
@@ -1334,4 +1406,33 @@ export default async function ({
     },
     data_view_query_string
   }
+}
+
+// Helper function to find column position in query statements
+function find_column_position(query, pattern) {
+  const column_statements = query._statements.filter(
+    (statement) => statement.grouping === 'columns'
+  )
+
+  for (let i = 0; i < column_statements.length; i++) {
+    const statement = column_statements[i]
+    if (!Array.isArray(statement.value)) continue
+
+    const found = statement.value.some((value) => {
+      const query_string =
+        typeof value === 'string'
+          ? value
+          : typeof value.sql === 'string'
+            ? value.sql
+            : value?.sql?.sql || ''
+
+      return query_string.includes(pattern)
+    })
+
+    if (found) {
+      return i + 1 // +1 because SQL positions are 1-indexed
+    }
+  }
+
+  return 0 // Not found
 }
