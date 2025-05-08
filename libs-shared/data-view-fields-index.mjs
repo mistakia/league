@@ -104,6 +104,9 @@ export default {
 
   player_games_played: 'The number of games active',
 
+  player_burst_score:
+    "A measure of a player's explosive athletic ability, calculated as the player's vertical jump (inches) plus their broad jump (feet). Formula: vertical_jump + (broad_jump / 12.0)",
+
   player_pff_overall: "The player's overall PFF grade for the season",
   player_pff_offense: "The player's PFF offense grade for the season",
   player_pff_defense: "The player's PFF defense grade for the season",
