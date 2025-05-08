@@ -562,23 +562,24 @@
 
 ### Measurables
 
-| column                | name                  | description                       | coverage |
-| --------------------- | --------------------- | --------------------------------- | -------- |
-| height                | Height                | Height in inches                  | 100.00%  |
-| weight                | Weight                | Weight in pounds                  | 100.00%  |
-| forty                 | 40-Yard Dash Time     | 40-yard dash time                 | 42.70%   |
-| bench                 | Bench Press Reps      | Number of bench press repetitions | 32.51%   |
-| vertical              | Vertical Jump         | Vertical jump height              | 37.15%   |
-| broad                 | Broad Jump            | Broad jump distance               | 36.60%   |
-| shuttle               | Shuttle Run Time      | Shuttle run time                  | 33.03%   |
-| cone                  | 3-Cone Drill Time     | 3-cone drill time                 | 32.49%   |
-| arm                   | Arm Length            | Arm length                        | 27.52%   |
-| hand                  | Hand Size             | Hand size                         | 27.44%   |
-| ngs_athleticism_score | NGS Athleticism Score | NGS Prospect athleticism score    | 21.59%   |
-| ngs_draft_grade       | NGS Draft Grade       | NGS Prospect draft grade          | 21.59%   |
-| nfl_grade             | NFL Grade             | NFL Prospect grade                | 21.51%   |
-| ngs_production_score  | NGS Production Score  | NGS Prospect production score     | 21.59%   |
-| ngs_size_score        | NGS Size Score        | NGS Prospect size score           | 19.40%   |
+| column                | name                  | description                                                                                                                           | coverage |
+| --------------------- | --------------------- | ------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| height                | Height                | Height in inches                                                                                                                      | 100.00%  |
+| weight                | Weight                | Weight in pounds                                                                                                                      | 100.00%  |
+| forty                 | 40-Yard Dash Time     | 40-yard dash time                                                                                                                     | 42.70%   |
+| bench                 | Bench Press Reps      | Number of bench press repetitions                                                                                                     | 32.51%   |
+| vertical              | Vertical Jump         | Vertical jump height                                                                                                                  | 37.15%   |
+| broad                 | Broad Jump            | Broad jump distance                                                                                                                   | 36.60%   |
+| shuttle               | Shuttle Run Time      | Shuttle run time                                                                                                                      | 33.03%   |
+| cone                  | 3-Cone Drill Time     | 3-cone drill time                                                                                                                     | 32.49%   |
+| arm                   | Arm Length            | Arm length                                                                                                                            | 27.52%   |
+| hand                  | Hand Size             | Hand size                                                                                                                             | 27.44%   |
+| ngs_athleticism_score | NGS Athleticism Score | NGS Prospect athleticism score                                                                                                        | 21.59%   |
+| ngs_draft_grade       | NGS Draft Grade       | NGS Prospect draft grade                                                                                                              | 21.59%   |
+| nfl_grade             | NFL Grade             | NFL Prospect grade                                                                                                                    | 21.51%   |
+| ngs_production_score  | NGS Production Score  | NGS Prospect production score                                                                                                         | 21.59%   |
+| ngs_size_score        | NGS Size Score        | NGS Prospect size score                                                                                                               | 19.40%   |
+| burst_score           | Burst Score           | A measure of explosive athletic ability, calculated as vertical jump (inches) + broad jump (feet). Formula: vertical + (broad / 12.0) |          |
 
 ### Player Identification
 
