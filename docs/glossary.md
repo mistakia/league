@@ -30,6 +30,7 @@
   - [General](#general-2)
   - [Measurables](#measurables)
   - [Player Identification](#player-identification-1)
+  - [Player Awards & Value](#player-awards--value)
 
   [Submit a Stat](https://github.com/mistakia/league/issues/new?assignees=&labels=kind%2Fstat%2C+status%2Fready&projects=&template=submit-a-stat.md&title=Add+stat%3A+%3CSTAT+NAME%3E)
 
@@ -598,5 +599,15 @@
 | yahoo_id        | Yahoo ID                  | Yahoo ID                  | 26.52%   |
 | keeptradecut_id | Keep Trade Cut ID         | Keep Trade Cut ID         | 2.60%    |
 | pfr_id          | Pro Football Reference ID | Pro Football Reference ID | 46.96%   |
+
+### Player Awards & Value
+
+| column                                             | name                                             | description                                                                                                                                                                                                      | coverage |
+| -------------------------------------------------- | ------------------------------------------------ | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------- |
+| all_pro_first_team_selections                      | All-Pro First Team Selections                    | Number of times the player was named to the All-Pro First Team                                                                                                                                                   | -        |
+| pro_bowl_selections                                | Pro Bowl Selections                              | Number of times the player was selected to the Pro Bowl                                                                                                                                                          | -        |
+| pfr_years_as_primary_starter                       | Years as Primary Starter                         | Number of seasons the player was a primary starter (source: Pro Football Reference)                                                                                                                              | -        |
+| pfr_weighted_career_approximate_value              | Weighted Career Approximate Value                | Pro Football Reference Career Approximate Value (weighted) - a metric that attempts to put a single numerical value on a player's career. The weighted career AV is computed by summing 100% of the player's best-season AV, 95% of his second-best-season AV, 90% of his third best, and so on. The idea is that the weighted career AV rating should weight peak seasons slightly more than "compiler"-type seasons. [More info](https://www.pro-football-reference.com/about/glossary.htm) | -        |
+| pfr_weighted_career_approximate_value_drafted_team | Weighted Career Approximate Value (Drafted Team) | Pro Football Reference Career Approximate Value (weighted) accumulated with the team that drafted the player. The weighted career AV is computed by summing 100% of the player's best-season AV, 95% of his second-best-season AV, 90% of his third best, and so on. The idea is that the weighted career AV rating should weight peak seasons slightly more than "compiler"-type seasons. [More info](https://www.pro-football-reference.com/about/glossary.htm)                             | -        |
 
 </div>

@@ -70,8 +70,8 @@ const import_player_draft_position_pfr = async ({
       round: draft_player.round,
       dpos: draft_player.overall_pick,
       pfr_id: draft_player.pfr_id,
-      pfr_all_pro_first_team: draft_player.all_pro_first_team_selections,
-      pfr_pro_bowls: draft_player.pro_bowl_selections,
+      all_pro_first_team_selections: draft_player.all_pro_first_team_selections,
+      pro_bowl_selections: draft_player.pro_bowl_selections,
       pfr_years_as_primary_starter: draft_player.years_as_primary_starter,
       pfr_weighted_career_approximate_value:
         draft_player.pfr_weighted_career_approximate_value,
