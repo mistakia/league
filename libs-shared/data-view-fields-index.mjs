@@ -104,6 +104,17 @@ export default {
 
   player_games_played: 'The number of games active',
 
+  player_all_pro_first_team_selections:
+    'Number of All-Pro First Team selections',
+  player_pro_bowl_selections:
+    'Number of Pro Bowl selections',
+  player_pfr_years_as_primary_starter:
+    'Number of years as a primary starter according to Pro Football Reference',
+  player_pfr_weighted_career_approximate_value:
+    "Career Approximate Value (weighted) calculated by Pro Football Reference - a metric that attempts to put a single numerical value on any player's season, at any position, from any year",
+  player_pfr_weighted_career_approximate_value_drafted_team:
+    'Career Approximate Value (weighted) accumulated with the team that drafted the player according to Pro Football Reference',
+
   player_burst_score:
     "A measure of a player's explosive athletic ability, calculated as the player's vertical jump (inches) plus their broad jump (feet). Formula: vertical_jump + (broad_jump / 12.0)",
 

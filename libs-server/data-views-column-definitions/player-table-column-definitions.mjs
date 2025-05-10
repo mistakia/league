@@ -443,6 +443,32 @@ export default {
     table_name: 'player',
     column_name: 'contract_inflated_guaranteed',
     get_cache_info: player_table_get_cache_info
+  },
+
+  player_all_pro_first_team_selections: {
+    table_name: 'player',
+    column_name: 'all_pro_first_team_selections',
+    get_cache_info: player_table_get_cache_info
+  },
+  player_pro_bowl_selections: {
+    table_name: 'player',
+    column_name: 'pro_bowl_selections',
+    get_cache_info: player_table_get_cache_info
+  },
+  player_pfr_years_as_primary_starter: {
+    table_name: 'player',
+    column_name: 'pfr_years_as_primary_starter',
+    get_cache_info: player_table_get_cache_info
+  },
+  player_pfr_weighted_career_approximate_value: {
+    table_name: 'player',
+    column_name: 'pfr_weighted_career_approximate_value',
+    get_cache_info: player_table_get_cache_info
+  },
+  player_pfr_weighted_career_approximate_value_drafted_team: {
+    table_name: 'player',
+    column_name: 'pfr_weighted_career_approximate_value_drafted_team',
+    get_cache_info: player_table_get_cache_info
   }
   // TODO player.dcp ??
 }

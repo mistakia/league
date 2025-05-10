@@ -15475,8 +15475,8 @@ CREATE TABLE public.player (
     sis_prospect_grade numeric(10,3),
     sis_prospect_pos_rank integer,
     sis_prospect_overall_rank integer,
-    pfr_all_pro_first_team smallint DEFAULT 0,
-    pfr_pro_bowls smallint DEFAULT 0,
+    all_pro_first_team_selections smallint DEFAULT 0,
+    pro_bowls_selections smallint DEFAULT 0,
     pfr_years_as_primary_starter smallint DEFAULT 0,
     pfr_weighted_career_approximate_value smallint DEFAULT 0,
     pfr_weighted_career_approximate_value_drafted_team smallint DEFAULT 0
