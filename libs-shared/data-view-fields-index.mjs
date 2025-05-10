@@ -106,8 +106,7 @@ export default {
 
   player_all_pro_first_team_selections:
     'Number of All-Pro First Team selections',
-  player_pro_bowl_selections:
-    'Number of Pro Bowl selections',
+  player_pro_bowl_selections: 'Number of Pro Bowl selections',
   player_pfr_years_as_primary_starter:
     'Number of years as a primary starter according to Pro Football Reference',
   player_pfr_weighted_career_approximate_value:
