@@ -284,7 +284,10 @@ describe('API /teams - reserve', function () {
 
     it('player not on reserve/ir', async () => {
       MockDate.set(start.add('1', 'week').toISOString())
-      const player = await selectPlayer()
+      const player = await selectPlayer({
+        injury_status: null,
+        nfl_status: constants.player_nfl_status.ACTIVE
+      })
       const teamId = 1
       const leagueId = 1
       const userId = 1
