@@ -26,6 +26,7 @@ import player_snaps_table_fields from './player-snaps-table-fields'
 import player_routes_table_fields from './player-routes-table-fields'
 import team_dvoa_table_fields from './team-dvoa-table-fields'
 import nfl_team_seasonlogs_table_fields from './nfl-team-seasonlogs-table-fields'
+import player_pfr_season_value_table_fields from './player-pfr-season-value-table-fields'
 
 // Player Column Fields
 // header_label - string, required
@@ -105,7 +106,8 @@ export function PlayerTableFields({
     ...player_snaps_table_fields,
     ...player_routes_table_fields,
     ...team_dvoa_table_fields,
-    ...nfl_team_seasonlogs_table_fields
+    ...nfl_team_seasonlogs_table_fields,
+    ...player_pfr_season_value_table_fields
   }
 
   for (const [key, value] of Object.entries(fields)) {

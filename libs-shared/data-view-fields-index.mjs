@@ -113,6 +113,8 @@ export default {
     "Career Approximate Value (weighted) calculated by Pro Football Reference - a metric that attempts to put a single numerical value on any player's season, at any position, from any year",
   player_pfr_weighted_career_approximate_value_drafted_team:
     'Career Approximate Value (weighted) accumulated with the team that drafted the player according to Pro Football Reference',
+  player_pfr_season_value:
+    'Single season Approximate Value calculated by Pro Football Reference',
 
   player_burst_score:
     "A measure of a player's explosive athletic ability, calculated as the player's vertical jump (inches) plus their broad jump (feet). Formula: vertical_jump + (broad_jump / 12.0)",

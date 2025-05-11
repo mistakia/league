@@ -558,6 +558,47 @@ export default function ({ is_logged_in }) {
       column_title: 'Contract Inflated Guaranteed (Current)',
       header_label: 'Inflated Gtd',
       player_value_path: 'contract_inflated_guaranteed'
-    })
+    }),
+
+    player_pfr_weighted_career_approximate_value: {
+      column_title: 'PFR Weighted Career Approximate Value',
+      header_label: 'PFR AV (Career)',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      player_value_path: 'pfr_weighted_career_approximate_value',
+      column_groups: [COLUMN_GROUPS.PFR, COLUMN_GROUPS.CAREER]
+    },
+    player_pfr_weighted_career_approximate_value_drafted_team: {
+      column_title: 'PFR Weighted Career Approximate Value with Drafted Team',
+      header_label: 'PFR AV (Drafted Team)',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      player_value_path: 'pfr_weighted_career_approximate_value_drafted_team',
+      column_groups: [COLUMN_GROUPS.PFR, COLUMN_GROUPS.CAREER]
+    },
+    player_pfr_years_as_primary_starter: {
+      column_title: 'PFR Years as Primary Starter',
+      header_label: 'Yrs Start',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      player_value_path: 'pfr_years_as_primary_starter',
+      column_groups: [COLUMN_GROUPS.PFR, COLUMN_GROUPS.CAREER]
+    },
+    player_all_pro_first_team_selections: {
+      column_title: 'All-Pro First Team Selections',
+      header_label: 'AP1',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      player_value_path: 'all_pro_first_team_selections',
+      column_groups: [COLUMN_GROUPS.CAREER]
+    },
+    player_pro_bowl_selections: {
+      column_title: 'Pro Bowl Selections',
+      header_label: 'PBs',
+      size: 80,
+      data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
+      player_value_path: 'pro_bowl_selections',
+      column_groups: [COLUMN_GROUPS.CAREER]
+    }
   }
 }
