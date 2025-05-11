@@ -5,6 +5,7 @@ import chai_http, { request as chai_request } from 'chai-http'
 import server from '#api'
 import knex from '#db'
 import league from '#db/seeds/league.mjs'
+import { getRoster } from '#libs-server'
 import { constants } from '#libs-shared'
 import { user1, user2 } from './fixtures/token.mjs'
 import {
@@ -182,7 +183,11 @@ describe('API /teams - tag', function () {
     })
 
     it('player not on team', async () => {
-      const player = await selectPlayer({ exclude_pids })
+      const roster = await getRoster({ tid: 1 })
+      const rostered_pids = roster.players.map((p) => p.pid)
+      const player = await selectPlayer({
+        exclude_pids: [...rostered_pids, ...exclude_pids]
+      })
       const request = chai_request
         .execute(server)
         .post('/api/teams/1/tag')
