@@ -1,6 +1,6 @@
 import fetch from 'node-fetch'
 import debug from 'debug'
-import { ProxyAgent } from 'proxy-agent'
+import { HttpsProxyAgent } from 'https-proxy-agent'
 
 import db from '#db'
 
@@ -166,17 +166,13 @@ async function fetch_with_proxy({ url, options = {}, force_proxy = false }) {
     try {
       log(`Fetching ${url} via proxy ${proxy_config.connection_string}`)
 
-      const agent = new ProxyAgent({
-        ...proxy_config,
-        httpsAgent: true
+      const agent = new HttpsProxyAgent(proxy_config.connection_string, {
+        rejectUnauthorized: false
       })
 
       const fetch_options = {
         ...options,
-        agent,
-        https: {
-          rejectUnauthorized: false
-        }
+        agent
       }
 
       const response = await fetch(url, fetch_options)
