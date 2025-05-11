@@ -13,7 +13,8 @@ import {
   addPlayer,
   notLoggedIn,
   missing,
-  invalid
+  invalid,
+  error
 } from './utils/index.mjs'
 
 process.env.NODE_ENV = 'test'
@@ -207,6 +208,73 @@ describe('API /teams - tag', function () {
 
     it('reserve violation', async () => {
       // TODO
+    })
+
+    it('exceeds consecutive franchise tag limit', async () => {
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const current_year = constants.season.year
+
+      // Select a player that is not yet on the roster
+      const player = await selectPlayer({ exclude_pids })
+      exclude_pids.push(player.pid)
+
+      // Add player to the team
+      await addPlayer({
+        player,
+        leagueId,
+        teamId,
+        userId,
+        slot: constants.slots.BENCH
+      })
+
+      // Insert franchise tag transactions for the two previous years
+      const two_years_ago = current_year - 2
+      const one_year_ago = current_year - 1
+
+      // Add franchise tag transaction from two years ago
+      await knex('transactions').insert({
+        userid: userId,
+        tid: teamId,
+        lid: leagueId,
+        pid: player.pid,
+        type: constants.transactions.FRANCHISE_TAG,
+        value: 0,
+        week: 0,
+        year: two_years_ago,
+        timestamp: Math.round(Date.now() / 1000) - 63072000 // Approx 2 years ago
+      })
+
+      // Add franchise tag transaction from one year ago
+      await knex('transactions').insert({
+        userid: userId,
+        tid: teamId,
+        lid: leagueId,
+        pid: player.pid,
+        type: constants.transactions.FRANCHISE_TAG,
+        value: 0,
+        week: 0,
+        year: one_year_ago,
+        timestamp: Math.round(Date.now() / 1000) - 31536000 // Approx 1 year ago
+      })
+
+      // Attempt to add a franchise tag for the current year
+      const request = chai_request
+        .execute(server)
+        .post('/api/teams/1/tag')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          tag: constants.tags.FRANCHISE,
+          pid: player.pid,
+          leagueId
+        })
+
+      // Expect an error stating player cannot be franchise tagged three years in a row
+      await error(
+        request,
+        'player cannot be franchise tagged for three consecutive years'
+      )
     })
   })
 })

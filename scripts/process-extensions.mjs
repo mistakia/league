@@ -10,7 +10,8 @@ import {
   getPlayerExtensions,
   getLastTransaction,
   report_job,
-  is_main
+  is_main,
+  validate_franchise_tag
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -32,6 +33,20 @@ const getTransactionType = (tag) => {
 
 const createTransaction = async ({ roster_player, tid, league }) => {
   const { tag, pid, pos } = roster_player
+
+  // Skip creating franchise tag transactions for players who already had franchise tags for two consecutive years
+  if (tag === constants.tags.FRANCHISE) {
+    const is_valid_franchise_tag = await validate_franchise_tag({
+      pid,
+      tid
+    })
+
+    if (!is_valid_franchise_tag) {
+      throw new Error(
+        'player cannot be franchise tagged for three consecutive years'
+      )
+    }
+  }
 
   const extensions = await getPlayerExtensions({
     lid: league.uid,

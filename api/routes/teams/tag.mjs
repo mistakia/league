@@ -7,7 +7,8 @@ import {
   getRoster,
   getLeague,
   verifyUserTeam,
-  verifyReserveStatus
+  verifyReserveStatus,
+  validate_franchise_tag
 } from '#libs-server'
 
 const router = express.Router({ mergeParams: true })
@@ -81,6 +82,20 @@ router.post('/?', async (req, res) => {
     // make sure player is on active roster
     if (!roster.active.find((r) => r.pid === pid)) {
       return res.status(400).send({ error: 'player is not on active roster' })
+    }
+
+    // Check if player has been franchise tagged for the past two consecutive years
+    if (tag === constants.tags.FRANCHISE) {
+      const is_valid_franchise_tag = await validate_franchise_tag({
+        pid,
+        tid
+      })
+
+      if (!is_valid_franchise_tag) {
+        return res.status(400).send({
+          error: 'player cannot be franchise tagged for three consecutive years'
+        })
+      }
     }
 
     // make sure extension has not passed
