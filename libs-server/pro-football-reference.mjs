@@ -1,4 +1,3 @@
-import fetch from 'node-fetch'
 import { JSDOM } from 'jsdom'
 import debug from 'debug'
 
@@ -7,8 +6,44 @@ import { wait } from '#libs-server'
 import * as cache from './cache.mjs'
 import config from '#config'
 import db from '#db'
+import { fetch_with_proxy } from './proxy-manager.mjs'
 
 const log = debug('pro-football-reference')
+
+export const active_nfl_teams = [
+  'crd',
+  'atl',
+  'rav',
+  'buf',
+  'car',
+  'chi',
+  'cin',
+  'cle',
+  'dal',
+  'den',
+  'det',
+  'gnb',
+  'htx',
+  'clt',
+  'jax',
+  'kan',
+  'rai',
+  'sdg', // Note: Los Angeles Chargers uses 'sdg' (San Diego Chargers)
+  'ram',
+  'mia',
+  'min',
+  'nwe',
+  'nor',
+  'nyg',
+  'nyj',
+  'phi',
+  'pit',
+  'sfo',
+  'sea',
+  'tam',
+  'oti', // Note: Tennessee Titans uses 'oti' (Oilers, Tennessee)
+  'was' // Note: Washington Commanders uses 'was' (Washington)
+]
 
 const format_time = (time_string) => {
   // Extract hours, minutes, and period from the time string
@@ -107,7 +142,7 @@ const get_players_from_page = async ({ url, ignore_cache = false }) => {
     }
   }
 
-  const response = await fetch(url)
+  const response = await fetch_with_proxy({ url })
   const text = await response.text()
   const dom = new JSDOM(text)
   const doc = dom.window.document
@@ -147,7 +182,7 @@ const get_players_page_links = async ({ ignore_cache = false } = {}) => {
   }
 
   const url = `${config.pro_football_reference_url}/players/`
-  const response = await fetch(url)
+  const response = await fetch_with_proxy({ url })
   const text = await response.text()
   const dom = new JSDOM(text)
   const doc = dom.window.document
@@ -1430,7 +1465,7 @@ export const get_games = async ({
   const url = `${config.pro_football_reference_url}/years/${year}/games.htm`
   log(`fetching ${url}`)
 
-  const response = await fetch(url)
+  const response = await fetch_with_proxy({ url })
   const text = await response.text()
   const dom = new JSDOM(text)
   const doc = dom.window.document
@@ -1505,7 +1540,7 @@ export const get_game = async ({
 
   const url = `${config.pro_football_reference_url}/boxscores/${pfr_game_id}.htm`
   log(`fetching ${url}`)
-  const response = await fetch(url)
+  const response = await fetch_with_proxy({ url })
   const text = await response.text()
   const formatted_text = format_game_html(text)
   const dom = new JSDOM(formatted_text)
@@ -1687,7 +1722,7 @@ export const get_draft = async ({
   const url = `${config.pro_football_reference_url}/years/${year}/draft.htm`
   log(`fetching ${url}`)
 
-  const response = await fetch(url)
+  const response = await fetch_with_proxy({ url })
   const text = await response.text()
   const dom = new JSDOM(text)
   const doc = dom.window.document
@@ -1752,4 +1787,99 @@ export const get_draft = async ({
   }
 
   return draft_players
+}
+
+export const get_team_roster = async ({ team, year, ignore_cache = false }) => {
+  if (!team) {
+    throw new Error('team is required')
+  }
+
+  if (!year) {
+    throw new Error('year is required')
+  }
+
+  const cache_key = `/pro-football-reference/rosters/${team}/${year}.json`
+  if (!ignore_cache) {
+    const cache_value = await cache.get({ key: cache_key })
+    if (cache_value) {
+      log(`cache hit for ${cache_key}`)
+      return { players: cache_value, cache_hit: true }
+    }
+  }
+
+  const url = `${config.pro_football_reference_url}/teams/${team}/${year}_roster.htm`
+  log(`fetching roster from ${url}`)
+
+  try {
+    const response = await fetch_with_proxy({ url })
+
+    if (!response.ok) {
+      throw new Error(
+        `Failed to fetch roster: ${response.status} ${response.statusText}`
+      )
+    }
+
+    const text = await response.text()
+    const formatted_text = format_game_html(text)
+    const dom = new JSDOM(formatted_text)
+    const doc = dom.window.document
+
+    const roster_table = doc.querySelector('table#roster')
+    if (!roster_table) {
+      throw new Error(`No roster table found for ${team} ${year}`)
+    }
+
+    const players = parse_roster_table(roster_table)
+
+    if (players.length) {
+      await cache.set({ key: cache_key, value: players })
+      log(`cached ${players.length} players for ${team} ${year}`)
+    }
+
+    return { players, cache_hit: false }
+  } catch (error) {
+    log(`Error fetching roster for ${team} ${year}: ${error.message}`)
+    throw error
+  }
+}
+
+// Helper function to parse player data from a roster table
+const parse_roster_table = (roster_table) => {
+  const players = []
+  const rows = roster_table.querySelectorAll('tbody tr')
+
+  for (const row of rows) {
+    // Skip header rows or any non-player rows
+    if (!row.querySelector('td[data-stat="player"]')) continue
+
+    const player_link = row.querySelector('td[data-stat="player"] a')
+    if (!player_link) continue
+
+    const extract_text = (selector, convert_to_number = false) => {
+      const element = row.querySelector(selector)
+      const text = element ? element.textContent : null
+      return convert_to_number ? (text ? Number(text) : null) : text
+    }
+
+    const player = {
+      pfr_id: player_link.href.split('/').slice(-1)[0].split('.')[0],
+      name: player_link.textContent,
+      number: extract_text('th[data-stat="uniform_number"]', true),
+      position: extract_text('td[data-stat="pos"]'),
+      age: extract_text('td[data-stat="age"]', true),
+      games_played: extract_text('td[data-stat="g"]', true) || 0,
+      games_started: extract_text('td[data-stat="gs"]', true) || 0,
+      weight: extract_text('td[data-stat="weight"]', true),
+      height: extract_text('td[data-stat="height"]'),
+      college: extract_text('td[data-stat="college_id"]'),
+      birth_date: extract_text('td[data-stat="birth_date_mod"]'),
+      experience: extract_text('td[data-stat="experience"]'),
+      av: extract_text('td[data-stat="av"]', true) || 0,
+      draft_info: extract_text('td[data-stat="draft_info"]')
+    }
+
+    players.push(player)
+  }
+
+  return players
 }
