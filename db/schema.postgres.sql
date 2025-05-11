@@ -19574,7 +19574,8 @@ CREATE TABLE public.player_seasonlogs (
     espn_rtm_routes integer DEFAULT 0,
     espn_rtm_targets integer DEFAULT 0,
     espn_rtm_recv_yds integer DEFAULT 0,
-    career_year smallint DEFAULT '0'::smallint
+    career_year smallint DEFAULT '0'::smallint,
+    pfr_season_value smallint
 );
 
 
