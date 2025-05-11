@@ -6,7 +6,7 @@ import db from '#db'
 import { pfr, wait } from '#libs-server'
 
 const log = debug('import-team-rosters-pfr')
-debug.enable('import-team-rosters-pfr,pro-football-reference')
+debug.enable('import-team-rosters-pfr,pro-football-reference,proxy-manager')
 
 // Constants
 const WAIT_TIME_AFTER_REQUEST = 5000 // 5 seconds
