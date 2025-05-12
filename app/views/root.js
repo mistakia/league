@@ -10,6 +10,7 @@ import BugsnagPluginReact from '@bugsnag/plugin-react'
 import { store, history } from '@core/store.js'
 import storeRegistry from '@core/store-registry'
 import App from '@components/app'
+import ErrorView from '@components/error-view'
 
 storeRegistry.register(store)
 
@@ -29,10 +30,11 @@ Bugsnag.start({
   enabledReleaseStages: ['production']
 })
 
+// Get Bugsnag's ErrorBoundary and configure it with our custom ErrorView
 const ErrorBoundary = Bugsnag.getPlugin('react').createErrorBoundary(React)
 
 const Root = () => (
-  <ErrorBoundary>
+  <ErrorBoundary FallbackComponent={ErrorView}>
     <Provider store={store}>
       <Router history={history}>
         <App />

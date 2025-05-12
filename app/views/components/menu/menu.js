@@ -10,6 +10,7 @@ import NavigateNextIcon from '@mui/icons-material/NavigateNext'
 import IconButton from '@mui/material/IconButton'
 import InfoIcon from '@mui/icons-material/Info'
 
+import { DISCORD_URL } from '@core/constants'
 import TeamName from '@components/team-name'
 import LeagueSchedule from '@components/league-schedule'
 
@@ -197,11 +198,7 @@ export default function AppMenu({
                 >
                   GitHub
                 </a>
-                <a
-                  href='https://discord.gg/azSX97Qj9Z'
-                  target='_blank'
-                  rel='noopener noreferrer'
-                >
+                <a href={DISCORD_URL} target='_blank' rel='noopener noreferrer'>
                   Discord
                 </a>
                 <a

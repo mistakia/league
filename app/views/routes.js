@@ -34,6 +34,7 @@ const TeamPage = lazy(() => import('@pages/team'))
 const LeagueSettingsPage = lazy(() => import('@pages/league-settings'))
 const MatchupPage = lazy(() => import('@pages/matchup'))
 const UserSettingsPage = lazy(() => import('@pages/user-settings'))
+const ErrorTest = lazy(() => import('@components/error-test'))
 
 const mapStateToProps = createSelector(get_app, (app) => ({ app }))
 
@@ -58,6 +59,7 @@ const Routes = ({ app }) => {
       {app.userId && <Route path='/trade' element={<TradePage />} />}
       <Route path='/data-views' element={<DataViewsPage />} />
       <Route path='/data-views/:view_id' element={<DataViewsPage />} />
+      <Route path='/error-test' element={<ErrorTest />} />
       <Route path='/leagues/:lid'>
         <Route path='/leagues/:lid/players' element={<PlayersPage />} />
         <Route
