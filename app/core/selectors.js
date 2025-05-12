@@ -3058,6 +3058,8 @@ export const getWaiverPlayersForCurrentTeam = createSelector(
           [waiver.uid, 'release'],
           new List(releases)
         )
+      } else {
+        teamWaivers = teamWaivers.setIn([waiver.uid, 'release'], new List())
       }
     }
 
