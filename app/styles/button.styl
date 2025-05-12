@@ -1,0 +1,19 @@
+.league_button
+  border-radius $button_border_radius
+  border none
+  cursor pointer
+  font-family "Inter", "Helvetica", "Arial", sans-serif
+  font-size 14px
+  padding 8px 16px
+  transition background-color $smooth_transition,box-shadow $smooth_transition,border $smooth_transition
+  background-color $backgroundColor
+  color $textColor
+  box-shadow none
+  text-align center
+  display inline-block
+  border 1px solid $borderColor
+  
+  &:hover
+    background-color rgba(0, 0, 0, 0.04)
+    box-shadow $box_shadow
+    border-color $borderColor

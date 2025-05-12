@@ -1,0 +1,87 @@
+$error_code_text = #ffffff
+$card_border_radius = 8px
+$section_padding = 20px
+
+.error_view
+  height 100%
+  width 100%
+  display flex
+  justify-content center
+  align-items center
+  background-color #f8f9fa
+  color $textColor
+  font-family "Inter", "Helvetica", "Arial", sans-serif
+  padding $section_padding
+
+  .error_view_content
+    max-width 800px
+    width 90%
+    padding 30px
+    background-color #ffffff
+    border-radius $card_border_radius
+    box-shadow 0 4px 12px rgba(0, 0, 0, 0.1)
+    
+    h1
+      color rgb(255, 80, 0)
+      margin-top 0
+      margin-bottom 20px
+    
+    p
+      font-size 16px
+      line-height 1.5
+      margin-bottom 16px
+    
+    a
+      color $blue
+      text-decoration none
+      
+      &:hover
+        text-decoration underline
+    
+    .error_details
+      margin-top 30px
+      padding $section_padding
+      border-radius $card_border_radius
+      background-color $backgroundColor
+      margin-bottom 30px
+      
+      h3
+        margin-top 0
+        margin-bottom 15px
+      
+      .error_code_container
+        position relative
+        margin-bottom 15px
+        
+        .error_code
+          padding 15px
+          background-color #282c34
+          color $error_code_text
+          border-radius $button_border_radius
+          overflow auto
+          font-family monospace
+          font-size 13px
+          line-height 1.4
+          max-height 300px
+        
+        .copy_icon_button
+          position absolute !important
+          top 8px
+          right 8px
+          background-color rgba(255, 255, 255, 0.1)
+          color $error_code_text
+          border none
+          border-radius $button_border_radius
+          width 32px
+          height 32px
+          cursor pointer
+          display flex
+          align-items center
+          justify-content center
+          
+          &:hover
+            background-color rgba(255, 255, 255, 0.2)
+
+.error_actions
+  display flex
+  justify-content center

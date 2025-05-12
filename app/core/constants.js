@@ -19,3 +19,5 @@ export const README_URL =
   'https://api.github.com/repos/mistakia/league/contents/README.md'
 
 export const TRANSACTIONS_PER_LOAD = 100
+
+export const DISCORD_URL = 'https://discord.gg/azSX97Qj9Z'
