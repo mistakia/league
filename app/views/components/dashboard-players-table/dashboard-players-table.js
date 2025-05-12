@@ -168,7 +168,7 @@ export default function DashboardPlayersTable({
               <SortablePlayerRoster
                 key={playerMap.get('pid')}
                 waiver={{
-                  uid: playerMap.get('pid'),
+                  pid: playerMap.get('pid'),
                   playerMap
                 }}
                 percentiles={percentiles}
