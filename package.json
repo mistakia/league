@@ -40,6 +40,7 @@
     "#private/libs-server": "./private/libs-server/index.mjs"
   },
   "dependencies": {
+    "@google-cloud/local-auth": "^3.0.1",
     "@sendgrid/mail": "^7.7.0",
     "@trashman/ed25519-blake2b": "0.0.7",
     "bcrypt": "^5.1.1",
