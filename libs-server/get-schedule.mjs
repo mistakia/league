@@ -67,6 +67,30 @@ const getIntraSched = (div1, div2, divOffset = 1) => {
 // should return an array of 14 arrays of matchup objects with home and away properties
 // each week there should be teams.length / 2 matchups
 
+const has_duplicate_consecutive_weeks = (schedule) => {
+  for (let i = 0; i < schedule.length - 1; i++) {
+    const week1 = schedule[i]
+    const week2 = schedule[i + 1]
+
+    if (week1.length !== week2.length) continue
+
+    const week1_matches = new Set(
+      week1.map((match) => `${match.home.uid}-${match.away.uid}`)
+    )
+    const week2_matches = new Set(
+      week2.map((match) => `${match.home.uid}-${match.away.uid}`)
+    )
+
+    if (
+      week1_matches.size === week2_matches.size &&
+      [...week1_matches].every((match) => week2_matches.has(match))
+    ) {
+      return true
+    }
+  }
+  return false
+}
+
 const getSchedule = (teams, random_seed) => {
   const num_weeks = constants.season.regularSeasonFinalWeek
 
@@ -83,7 +107,7 @@ const getSchedule = (teams, random_seed) => {
 
   const num_divisions = Object.keys(divisions).length
   const divKeys = Object.keys(divisions)
-  const schedule = []
+  let schedule = []
 
   if (num_divisions === 2) {
     const div1 = divisions[divKeys[0]]
@@ -161,7 +185,16 @@ const getSchedule = (teams, random_seed) => {
     }
   }
 
-  return shuffleArray(schedule, random_seed)
+  // Final shuffle to avoid consecutive duplicate weeks
+  let attempts = 0
+  const max_attempts = 10
+
+  do {
+    schedule = shuffleArray(schedule, random_seed + attempts)
+    attempts++
+  } while (has_duplicate_consecutive_weeks(schedule) && attempts < max_attempts)
+
+  return schedule
 }
 
 export default getSchedule
