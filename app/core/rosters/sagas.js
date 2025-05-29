@@ -402,7 +402,7 @@ export function* tagNotification() {
 export function* transitionPlacedNotification() {
   yield put(
     notificationActions.show({
-      message: 'Transition Bid Placed',
+      message: 'Transition Tag Placed',
       severity: 'success'
     })
   )
