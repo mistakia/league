@@ -290,6 +290,40 @@ export function rostersReducer(state = new Map(), { payload, type }) {
         if (!players) return state
 
         const index = players.findIndex((p) => p.pid === payload.pid)
+
+        // Store previous state for potential reversion
+        const previous_tag = state.getIn([
+          payload.teamId,
+          constants.year,
+          constants.week,
+          'players',
+          index,
+          'tag'
+        ])
+
+        const previous_bid = state.getIn([
+          payload.teamId,
+          constants.year,
+          constants.week,
+          'players',
+          index,
+          'bid'
+        ])
+
+        // Store previous state in a meta field
+        state.setIn(
+          [
+            payload.teamId,
+            constants.year,
+            constants.week,
+            'players',
+            index,
+            'previous_state'
+          ],
+          { tag: previous_tag, bid: previous_bid }
+        )
+
+        // Apply the transition tag
         state.setIn(
           [
             payload.teamId,
@@ -349,6 +383,93 @@ export function rostersReducer(state = new Map(), { payload, type }) {
           bid: null
         }
       )
+    }
+
+    case rosterActions.PUT_TRANSITION_TAG_FAILED:
+    case rosterActions.POST_TRANSITION_TAG_FAILED: {
+      return state.withMutations((state) => {
+        const players = state.getIn([
+          payload.opts.teamId,
+          constants.year,
+          constants.week,
+          'players'
+        ])
+        if (!players) return state
+
+        const index = players.findIndex((p) => p.pid === payload.opts.pid)
+
+        // Get previous state if available
+        const previous_state = state.getIn([
+          payload.opts.teamId,
+          constants.year,
+          constants.week,
+          'players',
+          index,
+          'previous_state'
+        ])
+
+        // Restore previous tag and bid
+        if (previous_state) {
+          state.setIn(
+            [
+              payload.opts.teamId,
+              constants.year,
+              constants.week,
+              'players',
+              index,
+              'tag'
+            ],
+            previous_state.tag
+          )
+
+          state.setIn(
+            [
+              payload.opts.teamId,
+              constants.year,
+              constants.week,
+              'players',
+              index,
+              'bid'
+            ],
+            previous_state.bid
+          )
+        } else {
+          // Fallback to default values if no previous state found
+          state.setIn(
+            [
+              payload.opts.teamId,
+              constants.year,
+              constants.week,
+              'players',
+              index,
+              'tag'
+            ],
+            constants.tags.REGULAR
+          )
+
+          state.setIn(
+            [
+              payload.opts.teamId,
+              constants.year,
+              constants.week,
+              'players',
+              index,
+              'bid'
+            ],
+            null
+          )
+        }
+
+        // Clean up the previous_state field
+        state.deleteIn([
+          payload.opts.teamId,
+          constants.year,
+          constants.week,
+          'players',
+          index,
+          'previous_state'
+        ])
+      })
     }
 
     case rosterActions.POST_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED:
