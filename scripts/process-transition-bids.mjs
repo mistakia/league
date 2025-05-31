@@ -10,9 +10,13 @@ import {
   report_job
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import yargs from 'yargs'
+import { hideBin } from 'yargs/helpers'
 
 const log = debug('process-transition-bids')
 debug.enable('process-transition-bids')
+
+const argv = yargs(hideBin(process.argv)).argv
 
 async function sortBidsByWaiverOrder(bids) {
   const teams = await db('teams').select('uid', 'waiver_order').where({
@@ -30,7 +34,11 @@ async function sortBidsByWaiverOrder(bids) {
   )
 }
 
-const run = async () => {
+const run = async ({ dry_run = false } = {}) => {
+  if (dry_run) {
+    log('DRY RUN MODE: No database changes will be made')
+  }
+
   const timestamp = Math.round(Date.now() / 1000)
 
   // get leagues past tran date cutoff with bids pending processing
@@ -66,23 +74,37 @@ const run = async () => {
       try {
         if (originalTeamBid || transitionBids.length === 1) {
           log('processing transition bid', winning_bid)
-          await processTransitionBid(winning_bid)
+
+          if (!dry_run) {
+            await processTransitionBid(winning_bid)
+          } else {
+            log(
+              `DRY RUN: Would process transition bid for player ${winning_bid.pid} by team ${winning_bid.tid}`
+            )
+          }
 
           const { pid } = winning_bid
-          await db('transition_bids')
-            .update({
-              succ: 0,
-              reason: 'player no longer a restricted free agent',
-              processed: timestamp
-            })
-            .where({
-              pid,
-              lid,
-              year: constants.season.year
-            })
-            .whereNull('cancelled')
-            .whereNull('processed')
-            .whereNot('uid', winning_bid.uid)
+
+          if (!dry_run) {
+            await db('transition_bids')
+              .update({
+                succ: 0,
+                reason: 'player no longer a restricted free agent',
+                processed: timestamp
+              })
+              .where({
+                pid,
+                lid,
+                year: constants.season.year
+              })
+              .whereNull('cancelled')
+              .whereNull('processed')
+              .whereNot('uid', winning_bid.uid)
+          } else {
+            log(
+              `DRY RUN: Would mark all other bids for player ${pid} as unsuccessful`
+            )
+          }
         } else {
           // multiple bids tied with no original team
           log(`tied top bids for league ${lid}`)
@@ -93,26 +115,39 @@ const run = async () => {
           winning_bid = sorted_bids[0]
 
           log('processing winning transition bid', winning_bid)
-          await processTransitionBid(winning_bid)
 
-          // Reset waiver order for the winning team
-          await resetWaiverOrder({ leagueId: lid, teamId: winning_bid.tid })
+          if (!dry_run) {
+            await processTransitionBid(winning_bid)
+            // Reset waiver order for the winning team
+            await resetWaiverOrder({ leagueId: lid, teamId: winning_bid.tid })
+          } else {
+            log(
+              `DRY RUN: Would process winning transition bid for player ${winning_bid.pid} by team ${winning_bid.tid}`
+            )
+            log(`DRY RUN: Would reset waiver order for team ${winning_bid.tid}`)
+          }
 
           // Update all other bids as unsuccessful
-          await db('transition_bids')
-            .update({
-              succ: 0,
-              reason: 'player no longer a restricted free agent',
-              processed: timestamp
-            })
-            .where({
-              pid: winning_bid.pid,
-              lid,
-              year: constants.season.year
-            })
-            .whereNull('cancelled')
-            .whereNull('processed')
-            .whereNot('uid', winning_bid.uid)
+          if (!dry_run) {
+            await db('transition_bids')
+              .update({
+                succ: 0,
+                reason: 'player no longer a restricted free agent',
+                processed: timestamp
+              })
+              .where({
+                pid: winning_bid.pid,
+                lid,
+                year: constants.season.year
+              })
+              .whereNull('cancelled')
+              .whereNull('processed')
+              .whereNot('uid', winning_bid.uid)
+          } else {
+            log(
+              `DRY RUN: Would mark all other bids for player ${winning_bid.pid} as unsuccessful`
+            )
+          }
         }
       } catch (err) {
         error = err
@@ -120,15 +155,27 @@ const run = async () => {
       }
 
       // save transition bid outcome
-      await db('transition_bids')
-        .update({
-          succ: error ? 0 : 1,
-          reason: error ? error.message : null, // TODO - use error codes
-          processed: timestamp
-        })
-        .where('uid', winning_bid.uid)
+      if (!dry_run) {
+        await db('transition_bids')
+          .update({
+            succ: error ? 0 : 1,
+            reason: error ? error.message : null, // TODO - use error codes
+            processed: timestamp
+          })
+          .where('uid', winning_bid.uid)
+      } else {
+        log(
+          `DRY RUN: Would update transition bid ${winning_bid.uid} with success=${error ? 'false' : 'true'}`
+        )
+      }
 
-      transitionBids = await getTopTransitionBids(lid)
+      if (dry_run) {
+        // In dry run mode, manually break the loop after first iteration to avoid showing the same info
+        log('DRY RUN: Stopping after first bid to prevent repetitive logging')
+        break
+      } else {
+        transitionBids = await getTopTransitionBids(lid)
+      }
     }
   }
 }
@@ -139,16 +186,19 @@ const main = async () => {
   debug.enable('process-transition-bids')
   let error
   try {
-    await run()
+    const dry_run = argv.dry_run || false
+    await run({ dry_run })
   } catch (err) {
     error = err
     console.log(error)
   }
 
-  await report_job({
-    job_type: job_types.PROCESS_TRANSITION_BIDS,
-    error
-  })
+  if (!argv.dry_run) {
+    await report_job({
+      job_type: job_types.PROCESS_TRANSITION_BIDS,
+      error
+    })
+  }
 
   process.exit()
 }

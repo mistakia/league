@@ -2,10 +2,14 @@ import db from '#db'
 import { constants } from '#libs-shared'
 
 export default async function (leagueId) {
+  const current_timestamp = Math.round(Date.now() / 1000)
+  const one_day_seconds = 24 * 60 * 60
+
   const active_rfa_players = await db('transition_bids')
     .where('lid', leagueId)
     .where('year', constants.season.year)
     .whereNotNull('announced')
+    .where('announced', '<=', current_timestamp - one_day_seconds) // Ensure 24 hours have passed since announcement
     .whereNotExists(function () {
       this.select('*')
         .from('transition_bids as successful_bids')
