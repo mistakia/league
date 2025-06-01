@@ -61,7 +61,8 @@ const run = async ({ dry_run = false } = {}) => {
 
   for (const lid of lids) {
     let transitionBids = await getTopTransitionBids(lid)
-    if (!transitionBids) {
+
+    if (!transitionBids.length) {
       log(`no bids ready to be processed for league ${lid}`)
       continue
     }
