@@ -215,6 +215,9 @@
 ## Announce restricted free agent at midnight
 0 0 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/announce-restricted-free-agent.mjs &>> /var/log/league/announce-restricted-free-agent.log
 
+## Process transition bids 1 minute after midnight
+1 0 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-transition-bids.mjs &>> /var/log/league/process-transition-bids.log
+
 
 
 # League Each Season Week
