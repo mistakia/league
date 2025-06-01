@@ -272,7 +272,7 @@ router.post('/?', async (req, res) => {
 
         await db('transition_bids')
           .where({
-            pid,
+            pid: remove,
             tid,
             year: constants.season.year
           })
