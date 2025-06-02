@@ -10,7 +10,9 @@ import {
   isBeforeExtensionDeadline,
   getCutlistPlayers,
   get_app,
-  getPoachPlayersForCurrentLeague
+  getPoachPlayersForCurrentLeague,
+  getTeamsForCurrentLeague,
+  getTransitionPlayers
 } from '@core/selectors'
 import {
   constants,
@@ -31,6 +33,8 @@ const mapStateToProps = createSelector(
   getCutlistPlayers,
   get_app,
   getPoachPlayersForCurrentLeague,
+  getTeamsForCurrentLeague,
+  getTransitionPlayers,
   (
     league,
     roster,
@@ -40,7 +44,9 @@ const mapStateToProps = createSelector(
     isBeforeExtensionDeadline,
     cutlist,
     app,
-    poaches
+    poaches,
+    teams,
+    transitionPlayers
   ) => {
     const projectionType = constants.season.isRegularSeason ? 'ros' : '0'
     const items = []
@@ -143,7 +149,9 @@ const mapStateToProps = createSelector(
       percentiles,
       cutlist,
       is_team_manager: app.teamId === team.uid,
-      poaches
+      poaches,
+      teams,
+      transitionPlayers
     }
   }
 )

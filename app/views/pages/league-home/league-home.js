@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
@@ -20,8 +20,9 @@ import {
   constants,
   isReserveEligible,
   isReserveCovEligible,
-  getFreeAgentPeriod
+  getFreeAgentPeriod,
 } from '@libs-shared'
+import { get_restricted_free_agency_notices } from '@core/utils/restricted-free-agency-notices'
 
 import './league-home.styl'
 
@@ -40,7 +41,9 @@ export default function LeagueHomePage({
   loadTeams,
   loadRosters,
   leagueId,
-  percentiles
+  percentiles,
+  teams,
+  is_team_manager
 }) {
   const navigate = useNavigate()
   const { lid } = useParams()
@@ -70,7 +73,20 @@ export default function LeagueHomePage({
     loadRecentTransactions
   ])
 
-  const notice_items = []
+  const rfa_notices = useMemo(
+    () =>
+      get_restricted_free_agency_notices({
+        league,
+        teams,
+        team_id: teamId,
+        transition_players: transitionPlayers,
+        is_team_manager
+      }),
+    [league, teams, teamId, transitionPlayers, is_team_manager]
+  )
+
+  const notice_items = [...rfa_notices]
+
   if (league.free_agency_live_auction_start) {
     const faPeriod = getFreeAgentPeriod(league)
     if (constants.season.now.isBefore(faPeriod.start)) {
@@ -314,5 +330,7 @@ LeagueHomePage.propTypes = {
   loadTeams: PropTypes.func,
   leagueId: PropTypes.number,
   loadRosters: PropTypes.func,
-  percentiles: PropTypes.object
+  percentiles: PropTypes.object,
+  teams: PropTypes.object,
+  is_team_manager: PropTypes.bool
 }

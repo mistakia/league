@@ -12,6 +12,8 @@ export const year = season.year
 export const fantasy_season_week = season.fantasy_season_week
 export const isOffseason = season.isOffseason
 export const isRegularSeason = season.isRegularSeason
+export const league_default_restricted_free_agency_announcement_hour = 24
+export const league_default_restricted_free_agency_processing_hour = 0
 
 export const nfl_draft_rounds = [0, 1, 2, 3, 4, 5, 6, 7]
 

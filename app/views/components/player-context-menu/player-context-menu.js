@@ -324,7 +324,7 @@ export default function PlayerContextMenu({
           add({
             key: 'transition-nomination',
             onClick: handle_nominate_restricted_free_agent,
-            label: 'Designate as Next Nominee'
+            label: 'Designate as Next RFA Nominee'
           })
         }
       }
