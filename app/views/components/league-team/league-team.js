@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useMemo } from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import { useParams } from 'react-router-dom'
@@ -17,10 +17,11 @@ import PlayerRoster from '@components/player-roster'
 import {
   constants,
   isReserveEligible,
-  isReserveCovEligible
+  isReserveCovEligible,
 } from '@libs-shared'
 import LeagueTeamValueDeltas from '@components/league-team-value-deltas'
 import Notices from '@components/notices'
+import { get_restricted_free_agency_notices } from '@core/utils/restricted-free-agency-notices'
 
 import './league-team.styl'
 
@@ -33,7 +34,9 @@ export default function LeagueTeam({
   percentiles,
   cutlist,
   is_team_manager,
-  poaches
+  poaches,
+  teams,
+  transitionPlayers
 }) {
   const { lid, tid } = useParams()
 
@@ -136,7 +139,19 @@ export default function LeagueTeam({
     )
   }
 
-  const notice_items = []
+  const rfa_notices = useMemo(
+    () =>
+      get_restricted_free_agency_notices({
+        league,
+        teams,
+        team_id: teamId,
+        transition_players: transitionPlayers,
+        is_team_manager
+      }),
+    [league, teams, teamId, transitionPlayers, is_team_manager]
+  )
+
+  const notice_items = [...rfa_notices]
 
   // Add reserve notices
   for (const playerMap of [...players.ir, ...players.ir_long_term]) {
@@ -292,5 +307,7 @@ LeagueTeam.propTypes = {
   percentiles: PropTypes.object,
   cutlist: ImmutablePropTypes.list,
   is_team_manager: PropTypes.bool,
-  poaches: ImmutablePropTypes.list
+  poaches: ImmutablePropTypes.list,
+  teams: ImmutablePropTypes.list,
+  transitionPlayers: ImmutablePropTypes.list
 }

@@ -9,7 +9,8 @@ import {
   getCurrentPlayers,
   isBeforeTransitionEnd,
   getWaiverPlayersForCurrentTeam,
-  getPoachPlayersForCurrentLeague
+  getPoachPlayersForCurrentLeague,
+  getTeamsForCurrentLeague
 } from '@core/selectors'
 import { playerActions } from '@core/players'
 import { draftPickValueActions } from '@core/draft-pick-value'
@@ -29,6 +30,7 @@ const mapStateToProps = createSelector(
   getWaiverPlayersForCurrentTeam,
   getPoachPlayersForCurrentLeague,
   isBeforeTransitionEnd,
+  getTeamsForCurrentLeague,
   (
     app,
     transitionPlayers,
@@ -37,7 +39,8 @@ const mapStateToProps = createSelector(
     league,
     waivers,
     poaches,
-    isBeforeTransitionEnd
+    isBeforeTransitionEnd,
+    teams
   ) => {
     const items = []
     transitionPlayers.forEach((p) => {
@@ -53,6 +56,13 @@ const mapStateToProps = createSelector(
       stats: ['market_salary', 'pts_added', 'salary_adj_pts_added']
     })
 
+    // Find the user's teamId for this league
+    let is_team_manager = false
+    if (teams && app.teamId) {
+      // teams is an Immutable.Map keyed by uid
+      is_team_manager = teams.has(app.teamId)
+    }
+
     return {
       transitionPlayers,
       teamId: app.teamId,
@@ -63,7 +73,9 @@ const mapStateToProps = createSelector(
       waivers,
       poaches,
       isBeforeTransitionEnd,
-      percentiles
+      percentiles,
+      teams,
+      is_team_manager
     }
   }
 )

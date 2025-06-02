@@ -20810,7 +20810,9 @@ CREATE TABLE public.seasons (
     season_due_amount bigint,
     free_agency_live_auction_end bigint,
     wildcard_round smallint,
-    championship_round integer[]
+    championship_round integer[],
+    restricted_free_agency_announcement_hour smallint DEFAULT 24 NOT NULL,
+    restricted_free_agency_processing_hour smallint DEFAULT 0 NOT NULL
 );
 
 

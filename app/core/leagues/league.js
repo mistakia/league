@@ -111,6 +111,9 @@ export const League = new Record({
   wildcard_round: null,
   championship_round: new List(),
 
+  restricted_free_agency_announcement_hour: null,
+  restricted_free_agency_processing_hour: null,
+
   isLoading: false,
   isLoaded: false
 })
@@ -224,6 +227,9 @@ export function createLeague({
   wildcard_round,
   championship_round,
 
+  restricted_free_agency_announcement_hour,
+  restricted_free_agency_processing_hour,
+
   isLoaded,
   isLoading
 }) {
@@ -335,6 +341,9 @@ export function createLeague({
 
     wildcard_round,
     championship_round: new List(championship_round),
+
+    restricted_free_agency_announcement_hour,
+    restricted_free_agency_processing_hour,
 
     isLoading,
     isLoaded
