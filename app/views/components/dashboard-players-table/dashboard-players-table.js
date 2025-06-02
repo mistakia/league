@@ -35,7 +35,7 @@ const SortableHandle = () => (
 const SortablePlayerRoster = ({ waiver, percentiles, ...props }) => {
   const { attributes, listeners, setNodeRef, transform, transition } =
     useSortable({
-      id: waiver.uid
+      id: waiver.uid || waiver.pid
     })
 
   const style = {
