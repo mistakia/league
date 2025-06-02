@@ -198,11 +198,9 @@ router.post('/?', async (req, res) => {
       if (market_salary) {
         const salary_difference = bid - market_salary.market_salary
         if (salary_difference < -10) {
-          return res
-            .status(400)
-            .send({
-              error: 'bid must not be more than $10 below market salary'
-            })
+          return res.status(400).send({
+            error: 'bid must not be more than $10 below market salary'
+          })
         }
       }
     } else {
@@ -560,11 +558,9 @@ router.put('/?', async (req, res) => {
       if (market_salary) {
         const salary_difference = bid - market_salary.market_salary
         if (salary_difference < -10) {
-          return res
-            .status(400)
-            .send({
-              error: 'bid must not be more than $10 below market salary'
-            })
+          return res.status(400).send({
+            error: 'bid must not be more than $10 below market salary'
+          })
         }
       }
     }
