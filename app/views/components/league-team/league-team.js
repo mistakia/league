@@ -17,7 +17,7 @@ import PlayerRoster from '@components/player-roster'
 import {
   constants,
   isReserveEligible,
-  isReserveCovEligible,
+  isReserveCovEligible
 } from '@libs-shared'
 import LeagueTeamValueDeltas from '@components/league-team-value-deltas'
 import Notices from '@components/notices'

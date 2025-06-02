@@ -238,7 +238,8 @@ router.post('/?', async (req, res) => {
         slot: constants.slots.BENCH,
         pid,
         pos: player_row.pos,
-        value: bid
+        value: bid,
+        restricted_free_agency_original_team: playerTid
       })
     }
 
@@ -533,7 +534,8 @@ router.put('/?', async (req, res) => {
         slot: constants.slots.BENCH,
         pid,
         pos: player_row.pos,
-        value: bid
+        value: bid,
+        restricted_free_agency_original_team: transitionBid.player_tid
       })
     } else {
       // update value to bid

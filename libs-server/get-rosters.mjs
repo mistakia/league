@@ -106,6 +106,7 @@ export default async function ({
           if (player && player.tag === constants.tags.TRANSITION) {
             player.bid = bid.bid
             player.transition_tag_nominated = bid.nominated
+            player.restricted_free_agency_original_team = bid.player_tid
           }
         }
       }
@@ -141,6 +142,7 @@ export default async function ({
             if (bid) {
               player.transition_tag_processed = bid.processed
               player.transition_tag_announced = bid.announced
+              player.restricted_free_agency_original_team = bid.player_tid
             }
           }
         }
