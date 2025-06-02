@@ -349,7 +349,21 @@ export function rostersReducer(state = new Map(), { payload, type }) {
         )
 
         if (payload.remove) {
-          const index = players.findIndex((p) => p.pid === payload.remove)
+          const remove_index = players.findIndex(
+            (p) => p.pid === payload.remove
+          )
+
+          // Store the removed player's tag before changing it
+          const removed_player_tag = state.getIn([
+            payload.teamId,
+            constants.year,
+            constants.week,
+            'players',
+            remove_index,
+            'tag'
+          ])
+
+          // Store removed player info in a meta field on the main player
           state.setIn(
             [
               payload.teamId,
@@ -357,6 +371,18 @@ export function rostersReducer(state = new Map(), { payload, type }) {
               constants.week,
               'players',
               index,
+              'removed_player_info'
+            ],
+            { pid: payload.remove, previous_tag: removed_player_tag }
+          )
+
+          state.setIn(
+            [
+              payload.teamId,
+              constants.year,
+              constants.week,
+              'players',
+              remove_index,
               'tag'
             ],
             constants.tags.REGULAR
@@ -375,7 +401,7 @@ export function rostersReducer(state = new Map(), { payload, type }) {
       ])
       if (!players) return state
 
-      const index = players.findIndex((p) => p.pid === payload.remove)
+      const index = players.findIndex((p) => p.pid === payload.pid)
       return state.mergeIn(
         [payload.teamId, constants.year, constants.week, 'players', index],
         {
@@ -406,6 +432,16 @@ export function rostersReducer(state = new Map(), { payload, type }) {
           'players',
           index,
           'previous_state'
+        ])
+
+        // Get removed player info if available
+        const removed_player_info = state.getIn([
+          payload.opts.teamId,
+          constants.year,
+          constants.week,
+          'players',
+          index,
+          'removed_player_info'
         ])
 
         // Restore previous tag and bid
@@ -460,7 +496,27 @@ export function rostersReducer(state = new Map(), { payload, type }) {
           )
         }
 
-        // Clean up the previous_state field
+        // Restore removed player's tag if applicable
+        if (removed_player_info) {
+          const removed_index = players.findIndex(
+            (p) => p.pid === removed_player_info.pid
+          )
+          if (removed_index !== -1) {
+            state.setIn(
+              [
+                payload.opts.teamId,
+                constants.year,
+                constants.week,
+                'players',
+                removed_index,
+                'tag'
+              ],
+              removed_player_info.previous_tag
+            )
+          }
+        }
+
+        // Clean up the temporary state fields
         state.deleteIn([
           payload.opts.teamId,
           constants.year,
@@ -468,6 +524,15 @@ export function rostersReducer(state = new Map(), { payload, type }) {
           'players',
           index,
           'previous_state'
+        ])
+
+        state.deleteIn([
+          payload.opts.teamId,
+          constants.year,
+          constants.week,
+          'players',
+          index,
+          'removed_player_info'
         ])
       })
     }
