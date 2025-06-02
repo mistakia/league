@@ -16,6 +16,10 @@ import {
   verticalListSortingStrategy
 } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
+import {
+  restrictToVerticalAxis,
+  restrictToParentElement
+} from '@dnd-kit/modifiers'
 import Toolbar from '@mui/material/Toolbar'
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator'
 
@@ -119,6 +123,7 @@ export default function DashboardPlayersTable({
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
+          modifiers={[restrictToVerticalAxis, restrictToParentElement]}
           onDragEnd={({ active, over }) => {
             if (active.id !== over?.id) {
               const oldIndex = claims.findIndex((c) => c.uid === active.id)
@@ -148,6 +153,7 @@ export default function DashboardPlayersTable({
         <DndContext
           sensors={sensors}
           collisionDetection={closestCenter}
+          modifiers={[restrictToVerticalAxis, restrictToParentElement]}
           onDragEnd={({ active, over }) => {
             if (active.id !== over?.id) {
               const oldIndex = cutlist.findIndex(
