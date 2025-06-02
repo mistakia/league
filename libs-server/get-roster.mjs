@@ -40,8 +40,10 @@ export default async function ({
 
     if (bids.length) {
       for (const roster_player of roster_row.players) {
-        const { bid } = bids.find((b) => b.pid === roster_player.pid) || {}
+        const { bid, player_tid } =
+          bids.find((b) => b.pid === roster_player.pid) || {}
         roster_player.bid = bid
+        roster_player.restricted_free_agency_original_team = player_tid
       }
     }
 
@@ -51,7 +53,7 @@ export default async function ({
     )
     if (transition_tagged_players.length) {
       const transition_bids = await db('transition_bids')
-        .select('pid', 'processed', 'nominated', 'announced')
+        .select('pid', 'processed', 'nominated', 'announced', 'player_tid')
         .where({
           player_tid: tid,
           year: constants.season.year
@@ -67,6 +69,7 @@ export default async function ({
         if (bid) {
           roster_player.transition_tag_processed = bid.processed
           roster_player.transition_tag_announced = bid.announced
+          roster_player.restricted_free_agency_original_team = bid.player_tid
         }
       }
     }

@@ -20,7 +20,7 @@ import {
   constants,
   isReserveEligible,
   isReserveCovEligible,
-  getFreeAgentPeriod,
+  getFreeAgentPeriod
 } from '@libs-shared'
 import { get_restricted_free_agency_notices } from '@core/utils/restricted-free-agency-notices'
 

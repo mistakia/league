@@ -1230,10 +1230,9 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
   } else {
     const roster = getCurrentTeamRoster(state)
 
-    if (
-      status.tagged.transition &&
-      !playerMap.get('transition_tag_processed')
-    ) {
+    const transition_tag_processed = playerMap.get('transition_tag_processed')
+
+    if (status.tagged.transition && !transition_tag_processed) {
       status.eligible.transitionBid = true
     }
 
@@ -1265,7 +1264,9 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
       const has_available_restricted_tag = roster.hasUnprocessedRestrictedTag()
       const isBeforeRestrictedFreeAgency = isBeforeTransitionEnd(state)
       status.eligible.transitionTag =
-        isBeforeRestrictedFreeAgency && has_available_restricted_tag
+        isBeforeRestrictedFreeAgency &&
+        has_available_restricted_tag &&
+        !transition_tag_processed
 
       const isActive = Boolean(
         roster.active.find(({ pid }) => pid === playerId)
