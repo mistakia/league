@@ -211,20 +211,6 @@ DO UPDATE SET value = '${escaped_value}', updated_at = '${timestamp || 'NOW()'}'
 }
 
 /**
- * Executes a SQL query and returns the result
- */
-const execute_query = async (db_user, db_name, db_password, query) => {
-  let psql_cmd = `psql -U ${db_user} -d ${db_name} -t -c "${query}"`
-
-  if (db_password) {
-    psql_cmd = `PGPASSWORD=${db_password} ${psql_cmd}`
-  }
-
-  const { stdout } = await exec(psql_cmd)
-  return stdout.trim()
-}
-
-/**
  * Find the latest backup file on Google Drive matching the query.
  */
 const find_backup_file = async ({ drive, query }) => {
@@ -388,7 +374,7 @@ const prepare_import_file = async ({
       await fs.writeFile(filtered_file, '')
       for (const table of tables) {
         const table_schema = await exec(
-          `sed -n '/CREATE TABLE public\\.${table}/,/^\);/p' "${extracted_sql_file}"`
+          `sed -n '/CREATE TABLE public\\.${table}/,/^);/p' "${extracted_sql_file}"`
         )
         await fs.appendFile(filtered_file, table_schema.stdout + '\n\n')
         const table_data = await exec(
@@ -455,7 +441,7 @@ const import_sql_file = async ({
     psql_command = `PGPASSWORD=${db_password} ${psql_command}`
   }
   psql_command += ` -f "${import_file}"`
-  const { stdout, stderr } = await exec(psql_command)
+  const { stderr } = await exec(psql_command)
   if (
     stderr &&
     !options.data_only &&
