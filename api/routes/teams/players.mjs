@@ -41,10 +41,11 @@ router.get('/?', async (req, res) => {
         return res.send(
           players.map((p) => {
             const bid = bids.find((b) => b.pid === p.pid)
-            return { 
+            return {
               ...p,
               bid: bid?.bid,
-              restricted_free_agency_conditional_releases: bid?.restricted_free_agency_conditional_releases || []
+              restricted_free_agency_conditional_releases:
+                bid?.restricted_free_agency_conditional_releases || []
             }
           })
         )
@@ -76,10 +77,11 @@ router.get('/?', async (req, res) => {
       return res.send(
         players.map((p) => {
           const bid = bids.find((b) => b.pid === p.pid)
-          return { 
+          return {
             ...p,
             bid: bid?.bid,
-            restricted_free_agency_conditional_releases: bid?.restricted_free_agency_conditional_releases || []
+            restricted_free_agency_conditional_releases:
+              bid?.restricted_free_agency_conditional_releases || []
           }
         })
       )

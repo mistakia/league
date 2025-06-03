@@ -436,7 +436,9 @@ export function playersReducer(state = initialState, { payload, type }) {
 
         state.mergeIn(['items', payload.data.pid], {
           tag: constants.tags.TRANSITION,
-          bid: payload.data.bid
+          bid: payload.data.bid,
+          restricted_free_agency_conditional_releases:
+            payload.data.release || []
         })
 
         if (payload.data.remove)
@@ -447,7 +449,10 @@ export function playersReducer(state = initialState, { payload, type }) {
 
     case rosterActions.DELETE_TRANSITION_TAG_FULFILLED:
     case rosterActions.DELETE_TAG_FULFILLED: {
-      const data = { bid: null }
+      const data = {
+        bid: null,
+        restricted_free_agency_conditional_releases: null
+      }
       if (
         !payload.data.player_tid ||
         payload.data.player_tid === payload.data.tid
