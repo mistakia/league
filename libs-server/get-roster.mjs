@@ -39,11 +39,27 @@ export default async function ({
       .whereNull('cancelled')
 
     if (bids.length) {
+      // Get conditional releases for all transition bids
+      const transition_releases = await db('transition_releases').whereIn(
+        'transitionid',
+        bids.map((b) => b.uid)
+      )
+
       for (const roster_player of roster_row.players) {
-        const { bid, player_tid } =
-          bids.find((b) => b.pid === roster_player.pid) || {}
-        roster_player.bid = bid
-        roster_player.restricted_free_agency_original_team = player_tid
+        const bid = bids.find((b) => b.pid === roster_player.pid)
+        if (bid) {
+          roster_player.bid = bid.bid
+          roster_player.restricted_free_agency_original_team = bid.player_tid
+
+          // Add conditional releases for this bid
+          const releases = transition_releases.filter(
+            (r) => r.transitionid === bid.uid
+          )
+          if (releases.length) {
+            roster_player.restricted_free_agency_conditional_releases =
+              releases.map((r) => r.pid)
+          }
+        }
       }
     }
 

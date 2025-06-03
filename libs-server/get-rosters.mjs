@@ -100,6 +100,12 @@ export default async function ({
         .whereNull('processed')
 
       if (bids.length) {
+        // Get conditional releases for all transition bids
+        const transition_releases = await db('transition_releases').whereIn(
+          'transitionid',
+          bids.map((b) => b.uid)
+        )
+
         const team_roster = rosters.find((r) => r.tid === tid)
         for (const bid of bids) {
           const player = team_roster.players.find((p) => p.pid === bid.pid)
@@ -107,6 +113,16 @@ export default async function ({
             player.bid = bid.bid
             player.transition_tag_nominated = bid.nominated
             player.restricted_free_agency_original_team = bid.player_tid
+
+            // Add conditional releases for this bid
+            const releases = transition_releases.filter(
+              (r) => r.transitionid === bid.uid
+            )
+            if (releases.length) {
+              player.restricted_free_agency_conditional_releases = releases.map(
+                (r) => r.pid
+              )
+            }
           }
         }
       }
