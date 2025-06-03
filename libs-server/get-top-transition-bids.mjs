@@ -1,28 +1,51 @@
 import db from '#db'
 import { constants } from '#libs-shared'
 
-export default async function (leagueId) {
-  const current_timestamp = Math.round(Date.now() / 1000)
-  const one_day_seconds = 24 * 60 * 60
+// Define constants for better readability
+const ORIGINAL_TEAM_BID_BOOST_PERCENT = 0.2
+const ORIGINAL_TEAM_MIN_BOOST_DOLLARS = 2
 
+/**
+ * Get the highest priority transition bids for a league that are ready to be processed.
+ * This function finds active restricted free agents and selects the top bid(s) for processing.
+ *
+ * Original team bids get a boost of 20% or $2, whichever is greater.
+ * If multiple bids have the same maximum amount, they are sorted by player ID.
+ *
+ * @param {string|number} leagueId - The league ID to check
+ * @returns {Promise<Array>} Array of transition bids ready to be processed
+ */
+export default async function get_top_restricted_free_agency_bids(leagueId) {
+  // Find players with announced transition bids that don't have any successful bids yet
   const active_rfa_players = await db('transition_bids')
-    .where('lid', leagueId)
-    .where('year', constants.season.year)
+    .where({
+      lid: leagueId,
+      year: constants.season.year
+    })
     .whereNotNull('announced')
-    .where('announced', '<=', current_timestamp - one_day_seconds) // Ensure 24 hours have passed since announcement
     .whereNotExists(function () {
       this.select('*')
         .from('transition_bids as successful_bids')
         .whereRaw('successful_bids.pid = transition_bids.pid')
-        .where('successful_bids.succ', true)
-        .where('successful_bids.year', constants.season.year)
+        .where({
+          'successful_bids.succ': true,
+          'successful_bids.year': constants.season.year
+        })
     })
 
   const active_rfa_pids = active_rfa_players.map((p) => p.pid)
 
+  // If no active restricted free agents, return empty array
+  if (!active_rfa_pids.length) {
+    return []
+  }
+
+  // Get all unprocessed, uncancelled bids for active RFA players
   const transition_bid_rows = await db('transition_bids')
-    .where('lid', leagueId)
-    .where('year', constants.season.year)
+    .where({
+      lid: leagueId,
+      year: constants.season.year
+    })
     .whereIn('pid', active_rfa_pids)
     .whereNull('cancelled')
     .whereNull('processed')
@@ -31,27 +54,36 @@ export default async function (leagueId) {
     return []
   }
 
-  transition_bid_rows.forEach((t) => {
-    // if competing bids, use bid amount
-    if (t.player_tid !== t.tid) {
-      t._bid = t.bid
+  // Calculate effective bid amount for each bid
+  // Original team (player_tid === tid) gets a boost
+  transition_bid_rows.forEach((bid) => {
+    // If competing bid (not original team), use actual bid amount
+    if (bid.player_tid !== bid.tid) {
+      bid._bid = bid.bid
       return
     }
 
-    // boost original team bids by 20% or $2, whichever is greater
-    const _20pct = Math.min(t.bid * 0.2)
-    const boost = Math.max(2, _20pct)
-    t._bid = t.bid + boost
+    // For original team, boost bid by 20% or $2, whichever is greater
+    const percentage_boost = Math.round(
+      bid.bid * ORIGINAL_TEAM_BID_BOOST_PERCENT
+    )
+    const boost_amount = Math.max(
+      ORIGINAL_TEAM_MIN_BOOST_DOLLARS,
+      percentage_boost
+    )
+    bid._bid = bid.bid + boost_amount
   })
 
-  // find highest transition bids
-  const bid_amounts = transition_bid_rows.map((t) => t._bid)
+  // Find highest transition bids
+  const bid_amounts = transition_bid_rows.map((bid) => bid._bid)
   const max_bid = Math.max(...bid_amounts)
-  const max_bids = transition_bid_rows.filter((t) => t._bid === max_bid)
+  const max_bids = transition_bid_rows.filter((bid) => bid._bid === max_bid)
 
-  // if more than one, process player based on alphabetical order
-  const max_pids = max_bids.map((p) => p.pid)
+  // If more than one bid with the same amount, process player based on player ID order
+  const max_pids = max_bids.map((bid) => bid.pid)
   const sorted_pids = max_pids.sort((a, b) => a - b)
   const top_pid = sorted_pids[0]
-  return max_bids.filter((b) => b.pid === top_pid)
+
+  // Return all bids for the top priority player
+  return max_bids.filter((bid) => bid.pid === top_pid)
 }
