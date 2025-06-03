@@ -259,7 +259,11 @@ const extract_sql_file_from_archive = async ({ downloaded_file }) => {
 /**
  * Drop and recreate the database if requested.
  */
-const drop_and_recreate_database = async ({ db_name, db_user, db_password }) => {
+const drop_and_recreate_database = async ({
+  db_name,
+  db_user,
+  db_password
+}) => {
   log(`Dropping and recreating database: ${db_name}`)
   try {
     let drop_cmd = `dropdb -U ${db_user} ${db_name}`
@@ -268,7 +272,9 @@ const drop_and_recreate_database = async ({ db_name, db_user, db_password }) => 
     }
     await exec(drop_cmd)
   } catch (error) {
-    log(`Database ${db_name} doesn't exist or cannot be dropped, will create it`)
+    log(
+      `Database ${db_name} doesn't exist or cannot be dropped, will create it`
+    )
   }
   let create_cmd = `createdb -U ${db_user} ${db_name}`
   if (db_password) {
@@ -348,7 +354,12 @@ const prepare_import_file = async ({
       extract_dir,
       'data_only_' + path.basename(extracted_sql_file)
     )
-    await fs.writeFile(combined_file, options.ignore_duplicates ? 'SET session_replication_role = replica;\n\n' : '')
+    await fs.writeFile(
+      combined_file,
+      options.ignore_duplicates
+        ? 'SET session_replication_role = replica;\n\n'
+        : ''
+    )
     for (const table of tables) {
       const table_file = path.join(temp_dir, `${table}.sql`)
       await extract_table_data(extracted_sql_file, table, table_file)
@@ -356,7 +367,10 @@ const prepare_import_file = async ({
       await fs.appendFile(combined_file, table_content + '\n')
     }
     if (options.ignore_duplicates) {
-      await fs.appendFile(combined_file, '\nSET session_replication_role = DEFAULT;\n')
+      await fs.appendFile(
+        combined_file,
+        '\nSET session_replication_role = DEFAULT;\n'
+      )
     }
     import_file = combined_file
     await exec(`rm -rf "${temp_dir}"`)
@@ -480,7 +494,9 @@ const download_backup_from_drive = async (
     log(`Found backup file: ${file.name}`)
     const downloaded_file = await downloadFile({ drive, file })
     log(`Downloaded ${downloaded_file}`)
-    const extracted_sql_file = await extract_sql_file_from_archive({ downloaded_file })
+    const extracted_sql_file = await extract_sql_file_from_archive({
+      downloaded_file
+    })
     if (options.drop) {
       await drop_and_recreate_database({ db_name, db_user, db_password })
     }
