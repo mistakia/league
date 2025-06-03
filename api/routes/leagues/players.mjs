@@ -46,9 +46,16 @@ router.get('/?', async (req, res) => {
 
       if (bids.length) {
         const bidMap = new Map(bids.map((b) => [b.pid, b.bid]))
+        const releases_map = new Map(
+          bids.map((b) => [
+            b.pid,
+            b.restricted_free_agency_conditional_releases || []
+          ])
+        )
         players = players.map((p) => ({
           ...p,
-          bid: bidMap.get(p.pid) || undefined
+          bid: bidMap.get(p.pid) || undefined,
+          restricted_free_agency_conditional_releases: releases_map.get(p.pid)
         }))
       }
     }

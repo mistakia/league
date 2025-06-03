@@ -23,6 +23,26 @@ export default async function ({ userId, leagueId }) {
       .whereNull('cancelled')
       .whereNull('processed')
 
+    if (bids.length) {
+      // Get conditional releases for all transition bids
+      const transition_releases = await db('transition_releases').whereIn(
+        'transitionid',
+        bids.map((b) => b.uid)
+      )
+
+      // Map releases to bids
+      for (const bid of bids) {
+        const releases = transition_releases.filter(
+          (r) => r.transitionid === bid.uid
+        )
+        if (releases.length) {
+          bid.restricted_free_agency_conditional_releases = releases.map(
+            (r) => r.pid
+          )
+        }
+      }
+    }
+
     return bids
   }
 
