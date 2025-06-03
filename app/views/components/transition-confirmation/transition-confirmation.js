@@ -56,7 +56,12 @@ export default class TransitionConfirmation extends React.Component {
     }
 
     const pid = playerMap.get('pid')
-    this._isUpdate = Boolean(tagged_pids.includes(pid) || playerMap.get('bid'))
+    const bid = playerMap.get('bid')
+    const restricted_free_agency_bid_exists =
+      bid !== null && bid !== undefined && Number(bid) >= 0
+    this._isUpdate = Boolean(
+      tagged_pids.includes(pid) || restricted_free_agency_bid_exists
+    )
     this._isOriginalTeam = team.roster.tid === playerMap.get('tid')
     // TODO - check roster size limit eligiblity
     this._isEligible =
