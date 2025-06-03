@@ -29,7 +29,10 @@ export default class TransitionConfirmation extends React.Component {
     const { team, playerMap } = props
 
     this.state = {
-      releaseIds: [],
+      releaseIds: playerMap.get(
+        'restricted_free_agency_conditional_releases',
+        []
+      ),
       untag: '',
       bid: playerMap.get('bid', 0),
       error: false,
