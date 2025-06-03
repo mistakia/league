@@ -396,10 +396,10 @@ export default function PlayerContextMenu({
       add({
         key: 'transition',
         onClick: handleTransitionTag,
-        label: `${status.bid ? 'Update' : 'Place'} Restricted Free Agent Bid`
+        label: `${status.restricted_free_agent_bid_exists ? 'Update' : 'Place'} Restricted Free Agent Bid`
       })
 
-      if (status.bid) {
+      if (status.restricted_free_agent_bid_exists) {
         add({
           key: 'transition-remove',
           onClick: handleRemoveTransitionTag,

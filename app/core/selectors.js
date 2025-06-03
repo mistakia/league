@@ -1182,7 +1182,9 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
   const playerTag = playerMap.get('tag')
   const playerSlot = playerMap.get('slot')
   const playerId = playerMap.get('pid')
-  status.bid = playerMap.get('bid')
+  const bid = playerMap.get('bid')
+  status.restricted_free_agent_bid_exists =
+    bid !== null && bid !== undefined && Number(bid) >= 0
   status.tagged.rookie = playerTag === constants.tags.ROOKIE
   status.tagged.transition = playerTag === constants.tags.TRANSITION
   status.tagged.franchise = playerTag === constants.tags.FRANCHISE
