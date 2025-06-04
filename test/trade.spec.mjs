@@ -386,7 +386,7 @@ describe('API /trades', function () {
     })
 
     it('deadline has passed', async function () {
-      MockDate.set(constants.season.start.add('13', 'weeks').toISOString())
+      MockDate.set(constants.season.regular_season_start.add('13', 'weeks').toISOString())
       const request = chai_request
         .execute(server)
         .post('/api/leagues/1/trades')

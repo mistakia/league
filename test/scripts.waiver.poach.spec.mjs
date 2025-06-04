@@ -14,7 +14,7 @@ process.env.NODE_ENV = 'test'
 chai.should()
 // chai.use(chai_http)
 const expect = chai.expect
-const { start } = constants.season
+const { regular_season_start } = constants.season
 
 describe('SCRIPTS /waivers - poach', function () {
   before(async function () {
@@ -23,19 +23,19 @@ describe('SCRIPTS /waivers - poach', function () {
 
   describe('process', function () {
     beforeEach(async function () {
-      MockDate.set(start.subtract('1', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
       await knex.seed.run()
       await league(knex)
 
       await knex('seasons')
         .update({
-          free_agency_live_auction_start: start.subtract('1', 'week').unix()
+          free_agency_live_auction_start: regular_season_start.subtract('1', 'week').unix()
         })
         .where('lid', 1)
     })
 
     it('no waivers to process - offseason', async () => {
-      MockDate.set(start.subtract('1', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
 
       let error
       try {
@@ -50,7 +50,7 @@ describe('SCRIPTS /waivers - poach', function () {
     })
 
     it('no waivers to process - season', async () => {
-      MockDate.set(start.add('1', 'month').toISOString())
+      MockDate.set(regular_season_start.add('1', 'month').toISOString())
 
       let error
       try {
@@ -64,7 +64,7 @@ describe('SCRIPTS /waivers - poach', function () {
     })
 
     it('no waivers ready to process - offseason', async () => {
-      MockDate.set(start.subtract('1', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
 
       const player = await selectPlayer({ rookie: true })
       await addPlayer({
@@ -108,7 +108,7 @@ describe('SCRIPTS /waivers - poach', function () {
     })
 
     it('no waivers ready to process - season', async () => {
-      MockDate.set(start.add('1', 'month').day(5).toISOString())
+      MockDate.set(regular_season_start.add('1', 'month').day(5).toISOString())
 
       const player = await selectPlayer({ rookie: true })
       await addPlayer({
@@ -152,7 +152,7 @@ describe('SCRIPTS /waivers - poach', function () {
     })
 
     it('process single ready waiver - offseason', async () => {
-      MockDate.set(start.subtract('1', 'month').day(5).toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'month').day(5).toISOString())
 
       const player = await selectPlayer({ rookie: true })
       await addPlayer({
@@ -177,7 +177,7 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       MockDate.set(
-        start.subtract('1', 'month').day(7).add('1', 'minute').toISOString()
+        regular_season_start.subtract('1', 'month').day(7).add('1', 'minute').toISOString()
       )
 
       let error
@@ -227,7 +227,7 @@ describe('SCRIPTS /waivers - poach', function () {
     })
 
     it('process single ready waiver - season', async () => {
-      MockDate.set(start.add('1', 'month').day(5).toISOString())
+      MockDate.set(regular_season_start.add('1', 'month').day(5).toISOString())
 
       const player = await selectPlayer({ rookie: true })
       await addPlayer({
@@ -252,7 +252,7 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       MockDate.set(
-        start.add('1', 'month').day(7).add('1', 'minute').toISOString()
+        regular_season_start.add('1', 'month').day(7).add('1', 'minute').toISOString()
       )
 
       let error
@@ -302,7 +302,7 @@ describe('SCRIPTS /waivers - poach', function () {
     })
 
     it('process multiple waivers for the same player', async () => {
-      MockDate.set(start.add('1', 'month').day(5).toISOString())
+      MockDate.set(regular_season_start.add('1', 'month').day(5).toISOString())
 
       const player = await selectPlayer({ rookie: true })
       await addPlayer({
@@ -340,7 +340,7 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       MockDate.set(
-        start.add('1', 'month').day(7).add('1', 'minute').toISOString()
+        regular_season_start.add('1', 'month').day(7).add('1', 'minute').toISOString()
       )
 
       let error
@@ -398,7 +398,7 @@ describe('SCRIPTS /waivers - poach', function () {
     })
 
     it('process multiple waivers for multiple players', async () => {
-      MockDate.set(start.add('1', 'month').day(5).toISOString())
+      MockDate.set(regular_season_start.add('1', 'month').day(5).toISOString())
 
       const player1 = await selectPlayer({ rookie: true })
       await addPlayer({
@@ -450,7 +450,7 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       MockDate.set(
-        start.add('1', 'month').day(7).add('1', 'minute').toISOString()
+        regular_season_start.add('1', 'month').day(7).add('1', 'minute').toISOString()
       )
 
       let error
@@ -520,7 +520,7 @@ describe('SCRIPTS /waivers - poach', function () {
     })
 
     it('process multiple waivers for the same and different players', async () => {
-      MockDate.set(start.add('1', 'month').day(5).toISOString())
+      MockDate.set(regular_season_start.add('1', 'month').day(5).toISOString())
 
       const player1 = await selectPlayer({ rookie: true })
       await addPlayer({
@@ -584,7 +584,7 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       MockDate.set(
-        start.add('1', 'month').day(7).add('1', 'minute').toISOString()
+        regular_season_start.add('1', 'month').day(7).add('1', 'minute').toISOString()
       )
 
       let error
@@ -666,12 +666,12 @@ describe('SCRIPTS /waivers - poach', function () {
   describe('errors', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('1', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
       await league(knex)
     })
 
     it('player not on practice squad', async () => {
-      MockDate.set(start.add('1', 'month').day(5).toISOString())
+      MockDate.set(regular_season_start.add('1', 'month').day(5).toISOString())
 
       const player = await selectPlayer({ rookie: true })
       await addPlayer({
@@ -712,7 +712,7 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       MockDate.set(
-        start.add('1', 'month').day(7).add('1', 'minute').toISOString()
+        regular_season_start.add('1', 'month').day(7).add('1', 'minute').toISOString()
       )
 
       let error

@@ -17,7 +17,7 @@ process.env.NODE_ENV = 'test'
 
 chai.should()
 const expect = chai.expect
-const { start } = constants.season
+const { regular_season_start } = constants.season
 
 describe('SCRIPTS /waivers - free agency - practice', function () {
   before(async function () {
@@ -28,7 +28,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
   describe('process', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('2', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('2', 'month').toISOString())
       await league(knex)
     })
 
@@ -197,12 +197,12 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
   describe('errors', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('1', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
       await league(knex)
     })
 
     it('no waivers to process', async () => {
-      MockDate.set(start.add('1', 'month').day(4).toISOString())
+      MockDate.set(regular_season_start.add('1', 'month').day(4).toISOString())
       let error
       try {
         await run()

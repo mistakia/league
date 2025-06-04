@@ -26,7 +26,7 @@ process.env.NODE_ENV = 'test'
 
 chai.should()
 const expect = chai.expect
-const { start } = constants.season
+const { regular_season_start } = constants.season
 
 describe('SCRIPTS - transition bids - restricted free agency', function () {
   const leagueId = 1
@@ -34,7 +34,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
   before(async function () {
     this.timeout(60 * 1000)
 
-    MockDate.set(start.subtract('1', 'month').toISOString())
+    MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
     await knex.seed.run()
   })
 
@@ -46,16 +46,16 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
       // Set up dates relative to season start (which is in the future)
       // Season start is typically in September
       // The restricted free agency period typically occurs during the offseason (June-August)
-      const tran_date = start.subtract('3', 'month').unix()
-      const ext_date = start.subtract('4', 'month').unix()
+      const tran_date = regular_season_start.subtract('3', 'month').unix()
+      const ext_date = regular_season_start.subtract('4', 'month').unix()
 
       // Set restricted_free_agency_announcement_hour and processing_hour
       await knex('seasons')
         .update({
           year: constants.season.year,
           tran_start: tran_date,
-          tran_end: start.subtract('1', 'month').unix(),
-          ext_date,
+          tran_end: regular_season_start.subtract('1', 'month').unix(),
+          ext_date: ext_date,
           restricted_free_agency_announcement_hour: 10, // 10 AM
           restricted_free_agency_processing_hour: 12 // 12 PM (noon)
         })
@@ -65,11 +65,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
 
       // Set the mock date to be during the RFA period, specifically at noon
       // This will be in July (2 months before season start)
-      const mock_date = start
-        .subtract('2', 'month')
-        .hour(12)
-        .minute(0)
-        .second(0)
+      const mock_date = regular_season_start.subtract('2', 'month').hour(12).minute(0).second(0)
       MockDate.set(mock_date.toDate())
     })
 
@@ -289,14 +285,10 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
       this.timeout(60 * 1000)
 
       // Set up dates relative to season start
-      const tran_date = start.subtract('3', 'month').unix()
+      const tran_date = regular_season_start.subtract('3', 'month').unix()
 
       // Set the mock date to be during the RFA period, specifically at noon
-      const mock_date = start
-        .subtract('2', 'month')
-        .hour(12)
-        .minute(0)
-        .second(0)
+      const mock_date = regular_season_start.subtract('2', 'month').hour(12).minute(0).second(0)
       MockDate.set(mock_date.toDate())
 
       await league(knex)
@@ -306,7 +298,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
         .update({
           year: constants.season.year,
           tran_start: tran_date,
-          tran_end: start.subtract('1', 'month').unix(),
+          tran_end: regular_season_start.subtract('1', 'month').unix(),
           restricted_free_agency_announcement_hour: 10, // 10 AM
           restricted_free_agency_processing_hour: 12 // 12 PM (noon)
         })

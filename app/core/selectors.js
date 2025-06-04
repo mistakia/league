@@ -696,7 +696,7 @@ export const getLeagueEvents = createSelector(
       }
     }
 
-    const firstDayOfRegularSeason = constants.season.start.add('1', 'week')
+    const firstDayOfRegularSeason = constants.season.regular_season_start.add('1', 'week')
     if (now.isBefore(firstDayOfRegularSeason)) {
       events.push({
         detail: 'Regular Season Begins',
@@ -704,7 +704,7 @@ export const getLeagueEvents = createSelector(
       })
     }
 
-    const firstWaiverDate = constants.season.start
+    const firstWaiverDate = constants.season.regular_season_start
       .add('1', 'week')
       .day(3)
       .hour(15)
@@ -1007,7 +1007,7 @@ export function getPlayersByPosition(state, { position }) {
 }
 
 export const getRookiePlayers = createSelector(get_player_maps, (playerMaps) =>
-  playerMaps.filter((pMap) => pMap.get('start') === constants.year).toList()
+  playerMaps.filter((pMap) => pMap.get('nfl_draft_year') === constants.year).toList()
 )
 
 export function getPlayerById(state, { pid, playerMap }) {
@@ -1252,7 +1252,7 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
       //     was player a rookie last year
       //     otherwise are they a rookie now
       const isBeforeExtension = isBeforeExtensionDeadline(state)
-      const draft_year = playerMap.get('start')
+      const draft_year = playerMap.get('nfl_draft_year')
       if (isBeforeExtension && draft_year === constants.year - 1) {
         status.eligible.rookieTag = true
       } else if (draft_year === constants.year) {
@@ -1386,7 +1386,7 @@ export function isPlayerPracticeSquadEligible(
   if (
     !rosterInfo.tid && // not on a team
     !constants.isRegularSeason && // during the offseason
-    playerMap.get('start') !== constants.year && // not a rookie
+    playerMap.get('nfl_draft_year') !== constants.year && // not a rookie
     playerMap.get('team') !== 'INA' // not on a nfl team
   ) {
     return false

@@ -24,13 +24,13 @@ process.env.NODE_ENV = 'test'
 chai.should()
 chai.use(chai_http)
 const expect = chai.expect
-const { start } = constants.season
+const { regular_season_start } = constants.season
 
 describe('API /teams - restricted free agency', function () {
   before(async function () {
     this.timeout(60 * 1000)
 
-    MockDate.set(start.subtract('1', 'month').toISOString())
+    MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
 
     await knex.seed.run()
   })
@@ -41,7 +41,7 @@ describe('API /teams - restricted free agency', function () {
     })
 
     it('original team', async () => {
-      MockDate.set(start.subtract('2', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('2', 'month').toISOString())
 
       const player = await selectPlayer()
       const exclude_pids = [player.pid]
@@ -129,7 +129,7 @@ describe('API /teams - restricted free agency', function () {
     })
 
     it('competing team', async () => {
-      MockDate.set(start.subtract('2', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('2', 'month').toISOString())
 
       const leagueId = 1
       const playerTid = 2
@@ -183,7 +183,7 @@ describe('API /teams - restricted free agency', function () {
     })
 
     it('original team with cutlist and release, salary cap check', async () => {
-      MockDate.set(start.subtract('2', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('2', 'month').toISOString())
 
       const teamId = 1
       const leagueId = 1
@@ -373,7 +373,7 @@ describe('API /teams - restricted free agency', function () {
     })
 
     it('update bid amount', async () => {
-      MockDate.set(start.subtract('2', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('2', 'month').toISOString())
 
       const player = await selectPlayer()
       const teamId = 1
@@ -424,7 +424,7 @@ describe('API /teams - restricted free agency', function () {
     })
 
     it('update release players', async () => {
-      MockDate.set(start.subtract('2', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('2', 'month').toISOString())
 
       const player = await selectPlayer()
       const releasePlayer1 = await selectPlayer({ exclude_pids: [player.pid] })
@@ -499,7 +499,7 @@ describe('API /teams - restricted free agency', function () {
     })
 
     it('set RFA player as nominated', async () => {
-      MockDate.set(start.subtract('2', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('2', 'month').toISOString())
 
       const player = await selectPlayer()
       const teamId = 1
@@ -552,7 +552,7 @@ describe('API /teams - restricted free agency', function () {
     })
 
     it('remove a nomination', async () => {
-      MockDate.set(start.subtract('2', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('2', 'month').toISOString())
 
       const player = await selectPlayer()
       const teamId = 1

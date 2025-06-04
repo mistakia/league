@@ -71,7 +71,7 @@ const run = async () => {
   // do not pull in reports outside of the NFL season
   if (
     !constants.season.now.isBetween(
-      constants.season.start,
+      constants.season.regular_season_start,
       constants.season.end
     )
   ) {

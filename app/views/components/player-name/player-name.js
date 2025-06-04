@@ -103,7 +103,7 @@ export default function PlayerName({
         <div className='player__name-main'>
           <div className='player__name-top'>
             <span>{playerMap.get('pname')}</span>
-            {constants.year === playerMap.get('start') && (
+            {constants.year === playerMap.get('nfl_draft_year') && (
               <PlayerLabel label='R' type='rookie' description='Rookie' />
             )}
           </div>

@@ -24,7 +24,7 @@ process.env.NODE_ENV = 'test'
 chai.should()
 chai.use(chai_http)
 const expect = chai.expect
-const { start } = constants.season
+const { regular_season_start } = constants.season
 
 describe('API /teams - reserve', function () {
   before(async function () {
@@ -39,7 +39,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('move player to reserve - ir', async () => {
-      MockDate.set(start.subtract('1', 'week').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'week').toISOString())
       const player = await selectPlayer()
       const teamId = 1
       const leagueId = 1
@@ -283,7 +283,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('player not on reserve/ir', async () => {
-      MockDate.set(start.add('1', 'week').toISOString())
+      MockDate.set(regular_season_start.add('1', 'week').toISOString())
       const player = await selectPlayer({
         injury_status: null,
         nfl_status: constants.player_nfl_status.ACTIVE
@@ -343,7 +343,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('player not on reserve/cov - ir', async () => {
-      MockDate.set(start.add('1', 'week').toISOString())
+      MockDate.set(regular_season_start.add('1', 'week').toISOString())
       const player = await selectPlayer()
       const teamId = 1
       const leagueId = 1
@@ -379,7 +379,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('exceeds ir roster limits', async () => {
-      MockDate.set(start.subtract('1', 'week').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'week').toISOString())
       const teamId = 1
       const leagueId = 1
       await fillRoster({ leagueId, teamId })
@@ -449,7 +449,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('player not rostered on previous week roster', async () => {
-      MockDate.set(start.add('2', 'week').toISOString())
+      MockDate.set(regular_season_start.add('2', 'week').toISOString())
       const player = await selectPlayer()
       const teamId = 1
       const leagueId = 1

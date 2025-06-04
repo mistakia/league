@@ -23,7 +23,7 @@ process.env.NODE_ENV = 'test'
 chai.should()
 chai.use(chai_http)
 const expect = chai.expect
-const { start } = constants.season
+const { regular_season_start } = constants.season
 
 describe('API /teams - add', function () {
   before(async function () {
@@ -33,12 +33,12 @@ describe('API /teams - add', function () {
 
   describe('post', async function () {
     beforeEach(async function () {
-      MockDate.set(start.subtract('2', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('2', 'month').toISOString())
       await league(knex)
     })
 
     it('free agent - active roster - season', async () => {
-      MockDate.set(start.add('2', 'week').day(4).toISOString())
+      MockDate.set(regular_season_start.add('2', 'week').day(4).toISOString())
       const player = await selectPlayer()
 
       const teamId = 1
@@ -105,9 +105,9 @@ describe('API /teams - add', function () {
     it('rookie free agent - practice squad - offseason', async () => {
       const leagueId = 1
       await knex('seasons')
-        .update({ draft_start: start.subtract('1', 'week').unix() })
+        .update({ draft_start: regular_season_start.subtract('1', 'week').unix() })
         .where({ lid: leagueId })
-      MockDate.set(start.subtract('4', 'days').toISOString())
+      MockDate.set(regular_season_start.subtract('4', 'days').toISOString())
       const player = await selectPlayer({ rookie: true })
 
       const teamId = 1
@@ -173,7 +173,7 @@ describe('API /teams - add', function () {
 
   describe('error', function () {
     beforeEach(async function () {
-      MockDate.set(start.subtract('2', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('2', 'month').toISOString())
       await league(knex)
     })
 
@@ -287,7 +287,7 @@ describe('API /teams - add', function () {
     })
 
     it('add veteran free agent to active roster - offseason', async () => {
-      MockDate.set(start.subtract('1', 'week').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'week').toISOString())
       const player = await selectPlayer({ rookie: false })
       const request = chai_request
         .execute(server)
@@ -308,7 +308,7 @@ describe('API /teams - add', function () {
     })
 
     it('free agent has unprocessed waiver claim', async () => {
-      MockDate.set(start.add('2', 'week').day(3).hour(15).toISOString())
+      MockDate.set(regular_season_start.add('2', 'week').day(3).hour(15).toISOString())
       const player = await selectPlayer({ rookie: false })
 
       await knex('waivers').insert({

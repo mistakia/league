@@ -29,14 +29,14 @@ const generate_scoring_format_player_careerlogs = async ({
   const seasons_by_pid = groupBy(player_seasons, 'pid')
   const pids = Object.keys(seasons_by_pid)
   const draft_classes_query = await db('player')
-    .select('start', 'pid', 'dpos')
+    .select('nfl_draft_year', 'pid', 'dpos')
     .whereIn('pos', constants.positions)
     .whereIn('pid', pids)
-  const draft_classes = draft_classes_query.map((i) => i.start)
+  const draft_classes = draft_classes_query.map((i) => i.nfl_draft_year)
   const sorted_pids_by_draft_classes = {}
   for (const draft_class of draft_classes) {
     const players = draft_classes_query.filter(
-      (i) => i.start === draft_class && i.dpos
+      (i) => i.nfl_draft_year === draft_class && i.dpos
     )
     sorted_pids_by_draft_classes[draft_class] = players
       .sort((a, b) => a.dpos - b.dpos)
@@ -44,7 +44,7 @@ const generate_scoring_format_player_careerlogs = async ({
   }
 
   for (const pid in seasons_by_pid) {
-    const draft_class = draft_classes_query.find((i) => i.pid === pid)?.start
+    const draft_class = draft_classes_query.find((i) => i.pid === pid)?.nfl_draft_year
     if (!draft_class) {
       log(`missing draft class for ${pid}`)
       continue

@@ -16,7 +16,7 @@ process.env.NODE_ENV = 'test'
 
 chai.should()
 chai.use(chai_http)
-const { start } = constants.season
+const { regular_season_start } = constants.season
 
 describe('API /waivers - cancel', function () {
   let pid
@@ -26,25 +26,25 @@ describe('API /waivers - cancel', function () {
     this.timeout(60 * 1000)
     await knex.seed.run()
 
-    MockDate.set(start.subtract('1', 'month').toISOString())
+    MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
 
     await league(knex)
     await draftPicks(knex)
 
     await knex('seasons')
       .update({
-        free_agency_live_auction_start: start.subtract('1', 'week').unix()
+        free_agency_live_auction_start: regular_season_start.subtract('1', 'week').unix()
       })
       .where('lid', 1)
   })
 
   it('cancel poaching waiver', async () => {
-    MockDate.set(start.subtract('1', 'month').add('10', 'minute').toISOString())
+    MockDate.set(regular_season_start.subtract('1', 'month').add('10', 'minute').toISOString())
 
     // make draft selection
     const leagueId = 1
     const player_rows = await knex('player')
-      .where('start', constants.season.year)
+      .where('nfl_draft_year', constants.season.year)
       .limit(1)
     const player_row = player_rows[0]
     pid = player_row.pid
@@ -60,7 +60,7 @@ describe('API /waivers - cancel', function () {
       })
 
     MockDate.set(
-      start
+      regular_season_start
         .subtract('1', 'month')
         .add('10', 'minute')
         .add('25', 'hours')

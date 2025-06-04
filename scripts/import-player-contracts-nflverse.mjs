@@ -74,7 +74,7 @@ const process_row = async ({ row }) => {
     try {
       player_row = await find_player_row({
         name: row.player,
-        start: row.draft_year,
+        nfl_draft_year: row.draft_year,
         dob: row.date_of_birth
           ? dayjs(row.date_of_birth, 'MMMM D, YYYY').format('YYYY-MM-DD')
           : null

@@ -21,13 +21,13 @@ process.env.NODE_ENV = 'test'
 chai.should()
 chai.use(chai_http)
 const expect = chai.expect
-const { start } = constants.season
+const { regular_season_start } = constants.season
 
 describe('API /teams - activate', function () {
   before(async function () {
     this.timeout(60 * 1000)
 
-    MockDate.set(start.subtract('1', 'week').toISOString())
+    MockDate.set(regular_season_start.subtract('1', 'week').toISOString())
 
     await knex.seed.run()
   })

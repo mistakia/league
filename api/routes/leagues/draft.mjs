@@ -151,7 +151,7 @@ router.post('/?', async (req, res) => {
     // make sure player is a rookie
     const player_rows = await db('player').where({ pid })
     const player_row = player_rows[0]
-    if (!player_row || player_row.start !== constants.season.year) {
+    if (!player_row || player_row.nfl_draft_year !== constants.season.year) {
       return res.status(400).send({ error: 'invalid pid' })
     }
 

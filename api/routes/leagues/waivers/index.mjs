@@ -262,7 +262,7 @@ router.post('/?', async (req, res) => {
           })
 
           // if player is a rookie
-          if (player_row.start === constants.season.year) {
+          if (player_row.nfl_draft_year === constants.season.year) {
             // reject practice waivers before day after draft
             if (!league.draft_start || dayjs().isBefore(draftDates.draftEnd)) {
               return res.status(400).send({

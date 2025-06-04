@@ -17,7 +17,7 @@ describe('LIBS-SHARED getPoachProcessingTime', function () {
   })
 
   it('should add 48 hours during offseason', () => {
-    const offseason = constants.season.start.subtract('1', 'week')
+    const offseason = constants.season.regular_season_start.subtract('1', 'week')
     MockDate.set(offseason.toISOString())
     const submitted = dayjs().unix()
     const processing_time = getPoachProcessingTime(submitted)
@@ -28,7 +28,7 @@ describe('LIBS-SHARED getPoachProcessingTime', function () {
   })
 
   it('should add 48 hours during regular season outside Thu-Sun window', () => {
-    const wednesday = constants.season.start.add('5', 'week').day(3)
+    const wednesday = constants.season.regular_season_start.add('5', 'week').day(3)
     MockDate.set(wednesday.toISOString())
     const submitted = dayjs().unix()
     const processing_time = getPoachProcessingTime(submitted)
@@ -39,7 +39,7 @@ describe('LIBS-SHARED getPoachProcessingTime', function () {
   })
 
   it('should set to next Tuesday 3pm if submitted during Thu-Sun window', () => {
-    const thursday_after_6pm = constants.season.start
+    const thursday_after_6pm = constants.season.regular_season_start
       .add('5', 'week')
       .day(4)
       .hour(19)
@@ -47,7 +47,7 @@ describe('LIBS-SHARED getPoachProcessingTime', function () {
     const submitted = dayjs().unix()
     const processing_time = getPoachProcessingTime(submitted)
 
-    const next_tuesday_3pm = constants.season.start
+    const next_tuesday_3pm = constants.season.regular_season_start
       .add('6', 'week')
       .day(2)
       .hour(15)
@@ -55,7 +55,7 @@ describe('LIBS-SHARED getPoachProcessingTime', function () {
   })
 
   it('should set to Tuesday 3pm if submitted on Sunday before 3pm', () => {
-    const sunday_before_3pm = constants.season.start
+    const sunday_before_3pm = constants.season.regular_season_start
       .add('5', 'week')
       .day(0)
       .hour(14)
@@ -63,7 +63,7 @@ describe('LIBS-SHARED getPoachProcessingTime', function () {
     const submitted = dayjs().unix()
     const processing_time = getPoachProcessingTime(submitted)
 
-    const next_tuesday_3pm = constants.season.start
+    const next_tuesday_3pm = constants.season.regular_season_start
       .add('5', 'week')
       .day(2)
       .hour(15)

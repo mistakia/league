@@ -35,7 +35,7 @@ const seed_nfl_teams = async () => {
     dob,
     height,
     weight,
-    start,
+    nfl_draft_year: start,
     jnum
   } of player_rows_teams) {
     inserts.push({
@@ -50,7 +50,7 @@ const seed_nfl_teams = async () => {
       dob,
       height,
       weight,
-      start,
+      nfl_draft_year: start,
       jnum
     })
     inserts.push({
@@ -65,7 +65,7 @@ const seed_nfl_teams = async () => {
       dob,
       height,
       weight,
-      start,
+      nfl_draft_year: start,
       jnum
     })
     inserts.push({
@@ -80,7 +80,7 @@ const seed_nfl_teams = async () => {
       dob,
       height,
       weight,
-      start,
+      nfl_draft_year: start,
       jnum
     })
   }
