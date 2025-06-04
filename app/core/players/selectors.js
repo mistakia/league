@@ -72,7 +72,7 @@ export function getFilteredPlayers(state) {
     const veterans = experience.includes(-1)
     filtered = filtered.filter((playerMap) => {
       // exclude defenses
-      const draft_year = playerMap.get('start')
+      const draft_year = playerMap.get('nfl_draft_year')
       if (!draft_year) {
         return false
       }

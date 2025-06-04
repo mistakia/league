@@ -68,7 +68,7 @@ const import_players_from_snaps = async () => {
             dob: data.birthDate
               ? dayjs(data.birthDate, 'MM/DD/YYYY').format('YYYY-MM-DD')
               : '0000-00-00',
-            start: data.entryYear,
+            nfl_draft_year: data.entryYear,
             pos: data.position,
             pos1: data.position,
             height: data.height,

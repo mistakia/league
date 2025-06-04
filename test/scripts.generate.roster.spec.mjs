@@ -12,7 +12,7 @@ import run from '#scripts/generate-rosters.mjs'
 process.env.NODE_ENV = 'test'
 
 chai.should()
-const { start, end } = constants.season
+const { regular_season_start, end } = constants.season
 const expect = chai.expect
 
 describe('SCRIPTS /rosters - generate weekly rosters', function () {
@@ -24,7 +24,7 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
 
   describe('process', function () {
     beforeEach(async function () {
-      MockDate.set(start.subtract('1', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
       await league(knex)
     })
 
@@ -108,7 +108,7 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
     })
 
     it('generate rosters for next year', async () => {
-      MockDate.set(start.toISOString())
+      MockDate.set(regular_season_start.toISOString())
 
       await draft(knex)
 
@@ -200,7 +200,7 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
 
   /* describe('errors', function () {
    *   beforeEach(async function () {
-   *     MockDate.set(start.subtract('1', 'month').toISOString())
+   *     MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
    *     await league(knex)
    *   })
    * }) */

@@ -42,7 +42,7 @@ const calculate_points_added = async ({
       'scoring_format_player_gamelogs.points',
       'player.pname',
       'player.pos',
-      'player.start',
+      'player.nfl_draft_year',
       'nfl_games.week',
       'nfl_games.year',
       'nfl_games.esbid'
@@ -106,9 +106,9 @@ const calculate_points_added = async ({
       item.points[game.week] = { total: game.points }
     }
 
-    const { pname, pos, start } = games[0]
+    const { pname, pos, nfl_draft_year } = games[0]
     const pos_rnk = pos_rnk_map[pid] || null
-    players.push({ pid, pname, pos, start, pos_rnk, ...item })
+    players.push({ pid, pname, pos, nfl_draft_year, pos_rnk, ...item })
   }
 
   log(`calculating Points Added for ${rows.length} players`)
@@ -171,7 +171,7 @@ const calculate_points_added = async ({
   for (const player of players) {
     output[player.pid] = {
       player: player.pname,
-      rookie: player.start === year,
+      rookie: player.nfl_draft_year === year,
       pos: player.pos,
       pos_rnk: player.pos_rnk,
       pts_added: player.pts_added.earned,

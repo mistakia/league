@@ -121,7 +121,7 @@ const audit_player_ids_dynastyprocess_repo = async ({
     'dpos',
     'height',
     'weight',
-    'start',
+    'nfl_draft_year',
     'pff_id',
     'mfl_id',
     'fleaflicker_id',
@@ -170,7 +170,7 @@ const audit_player_ids_dynastyprocess_repo = async ({
       continue
     }
 
-    if (start_year && matching_player.start !== start_year) {
+    if (start_year && matching_player.nfl_draft_year !== start_year) {
       continue
     }
 

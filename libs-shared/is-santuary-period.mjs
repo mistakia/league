@@ -16,7 +16,7 @@ export default function isSantuaryPeriod(league) {
     }
   }
 
-  const regularSeasonStart = season.start.add('1', 'week')
+  const regularSeasonStart = season.regular_season_start.add('1', 'week')
   const santuaryEnd = regularSeasonStart.add('1', 'day')
   if (season.now.isBetween(regularSeasonStart, santuaryEnd)) {
     return true

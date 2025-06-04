@@ -11,7 +11,7 @@ describe('UTILS generate_player_id', function () {
     const pid = generate_player_id({
       fname: 'John',
       lname: 'Doe',
-      start: '2019',
+      nfl_draft_year: '2019',
       dob: '1990-01-01'
     })
 
@@ -25,7 +25,7 @@ describe('UTILS generate_player_id', function () {
     const pid = generate_player_id({
       fname: 'John',
       lname: 'D',
-      start: '2019',
+      nfl_draft_year: '2019',
       dob: '1990-01-01'
     })
 
@@ -39,7 +39,7 @@ describe('UTILS generate_player_id', function () {
     const pid = generate_player_id({
       fname: 'J',
       lname: 'Doe',
-      start: '2019',
+      nfl_draft_year: '2019',
       dob: '1990-01-01'
     })
 
@@ -54,26 +54,26 @@ describe('UTILS generate_player_id', function () {
       generate_player_id({
         fname: 'John',
         lname: 'Doe',
-        start: '2019'
+        nfl_draft_year: '2019'
       })
     ).to.throw('Missing field dob')
   })
 
-  it('should throw an error with missing start', () => {
+  it('should throw an error with missing nfl_draft_year', () => {
     expect(() =>
       generate_player_id({
         fname: 'John',
         lname: 'Doe',
         dob: '1990-01-01'
       })
-    ).to.throw('Missing field start')
+    ).to.throw('Missing field nfl_draft_year')
   })
 
   it('should throw an error with missing lname', () => {
     expect(() =>
       generate_player_id({
         fname: 'John',
-        start: '2019',
+        nfl_draft_year: '2019',
         dob: '1990-01-01'
       })
     ).to.throw('Missing field lname')
@@ -83,7 +83,7 @@ describe('UTILS generate_player_id', function () {
     expect(() =>
       generate_player_id({
         lname: 'Doe',
-        start: '2019',
+        nfl_draft_year: '2019',
         dob: '1990-01-01'
       })
     ).to.throw('Missing field fname')
@@ -93,7 +93,7 @@ describe('UTILS generate_player_id', function () {
     const pid = generate_player_id({
       fname: 'John',
       lname: 'Doe',
-      start: '2019',
+      nfl_draft_year: '2019',
       dob: '1990-1-1'
     })
 
@@ -107,7 +107,7 @@ describe('UTILS generate_player_id', function () {
     const pid = generate_player_id({
       fname: 'John',
       lname: 'Doe',
-      start: '19',
+      nfl_draft_year: '19',
       dob: '1990-01-01'
     })
 

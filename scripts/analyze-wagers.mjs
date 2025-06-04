@@ -188,10 +188,10 @@ const format_draftkings_selection_name = ({ selection }) => {
     if (market_display_name.includes('Rushing Yards')) {
       return `${player_name} ${selection_display_name} Rush Yds`
     }
-    if (market_display_name.includes('Receiving Yards')) {
+    if (market_display_name.includes('Receiving Yds')) {
       return `${player_name} ${selection_display_name} Recv Yds`
     }
-    if (market_display_name.includes('Passing Yards')) {
+    if (market_display_name.includes('Passing Yds')) {
       return `${player_name} ${selection_display_name} Pass Yds`
     }
     if (market_display_name.includes('Receptions')) {
@@ -304,7 +304,7 @@ const standardize_wager = ({ wager, source }) => {
   if (source === 'fanduel') {
     const week = dayjs(wager.settledDate)
       .subtract('2', 'day')
-      .diff(constants.season.start, 'weeks')
+      .diff(constants.season.regular_season_start, 'weeks')
 
     // check if the wager is a round robin
     if (wager.numLines > 1) {
@@ -1279,7 +1279,7 @@ const analyze_wagers = async ({
           max_potential_payout: 0,
           week: dayjs(selection.start_time)
             .subtract(2, 'day')
-            .diff(constants.season.start, 'weeks')
+            .diff(constants.season.regular_season_start, 'weeks')
         }
       }
 

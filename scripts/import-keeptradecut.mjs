@@ -87,7 +87,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
           name: keeptradecut_player.playerName,
           pos: keeptradecut_player.position,
           team: keeptradecut_player.team,
-          start: keeptradecut_player.draftYear
+          nfl_draft_year: keeptradecut_player.draftYear
         })
 
         if (player_row) {

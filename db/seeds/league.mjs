@@ -12,7 +12,7 @@ export default async function (knex, league_params = {}) {
     commishid: userId,
     draft_start: Math.round(Date.now() / 1000),
     free_agency_live_auction_start: null,
-    tddate: constants.season.start.add('12', 'weeks').unix(),
+    tddate: constants.season.regular_season_start.add('12', 'weeks').unix(),
     ext_date: constants.season.now.subtract('1', 'week').unix(),
     ...league_params
   })

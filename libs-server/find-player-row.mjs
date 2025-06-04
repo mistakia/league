@@ -60,7 +60,7 @@ const find_player_row = async ({
   esbid,
   gsisid,
   pname,
-  start,
+  nfl_draft_year,
   gsis_it_id,
   draftkings_id,
   fanduel_id,
@@ -176,8 +176,8 @@ const find_player_row = async ({
       })
     }
 
-    if (start) {
-      query.where({ start })
+    if (nfl_draft_year) {
+      query.where({ nfl_draft_year })
     }
   }
 

@@ -55,7 +55,7 @@ export default function PlayerRowNameColumn({
         onClick={handle_click}
       >
         <span>{name}</span>
-        {constants.year === player_map.get('start') && (
+        {constants.year === player_map.get('nfl_draft_year') && (
           <PlayerLabel label='R' type='rookie' description='Rookie' />
         )}
         <NFLTeam team={nfl_team} />

@@ -8,7 +8,7 @@ import league from '#db/seeds/league.mjs'
 import { constants } from '#libs-shared'
 
 process.env.NODE_ENV = 'test'
-const { start } = constants.season
+const { regular_season_start } = constants.season
 // chai.use(chai_http)
 
 describe('API /poaches - update', function () {
@@ -20,7 +20,7 @@ describe('API /poaches - update', function () {
   describe('errors', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('2', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('2', 'month').toISOString())
       await league(knex)
     })
 

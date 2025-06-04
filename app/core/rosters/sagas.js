@@ -474,7 +474,7 @@ export function* exportRosters() {
         last_transaction_timestamp: rosterPlayer.timestamp,
         last_transaction_type: constants.transactionsDetail[rosterPlayer.type],
         slot: constants.slotName[rosterPlayer.slot],
-        draft_year: playerMap.get('start'),
+        draft_year: playerMap.get('nfl_draft_year'),
         player_team: playerMap.get('team')
       })
     }

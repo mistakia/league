@@ -107,7 +107,7 @@ export default async function ({
       'player.fname',
       'player.lname',
       'player.pname',
-      'player.start',
+      'player.nfl_draft_year',
       'player.col',
       'player.dv',
       'player.pos',
@@ -152,7 +152,7 @@ export default async function ({
     // include rookies during offseason
     if (constants.season.week === 0) {
       query.orWhere(function () {
-        this.where('player.start', constants.season.year).whereIn(
+        this.where('player.nfl_draft_year', constants.season.year).whereIn(
           'player.pos',
           constants.positions
         )

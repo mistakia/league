@@ -146,7 +146,7 @@ class PlayerNameExpanded extends Player {
             <div className='player__name-expanded-full-name'>
               {playerName || '-'}
             </div>
-            {constants.year === playerMap.get('start') && (
+            {constants.year === playerMap.get('nfl_draft_year') && (
               <PlayerLabel label='R' type='rookie' description='Rookie' />
             )}
             {(slot === constants.slots.PSP ||
