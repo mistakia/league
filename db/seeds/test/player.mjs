@@ -26,7 +26,7 @@ export async function seed(knex, Promise) {
       pos,
       pos1: pos,
       current_nfl_team: constants.nflTeams[i % constants.nflTeams.length],
-      start: constants.season.year
+      nfl_draft_year: constants.season.year
     })
   }
   await knex('player').insert(rookies)
@@ -45,7 +45,7 @@ export async function seed(knex, Promise) {
       pos,
       pos1: pos,
       current_nfl_team: constants.nflTeams[i % constants.nflTeams.length],
-      start: constants.season.year - 1
+      nfl_draft_year: constants.season.year - 1
     })
   }
   await knex('player').insert(sophmores)

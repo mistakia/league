@@ -12,7 +12,7 @@ export default class PlayerNameText extends React.Component {
       <div className='player__name'>
         <div className='player__name-main'>
           <span>{playerMap.get('pname')}</span>
-          {constants.year === playerMap.get('start') && (
+          {constants.year === playerMap.get('nfl_draft_year') && (
             <PlayerLabel label='R' type='rookie' description='Rookie' />
           )}
         </div>

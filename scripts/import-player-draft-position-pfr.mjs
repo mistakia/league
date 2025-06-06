@@ -50,7 +50,7 @@ const import_player_draft_position_pfr = async ({
         const params = {
           name: draft_player.player_name,
           team: draft_player.team,
-          start: year
+          nfl_draft_year: year
         }
         player_row = await find_player_row(params)
       } catch (err) {

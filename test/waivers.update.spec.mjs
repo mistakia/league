@@ -22,7 +22,7 @@ process.env.NODE_ENV = 'test'
 chai.should()
 chai.use(chai_http)
 const expect = chai.expect
-const { start } = constants.season
+const { regular_season_start } = constants.season
 
 describe('API /waivers - update', function () {
   before(async function () {
@@ -33,12 +33,12 @@ describe('API /waivers - update', function () {
   describe('put', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('1', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
       await league(knex)
     })
 
     it('change order for single waiver', async () => {
-      MockDate.set(start.add('1', 'week').toISOString())
+      MockDate.set(regular_season_start.add('1', 'week').toISOString())
 
       const players = await knex('player')
         .whereNot('current_nfl_team', 'INA')
@@ -81,7 +81,7 @@ describe('API /waivers - update', function () {
     })
 
     it('change order for two waivers', async () => {
-      MockDate.set(start.add('1', 'week').toISOString())
+      MockDate.set(regular_season_start.add('1', 'week').toISOString())
 
       const players = await knex('player')
         .whereNot('current_nfl_team', 'INA')
@@ -140,7 +140,7 @@ describe('API /waivers - update', function () {
     })
 
     it('change order for three waivers', async () => {
-      MockDate.set(start.add('1', 'week').toISOString())
+      MockDate.set(regular_season_start.add('1', 'week').toISOString())
 
       const players = await knex('player')
         .whereNot('current_nfl_team', 'INA')
@@ -215,7 +215,7 @@ describe('API /waivers - update', function () {
     })
 
     it('update bid', async () => {
-      MockDate.set(start.add('1', 'week').toISOString())
+      MockDate.set(regular_season_start.add('1', 'week').toISOString())
 
       const players = await knex('player')
         .whereNot('current_nfl_team', 'INA')
@@ -263,7 +263,7 @@ describe('API /waivers - update', function () {
     })
 
     it('update release', async () => {
-      MockDate.set(start.add('1', 'week').toISOString())
+      MockDate.set(regular_season_start.add('1', 'week').toISOString())
 
       const players = await knex('player')
         .whereNot('current_nfl_team', 'INA')
@@ -319,10 +319,10 @@ describe('API /waivers - update', function () {
     let waiverId
     before(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('1', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
       await league(knex)
 
-      MockDate.set(start.add('1', 'week').toISOString())
+      MockDate.set(regular_season_start.add('1', 'week').toISOString())
 
       const players = await knex('player')
         .whereNot('current_nfl_team', 'INA')
@@ -518,7 +518,7 @@ describe('API /waivers - update', function () {
     })
 
     it('release player not on team', async () => {
-      MockDate.set(start.add('1', 'week').toISOString())
+      MockDate.set(regular_season_start.add('1', 'week').toISOString())
 
       const players = await knex('player')
         .whereNot('current_nfl_team', 'INA')

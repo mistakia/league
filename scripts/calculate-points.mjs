@@ -44,7 +44,7 @@ const calculate_points = async ({
       'player_gamelogs.*',
       'player.pname',
       'player.pos',
-      'player.start',
+      'player.nfl_draft_year',
       'player_gamelogs.pid',
       'nfl_games.week'
     )
@@ -85,8 +85,8 @@ const calculate_points = async ({
       item.points[game.week] = points
     }
 
-    const { pname, pos, start } = games[0]
-    players.push({ pid, pname, pos, start, ...item })
+    const { pname, pos, nfl_draft_year } = games[0]
+    players.push({ pid, pname, pos, nfl_draft_year, ...item })
   }
 
   const points_by_position = {}
@@ -112,7 +112,7 @@ const calculate_points = async ({
   for (const player of players) {
     output[player.pid] = {
       player: player.pname,
-      rookie: player.start === year,
+      rookie: player.nfl_draft_year === year,
       pos_rnk: points_by_position[player.pos].indexOf(player.total_points) + 1,
       pos: player.pos,
       points: player.total_points,

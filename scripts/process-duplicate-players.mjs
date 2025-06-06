@@ -212,13 +212,13 @@ const processDuplicatePlayers = async ({ formatted = null } = {}) => {
   const query = db('player')
     .select(
       'player.dob',
-      'player.start',
+      'player.nfl_draft_year',
       'player.formatted',
-      db.raw("CONCAT(dob, '_', start) as group_id")
+      db.raw("CONCAT(dob, '_', nfl_draft_year) as group_id")
     )
     .whereNot('dob', '0000-00-00')
-    .whereNot('start', '0000')
-    .groupBy('player.dob', 'player.start', 'player.formatted')
+    .whereNot('nfl_draft_year', '0000')
+    .groupBy('player.dob', 'player.nfl_draft_year', 'player.formatted')
     .having(db.raw('COUNT(*) > 1'))
     .orderBy(db.raw('COUNT(*)'), 'desc')
     .select(db.raw('COUNT(*) as count'))
@@ -229,14 +229,14 @@ const processDuplicatePlayers = async ({ formatted = null } = {}) => {
 
   const duplicates = await query
 
-  log(`${duplicates.length} players matched on dob and start year`)
+  log(`${duplicates.length} players matched on dob and nfl_draft_year`)
 
   let deleted_count = 0
   let ignore_count = 0
 
   for (const duplicate_player_row of duplicates) {
-    const { dob, start } = duplicate_player_row
-    const player_rows = await db('player').where({ dob, start })
+    const { dob, nfl_draft_year } = duplicate_player_row
+    const player_rows = await db('player').where({ dob, nfl_draft_year })
 
     // iterate over player_rows finding any two rows that can be merged
     for (let i = 0; i < player_rows.length; i += 1) {
@@ -286,7 +286,7 @@ const processDuplicatePlayers = async ({ formatted = null } = {}) => {
       .slice(0, 10)
       .map(
         (player_row) =>
-          `select * from player where formatted = '${player_row.formatted}' and dob = '${player_row.dob}' and start = ${player_row.start};`
+          `select * from player where formatted = '${player_row.formatted}' and dob = '${player_row.dob}' and nfl_draft_year = ${player_row.nfl_draft_year};`
       )
   )
 }

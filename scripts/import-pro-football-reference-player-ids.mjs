@@ -53,7 +53,7 @@ const import_pro_football_reference_player_ids = async ({
           (pfr_player.positions.includes(p.pos) ||
             pfr_player.positions.includes(p.pos1) ||
             pfr_player.positions.includes(p.pos2)) &&
-          pfr_player.start === p.start
+          pfr_player.start === p.nfl_draft_year
       )
 
       if (matched_players.length === 1) {

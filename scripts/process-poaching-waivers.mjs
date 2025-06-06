@@ -26,8 +26,8 @@ const run = async ({ daily = false } = {}) => {
 
   // Check if it's the first 24 hours of the regular season
   const is_first_24_hours_of_regular_season = constants.season.now.isBetween(
-    constants.season.start.add(7, 'days'),
-    constants.season.start.add(8, 'days')
+    constants.season.regular_season_start.add(7, 'days'),
+    constants.season.regular_season_start.add(8, 'days')
   )
 
   if (is_first_24_hours_of_regular_season) {

@@ -31,7 +31,7 @@ const format_player_ids = async () => {
     } catch (err) {
       log(err)
       log(
-        `failed to generate pid for ${player.fname} ${player.lname} ${player.start} ${player.dob}`
+        `failed to generate pid for ${player.fname} ${player.lname} ${player.nfl_draft_year} ${player.dob}`
       )
       error_count += 1
       continue
@@ -42,7 +42,7 @@ const format_player_ids = async () => {
       const player_rows = await db('player').where({ pid })
       if (player_rows.length) {
         log(
-          `generated pid ${pid} for ${player.pid} ${player.fname} ${player.lname} ${player.start} ${player.dob} already exists`
+          `generated pid ${pid} for ${player.pid} ${player.fname} ${player.lname} ${player.nfl_draft_year} ${player.dob} already exists`
         )
         collision_count += 1
         continue

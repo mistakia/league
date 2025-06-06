@@ -98,7 +98,7 @@ class PlayerRow extends Player {
           </div>
           <div className='player__row-name cursor' onClick={this.handleClick}>
             <span>{name}</span>
-            {constants.year === playerMap.get('start') && (
+            {constants.year === playerMap.get('nfl_draft_year') && (
               <PlayerLabel label='R' type='rookie' description='Rookie' />
             )}
             <NFLTeam team={nfl_team} />

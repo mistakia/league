@@ -22,7 +22,7 @@ process.env.NODE_ENV = 'test'
 chai.should()
 chai.use(chai_http)
 const expect = chai.expect
-const { start } = constants.season
+const { regular_season_start } = constants.season
 
 describe('API /teams - lineups', function () {
   before(async function () {
@@ -202,7 +202,7 @@ describe('API /teams - lineups', function () {
     })
 
     it('player not eligible for slot', async () => {
-      MockDate.set(start.add('1', 'month').toISOString())
+      MockDate.set(regular_season_start.add('1', 'month').toISOString())
       const player = await selectPlayer({ pos: 'WR' })
       await addPlayer({
         leagueId: 1,
@@ -228,7 +228,7 @@ describe('API /teams - lineups', function () {
     })
 
     it('player not on active roster', async () => {
-      MockDate.set(start.add('1', 'month').toISOString())
+      MockDate.set(regular_season_start.add('1', 'month').toISOString())
       const player = await selectPlayer({ pos: 'WR', rookie: true })
       await addPlayer({
         leagueId: 1,
@@ -274,7 +274,7 @@ describe('API /teams - lineups', function () {
     })
 
     it('previous lineup', async () => {
-      MockDate.set(start.add('1', 'week').toISOString())
+      MockDate.set(regular_season_start.add('1', 'week').toISOString())
       const player = await selectPlayer({ pos: 'WR' })
       await addPlayer({
         leagueId: 1,
@@ -283,7 +283,7 @@ describe('API /teams - lineups', function () {
         userId: 1
       })
 
-      MockDate.set(start.add('2', 'week').toISOString())
+      MockDate.set(regular_season_start.add('2', 'week').toISOString())
       await addPlayer({
         leagueId: 1,
         teamId: 1,
@@ -314,7 +314,7 @@ describe('API /teams - lineups', function () {
     })
 
     it('player started Regular Season on reserve', async () => {
-      MockDate.set(start.subtract('1', 'week').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'week').toISOString())
       const player = await selectPlayer({ pos: 'WR' })
       await addPlayer({
         leagueId: 1,
@@ -331,10 +331,10 @@ describe('API /teams - lineups', function () {
           lid: 1
         })
         .update({
-          free_agency_period_start: start.subtract('6', 'days').unix()
+          free_agency_period_start: regular_season_start.subtract('6', 'days').unix()
         })
 
-      MockDate.set(start.add('6', 'week').toISOString())
+      MockDate.set(regular_season_start.add('6', 'week').toISOString())
       await addPlayer({
         leagueId: 1,
         teamId: 1,

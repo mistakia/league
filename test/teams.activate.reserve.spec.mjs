@@ -21,13 +21,13 @@ process.env.NODE_ENV = 'test'
 chai.should()
 chai.use(chai_http)
 const expect = chai.expect
-const { start } = constants.season
+const { regular_season_start } = constants.season
 
 describe('API /teams - activate', function () {
   before(async function () {
     this.timeout(60 * 1000)
 
-    MockDate.set(start.subtract('1', 'week').toISOString())
+    MockDate.set(regular_season_start.subtract('1', 'week').toISOString())
 
     await knex.seed.run()
   })
@@ -38,7 +38,7 @@ describe('API /teams - activate', function () {
     })
 
     it('activate and reserve player', async () => {
-      MockDate.set(start.subtract('1', 'week').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'week').toISOString())
       const teamId = 1
       const leagueId = 1
       const userId = 1
@@ -137,7 +137,7 @@ describe('API /teams - activate', function () {
     })
 
     it('invalid reserve player - does not exist', async () => {
-      MockDate.set(start.subtract('1', 'week').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'week').toISOString())
       const player1 = await selectPlayer()
       const teamId = 1
       const leagueId = 1
@@ -168,7 +168,7 @@ describe('API /teams - activate', function () {
     })
 
     it('reserve player not on team', async () => {
-      MockDate.set(start.subtract('1', 'week').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'week').toISOString())
       const player1 = await selectPlayer()
       const player2 = await selectPlayer()
       const teamId = 1
@@ -200,7 +200,7 @@ describe('API /teams - activate', function () {
     })
 
     it('reserve player already on reserve', async () => {
-      MockDate.set(start.subtract('1', 'week').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'week').toISOString())
       const teamId = 1
       const leagueId = 1
 
@@ -233,7 +233,7 @@ describe('API /teams - activate', function () {
     })
 
     it('exceeds roster limits', async () => {
-      MockDate.set(start.subtract('1', 'week').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'week').toISOString())
       const teamId = 1
       const leagueId = 1
       const userId = 1
@@ -283,7 +283,7 @@ describe('API /teams - activate', function () {
     })
 
     it('activate player is on active roster', async () => {
-      MockDate.set(start.subtract('1', 'week').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'week').toISOString())
       const player1 = await selectPlayer()
       const player2 = await selectPlayer({ exclude_pids: [player1.pid] })
       const teamId = 1
