@@ -36,3 +36,6 @@ current
 source
 .deploys
 tmp
+
+# Debug test files
+test/libs-server.get-players-table-view-results-debug.mjs
