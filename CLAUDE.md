@@ -48,11 +48,18 @@ This is **xo.football**, an open-source fantasy football league management platf
 
 ### Database
 **PostgreSQL with comprehensive schema:**
-- Single migration file: `db/migrations/20200523184922_create.mjs`
 - 80+ tables for fantasy football operations (leagues, rosters, trades, waivers)
 - NFL data (games, plays, player stats) with partitioned tables
 - Betting market integration (props, odds from 10+ sportsbooks)
 - Schema managed via SQL dumps, not incremental migrations
+
+**Schema Change Workflow:**
+
+Preferred approach for database schema changes:
+1. Run SQL ALTER commands directly on the production database
+2. Export the updated schema using `yarn export:schema`
+3. Do NOT commit migration files or SQL commands to the repository
+4. The exported schema file (`db/schema.sql`) becomes the source of truth
 
 ## Key Development Patterns
 
