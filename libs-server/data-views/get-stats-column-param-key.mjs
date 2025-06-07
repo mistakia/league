@@ -9,9 +9,13 @@ export default function get_stats_column_param_key({
   const key = all_keys
     .map((key) => {
       const value = params[key]
-      return Array.isArray(value)
-        ? `${key}${value.sort().join('')}`
-        : `${key}${value || ''}`
+      if (Array.isArray(value)) {
+        return `${key}${value.sort().join('')}`
+      } else if (value !== undefined && value !== null) {
+        return `${key}${value}`
+      } else {
+        return `${key}`
+      }
     })
     .join('')
 
