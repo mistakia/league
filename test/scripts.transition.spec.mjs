@@ -55,7 +55,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
           year: constants.season.year,
           tran_start: tran_date,
           tran_end: start.subtract('1', 'month').unix(),
-          ext_date: ext_date,
+          ext_date,
           restricted_free_agency_announcement_hour: 10, // 10 AM
           restricted_free_agency_processing_hour: 12 // 12 PM (noon)
         })
@@ -65,7 +65,11 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
 
       // Set the mock date to be during the RFA period, specifically at noon
       // This will be in July (2 months before season start)
-      const mock_date = start.subtract('2', 'month').hour(12).minute(0).second(0)
+      const mock_date = start
+        .subtract('2', 'month')
+        .hour(12)
+        .minute(0)
+        .second(0)
       MockDate.set(mock_date.toDate())
     })
 
@@ -181,7 +185,12 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
         value: 160
       })
 
-      await fillRoster({ leagueId, teamId: team_id, excludeIR: true, exclude_pids })
+      await fillRoster({
+        leagueId,
+        teamId: team_id,
+        excludeIR: true,
+        exclude_pids
+      })
 
       // Get the current mocked timestamp
       const current_time = Math.round(Date.now() / 1000)
@@ -283,7 +292,11 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
       const tran_date = start.subtract('3', 'month').unix()
 
       // Set the mock date to be during the RFA period, specifically at noon
-      const mock_date = start.subtract('2', 'month').hour(12).minute(0).second(0)
+      const mock_date = start
+        .subtract('2', 'month')
+        .hour(12)
+        .minute(0)
+        .second(0)
       MockDate.set(mock_date.toDate())
 
       await league(knex)
