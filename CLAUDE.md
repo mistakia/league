@@ -18,8 +18,8 @@ This is **xo.football**, an open-source fantasy football league management platf
 
 - `yarn lint` - Run ESLint
 - `yarn prettier` - Format code with Prettier
-- `yarn test` - Run all tests with Mocha
-- `yarn test test/filename.spec.mjs` - Run specific test file
+- `yarn test --reporter min` - Run all tests with Mocha
+- `yarn test --reporter min test/filename.spec.mjs` - Run specific test file
 
 **Build & Deploy:**
 
@@ -28,9 +28,9 @@ This is **xo.football**, an open-source fantasy football league management platf
 
 **Testing:**
 
-- Individual tests: `yarn test test/auth.spec.mjs`
-- Test patterns: `yarn test test/common.*.spec.mjs`
-- Grep patterns: `yarn test --grep "should login successfully"`
+- Individual tests: `yarn test --reporter min test/auth.spec.mjs`
+- Test patterns: `yarn test --reporter min test/common.*.spec.mjs`
+- Grep patterns: `yarn test --reporter min --grep "should login successfully"`
 
 ## Architecture Overview
 
