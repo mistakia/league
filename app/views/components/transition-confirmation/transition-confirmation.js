@@ -122,7 +122,7 @@ export default class TransitionConfirmation extends React.Component {
       const bid_exceeds_max = parseInt(value, 10) > max_bid
       this.setState({
         error: false,
-        bid_exceeds_max: bid_exceeds_max
+        bid_exceeds_max
       })
     }
 
@@ -137,7 +137,7 @@ export default class TransitionConfirmation extends React.Component {
       if (current_bid > 0) {
         const max_bid = this.get_max_bid()
         const bid_exceeds_max = current_bid > max_bid
-        this.setState({ bid_exceeds_max: bid_exceeds_max })
+        this.setState({ bid_exceeds_max })
       }
     })
   }
