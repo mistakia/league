@@ -105,7 +105,7 @@ describe('API /auth', function () {
       const new_user = await knex('users')
         .where({ email: 'newuser@email.com' })
         .first()
-      // eslint-disable-next-line
+
       new_user.should.exist
       new_user.username.should.equal('newuser')
       new_user.invite_code.should.equal(invite_code)
@@ -114,11 +114,11 @@ describe('API /auth', function () {
       const updated_invite = await knex('invite_codes')
         .where({ code: invite_code })
         .first()
-      // eslint-disable-next-line
+
       updated_invite.should.exist
       updated_invite.uses_count.should.equal(1)
       updated_invite.used_by.should.equal(new_user.id)
-      // eslint-disable-next-line
+
       updated_invite.used_at.should.not.be.null
 
       // Clean up: remove the created user and invite code

@@ -62,7 +62,7 @@ describe('API /leagues/rosters - update', function () {
         })
 
       res.should.have.status(200)
-      // eslint-disable-next-line
+
       res.should.be.json
 
       res.body.value.should.equal(value)

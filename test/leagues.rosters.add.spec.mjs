@@ -46,7 +46,7 @@ describe('API /leagues/rosters - add', function () {
         })
 
       res.should.have.status(200)
-      // eslint-disable-next-line
+
       res.should.be.json
 
       res.body.pid.should.equal(player.pid)

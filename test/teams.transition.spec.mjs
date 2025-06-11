@@ -78,7 +78,7 @@ describe('API /teams - restricted free agency', function () {
         })
 
       res.should.have.status(200)
-      // eslint-disable-next-line
+
       res.should.be.json
 
       res.body.tid.should.equal(teamId)
@@ -169,7 +169,7 @@ describe('API /teams - restricted free agency', function () {
         })
 
       res2.should.have.status(200)
-      // eslint-disable-next-line
+
       res2.should.be.json
 
       res2.body.tid.should.equal(1)
@@ -248,7 +248,7 @@ describe('API /teams - restricted free agency', function () {
         })
 
       res2.should.have.status(200)
-      // eslint-disable-next-line
+
       res2.should.be.json
 
       res2.body.tid.should.equal(teamId)

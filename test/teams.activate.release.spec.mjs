@@ -66,7 +66,7 @@ describe('API /teams - activate', function () {
         })
 
       res.should.have.status(200)
-      // eslint-disable-next-line
+
       res.should.be.json
 
       res.body.tid.should.equal(teamId)

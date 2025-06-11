@@ -73,7 +73,7 @@ describe('API /waivers - update', function () {
         })
 
       res.should.have.status(200)
-      // eslint-disable-next-line
+
       res.should.be.json
 
       res.body.should.be.an('array')
@@ -131,7 +131,7 @@ describe('API /waivers - update', function () {
         })
 
       res.should.have.status(200)
-      // eslint-disable-next-line
+
       res.should.be.json
 
       res.body.should.be.an('array')
@@ -205,7 +205,7 @@ describe('API /waivers - update', function () {
         })
 
       res.should.have.status(200)
-      // eslint-disable-next-line
+
       res.should.be.json
 
       res.body.should.be.an('array')
@@ -251,7 +251,7 @@ describe('API /waivers - update', function () {
         })
 
       res.should.have.status(200)
-      // eslint-disable-next-line
+
       res.should.be.json
       res.body.bid.should.equal(bid)
 
@@ -303,7 +303,7 @@ describe('API /waivers - update', function () {
         })
 
       res.should.have.status(200)
-      // eslint-disable-next-line
+
       res.should.be.json
       res.body.release.should.deep.equal([releasePlayer.pid])
 

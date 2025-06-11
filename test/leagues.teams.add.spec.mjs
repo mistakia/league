@@ -40,7 +40,7 @@ describe('API /leagues/teams - add', function () {
         })
 
       res.should.have.status(200)
-      // eslint-disable-next-line
+
       res.should.be.json
 
       res.body.roster.tid.should.equal(1)

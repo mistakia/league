@@ -60,7 +60,7 @@ describe('API /teams - lineups', function () {
         })
 
       res.should.have.status(200)
-      // eslint-disable-next-line
+
       res.should.be.json
 
       expect(res.body.length).to.equal(1)

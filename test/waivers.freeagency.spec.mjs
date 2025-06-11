@@ -58,7 +58,7 @@ describe('API /waivers - free agency', function () {
         })
 
       res.should.have.status(200)
-      // eslint-disable-next-line
+
       res.should.be.json
 
       res.body.tid.should.equal(teamId)
@@ -69,7 +69,7 @@ describe('API /waivers - free agency', function () {
       res.body.submitted.should.equal(Math.round(Date.now() / 1000))
       res.body.bid.should.equal(0)
       res.body.type.should.equal(constants.waivers.FREE_AGENCY)
-      // eslint-disable-next-line
+
       res.body.uid.should.exist
     })
 
@@ -111,7 +111,7 @@ describe('API /waivers - free agency', function () {
         })
 
       res.should.have.status(200)
-      // eslint-disable-next-line
+
       res.should.be.json
 
       res.body.tid.should.equal(teamId)
@@ -122,7 +122,7 @@ describe('API /waivers - free agency', function () {
       res.body.submitted.should.equal(Math.round(Date.now() / 1000))
       res.body.bid.should.equal(0)
       res.body.type.should.equal(constants.waivers.FREE_AGENCY_PRACTICE)
-      // eslint-disable-next-line
+
       res.body.uid.should.exist
     })
 

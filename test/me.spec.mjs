@@ -27,7 +27,7 @@ describe('API /me', function () {
         .get('/api/me')
         .set('Authorization', `Bearer ${user1}`)
       res.should.have.status(200)
-      // eslint-disable-next-line
+
       res.should.be.json
       res.body.user.id.should.equal(1)
       res.body.user.email.should.equal('user1@email.com')
@@ -49,7 +49,7 @@ describe('API /me', function () {
         .send({ type: 'username', value: new_username })
 
       res.should.have.status(200)
-      // eslint-disable-next-line
+
       res.should.be.json
       res.body.value.should.equal(new_username)
 

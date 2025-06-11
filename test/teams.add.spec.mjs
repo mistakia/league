@@ -56,13 +56,13 @@ describe('API /teams - add', function () {
         })
 
       res.should.have.status(200)
-      // eslint-disable-next-line
+
       res.should.be.json
 
       res.body.length.should.equal(1)
       res.body[0].pid.should.equal(player.pid)
       res.body[0].slot.should.equal(constants.slots.BENCH)
-      // eslint-disable-next-line
+
       res.body[0].rid.should.exist
       res.body[0].pos.should.equal(player.pos1)
       res.body[0].transaction.userid.should.equal(userId)
@@ -124,13 +124,13 @@ describe('API /teams - add', function () {
         })
 
       res.should.have.status(200)
-      // eslint-disable-next-line
+
       res.should.be.json
 
       res.body.length.should.equal(1)
       res.body[0].pid.should.equal(player.pid)
       res.body[0].slot.should.equal(constants.slots.PS)
-      // eslint-disable-next-line
+
       res.body[0].rid.should.exist
       res.body[0].pos.should.equal(player.pos1)
       res.body[0].transaction.userid.should.equal(userId)

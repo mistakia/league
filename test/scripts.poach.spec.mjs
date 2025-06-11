@@ -293,7 +293,6 @@ describe('SCRIPTS /waivers - poach', function () {
         error = err
       }
 
-      // eslint-disable-next-line
       expect(error).to.exist
       expect(error).to.be.instanceof(Errors.EmptyPoachingClaims)
       expect(error.message).to.equal('no poaching claims to process')

@@ -76,5 +76,12 @@ export default [
     rules: {
       'react/prop-types': 'off'
     }
+  },
+  {
+    files: ['test/**/*.mjs', 'test/**/*.js'],
+
+    rules: {
+      'no-unused-expressions': 'off'
+    }
   }
 ]
