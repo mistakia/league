@@ -1,9 +1,7 @@
 import db from '#db'
+import { create_static_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 
-const player_table_get_cache_info = () => ({
-  cache_ttl: 1000 * 60 * 60 * 24 * 7, // 1 week
-  cache_expire_at: null
-})
+const player_table_get_cache_info = create_static_cache_info()
 
 export default {
   player_name: {

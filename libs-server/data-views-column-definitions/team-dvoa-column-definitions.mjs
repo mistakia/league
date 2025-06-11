@@ -2,6 +2,7 @@ import db from '#db'
 import { constants } from '#libs-shared'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
+import { create_season_aggregate_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 
 const get_default_params = ({ params = {} } = {}) => {
   let year = params.year || [constants.season.stats_season_year]
@@ -39,25 +40,12 @@ const get_default_params = ({ params = {} } = {}) => {
   return { year, team_unit, matchup_opponent_type, dvoa_type }
 }
 
-const get_cache_info = ({ params = {} } = {}) => {
-  const { year } = get_default_params({ params })
-
-  // TODO factor in week
-
-  if (year.includes(constants.season.year)) {
-    return {
-      cache_ttl: 1000 * 60 * 60 * 6, // 6 hours
-      // TODO should expire before the next game starts
-      cache_expire_at: null
-    }
-  } else {
-    // includes only prior years
-    return {
-      cache_ttl: 1000 * 60 * 60 * 24 * 30, // 30 days
-      cache_expire_at: null
-    }
+const get_cache_info = create_season_aggregate_cache_info({
+  get_params: ({ params = {} } = {}) => {
+    const { year } = get_default_params({ params })
+    return { year, week: [] }
   }
-}
+})
 
 const dvoa_team_unit_seasonlogs_table_alias = ({ params = {} } = {}) => {
   const { year, matchup_opponent_type, team_unit } = get_default_params({

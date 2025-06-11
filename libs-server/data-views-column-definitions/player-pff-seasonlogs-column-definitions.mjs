@@ -1,8 +1,18 @@
 import { constants } from '#libs-shared'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
+import { create_season_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 
 // TODO career_year
+
+const get_cache_info = create_season_cache_info({
+  get_params: ({ params = {} } = {}) => {
+    const year = Array.isArray(params.year)
+      ? params.year[0]
+      : params.year || constants.season.stats_season_year
+    return { year: [year] }
+  }
+})
 
 const pff_player_seasonlogs_table_alias = ({ params = {} }) => {
   let year = params.year || [constants.season.stats_season_year]
@@ -32,7 +42,8 @@ const create_field_from_pff_player_seasonlogs = (column_name) => ({
   table_name: 'pff_player_seasonlogs',
   table_alias: pff_player_seasonlogs_table_alias,
   join: pff_player_seasonlogs_join,
-  supported_splits: ['year']
+  supported_splits: ['year'],
+  get_cache_info
 })
 
 export default {

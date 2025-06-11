@@ -1,9 +1,17 @@
 import db from '#db'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
+import { create_season_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import { constants } from '#libs-shared'
 
 // TODO career_year
+
+const get_cache_info = create_season_cache_info({
+  get_params: ({ params = {} } = {}) => {
+    const { year } = get_default_params({ params })
+    return { year }
+  }
+})
 
 const get_default_params = ({ params = {} } = {}) => {
   const default_params = {
@@ -71,7 +79,8 @@ const create_player_rankings_field = (field, select_as) => ({
   join: data_view_join_function,
   with: add_player_rankings_with_statement,
   supported_splits: ['year', 'week'],
-  with_where: () => `player_rankings_index.${field}`
+  with_where: () => `player_rankings_index.${field}`,
+  get_cache_info
 })
 
 export default {

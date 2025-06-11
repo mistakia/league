@@ -1,5 +1,6 @@
 import { constants } from '#libs-shared'
 import { getLeague } from '#libs-server'
+import { create_static_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 
 import db from '#db'
 import player_projected_column_definitions from './player-projected-column-definitions.mjs'
@@ -93,9 +94,8 @@ export default {
         this.andOn('rosters_players.lid', '=', lid)
       })
     },
-    get_cache_info: () => ({
-      cache_ttl: 1000 * 60 * 60 * 12, // 12 hours
-      cache_expire_at: null
+    get_cache_info: create_static_cache_info({
+      ttl: 1000 * 60 * 60 * 12 // 12 hours
     })
   },
   player_league_salary: {
@@ -125,10 +125,8 @@ export default {
         )
       })
     },
-    get_cache_info: () => ({
-      cache_ttl: 1000 * 60 * 60 * 12, // 12 hours
-      // TODO set it to start of next offseason during the regular season and 12 hours during the offseason
-      cache_expire_at: null
+    get_cache_info: create_static_cache_info({
+      ttl: 1000 * 60 * 60 * 12 // 12 hours
     })
   },
 

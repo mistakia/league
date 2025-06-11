@@ -1,6 +1,7 @@
 import db from '#db'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
+import { create_season_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import { constants } from '#libs-shared'
 
 const get_params = ({ params = {} }) => {
@@ -37,6 +38,8 @@ const get_params = ({ params = {} }) => {
     platform_source_id
   }
 }
+
+const get_cache_info = create_season_cache_info({ get_params })
 
 const generate_table_alias = ({ params = {} } = {}) => {
   const { year, week, career_year, career_game, platform_source_id } =
@@ -111,7 +114,8 @@ const create_player_dfs_salaries_field = (field) => ({
   join: data_view_join_function,
   with: add_player_dfs_salaries_with_statement,
   supported_splits: ['year', 'week'],
-  with_where: () => 'player_salaries.salary'
+  with_where: () => 'player_salaries.salary',
+  get_cache_info
 })
 
 export default {
