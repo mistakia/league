@@ -1,4 +1,5 @@
 import { constants } from '#libs-shared'
+import { CACHE_TTL } from '#libs-server/data-views/cache-info-utils.mjs'
 
 import db from '#db'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
@@ -34,20 +35,15 @@ const get_default_params = ({ params = {} }) => {
 
 const get_cache_info_for_player_projected_stats = ({ params = {} } = {}) => {
   const { year, seas_type } = get_default_params({ params })
-  if (
+  const is_current_year_and_season =
     year === constants.season.year &&
     seas_type === constants.season.nfl_seas_type
-  ) {
-    return {
-      cache_ttl: 1000 * 60 * 60 * 6, // 6 hours
-      // TODO should expire before the next game starts
-      cache_expire_at: null
-    }
-  } else {
-    return {
-      cache_ttl: 1000 * 60 * 60 * 24 * 30, // 30 days
-      cache_expire_at: null
-    }
+
+  return {
+    cache_ttl: is_current_year_and_season
+      ? CACHE_TTL.SIX_HOURS
+      : CACHE_TTL.THIRTY_DAYS,
+    cache_expire_at: null
   }
 }
 

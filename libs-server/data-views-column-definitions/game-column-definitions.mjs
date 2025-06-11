@@ -1,6 +1,7 @@
 import db from '#db'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
+import { create_season_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import { constants } from '#libs-shared'
 
 const get_params = ({ params = {} }) => {
@@ -24,6 +25,8 @@ const get_params = ({ params = {} }) => {
     seas_type
   }
 }
+
+const get_cache_info = create_season_cache_info({ get_params })
 
 const generate_table_alias = ({ params = {} } = {}) => {
   const { year, week, seas_type } = get_params({ params })
@@ -102,6 +105,7 @@ export default {
     table_alias: generate_table_alias,
     join: (args) => data_view_join_function({ ...args, join_on_team: true }),
     with: add_game_with_statement,
-    supported_splits: ['year', 'week']
+    supported_splits: ['year', 'week'],
+    get_cache_info
   }
 }

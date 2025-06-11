@@ -2,6 +2,7 @@ import { constants, bookmaker_constants } from '#libs-shared'
 import db from '#db'
 import get_join_func from '#libs-server/get-join-func.mjs'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
+import { create_betting_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 
 const get_default_params = ({
   params,
@@ -478,25 +479,15 @@ const create_player_betting_market_field = ({
     betting_markets_table_alias({ ...args, is_player_game_prop }),
   join: player_betting_market_join,
   with: (args) => player_betting_market_with({ ...args, is_player_game_prop }),
-  get_cache_info: ({ params } = {}) => {
-    const { year } = get_default_params({
-      params,
-      is_player_game_prop
-    })
-
-    if (year === constants.season.year) {
-      return {
-        cache_ttl: 1000 * 60 * 60, // 1 hour
-        // TODO should expire before the next game starts
-        cache_expire_at: null
-      }
-    } else {
-      return {
-        cache_ttl: 1000 * 60 * 60 * 24 * 30, // 30 days
-        cache_expire_at: null
-      }
+  get_cache_info: create_betting_cache_info({
+    get_params: ({ params = {} } = {}) => {
+      const { year, week } = get_default_params({
+        params,
+        is_player_game_prop
+      })
+      return { year: [year], week: week ? [week] : [] }
     }
-  }
+  })
 })
 
 const create_team_betting_market_field = ({ column_name, column_alias }) => ({
@@ -512,26 +503,16 @@ const create_team_betting_market_field = ({ column_name, column_alias }) => ({
     }),
   join: team_betting_market_join,
   with: team_betting_market_with,
-  get_cache_info: ({ params } = {}) => {
-    const { year } = get_default_params({
-      params,
-      is_team_game_prop: true,
-      is_game_prop: true
-    })
-
-    if (year === constants.season.year) {
-      return {
-        cache_ttl: 1000 * 60 * 60, // 1 hour
-        // TODO should expire before the next game starts
-        cache_expire_at: null
-      }
-    } else {
-      return {
-        cache_ttl: 1000 * 60 * 60 * 24 * 30, // 30 days
-        cache_expire_at: null
-      }
+  get_cache_info: create_betting_cache_info({
+    get_params: ({ params = {} } = {}) => {
+      const { year, week } = get_default_params({
+        params,
+        is_team_game_prop: true,
+        is_game_prop: true
+      })
+      return { year: [year], week: week ? [week] : [] }
     }
-  }
+  })
 })
 
 const historical_main_select = ({
@@ -647,6 +628,16 @@ export default {
         base_table_alias: 'team_game_implied_team_total'
       }),
     join: team_game_implied_team_total_join,
-    with: team_game_implied_team_total_with
+    with: team_game_implied_team_total_with,
+    get_cache_info: create_betting_cache_info({
+      get_params: ({ params = {} } = {}) => {
+        const { year, week } = get_default_params({
+          params,
+          is_team_game_prop: true,
+          is_game_prop: true
+        })
+        return { year: [year], week: week ? [week] : [] }
+      }
+    })
   }
 }

@@ -4,6 +4,7 @@ import {
   join_per_game_cte
 } from '#libs-server/data-views/rate-type/rate-type-per-game.mjs'
 import { constants } from '#libs-shared'
+import { create_static_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 
 const get_default_params = ({ params = {} } = {}) => {
   let year = params.year || []
@@ -18,10 +19,7 @@ const get_default_params = ({ params = {} } = {}) => {
   return { year, week }
 }
 
-const get_cache_info = () => ({
-  cache_ttl: 1000 * 60 * 60 * 24 * 7, // 1 week
-  cache_expire_at: null
-})
+const get_cache_info = create_static_cache_info()
 
 export default {
   player_nfl_teams: {

@@ -1,6 +1,7 @@
 import db from '#db'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
+import { create_frequent_update_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import { constants } from '#libs-shared'
 
 const valid_practice_days = ['m', 'tu', 'w', 'th', 'f', 's', 'su']
@@ -30,6 +31,8 @@ const get_params = ({ params = {} }) => {
     practice_day
   }
 }
+
+const get_cache_info = create_frequent_update_cache_info({ get_params })
 
 const generate_table_alias = ({ params = {} } = {}) => {
   const { year, week } = get_params({ params })
@@ -78,7 +81,8 @@ const create_player_practice_field = (field, alias) => ({
   join: data_view_join_function,
   with: add_player_practice_with_statement,
   supported_splits: ['year', 'week'],
-  with_where: () => field
+  with_where: () => field,
+  get_cache_info
 })
 
 const create_player_practice_designation_field = (practice_day) => ({
@@ -90,7 +94,8 @@ const create_player_practice_designation_field = (practice_day) => ({
   join: data_view_join_function,
   with: add_player_practice_with_statement,
   supported_splits: ['year', 'week'],
-  with_where: () => practice_day
+  with_where: () => practice_day,
+  get_cache_info
 })
 
 export default {

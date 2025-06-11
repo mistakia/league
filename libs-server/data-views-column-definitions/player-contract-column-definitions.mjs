@@ -3,9 +3,12 @@ import db from '#db'
 import { constants } from '#libs-shared'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import get_join_func from '#libs-server/get-join-func.mjs'
+import { create_static_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 
 // TODO career_year
 // refactor to use with/cte table to handle career_year
+
+const get_cache_info = create_static_cache_info()
 
 const get_contract_year = (value = constants.season.year) => {
   const year = Array.isArray(value) ? value[0] : value
@@ -48,7 +51,8 @@ const create_player_contract_field = (field) => ({
   column_name: field,
   table_name: 'player_contracts',
   table_alias: player_contract_table_alias,
-  join: player_contract_join
+  join: player_contract_join,
+  get_cache_info
 })
 
 export default {

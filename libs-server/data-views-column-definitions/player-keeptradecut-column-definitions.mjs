@@ -2,6 +2,10 @@ import db from '#db'
 import { constants } from '#libs-shared'
 import get_join_func from '#libs-server/get-join-func.mjs'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
+import {
+  create_date_based_cache_info,
+  CACHE_TTL
+} from '#libs-server/data-views/cache-info-utils.mjs'
 
 // TODO career_year
 
@@ -17,27 +21,17 @@ const get_default_params = ({ params = {} } = {}) => {
   return { date, year, year_offset_single }
 }
 
-const get_cache_info_for_keeptradecut = ({ params = {} } = {}) => {
-  const { date, year } = get_default_params({ params })
-  if (date) {
-    return {
-      cache_ttl: 1000 * 60 * 60 * 24 * 30, // 30 days
-      cache_expire_at: null
+const get_cache_info_for_keeptradecut = create_date_based_cache_info({
+  get_date_params: ({ params = {} } = {}) => get_default_params({ params }),
+  calculate_ttl: ({ date, year }) => {
+    if (date) {
+      return CACHE_TTL.THIRTY_DAYS
     }
+    return year === constants.season.year
+      ? CACHE_TTL.SIX_HOURS
+      : CACHE_TTL.THIRTY_DAYS
   }
-
-  if (year === constants.season.year) {
-    return {
-      cache_ttl: 1000 * 60 * 60 * 6, // 6 hours
-      cache_expire_at: null
-    }
-  } else {
-    return {
-      cache_ttl: 1000 * 60 * 60 * 24 * 30, // 30 days
-      cache_expire_at: null
-    }
-  }
-}
+})
 
 const generate_table_alias = ({ type, params = {} } = {}) => {
   const { date, year, year_offset_single } = get_default_params({ params })
