@@ -80,7 +80,7 @@ describe('API /trades', function () {
         })
 
       proposeRes.should.have.status(200)
-      // eslint-disable-next-line
+
       proposeRes.should.be.json
       proposeRes.body.propose_tid.should.be.equal(1)
       proposeRes.body.accept_tid.should.be.equal(2)
@@ -102,7 +102,7 @@ describe('API /trades', function () {
         .set('Authorization', `Bearer ${user2}`)
 
       acceptRes.should.have.status(200)
-      // eslint-disable-next-line
+
       acceptRes.should.be.json
       acceptRes.body.propose_tid.should.be.equal(1)
       acceptRes.body.accept_tid.should.be.equal(2)
@@ -199,7 +199,7 @@ describe('API /trades', function () {
         })
 
       proposeRes.should.have.status(200)
-      // eslint-disable-next-line
+
       proposeRes.should.be.json
       proposeRes.body.propose_tid.should.be.equal(1)
       proposeRes.body.accept_tid.should.be.equal(2)
@@ -221,7 +221,7 @@ describe('API /trades', function () {
         .set('Authorization', `Bearer ${user2}`)
 
       acceptRes.should.have.status(200)
-      // eslint-disable-next-line
+
       acceptRes.should.be.json
       acceptRes.body.propose_tid.should.be.equal(1)
       acceptRes.body.accept_tid.should.be.equal(2)
@@ -256,7 +256,7 @@ describe('API /trades', function () {
         })
 
       res.should.have.status(200)
-      // eslint-disable-next-line
+
       res.should.be.json
 
       res.body.tid.should.equal(teamId)
@@ -276,7 +276,7 @@ describe('API /trades', function () {
       // verify poach is cancelled
       const poaches = await knex('poaches')
       expect(poaches.length).to.equal(1)
-      // eslint-disable-next-line
+
       expect(poaches[0].processed).to.exist
       expect(poaches[0].succ).to.equal(false)
       expect(poaches[0].reason).to.equal('Player traded')

@@ -37,7 +37,7 @@ describe('API /leagues - update', function () {
         })
 
       res.should.have.status(200)
-      // eslint-disable-next-line
+
       res.should.be.json
 
       // verify database change
@@ -60,7 +60,7 @@ describe('API /leagues - update', function () {
         })
 
       res.should.have.status(200)
-      // eslint-disable-next-line
+
       res.should.be.json
 
       // verify database change
@@ -83,7 +83,7 @@ describe('API /leagues - update', function () {
         })
 
       res.should.have.status(200)
-      // eslint-disable-next-line
+
       res.should.be.json
 
       // verify database change

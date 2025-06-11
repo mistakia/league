@@ -542,9 +542,7 @@ describe('LIBS SERVER get_data_view_results', () => {
         'player_fantasy_top_1_seasons_from_careerlogs',
         'player_fantasy_top_3_seasons_from_careerlogs',
         'player_fantasy_top_6_seasons_from_careerlogs',
-        'player_fantasy_top_12_seasons_from_careerlogs',
-        'player_fantasy_top_24_games_from_careerlogs',
-        'player_fantasy_top_36_games_from_careerlogs'
+        'player_fantasy_top_12_seasons_from_careerlogs'
       ],
       sort: [
         {

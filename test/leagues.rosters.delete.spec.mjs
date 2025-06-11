@@ -58,7 +58,7 @@ describe('API /leagues/rosters - delete', function () {
         })
 
       res.should.have.status(200)
-      // eslint-disable-next-line
+
       res.should.be.json
 
       res.body.roster.should.equal(1)

@@ -60,7 +60,7 @@ describe('API /teams - cutlist', function () {
         })
 
       res.should.have.status(200)
-      // eslint-disable-next-line
+
       res.should.be.json
 
       res.body.length.should.equal(1)
@@ -106,7 +106,7 @@ describe('API /teams - cutlist', function () {
         })
 
       res.should.have.status(200)
-      // eslint-disable-next-line
+
       res.should.be.json
 
       res.body.length.should.equal(2)
@@ -154,7 +154,7 @@ describe('API /teams - cutlist', function () {
         })
 
       res1.should.have.status(200)
-      // eslint-disable-next-line
+
       res1.should.be.json
 
       const pids = [player1.pid, player2.pid]
@@ -212,7 +212,7 @@ describe('API /teams - cutlist', function () {
         })
 
       res1.should.have.status(200)
-      // eslint-disable-next-line
+
       res1.should.be.json
 
       const res2 = await chai_request

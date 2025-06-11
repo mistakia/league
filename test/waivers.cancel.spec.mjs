@@ -92,7 +92,7 @@ describe('API /waivers - cancel', function () {
       })
 
     res.should.have.status(200)
-    // eslint-disable-next-line
+
     res.should.be.json
 
     res.body.uid.should.equal(waiverId)
@@ -128,7 +128,7 @@ describe('API /waivers - cancel', function () {
       })
 
     res.should.have.status(200)
-    // eslint-disable-next-line
+
     res.should.be.json
 
     res.body.uid.should.equal(waiverId)

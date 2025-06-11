@@ -44,7 +44,6 @@ describe('SCRIPTS /waivers - poach', function () {
         error = err
       }
 
-      // eslint-disable-next-line
       expect(error).to.exist
       expect(error).to.be.instanceof(Errors.EmptyPoachingWaivers)
       expect(error.message).to.equal('no poaching waivers to process')
@@ -60,7 +59,6 @@ describe('SCRIPTS /waivers - poach', function () {
         error = err
       }
 
-      // eslint-disable-next-line
       expect(error).to.exist
       expect(error).to.be.instanceof(Errors.EmptyPoachingWaivers)
     })
