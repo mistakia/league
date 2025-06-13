@@ -6,6 +6,7 @@ import { constants } from '#libs-shared'
 import { getLeague } from '#libs-server'
 import db from '#db'
 import is_main from './is-main.mjs'
+import set_draft_pick_number from '#scripts/set-draft-pick-number.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 
@@ -36,6 +37,11 @@ const create_conditional_pick = async function ({ tid, league }) {
     year,
     pick
   })
+
+  // Call set-draft-pick-number when year is current year and before draft
+  if (year === constants.season.year && is_before_draft) {
+    await set_draft_pick_number({ lid: league.uid })
+  }
 }
 
 export default create_conditional_pick
