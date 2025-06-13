@@ -10,9 +10,8 @@ const log = debug('set-draft-pick-number')
 const calculatePick = ({ round, order, league }) =>
   (round - 1) * league.num_teams + order
 
-const run = async () => {
+const set_draft_pick_number = async ({ lid }) => {
   log(`setting draft picks for ${constants.season.year}`)
-  const lid = 1
 
   const league = await getLeague({ lid })
   const teams = await db('teams').where({ lid, year: constants.season.year })
@@ -100,7 +99,7 @@ const main = async () => {
   debug.enable('set-draft-pick-number')
   let error
   try {
-    await run()
+    await set_draft_pick_number()
   } catch (err) {
     error = err
     console.log(error)
@@ -118,4 +117,4 @@ if (is_main(import.meta.url)) {
   main()
 }
 
-export default run
+export default set_draft_pick_number
