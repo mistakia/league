@@ -16,10 +16,33 @@ import {
   isPlayerRostered,
   isPlayerOnWaivers,
   verifyUserTeam,
-  verifyReserveStatus
+  verifyReserveStatus,
+  get_super_priority_status
 } from '#libs-server'
 
 const router = express.Router({ mergeParams: true })
+
+router.get('/super-priority/:pid', async (req, res) => {
+  const { logger } = req.app.locals
+  try {
+    const { leagueId } = req.params
+    const { pid } = req.params
+
+    if (!req.auth) {
+      return res.status(401).send({ error: 'invalid token' })
+    }
+
+    const super_priority_status = await get_super_priority_status({
+      pid,
+      lid: leagueId
+    })
+
+    res.send(super_priority_status)
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
 
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
@@ -62,7 +85,7 @@ router.get('/?', async (req, res) => {
 router.post('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const { pid, leagueId, type, teamId } = req.body
+    const { pid, leagueId, type, teamId, super_priority } = req.body
     let { release } = req.body
     let bid = parseInt(req.body.bid || 0, 10)
 
@@ -98,6 +121,13 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid type' })
     }
 
+    // Super priority can only be used for practice squad waivers
+    if (super_priority && type !== constants.waivers.FREE_AGENCY_PRACTICE) {
+      return res
+        .status(400)
+        .send({ error: 'super priority only valid for practice squad waivers' })
+    }
+
     if (
       typeof bid !== 'undefined' &&
       (isNaN(bid) || bid < 0 || bid % 1 !== 0)
@@ -128,6 +158,26 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid player' })
     }
     const player_row = player_rows.find((p) => p.pid === pid)
+
+    // Validate super priority claim
+    if (super_priority) {
+      const super_priority_status = await get_super_priority_status({
+        pid,
+        lid: leagueId
+      })
+
+      if (!super_priority_status.eligible) {
+        return res
+          .status(400)
+          .send({ error: 'super priority not available for this player' })
+      }
+
+      if (super_priority_status.original_tid !== tid) {
+        return res
+          .status(400)
+          .send({ error: 'super priority not available for this team' })
+      }
+    }
 
     if (type === constants.waivers.FREE_AGENCY_PRACTICE) {
       // set bid to zero for practice squad waivers
@@ -221,7 +271,9 @@ router.post('/?', async (req, res) => {
             }
 
             // if after rookie draft waivers cleared and before free agency period, check if player is on release waivers
+            // Skip this check for super priority claims which have their own eligibility rules
             if (
+              !super_priority &&
               league.draft_start &&
               dayjs().isAfter(draftDates.waiverEnd) &&
               (!league.free_agency_live_auction_start ||
@@ -236,9 +288,11 @@ router.post('/?', async (req, res) => {
             }
           } else {
             // reject practice waivers for veterans before fa period
+            // Skip this check for super priority claims which can be made anytime after poaching
             if (
-              !league.free_agency_live_auction_start ||
-              dayjs().isBefore(faPeriod.start)
+              !super_priority &&
+              (!league.free_agency_live_auction_start ||
+                dayjs().isBefore(faPeriod.start))
             ) {
               return res.status(400).send({
                 error: 'practice squad waivers are not open for non-rookies'
@@ -380,7 +434,8 @@ router.post('/?', async (req, res) => {
       po: 9999,
       submitted: Math.round(Date.now() / 1000),
       bid,
-      type
+      type,
+      super_priority: super_priority ? 1 : 0
     }
     const ids = await db('waivers').insert(data).returning('uid')
     const waiverId = ids[0].uid

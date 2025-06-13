@@ -15,6 +15,8 @@ export { default as submitReserve } from './submit-reserve.mjs'
 export { default as submitActivate } from './submit-activate.mjs'
 export { default as processPoach } from './process-poach.mjs'
 export { default as processRelease } from './process-release.mjs'
+export { default as get_super_priority_status } from './get-super-priority-status.mjs'
+export { default as process_super_priority } from './process-super-priority.mjs'
 export { default as processTransitionBid } from './process-transition-bid.mjs'
 export { default as getRoster } from './get-roster.mjs'
 export { default as getProjections } from './get-projections.mjs'
@@ -97,6 +99,7 @@ export { default as format_market_selection_id } from './format-market-selection
 export * as fanatics from './fanatics.mjs'
 export { default as fetch_with_retry } from './fetch-with-retry.mjs'
 export { default as fetch_with_proxy, proxy_manager } from './proxy-manager.mjs'
+export { default as handle_season_args_for_script } from './handle-season-args-for-script.mjs'
 
 export const getChartedPlayByPlayQuery = (db) =>
   db('nfl_plays')

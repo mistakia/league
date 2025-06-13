@@ -40,8 +40,6 @@ export default async function (lid) {
     .groupBy('pid')
   const active_waiver_pids = active_waiver_rows.map((w) => w.pid)
 
-  // TODO - return undefined if there are any active waivers and practice waiver players
-
   // get relevant transactions from last 24 hours
   const cutoff = dayjs().subtract('24', 'hours').unix()
   const recent_transaction_rows = await db('transactions')
@@ -96,6 +94,50 @@ export default async function (lid) {
 
   if (active_waiver_pids.length) {
     query.whereNotIn('waivers.pid', active_waiver_pids)
+  }
+
+  // Check for super priority claims first
+  const super_priority_query = db('waivers')
+    .select(
+      'teams.*',
+      'waivers.uid as wid',
+      'waivers.bid',
+      'waivers.pid',
+      'waivers.tid',
+      'waivers.userid',
+      'waivers.super_priority'
+    )
+    .join('teams', 'waivers.tid', 'teams.uid')
+    .where('teams.year', constants.season.year)
+    .whereNull('processed')
+    .whereNull('cancelled')
+    .where('waivers.lid', lid)
+    .where('waivers.type', constants.waivers.FREE_AGENCY_PRACTICE)
+    .where('waivers.super_priority', 1)
+    .orderBy([
+      {
+        column: 'waivers.submitted',
+        order: 'asc'
+      },
+      {
+        column: 'waivers.uid',
+        order: 'asc'
+      }
+    ])
+
+  if (recent_transaction_pids.length) {
+    super_priority_query.whereNotIn('waivers.pid', recent_transaction_pids)
+  }
+
+  if (active_waiver_pids.length) {
+    super_priority_query.whereNotIn('waivers.pid', active_waiver_pids)
+  }
+
+  const super_priority_waivers = await super_priority_query
+
+  // If there are super priority claims, return the first one
+  if (super_priority_waivers.length) {
+    return super_priority_waivers[0]
   }
 
   const waiver_rows = await query

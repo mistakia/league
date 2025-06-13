@@ -54,7 +54,7 @@ export default async function ({
   }
 
   const teams = await db('teams')
-    .where({ uid: teamId, year: constants.season.year })
+    .where({ uid: teamId, lid: leagueId, year: constants.season.year })
     .limit(1)
   const team = teams[0]
 
