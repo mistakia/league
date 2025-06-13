@@ -211,7 +211,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       expect(waivers[0].cancelled).to.equal(null)
 
       expect(waivers[1].succ).to.equal(false)
-      expect(waivers[1].reason).to.equal('player is not a free agent')
+      expect(waivers[1].reason).to.equal('Player already claimed')
       expect(waivers[1].pid).to.equal(player1.pid)
 
       expect(waivers[2].succ).to.equal(true)
@@ -233,7 +233,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       expect(waivers[5].pid).to.equal(player4.pid)
 
       expect(waivers[6].succ).to.equal(false)
-      expect(waivers[6].reason).to.equal('player is not a free agent')
+      expect(waivers[6].reason).to.equal('Player already claimed')
       expect(waivers[6].pid).to.equal(player4.pid)
 
       // check team waiver order

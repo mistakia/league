@@ -7,6 +7,102 @@ import getRoster from './get-roster.mjs'
 import getLastTransaction from './get-last-transaction.mjs'
 import sendNotifications from './send-notifications.mjs'
 import getLeague from './get-league.mjs'
+import get_super_priority_status from './get-super-priority-status.mjs'
+
+// Helper function to check for super priority on release
+async function handle_super_priority_on_release({ pid, releasing_tid, lid }) {
+  // Quick check: was this player poached by the releasing team?
+  const poach_check = await db('transactions')
+    .where({
+      pid,
+      lid,
+      type: constants.transactions.POACHED,
+      tid: releasing_tid
+    })
+    .limit(1)
+
+  if (!poach_check.length) {
+    return // Player was not poached by this team, no super priority possible
+  }
+
+  // Quick check: is there already a claimed super priority for this player?
+  const claimed_check = await db('super_priority')
+    .where({ pid, lid, poaching_tid: releasing_tid, claimed: 1 })
+    .limit(1)
+
+  if (claimed_check.length) {
+    return // Super priority already claimed, nothing to do
+  }
+
+  // Get comprehensive super priority status
+  const super_priority_status = await get_super_priority_status({
+    pid,
+    lid,
+    release_tid: releasing_tid
+  })
+
+  if (!super_priority_status.eligible) {
+    return // Player not eligible for super priority
+  }
+
+  // Determine if manual waiver is needed
+  let requires_waiver = false
+
+  // Check if player was originally a PS (signed) player, not PSD (drafted)
+  const original_roster = await db('rosters_players')
+    .join('rosters', 'rosters_players.rid', 'rosters.uid')
+    .where({
+      'rosters_players.pid': pid,
+      'rosters_players.tid': super_priority_status.original_tid,
+      'rosters_players.lid': lid
+    })
+    .where('rosters.year', constants.year)
+    .whereIn('rosters_players.slot', constants.ps_signed_slots) // PS or PSP
+    .orderBy('rosters.week', 'desc')
+    .first()
+
+  if (original_roster) {
+    // Player was originally PS (signed), check if original team has open PS slot
+    const original_team_roster = await getRoster({
+      tid: super_priority_status.original_tid
+    })
+    const league = await getLeague({ lid })
+    const roster = new Roster({ roster: original_team_roster, league })
+
+    if (roster.practice.length >= league.ps) {
+      requires_waiver = true // No open PS slot, requires manual waiver
+    }
+  }
+
+  // Create or update super_priority record
+  const existing_record = await db('super_priority')
+    .where({
+      pid,
+      original_tid: super_priority_status.original_tid,
+      poaching_tid: releasing_tid,
+      lid,
+      poach_timestamp: super_priority_status.poach_timestamp
+    })
+    .first()
+
+  if (!existing_record) {
+    await db('super_priority').insert({
+      pid,
+      original_tid: super_priority_status.original_tid,
+      poaching_tid: releasing_tid,
+      lid,
+      poach_timestamp: super_priority_status.poach_timestamp,
+      eligible: 1,
+      claimed: 0,
+      requires_waiver
+    })
+  } else if (!existing_record.eligible) {
+    // Update existing record to mark as eligible and set waiver requirement
+    await db('super_priority')
+      .where({ uid: existing_record.uid })
+      .update({ eligible: 1, requires_waiver })
+  }
+}
 
 export default async function ({
   lid,
@@ -203,9 +299,18 @@ export default async function ({
     transaction
   })
 
+  // Check for super priority eligibility when releasing a player
+  await handle_super_priority_on_release({
+    pid: release_pid,
+    releasing_tid: tid,
+    lid,
+    timestamp
+  })
+
   if (create_notification) {
     const teams = await db('teams').where({
       uid: tid,
+      lid,
       year: constants.season.year
     })
     const team = teams[0]

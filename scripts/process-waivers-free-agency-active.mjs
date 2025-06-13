@@ -86,21 +86,6 @@ const run = async ({ daily = false } = {}) => {
           waiverId: waiver.wid
         })
 
-        // cancel any outstanding waivers with the same release player
-        /* if (release.length) {
-         *   await db('waivers')
-         *     .update({
-         *       succ: 0,
-         *       reason: 'invalid release',
-         *       processed: timestamp
-         *     })
-         *     .join('waiver_releases', 'waiver_releases.waiverid', 'waviers.uid')
-         *     .whereNull('processed')
-         *     .whereNull('cancelled')
-         *     .where('tid', waiver.tid)
-         *     .whereIn('waiver_releases', release)
-         * }
-         */
         // reset waiver order if necessary
         const tiedWaivers = await db('waivers')
           .where({
@@ -124,6 +109,19 @@ const run = async ({ daily = false } = {}) => {
             year: constants.season.year
           })
         }
+
+        // cancel any other pending waivers for this player
+        await db('waivers')
+          .update({
+            succ: 0,
+            reason: 'Player already claimed',
+            processed: timestamp
+          })
+          .where('lid', lid)
+          .where('pid', waiver.pid)
+          .where('uid', '!=', waiver.wid)
+          .whereNull('processed')
+          .whereNull('cancelled')
       } catch (err) {
         error = err
       }

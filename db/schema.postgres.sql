@@ -1445,7 +1445,13 @@ DROP INDEX IF EXISTS public.index_nfl_plays_catchable_ball;
 DROP INDEX IF EXISTS public.index_nfl_plays_bc_pid;
 DROP INDEX IF EXISTS public.index_nfl_plays_assisted_tackle_2_pid;
 DROP INDEX IF EXISTS public.index_nfl_plays_assisted_tackle_1_pid;
+DROP INDEX IF EXISTS public.idx_waivers_super_priority;
 DROP INDEX IF EXISTS public.idx_users_invite_code;
+DROP INDEX IF EXISTS public.idx_super_priority_poach_timestamp;
+DROP INDEX IF EXISTS public.idx_super_priority_pid;
+DROP INDEX IF EXISTS public.idx_super_priority_lid;
+DROP INDEX IF EXISTS public.idx_super_priority_eligible;
+DROP INDEX IF EXISTS public.idx_super_priority_claimed;
 DROP INDEX IF EXISTS public.idx_sis_id;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_seasonlogs_pid_year_hash;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_gamelogs_pid_esbid_hash;
@@ -1619,8 +1625,10 @@ ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_username
 ALTER TABLE IF EXISTS ONLY public.users_teams DROP CONSTRAINT IF EXISTS users_teams_pkey;
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_key;
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_hash_key;
+ALTER TABLE IF EXISTS ONLY public.super_priority DROP CONSTRAINT IF EXISTS unique_super_priority;
 ALTER TABLE IF EXISTS ONLY public.transactions DROP CONSTRAINT IF EXISTS transactions_pkey;
 ALTER TABLE IF EXISTS ONLY public.teams DROP CONSTRAINT IF EXISTS teams_pkey;
+ALTER TABLE IF EXISTS ONLY public.super_priority DROP CONSTRAINT IF EXISTS super_priority_pkey;
 ALTER TABLE IF EXISTS ONLY public.seasons DROP CONSTRAINT IF EXISTS seasons_pkey;
 ALTER TABLE IF EXISTS ONLY public.rosters_players DROP CONSTRAINT IF EXISTS rosters_players_pkey;
 ALTER TABLE IF EXISTS ONLY public.prop_pairing_props DROP CONSTRAINT IF EXISTS prop_pairing_props_unique;
@@ -1725,6 +1733,7 @@ ALTER TABLE IF EXISTS public.transition_bids ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.transactions ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.trades ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.teams ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.super_priority ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.sources ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.rosters ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.props_index_new ALTER COLUMN prop_id DROP DEFAULT;
@@ -1760,6 +1769,8 @@ DROP TABLE IF EXISTS public.trades;
 DROP TABLE IF EXISTS public.trade_releases;
 DROP SEQUENCE IF EXISTS public.teams_uid_seq;
 DROP TABLE IF EXISTS public.teams;
+DROP SEQUENCE IF EXISTS public.super_priority_uid_seq;
+DROP TABLE IF EXISTS public.super_priority;
 DROP SEQUENCE IF EXISTS public.sources_uid_seq;
 DROP TABLE IF EXISTS public.sources;
 DROP TABLE IF EXISTS public.seasons;
@@ -20848,6 +20859,44 @@ ALTER SEQUENCE public.sources_uid_seq OWNED BY public.sources.uid;
 
 
 --
+-- Name: super_priority; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.super_priority (
+    uid integer NOT NULL,
+    pid character varying(25) NOT NULL,
+    original_tid integer NOT NULL,
+    poaching_tid integer NOT NULL,
+    lid integer NOT NULL,
+    poach_timestamp integer NOT NULL,
+    eligible smallint DEFAULT 1 NOT NULL,
+    claimed smallint DEFAULT 0 NOT NULL,
+    claimed_at integer,
+    requires_waiver smallint DEFAULT 0 NOT NULL
+);
+
+
+--
+-- Name: super_priority_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.super_priority_uid_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: super_priority_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.super_priority_uid_seq OWNED BY public.super_priority.uid;
+
+
+--
 -- Name: teams; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -21180,7 +21229,8 @@ CREATE TABLE public.waivers (
     succ boolean,
     reason text,
     processed integer,
-    cancelled integer
+    cancelled integer,
+    super_priority smallint DEFAULT 0 NOT NULL
 );
 
 
@@ -21923,6 +21973,13 @@ ALTER TABLE ONLY public.rosters ALTER COLUMN uid SET DEFAULT nextval('public.ros
 --
 
 ALTER TABLE ONLY public.sources ALTER COLUMN uid SET DEFAULT nextval('public.sources_uid_seq'::regclass);
+
+
+--
+-- Name: super_priority uid; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.super_priority ALTER COLUMN uid SET DEFAULT nextval('public.super_priority_uid_seq'::regclass);
 
 
 --
@@ -22752,6 +22809,14 @@ ALTER TABLE ONLY public.seasons
 
 
 --
+-- Name: super_priority super_priority_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.super_priority
+    ADD CONSTRAINT super_priority_pkey PRIMARY KEY (uid);
+
+
+--
 -- Name: teams teams_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -22765,6 +22830,14 @@ ALTER TABLE ONLY public.teams
 
 ALTER TABLE ONLY public.transactions
     ADD CONSTRAINT transactions_pkey PRIMARY KEY (uid);
+
+
+--
+-- Name: super_priority unique_super_priority; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.super_priority
+    ADD CONSTRAINT unique_super_priority UNIQUE (pid, original_tid, poaching_tid, lid, poach_timestamp);
 
 
 --
@@ -23983,10 +24056,52 @@ CREATE INDEX idx_sis_id ON public.player USING btree (sis_id);
 
 
 --
+-- Name: idx_super_priority_claimed; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_super_priority_claimed ON public.super_priority USING btree (claimed);
+
+
+--
+-- Name: idx_super_priority_eligible; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_super_priority_eligible ON public.super_priority USING btree (eligible);
+
+
+--
+-- Name: idx_super_priority_lid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_super_priority_lid ON public.super_priority USING btree (lid);
+
+
+--
+-- Name: idx_super_priority_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_super_priority_pid ON public.super_priority USING btree (pid);
+
+
+--
+-- Name: idx_super_priority_poach_timestamp; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_super_priority_poach_timestamp ON public.super_priority USING btree (poach_timestamp);
+
+
+--
 -- Name: idx_users_invite_code; Type: INDEX; Schema: public; Owner: -
 --
 
 CREATE INDEX idx_users_invite_code ON public.users USING btree (invite_code);
+
+
+--
+-- Name: idx_waivers_super_priority; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_waivers_super_priority ON public.waivers USING btree (super_priority);
 
 
 --

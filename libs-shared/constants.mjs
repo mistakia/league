@@ -808,7 +808,9 @@ export const transactions = {
   RESERVE_IR: 15,
   RESERVE_COV: 16,
   PRACTICE_PROTECTED: 17,
-  RESERVE_IR_LONG_TERM: 18
+  RESERVE_IR_LONG_TERM: 18,
+
+  SUPER_PRIORITY: 19
 }
 
 export const tags = {
@@ -849,7 +851,8 @@ export const transactionsDetail = {
   15: 'Reserve (IR)',
   16: 'Reserve (COV)',
   17: 'Protected (PS)',
-  18: 'Reserve (IR LT)'
+  18: 'Reserve (IR LT)',
+  19: 'Super Priority'
 }
 
 export const nflTeams = [

@@ -24,8 +24,6 @@ describe('API /wagers', function () {
 
     res.should.be.json
     res.body.should.be.an('array')
-
-    console.log(res.body)
   })
 
   describe('errors', function () {
