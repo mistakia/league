@@ -42,6 +42,14 @@ export const create_season_cache_info = ({
   return ({ params = {} } = {}) => {
     const { year, week } = get_params({ params })
 
+    // If no year specified, treat as current season data
+    if (!year || year.length === 0) {
+      return {
+        cache_ttl: current_season_ttl,
+        cache_expire_at: null
+      }
+    }
+
     // Historical data (previous seasons)
     if (!year.includes(constants.season.year)) {
       return {
@@ -60,8 +68,16 @@ export const create_season_cache_info = ({
     }
 
     // Week-level data (play/game data)
+    // If no weeks specified, treat as current data
+    if (!week || week.length === 0) {
+      return {
+        cache_ttl: current_season_ttl,
+        cache_expire_at: null
+      }
+    }
+
     // If specific weeks are requested and they're all in the past, treat as historical
-    if (week.length > 0 && week.every((w) => w < constants.season.week)) {
+    if (week.every((w) => w < constants.season.week)) {
       return {
         cache_ttl: historical_ttl,
         cache_expire_at: null
@@ -123,7 +139,8 @@ export const create_exact_year_cache_info = ({
   return ({ params = {} } = {}) => {
     const year = get_year(params)
 
-    if (year === constants.season.year) {
+    // If no year specified, treat as current year data
+    if (year === undefined || year === null || year === constants.season.year) {
       return {
         cache_ttl: current_year_ttl,
         cache_expire_at: null
@@ -140,11 +157,12 @@ export const create_exact_year_cache_info = ({
 // Cache info for data with custom date-based logic
 export const create_date_based_cache_info = ({
   get_date_params,
-  calculate_ttl
+  calculate_ttl,
+  fallback_ttl = CACHE_TTL.SIX_HOURS // fallback when date params are undefined
 } = {}) => {
   return ({ params = {} } = {}) => {
     const date_params = get_date_params({ params })
-    const cache_ttl = calculate_ttl(date_params)
+    const cache_ttl = date_params ? calculate_ttl(date_params) : fallback_ttl
 
     return {
       cache_ttl,
