@@ -1,6 +1,6 @@
 {
   "permissions": {
-    "allow": ["Bash(grep:*)", "Bash(yarn test)"],
+    "allow": ["Bash(grep:*)", "Bash(yarn test:*)", "Bash(find:*)"],
     "deny": []
   }
 }
