@@ -7,13 +7,26 @@ export default async function ({
   exclude_pids = [],
   excludePS = false,
   nfl_status = undefined,
-  injury_status = undefined
+  injury_status = undefined,
+  exclude_rostered_players = false,
+  lid = 1
 } = {}) {
   const query = db('player')
     .whereNot('current_nfl_team', 'INA')
     .where('pos1', pos)
     .orderByRaw('RANDOM()')
     .limit(1)
+
+  // Exclude rostered players if requested
+  if (exclude_rostered_players) {
+    const rostered_players = await db('rosters_players').where({
+      lid,
+      week: constants.season.week,
+      year: constants.season.year
+    })
+    const rostered_pids = rostered_players.map((p) => p.pid)
+    exclude_pids = [...exclude_pids, ...rostered_pids]
+  }
 
   if (exclude_pids.length) {
     query.whereNotIn('pid', exclude_pids)

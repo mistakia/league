@@ -256,7 +256,7 @@ describe('API /teams - deactivate', function () {
     })
 
     it('player not on team', async () => {
-      const player = await selectPlayer()
+      const player = await selectPlayer({ exclude_rostered_players: true })
       const request = chai_request
         .execute(server)
         .post('/api/teams/1/deactivate')
@@ -270,7 +270,10 @@ describe('API /teams - deactivate', function () {
     })
 
     it('player already on practice squad', async () => {
-      const player = await selectPlayer({ rookie: true })
+      const player = await selectPlayer({
+        rookie: true,
+        exclude_rostered_players: true
+      })
       await addPlayer({
         leagueId: 1,
         player,
@@ -301,7 +304,10 @@ describe('API /teams - deactivate', function () {
     it('player previously poached', async () => {
       MockDate.set(start.add('1', 'month').day(4).toISOString())
       const leagueId = 1
-      const player = await selectPlayer()
+      const player = await selectPlayer({
+        exclude_rostered_players: true,
+        lid: leagueId
+      })
 
       await addPlayer({
         teamId: 1,
@@ -330,7 +336,10 @@ describe('API /teams - deactivate', function () {
       const leagueId = 1
       const userId = 1
       const teamId = 1
-      const player = await selectPlayer()
+      const player = await selectPlayer({
+        exclude_rostered_players: true,
+        lid: leagueId
+      })
 
       await knex('transactions').insert({
         userid: userId,
@@ -376,11 +385,11 @@ describe('API /teams - deactivate', function () {
     it('signed via free agency waivers with multiple bids', async () => {
       MockDate.set(start.add('1', 'month').day(4).toISOString())
       const leagueId = 1
-      const player = await selectPlayer()
+      const player = await selectPlayer({
+        exclude_rostered_players: true,
+        lid: leagueId
+      })
       const timestamp = Math.round(Date.now() / 1000)
-
-      // reset to prevent duplicate key collison
-      await knex('rosters_players').del()
 
       const result = await knex('waivers')
         .insert({
