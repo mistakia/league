@@ -4,10 +4,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#libs-shared'
-import {
-  get_super_priority_status,
-  is_main
-} from '#libs-server'
+import { get_super_priority_status, is_main } from '#libs-server'
 
 const log = debug('populate:super-priority')
 if (process.env.NODE_ENV !== 'test') {
@@ -66,11 +63,12 @@ const run = async ({
         eligible_count++
 
         // Get player details for tracking
-        const [player_details, original_team, poaching_team] = await Promise.all([
-          db('player').where('pid', poach_tx.pid).first(),
-          db('teams').where('uid', status.original_tid).first(),
-          db('teams').where('uid', status.poaching_tid).first()
-        ])
+        const [player_details, original_team, poaching_team] =
+          await Promise.all([
+            db('player').where('pid', poach_tx.pid).first(),
+            db('teams').where('uid', status.original_tid).first(),
+            db('teams').where('uid', status.poaching_tid).first()
+          ])
 
         if (player_details && original_team && poaching_team) {
           eligible_players_processed.push({
@@ -99,13 +97,17 @@ const run = async ({
               lid: poach_tx.lid,
               poach_timestamp: poach_tx.timestamp,
               eligible: 1,
-              expires_at: null,
-              weeks_rostered: 0,
-              games_started: 0,
               claimed: 0,
-              claimed_at: null
+              claimed_at: null,
+              requires_waiver: 0
             })
-            .onConflict(['pid', 'original_tid', 'poaching_tid', 'lid', 'poach_timestamp'])
+            .onConflict([
+              'pid',
+              'original_tid',
+              'poaching_tid',
+              'lid',
+              'poach_timestamp'
+            ])
             .merge({
               eligible: 1,
               poach_timestamp: poach_tx.timestamp,
@@ -185,7 +187,8 @@ const main = async () => {
       .option('lid', {
         alias: 'l',
         type: 'number',
-        describe: 'League ID to process (optional, processes all leagues if not specified)'
+        describe:
+          'League ID to process (optional, processes all leagues if not specified)'
       })
       .option('dry-run', {
         alias: 'd',
@@ -193,8 +196,7 @@ const main = async () => {
         default: false,
         describe: 'Run in dry-run mode without making database changes'
       })
-      .help()
-      .argv
+      .help().argv
 
     const result = await run({
       year: argv.year,

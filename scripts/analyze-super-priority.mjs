@@ -4,10 +4,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#libs-shared'
-import {
-  get_super_priority_status,
-  is_main
-} from '#libs-server'
+import { get_super_priority_status, is_main } from '#libs-server'
 
 const log = debug('analyze:super-priority')
 if (process.env.NODE_ENV !== 'test') {
@@ -224,12 +221,14 @@ const main = async () => {
       .option('lid', {
         alias: 'l',
         type: 'number',
-        describe: 'League ID to analyze (optional, analyzes all leagues if not specified)'
+        describe:
+          'League ID to analyze (optional, analyzes all leagues if not specified)'
       })
       .option('pid', {
         alias: 'p',
         type: 'string',
-        describe: 'Player ID to analyze (optional, analyzes specific player if specified)'
+        describe:
+          'Player ID to analyze (optional, analyzes specific player if specified)'
       })
       .option('validate', {
         alias: 'v',
@@ -237,8 +236,7 @@ const main = async () => {
         default: false,
         describe: 'Validate consistency between cached and calculated data'
       })
-      .help()
-      .argv
+      .help().argv
 
     await run({
       year: argv.year,
