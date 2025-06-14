@@ -28,26 +28,32 @@ router.get('/?', async (req, res) => {
       : []
 
     let query = db('transactions')
-      .where({ lid: leagueId })
-      .orderBy('timestamp', 'desc')
-      .orderBy('uid', 'desc')
+      .leftJoin('draft', function() {
+        this.on('transactions.pid', '=', 'draft.pid')
+          .andOn('transactions.lid', '=', 'draft.lid')
+          .andOn('transactions.type', '=', db.raw('?', [constants.transactions.DRAFT]))
+      })
+      .select('transactions.*', 'draft.pick', 'draft.pick_str')
+      .where({ 'transactions.lid': leagueId })
+      .orderBy('transactions.timestamp', 'desc')
+      .orderBy('transactions.uid', 'desc')
       .limit(limit)
       .offset(offset)
 
     if (types.length) {
-      query = query.whereIn('type', types)
+      query = query.whereIn('transactions.type', types)
     }
 
     if (teams.length) {
-      query = query.whereIn('tid', teams)
+      query = query.whereIn('transactions.tid', teams)
     }
 
     if (pid) {
-      query = query.where('pid', pid)
+      query = query.where('transactions.pid', pid)
     }
 
     if (since) {
-      query = query.where('timestamp', '>', since)
+      query = query.where('transactions.timestamp', '>', since)
     }
 
     const transactions = await query
