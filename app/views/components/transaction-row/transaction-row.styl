@@ -1,103 +1,198 @@
+// Base transaction styling
 .transaction
-  display flex
   background white
-  border-radius 3px
-  overflow hidden
+  transition all 0.15s ease
 
   .player__name-position
     order 10
   .player__name-label
     display none
 
-.transaction__value
-  flex 0 0 35px
+// WIDE LAYOUT - Row: team | transaction type | player | position | time | salary
+.transaction--wide
   display flex
   align-items center
-  font-size 14px
-  font-weight bold
-  margin-left 16px
+  min-height 60px
+  border-bottom 1px solid lighten($borderColor, 70%)
 
-.transaction__timestamp
+.transaction--wide .transaction__team
+  flex 0 0 100px
+  display flex
+  align-items center
+  
+  .team__name
+    font-size 13px
+    font-weight 500
+    
+  .team__image
+    margin 0 6px 0 0
+    height 24px
+    width 24px
+
+.transaction--wide .transaction__type
+  flex 0 0 140px
+  display flex
+  align-items center
+  color $textColor
+  font-size 14px
+  font-weight 600
+  gap 6px
+  flex-wrap wrap
+  padding 0 12px
+
+.transaction--wide .transaction__player
+  flex 1
+  display flex
+  min-width 0
+  padding 0 12px
+
+.transaction--wide .transaction__position
+  flex 0 0 60px
+  display flex
+  align-items center
+  justify-content center
+  font-size 12px
+  font-weight 500
+  color lighten($textColor, 20%)
+  text-transform uppercase
+  padding 0 8px
+
+.transaction--wide .transaction__timestamp
+  flex 0 0 140px
+  display flex
+  justify-content center
+  padding 0 8px
+  
+  .timestamp
+    font-size 12px
+    color lighten($textColor, 30%)
+    text-align center
+    
+  .timestamp__date
+    min-width auto
+    
+  .timestamp__time
+    min-width auto
+    margin-left 6px
+
+.transaction--wide .transaction__value
+  flex 0 0 80px
+  display flex
+  align-items center
+  justify-content flex-end
+  font-size 15px
+  font-weight 600
+  color $textColor
+
+.transaction--wide .transaction__draft-pick
+  display inline-flex
+  align-items center
+  color $blue
+  font-weight 500
+  font-size 11px
+  background lighten($blue, 97%)
+  padding 3px 6px
+  border-radius 4px
+  border 1px solid lighten($blue, 85%)
+  white-space nowrap
+  margin-left 4px
+
+// NARROW LAYOUT - Card with two rows
+.transaction-row-wrapper--narrow
+  padding-bottom 8px
+
+.transaction--narrow
+  display flex
+  flex-direction column
+  padding 16px 20px
+  height 100%
+  background #fafafa
+  border-radius 8px
+  box-shadow 0 1px 3px rgba(0, 0, 0, 0.04)
+  border 1px solid lighten($borderColor, 70%)
+
+  &:hover
+    box-shadow 0 2px 8px rgba(0, 0, 0, 0.08)
+    border-color lighten($borderColor, 50%)
+
+.transaction--narrow .transaction__header
+  display flex
+  justify-content space-between
+  align-items flex-start
+  margin-bottom 12px
+  width 100%
+
+.transaction--narrow .transaction__content
+  display flex
+  justify-content space-between
+  align-items center
+  width 100%
+
+.transaction--narrow .transaction__type
+  flex 0 0 auto
+  display flex
+  align-items center
+  color $textColor
+  font-size 15px
+  font-weight 600
+  gap 8px
+  flex-wrap wrap
+
+.transaction--narrow .transaction__timestamp
   flex 0 0 auto
   display flex
   justify-content flex-end
+  
   .timestamp
-    font-size 10px
+    font-size 13px
+    color lighten($textColor, 30%)
+    text-align right
+    
   .timestamp__date
-    min-width 100px
+    min-width auto
+    
   .timestamp__time
-    min-width 80px
+    min-width auto
+    margin-left 8px
 
-.transaction__type
-  flex 0 0 80px
+.transaction--narrow .transaction__team
+  flex 0 0 auto
   display flex
-  text-transform uppercase
   align-items center
-  color lighten($textColor, 40%)
-  font-size 12px
-  font-weight bold
+  
+  .team__name
+    font-size 14px
+    font-weight 500
+    
+  .team__image
+    margin 0 8px 0 0
+    height 28px
+    width 28px
 
-.transaction__player
+.transaction--narrow .transaction__player
   flex 1
   display flex
   padding 0 16px
+  min-width 0
 
-.transaction__team
-  flex 1
+.transaction--narrow .transaction__value
+  flex 0 0 auto
   display flex
   align-items center
-  max-width 130px
-  .team__name
-    padding 0
-    font-size 12px
-  .team__image
-    margin 4px
-    height 30px
-    width 30px
+  font-size 16px
+  font-weight 600
+  color $textColor
+  min-width 60px
+  justify-content flex-end
 
-.transaction__top
-  display flex
-  justify-content space-between
-  background lighten(yellow, 90%)
-  padding 0 8px
-
-.transaction__body
-  display flex
-  justify-content space-between
-
-@media (min-width 601px)
-  .transaction
-    height 39px
-
-@media (max-width 800px)
-  .transaction__type
-    padding 8px 0
-
-  .transaction__timestamp .timestamp
-    flex-direction row
-    flex-wrap wrap
-    width 100px
-
-@media (max-width 600px)
-  .transaction
-    margin-top 4px
-    flex-direction column
-    border 1px solid $borderColor
-    border-radius 8px
-
-  .transaction__type
-    color $textColor
-    min-width 120px
-
-  .transaction__team
-    max-width 80px
-
-  .transaction__timestamp
-    .timestamp
-      flex-wrap nowrap
-      width 100%
-
-    .timestamp__date
-    .timestamp__time
-      justify-content flex-end
-      min-width auto
+.transaction--narrow .transaction__draft-pick
+  display inline-flex
+  align-items center
+  color $blue
+  font-weight 500
+  font-size 12px
+  background lighten($blue, 97%)
+  padding 4px 8px
+  border-radius 6px
+  border 1px solid lighten($blue, 85%)
+  white-space nowrap

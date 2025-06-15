@@ -8,75 +8,90 @@ import Timestamp from '@components/timestamp'
 
 import './transaction-row.styl'
 
-const isSmall = () => window.innerWidth <= 600
+export default function TransactionRow({
+  transaction,
+  style,
+  showPlayer,
+  layout
+}) {
+  const is_draft_transaction = transaction.type === constants.transactions.DRAFT
 
-export default class TransactionRow extends React.Component {
-  constructor(props) {
-    super(props)
-    this.state = { small: isSmall() }
+  // Determine layout version
+  let use_wide_layout = false
+  if (layout === 'wide') {
+    use_wide_layout = true
+  } else if (layout === 'narrow') {
+    use_wide_layout = false
   }
 
-  update = () => {
-    this.setState({ small: isSmall() })
-  }
-
-  componentDidMount() {
-    window.addEventListener('resize', this.update)
-  }
-
-  componentWillUnmount() {
-    window.removeEventListener('resize', this.update)
-  }
-
-  render = () => {
-    const { transaction, style, showPlayer } = this.props
-
-    if (this.state.small) {
-      return (
-        <div style={style}>
-          <div className='transaction'>
-            <div className='transaction__top'>
-              <div className='transaction__type'>
-                {constants.transactionsDetail[transaction.type]}
-              </div>
-              <div className='transaction__timestamp'>
-                <Timestamp timestamp={transaction.timestamp} />
-              </div>
-            </div>
-            <div className='transaction__body'>
-              <div className='transaction__team'>
-                <TeamName abbrv color image tid={transaction.tid} />
-              </div>
-              {Boolean(showPlayer) && (
-                <div className='transaction__player'>
-                  <PlayerName pid={transaction.pid} headshot_width={48} />
-                </div>
-              )}
-              <div className='transaction__value'>${transaction.value}</div>
-            </div>
-          </div>
-        </div>
-      )
-    }
-
-    return (
-      <div style={style}>
-        <div className='transaction'>
-          <div className='transaction__team'>
-            <TeamName abbrv color image tid={transaction.tid} />
-          </div>
-          <div className='transaction__type'>
-            {constants.transactionsDetail[transaction.type]}
-          </div>
-          {Boolean(showPlayer) && (
-            <div className='transaction__player'>
-              <PlayerName pid={transaction.pid} headshot_width={48} />
-            </div>
+  const transaction_type_content = (
+    <>
+      {constants.transactionsDetail[transaction.type]}
+      {is_draft_transaction && (
+        <>
+          {transaction.pick && (
+            <span className='transaction__draft-pick'>#{transaction.pick}</span>
           )}
-          <div className='transaction__timestamp'>
-            <Timestamp timestamp={transaction.timestamp} />
+          {transaction.pick_str && (
+            <span className='transaction__draft-pick'>
+              {transaction.pick_str}
+            </span>
+          )}
+        </>
+      )}
+    </>
+  )
+
+  if (use_wide_layout) {
+    // WIDE LAYOUT: team | transaction type | player | position | time | salary
+    return (
+      <div className='transaction transaction--wide' style={style}>
+        <div className='transaction__team'>
+          <TeamName abbrv color image tid={transaction.tid} />
+        </div>
+        <div className='transaction__type'>{transaction_type_content}</div>
+        {Boolean(showPlayer) && (
+          <div className='transaction__player'>
+            <PlayerName
+              pid={transaction.pid}
+              headshot_width={60}
+              headshot_square
+            />
           </div>
-          <div className='transaction__value'>${transaction.value}</div>
+        )}
+        <div className='transaction__timestamp'>
+          <Timestamp timestamp={transaction.timestamp} />
+        </div>
+        <div className='transaction__value'>${transaction.value}</div>
+      </div>
+    )
+  } else {
+    // NARROW LAYOUT: Card with two rows
+    return (
+      <div className='transaction-row-wrapper--narrow' style={style}>
+        <div className='transaction transaction--narrow'>
+          <div className='transaction__header'>
+            <div className='transaction__type'>{transaction_type_content}</div>
+            <div className='transaction__timestamp'>
+              <Timestamp timestamp={transaction.timestamp} />
+            </div>
+          </div>
+          <div className='transaction__content'>
+            <div className='transaction__team'>
+              <TeamName abbrv color image tid={transaction.tid} />
+            </div>
+            {Boolean(showPlayer) && (
+              <div className='transaction__player'>
+                <PlayerName
+                  pid={transaction.pid}
+                  headshot_width={60}
+                  headshot_square
+                  hidePosition
+                />
+              </div>
+            )}
+            <div className='transaction__value'>${transaction.value}</div>
+          </div>
         </div>
       </div>
     )
@@ -84,7 +99,8 @@ export default class TransactionRow extends React.Component {
 }
 
 TransactionRow.propTypes = {
-  style: PropTypes.object,
   transaction: PropTypes.object,
-  showPlayer: PropTypes.bool
+  style: PropTypes.object,
+  showPlayer: PropTypes.bool,
+  layout: PropTypes.oneOf(['wide', 'narrow'])
 }

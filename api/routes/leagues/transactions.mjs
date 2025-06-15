@@ -28,10 +28,14 @@ router.get('/?', async (req, res) => {
       : []
 
     let query = db('transactions')
-      .leftJoin('draft', function() {
+      .leftJoin('draft', function () {
         this.on('transactions.pid', '=', 'draft.pid')
           .andOn('transactions.lid', '=', 'draft.lid')
-          .andOn('transactions.type', '=', db.raw('?', [constants.transactions.DRAFT]))
+          .andOn(
+            'transactions.type',
+            '=',
+            db.raw('?', [constants.transactions.DRAFT])
+          )
       })
       .select('transactions.*', 'draft.pick', 'draft.pick_str')
       .where({ 'transactions.lid': leagueId })
