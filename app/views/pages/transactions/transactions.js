@@ -13,7 +13,10 @@ import TransactionTeamFilter from '@components/transaction-team-filter'
 
 import './transactions.styl'
 
-const getHeight = () => (window.innerWidth <= 600 ? 75 : 40)
+const layout_breakpoint = 700
+const getHeight = () => (window.innerWidth > layout_breakpoint ? 60 : 112)
+const getLayout = () =>
+  window.innerWidth > layout_breakpoint ? 'wide' : 'narrow'
 
 export default function TransactionsPage({
   transactions,
@@ -24,8 +27,13 @@ export default function TransactionsPage({
 }) {
   const navigate = useNavigate()
   const [height, setHeight] = useState(getHeight())
+  const [layout, setLayout] = useState(getLayout())
 
-  const update = () => setHeight(getHeight())
+  const update = () => {
+    setHeight(getHeight())
+    setLayout(getLayout())
+  }
+
   const { lid } = useParams()
 
   useEffect(() => {
@@ -45,7 +53,14 @@ export default function TransactionsPage({
 
   const Row = ({ index, ...params }) => {
     const transaction = transactions.get(index)
-    return <TransactionRow transaction={transaction} showPlayer {...params} />
+    return (
+      <TransactionRow
+        transaction={transaction}
+        showPlayer
+        layout={layout}
+        {...params}
+      />
+    )
   }
 
   Row.propTypes = {

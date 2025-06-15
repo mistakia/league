@@ -7,6 +7,7 @@ import {
   getCurrentLeague,
   isBeforeExtensionDeadline
 } from '@core/selectors'
+import { constants, getExtensionAmount } from '@libs-shared'
 import { playerActions } from '@core/players'
 
 import SelectedPlayerTransactions from './selected-player-transactions'
@@ -15,10 +16,12 @@ const mapStateToProps = createSelector(
   getSelectedPlayer,
   getCurrentLeague,
   isBeforeExtensionDeadline,
-  (playerMap, league, isBeforeExtensionDeadline) => {
-    const transactions = playerMap.get('transactions', new List())
+  (player_map, league, is_before_extension_deadline) => {
+    const transactions = player_map.get('transactions', new List())
     const teams = {}
-    let maxTransaction = { value: 0 }
+    let max_transaction = { value: 0 }
+
+    // Process transactions to find max per team and overall max
     for (const transaction of transactions.valueSeq()) {
       if (
         !teams[transaction.tid] ||
@@ -27,18 +30,63 @@ const mapStateToProps = createSelector(
         teams[transaction.tid] = transaction
       }
       if (
-        !maxTransaction.timestamp ||
-        transaction.value > maxTransaction.value
+        !max_transaction.timestamp ||
+        transaction.value > max_transaction.value
       ) {
-        maxTransaction = transaction
+        max_transaction = transaction
       }
     }
+
+    // Find draft transaction
+    const draft_transaction = transactions.find(
+      (t) => t.type === constants.transactions.DRAFT
+    )
+
+    // Calculate extension salaries
+    const extensions = player_map.get('extensions', 0)
+    const value = player_map.get('value')
+    const extension_salaries = []
+    const extended_salary = is_before_extension_deadline
+      ? getExtensionAmount({
+          pos: player_map.get('pos'),
+          tag: player_map.get('tag'),
+          extensions,
+          league,
+          value
+        })
+      : value
+    extension_salaries.push({
+      year: constants.year,
+      extended_salary
+    })
+
+    let salary = extended_salary
+    let year = constants.year
+    for (let i = extensions; extension_salaries.length < 4; i++) {
+      salary = getExtensionAmount({
+        pos: player_map.get('pos'),
+        extensions: i,
+        league,
+        value: salary
+      })
+      year += 1
+      extension_salaries.push({
+        year,
+        extended_salary: salary
+      })
+    }
+
     return {
       league,
-      playerMap,
+      playerMap: player_map,
       teams,
-      maxTransaction,
-      isBeforeExtensionDeadline
+      maxTransaction: max_transaction,
+      isBeforeExtensionDeadline: is_before_extension_deadline,
+      draft_transaction,
+      extension_salaries,
+      extensions,
+      value,
+      loadingTransactions: player_map.get('loadingTransactions', false)
     }
   }
 )

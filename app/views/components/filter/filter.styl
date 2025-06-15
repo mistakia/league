@@ -1,103 +1,134 @@
 .player__filter
   position relative
-  border-radius 3px
-  padding 4px 8px
-  margin 8px 4px !important
+  border-radius 6px
+  padding 8px 12px
+  margin 0 8px 0 0
   display flex
   flex-direction column
-  background #f0f0f0
+  background white
   cursor pointer
   user-select none
-  min-height 35px
+  min-height 40px
   flex 0 0 auto
-  max-width 126px
-  transition box-shadow $smooth_transition
+  max-width 140px
+  transition all 0.15s ease
+  border 1px solid lighten($borderColor, 50%)
+  box-shadow 0 1px 3px rgba(0, 0, 0, 0.04)
 
   &:not(.switch)
     background white
+    
   &:hover
     background white
-    box-shadow $box_shadow
+    box-shadow 0 2px 8px rgba(0, 0, 0, 0.08)
+    border-color lighten($borderColor, 20%)
+    
     .player__filter-label
-      color $accentColor
+      color $blue
 
   &.switch
     align-items center
 
 .player__filter-label
-  font-size 0.6875rem
-  font-weight 700
-  color lighten($textColor, 40%)
+  font-size 11px
+  font-weight 600
+  color lighten($textColor, 30%)
   text-transform uppercase
-  letter-spacing 0.02em
+  letter-spacing 0.05em
+  margin-bottom 2px
 
 .player__filter-dropdown
   background white
   position absolute
   top 3rem
-  min-width 150px
+  min-width 180px
   z-index 10001
   display flex
   flex-direction column
-  border 1px solid $borderColor
-  box-shadow $box_shadow
-  border-radius 3px
+  border 1px solid lighten($borderColor, 30%)
+  box-shadow 0 4px 16px rgba(0, 0, 0, 0.12)
+  border-radius 8px
+  overflow hidden
 
 .player__filter-dropdown-body
   display flex
   flex-direction column
-  max-height 250px
+  max-height 280px
   overflow hidden
   overflow-y scroll
-  border-radius 0 0 3px 3px
+  border-radius 0 0 8px 8px
 
 .player__filter-dropdown-item
   flex 1
-  padding 8px 16px
+  padding 10px 16px
   display flex
+  transition background-color 0.15s ease
 
   &.selected
-    background rgba(25, 118, 210, 0.08)
+    background lighten($blue, 95%)
+    color $blue
 
   &:hover
-    background #fafafa
+    background lighten($backgroundColor, 50%)
 
   .MuiCheckbox-root
-    padding 0 9px 0 0
+    padding 0 8px 0 0
 
   .MuiSvgIcon-root
-    width 16px
-    height 16px
+    width 18px
+    height 18px
 
 .player__filter-selection
   white-space nowrap
   overflow hidden
   text-overflow ellipsis
+  font-size 13px
+  font-weight 500
+  color $textColor
 
 .player__filter-dropdown-head
   display flex
-  border-bottom 1px solid $borderColor
+  border-bottom 1px solid lighten($borderColor, 50%)
   justify-content space-between
-  padding 8px
+  padding 12px 16px
+  background lighten($backgroundColor, 50%)
 
 .player__filter-dropdown-action
-  background #f0f0f0
-  padding 0.25rem 0.5rem
-  border-radius 3px
+  background lighten($backgroundColor, 30%)
+  padding 6px 12px
+  border-radius 6px
   display flex
   justify-content center
   align-items center
+  font-size 12px
+  font-weight 500
+  transition background-color 0.15s ease
+  border 1px solid lighten($borderColor, 50%)
+  
   &:hover
-    background darken(#f0f0f0, 30%)
+    background lighten($backgroundColor, 10%)
+    border-color lighten($borderColor, 20%)
+
+@media (max-width 1000px)
+  .player__filter
+    margin 0 6px 8px 0
+    max-width 130px
 
 @media (max-width 800px)
+  .player__filter
+    margin 0 4px 8px 0
+    max-width 120px
+    min-height 36px
+    padding 6px 10px
+
   .player__filter-dropdown
     position fixed
     left 50%
     top 50%
     transform translate(-50%, -50%)
-    width 66%
+    width 80%
+    max-width 320px
 
   .player__filter-dropdown-action
-    min-height 32px
-    min-width 48px
+    min-height 36px
+    min-width 60px
