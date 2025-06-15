@@ -8,7 +8,7 @@
   background white
   cursor pointer
   user-select none
-  min-height 40px
+  min-height 44px
   flex 0 0 auto
   max-width 140px
   transition all 0.15s ease
@@ -63,10 +63,10 @@
   padding 10px 16px
   display flex
   transition background-color 0.15s ease
+  align-items center
 
   &.selected
     background lighten($blue, 95%)
-    color $blue
 
   &:hover
     background lighten($backgroundColor, 50%)
@@ -91,7 +91,6 @@
   border-bottom 1px solid lighten($borderColor, 50%)
   justify-content space-between
   padding 12px 16px
-  background lighten($backgroundColor, 50%)
 
 .player__filter-dropdown-action
   background lighten($backgroundColor, 30%)
