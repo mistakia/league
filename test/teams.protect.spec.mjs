@@ -28,7 +28,9 @@ describe('API /teams - protect', function () {
     this.timeout(60 * 1000)
     await knex.seed.run()
 
-    MockDate.set(constants.season.start.add('1', 'month').toISOString())
+    MockDate.set(
+      constants.season.regular_season_start.add('1', 'month').toISOString()
+    )
   })
 
   describe('post', function () {

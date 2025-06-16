@@ -238,7 +238,7 @@ export default function ({ is_logged_in }) {
       size: 60,
       data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
       column_groups: [COLUMN_GROUPS.DRAFT],
-      player_value_path: 'start'
+      player_value_path: 'nfl_draft_year'
     },
     player_current_nfl_team: {
       column_title: 'Current NFL Team',

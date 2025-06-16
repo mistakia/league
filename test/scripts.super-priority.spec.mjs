@@ -16,7 +16,7 @@ import populate_super_priority_table from '#scripts/populate-super-priority-tabl
 process.env.NODE_ENV = 'test'
 const expect = chai.expect
 chai.should()
-const { start } = constants.season
+const { regular_season_start } = constants.season
 
 describe('SCRIPTS - Super Priority Processing', function () {
   before(async function () {
@@ -26,7 +26,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
 
   beforeEach(async function () {
     this.timeout(60 * 1000)
-    MockDate.set(start.subtract('1', 'month').toISOString())
+    MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
     await league(knex)
     // Clear super_priority table to avoid unique constraint violations
     await knex('super_priority').del()
@@ -78,7 +78,7 @@ describe('SCRIPTS - Super Priority Processing', function () {
       })
 
       // Set date to free agency period
-      MockDate.set(start.add('2', 'months').toISOString())
+      MockDate.set(regular_season_start.add('2', 'months').toISOString())
 
       // Release player from poaching team to make available for waivers
       // Must be more than 24 hours ago to be eligible for processing
@@ -248,17 +248,21 @@ describe('SCRIPTS - Super Priority Processing', function () {
     })
 
     it('should prioritize active roster waiver over super priority practice squad waiver', async () => {
-      // Set up proper timing - we're in free agency period (before season start)
-      const free_agency_auction_start = start.subtract('2', 'months')
-      const current_time = start.subtract('1', 'month') // After auction start, before season
+      // Set up proper timing - we're in free agency period (before season regular_season_start)
+      const free_agency_auction_regular_season_start =
+        regular_season_start.subtract('2', 'months')
+      const current_time = regular_season_start.subtract('1', 'month') // After auction regular_season_start, before season
       MockDate.set(current_time.toISOString())
 
       // Set up league for free agency period to allow active roster waiver processing
       await knex('seasons')
         .where({ lid: 1, year: constants.year })
         .update({
-          free_agency_live_auction_start: free_agency_auction_start.unix(),
-          draft_start: free_agency_auction_start.subtract('1', 'week').unix() // Draft completed before FA
+          free_agency_live_auction_start:
+            free_agency_auction_regular_season_start.unix(),
+          draft_start: free_agency_auction_regular_season_start
+            .subtract('1', 'week')
+            .unix() // Draft completed before FA
         })
 
       // Update timestamps to be relative to current mock time

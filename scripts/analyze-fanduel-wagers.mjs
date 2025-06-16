@@ -154,7 +154,7 @@ const analyze_fanduel_wagers = async ({
   for (const wager of wagers) {
     wager.week = dayjs(wager.settledDate)
       .subtract('2', 'day')
-      .diff(constants.season.start, 'weeks')
+      .diff(constants.season.regular_season_start, 'weeks')
   }
 
   const filtered = wagers.filter((wager) => {
@@ -194,7 +194,7 @@ const analyze_fanduel_wagers = async ({
     .map((leg) => {
       const week = dayjs(leg.startTime)
         .subtract('2', 'day')
-        .diff(constants.season.start, 'weeks')
+        .diff(constants.season.regular_season_start, 'weeks')
 
       let max_potential_payout = 0
       let open_potential_payout = 0

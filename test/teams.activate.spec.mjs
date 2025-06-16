@@ -23,7 +23,7 @@ process.env.NODE_ENV = 'test'
 chai.should()
 chai.use(chai_http)
 const expect = chai.expect
-const { start } = constants.season
+const { regular_season_start } = constants.season
 
 describe('API /teams - activate', function () {
   before(async function () {
@@ -37,7 +37,7 @@ describe('API /teams - activate', function () {
     })
 
     it('drafted player', async () => {
-      MockDate.set(start.subtract('1', 'week').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'week').toISOString())
       const player = await selectPlayer()
       const teamId = 1
       const leagueId = 1

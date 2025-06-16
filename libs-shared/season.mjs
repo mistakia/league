@@ -27,7 +27,7 @@ const getEstOffset = (datetime = new Date()) => {
 export default class Season {
   constructor({
     offseason,
-    start,
+    regular_season_start,
     end,
     openingDay,
     finalWeek,
@@ -40,7 +40,10 @@ export default class Season {
     this.offseason = dayjs.unix(offseason).utc().utcOffset(-5)
 
     // Two Tuesdays before first game
-    this.start = dayjs.unix(start).utc().utcOffset(-4)
+    this.regular_season_start = dayjs
+      .unix(regular_season_start)
+      .utc()
+      .utcOffset(-4)
 
     // super bowl
     this.end = dayjs.unix(end).utc().utcOffset(-5)
@@ -108,7 +111,7 @@ export default class Season {
   }
 
   get fantasy_season_week() {
-    if (this.now < this.start) {
+    if (this.now < this.regular_season_start) {
       return 0
     }
 
@@ -120,7 +123,7 @@ export default class Season {
   }
 
   get week() {
-    const diff = Math.max(0, this.now.diff(this.start, 'weeks'))
+    const diff = Math.max(0, this.now.diff(this.regular_season_start, 'weeks'))
     return diff
   }
 
@@ -128,7 +131,7 @@ export default class Season {
   // POST and REG seas_type starts at 1
   // PRE seas_type starts at 0
   calculate_week(dayjs_date) {
-    const diff = dayjs_date.diff(this.start, 'weeks')
+    const diff = dayjs_date.diff(this.regular_season_start, 'weeks')
     let seas_type = 'PRE'
     let week_number = 0
 
@@ -151,12 +154,14 @@ export default class Season {
 
   get week_end() {
     const week = this.week
-    return this.start.add(week + 1, 'weeks')
+    return this.regular_season_start.add(week + 1, 'weeks')
   }
 
   get year() {
     const now = this.now
-    return now.isBefore(this.end) ? this.start.year() : this.end.year()
+    return now.isBefore(this.end)
+      ? this.regular_season_start.year()
+      : this.end.year()
   }
 
   get nfl_seas_type() {
@@ -172,7 +177,7 @@ export default class Season {
   }
 
   get nfl_seas_week() {
-    const week = this.now.diff(this.start, 'weeks')
+    const week = this.now.diff(this.regular_season_start, 'weeks')
 
     if (week < 1) {
       if (week <= -3) {

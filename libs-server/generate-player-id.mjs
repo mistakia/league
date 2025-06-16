@@ -5,7 +5,7 @@ import is_main from './is-main.mjs'
 const log = debug('generate-player-id')
 debug.enable('generate-player-id')
 
-const required_fields = ['fname', 'lname', 'start', 'dob']
+const required_fields = ['fname', 'lname', 'nfl_draft_year', 'dob']
 
 const generate_player_id = (player_data) => {
   // check if all required fields are present
@@ -36,8 +36,11 @@ const generate_player_id = (player_data) => {
     .join('')
     .padEnd(4, 'X')
 
-  // format nfl start year, a number, to ensure it is in format YYYY, fill in any missing digits
-  const start = player_data.start.toString().slice(0, 4).padStart(4, '0')
+  // format nfl draft year, a number, to ensure it is in format YYYY, fill in any missing digits
+  const start = player_data.nfl_draft_year
+    .toString()
+    .slice(0, 4)
+    .padStart(4, '0')
 
   // format date of birth to ensure it is in format YYYY-MM-DD, fill in any missing digits
   const dob = player_data.dob

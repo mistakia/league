@@ -20,7 +20,7 @@ import {
 } from './utils/index.mjs'
 
 process.env.NODE_ENV = 'test'
-const { start } = constants.season
+const { regular_season_start } = constants.season
 chai.should()
 chai.use(chai_http)
 const expect = chai.expect
@@ -33,7 +33,7 @@ describe('API /leagues/rosters - update', function () {
 
   describe('put', function () {
     beforeEach(async function () {
-      MockDate.set(start.subtract('2', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('2', 'month').toISOString())
       await league(knex)
     })
 
@@ -87,7 +87,7 @@ describe('API /leagues/rosters - update', function () {
 
   describe('errors', function () {
     beforeEach(async function () {
-      MockDate.set(start.subtract('2', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('2', 'month').toISOString())
       await league(knex)
     })
 

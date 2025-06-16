@@ -237,7 +237,7 @@ export default {
   },
   player_starting_nfl_year: {
     table_name: 'player',
-    column_name: 'start',
+    column_name: 'nfl_draft_year',
     get_cache_info: player_table_get_cache_info
   },
   player_current_nfl_team: {

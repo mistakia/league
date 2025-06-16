@@ -104,7 +104,7 @@ class PlayerRoster extends Player {
     })
 
     if (isBeforeExtensionDeadline) {
-      const is_rookie = playerMap.get('start') >= constants.year - 1
+      const is_rookie = playerMap.get('nfl_draft_year') >= constants.year - 1
       if (is_rookie) {
         rookie_tag_savings =
           Math.max(regular_extended_salary - value, 0) || null

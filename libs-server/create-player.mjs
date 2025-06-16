@@ -20,7 +20,7 @@ debug.enable('create-player')
    fname
    lname
    dob
-   start
+   nfl_draft_year
 
    pos
    pos1
@@ -42,7 +42,7 @@ const required = [
   'fname',
   'lname',
   'dob',
-  'start',
+  'nfl_draft_year',
   'pos',
   'pos1',
   'height',
@@ -53,24 +53,24 @@ const required = [
 const createPlayer = async (playerData) => {
   const playerId = await generate_player_id(playerData)
 
-  if (!playerData.start) {
+  if (!playerData.nfl_draft_year) {
     const { espn_id, sportradar_id } = playerData
     if (espn_id) {
       const espnPlayer = await espn.getPlayer({ espn_id })
-      playerData.start = espnPlayer.athlete.debutYear
+      playerData.nfl_draft_year = espnPlayer.athlete.debutYear
     }
 
-    if (IS_PROD && !playerData.start && sportradar_id) {
+    if (IS_PROD && !playerData.nfl_draft_year && sportradar_id) {
       try {
         const sportradarPlayer = await sportradar.getPlayer({ sportradar_id })
-        playerData.start = sportradarPlayer.rookie_year
+        playerData.nfl_draft_year = sportradarPlayer.rookie_year
 
-        if (!playerData.start) {
+        if (!playerData.nfl_draft_year) {
           if (sportradarPlayer.draft) {
-            playerData.start = sportradarPlayer.draft.year
+            playerData.nfl_draft_year = sportradarPlayer.draft.year
           } else if (sportradarPlayer.seasons.length) {
             const seasons = sportradarPlayer.seasons.map((s) => s.year)
-            playerData.start = Math.min(...seasons)
+            playerData.nfl_draft_year = Math.min(...seasons)
           }
         }
       } catch (e) {

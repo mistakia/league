@@ -15432,7 +15432,7 @@ CREATE TABLE public.player (
     round smallint,
     col character varying(255),
     dv character varying(35),
-    start integer NOT NULL,
+    nfl_draft_year integer NOT NULL,
     current_nfl_team character varying(3) DEFAULT 'INA'::character varying NOT NULL,
     posd character varying(8),
     jnum smallint,
@@ -15656,10 +15656,10 @@ COMMENT ON COLUMN public.player.dv IS 'college division';
 
 
 --
--- Name: COLUMN player.start; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN player.nfl_draft_year; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.start IS 'starting nfl year';
+COMMENT ON COLUMN public.player.nfl_draft_year IS 'nfl draft year';
 
 
 --

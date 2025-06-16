@@ -195,7 +195,7 @@ const run = async ({ dry = false }) => {
   // do not pull in nfl_game_event props outside of the NFL season
   if (
     !constants.season.now.isBetween(
-      constants.season.start,
+      constants.season.regular_season_start,
       constants.season.end
     )
   ) {

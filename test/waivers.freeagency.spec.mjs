@@ -22,7 +22,7 @@ process.env.NODE_ENV = 'test'
 
 chai.should()
 chai.use(chai_http)
-const { start } = constants.season
+const { regular_season_start } = constants.season
 
 describe('API /waivers - free agency', function () {
   before(async function () {
@@ -34,12 +34,12 @@ describe('API /waivers - free agency', function () {
   describe('put', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('2', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('2', 'month').toISOString())
       await league(knex)
     })
 
     it('submit waiver for player', async () => {
-      MockDate.set(start.add('1', 'week').toISOString())
+      MockDate.set(regular_season_start.add('1', 'week').toISOString())
 
       const player = await selectPlayer()
 
@@ -74,7 +74,7 @@ describe('API /waivers - free agency', function () {
     })
 
     it('submit waiver for released rookie - offseason', async () => {
-      MockDate.set(start.subtract('1', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
       const leagueId = 1
       const player = await selectPlayer({ rookie: true })
       await addPlayer({
@@ -87,7 +87,7 @@ describe('API /waivers - free agency', function () {
         value: 3
       })
 
-      MockDate.set(start.subtract('3', 'week').toISOString())
+      MockDate.set(regular_season_start.subtract('3', 'week').toISOString())
       await releasePlayer({
         leagueId,
         player,
@@ -95,7 +95,12 @@ describe('API /waivers - free agency', function () {
         userId: 2
       })
 
-      MockDate.set(start.subtract('3', 'week').add('4', 'hour').toISOString())
+      MockDate.set(
+        regular_season_start
+          .subtract('3', 'week')
+          .add('4', 'hour')
+          .toISOString()
+      )
 
       // submit waiver claim
       const teamId = 1
@@ -138,12 +143,12 @@ describe('API /waivers - free agency', function () {
   describe('errors', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('2', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('2', 'month').toISOString())
       await league(knex)
     })
 
     it('duplicate waiver claim', async () => {
-      MockDate.set(start.subtract('1', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
       const leagueId = 1
       const player = await selectPlayer({ rookie: true })
       await addPlayer({
@@ -156,7 +161,7 @@ describe('API /waivers - free agency', function () {
         value: 3
       })
 
-      MockDate.set(start.subtract('3', 'week').toISOString())
+      MockDate.set(regular_season_start.subtract('3', 'week').toISOString())
       await releasePlayer({
         leagueId,
         player,
@@ -164,7 +169,12 @@ describe('API /waivers - free agency', function () {
         userId: 2
       })
 
-      MockDate.set(start.subtract('3', 'week').add('4', 'hour').toISOString())
+      MockDate.set(
+        regular_season_start
+          .subtract('3', 'week')
+          .add('4', 'hour')
+          .toISOString()
+      )
       const teamId = 1
       await chai_request
         .execute(server)
@@ -225,7 +235,7 @@ describe('API /waivers - free agency', function () {
       const player = players[0]
 
       // set time to thursday
-      MockDate.set(start.add('1', 'week').day(5).toISOString())
+      MockDate.set(regular_season_start.add('1', 'week').day(5).toISOString())
 
       // add player
       await addPlayer({ leagueId: 1, player, teamId: 2, userId: 2 })
@@ -259,7 +269,7 @@ describe('API /waivers - free agency', function () {
     })
 
     it('practice waiver for non rookie - offseason', async () => {
-      MockDate.set(start.subtract('1', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
       const leagueId = 1
       const player = await selectPlayer({ rookie: false })
 
@@ -283,7 +293,7 @@ describe('API /waivers - free agency', function () {
     })
 
     it('player is no longer on waivers - outside waiver period', async () => {
-      MockDate.set(start.add('1', 'month').day(5).toISOString())
+      MockDate.set(regular_season_start.add('1', 'month').day(5).toISOString())
       const leagueId = 1
       const player = await selectPlayer()
       const teamId = 1
@@ -302,7 +312,7 @@ describe('API /waivers - free agency', function () {
     })
 
     it('player is no longer on waivers - outside waiver period - practice', async () => {
-      MockDate.set(start.subtract('1', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
       const leagueId = 1
       const player = await selectPlayer({ rookie: true })
       await addPlayer({
@@ -315,7 +325,7 @@ describe('API /waivers - free agency', function () {
         value: 3
       })
 
-      MockDate.set(start.subtract('3', 'week').toISOString())
+      MockDate.set(regular_season_start.subtract('3', 'week').toISOString())
       await releasePlayer({
         leagueId,
         player,
@@ -323,7 +333,12 @@ describe('API /waivers - free agency', function () {
         userId: 2
       })
 
-      MockDate.set(start.subtract('3', 'week').add('25', 'hour').toISOString())
+      MockDate.set(
+        regular_season_start
+          .subtract('3', 'week')
+          .add('25', 'hour')
+          .toISOString()
+      )
 
       // submit waiver claim
       const teamId = 1
@@ -342,7 +357,7 @@ describe('API /waivers - free agency', function () {
     })
 
     it('team exceeds roster limits', async () => {
-      MockDate.set(start.add('1', 'month').day(2).toISOString())
+      MockDate.set(regular_season_start.add('1', 'month').day(2).toISOString())
       const leagueId = 1
       const teamId = 1
       await fillRoster({ leagueId, teamId })
@@ -364,7 +379,7 @@ describe('API /waivers - free agency', function () {
     })
 
     it('reserve player violation', async () => {
-      MockDate.set(start.add('1', 'week').toISOString())
+      MockDate.set(regular_season_start.add('1', 'week').toISOString())
       const reservePlayer = await selectPlayer({
         nfl_status: constants.player_nfl_status.ACTIVE
       })

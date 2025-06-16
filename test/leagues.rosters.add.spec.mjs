@@ -15,7 +15,7 @@ process.env.NODE_ENV = 'test'
 chai.should()
 chai.use(chai_http)
 const expect = chai.expect
-const { start } = constants.season
+const { regular_season_start } = constants.season
 
 describe('API /leagues/rosters - add', function () {
   before(async function () {
@@ -25,7 +25,7 @@ describe('API /leagues/rosters - add', function () {
 
   describe('post', function () {
     beforeEach(async function () {
-      MockDate.set(start.subtract('2', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('2', 'month').toISOString())
       await league(knex)
     })
 
@@ -78,7 +78,7 @@ describe('API /leagues/rosters - add', function () {
 
   describe('errors', function () {
     beforeEach(async function () {
-      MockDate.set(start.subtract('2', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('2', 'month').toISOString())
       await league(knex)
     })
 

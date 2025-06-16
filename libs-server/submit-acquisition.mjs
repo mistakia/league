@@ -105,7 +105,7 @@ export default async function ({
     }
 
     // check if during free agency period for veterans
-    if (player_row.start !== constants.season.year) {
+    if (player_row.nfl_draft_year !== constants.season.year) {
       if (league.free_agency_live_auction_start) {
         const faPeriod = getFreeAgentPeriod(league)
         if (
@@ -133,7 +133,7 @@ export default async function ({
   // verify player is practice squad eligible (rookie, not on a team, or on a PS)
   /* if (type === constants.transactions.PRACTICE_ADD) {
    *   if (
-   *     player_row.start !== constants.season.year &&
+   *     player_row.nfl_draft_year !== constants.season.year &&
    *     player_row.current_nfl_team !== 'INA'
    *   ) {
    *     throw new Error('player is not practice squad eligible')

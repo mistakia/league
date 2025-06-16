@@ -33,9 +33,9 @@ export default async function ({
   }
 
   if (rookie) {
-    query.where('start', constants.season.year)
+    query.where('nfl_draft_year', constants.season.year)
   } else {
-    query.whereNot('start', constants.season.year)
+    query.whereNot('nfl_draft_year', constants.season.year)
   }
 
   if (excludePS) {

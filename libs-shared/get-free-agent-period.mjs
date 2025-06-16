@@ -27,6 +27,6 @@ export default function getFreeAgentPeriod({
     free_agency_live_auction_end: free_agency_live_auction_end_dayjs,
     end: free_agency_period_end
       ? dayjs.unix(free_agency_period_end).tz('America/New_York')
-      : season.start.add('1', 'week').subtract('1', 'minute')
+      : season.regular_season_start.add('1', 'week').subtract('1', 'minute')
   }
 }

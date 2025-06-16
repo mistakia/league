@@ -110,7 +110,7 @@ export default function SelectedPlayer({
   const tid = playerMap.get('tid', false)
   const player_nfl_status = playerMap.get('nfl_status')
   const draftNum = playerMap.get('dpos')
-  const draftYear = playerMap.get('start')
+  const draftYear = playerMap.get('nfl_draft_year')
   const draftRound = playerMap.get('round')
   const playerValue = playerMap.get('value')
   const rosPoints = playerMap.getIn(['points', 'ros', 'total'], 0)

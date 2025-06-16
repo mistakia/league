@@ -24,7 +24,7 @@ process.env.NODE_ENV = 'test'
 chai.should()
 chai.use(chai_http)
 const expect = chai.expect
-const { start } = constants.season
+const { regular_season_start } = constants.season
 
 describe('API /teams - deactivate', function () {
   before(async function () {
@@ -39,7 +39,7 @@ describe('API /teams - deactivate', function () {
     })
 
     it('drafted player', async () => {
-      MockDate.set(start.subtract('1', 'week').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'week').toISOString())
       const player = await selectPlayer({ rookie: true })
       const teamId = 1
       const leagueId = 1
@@ -105,7 +105,7 @@ describe('API /teams - deactivate', function () {
     })
 
     it('signed via waivers, with no competing bids', async () => {
-      MockDate.set(start.add('1', 'month').day(4).toISOString())
+      MockDate.set(regular_season_start.add('1', 'month').day(4).toISOString())
       const leagueId = 1
       const teamId = 1
       const userId = 1
@@ -302,7 +302,7 @@ describe('API /teams - deactivate', function () {
     })
 
     it('player previously poached', async () => {
-      MockDate.set(start.add('1', 'month').day(4).toISOString())
+      MockDate.set(regular_season_start.add('1', 'month').day(4).toISOString())
       const leagueId = 1
       const player = await selectPlayer({
         exclude_rostered_players: true,
@@ -332,7 +332,7 @@ describe('API /teams - deactivate', function () {
     })
 
     it('player previously activated', async () => {
-      MockDate.set(start.add('1', 'month').day(4).toISOString())
+      MockDate.set(regular_season_start.add('1', 'month').day(4).toISOString())
       const leagueId = 1
       const userId = 1
       const teamId = 1
@@ -383,7 +383,7 @@ describe('API /teams - deactivate', function () {
     })
 
     it('signed via free agency waivers with multiple bids', async () => {
-      MockDate.set(start.add('1', 'month').day(4).toISOString())
+      MockDate.set(regular_season_start.add('1', 'month').day(4).toISOString())
       const leagueId = 1
       const player = await selectPlayer({
         exclude_rostered_players: true,
