@@ -11,7 +11,7 @@ import { selectPlayer } from './utils/index.mjs'
 process.env.NODE_ENV = 'test'
 const expect = chai.expect
 chai.should()
-const { start } = constants.season
+const { regular_season_start } = constants.season
 
 describe('LIB - get_super_priority_status', function () {
   before(async function () {
@@ -21,7 +21,7 @@ describe('LIB - get_super_priority_status', function () {
 
   beforeEach(async function () {
     this.timeout(60 * 1000)
-    MockDate.set(start.subtract('1', 'month').toISOString())
+    MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
     await league(knex)
   })
 
@@ -343,7 +343,7 @@ describe('LIB - get_super_priority_status', function () {
         })
         .returning('uid')
 
-      // Add roster entry in starting slot
+      // Add roster entry in regular_season_starting slot
       await knex('rosters_players').insert({
         rid: roster.uid,
         pid: player.pid,

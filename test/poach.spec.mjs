@@ -12,7 +12,7 @@ import { user1 } from './fixtures/token.mjs'
 
 process.env.NODE_ENV = 'test'
 chai.use(chai_http)
-const { start } = constants.season
+const { regular_season_start } = constants.season
 
 describe('API /poaches', function () {
   before(async function () {
@@ -28,12 +28,12 @@ describe('API /poaches', function () {
   describe('errors', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('2', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('2', 'month').toISOString())
       await league(knex)
     })
 
     it('reserve player violation', async () => {
-      MockDate.set(start.add('1', 'week').toISOString())
+      MockDate.set(regular_season_start.add('1', 'week').toISOString())
       const reservePlayer = await selectPlayer({
         nfl_status: constants.player_nfl_status.ACTIVE
       })
@@ -59,7 +59,9 @@ describe('API /poaches', function () {
         userId: 2
       })
 
-      MockDate.set(start.add('1', 'week').add('3', 'day').toISOString())
+      MockDate.set(
+        regular_season_start.add('1', 'week').add('3', 'day').toISOString()
+      )
 
       const request = chai_request
         .execute(server)

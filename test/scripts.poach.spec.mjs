@@ -15,13 +15,13 @@ process.env.NODE_ENV = 'test'
 chai.should()
 // chai.use(chai_http)
 const expect = chai.expect
-const { start } = constants.season
+const { regular_season_start } = constants.season
 
 describe('SCRIPTS /waivers - poach', function () {
   before(async function () {
     this.timeout(60 * 1000)
 
-    MockDate.set(start.subtract('1', 'month').toISOString())
+    MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
 
     await knex.seed.run()
   })
@@ -29,12 +29,12 @@ describe('SCRIPTS /waivers - poach', function () {
   describe('run', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('1', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
       await league(knex)
     })
 
     it('process single claim', async () => {
-      MockDate.set(start.subtract('1', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
       const player = await selectPlayer({ rookie: true })
       await addPlayer({
         leagueId: 1,
@@ -69,7 +69,7 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       MockDate.set(
-        start
+        regular_season_start
           .subtract('1', 'month')
           .add('2', 'day')
           .add('1', 'minute')
@@ -119,7 +119,7 @@ describe('SCRIPTS /waivers - poach', function () {
     })
 
     it('process single claim, of multiple', async () => {
-      MockDate.set(start.subtract('1', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
       const player1 = await selectPlayer({ rookie: true })
       await addPlayer({
         leagueId: 1,
@@ -153,7 +153,12 @@ describe('SCRIPTS /waivers - poach', function () {
         submitted: Math.round(Date.now() / 1000)
       })
 
-      MockDate.set(start.subtract('1', 'month').add('2', 'hour').toISOString())
+      MockDate.set(
+        regular_season_start
+          .subtract('1', 'month')
+          .add('2', 'hour')
+          .toISOString()
+      )
       const player2 = await selectPlayer({
         rookie: true,
         exclude_pids: [player1.pid]
@@ -191,7 +196,7 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       MockDate.set(
-        start
+        regular_season_start
           .subtract('1', 'month')
           .add('2', 'day')
           .add('1', 'minute')
@@ -252,7 +257,7 @@ describe('SCRIPTS /waivers - poach', function () {
     })
 
     it('no claims to be processed', async () => {
-      MockDate.set(start.subtract('1', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
       const player = await selectPlayer({ rookie: true })
       await addPlayer({
         leagueId: 1,
@@ -325,7 +330,7 @@ describe('SCRIPTS /waivers - poach', function () {
     })
 
     it('release player not on roster - have roster space', async () => {
-      MockDate.set(start.subtract('1', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
       const releasePlayer = await selectPlayer({ pos: 'RB' })
       const player = await selectPlayer({
         rookie: true,
@@ -378,7 +383,7 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       MockDate.set(
-        start
+        regular_season_start
           .subtract('1', 'month')
           .add('2', 'day')
           .add('1', 'minute')
@@ -423,12 +428,12 @@ describe('SCRIPTS /waivers - poach', function () {
   describe('errors', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('1', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
       await league(knex)
     })
 
     it('player is not on a practice squad', async () => {
-      MockDate.set(start.subtract('1', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
       const player = await selectPlayer({ rookie: true })
       await addPlayer({
         leagueId: 1,
@@ -479,7 +484,7 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       MockDate.set(
-        start
+        regular_season_start
           .subtract('1', 'month')
           .add('2', 'day')
           .add('1', 'minute')

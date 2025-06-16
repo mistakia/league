@@ -116,7 +116,7 @@ const import_players_from_combine_profiles_for_year = async ({
           col: profile.person.collegeNames.length
             ? profile.person.collegeNames[0]
             : null,
-          start: year,
+          nfl_draft_year: year,
           esbid: profile.person.esbId,
           jnum: 0,
           dob: '0000-00-00', // TODO - ideally required

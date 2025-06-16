@@ -16,7 +16,7 @@ process.env.NODE_ENV = 'test'
 
 chai.should()
 const expect = chai.expect
-const { start } = constants.season
+const { regular_season_start } = constants.season
 
 describe('SCRIPTS /waivers - free agency - active roster', function () {
   before(async function () {
@@ -27,12 +27,12 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
   describe('process', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('1', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
       await league(knex)
     })
 
     it('process single faab waiver', async () => {
-      MockDate.set(start.add('1', 'month').day(4).toISOString())
+      MockDate.set(regular_season_start.add('1', 'month').day(4).toISOString())
       const player = await selectPlayer()
       const teamId = 1
       const leagueId = 1
@@ -102,7 +102,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
     })
 
     it('process multiple faab waivers', async () => {
-      MockDate.set(start.add('1', 'month').day(4).toISOString())
+      MockDate.set(regular_season_start.add('1', 'month').day(4).toISOString())
       const leagueId = 1
       const exclude_pids = []
       const player1 = await selectPlayer()
@@ -302,7 +302,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
     })
 
     it('no waivers ready to process', async () => {
-      MockDate.set(start.add('1', 'month').day(4).toISOString())
+      MockDate.set(regular_season_start.add('1', 'month').day(4).toISOString())
       const player = await selectPlayer()
       const leagueId = 1
       await knex('transactions').insert({
@@ -352,12 +352,12 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
   describe('errors', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('1', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
       await league(knex)
     })
 
     it('no waivers to process', async () => {
-      MockDate.set(start.add('1', 'month').day(4).toISOString())
+      MockDate.set(regular_season_start.add('1', 'month').day(4).toISOString())
       let error
       try {
         await run()

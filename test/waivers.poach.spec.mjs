@@ -17,7 +17,7 @@ process.env.NODE_ENV = 'test'
 const expect = chai.expect
 chai.should()
 chai.use(chai_http)
-const { start } = constants.season
+const { regular_season_start } = constants.season
 
 // Track used player IDs to avoid duplicate waiver claims
 const team_id_2_used_player_ids = []
@@ -28,7 +28,7 @@ describe('API /waivers - poach', function () {
   before(async function () {
     this.timeout(60 * 1000)
 
-    MockDate.set(start.subtract('1', 'month').toISOString())
+    MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
 
     await knex.seed.run()
     await league(knex)
@@ -39,18 +39,25 @@ describe('API /waivers - poach', function () {
 
     await knex('seasons')
       .update({
-        free_agency_live_auction_start: start.subtract('1', 'week').unix()
+        free_agency_live_auction_start: regular_season_start
+          .subtract('1', 'week')
+          .unix()
       })
       .where('lid', 1)
   })
 
   it('submit poaching waiver for drafted player', async () => {
-    MockDate.set(start.subtract('1', 'month').add('10', 'minute').toISOString())
+    MockDate.set(
+      regular_season_start
+        .subtract('1', 'month')
+        .add('10', 'minute')
+        .toISOString()
+    )
 
     // make draft selection
     const leagueId = 1
     const players = await knex('player')
-      .where('start', constants.season.year)
+      .where('nfl_draft_year', constants.season.year)
       .limit(1)
 
     const player = players[0]
@@ -66,7 +73,7 @@ describe('API /waivers - poach', function () {
       })
 
     MockDate.set(
-      start
+      regular_season_start
         .subtract('1', 'month')
         .add('10', 'minute')
         .add('25', 'hours')
@@ -304,7 +311,7 @@ describe('API /waivers - poach', function () {
 
     it('release player not on team', async () => {
       const players = await knex('player')
-        .where('start', constants.season.year)
+        .where('nfl_draft_year', constants.season.year)
         .whereNotIn('pid', [...team_id_2_used_player_ids, drafted_player_id])
         .limit(1)
 
@@ -364,7 +371,7 @@ describe('API /waivers - poach', function () {
     })
 
     it('player is not on waivers - past 48 hours', async () => {
-      const time = start
+      const time = regular_season_start
         .subtract('1', 'month')
         .add('2', 'day')
         .add('11', 'minute')

@@ -142,7 +142,7 @@ const analyze_draftkings_wagers = async ({
   for (const wager of wagers) {
     wager.week = dayjs(wager.settlementDate)
       .subtract('2', 'day')
-      .diff(constants.season.start, 'weeks')
+      .diff(constants.season.regular_season_start, 'weeks')
   }
 
   const filtered = wagers.filter((wager) => {

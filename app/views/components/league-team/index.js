@@ -87,7 +87,7 @@ const mapStateToProps = createSelector(
           value
         })
 
-        const is_rookie = p.get('start') >= constants.year - 1
+        const is_rookie = p.get('nfl_draft_year') >= constants.year - 1
         if (is_rookie) {
           rookie_tag_savings =
             Math.max(regular_extended_salary - value, 0) || null

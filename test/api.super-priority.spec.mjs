@@ -19,7 +19,7 @@ import {
 process.env.NODE_ENV = 'test'
 chai.should()
 chai.use(chai_http)
-const { start } = constants.season
+const { regular_season_start } = constants.season
 
 describe('API /leagues/:lid/waivers - Super Priority', function () {
   before(async function () {
@@ -29,7 +29,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
 
   beforeEach(async function () {
     this.timeout(60 * 1000)
-    MockDate.set(start.subtract('1', 'month').toISOString())
+    MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
     await league(knex)
   })
 
@@ -116,7 +116,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
       player = await selectPlayer({ rookie: false })
 
       // Start with initial date for setup
-      MockDate.set(start.subtract('1', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
 
       // Step 1: Add player to original team (team 1) practice squad first
       await addPlayer({
@@ -129,7 +129,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
       })
 
       // Move time forward for poach
-      MockDate.set(start.subtract('3', 'week').toISOString())
+      MockDate.set(regular_season_start.subtract('3', 'week').toISOString())
       poach_timestamp = Math.round(Date.now() / 1000)
 
       // Step 2: Create poach transaction (team 2 poaches from team 1)
@@ -156,7 +156,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
       })
 
       // Step 4: Set date to free agency period first
-      MockDate.set(start.add('2', 'months').toISOString())
+      MockDate.set(regular_season_start.add('2', 'months').toISOString())
 
       // Step 5: Release player recently to make available for waivers
       await releasePlayer({
@@ -341,7 +341,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
 
     beforeEach(async () => {
       player = await selectPlayer({ rookie: false })
-      MockDate.set(start.add('2', 'months').toISOString())
+      MockDate.set(regular_season_start.add('2', 'months').toISOString())
     })
 
     it('should handle super priority claim when player already claimed back', async () => {
@@ -501,7 +501,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
 
     beforeEach(async () => {
       player = await selectPlayer({ rookie: false })
-      MockDate.set(start.add('2', 'months').toISOString())
+      MockDate.set(regular_season_start.add('2', 'months').toISOString())
 
       const poach_timestamp = Math.round(Date.now() / 1000) - 7 * 24 * 60 * 60 // 1 week ago
 

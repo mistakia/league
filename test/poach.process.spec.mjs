@@ -14,7 +14,7 @@ chai.should()
 process.env.NODE_ENV = 'test'
 chai.use(chai_http)
 const expect = chai.expect
-const { start } = constants.season
+const { regular_season_start } = constants.season
 
 describe('API /poaches - process', function () {
   before(async function () {
@@ -25,7 +25,7 @@ describe('API /poaches - process', function () {
   describe('should process a poach', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('2', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('2', 'month').toISOString())
       await league(knex)
     })
 

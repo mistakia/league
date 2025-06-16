@@ -24,7 +24,7 @@ process.env.NODE_ENV = 'test'
 chai.should()
 chai.use(chai_http)
 const expect = chai.expect
-const { start } = constants.season
+const { regular_season_start } = constants.season
 
 describe('API /teams - release', function () {
   before(async function () {
@@ -35,12 +35,12 @@ describe('API /teams - release', function () {
   describe('post', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('1', 'week').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'week').toISOString())
       await league(knex)
     })
 
     it('practice squad player - season', async () => {
-      MockDate.set(start.add('1', 'month').day(5).toISOString())
+      MockDate.set(regular_season_start.add('1', 'month').day(5).toISOString())
 
       const teamId = 1
       const leagueId = 1
@@ -96,7 +96,7 @@ describe('API /teams - release', function () {
     })
 
     it('practice squad player - offseason', async () => {
-      MockDate.set(start.subtract('1', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
 
       const teamId = 1
       const leagueId = 1
@@ -152,7 +152,7 @@ describe('API /teams - release', function () {
     })
 
     it('active roster player - season', async () => {
-      MockDate.set(start.add('1', 'month').toISOString())
+      MockDate.set(regular_season_start.add('1', 'month').toISOString())
 
       const teamId = 1
       const leagueId = 1
@@ -208,7 +208,7 @@ describe('API /teams - release', function () {
     })
 
     it('active roster player - offseason', async () => {
-      MockDate.set(start.subtract('1', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
 
       const teamId = 1
       const leagueId = 1
@@ -264,7 +264,7 @@ describe('API /teams - release', function () {
     })
 
     it('ir player - offseason', async () => {
-      MockDate.set(start.subtract('1', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
 
       const teamId = 1
       const leagueId = 1
@@ -320,7 +320,7 @@ describe('API /teams - release', function () {
     })
 
     it('ir player - season', async () => {
-      MockDate.set(start.add('1', 'month').toISOString())
+      MockDate.set(regular_season_start.add('1', 'month').toISOString())
 
       const teamId = 1
       const leagueId = 1
@@ -387,7 +387,7 @@ describe('API /teams - release', function () {
   describe('errors', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
-      MockDate.set(start.subtract('1', 'week').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'week').toISOString())
       await league(knex)
     })
 
@@ -450,7 +450,7 @@ describe('API /teams - release', function () {
     })
 
     it('invalid player - not on team', async () => {
-      MockDate.set(start.subtract('1', 'month').toISOString())
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
 
       const teamId = 1
       const leagueId = 1
@@ -470,7 +470,7 @@ describe('API /teams - release', function () {
     })
 
     it('release player with a poaching claim', async () => {
-      MockDate.set(start.add('1', 'month').day(5).toISOString())
+      MockDate.set(regular_season_start.add('1', 'month').day(5).toISOString())
 
       const teamId = 1
       const leagueId = 1
@@ -507,7 +507,7 @@ describe('API /teams - release', function () {
     })
 
     it('player is protected', async () => {
-      MockDate.set(start.add('1', 'week').toISOString())
+      MockDate.set(regular_season_start.add('1', 'week').toISOString())
       const player = await selectPlayer()
       await addPlayer({
         leagueId: 1,
