@@ -40,7 +40,12 @@ describe('API /draft', function () {
   })
 
   it('make selection', async () => {
-    MockDate.set(regular_season_start.subtract('1', 'month').add('10', 'minute').toISOString())
+    MockDate.set(
+      regular_season_start
+        .subtract('1', 'month')
+        .add('10', 'minute')
+        .toISOString()
+    )
 
     const leagueId = 1
     const teamId = 1
@@ -133,7 +138,12 @@ describe('API /draft', function () {
     })
 
     it('invalid pid - does not exist', async () => {
-      MockDate.set(regular_season_start.subtract('1', 'month').add('1', 'day').toISOString())
+      MockDate.set(
+        regular_season_start
+          .subtract('1', 'month')
+          .add('1', 'day')
+          .toISOString()
+      )
       const request = chai_request
         .execute(server)
         .post('/api/leagues/1/draft')
@@ -187,7 +197,10 @@ describe('API /draft', function () {
 
     it('draft hasnt started', async () => {
       MockDate.set(
-        regular_season_start.subtract('1', 'month').subtract('1', 'day').toISOString()
+        regular_season_start
+          .subtract('1', 'month')
+          .subtract('1', 'day')
+          .toISOString()
       )
       const request = chai_request
         .execute(server)
@@ -205,7 +218,10 @@ describe('API /draft', function () {
     it('pick not on clock', async () => {
       const player = await selectPlayer({ rookie: true })
       MockDate.set(
-        regular_season_start.subtract('1', 'month').add('1', 'minute').toISOString()
+        regular_season_start
+          .subtract('1', 'month')
+          .add('1', 'minute')
+          .toISOString()
       )
       const request = chai_request
         .execute(server)
@@ -222,7 +238,10 @@ describe('API /draft', function () {
 
     it('pick is already selected', async () => {
       MockDate.set(
-        regular_season_start.subtract('1', 'month').add('1', 'minute').toISOString()
+        regular_season_start
+          .subtract('1', 'month')
+          .add('1', 'minute')
+          .toISOString()
       )
       const request = chai_request
         .execute(server)
@@ -239,7 +258,10 @@ describe('API /draft', function () {
 
     it('pickId does not belong to teamId', async () => {
       MockDate.set(
-        regular_season_start.subtract('1', 'month').add('1', 'minute').toISOString()
+        regular_season_start
+          .subtract('1', 'month')
+          .add('1', 'minute')
+          .toISOString()
       )
       const request = chai_request
         .execute(server)
@@ -257,7 +279,12 @@ describe('API /draft', function () {
     it('player rostered', async () => {
       const picks = await knex('draft').where({ uid: 1 }).limit(1)
       const { pid } = picks[0]
-      MockDate.set(regular_season_start.subtract('1', 'month').add('2', 'day').toISOString())
+      MockDate.set(
+        regular_season_start
+          .subtract('1', 'month')
+          .add('2', 'day')
+          .toISOString()
+      )
       const request = chai_request
         .execute(server)
         .post('/api/leagues/1/draft')
@@ -272,7 +299,9 @@ describe('API /draft', function () {
     })
 
     it('selection after draft has ended', async () => {
-      MockDate.set(regular_season_start.add('1', 'month').add('1', 'day').toISOString())
+      MockDate.set(
+        regular_season_start.add('1', 'month').add('1', 'day').toISOString()
+      )
       const player = await selectPlayer({ rookie: true })
       const request = chai_request
         .execute(server)

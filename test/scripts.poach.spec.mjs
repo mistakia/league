@@ -153,7 +153,12 @@ describe('SCRIPTS /waivers - poach', function () {
         submitted: Math.round(Date.now() / 1000)
       })
 
-      MockDate.set(regular_season_start.subtract('1', 'month').add('2', 'hour').toISOString())
+      MockDate.set(
+        regular_season_start
+          .subtract('1', 'month')
+          .add('2', 'hour')
+          .toISOString()
+      )
       const player2 = await selectPlayer({
         rookie: true,
         exclude_pids: [player1.pid]

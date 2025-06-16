@@ -40,7 +40,10 @@ export default class Season {
     this.offseason = dayjs.unix(offseason).utc().utcOffset(-5)
 
     // Two Tuesdays before first game
-    this.regular_season_start = dayjs.unix(regular_season_start).utc().utcOffset(-4)
+    this.regular_season_start = dayjs
+      .unix(regular_season_start)
+      .utc()
+      .utcOffset(-4)
 
     // super bowl
     this.end = dayjs.unix(end).utc().utcOffset(-5)
@@ -156,7 +159,9 @@ export default class Season {
 
   get year() {
     const now = this.now
-    return now.isBefore(this.end) ? this.regular_season_start.year() : this.end.year()
+    return now.isBefore(this.end)
+      ? this.regular_season_start.year()
+      : this.end.year()
   }
 
   get nfl_seas_type() {

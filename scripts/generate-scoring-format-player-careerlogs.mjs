@@ -44,7 +44,9 @@ const generate_scoring_format_player_careerlogs = async ({
   }
 
   for (const pid in seasons_by_pid) {
-    const draft_class = draft_classes_query.find((i) => i.pid === pid)?.nfl_draft_year
+    const draft_class = draft_classes_query.find(
+      (i) => i.pid === pid
+    )?.nfl_draft_year
     if (!draft_class) {
       log(`missing draft class for ${pid}`)
       continue

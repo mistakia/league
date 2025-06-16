@@ -179,7 +179,12 @@ const import_fanduel_wagers = async ({
     const start_time = dayjs(part.startTime)
 
     // check if start_time is not between now and end of current season
-    if (!start_time.isBetween(constants.season.regular_season_start, constants.season.end)) {
+    if (
+      !start_time.isBetween(
+        constants.season.regular_season_start,
+        constants.season.end
+      )
+    ) {
       log(
         `start time ${start_time.format()} is not this season (${
           constants.season.year

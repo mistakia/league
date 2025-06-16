@@ -29,7 +29,9 @@ describe('SCRIPTS /waivers - poach', function () {
 
       await knex('seasons')
         .update({
-          free_agency_live_auction_start: regular_season_start.subtract('1', 'week').unix()
+          free_agency_live_auction_start: regular_season_start
+            .subtract('1', 'week')
+            .unix()
         })
         .where('lid', 1)
     })
@@ -152,7 +154,9 @@ describe('SCRIPTS /waivers - poach', function () {
     })
 
     it('process single ready waiver - offseason', async () => {
-      MockDate.set(regular_season_start.subtract('1', 'month').day(5).toISOString())
+      MockDate.set(
+        regular_season_start.subtract('1', 'month').day(5).toISOString()
+      )
 
       const player = await selectPlayer({ rookie: true })
       await addPlayer({
@@ -177,7 +181,11 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       MockDate.set(
-        regular_season_start.subtract('1', 'month').day(7).add('1', 'minute').toISOString()
+        regular_season_start
+          .subtract('1', 'month')
+          .day(7)
+          .add('1', 'minute')
+          .toISOString()
       )
 
       let error
@@ -252,7 +260,11 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       MockDate.set(
-        regular_season_start.add('1', 'month').day(7).add('1', 'minute').toISOString()
+        regular_season_start
+          .add('1', 'month')
+          .day(7)
+          .add('1', 'minute')
+          .toISOString()
       )
 
       let error
@@ -340,7 +352,11 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       MockDate.set(
-        regular_season_start.add('1', 'month').day(7).add('1', 'minute').toISOString()
+        regular_season_start
+          .add('1', 'month')
+          .day(7)
+          .add('1', 'minute')
+          .toISOString()
       )
 
       let error
@@ -450,7 +466,11 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       MockDate.set(
-        regular_season_start.add('1', 'month').day(7).add('1', 'minute').toISOString()
+        regular_season_start
+          .add('1', 'month')
+          .day(7)
+          .add('1', 'minute')
+          .toISOString()
       )
 
       let error
@@ -584,7 +604,11 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       MockDate.set(
-        regular_season_start.add('1', 'month').day(7).add('1', 'minute').toISOString()
+        regular_season_start
+          .add('1', 'month')
+          .day(7)
+          .add('1', 'minute')
+          .toISOString()
       )
 
       let error
@@ -712,7 +736,11 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       MockDate.set(
-        regular_season_start.add('1', 'month').day(7).add('1', 'minute').toISOString()
+        regular_season_start
+          .add('1', 'month')
+          .day(7)
+          .add('1', 'minute')
+          .toISOString()
       )
 
       let error

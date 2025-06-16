@@ -39,13 +39,20 @@ describe('API /waivers - poach', function () {
 
     await knex('seasons')
       .update({
-        free_agency_live_auction_start: regular_season_start.subtract('1', 'week').unix()
+        free_agency_live_auction_start: regular_season_start
+          .subtract('1', 'week')
+          .unix()
       })
       .where('lid', 1)
   })
 
   it('submit poaching waiver for drafted player', async () => {
-    MockDate.set(regular_season_start.subtract('1', 'month').add('10', 'minute').toISOString())
+    MockDate.set(
+      regular_season_start
+        .subtract('1', 'month')
+        .add('10', 'minute')
+        .toISOString()
+    )
 
     // make draft selection
     const leagueId = 1

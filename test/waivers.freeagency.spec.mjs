@@ -95,7 +95,12 @@ describe('API /waivers - free agency', function () {
         userId: 2
       })
 
-      MockDate.set(regular_season_start.subtract('3', 'week').add('4', 'hour').toISOString())
+      MockDate.set(
+        regular_season_start
+          .subtract('3', 'week')
+          .add('4', 'hour')
+          .toISOString()
+      )
 
       // submit waiver claim
       const teamId = 1
@@ -164,7 +169,12 @@ describe('API /waivers - free agency', function () {
         userId: 2
       })
 
-      MockDate.set(regular_season_start.subtract('3', 'week').add('4', 'hour').toISOString())
+      MockDate.set(
+        regular_season_start
+          .subtract('3', 'week')
+          .add('4', 'hour')
+          .toISOString()
+      )
       const teamId = 1
       await chai_request
         .execute(server)
@@ -323,7 +333,12 @@ describe('API /waivers - free agency', function () {
         userId: 2
       })
 
-      MockDate.set(regular_season_start.subtract('3', 'week').add('25', 'hour').toISOString())
+      MockDate.set(
+        regular_season_start
+          .subtract('3', 'week')
+          .add('25', 'hour')
+          .toISOString()
+      )
 
       // submit waiver claim
       const teamId = 1

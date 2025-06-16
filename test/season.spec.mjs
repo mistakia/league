@@ -21,7 +21,9 @@ describe('LIBS-SHARED Season', function () {
     expect(constants.season.isRegularSeason).to.equal(false)
 
     // 1 minute before start of week 1
-    MockDate.set(regular_season_start.add('7', 'day').subtract('1', 'minute').toISOString())
+    MockDate.set(
+      regular_season_start.add('7', 'day').subtract('1', 'minute').toISOString()
+    )
     expect(constants.season.isRegularSeason).to.equal(false)
 
     // start of week 1
@@ -56,11 +58,15 @@ describe('LIBS-SHARED Season', function () {
     expect(constants.season.isWaiverPeriod).to.equal(true)
 
     // wednesday of week 1 - noon
-    MockDate.set(regular_season_start.add('7', 'day').day(3).hour(11).toISOString())
+    MockDate.set(
+      regular_season_start.add('7', 'day').day(3).hour(11).toISOString()
+    )
     expect(constants.season.isWaiverPeriod).to.equal(true)
 
     // wednesday of week 1 - 3pm
-    MockDate.set(regular_season_start.add('7', 'day').day(3).hour(15).toISOString())
+    MockDate.set(
+      regular_season_start.add('7', 'day').day(3).hour(15).toISOString()
+    )
     expect(constants.season.isWaiverPeriod).to.equal(false)
 
     // tuesday of week 2
@@ -68,11 +74,15 @@ describe('LIBS-SHARED Season', function () {
     expect(constants.season.isWaiverPeriod).to.equal(true)
 
     // wednesday of week 2 - noon
-    MockDate.set(regular_season_start.add('14', 'day').day(3).hour(11).toISOString())
+    MockDate.set(
+      regular_season_start.add('14', 'day').day(3).hour(11).toISOString()
+    )
     expect(constants.season.isWaiverPeriod).to.equal(true)
 
     // wednesday of week 16 - 3pm
-    MockDate.set(regular_season_start.add('112', 'day').day(3).hour(15).toISOString())
+    MockDate.set(
+      regular_season_start.add('112', 'day').day(3).hour(15).toISOString()
+    )
     expect(constants.season.isWaiverPeriod).to.equal(false)
 
     // tuesday of week 16
@@ -80,11 +90,15 @@ describe('LIBS-SHARED Season', function () {
     expect(constants.season.isWaiverPeriod).to.equal(true)
 
     // wednesday of week 16 - noon
-    MockDate.set(regular_season_start.add('112', 'day').day(3).hour(11).toISOString())
+    MockDate.set(
+      regular_season_start.add('112', 'day').day(3).hour(11).toISOString()
+    )
     expect(constants.season.isWaiverPeriod).to.equal(true)
 
     // wednesday of week 16 - 3pm
-    MockDate.set(regular_season_start.add('112', 'day').day(3).hour(15).toISOString())
+    MockDate.set(
+      regular_season_start.add('112', 'day').day(3).hour(15).toISOString()
+    )
     expect(constants.season.isWaiverPeriod).to.equal(false)
 
     // tuesday of week 17
@@ -102,7 +116,12 @@ describe('LIBS-SHARED Season', function () {
     expect(constants.season.week).to.equal(0)
 
     // end of week 0
-    MockDate.set(regular_season_start.add('7', 'days').subtract('1', 'minute').toISOString())
+    MockDate.set(
+      regular_season_start
+        .add('7', 'days')
+        .subtract('1', 'minute')
+        .toISOString()
+    )
     expect(constants.season.week).to.equal(0)
 
     // start of week 1
@@ -110,7 +129,12 @@ describe('LIBS-SHARED Season', function () {
     expect(constants.season.week).to.equal(1)
 
     // end of week 1
-    MockDate.set(regular_season_start.add('14', 'days').subtract('1', 'minute').toISOString())
+    MockDate.set(
+      regular_season_start
+        .add('14', 'days')
+        .subtract('1', 'minute')
+        .toISOString()
+    )
     expect(constants.season.week).to.equal(1)
 
     // start of week 16
@@ -119,7 +143,10 @@ describe('LIBS-SHARED Season', function () {
 
     // end of week 16 - day light savings
     MockDate.set(
-      regular_season_start.add('119', 'days').subtract('61', 'minute').toISOString()
+      regular_season_start
+        .add('119', 'days')
+        .subtract('61', 'minute')
+        .toISOString()
     )
     expect(constants.season.week).to.equal(16)
 

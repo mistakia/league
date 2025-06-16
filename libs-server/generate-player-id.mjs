@@ -37,7 +37,10 @@ const generate_player_id = (player_data) => {
     .padEnd(4, 'X')
 
   // format nfl draft year, a number, to ensure it is in format YYYY, fill in any missing digits
-  const start = player_data.nfl_draft_year.toString().slice(0, 4).padStart(4, '0')
+  const start = player_data.nfl_draft_year
+    .toString()
+    .slice(0, 4)
+    .padStart(4, '0')
 
   // format date of birth to ensure it is in format YYYY-MM-DD, fill in any missing digits
   const dob = player_data.dob

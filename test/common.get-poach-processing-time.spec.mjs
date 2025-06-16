@@ -17,7 +17,10 @@ describe('LIBS-SHARED getPoachProcessingTime', function () {
   })
 
   it('should add 48 hours during offseason', () => {
-    const offseason = constants.season.regular_season_start.subtract('1', 'week')
+    const offseason = constants.season.regular_season_start.subtract(
+      '1',
+      'week'
+    )
     MockDate.set(offseason.toISOString())
     const submitted = dayjs().unix()
     const processing_time = getPoachProcessingTime(submitted)
@@ -28,7 +31,9 @@ describe('LIBS-SHARED getPoachProcessingTime', function () {
   })
 
   it('should add 48 hours during regular season outside Thu-Sun window', () => {
-    const wednesday = constants.season.regular_season_start.add('5', 'week').day(3)
+    const wednesday = constants.season.regular_season_start
+      .add('5', 'week')
+      .day(3)
     MockDate.set(wednesday.toISOString())
     const submitted = dayjs().unix()
     const processing_time = getPoachProcessingTime(submitted)

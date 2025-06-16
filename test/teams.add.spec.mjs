@@ -105,7 +105,9 @@ describe('API /teams - add', function () {
     it('rookie free agent - practice squad - offseason', async () => {
       const leagueId = 1
       await knex('seasons')
-        .update({ draft_start: regular_season_start.subtract('1', 'week').unix() })
+        .update({
+          draft_start: regular_season_start.subtract('1', 'week').unix()
+        })
         .where({ lid: leagueId })
       MockDate.set(regular_season_start.subtract('4', 'days').toISOString())
       const player = await selectPlayer({ rookie: true })
@@ -308,7 +310,9 @@ describe('API /teams - add', function () {
     })
 
     it('free agent has unprocessed waiver claim', async () => {
-      MockDate.set(regular_season_start.add('2', 'week').day(3).hour(15).toISOString())
+      MockDate.set(
+        regular_season_start.add('2', 'week').day(3).hour(15).toISOString()
+      )
       const player = await selectPlayer({ rookie: false })
 
       await knex('waivers').insert({

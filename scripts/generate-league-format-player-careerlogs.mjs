@@ -46,7 +46,9 @@ const generate_league_format_player_careerlogs = async ({
   }
 
   for (const pid in seasons_by_pid) {
-    const draft_class = draft_classes_query.find((i) => i.pid === pid).nfl_draft_year
+    const draft_class = draft_classes_query.find(
+      (i) => i.pid === pid
+    ).nfl_draft_year
     const seasons = seasons_by_pid[pid]
 
     const sorted = seasons.sort((a, b) => a.year - b.year)

@@ -1,26 +1,31 @@
 # Refactor Plan: Rename Ambiguous `start` Fields
 
 ## Overview
+
 This refactor addresses two ambiguous uses of `start` in the codebase:
+
 1. Rename `player.start` to `player.nfl_draft_year` in the player table and related code
 2. Rename `season.start` to `season.regular_season_start` for clarity
 
 ## Summary of Progress
-- **Completed:** 
+
+- **Completed:**
   - Code changes in 16 files to replace `player.start` with `player.nfl_draft_year`
   - Created database migration script for renaming `player.start`
   - Updated `season.mjs` and `season-dates.mjs` to use `regular_season_start` instead of `start`
-- **In Progress:** 
+- **In Progress:**
   - Updating references to `season.start` in various scripts and tests
 
 ## Implementation Plan
 
 ### 1. Database Schema Changes
+
 - ✅ Create migration SQL scripts to rename columns
   - ✅ For `player.start` to `player.nfl_draft_year`
   - ✅ Update column comment from 'starting nfl year' to 'NFL draft year'
 
 ### 2. `season.start` Renaming
+
 - ✅ Update `libs-shared/season.mjs` to rename the property from `start` to `regular_season_start`
 - ✅ Update `libs-shared/season-dates.mjs` to rename the property from `start` to `regular_season_start`
 - ⬜ Update all references to `season.start` in scripts, tests, and application code
@@ -29,11 +34,13 @@ This refactor addresses two ambiguous uses of `start` in the codebase:
 ## Tracking Progress
 
 ### Files to Check/Modify for `player.start` → `player.nfl_draft_year`
+
 - ✅ Code changes in 16 files already completed
 - ✅ Database migration script created at `db/migrations/20240714000000_rename_start_columns.mjs`
 - ✅ Update database schema comment
 
 ### Files to Check/Modify for `season.start` → `season.regular_season_start`
+
 - ✅ libs-shared/season.mjs
 - ✅ libs-shared/season-dates.mjs
 - ⬜ libs-shared/get-free-agent-period.mjs
@@ -55,6 +62,7 @@ This refactor addresses two ambiguous uses of `start` in the codebase:
 - ⬜ test/teams.protect.spec.mjs
 
 ## Notes
+
 - This refactor focuses on `player.start` and `season.start` fields only
 - Other uses of "start" (game starts, lineup starters, etc.) remain unchanged
 - Backward compatibility is maintained for `season.start` through a getter method

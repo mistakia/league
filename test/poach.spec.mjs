@@ -59,7 +59,9 @@ describe('API /poaches', function () {
         userId: 2
       })
 
-      MockDate.set(regular_season_start.add('1', 'week').add('3', 'day').toISOString())
+      MockDate.set(
+        regular_season_start.add('1', 'week').add('3', 'day').toISOString()
+      )
 
       const request = chai_request
         .execute(server)

@@ -249,7 +249,8 @@ describe('SCRIPTS - Super Priority Processing', function () {
 
     it('should prioritize active roster waiver over super priority practice squad waiver', async () => {
       // Set up proper timing - we're in free agency period (before season regular_season_start)
-      const free_agency_auction_regular_season_start = regular_season_start.subtract('2', 'months')
+      const free_agency_auction_regular_season_start =
+        regular_season_start.subtract('2', 'months')
       const current_time = regular_season_start.subtract('1', 'month') // After auction regular_season_start, before season
       MockDate.set(current_time.toISOString())
 
@@ -257,8 +258,11 @@ describe('SCRIPTS - Super Priority Processing', function () {
       await knex('seasons')
         .where({ lid: 1, year: constants.year })
         .update({
-          free_agency_live_auction_start: free_agency_auction_regular_season_start.unix(),
-          draft_start: free_agency_auction_regular_season_start.subtract('1', 'week').unix() // Draft completed before FA
+          free_agency_live_auction_start:
+            free_agency_auction_regular_season_start.unix(),
+          draft_start: free_agency_auction_regular_season_start
+            .subtract('1', 'week')
+            .unix() // Draft completed before FA
         })
 
       // Update timestamps to be relative to current mock time

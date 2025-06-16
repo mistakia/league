@@ -696,7 +696,10 @@ export const getLeagueEvents = createSelector(
       }
     }
 
-    const firstDayOfRegularSeason = constants.season.regular_season_start.add('1', 'week')
+    const firstDayOfRegularSeason = constants.season.regular_season_start.add(
+      '1',
+      'week'
+    )
     if (now.isBefore(firstDayOfRegularSeason)) {
       events.push({
         detail: 'Regular Season Begins',
@@ -1007,7 +1010,9 @@ export function getPlayersByPosition(state, { position }) {
 }
 
 export const getRookiePlayers = createSelector(get_player_maps, (playerMaps) =>
-  playerMaps.filter((pMap) => pMap.get('nfl_draft_year') === constants.year).toList()
+  playerMaps
+    .filter((pMap) => pMap.get('nfl_draft_year') === constants.year)
+    .toList()
 )
 
 export function getPlayerById(state, { pid, playerMap }) {
