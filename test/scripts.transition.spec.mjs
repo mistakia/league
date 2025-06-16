@@ -55,7 +55,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
           year: constants.season.year,
           tran_start: tran_date,
           tran_end: regular_season_start.subtract('1', 'month').unix(),
-          ext_date: ext_date,
+          ext_date,
           restricted_free_agency_announcement_hour: 10, // 10 AM
           restricted_free_agency_processing_hour: 12 // 12 PM (noon)
         })
