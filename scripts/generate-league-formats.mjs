@@ -8,6 +8,10 @@ import {
   generate_scoring_format_hash
 } from '#libs-shared'
 import { is_main, getLeague } from '#libs-server'
+import {
+  scoring_formats as named_scoring_formats,
+  league_formats as named_league_formats
+} from '#libs-shared/league-format-definitions.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 // const argv = yargs(hideBin(process.argv)).argv
@@ -184,6 +188,55 @@ const generate_league_formats = async () => {
     ...default_league_scoring_format
   })
   league_formats.push(generate_league_format_hash(default_league))
+
+  // Add named format definitions
+  log('Processing named format definitions...')
+
+  // Process named scoring formats
+  Object.entries(named_scoring_formats).forEach(([key, format_def]) => {
+    const { scoring_format_hash } = generate_scoring_format_hash(
+      format_def.config
+    )
+    scoring_formats_map.set(scoring_format_hash, {
+      scoring_format_hash,
+      scoring_format_title: format_def.label,
+      ...format_def.config
+    })
+  })
+
+  // Process named league formats
+  Object.entries(named_league_formats).forEach(([key, format_def]) => {
+    // Get the scoring format config
+    const scoring_format_config =
+      named_scoring_formats[format_def.scoring_format]?.config
+    if (!scoring_format_config) {
+      log(
+        `Warning: Scoring format '${format_def.scoring_format}' not found for league format '${key}'`
+      )
+      return
+    }
+
+    const { scoring_format_hash } = generate_scoring_format_hash(
+      scoring_format_config
+    )
+
+    const league_format = {
+      scoring_format_hash,
+      ...format_def.config
+    }
+
+    const { league_format_hash } = generate_league_format_hash(league_format)
+    league_formats.push({
+      league_format_hash,
+      scoring_format_hash,
+      ...league_format
+    })
+  })
+
+  log(
+    `Added ${Object.keys(named_scoring_formats).length} named scoring formats`
+  )
+  log(`Added ${Object.keys(named_league_formats).length} named league formats`)
 
   // delete league formats not in `league_formats` array or in `seasons` table
   const league_format_hashes = league_formats.map(

@@ -1,0 +1,2305 @@
+{
+  "timestamp": "2025-06-15T20:32:17.404Z",
+  "summary": {
+    "total_tables": 12,
+    "scoring_format_coverage": {
+      "draftkings": {
+        "tables_with_data": 4,
+        "total_tables": 5,
+        "coverage_percentage": "80.0"
+      },
+      "fanduel": {
+        "tables_with_data": 1,
+        "total_tables": 5,
+        "coverage_percentage": "20.0"
+      },
+      "genesis": {
+        "tables_with_data": 5,
+        "total_tables": 5,
+        "coverage_percentage": "100.0"
+      },
+      "half_ppr": {
+        "tables_with_data": 1,
+        "total_tables": 5,
+        "coverage_percentage": "20.0"
+      },
+      "half_ppr_lower_turnover": {
+        "tables_with_data": 1,
+        "total_tables": 5,
+        "coverage_percentage": "20.0"
+      },
+      "ppr": {
+        "tables_with_data": 1,
+        "total_tables": 5,
+        "coverage_percentage": "20.0"
+      },
+      "ppr_lower_turnover": {
+        "tables_with_data": 1,
+        "total_tables": 5,
+        "coverage_percentage": "20.0"
+      },
+      "sfb15_mfl": {
+        "tables_with_data": 0,
+        "total_tables": 5,
+        "coverage_percentage": "0.0"
+      },
+      "sfb15_sleeper": {
+        "tables_with_data": 0,
+        "total_tables": 5,
+        "coverage_percentage": "0.0"
+      },
+      "standard": {
+        "tables_with_data": 1,
+        "total_tables": 5,
+        "coverage_percentage": "20.0"
+      }
+    },
+    "league_format_coverage": {
+      "draftkings_classic": {
+        "tables_with_data": 0,
+        "total_tables": 7,
+        "coverage_percentage": "0.0"
+      },
+      "genesis_10_team": {
+        "tables_with_data": 7,
+        "total_tables": 7,
+        "coverage_percentage": "100.0"
+      },
+      "half_ppr_10_team": {
+        "tables_with_data": 0,
+        "total_tables": 7,
+        "coverage_percentage": "0.0"
+      },
+      "half_ppr_10_team_superflex": {
+        "tables_with_data": 0,
+        "total_tables": 7,
+        "coverage_percentage": "0.0"
+      },
+      "half_ppr_12_team": {
+        "tables_with_data": 0,
+        "total_tables": 7,
+        "coverage_percentage": "0.0"
+      },
+      "half_ppr_12_team_superflex": {
+        "tables_with_data": 0,
+        "total_tables": 7,
+        "coverage_percentage": "0.0"
+      },
+      "half_ppr_lower_turnover_10_team": {
+        "tables_with_data": 0,
+        "total_tables": 7,
+        "coverage_percentage": "0.0"
+      },
+      "half_ppr_lower_turnover_10_team_superflex": {
+        "tables_with_data": 0,
+        "total_tables": 7,
+        "coverage_percentage": "0.0"
+      },
+      "half_ppr_lower_turnover_12_team": {
+        "tables_with_data": 0,
+        "total_tables": 7,
+        "coverage_percentage": "0.0"
+      },
+      "half_ppr_lower_turnover_12_team_superflex": {
+        "tables_with_data": 0,
+        "total_tables": 7,
+        "coverage_percentage": "0.0"
+      },
+      "ppr_10_team": {
+        "tables_with_data": 0,
+        "total_tables": 7,
+        "coverage_percentage": "0.0"
+      },
+      "ppr_10_team_superflex": {
+        "tables_with_data": 0,
+        "total_tables": 7,
+        "coverage_percentage": "0.0"
+      },
+      "ppr_12_team": {
+        "tables_with_data": 0,
+        "total_tables": 7,
+        "coverage_percentage": "0.0"
+      },
+      "ppr_12_team_superflex": {
+        "tables_with_data": 0,
+        "total_tables": 7,
+        "coverage_percentage": "0.0"
+      },
+      "ppr_lower_turnover_10_team": {
+        "tables_with_data": 0,
+        "total_tables": 7,
+        "coverage_percentage": "0.0"
+      },
+      "ppr_lower_turnover_10_team_superflex": {
+        "tables_with_data": 0,
+        "total_tables": 7,
+        "coverage_percentage": "0.0"
+      },
+      "ppr_lower_turnover_12_team": {
+        "tables_with_data": 0,
+        "total_tables": 7,
+        "coverage_percentage": "0.0"
+      },
+      "ppr_lower_turnover_12_team_superflex": {
+        "tables_with_data": 0,
+        "total_tables": 7,
+        "coverage_percentage": "0.0"
+      },
+      "sfb15_mfl": {
+        "tables_with_data": 0,
+        "total_tables": 7,
+        "coverage_percentage": "0.0"
+      },
+      "sfb15_sleeper": {
+        "tables_with_data": 0,
+        "total_tables": 7,
+        "coverage_percentage": "0.0"
+      },
+      "standard_10_team": {
+        "tables_with_data": 0,
+        "total_tables": 7,
+        "coverage_percentage": "0.0"
+      },
+      "standard_12_team": {
+        "tables_with_data": 0,
+        "total_tables": 7,
+        "coverage_percentage": "0.0"
+      }
+    }
+  },
+  "tables": [
+    {
+      "table_name": "scoring_format_definitions",
+      "table_config": {
+        "table": "league_scoring_formats",
+        "hash_column": "scoring_format_hash",
+        "type": "scoring",
+        "description": "Core scoring format definitions",
+        "time_columns": []
+      },
+      "results": [
+        {
+          "format_name": "draftkings",
+          "format_hash": "ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e",
+          "exists": true,
+          "record_count": 1,
+          "coverage": {}
+        },
+        {
+          "format_name": "fanduel",
+          "format_hash": "04fe44246221c6ee47cba713ac4aad95f4b1f28e50078e7f12ecfb0fed257933",
+          "exists": true,
+          "record_count": 1,
+          "coverage": {}
+        },
+        {
+          "format_name": "genesis",
+          "format_hash": "0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d",
+          "exists": true,
+          "record_count": 1,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr",
+          "format_hash": "196a4e9151ed50bf4c407f6580a21d885c806402d6676cbd37375991279a138f",
+          "exists": true,
+          "record_count": 1,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover",
+          "format_hash": "df413f3f77684ba130ce79df7cc372f1cb097ca56e0b612c11845eec8b796263",
+          "exists": true,
+          "record_count": 1,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr",
+          "format_hash": "a29c5c91c762cc114abd6911cd59293a5727cb99f44dcde8d5462485d7915559",
+          "exists": true,
+          "record_count": 1,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover",
+          "format_hash": "23bedcd3224f626b9e280b4589e35ce8897b88232febda7bf3a612638cd2c9ae",
+          "exists": true,
+          "record_count": 1,
+          "coverage": {}
+        },
+        {
+          "format_name": "sfb15_mfl",
+          "format_hash": "95714ea0d1ed6a920fc5cb9ab34f725e6bc3e36a636f4cb6f7dd0224c5c41e66",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "sfb15_sleeper",
+          "format_hash": "2fc6320827e961ed3403045090980349c30dd9578917a05f43b73e130876ebce",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "standard",
+          "format_hash": "a30d67ba4a329c4de2fea544cb89869d2d1e8406dc2a85be6393ec1cfe88818e",
+          "exists": true,
+          "record_count": 1,
+          "coverage": {}
+        }
+      ]
+    },
+    {
+      "table_name": "league_format_definitions",
+      "table_config": {
+        "table": "league_formats",
+        "hash_column": "league_format_hash",
+        "type": "league",
+        "description": "Core league format definitions",
+        "time_columns": [],
+        "additional_columns": ["scoring_format_hash"]
+      },
+      "results": [
+        {
+          "format_name": "draftkings_classic",
+          "format_hash": "52dff178c05048af9f38e4f4b5c2372623619476333b0cb20b6783f6d9513e34",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "genesis_10_team",
+          "format_hash": "1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b",
+          "exists": true,
+          "record_count": 1,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_10_team",
+          "format_hash": "54ada7372303d92d6101a695bc6960385525cb36f52aa1ceed5e56f3921d2c1f",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_10_team_superflex",
+          "format_hash": "26188bdbfed990fd907934850777e1001a83dc2291c09ca38ac3b209704be514",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_12_team",
+          "format_hash": "0ca34a52a960d11c896e57a31aa9c1177c576282188b98ce7e756a07478d923e",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_12_team_superflex",
+          "format_hash": "ec5a79248e24911d0cd099a447b9f26ea72c0f999228354d47c85b61b6db91c3",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_10_team",
+          "format_hash": "eccbba076b886b25e9a49dd06a0e2ff20b3edce9eff8a061d8cee7a9841c7de6",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_10_team_superflex",
+          "format_hash": "b7c23f84aee1ad20ba7984b8af73427c529d1548496d81f9bd3481abbe71d570",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_12_team",
+          "format_hash": "b68d6e71bf522cc02092d9e335567fb9dac2a89d2750b63376bada8cc991782f",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_12_team_superflex",
+          "format_hash": "77dd3218bf036e2207361bc32b799992cf3e1ddcd8423f0f3d99b7fbb5075353",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_10_team",
+          "format_hash": "68020d1f302b7c13392d038d987c8cd2a4bad72f521df4553e4055f23a4be82e",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_10_team_superflex",
+          "format_hash": "cd0b0f97f88a22827e72672acc3af59e05432c660f6b8fae4857d83cc51bb12b",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_12_team",
+          "format_hash": "eae52d9963e72597b78e24d27a4a5c14dc446b212cc4962f384bc5bc4b68f459",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_12_team_superflex",
+          "format_hash": "72ac30c0df7d1a2d4cd04c28b5a4bc4adb5b41b26a34cffff72025edcb37e86e",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_10_team",
+          "format_hash": "2774bbf98729aeb7177f9f800c1661427f0171dddce246830f9a77e5f8295093",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_10_team_superflex",
+          "format_hash": "2914099379c3ccd16d88a3a88da162d1010968dfd2e186a5c04656957b843aea",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_12_team",
+          "format_hash": "b6628134d0db1d2b5b8e0aa055eac3c3778e5faa55f2e18305e447baffd77772",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_12_team_superflex",
+          "format_hash": "92b023a804d534b6567468ba5593517bd76171be2e7f0b16209ef2aeb06f7576",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "sfb15_mfl",
+          "format_hash": "59bfafdb50793debdc5b47183c261aa8109c460520cf498d5d64ae44597f140b",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "sfb15_sleeper",
+          "format_hash": "a6c3cabc6704ac7219a2494b0c187a93decb0f017904e2e2bf4b5c8519cafc57",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "standard_10_team",
+          "format_hash": "95c4211c7a02a9004a2714aa38bfc8c7eaa8d1b048a4e23e0ed4200fa33d2da2",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "standard_12_team",
+          "format_hash": "9f6c03ef81876c2f14422302cd678320b5556000220e8a59111fcd0d757f7c8a",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        }
+      ]
+    },
+    {
+      "table_name": "seasons",
+      "table_config": {
+        "table": "seasons",
+        "hash_column": "league_format_hash",
+        "type": "league",
+        "description": "Season configurations by league and year",
+        "time_columns": ["year"],
+        "additional_columns": ["lid", "scoring_format_hash"]
+      },
+      "results": [
+        {
+          "format_name": "draftkings_classic",
+          "format_hash": "52dff178c05048af9f38e4f4b5c2372623619476333b0cb20b6783f6d9513e34",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "genesis_10_team",
+          "format_hash": "1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b",
+          "exists": true,
+          "record_count": 3,
+          "coverage": {
+            "year": [
+              {
+                "year": 2023,
+                "count": 1
+              },
+              {
+                "year": 2024,
+                "count": 1
+              },
+              {
+                "year": 2025,
+                "count": 1
+              }
+            ],
+            "unique_leagues": 1
+          }
+        },
+        {
+          "format_name": "half_ppr_10_team",
+          "format_hash": "54ada7372303d92d6101a695bc6960385525cb36f52aa1ceed5e56f3921d2c1f",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_10_team_superflex",
+          "format_hash": "26188bdbfed990fd907934850777e1001a83dc2291c09ca38ac3b209704be514",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_12_team",
+          "format_hash": "0ca34a52a960d11c896e57a31aa9c1177c576282188b98ce7e756a07478d923e",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_12_team_superflex",
+          "format_hash": "ec5a79248e24911d0cd099a447b9f26ea72c0f999228354d47c85b61b6db91c3",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_10_team",
+          "format_hash": "eccbba076b886b25e9a49dd06a0e2ff20b3edce9eff8a061d8cee7a9841c7de6",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_10_team_superflex",
+          "format_hash": "b7c23f84aee1ad20ba7984b8af73427c529d1548496d81f9bd3481abbe71d570",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_12_team",
+          "format_hash": "b68d6e71bf522cc02092d9e335567fb9dac2a89d2750b63376bada8cc991782f",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_12_team_superflex",
+          "format_hash": "77dd3218bf036e2207361bc32b799992cf3e1ddcd8423f0f3d99b7fbb5075353",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_10_team",
+          "format_hash": "68020d1f302b7c13392d038d987c8cd2a4bad72f521df4553e4055f23a4be82e",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_10_team_superflex",
+          "format_hash": "cd0b0f97f88a22827e72672acc3af59e05432c660f6b8fae4857d83cc51bb12b",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_12_team",
+          "format_hash": "eae52d9963e72597b78e24d27a4a5c14dc446b212cc4962f384bc5bc4b68f459",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_12_team_superflex",
+          "format_hash": "72ac30c0df7d1a2d4cd04c28b5a4bc4adb5b41b26a34cffff72025edcb37e86e",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_10_team",
+          "format_hash": "2774bbf98729aeb7177f9f800c1661427f0171dddce246830f9a77e5f8295093",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_10_team_superflex",
+          "format_hash": "2914099379c3ccd16d88a3a88da162d1010968dfd2e186a5c04656957b843aea",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_12_team",
+          "format_hash": "b6628134d0db1d2b5b8e0aa055eac3c3778e5faa55f2e18305e447baffd77772",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_12_team_superflex",
+          "format_hash": "92b023a804d534b6567468ba5593517bd76171be2e7f0b16209ef2aeb06f7576",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "sfb15_mfl",
+          "format_hash": "59bfafdb50793debdc5b47183c261aa8109c460520cf498d5d64ae44597f140b",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "sfb15_sleeper",
+          "format_hash": "a6c3cabc6704ac7219a2494b0c187a93decb0f017904e2e2bf4b5c8519cafc57",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "standard_10_team",
+          "format_hash": "95c4211c7a02a9004a2714aa38bfc8c7eaa8d1b048a4e23e0ed4200fa33d2da2",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "standard_12_team",
+          "format_hash": "9f6c03ef81876c2f14422302cd678320b5556000220e8a59111fcd0d757f7c8a",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        }
+      ]
+    },
+    {
+      "table_name": "league_format_player_seasonlogs",
+      "table_config": {
+        "table": "league_format_player_seasonlogs",
+        "hash_column": "league_format_hash",
+        "type": "league",
+        "description": "Player season statistics by league format",
+        "time_columns": ["year"],
+        "additional_columns": ["pid"]
+      },
+      "results": [
+        {
+          "format_name": "draftkings_classic",
+          "format_hash": "52dff178c05048af9f38e4f4b5c2372623619476333b0cb20b6783f6d9513e34",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "genesis_10_team",
+          "format_hash": "1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b",
+          "exists": true,
+          "record_count": 16127,
+          "coverage": {
+            "year": [
+              {
+                "year": 2001,
+                "count": 539
+              },
+              {
+                "year": 2002,
+                "count": 616
+              },
+              {
+                "year": 2003,
+                "count": 640
+              },
+              {
+                "year": 2004,
+                "count": 638
+              },
+              {
+                "year": 2005,
+                "count": 636
+              },
+              {
+                "year": 2006,
+                "count": 623
+              },
+              {
+                "year": 2007,
+                "count": 628
+              },
+              {
+                "year": 2008,
+                "count": 626
+              },
+              {
+                "year": 2009,
+                "count": 621
+              },
+              {
+                "year": 2010,
+                "count": 639
+              },
+              {
+                "year": 2011,
+                "count": 641
+              },
+              {
+                "year": 2012,
+                "count": 650
+              },
+              {
+                "year": 2013,
+                "count": 648
+              },
+              {
+                "year": 2014,
+                "count": 658
+              },
+              {
+                "year": 2015,
+                "count": 684
+              },
+              {
+                "year": 2016,
+                "count": 686
+              },
+              {
+                "year": 2017,
+                "count": 683
+              },
+              {
+                "year": 2018,
+                "count": 769
+              },
+              {
+                "year": 2019,
+                "count": 750
+              },
+              {
+                "year": 2020,
+                "count": 814
+              },
+              {
+                "year": 2021,
+                "count": 845
+              },
+              {
+                "year": 2022,
+                "count": 784
+              },
+              {
+                "year": 2023,
+                "count": 629
+              },
+              {
+                "year": 2024,
+                "count": 680
+              }
+            ],
+            "unique_players": 3614
+          }
+        },
+        {
+          "format_name": "half_ppr_10_team",
+          "format_hash": "54ada7372303d92d6101a695bc6960385525cb36f52aa1ceed5e56f3921d2c1f",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_10_team_superflex",
+          "format_hash": "26188bdbfed990fd907934850777e1001a83dc2291c09ca38ac3b209704be514",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_12_team",
+          "format_hash": "0ca34a52a960d11c896e57a31aa9c1177c576282188b98ce7e756a07478d923e",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_12_team_superflex",
+          "format_hash": "ec5a79248e24911d0cd099a447b9f26ea72c0f999228354d47c85b61b6db91c3",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_10_team",
+          "format_hash": "eccbba076b886b25e9a49dd06a0e2ff20b3edce9eff8a061d8cee7a9841c7de6",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_10_team_superflex",
+          "format_hash": "b7c23f84aee1ad20ba7984b8af73427c529d1548496d81f9bd3481abbe71d570",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_12_team",
+          "format_hash": "b68d6e71bf522cc02092d9e335567fb9dac2a89d2750b63376bada8cc991782f",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_12_team_superflex",
+          "format_hash": "77dd3218bf036e2207361bc32b799992cf3e1ddcd8423f0f3d99b7fbb5075353",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_10_team",
+          "format_hash": "68020d1f302b7c13392d038d987c8cd2a4bad72f521df4553e4055f23a4be82e",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_10_team_superflex",
+          "format_hash": "cd0b0f97f88a22827e72672acc3af59e05432c660f6b8fae4857d83cc51bb12b",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_12_team",
+          "format_hash": "eae52d9963e72597b78e24d27a4a5c14dc446b212cc4962f384bc5bc4b68f459",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_12_team_superflex",
+          "format_hash": "72ac30c0df7d1a2d4cd04c28b5a4bc4adb5b41b26a34cffff72025edcb37e86e",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_10_team",
+          "format_hash": "2774bbf98729aeb7177f9f800c1661427f0171dddce246830f9a77e5f8295093",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_10_team_superflex",
+          "format_hash": "2914099379c3ccd16d88a3a88da162d1010968dfd2e186a5c04656957b843aea",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_12_team",
+          "format_hash": "b6628134d0db1d2b5b8e0aa055eac3c3778e5faa55f2e18305e447baffd77772",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_12_team_superflex",
+          "format_hash": "92b023a804d534b6567468ba5593517bd76171be2e7f0b16209ef2aeb06f7576",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "sfb15_mfl",
+          "format_hash": "59bfafdb50793debdc5b47183c261aa8109c460520cf498d5d64ae44597f140b",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "sfb15_sleeper",
+          "format_hash": "a6c3cabc6704ac7219a2494b0c187a93decb0f017904e2e2bf4b5c8519cafc57",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "standard_10_team",
+          "format_hash": "95c4211c7a02a9004a2714aa38bfc8c7eaa8d1b048a4e23e0ed4200fa33d2da2",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "standard_12_team",
+          "format_hash": "9f6c03ef81876c2f14422302cd678320b5556000220e8a59111fcd0d757f7c8a",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        }
+      ]
+    },
+    {
+      "table_name": "league_format_player_careerlogs",
+      "table_config": {
+        "table": "league_format_player_careerlogs",
+        "hash_column": "league_format_hash",
+        "type": "league",
+        "description": "Player career statistics by league format",
+        "time_columns": [],
+        "additional_columns": ["pid"]
+      },
+      "results": [
+        {
+          "format_name": "draftkings_classic",
+          "format_hash": "52dff178c05048af9f38e4f4b5c2372623619476333b0cb20b6783f6d9513e34",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "genesis_10_team",
+          "format_hash": "1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b",
+          "exists": true,
+          "record_count": 3614,
+          "coverage": {
+            "unique_players": 3614
+          }
+        },
+        {
+          "format_name": "half_ppr_10_team",
+          "format_hash": "54ada7372303d92d6101a695bc6960385525cb36f52aa1ceed5e56f3921d2c1f",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_10_team_superflex",
+          "format_hash": "26188bdbfed990fd907934850777e1001a83dc2291c09ca38ac3b209704be514",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_12_team",
+          "format_hash": "0ca34a52a960d11c896e57a31aa9c1177c576282188b98ce7e756a07478d923e",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_12_team_superflex",
+          "format_hash": "ec5a79248e24911d0cd099a447b9f26ea72c0f999228354d47c85b61b6db91c3",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_10_team",
+          "format_hash": "eccbba076b886b25e9a49dd06a0e2ff20b3edce9eff8a061d8cee7a9841c7de6",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_10_team_superflex",
+          "format_hash": "b7c23f84aee1ad20ba7984b8af73427c529d1548496d81f9bd3481abbe71d570",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_12_team",
+          "format_hash": "b68d6e71bf522cc02092d9e335567fb9dac2a89d2750b63376bada8cc991782f",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_12_team_superflex",
+          "format_hash": "77dd3218bf036e2207361bc32b799992cf3e1ddcd8423f0f3d99b7fbb5075353",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_10_team",
+          "format_hash": "68020d1f302b7c13392d038d987c8cd2a4bad72f521df4553e4055f23a4be82e",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_10_team_superflex",
+          "format_hash": "cd0b0f97f88a22827e72672acc3af59e05432c660f6b8fae4857d83cc51bb12b",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_12_team",
+          "format_hash": "eae52d9963e72597b78e24d27a4a5c14dc446b212cc4962f384bc5bc4b68f459",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_12_team_superflex",
+          "format_hash": "72ac30c0df7d1a2d4cd04c28b5a4bc4adb5b41b26a34cffff72025edcb37e86e",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_10_team",
+          "format_hash": "2774bbf98729aeb7177f9f800c1661427f0171dddce246830f9a77e5f8295093",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_10_team_superflex",
+          "format_hash": "2914099379c3ccd16d88a3a88da162d1010968dfd2e186a5c04656957b843aea",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_12_team",
+          "format_hash": "b6628134d0db1d2b5b8e0aa055eac3c3778e5faa55f2e18305e447baffd77772",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_12_team_superflex",
+          "format_hash": "92b023a804d534b6567468ba5593517bd76171be2e7f0b16209ef2aeb06f7576",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "sfb15_mfl",
+          "format_hash": "59bfafdb50793debdc5b47183c261aa8109c460520cf498d5d64ae44597f140b",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "sfb15_sleeper",
+          "format_hash": "a6c3cabc6704ac7219a2494b0c187a93decb0f017904e2e2bf4b5c8519cafc57",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "standard_10_team",
+          "format_hash": "95c4211c7a02a9004a2714aa38bfc8c7eaa8d1b048a4e23e0ed4200fa33d2da2",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "standard_12_team",
+          "format_hash": "9f6c03ef81876c2f14422302cd678320b5556000220e8a59111fcd0d757f7c8a",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        }
+      ]
+    },
+    {
+      "table_name": "league_format_player_gamelogs",
+      "table_config": {
+        "table": "league_format_player_gamelogs",
+        "hash_column": "league_format_hash",
+        "type": "league",
+        "description": "Player game-by-game statistics by league format",
+        "time_columns": [],
+        "additional_columns": ["pid", "esbid"]
+      },
+      "results": [
+        {
+          "format_name": "draftkings_classic",
+          "format_hash": "52dff178c05048af9f38e4f4b5c2372623619476333b0cb20b6783f6d9513e34",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "genesis_10_team",
+          "format_hash": "1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b",
+          "exists": true,
+          "record_count": 175070,
+          "coverage": {
+            "unique_players": 3614
+          }
+        },
+        {
+          "format_name": "half_ppr_10_team",
+          "format_hash": "54ada7372303d92d6101a695bc6960385525cb36f52aa1ceed5e56f3921d2c1f",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_10_team_superflex",
+          "format_hash": "26188bdbfed990fd907934850777e1001a83dc2291c09ca38ac3b209704be514",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_12_team",
+          "format_hash": "0ca34a52a960d11c896e57a31aa9c1177c576282188b98ce7e756a07478d923e",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_12_team_superflex",
+          "format_hash": "ec5a79248e24911d0cd099a447b9f26ea72c0f999228354d47c85b61b6db91c3",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_10_team",
+          "format_hash": "eccbba076b886b25e9a49dd06a0e2ff20b3edce9eff8a061d8cee7a9841c7de6",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_10_team_superflex",
+          "format_hash": "b7c23f84aee1ad20ba7984b8af73427c529d1548496d81f9bd3481abbe71d570",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_12_team",
+          "format_hash": "b68d6e71bf522cc02092d9e335567fb9dac2a89d2750b63376bada8cc991782f",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_12_team_superflex",
+          "format_hash": "77dd3218bf036e2207361bc32b799992cf3e1ddcd8423f0f3d99b7fbb5075353",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_10_team",
+          "format_hash": "68020d1f302b7c13392d038d987c8cd2a4bad72f521df4553e4055f23a4be82e",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_10_team_superflex",
+          "format_hash": "cd0b0f97f88a22827e72672acc3af59e05432c660f6b8fae4857d83cc51bb12b",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_12_team",
+          "format_hash": "eae52d9963e72597b78e24d27a4a5c14dc446b212cc4962f384bc5bc4b68f459",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_12_team_superflex",
+          "format_hash": "72ac30c0df7d1a2d4cd04c28b5a4bc4adb5b41b26a34cffff72025edcb37e86e",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_10_team",
+          "format_hash": "2774bbf98729aeb7177f9f800c1661427f0171dddce246830f9a77e5f8295093",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_10_team_superflex",
+          "format_hash": "2914099379c3ccd16d88a3a88da162d1010968dfd2e186a5c04656957b843aea",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_12_team",
+          "format_hash": "b6628134d0db1d2b5b8e0aa055eac3c3778e5faa55f2e18305e447baffd77772",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_12_team_superflex",
+          "format_hash": "92b023a804d534b6567468ba5593517bd76171be2e7f0b16209ef2aeb06f7576",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "sfb15_mfl",
+          "format_hash": "59bfafdb50793debdc5b47183c261aa8109c460520cf498d5d64ae44597f140b",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "sfb15_sleeper",
+          "format_hash": "a6c3cabc6704ac7219a2494b0c187a93decb0f017904e2e2bf4b5c8519cafc57",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "standard_10_team",
+          "format_hash": "95c4211c7a02a9004a2714aa38bfc8c7eaa8d1b048a4e23e0ed4200fa33d2da2",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "standard_12_team",
+          "format_hash": "9f6c03ef81876c2f14422302cd678320b5556000220e8a59111fcd0d757f7c8a",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        }
+      ]
+    },
+    {
+      "table_name": "league_format_player_projection_values",
+      "table_config": {
+        "table": "league_format_player_projection_values",
+        "hash_column": "league_format_hash",
+        "type": "league",
+        "description": "Player projections and market values by league format",
+        "time_columns": ["week", "year"],
+        "additional_columns": ["pid"]
+      },
+      "results": [
+        {
+          "format_name": "draftkings_classic",
+          "format_hash": "52dff178c05048af9f38e4f4b5c2372623619476333b0cb20b6783f6d9513e34",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "genesis_10_team",
+          "format_hash": "1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b",
+          "exists": true,
+          "record_count": 18900,
+          "coverage": {
+            "week": [
+              {
+                "week": "0",
+                "count": 945
+              },
+              {
+                "week": "1",
+                "count": 945
+              },
+              {
+                "week": "10",
+                "count": 945
+              },
+              {
+                "week": "11",
+                "count": 945
+              },
+              {
+                "week": "12",
+                "count": 945
+              },
+              {
+                "week": "13",
+                "count": 945
+              },
+              {
+                "week": "14",
+                "count": 945
+              },
+              {
+                "week": "15",
+                "count": 945
+              },
+              {
+                "week": "16",
+                "count": 945
+              },
+              {
+                "week": "17",
+                "count": 945
+              },
+              {
+                "week": "18",
+                "count": 945
+              },
+              {
+                "week": "2",
+                "count": 945
+              },
+              {
+                "week": "3",
+                "count": 945
+              },
+              {
+                "week": "4",
+                "count": 945
+              },
+              {
+                "week": "5",
+                "count": 945
+              },
+              {
+                "week": "6",
+                "count": 945
+              },
+              {
+                "week": "7",
+                "count": 945
+              },
+              {
+                "week": "8",
+                "count": 945
+              },
+              {
+                "week": "9",
+                "count": 945
+              },
+              {
+                "week": "ros",
+                "count": 945
+              }
+            ],
+            "year": [
+              {
+                "year": 2025,
+                "count": 18900
+              }
+            ],
+            "unique_players": 945
+          }
+        },
+        {
+          "format_name": "half_ppr_10_team",
+          "format_hash": "54ada7372303d92d6101a695bc6960385525cb36f52aa1ceed5e56f3921d2c1f",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_10_team_superflex",
+          "format_hash": "26188bdbfed990fd907934850777e1001a83dc2291c09ca38ac3b209704be514",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_12_team",
+          "format_hash": "0ca34a52a960d11c896e57a31aa9c1177c576282188b98ce7e756a07478d923e",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_12_team_superflex",
+          "format_hash": "ec5a79248e24911d0cd099a447b9f26ea72c0f999228354d47c85b61b6db91c3",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_10_team",
+          "format_hash": "eccbba076b886b25e9a49dd06a0e2ff20b3edce9eff8a061d8cee7a9841c7de6",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_10_team_superflex",
+          "format_hash": "b7c23f84aee1ad20ba7984b8af73427c529d1548496d81f9bd3481abbe71d570",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_12_team",
+          "format_hash": "b68d6e71bf522cc02092d9e335567fb9dac2a89d2750b63376bada8cc991782f",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_12_team_superflex",
+          "format_hash": "77dd3218bf036e2207361bc32b799992cf3e1ddcd8423f0f3d99b7fbb5075353",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_10_team",
+          "format_hash": "68020d1f302b7c13392d038d987c8cd2a4bad72f521df4553e4055f23a4be82e",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_10_team_superflex",
+          "format_hash": "cd0b0f97f88a22827e72672acc3af59e05432c660f6b8fae4857d83cc51bb12b",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_12_team",
+          "format_hash": "eae52d9963e72597b78e24d27a4a5c14dc446b212cc4962f384bc5bc4b68f459",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_12_team_superflex",
+          "format_hash": "72ac30c0df7d1a2d4cd04c28b5a4bc4adb5b41b26a34cffff72025edcb37e86e",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_10_team",
+          "format_hash": "2774bbf98729aeb7177f9f800c1661427f0171dddce246830f9a77e5f8295093",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_10_team_superflex",
+          "format_hash": "2914099379c3ccd16d88a3a88da162d1010968dfd2e186a5c04656957b843aea",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_12_team",
+          "format_hash": "b6628134d0db1d2b5b8e0aa055eac3c3778e5faa55f2e18305e447baffd77772",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_12_team_superflex",
+          "format_hash": "92b023a804d534b6567468ba5593517bd76171be2e7f0b16209ef2aeb06f7576",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "sfb15_mfl",
+          "format_hash": "59bfafdb50793debdc5b47183c261aa8109c460520cf498d5d64ae44597f140b",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "sfb15_sleeper",
+          "format_hash": "a6c3cabc6704ac7219a2494b0c187a93decb0f017904e2e2bf4b5c8519cafc57",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "standard_10_team",
+          "format_hash": "95c4211c7a02a9004a2714aa38bfc8c7eaa8d1b048a4e23e0ed4200fa33d2da2",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "standard_12_team",
+          "format_hash": "9f6c03ef81876c2f14422302cd678320b5556000220e8a59111fcd0d757f7c8a",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        }
+      ]
+    },
+    {
+      "table_name": "league_format_draft_pick_value",
+      "table_config": {
+        "table": "league_format_draft_pick_value",
+        "hash_column": "league_format_hash",
+        "type": "league",
+        "description": "Draft pick value analysis by league format",
+        "time_columns": [],
+        "additional_columns": ["rank"]
+      },
+      "results": [
+        {
+          "format_name": "draftkings_classic",
+          "format_hash": "52dff178c05048af9f38e4f4b5c2372623619476333b0cb20b6783f6d9513e34",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "genesis_10_team",
+          "format_hash": "1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b",
+          "exists": true,
+          "record_count": 87,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_10_team",
+          "format_hash": "54ada7372303d92d6101a695bc6960385525cb36f52aa1ceed5e56f3921d2c1f",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_10_team_superflex",
+          "format_hash": "26188bdbfed990fd907934850777e1001a83dc2291c09ca38ac3b209704be514",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_12_team",
+          "format_hash": "0ca34a52a960d11c896e57a31aa9c1177c576282188b98ce7e756a07478d923e",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_12_team_superflex",
+          "format_hash": "ec5a79248e24911d0cd099a447b9f26ea72c0f999228354d47c85b61b6db91c3",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_10_team",
+          "format_hash": "eccbba076b886b25e9a49dd06a0e2ff20b3edce9eff8a061d8cee7a9841c7de6",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_10_team_superflex",
+          "format_hash": "b7c23f84aee1ad20ba7984b8af73427c529d1548496d81f9bd3481abbe71d570",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_12_team",
+          "format_hash": "b68d6e71bf522cc02092d9e335567fb9dac2a89d2750b63376bada8cc991782f",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover_12_team_superflex",
+          "format_hash": "77dd3218bf036e2207361bc32b799992cf3e1ddcd8423f0f3d99b7fbb5075353",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_10_team",
+          "format_hash": "68020d1f302b7c13392d038d987c8cd2a4bad72f521df4553e4055f23a4be82e",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_10_team_superflex",
+          "format_hash": "cd0b0f97f88a22827e72672acc3af59e05432c660f6b8fae4857d83cc51bb12b",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_12_team",
+          "format_hash": "eae52d9963e72597b78e24d27a4a5c14dc446b212cc4962f384bc5bc4b68f459",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_12_team_superflex",
+          "format_hash": "72ac30c0df7d1a2d4cd04c28b5a4bc4adb5b41b26a34cffff72025edcb37e86e",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_10_team",
+          "format_hash": "2774bbf98729aeb7177f9f800c1661427f0171dddce246830f9a77e5f8295093",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_10_team_superflex",
+          "format_hash": "2914099379c3ccd16d88a3a88da162d1010968dfd2e186a5c04656957b843aea",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_12_team",
+          "format_hash": "b6628134d0db1d2b5b8e0aa055eac3c3778e5faa55f2e18305e447baffd77772",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover_12_team_superflex",
+          "format_hash": "92b023a804d534b6567468ba5593517bd76171be2e7f0b16209ef2aeb06f7576",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "sfb15_mfl",
+          "format_hash": "59bfafdb50793debdc5b47183c261aa8109c460520cf498d5d64ae44597f140b",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "sfb15_sleeper",
+          "format_hash": "a6c3cabc6704ac7219a2494b0c187a93decb0f017904e2e2bf4b5c8519cafc57",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "standard_10_team",
+          "format_hash": "95c4211c7a02a9004a2714aa38bfc8c7eaa8d1b048a4e23e0ed4200fa33d2da2",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "standard_12_team",
+          "format_hash": "9f6c03ef81876c2f14422302cd678320b5556000220e8a59111fcd0d757f7c8a",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        }
+      ]
+    },
+    {
+      "table_name": "scoring_format_player_seasonlogs",
+      "table_config": {
+        "table": "scoring_format_player_seasonlogs",
+        "hash_column": "scoring_format_hash",
+        "type": "scoring",
+        "description": "Player season statistics by scoring format",
+        "time_columns": ["year"],
+        "additional_columns": ["pid"]
+      },
+      "results": [
+        {
+          "format_name": "draftkings",
+          "format_hash": "ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e",
+          "exists": true,
+          "record_count": 16173,
+          "coverage": {
+            "year": [
+              {
+                "year": 2001,
+                "count": 541
+              },
+              {
+                "year": 2002,
+                "count": 618
+              },
+              {
+                "year": 2003,
+                "count": 642
+              },
+              {
+                "year": 2004,
+                "count": 640
+              },
+              {
+                "year": 2005,
+                "count": 638
+              },
+              {
+                "year": 2006,
+                "count": 625
+              },
+              {
+                "year": 2007,
+                "count": 630
+              },
+              {
+                "year": 2008,
+                "count": 628
+              },
+              {
+                "year": 2009,
+                "count": 623
+              },
+              {
+                "year": 2010,
+                "count": 642
+              },
+              {
+                "year": 2011,
+                "count": 644
+              },
+              {
+                "year": 2012,
+                "count": 653
+              },
+              {
+                "year": 2013,
+                "count": 651
+              },
+              {
+                "year": 2014,
+                "count": 661
+              },
+              {
+                "year": 2015,
+                "count": 687
+              },
+              {
+                "year": 2016,
+                "count": 688
+              },
+              {
+                "year": 2017,
+                "count": 684
+              },
+              {
+                "year": 2018,
+                "count": 770
+              },
+              {
+                "year": 2019,
+                "count": 751
+              },
+              {
+                "year": 2020,
+                "count": 815
+              },
+              {
+                "year": 2021,
+                "count": 846
+              },
+              {
+                "year": 2022,
+                "count": 785
+              },
+              {
+                "year": 2023,
+                "count": 630
+              },
+              {
+                "year": 2024,
+                "count": 681
+              }
+            ],
+            "unique_players": 3616
+          }
+        },
+        {
+          "format_name": "fanduel",
+          "format_hash": "04fe44246221c6ee47cba713ac4aad95f4b1f28e50078e7f12ecfb0fed257933",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "genesis",
+          "format_hash": "0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d",
+          "exists": true,
+          "record_count": 16158,
+          "coverage": {
+            "year": [
+              {
+                "year": 2001,
+                "count": 541
+              },
+              {
+                "year": 2002,
+                "count": 618
+              },
+              {
+                "year": 2003,
+                "count": 642
+              },
+              {
+                "year": 2004,
+                "count": 640
+              },
+              {
+                "year": 2005,
+                "count": 638
+              },
+              {
+                "year": 2006,
+                "count": 625
+              },
+              {
+                "year": 2007,
+                "count": 630
+              },
+              {
+                "year": 2008,
+                "count": 628
+              },
+              {
+                "year": 2009,
+                "count": 623
+              },
+              {
+                "year": 2010,
+                "count": 641
+              },
+              {
+                "year": 2011,
+                "count": 643
+              },
+              {
+                "year": 2012,
+                "count": 652
+              },
+              {
+                "year": 2013,
+                "count": 650
+              },
+              {
+                "year": 2014,
+                "count": 660
+              },
+              {
+                "year": 2015,
+                "count": 686
+              },
+              {
+                "year": 2016,
+                "count": 687
+              },
+              {
+                "year": 2017,
+                "count": 683
+              },
+              {
+                "year": 2018,
+                "count": 769
+              },
+              {
+                "year": 2019,
+                "count": 750
+              },
+              {
+                "year": 2020,
+                "count": 814
+              },
+              {
+                "year": 2021,
+                "count": 845
+              },
+              {
+                "year": 2022,
+                "count": 784
+              },
+              {
+                "year": 2023,
+                "count": 629
+              },
+              {
+                "year": 2024,
+                "count": 680
+              }
+            ],
+            "unique_players": 3614
+          }
+        },
+        {
+          "format_name": "half_ppr",
+          "format_hash": "196a4e9151ed50bf4c407f6580a21d885c806402d6676cbd37375991279a138f",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover",
+          "format_hash": "df413f3f77684ba130ce79df7cc372f1cb097ca56e0b612c11845eec8b796263",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr",
+          "format_hash": "a29c5c91c762cc114abd6911cd59293a5727cb99f44dcde8d5462485d7915559",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover",
+          "format_hash": "23bedcd3224f626b9e280b4589e35ce8897b88232febda7bf3a612638cd2c9ae",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "sfb15_mfl",
+          "format_hash": "95714ea0d1ed6a920fc5cb9ab34f725e6bc3e36a636f4cb6f7dd0224c5c41e66",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "sfb15_sleeper",
+          "format_hash": "2fc6320827e961ed3403045090980349c30dd9578917a05f43b73e130876ebce",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "standard",
+          "format_hash": "a30d67ba4a329c4de2fea544cb89869d2d1e8406dc2a85be6393ec1cfe88818e",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        }
+      ]
+    },
+    {
+      "table_name": "scoring_format_player_careerlogs",
+      "table_config": {
+        "table": "scoring_format_player_careerlogs",
+        "hash_column": "scoring_format_hash",
+        "type": "scoring",
+        "description": "Player career statistics by scoring format",
+        "time_columns": [],
+        "additional_columns": ["pid"]
+      },
+      "results": [
+        {
+          "format_name": "draftkings",
+          "format_hash": "ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e",
+          "exists": true,
+          "record_count": 3614,
+          "coverage": {
+            "unique_players": 3614
+          }
+        },
+        {
+          "format_name": "fanduel",
+          "format_hash": "04fe44246221c6ee47cba713ac4aad95f4b1f28e50078e7f12ecfb0fed257933",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "genesis",
+          "format_hash": "0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d",
+          "exists": true,
+          "record_count": 3613,
+          "coverage": {
+            "unique_players": 3613
+          }
+        },
+        {
+          "format_name": "half_ppr",
+          "format_hash": "196a4e9151ed50bf4c407f6580a21d885c806402d6676cbd37375991279a138f",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover",
+          "format_hash": "df413f3f77684ba130ce79df7cc372f1cb097ca56e0b612c11845eec8b796263",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr",
+          "format_hash": "a29c5c91c762cc114abd6911cd59293a5727cb99f44dcde8d5462485d7915559",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover",
+          "format_hash": "23bedcd3224f626b9e280b4589e35ce8897b88232febda7bf3a612638cd2c9ae",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "sfb15_mfl",
+          "format_hash": "95714ea0d1ed6a920fc5cb9ab34f725e6bc3e36a636f4cb6f7dd0224c5c41e66",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "sfb15_sleeper",
+          "format_hash": "2fc6320827e961ed3403045090980349c30dd9578917a05f43b73e130876ebce",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "standard",
+          "format_hash": "a30d67ba4a329c4de2fea544cb89869d2d1e8406dc2a85be6393ec1cfe88818e",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        }
+      ]
+    },
+    {
+      "table_name": "scoring_format_player_gamelogs",
+      "table_config": {
+        "table": "scoring_format_player_gamelogs",
+        "hash_column": "scoring_format_hash",
+        "type": "scoring",
+        "description": "Player game-by-game points by scoring format",
+        "time_columns": [],
+        "additional_columns": ["pid", "esbid"]
+      },
+      "results": [
+        {
+          "format_name": "draftkings",
+          "format_hash": "ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e",
+          "exists": true,
+          "record_count": 175621,
+          "coverage": {
+            "unique_players": 3615
+          }
+        },
+        {
+          "format_name": "fanduel",
+          "format_hash": "04fe44246221c6ee47cba713ac4aad95f4b1f28e50078e7f12ecfb0fed257933",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "genesis",
+          "format_hash": "0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d",
+          "exists": true,
+          "record_count": 175594,
+          "coverage": {
+            "unique_players": 3614
+          }
+        },
+        {
+          "format_name": "half_ppr",
+          "format_hash": "196a4e9151ed50bf4c407f6580a21d885c806402d6676cbd37375991279a138f",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover",
+          "format_hash": "df413f3f77684ba130ce79df7cc372f1cb097ca56e0b612c11845eec8b796263",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr",
+          "format_hash": "a29c5c91c762cc114abd6911cd59293a5727cb99f44dcde8d5462485d7915559",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover",
+          "format_hash": "23bedcd3224f626b9e280b4589e35ce8897b88232febda7bf3a612638cd2c9ae",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "sfb15_mfl",
+          "format_hash": "95714ea0d1ed6a920fc5cb9ab34f725e6bc3e36a636f4cb6f7dd0224c5c41e66",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "sfb15_sleeper",
+          "format_hash": "2fc6320827e961ed3403045090980349c30dd9578917a05f43b73e130876ebce",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "standard",
+          "format_hash": "a30d67ba4a329c4de2fea544cb89869d2d1e8406dc2a85be6393ec1cfe88818e",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        }
+      ]
+    },
+    {
+      "table_name": "scoring_format_player_projection_points",
+      "table_config": {
+        "table": "scoring_format_player_projection_points",
+        "hash_column": "scoring_format_hash",
+        "type": "scoring",
+        "description": "Player projections by scoring format",
+        "time_columns": ["week", "year"],
+        "additional_columns": ["pid"]
+      },
+      "results": [
+        {
+          "format_name": "draftkings",
+          "format_hash": "ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "fanduel",
+          "format_hash": "04fe44246221c6ee47cba713ac4aad95f4b1f28e50078e7f12ecfb0fed257933",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "genesis",
+          "format_hash": "0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d",
+          "exists": true,
+          "record_count": 83482,
+          "coverage": {
+            "week": [
+              {
+                "week": "0",
+                "count": 4418
+              },
+              {
+                "week": "1",
+                "count": 4651
+              },
+              {
+                "week": "10",
+                "count": 4379
+              },
+              {
+                "week": "11",
+                "count": 4389
+              },
+              {
+                "week": "12",
+                "count": 4390
+              },
+              {
+                "week": "13",
+                "count": 4404
+              },
+              {
+                "week": "14",
+                "count": 4409
+              },
+              {
+                "week": "15",
+                "count": 4420
+              },
+              {
+                "week": "16",
+                "count": 4441
+              },
+              {
+                "week": "17",
+                "count": 4435
+              },
+              {
+                "week": "18",
+                "count": 2417
+              },
+              {
+                "week": "2",
+                "count": 4656
+              },
+              {
+                "week": "3",
+                "count": 4306
+              },
+              {
+                "week": "4",
+                "count": 4322
+              },
+              {
+                "week": "5",
+                "count": 4336
+              },
+              {
+                "week": "6",
+                "count": 4341
+              },
+              {
+                "week": "7",
+                "count": 4357
+              },
+              {
+                "week": "8",
+                "count": 4368
+              },
+              {
+                "week": "9",
+                "count": 4374
+              },
+              {
+                "week": "ros",
+                "count": 1669
+              }
+            ],
+            "year": [
+              {
+                "year": 2021,
+                "count": 16601
+              },
+              {
+                "year": 2022,
+                "count": 16795
+              },
+              {
+                "year": 2023,
+                "count": 16195
+              },
+              {
+                "year": 2024,
+                "count": 14991
+              },
+              {
+                "year": 2025,
+                "count": 18900
+              }
+            ],
+            "unique_players": 1673
+          }
+        },
+        {
+          "format_name": "half_ppr",
+          "format_hash": "196a4e9151ed50bf4c407f6580a21d885c806402d6676cbd37375991279a138f",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "half_ppr_lower_turnover",
+          "format_hash": "df413f3f77684ba130ce79df7cc372f1cb097ca56e0b612c11845eec8b796263",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr",
+          "format_hash": "a29c5c91c762cc114abd6911cd59293a5727cb99f44dcde8d5462485d7915559",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "ppr_lower_turnover",
+          "format_hash": "23bedcd3224f626b9e280b4589e35ce8897b88232febda7bf3a612638cd2c9ae",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "sfb15_mfl",
+          "format_hash": "95714ea0d1ed6a920fc5cb9ab34f725e6bc3e36a636f4cb6f7dd0224c5c41e66",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "sfb15_sleeper",
+          "format_hash": "2fc6320827e961ed3403045090980349c30dd9578917a05f43b73e130876ebce",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        },
+        {
+          "format_name": "standard",
+          "format_hash": "a30d67ba4a329c4de2fea544cb89869d2d1e8406dc2a85be6393ec1cfe88818e",
+          "exists": false,
+          "record_count": 0,
+          "coverage": {}
+        }
+      ]
+    }
+  ],
+  "missing_coverage": {
+    "scoring_formats": ["sfb15_mfl", "sfb15_sleeper"],
+    "league_formats": [
+      "draftkings_classic",
+      "half_ppr_10_team",
+      "half_ppr_10_team_superflex",
+      "half_ppr_12_team",
+      "half_ppr_12_team_superflex",
+      "half_ppr_lower_turnover_10_team",
+      "half_ppr_lower_turnover_10_team_superflex",
+      "half_ppr_lower_turnover_12_team",
+      "half_ppr_lower_turnover_12_team_superflex",
+      "ppr_10_team",
+      "ppr_10_team_superflex",
+      "ppr_12_team",
+      "ppr_12_team_superflex",
+      "ppr_lower_turnover_10_team",
+      "ppr_lower_turnover_10_team_superflex",
+      "ppr_lower_turnover_12_team",
+      "ppr_lower_turnover_12_team_superflex",
+      "sfb15_mfl",
+      "sfb15_sleeper",
+      "standard_10_team",
+      "standard_12_team"
+    ]
+  }
+}
