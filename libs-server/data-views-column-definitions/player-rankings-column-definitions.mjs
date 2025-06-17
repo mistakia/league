@@ -43,7 +43,8 @@ const add_player_rankings_with_statement = ({
   params = {},
   with_table_name,
   where_clauses = [],
-  select_strings = []
+  select_strings = [],
+  splits = []
 }) => {
   const { year, week, ranking_source_id, ranking_type } = get_default_params({
     params
@@ -55,6 +56,15 @@ const add_player_rankings_with_statement = ({
     .whereIn('ranking_type', ranking_type)
     .whereIn('year', year)
     .whereIn('week', week)
+
+  // Add year and week to SELECT when splits are included
+  if (splits.includes('year')) {
+    with_query.select('year')
+  }
+
+  if (splits.includes('week')) {
+    with_query.select('week')
+  }
 
   if (select_strings.length) {
     for (const select_string of select_strings) {
