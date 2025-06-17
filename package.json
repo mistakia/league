@@ -22,7 +22,10 @@
     "load:crontab:worker1": "ssh league-worker-1 'export NVM_DIR=\"$HOME/.nvm\" && [ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\" && cd /root/league && git pull && crontab /root/league/server/crontab-worker-1.cron'",
     "load:crontab:worker2": "cp -f server/crontab-worker-2.cron $HOME/crontab/ && load_crontab_files",
     "load:logrotate:main": "ssh league 'cd /root/league && git pull && cp /root/league/server/logrotate-main /etc/logrotate.d/league-main'",
-    "export:schema": "ssh league 'pg_dump -U league_user -h localhost --dbname=league_production --schema-only --clean --no-owner --if-exists --file=/root/schema.postgres.sql --no-tablespaces' && scp league:/root/schema.postgres.sql ./db/ && awk 'NR==17{print \"SET search_path = public;\"} {print}' ./db/schema.postgres.sql > ./db/schema.tmp.sql && mv ./db/schema.tmp.sql ./db/schema.postgres.sql"
+    "export:schema": "ssh league 'pg_dump -U league_user -h localhost --dbname=league_production --schema-only --clean --no-owner --if-exists --file=/root/schema.postgres.sql --no-tablespaces' && scp league:/root/schema.postgres.sql ./db/ && awk 'NR==17{print \"SET search_path = public;\"} {print}' ./db/schema.postgres.sql > ./db/schema.tmp.sql && mv ./db/schema.tmp.sql ./db/schema.postgres.sql",
+    "generate:formats": "node scripts/generate-named-formats.mjs",
+    "analyze:format-coverage": "node scripts/analyze-format-coverage.mjs",
+    "generate:format-data": "node scripts/generate-format-data.mjs"
   },
   "imports": {
     "#config": "./config.js",
