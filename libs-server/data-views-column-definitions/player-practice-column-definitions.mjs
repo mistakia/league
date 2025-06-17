@@ -44,7 +44,8 @@ const add_player_practice_with_statement = ({
   query,
   params = {},
   with_table_name,
-  where_clauses = []
+  where_clauses = [],
+  splits = []
 }) => {
   const { year, week } = get_params({ params })
 
@@ -63,6 +64,14 @@ const add_player_practice_with_statement = ({
     )
     .whereIn('year', year)
     .whereIn('week', week)
+
+  if (splits.includes('year')) {
+    with_query.select('year')
+  }
+
+  if (splits.includes('week')) {
+    with_query.select('week')
+  }
 
   if (where_clauses.length) {
     for (const where_clause of where_clauses) {
