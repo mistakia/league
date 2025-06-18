@@ -126,14 +126,14 @@ export function* toggleOrder({ payload }) {
     if (currentOrder === 'asc') {
       const view_default_order_by = DefaultPlayersViews[selected_view].order_by
       yield put(
-        playerActions.set_players_order({
+        playerActions.setPlayersPageOrder({
           order: 'desc',
           orderBy: view_default_order_by
         })
       )
     } else {
       yield put(
-        playerActions.set_players_order({
+        playerActions.setPlayersPageOrder({
           order: 'asc',
           orderBy
         })
@@ -141,7 +141,7 @@ export function* toggleOrder({ payload }) {
     }
   } else {
     yield put(
-      playerActions.set_players_order({
+      playerActions.setPlayersPageOrder({
         order: 'desc',
         orderBy
       })

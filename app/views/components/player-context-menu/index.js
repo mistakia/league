@@ -46,9 +46,8 @@ const mapDispatchToProps = {
   protect: rosterActions.protect,
   toggleCutlist: playerActions.toggleCutlist,
   nominate_pid: auctionActions.select,
-  nominate_restricted_free_agent: rosterActions.nominate_restricted_free_agent,
-  unnominate_restricted_free_agent:
-    rosterActions.unnominate_restricted_free_agent
+  nominate_restricted_free_agent: rosterActions.nominateRestrictedFreeAgent,
+  unnominate_restricted_free_agent: rosterActions.unnominateRestrictedFreeAgent
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlayerContextMenu)

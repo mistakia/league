@@ -16,7 +16,7 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  select_players_page_view: playerActions.select_players_page_view
+  select_players_page_view: playerActions.selectPlayersPageView
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlayersViewMenu)

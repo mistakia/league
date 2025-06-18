@@ -69,7 +69,7 @@ const mapStateToProps = createSelector(
 
 const mapDispatchToProps = {
   search: playerActions.search,
-  reset_player_filter_options: playerActions.reset_player_filter_options,
+  reset_player_filter_options: playerActions.resetPlayerFilterOptions,
   loadRosters: rosterActions.loadRosters,
   loadAllPlayers: playerActions.loadAllPlayers,
   init_charted_plays: statActions.init_charted_plays
