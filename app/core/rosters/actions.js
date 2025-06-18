@@ -1,6 +1,10 @@
 import { actions_utils } from '@core/utils'
 import { constants } from '@libs-shared'
-const { create_api_actions, create_api_action_types } = actions_utils
+const { 
+  create_api_actions, 
+  create_api_action_types, 
+  create_toggle_action
+} = actions_utils
 
 export const rosterActions = {
   // Websocket Events
@@ -36,157 +40,106 @@ export const rosterActions = {
   LOAD_ROSTERS: 'LOAD_ROSTERS',
   loadRosters: (leagueId) => ({
     type: rosterActions.LOAD_ROSTERS,
-    payload: {
-      leagueId: Number(leagueId)
-    }
+    payload: { leagueId: Number(leagueId) }
   }),
 
   LOAD_ROSTERS_FOR_YEAR: 'LOAD_ROSTERS_FOR_YEAR',
-  load_rosters_for_year: ({ lid, year = constants.year }) => ({
+  loadRostersForYear: ({ lid, year = constants.year }) => ({
     type: rosterActions.LOAD_ROSTERS_FOR_YEAR,
-    payload: {
-      lid: Number(lid),
-      year: Number(year)
-    }
+    payload: { lid: Number(lid), year: Number(year) }
   }),
 
   EXPORT_ROSTERS: 'EXPORT_ROSTERS',
-  exportRosters: () => ({
-    type: rosterActions.EXPORT_ROSTERS
-  }),
+  exportRosters: create_toggle_action('EXPORT_ROSTERS'),
 
   ADD_FREE_AGENT: 'ADD_FREE_AGENT',
   addFreeAgent: ({ pid, release, slot }) => ({
     type: rosterActions.ADD_FREE_AGENT,
-    payload: {
-      pid,
-      release,
-      slot
-    }
+    payload: { pid, release, slot }
   }),
 
   RELEASE_PLAYER: 'RELEASE_PLAYER',
   release: (pid) => ({
     type: rosterActions.RELEASE_PLAYER,
-    payload: {
-      pid
-    }
+    payload: { pid }
   }),
 
   SET_ROSTER_RESERVE: 'SET_ROSTER_RESERVE',
   reserve: ({ reserve_pid, slot, activate_pid }) => ({
     type: rosterActions.SET_ROSTER_RESERVE,
-    payload: {
-      reserve_pid,
-      slot,
-      activate_pid
-    }
+    payload: { reserve_pid, slot, activate_pid }
   }),
 
   // rookie, franchise tag
   ADD_TAG: 'ADD_TAG',
   addTag: ({ pid, tag, remove }) => ({
     type: rosterActions.ADD_TAG,
-    payload: {
-      pid,
-      tag,
-      remove
-    }
+    payload: { pid, tag, remove }
   }),
 
   REMOVE_TAG: 'REMOVE_TAG',
   removeTag: ({ pid, teamId }) => ({
     type: rosterActions.REMOVE_TAG,
-    payload: {
-      pid,
-      teamId
-    }
+    payload: { pid, teamId }
   }),
 
   PROJECT_LINEUPS: 'PROJECT_LINEUPS',
-  projectLineups: () => ({
-    type: rosterActions.PROJECT_LINEUPS
-  }),
+  projectLineups: create_toggle_action('PROJECT_LINEUPS'),
 
   // USER
   SET_LINEUPS: 'SET_LINEUPS',
   setLineupProjections: (lineups) => ({
     type: rosterActions.SET_LINEUPS,
-    payload: {
-      lineups
-    }
+    payload: { lineups }
   }),
 
   ACTIVATE_PLAYER: 'ACTIVATE_PLAYER',
   activate: ({ activate_pid, release_pid, reserve_pid, slot }) => ({
     type: rosterActions.ACTIVATE_PLAYER,
-    payload: {
-      activate_pid,
-      release_pid,
-      reserve_pid,
-      slot
-    }
+    payload: { activate_pid, release_pid, reserve_pid, slot }
   }),
 
   DEACTIVATE_PLAYER: 'DEACTIVATE_PLAYER',
   deactivate: ({ deactivate_pid, release_pid }) => ({
     type: rosterActions.DEACTIVATE_PLAYER,
-    payload: {
-      deactivate_pid,
-      release_pid
-    }
+    payload: { deactivate_pid, release_pid }
   }),
 
   PROTECT_PLAYER: 'PROTECT_PLAYER',
   protect: (pid) => ({
     type: rosterActions.PROTECT_PLAYER,
-    payload: {
-      pid
-    }
+    payload: { pid }
   }),
 
   UPDATE_ROSTER_PLAYER_SLOT: 'UPDATE_ROSTER_PLAYER_SLOT',
   update: (players) => ({
     type: rosterActions.UPDATE_ROSTER_PLAYER_SLOT,
-    payload: {
-      players
-    }
+    payload: { players }
   }),
 
   // COMMISH / ADMIN
   ADD_PLAYER_ROSTER: 'ADD_PLAYER_ROSTER',
   add: ({ pid, value, teamId }) => ({
     type: rosterActions.ADD_PLAYER_ROSTER,
-    payload: {
-      pid,
-      value,
-      teamId
-    }
+    payload: { pid, value, teamId }
   }),
 
   REMOVE_PLAYER_ROSTER: 'REMOVE_PLAYER_ROSTER',
   remove: ({ pid, teamId }) => ({
     type: rosterActions.REMOVE_PLAYER_ROSTER,
-    payload: {
-      pid,
-      teamId
-    }
+    payload: { pid, teamId }
   }),
 
   NOMINATE_RESTRICTED_FREE_AGENT: 'NOMINATE_RESTRICTED_FREE_AGENT',
-  nominate_restricted_free_agent: (pid) => ({
+  nominateRestrictedFreeAgent: (pid) => ({
     type: rosterActions.NOMINATE_RESTRICTED_FREE_AGENT,
-    payload: {
-      pid
-    }
+    payload: { pid }
   }),
 
   UNNOMINATE_RESTRICTED_FREE_AGENT: 'UNNOMINATE_RESTRICTED_FREE_AGENT',
-  unnominate_restricted_free_agent: (pid) => ({
+  unnominateRestrictedFreeAgent: (pid) => ({
     type: rosterActions.UNNOMINATE_RESTRICTED_FREE_AGENT,
-    payload: {
-      pid
-    }
+    payload: { pid }
   }),
 
   // TODO - currently not used
@@ -194,43 +147,24 @@ export const rosterActions = {
   UPDATE_PLAYER_ROSTER: 'UPDATE_PLAYER_ROSTER',
   updateValue: ({ pid, value, teamId }) => ({
     type: rosterActions.UPDATE_PLAYER_ROSTER,
-    payload: {
-      pid,
-      teamId
-    }
+    payload: { pid, teamId }
   }),
 
   ADD_TRANSITION_TAG: 'ADD_TRANSITION_TAG',
   addTransitionTag: ({ pid, release, playerTid, teamId, bid, remove }) => ({
     type: rosterActions.ADD_TRANSITION_TAG,
-    payload: {
-      pid,
-      release,
-      teamId,
-      playerTid,
-      bid,
-      remove
-    }
+    payload: { pid, release, teamId, playerTid, bid, remove }
   }),
   UPDATE_TRANSITION_TAG: 'UPDATE_TRANSITION_TAG',
   updateTransitionTag: ({ pid, release, playerTid, teamId, bid }) => ({
     type: rosterActions.UPDATE_TRANSITION_TAG,
-    payload: {
-      pid,
-      release,
-      teamId,
-      playerTid,
-      bid
-    }
+    payload: { pid, release, teamId, playerTid, bid }
   }),
 
   REMOVE_TRANSITION_TAG: 'REMOVE_TRANSITION_TAG',
   removeTransitionTag: ({ pid, teamId }) => ({
     type: rosterActions.REMOVE_TRANSITION_TAG,
-    payload: {
-      pid,
-      teamId
-    }
+    payload: { pid, teamId }
   })
 }
 
@@ -254,8 +188,8 @@ export const putTransitionTagActions = create_api_actions('PUT_TRANSITION_TAG')
 export const deleteTransitionTagActions = create_api_actions(
   'DELETE_TRANSITION_TAG'
 )
-export const post_restricted_free_agent_nomination_actions = create_api_actions(
+export const postRestrictedFreeAgentNominationActions = create_api_actions(
   'POST_RESTRICTED_FREE_AGENT_NOMINATION'
 )
-export const delete_restricted_free_agent_nomination_actions =
+export const deleteRestrictedFreeAgentNominationActions =
   create_api_actions('DELETE_RESTRICTED_FREE_AGENT_NOMINATION')
