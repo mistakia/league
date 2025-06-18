@@ -7,7 +7,7 @@ import { gamelogsActions } from '@core/gamelogs/actions'
 import { waiverActions } from '@core/waivers/actions'
 import { playerActions } from '@core/players/actions'
 import { teamActions } from '@core/teams/actions'
-import { data_views_actions } from '@core/data-views/actions'
+import { dataViewsActions } from '@core/data-views/actions'
 import { league_team_daily_values_actions } from '@core/league-team-daily-values/actions'
 import { seasons_actions } from '@core/seasons/actions'
 import { playActions } from '@core/plays/actions'
@@ -128,7 +128,7 @@ export function apiReducer(state = initialState, { payload, type }) {
         `GET_TEAMS_${payload.opts.leagueId}_${payload.opts.year}`
       ])
 
-    case data_views_actions.GET_DATA_VIEWS_FULFILLED:
+    case dataViewsActions.GET_DATA_VIEWS_FULFILLED:
       return state.setIn(
         [
           'request_history',

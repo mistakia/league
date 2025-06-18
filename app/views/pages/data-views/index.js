@@ -130,13 +130,13 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  data_view_changed: data_views_actions.data_view_changed,
-  set_selected_data_view: data_views_actions.set_selected_data_view,
-  delete_data_view: data_views_actions.delete_data_view,
-  save_data_view: data_views_actions.save_data_view,
-  load_data_views: data_views_actions.load_data_views,
-  reset_data_view_cache: data_views_actions.reset_data_view_cache,
-  load_data_view: data_views_actions.load_data_view
+  data_view_changed: data_views_actions.dataViewChanged,
+  set_selected_data_view: data_views_actions.setSelectedDataView,
+  delete_data_view: data_views_actions.deleteDataView,
+  save_data_view: data_views_actions.saveDataView,
+  load_data_views: data_views_actions.loadDataViews,
+  reset_data_view_cache: data_views_actions.resetDataViewCache,
+  load_data_view: data_views_actions.loadDataView
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(DataViewsPage)

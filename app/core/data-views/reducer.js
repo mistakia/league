@@ -1,7 +1,7 @@
 import Immutable, { Map } from 'immutable'
 
 import { appActions } from '@core/app/actions'
-import { data_views_actions } from './actions'
+import { dataViewsActions } from './actions'
 import { default_data_views } from './default-data-views'
 import { data_view_request_actions } from '@core/data-view-request/actions'
 
@@ -14,7 +14,7 @@ export function data_views_reducer(
   { payload, type }
 ) {
   switch (type) {
-    case data_views_actions.GET_DATA_VIEWS_FULFILLED:
+    case dataViewsActions.GET_DATA_VIEWS_FULFILLED:
       return state.withMutations((state) => {
         payload.data.forEach((view) => {
           state.set(
@@ -28,7 +28,7 @@ export function data_views_reducer(
         })
       })
 
-    case data_views_actions.GET_DATA_VIEW_FULFILLED:
+    case dataViewsActions.GET_DATA_VIEW_FULFILLED:
       return state.withMutations((state) => {
         state.set(
           payload.data.view_id,
@@ -40,7 +40,7 @@ export function data_views_reducer(
         )
       })
 
-    case data_views_actions.POST_DATA_VIEW_FULFILLED:
+    case dataViewsActions.POST_DATA_VIEW_FULFILLED:
       return state.withMutations((state) => {
         state.set(
           payload.data.view_id,
@@ -61,7 +61,7 @@ export function data_views_reducer(
         }
       })
 
-    case data_views_actions.DELETE_DATA_VIEW_FULFILLED: {
+    case dataViewsActions.DELETE_DATA_VIEW_FULFILLED: {
       const { view_id } = payload.opts
       return state.delete(view_id)
     }
@@ -87,7 +87,7 @@ export function data_views_reducer(
       return state
     }
 
-    case data_views_actions.DATA_VIEW_CHANGED: {
+    case dataViewsActions.DATA_VIEW_CHANGED: {
       const { data_view } = payload
       return state.mergeIn([data_view.view_id], {
         ...data_view,

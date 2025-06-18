@@ -25,8 +25,8 @@ import {
   postTransitionTagActions,
   deleteTransitionTagActions,
   putTransitionTagActions,
-  post_restricted_free_agent_nomination_actions,
-  delete_restricted_free_agent_nomination_actions
+  postRestrictedFreeAgentNominationActions,
+  deleteRestrictedFreeAgentNominationActions
 } from '@core/rosters/actions'
 import { getPlayersGamelogsActions } from '@core/gamelogs/actions'
 import {
@@ -45,7 +45,7 @@ import {
   getPlayerProjectionsActions,
   getPlayerGamelogsActions,
   getPlayerPracticesActions,
-  get_player_betting_markets_actions
+  getPlayerBettingMarketsActions
 } from '@core/players/actions'
 import { getChartedPlaysActions } from '@core/stats/actions'
 import { getPlaysActions, getPlayStatsActions } from '@core/plays/actions'
@@ -93,10 +93,10 @@ import { getPercentilesActions } from '@core/percentiles/actions'
 import { getNflTeamSeasonlogsActions } from '@core/seasonlogs/actions'
 import { get_league_team_daily_values_actions } from '@core/league-team-daily-values/actions'
 import {
-  post_data_view_actions,
-  delete_data_view_actions,
-  get_data_views_actions,
-  get_data_view_actions
+  postDataViewActions,
+  deleteDataViewActions,
+  getDataViewsActions,
+  getDataViewActions
 } from '@core/data-views/actions'
 import { get_league_careerlogs_actions } from '@core/league-careerlogs/actions'
 import { get_season_actions } from '@core/seasons/actions'
@@ -426,43 +426,43 @@ export const post_process_poach = fetch.bind(
 export const post_data_view = fetch.bind(
   null,
   api.post_data_view,
-  post_data_view_actions
+  postDataViewActions
 )
 
 export const delete_data_view = fetch.bind(
   null,
   api.delete_data_view,
-  delete_data_view_actions
+  deleteDataViewActions
 )
 
 export const get_data_views = fetch.bind(
   null,
   api.get_data_views,
-  get_data_views_actions
+  getDataViewsActions
 )
 
 export const get_data_view = fetch.bind(
   null,
   api.get_data_view,
-  get_data_view_actions
+  getDataViewActions
 )
 
 export const post_restricted_free_agent_nomination = fetch.bind(
   null,
   api.post_restricted_free_agent_nomination,
-  post_restricted_free_agent_nomination_actions
+  postRestrictedFreeAgentNominationActions
 )
 
 export const delete_restricted_free_agent_nomination = fetch.bind(
   null,
   api.delete_restricted_free_agent_nomination,
-  delete_restricted_free_agent_nomination_actions
+  deleteRestrictedFreeAgentNominationActions
 )
 
 export const get_player_betting_markets = fetch.bind(
   null,
   api.get_player_betting_markets,
-  get_player_betting_markets_actions
+  getPlayerBettingMarketsActions
 )
 
 export const get_league_careerlogs = fetch.bind(

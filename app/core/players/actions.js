@@ -1,9 +1,9 @@
 import { actions_utils } from '@core/utils'
-const { 
-  create_api_actions, 
-  create_api_action_types, 
-  create_toggle_action, 
-  create_load_action 
+const {
+  create_api_actions,
+  create_api_action_types,
+  create_toggle_action,
+  create_load_action
 } = actions_utils
 
 export const playerActions = {

@@ -1,10 +1,7 @@
 import { actions_utils } from '@core/utils'
 import { constants } from '@libs-shared'
-const { 
-  create_api_actions, 
-  create_api_action_types, 
-  create_toggle_action
-} = actions_utils
+const { create_api_actions, create_api_action_types, create_toggle_action } =
+  actions_utils
 
 export const rosterActions = {
   // Websocket Events
@@ -191,5 +188,6 @@ export const deleteTransitionTagActions = create_api_actions(
 export const postRestrictedFreeAgentNominationActions = create_api_actions(
   'POST_RESTRICTED_FREE_AGENT_NOMINATION'
 )
-export const deleteRestrictedFreeAgentNominationActions =
-  create_api_actions('DELETE_RESTRICTED_FREE_AGENT_NOMINATION')
+export const deleteRestrictedFreeAgentNominationActions = create_api_actions(
+  'DELETE_RESTRICTED_FREE_AGENT_NOMINATION'
+)

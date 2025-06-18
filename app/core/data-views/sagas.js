@@ -1,6 +1,6 @@
 import { takeLatest, fork, call, select, put } from 'redux-saga/effects'
 
-import { data_views_actions } from './actions'
+import { dataViewsActions } from './actions'
 import { default_data_view_view_id } from './default-data-views'
 import {
   post_data_view,
@@ -141,7 +141,7 @@ export function* handle_delete_data_view_fulfilled({ payload }) {
   const selected_view_id = yield select(get_selected_data_view_id)
   if (payload.opts.view_id === selected_view_id) {
     yield put(
-      data_views_actions.set_selected_data_view(default_data_view_view_id)
+      dataViewsActions.set_selected_data_view(default_data_view_view_id)
     )
   }
 
@@ -154,7 +154,7 @@ export function* handle_delete_data_view_fulfilled({ payload }) {
 }
 
 export function* handle_get_data_view_fulfilled({ payload }) {
-  yield put(data_views_actions.set_selected_data_view(payload.data.view_id))
+  yield put(dataViewsActions.set_selected_data_view(payload.data.view_id))
   yield call(handle_data_view_request, { data_view: payload.data })
 }
 
@@ -163,53 +163,53 @@ export function* handle_get_data_view_fulfilled({ payload }) {
 // -------------------------------------
 
 export function* watchPlayersTableViewChanged() {
-  yield takeLatest(data_views_actions.DATA_VIEW_CHANGED, data_view_changed)
+  yield takeLatest(dataViewsActions.DATA_VIEW_CHANGED, data_view_changed)
 }
 
 export function* watchSetSelectedPlayersTableView() {
-  yield takeLatest(data_views_actions.SET_SELECTED_DATA_VIEW, data_view_changed)
+  yield takeLatest(dataViewsActions.SET_SELECTED_DATA_VIEW, data_view_changed)
 }
 
 export function* watchSavePlayersTableView() {
-  yield takeLatest(data_views_actions.SAVE_DATA_VIEW, save_data_view)
+  yield takeLatest(dataViewsActions.SAVE_DATA_VIEW, save_data_view)
 }
 
 export function* watch_load_data_views() {
-  yield takeLatest(data_views_actions.LOAD_DATA_VIEWS, load_data_views)
+  yield takeLatest(dataViewsActions.LOAD_DATA_VIEWS, load_data_views)
 }
 
 export function* watch_post_data_view_fulfilled() {
   yield takeLatest(
-    data_views_actions.POST_DATA_VIEW_FULFILLED,
+    dataViewsActions.POST_DATA_VIEW_FULFILLED,
     post_data_view_fulfilled_notification
   )
 }
 
 export function* watch_delete_data_view_fulfilled() {
   yield takeLatest(
-    data_views_actions.DELETE_DATA_VIEW_FULFILLED,
+    dataViewsActions.DELETE_DATA_VIEW_FULFILLED,
     handle_delete_data_view_fulfilled
   )
 }
 
 export function* watch_delete_data_view() {
-  yield takeLatest(data_views_actions.DELETE_DATA_VIEW, handle_delete_data_view)
+  yield takeLatest(dataViewsActions.DELETE_DATA_VIEW, handle_delete_data_view)
 }
 
 export function* watch_reset_data_view_cache() {
   yield takeLatest(
-    data_views_actions.RESET_DATA_VIEW_CACHE,
+    dataViewsActions.RESET_DATA_VIEW_CACHE,
     reset_data_view_cache
   )
 }
 
 export function* watch_load_data_view() {
-  yield takeLatest(data_views_actions.LOAD_DATA_VIEW, load_data_view)
+  yield takeLatest(dataViewsActions.LOAD_DATA_VIEW, load_data_view)
 }
 
 export function* watch_get_data_view_fulfilled() {
   yield takeLatest(
-    data_views_actions.GET_DATA_VIEW_FULFILLED,
+    dataViewsActions.GET_DATA_VIEW_FULFILLED,
     handle_get_data_view_fulfilled
   )
 }

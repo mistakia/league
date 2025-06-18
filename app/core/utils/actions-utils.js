@@ -31,7 +31,9 @@ export const create_set_action = (action_type) => (value) => ({
   payload: { value }
 })
 
-export const create_load_action = (action_type) => (params = {}) => ({
-  type: action_type,
-  payload: params
-})
+export const create_load_action =
+  (action_type) =>
+  (params = {}) => ({
+    type: action_type,
+    payload: params
+  })

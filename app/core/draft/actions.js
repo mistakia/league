@@ -1,5 +1,6 @@
 import { actions_utils } from '@core/utils'
-const { create_api_actions, create_api_action_types, create_toggle_action } = actions_utils
+const { create_api_actions, create_api_action_types, create_toggle_action } =
+  actions_utils
 
 export const draftActions = {
   DRAFTED_PLAYER: 'DRAFTED_PLAYER',
