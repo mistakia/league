@@ -25,9 +25,9 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  load_rosters_for_year: rosterActions.loadRostersForYear,
+  load_rosters_for_year: rosterActions.load_rosters_for_year,
   loadMatchups: matchupsActions.loadMatchups,
-  loadLeaguePlayers: playerActions.loadLeaguePlayers,
+  loadLeaguePlayers: playerActions.load_league_players,
   selectYear: appActions.selectYear,
   select_matchup: matchupsActions.select_matchup,
   selectWeek: scoreboardActions.selectWeek,

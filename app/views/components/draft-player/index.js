@@ -18,7 +18,7 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  select: draftActions.selectPlayer
+  select: draftActions.select_player
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(DraftPlayer)

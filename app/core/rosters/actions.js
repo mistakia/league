@@ -35,22 +35,22 @@ export const rosterActions = {
   ...create_api_action_types('DELETE_RESTRICTED_FREE_AGENT_NOMINATION'),
 
   LOAD_ROSTERS: 'LOAD_ROSTERS',
-  loadRosters: (leagueId) => ({
+  load_rosters: (leagueId) => ({
     type: rosterActions.LOAD_ROSTERS,
     payload: { leagueId: Number(leagueId) }
   }),
 
   LOAD_ROSTERS_FOR_YEAR: 'LOAD_ROSTERS_FOR_YEAR',
-  loadRostersForYear: ({ lid, year = constants.year }) => ({
+  load_rosters_for_year: ({ lid, year = constants.year }) => ({
     type: rosterActions.LOAD_ROSTERS_FOR_YEAR,
     payload: { lid: Number(lid), year: Number(year) }
   }),
 
   EXPORT_ROSTERS: 'EXPORT_ROSTERS',
-  exportRosters: create_toggle_action('EXPORT_ROSTERS'),
+  export_rosters: create_toggle_action('EXPORT_ROSTERS'),
 
   ADD_FREE_AGENT: 'ADD_FREE_AGENT',
-  addFreeAgent: ({ pid, release, slot }) => ({
+  add_free_agent: ({ pid, release, slot }) => ({
     type: rosterActions.ADD_FREE_AGENT,
     payload: { pid, release, slot }
   }),
@@ -69,23 +69,23 @@ export const rosterActions = {
 
   // rookie, franchise tag
   ADD_TAG: 'ADD_TAG',
-  addTag: ({ pid, tag, remove }) => ({
+  add_tag: ({ pid, tag, remove }) => ({
     type: rosterActions.ADD_TAG,
     payload: { pid, tag, remove }
   }),
 
   REMOVE_TAG: 'REMOVE_TAG',
-  removeTag: ({ pid, teamId }) => ({
+  remove_tag: ({ pid, teamId }) => ({
     type: rosterActions.REMOVE_TAG,
     payload: { pid, teamId }
   }),
 
   PROJECT_LINEUPS: 'PROJECT_LINEUPS',
-  projectLineups: create_toggle_action('PROJECT_LINEUPS'),
+  project_lineups: create_toggle_action('PROJECT_LINEUPS'),
 
   // USER
   SET_LINEUPS: 'SET_LINEUPS',
-  setLineupProjections: (lineups) => ({
+  set_lineup_projections: (lineups) => ({
     type: rosterActions.SET_LINEUPS,
     payload: { lineups }
   }),
@@ -128,13 +128,13 @@ export const rosterActions = {
   }),
 
   NOMINATE_RESTRICTED_FREE_AGENT: 'NOMINATE_RESTRICTED_FREE_AGENT',
-  nominateRestrictedFreeAgent: (pid) => ({
+  nominate_restricted_free_agent: (pid) => ({
     type: rosterActions.NOMINATE_RESTRICTED_FREE_AGENT,
     payload: { pid }
   }),
 
   UNNOMINATE_RESTRICTED_FREE_AGENT: 'UNNOMINATE_RESTRICTED_FREE_AGENT',
-  unnominateRestrictedFreeAgent: (pid) => ({
+  unnominate_restricted_free_agent: (pid) => ({
     type: rosterActions.UNNOMINATE_RESTRICTED_FREE_AGENT,
     payload: { pid }
   }),
@@ -142,24 +142,24 @@ export const rosterActions = {
   // TODO - currently not used
   // commish
   UPDATE_PLAYER_ROSTER: 'UPDATE_PLAYER_ROSTER',
-  updateValue: ({ pid, value, teamId }) => ({
+  update_value: ({ pid, value, teamId }) => ({
     type: rosterActions.UPDATE_PLAYER_ROSTER,
     payload: { pid, teamId }
   }),
 
   ADD_TRANSITION_TAG: 'ADD_TRANSITION_TAG',
-  addTransitionTag: ({ pid, release, playerTid, teamId, bid, remove }) => ({
+  add_transition_tag: ({ pid, release, playerTid, teamId, bid, remove }) => ({
     type: rosterActions.ADD_TRANSITION_TAG,
     payload: { pid, release, teamId, playerTid, bid, remove }
   }),
   UPDATE_TRANSITION_TAG: 'UPDATE_TRANSITION_TAG',
-  updateTransitionTag: ({ pid, release, playerTid, teamId, bid }) => ({
+  update_transition_tag: ({ pid, release, playerTid, teamId, bid }) => ({
     type: rosterActions.UPDATE_TRANSITION_TAG,
     payload: { pid, release, teamId, playerTid, bid }
   }),
 
   REMOVE_TRANSITION_TAG: 'REMOVE_TRANSITION_TAG',
-  removeTransitionTag: ({ pid, teamId }) => ({
+  remove_transition_tag: ({ pid, teamId }) => ({
     type: rosterActions.REMOVE_TRANSITION_TAG,
     payload: { pid, teamId }
   })

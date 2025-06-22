@@ -9,16 +9,16 @@ export const draftActions = {
   ...create_api_action_types('POST_DRAFT'),
 
   DRAFT_SELECT_PLAYER: 'DRAFT_SELECT_PLAYER',
-  selectPlayer: (pid) => ({
+  select_player: (pid) => ({
     type: draftActions.DRAFT_SELECT_PLAYER,
     payload: { pid }
   }),
 
   LOAD_DRAFT: 'LOAD_DRAFT',
-  loadDraft: create_toggle_action('LOAD_DRAFT'),
+  load_draft: create_toggle_action('LOAD_DRAFT'),
 
   DRAFT_PLAYER: 'DRAFT_PLAYER',
-  draftPlayer: create_toggle_action('DRAFT_PLAYER')
+  draft_player: create_toggle_action('DRAFT_PLAYER')
 }
 
 export const getDraftActions = create_api_actions('GET_DRAFT')

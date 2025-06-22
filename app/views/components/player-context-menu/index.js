@@ -44,10 +44,10 @@ const mapDispatchToProps = {
   reserve: rosterActions.reserve,
   release: rosterActions.release,
   protect: rosterActions.protect,
-  toggleCutlist: playerActions.toggleCutlist,
+  toggleCutlist: playerActions.toggle_cutlist,
   nominate_pid: auctionActions.select,
-  nominate_restricted_free_agent: rosterActions.nominateRestrictedFreeAgent,
-  unnominate_restricted_free_agent: rosterActions.unnominateRestrictedFreeAgent
+  nominate_restricted_free_agent: rosterActions.nominate_restricted_free_agent,
+  unnominate_restricted_free_agent: rosterActions.unnominate_restricted_free_agent
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlayerContextMenu)

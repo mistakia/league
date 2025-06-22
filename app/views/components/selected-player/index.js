@@ -49,8 +49,8 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  deselect: playerActions.deselectPlayer,
-  loadAllPlayers: playerActions.loadAllPlayers
+  deselect: playerActions.deselect_player,
+  loadAllPlayers: playerActions.load_all_players
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(SelectedPlayer)

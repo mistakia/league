@@ -8,21 +8,21 @@ const {
 
 export const playerActions = {
   LOAD_ALL_PLAYERS: 'LOAD_ALL_PLAYERS',
-  loadAllPlayers: create_load_action('LOAD_ALL_PLAYERS'),
+  load_all_players: create_load_action('LOAD_ALL_PLAYERS'),
 
   LOAD_LEAGUE_PLAYERS: 'LOAD_LEAGUE_PLAYERS',
-  loadLeaguePlayers: create_load_action('LOAD_LEAGUE_PLAYERS'),
+  load_league_players: create_load_action('LOAD_LEAGUE_PLAYERS'),
 
   LOAD_TEAM_PLAYERS: 'LOAD_TEAM_PLAYERS',
-  loadTeamPlayers: create_load_action('LOAD_TEAM_PLAYERS'),
+  load_team_players: create_load_action('LOAD_TEAM_PLAYERS'),
 
   SET_WATCHLIST: 'SET_WATCHLIST',
-  setWatchlist: (watchlist) => ({
+  set_watchlist: (watchlist) => ({
     type: playerActions.SET_WATCHLIST,
     payload: { watchlist }
   }),
   TOGGLE_WATCHLIST: 'TOGGLE_WATCHLIST',
-  toggleWatchlist: (pid) => ({
+  toggle_watchlist: (pid) => ({
     type: playerActions.TOGGLE_WATCHLIST,
     payload: { pid }
   }),
@@ -41,27 +41,27 @@ export const playerActions = {
     }
   }),
   TOGGLE_WATCHLIST_ONLY: 'TOGGLE_WATCHLIST_ONLY',
-  toggleWatchlistOnly: create_toggle_action('TOGGLE_WATCHLIST_ONLY'),
+  toggle_watchlist_only: create_toggle_action('TOGGLE_WATCHLIST_ONLY'),
   TOGGLE_PLAYERS_PAGE_ORDER: 'TOGGLE_PLAYERS_PAGE_ORDER',
-  togglePlayersPageOrder: (orderBy) => ({
+  toggle_players_page_order: (orderBy) => ({
     type: playerActions.TOGGLE_PLAYERS_PAGE_ORDER,
     payload: { orderBy }
   }),
   SET_PLAYERS_PAGE_ORDER: 'SET_PLAYERS_PAGE_ORDER',
-  setPlayersPageOrder: ({ order, orderBy }) => ({
+  set_players_page_order: ({ order, orderBy }) => ({
     type: playerActions.SET_PLAYERS_PAGE_ORDER,
     payload: { order, orderBy }
   }),
   PLAYERS_SELECT_PLAYER: 'PLAYERS_SELECT_PLAYER',
-  selectPlayer: (pid) => ({
+  select_player: (pid) => ({
     type: playerActions.PLAYERS_SELECT_PLAYER,
     payload: { pid }
   }),
   PLAYERS_DESELECT_PLAYER: 'PLAYERS_DESELECT_PLAYER',
-  deselectPlayer: create_toggle_action('PLAYERS_DESELECT_PLAYER'),
+  deselect_player: create_toggle_action('PLAYERS_DESELECT_PLAYER'),
 
   SET_PLAYER_VALUES: 'SET_PLAYER_VALUES',
-  setValues: ({ players, baselines }) => ({
+  set_values: ({ players, baselines }) => ({
     type: playerActions.SET_PLAYER_VALUES,
     payload: {
       players,
@@ -69,7 +69,7 @@ export const playerActions = {
     }
   }),
   SET_PLAYER_STATS: 'SET_PLAYER_STATS',
-  setStats: ({ players, percentiles }) => ({
+  set_stats: ({ players, percentiles }) => ({
     type: playerActions.SET_PLAYER_STATS,
     payload: {
       players,
@@ -77,7 +77,7 @@ export const playerActions = {
     }
   }),
   SET_PROJECTED_CONTRIBUTION: 'SET_PROJECTED_CONTRIBUTION',
-  setProjectedContribution: (players) => ({
+  set_projected_contribution: (players) => ({
     type: playerActions.SET_PROJECTED_CONTRIBUTION,
     payload: { players }
   }),
@@ -91,13 +91,13 @@ export const playerActions = {
   ...create_api_action_types('GET_PLAYER_TRANSACTIONS'),
 
   GET_PLAYER_TRANSACTIONS: 'GET_PLAYER_TRANSACTIONS',
-  getPlayerTransactions: (pid) => ({
+  get_player_transactions: (pid) => ({
     type: playerActions.GET_PLAYER_TRANSACTIONS,
     payload: { pid }
   }),
 
   SAVE_PROJECTION: 'SAVE_PROJECTION',
-  saveProjection: ({ pid, value, type, userId, week }) => ({
+  save_projection: ({ pid, value, type, userId, week }) => ({
     type: playerActions.SAVE_PROJECTION,
     payload: {
       userId,
@@ -108,7 +108,7 @@ export const playerActions = {
     }
   }),
   DELETE_PROJECTION: 'DELETE_PROJECTION',
-  deleteProjection: ({ pid, week }) => ({
+  delete_projection: ({ pid, week }) => ({
     type: playerActions.DELETE_PROJECTION,
     payload: {
       pid,
@@ -116,12 +116,12 @@ export const playerActions = {
     }
   }),
   SET_PROJECTION: 'SET_PROJECTION',
-  setProjection: (opts) => ({
+  set_projection: (opts) => ({
     type: playerActions.SET_PROJECTION,
     payload: { opts }
   }),
   REMOVE_PROJECTION: 'REMOVE_PROJECTION',
-  removeProjection: (opts) => ({
+  remove_projection: (opts) => ({
     type: playerActions.REMOVE_PROJECTION,
     payload: { opts }
   }),
@@ -130,19 +130,19 @@ export const playerActions = {
   ...create_api_action_types('DEL_PROJECTION'),
 
   SELECT_PLAYERS_PAGE_VIEW: 'SELECT_PLAYERS_PAGE_VIEW',
-  selectPlayersPageView: (view_key) => ({
+  select_players_page_view: (view_key) => ({
     type: playerActions.SELECT_PLAYERS_PAGE_VIEW,
     payload: { view_key }
   }),
 
   ...create_api_action_types('GET_CUTLIST'),
   TOGGLE_CUTLIST: 'TOGGLE_CUTLIST',
-  toggleCutlist: (pid) => ({
+  toggle_cutlist: (pid) => ({
     type: playerActions.TOGGLE_CUTLIST,
     payload: { pid }
   }),
   REORDER_CUTLIST: 'REORDER_CUTLIST',
-  reorderCutlist: ({ oldIndex, newIndex }) => ({
+  reorder_cutlist: ({ oldIndex, newIndex }) => ({
     type: playerActions.REORDER_CUTLIST,
     payload: {
       oldIndex,
@@ -154,24 +154,24 @@ export const playerActions = {
   ...create_api_action_types('GET_BASELINES'),
 
   GET_PLAYER_PROJECTIONS: 'GET_PLAYER_PROJECTIONS',
-  getPlayerProjections: (pid) => ({
+  get_player_projections: (pid) => ({
     type: playerActions.GET_PLAYER_PROJECTIONS,
     payload: { pid }
   }),
   ...create_api_action_types('GET_PLAYER_PROJECTIONS'),
 
   LOAD_PLAYER_PRACTICES: 'LOAD_PLAYER_PRACTICES',
-  loadPlayerPractices: create_load_action('LOAD_PLAYER_PRACTICES'),
+  load_player_practices: create_load_action('LOAD_PLAYER_PRACTICES'),
   LOAD_PLAYER_GAMELOGS: 'LOAD_PLAYER_GAMELOGS',
-  loadPlayerGamelogs: create_load_action('LOAD_PLAYER_GAMELOGS'),
+  load_player_gamelogs: create_load_action('LOAD_PLAYER_GAMELOGS'),
   ...create_api_action_types('GET_PLAYER_GAMELOGS'),
   ...create_api_action_types('GET_PLAYER_PRACTICES'),
 
   RESET_PLAYER_FILTER_OPTIONS: 'RESET_PLAYER_FILTER_OPTIONS',
-  resetPlayerFilterOptions: create_toggle_action('RESET_PLAYER_FILTER_OPTIONS'),
+  reset_player_filter_options: create_toggle_action('RESET_PLAYER_FILTER_OPTIONS'),
 
   LOAD_PLAYER_BETTING_MARKETS: 'LOAD_PLAYER_BETTING_MARKETS',
-  loadPlayerBettingMarkets: create_load_action('LOAD_PLAYER_BETTING_MARKETS'),
+  load_player_betting_markets: create_load_action('LOAD_PLAYER_BETTING_MARKETS'),
   ...create_api_action_types('GET_PLAYER_BETTING_MARKETS')
 }
 

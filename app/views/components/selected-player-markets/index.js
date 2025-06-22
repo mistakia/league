@@ -29,7 +29,7 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  load_player_betting_markets: playerActions.loadPlayerBettingMarkets
+  load_player_betting_markets: playerActions.load_player_betting_markets
 }
 
 export default connect(

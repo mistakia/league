@@ -89,10 +89,10 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  loadDraft: draftActions.loadDraft,
-  draftPlayer: draftActions.draftPlayer,
+  loadDraft: draftActions.load_draft,
+  draftPlayer: draftActions.draft_player,
   showConfirmation: confirmationActions.show,
-  loadAllPlayers: playerActions.loadAllPlayers,
+  loadAllPlayers: playerActions.load_all_players,
   load_league: leagueActions.load_league,
   loadTeams: teamActions.loadTeams
 }

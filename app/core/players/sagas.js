@@ -111,7 +111,7 @@ export function* calculateValues() {
     userId
   })
   worker.terminate()
-  yield putResolve(playerActions.setValues(result))
+  yield putResolve(playerActions.set_values(result))
   yield put(rosterActions.projectLineups())
   // TODO calculate bid up to values
 }
@@ -126,14 +126,14 @@ export function* toggleOrder({ payload }) {
     if (currentOrder === 'asc') {
       const view_default_order_by = DefaultPlayersViews[selected_view].order_by
       yield put(
-        playerActions.setPlayersPageOrder({
+        playerActions.set_players_page_order({
           order: 'desc',
           orderBy: view_default_order_by
         })
       )
     } else {
       yield put(
-        playerActions.setPlayersPageOrder({
+        playerActions.set_players_page_order({
           order: 'asc',
           orderBy
         })
@@ -141,7 +141,7 @@ export function* toggleOrder({ payload }) {
     }
   } else {
     yield put(
-      playerActions.setPlayersPageOrder({
+      playerActions.set_players_page_order({
         order: 'desc',
         orderBy
       })
@@ -155,7 +155,7 @@ export function* saveProjection({ payload }) {
   if (token) yield call(putProjection, { value, type, pid, userId, week })
   else
     yield putResolve(
-      playerActions.setProjection({ value, type, pid, userId, week })
+      playerActions.set_projection({ value, type, pid, userId, week })
     )
   yield call(calculateValues)
 }
@@ -169,7 +169,7 @@ export function* deleteProjection({ payload }) {
   const { pid, week } = payload
   const { userId, token } = yield select(get_app)
   if (token) yield call(delProjection, { userId, week, pid })
-  else yield putResolve(playerActions.removeProjection({ pid, week }))
+  else yield putResolve(playerActions.remove_projection({ pid, week }))
   yield call(calculateValues)
 }
 
@@ -208,7 +208,7 @@ export function* init({ payload }) {
   if (watchlist) {
     try {
       const array = watchlist.split(',')
-      yield put(playerActions.setWatchlist(array))
+      yield put(playerActions.set_watchlist(array))
     } catch (err) {
       console.log(err)
     }

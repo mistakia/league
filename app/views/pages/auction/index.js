@@ -14,9 +14,9 @@ const mapStateToProps = createSelector(getAuction, (auction) => ({
 }))
 
 const mapDispatchToProps = {
-  loadAllPlayers: playerActions.loadAllPlayers,
+  loadAllPlayers: playerActions.load_all_players,
   load_league: leagueActions.load_league,
-  loadRosters: rosterActions.loadRosters
+  loadRosters: rosterActions.load_rosters
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(AuctionPage)
