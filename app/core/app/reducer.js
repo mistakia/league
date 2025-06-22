@@ -4,7 +4,7 @@ import Bugsnag from '@bugsnag/js'
 import { appActions } from './actions'
 import { settingActions } from '@core/settings'
 import { constants, uuidv4 } from '@libs-shared'
-import { rosterActions } from '@core/rosters'
+import { roster_actions } from '@core/rosters'
 import { teamActions } from '@core/teams'
 import { matchupsActions } from '@core/matchups'
 import { data_views_actions, default_data_view_view_id } from '@core/data-views'
@@ -38,13 +38,13 @@ export function appReducer(state = initialState(), { payload, type }) {
         leagueId: payload.leagueId || state.leagueId
       })
 
-    case rosterActions.GET_ROSTERS_PENDING:
+    case roster_actions.GET_ROSTERS_PENDING:
       return state.set('isLoadingRosters', payload.opts.leagueId)
 
-    case rosterActions.GET_ROSTERS_FAILED:
+    case roster_actions.GET_ROSTERS_FAILED:
       return state.set('isLoadingRosters', null)
 
-    case rosterActions.GET_ROSTERS_FULFILLED:
+    case roster_actions.GET_ROSTERS_FULFILLED:
       return state.withMutations((state) => {
         state.set('isLoadingRosters', null)
         state.set('isLoadedRosters', payload.opts.leagueId)

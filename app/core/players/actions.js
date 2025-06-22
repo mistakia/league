@@ -6,7 +6,7 @@ const {
   create_load_action
 } = actions_utils
 
-export const playerActions = {
+export const player_actions = {
   LOAD_ALL_PLAYERS: 'LOAD_ALL_PLAYERS',
   load_all_players: create_load_action('LOAD_ALL_PLAYERS'),
 
@@ -14,27 +14,30 @@ export const playerActions = {
   load_league_players: create_load_action('LOAD_LEAGUE_PLAYERS'),
 
   LOAD_TEAM_PLAYERS: 'LOAD_TEAM_PLAYERS',
-  load_team_players: create_load_action('LOAD_TEAM_PLAYERS'),
+  load_team_players: ({ leagueId, teamId }) => ({
+    type: player_actions.LOAD_TEAM_PLAYERS,
+    payload: { leagueId, teamId }
+  }),
 
   SET_WATCHLIST: 'SET_WATCHLIST',
   set_watchlist: (watchlist) => ({
-    type: playerActions.SET_WATCHLIST,
+    type: player_actions.SET_WATCHLIST,
     payload: { watchlist }
   }),
   TOGGLE_WATCHLIST: 'TOGGLE_WATCHLIST',
   toggle_watchlist: (pid) => ({
-    type: playerActions.TOGGLE_WATCHLIST,
+    type: player_actions.TOGGLE_WATCHLIST,
     payload: { pid }
   }),
 
   SEARCH_PLAYERS: 'SEARCH_PLAYERS',
   search: (value) => ({
-    type: playerActions.SEARCH_PLAYERS,
+    type: player_actions.SEARCH_PLAYERS,
     payload: { value }
   }),
   FILTER_PLAYERS: 'FILTER_PLAYERS',
   filter: ({ type, values }) => ({
-    type: playerActions.FILTER_PLAYERS,
+    type: player_actions.FILTER_PLAYERS,
     payload: {
       type,
       values
@@ -44,17 +47,17 @@ export const playerActions = {
   toggle_watchlist_only: create_toggle_action('TOGGLE_WATCHLIST_ONLY'),
   TOGGLE_PLAYERS_PAGE_ORDER: 'TOGGLE_PLAYERS_PAGE_ORDER',
   toggle_players_page_order: (orderBy) => ({
-    type: playerActions.TOGGLE_PLAYERS_PAGE_ORDER,
+    type: player_actions.TOGGLE_PLAYERS_PAGE_ORDER,
     payload: { orderBy }
   }),
   SET_PLAYERS_PAGE_ORDER: 'SET_PLAYERS_PAGE_ORDER',
   set_players_page_order: ({ order, orderBy }) => ({
-    type: playerActions.SET_PLAYERS_PAGE_ORDER,
+    type: player_actions.SET_PLAYERS_PAGE_ORDER,
     payload: { order, orderBy }
   }),
   PLAYERS_SELECT_PLAYER: 'PLAYERS_SELECT_PLAYER',
   select_player: (pid) => ({
-    type: playerActions.PLAYERS_SELECT_PLAYER,
+    type: player_actions.PLAYERS_SELECT_PLAYER,
     payload: { pid }
   }),
   PLAYERS_DESELECT_PLAYER: 'PLAYERS_DESELECT_PLAYER',
@@ -62,7 +65,7 @@ export const playerActions = {
 
   SET_PLAYER_VALUES: 'SET_PLAYER_VALUES',
   set_values: ({ players, baselines }) => ({
-    type: playerActions.SET_PLAYER_VALUES,
+    type: player_actions.SET_PLAYER_VALUES,
     payload: {
       players,
       baselines
@@ -70,7 +73,7 @@ export const playerActions = {
   }),
   SET_PLAYER_STATS: 'SET_PLAYER_STATS',
   set_stats: ({ players, percentiles }) => ({
-    type: playerActions.SET_PLAYER_STATS,
+    type: player_actions.SET_PLAYER_STATS,
     payload: {
       players,
       percentiles
@@ -78,7 +81,7 @@ export const playerActions = {
   }),
   SET_PROJECTED_CONTRIBUTION: 'SET_PROJECTED_CONTRIBUTION',
   set_projected_contribution: (players) => ({
-    type: playerActions.SET_PROJECTED_CONTRIBUTION,
+    type: player_actions.SET_PROJECTED_CONTRIBUTION,
     payload: { players }
   }),
 
@@ -90,15 +93,12 @@ export const playerActions = {
   ...create_api_action_types('GET_PLAYER'),
   ...create_api_action_types('GET_PLAYER_TRANSACTIONS'),
 
-  GET_PLAYER_TRANSACTIONS: 'GET_PLAYER_TRANSACTIONS',
-  get_player_transactions: (pid) => ({
-    type: playerActions.GET_PLAYER_TRANSACTIONS,
-    payload: { pid }
-  }),
+  LOAD_PLAYER_TRANSACTIONS: 'LOAD_PLAYER_TRANSACTIONS',
+  load_player_transactions: create_load_action('LOAD_PLAYER_TRANSACTIONS'),
 
   SAVE_PROJECTION: 'SAVE_PROJECTION',
   save_projection: ({ pid, value, type, userId, week }) => ({
-    type: playerActions.SAVE_PROJECTION,
+    type: player_actions.SAVE_PROJECTION,
     payload: {
       userId,
       pid,
@@ -109,7 +109,7 @@ export const playerActions = {
   }),
   DELETE_PROJECTION: 'DELETE_PROJECTION',
   delete_projection: ({ pid, week }) => ({
-    type: playerActions.DELETE_PROJECTION,
+    type: player_actions.DELETE_PROJECTION,
     payload: {
       pid,
       week
@@ -117,12 +117,12 @@ export const playerActions = {
   }),
   SET_PROJECTION: 'SET_PROJECTION',
   set_projection: (opts) => ({
-    type: playerActions.SET_PROJECTION,
+    type: player_actions.SET_PROJECTION,
     payload: { opts }
   }),
   REMOVE_PROJECTION: 'REMOVE_PROJECTION',
   remove_projection: (opts) => ({
-    type: playerActions.REMOVE_PROJECTION,
+    type: player_actions.REMOVE_PROJECTION,
     payload: { opts }
   }),
 
@@ -131,19 +131,19 @@ export const playerActions = {
 
   SELECT_PLAYERS_PAGE_VIEW: 'SELECT_PLAYERS_PAGE_VIEW',
   select_players_page_view: (view_key) => ({
-    type: playerActions.SELECT_PLAYERS_PAGE_VIEW,
+    type: player_actions.SELECT_PLAYERS_PAGE_VIEW,
     payload: { view_key }
   }),
 
   ...create_api_action_types('GET_CUTLIST'),
   TOGGLE_CUTLIST: 'TOGGLE_CUTLIST',
   toggle_cutlist: (pid) => ({
-    type: playerActions.TOGGLE_CUTLIST,
+    type: player_actions.TOGGLE_CUTLIST,
     payload: { pid }
   }),
   REORDER_CUTLIST: 'REORDER_CUTLIST',
   reorder_cutlist: ({ oldIndex, newIndex }) => ({
-    type: playerActions.REORDER_CUTLIST,
+    type: player_actions.REORDER_CUTLIST,
     payload: {
       oldIndex,
       newIndex
@@ -153,25 +153,30 @@ export const playerActions = {
   ...create_api_action_types('POST_CUTLIST'),
   ...create_api_action_types('GET_BASELINES'),
 
-  GET_PLAYER_PROJECTIONS: 'GET_PLAYER_PROJECTIONS',
-  get_player_projections: (pid) => ({
-    type: playerActions.GET_PLAYER_PROJECTIONS,
-    payload: { pid }
-  }),
+  LOAD_PLAYER_PROJECTIONS: 'LOAD_PLAYER_PROJECTIONS',
+  load_player_projections: create_load_action('LOAD_PLAYER_PROJECTIONS'),
   ...create_api_action_types('GET_PLAYER_PROJECTIONS'),
 
   LOAD_PLAYER_PRACTICES: 'LOAD_PLAYER_PRACTICES',
-  load_player_practices: create_load_action('LOAD_PLAYER_PRACTICES'),
+  load_player_practices: (pid) => ({
+    type: player_actions.LOAD_PLAYER_PRACTICES,
+    payload: { pid }
+  }),
   LOAD_PLAYER_GAMELOGS: 'LOAD_PLAYER_GAMELOGS',
   load_player_gamelogs: create_load_action('LOAD_PLAYER_GAMELOGS'),
   ...create_api_action_types('GET_PLAYER_GAMELOGS'),
   ...create_api_action_types('GET_PLAYER_PRACTICES'),
 
   RESET_PLAYER_FILTER_OPTIONS: 'RESET_PLAYER_FILTER_OPTIONS',
-  reset_player_filter_options: create_toggle_action('RESET_PLAYER_FILTER_OPTIONS'),
+  reset_player_filter_options: create_toggle_action(
+    'RESET_PLAYER_FILTER_OPTIONS'
+  ),
 
   LOAD_PLAYER_BETTING_MARKETS: 'LOAD_PLAYER_BETTING_MARKETS',
-  load_player_betting_markets: create_load_action('LOAD_PLAYER_BETTING_MARKETS'),
+  load_player_betting_markets: (pid) => ({
+    type: player_actions.LOAD_PLAYER_BETTING_MARKETS,
+    payload: { pid }
+  }),
   ...create_api_action_types('GET_PLAYER_BETTING_MARKETS')
 }
 
@@ -201,6 +206,6 @@ export const getPlayerGamelogsActions = create_api_actions(
 export const getPlayerPracticesActions = create_api_actions(
   'GET_PLAYER_PRACTICES'
 )
-export const getPlayerBettingMarketsActions = create_api_actions(
+export const get_player_betting_markets_actions = create_api_actions(
   'GET_PLAYER_BETTING_MARKETS'
 )

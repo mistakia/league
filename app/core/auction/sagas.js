@@ -215,7 +215,7 @@ export function* watchAuctionBid() {
 /* export function* watchInitAuctionLineup() {
  *   while (true) {
  *     yield all([
- *       take(playerActions.FETCH_ALL_PLAYERS_FULFILLED),
+ *       take(player_actions.FETCH_ALL_PLAYERS_FULFILLED),
  *       take(auctionActions.AUCTION_JOIN)
  *     ])
  *     yield call(optimize)
@@ -223,7 +223,7 @@ export function* watchAuctionBid() {
  * }
  *  */
 /* export function* watchToggleWatchlist() {
- *   yield takeLatest(playerActions.TOGGLE_WATCHLIST, optimize)
+ *   yield takeLatest(player_actions.TOGGLE_WATCHLIST, optimize)
  * }
  *
  * export function* watchSetAuctionBudget() {

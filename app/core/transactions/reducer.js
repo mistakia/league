@@ -3,7 +3,7 @@ import { List, Record } from 'immutable'
 import { constants } from '@libs-shared'
 import { transactionsActions } from './actions'
 import { teamActions } from '@core/teams'
-import { rosterActions } from '@core/rosters'
+import { roster_actions } from '@core/rosters'
 import { TRANSACTIONS_PER_LOAD } from '@core/constants'
 
 const initialState = new Record({
@@ -75,7 +75,7 @@ export function transactionsReducer(state = initialState(), { payload, type }) {
         )
       )
 
-    case rosterActions.ROSTER_TRANSACTIONS:
+    case roster_actions.ROSTER_TRANSACTIONS:
       return state.updateIn(['release'], (list) =>
         list.push(...payload.data.map((p) => p.transaction))
       )

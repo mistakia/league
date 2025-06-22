@@ -35,11 +35,11 @@ export default function LeagueHomePage({
   poaches,
   teamId,
   isBeforeTransitionEnd,
-  loadLeaguePlayers,
+  load_league_players,
   loadDraftPickValue,
   loadRecentTransactions,
   loadTeams,
-  loadRosters,
+  load_rosters,
   leagueId,
   percentiles,
   teams,
@@ -60,15 +60,15 @@ export default function LeagueHomePage({
 
   useEffect(() => {
     if (leagueId) loadTeams(leagueId)
-    if (leagueId) loadRosters(leagueId)
-    loadLeaguePlayers()
+    if (leagueId) load_rosters(leagueId)
+    load_league_players()
     loadDraftPickValue()
     loadRecentTransactions()
   }, [
     leagueId,
     loadTeams,
-    loadRosters,
-    loadLeaguePlayers,
+    load_rosters,
+    load_league_players,
     loadDraftPickValue,
     loadRecentTransactions
   ])
@@ -321,7 +321,7 @@ LeagueHomePage.propTypes = {
   cutlist: ImmutablePropTypes.list,
   league: PropTypes.object,
   waivers: PropTypes.object,
-  loadLeaguePlayers: PropTypes.func,
+  load_league_players: PropTypes.func,
   loadDraftPickValue: PropTypes.func,
   poaches: ImmutablePropTypes.list,
   teamId: PropTypes.number,
@@ -329,7 +329,7 @@ LeagueHomePage.propTypes = {
   loadRecentTransactions: PropTypes.func,
   loadTeams: PropTypes.func,
   leagueId: PropTypes.number,
-  loadRosters: PropTypes.func,
+  load_rosters: PropTypes.func,
   percentiles: PropTypes.object,
   teams: PropTypes.object,
   is_team_manager: PropTypes.bool

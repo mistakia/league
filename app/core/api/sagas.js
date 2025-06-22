@@ -25,8 +25,8 @@ import {
   postTransitionTagActions,
   deleteTransitionTagActions,
   putTransitionTagActions,
-  postRestrictedFreeAgentNominationActions,
-  deleteRestrictedFreeAgentNominationActions
+  post_restricted_free_agent_nomination_actions,
+  delete_restricted_free_agent_nomination_actions
 } from '@core/rosters/actions'
 import { getPlayersGamelogsActions } from '@core/gamelogs/actions'
 import {
@@ -45,7 +45,7 @@ import {
   getPlayerProjectionsActions,
   getPlayerGamelogsActions,
   getPlayerPracticesActions,
-  getPlayerBettingMarketsActions
+  get_player_betting_markets_actions
 } from '@core/players/actions'
 import { getChartedPlaysActions } from '@core/stats/actions'
 import { getPlaysActions, getPlayStatsActions } from '@core/plays/actions'
@@ -93,10 +93,10 @@ import { getPercentilesActions } from '@core/percentiles/actions'
 import { getNflTeamSeasonlogsActions } from '@core/seasonlogs/actions'
 import { get_league_team_daily_values_actions } from '@core/league-team-daily-values/actions'
 import {
-  postDataViewActions,
-  deleteDataViewActions,
-  getDataViewsActions,
-  getDataViewActions
+  post_data_view_actions,
+  delete_data_view_actions,
+  get_data_views_actions,
+  get_data_view_actions
 } from '@core/data-views/actions'
 import { get_league_careerlogs_actions } from '@core/league-careerlogs/actions'
 import { get_season_actions } from '@core/seasons/actions'
@@ -357,7 +357,7 @@ export const putTransitionTag = fetch.bind(
   putTransitionTagActions
 )
 
-export const getPlayerTransactions = fetch.bind(
+export const get_player_transactions = fetch.bind(
   null,
   api.getTransactions,
   getPlayerTransactionsActions
@@ -369,9 +369,9 @@ export const getBaselines = fetch.bind(
   getBaselinesActions
 )
 
-export const getPlayerProjections = fetch.bind(
+export const get_player_projections = fetch.bind(
   null,
-  api.getPlayerProjections,
+  api.get_player_projections,
   getPlayerProjectionsActions
 )
 
@@ -426,43 +426,43 @@ export const post_process_poach = fetch.bind(
 export const post_data_view = fetch.bind(
   null,
   api.post_data_view,
-  postDataViewActions
+  post_data_view_actions
 )
 
 export const delete_data_view = fetch.bind(
   null,
   api.delete_data_view,
-  deleteDataViewActions
+  delete_data_view_actions
 )
 
 export const get_data_views = fetch.bind(
   null,
   api.get_data_views,
-  getDataViewsActions
+  get_data_views_actions
 )
 
 export const get_data_view = fetch.bind(
   null,
   api.get_data_view,
-  getDataViewActions
+  get_data_view_actions
 )
 
 export const post_restricted_free_agent_nomination = fetch.bind(
   null,
   api.post_restricted_free_agent_nomination,
-  postRestrictedFreeAgentNominationActions
+  post_restricted_free_agent_nomination_actions
 )
 
 export const delete_restricted_free_agent_nomination = fetch.bind(
   null,
   api.delete_restricted_free_agent_nomination,
-  deleteRestrictedFreeAgentNominationActions
+  delete_restricted_free_agent_nomination_actions
 )
 
 export const get_player_betting_markets = fetch.bind(
   null,
   api.get_player_betting_markets,
-  getPlayerBettingMarketsActions
+  get_player_betting_markets_actions
 )
 
 export const get_league_careerlogs = fetch.bind(

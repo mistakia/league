@@ -7,8 +7,8 @@ import {
   is_player_filter_options_changed
 } from '@core/selectors'
 import { getPlayerFields } from '@core/player-fields'
-import { playerActions } from '@core/players'
-import { rosterActions } from '@core/rosters'
+import { player_actions } from '@core/players'
+import { roster_actions } from '@core/rosters'
 import { statActions } from '@core/stats'
 import {
   getSelectedViewGroupedFields,
@@ -68,10 +68,10 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  search: playerActions.search,
-  reset_player_filter_options: playerActions.reset_player_filter_options,
-  loadRosters: rosterActions.load_rosters,
-  loadAllPlayers: playerActions.load_all_players,
+  search: player_actions.search,
+  reset_player_filter_options: player_actions.reset_player_filter_options,
+  load_rosters: roster_actions.load_rosters,
+  load_all_players: player_actions.load_all_players,
   init_charted_plays: statActions.init_charted_plays
 }
 

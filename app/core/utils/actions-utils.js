@@ -21,16 +21,6 @@ export const create_toggle_action = (action_type) => () => ({
   type: action_type
 })
 
-export const create_select_action = (action_type) => (id) => ({
-  type: action_type,
-  payload: { id }
-})
-
-export const create_set_action = (action_type) => (value) => ({
-  type: action_type,
-  payload: { value }
-})
-
 export const create_load_action =
   (action_type) =>
   (params = {}) => ({

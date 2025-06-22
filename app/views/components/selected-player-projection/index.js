@@ -1,11 +1,11 @@
 import { connect } from 'react-redux'
 
-import { playerActions } from '@core/players'
+import { player_actions } from '@core/players'
 
 import SelectedPlayerProjection from './selected-player-projection'
 
 const mapDispatchToProps = {
-  delete_projection: playerActions.deleteProjection
+  delete_projection: player_actions.delete_projection
 }
 
 export default connect(null, mapDispatchToProps)(SelectedPlayerProjection)

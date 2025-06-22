@@ -12,11 +12,11 @@ import {
   getPoachPlayersForCurrentLeague,
   getTeamsForCurrentLeague
 } from '@core/selectors'
-import { playerActions } from '@core/players'
+import { player_actions } from '@core/players'
 import { draftPickValueActions } from '@core/draft-pick-value'
 import { transactionsActions } from '@core/transactions'
 import { teamActions } from '@core/teams'
-import { rosterActions } from '@core/rosters'
+import { roster_actions } from '@core/rosters'
 import { calculatePercentiles } from '@libs-shared'
 
 import LeagueHomePage from './league-home'
@@ -82,8 +82,8 @@ const mapStateToProps = createSelector(
 
 const mapDispatchToProps = {
   loadTeams: teamActions.loadTeams,
-  loadRosters: rosterActions.loadRosters,
-  loadLeaguePlayers: playerActions.loadLeaguePlayers,
+  load_rosters: roster_actions.load_rosters,
+  load_league_players: player_actions.load_league_players,
   loadDraftPickValue: draftPickValueActions.loadDraftPickValue,
   loadRecentTransactions: transactionsActions.loadRecentTransactions
 }

@@ -1,5 +1,5 @@
 import { fromJS, List } from 'immutable'
-import { dataViewsActions } from '../data-views/actions'
+import { data_views_actions } from '../data-views'
 import { data_view_request_actions } from './actions'
 
 const initial_state = fromJS({
@@ -25,7 +25,7 @@ export function data_view_request_reducer(
         metadata: payload.append_results ? state.get('metadata') : null
       })
 
-    case dataViewsActions.SET_SELECTED_DATA_VIEW: {
+    case data_views_actions.SET_SELECTED_DATA_VIEW: {
       if (payload.view_change_params.view_state_changed) {
         return state.merge({
           current_request: payload.data_view_id,
@@ -43,7 +43,7 @@ export function data_view_request_reducer(
       return state
     }
 
-    case dataViewsActions.DATA_VIEW_CHANGED: {
+    case data_views_actions.DATA_VIEW_CHANGED: {
       if (payload.view_change_params.view_state_changed) {
         return state.merge({
           current_request: payload.data_view.view_id,

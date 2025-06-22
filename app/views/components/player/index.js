@@ -6,7 +6,7 @@ import { createSelector } from 'reselect'
 
 import { contextMenuActions } from '@core/context-menu'
 import { get_context_menu_info, getCurrentLeague } from '@core/selectors'
-import { playerActions } from '@core/players'
+import { player_actions } from '@core/players'
 
 import './player.styl'
 
@@ -47,7 +47,7 @@ const mapStateToProps = createSelector(
 
 const mapDispatchToProps = {
   showContext: contextMenuActions.show,
-  select: playerActions.selectPlayer
+  select: player_actions.select_player
 }
 
 export function connect(Component) {

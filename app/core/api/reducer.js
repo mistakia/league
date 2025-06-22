@@ -5,9 +5,9 @@ import { seasonlogsActions } from '@core/seasonlogs/actions'
 import { matchupsActions } from '@core/matchups/actions'
 import { gamelogsActions } from '@core/gamelogs/actions'
 import { waiverActions } from '@core/waivers/actions'
-import { playerActions } from '@core/players/actions'
+import { player_actions } from '@core/players/actions'
 import { teamActions } from '@core/teams/actions'
-import { dataViewsActions } from '@core/data-views/actions'
+import { data_views_actions } from '@core/data-views'
 import { league_team_daily_values_actions } from '@core/league-team-daily-values/actions'
 import { seasons_actions } from '@core/seasons/actions'
 import { playActions } from '@core/plays/actions'
@@ -101,13 +101,13 @@ export function apiReducer(state = initialState, { payload, type }) {
         true
       )
 
-    case playerActions.GET_PLAYER_BETTING_MARKETS_PENDING:
+    case player_actions.GET_PLAYER_BETTING_MARKETS_PENDING:
       return state.setIn(
         ['request_history', `GET_PLAYER_BETTING_MARKETS_${payload.opts.pid}`],
         true
       )
 
-    case playerActions.GET_PLAYER_BETTING_MARKETS_FAILED:
+    case player_actions.GET_PLAYER_BETTING_MARKETS_FAILED:
       return state.deleteIn([
         'request_history',
         `GET_PLAYER_BETTING_MARKETS_${payload.opts.pid}`
@@ -128,7 +128,7 @@ export function apiReducer(state = initialState, { payload, type }) {
         `GET_TEAMS_${payload.opts.leagueId}_${payload.opts.year}`
       ])
 
-    case dataViewsActions.GET_DATA_VIEWS_FULFILLED:
+    case data_views_actions.GET_DATA_VIEWS_FULFILLED:
       return state.setIn(
         [
           'request_history',

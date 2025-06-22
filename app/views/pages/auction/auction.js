@@ -13,17 +13,17 @@ import './auction.styl'
 export default function AuctionPage({
   transactions,
   tids,
-  loadAllPlayers,
+  load_all_players,
   load_league,
-  loadRosters
+  load_rosters
 }) {
   const { lid } = useParams()
 
   useEffect(() => {
     load_league()
-    loadAllPlayers()
-    loadRosters(lid)
-  }, [loadAllPlayers, load_league, loadRosters, lid])
+    load_all_players()
+    load_rosters(lid)
+  }, [load_all_players, load_league, load_rosters, lid])
 
   useEffect(() => {
     const element = document.querySelector('.auction__team.winning')
@@ -62,9 +62,9 @@ export default function AuctionPage({
 }
 
 AuctionPage.propTypes = {
-  loadAllPlayers: PropTypes.func,
+  load_all_players: PropTypes.func,
   transactions: ImmutablePropTypes.list,
   tids: ImmutablePropTypes.list,
   load_league: PropTypes.func,
-  loadRosters: PropTypes.func
+  load_rosters: PropTypes.func
 }

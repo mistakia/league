@@ -1,6 +1,6 @@
 import { List, Record } from 'immutable'
 
-import { draftActions } from './actions'
+import { draft_actions } from './actions'
 import { appActions } from '@core/app'
 
 const initialState = new Record({
@@ -16,7 +16,7 @@ const initialState = new Record({
 
 export function draftReducer(state = initialState(), { payload, type }) {
   switch (type) {
-    case draftActions.DRAFT_SELECT_PLAYER:
+    case draft_actions.DRAFT_SELECT_PLAYER:
       return state.merge({ selected: payload.pid })
 
     case appActions.AUTH_FULFILLED: {
@@ -34,18 +34,18 @@ export function draftReducer(state = initialState(), { payload, type }) {
       })
     }
 
-    case draftActions.LOAD_DRAFT:
+    case draft_actions.LOAD_DRAFT:
       return state.merge({ picks: new List() })
 
-    case draftActions.POST_DRAFT_PENDING:
-    case draftActions.GET_DRAFT_PENDING:
+    case draft_actions.POST_DRAFT_PENDING:
+    case draft_actions.GET_DRAFT_PENDING:
       return state.merge({ isPending: true })
 
-    case draftActions.POST_DRAFT_FAILED:
-    case draftActions.GET_DRAFT_FAILED:
+    case draft_actions.POST_DRAFT_FAILED:
+    case draft_actions.GET_DRAFT_FAILED:
       return state.merge({ isPending: false })
 
-    case draftActions.GET_DRAFT_FULFILLED: {
+    case draft_actions.GET_DRAFT_FULFILLED: {
       const drafted = payload.data.picks.filter((p) => p.pid).map((p) => p.pid)
 
       return state.merge({
@@ -55,8 +55,8 @@ export function draftReducer(state = initialState(), { payload, type }) {
       })
     }
 
-    case draftActions.DRAFTED_PLAYER:
-    case draftActions.POST_DRAFT_FULFILLED: {
+    case draft_actions.DRAFTED_PLAYER:
+    case draft_actions.POST_DRAFT_FULFILLED: {
       const { data } = payload
       return state.merge({
         picks: state.picks.setIn(

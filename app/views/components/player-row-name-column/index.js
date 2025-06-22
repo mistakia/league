@@ -2,7 +2,7 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { get_app, get_player_maps, getCurrentLeague } from '@core/selectors'
-import { playerActions } from '@core/players'
+import { player_actions } from '@core/players'
 import { contextMenuActions } from '@core/context-menu'
 
 import PlayerRowNameColumn from './player-row-name-column'
@@ -19,7 +19,7 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  select_player: playerActions.selectPlayer,
+  select_player: player_actions.select_player,
   show_context_menu: contextMenuActions.show
 }
 

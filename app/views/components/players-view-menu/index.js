@@ -2,7 +2,7 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { getSelectedPlayersPageView } from '@core/selectors'
-import { playerActions } from '@core/players'
+import { player_actions } from '@core/players'
 
 import PlayersViewMenu from './players-view-menu'
 
@@ -16,7 +16,7 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  select_players_page_view: playerActions.select_players_page_view
+  select_players_page_view: player_actions.select_players_page_view
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlayersViewMenu)

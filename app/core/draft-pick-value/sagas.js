@@ -1,6 +1,6 @@
 import { fork, takeLatest, call, select } from 'redux-saga/effects'
 
-import { playerActions } from '@core/players'
+import { player_actions } from '@core/players'
 import { get_app } from '@core/selectors'
 import { getDraftPickValue } from '@core/api'
 import { tradeActions } from '@core/trade'
@@ -16,7 +16,7 @@ export function* loadDraftPickValue() {
 // -------------------------------------
 
 export function* watchPlayersSelectPlayer() {
-  yield takeLatest(playerActions.PLAYERS_SELECT_PLAYER, loadDraftPickValue)
+  yield takeLatest(player_actions.PLAYERS_SELECT_PLAYER, loadDraftPickValue)
 }
 
 export function* watchLoadTrades() {

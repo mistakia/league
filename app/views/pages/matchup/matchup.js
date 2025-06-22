@@ -25,7 +25,7 @@ export default function MatchupPage({
   year,
   week,
   loadMatchups,
-  loadLeaguePlayers,
+  load_league_players,
   load_rosters_for_year,
   selectWeek,
   selectYear,
@@ -66,11 +66,11 @@ export default function MatchupPage({
       return navigate('/', { replace: true })
     }
 
-    loadLeaguePlayers()
+    load_league_players()
     load_rosters_for_year({ lid, year: seas_year })
     load_season()
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [lid, loadLeaguePlayers, load_rosters_for_year])
+  }, [lid, load_league_players, load_rosters_for_year])
 
   useEffect(() => {
     if (seas_week && Number(seas_week) !== week) {
@@ -181,6 +181,6 @@ MatchupPage.propTypes = {
   loadMatchups: PropTypes.func,
   select_matchup: PropTypes.func,
   load_rosters_for_year: PropTypes.func,
-  loadLeaguePlayers: PropTypes.func,
+  load_league_players: PropTypes.func,
   load_season: PropTypes.func
 }

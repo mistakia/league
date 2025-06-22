@@ -19,7 +19,7 @@ export default function PlayerContextMenu({
   protect,
   waiverId,
   poachId,
-  toggleCutlist,
+  toggle_cutlist,
   isOnCutlist,
   hideDisabled,
   buttonGroup,
@@ -219,7 +219,7 @@ export default function PlayerContextMenu({
 
   const handleCutlist = () => {
     const pid = playerMap.get('pid')
-    toggleCutlist(pid)
+    toggle_cutlist(pid)
     hide()
   }
 
@@ -480,7 +480,7 @@ PlayerContextMenu.propTypes = {
   protect: PropTypes.func,
   waiverId: PropTypes.number,
   poachId: PropTypes.number,
-  toggleCutlist: PropTypes.func,
+  toggle_cutlist: PropTypes.func,
   isOnCutlist: PropTypes.bool,
   hideDisabled: PropTypes.bool,
   buttonGroup: PropTypes.bool,

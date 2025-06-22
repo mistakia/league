@@ -54,8 +54,8 @@ export default function PlayersPage({
   order,
   orderBy,
   is_player_filter_options_changed,
-  loadRosters,
-  loadAllPlayers,
+  load_rosters,
+  load_all_players,
   init_charted_plays
 }) {
   const { lid } = useParams()
@@ -67,9 +67,9 @@ export default function PlayersPage({
   let scroll_ref
 
   useEffect(() => {
-    loadAllPlayers()
+    load_all_players()
     init_charted_plays()
-  }, [loadAllPlayers, init_charted_plays])
+  }, [load_all_players, init_charted_plays])
 
   useEffect(() => {
     for (const field_key of selected_players_page_view.fields) {
@@ -90,9 +90,9 @@ export default function PlayersPage({
     }
 
     if (lid !== '0') {
-      loadRosters(lid)
+      load_rosters(lid)
     }
-  }, [lid, loadRosters, navigate])
+  }, [lid, load_rosters, navigate])
 
   useEffect(() => {
     set_page(0)
@@ -321,7 +321,7 @@ PlayersPage.propTypes = {
   selected_players_page_view: PropTypes.object,
   reset_player_filter_options: PropTypes.func,
   is_player_filter_options_changed: PropTypes.bool,
-  loadRosters: PropTypes.func,
-  loadAllPlayers: PropTypes.func,
+  load_rosters: PropTypes.func,
+  load_all_players: PropTypes.func,
   init_charted_plays: PropTypes.func
 }

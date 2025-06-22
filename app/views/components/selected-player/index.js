@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { playerActions } from '@core/players'
+import { player_actions } from '@core/players'
 import {
   getSelectedPlayer,
   get_app,
@@ -49,8 +49,8 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  deselect: playerActions.deselect_player,
-  loadAllPlayers: playerActions.load_all_players
+  deselect: player_actions.deselect_player,
+  load_all_players: player_actions.load_all_players
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(SelectedPlayer)

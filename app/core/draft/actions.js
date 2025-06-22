@@ -2,7 +2,7 @@ import { actions_utils } from '@core/utils'
 const { create_api_actions, create_api_action_types, create_toggle_action } =
   actions_utils
 
-export const draftActions = {
+export const draft_actions = {
   DRAFTED_PLAYER: 'DRAFTED_PLAYER',
 
   ...create_api_action_types('GET_DRAFT'),
@@ -10,7 +10,7 @@ export const draftActions = {
 
   DRAFT_SELECT_PLAYER: 'DRAFT_SELECT_PLAYER',
   select_player: (pid) => ({
-    type: draftActions.DRAFT_SELECT_PLAYER,
+    type: draft_actions.DRAFT_SELECT_PLAYER,
     payload: { pid }
   }),
 

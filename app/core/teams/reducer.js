@@ -4,7 +4,7 @@ import { appActions } from '@core/app'
 import { createTeam } from './team'
 import { teamActions } from './actions'
 import { auctionActions } from '@core/auction'
-import { draftActions } from '@core/draft'
+import { draft_actions } from '@core/draft'
 import { tradeActions } from '@core/trade'
 import { constants } from '@libs-shared'
 
@@ -58,8 +58,8 @@ export function teamsReducer(state = initialState, { payload, type }) {
         payload.data.value
       )
 
-    case draftActions.DRAFTED_PLAYER:
-    case draftActions.POST_DRAFT_FULFILLED: {
+    case draft_actions.DRAFTED_PLAYER:
+    case draft_actions.POST_DRAFT_FULFILLED: {
       const { data } = payload
       const teamPicks = state.getIn([constants.year, data.tid, 'picks'])
       const key = teamPicks.findKey((p) => p.uid === data.uid)
