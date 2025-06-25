@@ -1,6 +1,6 @@
 import { fork, takeLatest, call, select } from 'redux-saga/effects'
 
-import { playerActions } from '@core/players'
+import { player_actions } from '@core/players'
 import { getPlays, getPlayStats } from '@core/api'
 import { constants } from '@libs-shared'
 import { get_request_history } from '@core/selectors'
@@ -23,9 +23,9 @@ export function* watchFetchPlayersFulfilled() {
   if (constants.isRegularSeason) {
     yield takeLatest(
       [
-        playerActions.FETCH_ALL_PLAYERS_FULFILLED,
-        playerActions.FETCH_LEAGUE_PLAYERS_FULFILLED,
-        playerActions.FETCH_TEAM_PLAYERS_FULFILLED
+        player_actions.FETCH_ALL_PLAYERS_FULFILLED,
+        player_actions.FETCH_LEAGUE_PLAYERS_FULFILLED,
+        player_actions.FETCH_TEAM_PLAYERS_FULFILLED
       ],
       loadPlays
     )

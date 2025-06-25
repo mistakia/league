@@ -1,5 +1,10 @@
 import { actions_utils } from '@core/utils'
-const { create_api_actions, create_api_action_types } = actions_utils
+const {
+  create_api_actions,
+  create_api_action_types,
+  create_toggle_action,
+  create_load_action
+} = actions_utils
 
 export const data_views_actions = {
   ...create_api_action_types('GET_DATA_VIEWS'),
@@ -23,9 +28,7 @@ export const data_views_actions = {
   }),
 
   RESET_DATA_VIEW_CACHE: 'RESET_DATA_VIEW_CACHE',
-  reset_data_view_cache: () => ({
-    type: data_views_actions.RESET_DATA_VIEW_CACHE
-  }),
+  reset_data_view_cache: create_toggle_action('RESET_DATA_VIEW_CACHE'),
 
   DELETE_DATA_VIEW: 'DELETE_DATA_VIEW',
   delete_data_view: (data_view_id) => ({
@@ -40,10 +43,7 @@ export const data_views_actions = {
   }),
 
   LOAD_DATA_VIEWS: 'LOAD_DATA_VIEWS',
-  load_data_views: ({ user_id, username } = {}) => ({
-    type: data_views_actions.LOAD_DATA_VIEWS,
-    payload: { user_id, username }
-  }),
+  load_data_views: create_load_action('LOAD_DATA_VIEWS'),
 
   LOAD_DATA_VIEW: 'LOAD_DATA_VIEW',
   load_data_view: (data_view_id) => ({

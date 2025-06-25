@@ -2,7 +2,7 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { getTeamsForCurrentLeague } from '@core/selectors'
-import { playerActions } from '@core/players'
+import { player_actions } from '@core/players'
 import { teamActions } from '@core/teams'
 import { draftPickValueActions } from '@core/draft-pick-value'
 import { league_careerlogs_actions } from '@core/league-careerlogs'
@@ -15,7 +15,7 @@ const mapStateToProps = createSelector(getTeamsForCurrentLeague, (teams) => ({
 
 const mapDispatchToProps = {
   loadTeams: teamActions.loadTeams,
-  loadLeaguePlayers: playerActions.loadLeaguePlayers,
+  load_league_players: player_actions.load_league_players,
   loadDraftPickValue: draftPickValueActions.loadDraftPickValue,
   loadLeagueTeamStats: teamActions.loadLeagueTeamStats,
   load_league_careerlogs: league_careerlogs_actions.load_league_careerlogs

@@ -27,7 +27,7 @@ import './league-team.styl'
 
 export default function LeagueTeam({
   league,
-  loadTeamPlayers,
+  load_team_players,
   roster,
   picks,
   players,
@@ -44,11 +44,11 @@ export default function LeagueTeam({
   const teamId = Number(tid)
 
   useEffect(() => {
-    loadTeamPlayers({
+    load_team_players({
       leagueId: Number(lid),
       teamId
     })
-  }, [tid, lid, loadTeamPlayers, teamId])
+  }, [tid, lid, load_team_players, teamId])
 
   const groups = {}
   for (const position of constants.positions) {
@@ -300,7 +300,7 @@ export default function LeagueTeam({
 
 LeagueTeam.propTypes = {
   league: PropTypes.object,
-  loadTeamPlayers: PropTypes.func,
+  load_team_players: PropTypes.func,
   roster: PropTypes.object,
   picks: ImmutablePropTypes.list,
   players: PropTypes.object,

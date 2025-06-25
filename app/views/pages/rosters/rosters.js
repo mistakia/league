@@ -12,9 +12,9 @@ import Roster from '@components/roster'
 import './rosters.styl'
 
 export default function RostersPage({
-  loadRosters,
-  loadLeaguePlayers,
-  exportRosters,
+  load_rosters,
+  load_league_players,
+  export_rosters,
   rosters,
   league,
   teams,
@@ -31,9 +31,9 @@ export default function RostersPage({
       return navigate('/', { replace: true })
     }
 
-    loadLeaguePlayers()
-    loadRosters(lid)
-  }, [lid, loadRosters, loadLeaguePlayers, navigate])
+    load_league_players()
+    load_rosters(lid)
+  }, [lid, load_rosters, load_league_players, navigate])
 
   const labels = []
   if (league.sqb) {
@@ -212,7 +212,7 @@ export default function RostersPage({
         <div className='rosters__picks'>{pickItems}</div>
       </div>
       <div className='rosters__footer'>
-        <Button startIcon={<GetAppIcon />} onClick={exportRosters}>
+        <Button startIcon={<GetAppIcon />} onClick={export_rosters}>
           Export CSV
         </Button>
       </div>
@@ -226,11 +226,11 @@ RostersPage.propTypes = {
   rosters: ImmutablePropTypes.map,
   teams: ImmutablePropTypes.map,
   league: PropTypes.object,
-  exportRosters: PropTypes.func,
+  export_rosters: PropTypes.func,
   ps_drafted_count_max: PropTypes.number,
   ps_signed_count_max: PropTypes.number,
   bench_count_max: PropTypes.number,
   ir_long_term_count_max: PropTypes.number,
-  loadLeaguePlayers: PropTypes.func,
-  loadRosters: PropTypes.func
+  load_league_players: PropTypes.func,
+  load_rosters: PropTypes.func
 }

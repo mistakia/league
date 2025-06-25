@@ -170,9 +170,9 @@ export default class TransitionConfirmation extends React.Component {
       }
 
       if (this._isUpdate) {
-        this.props.updateTransitionTag(data)
+        this.props.update_transition_tag(data)
       } else {
-        this.props.addTransitionTag(data)
+        this.props.add_transition_tag(data)
       }
 
       this.props.onClose()
@@ -339,6 +339,6 @@ TransitionConfirmation.propTypes = {
   playerMap: ImmutablePropTypes.map,
   cutlistTotalSalary: PropTypes.number,
   cutlist: ImmutablePropTypes.list,
-  addTransitionTag: PropTypes.func,
-  updateTransitionTag: PropTypes.func
+  add_transition_tag: PropTypes.func,
+  update_transition_tag: PropTypes.func
 }

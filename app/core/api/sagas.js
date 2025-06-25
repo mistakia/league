@@ -357,7 +357,7 @@ export const putTransitionTag = fetch.bind(
   putTransitionTagActions
 )
 
-export const getPlayerTransactions = fetch.bind(
+export const get_player_transactions = fetch.bind(
   null,
   api.getTransactions,
   getPlayerTransactionsActions
@@ -369,9 +369,9 @@ export const getBaselines = fetch.bind(
   getBaselinesActions
 )
 
-export const getPlayerProjections = fetch.bind(
+export const get_player_projections = fetch.bind(
   null,
-  api.getPlayerProjections,
+  api.get_player_projections,
   getPlayerProjectionsActions
 )
 

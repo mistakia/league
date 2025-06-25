@@ -30,9 +30,9 @@ export default function DraftPage({
   isDraftWindowOpen,
   teamId,
   showConfirmation,
-  draftPlayer,
-  loadDraft,
-  loadAllPlayers,
+  draft_player,
+  load_draft,
+  load_all_players,
   load_league,
   loadTeams,
   is_draft_complete
@@ -47,11 +47,11 @@ export default function DraftPage({
   }
 
   useEffect(() => {
-    loadDraft()
-    loadAllPlayers()
+    load_draft()
+    load_all_players()
     load_league()
     loadTeams(lid)
-  }, [loadDraft, loadAllPlayers, load_league, loadTeams, lid])
+  }, [load_draft, load_all_players, load_league, loadTeams, lid])
 
   useEffect(() => {
     scroll_to_pick()
@@ -67,7 +67,7 @@ export default function DraftPage({
       )} ${selectedPlayerMap.get('lname')} (${selectedPlayerMap.get(
         'pos'
       )}) with the #${nextPick.pick} pick in the ${constants.year} draft.`,
-      onConfirm: draftPlayer
+      onConfirm: draft_player
     })
   }
   const { positions } = constants
@@ -386,12 +386,12 @@ export default function DraftPage({
 
 DraftPage.propTypes = {
   windowEnd: PropTypes.object,
-  loadDraft: PropTypes.func,
-  draftPlayer: PropTypes.func,
+  load_draft: PropTypes.func,
+  draft_player: PropTypes.func,
   showConfirmation: PropTypes.func,
   selectedPlayerMap: ImmutablePropTypes.map,
   nextPick: PropTypes.object,
-  loadAllPlayers: PropTypes.func,
+  load_all_players: PropTypes.func,
   load_league: PropTypes.func,
   loadTeams: PropTypes.func,
   players: ImmutablePropTypes.list,

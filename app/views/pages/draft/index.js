@@ -7,7 +7,7 @@ import {
   getDraftDates,
   get_last_consecutive_pick
 } from '@libs-shared'
-import { draftActions } from '@core/draft'
+import { draft_actions } from '@core/draft'
 import {
   get_app,
   getCurrentLeague,
@@ -18,7 +18,7 @@ import {
   getLastPick,
   getRookiePlayers
 } from '@core/selectors'
-import { playerActions } from '@core/players'
+import { player_actions } from '@core/players'
 import { confirmationActions } from '@core/confirmations'
 import { leagueActions } from '@core/leagues'
 import { teamActions } from '@core/teams'
@@ -89,10 +89,10 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  loadDraft: draftActions.loadDraft,
-  draftPlayer: draftActions.draftPlayer,
+  load_draft: draft_actions.load_draft,
+  draft_player: draft_actions.draft_player,
   showConfirmation: confirmationActions.show,
-  loadAllPlayers: playerActions.loadAllPlayers,
+  load_all_players: player_actions.load_all_players,
   load_league: leagueActions.load_league,
   loadTeams: teamActions.loadTeams
 }

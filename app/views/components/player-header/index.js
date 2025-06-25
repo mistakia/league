@@ -2,7 +2,7 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { getPlayers } from '@core/selectors'
-import { playerActions } from '@core/players'
+import { player_actions } from '@core/players'
 
 import PlayerHeader from './player-header'
 
@@ -12,7 +12,7 @@ const mapStateToProps = createSelector(getPlayers, (players) => ({
 }))
 
 const mapDispatchToProps = {
-  toggle_players_page_order: playerActions.toggle_players_page_order
+  toggle_players_page_order: player_actions.toggle_players_page_order
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlayerHeader)

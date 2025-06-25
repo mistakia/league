@@ -2,7 +2,7 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { getCurrentLeague, getCurrentPlayers } from '@core/selectors'
-import { rosterActions } from '@core/rosters'
+import { roster_actions } from '@core/rosters'
 
 import RookieConfirmation from './rookie-confirmation'
 
@@ -16,7 +16,7 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  add: rosterActions.addTag
+  add: roster_actions.add_tag
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(RookieConfirmation)

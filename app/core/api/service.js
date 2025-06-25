@@ -320,7 +320,7 @@ export const api = {
     const url = `${API_URL}/leagues/${leagueId}/baselines`
     return { url }
   },
-  getPlayerProjections({ pid }) {
+  get_player_projections({ pid }) {
     const url = `${API_URL}/projections/${pid}`
     return { url }
   },

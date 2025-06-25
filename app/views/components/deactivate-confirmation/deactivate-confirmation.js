@@ -21,13 +21,13 @@ export default function DeactivateConfirmation({
   playerMap,
   team,
   pid,
-  loadPlayerTransactions
+  load_player_transactions
 }) {
   const [release_pid, set_release_pid] = useState('')
 
   useEffect(() => {
-    loadPlayerTransactions(pid)
-  }, [loadPlayerTransactions, pid])
+    load_player_transactions(pid)
+  }, [load_player_transactions, pid])
 
   const handleSelectRelease = (event) => {
     const { value } = event.target
@@ -120,6 +120,6 @@ DeactivateConfirmation.propTypes = {
   deactivate: PropTypes.func,
   playerMap: ImmutablePropTypes.map,
   team: PropTypes.object,
-  loadPlayerTransactions: PropTypes.func,
+  load_player_transactions: PropTypes.func,
   pid: PropTypes.string
 }

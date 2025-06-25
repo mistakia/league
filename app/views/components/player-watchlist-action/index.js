@@ -2,7 +2,7 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { getPlayers } from '@core/selectors'
-import { playerActions } from '@core/players'
+import { player_actions } from '@core/players'
 
 import PlayerWatchlistAction from './player-watchlist-action'
 
@@ -16,7 +16,7 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  toggle: playerActions.toggleWatchlist
+  toggle: player_actions.toggle_watchlist
 }
 
 export default connect(

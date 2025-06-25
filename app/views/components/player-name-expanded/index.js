@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { playerActions } from '@core/players'
+import { player_actions } from '@core/players'
 import { getPlayerById, getGameStatusByPlayerId } from '@core/selectors'
 import { constants } from '#libs-shared'
 
@@ -15,7 +15,7 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  select: playerActions.selectPlayer
+  select: player_actions.select_player
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlayerNameExpanded)

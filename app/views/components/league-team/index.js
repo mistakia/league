@@ -19,7 +19,7 @@ import {
   calculatePercentiles,
   getExtensionAmount
 } from '@libs-shared'
-import { playerActions } from '@core/players'
+import { player_actions } from '@core/players'
 
 import LeagueTeam from './league-team'
 
@@ -157,7 +157,7 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  loadTeamPlayers: playerActions.loadTeamPlayers
+  load_team_players: player_actions.load_team_players
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(LeagueTeam)

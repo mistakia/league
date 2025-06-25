@@ -2,7 +2,7 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { getSelectedPlayer } from '@core/selectors'
-import { playerActions } from '@core/players'
+import { player_actions } from '@core/players'
 
 import SelectedPlayerSeasonProjections from './selected-player-projections'
 
@@ -11,7 +11,7 @@ const mapStateToProps = createSelector(getSelectedPlayer, (playerMap) => ({
 }))
 
 const mapDispatchToProps = {
-  load: playerActions.getPlayerProjections
+  load: player_actions.load_player_projections
 }
 
 export default connect(

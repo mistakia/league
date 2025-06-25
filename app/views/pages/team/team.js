@@ -13,7 +13,7 @@ import './team.styl'
 export default function TeamPage({
   loadTeams,
   loadLeagueTeamStats,
-  loadLeaguePlayers,
+  load_league_players,
   teams,
   loadDraftPickValue,
   load_league_careerlogs
@@ -27,7 +27,7 @@ export default function TeamPage({
     }
 
     loadTeams(lid)
-    loadLeaguePlayers(lid)
+    load_league_players(lid)
     loadDraftPickValue()
     loadLeagueTeamStats(lid)
     load_league_careerlogs(lid)
@@ -35,7 +35,7 @@ export default function TeamPage({
     lid,
     tid,
     loadTeams,
-    loadLeaguePlayers,
+    load_league_players,
     loadDraftPickValue,
     loadLeagueTeamStats,
     load_league_careerlogs,
@@ -72,7 +72,7 @@ export default function TeamPage({
 TeamPage.propTypes = {
   loadTeams: PropTypes.func,
   loadLeagueTeamStats: PropTypes.func,
-  loadLeaguePlayers: PropTypes.func,
+  load_league_players: PropTypes.func,
   teams: ImmutablePropTypes.map,
   loadDraftPickValue: PropTypes.func,
   load_league_careerlogs: PropTypes.func

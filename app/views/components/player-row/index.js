@@ -7,7 +7,7 @@ import {
   get_app,
   getPlayerStatus
 } from '@core/selectors'
-import { playerActions } from '@core/players'
+import { player_actions } from '@core/players'
 import { getSelectedViewGroupedFields } from '@core/players/selectors'
 
 import PlayerRow from './player-row'
@@ -31,7 +31,7 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  select: playerActions.selectPlayer
+  select: player_actions.select_player
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(PlayerRow)

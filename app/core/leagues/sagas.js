@@ -6,7 +6,7 @@ import { appActions } from '@core/app'
 import { get_app, getLeagueById } from '@core/selectors'
 import { notificationActions } from '@core/notifications'
 import { teamActions } from '@core/teams'
-import { rosterActions } from '@core/rosters'
+import { roster_actions } from '@core/rosters'
 
 export function* loadLeague() {
   const { leagueId } = yield select(get_app)
@@ -56,7 +56,7 @@ export function* watchLoadLeagueTeamStats() {
 }
 
 export function* watchLoadRosters() {
-  yield takeLatest(rosterActions.LOAD_ROSTERS, loadLeague)
+  yield takeLatest(roster_actions.LOAD_ROSTERS, loadLeague)
 }
 
 export function* watchLoadTeams() {

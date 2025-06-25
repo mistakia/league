@@ -1,7 +1,7 @@
 import { Record, List, Map } from 'immutable'
 
 import { statActions } from './actions'
-import { playerActions } from '@core/players'
+import { player_actions } from '@core/players'
 import { constants } from '@libs-shared'
 
 const initialState = new Record({
@@ -33,7 +33,7 @@ export function statsReducer(state = initialState(), { payload, type }) {
     case statActions.GET_CHARTED_PLAYS_FAILED:
       return state.merge({ isPending: false })
 
-    case playerActions.SET_PLAYER_STATS:
+    case player_actions.SET_PLAYER_STATS:
       return state.merge({
         isPending: false
       })

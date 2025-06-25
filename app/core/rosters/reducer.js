@@ -1,6 +1,6 @@
 import { Map } from 'immutable'
 
-import { rosterActions } from './actions'
+import { roster_actions } from './actions'
 import { createRoster } from './roster'
 import { appActions } from '@core/app'
 import { constants } from '@libs-shared'
@@ -12,7 +12,7 @@ export function rostersReducer(state = new Map(), { payload, type }) {
     case appActions.LOGOUT:
       return new Map()
 
-    case rosterActions.GET_ROSTERS_FULFILLED:
+    case roster_actions.GET_ROSTERS_FULFILLED:
       return state.withMutations((state) => {
         payload.data.forEach((r) =>
           state.setIn([r.tid, r.year, r.week], createRoster(r))
@@ -42,7 +42,7 @@ export function rostersReducer(state = new Map(), { payload, type }) {
       )
     }
 
-    case rosterActions.POST_RELEASE_FULFILLED: {
+    case roster_actions.POST_RELEASE_FULFILLED: {
       const players = state.getIn([
         payload.data.transaction.tid,
         constants.year,
@@ -60,7 +60,7 @@ export function rostersReducer(state = new Map(), { payload, type }) {
       ])
     }
 
-    case rosterActions.ROSTER_TRANSACTIONS: {
+    case roster_actions.ROSTER_TRANSACTIONS: {
       return state.withMutations((state) => {
         payload.data.forEach((p) => {
           const t = p.transaction
@@ -105,7 +105,7 @@ export function rostersReducer(state = new Map(), { payload, type }) {
       })
     }
 
-    case rosterActions.PUT_ROSTER_FULFILLED: {
+    case roster_actions.PUT_ROSTER_FULFILLED: {
       return state.withMutations((state) => {
         const tid = payload.data[0].tid
         const players = state.getIn([
@@ -126,11 +126,11 @@ export function rostersReducer(state = new Map(), { payload, type }) {
       })
     }
 
-    case rosterActions.ROSTER_TRANSACTION:
-    case rosterActions.POST_ACTIVATE_FULFILLED:
-    case rosterActions.POST_DEACTIVATE_FULFILLED:
-    case rosterActions.POST_PROTECT_FULFILLED:
-    case rosterActions.POST_RESERVE_FULFILLED: {
+    case roster_actions.ROSTER_TRANSACTION:
+    case roster_actions.POST_ACTIVATE_FULFILLED:
+    case roster_actions.POST_DEACTIVATE_FULFILLED:
+    case roster_actions.POST_PROTECT_FULFILLED:
+    case roster_actions.POST_RESERVE_FULFILLED: {
       return state.withMutations((state) => {
         const players = state.getIn([
           payload.data.tid,
@@ -183,7 +183,7 @@ export function rostersReducer(state = new Map(), { payload, type }) {
       })
     }
 
-    case rosterActions.SET_LINEUPS:
+    case roster_actions.SET_LINEUPS:
       return state.withMutations((state) => {
         for (const teamId in payload.lineups) {
           const lineups = payload.lineups[teamId]
@@ -206,7 +206,7 @@ export function rostersReducer(state = new Map(), { payload, type }) {
     case teamActions.DELETE_TEAMS_FULFILLED:
       return state.delete(payload.opts.teamId)
 
-    case rosterActions.POST_ROSTERS_FULFILLED: {
+    case roster_actions.POST_ROSTERS_FULFILLED: {
       const { rid, slot, pos, pid } = payload.data
       const { userid, tid, lid, type, value, year, timestamp } =
         payload.data.transaction
@@ -230,7 +230,7 @@ export function rostersReducer(state = new Map(), { payload, type }) {
       )
     }
 
-    case rosterActions.POST_TAG_FULFILLED:
+    case roster_actions.POST_TAG_FULFILLED:
       return state.withMutations((state) => {
         const players = state.getIn([
           payload.opts.teamId,
@@ -269,17 +269,17 @@ export function rostersReducer(state = new Map(), { payload, type }) {
         }
       })
 
-    case rosterActions.PUT_ROSTERS_FULFILLED:
+    case roster_actions.PUT_ROSTERS_FULFILLED:
       return state // TODO
 
-    case rosterActions.DELETE_ROSTERS_FULFILLED:
+    case roster_actions.DELETE_ROSTERS_FULFILLED:
       return state.updateIn(
         [payload.opts.teamId, constants.year, constants.week, 'players'],
         (arr) => arr.filter((p) => p.pid !== payload.opts.pid)
       )
 
-    case rosterActions.UPDATE_TRANSITION_TAG:
-    case rosterActions.ADD_TRANSITION_TAG: {
+    case roster_actions.UPDATE_TRANSITION_TAG:
+    case roster_actions.ADD_TRANSITION_TAG: {
       return state.withMutations((state) => {
         const players = state.getIn([
           payload.teamId,
@@ -391,8 +391,8 @@ export function rostersReducer(state = new Map(), { payload, type }) {
       })
     }
 
-    case rosterActions.REMOVE_TRANSITION_TAG:
-    case rosterActions.REMOVE_TAG: {
+    case roster_actions.REMOVE_TRANSITION_TAG:
+    case roster_actions.REMOVE_TAG: {
       const players = state.getIn([
         payload.teamId,
         constants.year,
@@ -411,8 +411,8 @@ export function rostersReducer(state = new Map(), { payload, type }) {
       )
     }
 
-    case rosterActions.PUT_TRANSITION_TAG_FAILED:
-    case rosterActions.POST_TRANSITION_TAG_FAILED: {
+    case roster_actions.PUT_TRANSITION_TAG_FAILED:
+    case roster_actions.POST_TRANSITION_TAG_FAILED: {
       return state.withMutations((state) => {
         const players = state.getIn([
           payload.opts.teamId,
@@ -537,7 +537,7 @@ export function rostersReducer(state = new Map(), { payload, type }) {
       })
     }
 
-    case rosterActions.POST_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED:
+    case roster_actions.POST_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED:
       return state
         .updateIn(
           [payload.opts.teamId, constants.year, constants.week, 'players'],
@@ -561,7 +561,7 @@ export function rostersReducer(state = new Map(), { payload, type }) {
             })
         )
 
-    case rosterActions.DELETE_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED:
+    case roster_actions.DELETE_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED:
       return state.updateIn(
         [payload.opts.team_id, constants.year, constants.week, 'players'],
         (players) => {

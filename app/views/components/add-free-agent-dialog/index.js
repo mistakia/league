@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { rosterActions } from '@core/rosters'
+import { roster_actions } from '@core/rosters'
 import {
   getCurrentPlayers,
   getCurrentTeamRosterRecord,
@@ -22,7 +22,7 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  addFreeAgent: rosterActions.addFreeAgent
+  add_free_agent: roster_actions.add_free_agent
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(AddFreeAgentDialog)

@@ -3,7 +3,7 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { get_player_maps } from '@core/selectors'
-import { playerActions } from '@core/players/actions'
+import { player_actions } from '@core/players/actions'
 
 import SelectedPlayerMarkets from './selected-player-markets'
 
@@ -29,7 +29,7 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  load_player_betting_markets: playerActions.load_player_betting_markets
+  load_player_betting_markets: player_actions.load_player_betting_markets
 }
 
 export default connect(

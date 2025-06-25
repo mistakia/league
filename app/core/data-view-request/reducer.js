@@ -1,5 +1,5 @@
 import { fromJS, List } from 'immutable'
-import { data_views_actions } from '../data-views/actions'
+import { data_views_actions } from '../data-views'
 import { data_view_request_actions } from './actions'
 
 const initial_state = fromJS({

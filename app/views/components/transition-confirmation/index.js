@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { rosterActions } from '@core/rosters'
+import { roster_actions } from '@core/rosters'
 import {
   getCurrentPlayers,
   getCutlistTotalSalary,
@@ -22,8 +22,8 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  addTransitionTag: rosterActions.addTransitionTag,
-  updateTransitionTag: rosterActions.updateTransitionTag
+  add_transition_tag: roster_actions.add_transition_tag,
+  update_transition_tag: roster_actions.update_transition_tag
 }
 
 export default connect(

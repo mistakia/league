@@ -2,7 +2,7 @@ import { createSelector } from 'reselect'
 import { connect } from 'react-redux'
 
 import { isDrafted, getDraft, getPlayers } from '@core/selectors'
-import { draftActions } from '@core/draft'
+import { draft_actions } from '@core/draft'
 
 import DraftPlayer from './draft-player'
 
@@ -18,7 +18,7 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  select: draftActions.selectPlayer
+  select: draft_actions.select_player
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(DraftPlayer)

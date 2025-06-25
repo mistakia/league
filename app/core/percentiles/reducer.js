@@ -1,7 +1,7 @@
 import { Map } from 'immutable'
 
 import { percentileActions } from './actions'
-import { playerActions } from '@core/players'
+import { player_actions } from '@core/players'
 
 export function percentilesReducer(state = new Map(), { payload, type }) {
   switch (type) {
@@ -12,7 +12,7 @@ export function percentilesReducer(state = new Map(), { payload, type }) {
         })
       })
 
-    case playerActions.SET_PLAYER_STATS:
+    case player_actions.SET_PLAYER_STATS:
       return state.withMutations((state) => {
         for (const stat in payload.percentiles) {
           state.setIn(

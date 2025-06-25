@@ -1,7 +1,7 @@
 export { rosterSagas } from './sagas'
 export { rostersReducer } from './reducer'
+export { roster_actions } from './actions'
 export {
-  rosterActions,
   getRostersActions,
   putRosterActions,
   postActivateActions,

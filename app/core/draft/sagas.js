@@ -9,18 +9,18 @@ import {
   getNextPick,
   getCurrentLeague
 } from '@core/selectors'
-import { draftActions } from './actions'
+import { draft_actions } from './actions'
 import { fetchDraft, postDraft } from '@core/api'
 import { constants } from '@libs-shared'
 
 dayjs.extend(isBetween)
 
-export function* loadDraft() {
+export function* load_draft() {
   const { leagueId } = yield select(get_app)
   yield call(fetchDraft, { leagueId })
 }
 
-export function* draftPlayer() {
+export function* draft_player() {
   const { selected } = yield select(getDraft)
   const { teamId, leagueId } = yield select(get_app)
   const { uid } = yield select(getNextPick)
@@ -40,11 +40,11 @@ export function* init() {
 // -------------------------------------
 
 export function* watchLoadDraft() {
-  yield takeLatest(draftActions.LOAD_DRAFT, loadDraft)
+  yield takeLatest(draft_actions.LOAD_DRAFT, load_draft)
 }
 
 export function* watchDraftPlayer() {
-  yield takeLatest(draftActions.DRAFT_PLAYER, draftPlayer)
+  yield takeLatest(draft_actions.DRAFT_PLAYER, draft_player)
 }
 
 export function* watchAuthFulfilled() {

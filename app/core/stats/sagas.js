@@ -6,7 +6,7 @@ import {
   getStats,
   get_request_history
 } from '@core/selectors'
-import { playerActions } from '@core/players'
+import { player_actions } from '@core/players'
 import { statActions } from './actions'
 import { getChartedPlays } from '@core/api'
 
@@ -73,7 +73,7 @@ export function* calculateStats() {
     league
   })
   worker.terminate()
-  yield put(playerActions.setStats(result))
+  yield put(player_actions.set_stats(result))
 }
 
 //= ====================================
@@ -85,7 +85,7 @@ export function* watch_init_charted_plays() {
 }
 
 export function* watchSetPlayersView() {
-  yield takeLatest(playerActions.SELECT_PLAYERS_PAGE_VIEW, loadChartedPlays)
+  yield takeLatest(player_actions.SELECT_PLAYERS_PAGE_VIEW, loadChartedPlays)
 }
 
 export function* watchGetChartedPlaysFulfilled() {

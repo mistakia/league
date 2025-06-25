@@ -9,7 +9,7 @@ import {
 } from 'redux-saga/effects'
 import { Map } from 'immutable'
 
-import { rosterActions } from './actions'
+import { roster_actions } from './actions'
 import { tradeActions } from '@core/trade'
 import { notificationActions } from '@core/notifications'
 import {
@@ -50,7 +50,7 @@ import {
   get_team_by_id_for_current_year
 } from '@core/selectors'
 import { constants } from '@libs-shared'
-import { playerActions } from '@core/players'
+import { player_actions } from '@core/players'
 import { poachActions } from '@core/poaches'
 import { waiverActions } from '@core/waivers'
 import { csv } from '@core/export'
@@ -61,7 +61,7 @@ export function* initRosters() {
   if (leagueId) yield call(getRosters, { leagueId })
 }
 
-export function* loadRosters({ payload }) {
+export function* load_rosters({ payload }) {
   const { leagueId } = payload
   const state = yield select()
   const isLoading = state.getIn(['app', 'isLoadingRosters'])
@@ -81,8 +81,9 @@ export function* load_rosters_ignore_cache() {
   yield call(getRosters, { leagueId })
 }
 
-export function* load_rosters_for_year() {
-  const { leagueId, year } = yield select(get_app)
+export function* load_rosters_for_year({ payload }) {
+  const { year } = payload
+  const { leagueId } = yield select(get_app)
   yield call(getRosters, { leagueId, year })
 }
 
@@ -122,13 +123,13 @@ export function* setPlayerLineupContribution({ pid }) {
   const currentRoster = yield select(getCurrentTeamRosterRecord)
   const week = Math.max(constants.week, 1)
   if (!currentRoster.getIn(['lineups', `${week}`])) {
-    yield take(rosterActions.SET_LINEUPS)
+    yield take(roster_actions.SET_LINEUPS)
   }
   const projectedContribution = {}
   const playerMap = (yield select(get_player_maps)).get(pid)
   const result = yield call(calculatePlayerLineupContribution, { playerMap })
   projectedContribution[pid] = result
-  yield put(playerActions.setProjectedContribution(projectedContribution))
+  yield put(player_actions.set_projected_contribution(projectedContribution))
 }
 
 export function* calculatePlayerLineupContribution({ playerMap }) {
@@ -231,7 +232,7 @@ export function* projectContributions() {
     projectedContribution[playerMap.get('pid')] = playerData
   }
 
-  yield put(playerActions.setProjectedContribution(projectedContribution))
+  yield put(player_actions.set_projected_contribution(projectedContribution))
 
   const claimContribution = {}
   const poaches = yield select(getPoachPlayersForCurrentTeam)
@@ -253,10 +254,10 @@ export function* projectContributions() {
     }
   }
 
-  yield put(playerActions.setProjectedContribution(claimContribution))
+  yield put(player_actions.set_projected_contribution(claimContribution))
 }
 
-export function* projectLineups() {
+export function* project_lineups() {
   yield put(
     notificationActions.show({
       message: 'Projecting Lineups'
@@ -281,7 +282,7 @@ export function* projectLineups() {
   }
   worker.terminate()
 
-  yield putResolve(rosterActions.setLineupProjections(lineups))
+  yield putResolve(roster_actions.set_lineup_projections(lineups))
   yield call(projectContributions)
 }
 
@@ -329,10 +330,10 @@ export function* projectTrade() {
     })
     projectedContribution[playerMap.get('pid')] = playerData
   }
-  yield put(playerActions.setProjectedContribution(projectedContribution))
+  yield put(player_actions.set_projected_contribution(projectedContribution))
 }
 
-export function* addTag({ payload }) {
+export function* add_tag({ payload }) {
   const { teamId, leagueId } = yield select(get_app)
   yield call(postTag, { teamId, leagueId, ...payload })
 }
@@ -357,7 +358,7 @@ export function* updatePlayer({ payload }) {
   yield call(putRosters, { leagueId, ...payload })
 }
 
-export function* addFreeAgent({ payload }) {
+export function* add_free_agent({ payload }) {
   const { leagueId, teamId } = yield select(get_app)
   yield call(postAddFreeAgent, { leagueId, teamId, ...payload })
 }
@@ -435,22 +436,22 @@ export function* delete_restricted_free_agent_nomination_notification() {
   )
 }
 
-export function* addTransitionTag({ payload }) {
+export function* add_transition_tag({ payload }) {
   const { leagueId, teamId } = yield select(get_app)
   yield call(postTransitionTag, { leagueId, teamId, ...payload })
 }
 
-export function* removeTransitionTag({ payload }) {
+export function* remove_transition_tag({ payload }) {
   const { leagueId, teamId } = yield select(get_app)
   yield call(deleteTransitionTag, { leagueId, teamId, ...payload })
 }
 
-export function* updateTransitionTag({ payload }) {
+export function* update_transition_tag({ payload }) {
   const { leagueId, teamId } = yield select(get_app)
   yield call(putTransitionTag, { leagueId, teamId, ...payload })
 }
 
-export function* exportRosters() {
+export function* export_rosters() {
   const league = yield select(getCurrentLeague)
   const rosters = yield select(getRostersForCurrentLeague)
   const playerMaps = yield select(get_player_maps)
@@ -518,21 +519,21 @@ export function* unnominate_restricted_free_agent({ payload }) {
 
 export function* watchUpdateRosterPlayerSlot() {
   yield takeLatest(
-    rosterActions.UPDATE_ROSTER_PLAYER_SLOT,
+    roster_actions.UPDATE_ROSTER_PLAYER_SLOT,
     updateRosterPlayerSlot
   )
 }
 
 export function* watchActivatePlayer() {
-  yield takeLatest(rosterActions.ACTIVATE_PLAYER, activate)
+  yield takeLatest(roster_actions.ACTIVATE_PLAYER, activate)
 }
 
 export function* watchDeactivatePlayer() {
-  yield takeLatest(rosterActions.DEACTIVATE_PLAYER, deactivate)
+  yield takeLatest(roster_actions.DEACTIVATE_PLAYER, deactivate)
 }
 
 export function* watchProtectPlayer() {
-  yield takeLatest(rosterActions.PROTECT_PLAYER, protect)
+  yield takeLatest(roster_actions.PROTECT_PLAYER, protect)
 }
 
 export function* watchAuthFulfilled() {
@@ -540,40 +541,40 @@ export function* watchAuthFulfilled() {
 }
 
 export function* watchProjectLineups() {
-  yield takeLatest(rosterActions.PROJECT_LINEUPS, projectLineups)
+  yield takeLatest(roster_actions.PROJECT_LINEUPS, project_lineups)
 }
 
 export function* watchRosterTransaction() {
-  yield takeLatest(rosterActions.ROSTER_TRANSACTION, projectLineups)
+  yield takeLatest(roster_actions.ROSTER_TRANSACTION, project_lineups)
 }
 
 export function* watchRosterTransactions() {
-  yield takeLatest(rosterActions.ROSTER_TRANSACTIONS, projectLineups)
+  yield takeLatest(roster_actions.ROSTER_TRANSACTIONS, project_lineups)
 }
 
 export function* watchAddPlayerRoster() {
-  yield takeLatest(rosterActions.ADD_PLAYER_ROSTER, addPlayer)
+  yield takeLatest(roster_actions.ADD_PLAYER_ROSTER, addPlayer)
 }
 
 export function* watchUpdatePlayerRoster() {
-  yield takeLatest(rosterActions.UPDATE_PLAYER_ROSTER, updatePlayer)
+  yield takeLatest(roster_actions.UPDATE_PLAYER_ROSTER, updatePlayer)
 }
 
 export function* watchRemovePlayerRoster() {
-  yield takeLatest(rosterActions.REMOVE_PLAYER_ROSTER, removePlayer)
+  yield takeLatest(roster_actions.REMOVE_PLAYER_ROSTER, removePlayer)
 }
 
 export function* watchAddFreeAgent() {
-  yield takeLatest(rosterActions.ADD_FREE_AGENT, addFreeAgent)
+  yield takeLatest(roster_actions.ADD_FREE_AGENT, add_free_agent)
 }
 
 export function* watchSetRosterReserve() {
-  yield takeLatest(rosterActions.SET_ROSTER_RESERVE, reserve)
+  yield takeLatest(roster_actions.SET_ROSTER_RESERVE, reserve)
 }
 
 export function* watchPlayersSelectPlayer() {
   yield takeLatest(
-    playerActions.PLAYERS_SELECT_PLAYER,
+    player_actions.PLAYERS_SELECT_PLAYER,
     setSelectedPlayerLineupContribution
   )
 }
@@ -593,19 +594,19 @@ export function* watchPostPoachFulfilled() {
 }
 
 export function* watchReleasePlayer() {
-  yield takeLatest(rosterActions.RELEASE_PLAYER, release)
+  yield takeLatest(roster_actions.RELEASE_PLAYER, release)
 }
 
 export function* watchPostReleaseFulfilled() {
-  yield takeLatest(rosterActions.POST_RELEASE_FULFILLED, releaseNotification)
+  yield takeLatest(roster_actions.POST_RELEASE_FULFILLED, releaseNotification)
 }
 
 export function* watchPostProtectFulfilled() {
-  yield takeLatest(rosterActions.POST_PROTECT_FULFILLED, protectNotification)
+  yield takeLatest(roster_actions.POST_PROTECT_FULFILLED, protectNotification)
 }
 
 export function* watchPostTagFulfilled() {
-  yield takeLatest(rosterActions.POST_TAG_FULFILLED, tagNotification)
+  yield takeLatest(roster_actions.POST_TAG_FULFILLED, tagNotification)
 }
 
 export function* watchTradeSetProposingTeamPlayers() {
@@ -625,56 +626,56 @@ export function* watchSelectTrade() {
 }
 
 export function* watchAddTag() {
-  yield takeLatest(rosterActions.ADD_TAG, addTag)
+  yield takeLatest(roster_actions.ADD_TAG, add_tag)
 }
 
 export function* watchRemoveTag() {
-  yield takeLatest(rosterActions.REMOVE_TAG, removeTag)
+  yield takeLatest(roster_actions.REMOVE_TAG, removeTag)
 }
 
 export function* watchAddTransitionTag() {
-  yield takeLatest(rosterActions.ADD_TRANSITION_TAG, addTransitionTag)
+  yield takeLatest(roster_actions.ADD_TRANSITION_TAG, add_transition_tag)
 }
 
 export function* watchRemoveTransitionTag() {
-  yield takeLatest(rosterActions.REMOVE_TRANSITION_TAG, removeTransitionTag)
+  yield takeLatest(roster_actions.REMOVE_TRANSITION_TAG, remove_transition_tag)
 }
 
 export function* watchPostTransitionTagFulfilled() {
   yield takeLatest(
-    rosterActions.POST_TRANSITION_TAG_FULFILLED,
+    roster_actions.POST_TRANSITION_TAG_FULFILLED,
     transitionPlacedNotification
   )
 }
 
 export function* watchDeleteTransiionTagFulfilled() {
   yield takeLatest(
-    rosterActions.DELETE_TRANSITION_TAG_FULFILLED,
+    roster_actions.DELETE_TRANSITION_TAG_FULFILLED,
     transitionRemovedNotification
   )
 }
 
 export function* watchUpdateTransitionTag() {
-  yield takeLatest(rosterActions.UPDATE_TRANSITION_TAG, updateTransitionTag)
+  yield takeLatest(roster_actions.UPDATE_TRANSITION_TAG, update_transition_tag)
 }
 
 export function* watchPutTransitionTagFulfilled() {
   yield takeLatest(
-    rosterActions.PUT_TRANSITION_TAG_FULFILLED,
+    roster_actions.PUT_TRANSITION_TAG_FULFILLED,
     transitionPlacedNotification
   )
 }
 
 export function* watchExportRosters() {
-  yield takeLatest(rosterActions.EXPORT_ROSTERS, exportRosters)
+  yield takeLatest(roster_actions.EXPORT_ROSTERS, export_rosters)
 }
 
 export function* watchLoadRosters() {
-  yield takeLatest(rosterActions.LOAD_ROSTERS, loadRosters)
+  yield takeLatest(roster_actions.LOAD_ROSTERS, load_rosters)
 }
 
 export function* watchLoadTeams() {
-  yield takeLatest(teamActions.LOAD_TEAMS, loadRosters)
+  yield takeLatest(teamActions.LOAD_TEAMS, load_rosters)
 }
 
 export function* watchSelectYear() {
@@ -682,7 +683,7 @@ export function* watchSelectYear() {
 }
 
 export function* watch_load_rosters_for_year() {
-  yield takeLatest(rosterActions.LOAD_ROSTERS_FOR_YEAR, load_rosters_for_year)
+  yield takeLatest(roster_actions.LOAD_ROSTERS_FOR_YEAR, load_rosters_for_year)
 }
 
 export function* watchPostProcessPoachFulfilled() {
@@ -694,28 +695,28 @@ export function* watchPostProcessPoachFulfilled() {
 
 export function* watch_nominate_restricted_free_agent() {
   yield takeLatest(
-    rosterActions.NOMINATE_RESTRICTED_FREE_AGENT,
+    roster_actions.NOMINATE_RESTRICTED_FREE_AGENT,
     nominate_restricted_free_agent
   )
 }
 
 export function* watch_unnominate_restricted_free_agent() {
   yield takeLatest(
-    rosterActions.UNNOMINATE_RESTRICTED_FREE_AGENT,
+    roster_actions.UNNOMINATE_RESTRICTED_FREE_AGENT,
     unnominate_restricted_free_agent
   )
 }
 
 export function* watch_post_restricted_free_agent_nomination_fulfilled() {
   yield takeLatest(
-    rosterActions.POST_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED,
+    roster_actions.POST_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED,
     post_restricted_free_agent_nomination_notification
   )
 }
 
 export function* watch_delete_restricted_free_agent_nomination_fulfilled() {
   yield takeLatest(
-    rosterActions.DELETE_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED,
+    roster_actions.DELETE_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED,
     delete_restricted_free_agent_nomination_notification
   )
 }

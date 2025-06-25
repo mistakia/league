@@ -64,7 +64,7 @@ export default class AddFreeAgentDialog extends React.Component {
       return this.setState({ error: true })
     }
 
-    this.props.addFreeAgent({
+    this.props.add_free_agent({
       pid: playerMap.get('pid'),
       release,
       slot: practice ? constants.slots.PS : constants.slots.BENCH
@@ -134,6 +134,6 @@ AddFreeAgentDialog.propTypes = {
   practice: PropTypes.bool,
   roster: ImmutablePropTypes.record,
   rosterPlayers: PropTypes.object,
-  addFreeAgent: PropTypes.func,
+  add_free_agent: PropTypes.func,
   onClose: PropTypes.func
 }
