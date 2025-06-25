@@ -54,7 +54,7 @@ export default function SelectedPlayer({
   market_salary_adjusted,
   is_before_live_auction_end,
   deselect,
-  loadAllPlayers,
+  load_all_players,
   is_hosted_league
 }) {
   const projectionView = 0
@@ -85,9 +85,9 @@ export default function SelectedPlayer({
 
   useEffect(() => {
     if (is_before_live_auction_end) {
-      loadAllPlayers()
+      load_all_players()
     }
-  }, [is_before_live_auction_end, loadAllPlayers])
+  }, [is_before_live_auction_end, load_all_players])
 
   const handleChange = (event, value) => setValue(value)
   const handleToggleExpand = (event) => setCollapsed(!collapsed)
@@ -402,6 +402,6 @@ SelectedPlayer.propTypes = {
   is_logged_in: PropTypes.bool,
   market_salary_adjusted: PropTypes.number,
   is_before_live_auction_end: PropTypes.bool,
-  loadAllPlayers: PropTypes.func,
+  load_all_players: PropTypes.func,
   is_hosted_league: PropTypes.bool
 }

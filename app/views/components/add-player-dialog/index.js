@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { rosterActions } from '@core/rosters'
+import { roster_actions } from '@core/rosters'
 import {
   getAvailablePlayersForCurrentLeague,
   getRostersForCurrentLeague,
@@ -18,7 +18,7 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  add: rosterActions.add
+  add: roster_actions.add
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(AddPlayerDialog)

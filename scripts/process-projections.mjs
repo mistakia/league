@@ -19,7 +19,7 @@ import {
   getPlayers,
   getRoster,
   getLeague,
-  getPlayerTransactions,
+  get_player_transactions,
   is_main,
   batch_insert,
   report_job
@@ -382,7 +382,7 @@ const process_league = async ({ year, lid }) => {
     scoring_format_hash: league.scoring_format_hash
   })
 
-  const transactions = await getPlayerTransactions({
+  const transactions = await get_player_transactions({
     lid,
     pids: rostered_pids
   })

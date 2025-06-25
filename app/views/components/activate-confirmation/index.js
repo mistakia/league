@@ -1,7 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { rosterActions } from '@core/rosters'
+import { roster_actions } from '@core/rosters'
 import { getCurrentPlayers } from '@core/selectors'
 
 import ActivateConfirmation from './activate-confirmation'
@@ -11,7 +11,7 @@ const mapStateToProps = createSelector(getCurrentPlayers, (team) => ({
 }))
 
 const mapDispatchToProps = {
-  activate: rosterActions.activate
+  activate: roster_actions.activate
 }
 
 export default connect(

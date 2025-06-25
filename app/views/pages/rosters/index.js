@@ -1,14 +1,14 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { rosterActions } from '@core/rosters'
+import { roster_actions } from '@core/rosters'
 import {
   getTeamsForCurrentLeague,
   getRostersForCurrentLeague,
   getCurrentLeague
 } from '@core/selectors'
 import { constants } from '@libs-shared'
-import { playerActions } from '@core/players'
+import { player_actions } from '@core/players'
 
 import RostersPage from './rosters'
 
@@ -62,9 +62,9 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  exportRosters: rosterActions.exportRosters,
-  loadLeaguePlayers: playerActions.loadLeaguePlayers,
-  loadRosters: rosterActions.loadRosters
+  export_rosters: roster_actions.export_rosters,
+  load_league_players: player_actions.load_league_players,
+  load_rosters: roster_actions.load_rosters
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(RostersPage)

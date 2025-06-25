@@ -8,7 +8,7 @@ import {
   isBeforeExtensionDeadline
 } from '@core/selectors'
 import { constants, getExtensionAmount } from '@libs-shared'
-import { playerActions } from '@core/players'
+import { player_actions } from '@core/players'
 
 import SelectedPlayerTransactions from './selected-player-transactions'
 
@@ -92,7 +92,7 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  load: playerActions.getPlayerTransactions
+  load: player_actions.load_player_transactions
 }
 
 export default connect(

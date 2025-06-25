@@ -11,9 +11,7 @@ export const scoreboardActions = {
   SCOREBOARD_SELECT_WEEK: 'SCOREBOARD_SELECT_WEEK',
   selectWeek: (week) => ({
     type: scoreboardActions.SCOREBOARD_SELECT_WEEK,
-    payload: {
-      week: Number(week)
-    }
+    payload: { week: Number(week) }
   })
 }
 

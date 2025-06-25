@@ -2,7 +2,7 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { get_app } from '@core/selectors'
-import { playerActions } from '@core/players'
+import { player_actions } from '@core/players'
 
 import EditableProjection from './editable-projection'
 
@@ -11,7 +11,7 @@ const mapStateToProps = createSelector(get_app, (app) => ({
 }))
 
 const mapDispatchToProps = {
-  save: playerActions.saveProjection
+  save: player_actions.save_projection
 }
 
 export default connect(mapStateToProps, mapDispatchToProps)(EditableProjection)

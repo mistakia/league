@@ -1,7 +1,7 @@
 export { playersReducer } from './reducer'
 export { createPlayer } from './player'
+export { player_actions } from './actions'
 export {
-  playerActions,
   playersRequestActions,
   allPlayersRequestActions,
   leaguePlayersRequestActions,
@@ -16,6 +16,7 @@ export {
   getBaselinesActions,
   getPlayerProjectionsActions,
   getPlayerGamelogsActions,
-  getPlayerPracticesActions
+  getPlayerPracticesActions,
+  get_player_betting_markets_actions
 } from './actions'
-export { playerSagas, calculateValues, loadAllPlayers } from './sagas'
+export { playerSagas, calculateValues, load_all_players } from './sagas'

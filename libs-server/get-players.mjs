@@ -2,7 +2,7 @@ import debug from 'debug'
 
 import db from '#db'
 import { constants } from '#libs-shared'
-import getPlayerTransactions from './get-player-transactions.mjs'
+import get_player_transactions from './get-player-transactions.mjs'
 import getLeague from './get-league.mjs'
 
 const log = debug('get_players')
@@ -238,7 +238,7 @@ export default async function ({
 
   if (playerIdsInLeague.length) {
     // include league player salary values
-    const playerTransactions = await getPlayerTransactions({
+    const playerTransactions = await get_player_transactions({
       lid: leagueId,
       pids: playerIdsInLeague
     })

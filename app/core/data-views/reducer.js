@@ -1,7 +1,7 @@
 import Immutable, { Map } from 'immutable'
 
 import { appActions } from '@core/app/actions'
-import { data_views_actions } from './actions'
+import { data_views_actions } from './index'
 import { default_data_views } from './default-data-views'
 import { data_view_request_actions } from '@core/data-view-request/actions'
 

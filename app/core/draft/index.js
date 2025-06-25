@@ -1,3 +1,3 @@
 export { draftSagas } from './sagas'
 export { draftReducer } from './reducer'
-export { draftActions, getDraftActions, postDraftActions } from './actions'
+export { draft_actions, getDraftActions, postDraftActions } from './actions'

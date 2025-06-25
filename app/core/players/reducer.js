@@ -1,9 +1,9 @@
 import { Map, List, Set } from 'immutable'
 
-import { playerActions } from './actions'
+import { player_actions } from './actions'
 import { createPlayer } from './player'
 import { statActions } from '@core/stats'
-import { rosterActions } from '@core/rosters'
+import { roster_actions } from '@core/rosters'
 import { auctionActions } from '@core/auction'
 import { appActions } from '@core/app'
 import { data_view_request_actions } from '@core/data-view-request/actions'
@@ -65,7 +65,7 @@ export function playersReducer(state = initialState, { payload, type }) {
       return state
     }
 
-    case playerActions.SELECT_PLAYERS_PAGE_VIEW: {
+    case player_actions.SELECT_PLAYERS_PAGE_VIEW: {
       const view = state.getIn(['players_page_views', payload.view_key])
       return state.merge({
         selected_players_page_view: payload.view_key,
@@ -75,11 +75,11 @@ export function playersReducer(state = initialState, { payload, type }) {
       })
     }
 
-    case playerActions.SEARCH_PLAYERS:
+    case player_actions.SEARCH_PLAYERS:
       return state.merge({ search: payload.value })
 
-    case playerActions.SET_PROJECTION:
-    case playerActions.PUT_PROJECTION_FULFILLED: {
+    case player_actions.SET_PROJECTION:
+    case player_actions.PUT_PROJECTION_FULFILLED: {
       const { value, type, week, pid, userId } = payload.opts
       const key = state
         .get('items')
@@ -95,8 +95,8 @@ export function playersReducer(state = initialState, { payload, type }) {
       )
     }
 
-    case playerActions.REMOVE_PROJECTION:
-    case playerActions.DEL_PROJECTION_FULFILLED: {
+    case player_actions.REMOVE_PROJECTION:
+    case player_actions.DEL_PROJECTION_FULFILLED: {
       const { pid, week } = payload.opts
       return state.setIn(
         ['items', pid, 'projections'],
@@ -106,25 +106,25 @@ export function playersReducer(state = initialState, { payload, type }) {
       )
     }
 
-    case playerActions.PLAYERS_SELECT_PLAYER:
+    case player_actions.PLAYERS_SELECT_PLAYER:
       return state.merge({ selected: payload.pid })
 
     case auctionActions.AUCTION_SELECT_PLAYER:
-    case playerActions.PLAYERS_DESELECT_PLAYER:
+    case player_actions.PLAYERS_DESELECT_PLAYER:
       return state.merge({ selected: null })
 
-    case playerActions.FILTER_PLAYERS:
+    case player_actions.FILTER_PLAYERS:
       return state.merge({ [payload.type]: new List(payload.values) })
 
-    case playerActions.TOGGLE_WATCHLIST_ONLY:
+    case player_actions.TOGGLE_WATCHLIST_ONLY:
       return state.merge({ watchlistOnly: !state.get('watchlistOnly') })
 
-    case playerActions.SET_PLAYERS_PAGE_ORDER: {
+    case player_actions.SET_PLAYERS_PAGE_ORDER: {
       const { order, orderBy } = payload
       return state.merge({ order, orderBy, selected: null })
     }
 
-    case playerActions.SET_PLAYER_VALUES:
+    case player_actions.SET_PLAYER_VALUES:
       return state.withMutations((state) => {
         for (const week in payload.baselines) {
           for (const position in payload.baselines[week]) {
@@ -155,7 +155,7 @@ export function playersReducer(state = initialState, { payload, type }) {
         }
       })
 
-    case playerActions.SET_PLAYER_STATS:
+    case player_actions.SET_PLAYER_STATS:
       return state.withMutations((state) => {
         state.set('isPending', false)
 
@@ -173,7 +173,7 @@ export function playersReducer(state = initialState, { payload, type }) {
         }
       })
 
-    case playerActions.GET_PROJECTIONS_FULFILLED:
+    case player_actions.GET_PROJECTIONS_FULFILLED:
       return state.withMutations((players) => {
         payload.data.forEach((p) => {
           if (players.hasIn(['items', p.pid])) {
@@ -184,7 +184,7 @@ export function playersReducer(state = initialState, { payload, type }) {
         })
       })
 
-    case playerActions.SEARCH_PLAYERS_FULFILLED:
+    case player_actions.SEARCH_PLAYERS_FULFILLED:
       return state.withMutations((players) => {
         payload.data.forEach((playerData) => {
           if (players.hasIn(['items', playerData.pid])) {
@@ -202,21 +202,21 @@ export function playersReducer(state = initialState, { payload, type }) {
         })
       })
 
-    case playerActions.FETCH_LEAGUE_PLAYERS_PENDING:
+    case player_actions.FETCH_LEAGUE_PLAYERS_PENDING:
       return state.set('leaguePlayersPending', true)
 
-    case playerActions.FETCH_ALL_PLAYERS_PENDING:
+    case player_actions.FETCH_ALL_PLAYERS_PENDING:
       return state.set('allPlayersPending', true)
 
-    case playerActions.FETCH_ALL_PLAYERS_FULFILLED:
-    case playerActions.FETCH_TEAM_PLAYERS_FULFILLED:
-    case playerActions.FETCH_LEAGUE_PLAYERS_FULFILLED:
-    case playerActions.FETCH_PLAYERS_FULFILLED: {
+    case player_actions.FETCH_ALL_PLAYERS_FULFILLED:
+    case player_actions.FETCH_TEAM_PLAYERS_FULFILLED:
+    case player_actions.FETCH_LEAGUE_PLAYERS_FULFILLED:
+    case player_actions.FETCH_PLAYERS_FULFILLED: {
       return state.withMutations((players) => {
-        if (type === playerActions.FETCH_ALL_PLAYERS_FULFILLED) {
+        if (type === player_actions.FETCH_ALL_PLAYERS_FULFILLED) {
           players.set('allPlayersLoaded', true)
           players.set('allPlayersPending', false)
-        } else if (type === playerActions.FETCH_LEAGUE_PLAYERS_FULFILLED) {
+        } else if (type === player_actions.FETCH_LEAGUE_PLAYERS_FULFILLED) {
           players.set('leaguePlayersLoaded', true)
           players.set('leaguePlayersPending', false)
         }
@@ -239,12 +239,12 @@ export function playersReducer(state = initialState, { payload, type }) {
       })
     }
 
-    case playerActions.GET_PLAYER_FULFILLED:
+    case player_actions.GET_PLAYER_FULFILLED:
       return state.withMutations((players) => {
         players.mergeIn(['items', payload.opts.pid], payload.data)
       })
 
-    case playerActions.GET_PLAYER_PRACTICES_FULFILLED:
+    case player_actions.GET_PLAYER_PRACTICES_FULFILLED:
       return state.withMutations((players) => {
         players.setIn(
           ['items', payload.opts.pid, 'practice'],
@@ -252,12 +252,12 @@ export function playersReducer(state = initialState, { payload, type }) {
         )
       })
 
-    case playerActions.GET_CUTLIST_FULFILLED:
+    case player_actions.GET_CUTLIST_FULFILLED:
       return state.merge({
         cutlist: new List(payload.data)
       })
 
-    case playerActions.TOGGLE_CUTLIST: {
+    case player_actions.TOGGLE_CUTLIST: {
       const cutlist = state.get('cutlist')
       const { pid } = payload
       if (!pid) {
@@ -270,7 +270,7 @@ export function playersReducer(state = initialState, { payload, type }) {
       })
     }
 
-    case playerActions.REORDER_CUTLIST: {
+    case player_actions.REORDER_CUTLIST: {
       const cutlist = state.get('cutlist')
       const { oldIndex, newIndex } = payload
       const pid = cutlist.get(oldIndex)
@@ -278,12 +278,12 @@ export function playersReducer(state = initialState, { payload, type }) {
       return state.set('cutlist', newCutlist)
     }
 
-    case playerActions.SET_WATCHLIST:
+    case player_actions.SET_WATCHLIST:
       return state.merge({
         watchlist: new Set(payload.watchlist)
       })
 
-    case playerActions.TOGGLE_WATCHLIST: {
+    case player_actions.TOGGLE_WATCHLIST: {
       const watchlist = state.get('watchlist')
       const { pid } = payload
       return state.merge({
@@ -293,14 +293,14 @@ export function playersReducer(state = initialState, { payload, type }) {
       })
     }
 
-    case playerActions.SET_PROJECTED_CONTRIBUTION:
+    case player_actions.SET_PROJECTED_CONTRIBUTION:
       return state.withMutations((state) => {
         for (const pid in payload.players) {
           state.setIn(['items', pid, 'lineups'], payload.players[pid])
         }
       })
 
-    case rosterActions.GET_ROSTERS_FULFILLED: {
+    case roster_actions.GET_ROSTERS_FULFILLED: {
       const week = Math.min(
         constants.fantasy_season_week,
         constants.season.finalWeek
@@ -341,7 +341,7 @@ export function playersReducer(state = initialState, { payload, type }) {
       })
     }
 
-    case rosterActions.POST_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED:
+    case roster_actions.POST_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED:
       return state.withMutations((state) => {
         // Clear transition_tag_nominated for all players
         state.get('items').forEach((player, pid) => {
@@ -357,7 +357,7 @@ export function playersReducer(state = initialState, { payload, type }) {
         )
       })
 
-    case rosterActions.DELETE_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED:
+    case roster_actions.DELETE_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED:
       return state.setIn(
         ['items', payload.opts.pid, 'transition_tag_nominated'],
         null
@@ -373,7 +373,7 @@ export function playersReducer(state = initialState, { payload, type }) {
       })
     }
 
-    case rosterActions.POST_RELEASE_FULFILLED: {
+    case roster_actions.POST_RELEASE_FULFILLED: {
       const cutlist = state.get('cutlist')
       const { pid } = payload.data
       const index = cutlist.keyOf(pid)
@@ -391,7 +391,7 @@ export function playersReducer(state = initialState, { payload, type }) {
       })
     }
 
-    case rosterActions.ROSTER_TRANSACTIONS:
+    case roster_actions.ROSTER_TRANSACTIONS:
       return state.withMutations((state) => {
         payload.data.forEach((p) => {
           const t = p.transaction
@@ -414,7 +414,7 @@ export function playersReducer(state = initialState, { payload, type }) {
         })
       })
 
-    case rosterActions.POST_TAG_FULFILLED:
+    case roster_actions.POST_TAG_FULFILLED:
       return state.withMutations((state) => {
         state.mergeIn(['items', payload.opts.pid], { tag: payload.opts.tag })
         if (payload.opts.remove)
@@ -423,8 +423,8 @@ export function playersReducer(state = initialState, { payload, type }) {
           })
       })
 
-    case rosterActions.POST_TRANSITION_TAG_FULFILLED:
-    case rosterActions.PUT_TRANSITION_TAG_FULFILLED:
+    case roster_actions.POST_TRANSITION_TAG_FULFILLED:
+    case roster_actions.PUT_TRANSITION_TAG_FULFILLED:
       return state.withMutations((state) => {
         const cutlist = state.get('cutlist')
         const { pid } = payload.data
@@ -447,8 +447,8 @@ export function playersReducer(state = initialState, { payload, type }) {
           })
       })
 
-    case rosterActions.DELETE_TRANSITION_TAG_FULFILLED:
-    case rosterActions.DELETE_TAG_FULFILLED: {
+    case roster_actions.DELETE_TRANSITION_TAG_FULFILLED:
+    case roster_actions.DELETE_TAG_FULFILLED: {
       const data = {
         bid: null,
         restricted_free_agency_conditional_releases: null
@@ -462,7 +462,7 @@ export function playersReducer(state = initialState, { payload, type }) {
       return state.mergeIn(['items', payload.data.pid], data)
     }
 
-    case rosterActions.PUT_ROSTER_FULFILLED: {
+    case roster_actions.PUT_ROSTER_FULFILLED: {
       return state.withMutations((state) => {
         payload.data.forEach(({ pid, slot }) =>
           state.mergeIn(['items', pid], { slot })
@@ -470,11 +470,11 @@ export function playersReducer(state = initialState, { payload, type }) {
       })
     }
 
-    case rosterActions.POST_ACTIVATE_FULFILLED:
-    case rosterActions.POST_DEACTIVATE_FULFILLED:
-    case rosterActions.POST_PROTECT_FULFILLED:
-    case rosterActions.POST_RESERVE_FULFILLED:
-    case rosterActions.ROSTER_TRANSACTION: {
+    case roster_actions.POST_ACTIVATE_FULFILLED:
+    case roster_actions.POST_DEACTIVATE_FULFILLED:
+    case roster_actions.POST_PROTECT_FULFILLED:
+    case roster_actions.POST_RESERVE_FULFILLED:
+    case roster_actions.ROSTER_TRANSACTION: {
       const { pid, slot, transaction } = payload.data
       const { value, type, tid } = transaction
       return state.mergeIn(['items', pid], {
@@ -485,25 +485,25 @@ export function playersReducer(state = initialState, { payload, type }) {
       })
     }
 
-    case playerActions.GET_PLAYER_TRANSACTIONS_PENDING:
+    case player_actions.GET_PLAYER_TRANSACTIONS_PENDING:
       return state.setIn(
         ['items', payload.opts.pid, 'loadingTransactions'],
         true
       )
 
-    case playerActions.GET_PLAYER_TRANSACTIONS_FAILED:
+    case player_actions.GET_PLAYER_TRANSACTIONS_FAILED:
       return state.setIn(
         ['items', payload.opts.pid, 'loadingTransactions'],
         false
       )
 
-    case playerActions.GET_PLAYER_TRANSACTIONS_FULFILLED:
+    case player_actions.GET_PLAYER_TRANSACTIONS_FULFILLED:
       return state.mergeIn(['items', payload.opts.pid], {
         transactions: new List(payload.data),
         loadingTransactions: false
       })
 
-    case playerActions.GET_BASELINES_FULFILLED:
+    case player_actions.GET_BASELINES_FULFILLED:
       return state.withMutations((state) => {
         for (const baseline of payload.data) {
           const { week, pos, type, pid } = baseline
@@ -511,19 +511,19 @@ export function playersReducer(state = initialState, { payload, type }) {
         }
       })
 
-    case playerActions.GET_PLAYER_PROJECTIONS_PENDING:
+    case player_actions.GET_PLAYER_PROJECTIONS_PENDING:
       return state.setIn(
         ['items', payload.opts.pid, 'loading_projections'],
         true
       )
 
-    case playerActions.GET_PLAYER_PROJECTIONS_FAILED:
+    case player_actions.GET_PLAYER_PROJECTIONS_FAILED:
       return state.setIn(
         ['items', payload.opts.pid, 'loading_projections'],
         false
       )
 
-    case playerActions.GET_PLAYER_PROJECTIONS_FULFILLED:
+    case player_actions.GET_PLAYER_PROJECTIONS_FULFILLED:
       return state.withMutations((state) => {
         state.setIn(
           ['items', payload.opts.pid, 'projections'],
@@ -532,7 +532,7 @@ export function playersReducer(state = initialState, { payload, type }) {
         state.setIn(['items', payload.opts.pid, 'loading_projections'], false)
       })
 
-    case playerActions.RESET_PLAYER_FILTER_OPTIONS:
+    case player_actions.RESET_PLAYER_FILTER_OPTIONS:
       return state.merge({ ...default_player_filter_options })
 
     case data_view_request_actions.DATA_VIEW_RESULT:
@@ -566,7 +566,7 @@ export function playersReducer(state = initialState, { payload, type }) {
         })
       })
 
-    case playerActions.GET_PLAYER_BETTING_MARKETS_FULFILLED:
+    case player_actions.GET_PLAYER_BETTING_MARKETS_FULFILLED:
       return state.withMutations((state) => {
         state.setIn(
           ['items', payload.opts.pid, 'betting_markets'],

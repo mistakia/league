@@ -2,7 +2,7 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { calculatePoints, groupBy } from '@libs-shared'
-import { playerActions } from '@core/players'
+import { player_actions } from '@core/players'
 import {
   getGamelogsForSelectedPlayer,
   getSelectedPlayer,
@@ -36,7 +36,7 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  load: playerActions.loadPlayerGamelogs
+  load: player_actions.load_player_gamelogs
 }
 
 export default connect(

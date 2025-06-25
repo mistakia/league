@@ -1,6 +1,6 @@
 import { takeLatest, fork, call, select, put } from 'redux-saga/effects'
 
-import { data_views_actions } from './actions'
+import { data_views_actions } from './index'
 import { default_data_view_view_id } from './default-data-views'
 import {
   post_data_view,

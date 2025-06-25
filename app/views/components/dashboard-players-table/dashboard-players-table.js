@@ -80,7 +80,7 @@ export default function DashboardPlayersTable({
   total,
   waiverType,
   reorderWaivers,
-  reorderCutlist,
+  reorder_cutlist,
   leadColumn = '',
   space,
   isTransition,
@@ -162,7 +162,7 @@ export default function DashboardPlayersTable({
               const newIndex = cutlist.findIndex(
                 (p) => p.get('pid') === over.id
               )
-              reorderCutlist({ oldIndex, newIndex })
+              reorder_cutlist({ oldIndex, newIndex })
             }
           }}
         >
@@ -387,7 +387,7 @@ DashboardPlayersTable.propTypes = {
   space: PropTypes.number,
   total: ImmutablePropTypes.list,
   cutlist: ImmutablePropTypes.list,
-  reorderCutlist: PropTypes.func,
+  reorder_cutlist: PropTypes.func,
   isTransition: PropTypes.bool,
   percentiles: PropTypes.object,
   is_team_manager: PropTypes.bool
