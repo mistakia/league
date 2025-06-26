@@ -83,7 +83,7 @@ router.post('/?', async (req, res) => {
       }
 
       const rosterPlayer = roster.get(pid)
-      if (rosterPlayer.tag === constants.tags.TRANSITION) {
+      if (rosterPlayer.tag === constants.tags.RESTRICTED_FREE_AGENCY) {
         return res
           .status(400)
           .send({ error: 'restricted free agents are ineligible' })

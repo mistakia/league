@@ -50,7 +50,7 @@ describe('API /teams - tag', function () {
       // TODO
     })
 
-    it('cancel existing transition bid', async () => {
+    it('cancel existing restricted free agency bid', async () => {
       // TODO
     })
   })

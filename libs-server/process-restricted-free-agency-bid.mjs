@@ -8,7 +8,7 @@ import create_conditional_pick from './create-conditional-pick.mjs'
 import getTeam from './get-team.mjs'
 import debug from 'debug'
 
-const log = debug('process-transition-bids')
+const log = debug('process-restricted-free-agency-bids')
 
 export default async function ({
   pid,
@@ -27,7 +27,7 @@ export default async function ({
     throw new Error('player no longer on original team roster')
   }
 
-  if (playerRosterRow.tag !== constants.tags.TRANSITION) {
+  if (playerRosterRow.tag !== constants.tags.RESTRICTED_FREE_AGENCY) {
     throw new Error('player no longer a restricted free agent')
   }
 
@@ -37,7 +37,10 @@ export default async function ({
   const rosterRow = await getRoster({ tid })
   const roster = new Roster({ roster: rosterRow, league })
 
-  const releases = await db('transition_releases').where('transitionid', uid)
+  const releases = await db('restricted_free_agency_releases').where(
+    'restricted_free_agency_bid_id',
+    uid
+  )
   const cutlist_rows = await db('league_cutlist')
     .where('tid', tid)
     .orderBy('order', 'asc')
@@ -89,7 +92,7 @@ export default async function ({
       pid,
       pos,
       slot: constants.slots.BENCH,
-      tag: constants.tags.TRANSITION,
+      tag: constants.tags.RESTRICTED_FREE_AGENCY,
       extensions: 0,
       tid,
       lid,
@@ -115,7 +118,7 @@ export default async function ({
     tid,
     lid,
     pid,
-    type: constants.transactions.TRANSITION_TAG,
+    type: constants.transactions.RESTRICTED_FREE_AGENCY_TAG,
     value: bid,
     week: constants.season.week,
     year: constants.season.year,

@@ -316,9 +316,9 @@ export function playersReducer(state = initialState, { payload, type }) {
               slot,
               tag,
               extensions,
-              transition_tag_processed,
-              transition_tag_nominated,
-              transition_tag_announced
+              restricted_free_agency_tag_processed,
+              restricted_free_agency_tag_nominated,
+              restricted_free_agency_tag_announced
             } = rosterSlot
             const params = {
               value,
@@ -327,9 +327,9 @@ export function playersReducer(state = initialState, { payload, type }) {
               tid: roster.tid,
               extensions,
               slot,
-              transition_tag_processed,
-              transition_tag_nominated,
-              transition_tag_announced
+              restricted_free_agency_tag_processed,
+              restricted_free_agency_tag_nominated,
+              restricted_free_agency_tag_announced
             }
             if (state.hasIn(['items', pid])) {
               state.mergeIn(['items', pid], params)
@@ -343,23 +343,26 @@ export function playersReducer(state = initialState, { payload, type }) {
 
     case roster_actions.POST_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED:
       return state.withMutations((state) => {
-        // Clear transition_tag_nominated for all players
+        // Clear restricted_free_agency_tag_nominated for all players
         state.get('items').forEach((player, pid) => {
-          if (player.get('transition_tag_nominated')) {
-            state.setIn(['items', pid, 'transition_tag_nominated'], null)
+          if (player.get('restricted_free_agency_tag_nominated')) {
+            state.setIn(
+              ['items', pid, 'restricted_free_agency_tag_nominated'],
+              null
+            )
           }
         })
 
-        // Set transition_tag_nominated for the nominated player
+        // Set restricted_free_agency_tag_nominated for the nominated player
         state.setIn(
-          ['items', payload.opts.pid, 'transition_tag_nominated'],
+          ['items', payload.opts.pid, 'restricted_free_agency_tag_nominated'],
           payload.data.nominated
         )
       })
 
     case roster_actions.DELETE_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED:
       return state.setIn(
-        ['items', payload.opts.pid, 'transition_tag_nominated'],
+        ['items', payload.opts.pid, 'restricted_free_agency_tag_nominated'],
         null
       )
 
@@ -423,8 +426,8 @@ export function playersReducer(state = initialState, { payload, type }) {
           })
       })
 
-    case roster_actions.POST_TRANSITION_TAG_FULFILLED:
-    case roster_actions.PUT_TRANSITION_TAG_FULFILLED:
+    case roster_actions.POST_RESTRICTED_FREE_AGENCY_TAG_FULFILLED:
+    case roster_actions.PUT_RESTRICTED_FREE_AGENCY_TAG_FULFILLED:
       return state.withMutations((state) => {
         const cutlist = state.get('cutlist')
         const { pid } = payload.data
@@ -435,7 +438,7 @@ export function playersReducer(state = initialState, { payload, type }) {
         }
 
         state.mergeIn(['items', payload.data.pid], {
-          tag: constants.tags.TRANSITION,
+          tag: constants.tags.RESTRICTED_FREE_AGENCY,
           bid: payload.data.bid,
           restricted_free_agency_conditional_releases:
             payload.data.release || []
@@ -447,7 +450,7 @@ export function playersReducer(state = initialState, { payload, type }) {
           })
       })
 
-    case roster_actions.DELETE_TRANSITION_TAG_FULFILLED:
+    case roster_actions.DELETE_RESTRICTED_FREE_AGENCY_TAG_FULFILLED:
     case roster_actions.DELETE_TAG_FULFILLED: {
       const data = {
         bid: null,

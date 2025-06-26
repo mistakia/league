@@ -4,7 +4,7 @@ import { createSelector } from 'reselect'
 import { getCurrentLeague, getCurrentPlayers } from '@core/selectors'
 import { roster_actions } from '@core/rosters'
 
-import RemoveTransitionTagConfirmation from './remove-transition-tag-confirmation'
+import RemoveRestrictedFreeAgencyTagConfirmation from './remove-restricted-free-agency-tag-confirmation'
 
 const mapStateToProps = createSelector(
   getCurrentLeague,
@@ -16,10 +16,10 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  remove: roster_actions.remove_transition_tag
+  remove: roster_actions.remove_restricted_free_agency_tag
 }
 
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(RemoveTransitionTagConfirmation)
+)(RemoveRestrictedFreeAgencyTagConfirmation)

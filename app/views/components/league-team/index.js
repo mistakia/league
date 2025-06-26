@@ -12,7 +12,7 @@ import {
   get_app,
   getPoachPlayersForCurrentLeague,
   getTeamsForCurrentLeague,
-  getTransitionPlayers
+  getRestrictedFreeAgencyPlayers
 } from '@core/selectors'
 import {
   constants,
@@ -34,7 +34,7 @@ const mapStateToProps = createSelector(
   get_app,
   getPoachPlayersForCurrentLeague,
   getTeamsForCurrentLeague,
-  getTransitionPlayers,
+  getRestrictedFreeAgencyPlayers,
   (
     league,
     roster,
@@ -46,14 +46,15 @@ const mapStateToProps = createSelector(
     app,
     poaches,
     teams,
-    transitionPlayers
+    restrictedFreeAgencyPlayers
   ) => {
     const projectionType = constants.season.isRegularSeason ? 'ros' : '0'
     const items = []
     players.players.forEach((p) => {
       const value = p.get('value', 0)
       const tag = p.get('tag')
-      const isRestrictedFreeAgent = tag === constants.tags.TRANSITION
+      const isRestrictedFreeAgent =
+        tag === constants.tags.RESTRICTED_FREE_AGENCY
       const bid = p.get('bid', 0)
       const extensions = p.get('extensions', 0)
       const pos = p.get('pos')
@@ -151,7 +152,7 @@ const mapStateToProps = createSelector(
       is_team_manager: app.teamId === team.uid,
       poaches,
       teams,
-      transitionPlayers
+      restrictedFreeAgencyPlayers
     }
   }
 )

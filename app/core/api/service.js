@@ -304,16 +304,16 @@ export const api = {
     const url = `${API_URL}/teams/${teamId}/cutlist`
     return { url, ...POST(data) }
   },
-  postTransitionTag({ teamId, ...data }) {
-    const url = `${API_URL}/teams/${teamId}/tag/transition`
+  postRestrictedFreeAgencyTag({ teamId, ...data }) {
+    const url = `${API_URL}/teams/${teamId}/tag/restricted-free-agency`
     return { url, ...POST(data) }
   },
-  deleteTransitionTag({ teamId, ...data }) {
-    const url = `${API_URL}/teams/${teamId}/tag/transition`
+  deleteRestrictedFreeAgencyTag({ teamId, ...data }) {
+    const url = `${API_URL}/teams/${teamId}/tag/restricted-free-agency`
     return { url, ...DELETE(data) }
   },
-  putTransitionTag({ teamId, ...data }) {
-    const url = `${API_URL}/teams/${teamId}/tag/transition`
+  putRestrictedFreeAgencyTag({ teamId, ...data }) {
+    const url = `${API_URL}/teams/${teamId}/tag/restricted-free-agency`
     return { url, ...PUT(data) }
   },
   getBaselines({ leagueId }) {
@@ -378,11 +378,11 @@ export const api = {
     return { url }
   },
   post_restricted_free_agent_nomination({ teamId, ...data }) {
-    const url = `${API_URL}/teams/${teamId}/tag/transition/nominate`
+    const url = `${API_URL}/teams/${teamId}/tag/restricted-free-agency/nominate`
     return { url, ...POST(data) }
   },
   delete_restricted_free_agent_nomination({ teamId, ...data }) {
-    const url = `${API_URL}/teams/${teamId}/tag/transition/nominate`
+    const url = `${API_URL}/teams/${teamId}/tag/restricted-free-agency/nominate`
     return { url, ...DELETE(data) }
   },
   get_league_careerlogs({ leagueId }) {

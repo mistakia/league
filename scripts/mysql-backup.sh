@@ -46,8 +46,8 @@ trades_picks
 trades_players
 trades_transactions
 transactions
-transition_bids
-transition_releases
+restricted_free_agency_bids
+restricted_free_agency_releases
 users
 users_sources
 users_teams

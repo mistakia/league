@@ -1,15 +1,18 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getCurrentLeague, isBeforeTransitionEnd } from '@core/selectors'
+import {
+  getCurrentLeague,
+  isBeforeRestrictedFreeAgencyEnd
+} from '@core/selectors'
 import PlayerRosterTotal from './player-roster-total'
 
 const mapStateToProps = createSelector(
   getCurrentLeague,
-  isBeforeTransitionEnd,
-  (league, isBeforeTransitionEnd) => ({
+  isBeforeRestrictedFreeAgencyEnd,
+  (league, isBeforeRestrictedFreeAgencyEnd) => ({
     league,
-    isBeforeTransitionEnd
+    isBeforeRestrictedFreeAgencyEnd
   })
 )
 

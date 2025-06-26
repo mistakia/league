@@ -26,9 +26,9 @@ import {
   postRelease,
   postTag,
   deleteTag,
-  postTransitionTag,
-  deleteTransitionTag,
-  putTransitionTag,
+  postRestrictedFreeAgencyTag,
+  deleteRestrictedFreeAgencyTag,
+  putRestrictedFreeAgencyTag,
   post_restricted_free_agent_nomination,
   delete_restricted_free_agent_nomination
 } from '@core/api'
@@ -400,19 +400,19 @@ export function* tagNotification() {
   )
 }
 
-export function* transitionPlacedNotification() {
+export function* restrictedFreeAgencyPlacedNotification() {
   yield put(
     notificationActions.show({
-      message: 'Transition Tag Placed',
+      message: 'Restricted Free Agency Tag Placed',
       severity: 'success'
     })
   )
 }
 
-export function* transitionRemovedNotification() {
+export function* restrictedFreeAgencyRemovedNotification() {
   yield put(
     notificationActions.show({
-      message: 'Transition Bid Cancelled',
+      message: 'Restricted Free Agency Bid Cancelled',
       severity: 'success'
     })
   )
@@ -436,19 +436,19 @@ export function* delete_restricted_free_agent_nomination_notification() {
   )
 }
 
-export function* add_transition_tag({ payload }) {
+export function* add_restricted_free_agency_tag({ payload }) {
   const { leagueId, teamId } = yield select(get_app)
-  yield call(postTransitionTag, { leagueId, teamId, ...payload })
+  yield call(postRestrictedFreeAgencyTag, { leagueId, teamId, ...payload })
 }
 
-export function* remove_transition_tag({ payload }) {
+export function* remove_restricted_free_agency_tag({ payload }) {
   const { leagueId, teamId } = yield select(get_app)
-  yield call(deleteTransitionTag, { leagueId, teamId, ...payload })
+  yield call(deleteRestrictedFreeAgencyTag, { leagueId, teamId, ...payload })
 }
 
-export function* update_transition_tag({ payload }) {
+export function* update_restricted_free_agency_tag({ payload }) {
   const { leagueId, teamId } = yield select(get_app)
-  yield call(putTransitionTag, { leagueId, teamId, ...payload })
+  yield call(putRestrictedFreeAgencyTag, { leagueId, teamId, ...payload })
 }
 
 export function* export_rosters() {
@@ -633,36 +633,45 @@ export function* watchRemoveTag() {
   yield takeLatest(roster_actions.REMOVE_TAG, removeTag)
 }
 
-export function* watchAddTransitionTag() {
-  yield takeLatest(roster_actions.ADD_TRANSITION_TAG, add_transition_tag)
-}
-
-export function* watchRemoveTransitionTag() {
-  yield takeLatest(roster_actions.REMOVE_TRANSITION_TAG, remove_transition_tag)
-}
-
-export function* watchPostTransitionTagFulfilled() {
+export function* watchAddRestrictedFreeAgencyTag() {
   yield takeLatest(
-    roster_actions.POST_TRANSITION_TAG_FULFILLED,
-    transitionPlacedNotification
+    roster_actions.ADD_RESTRICTED_FREE_AGENCY_TAG,
+    add_restricted_free_agency_tag
   )
 }
 
-export function* watchDeleteTransiionTagFulfilled() {
+export function* watchRemoveRestrictedFreeAgencyTag() {
   yield takeLatest(
-    roster_actions.DELETE_TRANSITION_TAG_FULFILLED,
-    transitionRemovedNotification
+    roster_actions.REMOVE_RESTRICTED_FREE_AGENCY_TAG,
+    remove_restricted_free_agency_tag
   )
 }
 
-export function* watchUpdateTransitionTag() {
-  yield takeLatest(roster_actions.UPDATE_TRANSITION_TAG, update_transition_tag)
+export function* watchPostRestrictedFreeAgencyTagFulfilled() {
+  yield takeLatest(
+    roster_actions.POST_RESTRICTED_FREE_AGENCY_TAG_FULFILLED,
+    restrictedFreeAgencyPlacedNotification
+  )
 }
 
-export function* watchPutTransitionTagFulfilled() {
+export function* watchDeleteRestrictedFreeAgencyTagFulfilled() {
   yield takeLatest(
-    roster_actions.PUT_TRANSITION_TAG_FULFILLED,
-    transitionPlacedNotification
+    roster_actions.DELETE_RESTRICTED_FREE_AGENCY_TAG_FULFILLED,
+    restrictedFreeAgencyRemovedNotification
+  )
+}
+
+export function* watchUpdateRestrictedFreeAgencyTag() {
+  yield takeLatest(
+    roster_actions.UPDATE_RESTRICTED_FREE_AGENCY_TAG,
+    update_restricted_free_agency_tag
+  )
+}
+
+export function* watchPutRestrictedFreeAgencyTagFulfilled() {
+  yield takeLatest(
+    roster_actions.PUT_RESTRICTED_FREE_AGENCY_TAG_FULFILLED,
+    restrictedFreeAgencyPlacedNotification
   )
 }
 
@@ -758,13 +767,13 @@ export const rosterSagas = [
   fork(watchTradeSelectTeam),
   fork(watchSelectTrade),
 
-  fork(watchAddTransitionTag),
-  fork(watchRemoveTransitionTag),
-  fork(watchUpdateTransitionTag),
+  fork(watchAddRestrictedFreeAgencyTag),
+  fork(watchRemoveRestrictedFreeAgencyTag),
+  fork(watchUpdateRestrictedFreeAgencyTag),
 
-  fork(watchPostTransitionTagFulfilled),
-  fork(watchPutTransitionTagFulfilled),
-  fork(watchDeleteTransiionTagFulfilled),
+  fork(watchPostRestrictedFreeAgencyTagFulfilled),
+  fork(watchPutRestrictedFreeAgencyTagFulfilled),
+  fork(watchDeleteRestrictedFreeAgencyTagFulfilled),
 
   fork(watchExportRosters),
 

@@ -9,7 +9,7 @@ import DialogTitle from '@mui/material/DialogTitle'
 
 import Button from '@components/button'
 
-export default class RemoveTransitionTagConfirmation extends React.Component {
+export default class RemoveRestrictedFreeAgencyTagConfirmation extends React.Component {
   handleSubmit = () => {
     const pid = this.props.playerMap.get('pid')
     const { tid } = this.props.team.roster
@@ -22,10 +22,10 @@ export default class RemoveTransitionTagConfirmation extends React.Component {
 
     return (
       <Dialog open onClose={this.props.onClose}>
-        <DialogTitle>Remove Transition Bid</DialogTitle>
+        <DialogTitle>Remove Restricted Free Agency Bid</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {`Remove Transition Bid on ${playerMap.get(
+            {`Remove Restricted Free Agency Bid on ${playerMap.get(
               'name'
             )} (${playerMap.get('pos')})`}
           </DialogContentText>
@@ -43,7 +43,7 @@ export default class RemoveTransitionTagConfirmation extends React.Component {
   }
 }
 
-RemoveTransitionTagConfirmation.propTypes = {
+RemoveRestrictedFreeAgencyTagConfirmation.propTypes = {
   playerMap: ImmutablePropTypes.map,
   team: PropTypes.object,
   remove: PropTypes.func,

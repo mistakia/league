@@ -20,9 +20,9 @@ import NFLTeam from '@components/nfl-team'
 import Button from '@components/button'
 import { constants } from '@libs-shared'
 
-import './transition-confirmation.styl'
+import './restricted-free-agency-confirmation.styl'
 
-export default class TransitionConfirmation extends React.Component {
+export default class RestrictedFreeAgencyConfirmation extends React.Component {
   constructor(props) {
     super(props)
 
@@ -43,14 +43,14 @@ export default class TransitionConfirmation extends React.Component {
 
     this._untags = []
     const tagged_players = team.roster.getPlayersByTag(
-      constants.tags.TRANSITION
+      constants.tags.RESTRICTED_FREE_AGENCY
     )
     const tagged_pids = tagged_players.map((p) => p.pid)
     for (const pid of tagged_pids) {
       const player_map = team.players.find(
         (player_map) => player_map.get('pid') === pid
       )
-      if (player_map.get('transition_tag_processed')) {
+      if (player_map.get('restricted_free_agency_tag_processed')) {
         continue
       }
       this._untags.push(player_map)
@@ -69,7 +69,7 @@ export default class TransitionConfirmation extends React.Component {
       this._isUpdate ||
       !this._isOriginalTeam ||
       team.roster.isEligibleForTag({
-        tag: constants.tags.TRANSITION
+        tag: constants.tags.RESTRICTED_FREE_AGENCY
       })
 
     // Check if initial bid exceeds max bid
@@ -170,9 +170,9 @@ export default class TransitionConfirmation extends React.Component {
       }
 
       if (this._isUpdate) {
-        this.props.update_transition_tag(data)
+        this.props.update_restricted_free_agency_tag(data)
       } else {
-        this.props.add_transition_tag(data)
+        this.props.add_restricted_free_agency_tag(data)
       }
 
       this.props.onClose()
@@ -200,7 +200,7 @@ export default class TransitionConfirmation extends React.Component {
         return
       }
 
-      if (player_map.get('tag') === constants.tags.TRANSITION) {
+      if (player_map.get('tag') === constants.tags.RESTRICTED_FREE_AGENCY) {
         return
       }
 
@@ -269,7 +269,7 @@ export default class TransitionConfirmation extends React.Component {
               'pos'
             )})`}
           </DialogContentText>
-          <div className='transition__bid-inputs'>
+          <div className='restricted-free-agency__bid-inputs'>
             <TextField
               label='Bid'
               helperText={`Max Bid: ${this.get_max_bid()}`}
@@ -285,7 +285,7 @@ export default class TransitionConfirmation extends React.Component {
               variant='outlined'
             />
             {this.state.bid_exceeds_max && (
-              <div className='transition__bid-warning'>
+              <div className='restricted-free-agency__bid-warning'>
                 <strong>⚠️ WARNING:</strong> Your bid of ${this.state.bid}{' '}
                 exceeds the maximum available bid of ${this.get_max_bid()}. You
                 may not have sufficient salary cap space to successfully process
@@ -333,12 +333,12 @@ export default class TransitionConfirmation extends React.Component {
   }
 }
 
-TransitionConfirmation.propTypes = {
+RestrictedFreeAgencyConfirmation.propTypes = {
   onClose: PropTypes.func,
   team: PropTypes.object,
   playerMap: ImmutablePropTypes.map,
   cutlistTotalSalary: PropTypes.number,
   cutlist: ImmutablePropTypes.list,
-  add_transition_tag: PropTypes.func,
-  update_transition_tag: PropTypes.func
+  add_restricted_free_agency_tag: PropTypes.func,
+  update_restricted_free_agency_tag: PropTypes.func
 }

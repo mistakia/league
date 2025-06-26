@@ -30,7 +30,7 @@ router.get('/?', async (req, res) => {
       return res.status(400).send({ error: error.message })
     }
 
-    const transitionBids = await db('transition_bids')
+    const restrictedFreeAgencyBids = await db('restricted_free_agency_bids')
       .where({
         tid: teamId,
         year: constants.season.year
@@ -38,7 +38,7 @@ router.get('/?', async (req, res) => {
       .whereNull('processed')
       .whereNull('cancelled')
 
-    res.send(transitionBids)
+    res.send(restrictedFreeAgencyBids)
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
@@ -173,7 +173,7 @@ router.post('/?', async (req, res) => {
         roster.removeTag(remove)
       }
       const isEligible = roster.isEligibleForTag({
-        tag: constants.tags.TRANSITION
+        tag: constants.tags.RESTRICTED_FREE_AGENCY
       })
       if (!isEligible) {
         return res.status(400).send({ error: 'exceeds tag limit' })
@@ -204,8 +204,8 @@ router.post('/?', async (req, res) => {
         }
       }
     } else {
-      // check if transition bid exists
-      const transition_bid = await db('transition_bids')
+      // check if restricted free agency bid exists
+      const restricted_free_agency_bid = await db('restricted_free_agency_bids')
         .where({
           pid,
           tid: playerTid,
@@ -216,7 +216,7 @@ router.post('/?', async (req, res) => {
         .whereNull('cancelled')
         .first()
 
-      if (!transition_bid) {
+      if (!restricted_free_agency_bid) {
         return res.status(400).send({ error: 'invalid player' })
       }
     }
@@ -252,7 +252,7 @@ router.post('/?', async (req, res) => {
 
     if (playerTid === tid) {
       await db('rosters_players')
-        .update({ tag: constants.tags.TRANSITION })
+        .update({ tag: constants.tags.RESTRICTED_FREE_AGENCY })
         .where({
           rid: rosterRow.uid,
           pid
@@ -271,7 +271,7 @@ router.post('/?', async (req, res) => {
           pid: remove
         })
 
-        await db('transition_bids')
+        await db('restricted_free_agency_bids')
           .where({
             pid: remove,
             tid,
@@ -283,7 +283,7 @@ router.post('/?', async (req, res) => {
       }
     }
 
-    // insert into transitionBids
+    // insert into restrictedFreeAgencyBids
     const data = {
       tid,
       userid: req.auth.userId,
@@ -295,16 +295,18 @@ router.post('/?', async (req, res) => {
       player_tid: playerTid
     }
 
-    const query = await db('transition_bids').insert(data).returning('uid')
-    const transition_id = query[0].uid
-    data.uid = transition_id
+    const query = await db('restricted_free_agency_bids')
+      .insert(data)
+      .returning('uid')
+    const restricted_free_agency_bid_id = query[0].uid
+    data.uid = restricted_free_agency_bid_id
 
     if (release.length) {
       const releaseInserts = release.map((pid) => ({
-        transitionid: transition_id,
+        restricted_free_agency_bid_id,
         pid
       }))
-      await db('transition_releases').insert(releaseInserts)
+      await db('restricted_free_agency_releases').insert(releaseInserts)
     }
 
     data.release = release
@@ -358,7 +360,7 @@ router.delete('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
 
-    // make sure transition deadline has not passed
+    // make sure restricted free agency deadline has not passed
     if (
       league.tran_end &&
       constants.season.now.isAfter(dayjs.unix(league.tran_end))
@@ -368,8 +370,8 @@ router.delete('/?', async (req, res) => {
         .send({ error: 'restricted free agency deadline has passed' })
     }
 
-    // verify transition id exists
-    const query1 = await db('transition_bids')
+    // verify restricted free agency bid exists
+    const query1 = await db('restricted_free_agency_bids')
       .where({
         pid,
         tid,
@@ -380,16 +382,16 @@ router.delete('/?', async (req, res) => {
     if (!query1.length) {
       return res.status(400).send({ error: 'invalid player' })
     }
-    const transitionBid = query1[0]
+    const restrictedFreeAgencyBid = query1[0]
 
     // check if bid has already been processed
-    if (transitionBid.processed) {
+    if (restrictedFreeAgencyBid.processed) {
       return res.status(400).send({ error: 'bid has already been processed' })
     }
 
     const is_current_manager_bid =
-      transitionBid.player_tid === transitionBid.tid
-    if (is_current_manager_bid && transitionBid.announced) {
+      restrictedFreeAgencyBid.player_tid === restrictedFreeAgencyBid.tid
+    if (is_current_manager_bid && restrictedFreeAgencyBid.announced) {
       return res
         .status(400)
         .send({ error: 'restricted free agent has already been announced' })
@@ -397,9 +399,9 @@ router.delete('/?', async (req, res) => {
 
     // cancel bid
     const cancelled = Math.round(Date.now() / 1000)
-    await db('transition_bids')
+    await db('restricted_free_agency_bids')
       .update('cancelled', cancelled)
-      .where('uid', transitionBid.uid)
+      .where('uid', restrictedFreeAgencyBid.uid)
 
     // TODO cancel any pending competing bids
 
@@ -409,7 +411,7 @@ router.delete('/?', async (req, res) => {
       pid
     })
 
-    res.send({ ...transitionBid, cancelled })
+    res.send({ ...restrictedFreeAgencyBid, cancelled })
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
@@ -465,8 +467,8 @@ router.put('/?', async (req, res) => {
       return res.status(400).send({ error: error.message })
     }
 
-    // verify transition id exists
-    const query1 = await db('transition_bids')
+    // verify restricted free agency bid exists
+    const query1 = await db('restricted_free_agency_bids')
       .where({
         pid,
         tid,
@@ -477,7 +479,7 @@ router.put('/?', async (req, res) => {
     if (!query1.length) {
       return res.status(400).send({ error: 'invalid player' })
     }
-    const transitionBid = query1[0]
+    const restrictedFreeAgencyBid = query1[0]
 
     // get players info
     const pids = [pid]
@@ -519,12 +521,12 @@ router.put('/?', async (req, res) => {
       roster.removePlayer(row.pid)
     }
 
-    if (transitionBid.processed) {
+    if (restrictedFreeAgencyBid.processed) {
       return res.status(400).send({ error: 'bid has already been processed' })
     }
 
     // if competing bid, make sure there is roster space
-    if (transitionBid.player_tid !== teamId) {
+    if (restrictedFreeAgencyBid.player_tid !== teamId) {
       if (!roster.hasOpenBenchSlot(player_row.pos)) {
         return res.status(400).send({ error: 'exceeds roster limits' })
       }
@@ -535,7 +537,7 @@ router.put('/?', async (req, res) => {
         pid,
         pos: player_row.pos,
         value: bid,
-        restricted_free_agency_original_team: transitionBid.player_tid
+        restricted_free_agency_original_team: restrictedFreeAgencyBid.player_tid
       })
     } else {
       // update value to bid
@@ -573,41 +575,41 @@ router.put('/?', async (req, res) => {
      *   return res.stauts(400).send({ error: 'exceeds cap space' })
      * }
      */
-    if (transitionBid.player_tid === teamId) {
+    if (restrictedFreeAgencyBid.player_tid === teamId) {
       await db('rosters_players')
-        .update({ tag: constants.tags.TRANSITION })
+        .update({ tag: constants.tags.RESTRICTED_FREE_AGENCY })
         .where({
           rid: rosterRow.uid,
           pid
         })
     }
 
-    // insert into transitionBids
-    await db('transition_bids')
+    // insert into restrictedFreeAgencyBids
+    await db('restricted_free_agency_bids')
       .update({
         userid: req.auth.userId,
         bid
       })
-      .where('uid', transitionBid.uid)
+      .where('uid', restrictedFreeAgencyBid.uid)
 
     if (release.length) {
       const releaseInserts = release.map((pid) => ({
-        transitionid: transitionBid.uid,
+        restricted_free_agency_bid_id: restrictedFreeAgencyBid.uid,
         pid
       }))
-      await db('transition_releases')
+      await db('restricted_free_agency_releases')
         .insert(releaseInserts)
-        .onConflict(['transitionid', 'pid'])
+        .onConflict(['restricted_free_agency_bid_id', 'pid'])
         .merge()
     }
 
-    await db('transition_releases')
+    await db('restricted_free_agency_releases')
       .del()
-      .where('transitionid', transitionBid.uid)
+      .where('restricted_free_agency_bid_id', restrictedFreeAgencyBid.uid)
       .whereNotIn('pid', release)
 
     res.send({
-      ...transitionBid,
+      ...restrictedFreeAgencyBid,
       bid,
       userid: req.auth.userId,
       release
@@ -650,8 +652,8 @@ router.post('/nominate/?', async (req, res) => {
       return res.status(400).send({ error: error.message })
     }
 
-    // Check if the transition bid exists and belongs to the original manager
-    const transition_bid = await db('transition_bids')
+    // Check if the restricted free agency bid exists and belongs to the original manager
+    const restricted_free_agency_bid = await db('restricted_free_agency_bids')
       .where({
         pid,
         tid,
@@ -661,22 +663,22 @@ router.post('/nominate/?', async (req, res) => {
       .whereNull('cancelled')
       .first()
 
-    if (!transition_bid) {
+    if (!restricted_free_agency_bid) {
       return res
         .status(400)
         .send({ error: 'invalid restricted free agent bid' })
     }
 
-    if (transition_bid.processed) {
+    if (restricted_free_agency_bid.processed) {
       return res.status(400).send({ error: 'bid has already been processed' })
     }
 
-    if (transition_bid.announced) {
+    if (restricted_free_agency_bid.announced) {
       return res.status(400).send({ error: 'bid has already been announced' })
     }
 
     // clear any other unannounced nominations for this team
-    await db('transition_bids')
+    await db('restricted_free_agency_bids')
       .where({
         tid,
         player_tid: tid
@@ -689,9 +691,9 @@ router.post('/nominate/?', async (req, res) => {
 
     const nominated_timestamp = Math.round(Date.now() / 1000)
 
-    // Update the transition bid to mark it as announced
-    await db('transition_bids')
-      .where('uid', transition_bid.uid)
+    // Update the restricted free agency bid to mark it as announced
+    await db('restricted_free_agency_bids')
+      .where('uid', restricted_free_agency_bid.uid)
       .update({ nominated: nominated_timestamp })
 
     res.send({ nominated: nominated_timestamp })
@@ -733,8 +735,8 @@ router.delete('/nominate/?', async (req, res) => {
       return res.status(400).send({ error: error.message })
     }
 
-    // Check if the transition bid exists and belongs to the original manager
-    const transition_bid = await db('transition_bids')
+    // Check if the restricted free agency bid exists and belongs to the original manager
+    const restricted_free_agency_bid = await db('restricted_free_agency_bids')
       .where({
         pid,
         tid,
@@ -744,27 +746,27 @@ router.delete('/nominate/?', async (req, res) => {
       .whereNull('cancelled')
       .first()
 
-    if (!transition_bid) {
+    if (!restricted_free_agency_bid) {
       return res
         .status(400)
         .send({ error: 'invalid restricted free agent bid' })
     }
 
-    if (transition_bid.cancelled) {
+    if (restricted_free_agency_bid.cancelled) {
       return res.status(400).send({ error: 'bid has already been cancelled' })
     }
 
-    if (transition_bid.processed) {
+    if (restricted_free_agency_bid.processed) {
       return res.status(400).send({ error: 'bid has already been processed' })
     }
 
-    if (transition_bid.announced) {
+    if (restricted_free_agency_bid.announced) {
       return res.status(400).send({ error: 'bid has already been announced' })
     }
 
     // Cancel the nomination
-    await db('transition_bids')
-      .where('uid', transition_bid.uid)
+    await db('restricted_free_agency_bids')
+      .where('uid', restricted_free_agency_bid.uid)
       .update({ nominated: null })
 
     res.send({
