@@ -35,9 +35,9 @@ export default class Roster {
       tag,
       extensions,
       bid,
-      transition_tag_processed,
-      transition_tag_nominated,
-      transition_tag_announced,
+      restricted_free_agency_tag_processed,
+      restricted_free_agency_tag_nominated,
+      restricted_free_agency_tag_announced,
       restricted_free_agency_original_team
     } of roster.players) {
       const salary = isBeforeExtensionDeadline
@@ -59,9 +59,9 @@ export default class Roster {
         value: salary,
         extensions,
         tag,
-        transition_tag_processed,
-        transition_tag_nominated,
-        transition_tag_announced,
+        restricted_free_agency_tag_processed,
+        restricted_free_agency_tag_nominated,
+        restricted_free_agency_tag_announced,
         restricted_free_agency_original_team
       })
     }
@@ -290,8 +290,8 @@ export default class Roster {
     }
 
     // Only count players that are originally from this team for tag limits
-    // For transition (RFA) tags, we only count players who originated from this team
-    if (tag === constants.tags.TRANSITION) {
+    // For restricted free agency (RFA) tags, we only count players who originated from this team
+    if (tag === constants.tags.RESTRICTED_FREE_AGENCY) {
       const originalTeamTaggedPlayers = this.all.filter(
         (player) =>
           player.tag === tag &&
@@ -314,16 +314,17 @@ export default class Roster {
   }
 
   hasUnprocessedRestrictedTag() {
-    const processed_transition_tags = this.all.filter(
+    const processed_restricted_free_agency_tags = this.all.filter(
       (player) =>
-        player.tag === constants.tags.TRANSITION &&
-        player.transition_tag_processed &&
+        player.tag === constants.tags.RESTRICTED_FREE_AGENCY &&
+        player.restricted_free_agency_tag_processed &&
         (!player.restricted_free_agency_original_team ||
           player.restricted_free_agency_original_team === this.tid)
     ).length
 
-    const originalTeamTagLimit = this._league[`tag${constants.tags.TRANSITION}`]
-    return processed_transition_tags !== originalTeamTagLimit
+    const originalTeamTagLimit =
+      this._league[`tag${constants.tags.RESTRICTED_FREE_AGENCY}`]
+    return processed_restricted_free_agency_tags !== originalTeamTagLimit
   }
 
   hasOpenBenchSlot(pos) {

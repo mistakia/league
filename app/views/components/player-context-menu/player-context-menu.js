@@ -197,9 +197,9 @@ export default function PlayerContextMenu({
     hide()
   }
 
-  const handleTransitionTag = () => {
+  const handleRestrictedFreeAgencyTag = () => {
     showConfirmation({
-      id: 'TRANSITION',
+      id: 'RESTRICTED_FREE_AGENCY',
       data: {
         playerMap
       }
@@ -207,9 +207,9 @@ export default function PlayerContextMenu({
     hide()
   }
 
-  const handleRemoveTransitionTag = () => {
+  const handleRemoveRestrictedFreeAgencyTag = () => {
     showConfirmation({
-      id: 'REMOVE_TRANSITION_TAG',
+      id: 'REMOVE_RESTRICTED_FREE_AGENCY_TAG',
       data: {
         playerMap
       }
@@ -300,38 +300,44 @@ export default function PlayerContextMenu({
       })
     }
 
-    if (constants.season.isOffseason && status.eligible.transitionTag) {
+    if (
+      constants.season.isOffseason &&
+      status.eligible.restrictedFreeAgencyTag
+    ) {
       add({
-        key: 'transition',
-        onClick: handleTransitionTag,
-        label: `${status.tagged.transition ? 'Update' : 'Apply'} Restricted Free Agent Tag`
+        key: 'restricted-free-agency',
+        onClick: handleRestrictedFreeAgencyTag,
+        label: `${status.tagged.restrictedFreeAgency ? 'Update' : 'Apply'} Restricted Free Agent Tag`
       })
 
-      if (status.tagged.transition && !status.tagged.transition_announced) {
+      if (
+        status.tagged.restrictedFreeAgency &&
+        !status.tagged.restricted_free_agency_announced
+      ) {
         add({
-          key: 'transition-remove',
-          onClick: handleRemoveTransitionTag,
+          key: 'restricted-free-agency-remove',
+          onClick: handleRemoveRestrictedFreeAgencyTag,
           label: 'Remove Restricted Free Agent Tag'
         })
 
-        if (status.tagged.transition_nominated) {
+        if (status.tagged.restricted_free_agency_nominated) {
           add({
-            key: 'transition-nomination',
+            key: 'restricted-free-agency-nomination',
             onClick: handle_unnominate_restricted_free_agent,
             label: 'Remove As Next Nominee'
           })
         } else {
           add({
-            key: 'transition-nomination',
+            key: 'restricted-free-agency-nomination',
             onClick: handle_nominate_restricted_free_agent,
             label: 'Designate as Next RFA Nominee'
           })
         }
       }
-    } else if (status.eligible.transitionBid) {
+    } else if (status.eligible.restrictedFreeAgencyBid) {
       add({
-        key: 'transition',
-        onClick: handleTransitionTag,
+        key: 'restricted-free-agency',
+        onClick: handleRestrictedFreeAgencyTag,
         label: 'Update Restricted Free Agent Tag'
       })
     }
@@ -347,7 +353,7 @@ export default function PlayerContextMenu({
     if (
       constants.season.isOffseason &&
       status.active &&
-      !status.tagged.transition
+      !status.tagged.restrictedFreeAgency
     ) {
       add({
         key: 'cutlist',
@@ -392,17 +398,17 @@ export default function PlayerContextMenu({
       label: 'Update Poach'
     })
   } else if (!status.fa) {
-    if (status.eligible.transitionBid) {
+    if (status.eligible.restrictedFreeAgencyBid) {
       add({
-        key: 'transition',
-        onClick: handleTransitionTag,
+        key: 'restricted-free-agency',
+        onClick: handleRestrictedFreeAgencyTag,
         label: `${status.restricted_free_agent_bid_exists ? 'Update' : 'Place'} Restricted Free Agent Bid`
       })
 
       if (status.restricted_free_agent_bid_exists) {
         add({
-          key: 'transition-remove',
-          onClick: handleRemoveTransitionTag,
+          key: 'restricted-free-agency-remove',
+          onClick: handleRemoveRestrictedFreeAgencyTag,
           label: 'Remove Restricted Free Agent Bid'
         })
       }

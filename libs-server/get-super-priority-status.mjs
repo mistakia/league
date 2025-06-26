@@ -113,7 +113,7 @@ async function calculate_super_priority_from_source({
     .where({ pid, tid: poaching_tid, lid })
     .whereIn('type', [
       constants.transactions.TRADE,
-      constants.transactions.TRANSITION_TAG,
+      constants.transactions.RESTRICTED_FREE_AGENCY_TAG,
       constants.transactions.EXTENSION
     ])
     .where('timestamp', '>', poach_timestamp)

@@ -262,7 +262,7 @@ const announce_restricted_free_agent = async ({
     `Today's nominating team is ${nominating_team.name} (${nominating_team.abbrv})`
   )
 
-  const transition_bid = await db('transition_bids')
+  const restricted_free_agency_bid = await db('restricted_free_agency_bids')
     .where({
       tid: nominating_team.uid,
       lid,
@@ -274,14 +274,14 @@ const announce_restricted_free_agent = async ({
     .whereNotNull('nominated')
     .first()
 
-  if (transition_bid) {
+  if (restricted_free_agency_bid) {
     const player_row = await db('player')
-      .where({ pid: transition_bid.pid })
+      .where({ pid: restricted_free_agency_bid.pid })
       .first()
 
     if (!player_row) {
       throw new Error(
-        `Player with pid ${transition_bid.pid} for team ${nominating_team.uid} not found`
+        `Player with pid ${restricted_free_agency_bid.pid} for team ${nominating_team.uid} not found`
       )
     }
 
@@ -309,8 +309,8 @@ const announce_restricted_free_agent = async ({
       }
     } else {
       // Update the database with the calculated announcement timestamp
-      await db('transition_bids')
-        .where({ uid: transition_bid.uid })
+      await db('restricted_free_agency_bids')
+        .where({ uid: restricted_free_agency_bid.uid })
         .update({ announced: announcement_timestamp })
 
       await sendNotifications({

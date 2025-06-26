@@ -2,7 +2,11 @@ import express from 'express'
 import cron from 'node-cron'
 
 import cache from '#api/cache.mjs'
-import { getPlayers, getTransitionBids, getLeague } from '#libs-server'
+import {
+  getPlayers,
+  getRestrictedFreeAgencyBids,
+  getLeague
+} from '#libs-server'
 
 const router = express.Router()
 
@@ -60,7 +64,7 @@ router.post('/?', async (req, res) => {
     }
 
     if (userId) {
-      const bids = await getTransitionBids({ userId, leagueId })
+      const bids = await getRestrictedFreeAgencyBids({ userId, leagueId })
       if (bids.length) {
         const bid_map = new Map(bids.map((b) => [b.pid, b.bid]))
         const releases_map = new Map(

@@ -231,13 +231,13 @@ describe('LIB - get_super_priority_status', function () {
       expect(status.original_tid).to.equal(1)
     })
 
-    it('should return not eligible when player was transition tagged', async () => {
-      // Add transition tag transaction after poach
+    it('should return not eligible when player was restricted free agency tagged', async () => {
+      // Add restricted free agency tag transaction after poach
       await knex('transactions').insert({
         pid: player.pid,
         tid: 2,
         lid: 1,
-        type: constants.transactions.TRANSITION_TAG,
+        type: constants.transactions.RESTRICTED_FREE_AGENCY_TAG,
         value: 0,
         year: constants.year,
         timestamp: poach_timestamp + 24 * 60 * 60,

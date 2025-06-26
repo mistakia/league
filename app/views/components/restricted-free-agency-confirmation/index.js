@@ -8,7 +8,7 @@ import {
   getPlayers
 } from '@core/selectors'
 
-import TransitionConfirmation from './transition-confirmation'
+import RestrictedFreeAgencyConfirmation from './restricted-free-agency-confirmation'
 
 const mapStateToProps = createSelector(
   getCurrentPlayers,
@@ -22,11 +22,12 @@ const mapStateToProps = createSelector(
 )
 
 const mapDispatchToProps = {
-  add_transition_tag: roster_actions.add_transition_tag,
-  update_transition_tag: roster_actions.update_transition_tag
+  add_restricted_free_agency_tag: roster_actions.add_restricted_free_agency_tag,
+  update_restricted_free_agency_tag:
+    roster_actions.update_restricted_free_agency_tag
 }
 
 export default connect(
   mapStateToProps,
   mapDispatchToProps
-)(TransitionConfirmation)
+)(RestrictedFreeAgencyConfirmation)

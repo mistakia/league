@@ -180,7 +180,7 @@ export function getFilteredPlayers(state) {
 
       if (
         availability.includes('RESTRICTED FREE AGENT') &&
-        playerMap.get('tag') === constants.tags.TRANSITION
+        playerMap.get('tag') === constants.tags.RESTRICTED_FREE_AGENCY
       ) {
         return true
       }
@@ -194,7 +194,8 @@ export function getFilteredPlayers(state) {
         const tag = playerMap.get('tag')
         const slot = playerMap.get('slot')
         const isRestrictedOrFranchised =
-          tag === constants.tags.TRANSITION || tag === constants.tags.FRANCHISE
+          tag === constants.tags.RESTRICTED_FREE_AGENCY ||
+          tag === constants.tags.FRANCHISE
         if (
           !constants.ps_slots.includes(slot) &&
           !isRestrictedOrFranchised &&

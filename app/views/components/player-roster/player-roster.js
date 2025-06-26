@@ -19,8 +19,8 @@ class PlayerRoster extends Player {
       isHosted,
       league,
       isBeforeExtensionDeadline,
-      isBeforeTransitionEnd,
-      isTransition,
+      isBeforeRestrictedFreeAgencyEnd,
+      isRestrictedFreeAgency,
       percentiles = {},
       is_manager_in_league,
       is_team_manager
@@ -31,25 +31,25 @@ class PlayerRoster extends Player {
     const isClaim = isWaiver || isPoach
     const { isRegularSeason, isOffseason } = constants
     const tag = playerMap.get('tag')
-    const isRestrictedFreeAgent = tag === constants.tags.TRANSITION
+    const isRestrictedFreeAgent = tag === constants.tags.RESTRICTED_FREE_AGENCY
     const is_restricted_free_agent_tag_processed = playerMap.get(
-      'transition_tag_processed'
+      'restricted_free_agency_tag_processed'
     )
 
     const value = playerMap.get('value', 0)
     const bid = playerMap.get('bid')
     const salary = isBeforeExtensionDeadline
       ? value
-      : isBeforeTransitionEnd &&
+      : isBeforeRestrictedFreeAgencyEnd &&
           !is_restricted_free_agent_tag_processed &&
           isRestrictedFreeAgent &&
-          (is_team_manager || isTransition)
+          (is_team_manager || isRestrictedFreeAgency)
         ? bid
         : value
     const extensions = playerMap.get('extensions', 0)
     const pos = playerMap.get('pos', '')
     const slot = playerMap.get('slot')
-    const extendedSalary = isTransition
+    const extendedSalary = isRestrictedFreeAgency
       ? bid
       : getExtensionAmount({
           pos,
@@ -66,7 +66,7 @@ class PlayerRoster extends Player {
     // const market_salary_adj = playerMap.get('market_salary_adj', 0)
     const get_savings = () => {
       if (!hasProjections) return null
-      if (isTransition || isRestrictedFreeAgent)
+      if (isRestrictedFreeAgency || isRestrictedFreeAgent)
         return typeof bid === 'number' ? market_salary - bid : null
       if (isBeforeExtensionDeadline) return market_salary - extendedSalary
       return market_salary - value
@@ -157,12 +157,12 @@ class PlayerRoster extends Player {
               ))}
           </div>
         )}
-        {Boolean(isTransition) && (
+        {Boolean(isRestrictedFreeAgency) && (
           <div className='table__cell player__item-team'>
             <TeamName abbrv tid={playerMap.get('tid')} />
           </div>
         )}
-        {Boolean(isTransition) && (
+        {Boolean(isRestrictedFreeAgency) && (
           <div className='metric table__cell'>
             {typeof bid === 'number' ? `$${bid}` : '-'}
           </div>
@@ -175,7 +175,7 @@ class PlayerRoster extends Player {
         {!isWaiver && (
           <div className='row__group'>
             <div className='row__group-body'>
-              {!isTransition && (
+              {!isRestrictedFreeAgency && (
                 <PercentileMetric
                   scaled
                   value={isPoach ? value + 2 : salary}

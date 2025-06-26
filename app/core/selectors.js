@@ -590,7 +590,7 @@ export const isBeforeExtensionDeadline = createSelector(
   }
 )
 
-export const isBeforeTransitionStart = createSelector(
+export const isBeforeRestrictedFreeAgencyStart = createSelector(
   (state) =>
     state.getIn(['leagues', state.getIn(['app', 'leagueId']), 'tran_start']),
   (tran_start) => {
@@ -603,7 +603,7 @@ export const isBeforeTransitionStart = createSelector(
   }
 )
 
-export const isBeforeTransitionEnd = createSelector(
+export const isBeforeRestrictedFreeAgencyEnd = createSelector(
   (state) =>
     state.getIn(['leagues', state.getIn(['app', 'leagueId']), 'tran_end']),
   (tran_end) => {
@@ -617,8 +617,8 @@ export const isBeforeTransitionEnd = createSelector(
 )
 
 export const isRestrictedFreeAgencyPeriod = createSelector(
-  isBeforeTransitionStart,
-  isBeforeTransitionEnd,
+  isBeforeRestrictedFreeAgencyStart,
+  isBeforeRestrictedFreeAgencyEnd,
   (isBeforeStart, isBeforeEnd) => {
     return !isBeforeStart && isBeforeEnd
   }
@@ -945,10 +945,12 @@ export function getBaselines(state) {
   })
 }
 
-export const getTransitionPlayers = createSelector(
+export const getRestrictedFreeAgencyPlayers = createSelector(
   get_player_maps,
   (playerMaps) =>
-    playerMaps.filter((pMap) => pMap.get('tag') === constants.tags.TRANSITION)
+    playerMaps.filter(
+      (pMap) => pMap.get('tag') === constants.tags.RESTRICTED_FREE_AGENCY
+    )
 )
 
 export function getCutlistPlayers(state) {
@@ -1149,10 +1151,10 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
     bid: null,
     tagged: {
       rookie: false,
-      transition: false,
+      restrictedFreeAgency: false,
       franchise: false,
-      transition_nominated: false,
-      transition_announced: false
+      restricted_free_agency_nominated: false,
+      restricted_free_agency_announced: false
     },
     waiver: {
       active: false,
@@ -1169,8 +1171,8 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
       ps: false,
       poach: false,
       rookieTag: false,
-      transitionTag: false,
-      transitionBid: false
+      restrictedFreeAgencyTag: false,
+      restrictedFreeAgencyBid: false
     },
     reserve: {
       ir: false,
@@ -1191,7 +1193,8 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
   status.restricted_free_agent_bid_exists =
     bid !== null && bid !== undefined && Number(bid) >= 0
   status.tagged.rookie = playerTag === constants.tags.ROOKIE
-  status.tagged.transition = playerTag === constants.tags.TRANSITION
+  status.tagged.restrictedFreeAgency =
+    playerTag === constants.tags.RESTRICTED_FREE_AGENCY
   status.tagged.franchise = playerTag === constants.tags.FRANCHISE
   status.protected =
     playerSlot === constants.slots.PSP || playerSlot === constants.slots.PSDP
@@ -1237,17 +1240,22 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
   } else {
     const roster = getCurrentTeamRoster(state)
 
-    const transition_tag_processed = playerMap.get('transition_tag_processed')
+    const restricted_free_agency_tag_processed = playerMap.get(
+      'restricted_free_agency_tag_processed'
+    )
 
-    if (status.tagged.transition && !transition_tag_processed) {
-      status.eligible.transitionBid = true
+    if (
+      status.tagged.restrictedFreeAgency &&
+      !restricted_free_agency_tag_processed
+    ) {
+      status.eligible.restrictedFreeAgencyBid = true
     }
 
-    status.tagged.transition_nominated = playerMap.get(
-      'transition_tag_nominated'
+    status.tagged.restricted_free_agency_nominated = playerMap.get(
+      'restricted_free_agency_tag_nominated'
     )
-    status.tagged.transition_announced = playerMap.get(
-      'transition_tag_announced'
+    status.tagged.restricted_free_agency_announced = playerMap.get(
+      'restricted_free_agency_tag_announced'
     )
 
     if (roster.has(playerId)) {
@@ -1269,11 +1277,12 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
       }
 
       const has_available_restricted_tag = roster.hasUnprocessedRestrictedTag()
-      const isBeforeRestrictedFreeAgency = isBeforeTransitionEnd(state)
-      status.eligible.transitionTag =
+      const isBeforeRestrictedFreeAgency =
+        isBeforeRestrictedFreeAgencyEnd(state)
+      status.eligible.restrictedFreeAgencyTag =
         isBeforeRestrictedFreeAgency &&
         has_available_restricted_tag &&
-        !transition_tag_processed
+        !restricted_free_agency_tag_processed
 
       const isActive = Boolean(
         roster.active.find(({ pid }) => pid === playerId)

@@ -8,7 +8,7 @@ import { constants } from '#libs-shared'
 import {
   is_main,
   get_trades,
-  get_transition_signings,
+  get_restricted_free_agency_signings,
   batch_insert
 } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
@@ -29,11 +29,12 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
     .where('lid', lid)
     .orderBy('timestamp', 'asc')
 
-  const transition_signings = await get_transition_signings({ lid })
-  const transition_index = {}
-  for (const tran of transition_signings) {
-    const tran_sign_key = `${tran.pid}__${tran.date}`
-    transition_index[tran_sign_key] = tran
+  const restricted_free_agency_signings =
+    await get_restricted_free_agency_signings({ lid })
+  const restricted_free_agency_index = {}
+  for (const restricted_free_agency_signing of restricted_free_agency_signings) {
+    const rfa_sign_key = `${restricted_free_agency_signing.pid}__${restricted_free_agency_signing.date}`
+    restricted_free_agency_index[rfa_sign_key] = restricted_free_agency_signing
   }
 
   const transaction_pids = Array.from(new Set(transactions.map((t) => t.pid)))
@@ -116,15 +117,18 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
         teams_index[tran_tid].players[transaction.pid] = true
         break
 
-      case constants.transactions.TRANSITION_TAG: {
-        const tran_sign_key = `${transaction.pid}__${tran_date}`
-        const tran_signing = transition_index[tran_sign_key]
-        if (!tran_signing) {
-          throw new Error(`no transition signing found for ${tran_sign_key}`)
+      case constants.transactions.RESTRICTED_FREE_AGENCY_TAG: {
+        const rfa_sign_key = `${transaction.pid}__${tran_date}`
+        const restricted_free_agency_signing =
+          restricted_free_agency_index[rfa_sign_key]
+        if (!restricted_free_agency_signing) {
+          throw new Error(
+            `no restricted free agency signing found for ${rfa_sign_key}`
+          )
         }
 
-        const winning_tid = tran_signing.tid
-        const losing_tid = tran_signing.player_tid
+        const winning_tid = restricted_free_agency_signing.tid
+        const losing_tid = restricted_free_agency_signing.player_tid
         if (winning_tid !== losing_tid) {
           // remove player from losing team
           delete teams_index[losing_tid].players[transaction.pid]

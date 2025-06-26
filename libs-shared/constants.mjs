@@ -799,7 +799,7 @@ export const transactions = {
   DRAFT: 8,
 
   EXTENSION: 9,
-  TRANSITION_TAG: 10,
+  RESTRICTED_FREE_AGENCY_TAG: 10,
   FRANCHISE_TAG: 11,
   ROOKIE_TAG: 12,
 
@@ -817,14 +817,14 @@ export const tags = {
   REGULAR: 1,
   FRANCHISE: 2,
   ROOKIE: 3,
-  TRANSITION: 4
+  RESTRICTED_FREE_AGENCY: 4
 }
 
 export const tagsDetail = {
   1: 'Regular',
   2: 'Franchise',
   3: 'Rookie',
-  4: 'Transition'
+  4: 'Restricted Free Agency'
 }
 
 export const transactionsDetail = {

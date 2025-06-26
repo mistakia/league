@@ -15,8 +15,8 @@ export {
   postReleaseActions,
   postTagActions,
   deleteTagActions,
-  postTransitionTagActions,
-  putTransitionTagActions,
-  deleteTransitionTagActions
+  postRestrictedFreeAgencyTagActions,
+  putRestrictedFreeAgencyTagActions,
+  deleteRestrictedFreeAgencyTagActions
 } from './actions'
 export { Roster } from './roster'

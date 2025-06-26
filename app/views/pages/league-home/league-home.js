@@ -28,13 +28,13 @@ import './league-home.styl'
 
 export default function LeagueHomePage({
   players,
-  transitionPlayers,
+  restrictedFreeAgencyPlayers,
   cutlist,
   league,
   waivers,
   poaches,
   teamId,
-  isBeforeTransitionEnd,
+  isBeforeRestrictedFreeAgencyEnd,
   load_league_players,
   loadDraftPickValue,
   loadRecentTransactions,
@@ -79,10 +79,10 @@ export default function LeagueHomePage({
         league,
         teams,
         team_id: teamId,
-        transition_players: transitionPlayers,
+        restricted_free_agency_players: restrictedFreeAgencyPlayers,
         is_team_manager
       }),
-    [league, teams, teamId, transitionPlayers, is_team_manager]
+    [league, teams, teamId, restrictedFreeAgencyPlayers, is_team_manager]
   )
 
   const notice_items = [...rfa_notices]
@@ -118,25 +118,25 @@ export default function LeagueHomePage({
       )
   }
 
-  const transitionItems = []
+  const restrictedFreeAgencyItems = []
   const active_free_agent_items = []
   const nominated_free_agent_items = []
-  transitionPlayers.forEach((playerMap, index) => {
-    const is_processed = playerMap.get('transition_tag_processed')
+  restrictedFreeAgencyPlayers.forEach((playerMap, index) => {
+    const is_processed = playerMap.get('restricted_free_agency_tag_processed')
     if (is_processed) {
       return
     }
 
-    const is_announced = playerMap.get('transition_tag_announced')
+    const is_announced = playerMap.get('restricted_free_agency_tag_announced')
     const is_active = !is_processed && is_announced
-    const is_nominated = playerMap.get('transition_tag_nominated')
+    const is_nominated = playerMap.get('restricted_free_agency_tag_nominated')
 
     if (is_active) {
       active_free_agent_items.push(
         <PlayerRoster
           key={index}
           playerMap={playerMap}
-          isTransition
+          isRestrictedFreeAgency
           {...{ percentiles }}
         />
       )
@@ -145,16 +145,16 @@ export default function LeagueHomePage({
         <PlayerRoster
           key={index}
           playerMap={playerMap}
-          isTransition
+          isRestrictedFreeAgency
           {...{ percentiles }}
         />
       )
     } else {
-      transitionItems.push(
+      restrictedFreeAgencyItems.push(
         <PlayerRoster
           key={index}
           playerMap={playerMap}
-          isTransition
+          isRestrictedFreeAgency
           {...{ percentiles }}
         />
       )
@@ -224,7 +224,7 @@ export default function LeagueHomePage({
             <DashboardPlayersTable
               title='Announced Restricted Free Agent'
               items={active_free_agent_items}
-              isTransition
+              isRestrictedFreeAgency
               {...{ percentiles }}
             />
           </Grid>
@@ -234,21 +234,22 @@ export default function LeagueHomePage({
             <DashboardPlayersTable
               title='Designated Next Restricted Free Agent Nominee'
               items={nominated_free_agent_items}
-              isTransition
+              isRestrictedFreeAgency
               {...{ percentiles }}
             />
           </Grid>
         )}
-        {isBeforeTransitionEnd && Boolean(transitionPlayers.size) && (
-          <Grid item xs={12}>
-            <DashboardPlayersTable
-              title='Restricted Free Agents'
-              items={transitionItems}
-              isTransition
-              {...{ percentiles }}
-            />
-          </Grid>
-        )}
+        {isBeforeRestrictedFreeAgencyEnd &&
+          Boolean(restrictedFreeAgencyPlayers.size) && (
+            <Grid item xs={12}>
+              <DashboardPlayersTable
+                title='Restricted Free Agents'
+                items={restrictedFreeAgencyItems}
+                isRestrictedFreeAgency
+                {...{ percentiles }}
+              />
+            </Grid>
+          )}
         {Boolean(waivers.poach.size) && (
           <Grid item xs={12}>
             <DashboardPlayersTable
@@ -317,7 +318,7 @@ export default function LeagueHomePage({
 
 LeagueHomePage.propTypes = {
   players: PropTypes.object,
-  transitionPlayers: ImmutablePropTypes.map,
+  restrictedFreeAgencyPlayers: ImmutablePropTypes.map,
   cutlist: ImmutablePropTypes.list,
   league: PropTypes.object,
   waivers: PropTypes.object,
@@ -325,7 +326,7 @@ LeagueHomePage.propTypes = {
   loadDraftPickValue: PropTypes.func,
   poaches: ImmutablePropTypes.list,
   teamId: PropTypes.number,
-  isBeforeTransitionEnd: PropTypes.bool,
+  isBeforeRestrictedFreeAgencyEnd: PropTypes.bool,
   loadRecentTransactions: PropTypes.func,
   loadTeams: PropTypes.func,
   leagueId: PropTypes.number,
