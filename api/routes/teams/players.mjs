@@ -1,7 +1,7 @@
 import express from 'express'
 
 import cache from '#api/cache.mjs'
-import { getPlayers, getTransitionBids } from '#libs-server'
+import { getPlayers, getRestrictedFreeAgencyBids } from '#libs-server'
 import { constants } from '#libs-shared'
 
 const router = express.Router({ mergeParams: true })
@@ -29,7 +29,7 @@ router.get('/?', async (req, res) => {
           return res.send(players)
         }
 
-        const bids = await getTransitionBids({
+        const bids = await getRestrictedFreeAgencyBids({
           userId,
           leagueId
         })
@@ -69,7 +69,7 @@ router.get('/?', async (req, res) => {
         return res.send(players)
       }
 
-      const bids = await getTransitionBids({ userId, leagueId })
+      const bids = await getRestrictedFreeAgencyBids({ userId, leagueId })
       if (!bids.length) {
         return res.send(players)
       }

@@ -22,9 +22,9 @@ import {
   postReleaseActions,
   postTagActions,
   deleteTagActions,
-  postTransitionTagActions,
-  deleteTransitionTagActions,
-  putTransitionTagActions,
+  postRestrictedFreeAgencyTagActions,
+  deleteRestrictedFreeAgencyTagActions,
+  putRestrictedFreeAgencyTagActions,
   post_restricted_free_agent_nomination_actions,
   delete_restricted_free_agent_nomination_actions
 } from '@core/rosters/actions'
@@ -341,20 +341,20 @@ export const fetchProps = fetch.bind(null, api.getProps, getPropsActions)
 export const getCutlist = fetch.bind(null, api.getCutlist, getCutlistActions)
 export const postCutlist = fetch.bind(null, api.postCutlist, postCutlistActions)
 
-export const postTransitionTag = fetch.bind(
+export const postRestrictedFreeAgencyTag = fetch.bind(
   null,
-  api.postTransitionTag,
-  postTransitionTagActions
+  api.postRestrictedFreeAgencyTag,
+  postRestrictedFreeAgencyTagActions
 )
-export const deleteTransitionTag = fetch.bind(
+export const deleteRestrictedFreeAgencyTag = fetch.bind(
   null,
-  api.deleteTransitionTag,
-  deleteTransitionTagActions
+  api.deleteRestrictedFreeAgencyTag,
+  deleteRestrictedFreeAgencyTagActions
 )
-export const putTransitionTag = fetch.bind(
+export const putRestrictedFreeAgencyTag = fetch.bind(
   null,
-  api.putTransitionTag,
-  putTransitionTagActions
+  api.putRestrictedFreeAgencyTag,
+  putRestrictedFreeAgencyTagActions
 )
 
 export const get_player_transactions = fetch.bind(

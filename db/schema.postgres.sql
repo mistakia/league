@@ -1496,7 +1496,7 @@ DROP INDEX IF EXISTS public.idx_25141_userid_tid_year;
 DROP INDEX IF EXISTS public.idx_25138_userid;
 DROP INDEX IF EXISTS public.idx_25138_sourceid;
 DROP INDEX IF EXISTS public.idx_25127_email;
-DROP INDEX IF EXISTS public.idx_25114_transitionid;
+DROP INDEX IF EXISTS public.idx_25114_restricted_free_agency_bid_id;
 DROP INDEX IF EXISTS public.idx_25114_pid;
 DROP INDEX IF EXISTS public.idx_25108_lid;
 DROP INDEX IF EXISTS public.idx_25103_uid;
@@ -1702,7 +1702,7 @@ ALTER TABLE IF EXISTS ONLY public.invite_codes DROP CONSTRAINT IF EXISTS invite_
 ALTER TABLE IF EXISTS ONLY public.waivers DROP CONSTRAINT IF EXISTS "idx_25151_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS "idx_25127_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.user_data_views DROP CONSTRAINT IF EXISTS "idx_25118_PRIMARY";
-ALTER TABLE IF EXISTS ONLY public.transition_bids DROP CONSTRAINT IF EXISTS "idx_25108_PRIMARY";
+ALTER TABLE IF EXISTS ONLY public.restricted_free_agency_bids DROP CONSTRAINT IF EXISTS "idx_25108_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.sources DROP CONSTRAINT IF EXISTS "idx_25023_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.rosters DROP CONSTRAINT IF EXISTS "idx_24995_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.props_index_new DROP CONSTRAINT IF EXISTS "idx_24981_PRIMARY";
@@ -1729,13 +1729,13 @@ ALTER TABLE IF EXISTS ONLY public.config DROP CONSTRAINT IF EXISTS config_pkey;
 ALTER TABLE IF EXISTS ONLY public.config DROP CONSTRAINT IF EXISTS config_key_unique;
 ALTER TABLE IF EXISTS public.waivers ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.users ALTER COLUMN id DROP DEFAULT;
-ALTER TABLE IF EXISTS public.transition_bids ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.transactions ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.trades ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.teams ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.super_priority ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.sources ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.rosters ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.restricted_free_agency_bids ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.props_index_new ALTER COLUMN prop_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.props_index ALTER COLUMN prop_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.poaches ALTER COLUMN uid DROP DEFAULT;
@@ -1756,9 +1756,6 @@ DROP SEQUENCE IF EXISTS public.users_id_seq;
 DROP TABLE IF EXISTS public.users;
 DROP TABLE IF EXISTS public.user_data_views;
 DROP TABLE IF EXISTS public.urls;
-DROP TABLE IF EXISTS public.transition_releases;
-DROP SEQUENCE IF EXISTS public.transition_bids_uid_seq;
-DROP TABLE IF EXISTS public.transition_bids;
 DROP SEQUENCE IF EXISTS public.transactions_uid_seq;
 DROP TABLE IF EXISTS public.transactions;
 DROP SEQUENCE IF EXISTS public.trades_uid_seq;
@@ -1783,6 +1780,9 @@ DROP SEQUENCE IF EXISTS public.rosters_uid_seq;
 DROP TABLE IF EXISTS public.rosters_players;
 DROP TABLE IF EXISTS public.rosters;
 DROP TABLE IF EXISTS public.ros_projections;
+DROP TABLE IF EXISTS public.restricted_free_agency_releases;
+DROP SEQUENCE IF EXISTS public.restricted_free_agency_bids_uid_seq;
+DROP TABLE IF EXISTS public.restricted_free_agency_bids;
 DROP SEQUENCE IF EXISTS public.props_index_prop_id_seq;
 DROP SEQUENCE IF EXISTS public.props_index_new_prop_id_seq;
 DROP TABLE IF EXISTS public.props_index_new;
@@ -15659,7 +15659,7 @@ COMMENT ON COLUMN public.player.dv IS 'college division';
 -- Name: COLUMN player.nfl_draft_year; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.player.nfl_draft_year IS 'nfl draft year';
+COMMENT ON COLUMN public.player.nfl_draft_year IS 'starting nfl year';
 
 
 --
@@ -20565,6 +20565,59 @@ ALTER SEQUENCE public.props_index_prop_id_seq OWNED BY public.props_index.prop_i
 
 
 --
+-- Name: restricted_free_agency_bids; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.restricted_free_agency_bids (
+    uid integer NOT NULL,
+    pid character varying(25),
+    userid integer NOT NULL,
+    bid integer,
+    tid integer NOT NULL,
+    year smallint,
+    player_tid integer NOT NULL,
+    lid integer NOT NULL,
+    succ boolean,
+    reason text,
+    submitted integer NOT NULL,
+    processed integer,
+    cancelled integer,
+    nominated integer,
+    announced integer
+);
+
+
+--
+-- Name: restricted_free_agency_bids_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.restricted_free_agency_bids_uid_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: restricted_free_agency_bids_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.restricted_free_agency_bids_uid_seq OWNED BY public.restricted_free_agency_bids.uid;
+
+
+--
+-- Name: restricted_free_agency_releases; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.restricted_free_agency_releases (
+    restricted_free_agency_bid_id integer NOT NULL,
+    pid character varying(25)
+);
+
+
+--
 -- Name: ros_projections; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -21054,59 +21107,6 @@ CREATE SEQUENCE public.transactions_uid_seq
 --
 
 ALTER SEQUENCE public.transactions_uid_seq OWNED BY public.transactions.uid;
-
-
---
--- Name: transition_bids; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.transition_bids (
-    uid integer NOT NULL,
-    pid character varying(25),
-    userid integer NOT NULL,
-    bid integer,
-    tid integer NOT NULL,
-    year smallint,
-    player_tid integer NOT NULL,
-    lid integer NOT NULL,
-    succ boolean,
-    reason text,
-    submitted integer NOT NULL,
-    processed integer,
-    cancelled integer,
-    nominated integer,
-    announced integer
-);
-
-
---
--- Name: transition_bids_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
---
-
-CREATE SEQUENCE public.transition_bids_uid_seq
-    AS integer
-    START WITH 1
-    INCREMENT BY 1
-    NO MINVALUE
-    NO MAXVALUE
-    CACHE 1;
-
-
---
--- Name: transition_bids_uid_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
---
-
-ALTER SEQUENCE public.transition_bids_uid_seq OWNED BY public.transition_bids.uid;
-
-
---
--- Name: transition_releases; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.transition_releases (
-    transitionid integer NOT NULL,
-    pid character varying(25)
-);
 
 
 --
@@ -21962,6 +21962,13 @@ ALTER TABLE ONLY public.props_index_new ALTER COLUMN prop_id SET DEFAULT nextval
 
 
 --
+-- Name: restricted_free_agency_bids uid; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.restricted_free_agency_bids ALTER COLUMN uid SET DEFAULT nextval('public.restricted_free_agency_bids_uid_seq'::regclass);
+
+
+--
 -- Name: rosters uid; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -22001,13 +22008,6 @@ ALTER TABLE ONLY public.trades ALTER COLUMN uid SET DEFAULT nextval('public.trad
 --
 
 ALTER TABLE ONLY public.transactions ALTER COLUMN uid SET DEFAULT nextval('public.transactions_uid_seq'::regclass);
-
-
---
--- Name: transition_bids uid; Type: DEFAULT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.transition_bids ALTER COLUMN uid SET DEFAULT nextval('public.transition_bids_uid_seq'::regclass);
 
 
 --
@@ -22217,10 +22217,10 @@ ALTER TABLE ONLY public.sources
 
 
 --
--- Name: transition_bids idx_25108_PRIMARY; Type: CONSTRAINT; Schema: public; Owner: -
+-- Name: restricted_free_agency_bids idx_25108_PRIMARY; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
-ALTER TABLE ONLY public.transition_bids
+ALTER TABLE ONLY public.restricted_free_agency_bids
     ADD CONSTRAINT "idx_25108_PRIMARY" PRIMARY KEY (uid);
 
 
@@ -23730,21 +23730,21 @@ CREATE UNIQUE INDEX idx_25103_uid ON public.transactions USING btree (uid);
 -- Name: idx_25108_lid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_25108_lid ON public.transition_bids USING btree (lid);
+CREATE INDEX idx_25108_lid ON public.restricted_free_agency_bids USING btree (lid);
 
 
 --
 -- Name: idx_25114_pid; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE UNIQUE INDEX idx_25114_pid ON public.transition_releases USING btree (transitionid, pid);
+CREATE UNIQUE INDEX idx_25114_pid ON public.restricted_free_agency_releases USING btree (restricted_free_agency_bid_id, pid);
 
 
 --
--- Name: idx_25114_transitionid; Type: INDEX; Schema: public; Owner: -
+-- Name: idx_25114_restricted_free_agency_bid_id; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_25114_transitionid ON public.transition_releases USING btree (transitionid);
+CREATE INDEX idx_25114_restricted_free_agency_bid_id ON public.restricted_free_agency_releases USING btree (restricted_free_agency_bid_id);
 
 
 --

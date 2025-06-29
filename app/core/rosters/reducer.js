@@ -278,8 +278,8 @@ export function rostersReducer(state = new Map(), { payload, type }) {
         (arr) => arr.filter((p) => p.pid !== payload.opts.pid)
       )
 
-    case roster_actions.UPDATE_TRANSITION_TAG:
-    case roster_actions.ADD_TRANSITION_TAG: {
+    case roster_actions.UPDATE_RESTRICTED_FREE_AGENCY_TAG:
+    case roster_actions.ADD_RESTRICTED_FREE_AGENCY_TAG: {
       return state.withMutations((state) => {
         const players = state.getIn([
           payload.teamId,
@@ -323,7 +323,7 @@ export function rostersReducer(state = new Map(), { payload, type }) {
           { tag: previous_tag, bid: previous_bid }
         )
 
-        // Apply the transition tag
+        // Apply the restricted free agency tag
         state.setIn(
           [
             payload.teamId,
@@ -333,7 +333,7 @@ export function rostersReducer(state = new Map(), { payload, type }) {
             index,
             'tag'
           ],
-          constants.tags.TRANSITION
+          constants.tags.RESTRICTED_FREE_AGENCY
         )
 
         state.setIn(
@@ -391,7 +391,7 @@ export function rostersReducer(state = new Map(), { payload, type }) {
       })
     }
 
-    case roster_actions.REMOVE_TRANSITION_TAG:
+    case roster_actions.REMOVE_RESTRICTED_FREE_AGENCY_TAG:
     case roster_actions.REMOVE_TAG: {
       const players = state.getIn([
         payload.teamId,
@@ -411,8 +411,8 @@ export function rostersReducer(state = new Map(), { payload, type }) {
       )
     }
 
-    case roster_actions.PUT_TRANSITION_TAG_FAILED:
-    case roster_actions.POST_TRANSITION_TAG_FAILED: {
+    case roster_actions.PUT_RESTRICTED_FREE_AGENCY_TAG_FAILED:
+    case roster_actions.POST_RESTRICTED_FREE_AGENCY_TAG_FAILED: {
       return state.withMutations((state) => {
         const players = state.getIn([
           payload.opts.teamId,
@@ -544,7 +544,7 @@ export function rostersReducer(state = new Map(), { payload, type }) {
           (players) =>
             players.map((player) => ({
               ...player,
-              transition_tag_nominated: null
+              restricted_free_agency_tag_nominated: null
             }))
         )
         .updateIn(
@@ -554,7 +554,7 @@ export function rostersReducer(state = new Map(), { payload, type }) {
               if (player.pid === payload.opts.pid) {
                 return {
                   ...player,
-                  transition_tag_nominated: payload.data.nominated
+                  restricted_free_agency_tag_nominated: payload.data.nominated
                 }
               }
               return player
@@ -568,7 +568,7 @@ export function rostersReducer(state = new Map(), { payload, type }) {
           if (!players) return players
           return players.map((player) => {
             if (player.pid === payload.opts.pid) {
-              return { ...player, transition_tag_nominated: null }
+              return { ...player, restricted_free_agency_tag_nominated: null }
             }
             return player
           })

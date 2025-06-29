@@ -486,8 +486,8 @@ router.post(
         .whereIn('tid', [trade.propose_tid, trade.accept_tid])
         .del()
 
-      // cancel any transition bids
-      await db('transition_bids')
+      // cancel any restricted free agency bids
+      await db('restricted_free_agency_bids')
         .update('cancelled', Math.round(Date.now() / 1000))
         .whereIn('pid', all_pids)
         .whereNull('cancelled')

@@ -1,7 +1,7 @@
 import express from 'express'
 import dayjs from 'dayjs'
 
-import transition from './transition.mjs'
+import restricted_free_agency from './restricted-free-agency.mjs'
 import { constants, Roster } from '#libs-shared'
 import {
   getRoster,
@@ -123,9 +123,9 @@ router.post('/?', async (req, res) => {
       })
     }
 
-    // cancel existing transition bids
+    // cancel existing restricted free agency bids
     const timestamp = Math.round(Date.now() / 1000)
-    await db('transition_bids')
+    await db('restricted_free_agency_bids')
       .update('cancelled', timestamp)
       .where({
         year: constants.season.year,
@@ -217,6 +217,6 @@ router.delete('/?', async (req, res) => {
   }
 })
 
-router.use('/transition', transition)
+router.use('/restricted-free-agency', restricted_free_agency)
 
 export default router

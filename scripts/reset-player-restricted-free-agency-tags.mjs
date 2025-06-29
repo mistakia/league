@@ -5,13 +5,13 @@ import { constants } from '#libs-shared'
 import { is_main } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-const log = debug('reset-player-transition-tags')
+const log = debug('reset-player-restricted-free-agency-tags')
 
 const run = async () => {
   const lid = 1
 
-  // Get all transition bids for the current year
-  const transition_bids = await db('transition_bids')
+  // Get all restricted free agency bids for the current year
+  const restricted_free_agency_bids = await db('restricted_free_agency_bids')
     .where({
       year: constants.season.year,
       lid
@@ -36,20 +36,21 @@ const run = async () => {
     const query = db('rosters_players')
       .update({ tag: constants.tags.REGULAR })
       .where({
-        tag: constants.tags.TRANSITION,
+        tag: constants.tags.RESTRICTED_FREE_AGENCY,
         week: 0,
         year: constants.season.year,
         tid: team.uid
       })
 
-    const team_transition_bids = transition_bids.filter(
+    const team_restricted_free_agency_bids = restricted_free_agency_bids.filter(
       (bid) => bid.tid === team.uid
     )
-    const team_transition_pids = team_transition_bids.map((bid) => bid.pid)
+    const team_restricted_free_agency_pids =
+      team_restricted_free_agency_bids.map((bid) => bid.pid)
 
     // Exclude players with bids for the current year
-    if (team_transition_pids.length > 0) {
-      query.whereNotIn('pid', team_transition_pids)
+    if (team_restricted_free_agency_pids.length > 0) {
+      query.whereNotIn('pid', team_restricted_free_agency_pids)
     }
 
     const updated_count = await query
@@ -68,7 +69,7 @@ const run = async () => {
 }
 
 const main = async () => {
-  debug.enable('reset-player-transition-tags')
+  debug.enable('reset-player-restricted-free-agency-tags')
 
   let error
   try {

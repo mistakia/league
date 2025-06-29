@@ -3,11 +3,11 @@ import { createSelector } from 'reselect'
 
 import {
   get_app,
-  getTransitionPlayers,
+  getRestrictedFreeAgencyPlayers,
   getCutlistPlayers,
   getCurrentLeague,
   getCurrentPlayers,
-  isBeforeTransitionEnd,
+  isBeforeRestrictedFreeAgencyEnd,
   getWaiverPlayersForCurrentTeam,
   getPoachPlayersForCurrentLeague,
   getTeamsForCurrentLeague
@@ -23,27 +23,27 @@ import LeagueHomePage from './league-home'
 
 const mapStateToProps = createSelector(
   get_app,
-  getTransitionPlayers,
+  getRestrictedFreeAgencyPlayers,
   getCurrentPlayers,
   getCutlistPlayers,
   getCurrentLeague,
   getWaiverPlayersForCurrentTeam,
   getPoachPlayersForCurrentLeague,
-  isBeforeTransitionEnd,
+  isBeforeRestrictedFreeAgencyEnd,
   getTeamsForCurrentLeague,
   (
     app,
-    transitionPlayers,
+    restrictedFreeAgencyPlayers,
     players,
     cutlist,
     league,
     waivers,
     poaches,
-    isBeforeTransitionEnd,
+    isBeforeRestrictedFreeAgencyEnd,
     teams
   ) => {
     const items = []
-    transitionPlayers.forEach((p) => {
+    restrictedFreeAgencyPlayers.forEach((p) => {
       items.push({
         market_salary: p.getIn(['market_salary', '0'], 0),
         pts_added: p.getIn(['pts_added', '0'], 0),
@@ -64,7 +64,7 @@ const mapStateToProps = createSelector(
     }
 
     return {
-      transitionPlayers,
+      restrictedFreeAgencyPlayers,
       teamId: app.teamId,
       leagueId: app.leagueId,
       players,
@@ -72,7 +72,7 @@ const mapStateToProps = createSelector(
       league,
       waivers,
       poaches,
-      isBeforeTransitionEnd,
+      isBeforeRestrictedFreeAgencyEnd,
       percentiles,
       teams,
       is_team_manager

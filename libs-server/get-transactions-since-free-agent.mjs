@@ -26,7 +26,8 @@ async function getTransactionsSinceFreeAgent({
     constants.transactions.AUCTION_PROCESSED,
     constants.transactions.PRACTICE_ADD
   ]
-  if (include_restricted) types.push(constants.transactions.TRANSITION_TAG)
+  if (include_restricted)
+    types.push(constants.transactions.RESTRICTED_FREE_AGENCY_TAG)
   const index = transactions.findIndex((t) => types.includes(t.type))
   if (index === -1) return transactions
   return transactions.slice(0, index + 1)

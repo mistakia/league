@@ -58,7 +58,7 @@ export const job_types = {
   GENERATE_SCHEDULE: 42,
   PROCESS_EXTENSIONS: 43,
 
-  PROCESS_TRANSITION_BIDS: 44,
+  PROCESS_RESTRICTED_FREE_AGENCY_BIDS: 44,
   RESET_PLAYER_TAGS: 45,
   RESET_PROTECTED_DESIGNATION: 46,
   SET_DRAFT_PICK_NUMBER: 47,
@@ -155,7 +155,7 @@ export const job_title_by_id = {
   41: 'Draw Divisions',
   42: 'Generate Schedule',
   43: 'Process Extensions',
-  44: 'Process Transition Bids',
+  44: 'Process Restricted Free Agency Bids',
   45: 'Reset Player Tags',
   46: 'Reset Player Protected Designation',
   47: 'Set Draft Pick Order',

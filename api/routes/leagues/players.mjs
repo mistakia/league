@@ -2,7 +2,7 @@ import express from 'express'
 import cron from 'node-cron'
 
 import cache from '#api/cache.mjs'
-import { getPlayers, getTransitionBids } from '#libs-server'
+import { getPlayers, getRestrictedFreeAgencyBids } from '#libs-server'
 
 const router = express.Router({ mergeParams: true })
 
@@ -39,7 +39,7 @@ router.get('/?', async (req, res) => {
     }
 
     if (userId) {
-      const bids = await getTransitionBids({
+      const bids = await getRestrictedFreeAgencyBids({
         userId,
         leagueId
       })

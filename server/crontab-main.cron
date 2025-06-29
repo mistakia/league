@@ -215,8 +215,8 @@
 ## Announce restricted free agent at 9pm
 0 21 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/announce-restricted-free-agent.mjs &>> /var/log/league/announce-restricted-free-agent.log
 
-## Process transition bids at 6pm
-0 18 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-transition-bids.mjs &>> /var/log/league/process-transition-bids.log
+## Process restricted free agency bids at 6pm
+0 18 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-restricted-free-agency-bids.mjs &>> /var/log/league/process-restricted-free-agency-bids.log
 
 
 

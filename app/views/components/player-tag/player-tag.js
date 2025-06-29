@@ -15,7 +15,7 @@ export default class PlayerTag extends React.Component {
       case constants.tags.ROOKIE:
         return <PlayerLabel label='R' type='tag' description='Rookie Tag' />
 
-      case constants.tags.TRANSITION:
+      case constants.tags.RESTRICTED_FREE_AGENCY:
         return (
           <PlayerLabel
             label='RFA'

@@ -11,7 +11,7 @@ export default class PlayerRosterTotal extends React.Component {
       league,
       reorder,
       isBeforeExtensionDeadline,
-      isBeforeTransitionEnd,
+      isBeforeRestrictedFreeAgencyEnd,
       is_team_manager
     } = this.props
 
@@ -33,7 +33,8 @@ export default class PlayerRosterTotal extends React.Component {
       const value = playerMap.get('value', 0)
       const bid = playerMap.get('bid', 0)
       const tag = playerMap.get('tag')
-      const isRestrictedFreeAgent = tag === constants.tags.TRANSITION
+      const isRestrictedFreeAgent =
+        tag === constants.tags.RESTRICTED_FREE_AGENCY
       const extendedSalary = getExtensionAmount({
         pos: playerMap.get('pos'),
         tag: isBeforeExtensionDeadline ? tag : constants.tags.REGULAR,
@@ -48,7 +49,7 @@ export default class PlayerRosterTotal extends React.Component {
       )
       const hasProjections = playerMap.hasIn(['market_salary', projectionType])
       const is_restricted_free_agent_tag_processed = playerMap.get(
-        'transition_tag_processed'
+        'restricted_free_agency_tag_processed'
       )
       const savings = hasProjections
         ? projectedSalary -
@@ -57,7 +58,7 @@ export default class PlayerRosterTotal extends React.Component {
 
       const salary = isBeforeExtensionDeadline
         ? value
-        : isBeforeTransitionEnd &&
+        : isBeforeRestrictedFreeAgencyEnd &&
             isRestrictedFreeAgent &&
             is_team_manager &&
             !is_restricted_free_agent_tag_processed
@@ -157,6 +158,6 @@ PlayerRosterTotal.propTypes = {
   reorder: PropTypes.bool,
   league: PropTypes.object,
   isBeforeExtensionDeadline: PropTypes.bool,
-  isBeforeTransitionEnd: PropTypes.bool,
+  isBeforeRestrictedFreeAgencyEnd: PropTypes.bool,
   is_team_manager: PropTypes.bool
 }

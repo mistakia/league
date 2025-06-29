@@ -33,15 +33,17 @@ export default async function ({
       }
     }
 
-    const bids = await db('transition_bids')
+    const bids = await db('restricted_free_agency_bids')
       .where('tid', tid)
       .where('year', constants.season.year)
       .whereNull('cancelled')
 
     if (bids.length) {
-      // Get conditional releases for all transition bids
-      const transition_releases = await db('transition_releases').whereIn(
-        'transitionid',
+      // Get conditional releases for all restricted free agency bids
+      const restricted_free_agency_releases = await db(
+        'restricted_free_agency_releases'
+      ).whereIn(
+        'restricted_free_agency_bid_id',
         bids.map((b) => b.uid)
       )
 
@@ -52,8 +54,8 @@ export default async function ({
           roster_player.restricted_free_agency_original_team = bid.player_tid
 
           // Add conditional releases for this bid
-          const releases = transition_releases.filter(
-            (r) => r.transitionid === bid.uid
+          const releases = restricted_free_agency_releases.filter(
+            (r) => r.restricted_free_agency_bid_id === bid.uid
           )
           if (releases.length) {
             roster_player.restricted_free_agency_conditional_releases =
@@ -64,11 +66,13 @@ export default async function ({
     }
 
     // for RFA tagged players, get if their tag is processed, nominated, or announced
-    const transition_tagged_players = roster_row.players.filter(
-      (p) => p.tag === constants.tags.TRANSITION
+    const restricted_free_agency_tagged_players = roster_row.players.filter(
+      (p) => p.tag === constants.tags.RESTRICTED_FREE_AGENCY
     )
-    if (transition_tagged_players.length) {
-      const transition_bids = await db('transition_bids')
+    if (restricted_free_agency_tagged_players.length) {
+      const restricted_free_agency_bids = await db(
+        'restricted_free_agency_bids'
+      )
         .select('pid', 'processed', 'nominated', 'announced', 'player_tid')
         .where({
           player_tid: tid,
@@ -76,15 +80,17 @@ export default async function ({
         })
         .whereIn(
           'pid',
-          transition_tagged_players.map((p) => p.pid)
+          restricted_free_agency_tagged_players.map((p) => p.pid)
         )
         .whereNull('cancelled')
 
-      for (const roster_player of transition_tagged_players) {
-        const bid = transition_bids.find((b) => b.pid === roster_player.pid)
+      for (const roster_player of restricted_free_agency_tagged_players) {
+        const bid = restricted_free_agency_bids.find(
+          (b) => b.pid === roster_player.pid
+        )
         if (bid) {
-          roster_player.transition_tag_processed = bid.processed
-          roster_player.transition_tag_announced = bid.announced
+          roster_player.restricted_free_agency_tag_processed = bid.processed
+          roster_player.restricted_free_agency_tag_announced = bid.announced
           roster_player.restricted_free_agency_original_team = bid.player_tid
         }
       }
