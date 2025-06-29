@@ -11,9 +11,9 @@ export const roster_actions = {
   ...create_api_action_types('POST_TAG'),
   ...create_api_action_types('DELETE_TAG'),
 
-  ...create_api_action_types('POST_TRANSITION_TAG'),
-  ...create_api_action_types('DELETE_TRANSITION_TAG'),
-  ...create_api_action_types('PUT_TRANSITION_TAG'),
+  ...create_api_action_types('POST_RESTRICTED_FREE_AGENCY_TAG'),
+  ...create_api_action_types('DELETE_RESTRICTED_FREE_AGENCY_TAG'),
+  ...create_api_action_types('PUT_RESTRICTED_FREE_AGENCY_TAG'),
 
   ...create_api_action_types('GET_ROSTERS'),
   ...create_api_action_types('POST_ROSTERS'),
@@ -147,20 +147,33 @@ export const roster_actions = {
     payload: { pid, teamId }
   }),
 
-  ADD_TRANSITION_TAG: 'ADD_TRANSITION_TAG',
-  add_transition_tag: ({ pid, release, playerTid, teamId, bid, remove }) => ({
-    type: roster_actions.ADD_TRANSITION_TAG,
+  ADD_RESTRICTED_FREE_AGENCY_TAG: 'ADD_RESTRICTED_FREE_AGENCY_TAG',
+  add_restricted_free_agency_tag: ({
+    pid,
+    release,
+    playerTid,
+    teamId,
+    bid,
+    remove
+  }) => ({
+    type: roster_actions.ADD_RESTRICTED_FREE_AGENCY_TAG,
     payload: { pid, release, teamId, playerTid, bid, remove }
   }),
-  UPDATE_TRANSITION_TAG: 'UPDATE_TRANSITION_TAG',
-  update_transition_tag: ({ pid, release, playerTid, teamId, bid }) => ({
-    type: roster_actions.UPDATE_TRANSITION_TAG,
+  UPDATE_RESTRICTED_FREE_AGENCY_TAG: 'UPDATE_RESTRICTED_FREE_AGENCY_TAG',
+  update_restricted_free_agency_tag: ({
+    pid,
+    release,
+    playerTid,
+    teamId,
+    bid
+  }) => ({
+    type: roster_actions.UPDATE_RESTRICTED_FREE_AGENCY_TAG,
     payload: { pid, release, teamId, playerTid, bid }
   }),
 
-  REMOVE_TRANSITION_TAG: 'REMOVE_TRANSITION_TAG',
-  remove_transition_tag: ({ pid, teamId }) => ({
-    type: roster_actions.REMOVE_TRANSITION_TAG,
+  REMOVE_RESTRICTED_FREE_AGENCY_TAG: 'REMOVE_RESTRICTED_FREE_AGENCY_TAG',
+  remove_restricted_free_agency_tag: ({ pid, teamId }) => ({
+    type: roster_actions.REMOVE_RESTRICTED_FREE_AGENCY_TAG,
     payload: { pid, teamId }
   })
 }
@@ -178,12 +191,14 @@ export const postReserveActions = create_api_actions('POST_RESERVE')
 export const postReleaseActions = create_api_actions('POST_RELEASE')
 export const postTagActions = create_api_actions('POST_TAG')
 export const deleteTagActions = create_api_actions('DELETE_TAG')
-export const postTransitionTagActions = create_api_actions(
-  'POST_TRANSITION_TAG'
+export const postRestrictedFreeAgencyTagActions = create_api_actions(
+  'POST_RESTRICTED_FREE_AGENCY_TAG'
 )
-export const putTransitionTagActions = create_api_actions('PUT_TRANSITION_TAG')
-export const deleteTransitionTagActions = create_api_actions(
-  'DELETE_TRANSITION_TAG'
+export const putRestrictedFreeAgencyTagActions = create_api_actions(
+  'PUT_RESTRICTED_FREE_AGENCY_TAG'
+)
+export const deleteRestrictedFreeAgencyTagActions = create_api_actions(
+  'DELETE_RESTRICTED_FREE_AGENCY_TAG'
 )
 export const post_restricted_free_agent_nomination_actions = create_api_actions(
   'POST_RESTRICTED_FREE_AGENT_NOMINATION'

@@ -6,7 +6,7 @@ import db from '#db'
 import { constants } from '#libs-shared'
 import {
   get_top_restricted_free_agency_bids,
-  processTransitionBid,
+  processRestrictedFreeAgencyBid,
   is_main,
   resetWaiverOrder,
   report_job
@@ -19,8 +19,8 @@ import { hideBin } from 'yargs/helpers'
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
-const log = debug('process-transition-bids')
-debug.enable('process-transition-bids')
+const log = debug('process-restricted-free-agency-bids')
+debug.enable('process-restricted-free-agency-bids')
 
 const argv = yargs(hideBin(process.argv)).argv
 
@@ -140,9 +140,9 @@ const run = async ({ dry_run = false } = {}) => {
   const active_leagues = await db('seasons')
     .select('seasons.*', 'leagues.name as name')
     .join('leagues', 'leagues.uid', '=', 'seasons.lid')
-    .join('transition_bids', function () {
-      this.on('transition_bids.lid', 'seasons.lid').on(
-        'transition_bids.year',
+    .join('restricted_free_agency_bids', function () {
+      this.on('restricted_free_agency_bids.lid', 'seasons.lid').on(
+        'restricted_free_agency_bids.year',
         'seasons.year'
       )
     })
@@ -153,9 +153,9 @@ const run = async ({ dry_run = false } = {}) => {
     .where('tran_start', '<=', timestamp)
     .where('tran_end', '>=', timestamp)
     .groupBy('seasons.lid', 'seasons.year', 'leagues.name')
-    .whereNull('transition_bids.processed')
-    .whereNull('transition_bids.cancelled')
-    .whereNotNull('transition_bids.announced')
+    .whereNull('restricted_free_agency_bids.processed')
+    .whereNull('restricted_free_agency_bids.cancelled')
+    .whereNotNull('restricted_free_agency_bids.announced')
     .distinct()
 
   log(`Found ${active_leagues.length} active leagues with unprocessed bids`)
@@ -219,9 +219,10 @@ const run = async ({ dry_run = false } = {}) => {
 
     log(`Processing league ${lid} (${league.name || 'Unnamed'})`)
 
-    let transition_bids = await get_top_restricted_free_agency_bids(lid)
+    let restricted_free_agency_bids =
+      await get_top_restricted_free_agency_bids(lid)
 
-    if (!transition_bids.length) {
+    if (!restricted_free_agency_bids.length) {
       log(`No bids ready to be processed for league ${lid}`)
       continue
     }
@@ -234,7 +235,7 @@ const run = async ({ dry_run = false } = {}) => {
     const eligible_bids = []
     const ineligible_bids = []
 
-    for (const bid of transition_bids) {
+    for (const bid of restricted_free_agency_bids) {
       if (has_enough_time_passed(bid.announced, min_seconds_required)) {
         eligible_bids.push(bid)
       } else {
@@ -246,7 +247,7 @@ const run = async ({ dry_run = false } = {}) => {
       if (dry_run) {
         // Find the earliest bid announcement to show when it would be eligible
         const earliest_announced = Math.min(
-          ...transition_bids.map((bid) => bid.announced)
+          ...restricted_free_agency_bids.map((bid) => bid.announced)
         )
         const time_since_announcement = timestamp - earliest_announced
         const time_remaining = min_seconds_required - time_since_announcement
@@ -255,7 +256,7 @@ const run = async ({ dry_run = false } = {}) => {
           .format('YYYY-MM-DD HH:mm:ss')
 
         const player = await db('player')
-          .where('pid', transition_bids[0].pid)
+          .where('pid', restricted_free_agency_bids[0].pid)
           .first()
         if (player) {
           log(
@@ -263,7 +264,7 @@ const run = async ({ dry_run = false } = {}) => {
           )
         } else {
           log(
-            `DRY RUN: Bid for player ${transition_bids[0].pid} is not eligible yet`
+            `DRY RUN: Bid for player ${restricted_free_agency_bids[0].pid} is not eligible yet`
           )
         }
 
@@ -281,37 +282,39 @@ const run = async ({ dry_run = false } = {}) => {
       }
     } else {
       // Use the eligible bids instead of all bids
-      transition_bids = eligible_bids
+      restricted_free_agency_bids = eligible_bids
     }
 
     // Use the eligible bids instead of all bids
-    transition_bids = eligible_bids
+    restricted_free_agency_bids = eligible_bids
 
     if (dry_run) {
       // Show what would be processed
       const player = await db('player')
-        .where('pid', transition_bids[0].pid)
+        .where('pid', restricted_free_agency_bids[0].pid)
         .first()
       if (player) {
         log(
-          `DRY RUN: Would process transition bid for ${player.fname} ${player.lname} (${player.pos}) in league ${lid}`
+          `DRY RUN: Would process restricted free agency bid for ${player.fname} ${player.lname} (${player.pos}) in league ${lid}`
         )
       } else {
         log(
-          `DRY RUN: Would process transition bid for player ${transition_bids[0].pid} in league ${lid}`
+          `DRY RUN: Would process restricted free agency bid for player ${restricted_free_agency_bids[0].pid} in league ${lid}`
         )
       }
 
-      if (transition_bids.length > 1) {
-        if (transition_bids.find((t) => t.player_tid === t.tid)) {
+      if (restricted_free_agency_bids.length > 1) {
+        if (restricted_free_agency_bids.find((t) => t.player_tid === t.tid)) {
           log(
             `DRY RUN: Original team has a matching bid, they would retain the player`
           )
         } else {
           log(
-            `DRY RUN: ${transition_bids.length} teams have the same bid amount, would use waiver order to determine winner`
+            `DRY RUN: ${restricted_free_agency_bids.length} teams have the same bid amount, would use waiver order to determine winner`
           )
-          const sorted = await sort_bids_by_waiver_order(transition_bids)
+          const sorted = await sort_bids_by_waiver_order(
+            restricted_free_agency_bids
+          )
           const winning_team = await db('teams')
             .where('uid', sorted[0].tid)
             .first()
@@ -348,26 +351,26 @@ const run = async ({ dry_run = false } = {}) => {
       continue
     }
 
-    while (transition_bids.length) {
+    while (restricted_free_agency_bids.length) {
       let error
-      const original_team_bid = transition_bids.find(
+      const original_team_bid = restricted_free_agency_bids.find(
         (t) => t.player_tid === t.tid
       )
-      let winning_bid = original_team_bid || transition_bids[0]
+      let winning_bid = original_team_bid || restricted_free_agency_bids[0]
 
       try {
-        if (original_team_bid || transition_bids.length === 1) {
-          log('Processing transition bid', winning_bid)
+        if (original_team_bid || restricted_free_agency_bids.length === 1) {
+          log('Processing restricted free agency bid', winning_bid)
 
           if (!dry_run) {
-            await processTransitionBid(winning_bid)
+            await processRestrictedFreeAgencyBid(winning_bid)
           }
 
           const { pid } = winning_bid
 
           if (!dry_run) {
             // Mark all other bids for this player as unsuccessful
-            await db('transition_bids')
+            await db('restricted_free_agency_bids')
               .update({
                 succ: 0,
                 reason: 'player no longer a restricted free agent',
@@ -385,23 +388,25 @@ const run = async ({ dry_run = false } = {}) => {
         } else {
           // multiple bids tied with no original team
           log(`Tied top bids for league ${lid}`)
-          log(transition_bids)
+          log(restricted_free_agency_bids)
 
           // Sort bids by waiver order
-          const sorted_bids = await sort_bids_by_waiver_order(transition_bids)
+          const sorted_bids = await sort_bids_by_waiver_order(
+            restricted_free_agency_bids
+          )
           winning_bid = sorted_bids[0]
 
-          log('Processing winning transition bid', winning_bid)
+          log('Processing winning restricted free agency bid', winning_bid)
 
           if (!dry_run) {
-            await processTransitionBid(winning_bid)
+            await processRestrictedFreeAgencyBid(winning_bid)
             // Reset waiver order for the winning team
             await resetWaiverOrder({ leagueId: lid, teamId: winning_bid.tid })
           }
 
           // Update all other bids as unsuccessful
           if (!dry_run) {
-            await db('transition_bids')
+            await db('restricted_free_agency_bids')
               .update({
                 succ: 0,
                 reason: 'player no longer a restricted free agent',
@@ -422,9 +427,9 @@ const run = async ({ dry_run = false } = {}) => {
         log(`Error processing bid: ${err.message}`)
       }
 
-      // save transition bid outcome
+      // save restricted free agency bid outcome
       if (!dry_run) {
-        await db('transition_bids')
+        await db('restricted_free_agency_bids')
           .update({
             succ: error ? 0 : 1,
             reason: error ? error.message : null,
@@ -437,7 +442,7 @@ const run = async ({ dry_run = false } = {}) => {
       const next_bids = await get_top_restricted_free_agency_bids(lid)
 
       // Filter the next bids by time requirement
-      transition_bids = next_bids.filter((bid) =>
+      restricted_free_agency_bids = next_bids.filter((bid) =>
         has_enough_time_passed(bid.announced, min_seconds_required)
       )
     }
@@ -447,7 +452,7 @@ const run = async ({ dry_run = false } = {}) => {
 export default run
 
 const main = async () => {
-  debug.enable('process-transition-bids')
+  debug.enable('process-restricted-free-agency-bids')
   let error
   try {
     const dry_run = argv.dry_run || false
@@ -459,7 +464,7 @@ const main = async () => {
 
   if (!argv.dry_run) {
     await report_job({
-      job_type: job_types.PROCESS_TRANSITION_BIDS,
+      job_type: job_types.PROCESS_RESTRICTED_FREE_AGENCY_BIDS,
       error
     })
   }

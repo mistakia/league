@@ -19,7 +19,7 @@ export function get_restricted_free_agency_notices({
   league,
   teams,
   team_id,
-  transition_players,
+  restricted_free_agency_players,
   is_team_manager
 }) {
   if (!league?.tran_start || !teams || teams.size === 0) return []
@@ -47,11 +47,11 @@ export function get_restricted_free_agency_notices({
     .filter((nomination) => {
       // Only show if this team hasn't nominated a player
       return !(
-        transition_players &&
-        transition_players.some(
+        restricted_free_agency_players &&
+        restricted_free_agency_players.some(
           (player_map) =>
             player_map.get('tid') === nomination.nominating_team.uid &&
-            player_map.get('transition_tag_nominated')
+            player_map.get('restricted_free_agency_tag_nominated')
         )
       )
     })

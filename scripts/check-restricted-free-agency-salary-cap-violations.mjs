@@ -14,7 +14,8 @@ debug.enable('check-restricted-free-agency-salary-cap-violations')
 // Constants for better maintainability
 const CURRENT_YEAR = constants.season.year
 const OFFSEASON_WEEK = 0
-const TRANSITION_TAG_TYPE = constants.transactions.TRANSITION_TAG
+const RESTRICTED_FREE_AGENCY_TAG_TYPE =
+  constants.transactions.RESTRICTED_FREE_AGENCY_TAG
 
 /**
  * Get leagues that have had restricted free agency transactions this season
@@ -29,7 +30,7 @@ const get_leagues_with_restricted_free_agency_transactions = async () => {
         .from('transactions')
         .where('transactions.lid', db.raw('seasons.lid'))
         .where('transactions.year', CURRENT_YEAR)
-        .where('transactions.type', TRANSITION_TAG_TYPE)
+        .where('transactions.type', RESTRICTED_FREE_AGENCY_TAG_TYPE)
     })
     .distinct()
 }
@@ -42,7 +43,7 @@ const get_teams_with_restricted_free_agency_transactions = async ({ lid }) => {
     .select('tid')
     .where('lid', lid)
     .where('year', CURRENT_YEAR)
-    .where('type', TRANSITION_TAG_TYPE)
+    .where('type', RESTRICTED_FREE_AGENCY_TAG_TYPE)
     .groupBy('tid')
 }
 
@@ -69,7 +70,7 @@ const get_restricted_free_agency_transactions = async ({ tid, lid }) => {
     .where('transactions.tid', tid)
     .where('transactions.lid', lid)
     .where('transactions.year', CURRENT_YEAR)
-    .where('transactions.type', TRANSITION_TAG_TYPE)
+    .where('transactions.type', RESTRICTED_FREE_AGENCY_TAG_TYPE)
     .orderBy('transactions.timestamp', 'desc')
 }
 

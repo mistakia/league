@@ -1,7 +1,7 @@
 import db from '#db'
 
 export default async function ({ lid, year = null }) {
-  const transition_bids_query = db('transition_bids')
+  const restricted_free_agency_bids_query = db('restricted_free_agency_bids')
     .select(
       '*',
       db.raw("TO_CHAR(TO_TIMESTAMP(processed), 'YYYY-MM-DD') AS date")
@@ -12,10 +12,10 @@ export default async function ({ lid, year = null }) {
     })
 
   if (year) {
-    transition_bids_query.where({ year })
+    restricted_free_agency_bids_query.where({ year })
   }
 
-  const transition_bids = await transition_bids_query
+  const restricted_free_agency_bids = await restricted_free_agency_bids_query
 
-  return transition_bids
+  return restricted_free_agency_bids
 }

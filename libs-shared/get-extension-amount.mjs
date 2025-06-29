@@ -34,7 +34,7 @@ export default function ({ extensions, tag, pos, league, value, bid, slot }) {
     case constants.tags.ROOKIE:
       return value
 
-    case constants.tags.TRANSITION:
+    case constants.tags.RESTRICTED_FREE_AGENCY:
       return bid || value
 
     case constants.tags.REGULAR:

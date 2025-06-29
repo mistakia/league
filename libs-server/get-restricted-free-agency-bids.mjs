@@ -17,23 +17,25 @@ export default async function ({ userId, leagueId }) {
 
   if (query1.length) {
     const tid = query1[0].uid
-    const bids = await db('transition_bids')
+    const bids = await db('restricted_free_agency_bids')
       .where('tid', tid)
       .where('year', constants.season.year)
       .whereNull('cancelled')
       .whereNull('processed')
 
     if (bids.length) {
-      // Get conditional releases for all transition bids
-      const transition_releases = await db('transition_releases').whereIn(
-        'transitionid',
+      // Get conditional releases for all restricted free agency bids
+      const restricted_free_agency_releases = await db(
+        'restricted_free_agency_releases'
+      ).whereIn(
+        'restricted_free_agency_bid_id',
         bids.map((b) => b.uid)
       )
 
       // Map releases to bids
       for (const bid of bids) {
-        const releases = transition_releases.filter(
-          (r) => r.transitionid === bid.uid
+        const releases = restricted_free_agency_releases.filter(
+          (r) => r.restricted_free_agency_bid_id === bid.uid
         )
         if (releases.length) {
           bid.restricted_free_agency_conditional_releases = releases.map(

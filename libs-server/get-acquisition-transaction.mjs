@@ -31,7 +31,7 @@ export default async function ({ lid, pid, tid, year, week }) {
     constants.transactions.AUCTION_PROCESSED,
     constants.transactions.DRAFT,
     constants.transactions.PRACTICE_ADD,
-    constants.transactions.TRANSITION_TAG
+    constants.transactions.RESTRICTED_FREE_AGENCY_TAG
   ]
 
   return transactions.find((t) => types.includes(t.type))

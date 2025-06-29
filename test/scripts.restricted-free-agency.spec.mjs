@@ -16,7 +16,7 @@ import {
   addPlayer,
   fillRoster
 } from './utils/index.mjs'
-import run from '#scripts/process-transition-bids.mjs'
+import run from '#scripts/process-restricted-free-agency-bids.mjs'
 
 // Initialize dayjs plugins
 dayjs.extend(utc)
@@ -28,7 +28,7 @@ chai.should()
 const expect = chai.expect
 const { regular_season_start } = constants.season
 
-describe('SCRIPTS - transition bids - restricted free agency', function () {
+describe('SCRIPTS - restricted free agency bids', function () {
   const leagueId = 1
 
   before(async function () {
@@ -84,7 +84,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
         player,
         teamId: team_id,
         userId: user_id,
-        tag: constants.tags.TRANSITION
+        tag: constants.tags.RESTRICTED_FREE_AGENCY
       })
 
       // Get the current mocked timestamp
@@ -93,7 +93,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
       // Set announcement time to be more than 26 hours ago to meet timing requirements
       const announcement_time = current_time - 60 * 60 * 30 // 30 hours ago
 
-      await knex('transition_bids').insert({
+      await knex('restricted_free_agency_bids').insert({
         pid: player.pid,
         userid: user_id,
         bid: value,
@@ -115,12 +115,14 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
 
       expect(error).to.equal(undefined)
 
-      // check transition bid
-      const transition_bids = await knex('transition_bids')
-      expect(transition_bids.length).to.equal(1)
-      expect(transition_bids[0].succ).to.equal(true)
-      expect(transition_bids[0].processed).to.not.equal(null)
-      expect(transition_bids[0].reason).to.equal(null)
+      // check restricted free agency bid
+      const restricted_free_agency_bids = await knex(
+        'restricted_free_agency_bids'
+      )
+      expect(restricted_free_agency_bids.length).to.equal(1)
+      expect(restricted_free_agency_bids[0].succ).to.equal(true)
+      expect(restricted_free_agency_bids[0].processed).to.not.equal(null)
+      expect(restricted_free_agency_bids[0].reason).to.equal(null)
 
       // verify roster
       await checkRoster({
@@ -136,7 +138,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
         teamId: team_id,
         userId: 1,
         value,
-        type: constants.transactions.TRANSITION_TAG
+        type: constants.transactions.RESTRICTED_FREE_AGENCY_TAG
       })
     })
 
@@ -163,7 +165,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
         teamId: team_id,
         userId: user_id,
         value: 20,
-        tag: constants.tags.TRANSITION
+        tag: constants.tags.RESTRICTED_FREE_AGENCY
       })
 
       const players = [player2, player3, player4]
@@ -198,7 +200,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
       // Set announcement time to be more than 26 hours ago to meet timing requirements
       const announcement_time = current_time - 60 * 60 * 30 // 30 hours ago
 
-      const query1 = await knex('transition_bids')
+      const query1 = await knex('restricted_free_agency_bids')
         .insert({
           pid: player1.pid,
           userid: user_id,
@@ -213,8 +215,8 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
         })
         .returning('uid')
 
-      await knex('transition_releases').insert({
-        transitionid: query1[0].uid,
+      await knex('restricted_free_agency_releases').insert({
+        restricted_free_agency_bid_id: query1[0].uid,
         pid: player4.pid
       })
 
@@ -234,12 +236,14 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
 
       expect(error).to.equal(undefined)
 
-      // check transition bid
-      const transition_bids = await knex('transition_bids')
-      expect(transition_bids.length).to.equal(1)
-      expect(transition_bids[0].succ).to.equal(true)
-      expect(transition_bids[0].processed).to.not.equal(null)
-      expect(transition_bids[0].reason).to.equal(null)
+      // check restricted free agency bid
+      const restricted_free_agency_bids = await knex(
+        'restricted_free_agency_bids'
+      )
+      expect(restricted_free_agency_bids.length).to.equal(1)
+      expect(restricted_free_agency_bids[0].succ).to.equal(true)
+      expect(restricted_free_agency_bids[0].processed).to.not.equal(null)
+      expect(restricted_free_agency_bids[0].reason).to.equal(null)
 
       // verify roster
       await checkRoster({
@@ -255,7 +259,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
         teamId: team_id,
         userId: 1,
         value: bid,
-        type: constants.transactions.TRANSITION_TAG
+        type: constants.transactions.RESTRICTED_FREE_AGENCY_TAG
       })
 
       // verify released players
@@ -326,11 +330,11 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
         player,
         teamId: team_id,
         userId: user_id,
-        tag: constants.tags.TRANSITION
+        tag: constants.tags.RESTRICTED_FREE_AGENCY
       })
 
       const timestamp = Math.round(Date.now() / 1000)
-      await knex('transition_bids').insert({
+      await knex('restricted_free_agency_bids').insert({
         pid: player.pid,
         userid: user_id,
         bid: value,
@@ -351,12 +355,14 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
 
       expect(error).to.equal(undefined)
 
-      // check transition bid
-      const transition_bids = await knex('transition_bids')
-      expect(transition_bids.length).to.equal(1)
-      expect(transition_bids[0].succ).to.equal(null)
-      expect(transition_bids[0].processed).to.equal(null)
-      expect(transition_bids[0].reason).to.equal(null)
+      // check restricted free agency bid
+      const restricted_free_agency_bids = await knex(
+        'restricted_free_agency_bids'
+      )
+      expect(restricted_free_agency_bids.length).to.equal(1)
+      expect(restricted_free_agency_bids[0].succ).to.equal(null)
+      expect(restricted_free_agency_bids[0].processed).to.equal(null)
+      expect(restricted_free_agency_bids[0].reason).to.equal(null)
     })
 
     it('bid not processed if not enough time elapsed', async () => {
@@ -370,14 +376,14 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
         player,
         teamId: team_id,
         userId: user_id,
-        tag: constants.tags.TRANSITION
+        tag: constants.tags.RESTRICTED_FREE_AGENCY
       })
 
       const timestamp = Math.round(Date.now() / 1000)
       // Set announcement time to just 30 minutes ago (not enough time elapsed)
       const announcement_time = timestamp - 60 * 30
 
-      await knex('transition_bids').insert({
+      await knex('restricted_free_agency_bids').insert({
         pid: player.pid,
         userid: user_id,
         bid: value,
@@ -399,12 +405,14 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
 
       expect(error).to.equal(undefined)
 
-      // check transition bid - should still be unprocessed
-      const transition_bids = await knex('transition_bids')
-      expect(transition_bids.length).to.equal(1)
-      expect(transition_bids[0].succ).to.equal(null)
-      expect(transition_bids[0].processed).to.equal(null)
-      expect(transition_bids[0].reason).to.equal(null)
+      // check restricted free agency bid - should still be unprocessed
+      const restricted_free_agency_bids = await knex(
+        'restricted_free_agency_bids'
+      )
+      expect(restricted_free_agency_bids.length).to.equal(1)
+      expect(restricted_free_agency_bids[0].succ).to.equal(null)
+      expect(restricted_free_agency_bids[0].processed).to.equal(null)
+      expect(restricted_free_agency_bids[0].reason).to.equal(null)
     })
 
     it('exceeds roster size limit', async () => {
@@ -431,7 +439,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
         player,
         teamId: team_id1,
         userId: user_id1,
-        tag: constants.tags.TRANSITION
+        tag: constants.tags.RESTRICTED_FREE_AGENCY
       })
 
       // Set waiver order for teams
@@ -445,7 +453,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
       const announcement_time = current_time - 60 * 60 * 30 // 30 hours ago
 
       // Original team bid
-      await knex('transition_bids').insert({
+      await knex('restricted_free_agency_bids').insert({
         pid: player.pid,
         userid: user_id1,
         bid: value1,
@@ -459,7 +467,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
       })
 
       // Competing team bids with same value
-      await knex('transition_bids').insert({
+      await knex('restricted_free_agency_bids').insert({
         pid: player.pid,
         userid: user_id2,
         bid: value2,
@@ -472,7 +480,7 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
         nominated: announcement_time - 60 * 60
       })
 
-      await knex('transition_bids').insert({
+      await knex('restricted_free_agency_bids').insert({
         pid: player.pid,
         userid: user_id3,
         bid: value2,
@@ -494,26 +502,28 @@ describe('SCRIPTS - transition bids - restricted free agency', function () {
 
       expect(error).to.equal(undefined)
 
-      // check transition bids
-      const transition_bids = await knex('transition_bids').orderBy('tid')
+      // check restricted free agency bids
+      const restricted_free_agency_bids = await knex(
+        'restricted_free_agency_bids'
+      ).orderBy('tid')
 
       // Team 2 should win due to better waiver order
-      expect(transition_bids.length).to.equal(3)
+      expect(restricted_free_agency_bids.length).to.equal(3)
 
       // Team 1 (original team) bid should be unsuccessful
-      expect(transition_bids[0].tid).to.equal(team_id1)
-      expect(transition_bids[0].succ).to.equal(false)
-      expect(transition_bids[0].processed).to.not.equal(null)
+      expect(restricted_free_agency_bids[0].tid).to.equal(team_id1)
+      expect(restricted_free_agency_bids[0].succ).to.equal(false)
+      expect(restricted_free_agency_bids[0].processed).to.not.equal(null)
 
       // Team 2 bid should be successful
-      expect(transition_bids[1].tid).to.equal(team_id2)
-      expect(transition_bids[1].succ).to.equal(true)
-      expect(transition_bids[1].processed).to.not.equal(null)
+      expect(restricted_free_agency_bids[1].tid).to.equal(team_id2)
+      expect(restricted_free_agency_bids[1].succ).to.equal(true)
+      expect(restricted_free_agency_bids[1].processed).to.not.equal(null)
 
       // Team 3 bid should be unsuccessful
-      expect(transition_bids[2].tid).to.equal(team_id3)
-      expect(transition_bids[2].succ).to.equal(false)
-      expect(transition_bids[2].processed).to.not.equal(null)
+      expect(restricted_free_agency_bids[2].tid).to.equal(team_id3)
+      expect(restricted_free_agency_bids[2].succ).to.equal(false)
+      expect(restricted_free_agency_bids[2].processed).to.not.equal(null)
 
       // Check that player is now on team 2
       await checkRoster({

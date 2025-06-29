@@ -83,7 +83,7 @@ export default function DashboardPlayersTable({
   reorder_cutlist,
   leadColumn = '',
   space,
-  isTransition,
+  isRestrictedFreeAgency,
   percentiles,
   is_team_manager
 }) {
@@ -227,17 +227,19 @@ export default function DashboardPlayersTable({
             {leadColumn}
           </div>
           {isClaim && <div className='table__cell text lead-cell'>Release</div>}
-          {Boolean(isTransition) && (
+          {Boolean(isRestrictedFreeAgency) && (
             <div className='table__cell player__item-team'>Team</div>
           )}
-          {(isWaiver || isTransition) && (
+          {(isWaiver || isRestrictedFreeAgency) && (
             <div className='metric table__cell'>Bid</div>
           )}
           {!isWaiver && (
             <div className='row__group'>
               <div className='row__group-head'>Salary</div>
               <div className='row__group-body'>
-                {!isTransition && <div className='table__cell'>{baseYear}</div>}
+                {!isRestrictedFreeAgency && (
+                  <div className='table__cell'>{baseYear}</div>
+                )}
                 {!isPoach && isOffseason && isBeforeExtensionDeadline && (
                   <div className='table__cell'>{baseYear + 1}</div>
                 )}
@@ -388,7 +390,7 @@ DashboardPlayersTable.propTypes = {
   total: ImmutablePropTypes.list,
   cutlist: ImmutablePropTypes.list,
   reorder_cutlist: PropTypes.func,
-  isTransition: PropTypes.bool,
+  isRestrictedFreeAgency: PropTypes.bool,
   percentiles: PropTypes.object,
   is_team_manager: PropTypes.bool
 }
