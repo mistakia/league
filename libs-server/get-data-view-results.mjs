@@ -1,6 +1,10 @@
 import db from '#db'
 import debug from 'debug'
-import { constants, named_scoring_formats, named_league_formats } from '#libs-shared'
+import {
+  constants,
+  named_scoring_formats,
+  named_league_formats
+} from '#libs-shared'
 import data_views_column_definitions from '#libs-server/data-views-column-definitions/index.mjs'
 import * as validators from '#libs-server/validators.mjs'
 
@@ -73,11 +77,17 @@ const resolve_format_hash = ({ format_value, format_type }) => {
   }
 
   // Try to resolve named format
-  if (format_type === 'scoring_format_hash' && named_scoring_formats[format_value]) {
+  if (
+    format_type === 'scoring_format_hash' &&
+    named_scoring_formats[format_value]
+  ) {
     return named_scoring_formats[format_value].hash
   }
 
-  if (format_type === 'league_format_hash' && named_league_formats[format_value]) {
+  if (
+    format_type === 'league_format_hash' &&
+    named_league_formats[format_value]
+  ) {
     return named_league_formats[format_value].hash
   }
 
@@ -92,26 +102,30 @@ const process_dynamic_params = (params) => {
   const process_param = (param, param_key) => {
     if (Array.isArray(param)) {
       return param.map((item) => {
-        const processed_item = typeof item === 'object' &&
+        const processed_item =
+          typeof item === 'object' &&
           item !== null &&
           !item.dynamic_type &&
           item.value !== undefined &&
           item.value !== null
-          ? item.value
-          : item
-        
+            ? item.value
+            : item
+
         // Resolve format hashes
-        if (param_key === 'scoring_format_hash' || param_key === 'league_format_hash') {
-          return resolve_format_hash({ 
-            format_value: processed_item, 
-            format_type: param_key 
+        if (
+          param_key === 'scoring_format_hash' ||
+          param_key === 'league_format_hash'
+        ) {
+          return resolve_format_hash({
+            format_value: processed_item,
+            format_type: param_key
           })
         }
-        
+
         return processed_item
       })
     }
-    
+
     let processed_value = param
     if (
       typeof param === 'object' &&
@@ -124,10 +138,13 @@ const process_dynamic_params = (params) => {
     }
 
     // Resolve format hashes
-    if (param_key === 'scoring_format_hash' || param_key === 'league_format_hash') {
-      processed_value = resolve_format_hash({ 
-        format_value: processed_value, 
-        format_type: param_key 
+    if (
+      param_key === 'scoring_format_hash' ||
+      param_key === 'league_format_hash'
+    ) {
+      processed_value = resolve_format_hash({
+        format_value: processed_value,
+        format_type: param_key
       })
     }
 
