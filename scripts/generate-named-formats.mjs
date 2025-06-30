@@ -232,7 +232,7 @@ This document shows the configuration for each named format in the system.
 
     for (const [name, format] of league_entries) {
       const description = format.description || 'No description'
-      content += `| \`${name}\` | ${description} | [View Details](#${name.replace(/_/g, '-')}) |\n`
+      content += `| \`${name}\` | ${description} | [View Details](#${name}) |\n`
     }
 
     content += '\n'
@@ -251,7 +251,7 @@ This document shows the configuration for each named format in the system.
 
     for (const [name, format] of scoring_entries) {
       const description = format.description || 'No description'
-      content += `| \`${name}\` | ${description} | [View Details](#${name.replace(/_/g, '-')}-1) |\n`
+      content += `| \`${name}\` | ${description} | [View Details](#${name}) |\n`
     }
 
     content += '\n'
@@ -305,7 +305,7 @@ This document shows the configuration for each named format in the system.
         }
 
         if (format.scoring_format) {
-          content += `\n**Scoring Format:** [\`${format.scoring_format}\`](#${format.scoring_format.replace(/_/g, '-')}-1)
+          content += `\n**Scoring Format:** [\`${format.scoring_format}\`](#${format.scoring_format})
 
 `
         }
