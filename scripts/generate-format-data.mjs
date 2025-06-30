@@ -413,9 +413,9 @@ const generate_all_formats = async (options = {}) => {
         scoring_steps,
         options
       )
-      
+
       // Add a small delay between formats to prevent connection exhaustion
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await new Promise((resolve) => setTimeout(resolve, 1000))
     }
   }
 
@@ -446,20 +446,13 @@ const generate_all_formats = async (options = {}) => {
         league_steps,
         options
       )
-      
+
       // Add a small delay between formats to prevent connection exhaustion
-      await new Promise(resolve => setTimeout(resolve, 1000))
+      await new Promise((resolve) => setTimeout(resolve, 1000))
     }
   }
 
   console.log(`\n✨ FORMAT DATA GENERATION COMPLETE!`)
-
-  // Close database connection
-  try {
-    await db.destroy()
-  } catch (error) {
-    console.warn('Warning: Could not close database connection:', error.message)
-  }
 }
 
 // Configure yargs

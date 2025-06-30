@@ -1,7 +1,11 @@
 import * as table_constants from 'react-table/src/constants.mjs'
 
 import COLUMN_GROUPS from './column-groups'
-import { nfl_plays_column_params, rate_type_column_param, named_scoring_formats } from '@libs-shared'
+import {
+  nfl_plays_column_params,
+  rate_type_column_param,
+  named_scoring_formats
+} from '@libs-shared'
 
 const scoring_format_hash_param = {
   label: 'Scoring Format',

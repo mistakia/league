@@ -1,6 +1,6 @@
 # Named Scoring and League Formats
 
-_Generated at: 2025-06-17T15:46:20.756Z_
+_Generated at: 2025-06-30T08:24:24.264Z_
 
 This document shows the configuration for each named format in the system.
 
@@ -684,9 +684,9 @@ This document shows the configuration for each named format in the system.
 | `ry` | 0.1 | Points per rushing yard |
 | `tdr` | 6 | Points per rushing touchdown |
 | `rec` | 1 | Points per reception |
-| `rbrec` | 1 | Bonus points per RB reception |
-| `wrrec` | 1 | Bonus points per WR reception |
-| `terec` | 1 | Bonus points per TE reception |
+| `rbrec` | 1 | Points per RB reception |
+| `wrrec` | 1 | Points per WR reception |
+| `terec` | 1 | Points per TE reception |
 | `recy` | 0.1 | Points per receiving yard |
 | `tdrec` | 6 | Points per receiving touchdown |
 | `twoptc` | 2 | Points per two-point conversion |
@@ -712,9 +712,9 @@ This document shows the configuration for each named format in the system.
 | `ry` | 0.1 | Points per rushing yard |
 | `tdr` | 6 | Points per rushing touchdown |
 | `rec` | 0.5 | Points per reception |
-| `rbrec` | 0.5 | Bonus points per RB reception |
-| `wrrec` | 0.5 | Bonus points per WR reception |
-| `terec` | 0.5 | Bonus points per TE reception |
+| `rbrec` | 0.5 | Points per RB reception |
+| `wrrec` | 0.5 | Points per WR reception |
+| `terec` | 0.5 | Points per TE reception |
 | `recy` | 0.1 | Points per receiving yard |
 | `tdrec` | 6 | Points per receiving touchdown |
 | `twoptc` | 2 | Points per two-point conversion |
@@ -740,9 +740,9 @@ This document shows the configuration for each named format in the system.
 | `ry` | 0.1 | Points per rushing yard |
 | `tdr` | 6 | Points per rushing touchdown |
 | `rec` | 0.5 | Points per reception |
-| `rbrec` | 0.5 | Bonus points per RB reception |
-| `wrrec` | 0.5 | Bonus points per WR reception |
-| `terec` | 0.5 | Bonus points per TE reception |
+| `rbrec` | 0.5 | Points per RB reception |
+| `wrrec` | 0.5 | Points per WR reception |
+| `terec` | 0.5 | Points per TE reception |
 | `recy` | 0.1 | Points per receiving yard |
 | `tdrec` | 6 | Points per receiving touchdown |
 | `twoptc` | 2 | Points per two-point conversion |
@@ -768,9 +768,9 @@ This document shows the configuration for each named format in the system.
 | `ry` | 0.1 | Points per rushing yard |
 | `tdr` | 6 | Points per rushing touchdown |
 | `rec` | 0.5 | Points per reception |
-| `rbrec` | 0.5 | Bonus points per RB reception |
-| `wrrec` | 0.5 | Bonus points per WR reception |
-| `terec` | 0.5 | Bonus points per TE reception |
+| `rbrec` | 0.5 | Points per RB reception |
+| `wrrec` | 0.5 | Points per WR reception |
+| `terec` | 0.5 | Points per TE reception |
 | `recy` | 0.1 | Points per receiving yard |
 | `tdrec` | 6 | Points per receiving touchdown |
 | `twoptc` | 2 | Points per two-point conversion |
@@ -796,9 +796,9 @@ This document shows the configuration for each named format in the system.
 | `ry` | 0.1 | Points per rushing yard |
 | `tdr` | 6 | Points per rushing touchdown |
 | `rec` | 0.5 | Points per reception |
-| `rbrec` | 0.5 | Bonus points per RB reception |
-| `wrrec` | 0.5 | Bonus points per WR reception |
-| `terec` | 0.5 | Bonus points per TE reception |
+| `rbrec` | 0.5 | Points per RB reception |
+| `wrrec` | 0.5 | Points per WR reception |
+| `terec` | 0.5 | Points per TE reception |
 | `recy` | 0.1 | Points per receiving yard |
 | `tdrec` | 6 | Points per receiving touchdown |
 | `twoptc` | 2 | Points per two-point conversion |
@@ -824,9 +824,9 @@ This document shows the configuration for each named format in the system.
 | `ry` | 0.1 | Points per rushing yard |
 | `tdr` | 6 | Points per rushing touchdown |
 | `rec` | 1 | Points per reception |
-| `rbrec` | 1 | Bonus points per RB reception |
-| `wrrec` | 1 | Bonus points per WR reception |
-| `terec` | 1 | Bonus points per TE reception |
+| `rbrec` | 1 | Points per RB reception |
+| `wrrec` | 1 | Points per WR reception |
+| `terec` | 1 | Points per TE reception |
 | `recy` | 0.1 | Points per receiving yard |
 | `tdrec` | 6 | Points per receiving touchdown |
 | `twoptc` | 2 | Points per two-point conversion |
@@ -852,9 +852,9 @@ This document shows the configuration for each named format in the system.
 | `ry` | 0.1 | Points per rushing yard |
 | `tdr` | 6 | Points per rushing touchdown |
 | `rec` | 1 | Points per reception |
-| `rbrec` | 1 | Bonus points per RB reception |
-| `wrrec` | 1 | Bonus points per WR reception |
-| `terec` | 1 | Bonus points per TE reception |
+| `rbrec` | 1 | Points per RB reception |
+| `wrrec` | 1 | Points per WR reception |
+| `terec` | 1 | Points per TE reception |
 | `recy` | 0.1 | Points per receiving yard |
 | `tdrec` | 6 | Points per receiving touchdown |
 | `twoptc` | 2 | Points per two-point conversion |
@@ -880,9 +880,9 @@ This document shows the configuration for each named format in the system.
 | `ry` | 0.1 | Points per rushing yard |
 | `tdr` | 6 | Points per rushing touchdown |
 | `rec` | 1 | Points per reception |
-| `rbrec` | 1 | Bonus points per RB reception |
-| `wrrec` | 1 | Bonus points per WR reception |
-| `terec` | 2 | Bonus points per TE reception |
+| `rbrec` | 1 | Points per RB reception |
+| `wrrec` | 1 | Points per WR reception |
+| `terec` | 2 | Points per TE reception |
 | `recy` | 0.1 | Points per receiving yard |
 | `tdrec` | 6 | Points per receiving touchdown |
 | `twoptc` | 2 | Points per two-point conversion |
@@ -908,9 +908,9 @@ This document shows the configuration for each named format in the system.
 | `ry` | 0.1 | Points per rushing yard |
 | `tdr` | 6 | Points per rushing touchdown |
 | `rec` | 2.5 | Points per reception |
-| `rbrec` | 2.5 | Bonus points per RB reception |
-| `wrrec` | 2.5 | Bonus points per WR reception |
-| `terec` | 3.5 | Bonus points per TE reception |
+| `rbrec` | 2.5 | Points per RB reception |
+| `wrrec` | 2.5 | Points per WR reception |
+| `terec` | 3.5 | Points per TE reception |
 | `recy` | 0.1 | Points per receiving yard |
 | `tdrec` | 6 | Points per receiving touchdown |
 | `twoptc` | 2 | Points per two-point conversion |
@@ -936,9 +936,9 @@ This document shows the configuration for each named format in the system.
 | `ry` | 0.1 | Points per rushing yard |
 | `tdr` | 6 | Points per rushing touchdown |
 | `rec` | 0 | Points per reception |
-| `rbrec` | 0 | Bonus points per RB reception |
-| `wrrec` | 0 | Bonus points per WR reception |
-| `terec` | 0 | Bonus points per TE reception |
+| `rbrec` | 0 | Points per RB reception |
+| `wrrec` | 0 | Points per WR reception |
+| `terec` | 0 | Points per TE reception |
 | `recy` | 0.1 | Points per receiving yard |
 | `tdrec` | 6 | Points per receiving touchdown |
 | `twoptc` | 2 | Points per two-point conversion |
