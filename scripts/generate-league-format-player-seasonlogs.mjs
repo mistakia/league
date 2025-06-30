@@ -152,7 +152,8 @@ const main = async () => {
           )
           .groupBy('nfl_games.year')
           .orderBy('nfl_games.year', 'asc'),
-      script_args: { league_format_hash, dry: argv.dry }
+      script_args: { league_format_hash, dry: argv.dry },
+      season_only: true // This script processes entire seasons, not individual weeks
     })
   } catch (err) {
     error = err

@@ -1,19 +1,16 @@
 import * as table_constants from 'react-table/src/constants.mjs'
 
 import COLUMN_GROUPS from './column-groups'
-import { nfl_plays_column_params, rate_type_column_param } from '@libs-shared'
+import { nfl_plays_column_params, rate_type_column_param, named_scoring_formats } from '@libs-shared'
 
 const scoring_format_hash_param = {
   label: 'Scoring Format',
-  values: [
-    {
-      value: 'ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e',
-      label: 'PPR / 4PTD / -1INT / -1FUM'
-    }
-  ],
+  values: Object.entries(named_scoring_formats).map(([key, format]) => ({
+    value: format.hash,
+    label: format.label
+  })),
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-  default_value:
-    'ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e',
+  default_value: named_scoring_formats.genesis.hash,
   single: true
 }
 

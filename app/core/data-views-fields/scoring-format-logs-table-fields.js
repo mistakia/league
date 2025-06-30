@@ -2,25 +2,18 @@ import * as table_constants from 'react-table/src/constants.mjs'
 
 import COLUMN_GROUPS from './column-groups'
 import from_format_player_logs from './from-format-player-logs'
-import { common_column_params } from '@libs-shared'
+import { common_column_params, named_scoring_formats } from '@libs-shared'
 
 const { single_year, single_year_offset } = common_column_params
 
 const scoring_format_hash_param = {
   label: 'Scoring Format',
-  values: [
-    {
-      value: '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d',
-      label: '0.5PPR / 4PTD / -1INT / 0.05PY / -1FUM (GENESIS LEAGUE)'
-    },
-    {
-      value: 'ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e',
-      label: 'PPR / 4PTD / -1INT / -1FUM'
-    }
-  ],
+  values: Object.entries(named_scoring_formats).map(([key, format]) => ({
+    value: format.hash,
+    label: format.label
+  })),
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-  default_value:
-    '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d',
+  default_value: named_scoring_formats.genesis.hash,
   single: true
 }
 

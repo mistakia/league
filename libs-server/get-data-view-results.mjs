@@ -1,6 +1,6 @@
 import db from '#db'
 import debug from 'debug'
-import { constants } from '#libs-shared'
+import { constants, named_scoring_formats, named_league_formats } from '#libs-shared'
 import data_views_column_definitions from '#libs-server/data-views-column-definitions/index.mjs'
 import * as validators from '#libs-server/validators.mjs'
 
@@ -62,22 +62,57 @@ const process_cache_info = ({ cache_info, data_view_metadata }) => {
   }
 }
 
+const resolve_format_hash = ({ format_value, format_type }) => {
+  if (!format_value || typeof format_value !== 'string') {
+    return format_value
+  }
+
+  // If it's already a hash (64-character hex string), return as is
+  if (/^[a-f0-9]{64}$/i.test(format_value)) {
+    return format_value
+  }
+
+  // Try to resolve named format
+  if (format_type === 'scoring_format_hash' && named_scoring_formats[format_value]) {
+    return named_scoring_formats[format_value].hash
+  }
+
+  if (format_type === 'league_format_hash' && named_league_formats[format_value]) {
+    return named_league_formats[format_value].hash
+  }
+
+  // Return original value if no match found
+  return format_value
+}
+
 const process_dynamic_params = (params) => {
   const processed_params = { ...params }
 
   // Helper function to process individual param
-  const process_param = (param) => {
+  const process_param = (param, param_key) => {
     if (Array.isArray(param)) {
-      return param.map((item) =>
-        typeof item === 'object' &&
-        item !== null &&
-        !item.dynamic_type &&
-        item.value !== undefined &&
-        item.value !== null
+      return param.map((item) => {
+        const processed_item = typeof item === 'object' &&
+          item !== null &&
+          !item.dynamic_type &&
+          item.value !== undefined &&
+          item.value !== null
           ? item.value
           : item
-      )
+        
+        // Resolve format hashes
+        if (param_key === 'scoring_format_hash' || param_key === 'league_format_hash') {
+          return resolve_format_hash({ 
+            format_value: processed_item, 
+            format_type: param_key 
+          })
+        }
+        
+        return processed_item
+      })
     }
+    
+    let processed_value = param
     if (
       typeof param === 'object' &&
       param !== null &&
@@ -85,14 +120,23 @@ const process_dynamic_params = (params) => {
       param.value !== undefined &&
       param.value !== null
     ) {
-      return param.value
+      processed_value = param.value
     }
-    return param
+
+    // Resolve format hashes
+    if (param_key === 'scoring_format_hash' || param_key === 'league_format_hash') {
+      processed_value = resolve_format_hash({ 
+        format_value: processed_value, 
+        format_type: param_key 
+      })
+    }
+
+    return processed_value
   }
 
   // Process all params
   for (const key in processed_params) {
-    processed_params[key] = process_param(processed_params[key])
+    processed_params[key] = process_param(processed_params[key], key)
   }
 
   // Process year parameter

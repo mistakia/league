@@ -132,7 +132,8 @@ const execute_script = (script_name, args = []) => {
     child.on('close', (code) => {
       if (code === 0) {
         console.log(`✅ Completed: ${script_name}`)
-        resolve()
+        // Add a small delay to allow connections to properly close
+        setTimeout(resolve, 500)
       } else {
         console.error(`❌ Failed: ${script_name} (exit code ${code})`)
         reject(new Error(`Script ${script_name} failed with exit code ${code}`))
@@ -412,6 +413,9 @@ const generate_all_formats = async (options = {}) => {
         scoring_steps,
         options
       )
+      
+      // Add a small delay between formats to prevent connection exhaustion
+      await new Promise(resolve => setTimeout(resolve, 1000))
     }
   }
 
@@ -442,6 +446,9 @@ const generate_all_formats = async (options = {}) => {
         league_steps,
         options
       )
+      
+      // Add a small delay between formats to prevent connection exhaustion
+      await new Promise(resolve => setTimeout(resolve, 1000))
     }
   }
 

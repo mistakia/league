@@ -1,25 +1,18 @@
 import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
 
-import { common_column_params } from '@libs-shared'
+import { common_column_params, named_league_formats } from '@libs-shared'
 
 const { single_year, single_year_offset } = common_column_params
 
 const league_format_hash_param = {
   label: 'League Format',
-  values: [
-    {
-      value: '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b',
-      label: '10 Team / SFLEX / 1 FLX / 0.5PPR / 4PTD (GENESIS LEAGUE)'
-    },
-    {
-      value: '97b8d7d2b53c7401b93bfad1fbe97aeb1a582e376b2fcb34868a8628d7fbe48a',
-      label: '12 Team / SFLEX / 1 FLX / PPR / 4PTD'
-    }
-  ],
+  values: Object.entries(named_league_formats).map(([key, format]) => ({
+    value: format.hash,
+    label: format.label
+  })),
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-  default_value:
-    '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b',
+  default_value: named_league_formats.genesis_10_team.hash,
   single: true
 }
 
