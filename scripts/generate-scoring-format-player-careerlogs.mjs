@@ -119,9 +119,15 @@ const generate_scoring_format_player_careerlogs = async ({
 const main = async () => {
   let error
   try {
-    const lid = 1
-    const league = await getLeague({ lid })
-    const { scoring_format_hash } = league
+    // Use CLI argument if provided, otherwise fall back to league lookup
+    let scoring_format_hash = argv.scoring_format_hash
+
+    if (!scoring_format_hash) {
+      const lid = argv.lid || 1
+      const league = await getLeague({ lid })
+      scoring_format_hash = league.scoring_format_hash
+    }
+
     await generate_scoring_format_player_careerlogs({
       scoring_format_hash,
       dry: argv.dry
