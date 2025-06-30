@@ -1,6 +1,6 @@
 # Named Scoring and League Formats
 
-_Generated at: 2025-06-30T08:24:24.264Z_
+_Generated at: 2025-06-30T09:44:26.248Z_
 
 This document shows the configuration for each named format in the system.
 
@@ -8,43 +8,43 @@ This document shows the configuration for each named format in the system.
 
 | Name                                        | Description                                                                                                   | Details                                                    |
 | ------------------------------------------- | ------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------- |
-| `draftkings_classic`                        | DraftKings classic DFS lineup - 1QB/2RB/3WR/1TE/1FLEX/1DST with $50k salary cap                               | [View Details](#draftkings-classic)                        |
-| `genesis_10_team`                           | Genesis League 10-team superflex format with no kicker - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX                         | [View Details](#genesis-10-team)                           |
-| `half_ppr_10_team`                          | 10-team league with half PPR scoring - 1QB/2RB/2WR/1TE/1FLEX                                                  | [View Details](#half-ppr-10-team)                          |
-| `half_ppr_10_team_superflex`                | 10-team superflex league with half PPR scoring - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX                                 | [View Details](#half-ppr-10-team-superflex)                |
-| `half_ppr_12_team`                          | 12-team league with half PPR scoring - 1QB/2RB/2WR/1TE/1FLEX                                                  | [View Details](#half-ppr-12-team)                          |
-| `half_ppr_12_team_superflex`                | 12-team superflex league with half PPR scoring - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX                                 | [View Details](#half-ppr-12-team-superflex)                |
-| `half_ppr_lower_turnover_10_team`           | 10-team league with half PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX                  | [View Details](#half-ppr-lower-turnover-10-team)           |
-| `half_ppr_lower_turnover_10_team_superflex` | 10-team superflex league with half PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX | [View Details](#half-ppr-lower-turnover-10-team-superflex) |
-| `half_ppr_lower_turnover_12_team`           | 12-team league with half PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX                  | [View Details](#half-ppr-lower-turnover-12-team)           |
-| `half_ppr_lower_turnover_12_team_superflex` | 12-team superflex league with half PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX | [View Details](#half-ppr-lower-turnover-12-team-superflex) |
-| `ppr_10_team`                               | 10-team league with full PPR scoring - 1QB/2RB/2WR/1TE/1FLEX                                                  | [View Details](#ppr-10-team)                               |
-| `ppr_10_team_superflex`                     | 10-team superflex league with full PPR scoring - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX                                 | [View Details](#ppr-10-team-superflex)                     |
-| `ppr_12_team`                               | 12-team league with full PPR scoring - 1QB/2RB/2WR/1TE/1FLEX                                                  | [View Details](#ppr-12-team)                               |
-| `ppr_12_team_superflex`                     | 12-team superflex league with full PPR scoring - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX                                 | [View Details](#ppr-12-team-superflex)                     |
-| `ppr_lower_turnover_10_team`                | 10-team league with full PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX                  | [View Details](#ppr-lower-turnover-10-team)                |
-| `ppr_lower_turnover_10_team_superflex`      | 10-team superflex league with full PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX | [View Details](#ppr-lower-turnover-10-team-superflex)      |
-| `ppr_lower_turnover_12_team`                | 12-team league with full PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX                  | [View Details](#ppr-lower-turnover-12-team)                |
-| `ppr_lower_turnover_12_team_superflex`      | 12-team superflex league with full PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX | [View Details](#ppr-lower-turnover-12-team-superflex)      |
-| `sfb15_mfl`                                 | Scott Fish Bowl 15 MFL format with 2 superflex and 9 flex positions                                           | [View Details](#sfb15-mfl)                                 |
-| `sfb15_sleeper`                             | Scott Fish Bowl 15 Sleeper format with 2 superflex and 9 flex positions                                       | [View Details](#sfb15-sleeper)                             |
-| `standard_10_team`                          | 10-team league with standard (no PPR) scoring - 1QB/2RB/2WR/1TE/1FLEX                                         | [View Details](#standard-10-team)                          |
-| `standard_12_team`                          | 12-team league with standard (no PPR) scoring - 1QB/2RB/2WR/1TE/1FLEX                                         | [View Details](#standard-12-team)                          |
+| `draftkings_classic`                        | DraftKings classic DFS lineup - 1QB/2RB/3WR/1TE/1FLEX/1DST with $50k salary cap                               | [View Details](#draftkings_classic)                        |
+| `genesis_10_team`                           | Genesis League 10-team superflex format with no kicker - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX                         | [View Details](#genesis_10_team)                           |
+| `half_ppr_10_team`                          | 10-team league with half PPR scoring - 1QB/2RB/2WR/1TE/1FLEX                                                  | [View Details](#half_ppr_10_team)                          |
+| `half_ppr_10_team_superflex`                | 10-team superflex league with half PPR scoring - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX                                 | [View Details](#half_ppr_10_team_superflex)                |
+| `half_ppr_12_team`                          | 12-team league with half PPR scoring - 1QB/2RB/2WR/1TE/1FLEX                                                  | [View Details](#half_ppr_12_team)                          |
+| `half_ppr_12_team_superflex`                | 12-team superflex league with half PPR scoring - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX                                 | [View Details](#half_ppr_12_team_superflex)                |
+| `half_ppr_lower_turnover_10_team`           | 10-team league with half PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX                  | [View Details](#half_ppr_lower_turnover_10_team)           |
+| `half_ppr_lower_turnover_10_team_superflex` | 10-team superflex league with half PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX | [View Details](#half_ppr_lower_turnover_10_team_superflex) |
+| `half_ppr_lower_turnover_12_team`           | 12-team league with half PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX                  | [View Details](#half_ppr_lower_turnover_12_team)           |
+| `half_ppr_lower_turnover_12_team_superflex` | 12-team superflex league with half PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX | [View Details](#half_ppr_lower_turnover_12_team_superflex) |
+| `ppr_10_team`                               | 10-team league with full PPR scoring - 1QB/2RB/2WR/1TE/1FLEX                                                  | [View Details](#ppr_10_team)                               |
+| `ppr_10_team_superflex`                     | 10-team superflex league with full PPR scoring - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX                                 | [View Details](#ppr_10_team_superflex)                     |
+| `ppr_12_team`                               | 12-team league with full PPR scoring - 1QB/2RB/2WR/1TE/1FLEX                                                  | [View Details](#ppr_12_team)                               |
+| `ppr_12_team_superflex`                     | 12-team superflex league with full PPR scoring - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX                                 | [View Details](#ppr_12_team_superflex)                     |
+| `ppr_lower_turnover_10_team`                | 10-team league with full PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX                  | [View Details](#ppr_lower_turnover_10_team)                |
+| `ppr_lower_turnover_10_team_superflex`      | 10-team superflex league with full PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX | [View Details](#ppr_lower_turnover_10_team_superflex)      |
+| `ppr_lower_turnover_12_team`                | 12-team league with full PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX                  | [View Details](#ppr_lower_turnover_12_team)                |
+| `ppr_lower_turnover_12_team_superflex`      | 12-team superflex league with full PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX | [View Details](#ppr_lower_turnover_12_team_superflex)      |
+| `sfb15_mfl`                                 | Scott Fish Bowl 15 MFL format with 2 superflex and 9 flex positions                                           | [View Details](#sfb15_mfl)                                 |
+| `sfb15_sleeper`                             | Scott Fish Bowl 15 Sleeper format with 2 superflex and 9 flex positions                                       | [View Details](#sfb15_sleeper)                             |
+| `standard_10_team`                          | 10-team league with standard (no PPR) scoring - 1QB/2RB/2WR/1TE/1FLEX                                         | [View Details](#standard_10_team)                          |
+| `standard_12_team`                          | 12-team league with standard (no PPR) scoring - 1QB/2RB/2WR/1TE/1FLEX                                         | [View Details](#standard_12_team)                          |
 
 ## Scoring Format Summary
 
-| Name                      | Description                                                                                                            | Details                                    |
-| ------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ------------------------------------------ |
-| `draftkings`              | DraftKings DFS scoring with full PPR, 4-point passing TDs, and milestone bonuses - bonus/kicker/defense support needed | [View Details](#draftkings-1)              |
-| `fanduel`                 | FanDuel DFS scoring with half PPR, 4-point passing TDs, and yardage bonuses - bonus/kicker/defense support needed      | [View Details](#fanduel-1)                 |
-| `genesis`                 | Genesis League scoring with half PPR, 4-point passing TDs, 0.05 passing yards, and -1 turnovers                        | [View Details](#genesis-1)                 |
-| `half_ppr`                | Half point per reception scoring with 6-point passing touchdowns                                                       | [View Details](#half-ppr-1)                |
-| `half_ppr_lower_turnover` | Half PPR with lower turnover penalties: -1 INT, -1 fumble lost                                                         | [View Details](#half-ppr-lower-turnover-1) |
-| `ppr`                     | Full point per reception scoring with 6-point passing touchdowns                                                       | [View Details](#ppr-1)                     |
-| `ppr_lower_turnover`      | Full PPR with lower turnover penalties: -1 INT, -1 fumble lost                                                         | [View Details](#ppr-lower-turnover-1)      |
-| `sfb15_mfl`               | Scott Fish Bowl 15 MFL scoring (PPR + 0.5 per carry + 1 per target) - no turnover penalties                            | [View Details](#sfb15-mfl-1)               |
-| `sfb15_sleeper`           | Scott Fish Bowl 15 Sleeper scoring (2.5 PPR + 0.5 per carry) - no turnover penalties                                   | [View Details](#sfb15-sleeper-1)           |
-| `standard`                | Standard scoring with no PPR and 6-point passing touchdowns                                                            | [View Details](#standard-1)                |
+| Name                      | Description                                                                                                            | Details                                  |
+| ------------------------- | ---------------------------------------------------------------------------------------------------------------------- | ---------------------------------------- |
+| `draftkings`              | DraftKings DFS scoring with full PPR, 4-point passing TDs, and milestone bonuses - bonus/kicker/defense support needed | [View Details](#draftkings)              |
+| `fanduel`                 | FanDuel DFS scoring with half PPR, 4-point passing TDs, and yardage bonuses - bonus/kicker/defense support needed      | [View Details](#fanduel)                 |
+| `genesis`                 | Genesis League scoring with half PPR, 4-point passing TDs, 0.05 passing yards, and -1 turnovers                        | [View Details](#genesis)                 |
+| `half_ppr`                | Half point per reception scoring with 6-point passing touchdowns                                                       | [View Details](#half_ppr)                |
+| `half_ppr_lower_turnover` | Half PPR with lower turnover penalties: -1 INT, -1 fumble lost                                                         | [View Details](#half_ppr_lower_turnover) |
+| `ppr`                     | Full point per reception scoring with 6-point passing touchdowns                                                       | [View Details](#ppr)                     |
+| `ppr_lower_turnover`      | Full PPR with lower turnover penalties: -1 INT, -1 fumble lost                                                         | [View Details](#ppr_lower_turnover)      |
+| `sfb15_mfl`               | Scott Fish Bowl 15 MFL scoring (PPR + 0.5 per carry + 1 per target) - no turnover penalties                            | [View Details](#sfb15_mfl)               |
+| `sfb15_sleeper`           | Scott Fish Bowl 15 Sleeper scoring (2.5 PPR + 0.5 per carry) - no turnover penalties                                   | [View Details](#sfb15_sleeper)           |
+| `standard`                | Standard scoring with no PPR and 6-point passing touchdowns                                                            | [View Details](#standard)                |
 
 ## League Format Details
 
@@ -74,7 +74,7 @@ This document shows the configuration for each named format in the system.
 | `cap` | 50000 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
-**Scoring Format:** [`draftkings`](#draftkings-1)
+**Scoring Format:** [`draftkings`](#draftkings)
 
 ### genesis_10_team
 
@@ -102,7 +102,7 @@ This document shows the configuration for each named format in the system.
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
-**Scoring Format:** [`genesis`](#genesis-1)
+**Scoring Format:** [`genesis`](#genesis)
 
 ### half_ppr_10_team
 
@@ -130,7 +130,7 @@ This document shows the configuration for each named format in the system.
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
-**Scoring Format:** [`half_ppr`](#half-ppr-1)
+**Scoring Format:** [`half_ppr`](#half_ppr)
 
 ### half_ppr_10_team_superflex
 
@@ -158,7 +158,7 @@ This document shows the configuration for each named format in the system.
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
-**Scoring Format:** [`half_ppr`](#half-ppr-1)
+**Scoring Format:** [`half_ppr`](#half_ppr)
 
 ### half_ppr_12_team
 
@@ -186,7 +186,7 @@ This document shows the configuration for each named format in the system.
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
-**Scoring Format:** [`half_ppr`](#half-ppr-1)
+**Scoring Format:** [`half_ppr`](#half_ppr)
 
 ### half_ppr_12_team_superflex
 
@@ -214,7 +214,7 @@ This document shows the configuration for each named format in the system.
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
-**Scoring Format:** [`half_ppr`](#half-ppr-1)
+**Scoring Format:** [`half_ppr`](#half_ppr)
 
 ### half_ppr_lower_turnover_10_team
 
@@ -242,7 +242,7 @@ This document shows the configuration for each named format in the system.
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
-**Scoring Format:** [`half_ppr_lower_turnover`](#half-ppr-lower-turnover-1)
+**Scoring Format:** [`half_ppr_lower_turnover`](#half_ppr_lower_turnover)
 
 ### half_ppr_lower_turnover_10_team_superflex
 
@@ -270,7 +270,7 @@ This document shows the configuration for each named format in the system.
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
-**Scoring Format:** [`half_ppr_lower_turnover`](#half-ppr-lower-turnover-1)
+**Scoring Format:** [`half_ppr_lower_turnover`](#half_ppr_lower_turnover)
 
 ### half_ppr_lower_turnover_12_team
 
@@ -298,7 +298,7 @@ This document shows the configuration for each named format in the system.
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
-**Scoring Format:** [`half_ppr_lower_turnover`](#half-ppr-lower-turnover-1)
+**Scoring Format:** [`half_ppr_lower_turnover`](#half_ppr_lower_turnover)
 
 ### half_ppr_lower_turnover_12_team_superflex
 
@@ -326,7 +326,7 @@ This document shows the configuration for each named format in the system.
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
-**Scoring Format:** [`half_ppr_lower_turnover`](#half-ppr-lower-turnover-1)
+**Scoring Format:** [`half_ppr_lower_turnover`](#half_ppr_lower_turnover)
 
 ### ppr_10_team
 
@@ -354,7 +354,7 @@ This document shows the configuration for each named format in the system.
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
-**Scoring Format:** [`ppr`](#ppr-1)
+**Scoring Format:** [`ppr`](#ppr)
 
 ### ppr_10_team_superflex
 
@@ -382,7 +382,7 @@ This document shows the configuration for each named format in the system.
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
-**Scoring Format:** [`ppr`](#ppr-1)
+**Scoring Format:** [`ppr`](#ppr)
 
 ### ppr_12_team
 
@@ -410,7 +410,7 @@ This document shows the configuration for each named format in the system.
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
-**Scoring Format:** [`ppr`](#ppr-1)
+**Scoring Format:** [`ppr`](#ppr)
 
 ### ppr_12_team_superflex
 
@@ -438,7 +438,7 @@ This document shows the configuration for each named format in the system.
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
-**Scoring Format:** [`ppr`](#ppr-1)
+**Scoring Format:** [`ppr`](#ppr)
 
 ### ppr_lower_turnover_10_team
 
@@ -466,7 +466,7 @@ This document shows the configuration for each named format in the system.
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
-**Scoring Format:** [`ppr_lower_turnover`](#ppr-lower-turnover-1)
+**Scoring Format:** [`ppr_lower_turnover`](#ppr_lower_turnover)
 
 ### ppr_lower_turnover_10_team_superflex
 
@@ -494,7 +494,7 @@ This document shows the configuration for each named format in the system.
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
-**Scoring Format:** [`ppr_lower_turnover`](#ppr-lower-turnover-1)
+**Scoring Format:** [`ppr_lower_turnover`](#ppr_lower_turnover)
 
 ### ppr_lower_turnover_12_team
 
@@ -522,7 +522,7 @@ This document shows the configuration for each named format in the system.
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
-**Scoring Format:** [`ppr_lower_turnover`](#ppr-lower-turnover-1)
+**Scoring Format:** [`ppr_lower_turnover`](#ppr_lower_turnover)
 
 ### ppr_lower_turnover_12_team_superflex
 
@@ -550,7 +550,7 @@ This document shows the configuration for each named format in the system.
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
-**Scoring Format:** [`ppr_lower_turnover`](#ppr-lower-turnover-1)
+**Scoring Format:** [`ppr_lower_turnover`](#ppr_lower_turnover)
 
 ### sfb15_mfl
 
@@ -578,7 +578,7 @@ This document shows the configuration for each named format in the system.
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
-**Scoring Format:** [`sfb15_mfl`](#sfb15-mfl-1)
+**Scoring Format:** [`sfb15_mfl`](#sfb15_mfl)
 
 ### sfb15_sleeper
 
@@ -606,7 +606,7 @@ This document shows the configuration for each named format in the system.
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
-**Scoring Format:** [`sfb15_sleeper`](#sfb15-sleeper-1)
+**Scoring Format:** [`sfb15_sleeper`](#sfb15_sleeper)
 
 ### standard_10_team
 
@@ -634,7 +634,7 @@ This document shows the configuration for each named format in the system.
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
-**Scoring Format:** [`standard`](#standard-1)
+**Scoring Format:** [`standard`](#standard)
 
 ### standard_12_team
 
@@ -662,7 +662,7 @@ This document shows the configuration for each named format in the system.
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
-**Scoring Format:** [`standard`](#standard-1)
+**Scoring Format:** [`standard`](#standard)
 
 ## Scoring Format Details
 
