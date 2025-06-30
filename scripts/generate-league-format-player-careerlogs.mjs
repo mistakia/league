@@ -131,9 +131,15 @@ const generate_league_format_player_careerlogs = async ({
 const main = async () => {
   let error
   try {
-    const lid = 1
-    const league = await getLeague({ lid })
-    const { league_format_hash } = league
+    // Use CLI argument if provided, otherwise fall back to league lookup
+    let league_format_hash = argv.league_format_hash
+    
+    if (!league_format_hash) {
+      const lid = argv.lid || 1
+      const league = await getLeague({ lid })
+      league_format_hash = league.league_format_hash
+    }
+    
     await generate_league_format_player_careerlogs({
       league_format_hash,
       dry: argv.dry
