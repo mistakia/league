@@ -23,7 +23,10 @@ export const scoring_formats = {
       twoptc: 2, // two-point conversions
       fuml: -2, // fumbles lost
       prtd: 6, // punt return touchdowns
-      krtd: 6 // kick return touchdowns
+      krtd: 6, // kick return touchdowns
+      trg: 0, // targets (no points in standard)
+      rush_first_down: 0, // rushing first downs
+      rec_first_down: 0 // receiving first downs
     },
     description: 'Standard scoring with no PPR and 6-point passing touchdowns'
   },
@@ -48,7 +51,10 @@ export const scoring_formats = {
       twoptc: 2, // two-point conversions
       fuml: -2, // fumbles lost
       prtd: 6, // punt return touchdowns
-      krtd: 6 // kick return touchdowns
+      krtd: 6, // kick return touchdowns
+      trg: 0, // targets (no points in standard)
+      rush_first_down: 0, // rushing first downs
+      rec_first_down: 0 // receiving first downs
     },
     description:
       'Half point per reception scoring with 6-point passing touchdowns'
@@ -74,7 +80,10 @@ export const scoring_formats = {
       twoptc: 2, // two-point conversions
       fuml: -2, // fumbles lost
       prtd: 6, // punt return touchdowns
-      krtd: 6 // kick return touchdowns
+      krtd: 6, // kick return touchdowns
+      trg: 0, // targets (no points in standard)
+      rush_first_down: 0, // rushing first downs
+      rec_first_down: 0 // receiving first downs
     },
     description:
       'Full point per reception scoring with 6-point passing touchdowns'
@@ -100,11 +109,10 @@ export const scoring_formats = {
       twoptc: 2, // two-point conversions
       fuml: 0, // fumbles lost (0 points in SFB)
       prtd: 6, // punt return touchdowns
-      krtd: 6 // kick return touchdowns
-      // TODO: Add support for:
-      // - 1 point per target
-      // - 1 point per rushing first down
-      // - 1 point per receiving first down
+      krtd: 6, // kick return touchdowns
+      trg: 1, // targets (1 point per target in SFB)
+      rush_first_down: 1, // rushing first downs (1 point in SFB)
+      rec_first_down: 1 // receiving first downs (1 point in SFB)
     },
     description:
       'Scott Fish Bowl 15 MFL scoring (PPR + 0.5 per carry + 1 per target) - no turnover penalties'
@@ -130,10 +138,10 @@ export const scoring_formats = {
       twoptc: 2, // two-point conversions
       fuml: 0, // fumbles lost (0 points in SFB)
       prtd: 6, // punt return touchdowns
-      krtd: 6 // kick return touchdowns
-      // TODO: Add support for:
-      // - 1 point per rushing first down
-      // - 1 point per receiving first down
+      krtd: 6, // kick return touchdowns
+      trg: 0, // targets (no points in SFB Sleeper)
+      rush_first_down: 1, // rushing first downs (1 point in SFB)
+      rec_first_down: 1 // receiving first downs (1 point in SFB)
     },
     description:
       'Scott Fish Bowl 15 Sleeper scoring (2.5 PPR + 0.5 per carry) - no turnover penalties'
@@ -159,7 +167,10 @@ export const scoring_formats = {
       twoptc: 2, // two-point conversions (2 points)
       fuml: -2, // fumbles lost (-2 points)
       prtd: 6, // punt return touchdowns (6 points)
-      krtd: 6 // kick return touchdowns (6 points)
+      krtd: 6, // kick return touchdowns (6 points)
+      trg: 0, // targets (no points in FanDuel)
+      rush_first_down: 0, // rushing first downs
+      rec_first_down: 0 // receiving first downs
       // TODO: Add support for unsupported FanDuel scoring:
       // - 100+ rushing yard bonus (3 points)
       // - 100+ receiving yard bonus (3 points)
@@ -194,7 +205,10 @@ export const scoring_formats = {
       twoptc: 2, // two-point conversions (2 points)
       fuml: -1, // fumbles lost (-1 points, less punitive than standard)
       prtd: 6, // punt return touchdowns (6 points)
-      krtd: 6 // kick return touchdowns (6 points)
+      krtd: 6, // kick return touchdowns (6 points)
+      trg: 0, // targets (no points in DraftKings)
+      rush_first_down: 0, // rushing first downs
+      rec_first_down: 0 // receiving first downs
       // TODO: Add support for unsupported DraftKings scoring:
       // - 300+ passing yard bonus (3 points)
       // - 100+ rushing yard bonus (3 points)
@@ -225,7 +239,10 @@ export const scoring_formats = {
       twoptc: 2, // two-point conversions
       fuml: -1, // fumbles lost (-1 point, less punitive)
       prtd: 6, // punt return touchdowns
-      krtd: 6 // kick return touchdowns
+      krtd: 6, // kick return touchdowns
+      trg: 0, // targets (no points in standard)
+      rush_first_down: 0, // rushing first downs
+      rec_first_down: 0 // receiving first downs
     },
     description:
       'Half PPR with lower turnover penalties: -1 INT, -1 fumble lost'
@@ -251,7 +268,10 @@ export const scoring_formats = {
       twoptc: 2, // two-point conversions
       fuml: -1, // fumbles lost (-1 point, less punitive)
       prtd: 6, // punt return touchdowns
-      krtd: 6 // kick return touchdowns
+      krtd: 6, // kick return touchdowns
+      trg: 0, // targets (no points in standard)
+      rush_first_down: 0, // rushing first downs
+      rec_first_down: 0 // receiving first downs
     },
     description:
       'Full PPR with lower turnover penalties: -1 INT, -1 fumble lost'
@@ -277,7 +297,10 @@ export const scoring_formats = {
       twoptc: 2, // two-point conversions
       fuml: -1, // fumbles lost (-1 point)
       prtd: 6, // punt return touchdowns
-      krtd: 6 // kick return touchdowns
+      krtd: 6, // kick return touchdowns
+      trg: 0, // targets (no points in Genesis)
+      rush_first_down: 0, // rushing first downs
+      rec_first_down: 0 // receiving first downs
     },
     description:
       'Genesis League scoring with half PPR, 4-point passing TDs, 0.05 passing yards, and -1 turnovers'

@@ -13,12 +13,30 @@ const calculatePoints = ({ stats, position = '', league }) => {
 
   const result = { total: 0 }
   for (const stat in scoring) {
-    const factor =
-      stat === 'rec'
-        ? league[`${position.toLowerCase()}rec`] || scoring[stat]
-        : scoring[stat]
+    let factor
+    let statValue
 
-    const score = factor * (stats[stat] || 0)
+    // Handle position-specific reception scoring
+    if (stat === 'rec') {
+      factor = league[`${position.toLowerCase()}rec`] || scoring[stat]
+      statValue = stats[stat] || 0
+    }
+    // Handle QB kneel exclusion for rushing yards
+    else if (
+      stat === 'ry' &&
+      league.exclude_qb_kneels &&
+      stats.ry_excluding_kneels !== undefined
+    ) {
+      factor = scoring[stat]
+      statValue = stats.ry_excluding_kneels || 0
+    }
+    // Handle all other stats normally
+    else {
+      factor = scoring[stat]
+      statValue = stats[stat] || 0
+    }
+
+    const score = factor * statValue
     result[stat] = score
     result.total = result.total + score
   }

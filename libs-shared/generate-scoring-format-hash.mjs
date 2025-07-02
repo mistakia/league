@@ -8,19 +8,51 @@ export default function ({
   tdp = 0,
   ra = 0,
   ry = 0,
+  ry_excluding_kneels = 0,
   tdr = 0,
+  rush_first_down = 0,
   rec = 0,
   rbrec = 0,
   wrrec = 0,
   terec = 0,
   recy = 0,
+  rec_first_down = 0,
   twoptc = 0,
   tdrec = 0,
   fuml = 0,
   prtd = 0,
-  krtd = 0
+  krtd = 0,
+  trg = 0,
+  exclude_qb_kneels = false
 }) {
-  const key = `${pa}${pc}${py}${ints}${tdp}${ra}${ry}${tdr}${rec}${rbrec}${wrrec}${terec}${recy}${twoptc}${tdrec}${fuml}${prtd}${krtd}`
+  // Core parameters from original hash function - maintains exact backward compatibility
+  const core_key = `${pa}${pc}${py}${ints}${tdp}${ra}${ry}${tdr}${rec}${rbrec}${wrrec}${terec}${recy}${twoptc}${tdrec}${fuml}${prtd}${krtd}`
+
+  // Extended parameters - only include if non-default values
+  // This ensures existing scoring formats generate identical hashes
+  let extended_key = ''
+
+  if (trg !== 0) {
+    extended_key += `_trg${trg}`
+  }
+
+  if (ry_excluding_kneels !== 0) {
+    extended_key += `_ry_excluding_kneels${ry_excluding_kneels}`
+  }
+
+  if (rush_first_down !== 0) {
+    extended_key += `_rush_first_down${rush_first_down}`
+  }
+
+  if (rec_first_down !== 0) {
+    extended_key += `_rec_first_down${rec_first_down}`
+  }
+
+  if (exclude_qb_kneels === true) {
+    extended_key += `_exclude_qb_kneels${exclude_qb_kneels}`
+  }
+
+  const key = core_key + extended_key
 
   const scoring_format_hash = Array.from(blake2b(key, null, 32))
     .map((b) => b.toString(16).padStart(2, '0'))
@@ -36,16 +68,21 @@ export default function ({
     tdp,
     ra,
     ry,
+    ry_excluding_kneels,
     tdr,
+    rush_first_down,
     rec,
     rbrec,
     wrrec,
     terec,
     recy,
+    rec_first_down,
     twoptc,
     tdrec,
     fuml,
     prtd,
-    krtd
+    krtd,
+    trg,
+    exclude_qb_kneels
   }
 }

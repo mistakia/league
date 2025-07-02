@@ -14,6 +14,11 @@ const calculateStatsFromPlayStats = (playStats) => {
   stats.rush_attempts_redzone = 0
   stats.rush_attempts_goaline = 0
 
+  // New statistics for fantasy points support
+  stats.rush_first_down = 0
+  stats.rec_first_down = 0
+  stats.ry_excluding_kneels = 0
+
   for (const playStat of playStats) {
     switch (playStat.statId) {
       case 2:
@@ -21,11 +26,13 @@ const calculateStatsFromPlayStats = (playStats) => {
         break
 
       case 3:
-        // first down rush
+        // rushing first down
+        stats.rush_first_down += 1
         break
 
       case 4:
-        // first down pass
+        // receiving first down (for targeted player)
+        stats.rec_first_down += 1
         break
 
       case 5:
@@ -52,6 +59,12 @@ const calculateStatsFromPlayStats = (playStats) => {
         // rushing attempt w/ yards
         stats.ra += 1
         stats.ry += playStat.yards
+
+        // Track rushing yards excluding QB kneels
+        if (!playStat.qb_kneel) {
+          stats.ry_excluding_kneels += playStat.yards
+        }
+
         stats.longest_rush = Math.max(stats.longest_rush, playStat.yards)
         if (playStat.ydl_100 <= 20) {
           stats.rush_attempts_redzone += 1
@@ -65,6 +78,12 @@ const calculateStatsFromPlayStats = (playStats) => {
         // rushing touchdown
         stats.ra += 1
         stats.ry += playStat.yards
+
+        // Track rushing yards excluding QB kneels
+        if (!playStat.qb_kneel) {
+          stats.ry_excluding_kneels += playStat.yards
+        }
+
         stats.longest_rush = Math.max(stats.longest_rush, playStat.yards)
         if (playStat.ydl_100 <= 20) {
           stats.rush_attempts_redzone += 1
@@ -79,6 +98,12 @@ const calculateStatsFromPlayStats = (playStats) => {
         // lateral rush
         // stats.ra += 1
         stats.ry += playStat.yards
+
+        // Track rushing yards excluding QB kneels
+        if (!playStat.qb_kneel) {
+          stats.ry_excluding_kneels += playStat.yards
+        }
+
         stats.longest_rush = Math.max(stats.longest_rush, playStat.yards)
         break
 
@@ -86,6 +111,12 @@ const calculateStatsFromPlayStats = (playStats) => {
         // lateral rushing touchdown
         // stats.ra += 1
         stats.ry += playStat.yards
+
+        // Track rushing yards excluding QB kneels
+        if (!playStat.qb_kneel) {
+          stats.ry_excluding_kneels += playStat.yards
+        }
+
         stats.longest_rush = Math.max(stats.longest_rush, playStat.yards)
         stats.tdr += 1
         break

@@ -202,12 +202,15 @@ export const stats = [
 
   'ra',
   'ry',
+  'ry_excluding_kneels', // rushing yards excluding kneel plays
   'tdr',
+  'rush_first_down', // rushing first downs
   'fuml',
 
   'trg',
   'rec',
   'recy',
+  'rec_first_down', // receiving first downs
   'tdrec',
 
   'snp',
@@ -257,11 +260,14 @@ export const statHeaders = {
   tdp: 'Passing TDs',
   ra: 'Rushing Attempts',
   ry: 'Rushing Yards',
+  ry_no_kneels: 'Rushing Yards (No Kneels)',
   tdr: 'Rushing TDs',
+  rush_first_down: 'Rushing First Downs',
   fuml: 'Fumbles',
   trg: 'Targets',
   rec: 'Receptions',
   recy: 'Receiving Yards',
+  rec_first_down: 'Receiving First Downs',
   tdrec: 'Receiving TDs',
   snp: 'Snaps',
   twoptc: 'Two Point Conversions'

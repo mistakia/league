@@ -87,6 +87,10 @@ const generate_league_formats = async () => {
     fuml: [-1, -2],
     prtd: [6],
     krtd: [6],
+    trg: [0],
+    rush_first_down: [0],
+    rec_first_down: [0],
+    exclude_qb_kneels: [false],
     cap: [200],
     min_bid: [0]
   }
@@ -140,7 +144,11 @@ const generate_league_formats = async () => {
       tdrec: combination.tdrec,
       fuml: combination.fuml,
       prtd: combination.prtd,
-      krtd: combination.krtd
+      krtd: combination.krtd,
+      trg: combination.trg,
+      rush_first_down: combination.rush_first_down,
+      rec_first_down: combination.rec_first_down,
+      exclude_qb_kneels: combination.exclude_qb_kneels
     }
 
     const { scoring_format_hash } = generate_scoring_format_hash(scoring_format)

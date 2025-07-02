@@ -577,7 +577,7 @@ const add_clauses_for_table = async ({
         rate_columns.push(column_definition.column_name)
       }
     }
-    with_func({
+    await with_func({
       query: players_query,
       params: group_column_params,
       with_table_name: table_name,
@@ -612,7 +612,7 @@ const add_clauses_for_table = async ({
     players_query.havingRaw(main_having_clause_strings.join(' AND '))
   }
 
-  // join table if needed
+  // Enhanced join handling with adaptive system
   if (join_func) {
     await join_func({
       query: players_query,
