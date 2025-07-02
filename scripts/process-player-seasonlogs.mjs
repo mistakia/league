@@ -81,6 +81,7 @@ const main = async () => {
           .where('nfl_games.seas_type', seas_type)
           .groupBy('nfl_games.year')
           .orderBy('nfl_games.year', 'asc'),
+      season_only: true,
       seas_type: argv.seas_type || 'REG'
     })
   } catch (err) {

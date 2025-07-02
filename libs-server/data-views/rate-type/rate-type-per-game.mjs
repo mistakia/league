@@ -231,6 +231,7 @@ export const join_player_per_game_cte = ({
   rate_type_table_name,
   splits,
   year_split_join_clause,
+  week_split_join_clause,
   params,
   is_team = false
 }) => {
@@ -253,18 +254,18 @@ export const join_player_per_game_cte = ({
       if (has_year_offset_range) {
         const min_offset = Math.min(year_offset[0], year_offset[1])
         const max_offset = Math.max(year_offset[0], year_offset[1])
+        const year_clause = year_split_join_clause || 'player_years.year'
         this.on(
           db.raw(
-            `${rate_type_table_name}.year BETWEEN player_years.year + ? AND player_years.year + ?`,
+            `${rate_type_table_name}.year BETWEEN ${year_clause} + ? AND ${year_clause} + ?`,
             [min_offset, max_offset]
           )
         )
       } else if (has_single_year_offset) {
         const offset = Array.isArray(year_offset) ? year_offset[0] : year_offset
+        const year_clause = year_split_join_clause || 'player_years.year'
         this.on(
-          db.raw(`${rate_type_table_name}.year = player_years.year + ?`, [
-            offset
-          ])
+          db.raw(`${rate_type_table_name}.year = ${year_clause} + ?`, [offset])
         )
       } else {
         const single_year_param_set =
@@ -286,8 +287,8 @@ export const join_player_per_game_cte = ({
     }
 
     // Add week join condition if 'week' split is enabled
-    if (splits.includes('week')) {
-      this.andOn(`${rate_type_table_name}.week`, '=', 'player_years_weeks.week')
+    if (splits.includes('week') && week_split_join_clause) {
+      this.andOn(`${rate_type_table_name}.week`, '=', week_split_join_clause)
     }
   })
 }
@@ -297,6 +298,7 @@ export const join_team_per_game_cte = ({
   rate_type_table_name,
   splits,
   year_split_join_clause,
+  week_split_join_clause,
   params
 }) => {
   const year_offset = params.year_offset
@@ -345,18 +347,18 @@ export const join_team_per_game_cte = ({
       if (has_year_offset_range) {
         const min_offset = Math.min(year_offset[0], year_offset[1])
         const max_offset = Math.max(year_offset[0], year_offset[1])
+        const year_clause = year_split_join_clause || 'player_years.year'
         this.on(
           db.raw(
-            `${rate_type_table_name}.year BETWEEN player_years.year + ? AND player_years.year + ?`,
+            `${rate_type_table_name}.year BETWEEN ${year_clause} + ? AND ${year_clause} + ?`,
             [min_offset, max_offset]
           )
         )
       } else if (has_single_year_offset) {
         const offset = Array.isArray(year_offset) ? year_offset[0] : year_offset
+        const year_clause = year_split_join_clause || 'player_years.year'
         this.on(
-          db.raw(`${rate_type_table_name}.year = player_years.year + ?`, [
-            offset
-          ])
+          db.raw(`${rate_type_table_name}.year = ${year_clause} + ?`, [offset])
         )
       } else {
         const single_year_param_set =
@@ -378,8 +380,8 @@ export const join_team_per_game_cte = ({
     }
 
     // Add week join condition if 'week' split is enabled
-    if (splits.includes('week')) {
-      this.andOn(`${rate_type_table_name}.week`, '=', 'player_years_weeks.week')
+    if (splits.includes('week') && week_split_join_clause) {
+      this.andOn(`${rate_type_table_name}.week`, '=', week_split_join_clause)
     }
   })
 }
@@ -389,6 +391,7 @@ export const join_per_game_cte = ({
   rate_type_table_name,
   splits,
   year_split_join_clause,
+  week_split_join_clause,
   params,
   is_team = false
 }) => {
@@ -398,6 +401,7 @@ export const join_per_game_cte = ({
       rate_type_table_name,
       splits,
       year_split_join_clause,
+      week_split_join_clause,
       params
     })
   } else {
@@ -406,6 +410,7 @@ export const join_per_game_cte = ({
       rate_type_table_name,
       splits,
       year_split_join_clause,
+      week_split_join_clause,
       params
     })
   }

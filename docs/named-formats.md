@@ -1,6 +1,6 @@
 # Named Scoring and League Formats
 
-_Generated at: 2025-06-30T09:44:26.248Z_
+_Generated at: 2025-07-02T00:52:41.811Z_
 
 This document shows the configuration for each named format in the system.
 
@@ -556,7 +556,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** Scott Fish Bowl 15 (MFL)  
 **Description:** Scott Fish Bowl 15 MFL format with 2 superflex and 9 flex positions  
-**Hash:** `59bfafdb50793debdc5b47183c261aa8109c460520cf498d5d64ae44597f140b`
+**Hash:** `11b9eac5de1ef77124396e17fc02e941fda1f3f851da5b49848b6bb9fd89bb52`
 
 **Configuration:**
 | Property | Value | Description |
@@ -584,7 +584,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** Scott Fish Bowl 15 (Sleeper)  
 **Description:** Scott Fish Bowl 15 Sleeper format with 2 superflex and 9 flex positions  
-**Hash:** `a6c3cabc6704ac7219a2494b0c187a93decb0f017904e2e2bf4b5c8519cafc57`
+**Hash:** `dd84e8d0283ee78448669ee426e48502a18b496f234d50798170cacd36a3b156`
 
 **Configuration:**
 | Property | Value | Description |
@@ -693,6 +693,10 @@ This document shows the configuration for each named format in the system.
 | `fuml` | -1 | Points per fumble lost |
 | `prtd` | 6 | Points per punt return touchdown |
 | `krtd` | 6 | Points per kick return touchdown |
+| `trg` | 0 | trg |
+| `rush_first_down` | 0 | rush_first_down |
+| `rec_first_down` | 0 | rec_first_down |
+| `exclude_qb_kneels` | false | exclude_qb_kneels |
 
 ### fanduel
 
@@ -721,6 +725,10 @@ This document shows the configuration for each named format in the system.
 | `fuml` | -2 | Points per fumble lost |
 | `prtd` | 6 | Points per punt return touchdown |
 | `krtd` | 6 | Points per kick return touchdown |
+| `trg` | 0 | trg |
+| `rush_first_down` | 0 | rush_first_down |
+| `rec_first_down` | 0 | rec_first_down |
+| `exclude_qb_kneels` | false | exclude_qb_kneels |
 
 ### genesis
 
@@ -749,6 +757,10 @@ This document shows the configuration for each named format in the system.
 | `fuml` | -1 | Points per fumble lost |
 | `prtd` | 6 | Points per punt return touchdown |
 | `krtd` | 6 | Points per kick return touchdown |
+| `trg` | 0 | trg |
+| `rush_first_down` | 0 | rush_first_down |
+| `rec_first_down` | 0 | rec_first_down |
+| `exclude_qb_kneels` | false | exclude_qb_kneels |
 
 ### half_ppr
 
@@ -777,6 +789,10 @@ This document shows the configuration for each named format in the system.
 | `fuml` | -2 | Points per fumble lost |
 | `prtd` | 6 | Points per punt return touchdown |
 | `krtd` | 6 | Points per kick return touchdown |
+| `trg` | 0 | trg |
+| `rush_first_down` | 0 | rush_first_down |
+| `rec_first_down` | 0 | rec_first_down |
+| `exclude_qb_kneels` | false | exclude_qb_kneels |
 
 ### half_ppr_lower_turnover
 
@@ -805,6 +821,10 @@ This document shows the configuration for each named format in the system.
 | `fuml` | -1 | Points per fumble lost |
 | `prtd` | 6 | Points per punt return touchdown |
 | `krtd` | 6 | Points per kick return touchdown |
+| `trg` | 0 | trg |
+| `rush_first_down` | 0 | rush_first_down |
+| `rec_first_down` | 0 | rec_first_down |
+| `exclude_qb_kneels` | false | exclude_qb_kneels |
 
 ### ppr
 
@@ -833,6 +853,10 @@ This document shows the configuration for each named format in the system.
 | `fuml` | -2 | Points per fumble lost |
 | `prtd` | 6 | Points per punt return touchdown |
 | `krtd` | 6 | Points per kick return touchdown |
+| `trg` | 0 | trg |
+| `rush_first_down` | 0 | rush_first_down |
+| `rec_first_down` | 0 | rec_first_down |
+| `exclude_qb_kneels` | false | exclude_qb_kneels |
 
 ### ppr_lower_turnover
 
@@ -861,12 +885,16 @@ This document shows the configuration for each named format in the system.
 | `fuml` | -1 | Points per fumble lost |
 | `prtd` | 6 | Points per punt return touchdown |
 | `krtd` | 6 | Points per kick return touchdown |
+| `trg` | 0 | trg |
+| `rush_first_down` | 0 | rush_first_down |
+| `rec_first_down` | 0 | rec_first_down |
+| `exclude_qb_kneels` | false | exclude_qb_kneels |
 
 ### sfb15_mfl
 
 **Label:** Scott Fish Bowl 15 (MFL)  
 **Description:** Scott Fish Bowl 15 MFL scoring (PPR + 0.5 per carry + 1 per target) - no turnover penalties  
-**Hash:** `95714ea0d1ed6a920fc5cb9ab34f725e6bc3e36a636f4cb6f7dd0224c5c41e66`
+**Hash:** `88b18fa96c0033c7811fc7163d8ad4556fdd51d53c44a2b71dace326312f1719`
 
 **Configuration:**
 | Property | Value | Description |
@@ -889,12 +917,16 @@ This document shows the configuration for each named format in the system.
 | `fuml` | 0 | Points per fumble lost |
 | `prtd` | 6 | Points per punt return touchdown |
 | `krtd` | 6 | Points per kick return touchdown |
+| `trg` | 1 | trg |
+| `rush_first_down` | 1 | rush_first_down |
+| `rec_first_down` | 1 | rec_first_down |
+| `exclude_qb_kneels` | false | exclude_qb_kneels |
 
 ### sfb15_sleeper
 
 **Label:** Scott Fish Bowl 15 (Sleeper)  
 **Description:** Scott Fish Bowl 15 Sleeper scoring (2.5 PPR + 0.5 per carry) - no turnover penalties  
-**Hash:** `2fc6320827e961ed3403045090980349c30dd9578917a05f43b73e130876ebce`
+**Hash:** `ed9c2daa0f00d9389f450b577c16fb0864fa22c6e261c0161db5f2da54457286`
 
 **Configuration:**
 | Property | Value | Description |
@@ -917,6 +949,10 @@ This document shows the configuration for each named format in the system.
 | `fuml` | 0 | Points per fumble lost |
 | `prtd` | 6 | Points per punt return touchdown |
 | `krtd` | 6 | Points per kick return touchdown |
+| `trg` | 0 | trg |
+| `rush_first_down` | 1 | rush_first_down |
+| `rec_first_down` | 1 | rec_first_down |
+| `exclude_qb_kneels` | false | exclude_qb_kneels |
 
 ### standard
 
@@ -945,3 +981,7 @@ This document shows the configuration for each named format in the system.
 | `fuml` | -2 | Points per fumble lost |
 | `prtd` | 6 | Points per punt return touchdown |
 | `krtd` | 6 | Points per kick return touchdown |
+| `trg` | 0 | trg |
+| `rush_first_down` | 0 | rush_first_down |
+| `rec_first_down` | 0 | rec_first_down |
+| `exclude_qb_kneels` | false | exclude_qb_kneels |

@@ -75,8 +75,12 @@ export default function data_view_join_function(join_arguments) {
         )
 
         // Add week join condition for team stats tables when week split is enabled
-        if (splits.includes('week') && table_name.includes('_team_stats')) {
-          this.andOn(`${table_name}.week`, '=', 'player_years_weeks.week')
+        if (
+          splits.includes('week') &&
+          table_name.includes('_team_stats') &&
+          week_split_join_clause
+        ) {
+          this.andOn(`${table_name}.week`, '=', week_split_join_clause)
         }
       }
     } else {
