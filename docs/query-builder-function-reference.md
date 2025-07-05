@@ -391,6 +391,8 @@ NOT (${table_name}.${column_name}::text[] && ARRAY[${values}]::text[])
 
 **Returns**: SQL WHERE string
 
+**CTE Integration**: The `get_with_where_string` function works with column definitions that provide a `with_where` function. The `with_where` returns a column expression (like `'fantasy_points_from_plays'`) that can be used for filtering within CTE contexts, enabling performance optimization through early filtering of aggregated data.
+
 ## Caching Infrastructure
 
 ### Cache Info Utilities (`cache-info-utils.mjs`)
