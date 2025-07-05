@@ -1,5 +1,5 @@
 import db from '#db'
-import { constants } from '#libs-shared'
+import { constants, DEFAULT_SCORING_FORMAT_HASH } from '#libs-shared'
 import get_join_func from '#libs-server/get-join-func.mjs'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
@@ -30,8 +30,7 @@ const get_cache_info_for_scoring_format_careerlogs = create_static_cache_info({
 
 const scoring_format_player_seasonlogs_table_alias = ({ params = {} }) => {
   let scoring_format_hash =
-    params.scoring_format_hash ||
-    '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
+    params.scoring_format_hash || DEFAULT_SCORING_FORMAT_HASH
   if (Array.isArray(scoring_format_hash)) {
     scoring_format_hash = scoring_format_hash[0]
   }
@@ -63,8 +62,7 @@ const scoring_format_player_seasonlogs_join = (join_arguments) => {
     join_table_clause: `scoring_format_player_seasonlogs as ${join_arguments.table_name}`,
     additional_conditions: function ({ params, table_name }) {
       let scoring_format_hash =
-        params.scoring_format_hash ||
-        '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
+        params.scoring_format_hash || DEFAULT_SCORING_FORMAT_HASH
       if (Array.isArray(scoring_format_hash)) {
         scoring_format_hash = scoring_format_hash[0]
       }
@@ -78,8 +76,7 @@ const scoring_format_player_seasonlogs_join = (join_arguments) => {
 
 const scoring_format_player_careerlogs_table_alias = ({ params = {} }) => {
   let scoring_format_hash =
-    params.scoring_format_hash ||
-    '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
+    params.scoring_format_hash || DEFAULT_SCORING_FORMAT_HASH
   if (Array.isArray(scoring_format_hash)) {
     scoring_format_hash = scoring_format_hash[0]
   }
@@ -93,18 +90,18 @@ const scoring_format_player_careerlogs_join = ({
   query,
   table_name,
   join_type = 'LEFT',
-  params = {}
+  params = {},
+  data_view_options = {}
 }) => {
   const join_func = get_join_func(join_type)
   let scoring_format_hash =
-    params.scoring_format_hash ||
-    '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
+    params.scoring_format_hash || DEFAULT_SCORING_FORMAT_HASH
   if (Array.isArray(scoring_format_hash)) {
     scoring_format_hash = scoring_format_hash[0]
   }
 
   const join_conditions = function () {
-    this.on(`${table_name}.pid`, '=', 'player.pid')
+    this.on(`${table_name}.pid`, '=', data_view_options.pid_reference)
     this.andOn(
       db.raw(`${table_name}.scoring_format_hash = '${scoring_format_hash}'`)
     )

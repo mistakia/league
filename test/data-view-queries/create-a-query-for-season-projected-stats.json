@@ -1,0 +1,31 @@
+{
+  "name": "should create a query for season projected stats",
+  "description": "Test case for should create a query for season projected stats",
+  "request": {
+    "sort": [
+      {
+        "column_id": "player_season_projected_points_added",
+        "desc": true
+      }
+    ],
+    "prefix_columns": ["player_name", "player_league_roster_status"],
+    "columns": [
+      "player_season_projected_points_added",
+      "player_season_projected_points",
+      "player_season_projected_pass_yds",
+      "player_season_projected_pass_tds",
+      "player_season_projected_pass_ints",
+      "player_season_projected_rush_atts",
+      "player_season_projected_rush_yds",
+      "player_season_projected_rush_tds",
+      "player_season_projected_fumbles_lost",
+      "player_season_projected_targets",
+      "player_season_projected_recs",
+      "player_season_projected_rec_yds",
+      "player_season_projected_rec_tds"
+    ]
+  },
+  "expected_query": "select \"player\".\"pid\", player.fname, player.lname, CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, \"t7bf6d614921ce46beb53c1cbac51c87e\".\"pts_added\" AS \"season_projected_points_added_0\", \"t3eac4f66cab58c4b1c8b5d2b3ab4eecd\".\"total\" AS \"season_projected_points_0\", \"tec118d5c0b35179ee21af0e28a8b6600\".\"py\" AS \"season_projected_pass_yds_0\", \"tec118d5c0b35179ee21af0e28a8b6600\".\"tdp\" AS \"season_projected_pass_tds_0\", \"tec118d5c0b35179ee21af0e28a8b6600\".\"ints\" AS \"season_projected_pass_ints_0\", \"tec118d5c0b35179ee21af0e28a8b6600\".\"ra\" AS \"season_projected_rush_atts_0\", \"tec118d5c0b35179ee21af0e28a8b6600\".\"ry\" AS \"season_projected_rush_yds_0\", \"tec118d5c0b35179ee21af0e28a8b6600\".\"tdr\" AS \"season_projected_rush_tds_0\", \"tec118d5c0b35179ee21af0e28a8b6600\".\"fuml\" AS \"season_projected_fumbles_lost_0\", \"tec118d5c0b35179ee21af0e28a8b6600\".\"trg\" AS \"season_projected_targets_0\", \"tec118d5c0b35179ee21af0e28a8b6600\".\"rec\" AS \"season_projected_recs_0\", \"tec118d5c0b35179ee21af0e28a8b6600\".\"recy\" AS \"season_projected_rec_yds_0\", \"tec118d5c0b35179ee21af0e28a8b6600\".\"tdrec\" AS \"season_projected_rec_tds_0\", \"player\".\"pos\" from \"player\" left join \"rosters_players\" on \"rosters_players\".\"pid\" = \"player\".\"pid\" and \"rosters_players\".\"year\" = 2025 and \"rosters_players\".\"week\" = 0 and \"rosters_players\".\"lid\" = 1 left join \"league_format_player_projection_values\" as \"t7bf6d614921ce46beb53c1cbac51c87e\" on \"t7bf6d614921ce46beb53c1cbac51c87e\".\"pid\" = \"player\".\"pid\" and \"t7bf6d614921ce46beb53c1cbac51c87e\".\"year\" = 2025 and \"t7bf6d614921ce46beb53c1cbac51c87e\".\"week\" = '0' and \"t7bf6d614921ce46beb53c1cbac51c87e\".\"league_format_hash\" = '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b' left join \"scoring_format_player_projection_points\" as \"t3eac4f66cab58c4b1c8b5d2b3ab4eecd\" on \"t3eac4f66cab58c4b1c8b5d2b3ab4eecd\".\"pid\" = \"player\".\"pid\" and \"t3eac4f66cab58c4b1c8b5d2b3ab4eecd\".\"year\" = 2025 and \"t3eac4f66cab58c4b1c8b5d2b3ab4eecd\".\"week\" = '0' and \"t3eac4f66cab58c4b1c8b5d2b3ab4eecd\".\"scoring_format_hash\" = 'ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e' left join \"projections_index\" as \"tec118d5c0b35179ee21af0e28a8b6600\" on \"tec118d5c0b35179ee21af0e28a8b6600\".\"pid\" = \"player\".\"pid\" and \"tec118d5c0b35179ee21af0e28a8b6600\".\"year\" = 2025 and \"tec118d5c0b35179ee21af0e28a8b6600\".\"week\" = '0' and \"tec118d5c0b35179ee21af0e28a8b6600\".\"sourceid\" = 18 and \"tec118d5c0b35179ee21af0e28a8b6600\".\"seas_type\" = 'REG' group by player.fname, player.lname, rosters_players.slot, rosters_players.tid, rosters_players.tag, \"t7bf6d614921ce46beb53c1cbac51c87e\".\"pts_added\", \"t3eac4f66cab58c4b1c8b5d2b3ab4eecd\".\"total\", \"tec118d5c0b35179ee21af0e28a8b6600\".\"py\", \"tec118d5c0b35179ee21af0e28a8b6600\".\"tdp\", \"tec118d5c0b35179ee21af0e28a8b6600\".\"ints\", \"tec118d5c0b35179ee21af0e28a8b6600\".\"ra\", \"tec118d5c0b35179ee21af0e28a8b6600\".\"ry\", \"tec118d5c0b35179ee21af0e28a8b6600\".\"tdr\", \"tec118d5c0b35179ee21af0e28a8b6600\".\"fuml\", \"tec118d5c0b35179ee21af0e28a8b6600\".\"trg\", \"tec118d5c0b35179ee21af0e28a8b6600\".\"rec\", \"tec118d5c0b35179ee21af0e28a8b6600\".\"recy\", \"tec118d5c0b35179ee21af0e28a8b6600\".\"tdrec\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 8 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": ["stats", "sorting"],
+  "timeout_ms": 40000
+}

@@ -10,7 +10,7 @@ export const scoring_formats = {
       pc: 0, // passing completions
       py: 0.04, // passing yards (points per yard)
       ints: -2, // interceptions
-      tdp: 6, // passing touchdowns
+      tdp: 4, // passing touchdowns
       ra: 0, // rushing attempts
       ry: 0.1, // rushing yards
       tdr: 6, // rushing touchdowns
@@ -28,7 +28,7 @@ export const scoring_formats = {
       rush_first_down: 0, // rushing first downs
       rec_first_down: 0 // receiving first downs
     },
-    description: 'Standard scoring with no PPR and 6-point passing touchdowns'
+    description: 'Standard scoring with no PPR and 4-point passing touchdowns'
   },
 
   half_ppr: {
@@ -38,7 +38,7 @@ export const scoring_formats = {
       pc: 0, // passing completions
       py: 0.04, // passing yards (points per yard)
       ints: -2, // interceptions
-      tdp: 6, // passing touchdowns
+      tdp: 4, // passing touchdowns
       ra: 0, // rushing attempts
       ry: 0.1, // rushing yards
       tdr: 6, // rushing touchdowns
@@ -57,7 +57,7 @@ export const scoring_formats = {
       rec_first_down: 0 // receiving first downs
     },
     description:
-      'Half point per reception scoring with 6-point passing touchdowns'
+      'Half point per reception scoring with 4-point passing touchdowns'
   },
 
   ppr: {
@@ -67,7 +67,7 @@ export const scoring_formats = {
       pc: 0, // passing completions
       py: 0.04, // passing yards (points per yard)
       ints: -2, // interceptions
-      tdp: 6, // passing touchdowns
+      tdp: 4, // passing touchdowns
       ra: 0, // rushing attempts
       ry: 0.1, // rushing yards
       tdr: 6, // rushing touchdowns
@@ -86,7 +86,7 @@ export const scoring_formats = {
       rec_first_down: 0 // receiving first downs
     },
     description:
-      'Full point per reception scoring with 6-point passing touchdowns'
+      'Full point per reception scoring with 4-point passing touchdowns'
   },
 
   sfb15_mfl: {
@@ -226,7 +226,7 @@ export const scoring_formats = {
       pc: 0, // passing completions
       py: 0.04, // passing yards (points per yard)
       ints: -1, // interceptions (-1 point, less punitive)
-      tdp: 6, // passing touchdowns
+      tdp: 4, // passing touchdowns
       ra: 0, // rushing attempts
       ry: 0.1, // rushing yards
       tdr: 6, // rushing touchdowns
@@ -255,7 +255,7 @@ export const scoring_formats = {
       pc: 0, // passing completions
       py: 0.04, // passing yards (points per yard)
       ints: -1, // interceptions (-1 point, less punitive)
-      tdp: 6, // passing touchdowns
+      tdp: 4, // passing touchdowns
       ra: 0, // rushing attempts
       ry: 0.1, // rushing yards
       tdr: 6, // rushing touchdowns

@@ -8,7 +8,6 @@ export default function ({
   tdp = 0,
   ra = 0,
   ry = 0,
-  ry_excluding_kneels = 0,
   tdr = 0,
   rush_first_down = 0,
   rec = 0,
@@ -34,10 +33,6 @@ export default function ({
 
   if (trg !== 0) {
     extended_key += `_trg${trg}`
-  }
-
-  if (ry_excluding_kneels !== 0) {
-    extended_key += `_ry_excluding_kneels${ry_excluding_kneels}`
   }
 
   if (rush_first_down !== 0) {
@@ -68,7 +63,6 @@ export default function ({
     tdp,
     ra,
     ry,
-    ry_excluding_kneels,
     tdr,
     rush_first_down,
     rec,

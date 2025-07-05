@@ -1,0 +1,48 @@
+{
+  "name": "player_rush_yards_after_contact_per_attempt_from_plays year_offset range",
+  "description": "Test case for player_rush_yards_after_contact_per_attempt_from_plays year_offset range",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_weighted_opportunity_rating_from_plays",
+        "params": {
+          "year": [2018, 2019, 2020, 2021]
+        }
+      },
+      {
+        "column_id": "player_weighted_opportunity_rating_from_plays",
+        "params": {
+          "year": [2018, 2019, 2020, 2021],
+          "year_offset": [1, 3]
+        }
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "player_weighted_opportunity_rating_from_plays",
+        "column_index": 0,
+        "desc": true
+      }
+    ],
+    "splits": ["year"],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["WR"]
+      }
+    ]
+  },
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2018,2019,2020,2021,2022,2023,2024]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.pos IN ('WR')), \"tfcccfa9683ee90d2f5b4ff8119aab5e9\" as (select \"pg\".\"pid\", ROUND((1.5 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0)) + (0.7 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0)), 4) as weighted_opp_rating_from_plays, \"nfl_plays\".\"year\" from \"nfl_plays\" inner join \"player_gamelogs\" as \"pg\" on \"nfl_plays\".\"esbid\" = \"pg\".\"esbid\" and \"nfl_plays\".\"off\" = \"pg\".\"tm\" where not \"play_type\" = 'NOPL' and (\"trg_pid\" is not null) and \"nfl_plays\".\"year\" in (2018, 2019, 2020, 2021) and \"nfl_plays\".\"seas_type\" in ('REG') group by \"pg\".\"pid\", \"nfl_plays\".\"year\"), \"tc362c7c66c0bc9281ff31ba0a15b34cc\" as (select \"pg\".\"pid\", COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) as player_targets, SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) as team_targets, SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) as player_air_yards, SUM(nfl_plays.dot) as team_air_yards, \"nfl_plays\".\"year\" from \"nfl_plays\" inner join \"player_gamelogs\" as \"pg\" on \"nfl_plays\".\"esbid\" = \"pg\".\"esbid\" and \"nfl_plays\".\"off\" = \"pg\".\"tm\" where not \"play_type\" = 'NOPL' and (\"trg_pid\" is not null) and \"nfl_plays\".\"year\" in (2018, 2019, 2020, 2021, 2022, 2023, 2024) and \"nfl_plays\".\"seas_type\" in ('REG') group by \"pg\".\"pid\", \"nfl_plays\".\"year\") select \"player\".\"pid\", player.fname, player.lname, \"tfcccfa9683ee90d2f5b4ff8119aab5e9\".\"weighted_opp_rating_from_plays\" AS \"weighted_opp_rating_from_plays_0\", (SELECT ROUND((1.5 * SUM(tc362c7c66c0bc9281ff31ba0a15b34cc.player_targets) / NULLIF(SUM(tc362c7c66c0bc9281ff31ba0a15b34cc.team_targets), 0)) + (0.7 * SUM(tc362c7c66c0bc9281ff31ba0a15b34cc.player_air_yards) / NULLIF(SUM(tc362c7c66c0bc9281ff31ba0a15b34cc.team_air_yards), 0)), 4) FROM tc362c7c66c0bc9281ff31ba0a15b34cc WHERE tc362c7c66c0bc9281ff31ba0a15b34cc.pid = player.pid AND tc362c7c66c0bc9281ff31ba0a15b34cc.year BETWEEN player_years.year + 1 AND player_years.year + 3) AS \"weighted_opp_rating_from_plays_1\", \"player_years\".\"year\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"tfcccfa9683ee90d2f5b4ff8119aab5e9\" on \"tfcccfa9683ee90d2f5b4ff8119aab5e9\".\"pid\" = \"player\".\"pid\" and tfcccfa9683ee90d2f5b4ff8119aab5e9.year = player_years.year and tfcccfa9683ee90d2f5b4ff8119aab5e9.year IN (2018,2019,2020,2021) left join \"tc362c7c66c0bc9281ff31ba0a15b34cc\" on \"tc362c7c66c0bc9281ff31ba0a15b34cc\".\"pid\" = \"player\".\"pid\" and tc362c7c66c0bc9281ff31ba0a15b34cc.year BETWEEN player_years.year + 1 AND player_years.year + 3 where player.pos IN ('WR') group by player.fname, player.lname, \"tfcccfa9683ee90d2f5b4ff8119aab5e9\".\"weighted_opp_rating_from_plays\", \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": [
+    "player",
+    "plays",
+    "filters",
+    "parameters",
+    "sorting",
+    "cte",
+    "joins"
+  ],
+  "timeout_ms": 40000
+}

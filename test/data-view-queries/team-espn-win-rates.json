@@ -1,0 +1,29 @@
+{
+  "name": "team_espn_win_rates",
+  "description": "Test case for team_espn_win_rates",
+  "request": {
+    "columns": [
+      {
+        "column_id": "team_espn_pass_rush_win_rate"
+      },
+      {
+        "column_id": "team_espn_pass_block_win_rate"
+      },
+      {
+        "column_id": "team_espn_run_block_win_rate"
+      },
+      {
+        "column_id": "team_espn_run_stop_win_rate"
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "team_espn_pass_rush_win_rate",
+        "desc": true
+      }
+    ]
+  },
+  "expected_query": "select \"player\".\"pid\", \"espn_team_win_rates_index\".\"pass_rush_win_rate\" AS \"espn_team_pass_rush_win_rate_0\", \"espn_team_win_rates_index\".\"pass_block_win_rate\" AS \"espn_team_pass_block_win_rate_0\", \"espn_team_win_rates_index\".\"run_block_win_rate\" AS \"espn_team_run_block_win_rate_0\", \"espn_team_win_rates_index\".\"run_stop_win_rate\" AS \"espn_team_run_stop_win_rate_0\", \"player\".\"pos\" from \"player\" left join \"espn_team_win_rates_index\" on \"espn_team_win_rates_index\".\"team\" = \"player\".\"current_nfl_team\" and \"espn_team_win_rates_index\".\"year\" = ${constants.season.stats_season_year} group by \"espn_team_win_rates_index\".\"pass_rush_win_rate\", \"espn_team_win_rates_index\".\"pass_block_win_rate\", \"espn_team_win_rates_index\".\"run_block_win_rate\", \"espn_team_win_rates_index\".\"run_stop_win_rate\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": ["team", "sorting"],
+  "timeout_ms": 40000
+}

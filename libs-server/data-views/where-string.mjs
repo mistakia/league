@@ -7,7 +7,8 @@ export const get_where_string = ({
   is_main_select = false,
   params = {},
   rate_type_column_mapping,
-  splits
+  splits,
+  data_view_options = {}
 }) => {
   const use_select_as =
     column_definition.select_as && is_main_select && column_definition.with
@@ -25,7 +26,8 @@ export const get_where_string = ({
         rate_type_column_mapping,
         column_id: where_clause.column_id,
         column_index,
-        splits
+        splits,
+        data_view_options
       })
     : column_definition.use_having
       ? `${column_name}_${column_index}`

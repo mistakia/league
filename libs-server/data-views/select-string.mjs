@@ -13,8 +13,8 @@ const get_select_string = ({
   table_name,
   rate_type_column_mapping,
   splits,
-  year_split_join_clause,
-  is_main_select = false
+  is_main_select = false,
+  data_view_options = {}
 }) => {
   const rate_type_table_name =
     rate_type_column_mapping[`${column_id}_${column_index}`]
@@ -86,22 +86,25 @@ const get_select_string = ({
     const min_year_offset = Math.min(...column_params.year_offset)
     const max_year_offset = Math.max(...column_params.year_offset)
 
-    const year_clause = year_split_join_clause || 'player_years.year'
+    // Use centralized references
+    const year_clause = data_view_options.year_reference
+    const pid_reference = data_view_options.pid_reference
+
     if (column_definition.has_numerator_denominator) {
-      final_select_expression = `(SELECT SUM(${join_table_name}.${select_as}_numerator) / NULLIF(SUM(${join_table_name}.${select_as}_denominator), 0) FROM ${join_table_name} WHERE ${join_table_name}.pid = player.pid AND ${join_table_name}.year BETWEEN ${year_clause} + ${min_year_offset} AND ${year_clause} + ${max_year_offset})`
+      final_select_expression = `(SELECT SUM(${join_table_name}.${select_as}_numerator) / NULLIF(SUM(${join_table_name}.${select_as}_denominator), 0) FROM ${join_table_name} WHERE ${join_table_name}.pid = ${pid_reference} AND ${join_table_name}.year BETWEEN ${year_clause} + ${min_year_offset} AND ${year_clause} + ${max_year_offset})`
     } else if (column_definition.main_select_string_year_offset_range) {
       final_select_expression =
         column_definition.main_select_string_year_offset_range({
           table_name: join_table_name,
-          params: column_params
+          params: column_params,
+          data_view_options
         })
     } else {
-      final_select_expression = `(SELECT SUM(${join_table_name}.${column_definition.column_name}) FROM ${join_table_name} WHERE ${join_table_name}.pid = player.pid AND ${join_table_name}.year BETWEEN ${year_clause} + ${min_year_offset} AND ${year_clause} + ${max_year_offset})`
+      final_select_expression = `(SELECT SUM(${join_table_name}.${column_definition.column_name}) FROM ${join_table_name} WHERE ${join_table_name}.pid = ${pid_reference} AND ${join_table_name}.year BETWEEN ${year_clause} + ${min_year_offset} AND ${year_clause} + ${max_year_offset})`
     }
 
     if (rate_type_table_name) {
-      const year_clause = year_split_join_clause || 'player_years.year'
-      final_select_expression = `${final_select_expression} / NULLIF((SELECT CAST(SUM(${rate_type_table_name}.rate_type_total_count) AS DECIMAL) FROM ${rate_type_table_name} WHERE ${rate_type_table_name}.pid = player.pid AND ${rate_type_table_name}.year BETWEEN ${year_clause} + ${min_year_offset} AND ${year_clause} + ${max_year_offset}), 0)`
+      final_select_expression = `${final_select_expression} / NULLIF((SELECT CAST(SUM(${rate_type_table_name}.rate_type_total_count) AS DECIMAL) FROM ${rate_type_table_name} WHERE ${rate_type_table_name}.pid = ${pid_reference} AND ${rate_type_table_name}.year BETWEEN ${year_clause} + ${min_year_offset} AND ${year_clause} + ${max_year_offset}), 0)`
     }
   } else {
     final_select_expression = select_expression

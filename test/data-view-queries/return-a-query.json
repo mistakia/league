@@ -1,0 +1,10 @@
+{
+  "name": "should return a query",
+  "description": "Test case for should return a query",
+  "request": {
+    "limit": 1000
+  },
+  "expected_query": "select \"player\".\"pid\", \"player\".\"pos\" from \"player\" group by \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 1000",
+  "tags": ["general"],
+  "timeout_ms": 40000
+}

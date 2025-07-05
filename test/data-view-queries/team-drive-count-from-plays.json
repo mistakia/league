@@ -1,0 +1,28 @@
+{
+  "name": "team drive count from plays",
+  "description": "Test case for team drive count from plays",
+  "request": {
+    "columns": [
+      {
+        "column_id": "team_drive_count_from_plays",
+        "params": {
+          "year": [2024],
+          "week": [1],
+          "qtr": [1]
+        }
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "params": {},
+        "value": ["TEAM"],
+        "operator": "IN"
+      }
+    ],
+    "splits": []
+  },
+  "expected_query": "with \"t2fd39fbbbad053a3f99d693c6702789e\" as (select \"nfl_plays\".\"off\" as \"nfl_team\", COUNT(DISTINCT CONCAT(esbid, '_', drive_seq)) AS team_drive_count_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"year\" in (2024) and \"nfl_plays\".\"week\" in (1) and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"qtr\" in (1) group by \"nfl_plays\".\"off\"), \"t2fd39fbbbad053a3f99d693c6702789e_team_stats\" as (select \"t2fd39fbbbad053a3f99d693c6702789e\".\"nfl_team\", sum(t2fd39fbbbad053a3f99d693c6702789e.team_drive_count_from_plays) as team_drive_count_from_plays from \"t2fd39fbbbad053a3f99d693c6702789e\" group by \"t2fd39fbbbad053a3f99d693c6702789e\".\"nfl_team\") select \"player\".\"pid\", \"t2fd39fbbbad053a3f99d693c6702789e_team_stats\".\"team_drive_count_from_plays\" AS \"team_drive_count_from_plays_0\", \"player\".\"pos\" from \"player\" left join \"t2fd39fbbbad053a3f99d693c6702789e_team_stats\" on \"t2fd39fbbbad053a3f99d693c6702789e_team_stats\".\"nfl_team\" = \"player\".\"current_nfl_team\" where player.pos IN ('TEAM') group by \"t2fd39fbbbad053a3f99d693c6702789e_team_stats\".\"team_drive_count_from_plays\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
+  "tags": ["team", "plays", "filters", "parameters", "cte"],
+  "timeout_ms": 40000
+}

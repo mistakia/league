@@ -1,0 +1,44 @@
+{
+  "name": "player nfl teams",
+  "description": "Test case for player nfl teams",
+  "request": {
+    "columns": [
+      {
+        "column_id": "player_receiving_yards_from_plays",
+        "params": {
+          "year": [2020, 2021, 2022, 2023, 2024]
+        }
+      },
+      {
+        "column_id": "player_nfl_teams"
+      }
+    ],
+    "splits": ["year"],
+    "where": [
+      {
+        "column_id": "player_nfl_teams",
+        "operator": "IN",
+        "value": ["CIN"]
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "player_receiving_yards_from_plays",
+        "desc": true
+      }
+    ]
+  },
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2020,2021,2022,2023,2024]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), \"tf851d676fddeb70ff3d41e0198712cb9\" as (select \"player_gamelogs\".\"pid\", count(*) as \"rate_type_total_count\", array_agg(distinct player_gamelogs.tm) as teams, \"nfl_games\".\"year\" from \"player_gamelogs\" left join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"nfl_games\".\"seas_type\" in ('REG') and \"player_gamelogs\".\"active\" = true group by \"nfl_games\".\"year\", \"player_gamelogs\".\"pid\"), \"t2a01128b3bf64274fa98f5bb6db8b2ba\" as (select COALESCE(trg_pid) as pid, \"nfl_plays\".\"year\", SUM(CASE WHEN comp = true THEN recv_yds ELSE 0 END) as rec_yds_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"year\" in (2020, 2021, 2022, 2023, 2024) and \"nfl_plays\".\"seas_type\" in ('REG') group by \"nfl_plays\".\"year\", COALESCE(trg_pid)) select \"player\".\"pid\", tf851d676fddeb70ff3d41e0198712cb9.teams as player_nfl_teams_0, \"t2a01128b3bf64274fa98f5bb6db8b2ba\".\"rec_yds_from_plays\" AS \"rec_yds_from_plays_0\", \"player_years\".\"year\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"tf851d676fddeb70ff3d41e0198712cb9\" on \"tf851d676fddeb70ff3d41e0198712cb9\".\"pid\" = \"player\".\"pid\" and \"tf851d676fddeb70ff3d41e0198712cb9\".\"year\" = \"player_years\".\"year\" left join \"t2a01128b3bf64274fa98f5bb6db8b2ba\" on \"t2a01128b3bf64274fa98f5bb6db8b2ba\".\"pid\" = \"player\".\"pid\" and t2a01128b3bf64274fa98f5bb6db8b2ba.year = player_years.year and t2a01128b3bf64274fa98f5bb6db8b2ba.year IN (2020,2021,2022,2023,2024) where tf851d676fddeb70ff3d41e0198712cb9.teams::text[] && ARRAY['CIN']::text[] group by tf851d676fddeb70ff3d41e0198712cb9.teams, \"t2a01128b3bf64274fa98f5bb6db8b2ba\".\"rec_yds_from_plays\", \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 3 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": [
+    "player",
+    "team",
+    "plays",
+    "filters",
+    "parameters",
+    "sorting",
+    "rate_type",
+    "cte",
+    "joins"
+  ],
+  "timeout_ms": 40000
+}

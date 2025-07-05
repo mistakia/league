@@ -12,8 +12,7 @@ const player_snaps_join = ({
   table_name,
   query,
   params,
-  splits,
-  year_split_join_clause
+  splits
 }) => {
   const already_added_for_per_player_play_rate_type =
     data_view_options.rate_type_tables[table_name]
@@ -32,8 +31,8 @@ const player_snaps_join = ({
     players_query: query,
     rate_type_table_name: table_name,
     splits,
-    year_split_join_clause,
-    params
+    params,
+    data_view_options
   })
 }
 

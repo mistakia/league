@@ -1,0 +1,20 @@
+{
+  "name": "player contract with no params",
+  "description": "Test case for player contract with no params",
+  "request": {
+    "columns": [
+      {
+        "column_id": "player_contract_base_salary"
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "player_contract_base_salary",
+        "desc": true
+      }
+    ]
+  },
+  "expected_query": "select \"player\".\"pid\", \"tb75ca4f410cdaf4b86f84af5464987dd\".\"base_salary\" AS \"base_salary_0\", \"player\".\"pos\" from \"player\" left join \"player_contracts\" as \"tb75ca4f410cdaf4b86f84af5464987dd\" on \"tb75ca4f410cdaf4b86f84af5464987dd\".\"pid\" = \"player\".\"pid\" and tb75ca4f410cdaf4b86f84af5464987dd.year = '${constants.season.year}' group by \"tb75ca4f410cdaf4b86f84af5464987dd\".\"base_salary\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": ["player", "contract", "plays", "sorting"],
+  "timeout_ms": 40000
+}

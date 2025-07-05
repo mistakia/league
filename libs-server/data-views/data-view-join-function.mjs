@@ -12,8 +12,6 @@ export default function data_view_join_function(join_arguments) {
     join_table_clause,
     join_type = 'LEFT',
     splits = [],
-    year_split_join_clause = null,
-    week_split_join_clause = null,
     params = {},
     additional_conditions = null,
     join_year = false,
@@ -22,7 +20,8 @@ export default function data_view_join_function(join_arguments) {
     cast_join_week_to_string = false,
     default_year = constants.season.year,
     join_on_team = false,
-    join_table_team_field = 'nfl_team'
+    join_table_team_field = 'nfl_team',
+    data_view_options = {}
   } = join_arguments
 
   // TODO join_type should be left in some cases where year_offset range is used without a with_where
@@ -75,31 +74,33 @@ export default function data_view_join_function(join_arguments) {
         )
 
         // Add week join condition for team stats tables when week split is enabled
-        if (
-          splits.includes('week') &&
-          table_name.includes('_team_stats') &&
-          week_split_join_clause
-        ) {
-          this.andOn(`${table_name}.week`, '=', week_split_join_clause)
+        if (splits.includes('week') && table_name.includes('_team_stats')) {
+          this.andOn(
+            `${table_name}.week`,
+            '=',
+            data_view_options.week_reference
+          )
         }
       }
     } else {
-      this.on(`${table_name}.pid`, '=', 'player.pid')
+      // Use centralized player PID reference
+      this.on(`${table_name}.pid`, '=', data_view_options.pid_reference)
     }
 
-    if (splits.length && year_split_join_clause) {
+    if (splits.length) {
       if (splits.includes('year')) {
         if (min_year_offset !== 0 || max_year_offset !== 0) {
           if (min_year_offset === max_year_offset) {
             this.andOn(
-              db.raw(`${table_name}.year = ${year_split_join_clause} + ?`, [
-                min_year_offset
-              ])
+              db.raw(
+                `${table_name}.year = ${data_view_options.year_reference} + ?`,
+                [min_year_offset]
+              )
             )
           } else {
             this.andOn(
               db.raw(
-                `${table_name}.year BETWEEN ${year_split_join_clause} + ? AND ${year_split_join_clause} + ?`,
+                `${table_name}.year BETWEEN ${data_view_options.year_reference} + ? AND ${data_view_options.year_reference} + ?`,
                 [min_year_offset, max_year_offset]
               )
             )
@@ -115,7 +116,9 @@ export default function data_view_join_function(join_arguments) {
               : params.year
             this.andOn(`${table_name}.year`, '=', db.raw('?', [specific_year]))
           } else {
-            this.andOn(db.raw(`${table_name}.year = ${year_split_join_clause}`))
+            this.andOn(
+              db.raw(`${table_name}.year = ${data_view_options.year_reference}`)
+            )
 
             if (params.year) {
               this.andOn(
@@ -134,10 +137,10 @@ export default function data_view_join_function(join_arguments) {
         )
       }
 
-      if (splits.includes('week') && week_split_join_clause) {
+      if (splits.includes('week')) {
         const week_clause = cast_join_week_to_string
-          ? `CAST(${week_split_join_clause} AS VARCHAR)`
-          : week_split_join_clause
+          ? `CAST(${data_view_options.week_reference} AS VARCHAR)`
+          : data_view_options.week_reference
         this.andOn(db.raw(`${table_name}.week = ${week_clause}`))
       }
 

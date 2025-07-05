@@ -10,7 +10,8 @@ export const add_team_stats_play_by_play_with_statement = ({
   select_strings = [],
   splits = [],
   select_column_names = [],
-  rate_columns = []
+  rate_columns = [],
+  data_view_options
 }) => {
   if (!with_table_name) {
     throw new Error('with_table_name is required')
@@ -62,7 +63,8 @@ export const add_team_stats_play_by_play_with_statement = ({
         rate_columns,
         splits,
         params,
-        having_clauses
+        having_clauses,
+        data_view_options
       })
     : create_team_stats_query({
         with_table_name,
@@ -70,13 +72,42 @@ export const add_team_stats_play_by_play_with_statement = ({
         rate_columns,
         splits,
         params,
-        having_clauses
+        having_clauses,
+        data_view_options
       })
 
   const with_stats_table_postfix = limit_to_player_active_games
     ? '_player_team_stats'
     : '_team_stats'
-  query.with(`${with_table_name}${with_stats_table_postfix}`, stats_query)
+  const final_stats_table_name = `${with_table_name}${with_stats_table_postfix}`
+
+  // TODO review this code
+  // Check if this final table is the from table - if so, make sure it has pid and split columns
+  if (
+    data_view_options &&
+    final_stats_table_name === data_view_options.from_table_name
+  ) {
+    // Ensure the stats query includes pid and split columns for from table compatibility
+    if (limit_to_player_active_games) {
+      // Player team stats already includes pid
+      if (
+        splits.includes('year') &&
+        !stats_query.toString().includes(`${with_table_name}.year`)
+      ) {
+        stats_query.select(`${with_table_name}.year`)
+        stats_query.groupBy(`${with_table_name}.year`)
+      }
+      if (
+        splits.includes('week') &&
+        !stats_query.toString().includes(`${with_table_name}.week`)
+      ) {
+        stats_query.select(`${with_table_name}.week`)
+        stats_query.groupBy(`${with_table_name}.week`)
+      }
+    }
+  }
+
+  query.with(final_stats_table_name, stats_query)
 }
 
 function create_team_stats_query({
@@ -85,7 +116,8 @@ function create_team_stats_query({
   rate_columns,
   splits,
   params,
-  having_clauses
+  having_clauses,
+  data_view_options
 }) {
   const team_stats_query = db(with_table_name)
     .select(`${with_table_name}.nfl_team`)
@@ -109,7 +141,8 @@ function create_player_team_stats_query({
   rate_columns,
   splits,
   params,
-  having_clauses
+  having_clauses,
+  data_view_options
 }) {
   const { seas_type } = get_play_by_play_default_params({ params })
   const player_team_stats_query = db('player_gamelogs')

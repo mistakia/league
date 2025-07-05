@@ -1,0 +1,35 @@
+{
+  "name": "team stat with def unit and rate type, limit to player active",
+  "description": "Test case for team stat with def unit and rate type, limit to player active",
+  "request": {
+    "columns": [
+      {
+        "column_id": "team_pass_yards_from_plays",
+        "params": {
+          "team_unit": "def",
+          "rate_type": "per_team_pass_play",
+          "limit_to_player_active_games": true,
+          "year": 2024
+        }
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "team_pass_yards_from_plays",
+        "desc": true
+      }
+    ]
+  },
+  "expected_query": "with \"t72dd346e69dcc17e2e17c4083808e602\" as (select \"nfl_plays\".\"def\", COUNT(*) as rate_type_total_count from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"play_type\" = 'PASS' and \"nfl_plays\".\"year\" in (2024) and \"nfl_plays\".\"seas_type\" in ('REG') group by \"nfl_plays\".\"def\"), \"t36ac8d28ba1c1bcff2548570f391e7cc\" as (select \"nfl_plays\".\"def\" as \"nfl_team\", SUM(pass_yds) AS team_pass_yds_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"year\" in (2024) and \"nfl_plays\".\"seas_type\" in ('REG') group by \"nfl_plays\".\"def\"), \"t36ac8d28ba1c1bcff2548570f391e7cc_player_team_stats\" as (select \"player_gamelogs\".\"pid\", sum(t36ac8d28ba1c1bcff2548570f391e7cc.team_pass_yds_from_plays) as team_pass_yds_from_plays from \"player_gamelogs\" inner join \"nfl_games\" on \"player_gamelogs\".\"esbid\" = \"nfl_games\".\"esbid\" inner join \"t36ac8d28ba1c1bcff2548570f391e7cc\" on \"player_gamelogs\".\"tm\" = \"t36ac8d28ba1c1bcff2548570f391e7cc\".\"nfl_team\" and \"nfl_games\".\"year\" = \"t36ac8d28ba1c1bcff2548570f391e7cc\".\"year\" and \"nfl_games\".\"week\" = \"t36ac8d28ba1c1bcff2548570f391e7cc\".\"week\" where \"nfl_games\".\"seas_type\" in ('REG') group by \"player_gamelogs\".\"pid\") select \"player\".\"pid\", CAST(t36ac8d28ba1c1bcff2548570f391e7cc_player_team_stats.team_pass_yds_from_plays AS DECIMAL) / NULLIF(CAST(t72dd346e69dcc17e2e17c4083808e602.rate_type_total_count AS DECIMAL), 0) AS \"team_pass_yds_from_plays_0\", \"player\".\"pos\" from \"player\" left join \"t72dd346e69dcc17e2e17c4083808e602\" on \"t72dd346e69dcc17e2e17c4083808e602\".\"def\" = \"player\".\"current_nfl_team\" left join \"t36ac8d28ba1c1bcff2548570f391e7cc_player_team_stats\" on \"t36ac8d28ba1c1bcff2548570f391e7cc_player_team_stats\".\"pid\" = \"player\".\"pid\" group by \"t36ac8d28ba1c1bcff2548570f391e7cc_player_team_stats\".\"team_pass_yds_from_plays\", t72dd346e69dcc17e2e17c4083808e602.rate_type_total_count, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": [
+    "player",
+    "team",
+    "stats",
+    "plays",
+    "parameters",
+    "sorting",
+    "rate_type",
+    "cte"
+  ],
+  "timeout_ms": 40000
+}

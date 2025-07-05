@@ -34,13 +34,14 @@ const player_contract_join = ({
   query,
   table_name,
   join_type = 'LEFT',
-  params = {}
+  params = {},
+  data_view_options = {}
 } = {}) => {
   const join_func = get_join_func(join_type)
   const year = get_contract_year(params.contract_year)
 
   const join_conditions = function () {
-    this.on(`${table_name}.pid`, '=', 'player.pid')
+    this.on(`${table_name}.pid`, '=', data_view_options.pid_reference)
     this.andOn(db.raw(`${table_name}.year = '${year}'`))
   }
 

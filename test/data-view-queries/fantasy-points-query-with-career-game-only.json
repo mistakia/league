@@ -1,0 +1,39 @@
+{
+  "name": "fantasy points query with career_game param only",
+  "description": "Test case for fantasy points query with career_game parameter only",
+  "request": {
+    "columns": [
+      "player_starting_nfl_year",
+      {
+        "column_id": "player_fantasy_points_from_plays",
+        "params": {
+          "career_game": [1, 5]
+        }
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "player_fantasy_points_from_plays",
+        "desc": true,
+        "column_index": 0
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_starting_nfl_year",
+        "operator": ">=",
+        "value": "2020"
+      },
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["WR"]
+      }
+    ],
+    "prefix_columns": ["player_name"],
+    "splits": []
+  },
+  "expected_query": "with \"tb025391141182b93f525365c372825a7\" as (select \"fantasy_points_plays\".\"pid\", SUM(fantasy_points_plays.fantasy_points_from_plays) as fantasy_points_from_plays, \"fantasy_points_plays\".\"seas_type\" from (with \"filtered_plays\" as (select \"nfl_plays\".\"bc_pid\", \"nfl_plays\".\"psr_pid\", \"nfl_plays\".\"trg_pid\", \"nfl_plays\".\"player_fuml_pid\", \"nfl_plays\".\"week\", \"nfl_plays\".\"seas_type\", \"nfl_plays\".\"year\", \"nfl_plays\".\"rush_yds\", \"nfl_plays\".\"rush_td\", \"nfl_plays\".\"pass_yds\", \"nfl_plays\".\"pass_td\", \"nfl_plays\".\"recv_yds\", \"nfl_plays\".\"comp\", \"nfl_plays\".\"int\", \"nfl_plays\".\"first_down\", \"nfl_plays\".\"play_type\", \"nfl_plays\".\"fuml\", \"nfl_plays\".\"esbid\" from \"nfl_plays\" where \"nfl_plays\".\"play_type\" not in ('NOPL') and (\"nfl_plays\".\"bc_pid\" is not null or \"nfl_plays\".\"psr_pid\" is not null or \"nfl_plays\".\"trg_pid\" is not null or \"nfl_plays\".\"player_fuml_pid\" is not null) and \"nfl_plays\".\"seas_type\" in ('REG')) select \"pid\", SUM(fantasy_points_from_plays) as fantasy_points_from_plays, \"seas_type\", \"esbid\" from (select * from (select \"bc_pid\" as \"pid\", ROUND(SUM(COALESCE(rush_yds, 0) * 0.1 + COALESCE(rush_td::int, 0) * 6), 2) as fantasy_points_from_plays, \"seas_type\", \"esbid\" from \"filtered_plays\" where \"bc_pid\" is not null group by \"bc_pid\", \"seas_type\", \"esbid\") as \"bc_stats\" union all select * from (select \"psr_pid\" as \"pid\", ROUND(SUM(COALESCE(pass_yds, 0) * 0.04 + COALESCE(pass_td::int, 0) * 4 + COALESCE(\"int\"::int, 0) * -1), 2) as fantasy_points_from_plays, \"seas_type\", \"esbid\" from \"filtered_plays\" where \"psr_pid\" is not null group by \"psr_pid\", \"seas_type\", \"esbid\") as \"psr_stats\" union all select * from (select \"trg_pid\" as \"pid\", ROUND(SUM(COALESCE(recv_yds, 0) * 0.1 + COALESCE(pass_td::int, 0) * 6 + COALESCE(comp::int, 0) * 1), 2) as fantasy_points_from_plays, \"seas_type\", \"esbid\" from \"filtered_plays\" where \"trg_pid\" is not null group by \"trg_pid\", \"seas_type\", \"esbid\") as \"trg_stats\" union all select * from (select \"player_fuml_pid\" as \"pid\", ROUND(SUM(-1), 2) as fantasy_points_from_plays, \"seas_type\", \"esbid\" from \"filtered_plays\" where \"player_fuml_pid\" is not null group by \"player_fuml_pid\", \"seas_type\", \"esbid\") as \"fuml_stats\") as \"combined_stats\" group by \"pid\", \"seas_type\", \"esbid\" having SUM(fantasy_points_from_plays) > 0) as \"fantasy_points_plays\" inner join \"player_gamelogs\" on \"fantasy_points_plays\".\"pid\" = \"player_gamelogs\".\"pid\" and \"fantasy_points_plays\".\"esbid\" = \"player_gamelogs\".\"esbid\" where \"player_gamelogs\".\"career_game\" between 1 and 5 group by \"fantasy_points_plays\".\"pid\", \"fantasy_points_plays\".\"seas_type\") select \"tb025391141182b93f525365c372825a7\".\"pid\", player.fname, player.lname, \"player\".\"nfl_draft_year\" AS \"nfl_draft_year_0\", \"tb025391141182b93f525365c372825a7\".\"fantasy_points_from_plays\" AS \"fantasy_points_from_plays_0\", \"player\".\"pos\" from \"tb025391141182b93f525365c372825a7\" inner join \"player\" on \"player\".\"pid\" = \"tb025391141182b93f525365c372825a7\".\"pid\" where player.nfl_draft_year >= '2020' AND player.pos IN ('WR') group by player.fname, player.lname, \"player\".\"nfl_draft_year\", \"tb025391141182b93f525365c372825a7\".\"fantasy_points_from_plays\", \"tb025391141182b93f525365c372825a7\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 5 DESC NULLS LAST, \"tb025391141182b93f525365c372825a7\".\"pid\" asc limit 500",
+  "tags": ["career_game", "parameters"],
+  "timeout_ms": 40000
+}

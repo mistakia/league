@@ -1,0 +1,24 @@
+{
+  "name": "team stat with per_team_quarter",
+  "description": "Test case for team stat with per_team_quarter",
+  "request": {
+    "columns": [
+      {
+        "column_id": "team_pass_yards_from_plays",
+        "params": {
+          "rate_type": ["per_team_quarter"],
+          "year": [2023]
+        }
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "team_pass_yards_from_plays",
+        "desc": true
+      }
+    ]
+  },
+  "expected_query": "with \"tceb97d46192522de48d043bb0be8dbe0\" as (select \"nfl_plays\".\"off\", COUNT(DISTINCT CONCAT(nfl_plays.esbid, qtr)) as rate_type_total_count from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"play_type\" in ('PASS', 'RUSH') and \"nfl_plays\".\"year\" in (2023) and \"nfl_plays\".\"seas_type\" in ('REG') group by \"nfl_plays\".\"off\"), \"t36bf0474d4db796322b4fe1d9755f770\" as (select \"nfl_plays\".\"off\" as \"nfl_team\", SUM(pass_yds) AS team_pass_yds_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"year\" in (2023) and \"nfl_plays\".\"seas_type\" in ('REG') group by \"nfl_plays\".\"off\"), \"t36bf0474d4db796322b4fe1d9755f770_team_stats\" as (select \"t36bf0474d4db796322b4fe1d9755f770\".\"nfl_team\", sum(t36bf0474d4db796322b4fe1d9755f770.team_pass_yds_from_plays) as team_pass_yds_from_plays from \"t36bf0474d4db796322b4fe1d9755f770\" group by \"t36bf0474d4db796322b4fe1d9755f770\".\"nfl_team\") select \"player\".\"pid\", CAST(t36bf0474d4db796322b4fe1d9755f770_team_stats.team_pass_yds_from_plays AS DECIMAL) / NULLIF(CAST(tceb97d46192522de48d043bb0be8dbe0.rate_type_total_count AS DECIMAL), 0) AS \"team_pass_yds_from_plays_0\", \"player\".\"pos\" from \"player\" left join \"tceb97d46192522de48d043bb0be8dbe0\" on \"tceb97d46192522de48d043bb0be8dbe0\".\"off\" = \"player\".\"current_nfl_team\" left join \"t36bf0474d4db796322b4fe1d9755f770_team_stats\" on \"t36bf0474d4db796322b4fe1d9755f770_team_stats\".\"nfl_team\" = \"player\".\"current_nfl_team\" group by \"t36bf0474d4db796322b4fe1d9755f770_team_stats\".\"team_pass_yds_from_plays\", tceb97d46192522de48d043bb0be8dbe0.rate_type_total_count, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": ["team", "stats", "parameters", "sorting", "rate_type", "cte"],
+  "timeout_ms": 40000
+}

@@ -1,0 +1,29 @@
+{
+  "name": "should create a query with fantasy points from careerlogs",
+  "description": "Test case for should create a query with fantasy points from careerlogs",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      "player_fantasy_points_from_careerlogs",
+      "player_fantasy_points_per_game_from_careerlogs",
+      "player_fantasy_top_3_seasons_from_careerlogs",
+      "player_fantasy_top_6_seasons_from_careerlogs",
+      "player_fantasy_top_12_seasons_from_careerlogs",
+      "player_fantasy_top_24_seasons_from_careerlogs",
+      "player_fantasy_top_36_seasons_from_careerlogs"
+    ],
+    "sort": [
+      {
+        "column_id": "player_fantasy_points_from_careerlogs",
+        "desc": true
+      }
+    ]
+  },
+  "expected_query": "select \"player\".\"pid\", player.fname, player.lname, \"t6a3ea799cf4673fd745d965239ff7044\".\"points\" AS \"points_from_careerlogs_0\", \"t6a3ea799cf4673fd745d965239ff7044\".\"points_per_game\" AS \"points_per_game_from_careerlogs_0\", \"t6a3ea799cf4673fd745d965239ff7044\".\"top_3\" AS \"top_3_from_careerlogs_0\", \"t6a3ea799cf4673fd745d965239ff7044\".\"top_6\" AS \"top_6_from_careerlogs_0\", \"t6a3ea799cf4673fd745d965239ff7044\".\"top_12\" AS \"top_12_from_careerlogs_0\", \"t6a3ea799cf4673fd745d965239ff7044\".\"top_24\" AS \"top_24_from_careerlogs_0\", \"t6a3ea799cf4673fd745d965239ff7044\".\"top_36\" AS \"top_36_from_careerlogs_0\", \"player\".\"pos\" from \"player\" left join \"scoring_format_player_careerlogs\" as \"t6a3ea799cf4673fd745d965239ff7044\" on \"t6a3ea799cf4673fd745d965239ff7044\".\"pid\" = \"player\".\"pid\" and t6a3ea799cf4673fd745d965239ff7044.scoring_format_hash = 'ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e' group by player.fname, player.lname, \"t6a3ea799cf4673fd745d965239ff7044\".\"points\", \"t6a3ea799cf4673fd745d965239ff7044\".\"points_per_game\", \"t6a3ea799cf4673fd745d965239ff7044\".\"top_3\", \"t6a3ea799cf4673fd745d965239ff7044\".\"top_6\", \"t6a3ea799cf4673fd745d965239ff7044\".\"top_12\", \"t6a3ea799cf4673fd745d965239ff7044\".\"top_24\", \"t6a3ea799cf4673fd745d965239ff7044\".\"top_36\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": ["sorting"],
+  "timeout_ms": 40000,
+  "expected_metadata": {
+    "cache_ttl": "six_hours",
+    "cache_expire_at": null
+  }
+}
