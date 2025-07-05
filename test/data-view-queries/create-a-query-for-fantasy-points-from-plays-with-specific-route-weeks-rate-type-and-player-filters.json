@@ -1,0 +1,50 @@
+{
+  "name": "should create a query for fantasy points from plays with specific route, weeks, rate type, and player filters",
+  "description": "Test case for should create a query for fantasy points from plays with specific route, weeks, rate type, and player filters",
+  "request": {
+    "columns": [
+      {
+        "column_id": "player_fantasy_points_from_plays",
+        "params": {
+          "route_ngs": ["GO"],
+          "week": [
+            1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19,
+            20, 21
+          ],
+          "rate_type": ["per_game"],
+          "year": [2023]
+        }
+      }
+    ],
+    "sort": [],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["WR"]
+      },
+      {
+        "column_id": "player_name",
+        "operator": "=",
+        "value": "Stefon Diggs"
+      }
+    ],
+    "prefix_columns": ["player_name"],
+    "splits": ["year"]
+  },
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.pos IN ('WR')), \"t26d16b91dcd797f5821bc1b15c6980ad\" as (select \"player_gamelogs_year_2023\".\"pid\", count(*) as \"rate_type_total_count\", array_agg(distinct player_gamelogs_year_2023.tm) as teams, \"nfl_games\".\"year\" from \"player_gamelogs_year_2023\" left join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs_year_2023\".\"esbid\" where \"nfl_games\".\"seas_type\" in ('REG') and \"player_gamelogs_year_2023\".\"active\" = true and \"nfl_games\".\"year\" in (2023) and \"nfl_games\".\"week\" in (1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 2, 3, 4, 5, 6, 7, 8, 9) group by \"nfl_games\".\"year\", \"player_gamelogs_year_2023\".\"pid\"), \"t8176863ab4cd2163f59e66fb7ef52178\" as (with \"filtered_plays\" as (select \"nfl_plays\".\"bc_pid\", \"nfl_plays\".\"psr_pid\", \"nfl_plays\".\"trg_pid\", \"nfl_plays\".\"player_fuml_pid\", \"nfl_plays\".\"week\", \"nfl_plays\".\"seas_type\", \"nfl_plays\".\"year\", \"nfl_plays\".\"rush_yds\", \"nfl_plays\".\"rush_td\", \"nfl_plays\".\"pass_yds\", \"nfl_plays\".\"pass_td\", \"nfl_plays\".\"recv_yds\", \"nfl_plays\".\"comp\", \"nfl_plays\".\"int\", \"nfl_plays\".\"first_down\", \"nfl_plays\".\"play_type\", \"nfl_plays\".\"fuml\", \"nfl_plays\".\"route_ngs\" from \"nfl_plays\" where \"nfl_plays\".\"play_type\" not in ('NOPL') and (\"nfl_plays\".\"bc_pid\" is not null or \"nfl_plays\".\"psr_pid\" is not null or \"nfl_plays\".\"trg_pid\" is not null or \"nfl_plays\".\"player_fuml_pid\" is not null) and \"nfl_plays\".\"year\" in (2023) and \"nfl_plays\".\"week\" in (1, 10, 11, 12, 13, 14, 15, 16, 17, 18, 2, 3, 4, 5, 6, 7, 8, 9) and \"nfl_plays\".\"seas_type\" in ('REG') and \"nfl_plays\".\"route_ngs\" in ('GO')) select \"pid\", SUM(fantasy_points_from_plays) as fantasy_points_from_plays, \"seas_type\", \"year\" from (select * from (select \"bc_pid\" as \"pid\", ROUND(SUM(COALESCE(rush_yds, 0) * 0.1 + COALESCE(rush_td::int, 0) * 6), 2) as fantasy_points_from_plays, \"seas_type\", \"year\" from \"filtered_plays\" where \"bc_pid\" is not null group by \"bc_pid\", \"seas_type\", \"year\") as \"bc_stats\" union all select * from (select \"psr_pid\" as \"pid\", ROUND(SUM(COALESCE(pass_yds, 0) * 0.04 + COALESCE(pass_td::int, 0) * 4 + COALESCE(\"int\"::int, 0) * -1), 2) as fantasy_points_from_plays, \"seas_type\", \"year\" from \"filtered_plays\" where \"psr_pid\" is not null group by \"psr_pid\", \"seas_type\", \"year\") as \"psr_stats\" union all select * from (select \"trg_pid\" as \"pid\", ROUND(SUM(COALESCE(recv_yds, 0) * 0.1 + COALESCE(pass_td::int, 0) * 6 + COALESCE(comp::int, 0) * 1), 2) as fantasy_points_from_plays, \"seas_type\", \"year\" from \"filtered_plays\" where \"trg_pid\" is not null group by \"trg_pid\", \"seas_type\", \"year\") as \"trg_stats\" union all select * from (select \"player_fuml_pid\" as \"pid\", ROUND(SUM(-1), 2) as fantasy_points_from_plays, \"seas_type\", \"year\" from \"filtered_plays\" where \"player_fuml_pid\" is not null group by \"player_fuml_pid\", \"seas_type\", \"year\") as \"fuml_stats\") as \"combined_stats\" group by \"pid\", \"seas_type\", \"year\" having SUM(fantasy_points_from_plays) > 0) select \"player\".\"pid\", player.fname, player.lname, CAST(t8176863ab4cd2163f59e66fb7ef52178.fantasy_points_from_plays AS DECIMAL) / NULLIF(CAST(t26d16b91dcd797f5821bc1b15c6980ad.rate_type_total_count AS DECIMAL), 0) AS \"fantasy_points_from_plays_0\", \"player_years\".\"year\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"t26d16b91dcd797f5821bc1b15c6980ad\" on \"t26d16b91dcd797f5821bc1b15c6980ad\".\"pid\" = \"player\".\"pid\" and \"t26d16b91dcd797f5821bc1b15c6980ad\".\"year\" = 2023 left join \"t8176863ab4cd2163f59e66fb7ef52178\" on \"t8176863ab4cd2163f59e66fb7ef52178\".\"pid\" = \"player\".\"pid\" and \"t8176863ab4cd2163f59e66fb7ef52178\".\"year\" = 2023 where player.pos IN ('WR') AND player.fname || ' ' || player.lname = 'Stefon Diggs' group by player.fname, player.lname, \"t8176863ab4cd2163f59e66fb7ef52178\".\"fantasy_points_from_plays\", t26d16b91dcd797f5821bc1b15c6980ad.rate_type_total_count, \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 500",
+  "tags": [
+    "player",
+    "plays",
+    "filters",
+    "parameters",
+    "rate_type",
+    "cte",
+    "joins"
+  ],
+  "timeout_ms": 40000,
+  "expected_metadata": {
+    "cache_ttl": "one_week",
+    "cache_expire_at": null
+  }
+}

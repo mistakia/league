@@ -30,11 +30,11 @@ const espn_score_join = (options) => {
       table_name,
       params,
       splits,
-      year_split_join_clause
+      data_view_options
     }) {
       this.andOn(`${table_name}.seas_type`, '=', db.raw('?', ['REG']))
 
-      if (!splits.includes('year') && !year_split_join_clause) {
+      if (!splits.includes('year')) {
         const year = get_valid_year(params.year)
         this.andOn(`${table_name}.year`, '=', year)
       }

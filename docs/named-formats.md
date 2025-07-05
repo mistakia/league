@@ -1,6 +1,6 @@
 # Named Scoring and League Formats
 
-_Generated at: 2025-07-02T00:52:41.811Z_
+_Generated at: 2025-07-05T08:37:32.390Z_
 
 This document shows the configuration for each named format in the system.
 
@@ -38,13 +38,13 @@ This document shows the configuration for each named format in the system.
 | `draftkings`              | DraftKings DFS scoring with full PPR, 4-point passing TDs, and milestone bonuses - bonus/kicker/defense support needed | [View Details](#draftkings)              |
 | `fanduel`                 | FanDuel DFS scoring with half PPR, 4-point passing TDs, and yardage bonuses - bonus/kicker/defense support needed      | [View Details](#fanduel)                 |
 | `genesis`                 | Genesis League scoring with half PPR, 4-point passing TDs, 0.05 passing yards, and -1 turnovers                        | [View Details](#genesis)                 |
-| `half_ppr`                | Half point per reception scoring with 6-point passing touchdowns                                                       | [View Details](#half_ppr)                |
+| `half_ppr`                | Half point per reception scoring with 4-point passing touchdowns                                                       | [View Details](#half_ppr)                |
 | `half_ppr_lower_turnover` | Half PPR with lower turnover penalties: -1 INT, -1 fumble lost                                                         | [View Details](#half_ppr_lower_turnover) |
-| `ppr`                     | Full point per reception scoring with 6-point passing touchdowns                                                       | [View Details](#ppr)                     |
+| `ppr`                     | Full point per reception scoring with 4-point passing touchdowns                                                       | [View Details](#ppr)                     |
 | `ppr_lower_turnover`      | Full PPR with lower turnover penalties: -1 INT, -1 fumble lost                                                         | [View Details](#ppr_lower_turnover)      |
 | `sfb15_mfl`               | Scott Fish Bowl 15 MFL scoring (PPR + 0.5 per carry + 1 per target) - no turnover penalties                            | [View Details](#sfb15_mfl)               |
 | `sfb15_sleeper`           | Scott Fish Bowl 15 Sleeper scoring (2.5 PPR + 0.5 per carry) - no turnover penalties                                   | [View Details](#sfb15_sleeper)           |
-| `standard`                | Standard scoring with no PPR and 6-point passing touchdowns                                                            | [View Details](#standard)                |
+| `standard`                | Standard scoring with no PPR and 4-point passing touchdowns                                                            | [View Details](#standard)                |
 
 ## League Format Details
 
@@ -108,7 +108,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** Half PPR 10 Team  
 **Description:** 10-team league with half PPR scoring - 1QB/2RB/2WR/1TE/1FLEX  
-**Hash:** `54ada7372303d92d6101a695bc6960385525cb36f52aa1ceed5e56f3921d2c1f`
+**Hash:** `64cb7ce1421f243dd780af29304133d5054d439dfc39ffb64bd77e945cea99a8`
 
 **Configuration:**
 | Property | Value | Description |
@@ -136,7 +136,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** Half PPR 10 Team Superflex  
 **Description:** 10-team superflex league with half PPR scoring - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX  
-**Hash:** `26188bdbfed990fd907934850777e1001a83dc2291c09ca38ac3b209704be514`
+**Hash:** `7827a68c0ba142deb72b7437fdac900216befeef0bed38989288a6ef4f5e88f5`
 
 **Configuration:**
 | Property | Value | Description |
@@ -164,7 +164,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** Half PPR 12 Team  
 **Description:** 12-team league with half PPR scoring - 1QB/2RB/2WR/1TE/1FLEX  
-**Hash:** `0ca34a52a960d11c896e57a31aa9c1177c576282188b98ce7e756a07478d923e`
+**Hash:** `679b4ce98e575e6ed0d8c5153cd1c92a2701baf98dff68665780d5a640d4165c`
 
 **Configuration:**
 | Property | Value | Description |
@@ -192,7 +192,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** Half PPR 12 Team Superflex  
 **Description:** 12-team superflex league with half PPR scoring - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX  
-**Hash:** `ec5a79248e24911d0cd099a447b9f26ea72c0f999228354d47c85b61b6db91c3`
+**Hash:** `99d663cbcf25ffe79f37031fc8771cf88c9adfe20f006c0cd4fb57d059dd6446`
 
 **Configuration:**
 | Property | Value | Description |
@@ -220,7 +220,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** Half PPR Lower Turnover 10 Team  
 **Description:** 10-team league with half PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX  
-**Hash:** `eccbba076b886b25e9a49dd06a0e2ff20b3edce9eff8a061d8cee7a9841c7de6`
+**Hash:** `ce41dc5669e598870cce14a016798dca3a6a252bccde39bcfaf8388e8d19a832`
 
 **Configuration:**
 | Property | Value | Description |
@@ -248,7 +248,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** Half PPR Lower Turnover 10 Team Superflex  
 **Description:** 10-team superflex league with half PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX  
-**Hash:** `b7c23f84aee1ad20ba7984b8af73427c529d1548496d81f9bd3481abbe71d570`
+**Hash:** `8afaa971b4b5fc67f9f34f9d91a03619221f7fdff0be17c16ae9f830ad912731`
 
 **Configuration:**
 | Property | Value | Description |
@@ -276,7 +276,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** Half PPR Lower Turnover 12 Team  
 **Description:** 12-team league with half PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX  
-**Hash:** `b68d6e71bf522cc02092d9e335567fb9dac2a89d2750b63376bada8cc991782f`
+**Hash:** `9abe8c6d4d77ecc4927175a149d1e2bccf415bbdbbaceb5afaa6876916e00e94`
 
 **Configuration:**
 | Property | Value | Description |
@@ -304,7 +304,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** Half PPR Lower Turnover 12 Team Superflex  
 **Description:** 12-team superflex league with half PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX  
-**Hash:** `77dd3218bf036e2207361bc32b799992cf3e1ddcd8423f0f3d99b7fbb5075353`
+**Hash:** `87d3d5fb64a9f318ee541af7eb180f35d2a516d7ae46aa9d9f4af80e964463f9`
 
 **Configuration:**
 | Property | Value | Description |
@@ -332,7 +332,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** PPR 10 Team  
 **Description:** 10-team league with full PPR scoring - 1QB/2RB/2WR/1TE/1FLEX  
-**Hash:** `68020d1f302b7c13392d038d987c8cd2a4bad72f521df4553e4055f23a4be82e`
+**Hash:** `b3af242bbd78987446e23dbf4e5ab9d729cafcd24597318d94c8ef183ac76188`
 
 **Configuration:**
 | Property | Value | Description |
@@ -360,7 +360,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** PPR 10 Team Superflex  
 **Description:** 10-team superflex league with full PPR scoring - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX  
-**Hash:** `cd0b0f97f88a22827e72672acc3af59e05432c660f6b8fae4857d83cc51bb12b`
+**Hash:** `fa66b63a9deb4e82eb752e18507cd6910814d67a2046cfc3705634cdaf058075`
 
 **Configuration:**
 | Property | Value | Description |
@@ -388,7 +388,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** PPR 12 Team  
 **Description:** 12-team league with full PPR scoring - 1QB/2RB/2WR/1TE/1FLEX  
-**Hash:** `eae52d9963e72597b78e24d27a4a5c14dc446b212cc4962f384bc5bc4b68f459`
+**Hash:** `674c3710dc806f99c20b20bfc04f56f7c23490643a1a1c3b2d43241fe21ae9a2`
 
 **Configuration:**
 | Property | Value | Description |
@@ -416,7 +416,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** PPR 12 Team Superflex  
 **Description:** 12-team superflex league with full PPR scoring - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX  
-**Hash:** `72ac30c0df7d1a2d4cd04c28b5a4bc4adb5b41b26a34cffff72025edcb37e86e`
+**Hash:** `d85636e8c2233b3587eca24d615f6fe4767595f446a65dc033bf085b1c25f5e9`
 
 **Configuration:**
 | Property | Value | Description |
@@ -444,7 +444,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** PPR Lower Turnover 10 Team  
 **Description:** 10-team league with full PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX  
-**Hash:** `2774bbf98729aeb7177f9f800c1661427f0171dddce246830f9a77e5f8295093`
+**Hash:** `3a6b37972cab5b3d5b317701558e58cd363b8e63ce3008fc38a0bb136b86d067`
 
 **Configuration:**
 | Property | Value | Description |
@@ -472,7 +472,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** PPR Lower Turnover 10 Team Superflex  
 **Description:** 10-team superflex league with full PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX  
-**Hash:** `2914099379c3ccd16d88a3a88da162d1010968dfd2e186a5c04656957b843aea`
+**Hash:** `ca21453cabe4db2abbee23868669ce31a7062d0f7c3c42db07a14735a4b81322`
 
 **Configuration:**
 | Property | Value | Description |
@@ -500,7 +500,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** PPR Lower Turnover 12 Team  
 **Description:** 12-team league with full PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX  
-**Hash:** `b6628134d0db1d2b5b8e0aa055eac3c3778e5faa55f2e18305e447baffd77772`
+**Hash:** `b69d6ae29bab63779e2e23d9194c82a137497d7051d7c1e1bd25a2962f7b7121`
 
 **Configuration:**
 | Property | Value | Description |
@@ -528,7 +528,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** PPR Lower Turnover 12 Team Superflex  
 **Description:** 12-team superflex league with full PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX  
-**Hash:** `92b023a804d534b6567468ba5593517bd76171be2e7f0b16209ef2aeb06f7576`
+**Hash:** `7b921f6971ea0c095ed0fc3c86d2d3856a78e903c252931b0357c394f23bc216`
 
 **Configuration:**
 | Property | Value | Description |
@@ -612,7 +612,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** Standard 10 Team (No PPR)  
 **Description:** 10-team league with standard (no PPR) scoring - 1QB/2RB/2WR/1TE/1FLEX  
-**Hash:** `95c4211c7a02a9004a2714aa38bfc8c7eaa8d1b048a4e23e0ed4200fa33d2da2`
+**Hash:** `857cfdd9a277cdec6b617968581186c407cab6008e0754921952d41361c0ac1b`
 
 **Configuration:**
 | Property | Value | Description |
@@ -640,7 +640,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** Standard 12 Team (No PPR)  
 **Description:** 12-team league with standard (no PPR) scoring - 1QB/2RB/2WR/1TE/1FLEX  
-**Hash:** `9f6c03ef81876c2f14422302cd678320b5556000220e8a59111fcd0d757f7c8a`
+**Hash:** `5dfdbf5ad81c7650dba75860197aa9243df08fe1a441e7ecc480928d87d330af`
 
 **Configuration:**
 | Property | Value | Description |
@@ -696,7 +696,6 @@ This document shows the configuration for each named format in the system.
 | `trg` | 0 | trg |
 | `rush_first_down` | 0 | rush_first_down |
 | `rec_first_down` | 0 | rec_first_down |
-| `exclude_qb_kneels` | false | exclude_qb_kneels |
 
 ### fanduel
 
@@ -728,7 +727,6 @@ This document shows the configuration for each named format in the system.
 | `trg` | 0 | trg |
 | `rush_first_down` | 0 | rush_first_down |
 | `rec_first_down` | 0 | rec_first_down |
-| `exclude_qb_kneels` | false | exclude_qb_kneels |
 
 ### genesis
 
@@ -760,13 +758,12 @@ This document shows the configuration for each named format in the system.
 | `trg` | 0 | trg |
 | `rush_first_down` | 0 | rush_first_down |
 | `rec_first_down` | 0 | rec_first_down |
-| `exclude_qb_kneels` | false | exclude_qb_kneels |
 
 ### half_ppr
 
 **Label:** Half PPR  
-**Description:** Half point per reception scoring with 6-point passing touchdowns  
-**Hash:** `196a4e9151ed50bf4c407f6580a21d885c806402d6676cbd37375991279a138f`
+**Description:** Half point per reception scoring with 4-point passing touchdowns  
+**Hash:** `2aeca584a5d1f3e48a68f9ba35ab5660c7ffce5e107a8025a346948840e74ff0`
 
 **Configuration:**
 | Property | Value | Description |
@@ -775,7 +772,7 @@ This document shows the configuration for each named format in the system.
 | `pc` | 0 | Points per passing completion |
 | `py` | 0.04 | Points per passing yard |
 | `ints` | -2 | Points per interception thrown |
-| `tdp` | 6 | Points per passing touchdown |
+| `tdp` | 4 | Points per passing touchdown |
 | `ra` | 0 | Points per rushing attempt |
 | `ry` | 0.1 | Points per rushing yard |
 | `tdr` | 6 | Points per rushing touchdown |
@@ -792,13 +789,12 @@ This document shows the configuration for each named format in the system.
 | `trg` | 0 | trg |
 | `rush_first_down` | 0 | rush_first_down |
 | `rec_first_down` | 0 | rec_first_down |
-| `exclude_qb_kneels` | false | exclude_qb_kneels |
 
 ### half_ppr_lower_turnover
 
 **Label:** Half PPR (Lower Turnover)  
 **Description:** Half PPR with lower turnover penalties: -1 INT, -1 fumble lost  
-**Hash:** `df413f3f77684ba130ce79df7cc372f1cb097ca56e0b612c11845eec8b796263`
+**Hash:** `8d25e53c0df6b8b02fa02fa14309ae6b4250a5a92812e2bb376222dddec6554a`
 
 **Configuration:**
 | Property | Value | Description |
@@ -807,7 +803,7 @@ This document shows the configuration for each named format in the system.
 | `pc` | 0 | Points per passing completion |
 | `py` | 0.04 | Points per passing yard |
 | `ints` | -1 | Points per interception thrown |
-| `tdp` | 6 | Points per passing touchdown |
+| `tdp` | 4 | Points per passing touchdown |
 | `ra` | 0 | Points per rushing attempt |
 | `ry` | 0.1 | Points per rushing yard |
 | `tdr` | 6 | Points per rushing touchdown |
@@ -824,13 +820,12 @@ This document shows the configuration for each named format in the system.
 | `trg` | 0 | trg |
 | `rush_first_down` | 0 | rush_first_down |
 | `rec_first_down` | 0 | rec_first_down |
-| `exclude_qb_kneels` | false | exclude_qb_kneels |
 
 ### ppr
 
 **Label:** PPR (Full)  
-**Description:** Full point per reception scoring with 6-point passing touchdowns  
-**Hash:** `a29c5c91c762cc114abd6911cd59293a5727cb99f44dcde8d5462485d7915559`
+**Description:** Full point per reception scoring with 4-point passing touchdowns  
+**Hash:** `dcfbfc93fb203e7ea66b25927805f076a102e31d8830af03e7b9754a19be5e63`
 
 **Configuration:**
 | Property | Value | Description |
@@ -839,7 +834,7 @@ This document shows the configuration for each named format in the system.
 | `pc` | 0 | Points per passing completion |
 | `py` | 0.04 | Points per passing yard |
 | `ints` | -2 | Points per interception thrown |
-| `tdp` | 6 | Points per passing touchdown |
+| `tdp` | 4 | Points per passing touchdown |
 | `ra` | 0 | Points per rushing attempt |
 | `ry` | 0.1 | Points per rushing yard |
 | `tdr` | 6 | Points per rushing touchdown |
@@ -856,13 +851,12 @@ This document shows the configuration for each named format in the system.
 | `trg` | 0 | trg |
 | `rush_first_down` | 0 | rush_first_down |
 | `rec_first_down` | 0 | rec_first_down |
-| `exclude_qb_kneels` | false | exclude_qb_kneels |
 
 ### ppr_lower_turnover
 
 **Label:** PPR (Lower Turnover)  
 **Description:** Full PPR with lower turnover penalties: -1 INT, -1 fumble lost  
-**Hash:** `23bedcd3224f626b9e280b4589e35ce8897b88232febda7bf3a612638cd2c9ae`
+**Hash:** `ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e`
 
 **Configuration:**
 | Property | Value | Description |
@@ -871,7 +865,7 @@ This document shows the configuration for each named format in the system.
 | `pc` | 0 | Points per passing completion |
 | `py` | 0.04 | Points per passing yard |
 | `ints` | -1 | Points per interception thrown |
-| `tdp` | 6 | Points per passing touchdown |
+| `tdp` | 4 | Points per passing touchdown |
 | `ra` | 0 | Points per rushing attempt |
 | `ry` | 0.1 | Points per rushing yard |
 | `tdr` | 6 | Points per rushing touchdown |
@@ -888,7 +882,6 @@ This document shows the configuration for each named format in the system.
 | `trg` | 0 | trg |
 | `rush_first_down` | 0 | rush_first_down |
 | `rec_first_down` | 0 | rec_first_down |
-| `exclude_qb_kneels` | false | exclude_qb_kneels |
 
 ### sfb15_mfl
 
@@ -920,7 +913,6 @@ This document shows the configuration for each named format in the system.
 | `trg` | 1 | trg |
 | `rush_first_down` | 1 | rush_first_down |
 | `rec_first_down` | 1 | rec_first_down |
-| `exclude_qb_kneels` | false | exclude_qb_kneels |
 
 ### sfb15_sleeper
 
@@ -952,13 +944,12 @@ This document shows the configuration for each named format in the system.
 | `trg` | 0 | trg |
 | `rush_first_down` | 1 | rush_first_down |
 | `rec_first_down` | 1 | rec_first_down |
-| `exclude_qb_kneels` | false | exclude_qb_kneels |
 
 ### standard
 
 **Label:** Standard (No PPR)  
-**Description:** Standard scoring with no PPR and 6-point passing touchdowns  
-**Hash:** `a30d67ba4a329c4de2fea544cb89869d2d1e8406dc2a85be6393ec1cfe88818e`
+**Description:** Standard scoring with no PPR and 4-point passing touchdowns  
+**Hash:** `b45d8818039422afa250f09bc4dd373edda837f8ed9f63386988b40294e010f3`
 
 **Configuration:**
 | Property | Value | Description |
@@ -967,7 +958,7 @@ This document shows the configuration for each named format in the system.
 | `pc` | 0 | Points per passing completion |
 | `py` | 0.04 | Points per passing yard |
 | `ints` | -2 | Points per interception thrown |
-| `tdp` | 6 | Points per passing touchdown |
+| `tdp` | 4 | Points per passing touchdown |
 | `ra` | 0 | Points per rushing attempt |
 | `ry` | 0.1 | Points per rushing yard |
 | `tdr` | 6 | Points per rushing touchdown |
@@ -984,4 +975,3 @@ This document shows the configuration for each named format in the system.
 | `trg` | 0 | trg |
 | `rush_first_down` | 0 | rush_first_down |
 | `rec_first_down` | 0 | rec_first_down |
-| `exclude_qb_kneels` | false | exclude_qb_kneels |

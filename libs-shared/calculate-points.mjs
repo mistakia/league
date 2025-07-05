@@ -1,15 +1,21 @@
-import { stats } from './constants.mjs'
+import { stats, projected_stats } from './constants.mjs'
 
-const getScoring = ({ league }) => {
+const getScoring = ({ league, use_projected_stats = false }) => {
   const result = {}
-  for (const stat of stats) {
+  const stats_to_use = use_projected_stats ? projected_stats : stats
+  for (const stat of stats_to_use) {
     result[stat] = league[stat] || 0
   }
   return result
 }
 
-const calculatePoints = ({ stats, position = '', league }) => {
-  const scoring = getScoring({ league })
+const calculatePoints = ({
+  stats,
+  position = '',
+  league,
+  use_projected_stats = false
+}) => {
+  const scoring = getScoring({ league, use_projected_stats })
 
   const result = { total: 0 }
   for (const stat in scoring) {

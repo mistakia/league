@@ -1,0 +1,76 @@
+{
+  "name": "test condition for scoring_format_hash param, multiple fantasy points from play",
+  "description": "Test case for test condition for scoring_format_hash param, multiple fantasy points from play",
+  "request": {
+    "columns": [
+      {
+        "column_id": "player_fantasy_points_per_game_from_seasonlogs",
+        "params": {
+          "year": [2023],
+          "scoring_format_hash": [
+            "ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e"
+          ]
+        }
+      },
+      {
+        "column_id": "player_fantasy_points_from_plays",
+        "params": {
+          "year": [2023],
+          "rate_type": ["per_game"],
+          "week": [1, 2, 3, 4, 5, 6, 7, 8],
+          "scoring_format_hash": [
+            "ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e"
+          ]
+        }
+      },
+      {
+        "column_id": "player_fantasy_points_from_plays",
+        "params": {
+          "year": [2023],
+          "rate_type": ["per_game"],
+          "week": [9, 10, 11, 12, 13, 14, 15, 16, 17],
+          "scoring_format_hash": [
+            "ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e"
+          ]
+        }
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "player_fantasy_points_per_game_from_seasonlogs",
+        "desc": true,
+        "column_index": 0
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["WR"]
+      },
+      {
+        "column_id": "player_fantasy_points_per_game_from_seasonlogs",
+        "operator": ">",
+        "value": "0",
+        "params": {
+          "scoring_format_hash": [
+            "ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e"
+          ]
+        }
+      }
+    ],
+    "prefix_columns": ["player_name"],
+    "splits": ["year"]
+  },
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2023]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.pos IN ('WR')), \"te28af74c7cf436b69ce8f6c02f3f9092\" as (select \"player_gamelogs_year_2023\".\"pid\", count(*) as \"rate_type_total_count\", array_agg(distinct player_gamelogs_year_2023.tm) as teams, \"nfl_games\".\"year\" from \"player_gamelogs_year_2023\" left join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs_year_2023\".\"esbid\" where \"nfl_games\".\"seas_type\" in ('REG') and \"player_gamelogs_year_2023\".\"active\" = true and \"nfl_games\".\"year\" in (2023) and \"nfl_games\".\"week\" in (1, 2, 3, 4, 5, 6, 7, 8) group by \"nfl_games\".\"year\", \"player_gamelogs_year_2023\".\"pid\"), \"t5bf3efa44adb1d42c9e2b0267da8d762\" as (select \"player_gamelogs_year_2023\".\"pid\", count(*) as \"rate_type_total_count\", array_agg(distinct player_gamelogs_year_2023.tm) as teams, \"nfl_games\".\"year\" from \"player_gamelogs_year_2023\" left join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs_year_2023\".\"esbid\" where \"nfl_games\".\"seas_type\" in ('REG') and \"player_gamelogs_year_2023\".\"active\" = true and \"nfl_games\".\"year\" in (2023) and \"nfl_games\".\"week\" in (10, 11, 12, 13, 14, 15, 16, 17, 9) group by \"nfl_games\".\"year\", \"player_gamelogs_year_2023\".\"pid\"), \"t07a10bff41a326bd006f6ca137556bef\" as (with \"filtered_plays\" as (select \"nfl_plays\".\"bc_pid\", \"nfl_plays\".\"psr_pid\", \"nfl_plays\".\"trg_pid\", \"nfl_plays\".\"player_fuml_pid\", \"nfl_plays\".\"week\", \"nfl_plays\".\"seas_type\", \"nfl_plays\".\"year\", \"nfl_plays\".\"rush_yds\", \"nfl_plays\".\"rush_td\", \"nfl_plays\".\"pass_yds\", \"nfl_plays\".\"pass_td\", \"nfl_plays\".\"recv_yds\", \"nfl_plays\".\"comp\", \"nfl_plays\".\"int\", \"nfl_plays\".\"first_down\", \"nfl_plays\".\"play_type\", \"nfl_plays\".\"fuml\" from \"nfl_plays\" where \"nfl_plays\".\"play_type\" not in ('NOPL') and (\"nfl_plays\".\"bc_pid\" is not null or \"nfl_plays\".\"psr_pid\" is not null or \"nfl_plays\".\"trg_pid\" is not null or \"nfl_plays\".\"player_fuml_pid\" is not null) and \"nfl_plays\".\"year\" in (2023) and \"nfl_plays\".\"week\" in (1, 2, 3, 4, 5, 6, 7, 8) and \"nfl_plays\".\"seas_type\" in ('REG')) select \"pid\", SUM(fantasy_points_from_plays) as fantasy_points_from_plays, \"seas_type\", \"year\" from (select * from (select \"bc_pid\" as \"pid\", ROUND(SUM(COALESCE(rush_yds, 0) * 0.1 + COALESCE(rush_td::int, 0) * 6), 2) as fantasy_points_from_plays, \"seas_type\", \"year\" from \"filtered_plays\" where \"bc_pid\" is not null group by \"bc_pid\", \"seas_type\", \"year\") as \"bc_stats\" union all select * from (select \"psr_pid\" as \"pid\", ROUND(SUM(COALESCE(pass_yds, 0) * 0.04 + COALESCE(pass_td::int, 0) * 4 + COALESCE(\"int\"::int, 0) * -1), 2) as fantasy_points_from_plays, \"seas_type\", \"year\" from \"filtered_plays\" where \"psr_pid\" is not null group by \"psr_pid\", \"seas_type\", \"year\") as \"psr_stats\" union all select * from (select \"trg_pid\" as \"pid\", ROUND(SUM(COALESCE(recv_yds, 0) * 0.1 + COALESCE(pass_td::int, 0) * 6 + COALESCE(comp::int, 0) * 1), 2) as fantasy_points_from_plays, \"seas_type\", \"year\" from \"filtered_plays\" where \"trg_pid\" is not null group by \"trg_pid\", \"seas_type\", \"year\") as \"trg_stats\" union all select * from (select \"player_fuml_pid\" as \"pid\", ROUND(SUM(-1), 2) as fantasy_points_from_plays, \"seas_type\", \"year\" from \"filtered_plays\" where \"player_fuml_pid\" is not null group by \"player_fuml_pid\", \"seas_type\", \"year\") as \"fuml_stats\") as \"combined_stats\" group by \"pid\", \"seas_type\", \"year\" having SUM(fantasy_points_from_plays) > 0), \"t9871d8d158d17482498f5444cbdf2b2e\" as (with \"filtered_plays\" as (select \"nfl_plays\".\"bc_pid\", \"nfl_plays\".\"psr_pid\", \"nfl_plays\".\"trg_pid\", \"nfl_plays\".\"player_fuml_pid\", \"nfl_plays\".\"week\", \"nfl_plays\".\"seas_type\", \"nfl_plays\".\"year\", \"nfl_plays\".\"rush_yds\", \"nfl_plays\".\"rush_td\", \"nfl_plays\".\"pass_yds\", \"nfl_plays\".\"pass_td\", \"nfl_plays\".\"recv_yds\", \"nfl_plays\".\"comp\", \"nfl_plays\".\"int\", \"nfl_plays\".\"first_down\", \"nfl_plays\".\"play_type\", \"nfl_plays\".\"fuml\" from \"nfl_plays\" where \"nfl_plays\".\"play_type\" not in ('NOPL') and (\"nfl_plays\".\"bc_pid\" is not null or \"nfl_plays\".\"psr_pid\" is not null or \"nfl_plays\".\"trg_pid\" is not null or \"nfl_plays\".\"player_fuml_pid\" is not null) and \"nfl_plays\".\"year\" in (2023) and \"nfl_plays\".\"week\" in (10, 11, 12, 13, 14, 15, 16, 17, 9) and \"nfl_plays\".\"seas_type\" in ('REG')) select \"pid\", SUM(fantasy_points_from_plays) as fantasy_points_from_plays, \"seas_type\", \"year\" from (select * from (select \"bc_pid\" as \"pid\", ROUND(SUM(COALESCE(rush_yds, 0) * 0.1 + COALESCE(rush_td::int, 0) * 6), 2) as fantasy_points_from_plays, \"seas_type\", \"year\" from \"filtered_plays\" where \"bc_pid\" is not null group by \"bc_pid\", \"seas_type\", \"year\") as \"bc_stats\" union all select * from (select \"psr_pid\" as \"pid\", ROUND(SUM(COALESCE(pass_yds, 0) * 0.04 + COALESCE(pass_td::int, 0) * 4 + COALESCE(\"int\"::int, 0) * -1), 2) as fantasy_points_from_plays, \"seas_type\", \"year\" from \"filtered_plays\" where \"psr_pid\" is not null group by \"psr_pid\", \"seas_type\", \"year\") as \"psr_stats\" union all select * from (select \"trg_pid\" as \"pid\", ROUND(SUM(COALESCE(recv_yds, 0) * 0.1 + COALESCE(pass_td::int, 0) * 6 + COALESCE(comp::int, 0) * 1), 2) as fantasy_points_from_plays, \"seas_type\", \"year\" from \"filtered_plays\" where \"trg_pid\" is not null group by \"trg_pid\", \"seas_type\", \"year\") as \"trg_stats\" union all select * from (select \"player_fuml_pid\" as \"pid\", ROUND(SUM(-1), 2) as fantasy_points_from_plays, \"seas_type\", \"year\" from \"filtered_plays\" where \"player_fuml_pid\" is not null group by \"player_fuml_pid\", \"seas_type\", \"year\") as \"fuml_stats\") as \"combined_stats\" group by \"pid\", \"seas_type\", \"year\" having SUM(fantasy_points_from_plays) > 0) select \"player\".\"pid\", player.fname, player.lname, \"tb9b614943131b9f2cbe8a4753294dfcb\".\"points_per_game\" AS \"points_per_game_from_seasonlogs_0\", CAST(t07a10bff41a326bd006f6ca137556bef.fantasy_points_from_plays AS DECIMAL) / NULLIF(CAST(te28af74c7cf436b69ce8f6c02f3f9092.rate_type_total_count AS DECIMAL), 0) AS \"fantasy_points_from_plays_0\", CAST(t9871d8d158d17482498f5444cbdf2b2e.fantasy_points_from_plays AS DECIMAL) / NULLIF(CAST(t5bf3efa44adb1d42c9e2b0267da8d762.rate_type_total_count AS DECIMAL), 0) AS \"fantasy_points_from_plays_1\", \"player_years\".\"year\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"te28af74c7cf436b69ce8f6c02f3f9092\" on \"te28af74c7cf436b69ce8f6c02f3f9092\".\"pid\" = \"player\".\"pid\" and \"te28af74c7cf436b69ce8f6c02f3f9092\".\"year\" = 2023 left join \"t5bf3efa44adb1d42c9e2b0267da8d762\" on \"t5bf3efa44adb1d42c9e2b0267da8d762\".\"pid\" = \"player\".\"pid\" and \"t5bf3efa44adb1d42c9e2b0267da8d762\".\"year\" = 2023 inner join \"scoring_format_player_seasonlogs\" as \"t363940a466a7e5e5b4624ffc010a5ebd\" on \"t363940a466a7e5e5b4624ffc010a5ebd\".\"pid\" = \"player\".\"pid\" and t363940a466a7e5e5b4624ffc010a5ebd.year = player_years.year and t363940a466a7e5e5b4624ffc010a5ebd.scoring_format_hash = 'ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e' left join \"scoring_format_player_seasonlogs\" as \"tb9b614943131b9f2cbe8a4753294dfcb\" on \"tb9b614943131b9f2cbe8a4753294dfcb\".\"pid\" = \"player\".\"pid\" and \"tb9b614943131b9f2cbe8a4753294dfcb\".\"year\" = 2023 and tb9b614943131b9f2cbe8a4753294dfcb.scoring_format_hash = 'ad64bf40cdfec0a1ebdf66453fa57687832f7556f3870251c044d5d270fc089e' left join \"t07a10bff41a326bd006f6ca137556bef\" on \"t07a10bff41a326bd006f6ca137556bef\".\"pid\" = \"player\".\"pid\" and \"t07a10bff41a326bd006f6ca137556bef\".\"year\" = 2023 left join \"t9871d8d158d17482498f5444cbdf2b2e\" on \"t9871d8d158d17482498f5444cbdf2b2e\".\"pid\" = \"player\".\"pid\" and \"t9871d8d158d17482498f5444cbdf2b2e\".\"year\" = 2023 where player.pos IN ('WR') and t363940a466a7e5e5b4624ffc010a5ebd.points_per_game > '0' group by player.fname, player.lname, \"tb9b614943131b9f2cbe8a4753294dfcb\".\"points_per_game\", \"t07a10bff41a326bd006f6ca137556bef\".\"fantasy_points_from_plays\", te28af74c7cf436b69ce8f6c02f3f9092.rate_type_total_count, \"t9871d8d158d17482498f5444cbdf2b2e\".\"fantasy_points_from_plays\", t5bf3efa44adb1d42c9e2b0267da8d762.rate_type_total_count, \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": [
+    "plays",
+    "filters",
+    "parameters",
+    "sorting",
+    "rate_type",
+    "cte",
+    "joins"
+  ],
+  "timeout_ms": 40000
+}

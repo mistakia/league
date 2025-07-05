@@ -45,7 +45,6 @@ const keeptradecut_join = ({
   table_name,
   join_type = 'LEFT',
   splits = [],
-  year_split_join_clause = null,
   params = {},
   data_view_options = {}
 }) => {
@@ -54,7 +53,11 @@ const keeptradecut_join = ({
   const { year_offset_single } = get_default_params({ params })
 
   if (splits.includes('year') && !data_view_options.opening_days_joined) {
-    query.leftJoin('opening_days', 'opening_days.year', 'player_years.year')
+    query.leftJoin(
+      'opening_days',
+      'opening_days.year',
+      data_view_options.year_reference
+    )
     data_view_options.opening_days_joined = true
   }
 
@@ -76,7 +79,7 @@ const keeptradecut_join = ({
   }
 
   const join_conditions = function () {
-    this.on(`${table_name}.pid`, '=', 'player.pid')
+    this.on(`${table_name}.pid`, '=', data_view_options.pid_reference)
     this.andOn(`${table_name}.qb`, '=', db.raw('?', [params.qb || 2]))
     this.andOn(`${table_name}.type`, '=', db.raw('?', [type]))
 
@@ -96,11 +99,12 @@ const keeptradecut_join = ({
         )
       )
 
-      if (year_split_join_clause) {
+      // TODO pretty sure this is always truthy
+      if (data_view_options.year_reference) {
         this.andOn(
           db.raw(`opening_days.year`),
           '=',
-          db.raw(`(${year_split_join_clause})`)
+          db.raw(`(${data_view_options.year_reference})`)
         )
       } else if (params.year) {
         const year_array = Array.isArray(params.year)
@@ -121,7 +125,7 @@ const keeptradecut_join = ({
       this.andOn(`${table_name}.d`, '=', function () {
         this.select(db.raw('MAX(d)'))
           .from('keeptradecut_rankings')
-          .where('pid', db.raw('player.pid'))
+          .where('pid', db.raw(data_view_options.pid_reference))
           .where('qb', db.raw('?', [params.qb || 2]))
           .where('type', db.raw('?', [type]))
       })

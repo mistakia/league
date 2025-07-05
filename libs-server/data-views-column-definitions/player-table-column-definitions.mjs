@@ -126,13 +126,7 @@ export default {
     },
     column_name: 'age',
     year_select: () => undefined,
-    join: ({
-      query,
-      splits,
-      join_type,
-      year_split_join_clause,
-      data_view_options
-    }) => {
+    join: ({ query, splits, join_type, data_view_options }) => {
       if (!splits.includes('year')) {
         return
       }
@@ -141,7 +135,11 @@ export default {
         return
       }
 
-      query.leftJoin('opening_days', 'opening_days.year', 'player_years.year')
+      query.leftJoin(
+        'opening_days',
+        'opening_days.year',
+        data_view_options.year_reference
+      )
       data_view_options.opening_days_joined = true
     },
     main_select: ({ column_index, splits }) => {

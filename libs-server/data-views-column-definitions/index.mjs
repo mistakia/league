@@ -73,23 +73,26 @@ export default {
       'rosters_players.tid',
       'rosters_players.tag'
     ],
-    join: async ({ query, params = {} }) => {
+    join: async ({ query, params = {}, data_view_options = {} }) => {
       const { year = constants.season.year, lid = 1 } = params
       let week = params.week
       if (!week) {
         const league = await getLeague({ lid, year })
-        console.log({ league, lid, year })
-        const championship_round = Array.isArray(league.championship_round)
-          ? Math.max(...league.championship_round)
-          : league.championship_round
-        week = Math.min(
-          constants.season.week,
-          championship_round || constants.season.finalWeek
-        )
+        if (league) {
+          const championship_round = Array.isArray(league.championship_round)
+            ? Math.max(...league.championship_round)
+            : league.championship_round
+          week = Math.min(
+            constants.season.week,
+            championship_round || constants.season.finalWeek
+          )
+        } else {
+          week = Math.min(constants.season.week, constants.season.finalWeek)
+        }
       }
 
       query.leftJoin('rosters_players', function () {
-        this.on('rosters_players.pid', '=', 'player.pid')
+        this.on('rosters_players.pid', '=', data_view_options.pid_reference)
         this.andOn('rosters_players.year', '=', year)
         this.andOn('rosters_players.week', '=', week)
         this.andOn('rosters_players.lid', '=', lid)
@@ -105,7 +108,7 @@ export default {
     table_alias: () => 'latest_transactions',
     select_as: () => 'player_salary',
     main_where: ({ table_name }) => `${table_name}.value`,
-    join: ({ query, params = {} }) => {
+    join: ({ query, params = {}, data_view_options = {} }) => {
       const { lid = 1 } = params
       query.leftJoin(
         db('transactions')
@@ -115,10 +118,10 @@ export default {
           .groupBy('pid')
           .as('transactions'),
         'transactions.pid',
-        'player.pid'
+        data_view_options.pid_reference
       )
       query.leftJoin('transactions as latest_transactions', function () {
-        this.on('latest_transactions.pid', '=', 'player.pid')
+        this.on('latest_transactions.pid', '=', data_view_options.pid_reference)
         this.andOn(
           'latest_transactions.timestamp',
           '=',

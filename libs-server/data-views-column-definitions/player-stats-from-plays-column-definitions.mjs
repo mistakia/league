@@ -274,7 +274,7 @@ const create_team_share_stat = ({
     }
     return with_select_string
   },
-  main_where: ({ params, table_name }) => {
+  main_where: ({ params, table_name, data_view_options }) => {
     if (
       params.year_offset &&
       Array.isArray(params.year_offset) &&
@@ -283,7 +283,11 @@ const create_team_share_stat = ({
       if (has_numerator_denominator) {
         return `CASE WHEN SUM(${table_name}.${column_name}_denominator) > 0 THEN ROUND(100.0 * SUM(${table_name}.${column_name}_numerator) / NULLIF(SUM(${table_name}.${column_name}_denominator), 0), 2) ELSE 0 END`
       } else if (main_select_string_year_offset_range) {
-        return main_select_string_year_offset_range({ table_name, params })
+        return main_select_string_year_offset_range({
+          table_name,
+          params,
+          data_view_options
+        })
       }
     }
     return null
@@ -761,8 +765,13 @@ export default {
       'ROUND((1.5 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0)) + (0.7 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0)), 4)',
     with_select_string_year_offset_range:
       'COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) as player_targets, SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END) as team_targets, SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) as player_air_yards, SUM(nfl_plays.dot) as team_air_yards',
-    main_select_string_year_offset_range: ({ table_name, params }) =>
-      `(SELECT ROUND((1.5 * SUM(${table_name}.player_targets) / NULLIF(SUM(${table_name}.team_targets), 0)) + (0.7 * SUM(${table_name}.player_air_yards) / NULLIF(SUM(${table_name}.team_air_yards), 0)), 4) FROM ${table_name} WHERE ${table_name}.pid = player.pid AND ${table_name}.year BETWEEN player_years.year + ${Math.min(...params.year_offset)} AND player_years.year + ${Math.max(...params.year_offset)})`
+    main_select_string_year_offset_range: ({
+      table_name,
+      params,
+      data_view_options = {}
+    }) => {
+      return `(SELECT ROUND((1.5 * SUM(${table_name}.player_targets) / NULLIF(SUM(${table_name}.team_targets), 0)) + (0.7 * SUM(${table_name}.player_air_yards) / NULLIF(SUM(${table_name}.team_air_yards), 0)), 4) FROM ${table_name} WHERE ${table_name}.pid = ${data_view_options.pid_reference} AND ${table_name}.year BETWEEN ${data_view_options.year_reference} + ${Math.min(...params.year_offset)} AND ${data_view_options.year_reference} + ${Math.max(...params.year_offset)})`
+    }
   }),
   player_receiving_first_down_share_from_plays: create_team_share_stat({
     column_name: 'recv_first_down_share_from_plays',

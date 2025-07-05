@@ -1,0 +1,70 @@
+{
+  "name": "year_offset range with where filters",
+  "description": "Test case for year_offset range with where filters",
+  "request": {
+    "sort": [
+      {
+        "column_id": "player_fantasy_points_from_plays",
+        "desc": true
+      }
+    ],
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_fantasy_points_from_plays",
+        "params": {
+          "year": [2018, 2019, 2020, 2021]
+        }
+      },
+      {
+        "column_id": "player_fantasy_points_from_plays",
+        "params": {
+          "year": [2018, 2019, 2020, 2021],
+          "year_offset": [1, 3]
+        }
+      },
+      {
+        "column_id": "player_pass_completion_percentage_from_plays",
+        "params": {
+          "year": [2018, 2019, 2020, 2021]
+        }
+      },
+      {
+        "column_id": "player_pass_completion_percentage_from_plays",
+        "params": {
+          "year": [2018, 2019, 2020, 2021],
+          "year_offset": [1, 3]
+        }
+      }
+    ],
+    "splits": ["year"],
+    "where": [
+      {
+        "column_id": "player_position",
+        "operator": "IN",
+        "value": ["QB"]
+      },
+      {
+        "column_id": "player_fantasy_points_from_plays",
+        "operator": ">=",
+        "value": 100,
+        "params": {
+          "year": [2018, 2019, 2020, 2021]
+        }
+      },
+      {
+        "column_id": "player_fantasy_points_from_plays",
+        "column_index": 1,
+        "operator": ">=",
+        "value": 300,
+        "params": {
+          "year": [2018, 2019, 2020, 2021],
+          "year_offset": [1, 3]
+        }
+      }
+    ]
+  },
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2018,2019,2020,2021,2022,2023,2024]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years WHERE player.pos IN ('QB')), \"tf36f50115edca47ed18c025bd6fc856f\" as (with \"filtered_plays\" as (select \"nfl_plays\".\"bc_pid\", \"nfl_plays\".\"psr_pid\", \"nfl_plays\".\"trg_pid\", \"nfl_plays\".\"player_fuml_pid\", \"nfl_plays\".\"week\", \"nfl_plays\".\"seas_type\", \"nfl_plays\".\"year\", \"nfl_plays\".\"rush_yds\", \"nfl_plays\".\"rush_td\", \"nfl_plays\".\"pass_yds\", \"nfl_plays\".\"pass_td\", \"nfl_plays\".\"recv_yds\", \"nfl_plays\".\"comp\", \"nfl_plays\".\"int\", \"nfl_plays\".\"first_down\", \"nfl_plays\".\"play_type\", \"nfl_plays\".\"fuml\" from \"nfl_plays\" where \"nfl_plays\".\"play_type\" not in ('NOPL') and (\"nfl_plays\".\"bc_pid\" is not null or \"nfl_plays\".\"psr_pid\" is not null or \"nfl_plays\".\"trg_pid\" is not null or \"nfl_plays\".\"player_fuml_pid\" is not null) and \"nfl_plays\".\"year\" in (2018, 2019, 2020, 2021) and \"nfl_plays\".\"seas_type\" in ('REG')) select \"pid\", SUM(fantasy_points_from_plays) as fantasy_points_from_plays, \"seas_type\", \"year\" from (select * from (select \"bc_pid\" as \"pid\", ROUND(SUM(COALESCE(rush_yds, 0) * 0.1 + COALESCE(rush_td::int, 0) * 6), 2) as fantasy_points_from_plays, \"seas_type\", \"year\" from \"filtered_plays\" where \"bc_pid\" is not null group by \"bc_pid\", \"seas_type\", \"year\") as \"bc_stats\" union all select * from (select \"psr_pid\" as \"pid\", ROUND(SUM(COALESCE(pass_yds, 0) * 0.04 + COALESCE(pass_td::int, 0) * 4 + COALESCE(\"int\"::int, 0) * -1), 2) as fantasy_points_from_plays, \"seas_type\", \"year\" from \"filtered_plays\" where \"psr_pid\" is not null group by \"psr_pid\", \"seas_type\", \"year\") as \"psr_stats\" union all select * from (select \"trg_pid\" as \"pid\", ROUND(SUM(COALESCE(recv_yds, 0) * 0.1 + COALESCE(pass_td::int, 0) * 6 + COALESCE(comp::int, 0) * 1), 2) as fantasy_points_from_plays, \"seas_type\", \"year\" from \"filtered_plays\" where \"trg_pid\" is not null group by \"trg_pid\", \"seas_type\", \"year\") as \"trg_stats\" union all select * from (select \"player_fuml_pid\" as \"pid\", ROUND(SUM(-1), 2) as fantasy_points_from_plays, \"seas_type\", \"year\" from \"filtered_plays\" where \"player_fuml_pid\" is not null group by \"player_fuml_pid\", \"seas_type\", \"year\") as \"fuml_stats\") as \"combined_stats\" group by \"pid\", \"seas_type\", \"year\" having SUM(fantasy_points_from_plays) > 0), \"tab57a906a037a5504d5751da7444d105\" as (with \"filtered_plays\" as (select \"nfl_plays\".\"bc_pid\", \"nfl_plays\".\"psr_pid\", \"nfl_plays\".\"trg_pid\", \"nfl_plays\".\"player_fuml_pid\", \"nfl_plays\".\"week\", \"nfl_plays\".\"seas_type\", \"nfl_plays\".\"year\", \"nfl_plays\".\"rush_yds\", \"nfl_plays\".\"rush_td\", \"nfl_plays\".\"pass_yds\", \"nfl_plays\".\"pass_td\", \"nfl_plays\".\"recv_yds\", \"nfl_plays\".\"comp\", \"nfl_plays\".\"int\", \"nfl_plays\".\"first_down\", \"nfl_plays\".\"play_type\", \"nfl_plays\".\"fuml\" from \"nfl_plays\" where \"nfl_plays\".\"play_type\" not in ('NOPL') and (\"nfl_plays\".\"bc_pid\" is not null or \"nfl_plays\".\"psr_pid\" is not null or \"nfl_plays\".\"trg_pid\" is not null or \"nfl_plays\".\"player_fuml_pid\" is not null) and \"nfl_plays\".\"year\" in (2018, 2019, 2020, 2021, 2022, 2023, 2024) and \"nfl_plays\".\"seas_type\" in ('REG')) select \"pid\", SUM(fantasy_points_from_plays) as fantasy_points_from_plays, \"seas_type\", \"year\" from (select * from (select \"bc_pid\" as \"pid\", ROUND(SUM(COALESCE(rush_yds, 0) * 0.1 + COALESCE(rush_td::int, 0) * 6), 2) as fantasy_points_from_plays, \"seas_type\", \"year\" from \"filtered_plays\" where \"bc_pid\" is not null group by \"bc_pid\", \"seas_type\", \"year\") as \"bc_stats\" union all select * from (select \"psr_pid\" as \"pid\", ROUND(SUM(COALESCE(pass_yds, 0) * 0.04 + COALESCE(pass_td::int, 0) * 4 + COALESCE(\"int\"::int, 0) * -1), 2) as fantasy_points_from_plays, \"seas_type\", \"year\" from \"filtered_plays\" where \"psr_pid\" is not null group by \"psr_pid\", \"seas_type\", \"year\") as \"psr_stats\" union all select * from (select \"trg_pid\" as \"pid\", ROUND(SUM(COALESCE(recv_yds, 0) * 0.1 + COALESCE(pass_td::int, 0) * 6 + COALESCE(comp::int, 0) * 1), 2) as fantasy_points_from_plays, \"seas_type\", \"year\" from \"filtered_plays\" where \"trg_pid\" is not null group by \"trg_pid\", \"seas_type\", \"year\") as \"trg_stats\" union all select * from (select \"player_fuml_pid\" as \"pid\", ROUND(SUM(-1), 2) as fantasy_points_from_plays, \"seas_type\", \"year\" from \"filtered_plays\" where \"player_fuml_pid\" is not null group by \"player_fuml_pid\", \"seas_type\", \"year\") as \"fuml_stats\") as \"combined_stats\" group by \"pid\", \"seas_type\", \"year\" having SUM(fantasy_points_from_plays) > 0), \"t89bc59c57e811f68fa4b04eaabac088c\" as (select COALESCE(psr_pid) as pid, \"nfl_plays\".\"year\", CASE WHEN SUM(CASE WHEN sk is null or sk = false THEN 1 ELSE 0 END) > 0 THEN ROUND(100.0 * SUM(CASE WHEN comp = true THEN 1 ELSE 0 END) / SUM(CASE WHEN sk is null or sk = false THEN 1 ELSE 0 END), 2) ELSE 0 END as pass_comp_pct_from_plays from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"year\" in (2018, 2019, 2020, 2021) and \"nfl_plays\".\"seas_type\" in ('REG') group by \"nfl_plays\".\"year\", COALESCE(psr_pid)), \"tdb0d3befe806111d203733d2827eb66e\" as (select COALESCE(psr_pid) as pid, \"nfl_plays\".\"year\", SUM(CASE WHEN comp = true THEN 1 ELSE 0 END) as pass_comp_pct_from_plays_numerator, SUM(CASE WHEN sk is null or sk = false THEN 1 ELSE 0 END) as pass_comp_pct_from_plays_denominator from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"year\" in (2018, 2019, 2020, 2021, 2022, 2023, 2024) and \"nfl_plays\".\"seas_type\" in ('REG') group by \"nfl_plays\".\"year\", COALESCE(psr_pid)) select \"tf36f50115edca47ed18c025bd6fc856f\".\"pid\", player.fname, player.lname, \"tf36f50115edca47ed18c025bd6fc856f\".\"fantasy_points_from_plays\" AS \"fantasy_points_from_plays_0\", (SELECT SUM(tab57a906a037a5504d5751da7444d105.fantasy_points_from_plays) FROM tab57a906a037a5504d5751da7444d105 WHERE tab57a906a037a5504d5751da7444d105.pid = tf36f50115edca47ed18c025bd6fc856f.pid AND tab57a906a037a5504d5751da7444d105.year BETWEEN tf36f50115edca47ed18c025bd6fc856f.year + 1 AND tf36f50115edca47ed18c025bd6fc856f.year + 3) AS \"fantasy_points_from_plays_1\", \"t89bc59c57e811f68fa4b04eaabac088c\".\"pass_comp_pct_from_plays\" AS \"pass_comp_pct_from_plays_0\", (SELECT SUM(tdb0d3befe806111d203733d2827eb66e.pass_comp_pct_from_plays_numerator) / NULLIF(SUM(tdb0d3befe806111d203733d2827eb66e.pass_comp_pct_from_plays_denominator), 0) FROM tdb0d3befe806111d203733d2827eb66e WHERE tdb0d3befe806111d203733d2827eb66e.pid = tf36f50115edca47ed18c025bd6fc856f.pid AND tdb0d3befe806111d203733d2827eb66e.year BETWEEN tf36f50115edca47ed18c025bd6fc856f.year + 1 AND tf36f50115edca47ed18c025bd6fc856f.year + 3) AS \"pass_comp_pct_from_plays_1\", \"tf36f50115edca47ed18c025bd6fc856f\".\"year\", \"player\".\"pos\" from \"tf36f50115edca47ed18c025bd6fc856f\" inner join \"player\" on \"player\".\"pid\" = \"tf36f50115edca47ed18c025bd6fc856f\".\"pid\" inner join \"tab57a906a037a5504d5751da7444d105\" on \"tab57a906a037a5504d5751da7444d105\".\"pid\" = \"tf36f50115edca47ed18c025bd6fc856f\".\"pid\" and tab57a906a037a5504d5751da7444d105.year BETWEEN tf36f50115edca47ed18c025bd6fc856f.year + 1 AND tf36f50115edca47ed18c025bd6fc856f.year + 3 left join \"t89bc59c57e811f68fa4b04eaabac088c\" on \"t89bc59c57e811f68fa4b04eaabac088c\".\"pid\" = \"tf36f50115edca47ed18c025bd6fc856f\".\"pid\" and t89bc59c57e811f68fa4b04eaabac088c.year = tf36f50115edca47ed18c025bd6fc856f.year and t89bc59c57e811f68fa4b04eaabac088c.year IN (2018,2019,2020,2021) left join \"tdb0d3befe806111d203733d2827eb66e\" on \"tdb0d3befe806111d203733d2827eb66e\".\"pid\" = \"tf36f50115edca47ed18c025bd6fc856f\".\"pid\" and tdb0d3befe806111d203733d2827eb66e.year BETWEEN tf36f50115edca47ed18c025bd6fc856f.year + 1 AND tf36f50115edca47ed18c025bd6fc856f.year + 3 where player.pos IN ('QB') group by player.fname, player.lname, \"tf36f50115edca47ed18c025bd6fc856f\".\"fantasy_points_from_plays\", tab57a906a037a5504d5751da7444d105.fantasy_points_from_plays, \"t89bc59c57e811f68fa4b04eaabac088c\".\"pass_comp_pct_from_plays\", \"tf36f50115edca47ed18c025bd6fc856f\".\"year\", \"tf36f50115edca47ed18c025bd6fc856f\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" having SUM(tab57a906a037a5504d5751da7444d105.fantasy_points_from_plays) >= '300' order by 4 DESC NULLS LAST, \"tf36f50115edca47ed18c025bd6fc856f\".\"pid\" asc limit 500",
+  "tags": ["filters", "parameters", "sorting", "cte", "joins"],
+  "timeout_ms": 40000
+}

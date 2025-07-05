@@ -36,7 +36,7 @@ The data views system provides a flexible, parameter-driven approach to building
 
 ### Pipeline Architecture
 
-The query builder follows an 8-stage pipeline centered around `get_data_view_results_query()`:
+The query builder follows a 9-stage pipeline centered around `get_data_view_results_query()`:
 
 ```
 Input Request
@@ -45,17 +45,19 @@ Input Request
     ↓
 [2] Parameter Processing & Dynamic Resolution
     ↓
-[3] Base Query Initialization & State Setup
+[3] From Table Optimization & Base Query Setup
     ↓
 [4] Split Handling & CTE Creation
     ↓
-[5] Rate Type Discovery & CTE Generation
+[5] Centralized Reference Setup
     ↓
-[6] Table Grouping by Split Compatibility
+[6] Rate Type Discovery & CTE Generation
     ↓
-[7] Clause Application per Table Group
+[7] Table Grouping by Split Compatibility
     ↓
-[8] Sorting, Pagination & Query Finalization
+[8] Clause Application per Table Group
+    ↓
+[9] Sorting, Pagination & Query Finalization
     ↓
 Final Query + Cache Metadata
 ```
@@ -66,12 +68,18 @@ Each stage makes key decisions that affect query performance:
 
 - **Stage 1**: Validates schema and filters invalid where clauses
 - **Stage 2**: Resolves dynamic parameters and format hashes
+- **Stage 3**: Determines optimal from table and sets up base query structure
 - **Stage 4**: Determines split strategy (none/year/week) and CTE structure
-- **Stage 5**: Identifies required rate type CTEs for sharing
-- **Stage 6**: Groups tables by split compatibility for processing order
-- **Stage 7**: Selects JOIN type (INNER vs LEFT) based on filtering needs
+- **Stage 5**: Sets up centralized references for consistent join patterns
+- **Stage 6**: Identifies required rate type CTEs for sharing
+- **Stage 7**: Groups tables by split compatibility for processing order
+- **Stage 8**: Selects JOIN type (INNER vs LEFT) based on filtering needs
 
 ### Performance-Critical Paths
+
+**From Table Optimization**: When sort columns specify a CTE table, the system starts the query from that table instead of the default `player` table. Uses whitelist system for gradual rollout.
+
+**Centralized Reference System**: All year/week/PID joins use centralized references from `data_view_options` instead of passing individual join clauses to each function.
 
 **Single-Year Optimization**: When `params.year` contains a single year, the system uses partitioned tables (`player_gamelogs_2024`) for significant performance gains.
 
@@ -90,7 +98,7 @@ Each stage makes key decisions that affect query performance:
   column_name: 'rec_yds',                 // Database column name
 
   // Query generation functions (performance-critical)
-  main_select: ({ column_index, params, table_name, rate_type_column_mapping, splits }) => [
+  main_select: ({ column_index, params, table_name, rate_type_column_mapping, splits, data_view_options }) => [
     {
       sql: `SUM(${table_name}.rec_yds) as receiving_yards_${column_index}`,
       bindings: []
@@ -113,9 +121,9 @@ Each stage makes key decisions that affect query performance:
     return 'player_gamelogs'
   },
 
-  join: async ({ query, table_name, params, join_type, splits }) => {
+  join: async ({ query, table_name, params, join_type, splits, data_view_options }) => {
     // Custom JOIN logic with performance considerations
-    query.leftJoin(table_name, `${table_name}.pid`, 'player.pid')
+    query.leftJoin(table_name, `${table_name}.pid`, data_view_options.pid_reference)
   },
 
   // Cache optimization
@@ -134,7 +142,7 @@ Each stage makes key decisions that affect query performance:
 
 ### Advanced Column Definition (WITH Statements)
 
-For complex aggregations that benefit from CTEs:
+For complex aggregations that benefit from CTEs (see [Fantasy Points Column Definition](./fantasy-points-column-definition.md) for a comprehensive real-world example):
 
 ```javascript
 {
@@ -158,14 +166,14 @@ For complex aggregations that benefit from CTEs:
     })
   },
 
-  with_select: ({ column_index, table_name }) => ({
+  with_select: ({ column_index, table_name, data_view_options }) => ({
     select: [`${table_name}.rushing_yards as team_rushing_yards_${column_index}`],
     group_by: []
   }),
 
   with_where: ({ table_name, params }) => {
-    // WHERE clause for CTE
-    return `${table_name}.play_count > 10`
+    // Returns column expression for CTE filtering
+    return 'rushing_yards'
   }
 }
 ```
@@ -264,6 +272,7 @@ POST /data_views/search
 **Critical Performance Responsibilities**:
 
 - Initializes query state and optimization flags
+- Determines optimal starting table via primary table analysis
 - Coordinates pipeline stages for optimal processing order
 - Manages CTE creation and reuse strategies
 - Controls JOIN type selection for performance
@@ -271,20 +280,30 @@ POST /data_views/search
 **Key Decision Logic**:
 
 ```javascript
+// From table optimization for performance
+const from_table_config = get_from_table_config({
+  sort,
+  columns,
+  prefix_columns,
+  splits,
+  data_views_column_definitions
+})
+
+// Initialize from the determined from table
+if (from_table_config.from_table_name) {
+  from_table_name = from_table_config.from_table_name
+  players_query = db(from_table_name).select(`${from_table_name}.pid`)
+
+  // Add early LEFT JOIN to player table for CTE-based from tables
+  if (from_table_config.from_table_type === 'cte') {
+    players_query.innerJoin('player', 'player.pid', `${from_table_name}.pid`)
+  }
+}
+
 // Determines split strategy based on request
 if (splits.includes('week') || splits.includes('year')) {
   const year_range = get_year_range([...prefix_columns, ...columns], where)
   // Creates base_years CTE for cross-join optimization
-}
-
-// Optimizes rate type processing
-if (splits.includes('week')) {
-  // Removes incompatible per_game rate types
-  columns = columns.map((column) =>
-    column.params?.rate_type?.[0] === 'per_game'
-      ? { ...column, params: { ...column.params, rate_type: undefined } }
-      : column
-  )
 }
 ```
 
@@ -302,21 +321,42 @@ async add_clauses_for_table({
   table_name,              // Target table name or alias
   group_column_params = {},// Shared parameters for optimization
   splits = [],             // Active split dimensions
-  year_split_join_clause,  // Year join condition
-  week_split_join_clause,  // Week join condition
   rate_type_column_mapping,// Column to rate type table mapping
-  data_view_options,       // Query-level optimization flags
+  data_view_options,       // Query-level optimization flags with centralized references
   data_view_metadata       // Cache metadata tracking
 })
 ```
 
 **Internal Optimization Process**:
 
-1. **Clause Collection**: Groups select and where operations
-2. **SQL Generation**: Calls column definition functions with optimization context
-3. **JOIN Strategy**: Selects INNER vs LEFT JOIN based on filtering needs
-4. **CTE Processing**: Handles WITH statement requirements efficiently
-5. **Query Application**: Applies optimized clauses to query builder
+1. **Self-Join Prevention**: Skips joins when table matches the from table from from table optimization
+2. **Clause Collection**: Groups select and where operations
+3. **SQL Generation**: Calls column definition functions with optimization context
+4. **JOIN Strategy**: Selects INNER vs LEFT JOIN based on filtering needs
+5. **CTE Processing**: Handles WITH statement requirements efficiently
+6. **Query Application**: Applies optimized clauses to query builder
+
+**Self-Join Prevention Logic**:
+
+```javascript
+// Skip join entirely if this table is the same as the from table (prevents self-join)
+if (table_name !== data_view_options.from_table_name) {
+  if (join_func) {
+    await join_func({
+      query: players_query,
+      table_name,
+      params: group_column_params,
+      join_type: where_clauses.length ? 'INNER' : 'LEFT',
+      splits,
+      data_view_options // Contains centralized references
+    })
+  }
+} else {
+  log(
+    `Skipping self-join for table: ${table_name} (from table: ${data_view_options.from_table_name})`
+  )
+}
+```
 
 ### Parameter Processing Functions
 
@@ -434,23 +474,64 @@ WITH player_years_weeks AS (
 - INNER JOIN on timestamp table leverages indexes
 - Eliminates redundant player-week combinations
 
-### Split Join Clause Generation
+### Centralized Reference System
 
-**Dynamic Join Optimization**:
+**Core Architecture**:
+
+The centralized reference system replaces individual `year_split_join_clause` and `week_split_join_clause` parameters with a unified reference system stored in `data_view_options`.
+
+**Setup Phase**:
 
 ```javascript
-// Standard split joins
-year_split_join_clause = 'player_years.year'
-week_split_join_clause = 'player_years_weeks.week'
+// setup_central_references() sets up references based on from table
+const setup_central_references = ({ data_view_options, splits }) => {
+  const { from_table_name } = data_view_options
 
-// Custom year selection with offset (for multi-year analysis)
-year_split_join_clause = column_definition.year_select({
-  table_name: 'player_gamelogs',
-  splits: ['year'],
-  column_params: { year_offset: [-1] } // Previous year comparison
-})
-// Returns: 'player_gamelogs.year - (-1)'
+  // Setup player PID reference
+  data_view_options.pid_reference = `${from_table_name}.pid`
+
+  // Setup year and week references - use the from table directly
+  data_view_options.year_reference = `${from_table_name}.year`
+  data_view_options.week_reference = `${from_table_name}.week`
+
+  return data_view_options
+}
 ```
+
+**Usage in Joins**:
+
+```javascript
+// Rate type joins using centralized references
+players_query.leftJoin(rate_type_table_name, function () {
+  this.on(`${rate_type_table_name}.pid`, data_view_options.pid_reference)
+
+  // Year joins with offset calculations
+  if (splits.includes('year')) {
+    this.on(
+      db.raw(
+        `${rate_type_table_name}.year = ${data_view_options.year_reference} + ?`,
+        [year_offset]
+      )
+    )
+  }
+
+  // Week joins
+  if (splits.includes('week')) {
+    this.andOn(
+      `${rate_type_table_name}.week`,
+      '=',
+      data_view_options.week_reference
+    )
+  }
+})
+```
+
+**Benefits**:
+
+- **Consistent References**: All joins use the same year/week/PID references
+- **From Table Adaptation**: References automatically adapt to from table optimization
+- **Simplified Function Signatures**: No need to pass individual join clauses
+- **Better Maintainability**: Single source of truth for all reference patterns
 
 ### Table Processing Order Optimization
 
@@ -524,20 +605,20 @@ export const join_per_game_cte = ({
   players_query,
   rate_type_table_name,
   splits,
-  year_split_join_clause
+  data_view_options
 }) => {
   if (splits.includes('year')) {
     // Split-aware join for time-series analysis
     players_query.leftJoin(rate_type_table_name, function () {
-      this.on(`${rate_type_table_name}.pid`, 'player.pid')
-      this.on(`${rate_type_table_name}.year`, year_split_join_clause)
+      this.on(`${rate_type_table_name}.pid`, data_view_options.pid_reference)
+      this.on(`${rate_type_table_name}.year`, data_view_options.year_reference)
     })
   } else {
     // Simple join for aggregated analysis
     players_query.leftJoin(
       rate_type_table_name,
       `${rate_type_table_name}.pid`,
-      'player.pid'
+      data_view_options.pid_reference
     )
   }
 }
@@ -595,10 +676,10 @@ for (const [rate_type_table_name, config] of Object.entries(
     params: config.params,
     rate_type_table_name,
     splits,
-    year_split_join_clause,
     rate_type: config.rate_type,
     team_unit: config.team_unit,
-    is_team: config.is_team
+    is_team: config.is_team,
+    data_view_options // Contains centralized year_reference, week_reference, pid_reference
   })
 }
 ```
@@ -609,7 +690,12 @@ for (const [rate_type_table_name, config] of Object.entries(
 
 ```javascript
 // Column definition main_select with rate type integration
-main_select: ({ column_index, rate_type_column_mapping, table_name }) => {
+main_select: ({
+  column_index,
+  rate_type_column_mapping,
+  table_name,
+  data_view_options
+}) => {
   const rate_type_table_name =
     rate_type_column_mapping[`player_fantasy_points_from_plays_${column_index}`]
 
@@ -634,6 +720,21 @@ main_select: ({ column_index, rate_type_column_mapping, table_name }) => {
       bindings: []
     }
   ]
+}
+
+// Year offset range handling with centralized references
+main_select_string_year_offset_range: ({
+  table_name,
+  params,
+  data_view_options
+}) => {
+  const min_year_offset = Math.min(...params.year_offset)
+  const max_year_offset = Math.max(...params.year_offset)
+
+  return `(SELECT SUM(${table_name}.fantasy_points) FROM ${table_name} 
+    WHERE ${table_name}.pid = ${data_view_options.pid_reference} 
+    AND ${table_name}.year BETWEEN ${data_view_options.year_reference} + ${min_year_offset} 
+    AND ${data_view_options.year_reference} + ${max_year_offset})`
 }
 ```
 
@@ -672,9 +773,7 @@ await join_func({
   params: group_column_params,
   join_type: where_clauses.length ? 'INNER' : 'LEFT', // Key optimization
   splits,
-  year_split_join_clause,
-  week_split_join_clause,
-  data_view_options
+  data_view_options // Contains centralized year_reference, week_reference, pid_reference
 })
 ```
 
@@ -699,6 +798,18 @@ const rate_type_table_name = get_rate_type_cte_table_name({
 
 // Only create CTE once, reference multiple times
 data_view_options.rate_type_tables[rate_type_table_name] = config
+
+// Join using centralized references
+join_rate_type_cte({
+  players_query,
+  params: config.params,
+  rate_type_table_name,
+  splits,
+  rate_type: config.rate_type,
+  team_unit: config.team_unit,
+  is_team: config.is_team,
+  data_view_options // Contains centralized year_reference, week_reference, etc.
+})
 ```
 
 **Performance Benefits**:
@@ -730,6 +841,62 @@ if (join_func) {
 
 ## State Management and Data Flow
 
+### New Functions in Centralized Reference System
+
+#### `setup_central_references({ data_view_options, splits })`
+
+**Purpose**: Sets up centralized references for year, week, and player PID based on the from table.
+
+**Parameters**:
+
+- `data_view_options` (Object): Query optimization state object containing from table information
+- `splits` (Array): Active split dimensions ['year', 'week']
+
+**Returns**: Updated `data_view_options` object with centralized references
+
+**Implementation**:
+
+```javascript
+const setup_central_references = ({ data_view_options, splits }) => {
+  const { from_table_name } = data_view_options
+
+  // Setup player PID reference
+  data_view_options.pid_reference = `${from_table_name}.pid`
+
+  // Setup year and week references - use the from table directly
+  data_view_options.year_reference = `${from_table_name}.year`
+  data_view_options.week_reference = `${from_table_name}.week`
+
+  return data_view_options
+}
+```
+
+#### `get_from_table_config({ sort, columns, prefix_columns, splits, data_views_column_definitions })`
+
+**Purpose**: Determines the optimal from table configuration with whitelist-based rollout.
+
+**Parameters**:
+
+- `sort` (Array): Sort configuration from user request
+- `columns` (Array): Column configurations
+- `prefix_columns` (Array): Prefix column configurations
+- `splits` (Array): Active split dimensions
+- `data_views_column_definitions` (Object): Column definition registry
+
+**Returns**: From table configuration object with `from_table_name`, `from_table_type`, and `column_id`
+
+#### `setup_from_table_and_player_joins({ players_query, from_table_config, data_views_column_definitions })`
+
+**Purpose**: Sets up the from table and required player joins for the query.
+
+**Parameters**:
+
+- `players_query` (Object): Knex query builder instance
+- `from_table_config` (Object): From table configuration
+- `data_views_column_definitions` (Object): Column definition registry
+
+**Returns**: Void (modifies players_query in place)
+
 ### Core State Objects
 
 #### `data_view_options` - Query Optimization State
@@ -740,6 +907,16 @@ const data_view_options = {
   opening_days_joined: false, // Prevents duplicate expensive joins
   player_seasonlogs_joined: false, // Tracks seasonlogs table usage
   nfl_year_week_timestamp_joined: false, // Week timestamp join tracking
+
+  // From table optimization
+  from_table_name: 'player', // Optimized starting table
+  from_table_type: 'table', // Type of from table (table/cte)
+  from_table_column_id: null, // Column ID that determined from table
+
+  // Centralized references (replaces individual join clause parameters)
+  pid_reference: 'player.pid', // Centralized player PID reference
+  year_reference: 'player_years.year', // Centralized year reference
+  week_reference: 'player_years_weeks.week', // Centralized week reference
 
   // Optimization state
   year_coalesce_args: [], // Year selection optimization
@@ -752,6 +929,9 @@ const data_view_options = {
 
 - **Join Tracking**: Prevents expensive duplicate joins
 - **CTE Management**: Enables reuse across columns
+- **Centralized References**: Consistent year/week/PID joins across all tables
+- **From Table Optimization**: Performance-optimized query starting points with whitelist system
+- **Self-Join Prevention**: Automatic detection and prevention of invalid self-joins
 - **Optimization Flags**: Conditional query modifications
 
 #### `data_view_metadata` - Cache Optimization
@@ -913,7 +1093,93 @@ For comprehensive documentation of every function in the query builder system, s
 
 ### Immediate Performance Improvements
 
-#### 1. Query Plan Caching
+#### 1. Centralized Reference System (Implemented)
+
+**Strategy**: Replace individual `year_split_join_clause` and `week_split_join_clause` parameters with centralized references stored in `data_view_options`.
+
+```javascript
+// Old system - parameters passed to each function
+await add_clauses_for_table({
+  players_query,
+  year_split_join_clause: 'player_years.year',
+  week_split_join_clause: 'player_years_weeks.week'
+  // ... other params
+})
+
+// New system - centralized references
+setup_central_references({ data_view_options, splits })
+// Sets: data_view_options.year_reference, week_reference, pid_reference
+
+await add_clauses_for_table({
+  players_query,
+  data_view_options // Contains all centralized references
+  // ... other params
+})
+```
+
+**Benefits Achieved**:
+
+- **Reduced Parameter Passing**: Eliminated need to pass year/week join clauses to every function
+- **Consistent References**: All joins use the same year/week references, preventing inconsistencies
+- **Simplified Function Signatures**: Cleaner, more maintainable function interfaces
+- **Better From Table Integration**: References automatically adapt to from table optimization
+- **Automatic PID Reference**: Player PID reference adapts to from table automatically
+
+**Implementation Details**:
+
+- `setup_central_references()` determines optimal references based on from table and splits
+- All join functions now use `data_view_options.year_reference` and `data_view_options.week_reference`
+- Rate type CTEs automatically use centralized references for consistent joins
+- Player PID reference adapts to from table optimization (`player.pid` vs `from_table.pid`)
+- Function signatures updated across all rate type plugins and column definitions
+
+#### 2. From Table Optimization with Whitelist System (Implemented)
+
+**Strategy**: Start queries from the most selective table rather than always using `player` table, with gradual rollout using whitelist.
+
+```javascript
+// Determine optimal starting table from sort column and splits
+const from_table_config = get_from_table_config({
+  sort,
+  columns,
+  prefix_columns,
+  splits,
+  data_views_column_definitions
+})
+
+// Whitelist system for gradual rollout
+const whitelisted_columns = new Set(['player_fantasy_points_from_plays'])
+
+// Only use sort-based from table for whitelisted columns
+if (
+  sort_based_from_table.from_table_name &&
+  sort_based_from_table.column_id &&
+  whitelisted_columns.has(sort_based_from_table.column_id)
+) {
+  return sort_based_from_table
+}
+
+// Fall back to default from table setup for non-whitelisted columns
+return setup_default_from_table(splits)
+```
+
+**Impact Achieved**:
+
+- Reduced query execution time from 30+ seconds to under 5 seconds for whitelisted columns
+- Starting result set reduced from ~27K records to 1-5K records
+- Eliminated redundant self-joins through prevention logic
+- Improved PostgreSQL query plan selection
+- Safe gradual rollout with whitelist system
+
+**Implementation Details**:
+
+- `determine_from_table()` analyzes first sort column for CTE vs regular table
+- `get_from_table_config()` applies whitelist and fallback logic
+- `setup_from_table_and_player_joins()` handles setup for all table types
+- Self-join prevention in `add_clauses_for_table()` avoids invalid SQL
+- Centralized references automatically adapt to chosen from table
+
+#### 3. Query Plan Caching
 
 **Opportunity**: Cache compiled query plans for repeated parameter patterns
 
@@ -933,7 +1199,7 @@ function getCachedQueryPlan(requestHash) {
 
 **Expected Impact**: 40-60% reduction in query build time for repeated patterns
 
-#### 2. Lazy Column Evaluation
+#### 4. Lazy Column Evaluation
 
 **Opportunity**: Only process columns that are actually needed
 
@@ -956,7 +1222,7 @@ class LazyColumnProcessor {
 
 **Expected Impact**: 20-30% reduction in processing overhead for sparse column sets
 
-#### 3. Batch Rate Type Processing
+#### 5. Batch Rate Type Processing
 
 **Opportunity**: Process similar rate types together
 

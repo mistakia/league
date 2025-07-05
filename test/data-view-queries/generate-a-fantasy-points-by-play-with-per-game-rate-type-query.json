@@ -1,0 +1,26 @@
+{
+  "name": "should generate a fantasy points by play with per_game rate_type query",
+  "description": "Test case for should generate a fantasy points by play with per_game rate_type query",
+  "request": {
+    "sort": [
+      {
+        "column_id": "player_fantasy_points_from_plays",
+        "desc": true
+      }
+    ],
+    "prefix_columns": ["player_name", "player_league_roster_status"],
+    "columns": [
+      {
+        "column_id": "player_fantasy_points_from_plays",
+        "params": {
+          "year": [2023],
+          "rate_type": ["per_game"]
+        }
+      }
+    ],
+    "where": []
+  },
+  "expected_query": "with \"tffa4ec673b4f60169d1851d9d0099ceb\" as (select \"player_gamelogs_year_2023\".\"pid\", count(*) as \"rate_type_total_count\", array_agg(distinct player_gamelogs_year_2023.tm) as teams from \"player_gamelogs_year_2023\" left join \"nfl_games\" on \"nfl_games\".\"esbid\" = \"player_gamelogs_year_2023\".\"esbid\" where \"nfl_games\".\"seas_type\" in ('REG') and \"player_gamelogs_year_2023\".\"active\" = true and \"nfl_games\".\"year\" in (2023) group by \"player_gamelogs_year_2023\".\"pid\"), \"teaf853ea97cdff629ed95f47e995f4ae\" as (with \"filtered_plays\" as (select \"nfl_plays\".\"bc_pid\", \"nfl_plays\".\"psr_pid\", \"nfl_plays\".\"trg_pid\", \"nfl_plays\".\"player_fuml_pid\", \"nfl_plays\".\"week\", \"nfl_plays\".\"seas_type\", \"nfl_plays\".\"year\", \"nfl_plays\".\"rush_yds\", \"nfl_plays\".\"rush_td\", \"nfl_plays\".\"pass_yds\", \"nfl_plays\".\"pass_td\", \"nfl_plays\".\"recv_yds\", \"nfl_plays\".\"comp\", \"nfl_plays\".\"int\", \"nfl_plays\".\"first_down\", \"nfl_plays\".\"play_type\", \"nfl_plays\".\"fuml\" from \"nfl_plays\" where \"nfl_plays\".\"play_type\" not in ('NOPL') and (\"nfl_plays\".\"bc_pid\" is not null or \"nfl_plays\".\"psr_pid\" is not null or \"nfl_plays\".\"trg_pid\" is not null or \"nfl_plays\".\"player_fuml_pid\" is not null) and \"nfl_plays\".\"year\" in (2023) and \"nfl_plays\".\"seas_type\" in ('REG')) select \"pid\", SUM(fantasy_points_from_plays) as fantasy_points_from_plays, \"seas_type\" from (select * from (select \"bc_pid\" as \"pid\", ROUND(SUM(COALESCE(rush_yds, 0) * 0.1 + COALESCE(rush_td::int, 0) * 6), 2) as fantasy_points_from_plays, \"seas_type\" from \"filtered_plays\" where \"bc_pid\" is not null group by \"bc_pid\", \"seas_type\") as \"bc_stats\" union all select * from (select \"psr_pid\" as \"pid\", ROUND(SUM(COALESCE(pass_yds, 0) * 0.04 + COALESCE(pass_td::int, 0) * 4 + COALESCE(\"int\"::int, 0) * -1), 2) as fantasy_points_from_plays, \"seas_type\" from \"filtered_plays\" where \"psr_pid\" is not null group by \"psr_pid\", \"seas_type\") as \"psr_stats\" union all select * from (select \"trg_pid\" as \"pid\", ROUND(SUM(COALESCE(recv_yds, 0) * 0.1 + COALESCE(pass_td::int, 0) * 6 + COALESCE(comp::int, 0) * 1), 2) as fantasy_points_from_plays, \"seas_type\" from \"filtered_plays\" where \"trg_pid\" is not null group by \"trg_pid\", \"seas_type\") as \"trg_stats\" union all select * from (select \"player_fuml_pid\" as \"pid\", ROUND(SUM(-1), 2) as fantasy_points_from_plays, \"seas_type\" from \"filtered_plays\" where \"player_fuml_pid\" is not null group by \"player_fuml_pid\", \"seas_type\") as \"fuml_stats\") as \"combined_stats\" group by \"pid\", \"seas_type\" having SUM(fantasy_points_from_plays) > 0) select \"teaf853ea97cdff629ed95f47e995f4ae\".\"pid\", player.fname, player.lname, CASE WHEN rosters_players.slot = 13 THEN 'injured_reserve' WHEN rosters_players.slot = 12 THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END AS player_league_roster_status, rosters_players.slot, rosters_players.tid, rosters_players.tag, CAST(teaf853ea97cdff629ed95f47e995f4ae.fantasy_points_from_plays AS DECIMAL) / NULLIF(CAST(tffa4ec673b4f60169d1851d9d0099ceb.rate_type_total_count AS DECIMAL), 0) AS \"fantasy_points_from_plays_0\", \"player\".\"pos\" from \"teaf853ea97cdff629ed95f47e995f4ae\" inner join \"player\" on \"player\".\"pid\" = \"teaf853ea97cdff629ed95f47e995f4ae\".\"pid\" left join \"tffa4ec673b4f60169d1851d9d0099ceb\" on \"tffa4ec673b4f60169d1851d9d0099ceb\".\"pid\" = \"teaf853ea97cdff629ed95f47e995f4ae\".\"pid\" left join \"rosters_players\" on \"rosters_players\".\"pid\" = \"teaf853ea97cdff629ed95f47e995f4ae\".\"pid\" and \"rosters_players\".\"year\" = 2025 and \"rosters_players\".\"week\" = 0 and \"rosters_players\".\"lid\" = 1 group by player.fname, player.lname, rosters_players.slot, rosters_players.tid, rosters_players.tag, \"teaf853ea97cdff629ed95f47e995f4ae\".\"fantasy_points_from_plays\", tffa4ec673b4f60169d1851d9d0099ceb.rate_type_total_count, \"teaf853ea97cdff629ed95f47e995f4ae\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 8 DESC NULLS LAST, \"teaf853ea97cdff629ed95f47e995f4ae\".\"pid\" asc limit 500",
+  "tags": ["plays", "games", "parameters", "sorting", "rate_type", "cte"],
+  "timeout_ms": 40000
+}

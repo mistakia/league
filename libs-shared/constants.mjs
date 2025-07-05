@@ -249,6 +249,38 @@ export const dstStats = [
 
 export const fantasyStats = [...stats, ...kStats, ...dstStats]
 
+// Stats supported for projections (excludes stats not yet in projection tables)
+export const projected_stats = [
+  'pa',
+  'pc',
+  'py',
+  'ints',
+  'tdp',
+
+  'ra',
+  'ry',
+  'tdr',
+  'fuml',
+
+  'trg',
+  'rec',
+  'recy',
+  'tdrec',
+
+  'snp',
+
+  'twoptc',
+
+  'prtd', // punt return touchdown
+  'krtd' // kickoff return touchdown
+]
+
+export const projected_fantasy_stats = [
+  ...projected_stats,
+  ...kStats,
+  ...dstStats
+]
+
 export const createStats = () =>
   fantasyStats.reduce((o, key) => ({ ...o, [key]: 0 }), {})
 

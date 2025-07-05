@@ -56,7 +56,11 @@ router.get('/stats', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const data = await db('nfl_play_stats_current_week')
-      .select('nfl_play_stats_current_week.*', 'nfl_plays_current_week.week')
+      .select(
+        'nfl_play_stats_current_week.*',
+        'nfl_plays_current_week.week',
+        'nfl_plays_current_week.qb_kneel'
+      )
       .leftJoin('nfl_plays_current_week', function () {
         this.on(
           'nfl_play_stats_current_week.esbid',

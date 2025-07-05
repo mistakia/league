@@ -100,6 +100,12 @@ export * as fanatics from './fanatics.mjs'
 export { default as fetch_with_retry } from './fetch-with-retry.mjs'
 export { default as fetch_with_proxy, proxy_manager } from './proxy-manager.mjs'
 export { default as handle_season_args_for_script } from './handle-season-args-for-script.mjs'
+export {
+  load_data_view_test_queries,
+  load_data_view_test_queries_sync
+} from './load-test-cases.mjs'
+export { update_test_file } from './update-test-file.mjs'
+export { process_expected_query } from './process-expected-query.mjs'
 
 export const getChartedPlayByPlayQuery = (db) =>
   db('nfl_plays')

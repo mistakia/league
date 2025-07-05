@@ -1,0 +1,27 @@
+{
+  "name": "should generate a tackle columns query",
+  "description": "Test case for should generate a tackle columns query",
+  "request": {
+    "columns": [
+      {
+        "column_id": "player_solo_tackles_from_plays",
+        "params": {
+          "year": [2023]
+        }
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "player_solo_tackles_from_plays",
+        "desc": true
+      }
+    ]
+  },
+  "expected_query": "with \"t89755c4c161289c0528388aab8875aa4\" as (select pid, SUM(CASE WHEN pid_column = 'solo_tackle_1_pid' THEN 1 WHEN pid_column = 'solo_tackle_2_pid' THEN 1 WHEN pid_column = 'solo_tackle_3_pid' THEN 1 ELSE 0 END) AS solo_tackles_from_plays from (select solo_tackle_1_pid as pid, 'solo_tackle_1_pid' as pid_column, play_type, seas_type, year from \"nfl_plays\" where \"solo_tackle_1_pid\" is not null union all select solo_tackle_2_pid as pid, 'solo_tackle_2_pid' as pid_column, play_type, seas_type, year from \"nfl_plays\" where \"solo_tackle_2_pid\" is not null union all select solo_tackle_3_pid as pid, 'solo_tackle_3_pid' as pid_column, play_type, seas_type, year from \"nfl_plays\" where \"solo_tackle_3_pid\" is not null) as \"defensive_plays\" where not \"play_type\" = 'NOPL' and \"defensive_plays\".\"year\" in (2023) and \"defensive_plays\".\"seas_type\" in ('REG') group by \"pid\") select \"player\".\"pid\", \"t89755c4c161289c0528388aab8875aa4\".\"solo_tackles_from_plays\" AS \"solo_tackles_from_plays_0\", \"player\".\"pos\" from \"player\" left join \"t89755c4c161289c0528388aab8875aa4\" on \"t89755c4c161289c0528388aab8875aa4\".\"pid\" = \"player\".\"pid\" group by \"t89755c4c161289c0528388aab8875aa4\".\"solo_tackles_from_plays\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": ["parameters", "sorting", "cte"],
+  "timeout_ms": 40000,
+  "expected_metadata": {
+    "cache_ttl": "one_week",
+    "cache_expire_at": null
+  }
+}

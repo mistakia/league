@@ -1,0 +1,28 @@
+{
+  "name": "player_salaries with where",
+  "description": "Test case for player_salaries with where",
+  "request": {
+    "columns": [
+      {
+        "column_id": "player_dfs_salary"
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "player_dfs_salary",
+        "desc": true
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_dfs_salary",
+        "params": {},
+        "value": "5000",
+        "operator": ">="
+      }
+    ]
+  },
+  "expected_query": "with \"tfdc85d6d1e23cd26bfb9b1ea27ad3e87\" as (select \"player_salaries\".\"pid\", \"player_salaries\".\"salary\", \"nfl_games\".\"year\", \"nfl_games\".\"week\" from \"player_salaries\" inner join \"nfl_games\" on \"player_salaries\".\"esbid\" = \"nfl_games\".\"esbid\" where \"player_salaries\".\"source_id\" in ('DRAFTKINGS') and \"nfl_games\".\"year\" in (${constants.season.stats_season_year}) and \"nfl_games\".\"week\" in (${Math.max(constants.season.week, 1)}) and player_salaries.salary >= '5000') select \"player\".\"pid\", \"tfdc85d6d1e23cd26bfb9b1ea27ad3e87\".\"salary\" AS \"dfs_salary_0\", \"player\".\"pos\" from \"player\" inner join \"tfdc85d6d1e23cd26bfb9b1ea27ad3e87\" on \"tfdc85d6d1e23cd26bfb9b1ea27ad3e87\".\"pid\" = \"player\".\"pid\" group by \"tfdc85d6d1e23cd26bfb9b1ea27ad3e87\".\"salary\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": ["player", "plays", "filters", "sorting", "cte"],
+  "timeout_ms": 40000
+}

@@ -1,0 +1,34 @@
+{
+  "name": "team espn line win rates with matchup_opponent_type param",
+  "description": "Test case for team espn line win rates with matchup_opponent_type param",
+  "request": {
+    "view_id": "ef18d7a8-f02a-440b-a375-0e7ae0e9f5d1",
+    "columns": [
+      {
+        "column_id": "team_espn_run_block_win_rate",
+        "params": {
+          "matchup_opponent_type": "current_week_opponent_total",
+          "year": [2024]
+        }
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "team_espn_run_block_win_rate",
+        "desc": true
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "params": {},
+        "value": ["TEAM"],
+        "operator": "IN"
+      }
+    ],
+    "splits": []
+  },
+  "expected_query": "with \"current_week_opponents\" as (select \"h\" as \"nfl_team\", \"v\" as \"opponent\" from \"public\".\"nfl_games\" where \"year\" = ${constants.season.year} and \"week\" = ${constants.season.nfl_seas_week} and \"seas_type\" = '${constants.season.nfl_seas_type}' union select \"v\" as \"nfl_team\", \"h\" as \"opponent\" from \"public\".\"nfl_games\" where \"year\" = ${constants.season.year} and \"week\" = ${constants.season.nfl_seas_week} and \"seas_type\" = '${constants.season.nfl_seas_type}') select \"player\".\"pid\", \"espn_team_win_rates_index\".\"run_block_win_rate\" AS \"espn_team_run_block_win_rate_0\", \"player\".\"pos\" from \"player\" inner join \"current_week_opponents\" on \"player\".\"current_nfl_team\" = \"current_week_opponents\".\"nfl_team\" left join \"espn_team_win_rates_index\" on \"espn_team_win_rates_index\".\"team\" = \"current_week_opponents\".\"opponent\" and \"espn_team_win_rates_index\".\"year\" = 2024 where player.pos IN ('TEAM') group by \"espn_team_win_rates_index\".\"run_block_win_rate\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": ["team", "filters", "parameters", "sorting", "cte"],
+  "timeout_ms": 40000
+}

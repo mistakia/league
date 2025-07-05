@@ -11,8 +11,7 @@ const games_played_join = ({
   table_name,
   query,
   params,
-  splits,
-  year_split_join_clause
+  splits
 }) => {
   const already_added_for_per_game_rate_type =
     data_view_options.rate_type_tables[table_name]
@@ -31,8 +30,8 @@ const games_played_join = ({
     players_query: query,
     rate_type_table_name: table_name,
     splits,
-    year_split_join_clause,
-    params
+    params,
+    data_view_options
   })
 }
 

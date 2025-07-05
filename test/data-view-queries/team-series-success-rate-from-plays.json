@@ -1,0 +1,23 @@
+{
+  "name": "team series success rate from plays",
+  "description": "Test case for team series success rate from plays",
+  "request": {
+    "columns": [
+      {
+        "column_id": "team_series_conversion_rate_from_plays",
+        "params": {
+          "year": [2024]
+        }
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "team_series_conversion_rate_from_plays",
+        "desc": true
+      }
+    ]
+  },
+  "expected_query": "with \"ta883516fdb1bedbb0e8e9205ee6ae188\" as (select \"nfl_plays\".\"off\" as \"nfl_team\", COUNT(DISTINCT CASE WHEN series_result IN ('FIRST_DOWN', 'TOUCHDOWN') THEN CONCAT(esbid, '_', series_seq) END) as team_series_conversion_rate_from_plays_numerator, COUNT(DISTINCT CASE WHEN series_result NOT IN ('QB_KNEEL', 'END_OF_HALF') THEN CONCAT(esbid, '_', series_seq) END) as team_series_conversion_rate_from_plays_denominator from \"nfl_plays\" where not \"play_type\" = 'NOPL' and \"nfl_plays\".\"year\" in (2024) and \"nfl_plays\".\"seas_type\" in ('REG') group by \"nfl_plays\".\"off\"), \"ta883516fdb1bedbb0e8e9205ee6ae188_team_stats\" as (select \"ta883516fdb1bedbb0e8e9205ee6ae188\".\"nfl_team\", sum(ta883516fdb1bedbb0e8e9205ee6ae188.team_series_conversion_rate_from_plays_numerator) / sum(ta883516fdb1bedbb0e8e9205ee6ae188.team_series_conversion_rate_from_plays_denominator) as team_series_conversion_rate_from_plays from \"ta883516fdb1bedbb0e8e9205ee6ae188\" group by \"ta883516fdb1bedbb0e8e9205ee6ae188\".\"nfl_team\") select \"player\".\"pid\", \"ta883516fdb1bedbb0e8e9205ee6ae188_team_stats\".\"team_series_conversion_rate_from_plays\" AS \"team_series_conversion_rate_from_plays_0\", \"player\".\"pos\" from \"player\" left join \"ta883516fdb1bedbb0e8e9205ee6ae188_team_stats\" on \"ta883516fdb1bedbb0e8e9205ee6ae188_team_stats\".\"nfl_team\" = \"player\".\"current_nfl_team\" group by \"ta883516fdb1bedbb0e8e9205ee6ae188_team_stats\".\"team_series_conversion_rate_from_plays\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": ["team", "plays", "parameters", "sorting", "cte"],
+  "timeout_ms": 40000
+}

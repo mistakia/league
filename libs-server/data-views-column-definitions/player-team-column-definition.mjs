@@ -74,14 +74,7 @@ export default {
       }
       return ['player.current_nfl_team']
     },
-    join: ({
-      query,
-      table_name,
-      params,
-      splits,
-      data_view_options,
-      year_split_join_clause
-    }) => {
+    join: ({ query, table_name, params, splits, data_view_options }) => {
       const already_added_for_per_game_rate_type =
         data_view_options.rate_type_tables[table_name]
       if (already_added_for_per_game_rate_type) {
@@ -102,8 +95,8 @@ export default {
           players_query: query,
           rate_type_table_name: table_name,
           splits,
-          year_split_join_clause,
-          params
+          params,
+          data_view_options
         })
       }
     },

@@ -132,9 +132,8 @@ export const join_per_player_route_cte = ({
   params,
   rate_type_table_name,
   splits,
-  year_split_join_clause,
-  week_split_join_clause,
-  group_by = null
+  group_by = null,
+  data_view_options = {}
 }) => {
   const year_offset = params.year_offset
   const has_year_offset_range =
@@ -151,13 +150,13 @@ export const join_per_player_route_cte = ({
   players_query.leftJoin(rate_type_table_name, function () {
     this.on(`${rate_type_table_name}.gsis_id`, 'player.gsisid')
 
-    if (splits.includes('year') && year_split_join_clause) {
+    if (splits.includes('year')) {
       if (has_year_offset_range) {
         const min_offset = Math.min(...year_offset)
         const max_offset = Math.max(...year_offset)
         this.on(
           db.raw(
-            `${rate_type_table_name}.year BETWEEN ${year_split_join_clause || 'player_years.year'} + ? AND ${year_split_join_clause || 'player_years.year'} + ?`,
+            `${rate_type_table_name}.year BETWEEN ${data_view_options.year_reference} + ? AND ${data_view_options.year_reference} + ?`,
             [min_offset, max_offset]
           )
         )
@@ -165,7 +164,7 @@ export const join_per_player_route_cte = ({
         const offset = Array.isArray(year_offset) ? year_offset[0] : year_offset
         this.on(
           db.raw(
-            `${rate_type_table_name}.year = ${year_split_join_clause || 'player_years.year'} + ?`,
+            `${rate_type_table_name}.year = ${data_view_options.year_reference} + ?`,
             [offset]
           )
         )
@@ -183,15 +182,20 @@ export const join_per_player_route_cte = ({
             db.raw('?', [specific_year])
           )
         } else {
-          this.on(`${rate_type_table_name}.year`, year_split_join_clause)
+          this.on(
+            `${rate_type_table_name}.year`,
+            data_view_options.year_reference
+          )
         }
       }
     }
 
     if (splits.includes('week')) {
-      if (week_split_join_clause) {
-        this.on(`${rate_type_table_name}.week`, '=', week_split_join_clause)
-      }
+      this.on(
+        `${rate_type_table_name}.week`,
+        '=',
+        data_view_options.week_reference
+      )
     }
 
     if (group_by) {

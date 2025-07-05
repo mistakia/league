@@ -24,7 +24,7 @@ const player_espn_line_join = (options) => {
       table_name,
       params,
       splits,
-      year_split_join_clause
+      data_view_options
     }) {
       const { year, win_rate_type } = get_default_params({ params })
 
@@ -34,7 +34,7 @@ const player_espn_line_join = (options) => {
         db.raw('?', [win_rate_type])
       )
 
-      if (!splits.includes('year') && !year_split_join_clause) {
+      if (!splits.includes('year')) {
         this.andOn(`${table_name}.year`, '=', year)
       }
     }

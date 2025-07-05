@@ -1,0 +1,38 @@
+{
+  "name": "should handle player_air_yards_share_from_plays",
+  "description": "Test case for should handle player_air_yards_share_from_plays",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_air_yards_share_from_plays",
+        "params": {
+          "year": [2023]
+        }
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_air_yards_share_from_plays",
+        "operator": ">=",
+        "value": 25,
+        "params": {
+          "year": [2023]
+        }
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "player_air_yards_share_from_plays",
+        "desc": true
+      }
+    ]
+  },
+  "expected_query": "with \"ta221528ca1830dbe89790d290a767c71\" as (select \"pg\".\"pid\", CASE WHEN SUM(nfl_plays.dot) > 0 THEN ROUND(100.0 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0), 2) ELSE 0 END as air_yds_share_from_plays from \"nfl_plays\" inner join \"player_gamelogs\" as \"pg\" on \"nfl_plays\".\"esbid\" = \"pg\".\"esbid\" and \"nfl_plays\".\"off\" = \"pg\".\"tm\" where not \"play_type\" = 'NOPL' and (\"trg_pid\" is not null) and \"nfl_plays\".\"year\" in (2023) and \"nfl_plays\".\"seas_type\" in ('REG') group by \"pg\".\"pid\" having CASE WHEN SUM(nfl_plays.dot) > 0 THEN ROUND(100.0 * SUM(CASE WHEN nfl_plays.trg_pid = pg.pid THEN nfl_plays.dot ELSE 0 END) / NULLIF(SUM(nfl_plays.dot), 0), 2) ELSE 0 END >= '25') select \"player\".\"pid\", \"ta221528ca1830dbe89790d290a767c71\".\"air_yds_share_from_plays\" AS \"air_yds_share_from_plays_0\", player.fname, player.lname, \"player\".\"pos\" from \"player\" inner join \"ta221528ca1830dbe89790d290a767c71\" on \"ta221528ca1830dbe89790d290a767c71\".\"pid\" = \"player\".\"pid\" group by \"ta221528ca1830dbe89790d290a767c71\".\"air_yds_share_from_plays\", player.fname, player.lname, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": ["player", "plays", "filters", "parameters", "sorting", "cte"],
+  "timeout_ms": 40000,
+  "expected_metadata": {
+    "cache_ttl": "one_week",
+    "cache_expire_at": null
+  }
+}

@@ -236,11 +236,16 @@ const player_betting_market_join = ({
   query,
   table_name,
   join_type = 'LEFT',
-  params = {}
+  params = {},
+  data_view_options = {}
 }) => {
   const join_func = get_join_func(join_type)
 
-  query[join_func](table_name, `${table_name}.selection_pid`, 'player.pid')
+  query[join_func](
+    table_name,
+    `${table_name}.selection_pid`,
+    data_view_options.pid_reference
+  )
 }
 
 const team_betting_market_join = ({

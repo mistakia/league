@@ -1,0 +1,45 @@
+{
+  "name": "should handle player_target_share_from_plays - different params",
+  "description": "Test case for should handle player_target_share_from_plays - different params",
+  "request": {
+    "prefix_columns": ["player_name"],
+    "columns": [
+      {
+        "column_id": "player_target_share_from_plays",
+        "params": {
+          "year": [2023]
+        }
+      },
+      {
+        "column_id": "player_target_share_from_plays",
+        "params": {
+          "year": [2022],
+          "week": [1, 2, 3]
+        }
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_target_share_from_plays",
+        "operator": ">=",
+        "value": 25,
+        "params": {
+          "year": [2023]
+        }
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "player_target_share_from_plays",
+        "desc": true
+      }
+    ]
+  },
+  "expected_query": "with \"t57303c049413002b904f2ae5f68271e8\" as (select \"pg\".\"pid\", ROUND(100.0 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as trg_share_from_plays from \"nfl_plays\" inner join \"player_gamelogs\" as \"pg\" on \"nfl_plays\".\"esbid\" = \"pg\".\"esbid\" and \"nfl_plays\".\"off\" = \"pg\".\"tm\" where not \"play_type\" = 'NOPL' and (\"trg_pid\" is not null) and \"nfl_plays\".\"year\" in (2023) and \"nfl_plays\".\"seas_type\" in ('REG') group by \"pg\".\"pid\" having ROUND(100.0 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) >= '25'), \"t1b8e51c9b1d91a5e7e8f67bdd12b3513\" as (select \"pg\".\"pid\", ROUND(100.0 * COUNT(CASE WHEN nfl_plays.trg_pid = pg.pid THEN 1 ELSE NULL END) / NULLIF(SUM(CASE WHEN trg_pid IS NOT NULL THEN 1 ELSE 0 END), 0), 2) as trg_share_from_plays from \"nfl_plays\" inner join \"player_gamelogs\" as \"pg\" on \"nfl_plays\".\"esbid\" = \"pg\".\"esbid\" and \"nfl_plays\".\"off\" = \"pg\".\"tm\" where not \"play_type\" = 'NOPL' and (\"trg_pid\" is not null) and \"nfl_plays\".\"year\" in (2022) and \"nfl_plays\".\"week\" in (1, 2, 3) and \"nfl_plays\".\"seas_type\" in ('REG') group by \"pg\".\"pid\") select \"player\".\"pid\", \"t57303c049413002b904f2ae5f68271e8\".\"trg_share_from_plays\" AS \"trg_share_from_plays_0\", player.fname, player.lname, \"t1b8e51c9b1d91a5e7e8f67bdd12b3513\".\"trg_share_from_plays\" AS \"trg_share_from_plays_1\", \"player\".\"pos\" from \"player\" inner join \"t57303c049413002b904f2ae5f68271e8\" on \"t57303c049413002b904f2ae5f68271e8\".\"pid\" = \"player\".\"pid\" left join \"t1b8e51c9b1d91a5e7e8f67bdd12b3513\" on \"t1b8e51c9b1d91a5e7e8f67bdd12b3513\".\"pid\" = \"player\".\"pid\" group by \"t57303c049413002b904f2ae5f68271e8\".\"trg_share_from_plays\", player.fname, player.lname, \"t1b8e51c9b1d91a5e7e8f67bdd12b3513\".\"trg_share_from_plays\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": ["player", "plays", "filters", "parameters", "sorting", "cte"],
+  "timeout_ms": 40000,
+  "expected_metadata": {
+    "cache_ttl": "one_week",
+    "cache_expire_at": null
+  }
+}

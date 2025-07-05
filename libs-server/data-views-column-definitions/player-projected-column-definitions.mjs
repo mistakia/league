@@ -1,4 +1,8 @@
-import { constants } from '#libs-shared'
+import {
+  constants,
+  DEFAULT_SCORING_FORMAT_HASH,
+  DEFAULT_LEAGUE_FORMAT_HASH
+} from '#libs-shared'
 import { CACHE_TTL } from '#libs-server/data-views/cache-info-utils.mjs'
 
 import db from '#db'
@@ -16,11 +20,9 @@ const get_default_params = ({ params = {} }) => {
     ? params.seas_type[0]
     : params.seas_type || 'REG'
   const scoring_format_hash =
-    params.scoring_format_hash ||
-    '0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d'
+    params.scoring_format_hash || DEFAULT_SCORING_FORMAT_HASH
   const league_format_hash =
-    params.league_format_hash ||
-    '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b'
+    params.league_format_hash || DEFAULT_LEAGUE_FORMAT_HASH
   const league_id = params.league_id || 1
 
   return {

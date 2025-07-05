@@ -361,6 +361,218 @@ const find_sort_column = ({ column_id, column_index = 0, columns }) => {
   return item ? item.column : null
 }
 
+/**
+ * Determines the optimal from table based on sort configuration and splits
+ * @param {Object} params - Parameters object
+ * @param {Array} params.sort - Sort configuration from user request
+ * @param {Array} params.columns - Column configurations
+ * @param {Array} params.prefix_columns - Prefix column configurations
+ * @param {Array} params.splits - Active split dimensions ['year', 'week']
+ * @param {Object} params.data_views_column_definitions - Column definition registry
+ * @returns {Object} From table information
+ */
+const determine_from_table = ({
+  sort = [],
+  columns,
+  prefix_columns,
+  splits,
+  data_views_column_definitions
+}) => {
+  // If no sort columns, use default behavior
+  if (!sort || sort.length === 0) {
+    return {
+      from_table_name: null,
+      from_table_type: 'default'
+    }
+  }
+
+  const first_sort = sort[0]
+  const table_columns = [...prefix_columns, ...columns].map(
+    (column, index) => ({ column, index })
+  )
+
+  const sort_column = find_sort_column({
+    column_id: first_sort.column_id,
+    column_index: first_sort.column_index || 0,
+    columns: table_columns
+  })
+
+  // Handle split columns - we no longer use split tables as from tables
+  if (sort_column && sort_column.is_split) {
+    return {
+      from_table_name: null,
+      from_table_type: 'default'
+    }
+  }
+
+  // Find the column definition for the sort column
+  const column_id = sort_column
+    ? typeof sort_column === 'string'
+      ? sort_column
+      : sort_column.column_id
+    : first_sort.column_id
+
+  const column_params =
+    sort_column && typeof sort_column === 'object' ? sort_column.params : {}
+  const column_definition = data_views_column_definitions[column_id]
+
+  if (!column_definition) {
+    return {
+      from_table_name: null,
+      from_table_type: 'default'
+    }
+  }
+
+  // Check if this column generates a CTE (WITH statement)
+  if (column_definition.with) {
+    const table_name = get_table_name({
+      column_definition,
+      column_params,
+      splits
+    })
+    return {
+      from_table_name: table_name,
+      from_table_type: 'cte',
+      column_id
+    }
+  }
+
+  // Regular table column
+  const table_name = get_table_name({
+    column_definition,
+    column_params,
+    splits
+  })
+  return {
+    from_table_name: table_name,
+    from_table_type: 'table',
+    column_id
+  }
+}
+
+/**
+ * Determines the final from table to use for the query
+ * @param {Object} params - Parameters object
+ * @param {Array} params.sort - Sort configuration
+ * @param {Array} params.columns - Column configurations
+ * @param {Array} params.prefix_columns - Prefix column configurations
+ * @param {Array} params.splits - Active split dimensions
+ * @param {Object} params.data_views_column_definitions - Column definition registry
+ * @returns {Object} Final from table configuration
+ */
+const get_from_table_config = ({
+  sort,
+  columns,
+  prefix_columns,
+  splits,
+  data_views_column_definitions
+}) => {
+  const sort_based_from_table = determine_from_table({
+    sort,
+    columns,
+    prefix_columns,
+    splits,
+    data_views_column_definitions
+  })
+
+  // Whitelist of columns that are ready for the new from_table system
+  const whitelisted_columns = new Set(['player_fantasy_points_from_plays'])
+
+  // Only use sort-based from table for whitelisted columns
+  if (
+    sort_based_from_table.from_table_name &&
+    sort_based_from_table.column_id &&
+    whitelisted_columns.has(sort_based_from_table.column_id)
+  ) {
+    // Use sort-based from table if available and no splits are configured
+    // or if it supports all required splits
+    if (splits.length === 0) {
+      return sort_based_from_table
+    }
+
+    // For tables with splits, check if they support the required splits
+    const column_definition =
+      data_views_column_definitions[sort_based_from_table.column_id]
+
+    // Check if the column definition supports all required splits
+    const supports_all_splits = splits.every((split) =>
+      column_definition?.supported_splits?.includes(split)
+    )
+
+    if (supports_all_splits) {
+      return sort_based_from_table
+    }
+  }
+
+  // Always fall back to player table as the from table
+  return {
+    from_table_name: 'player',
+    from_table_type: 'table'
+  }
+}
+
+/**
+ * Sets up the from table and player joins for the query
+ * @param {Object} params - Parameters object
+ * @param {Object} params.players_query - The Knex query builder instance
+ * @param {Object} params.from_table_config - From table configuration
+ * @param {Object} params.data_views_column_definitions - Column definition registry
+ * @param {Array} params.splits - Active split dimensions
+ * @returns {void}
+ */
+const setup_from_table_and_player_joins = ({
+  players_query,
+  from_table_config,
+  data_views_column_definitions,
+  splits = []
+}) => {
+  const { from_table_name, from_table_type, column_id } = from_table_config
+
+  log(`Setting up from table: ${from_table_name} (type: ${from_table_type})`)
+
+  // For 'table' type, get the actual table name and set up alias if needed
+  let actual_table_name = from_table_name
+  if (from_table_type === 'table' && column_id) {
+    const column_definition = data_views_column_definitions[column_id]
+    actual_table_name = column_definition?.table_name || from_table_name
+  }
+
+  // Set up the from table with alias if needed
+  const table_reference =
+    actual_table_name === from_table_name
+      ? actual_table_name
+      : `${actual_table_name} as ${from_table_name}`
+
+  players_query.from(table_reference)
+  players_query.select(`${from_table_name}.pid`)
+
+  // Join to player table if the from table is not 'player'
+  if (from_table_name !== 'player') {
+    players_query.innerJoin('player', 'player.pid', `${from_table_name}.pid`)
+  }
+
+  // Add inner joins for split tables only when from table is 'player' and splits are enabled
+  if (from_table_name === 'player') {
+    if (splits.includes('year')) {
+      players_query.innerJoin('player_years', 'player_years.pid', 'player.pid')
+    }
+
+    if (splits.includes('week')) {
+      players_query.innerJoin('player_years_weeks', function () {
+        this.on('player_years_weeks.pid', 'player.pid')
+        // Also join on year if both year and week splits are active
+        if (splits.includes('year')) {
+          this.on('player_years_weeks.year', 'player_years.year')
+        }
+      })
+    }
+  }
+
+  log(
+    `Set up from table: ${actual_table_name}${actual_table_name !== from_table_name ? ` as ${from_table_name}` : ''}`
+  )
+}
+
 const get_table_name = ({ column_definition, column_params, splits }) => {
   return column_definition.table_alias
     ? column_definition.table_alias({ params: column_params, splits })
@@ -415,8 +627,6 @@ const add_clauses_for_table = async ({
   table_name,
   group_column_params = {},
   splits = [],
-  year_split_join_clause,
-  week_split_join_clause,
   rate_type_column_mapping = {},
   data_view_options,
   data_view_metadata
@@ -444,7 +654,8 @@ const add_clauses_for_table = async ({
       column_definition,
       table_name,
       rate_type_column_mapping,
-      splits
+      splits,
+      data_view_options
     })
 
     select_strings.push(...main_select_result.select)
@@ -465,7 +676,8 @@ const add_clauses_for_table = async ({
         column_definition,
         table_name,
         rate_type_column_mapping,
-        splits
+        splits,
+        data_view_options
       })
       with_select_strings.push(...with_select_result.select)
       group_by_strings.push(...with_select_result.group_by)
@@ -501,7 +713,8 @@ const add_clauses_for_table = async ({
         column_index: 0,
         params: where_clause.params,
         rate_type_column_mapping,
-        splits
+        splits,
+        data_view_options
       })
 
       // add with selects for columns that are not in the select_columns
@@ -515,7 +728,8 @@ const add_clauses_for_table = async ({
           column_definition,
           table_name,
           rate_type_column_mapping,
-          splits
+          splits,
+          data_view_options
         })
         with_select_strings.push(...with_select_result.select)
         group_by_strings.push(...with_select_result.group_by)
@@ -539,7 +753,8 @@ const add_clauses_for_table = async ({
       column_index: 0,
       params: where_clause.params,
       rate_type_column_mapping,
-      splits
+      splits,
+      data_view_options
     })
 
     if (main_where_string) {
@@ -613,25 +828,30 @@ const add_clauses_for_table = async ({
   }
 
   // Enhanced join handling with adaptive system
-  if (join_func) {
-    await join_func({
-      query: players_query,
-      table_name,
-      params: group_column_params,
-      join_type: where_clauses.length ? 'INNER' : 'LEFT',
-      splits,
-      year_split_join_clause,
-      week_split_join_clause,
-      data_view_options
-    })
-  } else if (
-    table_name !== 'player' &&
-    table_name !== 'nfl_plays' &&
-    (select_strings.length ||
-      main_where_clause_strings.length ||
-      main_having_clause_strings.length)
-  ) {
-    players_query.leftJoin(table_name, `${table_name}.pid`, 'player.pid')
+  // Skip join entirely if this table is the same as the from table (prevents self-join)
+  if (table_name !== data_view_options.from_table_name) {
+    if (join_func) {
+      await join_func({
+        query: players_query,
+        table_name,
+        params: group_column_params,
+        join_type: where_clauses.length ? 'INNER' : 'LEFT',
+        splits,
+        data_view_options
+      })
+    } else if (
+      table_name !== 'player' &&
+      table_name !== 'nfl_plays' &&
+      (select_strings.length ||
+        main_where_clause_strings.length ||
+        main_having_clause_strings.length)
+    ) {
+      players_query.leftJoin(table_name, `${table_name}.pid`, 'player.pid')
+    }
+  } else {
+    log(
+      `Skipping self-join for table: ${table_name} (from table: ${data_view_options.from_table_name})`
+    )
   }
 }
 
@@ -728,6 +948,32 @@ const group_tables_by_supported_splits = (grouped_clauses_by_table, splits) => {
   return grouped_by_splits
 }
 
+const setup_central_references = ({ data_view_options, splits }) => {
+  const { from_table_name } = data_view_options
+
+  // Setup player PID reference
+  data_view_options.pid_reference = `${from_table_name}.pid`
+
+  // Setup year and week references based on splits and from table
+  if (splits.includes('year') && from_table_name === 'player') {
+    // Use split table reference when from table is player
+    data_view_options.year_reference = 'player_years.year'
+  } else {
+    // Use from table reference when from table is not player
+    data_view_options.year_reference = `${from_table_name}.year`
+  }
+
+  if (splits.includes('week') && from_table_name === 'player') {
+    // Use split table reference when from table is player
+    data_view_options.week_reference = 'player_years_weeks.week'
+  } else {
+    // Use from table reference when from table is not player
+    data_view_options.week_reference = `${from_table_name}.week`
+  }
+
+  return data_view_options
+}
+
 export const get_data_view_results_query = async ({
   splits = [],
   where = [],
@@ -789,15 +1035,27 @@ export const get_data_view_results_query = async ({
     return column
   })
 
-  const joined_table_index = {}
-  const with_statement_index = {}
-  const players_query = db('player').select('player.pid')
+  // Determine primary table first to optimize query structure
+  const from_table_config = get_from_table_config({
+    sort,
+    columns,
+    prefix_columns,
+    splits,
+    data_views_column_definitions
+  })
+
+  // Initialize query without from table - will be set up later
+  const players_query = db.queryBuilder()
+
   const table_columns = []
   const rate_type_column_mapping = {}
   const data_view_options = {
     opening_days_joined: false,
     player_seasonlogs_joined: false,
     nfl_year_week_timestamp_joined: false,
+    from_table_name: from_table_config.from_table_name,
+    from_table_type: from_table_config.from_table_type,
+    from_table_column_id: from_table_config.column_id,
     year_coalesce_args: [],
     rate_type_tables: {},
     matchup_opponent_types: new Set()
@@ -807,9 +1065,6 @@ export const get_data_view_results_query = async ({
     cache_ttl: 1000 * 60 * 60 * 24 * 7, // 1 week
     cache_expire_at: null
   }
-
-  let year_split_join_clause
-  let week_split_join_clause
 
   // Check columns for matchup_opponent_type
   for (const column of [...prefix_columns, ...columns]) {
@@ -949,27 +1204,18 @@ export const get_data_view_results_query = async ({
         `SELECT player_years.pid, nfl_year_week_timestamp.year, nfl_year_week_timestamp.week FROM player_years INNER JOIN nfl_year_week_timestamp ON player_years.year = nfl_year_week_timestamp.year${year_filter_clause}`
       )
     )
-
-    // Modify the main query to start from player_years_weeks
-    players_query.from('player_years_weeks')
-    players_query.join('player', 'player.pid', 'player_years_weeks.pid')
-    players_query.join('player_years', function () {
-      this.on('player_years.pid', 'player.pid')
-      this.on('player_years.year', 'player_years_weeks.year')
-    })
-
-    week_split_join_clause = 'player_years_weeks.week'
-
-    if (splits.includes('year')) {
-      year_split_join_clause = `player_years_weeks.year`
-    }
-  } else if (splits.includes('year')) {
-    // Modify the main query to start from player_years
-    players_query.from('player_years')
-    players_query.join('player', 'player.pid', 'player_years.pid')
-
-    year_split_join_clause = 'player_years.year'
   }
+
+  // Set up the from table and player joins using consolidated function
+  setup_from_table_and_player_joins({
+    players_query,
+    from_table_config,
+    data_views_column_definitions,
+    splits
+  })
+
+  // Setup centralized references for player pid, year, and week after from table is determined
+  setup_central_references({ data_view_options, splits })
 
   // sanitize parameters
 
@@ -1092,10 +1338,10 @@ export const get_data_view_results_query = async ({
       params,
       rate_type_table_name,
       splits,
-      year_split_join_clause,
       rate_type,
       team_unit,
-      is_team
+      is_team,
+      data_view_options
     })
   }
 
@@ -1146,24 +1392,13 @@ export const get_data_view_results_query = async ({
       table_name,
       { group_column_params = {}, where_clauses, select_columns }
     ] of sorted_tables) {
-      const year_select = select_columns.find(
-        (col) => data_views_column_definitions[col.column_id]?.year_select
-      )
-      const week_select = select_columns.find(
-        (col) => data_views_column_definitions[col.column_id]?.week_select
-      )
-
       await add_clauses_for_table({
         players_query,
         select_columns,
         where_clauses,
         table_name,
         group_column_params,
-        joined_table_index,
-        with_statement_index,
         splits: available_splits,
-        year_split_join_clause,
-        week_split_join_clause,
         rate_type_column_mapping,
         data_view_options,
         data_view_metadata
@@ -1192,52 +1427,20 @@ export const get_data_view_results_query = async ({
             data_view_options.year_coalesce_args.push(`${table_name}.year`)
           }
         }
-
-        if (table_name !== 'player' && table_name !== 'rosters_players') {
-          if (!year_split_join_clause) {
-            const year_offset = group_column_params.year_offset
-            const year_offset_single = Array.isArray(year_offset)
-              ? year_offset[0]
-              : year_offset
-            year_split_join_clause = year_select
-              ? data_views_column_definitions[
-                  year_select.column_id
-                ].year_select({
-                  table_name,
-                  splits,
-                  column_params: group_column_params
-                })
-              : year_offset_single
-                ? `${table_name}.year - ${year_offset_single}`
-                : `${table_name}.year`
-          }
-
-          if (!week_split_join_clause && available_splits.includes('week')) {
-            week_split_join_clause = week_select
-              ? data_views_column_definitions[
-                  week_select.column_id
-                ].week_select({
-                  table_name,
-                  splits,
-                  column_params: group_column_params
-                })
-              : `${table_name}.week`
-          }
-        }
       }
     }
   }
 
-  // Add a select and group by for each split
+  // Add a select and group by for each split using centralized references
   for (const split of splits) {
     if (split === 'year') {
-      players_query.select('player_years.year')
-      players_query.groupBy('player_years.year')
+      players_query.select(data_view_options.year_reference)
+      players_query.groupBy(data_view_options.year_reference)
     }
 
     if (split === 'week') {
-      players_query.select('player_years_weeks.week')
-      players_query.groupBy('player_years_weeks.week')
+      players_query.select(data_view_options.week_reference)
+      players_query.groupBy(data_view_options.week_reference)
     }
   }
 
@@ -1367,7 +1570,8 @@ export const get_data_view_results_query = async ({
     }
   }
 
-  players_query.orderBy('player.pid', 'asc')
+  // Use the centralized pid reference
+  players_query.orderBy(data_view_options.pid_reference, 'asc')
 
   if (offset) {
     players_query.offset(offset)
@@ -1376,7 +1580,7 @@ export const get_data_view_results_query = async ({
   players_query.select('player.pos')
 
   players_query.groupBy(
-    'player.pid',
+    data_view_options.pid_reference,
     'player.lname',
     'player.fname',
     'player.pos'

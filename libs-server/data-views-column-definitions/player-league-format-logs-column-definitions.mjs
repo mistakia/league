@@ -1,5 +1,5 @@
 import db from '#db'
-import { constants } from '#libs-shared'
+import { constants, DEFAULT_LEAGUE_FORMAT_HASH } from '#libs-shared'
 import get_join_func from '#libs-server/get-join-func.mjs'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
@@ -29,9 +29,7 @@ const get_cache_info_for_league_format_careerlogs = create_static_cache_info({
 })
 
 const league_format_player_seasonlogs_table_alias = ({ params = {} }) => {
-  const {
-    league_format_hash = '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b'
-  } = params
+  const { league_format_hash = DEFAULT_LEAGUE_FORMAT_HASH } = params
   let year = params.year || [constants.season.stats_season_year]
   if (!Array.isArray(year)) {
     year = [year]
@@ -49,9 +47,7 @@ const league_format_player_seasonlogs_table_alias = ({ params = {} }) => {
 
 const league_format_player_seasonlogs_join = (join_arguments) => {
   const additional_conditions = function ({ params, table_name, splits }) {
-    const {
-      league_format_hash = '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b'
-    } = params
+    const { league_format_hash = DEFAULT_LEAGUE_FORMAT_HASH } = params
 
     let year = params.year || [constants.season.stats_season_year]
     if (!Array.isArray(year)) {
@@ -86,9 +82,7 @@ const create_field_from_league_format_player_seasonlogs = (column_name) => ({
 })
 
 const league_format_player_careerlogs_table_alias = ({ params = {} }) => {
-  const {
-    league_format_hash = '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b'
-  } = params
+  const { league_format_hash = DEFAULT_LEAGUE_FORMAT_HASH } = params
   return get_table_hash(`league_format_player_careerlogs_${league_format_hash}`)
 }
 
@@ -96,15 +90,14 @@ const league_format_player_careerlogs_join = ({
   query,
   table_name,
   join_type = 'LEFT',
-  params = {}
+  params = {},
+  data_view_options = {}
 }) => {
   const join_func = get_join_func(join_type)
-  const {
-    league_format_hash = '1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b'
-  } = params
+  const { league_format_hash = DEFAULT_LEAGUE_FORMAT_HASH } = params
 
   const join_conditions = function () {
-    this.on(`${table_name}.pid`, '=', 'player.pid')
+    this.on(`${table_name}.pid`, '=', data_view_options.pid_reference)
     this.andOn(
       db.raw(`${table_name}.league_format_hash = '${league_format_hash}'`)
     )

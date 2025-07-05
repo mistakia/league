@@ -39,7 +39,8 @@ const process_scoring_format_year = async ({
         ...calculatePoints({
           stats: projection,
           position: player_row.pos,
-          league: league_scoring_format
+          league: league_scoring_format,
+          use_projected_stats: true
         })
       })
     }
@@ -52,7 +53,8 @@ const process_scoring_format_year = async ({
     //   ...calculatePoints({
     //     stats: player_row.projection.ros,
     //     position: player_row.pos,
-    //     league: league_scoring_format
+    //     league: league_scoring_format,
+    //     use_projected_stats: true
     //   })
     // })
   }
@@ -87,9 +89,6 @@ const process_projections_for_scoring_format = async ({
       .orderBy('year', 'desc')
     years = projection_years.map((row) => row.year)
   }
-
-  // Remove constants.season.year from years if present
-  years = years.filter((year) => year !== constants.season.year)
 
   if (!years.length) {
     throw new Error('No years to process')
