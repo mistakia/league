@@ -1,7 +1,11 @@
 import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
 
-import { common_column_params, named_league_formats } from '@libs-shared'
+import {
+  common_column_params,
+  named_league_formats,
+  DEFAULT_LEAGUE_FORMAT_HASH
+} from '@libs-shared'
 
 const { single_year, single_year_offset } = common_column_params
 
@@ -12,7 +16,7 @@ const league_format_hash_param = {
     label: format.label
   })),
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-  default_value: named_league_formats.genesis_10_team.hash,
+  default_value: DEFAULT_LEAGUE_FORMAT_HASH,
   single: true
 }
 
