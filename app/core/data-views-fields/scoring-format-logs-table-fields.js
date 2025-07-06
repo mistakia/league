@@ -2,7 +2,11 @@ import * as table_constants from 'react-table/src/constants.mjs'
 
 import COLUMN_GROUPS from './column-groups'
 import from_format_player_logs from './from-format-player-logs'
-import { common_column_params, named_scoring_formats } from '@libs-shared'
+import {
+  common_column_params,
+  named_scoring_formats,
+  DEFAULT_SCORING_FORMAT_HASH
+} from '@libs-shared'
 
 const { single_year, single_year_offset } = common_column_params
 
@@ -13,7 +17,7 @@ const scoring_format_hash_param = {
     label: format.label
   })),
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-  default_value: named_scoring_formats.genesis.hash,
+  default_value: DEFAULT_SCORING_FORMAT_HASH,
   single: true
 }
 
