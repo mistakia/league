@@ -1,7 +1,6 @@
 import db from '#db'
 import { data_views_constants } from '#libs-shared'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
-import nfl_plays_column_params from '#libs-shared/nfl-plays-column-params.mjs'
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 
 export const add_player_stats_play_by_play_with_statement = ({
@@ -38,12 +37,16 @@ export const add_player_stats_play_by_play_with_statement = ({
 
   for (const split of splits) {
     if (data_views_constants.split_params.includes(split)) {
-      const column_param_definition = nfl_plays_column_params[split]
-      const table_name = column_param_definition.table || 'nfl_plays'
-      const split_statement = `${table_name}.${split}`
+      const split_statement = `nfl_plays.${split}`
       with_query.select(split_statement)
       with_query.groupBy(split_statement)
     }
+  }
+
+  // Add year column when year param exists (needed for joins)
+  if (params.year && !splits.includes('year')) {
+    with_query.select('nfl_plays.year')
+    with_query.groupBy('nfl_plays.year')
   }
 
   const unique_select_strings = new Set(select_strings)
