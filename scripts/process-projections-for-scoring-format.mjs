@@ -90,7 +90,6 @@ const process_projections_for_scoring_format = async ({
     years = projection_years.map((row) => row.year)
   }
 
-
   if (!years.length) {
     throw new Error('No years to process')
   }
