@@ -402,8 +402,14 @@ const generate_rushing_scoring_sql = async (scoring_format) => {
   const ry = scoring_format.ry || 0
   const rtd = scoring_format.tdr || 0
   const rufd = scoring_format.rush_first_down || 0
+  const ra = scoring_format.ra || 0
 
   let sql = `COALESCE(rush_yds, 0) * ${ry} + COALESCE(rush_td::int, 0) * ${rtd}`
+
+  // Add points per rush attempt
+  if (ra) {
+    sql += ` + ${ra}`
+  }
 
   if (rufd) {
     sql += ` + (CASE WHEN first_down = true AND play_type = 'RUSH' THEN ${rufd} ELSE 0 END)`
