@@ -412,7 +412,16 @@ const generate_rushing_scoring_sql = async (scoring_format) => {
   }
 
   if (rufd) {
-    sql += ` + (CASE WHEN first_down = true AND play_type = 'RUSH' THEN ${rufd} ELSE 0 END)`
+    // For Sleeper Scott Fish Bowl, exclude touchdown plays from first down calculation
+    const is_sleeper_sfb =
+      scoring_format &&
+      scoring_format.scoring_format_hash ===
+        'ed9c2daa0f00d9389f450b577c16fb0864fa22c6e261c0161db5f2da54457286'
+    if (is_sleeper_sfb) {
+      sql += ` + (CASE WHEN first_down = true AND play_type = 'RUSH' AND COALESCE(rush_td::int, 0) = 0 THEN ${rufd} ELSE 0 END)`
+    } else {
+      sql += ` + (CASE WHEN first_down = true AND play_type = 'RUSH' THEN ${rufd} ELSE 0 END)`
+    }
   }
 
   return `ROUND(SUM(${sql}), 2)`
@@ -458,7 +467,16 @@ const generate_receiving_scoring_sql = async (
 
   // Add receiving first down points
   if (recfd) {
-    sql += ` + (CASE WHEN first_down = true AND play_type = 'PASS' THEN ${recfd} ELSE 0 END)`
+    // For Sleeper Scott Fish Bowl, exclude touchdown plays from first down calculation
+    const is_sleeper_sfb =
+      scoring_format &&
+      scoring_format.scoring_format_hash ===
+        'ed9c2daa0f00d9389f450b577c16fb0864fa22c6e261c0161db5f2da54457286'
+    if (is_sleeper_sfb) {
+      sql += ` + (CASE WHEN first_down = true AND play_type = 'PASS' AND COALESCE(pass_td::int, 0) = 0 THEN ${recfd} ELSE 0 END)`
+    } else {
+      sql += ` + (CASE WHEN first_down = true AND play_type = 'PASS' THEN ${recfd} ELSE 0 END)`
+    }
   }
 
   return `ROUND(SUM(${sql}), 2)`
