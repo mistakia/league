@@ -187,7 +187,10 @@ const format_play = (play) => ({
 
   pass_location: format_play_direction(play.pass_location),
 
-  first_down: format_boolean(play.first_down_rush || play.first_down_pass || play.first_down_penalty),
+  first_down:
+    format_boolean(play.first_down_rush) ||
+    format_boolean(play.first_down_pass) ||
+    format_boolean(play.first_down_penalty),
   first_down_rush: format_boolean(play.first_down_rush),
   first_down_pass: format_boolean(play.first_down_pass),
   first_down_penalty: format_boolean(play.first_down_penalty),
