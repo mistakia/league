@@ -106,6 +106,7 @@ export {
 } from './load-test-cases.mjs'
 export { update_test_file } from './update-test-file.mjs'
 export { process_expected_query } from './process-expected-query.mjs'
+export * from './draftkings-tracking.mjs'
 
 export const getChartedPlayByPlayQuery = (db) =>
   db('nfl_plays')

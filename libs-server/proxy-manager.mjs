@@ -211,5 +211,68 @@ async function fetch_with_proxy({ url, options = {}, force_proxy = false }) {
   }
 }
 
+// Consolidated retry function that can work with or without proxy
+export async function fetch_with_retry(url, options = {}, config = {}) {
+  const {
+    max_retries = 3,
+    use_proxy = true,
+    exponential_backoff = true,
+    initial_delay = 1000,
+    max_delay = 10000
+  } = config
+
+  const log = debug('fetch-with-retry')
+
+  for (let attempt = 0; attempt <= max_retries; attempt++) {
+    try {
+      // Try direct fetch first
+      const response = await fetch(url, options)
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      }
+
+      return response
+    } catch (error) {
+      log(`Attempt ${attempt + 1} failed for ${url}: ${error.message}`)
+
+      if (attempt === max_retries) {
+        throw error
+      }
+
+      // Try with proxy on first retry if enabled
+      if (use_proxy && attempt === 0) {
+        log('Retrying with proxy...')
+        try {
+          const proxy_response = await fetch_with_proxy({
+            url,
+            options: {
+              method: options.method || 'GET',
+              headers: options.headers
+            }
+          })
+
+          if (!proxy_response.ok) {
+            throw new Error(
+              `HTTP ${proxy_response.status}: ${proxy_response.statusText}`
+            )
+          }
+
+          return proxy_response
+        } catch (proxy_error) {
+          log(`Proxy attempt failed: ${proxy_error.message}`)
+        }
+      }
+
+      // Exponential backoff delay
+      if (exponential_backoff) {
+        const delay = Math.min(initial_delay * Math.pow(2, attempt), max_delay)
+        log(`Waiting ${delay}ms before retry...`)
+        await new Promise((resolve) => setTimeout(resolve, delay))
+      }
+    }
+  }
+}
+
 export { proxy_manager, fetch_with_proxy }
 export default fetch_with_proxy

@@ -18,8 +18,6 @@ module.exports = {
   sportradar_api: '',
   espn_api_v2_url: '',
   espn_api_v3_url: '',
-  draftkings_api_v5_url: '',
-  draftkings_api_v6_url: '',
   caesars_api_v3_url: '',
   fanduel_api_url: '',
   fanduel_api_headers: {},
