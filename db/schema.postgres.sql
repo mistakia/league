@@ -1625,6 +1625,8 @@ DROP INDEX IF EXISTS public.idx_espn_team_win_rates_history_year;
 DROP INDEX IF EXISTS public.idx_espn_receiving_metrics_history;
 DROP INDEX IF EXISTS public.idx_espn_player_win_rates_history_year;
 DROP INDEX IF EXISTS public.idx_espn_player_win_rates_history_espn_win_rate_type;
+DROP INDEX IF EXISTS public.idx_draftkings_activity_last_seen;
+DROP INDEX IF EXISTS public.idx_draftkings_activity_checks;
 DROP INDEX IF EXISTS public.idx_draft_tid;
 DROP INDEX IF EXISTS public.idx_draft_lid;
 DROP INDEX IF EXISTS public.idx_current_week_prop_market_selections_composite;
@@ -1810,6 +1812,7 @@ ALTER TABLE IF EXISTS ONLY public.dvoa_team_unit_seasonlogs_history DROP CONSTRA
 ALTER TABLE IF EXISTS ONLY public.dvoa_team_seasonlogs_index DROP CONSTRAINT IF EXISTS dvoa_team_seasonlogs_index_pkey;
 ALTER TABLE IF EXISTS ONLY public.dvoa_team_seasonlogs_history DROP CONSTRAINT IF EXISTS dvoa_team_seasonlogs_history_year_team_week_key;
 ALTER TABLE IF EXISTS ONLY public.dvoa_team_gamelogs DROP CONSTRAINT IF EXISTS dvoa_team_gamelogs_pkey;
+ALTER TABLE IF EXISTS ONLY public.draftkings_category_activity DROP CONSTRAINT IF EXISTS draftkings_category_activity_pkey;
 ALTER TABLE IF EXISTS ONLY public.current_week_prop_market_selections_index DROP CONSTRAINT IF EXISTS current_week_prop_market_selections_index_pkey;
 ALTER TABLE IF EXISTS ONLY public.config DROP CONSTRAINT IF EXISTS config_pkey;
 ALTER TABLE IF EXISTS ONLY public.config DROP CONSTRAINT IF EXISTS config_key_unique;
@@ -2067,6 +2070,7 @@ DROP TABLE IF EXISTS public.dvoa_team_unit_seasonlogs_history;
 DROP TABLE IF EXISTS public.dvoa_team_seasonlogs_index;
 DROP TABLE IF EXISTS public.dvoa_team_seasonlogs_history;
 DROP TABLE IF EXISTS public.dvoa_team_gamelogs;
+DROP TABLE IF EXISTS public.draftkings_category_activity;
 DROP SEQUENCE IF EXISTS public.draft_uid_seq;
 DROP TABLE IF EXISTS public.draft;
 DROP TABLE IF EXISTS public.current_week_prop_market_selections_index;
@@ -2615,6 +2619,22 @@ CREATE SEQUENCE public.draft_uid_seq
 --
 
 ALTER SEQUENCE public.draft_uid_seq OWNED BY public.draft.uid;
+
+
+--
+-- Name: draftkings_category_activity; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.draftkings_category_activity (
+    category_id integer NOT NULL,
+    subcategory_id integer DEFAULT 0 NOT NULL,
+    category_name text,
+    subcategory_name text,
+    last_seen_with_offers timestamp without time zone,
+    last_checked timestamp without time zone DEFAULT CURRENT_TIMESTAMP,
+    total_checks integer DEFAULT 0,
+    total_offers_found integer DEFAULT 0
+);
 
 
 --
@@ -22229,6 +22249,14 @@ ALTER TABLE ONLY public.current_week_prop_market_selections_index
 
 
 --
+-- Name: draftkings_category_activity draftkings_category_activity_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.draftkings_category_activity
+    ADD CONSTRAINT draftkings_category_activity_pkey PRIMARY KEY (category_id, subcategory_id);
+
+
+--
 -- Name: dvoa_team_gamelogs dvoa_team_gamelogs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -23624,6 +23652,20 @@ CREATE INDEX idx_draft_lid ON public.draft USING btree (lid);
 --
 
 CREATE INDEX idx_draft_tid ON public.draft USING btree (tid);
+
+
+--
+-- Name: idx_draftkings_activity_checks; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_draftkings_activity_checks ON public.draftkings_category_activity USING btree (total_checks);
+
+
+--
+-- Name: idx_draftkings_activity_last_seen; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_draftkings_activity_last_seen ON public.draftkings_category_activity USING btree (last_seen_with_offers);
 
 
 --

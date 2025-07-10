@@ -1,7 +1,6 @@
 import debug from 'debug'
 import dayjs from 'dayjs'
 
-import config from '#config'
 import {
   player_prop_types,
   team_game_market_types
@@ -11,9 +10,10 @@ import { wait } from '#libs-server'
 import WebSocket from 'ws'
 import db from '#db'
 import { fixTeam } from '#libs-shared'
-import { fetch_with_proxy } from '#libs-server/proxy-manager.mjs'
+import { fetch_with_retry } from '#libs-server/proxy-manager.mjs'
 
 const log = debug('draft-kings')
+const api_log = debug('draft-kings:api')
 // debug.enable('draft-kings')
 
 export const get_team_from_participant = ({ participant, participantType }) => {
@@ -189,6 +189,8 @@ export const get_market_type_offer_1002 = (subcategoryId) => {
 export const get_market_type_offer_1003 = (subcategoryId) => {
   switch (subcategoryId) {
     case 11819:
+    case 12438:
+      // TD Scorers - anytime touchdown scorer (uses rushing+receiving touchdowns)
       return player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
 
     case 11820:
@@ -277,6 +279,17 @@ const get_market_type_offer_492 = ({ subcategoryId, betOfferTypeId }) => {
   return null
 }
 
+const get_market_type_offer_530 = (subcategoryId) => {
+  switch (subcategoryId) {
+    case 4653:
+      return team_game_market_types.GAME_ALT_TEAM_TOTAL
+
+    default:
+      log(`unknown offercategoryId 530 subcategoryId ${subcategoryId}`)
+      return null
+  }
+}
+
 export const get_market_type = ({
   offerCategoryId,
   subcategoryId,
@@ -287,6 +300,12 @@ export const get_market_type = ({
   betOfferTypeId = Number(betOfferTypeId) || null
 
   switch (offerCategoryId) {
+    case 492:
+      return get_market_type_offer_492({ subcategoryId, betOfferTypeId })
+
+    case 530:
+      return get_market_type_offer_530(subcategoryId)
+
     case 634:
       return get_market_type_offer_634(subcategoryId)
 
@@ -308,83 +327,77 @@ export const get_market_type = ({
     case 1342:
       return get_market_type_offer_1342(subcategoryId)
 
-    case 492:
-      return get_market_type_offer_492({ subcategoryId, betOfferTypeId })
-
     default:
       log(`unknown offerCategoryId ${offerCategoryId}`)
       return null
   }
 }
 
-export const get_offers = async ({ offerCategoryId, subcategoryId }) => {
-  const url = `${config.draftkings_api_v6_url}/eventgroups/88808/categories/${offerCategoryId}/subcategories/${subcategoryId}?format=json`
-
-  // log(`fetching ${url}`)
-  const res = await fetch_with_proxy({ url, options: { method: 'POST' } })
-  const data = await res.json()
-
-  if (data && data.eventGroup && data.eventGroup.offerCategories) {
-    const events = data.eventGroup.events || []
-    const category = data.eventGroup.offerCategories.find(
-      (c) => c.offerCategoryId === offerCategoryId
-    )
-
-    if (category) {
-      const sub_category = category.offerSubcategoryDescriptors.find(
-        (c) => c.subcategoryId === subcategoryId
-      )
-
-      if (
-        sub_category &&
-        sub_category.offerSubcategory &&
-        sub_category.offerSubcategory.offers.length
-      ) {
-        return {
-          offers: sub_category.offerSubcategory.offers.flat(),
-          events
-        }
-      }
-    }
+// V1 API functions
+const get_draftkings_v1_config = async () => {
+  const draftkings_config = await get_draftkings_config()
+  return {
+    headers: draftkings_config?.headers || {},
+    sportsbook_api_url: draftkings_config?.draftkings_sportsbook_api_url
   }
-
-  return { offers: null, events: [] }
 }
 
-export const get_eventgroup_offer_categories = async () => {
-  const url = `${config.draftkings_api_v6_url}/eventgroups/88808?format=json`
+const draftkings_fetch_with_retry = async (url, options) => {
+  api_log(`DK API REQUEST: ${url}`)
+  const response = await fetch_with_retry(url, options, {
+    max_retries: 3,
+    use_proxy: true,
+    exponential_backoff: true,
+    initial_delay: 1000,
+    max_delay: 10000
+  })
 
-  // log(`fetching ${url}`)
-  const res = await fetch_with_proxy({ url, options: { method: 'POST' } })
-  const data = await res.json()
-
-  if (data && data.eventGroup && data.eventGroup.offerCategories) {
-    return data.eventGroup.offerCategories
-  }
-
-  return []
+  return await response.json()
 }
 
-export const get_eventgroup_offer_subcategories = async ({
-  offerCategoryId
+export const get_league_data_v1 = async ({ leagueId = 88808 } = {}) => {
+  const { headers, sportsbook_api_url } = await get_draftkings_v1_config()
+  const url = `${sportsbook_api_url}/sportscontent/dkusdc/v1/leagues/${leagueId}`
+
+  return await draftkings_fetch_with_retry(url, { headers })
+}
+
+export const get_category_data_v1 = async ({
+  leagueId = 88808,
+  categoryId
 }) => {
-  const url = `${config.draftkings_api_v6_url}/eventgroups/88808/categories/${offerCategoryId}?format=json`
+  const { headers, sportsbook_api_url } = await get_draftkings_v1_config()
+  const url = `${sportsbook_api_url}/sportscontent/dkusdc/v1/leagues/${leagueId}/categories/${categoryId}`
 
-  // log(`fetching ${url}`)
-  const res = await fetch_with_proxy({ url, options: { method: 'POST' } })
-  const data = await res.json()
+  return await draftkings_fetch_with_retry(url, { headers })
+}
 
-  if (data && data.eventGroup && data.eventGroup.offerCategories) {
-    const category = data.eventGroup.offerCategories.find(
-      (c) => c.offerCategoryId === offerCategoryId
-    )
+export const get_subcategory_data_v1 = async ({
+  categoryId,
+  subcategoryId
+}) => {
+  const { headers, sportsbook_api_url } = await get_draftkings_v1_config()
+  const url = `${sportsbook_api_url}/sportscontent/dkusdc/v1/leagues/88808/categories/${categoryId}/subcategories/${subcategoryId}`
 
-    if (category) {
-      return category.offerSubcategoryDescriptors
-    }
-  }
+  return await draftkings_fetch_with_retry(url, { headers })
+}
 
-  return []
+// Event-specific API functions
+export const get_event_categories = async ({ eventId }) => {
+  const { headers, sportsbook_api_url } = await get_draftkings_v1_config()
+  const url = `${sportsbook_api_url}/sportscontent/dkusdc/v1/events/${eventId}/categories`
+
+  const data = await draftkings_fetch_with_retry(url, { headers })
+
+  // The API returns data with events[0].categories structure
+  return data.events?.[0]?.categories || []
+}
+
+export const get_event_category_data = async ({ eventId, categoryId }) => {
+  const { headers, sportsbook_api_url } = await get_draftkings_v1_config()
+  const url = `${sportsbook_api_url}/sportscontent/dkusdc/v1/events/${eventId}/categories/${categoryId}`
+
+  return await draftkings_fetch_with_retry(url, { headers })
 }
 
 export const get_websocket_connection = ({ authorization } = {}) =>
@@ -575,8 +588,8 @@ export const get_all_wagers = async ({
 const get_draftkings_contests = async () => {
   const draftkings_config = await get_draftkings_config()
   const url = draftkings_config.draftkings_contests_url
-  log(`fetching ${url}`)
-  const data = await fetch_with_proxy({ url }).then((res) => res.json())
+  api_log(`DK API REQUEST: ${url}`)
+  const data = await fetch_with_retry(url).then((res) => res.json())
   return data
 }
 
@@ -597,7 +610,7 @@ export const get_draftkings_draft_group_draftables = async ({
 }) => {
   const draftkings_config = await get_draftkings_config()
   const url = `${draftkings_config.draftkings_salary_url}/${draft_group_id}/draftables`
-  log(`fetching ${url}`)
-  const data = await fetch_with_proxy({ url }).then((res) => res.json())
+  api_log(`DK API REQUEST: ${url}`)
+  const data = await fetch_with_retry(url).then((res) => res.json())
   return data
 }
