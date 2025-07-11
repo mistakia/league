@@ -523,6 +523,17 @@ const format_market = async ({
       }
     }
 
+    // Convert odds_american to integer, handling Unicode minus sign
+    let odds_american_value = draftkings_selection.displayOdds?.american
+    if (odds_american_value != null) {
+      // Handle Unicode minus sign if it's a string
+      if (typeof odds_american_value === 'string') {
+        odds_american_value = odds_american_value.replace(/\u2212/g, '-')
+      }
+      // Convert to number and round to integer
+      odds_american_value = Math.round(Number(odds_american_value))
+    }
+
     formatted_selections.push({
       source_id: 'DRAFTKINGS',
       source_market_id: draftkings_market.id,
@@ -535,7 +546,7 @@ const format_market = async ({
       ),
       selection_metric_line: formatted_selection_metric_line || null,
       odds_decimal: draftkings_selection.trueOdds,
-      odds_american: draftkings_selection.displayOdds?.american
+      odds_american: odds_american_value
     })
   }
 
