@@ -139,7 +139,7 @@ export default {
     stat_name: 'team_pass_comp_from_plays'
   }),
   team_pass_touchdowns_from_plays: team_stat_from_plays({
-    select_string: `SUM(CASE WHEN td = true THEN 1 ELSE 0 END)`,
+    select_string: `SUM(CASE WHEN pass_td = true THEN 1 ELSE 0 END)`,
     stat_name: 'team_pass_td_from_plays'
   }),
   team_pass_air_yards_from_plays: team_stat_from_plays({
@@ -159,7 +159,7 @@ export default {
     stat_name: 'team_rush_att_from_plays'
   }),
   team_rush_touchdowns_from_plays: team_stat_from_plays({
-    select_string: `SUM(CASE WHEN td = true AND bc_pid IS NOT NULL THEN 1 ELSE 0 END)`,
+    select_string: `SUM(CASE WHEN rush_td = true THEN 1 ELSE 0 END)`,
     stat_name: 'team_rush_td_from_plays'
   }),
   team_expected_points_added_from_plays: team_stat_from_plays({
