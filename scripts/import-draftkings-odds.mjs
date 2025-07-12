@@ -177,9 +177,9 @@ const safe_fix_team = (team_name) => {
 const analyze_formatted_markets = (formatted_markets) => {
   log(`\n=== MARKET ANALYSIS ===`)
 
-  // Check for missing esbid and year
-  const missing_esbid = []
-  const missing_year = []
+  // Group markets by eventId for both missing esbid and year
+  const events_missing_esbid = new Map()
+  const events_missing_year = new Map()
   const missing_market_type = []
   const source_markets_missing_market_type = new Set()
 
@@ -190,7 +190,15 @@ const analyze_formatted_markets = (formatted_markets) => {
       market.esbid === null ||
       market.esbid === undefined
     ) {
-      missing_esbid.push({
+      const event_id = market.source_event_id
+      if (!events_missing_esbid.has(event_id)) {
+        events_missing_esbid.set(event_id, {
+          event_id,
+          event_name: market.source_event_name,
+          markets: []
+        })
+      }
+      events_missing_esbid.get(event_id).markets.push({
         index,
         source_market_id: market.source_market_id,
         source_market_name: market.source_market_name
@@ -203,7 +211,15 @@ const analyze_formatted_markets = (formatted_markets) => {
       market.year === null ||
       market.year === undefined
     ) {
-      missing_year.push({
+      const event_id = market.source_event_id
+      if (!events_missing_year.has(event_id)) {
+        events_missing_year.set(event_id, {
+          event_id,
+          event_name: market.source_event_name,
+          markets: []
+        })
+      }
+      events_missing_year.get(event_id).markets.push({
         index,
         source_market_id: market.source_market_id,
         source_market_name: market.source_market_name
@@ -230,29 +246,45 @@ const analyze_formatted_markets = (formatted_markets) => {
     }
   })
 
-  log(`Markets missing 'esbid': ${missing_esbid.length}`)
-  if (missing_esbid.length > 0) {
-    log('Markets with missing esbid:')
-    missing_esbid.slice(0, 10).forEach((market, idx) => {
+  // Report events missing esbid
+  const total_markets_missing_esbid = Array.from(
+    events_missing_esbid.values()
+  ).reduce((sum, event) => sum + event.markets.length, 0)
+
+  log(`Markets missing 'esbid': ${total_markets_missing_esbid}`)
+  log(`Events missing 'esbid': ${events_missing_esbid.size}`)
+
+  if (events_missing_esbid.size > 0) {
+    log('Events with markets missing esbid:')
+    const events_array = Array.from(events_missing_esbid.values())
+    events_array.slice(0, 10).forEach((event, idx) => {
       log(
-        `  ${idx + 1}. ${market.source_market_name} (ID: ${market.source_market_id})`
+        `  ${idx + 1}. ${event.event_name} (Event ID: ${event.event_id}) - ${event.markets.length} markets`
       )
     })
-    if (missing_esbid.length > 10) {
-      log(`  ... and ${missing_esbid.length - 10} more`)
+    if (events_array.length > 10) {
+      log(`  ... and ${events_array.length - 10} more events`)
     }
   }
 
-  log(`Markets missing 'year': ${missing_year.length}`)
-  if (missing_year.length > 0) {
-    log('Markets with missing year:')
-    missing_year.slice(0, 10).forEach((market, idx) => {
+  // Report events missing year
+  const total_markets_missing_year = Array.from(
+    events_missing_year.values()
+  ).reduce((sum, event) => sum + event.markets.length, 0)
+
+  log(`Markets missing 'year': ${total_markets_missing_year}`)
+  log(`Events missing 'year': ${events_missing_year.size}`)
+
+  if (events_missing_year.size > 0) {
+    log('Events with markets missing year:')
+    const events_array = Array.from(events_missing_year.values())
+    events_array.slice(0, 10).forEach((event, idx) => {
       log(
-        `  ${idx + 1}. ${market.source_market_name} (ID: ${market.source_market_id})`
+        `  ${idx + 1}. ${event.event_name} (Event ID: ${event.event_id}) - ${event.markets.length} markets`
       )
     })
-    if (missing_year.length > 10) {
-      log(`  ... and ${missing_year.length - 10} more`)
+    if (events_array.length > 10) {
+      log(`  ... and ${events_array.length - 10} more events`)
     }
   }
 
