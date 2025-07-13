@@ -759,9 +759,14 @@ export const getLeagueEvents = createSelector(
           .minute(0)
           .second(0)
 
+        // Only show daily waiver processing if we're after the live auction has ended
+        // and the waiver processing time is before the free agency period ends
         if (
+          faPeriod.free_agency_live_auction_end &&
+          now.isAfter(faPeriod.free_agency_live_auction_end) &&
           now.isBefore(faPeriod.end) &&
-          now.isBefore(waiver_processing_time)
+          now.isBefore(waiver_processing_time) &&
+          waiver_processing_time.isBefore(faPeriod.end)
         ) {
           events.push({
             detail: 'Waivers Processed',
