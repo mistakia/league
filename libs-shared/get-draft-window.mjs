@@ -9,6 +9,32 @@ dayjs.extend(isSameOrAfter)
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
+/**
+ * Calculates the draft window start time for a given pick in a fantasy league draft.
+ *
+ * @param {Object} args - The arguments object.
+ * @param {number} args.start - Unix timestamp (seconds) for the draft start time.
+ * @param {number} [args.min=11] - Earliest hour of the day when a pick window can start.
+ * @param {number} [args.max=16] - Latest hour of the day when a pick window can start.
+ * @param {number} args.pickNum - The pick number (1-based) for which to calculate the window.
+ * @param {string} [args.type='hour'] - 'hour' or 'day'. Window duration type.
+ * @param {Object} [args.last_consecutive_pick] - Last consecutive pick made { pick, selection_timestamp }.
+ *
+ * @returns {import('dayjs').Dayjs} Start time of the draft window for the given pick.
+ *
+ * @example
+ * // Pre-draft: Calculate window for pick 5 in hourly draft
+ * getDraftWindow({ start: 1625130000, pickNum: 5, type: 'hour' })
+ *
+ * @example
+ * // Mid-draft: Calculate window for pick 10 with last consecutive pick
+ * getDraftWindow({
+ *   start: 1625130000,
+ *   pickNum: 10,
+ *   type: 'day',
+ *   last_consecutive_pick: { pick: 8, selection_timestamp: 1625133600 }
+ * })
+ */
 export default function getDraftWindow({
   start,
   min = 11,
@@ -17,62 +43,148 @@ export default function getDraftWindow({
   type = 'hour',
   last_consecutive_pick
 }) {
-  if (type === null) {
-    type = 'hour'
+  // Normalize null values
+  if (type === null) type = 'hour'
+  if (min === null) min = 11
+  if (max === null) max = 16
+
+  // Guard against invalid pick numbers
+  if (pickNum <= 0) {
+    console.warn('[getDraftWindow] Invalid pickNum:', pickNum)
+    return dayjs.unix(start).tz('America/New_York')
   }
 
-  if (min === null) {
-    min = 11
+  // Determine the reference timestamp to calculate from
+  const reference_timestamp = getReferenceTimestamp(
+    start,
+    last_consecutive_pick,
+    pickNum
+  )
+
+  let window_start
+
+  if (type === 'day') {
+    window_start = calculateDailyWindow(
+      reference_timestamp,
+      pickNum,
+      last_consecutive_pick,
+      min,
+      max
+    )
+  } else {
+    window_start = calculateHourlyWindow(reference_timestamp, pickNum, min, max)
   }
 
-  if (max === null) {
-    max = 16
+  return window_start
+}
+
+/**
+ * Determines the reference timestamp to calculate the draft window from.
+ * Uses last_consecutive_pick if available, otherwise uses draft start.
+ */
+function getReferenceTimestamp(start, last_consecutive_pick, pickNum) {
+  if (last_consecutive_pick && last_consecutive_pick.selection_timestamp) {
+    const pick_diff = pickNum - last_consecutive_pick.pick
+
+    // If pick_diff is 0 or negative, we're likely in a pre-draft or error state
+    if (pick_diff <= 0) {
+      console.warn(
+        '[getDraftWindow] Invalid pick_diff:',
+        pick_diff,
+        'falling back to start'
+      )
+      return start
+    }
+
+    return last_consecutive_pick.selection_timestamp
   }
 
-  let clockStart
+  return start
+}
 
-  if (type === 'day' && last_consecutive_pick) {
+/**
+ * Calculates the window start for daily draft windows.
+ */
+function calculateDailyWindow(
+  reference_timestamp,
+  pickNum,
+  last_consecutive_pick,
+  min,
+  max
+) {
+  let window_start = dayjs.unix(reference_timestamp).tz('America/New_York')
+
+  if (last_consecutive_pick && last_consecutive_pick.selection_timestamp) {
     const pick_diff = pickNum - last_consecutive_pick.pick
 
     if (pick_diff === 1) {
-      // For the immediate next pick, use the timestamp of the last consecutive pick
-      clockStart = dayjs
-        .unix(last_consecutive_pick.selection_timestamp)
-        .tz('America/New_York')
+      // Immediate next pick - use the last pick's timestamp
+      return window_start
+    }
+
+    // For subsequent picks, advance to next valid day(s)
+    const next_midnight = window_start.add(1, 'day').startOf('day')
+
+    // Ensure at least 24 hours from last pick
+    if (next_midnight.diff(window_start, 'hours') < 24) {
+      window_start = next_midnight.add(1, 'day')
     } else {
-      // For subsequent picks, use the midnight-based logic
-      clockStart = dayjs
-        .unix(last_consecutive_pick.selection_timestamp)
-        .tz('America/New_York')
-      const next_midnight = clockStart.add(1, 'day').startOf('day')
+      window_start = next_midnight
+    }
 
-      // Ensure the window is at least 24 hours
-      if (next_midnight.diff(clockStart, 'hours') < 24) {
-        clockStart = next_midnight.add(1, 'day')
-      } else {
-        clockStart = next_midnight
-      }
-
-      if (pick_diff > 2) {
-        clockStart = clockStart.add(pick_diff - 2, 'day')
-      }
+    // Add additional days for picks beyond the immediate next
+    if (pick_diff > 2) {
+      window_start = window_start.add(pick_diff - 2, 'day')
     }
   } else {
-    clockStart = dayjs.unix(start).tz('America/New_York').startOf('day')
-    const isValid = (time) =>
-      time.isSameOrAfter(time.hour(min)) && time.isSameOrBefore(time.hour(max))
+    // Pre-draft calculation: start from draft start and advance by pick number
+    window_start = window_start.startOf('day')
 
-    while (!isValid(clockStart)) {
-      clockStart = clockStart.add(1, type)
-    }
+    // Ensure we start within valid hours
+    window_start = ensureValidHours(window_start, min, max, 'day')
 
+    // Advance by pick number - 1 (since pick 1 starts at the draft start)
     for (let i = 1; i < pickNum; i++) {
-      clockStart = clockStart.add(1, type)
-      while (!isValid(clockStart)) {
-        clockStart = clockStart.add(1, type)
-      }
+      window_start = window_start.add(1, 'day')
+      window_start = ensureValidHours(window_start, min, max, 'day')
     }
   }
 
-  return clockStart
+  return window_start
+}
+
+/**
+ * Calculates the window start for hourly draft windows.
+ */
+function calculateHourlyWindow(reference_timestamp, pickNum, min, max) {
+  let window_start = dayjs
+    .unix(reference_timestamp)
+    .tz('America/New_York')
+    .startOf('day')
+
+  // Ensure we start within valid hours
+  window_start = ensureValidHours(window_start, min, max, 'hour')
+
+  // Advance by pick number - 1 (since pick 1 starts at the draft start)
+  for (let i = 1; i < pickNum; i++) {
+    window_start = window_start.add(1, 'hour')
+    window_start = ensureValidHours(window_start, min, max, 'hour')
+  }
+
+  return window_start
+}
+
+/**
+ * Ensures the given time falls within valid hours (min-max).
+ * If not, advances to the next valid time slot.
+ */
+function ensureValidHours(time, min, max, increment_type) {
+  const is_valid = (t) =>
+    t.isSameOrAfter(t.hour(min)) && t.isSameOrBefore(t.hour(max))
+
+  while (!is_valid(time)) {
+    time = time.add(1, increment_type)
+  }
+
+  return time
 }
