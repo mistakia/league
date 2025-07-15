@@ -29,7 +29,7 @@ export default function SelectedPlayerTransactions({
   loadingTransactions
 }) {
   useEffect(() => {
-    load(playerMap.get('pid'))
+    load({ pid: playerMap.get('pid') })
   }, [load, playerMap])
 
   const transactions = playerMap.get('transactions', new List())
