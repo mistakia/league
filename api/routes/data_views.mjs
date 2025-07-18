@@ -6,6 +6,363 @@ import convert_to_csv from '#libs-shared/convert-to-csv.mjs'
 
 const router = express.Router()
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     DataView:
+ *       type: object
+ *       properties:
+ *         view_id:
+ *           type: string
+ *           format: uuid
+ *           description: 'Unique identifier for the data view'
+ *           example: 'a1b2c3d4-5678-90ab-cdef-123456789012'
+ *         view_name:
+ *           type: string
+ *           minLength: 1
+ *           maxLength: 255
+ *           description: 'Name of the data view'
+ *           example: 'Weekly QB Rankings'
+ *         view_description:
+ *           type: string
+ *           minLength: 1
+ *           maxLength: 1000
+ *           nullable: true
+ *           description: 'Description of the data view'
+ *           example: 'Top quarterback rankings for the current week'
+ *         table_state:
+ *           $ref: '#/components/schemas/TableState'
+ *         created_at:
+ *           type: string
+ *           format: date-time
+ *           description: 'When the data view was created'
+ *           example: '2024-01-15T10:30:00Z'
+ *         updated_at:
+ *           type: string
+ *           format: date-time
+ *           description: 'When the data view was last updated'
+ *           example: '2024-01-15T14:22:00Z'
+ *         user_id:
+ *           type: integer
+ *           description: 'ID of the user who created the data view'
+ *           example: 123
+ *         view_username:
+ *           type: string
+ *           nullable: true
+ *           description: 'Username of the user who created the data view'
+ *           example: 'johndoe'
+ *       required:
+ *         - view_id
+ *         - view_name
+ *         - table_state
+ *         - user_id
+ *
+ *     TableState:
+ *       type: object
+ *       properties:
+ *         offset:
+ *           type: integer
+ *           minimum: 0
+ *           description: 'Number of rows to skip for pagination'
+ *           example: 0
+ *         limit:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 2000
+ *           description: 'Maximum number of rows to return'
+ *           example: 100
+ *         sort:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/SortColumn'
+ *           description: 'Sort configuration for the data view'
+ *         columns:
+ *           type: array
+ *           items:
+ *             oneOf:
+ *               - type: string
+ *                 description: 'Column ID as string'
+ *                 example: 'player_name'
+ *               - $ref: '#/components/schemas/ColumnConfig'
+ *           description: 'Columns to include in the data view'
+ *         where:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/WhereClause'
+ *           description: 'Filter conditions for the data view'
+ *         splits:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: 'Split configurations for data grouping'
+ *           example: ['week', 'team']
+ *         prefix_columns:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: 'Columns to prefix in the output'
+ *           example: ['player_', 'team_']
+ *
+ *     SortColumn:
+ *       type: object
+ *       properties:
+ *         column_id:
+ *           type: string
+ *           description: 'ID of the column to sort by'
+ *           example: 'fantasy_points'
+ *         desc:
+ *           type: boolean
+ *           description: 'Whether to sort in descending order'
+ *           example: true
+ *       required:
+ *         - column_id
+ *         - desc
+ *
+ *     ColumnConfig:
+ *       type: object
+ *       properties:
+ *         column_id:
+ *           type: string
+ *           description: 'ID of the column'
+ *           example: 'player_projected_points'
+ *         params:
+ *           type: object
+ *           description: 'Additional parameters for the column'
+ *           example: { "week": 4, "year": 2024 }
+ *       required:
+ *         - column_id
+ *
+ *     WhereClause:
+ *       type: object
+ *       properties:
+ *         column_id:
+ *           type: string
+ *           description: 'ID of the column to filter'
+ *           example: 'position'
+ *         operator:
+ *           type: string
+ *           enum: ['=', '!=', '>', '>=', '<', '<=', 'ILIKE', 'NOT ILIKE', 'LIKE', 'NOT LIKE', 'IS NULL', 'IS NOT NULL', 'IN', 'NOT IN']
+ *           description: 'Comparison operator'
+ *           example: '='
+ *         value:
+ *           oneOf:
+ *             - type: string
+ *             - type: number
+ *             - type: array
+ *               items:
+ *                 oneOf:
+ *                   - type: string
+ *                   - type: number
+ *           description: 'Value to compare against (not required for NULL operators)'
+ *           example: 'QB'
+ *         params:
+ *           type: object
+ *           description: 'Additional parameters for the filter'
+ *           example: { "case_sensitive": false }
+ *       required:
+ *         - column_id
+ *         - operator
+ *
+ *     DataViewCreateRequest:
+ *       type: object
+ *       properties:
+ *         view_id:
+ *           type: string
+ *           format: uuid
+ *           description: 'Optional view ID for updating existing view'
+ *           example: 'a1b2c3d4-5678-90ab-cdef-123456789012'
+ *         view_name:
+ *           type: string
+ *           minLength: 1
+ *           maxLength: 255
+ *           description: 'Name of the data view'
+ *           example: 'My QB Rankings'
+ *         view_description:
+ *           type: string
+ *           minLength: 1
+ *           maxLength: 1000
+ *           description: 'Description of the data view'
+ *           example: 'Custom quarterback rankings for week 4'
+ *         table_state:
+ *           $ref: '#/components/schemas/TableState'
+ *       required:
+ *         - view_name
+ *         - view_description
+ *         - table_state
+ *
+ *     DataViewSearchRequest:
+ *       type: object
+ *       properties:
+ *         where:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/WhereClause'
+ *           description: 'Filter conditions for the search'
+ *         columns:
+ *           type: array
+ *           items:
+ *             oneOf:
+ *               - type: string
+ *               - $ref: '#/components/schemas/ColumnConfig'
+ *           description: 'Columns to include in the results'
+ *         sort:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/SortColumn'
+ *           description: 'Sort configuration for the results'
+ *         offset:
+ *           type: integer
+ *           minimum: 0
+ *           description: 'Number of rows to skip for pagination'
+ *           example: 0
+ *         prefix_columns:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: 'Columns to prefix in the output'
+ *         splits:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: 'Split configurations for data grouping'
+ *       required:
+ *         - columns
+ *
+ *     DataViewResults:
+ *       type: array
+ *       items:
+ *         type: object
+ *         additionalProperties: true
+ *         description: 'Dynamic object containing the requested data columns'
+ *       description: 'Array of data results matching the search criteria'
+ *       example:
+ *         - player_name: 'Patrick Mahomes'
+ *           position: 'QB'
+ *           team: 'KC'
+ *           fantasy_points: 24.5
+ *         - player_name: 'Josh Allen'
+ *           position: 'QB'
+ *           team: 'BUF'
+ *           fantasy_points: 22.1
+ *
+ *     DeleteResponse:
+ *       type: object
+ *       properties:
+ *         success:
+ *           type: boolean
+ *           description: 'Whether the deletion was successful'
+ *           example: true
+ *       required:
+ *         - success
+ *
+ *   parameters:
+ *     dataViewId:
+ *       name: data_view_id
+ *       in: path
+ *       required: true
+ *       schema:
+ *         type: string
+ *         format: uuid
+ *       description: 'Unique identifier for the data view'
+ *       example: 'a1b2c3d4-5678-90ab-cdef-123456789012'
+ *
+ *     viewId:
+ *       name: view_id
+ *       in: path
+ *       required: true
+ *       schema:
+ *         type: string
+ *         format: uuid
+ *       description: 'Unique identifier for the data view'
+ *       example: 'a1b2c3d4-5678-90ab-cdef-123456789012'
+ *
+ *     exportFormat:
+ *       name: export_format
+ *       in: path
+ *       required: true
+ *       schema:
+ *         type: string
+ *         enum: [csv, json]
+ *       description: 'Format for exporting the data view'
+ *       example: 'csv'
+ *
+ *     ignoreCache:
+ *       name: ignore_cache
+ *       in: query
+ *       required: false
+ *       schema:
+ *         type: boolean
+ *       description: 'Whether to ignore cached results and fetch fresh data'
+ *       example: false
+ *
+ *     exportLimit:
+ *       name: limit
+ *       in: query
+ *       required: false
+ *       schema:
+ *         type: integer
+ *         minimum: 1
+ *       description: 'Maximum number of records to export'
+ *       example: 1000
+ *
+ *     userId:
+ *       name: user_id
+ *       in: query
+ *       required: false
+ *       schema:
+ *         type: integer
+ *       description: 'Filter data views by user ID'
+ *       example: 123
+ *
+ *     username:
+ *       name: username
+ *       in: query
+ *       required: false
+ *       schema:
+ *         type: string
+ *       description: 'Filter data views by username'
+ *       example: 'johndoe'
+ */
+
+/**
+ * @swagger
+ * /data_views:
+ *   get:
+ *     summary: List data views
+ *     description: |
+ *       Retrieves a list of user data views. Can be filtered by user ID or username.
+ *       Data views are custom table configurations that allow users to create, save,
+ *       and share specific data queries with custom columns, filters, and sorting.
+ *     tags:
+ *       - Data Views
+ *     parameters:
+ *       - $ref: '#/components/parameters/userId'
+ *       - $ref: '#/components/parameters/username'
+ *     responses:
+ *       '200':
+ *         description: List of data views retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/DataView'
+ *             example:
+ *               - view_id: 'a1b2c3d4-5678-90ab-cdef-123456789012'
+ *                 view_name: 'Weekly QB Rankings'
+ *                 view_description: 'Top quarterback rankings for the current week'
+ *                 table_state:
+ *                   columns: ['player_name', 'position', 'fantasy_points']
+ *                   sort: [{ column_id: 'fantasy_points', desc: true }]
+ *                   where: [{ column_id: 'position', operator: '=', value: 'QB' }]
+ *                 created_at: '2024-01-15T10:30:00Z'
+ *                 updated_at: '2024-01-15T14:22:00Z'
+ *                 user_id: 123
+ *                 view_username: 'johndoe'
+ *       '500':
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -43,6 +400,51 @@ router.get('/?', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /data_views/{data_view_id}:
+ *   get:
+ *     summary: Get a specific data view
+ *     description: |
+ *       Retrieves a specific data view by its unique identifier.
+ *       Returns the complete data view configuration including table state,
+ *       metadata, and the username of the creator.
+ *     tags:
+ *       - Data Views
+ *     parameters:
+ *       - $ref: '#/components/parameters/dataViewId'
+ *     responses:
+ *       '200':
+ *         description: Data view retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/DataView'
+ *             example:
+ *               view_id: 'a1b2c3d4-5678-90ab-cdef-123456789012'
+ *               view_name: 'Weekly QB Rankings'
+ *               view_description: 'Top quarterback rankings for the current week'
+ *               table_state:
+ *                 columns: ['player_name', 'position', 'fantasy_points']
+ *                 sort: [{ column_id: 'fantasy_points', desc: true }]
+ *                 where: [{ column_id: 'position', operator: '=', value: 'QB' }]
+ *                 offset: 0
+ *                 limit: 100
+ *               created_at: '2024-01-15T10:30:00Z'
+ *               updated_at: '2024-01-15T14:22:00Z'
+ *               user_id: 123
+ *               view_username: 'johndoe'
+ *       '400':
+ *         description: Invalid data view ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               error: 'invalid data_view_id'
+ *       '500':
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.get('/:data_view_id', async (req, res) => {
   const { logger, db } = req.app.locals
   try {
@@ -66,6 +468,119 @@ router.get('/:data_view_id', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /data_views:
+ *   post:
+ *     summary: Create or update a data view
+ *     description: |
+ *       Creates a new data view or updates an existing one if view_id is provided.
+ *       Data views allow users to save custom table configurations with specific
+ *       columns, filters, sorting, and other display preferences.
+ *
+ *       **Authentication required**: This endpoint requires a valid JWT token.
+ *
+ *       **Create vs Update**:
+ *       - If `view_id` is not provided, creates a new data view
+ *       - If `view_id` is provided, updates the existing data view (must be owned by authenticated user)
+ *     tags:
+ *       - Data Views
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/DataViewCreateRequest'
+ *           examples:
+ *             createNew:
+ *               summary: Create new data view
+ *               value:
+ *                 view_name: 'Top RB Rankings'
+ *                 view_description: 'Running back rankings for current week'
+ *                 table_state:
+ *                   columns: ['player_name', 'position', 'fantasy_points', 'rush_yards']
+ *                   sort: [{ column_id: 'fantasy_points', desc: true }]
+ *                   where: [{ column_id: 'position', operator: '=', value: 'RB' }]
+ *                   offset: 0
+ *                   limit: 50
+ *             updateExisting:
+ *               summary: Update existing data view
+ *               value:
+ *                 view_id: 'a1b2c3d4-5678-90ab-cdef-123456789012'
+ *                 view_name: 'Updated QB Rankings'
+ *                 view_description: 'Updated quarterback rankings with new filters'
+ *                 table_state:
+ *                   columns: ['player_name', 'position', 'fantasy_points', 'passing_yards']
+ *                   sort: [{ column_id: 'passing_yards', desc: true }]
+ *                   where: [
+ *                     { column_id: 'position', operator: '=', value: 'QB' },
+ *                     { column_id: 'fantasy_points', operator: '>', value: 15 }
+ *                   ]
+ *                   offset: 0
+ *                   limit: 25
+ *     responses:
+ *       '200':
+ *         description: Data view created or updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/DataView'
+ *             example:
+ *               view_id: 'a1b2c3d4-5678-90ab-cdef-123456789012'
+ *               view_name: 'Top RB Rankings'
+ *               view_description: 'Running back rankings for current week'
+ *               table_state:
+ *                 columns: ['player_name', 'position', 'fantasy_points', 'rush_yards']
+ *                 sort: [{ column_id: 'fantasy_points', desc: true }]
+ *                 where: [{ column_id: 'position', operator: '=', value: 'RB' }]
+ *                 offset: 0
+ *                 limit: 50
+ *               created_at: '2024-01-15T10:30:00Z'
+ *               updated_at: '2024-01-15T10:30:00Z'
+ *               user_id: 123
+ *       '400':
+ *         description: Invalid request data
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             examples:
+ *               invalidViewName:
+ *                 summary: Invalid view name
+ *                 value:
+ *                   error: 'invalid view_name'
+ *               invalidViewDescription:
+ *                 summary: Invalid view description
+ *                 value:
+ *                   error: 'invalid view_description'
+ *               invalidTableState:
+ *                 summary: Invalid table state
+ *                 value:
+ *                   error: 'invalid table_state'
+ *               invalidViewId:
+ *                 summary: Invalid view ID (when updating)
+ *                 value:
+ *                   error: 'invalid view_id'
+ *       '401':
+ *         description: Authentication required or unauthorized access
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             examples:
+ *               noAuth:
+ *                 summary: No authentication provided
+ *                 value:
+ *                   error: 'invalid userId'
+ *               notOwner:
+ *                 summary: User does not own the data view
+ *                 value:
+ *                   error: 'invalid userId'
+ *       '500':
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.post('/?', async (req, res) => {
   const { logger, db } = req.app.locals
   try {
@@ -140,6 +655,58 @@ router.post('/?', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /data_views/{view_id}:
+ *   delete:
+ *     summary: Delete a data view
+ *     description: |
+ *       Deletes a specific data view by its unique identifier.
+ *       Only the owner of the data view can delete it.
+ *
+ *       **Authentication required**: This endpoint requires a valid JWT token.
+ *       **Authorization**: User must be the owner of the data view.
+ *     tags:
+ *       - Data Views
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/viewId'
+ *     responses:
+ *       '200':
+ *         description: Data view deleted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/DeleteResponse'
+ *             example:
+ *               success: true
+ *       '400':
+ *         description: Invalid view ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               error: 'invalid view_id'
+ *       '401':
+ *         description: Authentication required or unauthorized access
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             examples:
+ *               noAuth:
+ *                 summary: No authentication provided
+ *                 value:
+ *                   error: 'invalid userId'
+ *               notOwner:
+ *                 summary: User does not own the data view
+ *                 value:
+ *                   error: 'invalid userId'
+ *       '500':
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.delete('/:view_id', async (req, res) => {
   const { logger, db } = req.app.locals
   try {
@@ -179,6 +746,85 @@ router.delete('/:view_id', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /data_views/search:
+ *   post:
+ *     summary: Search and retrieve data view results
+ *     description: |
+ *       Executes a data view search query and returns the matching results.
+ *       This endpoint is used to retrieve actual data based on the specified
+ *       columns, filters, sorting, and other parameters.
+ *
+ *       **Caching**: Results are cached using Redis for performance. The cache
+ *       key is generated based on the query parameters hash.
+ *
+ *       **Performance**: For large datasets, consider using pagination with
+ *       offset and appropriate limits.
+ *     tags:
+ *       - Data Views
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/DataViewSearchRequest'
+ *           examples:
+ *             basicSearch:
+ *               summary: Basic player search
+ *               value:
+ *                 columns: ['player_name', 'position', 'fantasy_points']
+ *                 where: [{ column_id: 'position', operator: '=', value: 'QB' }]
+ *                 sort: [{ column_id: 'fantasy_points', desc: true }]
+ *                 offset: 0
+ *             advancedSearch:
+ *               summary: Advanced search with multiple filters
+ *               value:
+ *                 columns: [
+ *                   { column_id: 'player_name' },
+ *                   { column_id: 'fantasy_points', params: { week: 4 } },
+ *                   { column_id: 'projected_points', params: { week: 5 } }
+ *                 ]
+ *                 where: [
+ *                   { column_id: 'position', operator: 'IN', value: ['QB', 'RB'] },
+ *                   { column_id: 'fantasy_points', operator: '>', value: 15 }
+ *                 ]
+ *                 sort: [
+ *                   { column_id: 'fantasy_points', desc: true },
+ *                   { column_id: 'player_name', desc: false }
+ *                 ]
+ *                 offset: 0
+ *                 splits: ['team']
+ *                 prefix_columns: ['player_']
+ *     responses:
+ *       '200':
+ *         description: Search results retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/DataViewResults'
+ *             examples:
+ *               playerResults:
+ *                 summary: Player search results
+ *                 value:
+ *                   - player_name: 'Patrick Mahomes'
+ *                     position: 'QB'
+ *                     fantasy_points: 24.5
+ *                     team: 'KC'
+ *                   - player_name: 'Josh Allen'
+ *                     position: 'QB'
+ *                     fantasy_points: 22.1
+ *                     team: 'BUF'
+ *                   - player_name: 'Lamar Jackson'
+ *                     position: 'QB'
+ *                     fantasy_points: 21.8
+ *                     team: 'BAL'
+ *               emptyResults:
+ *                 summary: No matching results
+ *                 value: []
+ *       '500':
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.post('/search/?', async (req, res) => {
   const { logger } = req.app.locals
   try {
@@ -226,6 +872,76 @@ router.post('/search/?', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /data_views/export/{view_id}/{export_format}:
+ *   get:
+ *     summary: Export data view results
+ *     description: |
+ *       Exports the results of a specific data view in the requested format.
+ *       The data view configuration (table state) is used to generate the results,
+ *       which are then formatted and returned as a downloadable file.
+ *
+ *       **Supported formats**: CSV, JSON
+ *
+ *       **Caching**: Results are cached for performance unless `ignore_cache=true`
+ *       is specified. Cache expiration is handled automatically.
+ *
+ *       **File naming**: Exported files are named using the pattern:
+ *       `{view_name}-{timestamp}.{format}`
+ *
+ *       **Performance**: Use the `limit` parameter to control the number of
+ *       records exported for large datasets.
+ *     tags:
+ *       - Data Views
+ *     parameters:
+ *       - $ref: '#/components/parameters/viewId'
+ *       - $ref: '#/components/parameters/exportFormat'
+ *       - $ref: '#/components/parameters/ignoreCache'
+ *       - $ref: '#/components/parameters/exportLimit'
+ *     responses:
+ *       '200':
+ *         description: Data view exported successfully
+ *         content:
+ *           text/csv:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *             example: |
+ *               player_name,position,fantasy_points,team
+ *               Patrick Mahomes,QB,24.5,KC
+ *               Josh Allen,QB,22.1,BUF
+ *               Lamar Jackson,QB,21.8,BAL
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/DataViewResults'
+ *             example:
+ *               - player_name: 'Patrick Mahomes'
+ *                 position: 'QB'
+ *                 fantasy_points: 24.5
+ *                 team: 'KC'
+ *               - player_name: 'Josh Allen'
+ *                 position: 'QB'
+ *                 fantasy_points: 22.1
+ *                 team: 'BUF'
+ *       '400':
+ *         description: Invalid request parameters
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             examples:
+ *               invalidViewId:
+ *                 summary: Invalid view ID
+ *                 value:
+ *                   error: 'invalid view_id'
+ *               invalidFormat:
+ *                 summary: Invalid export format
+ *                 value:
+ *                   error: 'invalid export_format'
+ *       '500':
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.get('/export/:view_id/:export_format', async (req, res) => {
   const { logger, db } = req.app.locals
   try {

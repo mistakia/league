@@ -88,7 +88,6 @@ import {
 import { notificationActions } from '@core/notifications/actions'
 import { getScoreboardActions } from '@core/scoreboard/actions'
 import { postErrorActions } from '@core/errors/actions'
-import { getPropsActions } from '@core/props/actions'
 import { getPercentilesActions } from '@core/percentiles/actions'
 import { getNflTeamSeasonlogsActions } from '@core/seasonlogs/actions'
 import { get_league_team_daily_values_actions } from '@core/league-team-daily-values/actions'
@@ -335,8 +334,6 @@ export const fetchScoreboard = fetch.bind(
 
 export const postError = fetch.bind(null, api.postError, postErrorActions)
 export const getStatus = fetch.bind(null, api.getStatus, getStatusActions)
-
-export const fetchProps = fetch.bind(null, api.getProps, getPropsActions)
 
 export const getCutlist = fetch.bind(null, api.getCutlist, getCutlistActions)
 export const postCutlist = fetch.bind(null, api.postCutlist, postCutlistActions)

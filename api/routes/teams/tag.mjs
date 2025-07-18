@@ -13,6 +13,85 @@ import {
 
 const router = express.Router({ mergeParams: true })
 
+/**
+ * @swagger
+ * /teams/{teamId}/tag:
+ *   post:
+ *     tags:
+ *       - Teams
+ *     summary: Tag a player
+ *     description: |
+ *       Apply a tag to a player (franchise, transition, etc.).
+ *       Player must be on active roster and within tag limits.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/teamId'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               pid:
+ *                 type: string
+ *                 description: Player ID to tag
+ *                 example: "JALE-HURT-2020-1998-08-07"
+ *               leagueId:
+ *                 type: integer
+ *                 description: League ID
+ *                 example: 2
+ *               tag:
+ *                 type: integer
+ *                 description: Tag type (see constants.tags)
+ *                 example: 3
+ *               remove:
+ *                 type: string
+ *                 description: Player ID to remove existing tag from (optional)
+ *                 example: "JORD-LOVE-2020-1998-11-02"
+ *             required:
+ *               - pid
+ *               - leagueId
+ *               - tag
+ *           examples:
+ *             franchiseTag:
+ *               summary: Apply franchise tag
+ *               value:
+ *                 pid: "JALE-HURT-2020-1998-08-07"
+ *                 leagueId: 2
+ *                 tag: 3
+ *             transitionTag:
+ *               summary: Apply transition tag
+ *               value:
+ *                 pid: "JALE-HURT-2020-1998-08-07"
+ *                 leagueId: 2
+ *                 tag: 4
+ *             tagWithRemove:
+ *               summary: Tag player and remove existing tag
+ *               value:
+ *                 pid: "JALE-HURT-2020-1998-08-07"
+ *                 leagueId: 2
+ *                 tag: 3
+ *                 remove: "JORD-LOVE-2020-1998-11-02"
+ *     responses:
+ *       200:
+ *         description: Player tagged successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.post('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -147,6 +226,65 @@ router.post('/?', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ *   delete:
+ *     tags:
+ *       - Teams
+ *     summary: Remove player tag
+ *     description: |
+ *       Remove a tag from a player. Player must be on active roster.
+ *       Must be before extension deadline.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/teamId'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               pid:
+ *                 type: string
+ *                 description: Player ID to remove tag from
+ *                 example: "JALE-HURT-2020-1998-08-07"
+ *               leagueId:
+ *                 type: integer
+ *                 description: League ID
+ *                 example: 2
+ *             required:
+ *               - pid
+ *               - leagueId
+ *           examples:
+ *             removeTag:
+ *               summary: Remove player tag
+ *               value:
+ *                 pid: "JALE-HURT-2020-1998-08-07"
+ *                 leagueId: 2
+ *     responses:
+ *       200:
+ *         description: Tag removed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   type: boolean
+ *                   example: true
+ *                 pid:
+ *                   type: string
+ *                   description: Player ID
+ *                   example: "JALE-HURT-2020-1998-08-07"
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.delete('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {

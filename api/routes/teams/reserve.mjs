@@ -5,6 +5,100 @@ import { verifyUserTeam, submitReserve } from '#libs-server'
 
 const router = express.Router({ mergeParams: true })
 
+/**
+ * @swagger
+ * /teams/{teamId}/reserve:
+ *   post:
+ *     tags:
+ *       - Teams
+ *     summary: Move player to injured reserve
+ *     description: |
+ *       Move a player to injured reserve (IR) or long-term IR.
+ *       Can optionally activate another player from reserve.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/teamId'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               reserve_pid:
+ *                 type: string
+ *                 description: Player ID to move to reserve
+ *                 example: "JALE-HURT-2020-1998-08-07"
+ *               leagueId:
+ *                 type: integer
+ *                 description: League ID
+ *                 example: 2
+ *               slot:
+ *                 type: integer
+ *                 description: Reserve slot type (7=IR, 8=Long-term IR)
+ *                 enum: [7, 8]
+ *                 example: 7
+ *               activate_pid:
+ *                 type: string
+ *                 description: Player ID to activate from reserve (optional)
+ *                 example: "JACO-BURR-2020-1996-12-10"
+ *             required:
+ *               - reserve_pid
+ *               - leagueId
+ *               - slot
+ *           examples:
+ *             moveToIR:
+ *               summary: Move player to IR
+ *               value:
+ *                 reserve_pid: "JALE-HURT-2020-1998-08-07"
+ *                 leagueId: 2
+ *                 slot: 7
+ *             moveToIRAndActivate:
+ *               summary: Move to IR and activate another
+ *               value:
+ *                 reserve_pid: "JALE-HURT-2020-1998-08-07"
+ *                 leagueId: 2
+ *                 slot: 7
+ *                 activate_pid: "JACO-BURR-2020-1996-12-10"
+ *     responses:
+ *       200:
+ *         description: Player moved to reserve successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 pid:
+ *                   type: string
+ *                   description: Player ID
+ *                   example: "JALE-HURT-2020-1998-08-07"
+ *                 tid:
+ *                   type: integer
+ *                   description: Team ID
+ *                   example: 13
+ *                 slot:
+ *                   type: integer
+ *                   description: New slot (reserve)
+ *                   example: 7
+ *                 rid:
+ *                   type: integer
+ *                   description: Roster ID
+ *                   example: 1234
+ *                 pos:
+ *                   type: string
+ *                   description: Player position
+ *                   example: "QB"
+ *                 transaction:
+ *                   type: object
+ *                   description: Transaction details
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.post('/?', async (req, res) => {
   const { logger, broadcast } = req.app.locals
   try {

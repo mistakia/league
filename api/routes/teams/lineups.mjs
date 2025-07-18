@@ -10,6 +10,35 @@ import { constants, Roster } from '#libs-shared'
 
 const router = express.Router({ mergeParams: true })
 
+/**
+ * @swagger
+ * /teams/{teamId}/lineups:
+ *   get:
+ *     tags:
+ *       - Teams
+ *     summary: Get team lineup
+ *     description: |
+ *       Get the team's lineup for a specific week and year.
+ *       Returns the roster configuration for the specified time period.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/teamId'
+ *       - $ref: '#/components/parameters/week'
+ *       - $ref: '#/components/parameters/year'
+ *     responses:
+ *       200:
+ *         description: Lineup retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               description: Roster data for the specified week
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -43,6 +72,105 @@ router.get('/?', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ *   put:
+ *     tags:
+ *       - Teams
+ *     summary: Update team lineup
+ *     description: |
+ *       Update the team's lineup by moving players to different slots.
+ *       Validates player eligibility and slot availability.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/teamId'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               week:
+ *                 type: integer
+ *                 description: Week number
+ *                 example: 4
+ *               year:
+ *                 type: integer
+ *                 description: Year
+ *                 example: 2024
+ *               leagueId:
+ *                 type: integer
+ *                 description: League ID
+ *                 example: 2
+ *               players:
+ *                 type: array
+ *                 items:
+ *                   type: object
+ *                   properties:
+ *                     pid:
+ *                       type: string
+ *                       description: Player ID
+ *                       example: "JALE-HURT-2020-1998-08-07"
+ *                     slot:
+ *                       type: integer
+ *                       description: Target slot
+ *                       example: 0
+ *                   required:
+ *                     - pid
+ *                     - slot
+ *                 description: Array of player moves
+ *             required:
+ *               - leagueId
+ *               - players
+ *           examples:
+ *             updateLineup:
+ *               summary: Update lineup for current week
+ *               value:
+ *                 leagueId: 2
+ *                 players:
+ *                   - pid: "JALE-HURT-2020-1998-08-07"
+ *                     slot: 0
+ *                   - pid: "JORD-LOVE-2020-1998-11-02"
+ *                     slot: 4
+ *     responses:
+ *       200:
+ *         description: Lineup updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   slot:
+ *                     type: integer
+ *                     description: Player slot
+ *                     example: 0
+ *                   pid:
+ *                     type: string
+ *                     description: Player ID
+ *                     example: "JALE-HURT-2020-1998-08-07"
+ *                   week:
+ *                     type: integer
+ *                     description: Week number
+ *                     example: 4
+ *                   year:
+ *                     type: integer
+ *                     description: Year
+ *                     example: 2024
+ *                   tid:
+ *                     type: integer
+ *                     description: Team ID
+ *                     example: 13
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.put('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {

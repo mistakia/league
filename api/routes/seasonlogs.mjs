@@ -4,6 +4,50 @@ import { constants } from '#libs-shared'
 
 const router = express.Router()
 
+/**
+ * @swagger
+ * /seasonlogs/teams:
+ *   get:
+ *     tags:
+ *       - Stats
+ *     summary: Get NFL team season logs
+ *     description: Retrieve season-long statistical logs for NFL teams, with optional league-specific scoring and ranking information.
+ *     parameters:
+ *       - $ref: '#/components/parameters/year'
+ *       - name: leagueId
+ *         in: query
+ *         schema:
+ *           type: integer
+ *         description: League ID to include league-specific points and rankings
+ *         example: 2
+ *     responses:
+ *       200:
+ *         description: NFL team season logs
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/NFLTeamSeasonLog'
+ *             examples:
+ *               team_season_logs:
+ *                 summary: Sample team season logs
+ *                 value:
+ *                   - year: 2024
+ *                     tm: "KC"
+ *                     stat_key: "points_scored"
+ *                     stat_value: 345
+ *                     pts: 12.5
+ *                     rnk: 3
+ *                   - year: 2024
+ *                     tm: "KC"
+ *                     stat_key: "points_allowed"
+ *                     stat_value: 210
+ *                     pts: 8.2
+ *                     rnk: 7
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.get('/teams', async (req, res) => {
   const { db, logger } = req.app.locals
   try {

@@ -5,6 +5,80 @@ import { verifyUserTeam, getTransactionsSinceFreeAgent } from '#libs-server'
 
 const router = express.Router({ mergeParams: true })
 
+/**
+ * @swagger
+ * /teams/{teamId}/transactions/reserve:
+ *   get:
+ *     tags:
+ *       - Teams
+ *     summary: Get reserve transactions
+ *     description: |
+ *       Get all transactions for players currently on injured reserve.
+ *       Shows transaction history since they became free agents.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/teamId'
+ *       - name: leagueId
+ *         in: query
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: League ID
+ *         example: 2
+ *     responses:
+ *       200:
+ *         description: Reserve transactions retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   userid:
+ *                     type: integer
+ *                     description: User ID who made the transaction
+ *                     example: 1
+ *                   tid:
+ *                     type: integer
+ *                     description: Team ID
+ *                     example: 13
+ *                   lid:
+ *                     type: integer
+ *                     description: League ID
+ *                     example: 2
+ *                   pid:
+ *                     type: string
+ *                     description: Player ID
+ *                     example: "JALE-HURT-2020-1998-08-07"
+ *                   type:
+ *                     type: integer
+ *                     description: Transaction type
+ *                     example: 7
+ *                   value:
+ *                     type: integer
+ *                     description: Transaction value
+ *                     example: 5
+ *                   week:
+ *                     type: integer
+ *                     description: Week number
+ *                     example: 4
+ *                   year:
+ *                     type: integer
+ *                     description: Year
+ *                     example: 2024
+ *                   timestamp:
+ *                     type: integer
+ *                     description: Unix timestamp
+ *                     example: 1640995200
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.get('/reserve', async (req, res) => {
   const { db, logger } = req.app.locals
   try {

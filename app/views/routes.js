@@ -23,7 +23,6 @@ const TradePage = lazy(() => import('@pages/trade'))
 const TeamSettingsPage = lazy(() => import('@pages/team-settings'))
 const MarkdownPage = lazy(() => import('@pages/markdown'))
 const StatusPage = lazy(() => import('@pages/status'))
-const PropsPage = lazy(() => import('@pages/props'))
 const TransactionsPage = lazy(() => import('@pages/transactions'))
 const StandingsPage = lazy(() => import('@pages/standings'))
 const StatsPage = lazy(() => import('@pages/stats'))
@@ -91,7 +90,6 @@ const Routes = ({ app }) => {
         <Route path='/leagues/:lid/settings' element={<LeagueSettingsPage />} />
         <Route path='/leagues/:lid' element={<LeagueHomePage />} />
       </Route>
-      <Route path='/props' element={<PropsPage />} />
       <Route path='/status' element={<StatusPage />} />
       <Route path='/settings' element={<UserSettingsPage />} />
       <Route

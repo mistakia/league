@@ -292,10 +292,6 @@ export const api = {
     const url = `${API_URL}/scoreboard?${queryString.stringify(params)}`
     return { url }
   },
-  getProps() {
-    const url = `${API_URL}/odds/props`
-    return { url }
-  },
   getCutlist({ teamId }) {
     const url = `${API_URL}/teams/${teamId}/cutlist`
     return { url }

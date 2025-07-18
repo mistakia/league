@@ -5,6 +5,71 @@ import { getPlayByPlayQuery } from '#libs-server'
 
 const router = express.Router()
 
+/**
+ * @swagger
+ * /scoreboard:
+ *   get:
+ *     tags:
+ *       - Scoreboard
+ *     summary: Get scoreboard data for a specific week
+ *     description: Retrieve comprehensive scoreboard data including play-by-play information and player statistics for a specified fantasy football week. This endpoint combines play data with player performance statistics.
+ *     parameters:
+ *       - $ref: '#/components/parameters/week'
+ *     responses:
+ *       200:
+ *         description: Scoreboard data with plays and player statistics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 allOf:
+ *                   - $ref: '#/components/schemas/NFLPlay'
+ *                   - type: object
+ *                     properties:
+ *                       playStats:
+ *                         type: array
+ *                         items:
+ *                           $ref: '#/components/schemas/NFLPlayStats'
+ *                         description: Player statistics for this specific play
+ *             examples:
+ *               scoreboard_data:
+ *                 summary: Sample scoreboard data
+ *                 value:
+ *                   - esbid: "2024120801"
+ *                     playId: 1
+ *                     week: 13
+ *                     year: 2024
+ *                     seas_type: "REG"
+ *                     off: "KC"
+ *                     def: "LV"
+ *                     down: 1
+ *                     yards_to_go: 10
+ *                     yfog: 25
+ *                     play_type: "PASS"
+ *                     yards_gained: 15
+ *                     playStats:
+ *                       - pid: "PATR-MAHO-2017-1995-09-17"
+ *                         stat_type: "PASSING"
+ *                         yards: 15
+ *                         touchdown: false
+ *                         interception: false
+ *                       - pid: "TRAV-KELC-2013-1989-10-05"
+ *                         stat_type: "RECEIVING"
+ *                         yards: 15
+ *                         touchdown: false
+ *                         targets: 1
+ *                         receptions: 1
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *         examples:
+ *           invalid_week:
+ *             summary: Invalid week parameter
+ *             value:
+ *               error: "invalid week"
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {

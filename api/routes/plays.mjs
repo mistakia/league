@@ -9,7 +9,42 @@ import { constants } from '#libs-shared'
 
 const router = express.Router()
 
-// returns all nfl plays for the current week
+/**
+ * @swagger
+ * /plays:
+ *   get:
+ *     tags:
+ *       - Plays
+ *     summary: Get current week NFL plays
+ *     description: Retrieve all NFL plays for the current regular season week. This endpoint returns detailed play-by-play data including down, distance, field position, and play outcome.
+ *     responses:
+ *       200:
+ *         description: Current week NFL plays
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/NFLPlay'
+ *             examples:
+ *               current_week_plays:
+ *                 summary: Sample current week plays
+ *                 value:
+ *                   - esbid: "2024120801"
+ *                     playId: 1
+ *                     year: 2024
+ *                     week: 13
+ *                     seas_type: "REG"
+ *                     off: "KC"
+ *                     def: "LV"
+ *                     down: 1
+ *                     yards_to_go: 10
+ *                     yfog: 25
+ *                     play_type: "RUSH"
+ *                     yards_gained: 7
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -24,6 +59,45 @@ router.get('/?', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /plays/all:
+ *   get:
+ *     tags:
+ *       - Plays
+ *     summary: Get all NFL plays by season
+ *     description: Retrieve all NFL plays for a specified season and season type. Results are cached for 15 minutes to improve performance.
+ *     parameters:
+ *       - $ref: '#/components/parameters/year'
+ *       - $ref: '#/components/parameters/seasonType'
+ *     responses:
+ *       200:
+ *         description: All NFL plays for the specified season
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/NFLPlay'
+ *             examples:
+ *               season_plays:
+ *                 summary: Sample season plays
+ *                 value:
+ *                   - esbid: "2024120801"
+ *                     playId: 1
+ *                     year: 2024
+ *                     week: 13
+ *                     seas_type: "REG"
+ *                     off: "KC"
+ *                     def: "LV"
+ *                     down: 1
+ *                     yards_to_go: 10
+ *                     yfog: 25
+ *                     play_type: "RUSH"
+ *                     yards_gained: 7
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.get('/all', async (req, res) => {
   const { db, logger } = req.app.locals
   const {
@@ -51,7 +125,40 @@ router.get('/all', async (req, res) => {
   }
 })
 
-// returns all nfl play stats for the current week
+/**
+ * @swagger
+ * /plays/stats:
+ *   get:
+ *     tags:
+ *       - Plays
+ *     summary: Get current week NFL play statistics
+ *     description: Retrieve detailed statistics for all NFL plays from the current regular season week, including player involvement and performance metrics.
+ *     responses:
+ *       200:
+ *         description: Current week NFL play statistics
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/NFLPlayStats'
+ *             examples:
+ *               play_stats:
+ *                 summary: Sample play statistics
+ *                 value:
+ *                   - esbid: "2024120801"
+ *                     playId: 1
+ *                     week: 13
+ *                     pid: "PATR-MAHO-2017-1995-09-17"
+ *                     stat_type: "PASSING"
+ *                     yards: 15
+ *                     touchdown: false
+ *                     interception: false
+ *                     valid: true
+ *                     qb_kneel: false
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.get('/stats', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -82,7 +189,115 @@ router.get('/stats', async (req, res) => {
   }
 })
 
-// returns historical nfl plays
+/**
+ * @swagger
+ * /plays/charted:
+ *   get:
+ *     tags:
+ *       - Plays
+ *     summary: Get historical NFL plays with advanced filtering
+ *     description: Retrieve historical NFL plays with comprehensive filtering options including years, weeks, days, quarters, downs, and player/team filters. Results are cached based on season type.
+ *     parameters:
+ *       - name: years
+ *         in: query
+ *         schema:
+ *           oneOf:
+ *             - type: integer
+ *             - type: array
+ *               items:
+ *                 type: integer
+ *         description: Filter by specific year(s)
+ *         example: [2023, 2024]
+ *       - name: weeks
+ *         in: query
+ *         schema:
+ *           oneOf:
+ *             - type: integer
+ *             - type: array
+ *               items:
+ *                 type: integer
+ *         description: Filter by specific week(s)
+ *         example: [1, 2, 3]
+ *       - name: days
+ *         in: query
+ *         schema:
+ *           oneOf:
+ *             - type: string
+ *             - type: array
+ *               items:
+ *                 type: string
+ *         description: Filter by day(s) of the week
+ *         example: ["Sunday", "Monday"]
+ *       - name: quarters
+ *         in: query
+ *         schema:
+ *           oneOf:
+ *             - type: integer
+ *             - type: array
+ *               items:
+ *                 type: integer
+ *         description: Filter by quarter(s)
+ *         example: [1, 2, 3, 4]
+ *       - name: downs
+ *         in: query
+ *         schema:
+ *           oneOf:
+ *             - type: integer
+ *             - type: array
+ *               items:
+ *                 type: integer
+ *         description: Filter by down(s)
+ *         example: [1, 2, 3, 4]
+ *       - name: pid
+ *         in: query
+ *         schema:
+ *           type: string
+ *         description: Filter by player ID (shows plays for their team)
+ *         example: "PATR-MAHO-2017-1995-09-17"
+ *     responses:
+ *       200:
+ *         description: Historical NFL plays matching filters
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/NFLPlayCharted'
+ *             examples:
+ *               charted_plays:
+ *                 summary: Sample charted plays
+ *                 value:
+ *                   - esbid: "2024120801"
+ *                     playId: 1
+ *                     year: 2024
+ *                     week: 13
+ *                     day: "Sunday"
+ *                     seas_type: "REG"
+ *                     off: "KC"
+ *                     def: "LV"
+ *                     down: 1
+ *                     yards_to_go: 10
+ *                     yfog: 25
+ *                     qtr: 1
+ *                     play_type: "RUSH"
+ *                     yards_gained: 7
+ *                     bc_pid: "PATR-MAHO-2017-1995-09-17"
+ *                     rush_yds: 7
+ *                     first_down: false
+ *                     successful_play: true
+ *                     dwn: 1
+ *                     dot: 75
+ *                     ydl_100: 25
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *         examples:
+ *           too_many_years:
+ *             summary: Too many years specified
+ *             value:
+ *               error: "too many years listed"
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.get('/charted', async (req, res) => {
   const { db, logger } = req.app.locals
   try {

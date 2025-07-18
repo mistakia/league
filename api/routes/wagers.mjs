@@ -88,6 +88,188 @@ const query_params_validator = v.compile({
   wager_status: wager_status_schema
 })
 
+/**
+ * @swagger
+ * /api/wagers/{user_id}:
+ *   get:
+ *     tags:
+ *       - Wagers
+ *     summary: Get user betting wagers
+ *     description: |
+ *       Retrieves betting wagers for a specific user with comprehensive filtering options.
+ *       Supports filtering by date range, wager type, selection counts, and status.
+ *
+ *       **Privacy**: When accessing another user's wagers, only public wagers are returned.
+ *       Users can see all their own wagers (public and private).
+ *
+ *       **Pagination**: Results are paginated with configurable limit and offset.
+ *
+ *       **Filtering**: Multiple filters can be combined for precise results.
+ *     parameters:
+ *       - name: user_id
+ *         in: path
+ *         required: true
+ *         description: User ID to retrieve wagers for
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         example: 123
+ *       - name: limit
+ *         in: query
+ *         description: Maximum number of wagers to return
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 1000
+ *           default: 1000
+ *         example: 100
+ *       - name: offset
+ *         in: query
+ *         description: Number of wagers to skip (for pagination)
+ *         schema:
+ *           type: integer
+ *           minimum: 0
+ *           default: 0
+ *         example: 0
+ *       - name: placed_before
+ *         in: query
+ *         description: Only return wagers placed before this Unix timestamp
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         example: 1640995200
+ *       - name: placed_after
+ *         in: query
+ *         description: Only return wagers placed after this Unix timestamp
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *         example: 1640908800
+ *       - name: wager_type
+ *         in: query
+ *         description: Filter by wager type (can be array for multiple types)
+ *         schema:
+ *           oneOf:
+ *             - type: string
+ *               enum: [SINGLE, PARLAY, ROUND_ROBIN]
+ *             - type: array
+ *               items:
+ *                 type: string
+ *                 enum: [SINGLE, PARLAY, ROUND_ROBIN]
+ *         style: form
+ *         explode: true
+ *         example: PARLAY
+ *       - name: min_selection_count
+ *         in: query
+ *         description: Minimum number of selections in the wager
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 12
+ *         example: 2
+ *       - name: max_selection_count
+ *         in: query
+ *         description: Maximum number of selections in the wager
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 12
+ *         example: 6
+ *       - name: min_selection_lost_count
+ *         in: query
+ *         description: Minimum number of lost selections in the wager
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 12
+ *         example: 1
+ *       - name: max_selection_lost_count
+ *         in: query
+ *         description: Maximum number of lost selections in the wager
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 12
+ *         example: 3
+ *       - name: wager_status
+ *         in: query
+ *         description: Filter by wager status (can be array for multiple statuses)
+ *         schema:
+ *           oneOf:
+ *             - type: string
+ *               enum: [OPEN, WON, LOST, PUSH, CANCELLED]
+ *             - type: array
+ *               items:
+ *                 type: string
+ *                 enum: [OPEN, WON, LOST, PUSH, CANCELLED]
+ *         style: form
+ *         explode: true
+ *         example: WON
+ *     responses:
+ *       200:
+ *         description: List of user wagers matching the filter criteria
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/PlacedWager'
+ *             examples:
+ *               successful_parlay:
+ *                 summary: Successful parlay wager
+ *                 value:
+ *                   - id: 12345
+ *                     userid: 123
+ *                     wager_type: PARLAY
+ *                     placed_at: 1640995200
+ *                     bet_count: 1
+ *                     selection_count: 3
+ *                     selection_lost: 0
+ *                     status: WON
+ *                     bet_wager_amount: 50.00
+ *                     total_wager_amount: 50.00
+ *                     wager_returned_amount: 175.50
+ *                     book_id: DRAFTKINGS
+ *                     book_wager_id: "DK_12345_ABC"
+ *                     public: true
+ *                     selection_1_id: "sel_123"
+ *                     selection_1_odds: -110
+ *                     selection_1_status: WON
+ *                     selection_2_id: "sel_456"
+ *                     selection_2_odds: 120
+ *                     selection_2_status: WON
+ *                     selection_3_id: "sel_789"
+ *                     selection_3_odds: -105
+ *                     selection_3_status: WON
+ *               open_single:
+ *                 summary: Open single bet
+ *                 value:
+ *                   - id: 12346
+ *                     userid: 123
+ *                     wager_type: SINGLE
+ *                     placed_at: 1641081600
+ *                     bet_count: 1
+ *                     selection_count: 1
+ *                     selection_lost: 0
+ *                     status: OPEN
+ *                     bet_wager_amount: 25.00
+ *                     total_wager_amount: 25.00
+ *                     wager_returned_amount: 0.00
+ *                     book_id: FANDUEL
+ *                     book_wager_id: "FD_67890_XYZ"
+ *                     public: false
+ *                     selection_1_id: "sel_abc"
+ *                     selection_1_odds: -115
+ *                     selection_1_status: OPEN
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ *     security:
+ *       - bearerAuth: []
+ */
 router.get('/:user_id', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
