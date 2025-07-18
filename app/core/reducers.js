@@ -22,7 +22,6 @@ import { statusReducer } from './status'
 import { scoreboardReducer } from './scoreboard'
 import { playsReducer } from './plays'
 import { gamelogsReducer } from './gamelogs'
-import { propsReducer } from './props'
 import { draftPickValueReducer } from './draft-pick-value'
 import { seasonlogsReducer } from './seasonlogs'
 import { percentilesReducer } from './percentiles'
@@ -59,7 +58,6 @@ const rootReducer = (router) =>
     scoreboard: scoreboardReducer,
     plays: playsReducer,
     gamelogs: gamelogsReducer,
-    props: propsReducer,
     draft_pick_value: draftPickValueReducer,
     seasonlogs: seasonlogsReducer,
     percentiles: percentilesReducer,

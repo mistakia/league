@@ -7,6 +7,45 @@ import { getLeague, sendEmail, validators } from '#libs-server'
 
 const router = express.Router()
 
+/**
+ * @swagger
+ * /auth/login:
+ *   post:
+ *     tags:
+ *       - Authentication
+ *     summary: User login
+ *     description: Authenticate user with email/username and password to receive JWT token
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email_or_username:
+ *                 type: string
+ *                 description: User email or username
+ *                 example: user@example.com
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 description: User password
+ *                 example: mypassword123
+ *             required:
+ *               - email_or_username
+ *               - password
+ *     responses:
+ *       200:
+ *         description: Login successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthResponse'
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.post('/login', async (req, res) => {
   const { db, config, logger } = req.app.locals
   try {
@@ -40,6 +79,62 @@ router.post('/login', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /auth/register:
+ *   post:
+ *     tags:
+ *       - Authentication
+ *     summary: User registration
+ *     description: Register a new user account with invite code
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: User email address
+ *                 example: user@example.com
+ *               username:
+ *                 type: string
+ *                 description: Desired username (optional, will be generated if not provided)
+ *                 example: myusername
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 description: User password
+ *                 example: mypassword123
+ *               invite_code:
+ *                 type: string
+ *                 description: Valid invite code required for registration
+ *                 example: INVITE123
+ *               teamId:
+ *                 type: integer
+ *                 description: Team ID to join (optional)
+ *                 example: 1
+ *               leagueId:
+ *                 type: integer
+ *                 description: League ID to join (optional)
+ *                 example: 1
+ *             required:
+ *               - password
+ *               - invite_code
+ *     responses:
+ *       200:
+ *         description: Registration successful
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/AuthResponse'
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.post('/register', async (req, res) => {
   const { db, config, logger } = req.app.locals
   try {
@@ -167,6 +262,79 @@ router.post('/register', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /auth/reset-password:
+ *   post:
+ *     tags:
+ *       - Authentication
+ *     summary: Request password reset
+ *     description: Request a password reset email for a user account. If the user exists, an email will be sent with a reset link that expires in 1 hour.
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               username:
+ *                 type: string
+ *                 description: Username of the account to reset (optional if email provided)
+ *                 example: myusername
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 description: Email address of the account to reset (optional if username provided)
+ *                 example: user@example.com
+ *             anyOf:
+ *               - required: [username]
+ *               - required: [email]
+ *           examples:
+ *             withEmail:
+ *               summary: Reset with email
+ *               value:
+ *                 email: user@example.com
+ *             withUsername:
+ *               summary: Reset with username
+ *               value:
+ *                 username: myusername
+ *             withBoth:
+ *               summary: Reset with both (email takes precedence)
+ *               value:
+ *                 email: user@example.com
+ *                 username: myusername
+ *     responses:
+ *       200:
+ *         description: Password reset email sent (or would have been sent if account exists)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Success message
+ *                   example: If an account exists, a password reset email has been sent
+ *               required:
+ *                 - message
+ *       400:
+ *         description: Bad request - missing required parameters or user not found (when username provided without email)
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             examples:
+ *               missingParams:
+ *                 summary: Missing username or email
+ *                 value:
+ *                   error: missing username or email
+ *               userNotFound:
+ *                 summary: User not found (username only)
+ *                 value:
+ *                   error: user not found
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.post('/reset-password', async (req, res) => {
   const { db, config, logger } = req.app.locals
   try {

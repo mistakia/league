@@ -22,6 +22,51 @@ import {
 
 const router = express.Router({ mergeParams: true })
 
+/**
+ * @swagger
+ * /leagues/{leagueId}/waivers/super-priority/{pid}:
+ *   get:
+ *     summary: Get super priority waiver status for a player
+ *     description: |
+ *       Retrieves the super priority waiver claim status for a specific player.
+ *       Super priority allows a team to reclaim a player they previously had on their practice squad
+ *       who was poached by another team and subsequently released.
+ *     tags:
+ *       - Waivers
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/leagueId'
+ *       - name: pid
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Player ID
+ *         example: 'ALVI-KAME-2022-1999-02-05'
+ *     responses:
+ *       200:
+ *         description: Super priority status retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/SuperPriorityStatus'
+ *             examples:
+ *               eligible:
+ *                 value:
+ *                   eligible: true
+ *                   original_tid: 5
+ *                   player_id: 'ALVI-KAME-2022-1999-02-05'
+ *               not_eligible:
+ *                 value:
+ *                   eligible: false
+ *                   original_tid: null
+ *                   player_id: 'ALVI-KAME-2022-1999-02-05'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.get('/super-priority/:pid', async (req, res) => {
   const { logger } = req.app.locals
   try {
@@ -44,6 +89,55 @@ router.get('/super-priority/:pid', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /leagues/{leagueId}/waivers:
+ *   get:
+ *     summary: Get processed waiver claims for a league
+ *     description: |
+ *       Retrieves all processed waiver claims for a specific league and waiver type.
+ *       Returns historical waiver claims that have been processed, including any player releases
+ *       associated with each claim.
+ *     tags:
+ *       - Waivers
+ *     parameters:
+ *       - $ref: '#/components/parameters/leagueId'
+ *       - name: type
+ *         in: query
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           enum: [1, 2, 3]
+ *         description: |
+ *           Waiver type:
+ *           - 1: FREE_AGENCY (active roster waivers)
+ *           - 2: POACH (practice squad poaching waivers)
+ *           - 3: FREE_AGENCY_PRACTICE (practice squad waivers)
+ *         example: 1
+ *     responses:
+ *       200:
+ *         description: Processed waiver claims retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/ProcessedWaiverClaim'
+ *             examples:
+ *               processed_claims:
+ *                 value:
+ *                   - uid: 12345
+ *                     processed: 1640995200
+ *                     release:
+ *                       - pid: 'JORD-LOVE-2020-1998-11-02'
+ *                   - uid: 12346
+ *                     processed: 1640908800
+ *                     release: []
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -82,6 +176,93 @@ router.get('/?', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /leagues/{leagueId}/waivers:
+ *   post:
+ *     summary: Submit a new waiver claim
+ *     description: |
+ *       Submits a new waiver claim for a player. The claim will be processed during the next waiver run.
+ *       Supports different waiver types including free agency, practice squad, and poaching claims.
+ *       Can optionally include players to release and a bid amount for free agency claims.
+ *     tags:
+ *       - Waivers
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/leagueId'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/WaiverClaimRequest'
+ *           examples:
+ *             free_agency_claim:
+ *               summary: Free agency waiver claim with bid and release
+ *               value:
+ *                 pid: 'ALVI-KAME-2022-1999-02-05'
+ *                 teamId: 5
+ *                 leagueId: 2
+ *                 type: 1
+ *                 bid: 50
+ *                 release: ['JORD-LOVE-2020-1998-11-02']
+ *             practice_squad_claim:
+ *               summary: Practice squad waiver claim
+ *               value:
+ *                 pid: 'DAMI-HARR-2019-1997-01-09'
+ *                 teamId: 5
+ *                 leagueId: 2
+ *                 type: 3
+ *                 bid: 0
+ *                 release: []
+ *             poach_claim:
+ *               summary: Practice squad poaching claim
+ *               value:
+ *                 pid: 'ISAI-PACH-2022-1999-07-22'
+ *                 teamId: 5
+ *                 leagueId: 2
+ *                 type: 2
+ *                 bid: 0
+ *                 release: []
+ *             super_priority_claim:
+ *               summary: Super priority practice squad claim
+ *               value:
+ *                 pid: 'ALVI-KAME-2022-1999-02-05'
+ *                 teamId: 5
+ *                 leagueId: 2
+ *                 type: 3
+ *                 bid: 0
+ *                 release: []
+ *                 super_priority: true
+ *     responses:
+ *       200:
+ *         description: Waiver claim submitted successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/WaiverClaim'
+ *             examples:
+ *               successful_claim:
+ *                 value:
+ *                   uid: 12345
+ *                   tid: 5
+ *                   userid: 1
+ *                   lid: 2
+ *                   pid: 'ALVI-KAME-2022-1999-02-05'
+ *                   po: 9999
+ *                   submitted: 1640995200
+ *                   bid: 50
+ *                   type: 1
+ *                   super_priority: 0
+ *                   release: ['JORD-LOVE-2020-1998-11-02']
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.post('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -458,6 +639,52 @@ router.post('/?', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /leagues/{leagueId}/waivers/order:
+ *   put:
+ *     summary: Update waiver claim priority order
+ *     description: |
+ *       Updates the priority order of pending waiver claims for a team.
+ *       Lower priority values are processed first (0 is highest priority).
+ *       Claims are processed in order of priority when waivers run.
+ *     tags:
+ *       - Waivers
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/leagueId'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/WaiverOrderRequest'
+ *           examples:
+ *             reorder_claims:
+ *               summary: Reorder waiver claims by priority
+ *               value:
+ *                 teamId: 5
+ *                 leagueId: 2
+ *                 waivers: [12345, 12347, 12346]
+ *     responses:
+ *       200:
+ *         description: Waiver order updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: integer
+ *               description: Array of waiver IDs in their new priority order
+ *             examples:
+ *               updated_order:
+ *                 value: [12345, 12347, 12346]
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.put('/order', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -505,6 +732,68 @@ router.put('/order', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /leagues/{leagueId}/waivers/{waiverId}:
+ *   put:
+ *     summary: Update an existing waiver claim
+ *     description: |
+ *       Updates an existing pending waiver claim. Can modify the bid amount and/or
+ *       players to be released. Only pending (unprocessed) claims can be updated.
+ *     tags:
+ *       - Waivers
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/leagueId'
+ *       - name: waiverId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Waiver claim ID
+ *         example: 12345
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/WaiverUpdateRequest'
+ *           examples:
+ *             update_bid_and_release:
+ *               summary: Update bid amount and release players
+ *               value:
+ *                 teamId: 5
+ *                 leagueId: 2
+ *                 bid: 75
+ *                 release: ['JORD-LOVE-2020-1998-11-02', 'DAMI-HARR-2019-1997-01-09']
+ *             update_bid_only:
+ *               summary: Update bid amount only
+ *               value:
+ *                 teamId: 5
+ *                 leagueId: 2
+ *                 bid: 100
+ *                 release: []
+ *     responses:
+ *       200:
+ *         description: Waiver claim updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/WaiverUpdateResponse'
+ *             examples:
+ *               updated_claim:
+ *                 value:
+ *                   uid: 12345
+ *                   bid: 75
+ *                   release: ['JORD-LOVE-2020-1998-11-02', 'DAMI-HARR-2019-1997-01-09']
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.put('/:waiverId', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -623,6 +912,60 @@ router.put('/:waiverId', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /leagues/{leagueId}/waivers/{waiverId}/cancel:
+ *   post:
+ *     summary: Cancel a pending waiver claim
+ *     description: |
+ *       Cancels a pending waiver claim. Only pending (unprocessed) claims can be cancelled.
+ *       Once cancelled, the claim will not be processed during the next waiver run.
+ *     tags:
+ *       - Waivers
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/leagueId'
+ *       - name: waiverId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Waiver claim ID to cancel
+ *         example: 12345
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/WaiverCancelRequest'
+ *           examples:
+ *             cancel_claim:
+ *               summary: Cancel a waiver claim
+ *               value:
+ *                 teamId: 5
+ *                 leagueId: 2
+ *     responses:
+ *       200:
+ *         description: Waiver claim cancelled successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/WaiverCancelResponse'
+ *             examples:
+ *               cancelled_claim:
+ *                 value:
+ *                   uid: 12345
+ *                   tid: 5
+ *                   lid: 2
+ *                   cancelled: 1640995200
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.post('/:waiverId/cancel', async (req, res) => {
   const { db, logger } = req.app.locals
   try {

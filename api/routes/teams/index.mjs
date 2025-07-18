@@ -16,6 +16,78 @@ import { constants } from '#libs-shared'
 
 const router = express.Router()
 
+/**
+ * @swagger
+ * /teams/{teamId}:
+ *   put:
+ *     tags:
+ *       - Teams
+ *     summary: Update team settings
+ *     description: |
+ *       Update team configuration including name, abbreviation, logo, and contact information.
+ *       Only team owners can update their team settings.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/teamId'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               field:
+ *                 $ref: '#/components/schemas/TeamFieldEnum'
+ *                 description: Team field to update
+ *                 example: name
+ *               value:
+ *                 type: string
+ *                 description: New value for the field
+ *                 example: "My Fantasy Team"
+ *             required:
+ *               - field
+ *               - value
+ *           examples:
+ *             updateName:
+ *               summary: Update team name
+ *               value:
+ *                 field: "name"
+ *                 value: "Dynasty Warriors"
+ *             updateAbbreviation:
+ *               summary: Update team abbreviation
+ *               value:
+ *                 field: "abbrv"
+ *                 value: "DW"
+ *             updateLogo:
+ *               summary: Update team logo
+ *               value:
+ *                 field: "image"
+ *                 value: "https://example.com/logo.png"
+ *             updatePrimaryContact:
+ *               summary: Update primary contact (6-character code)
+ *               value:
+ *                 field: "pc"
+ *                 value: "ABC123"
+ *     responses:
+ *       200:
+ *         description: Team updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 value:
+ *                   type: string
+ *                   description: Updated value
+ *                   example: "Dynasty Warriors"
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.put('/:teamId', async (req, res) => {
   const { db, logger } = req.app.locals
   try {

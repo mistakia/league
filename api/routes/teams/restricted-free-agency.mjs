@@ -11,6 +11,71 @@ import {
 
 const router = express.Router({ mergeParams: true })
 
+/**
+ * @swagger
+ * /teams/{teamId}/tag/restricted-free-agency:
+ *   get:
+ *     tags:
+ *       - Teams
+ *     summary: Get restricted free agency bids
+ *     description: |
+ *       Get all active restricted free agency bids for the team.
+ *       Shows bids that have not been processed or cancelled.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/teamId'
+ *     responses:
+ *       200:
+ *         description: Restricted free agency bids retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   uid:
+ *                     type: integer
+ *                     description: Bid ID
+ *                     example: 123
+ *                   tid:
+ *                     type: integer
+ *                     description: Team ID
+ *                     example: 13
+ *                   userid:
+ *                     type: integer
+ *                     description: User ID
+ *                     example: 1
+ *                   lid:
+ *                     type: integer
+ *                     description: League ID
+ *                     example: 2
+ *                   pid:
+ *                     type: string
+ *                     description: Player ID
+ *                     example: "JALE-HURT-2020-1998-08-07"
+ *                   submitted:
+ *                     type: integer
+ *                     description: Submission timestamp
+ *                     example: 1640995200
+ *                   year:
+ *                     type: integer
+ *                     description: Year
+ *                     example: 2024
+ *                   bid:
+ *                     type: integer
+ *                     description: Bid amount
+ *                     example: 25
+ *                   player_tid:
+ *                     type: integer
+ *                     description: Original team ID
+ *                     example: 5
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -45,6 +110,134 @@ router.get('/?', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ *   post:
+ *     tags:
+ *       - Teams
+ *     summary: Create restricted free agency bid
+ *     description: |
+ *       Create a restricted free agency bid for a player. Can be either an original
+ *       team bid or a competing bid from another team.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/teamId'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               pid:
+ *                 type: string
+ *                 description: Player ID
+ *                 example: "JALE-HURT-2020-1998-08-07"
+ *               leagueId:
+ *                 type: integer
+ *                 description: League ID
+ *                 example: 2
+ *               bid:
+ *                 type: integer
+ *                 description: Bid amount
+ *                 example: 25
+ *               playerTid:
+ *                 type: integer
+ *                 description: Original team ID
+ *                 example: 5
+ *               release:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Players to release if bid succeeds
+ *                 example: ["JORD-LOVE-2020-1998-11-02"]
+ *               remove:
+ *                 type: string
+ *                 description: Player to remove tag from (original team only)
+ *                 example: "JACO-BURR-2020-1996-12-10"
+ *             required:
+ *               - pid
+ *               - leagueId
+ *               - bid
+ *               - playerTid
+ *           examples:
+ *             originalTeamBid:
+ *               summary: Original team sets RFA bid
+ *               value:
+ *                 pid: "JALE-HURT-2020-1998-08-07"
+ *                 leagueId: 2
+ *                 bid: 25
+ *                 playerTid: 5
+ *             competingBid:
+ *               summary: Competing team makes offer
+ *               value:
+ *                 pid: "JALE-HURT-2020-1998-08-07"
+ *                 leagueId: 2
+ *                 bid: 30
+ *                 playerTid: 5
+ *                 release: ["JORD-LOVE-2020-1998-11-02"]
+ *     responses:
+ *       200:
+ *         description: Bid created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 uid:
+ *                   type: integer
+ *                   description: Bid ID
+ *                   example: 123
+ *                 tid:
+ *                   type: integer
+ *                   description: Team ID
+ *                   example: 13
+ *                 userid:
+ *                   type: integer
+ *                   description: User ID
+ *                   example: 1
+ *                 lid:
+ *                   type: integer
+ *                   description: League ID
+ *                   example: 2
+ *                 pid:
+ *                   type: string
+ *                   description: Player ID
+ *                   example: "JALE-HURT-2020-1998-08-07"
+ *                 submitted:
+ *                   type: integer
+ *                   description: Submission timestamp
+ *                   example: 1640995200
+ *                 year:
+ *                   type: integer
+ *                   description: Year
+ *                   example: 2024
+ *                 bid:
+ *                   type: integer
+ *                   description: Bid amount
+ *                   example: 25
+ *                 player_tid:
+ *                   type: integer
+ *                   description: Original team ID
+ *                   example: 5
+ *                 release:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   description: Players to release
+ *                   example: ["JORD-LOVE-2020-1998-11-02"]
+ *                 remove:
+ *                   type: string
+ *                   description: Player tag removed
+ *                   example: "JACO-BURR-2020-1996-12-10"
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.post('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -319,6 +512,74 @@ router.post('/?', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ *   delete:
+ *     tags:
+ *       - Teams
+ *     summary: Cancel restricted free agency bid
+ *     description: |
+ *       Cancel an existing restricted free agency bid.
+ *       Cannot cancel if already processed or announced.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/teamId'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               pid:
+ *                 type: string
+ *                 description: Player ID
+ *                 example: "JALE-HURT-2020-1998-08-07"
+ *               leagueId:
+ *                 type: integer
+ *                 description: League ID
+ *                 example: 2
+ *             required:
+ *               - pid
+ *               - leagueId
+ *           examples:
+ *             cancelBid:
+ *               summary: Cancel RFA bid
+ *               value:
+ *                 pid: "JALE-HURT-2020-1998-08-07"
+ *                 leagueId: 2
+ *     responses:
+ *       200:
+ *         description: Bid cancelled successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 uid:
+ *                   type: integer
+ *                   description: Bid ID
+ *                   example: 123
+ *                 tid:
+ *                   type: integer
+ *                   description: Team ID
+ *                   example: 13
+ *                 lid:
+ *                   type: integer
+ *                   description: League ID
+ *                   example: 2
+ *                 cancelled:
+ *                   type: integer
+ *                   description: Cancellation timestamp
+ *                   example: 1640995200
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.delete('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -418,6 +679,89 @@ router.delete('/?', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ *   put:
+ *     tags:
+ *       - Teams
+ *     summary: Update restricted free agency bid
+ *     description: |
+ *       Update an existing restricted free agency bid amount and/or release players.
+ *       Cannot update if already processed.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/teamId'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               pid:
+ *                 type: string
+ *                 description: Player ID
+ *                 example: "JALE-HURT-2020-1998-08-07"
+ *               leagueId:
+ *                 type: integer
+ *                 description: League ID
+ *                 example: 2
+ *               bid:
+ *                 type: integer
+ *                 description: New bid amount
+ *                 example: 30
+ *               release:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Updated players to release
+ *                 example: ["JORD-LOVE-2020-1998-11-02"]
+ *             required:
+ *               - pid
+ *               - leagueId
+ *               - bid
+ *           examples:
+ *             updateBid:
+ *               summary: Update bid amount
+ *               value:
+ *                 pid: "JALE-HURT-2020-1998-08-07"
+ *                 leagueId: 2
+ *                 bid: 30
+ *                 release: ["JORD-LOVE-2020-1998-11-02"]
+ *     responses:
+ *       200:
+ *         description: Bid updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 uid:
+ *                   type: integer
+ *                   description: Bid ID
+ *                   example: 123
+ *                 bid:
+ *                   type: integer
+ *                   description: Updated bid amount
+ *                   example: 30
+ *                 userid:
+ *                   type: integer
+ *                   description: User ID
+ *                   example: 1
+ *                 release:
+ *                   type: array
+ *                   items:
+ *                     type: string
+ *                   description: Updated release players
+ *                   example: ["JORD-LOVE-2020-1998-11-02"]
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.put('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -620,6 +964,63 @@ router.put('/?', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /teams/{teamId}/tag/restricted-free-agency/nominate:
+ *   post:
+ *     tags:
+ *       - Teams
+ *     summary: Nominate player for restricted free agency
+ *     description: |
+ *       Nominate a restricted free agent for the bidding process.
+ *       Only the original team can nominate their RFA players.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/teamId'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               pid:
+ *                 type: string
+ *                 description: Player ID to nominate
+ *                 example: "JALE-HURT-2020-1998-08-07"
+ *               leagueId:
+ *                 type: integer
+ *                 description: League ID
+ *                 example: 2
+ *             required:
+ *               - pid
+ *               - leagueId
+ *           examples:
+ *             nominatePlayer:
+ *               summary: Nominate RFA player
+ *               value:
+ *                 pid: "JALE-HURT-2020-1998-08-07"
+ *                 leagueId: 2
+ *     responses:
+ *       200:
+ *         description: Player nominated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 nominated:
+ *                   type: integer
+ *                   description: Nomination timestamp
+ *                   example: 1640995200
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.post('/nominate/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -703,6 +1104,62 @@ router.post('/nominate/?', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ *   delete:
+ *     tags:
+ *       - Teams
+ *     summary: Cancel restricted free agency nomination
+ *     description: |
+ *       Cancel the nomination of a restricted free agent.
+ *       Cannot cancel if already announced or processed.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/teamId'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               pid:
+ *                 type: string
+ *                 description: Player ID
+ *                 example: "JALE-HURT-2020-1998-08-07"
+ *               leagueId:
+ *                 type: integer
+ *                 description: League ID
+ *                 example: 2
+ *             required:
+ *               - pid
+ *               - leagueId
+ *           examples:
+ *             cancelNomination:
+ *               summary: Cancel RFA nomination
+ *               value:
+ *                 pid: "JALE-HURT-2020-1998-08-07"
+ *                 leagueId: 2
+ *     responses:
+ *       200:
+ *         description: Nomination cancelled successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 message:
+ *                   type: string
+ *                   description: Success message
+ *                   example: "Restricted free agent nomination successfully cancelled"
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.delete('/nominate/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {

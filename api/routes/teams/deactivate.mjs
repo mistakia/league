@@ -14,6 +14,92 @@ import {
 
 const router = express.Router({ mergeParams: true })
 
+/**
+ * @swagger
+ * /teams/{teamId}/deactivate:
+ *   post:
+ *     tags:
+ *       - Teams
+ *     summary: Deactivate a player to practice squad
+ *     description: |
+ *       Move a player from active roster to practice squad. Player must be eligible
+ *       (not poached, not previously activated, within 48 hours on active roster).
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/teamId'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               deactivate_pid:
+ *                 type: string
+ *                 description: Player ID to deactivate
+ *                 example: "JALE-HURT-2020-1998-08-07"
+ *               leagueId:
+ *                 type: integer
+ *                 description: League ID
+ *                 example: 2
+ *               release_pid:
+ *                 type: string
+ *                 description: Player ID to release from practice squad (optional)
+ *                 example: "JORD-LOVE-2020-1998-11-02"
+ *             required:
+ *               - deactivate_pid
+ *               - leagueId
+ *           examples:
+ *             deactivatePlayer:
+ *               summary: Simple deactivation
+ *               value:
+ *                 deactivate_pid: "JALE-HURT-2020-1998-08-07"
+ *                 leagueId: 2
+ *             deactivateWithRelease:
+ *               summary: Deactivate and release practice squad player
+ *               value:
+ *                 deactivate_pid: "JALE-HURT-2020-1998-08-07"
+ *                 leagueId: 2
+ *                 release_pid: "JORD-LOVE-2020-1998-11-02"
+ *     responses:
+ *       200:
+ *         description: Player deactivated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 pid:
+ *                   type: string
+ *                   description: Player ID
+ *                   example: "JALE-HURT-2020-1998-08-07"
+ *                 tid:
+ *                   type: integer
+ *                   description: Team ID
+ *                   example: 13
+ *                 slot:
+ *                   type: integer
+ *                   description: New slot (practice squad)
+ *                   example: 5
+ *                 rid:
+ *                   type: integer
+ *                   description: Roster ID
+ *                   example: 1234
+ *                 pos:
+ *                   type: string
+ *                   description: Player position
+ *                   example: "QB"
+ *                 transaction:
+ *                   type: object
+ *                   description: Transaction details
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.post('/?', async (req, res) => {
   const { db, logger, broadcast } = req.app.locals
   try {

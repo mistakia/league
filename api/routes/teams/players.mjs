@@ -6,6 +6,52 @@ import { constants } from '#libs-shared'
 
 const router = express.Router({ mergeParams: true })
 
+/**
+ * @swagger
+ * /teams/{teamId}/players:
+ *   get:
+ *     tags:
+ *       - Teams
+ *     summary: Get team players
+ *     description: |
+ *       Get all players on the team roster with their current information.
+ *       Includes restricted free agency bid information for team managers.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/teamId'
+ *       - name: leagueId
+ *         in: query
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: League ID
+ *         example: 2
+ *     responses:
+ *       200:
+ *         description: Team players retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 allOf:
+ *                   - $ref: '#/components/schemas/Player'
+ *                   - type: object
+ *                     properties:
+ *                       bid:
+ *                         type: integer
+ *                         description: Restricted free agency bid (if applicable)
+ *                         example: 50
+ *                       restricted_free_agency_conditional_releases:
+ *                         type: array
+ *                         items:
+ *                           type: string
+ *                         description: Players to release if RFA bid succeeds
+ *                         example: ["JORD-LOVE-2020-1998-11-02"]
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.get('/?', async (req, res) => {
   const { logger, db } = req.app.locals
   try {

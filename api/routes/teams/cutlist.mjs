@@ -5,6 +5,39 @@ import { getRoster, verifyUserTeam, getLeague } from '#libs-server'
 
 const router = express.Router({ mergeParams: true })
 
+/**
+ * @swagger
+ * /teams/{teamId}/cutlist:
+ *   get:
+ *     tags:
+ *       - Teams
+ *     summary: Get team cutlist
+ *     description: |
+ *       Get the ordered list of players on the team's cutlist for automated cuts.
+ *       Cutlist determines order of player releases during roster moves.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/teamId'
+ *     responses:
+ *       200:
+ *         description: Cutlist retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: string
+ *                 description: Player ID
+ *                 example: "JORD-LOVE-2020-1998-11-02"
+ *               example: ["JORD-LOVE-2020-1998-11-02", "ALVI-KAME-2022-1999-02-05"]
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -36,6 +69,64 @@ router.get('/?', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ *   post:
+ *     tags:
+ *       - Teams
+ *     summary: Update team cutlist
+ *     description: |
+ *       Set the ordered list of players on the team's cutlist for automated cuts.
+ *       Players must be on the team roster and not restricted free agents.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/teamId'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               leagueId:
+ *                 type: integer
+ *                 description: League ID
+ *                 example: 2
+ *               pids:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Ordered list of player IDs (first to be cut first)
+ *                 example: ["JORD-LOVE-2020-1998-11-02", "ALVI-KAME-2022-1999-02-05"]
+ *             required:
+ *               - leagueId
+ *               - pids
+ *           examples:
+ *             setCutlist:
+ *               summary: Set cutlist order
+ *               value:
+ *                 leagueId: 2
+ *                 pids: ["JORD-LOVE-2020-1998-11-02", "ALVI-KAME-2022-1999-02-05"]
+ *     responses:
+ *       200:
+ *         description: Cutlist updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: string
+ *                 description: Player ID
+ *                 example: "JORD-LOVE-2020-1998-11-02"
+ *               example: ["JORD-LOVE-2020-1998-11-02", "ALVI-KAME-2022-1999-02-05"]
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.post('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {

@@ -9,6 +9,150 @@ import {
 
 const router = express.Router({ mergeParams: true })
 
+/**
+ * @swagger
+ * /teams/{teamId}/add:
+ *   post:
+ *     tags:
+ *       - Teams
+ *     summary: Add a free agent player
+ *     description: |
+ *       Add a free agent player to team roster. Can add to bench or practice squad.
+ *       Must not be during waiver period for regular season.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/teamId'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               pid:
+ *                 type: string
+ *                 description: Player ID to add
+ *                 example: "ALVI-KAME-2022-1999-02-05"
+ *               teamId:
+ *                 type: integer
+ *                 description: Team ID
+ *                 example: 5
+ *               leagueId:
+ *                 type: integer
+ *                 description: League ID
+ *                 example: 2
+ *               slot:
+ *                 type: integer
+ *                 description: Target slot (bench or practice squad)
+ *                 enum: [4, 5]
+ *                 example: 4
+ *               release:
+ *                 type: array
+ *                 items:
+ *                   type: string
+ *                 description: Player IDs to release (optional)
+ *                 example: ["JORD-LOVE-2020-1998-11-02"]
+ *             required:
+ *               - pid
+ *               - teamId
+ *               - leagueId
+ *               - slot
+ *           examples:
+ *             addToBench:
+ *               summary: Add player to bench
+ *               value:
+ *                 pid: "ALVI-KAME-2022-1999-02-05"
+ *                 teamId: 5
+ *                 leagueId: 2
+ *                 slot: 4
+ *             addToPracticeSquad:
+ *               summary: Add player to practice squad
+ *               value:
+ *                 pid: "ALVI-KAME-2022-1999-02-05"
+ *                 teamId: 5
+ *                 leagueId: 2
+ *                 slot: 5
+ *             addWithRelease:
+ *               summary: Add player and release another
+ *               value:
+ *                 pid: "ALVI-KAME-2022-1999-02-05"
+ *                 teamId: 5
+ *                 leagueId: 2
+ *                 slot: 4
+ *                 release: ["JORD-LOVE-2020-1998-11-02"]
+ *     responses:
+ *       200:
+ *         description: Player added successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   pid:
+ *                     type: string
+ *                     description: Player ID
+ *                     example: "ALVI-KAME-2022-1999-02-05"
+ *                   tid:
+ *                     type: integer
+ *                     description: Team ID
+ *                     example: 5
+ *                   slot:
+ *                     type: integer
+ *                     description: Player slot
+ *                     example: 4
+ *                   rid:
+ *                     type: integer
+ *                     description: Roster ID
+ *                     example: 1234
+ *                   pos:
+ *                     type: string
+ *                     description: Player position
+ *                     example: "RB"
+ *                   transaction:
+ *                     type: object
+ *                     properties:
+ *                       userid:
+ *                         type: integer
+ *                         description: User ID who made the transaction
+ *                         example: 1
+ *                       tid:
+ *                         type: integer
+ *                         description: Team ID
+ *                         example: 5
+ *                       lid:
+ *                         type: integer
+ *                         description: League ID
+ *                         example: 2
+ *                       pid:
+ *                         type: string
+ *                         description: Player ID
+ *                         example: "ALVI-KAME-2022-1999-02-05"
+ *                       type:
+ *                         type: integer
+ *                         description: Transaction type
+ *                         example: 1
+ *                       week:
+ *                         type: integer
+ *                         description: Week number
+ *                         example: 4
+ *                       year:
+ *                         type: integer
+ *                         description: Year
+ *                         example: 2024
+ *                       timestamp:
+ *                         type: integer
+ *                         description: Unix timestamp
+ *                         example: 1640995200
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.post('/?', async (req, res) => {
   const { db, logger, broadcast } = req.app.locals
   try {

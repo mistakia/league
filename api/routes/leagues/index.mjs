@@ -6,6 +6,16 @@ import {
   generate_league_format_hash,
   generate_scoring_format_hash
 } from '#libs-shared'
+import {
+  league_fields,
+  league_format_fields,
+  league_scoring_format_fields,
+  season_fields,
+  league_settings_fields,
+  integer_fields,
+  positive_integer_fields,
+  float_fields
+} from './league-settings.mjs'
 import transactions from './transactions.mjs'
 import draft from './draft.mjs'
 import games from './games.mjs'
@@ -26,6 +36,91 @@ import careerlogs from './careerlogs.mjs'
 
 const router = express.Router()
 
+/**
+ * @swagger
+ * /leagues/{leagueId}:
+ *   put:
+ *     tags:
+ *       - Leagues
+ *     summary: Update league settings
+ *     description: |
+ *       Update league configuration settings. Only the league commissioner can update settings.
+ *       Supports updating various league attributes including roster configuration, scoring settings,
+ *       and external platform integrations.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/leagueId'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               field:
+ *                 $ref: '#/components/schemas/LeagueSettingsEnum'
+ *               value:
+ *                 oneOf:
+ *                   - type: string
+ *                   - type: number
+ *                 description: |
+ *                   New value for the field. Type depends on the field:
+ *                   - String fields: name
+ *                   - Integer fields: Most roster/scoring settings
+ *                   - Float fields: Some scoring settings (pa, pc, py, ra, ry, rbrec, wrrec, terec, rec, recy)
+ *                 example: "My Fantasy League"
+ *             required:
+ *               - field
+ *               - value
+ *           examples:
+ *             updateLeagueName:
+ *               summary: Update league name
+ *               value:
+ *                 field: name
+ *                 value: "My Fantasy League"
+ *             updateRosterSize:
+ *               summary: Update starting QB slots
+ *               value:
+ *                 field: sqb
+ *                 value: 1
+ *             updateScoringSettings:
+ *               summary: Update passing yards scoring
+ *               value:
+ *                 field: py
+ *                 value: 0.04
+ *     responses:
+ *       200:
+ *         description: Setting updated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 value:
+ *                   oneOf:
+ *                     - type: string
+ *                     - type: number
+ *                   description: Updated value
+ *             examples:
+ *               stringValue:
+ *                 summary: String field updated
+ *                 value:
+ *                   value: "My Fantasy League"
+ *               numericValue:
+ *                 summary: Numeric field updated
+ *                 value:
+ *                   value: 1
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *         description: Bad request - invalid field, value, or permissions
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *         description: Authentication required
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ *         description: Internal server error
+ */
 router.put('/:leagueId', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -49,66 +144,6 @@ router.put('/:leagueId', async (req, res) => {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
 
-    const league_fields = [
-      'name',
-
-      'espn_id',
-      'sleeper_id',
-      'mfl_id',
-      'fleaflicker_id'
-    ]
-
-    const league_format_fields = [
-      'num_teams',
-      'sqb',
-      'srb',
-      'swr',
-      'ste',
-      'srbwr',
-      'srbwrte',
-      'sqbrbwrte',
-      'swrte',
-      'sdst',
-      'sk',
-
-      'bench',
-      'ps',
-      'ir',
-
-      'cap',
-      'min_bid'
-    ]
-
-    const league_scoring_format_fields = [
-      'pa',
-      'pc',
-      'py',
-      'ints',
-      'tdp',
-      'ra',
-      'ry',
-      'tdr',
-      'rec',
-      'rbrec',
-      'wrrec',
-      'terec',
-      'recy',
-      'twoptc',
-      'tdrec',
-      'fuml',
-      'prtd',
-      'krtd'
-    ]
-
-    const season_fields = ['mqb', 'mrb', 'mwr', 'mte', 'mdst', 'mk', 'faab']
-
-    const fields = [
-      ...league_fields,
-      ...season_fields,
-      ...league_format_fields,
-      ...league_scoring_format_fields
-    ]
-
     if (!field) {
       return res.status(400).send({ error: 'missing field' })
     }
@@ -117,114 +152,22 @@ router.put('/:leagueId', async (req, res) => {
       return res.status(400).send({ error: 'missing value' })
     }
 
-    if (fields.indexOf(field) < 0) {
+    if (league_settings_fields.indexOf(field) < 0) {
       return res.status(400).send({ error: 'invalid field' })
     }
 
-    const ints = [
-      'sqb',
-      'srb',
-      'swr',
-      'ste',
-      'sk',
-      'sdst',
-      'srbwr',
-      'srbwrte',
-      'sqbrbwrte',
-      'swrte',
-      'bench',
-      'ps',
-      'ir',
-      'mqb',
-      'mrb',
-      'mwr',
-      'mte',
-      'mdst',
-      'mk',
-      'faab',
-      'cap',
-      'pa',
-      'pc',
-      'py',
-      'ints',
-      'tdp',
-      'ra',
-      'ry',
-      'tdr',
-      'rbrec',
-      'wrrec',
-      'terec',
-      'rec',
-      'recy',
-      'twoptc',
-      'tdrec',
-      'fuml',
-      'num_teams',
-      'min_bid',
-      'prtd',
-      'krtd',
-
-      'espn_id',
-      'sleeper_id',
-      'mfl_id',
-      'fleaflicker_id'
-    ]
-    const positives = [
-      'sqb',
-      'srb',
-      'swr',
-      'ste',
-      'sk',
-      'sdst',
-      'srbwr',
-      'srbwrte',
-      'sqbrbwrte',
-      'swrte',
-      'bench',
-      'ps',
-      'ir',
-      'mqb',
-      'mrb',
-      'mwr',
-      'mte',
-      'mdst',
-      'mk',
-      'faab',
-      'cap',
-      'min_bid',
-      'prtd',
-      'krtd',
-
-      'espn_id',
-      'sleeper_id',
-      'mfl_id',
-      'fleaflicker_id'
-    ]
-    const floats = [
-      'pa',
-      'pc',
-      'py',
-      'ra',
-      'ry',
-      'rbrec',
-      'wrrec',
-      'terec',
-      'rec',
-      'recy'
-    ]
-
-    if (ints.indexOf(field) >= 0) {
+    if (integer_fields.indexOf(field) >= 0) {
       if (isNaN(value)) {
         return res.status(400).send({ error: 'invalid value' })
       }
 
-      if (floats.indexOf(field) >= 0) {
+      if (float_fields.indexOf(field) >= 0) {
         value = parseFloat(value)
       } else {
         value = parseInt(value, 10)
       }
 
-      if (positives.indexOf(field) >= 0 && value < 0) {
+      if (positive_integer_fields.indexOf(field) >= 0 && value < 0) {
         return res.status(400).send({ error: 'invalid value' })
       }
     }
@@ -272,6 +215,60 @@ router.put('/:leagueId', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /leagues/{leagueId}:
+ *   get:
+ *     tags:
+ *       - Leagues
+ *     summary: Get league details
+ *     description: |
+ *       Retrieve detailed information about a specific fantasy league including
+ *       league settings, roster configuration, scoring format, and available seasons.
+ *     parameters:
+ *       - $ref: '#/components/parameters/leagueId'
+ *     responses:
+ *       200:
+ *         description: League details with available seasons
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/League'
+ *                 - type: object
+ *                   properties:
+ *                     years:
+ *                       type: array
+ *                       items:
+ *                         type: integer
+ *                       description: Available seasons for this league
+ *                       example: [2022, 2023, 2024]
+ *             example:
+ *               uid: 2
+ *               name: "TEFLON LEAGUE"
+ *               commishid: 5
+ *               hosted: false
+ *               num_teams: 14
+ *               sqb: 1
+ *               srb: 2
+ *               swr: 3
+ *               ste: 1
+ *               srbwrte: 1
+ *               sdst: 1
+ *               sk: 1
+ *               bench: 6
+ *               ps: 4
+ *               ir: 2
+ *               cap: 200
+ *               faab: 200
+ *               years: [2022, 2023, 2024]
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *         description: Invalid league ID
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ *         description: Internal server error
+ */
 router.get('/:leagueId/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -290,6 +287,61 @@ router.get('/:leagueId/?', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /leagues/{leagueId}/seasons/{year}:
+ *   get:
+ *     tags:
+ *       - Leagues
+ *     summary: Get league season details
+ *     description: |
+ *       Retrieve league information for a specific season including league settings,
+ *       roster configuration, and scoring format as configured for that year.
+ *     parameters:
+ *       - $ref: '#/components/parameters/leagueId'
+ *       - name: year
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *           minimum: 2020
+ *           maximum: 2030
+ *         description: Season year
+ *         example: 2024
+ *     responses:
+ *       200:
+ *         description: League season details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/League'
+ *             example:
+ *               uid: 2
+ *               name: "TEFLON LEAGUE"
+ *               commishid: 5
+ *               hosted: false
+ *               num_teams: 14
+ *               sqb: 1
+ *               srb: 2
+ *               swr: 3
+ *               ste: 1
+ *               srbwrte: 1
+ *               sdst: 1
+ *               sk: 1
+ *               bench: 6
+ *               ps: 4
+ *               ir: 2
+ *               cap: 200
+ *               faab: 200
+ *               league_format_hash: "b5310a7f7c47c20ce372e47e8a0a188b22b78b1d34e2ea18829d94b94ffdc342"
+ *               scoring_format_hash: "eb75c8fd2acb21fea5d8754f53e9aa2e5d7c40327d5853c58592f658235ba756"
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *         description: Invalid league ID or year
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ *         description: Internal server error
+ */
 router.get('/:leagueId/seasons/:year', async (req, res) => {
   const { logger } = req.app.locals
   try {

@@ -33,7 +33,7 @@ const offset_schema = {
 
 const time_type_schema = {
   type: 'enum',
-  values: ['OPEN', 'CLOSE', 'LIVE'],
+  values: Object.values(bookmaker_constants.time_type),
   optional: true,
   $$root: true
 }
@@ -70,7 +70,7 @@ const prop_markets_base_query_schema = {
     min: 1920,
     max: constants.season.year
   },
-  seas_type: { type: 'string', optional: true, enum: ['PRE', 'REG', 'POST'] },
+  seas_type: { type: 'string', optional: true, enum: constants.seas_types },
   bookmaker: bookmaker_schema,
   limit: limit_schema,
   offset: offset_schema
@@ -102,6 +102,86 @@ const prop_markets_base_query_validator = v.compile(
   prop_markets_base_query_schema
 )
 
+/**
+ * @swagger
+ * /markets:
+ *   get:
+ *     tags:
+ *       - Markets
+ *     summary: Get betting markets
+ *     description: Retrieve betting markets with optional filtering by various parameters
+ *     parameters:
+ *       - $ref: '#/components/parameters/week'
+ *       - $ref: '#/components/parameters/year'
+ *       - name: seas_type
+ *         in: query
+ *         schema:
+ *           $ref: '#/components/schemas/SeasonTypeEnum'
+ *         description: Season type
+ *       - name: bookmaker
+ *         in: query
+ *         schema:
+ *           $ref: '#/components/schemas/BookmakerEnum'
+ *           default: FANDUEL
+ *         description: Sportsbook name
+ *         example: DRAFTKINGS
+ *       - name: time_type
+ *         in: query
+ *         schema:
+ *           $ref: '#/components/schemas/TimeTypeEnum'
+ *           default: CLOSE
+ *         description: Market time type
+ *       - name: market_type
+ *         in: query
+ *         schema:
+ *           $ref: '#/components/schemas/MarketTypeEnum'
+ *         description: Type of betting market
+ *         example: GAME_PASSING_YARDS
+ *       - name: player_id
+ *         in: query
+ *         schema:
+ *           type: string
+ *         description: Filter by specific player
+ *       - name: game_id
+ *         in: query
+ *         schema:
+ *           type: string
+ *         description: Filter by specific game
+ *       - name: include_selections
+ *         in: query
+ *         schema:
+ *           type: boolean
+ *           default: true
+ *         description: Include betting selections in response
+ *       - name: limit
+ *         in: query
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 1000
+ *           default: 1000
+ *         description: Number of markets to return
+ *       - name: offset
+ *         in: query
+ *         schema:
+ *           type: integer
+ *           minimum: 0
+ *           default: 0
+ *         description: Number of markets to skip
+ *     responses:
+ *       200:
+ *         description: List of betting markets
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/BettingMarket'
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -266,7 +346,118 @@ router.get('/?', async (req, res) => {
   }
 })
 
-// GET /markets/:source_market_id/history - Historical data for a specific market
+/**
+ * @swagger
+ * /markets/{source_market_id}/history:
+ *   get:
+ *     tags:
+ *       - Markets
+ *     summary: Get historical data for a specific betting market
+ *     description: |
+ *       Retrieve historical odds and line movement data for a specific betting market.
+ *       This endpoint provides time-series data showing how odds and lines have changed over time.
+ *     parameters:
+ *       - name: source_market_id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Unique identifier for the betting market from the sportsbook
+ *         example: "dk_123456789"
+ *       - name: start_time
+ *         in: query
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: Start timestamp for historical data (ISO 8601 format)
+ *         example: "2024-01-01T00:00:00Z"
+ *       - name: end_time
+ *         in: query
+ *         schema:
+ *           type: string
+ *           format: date-time
+ *         description: End timestamp for historical data (ISO 8601 format)
+ *         example: "2024-01-31T23:59:59Z"
+ *       - name: limit
+ *         in: query
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 1000
+ *           default: 1000
+ *         description: Maximum number of historical records to return
+ *       - name: offset
+ *         in: query
+ *         schema:
+ *           type: integer
+ *           minimum: 0
+ *           default: 0
+ *         description: Number of records to skip (for pagination)
+ *     responses:
+ *       200:
+ *         description: Historical market data retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 type: object
+ *                 properties:
+ *                   source_market_id:
+ *                     type: string
+ *                     description: Market identifier from sportsbook
+ *                     example: "dk_123456789"
+ *                   timestamp:
+ *                     type: string
+ *                     format: date-time
+ *                     description: When this data point was recorded
+ *                     example: "2024-01-15T14:30:00Z"
+ *                   market_type:
+ *                     $ref: '#/components/schemas/MarketTypeEnum'
+ *                   source_id:
+ *                     $ref: '#/components/schemas/BookmakerEnum'
+ *                   open:
+ *                     type: boolean
+ *                     description: Whether market was open at this time
+ *                     example: true
+ *                   live:
+ *                     type: boolean
+ *                     nullable: true
+ *                     description: Whether market was live at this time
+ *                     example: false
+ *                   settled:
+ *                     type: boolean
+ *                     description: Whether market was settled at this time
+ *                     example: false
+ *                   odds_data:
+ *                     type: object
+ *                     description: Historical odds and line data
+ *                     additionalProperties: true
+ *             examples:
+ *               player_prop_history:
+ *                 summary: Player prop historical data
+ *                 value:
+ *                   - source_market_id: "dk_123456789"
+ *                     timestamp: "2024-01-15T14:30:00Z"
+ *                     market_type: "GAME_PASSING_YARDS"
+ *                     source_id: "DRAFTKINGS"
+ *                     open: true
+ *                     live: false
+ *                     settled: false
+ *                     odds_data: {}
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       404:
+ *         description: Market not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               error: "market not found"
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.get('/:source_market_id/history', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -330,7 +521,130 @@ router.get('/:source_market_id/history', async (req, res) => {
   }
 })
 
-// GET /markets/players/:pid - Markets for specific player
+/**
+ * @swagger
+ * /markets/players/{pid}:
+ *   get:
+ *     tags:
+ *       - Markets
+ *     summary: Get betting markets for a specific player
+ *     description: |
+ *       Retrieve all betting markets available for a specific player, including prop bets
+ *       for passing, rushing, receiving, and other statistical categories. Markets are
+ *       returned with their associated betting selections and current odds.
+ *     parameters:
+ *       - name: pid
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *           pattern: '^[a-zA-Z0-9-]+$'
+ *         description: Player ID in format FFFF-LLLL-YYYY-YYYY-MM-DD
+ *         example: "PATR-MAHO-2017-1995-09-17"
+ *       - $ref: '#/components/parameters/week'
+ *       - $ref: '#/components/parameters/year'
+ *       - name: seas_type
+ *         in: query
+ *         schema:
+ *           $ref: '#/components/schemas/SeasonTypeEnum'
+ *         description: Season type (REG=Regular season, POST=Playoffs, PRE=Preseason)
+ *       - name: bookmaker
+ *         in: query
+ *         schema:
+ *           $ref: '#/components/schemas/BookmakerEnum'
+ *           default: FANDUEL
+ *         description: Sportsbook to retrieve markets from
+ *         example: DRAFTKINGS
+ *       - name: limit
+ *         in: query
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 1000
+ *           default: 1000
+ *         description: Maximum number of markets to return
+ *       - name: offset
+ *         in: query
+ *         schema:
+ *           type: integer
+ *           minimum: 0
+ *           default: 0
+ *         description: Number of markets to skip (for pagination)
+ *     responses:
+ *       200:
+ *         description: Player markets retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 allOf:
+ *                   - $ref: '#/components/schemas/BettingMarket'
+ *                   - type: object
+ *                     properties:
+ *                       selection_pid:
+ *                         type: string
+ *                         description: Player ID this market is for
+ *                         example: "PATR-MAHO-2017-1995-09-17"
+ *                       source_market_id:
+ *                         type: string
+ *                         description: Unique market identifier from sportsbook
+ *                         example: "dk_123456789"
+ *                       time_type:
+ *                         $ref: '#/components/schemas/TimeTypeEnum'
+ *             examples:
+ *               quarterback_markets:
+ *                 summary: QB prop markets
+ *                 value:
+ *                   - market_type: "GAME_PASSING_YARDS"
+ *                     source_id: "DRAFTKINGS"
+ *                     source_market_name: "Patrick Mahomes - Passing Yards"
+ *                     esbid: "2025012601"
+ *                     open: true
+ *                     live: false
+ *                     settled: false
+ *                     selection_pid: "PATR-MAHO-2017-1995-09-17"
+ *                     selections:
+ *                       - selection_name: "Over"
+ *                         selection_type: "OVER"
+ *                         selection_metric_line: 267.5
+ *                         odds_decimal: 1.909
+ *                         odds_american: -110
+ *                       - selection_name: "Under"
+ *                         selection_type: "UNDER"
+ *                         selection_metric_line: 267.5
+ *                         odds_decimal: 1.909
+ *                         odds_american: -110
+ *               running_back_markets:
+ *                 summary: RB prop markets
+ *                 value:
+ *                   - market_type: "GAME_RUSHING_YARDS"
+ *                     source_id: "FANDUEL"
+ *                     source_market_name: "Christian McCaffrey - Rushing Yards"
+ *                     esbid: "2025012601"
+ *                     open: true
+ *                     live: false
+ *                     settled: false
+ *                     selection_pid: "CHRI-MCCA-2017-1996-06-07"
+ *                     selections:
+ *                       - selection_name: "Over"
+ *                         selection_type: "OVER"
+ *                         selection_metric_line: 89.5
+ *                         odds_decimal: 1.833
+ *                         odds_american: -120
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       404:
+ *         description: Player not found or no markets available
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               error: "missing player ID parameter"
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.get('/players/:pid', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -428,7 +742,131 @@ router.get('/players/:pid', async (req, res) => {
   }
 })
 
-// GET /markets/games/:esbid - Markets for specific game
+/**
+ * @swagger
+ * /markets/games/{esbid}:
+ *   get:
+ *     tags:
+ *       - Markets
+ *     summary: Get betting markets for a specific NFL game
+ *     description: |
+ *       Retrieve all betting markets available for a specific NFL game, including
+ *       player props, team props, and game-level markets. This endpoint consolidates
+ *       all betting opportunities for a single game from the specified sportsbook.
+ *     parameters:
+ *       - name: esbid
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *           pattern: '^[a-zA-Z0-9-]+$'
+ *         description: ESPN game ID (format YYYYMMDDII where II is game instance)
+ *         example: "2025012601"
+ *       - name: bookmaker
+ *         in: query
+ *         schema:
+ *           $ref: '#/components/schemas/BookmakerEnum'
+ *           default: FANDUEL
+ *         description: Sportsbook to retrieve markets from
+ *         example: DRAFTKINGS
+ *       - name: time_type
+ *         in: query
+ *         schema:
+ *           $ref: '#/components/schemas/TimeTypeEnum'
+ *           default: CLOSE
+ *         description: Market time type (when odds were captured)
+ *       - name: limit
+ *         in: query
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 1000
+ *           default: 1000
+ *         description: Maximum number of markets to return
+ *       - name: offset
+ *         in: query
+ *         schema:
+ *           type: integer
+ *           minimum: 0
+ *           default: 0
+ *         description: Number of markets to skip (for pagination)
+ *     responses:
+ *       200:
+ *         description: Game markets retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 allOf:
+ *                   - $ref: '#/components/schemas/BettingMarket'
+ *                   - type: object
+ *                     properties:
+ *                       esbid:
+ *                         type: string
+ *                         description: ESPN game ID
+ *                         example: "2025012601"
+ *                       source_market_id:
+ *                         type: string
+ *                         description: Unique market identifier from sportsbook
+ *                         example: "dk_123456789"
+ *                       time_type:
+ *                         $ref: '#/components/schemas/TimeTypeEnum'
+ *                       selection_pid:
+ *                         type: string
+ *                         nullable: true
+ *                         description: Player ID if this is a player prop market
+ *                         example: "PATR-MAHO-2017-1995-09-17"
+ *             examples:
+ *               game_markets_mix:
+ *                 summary: Mixed game and player markets
+ *                 value:
+ *                   - market_type: "GAME_PASSING_YARDS"
+ *                     source_id: "DRAFTKINGS"
+ *                     source_market_name: "Patrick Mahomes - Passing Yards"
+ *                     esbid: "2025012601"
+ *                     open: true
+ *                     live: false
+ *                     settled: false
+ *                     selection_pid: "PATR-MAHO-2017-1995-09-17"
+ *                     selections:
+ *                       - selection_name: "Over"
+ *                         selection_type: "OVER"
+ *                         selection_metric_line: 267.5
+ *                         odds_decimal: 1.909
+ *                         odds_american: -110
+ *                   - market_type: "GAME_TOTAL_POINTS"
+ *                     source_id: "DRAFTKINGS"
+ *                     source_market_name: "Total Points"
+ *                     esbid: "2025012601"
+ *                     open: true
+ *                     live: false
+ *                     settled: false
+ *                     selection_pid: null
+ *                     selections:
+ *                       - selection_name: "Over"
+ *                         selection_type: "OVER"
+ *                         selection_metric_line: 47.5
+ *                         odds_decimal: 1.909
+ *                         odds_american: -110
+ *                       - selection_name: "Under"
+ *                         selection_type: "UNDER"
+ *                         selection_metric_line: 47.5
+ *                         odds_decimal: 1.909
+ *                         odds_american: -110
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       404:
+ *         description: Game not found or no markets available
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               error: "missing game ID parameter"
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.get('/games/:esbid', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -490,7 +928,142 @@ router.get('/games/:esbid', async (req, res) => {
   }
 })
 
-// GET /markets/:source_market_id - Single market with all selections
+/**
+ * @swagger
+ * /markets/{source_market_id}:
+ *   get:
+ *     tags:
+ *       - Markets
+ *     summary: Get detailed information for a specific betting market
+ *     description: |
+ *       Retrieve comprehensive information for a single betting market, including
+ *       all available selections, current odds, and optionally historical data.
+ *       This endpoint provides the most detailed view of a specific market.
+ *     parameters:
+ *       - name: source_market_id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Unique identifier for the betting market from the sportsbook
+ *         example: "dk_123456789"
+ *       - name: include_history
+ *         in: query
+ *         schema:
+ *           type: boolean
+ *           default: false
+ *         description: Include historical selection data instead of current index data
+ *         example: true
+ *     responses:
+ *       200:
+ *         description: Market details retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               allOf:
+ *                 - $ref: '#/components/schemas/BettingMarket'
+ *                 - type: object
+ *                   properties:
+ *                     source_market_id:
+ *                       type: string
+ *                       description: Unique market identifier from sportsbook
+ *                       example: "dk_123456789"
+ *                     time_type:
+ *                       $ref: '#/components/schemas/TimeTypeEnum'
+ *                     selection_pid:
+ *                       type: string
+ *                       nullable: true
+ *                       description: Player ID if this is a player prop market
+ *                       example: "PATR-MAHO-2017-1995-09-17"
+ *                     selections:
+ *                       type: array
+ *                       items:
+ *                         allOf:
+ *                           - $ref: '#/components/schemas/BettingMarketSelection'
+ *                           - type: object
+ *                             properties:
+ *                               source_market_id:
+ *                                 type: string
+ *                                 description: Market identifier this selection belongs to
+ *                                 example: "dk_123456789"
+ *                               timestamp:
+ *                                 type: string
+ *                                 format: date-time
+ *                                 description: When this selection data was recorded
+ *                                 example: "2024-01-15T14:30:00Z"
+ *                       description: All betting selections for this market
+ *             examples:
+ *               passing_yards_market:
+ *                 summary: Passing yards prop market
+ *                 value:
+ *                   market_type: "GAME_PASSING_YARDS"
+ *                   source_id: "DRAFTKINGS"
+ *                   source_market_name: "Patrick Mahomes - Passing Yards"
+ *                   source_market_id: "dk_123456789"
+ *                   esbid: "2025012601"
+ *                   open: true
+ *                   live: false
+ *                   settled: false
+ *                   selection_pid: "PATR-MAHO-2017-1995-09-17"
+ *                   selections:
+ *                     - selection_name: "Over"
+ *                       selection_type: "OVER"
+ *                       selection_metric_line: 267.5
+ *                       odds_decimal: 1.909
+ *                       odds_american: -110
+ *                       source_market_id: "dk_123456789"
+ *                       timestamp: "2024-01-15T14:30:00Z"
+ *                       current_season_hit_rate_hard: 0.652
+ *                       current_season_edge_hard: 0.045
+ *                     - selection_name: "Under"
+ *                       selection_type: "UNDER"
+ *                       selection_metric_line: 267.5
+ *                       odds_decimal: 1.909
+ *                       odds_american: -110
+ *                       source_market_id: "dk_123456789"
+ *                       timestamp: "2024-01-15T14:30:00Z"
+ *                       current_season_hit_rate_hard: 0.348
+ *                       current_season_edge_hard: -0.045
+ *               team_total_market:
+ *                 summary: Team total points market
+ *                 value:
+ *                   market_type: "GAME_TEAM_TOTAL_POINTS"
+ *                   source_id: "FANDUEL"
+ *                   source_market_name: "Kansas City Chiefs - Total Points"
+ *                   source_market_id: "fd_987654321"
+ *                   esbid: "2025012601"
+ *                   open: true
+ *                   live: false
+ *                   settled: false
+ *                   selection_pid: null
+ *                   selections:
+ *                     - selection_name: "Over"
+ *                       selection_type: "OVER"
+ *                       selection_metric_line: 23.5
+ *                       odds_decimal: 1.833
+ *                       odds_american: -120
+ *                       source_market_id: "fd_987654321"
+ *                       timestamp: "2024-01-15T14:30:00Z"
+ *                     - selection_name: "Under"
+ *                       selection_type: "UNDER"
+ *                       selection_metric_line: 23.5
+ *                       odds_decimal: 2.100
+ *                       odds_american: 110
+ *                       source_market_id: "fd_987654321"
+ *                       timestamp: "2024-01-15T14:30:00Z"
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       404:
+ *         description: Market not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             example:
+ *               error: "market not found"
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.get('/:source_market_id', async (req, res) => {
   const { db, logger } = req.app.locals
   try {

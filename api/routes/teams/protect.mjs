@@ -11,6 +11,82 @@ import {
 
 const router = express.Router({ mergeParams: true })
 
+/**
+ * @swagger
+ * /teams/{teamId}/protect:
+ *   post:
+ *     tags:
+ *       - Teams
+ *     summary: Protect a practice squad player
+ *     description: |
+ *       Designate a practice squad player as protected from poaching.
+ *       Only available during regular season and for unprotected practice squad players.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/teamId'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               pid:
+ *                 type: string
+ *                 description: Player ID to protect
+ *                 example: "ALVI-KAME-2022-1999-02-05"
+ *               leagueId:
+ *                 type: integer
+ *                 description: League ID
+ *                 example: 2
+ *             required:
+ *               - pid
+ *               - leagueId
+ *           examples:
+ *             protectPlayer:
+ *               summary: Protect practice squad player
+ *               value:
+ *                 pid: "ALVI-KAME-2022-1999-02-05"
+ *                 leagueId: 2
+ *     responses:
+ *       200:
+ *         description: Player protected successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 pid:
+ *                   type: string
+ *                   description: Player ID
+ *                   example: "ALVI-KAME-2022-1999-02-05"
+ *                 tid:
+ *                   type: integer
+ *                   description: Team ID
+ *                   example: 13
+ *                 slot:
+ *                   type: integer
+ *                   description: New slot (protected practice squad)
+ *                   example: 6
+ *                 rid:
+ *                   type: integer
+ *                   description: Roster ID
+ *                   example: 1234
+ *                 pos:
+ *                   type: string
+ *                   description: Player position
+ *                   example: "RB"
+ *                 transaction:
+ *                   type: object
+ *                   description: Transaction details
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.post('/?', async (req, res) => {
   const { db, logger, broadcast } = req.app.locals
   try {

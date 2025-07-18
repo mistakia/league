@@ -16,6 +16,88 @@ import {
 
 const router = express.Router({ mergeParams: true })
 
+/**
+ * @swagger
+ * /teams/{teamId}/release:
+ *   post:
+ *     tags:
+ *       - Teams
+ *     summary: Release a player
+ *     description: |
+ *       Release a player from the team roster. Cannot release active roster players
+ *       during free agency period (unless commissioner).
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/teamId'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               pid:
+ *                 type: string
+ *                 description: Player ID to release
+ *                 example: "JORD-LOVE-2020-1998-11-02"
+ *               teamId:
+ *                 type: integer
+ *                 description: Team ID
+ *                 example: 5
+ *               leagueId:
+ *                 type: integer
+ *                 description: League ID
+ *                 example: 2
+ *             required:
+ *               - pid
+ *               - teamId
+ *               - leagueId
+ *           examples:
+ *             releasePlayer:
+ *               summary: Release player from roster
+ *               value:
+ *                 pid: "JORD-LOVE-2020-1998-11-02"
+ *                 teamId: 5
+ *                 leagueId: 2
+ *     responses:
+ *       200:
+ *         description: Player released successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 pid:
+ *                   type: string
+ *                   description: Player ID
+ *                   example: "JORD-LOVE-2020-1998-11-02"
+ *                 tid:
+ *                   type: integer
+ *                   description: Team ID
+ *                   example: 5
+ *                 slot:
+ *                   type: integer
+ *                   description: Previous slot
+ *                   example: 4
+ *                 rid:
+ *                   type: integer
+ *                   description: Roster ID
+ *                   example: 1234
+ *                 pos:
+ *                   type: string
+ *                   description: Player position
+ *                   example: "QB"
+ *                 transaction:
+ *                   type: object
+ *                   description: Transaction details
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.post('/?', async (req, res) => {
   const { db, logger, broadcast } = req.app.locals
   try {

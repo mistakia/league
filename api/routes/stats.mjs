@@ -5,6 +5,71 @@ import { getLeague } from '#libs-server'
 
 const router = express.Router()
 
+/**
+ * @swagger
+ * /stats/gamelogs/players:
+ *   get:
+ *     tags:
+ *       - Stats
+ *     summary: Get player game logs
+ *     description: Retrieve game-by-game statistics for players with filtering options
+ *     parameters:
+ *       - name: leagueId
+ *         in: query
+ *         schema:
+ *           type: integer
+ *         description: League ID for scoring context
+ *       - $ref: '#/components/parameters/year'
+ *       - $ref: '#/components/parameters/week'
+ *       - name: nfl_team
+ *         in: query
+ *         schema:
+ *           type: string
+ *         description: Filter by NFL team
+ *         example: KC
+ *       - name: opponent
+ *         in: query
+ *         schema:
+ *           type: string
+ *         description: Filter by opponent team
+ *         example: BUF
+ *       - name: position
+ *         in: query
+ *         schema:
+ *           oneOf:
+ *             - type: string
+ *             - type: array
+ *               items:
+ *                 type: string
+ *         description: Filter by position(s)
+ *         example: QB
+ *       - name: rushing
+ *         in: query
+ *         schema:
+ *           type: boolean
+ *         description: Include rushing statistics
+ *       - name: passing
+ *         in: query
+ *         schema:
+ *           type: boolean
+ *         description: Include passing statistics
+ *       - name: receiving
+ *         in: query
+ *         schema:
+ *           type: boolean
+ *         description: Include receiving statistics
+ *     responses:
+ *       200:
+ *         description: Player game logs
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/PlayerGameLog'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.get('/gamelogs/players', async (req, res) => {
   const { db, logger } = req.app.locals
   try {

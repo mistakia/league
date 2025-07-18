@@ -20,6 +20,7 @@ import data_views from './data_views.mjs'
 import wagers from './wagers.mjs'
 import markets from './markets.mjs'
 import shorten_url from './shorten_url.mjs'
+import docs from './docs.mjs'
 
 export default {
   auth,
@@ -43,5 +44,6 @@ export default {
   data_views,
   wagers,
   markets,
-  shorten_url
+  shorten_url,
+  docs
 }

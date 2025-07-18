@@ -10,6 +10,107 @@ import {
 
 const router = express.Router({ mergeParams: true })
 
+/**
+ * @swagger
+ * /teams/{teamId}/activate:
+ *   post:
+ *     tags:
+ *       - Teams
+ *     summary: Activate a player
+ *     description: |
+ *       Activate a player from practice squad or reserve to active roster.
+ *       Can optionally release another player or move a player to reserve to make room.
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - $ref: '#/components/parameters/teamId'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               activate_pid:
+ *                 type: string
+ *                 description: Player ID to activate
+ *                 example: "JALE-HURT-2020-1998-08-07"
+ *               leagueId:
+ *                 type: integer
+ *                 description: League ID
+ *                 example: 2
+ *               release_pid:
+ *                 type: string
+ *                 description: Player ID to release (optional)
+ *                 example: "JORD-LOVE-2020-1998-11-02"
+ *               reserve_pid:
+ *                 type: string
+ *                 description: Player ID to move to reserve (optional)
+ *                 example: "JACO-BURR-2020-1996-12-10"
+ *               slot:
+ *                 type: integer
+ *                 description: Reserve slot type (required if reserve_pid provided)
+ *                 enum: [7, 8]
+ *                 example: 7
+ *             required:
+ *               - activate_pid
+ *               - leagueId
+ *           examples:
+ *             simpleActivation:
+ *               summary: Simple activation from practice squad
+ *               value:
+ *                 activate_pid: "JALE-HURT-2020-1998-08-07"
+ *                 leagueId: 2
+ *             activateWithRelease:
+ *               summary: Activate player and release another
+ *               value:
+ *                 activate_pid: "JALE-HURT-2020-1998-08-07"
+ *                 leagueId: 2
+ *                 release_pid: "JORD-LOVE-2020-1998-11-02"
+ *             activateWithReserve:
+ *               summary: Activate player and move another to IR
+ *               value:
+ *                 activate_pid: "JALE-HURT-2020-1998-08-07"
+ *                 leagueId: 2
+ *                 reserve_pid: "JACO-BURR-2020-1996-12-10"
+ *                 slot: 7
+ *     responses:
+ *       200:
+ *         description: Player activated successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 pid:
+ *                   type: string
+ *                   description: Player ID
+ *                   example: "JALE-HURT-2020-1998-08-07"
+ *                 tid:
+ *                   type: integer
+ *                   description: Team ID
+ *                   example: 13
+ *                 slot:
+ *                   type: integer
+ *                   description: New slot (active roster)
+ *                   example: 4
+ *                 rid:
+ *                   type: integer
+ *                   description: Roster ID
+ *                   example: 1234
+ *                 pos:
+ *                   type: string
+ *                   description: Player position
+ *                   example: "QB"
+ *                 transaction:
+ *                   $ref: '#/components/schemas/Transaction'
+ *       400:
+ *         $ref: '#/components/responses/BadRequestError'
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.post('/?', async (req, res) => {
   const { logger, broadcast } = req.app.locals
   try {

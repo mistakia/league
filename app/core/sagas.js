@@ -22,7 +22,6 @@ import { statusSagas } from './status'
 import { scoreboardSagas } from './scoreboard'
 import { playSagas } from './plays'
 import { gamelogSagas } from './gamelogs'
-import { propSagas } from './props'
 import { draftPickValueSagas } from './draft-pick-value'
 import { seasonlogSagas } from './seasonlogs'
 import { percentileSagas } from './percentiles'
@@ -55,7 +54,6 @@ export default function* rootSaga() {
     ...scoreboardSagas,
     ...playSagas,
     ...gamelogSagas,
-    ...propSagas,
     ...draftPickValueSagas,
     ...seasonlogSagas,
     ...percentileSagas,
