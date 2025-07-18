@@ -61,7 +61,6 @@ export {
   getWaiverReport,
   fetchScoreboard,
   getPlayersGamelogs,
-  fetchProps,
   getCutlist,
   postCutlist,
   postRestrictedFreeAgencyTag,
