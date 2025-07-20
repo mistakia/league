@@ -219,6 +219,13 @@ export default {
       fixed: 1,
       reverse_percentiles: true
     }),
+  player_time_to_throw_from_plays: offensive_player_from_play_field({
+    column_title: 'Time to Throw (By Play)',
+    column_groups: [COLUMN_GROUPS.PASSING],
+    header_label: 'TTT',
+    player_value_path: 'time_to_throw_from_plays',
+    fixed: 2
+  }),
   player_pass_net_yards_per_attempt_from_plays:
     offensive_player_from_play_field({
       column_title: 'Passing Net Yards Per Attempt (By Play)',

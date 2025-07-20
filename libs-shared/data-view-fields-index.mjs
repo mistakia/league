@@ -217,6 +217,8 @@ export default {
     'The percentage of dropbacks resulting in quarterback pressure (calculated from play-by-play data)',
   player_quarterback_hurries_percentage_from_plays:
     'The percentage of dropbacks resulting in a quarterback hurry (calculated from play-by-play data)',
+  player_time_to_throw_from_plays:
+    'Average time from snap to pass release in seconds, excludes sacks (calculated from play-by-play data)',
   player_pass_net_yards_per_attempt_from_plays:
     'The net yards gained per pass attempt, including sacks (calculated from play-by-play data)',
   player_rush_yards_from_plays:

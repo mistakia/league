@@ -870,5 +870,11 @@ export default {
     pid_columns: ['psr_pid'],
     with_select_string: `SUM(CASE WHEN qb_pressure_ngs = true OR qb_pressure = true THEN 1 ELSE 0 END)`,
     stat_name: 'quarterback_pressures_from_plays'
+  }),
+
+  player_time_to_throw_from_plays: player_stat_from_plays({
+    pid_columns: ['psr_pid'],
+    with_select_string: `AVG(CASE WHEN time_to_throw_ngs IS NOT NULL AND (sk IS NULL OR sk = false) THEN time_to_throw_ngs ELSE NULL END)`,
+    stat_name: 'time_to_throw_from_plays'
   })
 }
