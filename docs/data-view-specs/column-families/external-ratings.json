@@ -1,0 +1,192 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://xo.football/schemas/external-ratings.json",
+  "title": "External Rating Columns",
+  "description": "Third-party ratings, rankings, and scores from PFF, ESPN, KeepTradeCut, etc.",
+  "version": "1.0.0",
+  "family_id": "external_ratings",
+
+  "family_metadata": {
+    "table_name": "various",
+    "cache_strategy": "weekly_update",
+    "description": "External ratings and evaluations from fantasy and NFL analysis platforms"
+  },
+
+  "rating_sources": {
+    "keeptradecut": {
+      "description": "KeepTradeCut dynasty league values and rankings",
+      "table_name": "player_keeptradecut_values"
+    },
+    "pff": {
+      "description": "Pro Football Focus grades and advanced metrics",
+      "table_name": "player_pff_seasonlogs"
+    },
+    "espn": {
+      "description": "ESPN receiver tracking scores",
+      "table_name": "player_espn_scores"
+    },
+    "pfr": {
+      "description": "Pro Football Reference season values",
+      "table_name": "player_pfr_values"
+    }
+  },
+
+  "columns": {
+    "player_keeptradecut_value": {
+      "description": "KeepTradeCut dynasty value score",
+      "parameters": ["year", "year_offset"],
+      "supported_rate_types": [],
+      "supported_splits": ["year"],
+      "data_type": "number"
+    },
+
+    "player_keeptradecut_overall_rank": {
+      "description": "Overall rank among all players in KeepTradeCut",
+      "parameters": ["year", "year_offset"],
+      "supported_rate_types": [],
+      "supported_splits": ["year"],
+      "data_type": "number"
+    },
+
+    "player_keeptradecut_position_rank": {
+      "description": "Position rank in KeepTradeCut",
+      "parameters": ["year", "year_offset"],
+      "supported_rate_types": [],
+      "supported_splits": ["year"],
+      "data_type": "number"
+    },
+
+    "player_pff_overall": {
+      "description": "PFF overall grade for the season",
+      "parameters": ["year", "week", "seas_type"],
+      "supported_rate_types": [],
+      "supported_splits": ["year", "week"],
+      "data_type": "number"
+    },
+
+    "player_pff_offense": {
+      "description": "PFF offensive grade",
+      "parameters": ["year", "week", "seas_type"],
+      "supported_rate_types": [],
+      "supported_splits": ["year", "week"],
+      "data_type": "number"
+    },
+
+    "player_pff_defense": {
+      "description": "PFF defensive grade",
+      "parameters": ["year", "week", "seas_type"],
+      "supported_rate_types": [],
+      "supported_splits": ["year", "week"],
+      "data_type": "number"
+    },
+
+    "player_pff_pass": {
+      "description": "PFF passing grade for quarterbacks",
+      "parameters": ["year", "week", "seas_type"],
+      "supported_rate_types": [],
+      "supported_splits": ["year", "week"],
+      "data_type": "number"
+    },
+
+    "player_pff_receiving": {
+      "description": "PFF receiving grade",
+      "parameters": ["year", "week", "seas_type"],
+      "supported_rate_types": [],
+      "supported_splits": ["year", "week"],
+      "data_type": "number"
+    },
+
+    "player_espn_open_score": {
+      "description": "ESPN receiver open score measuring separation ability",
+      "parameters": ["year", "week"],
+      "supported_rate_types": [],
+      "supported_splits": ["year", "week"],
+      "data_type": "number"
+    },
+
+    "player_espn_catch_score": {
+      "description": "ESPN catch score measuring catching ability",
+      "parameters": ["year", "week"],
+      "supported_rate_types": [],
+      "supported_splits": ["year", "week"],
+      "data_type": "number"
+    },
+
+    "player_espn_overall_score": {
+      "description": "ESPN overall performance score",
+      "parameters": ["year", "week"],
+      "supported_rate_types": [],
+      "supported_splits": ["year", "week"],
+      "data_type": "number"
+    },
+
+    "player_espn_yac_score": {
+      "description": "ESPN yards after catch score",
+      "parameters": ["year", "week"],
+      "supported_rate_types": [],
+      "supported_splits": ["year", "week"],
+      "data_type": "number"
+    },
+
+    "player_pfr_season_value": {
+      "description": "Pro Football Reference single season approximate value",
+      "parameters": ["year"],
+      "supported_rate_types": [],
+      "supported_splits": ["year"],
+      "data_type": "number"
+    },
+
+    "player_pfr_weighted_career_approximate_value": {
+      "description": "Career approximate value (weighted) from Pro Football Reference",
+      "parameters": ["year"],
+      "supported_rate_types": [],
+      "supported_splits": [],
+      "data_type": "number"
+    }
+  },
+
+  "parameter_defaults": {
+    "year": "constants.season.year",
+    "week": 0,
+    "seas_type": "REG"
+  },
+
+  "usage_patterns": {
+    "dynasty_valuation": {
+      "description": "Dynasty league player valuation",
+      "typical_columns": [
+        "player_keeptradecut_value",
+        "player_keeptradecut_overall_rank",
+        "player_keeptradecut_position_rank"
+      ],
+      "use_case": "Trade analysis and roster construction"
+    },
+    "performance_evaluation": {
+      "description": "Advanced performance metrics",
+      "typical_columns": [
+        "player_pff_overall",
+        "player_pff_offense",
+        "player_espn_overall_score"
+      ],
+      "use_case": "Player evaluation beyond basic stats"
+    },
+    "receiver_analysis": {
+      "description": "Detailed receiver evaluation",
+      "typical_columns": [
+        "player_espn_open_score",
+        "player_espn_catch_score",
+        "player_espn_yac_score"
+      ],
+      "position_filter": ["WR", "TE"],
+      "use_case": "Receiver skill breakdown analysis"
+    },
+    "historical_value": {
+      "description": "Historical career value assessment",
+      "typical_columns": [
+        "player_pfr_season_value",
+        "player_pfr_weighted_career_approximate_value"
+      ],
+      "use_case": "Career achievement and Hall of Fame analysis"
+    }
+  }
+}

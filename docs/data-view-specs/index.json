@@ -1,0 +1,199 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://xo.football/schemas/data-view-specs-index.json",
+  "title": "Data View Specifications Master Index",
+  "description": "Master index for all data view column specifications and parameters",
+  "version": "1.0.0",
+
+  "column_families": {
+    "player_basic": {
+      "file": "./column-families/player-basic.json",
+      "description": "Basic player demographics, physical attributes, and identifiers",
+      "table_name": "player",
+      "cache_strategy": "static_long_ttl"
+    },
+    "player_combine": {
+      "file": "./column-families/player-combine.json",
+      "description": "NFL Combine measurements and calculated athletic scores",
+      "table_name": "player",
+      "cache_strategy": "static_long_ttl"
+    },
+    "player_contracts": {
+      "file": "./column-families/player-contracts.json",
+      "description": "Player contract details and salary cap information",
+      "table_name": "player_contracts",
+      "cache_strategy": "weekly_update"
+    },
+    "player_projections": {
+      "file": "./column-families/player-projections.json",
+      "description": "Fantasy projections for week/season/rest-of-season timeframes",
+      "table_name": "scoring_format_player_projection_points",
+      "cache_strategy": "dynamic_by_season",
+      "requires_parameters": ["scoring_format_hash"]
+    },
+    "player_stats_from_plays": {
+      "file": "./column-families/player-stats-from-plays.json",
+      "description": "Advanced statistics calculated from NFL play-by-play data",
+      "table_name": "nfl_plays",
+      "cache_strategy": "dynamic_by_season",
+      "supports": ["rate_types", "year_splits", "week_splits"]
+    },
+    "player_fantasy_points": {
+      "file": "./column-families/player-fantasy-points.json",
+      "description": "Fantasy points calculated from plays with scoring format customization",
+      "table_name": "nfl_plays",
+      "cache_strategy": "dynamic_by_season",
+      "requires_parameters": ["scoring_format_hash"],
+      "supports": ["rate_types", "year_splits", "week_splits"]
+    },
+    "team_stats_from_plays": {
+      "file": "./column-families/team-stats-from-plays.json",
+      "description": "Team-level statistics calculated from play-by-play data",
+      "table_name": "nfl_plays",
+      "cache_strategy": "dynamic_by_season",
+      "supports": ["year_splits", "week_splits"]
+    },
+    "defensive_stats_from_plays": {
+      "file": "./column-families/defensive-stats-from-plays.json",
+      "description": "Defensive player statistics from play-by-play data",
+      "table_name": "nfl_plays",
+      "cache_strategy": "dynamic_by_season",
+      "supports": ["rate_types", "year_splits", "week_splits"]
+    },
+    "nfl_team_seasonlogs": {
+      "file": "./column-families/nfl-team-seasonlogs.json",
+      "description": "Comprehensive NFL team statistics and performance metrics",
+      "table_name": "nfl_team_seasonlogs",
+      "cache_strategy": "weekly_update"
+    },
+    "betting_markets": {
+      "file": "./column-families/betting-markets.json",
+      "description": "Betting lines and market data from sportsbooks",
+      "table_name": "prop_market_selections_index",
+      "cache_strategy": "real_time",
+      "requires_parameters": ["market_type", "source_id"]
+    },
+    "external_ratings": {
+      "file": "./column-families/external-ratings.json",
+      "description": "Third-party ratings from PFF, ESPN, KeepTradeCut, etc.",
+      "table_name": "various",
+      "cache_strategy": "weekly_update"
+    },
+    "player_practice": {
+      "file": "./column-families/player-practice.json",
+      "description": "Practice participation and injury status",
+      "table_name": "player_practice",
+      "cache_strategy": "daily_update"
+    },
+    "player_dfs_salaries": {
+      "file": "./column-families/player-dfs-salaries.json",
+      "description": "Daily fantasy sports salary data",
+      "table_name": "player_dfs_salaries",
+      "cache_strategy": "daily_update"
+    },
+    "league_specific": {
+      "file": "./column-families/league-specific.json",
+      "description": "League roster and salary data",
+      "table_name": "rosters_players",
+      "cache_strategy": "real_time",
+      "requires_parameters": ["lid"]
+    },
+    "miscellaneous": {
+      "file": "./column-families/miscellaneous.json",
+      "description": "Standalone columns that don't fit other families",
+      "table_name": "various",
+      "cache_strategy": "varies"
+    }
+  },
+
+  "shared_resources": {
+    "common_parameters": {
+      "file": "./parameters/schemas/common-parameters.json",
+      "description": "Shared parameters used across multiple families"
+    },
+    "fantasy_parameters": {
+      "file": "./parameters/schemas/fantasy-parameters.json",
+      "description": "Fantasy football specific parameters"
+    },
+    "betting_parameters": {
+      "file": "./parameters/schemas/betting-parameters.json",
+      "description": "Betting market specific parameters"
+    },
+    "play_parameters": {
+      "file": "./parameters/schemas/play-parameters.json",
+      "description": "NFL play-by-play specific parameters",
+      "source_file": "libs-shared/nfl-plays-column-params.mjs"
+    },
+    "team_parameters": {
+      "file": "./parameters/schemas/team-parameters.json",
+      "description": "Team unit and matchup parameters",
+      "source_file": "libs-shared/nfl-plays-team-column-params.mjs"
+    },
+    "parameter_values": {
+      "rate_types": "./parameters/values/rate-types.json",
+      "market_types": "./parameters/values/market-types.json"
+    }
+  },
+
+  "validation": {
+    "parameter_compatibility": "./validation/parameter-compatibility.json",
+    "split_rate_type_matrix": "./validation/split-rate-type-matrix.json"
+  },
+
+  "advanced_features": {
+    "rate_type_support": {
+      "families": [
+        "player_stats_from_plays",
+        "player_fantasy_points",
+        "defensive_stats_from_plays"
+      ]
+    },
+    "split_support": {
+      "year_splits": 8,
+      "week_splits": 6,
+      "both_splits": 4
+    },
+    "partitioned_table_optimization": {
+      "description": "Single-year queries use partitioned tables for 10-100x performance",
+      "affected_families": [
+        "player_stats_from_plays",
+        "team_stats_from_plays",
+        "player_fantasy_points"
+      ]
+    },
+    "multi_year_analysis": {
+      "description": "year_offset arrays enable historical trend analysis",
+      "supported_families": 6
+    }
+  },
+
+  "usage_recommendations": {
+    "getting_started": {
+      "basic_player_info": "Use player_basic family for identification and demographics",
+      "fantasy_analysis": "Combine player_projections with player_stats_from_plays",
+      "betting_analysis": "Use betting_markets with external_ratings for context"
+    },
+    "performance_optimization": {
+      "quick_tips": {
+        "single_year_queries": "Use year: [2024] instead of year: [2023, 2024] when possible",
+        "minimal_prefix_columns": "Only include essential identification columns",
+        "appropriate_rate_types": "Choose rate types that match your analysis goals",
+        "effective_filtering": "Use WHERE clauses to reduce result set early"
+      }
+    },
+    "common_patterns": {
+      "player_identification": [
+        "player_name",
+        "player_position",
+        "player_current_nfl_team"
+      ],
+      "performance_analysis": "Combine stats_from_plays with external_ratings",
+      "dynasty_valuation": "Use external_ratings (KeepTradeCut) with projections"
+    },
+    "anti_patterns": [
+      "Excessive prefix columns (limit to 3-5)",
+      "Multi-year arrays when single year suffices",
+      "Incompatible rate type and split combinations"
+    ]
+  }
+}

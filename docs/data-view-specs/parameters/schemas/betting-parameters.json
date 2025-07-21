@@ -1,0 +1,82 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://xo.football/schemas/betting-parameters.json",
+  "title": "Betting Market Parameters",
+  "description": "Parameters specific to betting market data",
+  "version": "1.0.0",
+
+  "parameters": {
+    "market_type": {
+      "description": "Type of betting market for filtering",
+      "type": ["array", "string"],
+      "items": {
+        "$ref": "../values/market-types.json#/values"
+      },
+      "default": "GAME_PASSING_YARDS",
+      "usage_pattern": "Filter betting markets by prop type, affects which data is returned",
+      "examples": [
+        "GAME_PASSING_YARDS",
+        ["GAME_RUSHING_YARDS", "GAME_RECEIVING_YARDS"]
+      ]
+    },
+
+    "source_id": {
+      "description": "Betting source/sportsbook identifier",
+      "type": ["array", "string"],
+      "items": {
+        "enum": [
+          "FANDUEL",
+          "DRAFTKINGS",
+          "CAESARS",
+          "BETMGM",
+          "BETRIVERS",
+          "BETONLINE",
+          "PRIZEPICKS",
+          "GAMBET",
+          "FANATICS",
+          "BOVADA",
+          "PINNACLE"
+        ]
+      },
+      "default": "FANDUEL",
+      "usage_pattern": "Filter data by sportsbook source, different books may have different lines",
+      "examples": ["FANDUEL", ["FANDUEL", "DRAFTKINGS"], "CAESARS"]
+    },
+
+    "time_type": {
+      "description": "Market timing for betting lines",
+      "type": ["array", "string"],
+      "items": {
+        "enum": ["OPEN", "CLOSE"]
+      },
+      "default": "CLOSE",
+      "usage_pattern": "Get opening or closing lines, closing lines are typically more accurate",
+      "examples": ["OPEN", "CLOSE", ["OPEN", "CLOSE"]]
+    },
+
+    "selection_type": {
+      "description": "Market selection type (over/under, specific outcome)",
+      "type": ["array", "string"],
+      "usage_pattern": "Filter to specific bet selections within a market",
+      "examples": ["OVER", "UNDER", ["OVER", "UNDER"]]
+    }
+  },
+
+  "parameter_combinations": {
+    "basic_prop_line": {
+      "description": "Get basic prop betting line",
+      "required_parameters": ["market_type"],
+      "optional_parameters": ["source_id", "time_type"]
+    },
+    "comparative_analysis": {
+      "description": "Compare lines across sportsbooks",
+      "required_parameters": ["market_type", "source_id"],
+      "pattern": "source_id as array to compare multiple books"
+    },
+    "line_movement": {
+      "description": "Analyze line movement from open to close",
+      "required_parameters": ["market_type", "time_type"],
+      "pattern": "time_type as [\"OPEN\", \"CLOSE\"] array"
+    }
+  }
+}

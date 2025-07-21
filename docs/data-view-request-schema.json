@@ -1,0 +1,183 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://xo.football/schemas/data-view-request-minimal.json",
+  "title": "Data View Request - Runtime Validation",
+  "description": "Minimal schema for runtime validation of data view requests. See docs/data-view-specs/ for detailed parameter documentation.",
+  "type": "object",
+
+  "properties": {
+    "columns": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/ColumnConfig" },
+      "minItems": 1,
+      "maxItems": 50
+    },
+    "prefix_columns": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/ColumnConfig" },
+      "maxItems": 10
+    },
+    "where": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/WhereClause" },
+      "maxItems": 20
+    },
+    "sort": {
+      "type": "array",
+      "items": { "$ref": "#/definitions/SortClause" },
+      "maxItems": 5
+    },
+    "splits": {
+      "type": "array",
+      "items": {
+        "type": "string",
+        "enum": ["year", "week"]
+      },
+      "uniqueItems": true,
+      "maxItems": 2
+    },
+    "offset": {
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 10000,
+      "default": 0
+    },
+    "limit": {
+      "type": "integer",
+      "minimum": 1,
+      "maximum": 500,
+      "default": 500
+    },
+    "view_name": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 100
+    },
+    "view_description": {
+      "type": "string",
+      "minLength": 1,
+      "maxLength": 500
+    },
+    "view_id": {
+      "type": "string",
+      "pattern": "^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
+    },
+    "view_search_column_id": {
+      "type": "string",
+      "pattern": "^[a-z_]+$"
+    }
+  },
+
+  "required": ["columns"],
+  "additionalProperties": false,
+
+  "definitions": {
+    "ColumnConfig": {
+      "oneOf": [
+        {
+          "type": "string",
+          "pattern": "^[a-z_]+$"
+        },
+        {
+          "type": "object",
+          "properties": {
+            "column_id": {
+              "type": "string",
+              "pattern": "^[a-z_]+$"
+            },
+            "params": {
+              "type": "object",
+              "description": "See docs/data-view-specs/parameters/ for valid parameter schemas"
+            }
+          },
+          "required": ["column_id"],
+          "additionalProperties": false
+        }
+      ]
+    },
+
+    "WhereClause": {
+      "type": "object",
+      "properties": {
+        "column_id": {
+          "type": "string",
+          "pattern": "^[a-z_]+$"
+        },
+        "operator": {
+          "type": "string",
+          "enum": [
+            "=",
+            "!=",
+            "<>",
+            ">",
+            ">=",
+            "<",
+            "<=",
+            "IN",
+            "NOT IN",
+            "LIKE",
+            "NOT LIKE",
+            "ILIKE",
+            "NOT ILIKE",
+            "IS NULL",
+            "IS NOT NULL",
+            "BETWEEN",
+            "NOT BETWEEN"
+          ]
+        },
+        "value": {
+          "oneOf": [
+            { "type": "string" },
+            { "type": "number" },
+            { "type": "boolean" },
+            { "type": "null" },
+            {
+              "type": "array",
+              "items": {
+                "oneOf": [
+                  { "type": "string" },
+                  { "type": "number" },
+                  { "type": "boolean" }
+                ]
+              },
+              "minItems": 1,
+              "maxItems": 50
+            }
+          ]
+        },
+        "params": {
+          "type": "object",
+          "description": "See docs/data-view-specs/parameters/ for valid parameter schemas"
+        }
+      },
+      "required": ["column_id", "operator"],
+      "additionalProperties": false,
+      "if": {
+        "properties": {
+          "operator": {
+            "not": { "enum": ["IS NULL", "IS NOT NULL"] }
+          }
+        }
+      },
+      "then": {
+        "required": ["value"]
+      }
+    },
+
+    "SortClause": {
+      "type": "object",
+      "properties": {
+        "column_id": {
+          "type": "string",
+          "pattern": "^[a-z_]+$"
+        },
+        "desc": {
+          "type": "boolean",
+          "default": false
+        }
+      },
+      "required": ["column_id"],
+      "additionalProperties": false
+    }
+  }
+}

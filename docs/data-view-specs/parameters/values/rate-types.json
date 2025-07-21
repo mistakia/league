@@ -1,0 +1,100 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://xo.football/schemas/rate-types.json",
+  "title": "Rate Type Values",
+  "description": "Valid rate types for statistical normalization",
+  "version": "1.0.0",
+
+  "rate_types": [
+    "per_game",
+    "per_team_half",
+    "per_team_quarter",
+    "per_team_play",
+    "per_team_pass_play",
+    "per_team_rush_play",
+    "per_player_rush_attempt",
+    "per_player_pass_attempt",
+    "per_player_target",
+    "per_player_reception",
+    "per_player_route",
+    "per_player_snap"
+  ],
+
+  "rate_type_categories": {
+    "game_based": {
+      "description": "Normalized per game played",
+      "rate_types": ["per_game"],
+      "mechanism": "Divides by games played",
+      "use_case": "Season-long averages and consistency metrics"
+    },
+    "team_based": {
+      "description": "Normalized per team unit (half, quarter, play)",
+      "rate_types": [
+        "per_team_half",
+        "per_team_quarter",
+        "per_team_play",
+        "per_team_pass_play",
+        "per_team_rush_play"
+      ],
+      "mechanism": "Divides by team-level denominators",
+      "use_case": "Team share and efficiency metrics"
+    },
+    "opportunity_based": {
+      "description": "Normalized per player opportunity",
+      "rate_types": [
+        "per_player_rush_attempt",
+        "per_player_pass_attempt",
+        "per_player_target",
+        "per_player_reception"
+      ],
+      "mechanism": "Divides by player-specific opportunities",
+      "use_case": "Efficiency and per-touch metrics"
+    },
+    "snap_based": {
+      "description": "Normalized per snap or route",
+      "rate_types": ["per_player_snap", "per_player_route"],
+      "mechanism": "Divides by playing time metrics",
+      "use_case": "Usage rate and snap efficiency"
+    }
+  },
+
+  "split_compatibility": {
+    "year_splits": {
+      "compatible": [
+        "per_game",
+        "per_team_play",
+        "per_team_pass_play",
+        "per_team_rush_play",
+        "per_player_target",
+        "per_player_rush_attempt"
+      ],
+      "description": "Rate types that work with year-based grouping"
+    },
+    "week_splits": {
+      "incompatible": ["per_game"],
+      "reason": "per_game normalization is meaningless at weekly level",
+      "compatible": [
+        "per_team_play",
+        "per_team_pass_play",
+        "per_team_rush_play",
+        "per_player_target",
+        "per_player_rush_attempt"
+      ]
+    }
+  },
+
+  "usage_examples": {
+    "efficiency_analysis": {
+      "rate_types": ["per_player_target", "per_player_rush_attempt"],
+      "use_case": "Analyze yards per carry, yards per target"
+    },
+    "market_share": {
+      "rate_types": ["per_team_play", "per_team_pass_play"],
+      "use_case": "Player's share of team opportunities"
+    },
+    "consistency": {
+      "rate_types": ["per_game"],
+      "use_case": "Game-by-game performance averages"
+    }
+  }
+}

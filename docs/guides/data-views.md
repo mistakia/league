@@ -29,6 +29,8 @@ Start off by familiarizing yourself with the available metrics and play by play 
 
 If there's something you'd like to see, or if coverage for a data point is lacking, let us know on [Discord](https://discord.gg/xo) or [submit a stat or improvement on Github](https://github.com/mistakia/league/issues/new?assignees=&labels=kind%2Fstat%2C+status%2Fready&projects=&template=submit-a-stat.md&title=Add+stat%3A+%3CSTAT+NAME%3E).
 
+For advanced users and developers, see the [Data Views System Documentation](../data-views-system.md) for technical implementation details, performance guidelines, and the complete API schema.
+
 ## Terminology
 
 | Term                 | Definition                                                                                                                                                                             |

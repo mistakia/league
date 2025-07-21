@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://xo.football/schemas/team-parameters.json",
+  "title": "Team Unit and Matchup Parameters",
+  "description": "Parameters for team unit selection and matchup opponent filtering",
+  "version": "1.0.0",
+
+  "_source_reference": {
+    "file": "libs-shared/nfl-plays-team-column-params.mjs",
+    "note": "This schema documents parameters defined in the source file. The source file remains the authoritative implementation."
+  }
+}
