@@ -244,6 +244,64 @@ export const get_market_type_offer_1342 = (subcategoryId) => {
   }
 }
 
+export const get_market_type_offer_1759 = (subcategoryId) => {
+  switch (subcategoryId) {
+    case 17147:
+      return player_prop_types.SEASON_PASSING_YARDS
+
+    case 17148:
+      return player_prop_types.SEASON_PASSING_TOUCHDOWNS
+
+    case 17223:
+      return player_prop_types.SEASON_RUSHING_YARDS
+
+    case 17314:
+      return player_prop_types.SEASON_RECEIVING_YARDS
+
+    case 17315:
+      return player_prop_types.SEASON_RECEIVING_TOUCHDOWNS
+
+    default:
+      log(`unknown offercategoryId 1759 subcategoryId ${subcategoryId}`)
+      return null
+  }
+}
+
+export const get_market_type_offer_1595 = (subcategoryId) => {
+  switch (subcategoryId) {
+    case 15379:
+      return player_prop_types.SEASON_LEADER_PASSING_YARDS
+
+    case 18156:
+      return player_prop_types.SEASON_LEADER_PASSING_TOUCHDOWNS
+
+    case 15380:
+      return player_prop_types.SEASON_LEADER_RUSHING_YARDS
+
+    case 15670:
+      return player_prop_types.SEASON_LEADER_RUSHING_TOUCHDOWNS
+
+    case 15381:
+      return player_prop_types.SEASON_LEADER_RECEIVING_YARDS
+
+    case 15651:
+      return player_prop_types.SEASON_LEADER_RECEIVING_TOUCHDOWNS
+
+    case 15885:
+      return player_prop_types.SEASON_LEADER_RECEPTIONS
+
+    case 15661:
+      return player_prop_types.SEASON_LEADER_SACKS
+
+    case 15820:
+      return player_prop_types.SEASON_LEADER_INTERCEPTIONS
+
+    default:
+      log(`unknown offercategoryId 1595 subcategoryId ${subcategoryId}`)
+      return null
+  }
+}
+
 const get_market_type_offer_492 = ({ subcategoryId, betOfferTypeId }) => {
   if (subcategoryId === 4518 && betOfferTypeId) {
     switch (betOfferTypeId) {
@@ -326,6 +384,12 @@ export const get_market_type = ({
 
     case 1342:
       return get_market_type_offer_1342(subcategoryId)
+
+    case 1595:
+      return get_market_type_offer_1595(subcategoryId)
+
+    case 1759:
+      return get_market_type_offer_1759(subcategoryId)
 
     default:
       log(`unknown offerCategoryId ${offerCategoryId}`)
