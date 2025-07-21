@@ -11,7 +11,7 @@ const router = express.Router()
 
 /**
  * @swagger
- * /plays:
+ * /api/plays:
  *   get:
  *     tags:
  *       - Plays
@@ -61,7 +61,7 @@ router.get('/?', async (req, res) => {
 
 /**
  * @swagger
- * /plays/all:
+ * /api/plays/all:
  *   get:
  *     tags:
  *       - Plays
@@ -127,7 +127,7 @@ router.get('/all', async (req, res) => {
 
 /**
  * @swagger
- * /plays/stats:
+ * /api/plays/stats:
  *   get:
  *     tags:
  *       - Plays
@@ -191,7 +191,7 @@ router.get('/stats', async (req, res) => {
 
 /**
  * @swagger
- * /plays/charted:
+ * /api/plays/charted:
  *   get:
  *     tags:
  *       - Plays

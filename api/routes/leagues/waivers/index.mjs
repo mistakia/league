@@ -24,7 +24,7 @@ const router = express.Router({ mergeParams: true })
 
 /**
  * @swagger
- * /leagues/{leagueId}/waivers/super-priority/{pid}:
+ * /api/leagues/{leagueId}/waivers/super-priority/{pid}:
  *   get:
  *     summary: Get super priority waiver status for a player
  *     description: |
@@ -91,7 +91,7 @@ router.get('/super-priority/:pid', async (req, res) => {
 
 /**
  * @swagger
- * /leagues/{leagueId}/waivers:
+ * /api/leagues/{leagueId}/waivers:
  *   get:
  *     summary: Get processed waiver claims for a league
  *     description: |
@@ -178,7 +178,7 @@ router.get('/?', async (req, res) => {
 
 /**
  * @swagger
- * /leagues/{leagueId}/waivers:
+ * /api/leagues/{leagueId}/waivers:
  *   post:
  *     summary: Submit a new waiver claim
  *     description: |
@@ -641,7 +641,7 @@ router.post('/?', async (req, res) => {
 
 /**
  * @swagger
- * /leagues/{leagueId}/waivers/order:
+ * /api/leagues/{leagueId}/waivers/order:
  *   put:
  *     summary: Update waiver claim priority order
  *     description: |
@@ -734,7 +734,7 @@ router.put('/order', async (req, res) => {
 
 /**
  * @swagger
- * /leagues/{leagueId}/waivers/{waiverId}:
+ * /api/leagues/{leagueId}/waivers/{waiverId}:
  *   put:
  *     summary: Update an existing waiver claim
  *     description: |
@@ -914,7 +914,7 @@ router.put('/:waiverId', async (req, res) => {
 
 /**
  * @swagger
- * /leagues/{leagueId}/waivers/{waiverId}/cancel:
+ * /api/leagues/{leagueId}/waivers/{waiverId}/cancel:
  *   post:
  *     summary: Cancel a pending waiver claim
  *     description: |

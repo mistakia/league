@@ -12,13 +12,13 @@ const router = express.Router({ mergeParams: true })
 
 /**
  * @swagger
- * /teams/{teamId}/lineups:
+ * /api/teams/{teamId}/lineups:
  *   get:
  *     tags:
  *       - Teams
- *     summary: Get team lineup
+ *     summary: Get fantasy team lineup
  *     description: |
- *       Get the team's lineup for a specific week and year.
+ *       Get the fantasy team's lineup for a specific week and year.
  *       Returns the roster configuration for the specified time period.
  *     security:
  *       - bearerAuth: []
@@ -77,9 +77,9 @@ router.get('/?', async (req, res) => {
  *   put:
  *     tags:
  *       - Teams
- *     summary: Update team lineup
+ *     summary: Update fantasy team lineup
  *     description: |
- *       Update the team's lineup by moving players to different slots.
+ *       Update the fantasy team's lineup by moving players to different slots.
  *       Validates player eligibility and slot availability.
  *     security:
  *       - bearerAuth: []

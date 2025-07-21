@@ -12,6 +12,165 @@ import trade, { getTrade } from './trade.mjs'
 
 const router = express.Router({ mergeParams: true })
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     CreateTradeRequest:
+ *       type: object
+ *       required:
+ *         - propose_tid
+ *         - accept_tid
+ *       properties:
+ *         propose_tid:
+ *           type: integer
+ *           description: Proposing team ID
+ *           example: 13
+ *         accept_tid:
+ *           type: integer
+ *           description: Accepting team ID
+ *           example: 14
+ *         proposingTeamPlayers:
+ *           oneOf:
+ *             - type: string
+ *             - type: array
+ *               items:
+ *                 type: string
+ *           description: Player ID(s) from proposing team
+ *           example: ["4017", "3892"]
+ *         acceptingTeamPlayers:
+ *           oneOf:
+ *             - type: string
+ *             - type: array
+ *               items:
+ *                 type: string
+ *           description: Player ID(s) from accepting team
+ *           example: ["2041"]
+ *         proposingTeamPicks:
+ *           oneOf:
+ *             - type: integer
+ *             - type: array
+ *               items:
+ *                 type: integer
+ *           description: Draft pick ID(s) from proposing team
+ *           example: [1542]
+ *         acceptingTeamPicks:
+ *           oneOf:
+ *             - type: integer
+ *             - type: array
+ *               items:
+ *                 type: integer
+ *           description: Draft pick ID(s) from accepting team
+ *           example: [1543]
+ *         releasePlayers:
+ *           oneOf:
+ *             - type: string
+ *             - type: array
+ *               items:
+ *                 type: string
+ *           description: Player ID(s) to release from proposing team
+ *           example: ["1889"]
+ *
+ *     TradesListResponse:
+ *       type: object
+ *       description: List of trade proposals
+ *       example:
+ *         - uid: 1234
+ *           lid: 2
+ *           propose_tid: 13
+ *           accept_tid: 14
+ *           userid: 5
+ *           proposed: 1698765432
+ *           accepted: null
+ *           rejected: null
+ *           cancelled: null
+ *           vetoed: null
+ *           proposingTeamPlayers: ["4017", "3892"]
+ *           acceptingTeamPlayers: ["2041"]
+ *           proposingTeamPicks: []
+ *           acceptingTeamPicks: []
+ *           proposingTeamReleasePlayers: []
+ *           acceptingTeamReleasePlayers: []
+ */
+
+/**
+ * @swagger
+ * /api/leagues/{leagueId}/trades:
+ *   get:
+ *     summary: Get trade proposals for a team
+ *     description: |
+ *       Retrieves all trade proposals involving a specific team, including both
+ *       proposed and received trades with their current status and details.
+ *
+ *       **Key Features:**
+ *       - Returns all trades involving the specified team
+ *       - Includes complete trade details with players and picks
+ *       - Shows trade status (pending, accepted, rejected, etc.)
+ *       - Organizes assets by proposing/accepting team
+ *
+ *       **Fantasy Football Context:**
+ *       - Teams can view all their trade activity
+ *       - Includes both sent and received trade proposals
+ *       - Shows historical and active trade negotiations
+ *       - Helps track trade proposal outcomes
+ *
+ *       **Trade Information:**
+ *       - **Players**: Roster players being exchanged
+ *       - **Picks**: Draft picks being traded
+ *       - **Releases**: Players to be released for roster space
+ *       - **Status**: Current state of each trade proposal
+ *     tags:
+ *       - Leagues
+ *     parameters:
+ *       - $ref: '#/components/parameters/leagueId'
+ *       - name: teamId
+ *         in: query
+ *         required: false
+ *         schema:
+ *           type: integer
+ *         description: |
+ *           Team ID to filter trades for. If not provided, returns all league trades.
+ *           Shows trades where this team is either proposing or accepting.
+ *         example: 13
+ *     responses:
+ *       200:
+ *         description: Trade proposals retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/TradesListResponse'
+ *             examples:
+ *               team_trades:
+ *                 summary: Trades involving specific team
+ *                 value:
+ *                   - uid: 1234
+ *                     lid: 2
+ *                     propose_tid: 13
+ *                     accept_tid: 14
+ *                     userid: 5
+ *                     proposed: 1698765432
+ *                     accepted: null
+ *                     rejected: null
+ *                     cancelled: null
+ *                     vetoed: null
+ *                     proposingTeamPlayers: ["4017", "3892"]
+ *                     acceptingTeamPlayers: ["2041"]
+ *                     proposingTeamPicks: []
+ *                     acceptingTeamPicks:
+ *                       - uid: 1542
+ *                         tid: 14
+ *                         lid: 2
+ *                         year: 2025
+ *                         round: 1
+ *                         pick: 4
+ *                         pick_str: "1.04"
+ *                         otid: 13
+ *                         pid: null
+ *                     proposingTeamReleasePlayers: []
+ *                     acceptingTeamReleasePlayers: []
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -87,6 +246,175 @@ router.get('/?', async (req, res) => {
   }
 })
 
+/**
+ * @swagger
+ * /api/leagues/{leagueId}/trades:
+ *   post:
+ *     summary: Create a trade proposal
+ *     description: |
+ *       Creates a new trade proposal between two teams. This endpoint handles complex
+ *       validation of players, picks, roster space, and league rules before creating
+ *       the trade proposal for the accepting team to review.
+ *
+ *       **Key Features:**
+ *       - Validates all trade components (players, picks, releases)
+ *       - Checks roster space and trade deadline
+ *       - Prevents trading locked or claimed players
+ *       - Ensures proposing team owns all traded assets
+ *       - Creates structured trade proposal for acceptance
+ *
+ *       **Fantasy Football Context:**
+ *       - Only team owners can propose trades
+ *       - Must occur before league trade deadline
+ *       - Cannot trade players with active poaching claims
+ *       - Validates roster space after hypothetical trade
+ *       - Creates formal proposal requiring acceptance
+ *
+ *       **Validation Rules:**
+ *       - **Trade Deadline**: Must be before league trade deadline
+ *       - **Asset Ownership**: Proposing team must own all traded players/picks
+ *       - **Roster Space**: Must have space for incoming players after releases
+ *       - **Poaching Claims**: Cannot trade players with active claims
+ *       - **RFA Restrictions**: Cannot trade restricted free agents
+ *       - **Team Ownership**: User must own the proposing team
+ *
+ *       **Trade Components:**
+ *       - **Players**: Active roster players being exchanged
+ *       - **Picks**: Future draft picks being traded
+ *       - **Releases**: Players to be released by proposing team for space
+ *
+ *       **Automatic Validation:**
+ *       - Verifies player ownership on both teams
+ *       - Checks draft pick ownership and availability
+ *       - Validates roster space with hypothetical roster changes
+ *       - Ensures no conflicting player statuses
+ *       - Confirms trade deadline compliance
+ *
+ *       **Trade Proposal Creation:**
+ *       - Creates pending trade in database
+ *       - Links all players, picks, and releases to trade
+ *       - Sets proposal timestamp and proposing user
+ *       - Returns complete trade details for review
+ *     tags:
+ *       - Leagues
+ *     parameters:
+ *       - $ref: '#/components/parameters/leagueId'
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateTradeRequest'
+ *           examples:
+ *             player_trade:
+ *               summary: Trade players between teams
+ *               value:
+ *                 propose_tid: 13
+ *                 accept_tid: 14
+ *                 proposingTeamPlayers: ["4017", "3892"]
+ *                 acceptingTeamPlayers: ["2041"]
+ *             pick_trade:
+ *               summary: Trade draft picks
+ *               value:
+ *                 propose_tid: 13
+ *                 accept_tid: 14
+ *                 proposingTeamPicks: [1542]
+ *                 acceptingTeamPicks: [1543]
+ *             complex_trade:
+ *               summary: Trade with players, picks, and releases
+ *               value:
+ *                 propose_tid: 13
+ *                 accept_tid: 14
+ *                 proposingTeamPlayers: ["4017"]
+ *                 acceptingTeamPlayers: ["2041", "3156"]
+ *                 proposingTeamPicks: []
+ *                 acceptingTeamPicks: [1542]
+ *                 releasePlayers: ["1889"]
+ *     responses:
+ *       200:
+ *         description: Trade proposal created successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Trade'
+ *             examples:
+ *               created_trade:
+ *                 summary: Successfully created trade proposal
+ *                 value:
+ *                   uid: 1234
+ *                   lid: 2
+ *                   propose_tid: 13
+ *                   accept_tid: 14
+ *                   userid: 5
+ *                   proposed: 1698765432
+ *                   accepted: null
+ *                   rejected: null
+ *                   cancelled: null
+ *                   vetoed: null
+ *                   proposingTeamPlayers: ["4017", "3892"]
+ *                   acceptingTeamPlayers: ["2041"]
+ *                   proposingTeamPicks: []
+ *                   acceptingTeamPicks: []
+ *                   proposingTeamReleasePlayers: ["1889"]
+ *                   acceptingTeamReleasePlayers: []
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             examples:
+ *               missing_propose_tid:
+ *                 summary: Missing proposing team ID
+ *                 value:
+ *                   error: missing param propose_tid
+ *               missing_accept_tid:
+ *                 summary: Missing accepting team ID
+ *                 value:
+ *                   error: missing param accept_tid
+ *               deadline_passed:
+ *                 summary: Trade deadline has passed
+ *                 value:
+ *                   error: deadline has passed
+ *               player_not_on_team:
+ *                 summary: Player not on proposing team
+ *                 value:
+ *                   error: proposing team player is not on proposing team
+ *               invalid_pick:
+ *                 summary: Invalid or unavailable draft pick
+ *                 value:
+ *                   error: pick is not valid
+ *               pick_not_owned:
+ *                 summary: Pick not owned by team
+ *                 value:
+ *                   error: pick is not owned by proposing team
+ *               no_roster_space:
+ *                 summary: Insufficient roster space
+ *                 value:
+ *                   error: no slots available
+ *               poaching_claim:
+ *                 summary: Player has active poaching claim
+ *                 value:
+ *                   error: player has poaching claim
+ *               release_player_error:
+ *                 summary: Release player not on team
+ *                 value:
+ *                   error: release player not on team
+ *               rfa_violation:
+ *                 summary: Restricted free agency violation
+ *                 value:
+ *                   error: RFA restriction details
+ *               team_verification_failed:
+ *                 summary: User doesn't own proposing team
+ *                 value:
+ *                   error: Team verification failed
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.post(
   '/?',
   async (req, res, next) => {

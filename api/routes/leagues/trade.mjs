@@ -13,6 +13,144 @@ import {
 
 const router = express.Router({ mergeParams: true })
 
+/**
+ * @swagger
+ * components:
+ *   schemas:
+ *     TradePlayer:
+ *       type: object
+ *       description: Player included in a trade
+ *       properties:
+ *         pid:
+ *           type: string
+ *           description: Player ID
+ *           example: "4017"
+ *         tid:
+ *           type: integer
+ *           description: Team ID
+ *           example: 13
+ *
+ *     TradePick:
+ *       type: object
+ *       description: Draft pick included in a trade
+ *       allOf:
+ *         - $ref: '#/components/schemas/DraftPick'
+ *         - type: object
+ *           properties:
+ *             tid:
+ *               type: integer
+ *               description: Team ID that owns the pick in the trade
+ *               example: 13
+ *
+ *     TradeRelease:
+ *       type: object
+ *       description: Player to be released as part of a trade
+ *       properties:
+ *         pid:
+ *           type: string
+ *           description: Player ID to release
+ *           example: "2041"
+ *         tid:
+ *           type: integer
+ *           description: Team ID releasing the player
+ *           example: 13
+ *
+ *     Trade:
+ *       type: object
+ *       description: Trade proposal between two teams
+ *       properties:
+ *         uid:
+ *           type: integer
+ *           description: Trade ID
+ *           example: 1234
+ *         lid:
+ *           type: integer
+ *           description: League ID
+ *           example: 2
+ *         propose_tid:
+ *           type: integer
+ *           description: Proposing team ID
+ *           example: 13
+ *         accept_tid:
+ *           type: integer
+ *           description: Accepting team ID
+ *           example: 14
+ *         userid:
+ *           type: integer
+ *           description: User ID who proposed the trade
+ *           example: 5
+ *         proposed:
+ *           type: integer
+ *           description: Unix timestamp when trade was proposed
+ *           example: 1698765432
+ *         accepted:
+ *           type: integer
+ *           nullable: true
+ *           description: Unix timestamp when trade was accepted
+ *           example: null
+ *         rejected:
+ *           type: integer
+ *           nullable: true
+ *           description: Unix timestamp when trade was rejected
+ *           example: null
+ *         cancelled:
+ *           type: integer
+ *           nullable: true
+ *           description: Unix timestamp when trade was cancelled
+ *           example: null
+ *         vetoed:
+ *           type: integer
+ *           nullable: true
+ *           description: Unix timestamp when trade was vetoed
+ *           example: null
+ *         proposingTeamPlayers:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: Player IDs from proposing team
+ *           example: ["4017", "3892"]
+ *         acceptingTeamPlayers:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: Player IDs from accepting team
+ *           example: ["2041"]
+ *         proposingTeamPicks:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/TradePick'
+ *           description: Draft picks from proposing team
+ *         acceptingTeamPicks:
+ *           type: array
+ *           items:
+ *             $ref: '#/components/schemas/TradePick'
+ *           description: Draft picks from accepting team
+ *         proposingTeamReleasePlayers:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: Players proposing team will release
+ *           example: []
+ *         acceptingTeamReleasePlayers:
+ *           type: array
+ *           items:
+ *             type: string
+ *           description: Players accepting team will release
+ *           example: []
+ *
+ *     AcceptTradeRequest:
+ *       type: object
+ *       properties:
+ *         releasePlayers:
+ *           oneOf:
+ *             - type: string
+ *             - type: array
+ *               items:
+ *                 type: string
+ *           description: Player ID(s) to release (if roster space needed)
+ *           example: ["2041", "1889"]
+ */
+
 export const getTrade = async (req, res) => {
   const { db, logger } = req.app.locals
   try {
@@ -81,8 +219,239 @@ export const getTrade = async (req, res) => {
   }
 }
 
+/**
+ * @swagger
+ * /api/leagues/{leagueId}/trade/{tradeId}:
+ *   get:
+ *     summary: Get trade details
+ *     description: |
+ *       Retrieves detailed information about a specific trade proposal including
+ *       all players, draft picks, and release requirements for both teams.
+ *
+ *       **Key Features:**
+ *       - Returns complete trade details with players and picks organized by team
+ *       - Shows all release requirements for both teams
+ *       - Includes draft pick details with full context
+ *       - Displays trade status and timestamps
+ *
+ *       **Fantasy Football Context:**
+ *       - Trades allow teams to exchange players and draft picks
+ *       - Teams may need to release players to make roster space
+ *       - Draft picks include original team information if traded
+ *       - Trade status indicates proposal, acceptance, rejection, or veto
+ *
+ *       **Trade Components:**
+ *       - **Players**: Active roster players being exchanged
+ *       - **Picks**: Future draft picks being traded
+ *       - **Releases**: Players that must be released for roster space
+ *       - **Status**: Current state of the trade proposal
+ *     tags:
+ *       - Leagues
+ *     parameters:
+ *       - $ref: '#/components/parameters/leagueId'
+ *       - name: tradeId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Trade ID
+ *         example: 1234
+ *     responses:
+ *       200:
+ *         description: Trade details retrieved successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Trade'
+ *             examples:
+ *               trade_proposal:
+ *                 summary: Active trade proposal
+ *                 value:
+ *                   uid: 1234
+ *                   lid: 2
+ *                   propose_tid: 13
+ *                   accept_tid: 14
+ *                   userid: 5
+ *                   proposed: 1698765432
+ *                   accepted: null
+ *                   rejected: null
+ *                   cancelled: null
+ *                   vetoed: null
+ *                   proposingTeamPlayers: ["4017", "3892"]
+ *                   acceptingTeamPlayers: ["2041"]
+ *                   proposingTeamPicks: []
+ *                   acceptingTeamPicks:
+ *                     - uid: 1542
+ *                       tid: 14
+ *                       lid: 2
+ *                       year: 2025
+ *                       round: 1
+ *                       pick: 4
+ *                       pick_str: "1.04"
+ *                       otid: 13
+ *                       pid: null
+ *                   proposingTeamReleasePlayers: []
+ *                   acceptingTeamReleasePlayers: []
+ *       400:
+ *         description: Trade not found
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             examples:
+ *               trade_not_found:
+ *                 summary: Trade not found
+ *                 value:
+ *                   error: "could not find tradeid: 1234"
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.get('/?', getTrade)
 
+/**
+ * @swagger
+ * /api/leagues/{leagueId}/trade/{tradeId}/accept:
+ *   post:
+ *     summary: Accept a trade proposal
+ *     description: |
+ *       Accepts a trade proposal and executes the trade, transferring players and picks
+ *       between teams. This endpoint handles complex validation and roster management.
+ *
+ *       **Key Features:**
+ *       - Validates trade deadline and player availability
+ *       - Checks roster space and locked player restrictions
+ *       - Transfers players and draft picks between teams
+ *       - Creates transaction records and notifications
+ *       - Cancels conflicting trade proposals and poaching claims
+ *       - Handles optional player releases for roster space
+ *
+ *       **Fantasy Football Context:**
+ *       - Only the accepting team owner can accept a trade
+ *       - Must occur before league trade deadline
+ *       - Cannot trade locked starters (players in active lineups)
+ *       - Automatic roster management ensures league rules compliance
+ *       - Creates permanent transaction history
+ *
+ *       **Validation Rules:**
+ *       - **Trade Deadline**: Must be before league trade deadline
+ *       - **Player Locks**: Cannot trade locked starters
+ *       - **Roster Space**: Both teams must have adequate space
+ *       - **RFA Restrictions**: Cannot trade restricted free agents
+ *       - **Team Ownership**: User must own the accepting team
+ *
+ *       **Automatic Actions:**
+ *       - **Player Transfers**: Moves players between team rosters
+ *       - **Pick Transfers**: Updates draft pick ownership
+ *       - **Releases**: Processes any required player releases
+ *       - **Transactions**: Creates trade and release transaction records
+ *       - **Cancellations**: Cancels conflicting trades and poaching claims
+ *       - **Notifications**: Sends league-wide trade notification
+ *
+ *       **Roster Management:**
+ *       - Players moved to bench slots on receiving teams
+ *       - Roster space validated before trade execution
+ *       - Release players removed from rosters
+ *       - Salary cap and roster constraints enforced
+ *
+ *       **Conflict Resolution:**
+ *       - Cancels other pending trades involving same players/picks
+ *       - Removes players from cutlists
+ *       - Cancels RFA bids for traded players
+ *       - Processes active poaching claims
+ *     tags:
+ *       - Leagues
+ *     parameters:
+ *       - $ref: '#/components/parameters/leagueId'
+ *       - name: tradeId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Trade ID to accept
+ *         example: 1234
+ *     security:
+ *       - bearerAuth: []
+ *     requestBody:
+ *       required: false
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/AcceptTradeRequest'
+ *           examples:
+ *             with_releases:
+ *               summary: Accept trade with player releases
+ *               value:
+ *                 releasePlayers: ["2041", "1889"]
+ *             without_releases:
+ *               summary: Accept trade without releases
+ *               value: {}
+ *     responses:
+ *       200:
+ *         description: Trade accepted and executed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Trade'
+ *             examples:
+ *               accepted_trade:
+ *                 summary: Successfully accepted trade
+ *                 value:
+ *                   uid: 1234
+ *                   lid: 2
+ *                   propose_tid: 13
+ *                   accept_tid: 14
+ *                   userid: 5
+ *                   proposed: 1698765432
+ *                   accepted: 1698765500
+ *                   rejected: null
+ *                   cancelled: null
+ *                   vetoed: null
+ *                   proposingTeamPlayers: ["4017", "3892"]
+ *                   acceptingTeamPlayers: ["2041"]
+ *                   proposingTeamPicks: []
+ *                   acceptingTeamPicks: []
+ *                   proposingTeamReleasePlayers: []
+ *                   acceptingTeamReleasePlayers: ["1889"]
+ *       400:
+ *         description: Bad request
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             examples:
+ *               invalid_trade:
+ *                 summary: Invalid trade ID
+ *                 value:
+ *                   error: "no valid trade with tradeid: 1234"
+ *               deadline_passed:
+ *                 summary: Trade deadline has passed
+ *                 value:
+ *                   error: deadline has passed
+ *               locked_starter:
+ *                 summary: Player is a locked starter
+ *                 value:
+ *                   error: player in trade is a locked starter
+ *               no_roster_space:
+ *                 summary: Insufficient roster space
+ *                 value:
+ *                   error: no slots available on accepting team roster
+ *               release_player_error:
+ *                 summary: Invalid release player
+ *                 value:
+ *                   error: release player not on accepting team
+ *               rfa_violation:
+ *                 summary: Restricted free agency violation
+ *                 value:
+ *                   error: RFA restriction details
+ *               team_verification_failed:
+ *                 summary: User doesn't own accepting team
+ *                 value:
+ *                   error: Team verification failed
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.post(
   '/accept',
   async (req, res, next) => {
@@ -591,6 +960,71 @@ router.post(
   getTrade
 )
 
+/**
+ * @swagger
+ * /api/leagues/{leagueId}/trade/{tradeId}/reject:
+ *   post:
+ *     summary: Reject a trade proposal
+ *     description: |
+ *       Rejects a trade proposal. Only the accepting team owner can reject a trade.
+ *       This action permanently closes the trade proposal and notifies the proposing team.
+ *
+ *       **Key Features:**
+ *       - Marks trade as rejected with timestamp
+ *       - Sends notification to proposing team
+ *       - Permanently closes the trade proposal
+ *       - Returns updated trade details
+ *
+ *       **Fantasy Football Context:**
+ *       - Only the accepting team owner can reject trades
+ *       - Rejected trades cannot be reopened or modified
+ *       - Proposing team receives notification of rejection
+ *       - Trade status permanently updated to rejected
+ *
+ *       **Access Control:**
+ *       - Must be the owner of the accepting team
+ *       - Trade must be in pending status (not already processed)
+ *       - User must be authenticated
+ *     tags:
+ *       - Leagues
+ *     parameters:
+ *       - $ref: '#/components/parameters/leagueId'
+ *       - name: tradeId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Trade ID to reject
+ *         example: 1234
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Trade rejected successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Trade'
+ *       400:
+ *         description: Invalid trade or insufficient permissions
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             examples:
+ *               invalid_trade:
+ *                 summary: Invalid trade ID
+ *                 value:
+ *                   error: "no valid trade with tradeid: 1234"
+ *               team_verification_failed:
+ *                 summary: User doesn't own accepting team
+ *                 value:
+ *                   error: Team verification failed
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.post(
   '/reject',
   async (req, res, next) => {
@@ -651,6 +1085,77 @@ router.post(
   getTrade
 )
 
+/**
+ * @swagger
+ * /api/leagues/{leagueId}/trade/{tradeId}/cancel:
+ *   post:
+ *     summary: Cancel a trade proposal
+ *     description: |
+ *       Cancels a trade proposal. Only the proposing team owner can cancel their own trade.
+ *       This action permanently closes the trade proposal and notifies the accepting team.
+ *
+ *       **Key Features:**
+ *       - Marks trade as cancelled with timestamp
+ *       - Sends notification to accepting team
+ *       - Permanently closes the trade proposal
+ *       - Returns updated trade details
+ *
+ *       **Fantasy Football Context:**
+ *       - Only the proposing team owner can cancel their trades
+ *       - Cancelled trades cannot be reopened or modified
+ *       - Accepting team receives notification of cancellation
+ *       - Trade status permanently updated to cancelled
+ *
+ *       **Access Control:**
+ *       - Must be the owner of the proposing team
+ *       - Trade must be in pending status (not already processed)
+ *       - User must be authenticated
+ *
+ *       **Use Cases:**
+ *       - Change of mind before trade is accepted
+ *       - Player injury or status change
+ *       - Want to modify trade terms (requires new proposal)
+ *       - No longer need the trade
+ *     tags:
+ *       - Leagues
+ *     parameters:
+ *       - $ref: '#/components/parameters/leagueId'
+ *       - name: tradeId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Trade ID to cancel
+ *         example: 1234
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Trade cancelled successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Trade'
+ *       400:
+ *         description: Invalid trade or insufficient permissions
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             examples:
+ *               invalid_trade:
+ *                 summary: Invalid trade ID
+ *                 value:
+ *                   error: "no valid trade with tradeid: 1234"
+ *               team_verification_failed:
+ *                 summary: User doesn't own proposing team
+ *                 value:
+ *                   error: Team verification failed
+ *       401:
+ *         $ref: '#/components/responses/UnauthorizedError'
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.post(
   '/cancel',
   async (req, res, next) => {
@@ -711,6 +1216,88 @@ router.post(
   getTrade
 )
 
+/**
+ * @swagger
+ * /api/leagues/{leagueId}/trade/{tradeId}/veto:
+ *   post:
+ *     summary: Veto a trade proposal
+ *     description: |
+ *       Vetoes a trade proposal. Only the league commissioner can veto trades.
+ *       This action permanently blocks the trade and notifies both teams.
+ *
+ *       **Key Features:**
+ *       - Marks trade as vetoed with timestamp
+ *       - Sends notification to both teams and league
+ *       - Permanently blocks the trade proposal
+ *       - Returns updated trade details
+ *
+ *       **Fantasy Football Context:**
+ *       - Only league commissioners can veto trades
+ *       - Used to prevent unfair or collusive trades
+ *       - Maintains competitive balance in the league
+ *       - Vetoed trades cannot be reopened
+ *
+ *       **Commissioner Powers:**
+ *       - Can veto any trade in the league
+ *       - Should use sparingly to maintain league integrity
+ *       - Responsible for explaining veto decisions
+ *       - Final authority on trade fairness
+ *
+ *       **Access Control:**
+ *       - Must be the league commissioner
+ *       - Trade can be in any status except already vetoed
+ *       - User must be authenticated
+ *
+ *       **Veto Reasons:**
+ *       - Suspected collusion between teams
+ *       - Grossly unfair trade terms
+ *       - Violation of league rules
+ *       - Competitive balance concerns
+ *     tags:
+ *       - Leagues
+ *     parameters:
+ *       - $ref: '#/components/parameters/leagueId'
+ *       - name: tradeId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Trade ID to veto
+ *         example: 1234
+ *     security:
+ *       - bearerAuth: []
+ *     responses:
+ *       200:
+ *         description: Trade vetoed successfully
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Trade'
+ *       400:
+ *         description: Invalid trade ID
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             examples:
+ *               invalid_trade:
+ *                 summary: Invalid trade ID
+ *                 value:
+ *                   error: "no valid trade with tradeid: 1234"
+ *       401:
+ *         description: Unauthorized - not commissioner
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/Error'
+ *             examples:
+ *               not_commissioner:
+ *                 summary: User is not league commissioner
+ *                 value:
+ *                   error: only the commissioner can veto trades
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
 router.post(
   '/veto',
   async (req, res, next) => {

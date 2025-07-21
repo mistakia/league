@@ -15,10 +15,10 @@ import errors from './errors.mjs'
 import percentiles from './percentiles.mjs'
 import seasonlogs from './seasonlogs.mjs'
 import cache from './cache.mjs'
-import data_views from './data_views.mjs'
+import data_views from './data-views.mjs'
 import wagers from './wagers.mjs'
 import markets from './markets.mjs'
-import shorten_url from './shorten_url.mjs'
+import shorten_url from './shorten-url.mjs'
 import docs from './docs.mjs'
 
 export default {
