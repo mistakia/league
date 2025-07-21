@@ -1,0 +1,139 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://xo.football/schemas/common-parameters.json",
+  "title": "Common Data View Parameters",
+  "description": "Shared parameters used across multiple column families",
+  "version": "1.0.0",
+
+  "parameters": {
+    "year": {
+      "description": "NFL season year for filtering data",
+      "type": ["array", "number"],
+      "items": {
+        "type": "number",
+        "minimum": 1999,
+        "maximum": 2030
+      },
+      "default": "constants.season.year",
+      "usage_pattern": "Single year for optimal performance (enables partitioned tables), arrays for multi-year analysis",
+      "examples": [2024, [2023, 2024], [2020, 2021, 2022, 2023, 2024]]
+    },
+
+    "week": {
+      "description": "NFL season week for filtering data",
+      "type": ["array", "number"],
+      "items": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 22
+      },
+      "default": "varies (0 for season totals, constants.season.week for current)",
+      "usage_pattern": "0 for season totals, specific weeks for weekly data, arrays for week ranges",
+      "examples": [0, 1, [1, 2, 3, 4], [17, 18]]
+    },
+
+    "seas_type": {
+      "description": "Season type for filtering",
+      "type": ["array", "string"],
+      "items": {
+        "enum": ["REG", "POST", "PRE"]
+      },
+      "default": "REG",
+      "usage_pattern": "Filter to regular season, playoffs, or preseason",
+      "examples": ["REG", ["REG", "POST"], "PRE"]
+    },
+
+    "year_offset": {
+      "description": "Years relative to base year for historical analysis",
+      "type": ["array", "number"],
+      "items": {
+        "type": "number",
+        "minimum": -10,
+        "maximum": 10
+      },
+      "usage_pattern": "Single offset for simple comparison, array for multi-year aggregation",
+      "examples": [-1, [0, -1, -2], [-3, -2, -1, 0]]
+    },
+
+    "career_year": {
+      "description": "Range of player's career years for filtering",
+      "type": "array",
+      "items": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 25
+      },
+      "minItems": 2,
+      "maxItems": 2,
+      "usage_pattern": "[start_year, end_year] for career progression analysis",
+      "examples": [
+        [1, 3],
+        [0, 1],
+        [3, 10]
+      ]
+    },
+
+    "career_game": {
+      "description": "Range of player's career games for filtering",
+      "type": "array",
+      "items": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 400
+      },
+      "minItems": 2,
+      "maxItems": 2,
+      "usage_pattern": "[start_game, end_game] for career game analysis",
+      "examples": [
+        [1, 16],
+        [17, 32],
+        [1, 48]
+      ]
+    },
+
+    "rate_type": {
+      "description": "Rate type for normalizing statistics",
+      "type": "array",
+      "items": {
+        "$ref": "../values/rate-types.json#/rate_types"
+      },
+      "usage_pattern": "Convert raw stats to rate-based metrics",
+      "examples": [["per_game"], ["per_team_play"], ["per_player_target"]]
+    },
+
+    "case_insensitive": {
+      "description": "Enable case-insensitive string matching",
+      "type": "boolean",
+      "default": false,
+      "usage_pattern": "Used in WHERE clauses for string columns like player names",
+      "examples": [true, false]
+    },
+
+    "limit_to_player_active_games": {
+      "description": "Limit statistics to games where player was active",
+      "type": "boolean",
+      "default": false,
+      "usage_pattern": "Filter out games where player was inactive/injured",
+      "examples": [true, false]
+    }
+  },
+
+  "parameter_groups": {
+    "temporal": {
+      "description": "Time-based filtering parameters",
+      "parameters": ["year", "week", "seas_type", "year_offset"]
+    },
+    "career": {
+      "description": "Career progression parameters",
+      "parameters": ["career_year", "career_game"]
+    },
+    "statistical": {
+      "description": "Statistical calculation parameters",
+      "parameters": ["rate_type", "limit_to_player_active_games"]
+    },
+    "formatting": {
+      "description": "Output formatting parameters",
+      "parameters": ["case_insensitive"]
+    }
+  }
+}

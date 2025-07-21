@@ -1,0 +1,81 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://xo.football/schemas/fantasy-parameters.json",
+  "title": "Fantasy-Specific Parameters",
+  "description": "Parameters specific to fantasy football calculations",
+  "version": "1.0.0",
+
+  "parameters": {
+    "scoring_format_hash": {
+      "description": "Hash identifying fantasy scoring format",
+      "type": "string",
+      "default": "DEFAULT_SCORING_FORMAT_HASH",
+      "usage_pattern": "Required for fantasy point calculations, named formats resolve to hashes",
+      "named_formats": [
+        "standard",
+        "half_ppr",
+        "ppr",
+        "half_ppr_lower_turnover",
+        "ppr_lower_turnover",
+        "draftkings",
+        "fanduel",
+        "genesis",
+        "sfb15_mfl",
+        "sfb15_sleeper"
+      ]
+    },
+
+    "league_format_hash": {
+      "description": "Hash identifying league format settings",
+      "type": "string",
+      "default": "DEFAULT_LEAGUE_FORMAT_HASH",
+      "usage_pattern": "Used in league-specific calculations and projections",
+      "named_formats": [
+        "standard_10_team",
+        "standard_12_team",
+        "half_ppr_10_team",
+        "half_ppr_12_team",
+        "half_ppr_10_team_superflex",
+        "half_ppr_12_team_superflex",
+        "ppr_10_team",
+        "ppr_12_team",
+        "ppr_10_team_superflex",
+        "ppr_12_team_superflex",
+        "half_ppr_lower_turnover_10_team",
+        "half_ppr_lower_turnover_12_team",
+        "half_ppr_lower_turnover_10_team_superflex",
+        "half_ppr_lower_turnover_12_team_superflex",
+        "ppr_lower_turnover_10_team",
+        "ppr_lower_turnover_12_team",
+        "ppr_lower_turnover_10_team_superflex",
+        "ppr_lower_turnover_12_team_superflex",
+        "genesis_10_team",
+        "draftkings_classic",
+        "sfb15_mfl",
+        "sfb15_sleeper"
+      ]
+    },
+
+    "lid": {
+      "description": "League identifier for league-specific data",
+      "type": "number",
+      "minimum": 1,
+      "default": 1,
+      "usage_pattern": "Filter to specific fantasy league for roster/salary data",
+      "examples": [1, 2, 100, 1337]
+    }
+  },
+
+  "parameter_dependencies": {
+    "fantasy_points_calculation": {
+      "description": "Fantasy points columns require scoring format",
+      "required_parameters": ["scoring_format_hash"],
+      "optional_parameters": ["league_format_hash"]
+    },
+    "league_specific_data": {
+      "description": "League roster/salary data requires league identifier",
+      "required_parameters": ["lid"],
+      "optional_parameters": ["year", "week"]
+    }
+  }
+}

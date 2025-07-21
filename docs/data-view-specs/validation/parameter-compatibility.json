@@ -1,0 +1,185 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://xo.football/schemas/parameter-compatibility.json",
+  "title": "Parameter Compatibility Matrix",
+  "description": "Validation rules for parameter combinations and compatibility",
+  "version": "1.0.0",
+
+  "parameter_dependencies": {
+    "scoring_format_hash": {
+      "description": "Required for fantasy point calculations",
+      "required_by_families": ["player_projections", "player_fantasy_points"],
+      "validation": "Must be valid scoring format identifier or named format"
+    },
+    "league_format_hash": {
+      "description": "Required for league-specific calculations",
+      "required_by_families": ["player_projections", "league_specific"],
+      "validation": "Must be valid league format identifier"
+    },
+    "market_type": {
+      "description": "Required for betting market columns",
+      "required_by_families": ["betting_markets"],
+      "validation": "Must be valid market type from enum",
+      "default": "GAME_PASSING_YARDS"
+    },
+    "source_id": {
+      "description": "Required for sportsbook-specific data",
+      "required_by_families": ["betting_markets"],
+      "validation": "Must be valid sportsbook identifier",
+      "default": "FANDUEL"
+    },
+    "lid": {
+      "description": "Required for league roster/salary data",
+      "required_by_families": ["league_specific"],
+      "validation": "Must be positive integer league ID",
+      "default": 1
+    }
+  },
+
+  "parameter_combinations": {
+    "temporal_parameters": {
+      "description": "Time-based parameter validation rules",
+      "rules": {
+        "year_week_dependency": {
+          "rule": "If week is specified, year should also be specified for context",
+          "severity": "warning"
+        },
+        "week_range_validation": {
+          "rule": "Week values must be 0-22, with 0 meaning season totals",
+          "severity": "error"
+        },
+        "year_offset_with_year": {
+          "rule": "year_offset requires year parameter to be meaningful",
+          "severity": "error"
+        }
+      }
+    },
+    "career_parameters": {
+      "description": "Career progression parameter rules",
+      "rules": {
+        "career_year_range": {
+          "rule": "career_year must be [start, end] array with start <= end",
+          "severity": "error"
+        },
+        "career_game_range": {
+          "rule": "career_game must be [start, end] array with start <= end",
+          "severity": "error"
+        },
+        "career_params_mutual": {
+          "rule": "career_year and career_game are typically used independently",
+          "severity": "warning"
+        }
+      }
+    },
+    "betting_parameters": {
+      "description": "Betting market parameter validation",
+      "rules": {
+        "market_source_compatibility": {
+          "rule": "Some market types may not be available from all sources",
+          "severity": "warning"
+        },
+        "time_type_market_dependency": {
+          "rule": "Some markets may not have both OPEN and CLOSE lines",
+          "severity": "warning"
+        }
+      }
+    }
+  },
+
+  "rate_type_compatibility": {
+    "split_restrictions": {
+      "week_splits_incompatible": {
+        "rate_types": ["per_game"],
+        "reason": "per_game normalization meaningless at weekly level",
+        "severity": "error"
+      }
+    },
+    "family_restrictions": {
+      "player_basic_no_rate_types": {
+        "families": ["player_basic", "player_combine", "external_ratings"],
+        "reason": "Static data doesn't support rate type normalization",
+        "severity": "error"
+      },
+      "betting_markets_no_rate_types": {
+        "families": ["betting_markets"],
+        "reason": "Betting lines are already normalized values",
+        "severity": "error"
+      }
+    }
+  },
+
+  "performance_recommendations": {
+    "single_year_optimization": {
+      "description": "Single year parameters enable partitioned table usage",
+      "applies_to": [
+        "player_stats_from_plays",
+        "team_stats_from_plays",
+        "player_fantasy_points"
+      ],
+      "performance_gain": "10-100x improvement",
+      "recommendation": "Use year: [2024] instead of year: [2023, 2024] when possible"
+    },
+    "minimal_prefix_columns": {
+      "description": "Limit prefix columns to essential identification",
+      "max_recommended": 5,
+      "performance_impact": "Each additional column increases query complexity"
+    },
+    "appropriate_filtering": {
+      "description": "Use WHERE clauses to reduce result set early",
+      "recommendation": "Filter by position, team, or performance thresholds"
+    }
+  },
+
+  "common_validation_errors": {
+    "missing_required_params": {
+      "error": "Parameter {param} is required for family {family}",
+      "examples": ["scoring_format_hash required for player_fantasy_points"]
+    },
+    "invalid_enum_value": {
+      "error": "Value {value} not valid for parameter {param}",
+      "examples": ["seas_type must be REG, POST, or PRE"]
+    },
+    "incompatible_combination": {
+      "error": "Parameter combination {params} not compatible",
+      "examples": ["rate_type per_game incompatible with week splits"]
+    },
+    "performance_warning": {
+      "warning": "Parameter combination {params} may impact performance",
+      "examples": ["Multiple year array with complex rate types"]
+    }
+  },
+
+  "validation_functions": {
+    "validate_temporal_params": {
+      "description": "Validate year, week, seas_type combination",
+      "checks": [
+        "year range",
+        "week range",
+        "seas_type enum",
+        "logical consistency"
+      ]
+    },
+    "validate_rate_type_compatibility": {
+      "description": "Check rate type works with family and splits",
+      "checks": [
+        "family supports rate types",
+        "rate type compatible with splits"
+      ]
+    },
+    "validate_required_params": {
+      "description": "Ensure required parameters present for family",
+      "checks": [
+        "family-specific required params",
+        "parameter format validation"
+      ]
+    },
+    "performance_check": {
+      "description": "Identify potential performance issues",
+      "checks": [
+        "single vs multi-year",
+        "rate type complexity",
+        "result set size"
+      ]
+    }
+  }
+}

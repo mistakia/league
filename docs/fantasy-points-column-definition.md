@@ -292,6 +292,18 @@ When this column is used for sorting, the query builder automatically detects it
 
 ## Related Documentation
 
-- [Data Views System](./data-views-system.md)
-- [Query Builder Function Reference](./query-builder-function-reference.md)
-- [Adding New Fantasy Statistics](./adding-new-fantasy-statistics.md)
+### System Architecture
+
+- [Data Views System](./data-views-system.md) - Complete system architecture and implementation details
+- [Query Builder Function Reference](./query-builder-function-reference.md) - Function parameter documentation
+
+### Schema and Specifications
+
+- [Data View Request Schema](./data-view-request-schema.json) - API request schema
+- [Performance Guidelines](./data-view-specs/performance-guidelines.json) - Optimization recommendations
+- [Fantasy Parameters Schema](./data-view-specs/parameters/schemas/fantasy-parameters.json) - Fantasy-specific parameter definitions
+
+### Development
+
+- [Adding New Fantasy Statistics](./adding-new-fantasy-statistics.md) - Guide for extending fantasy calculations
+- [Named Formats](./named-formats.md) - Available scoring format definitions

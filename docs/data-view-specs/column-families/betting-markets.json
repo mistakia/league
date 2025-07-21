@@ -1,0 +1,188 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://xo.football/schemas/betting-markets.json",
+  "title": "Betting Market Columns",
+  "description": "Betting lines and market data from sportsbooks",
+  "version": "1.0.0",
+  "family_id": "betting_markets",
+
+  "family_metadata": {
+    "table_name": "prop_market_selections_index",
+    "cache_strategy": "real_time",
+    "description": "Sportsbook betting lines, odds, and prop market data"
+  },
+
+  "required_parameters": {
+    "$ref": "../parameters/schemas/betting-parameters.json"
+  },
+
+  "common_parameters": {
+    "$ref": "../parameters/schemas/common-parameters.json#/parameters/year",
+    "$ref": "../parameters/schemas/common-parameters.json#/parameters/week",
+    "$ref": "../parameters/schemas/betting-parameters.json#/parameters/market_type",
+    "$ref": "../parameters/schemas/betting-parameters.json#/parameters/source_id",
+    "$ref": "../parameters/schemas/betting-parameters.json#/parameters/time_type"
+  },
+
+  "columns": {
+    "player_season_prop_line_from_betting_markets": {
+      "description": "Season-long prop betting line for player",
+      "parameters": [
+        "year",
+        "market_type",
+        "source_id",
+        "time_type",
+        "selection_type",
+        "career_year",
+        "career_game"
+      ],
+      "supported_rate_types": [],
+      "supported_splits": [],
+      "data_type": "number",
+      "market_scope": "season"
+    },
+
+    "player_game_prop_line_from_betting_markets": {
+      "description": "Single game prop betting line for player",
+      "parameters": [
+        "year",
+        "week",
+        "market_type",
+        "source_id",
+        "time_type",
+        "selection_type",
+        "career_year",
+        "career_game"
+      ],
+      "supported_rate_types": [],
+      "supported_splits": [],
+      "data_type": "number",
+      "market_scope": "game"
+    },
+
+    "player_game_prop_american_odds_from_betting_markets": {
+      "description": "American odds format for game prop bet",
+      "parameters": [
+        "year",
+        "week",
+        "market_type",
+        "source_id",
+        "time_type",
+        "selection_type",
+        "career_year",
+        "career_game"
+      ],
+      "supported_rate_types": [],
+      "supported_splits": [],
+      "data_type": "number"
+    },
+
+    "player_game_prop_decimal_odds_from_betting_markets": {
+      "description": "Decimal odds format for game prop bet",
+      "parameters": [
+        "year",
+        "week",
+        "market_type",
+        "source_id",
+        "time_type",
+        "selection_type",
+        "career_year",
+        "career_game"
+      ],
+      "supported_rate_types": [],
+      "supported_splits": [],
+      "data_type": "number"
+    },
+
+    "player_game_prop_implied_probability_from_betting_markets": {
+      "description": "Implied probability from betting odds",
+      "parameters": [
+        "year",
+        "week",
+        "market_type",
+        "source_id",
+        "time_type",
+        "selection_type",
+        "career_year",
+        "career_game"
+      ],
+      "supported_rate_types": [],
+      "supported_splits": [],
+      "data_type": "number"
+    },
+
+    "team_game_prop_line_from_betting_markets": {
+      "description": "Team-based prop betting line",
+      "parameters": [
+        "year",
+        "week",
+        "market_type",
+        "source_id",
+        "time_type",
+        "selection_type"
+      ],
+      "supported_rate_types": [],
+      "supported_splits": [],
+      "data_type": "number",
+      "market_scope": "team"
+    },
+
+    "player_prop_market_count_from_betting_markets": {
+      "description": "Count of available prop markets for player",
+      "parameters": ["year", "week", "source_id", "time_type"],
+      "supported_rate_types": [],
+      "supported_splits": [],
+      "data_type": "number",
+      "use_case": "Market availability analysis"
+    },
+
+    "player_prop_line_movement_from_betting_markets": {
+      "description": "Line movement from open to close",
+      "parameters": [
+        "year",
+        "week",
+        "market_type",
+        "source_id",
+        "career_year",
+        "career_game"
+      ],
+      "supported_rate_types": [],
+      "supported_splits": [],
+      "data_type": "number"
+    }
+  },
+
+  "parameter_defaults": {
+    "market_type": "GAME_PASSING_YARDS",
+    "source_id": "FANDUEL",
+    "time_type": "CLOSE",
+    "year": "constants.season.year",
+    "week": "constants.season.nfl_seas_week"
+  },
+
+  "usage_patterns": {
+    "basic_prop_analysis": {
+      "description": "Get current betting lines for player props",
+      "typical_columns": ["player_game_prop_line_from_betting_markets"],
+      "required_params": ["market_type"],
+      "optional_params": ["source_id", "time_type"]
+    },
+    "odds_comparison": {
+      "description": "Compare odds across sportsbooks",
+      "typical_columns": [
+        "player_game_prop_american_odds_from_betting_markets"
+      ],
+      "parameter_pattern": "source_id as array to compare multiple books"
+    },
+    "line_movement_analysis": {
+      "description": "Track how lines moved from open to close",
+      "typical_columns": ["player_prop_line_movement_from_betting_markets"],
+      "parameter_pattern": "requires both OPEN and CLOSE time_type data"
+    },
+    "market_depth_analysis": {
+      "description": "Analyze availability of betting markets",
+      "typical_columns": ["player_prop_market_count_from_betting_markets"],
+      "use_case": "Identify which players have the most betting interest"
+    }
+  }
+}

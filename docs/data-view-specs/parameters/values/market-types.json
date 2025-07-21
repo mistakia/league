@@ -1,0 +1,328 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://xo.football/schemas/market-types.json",
+  "title": "Betting Market Type Values",
+  "description": "Valid betting market types for prop markets",
+  "version": "1.0.0",
+
+  "values": [
+    "GAME_PASSING_YARDS",
+    "GAME_PASSING_TOUCHDOWNS",
+    "GAME_PASSING_COMPLETIONS",
+    "GAME_PASSING_ATTEMPTS",
+    "GAME_PASSING_INTERCEPTIONS",
+    "GAME_PASSING_LONGEST_COMPLETION",
+    "GAME_PASSING_COMPLETION_PERCENTAGE",
+    "GAME_PASSING_RUSHING_YARDS",
+    "GAME_PASSING_RUSHING_RECEIVING_TOUCHDOWNS",
+    "GAME_PASS_DEFLECTIONS",
+
+    "GAME_RUSHING_YARDS",
+    "GAME_RUSHING_TOUCHDOWNS",
+    "GAME_RUSH_ATTEMPTS",
+    "GAME_RUSHING_ATTEMPTS",
+    "GAME_LONGEST_RUSH",
+    "GAME_RUSHING_RECEIVING_YARDS",
+    "GAME_RUSHING_RECEIVING_TOUCHDOWNS",
+
+    "GAME_RECEIVING_YARDS",
+    "GAME_RECEIVING_TOUCHDOWNS",
+    "GAME_RECEPTIONS",
+    "GAME_RECEIVING_TARGETS",
+    "GAME_TARGETS",
+    "GAME_LONGEST_RECEPTION",
+
+    "GAME_PPR_FANTASY_POINTS",
+    "GAME_FANTASY_POINTS",
+
+    "GAME_TACKLES_ASSISTS",
+    "GAME_TACKLES_FOR_LOSS",
+    "GAME_DEFENSE_SACKS",
+    "GAME_PUNTS",
+    "GAME_FIELD_GOALS_MADE",
+
+    "GAME_FIRST_TOUCHDOWN_SCORER",
+    "GAME_LAST_TOUCHDOWN_SCORER",
+    "GAME_FIRST_TEAM_TOUCHDOWN_SCORER",
+
+    "GAME_FIRST_QUARTER_PASSING_YARDS",
+    "GAME_FIRST_QUARTER_RUSHING_YARDS",
+    "GAME_FIRST_QUARTER_RECEIVING_YARDS",
+
+    "GAME_LEADER_PASSING_YARDS",
+    "GAME_LEADER_RUSHING_YARDS",
+    "GAME_LEADER_RECEIVING_YARDS",
+
+    "GAME_ALT_PASSING_YARDS",
+    "GAME_ALT_PASSING_TOUCHDOWNS",
+    "GAME_ALT_PASSING_COMPLETIONS",
+    "GAME_ALT_PASSING_ATTEMPTS",
+    "GAME_ALT_PASSING_INTERCEPTIONS",
+    "GAME_ALT_PASSING_LONGEST_COMPLETION",
+    "GAME_ALT_PASSING_RUSHING_YARDS",
+
+    "GAME_ALT_RUSHING_YARDS",
+    "GAME_ALT_RUSHING_TOUCHDOWNS",
+    "GAME_ALT_RUSHING_ATTEMPTS",
+    "GAME_ALT_LONGEST_RUSH",
+    "GAME_ALT_RUSHING_RECEIVING_YARDS",
+
+    "GAME_ALT_RECEIVING_YARDS",
+    "GAME_ALT_RECEIVING_TOUCHDOWNS",
+    "GAME_ALT_RECEPTIONS",
+    "GAME_ALT_LONGEST_RECEPTION",
+
+    "GAME_ALT_TACKLES_ASSISTS",
+    "GAME_ALT_DEFENSE_INTERCEPTIONS",
+    "GAME_ALT_DEFENSE_SACKS",
+
+    "GAME_ALT_SPREAD",
+    "GAME_ALT_TOTAL",
+    "GAME_ALT_TEAM_TOTAL",
+
+    "GAME_FIRST_QUARTER_ALT_PASSING_YARDS",
+    "GAME_FIRST_QUARTER_ALT_RUSHING_YARDS",
+    "GAME_FIRST_QUARTER_ALT_RECEIVING_YARDS",
+
+    "SEASON_PASSING_YARDS",
+    "SEASON_PASSING_TOUCHDOWNS",
+    "SEASON_PASSING_COMPLETIONS",
+    "SEASON_PASS_ATTEMPTS",
+
+    "SEASON_RUSHING_YARDS",
+    "SEASON_RUSHING_TOUCHDOWNS",
+    "SEASON_RUSH_ATTEMPTS",
+
+    "SEASON_RECEIVING_YARDS",
+    "SEASON_RECEIVING_TOUCHDOWNS",
+    "SEASON_RECEPTIONS",
+    "SEASON_TARGETS",
+
+    "SEASON_FANTASY_POINTS",
+    "SEASON_DEFENSE_SACKS",
+
+    "SEASON_LEADER_PASSING_YARDS",
+    "SEASON_LEADER_PASSING_TOUCHDOWNS",
+    "SEASON_LEADER_RUSHING_YARDS",
+    "SEASON_LEADER_RUSHING_TOUCHDOWNS",
+    "SEASON_LEADER_RECEIVING_YARDS",
+    "SEASON_LEADER_RECEIVING_TOUCHDOWNS",
+    "SEASON_LEADER_SACKS",
+    "SEASON_LEADER_INTERCEPTIONS",
+
+    "PLAYOFF_PASSING_YARDS",
+    "PLAYOFF_RUSHING_YARDS",
+    "PLAYOFF_RECEIVING_YARDS",
+
+    "GAME_SPREAD",
+    "GAME_TOTAL",
+    "GAME_MONEYLINE",
+    "GAME_TEAM_TOTAL"
+  ],
+
+  "market_categories": {
+    "passing": {
+      "description": "Quarterback passing metrics",
+      "markets": [
+        "GAME_PASSING_YARDS",
+        "SEASON_PASSING_YARDS",
+        "GAME_PASSING_TOUCHDOWNS",
+        "SEASON_PASSING_TOUCHDOWNS",
+        "GAME_PASSING_COMPLETIONS",
+        "SEASON_PASSING_COMPLETIONS",
+        "GAME_PASSING_ATTEMPTS",
+        "SEASON_PASS_ATTEMPTS",
+        "GAME_PASSING_INTERCEPTIONS",
+        "GAME_PASSING_LONGEST_COMPLETION",
+        "GAME_PASSING_COMPLETION_PERCENTAGE",
+        "GAME_PASSING_RUSHING_YARDS",
+        "GAME_PASSING_RUSHING_RECEIVING_TOUCHDOWNS",
+        "GAME_PASS_DEFLECTIONS",
+        "GAME_ALT_PASSING_YARDS",
+        "GAME_ALT_PASSING_TOUCHDOWNS",
+        "GAME_ALT_PASSING_COMPLETIONS",
+        "GAME_ALT_PASSING_ATTEMPTS",
+        "GAME_ALT_PASSING_INTERCEPTIONS",
+        "GAME_ALT_PASSING_LONGEST_COMPLETION",
+        "GAME_ALT_PASSING_RUSHING_YARDS",
+        "GAME_FIRST_QUARTER_PASSING_YARDS",
+        "GAME_FIRST_QUARTER_ALT_PASSING_YARDS",
+        "GAME_LEADER_PASSING_YARDS",
+        "SEASON_LEADER_PASSING_YARDS",
+        "SEASON_LEADER_PASSING_TOUCHDOWNS",
+        "PLAYOFF_PASSING_YARDS"
+      ]
+    },
+    "rushing": {
+      "description": "Running back and quarterback rushing metrics",
+      "markets": [
+        "GAME_RUSHING_YARDS",
+        "SEASON_RUSHING_YARDS",
+        "GAME_RUSHING_TOUCHDOWNS",
+        "SEASON_RUSHING_TOUCHDOWNS",
+        "GAME_RUSHING_ATTEMPTS",
+        "SEASON_RUSH_ATTEMPTS",
+        "GAME_LONGEST_RUSH",
+        "GAME_RUSHING_RECEIVING_YARDS",
+        "GAME_RUSHING_RECEIVING_TOUCHDOWNS",
+        "GAME_ALT_RUSHING_YARDS",
+        "GAME_ALT_RUSHING_TOUCHDOWNS",
+        "GAME_ALT_RUSHING_ATTEMPTS",
+        "GAME_ALT_LONGEST_RUSH",
+        "GAME_ALT_RUSHING_RECEIVING_YARDS",
+        "GAME_FIRST_QUARTER_RUSHING_YARDS",
+        "GAME_FIRST_QUARTER_ALT_RUSHING_YARDS",
+        "GAME_LEADER_RUSHING_YARDS",
+        "SEASON_LEADER_RUSHING_YARDS",
+        "SEASON_LEADER_RUSHING_TOUCHDOWNS",
+        "PLAYOFF_RUSHING_YARDS"
+      ]
+    },
+    "receiving": {
+      "description": "Wide receiver and tight end receiving metrics",
+      "markets": [
+        "GAME_RECEIVING_YARDS",
+        "SEASON_RECEIVING_YARDS",
+        "GAME_RECEIVING_TOUCHDOWNS",
+        "SEASON_RECEIVING_TOUCHDOWNS",
+        "GAME_RECEPTIONS",
+        "SEASON_RECEPTIONS",
+        "GAME_RECEIVING_TARGETS",
+        "SEASON_TARGETS",
+        "GAME_LONGEST_RECEPTION",
+        "GAME_ALT_RECEIVING_YARDS",
+        "GAME_ALT_RECEIVING_TOUCHDOWNS",
+        "GAME_ALT_RECEPTIONS",
+        "GAME_ALT_LONGEST_RECEPTION",
+        "GAME_FIRST_QUARTER_RECEIVING_YARDS",
+        "GAME_FIRST_QUARTER_ALT_RECEIVING_YARDS",
+        "GAME_LEADER_RECEIVING_YARDS",
+        "SEASON_LEADER_RECEIVING_YARDS",
+        "SEASON_LEADER_RECEIVING_TOUCHDOWNS",
+        "PLAYOFF_RECEIVING_YARDS"
+      ]
+    },
+    "fantasy": {
+      "description": "Fantasy football point totals",
+      "markets": [
+        "GAME_PPR_FANTASY_POINTS",
+        "GAME_FANTASY_POINTS",
+        "SEASON_FANTASY_POINTS"
+      ]
+    },
+    "defense": {
+      "description": "Defensive player statistics",
+      "markets": [
+        "GAME_TACKLES_ASSISTS",
+        "GAME_TACKLES_FOR_LOSS",
+        "GAME_DEFENSE_SACKS",
+        "SEASON_DEFENSE_SACKS",
+        "GAME_ALT_TACKLES_ASSISTS",
+        "GAME_ALT_DEFENSE_INTERCEPTIONS",
+        "GAME_ALT_DEFENSE_SACKS",
+        "SEASON_LEADER_SACKS",
+        "SEASON_LEADER_INTERCEPTIONS"
+      ]
+    },
+    "special_teams": {
+      "description": "Special teams and kicking statistics",
+      "markets": ["GAME_PUNTS", "GAME_FIELD_GOALS_MADE"]
+    },
+    "touchdown_scorers": {
+      "description": "Touchdown scorer markets",
+      "markets": [
+        "GAME_FIRST_TOUCHDOWN_SCORER",
+        "GAME_LAST_TOUCHDOWN_SCORER",
+        "GAME_FIRST_TEAM_TOUCHDOWN_SCORER"
+      ]
+    },
+    "team_markets": {
+      "description": "Team-based betting markets",
+      "markets": [
+        "GAME_SPREAD",
+        "GAME_TOTAL",
+        "GAME_MONEYLINE",
+        "GAME_TEAM_TOTAL",
+        "GAME_ALT_SPREAD",
+        "GAME_ALT_TOTAL",
+        "GAME_ALT_TEAM_TOTAL"
+      ]
+    }
+  },
+
+  "time_periods": {
+    "game": {
+      "description": "Single game prop markets",
+      "prefix": "GAME_*",
+      "typical_range": "Weekly betting markets"
+    },
+    "season": {
+      "description": "Full season prop markets",
+      "prefix": "SEASON_*",
+      "typical_range": "Preseason futures markets"
+    },
+    "playoff": {
+      "description": "Playoff-specific prop markets",
+      "prefix": "PLAYOFF_*",
+      "typical_range": "Postseason betting markets"
+    }
+  },
+
+  "position_relevance": {
+    "QB": [
+      "GAME_PASSING_YARDS",
+      "GAME_PASSING_TOUCHDOWNS",
+      "GAME_PASSING_COMPLETIONS",
+      "GAME_PASSING_ATTEMPTS",
+      "GAME_PASSING_INTERCEPTIONS",
+      "GAME_PASSING_LONGEST_COMPLETION",
+      "GAME_PASSING_COMPLETION_PERCENTAGE",
+      "GAME_PASSING_RUSHING_YARDS",
+      "GAME_PASSING_RUSHING_RECEIVING_TOUCHDOWNS",
+      "GAME_PASS_DEFLECTIONS",
+      "GAME_RUSHING_YARDS",
+      "GAME_RUSHING_TOUCHDOWNS",
+      "GAME_RUSHING_ATTEMPTS",
+      "GAME_LONGEST_RUSH",
+      "GAME_PPR_FANTASY_POINTS"
+    ],
+    "RB": [
+      "GAME_RUSHING_YARDS",
+      "GAME_RUSHING_TOUCHDOWNS",
+      "GAME_RUSHING_ATTEMPTS",
+      "GAME_LONGEST_RUSH",
+      "GAME_RECEIVING_YARDS",
+      "GAME_RECEPTIONS",
+      "GAME_RECEIVING_TARGETS",
+      "GAME_RUSHING_RECEIVING_YARDS",
+      "GAME_RUSHING_RECEIVING_TOUCHDOWNS",
+      "GAME_PPR_FANTASY_POINTS"
+    ],
+    "WR": [
+      "GAME_RECEIVING_YARDS",
+      "GAME_RECEIVING_TOUCHDOWNS",
+      "GAME_RECEPTIONS",
+      "GAME_RECEIVING_TARGETS",
+      "GAME_LONGEST_RECEPTION",
+      "GAME_PPR_FANTASY_POINTS"
+    ],
+    "TE": [
+      "GAME_RECEIVING_YARDS",
+      "GAME_RECEIVING_TOUCHDOWNS",
+      "GAME_RECEPTIONS",
+      "GAME_RECEIVING_TARGETS",
+      "GAME_LONGEST_RECEPTION",
+      "GAME_PPR_FANTASY_POINTS"
+    ],
+    "DEF": [
+      "GAME_TACKLES_ASSISTS",
+      "GAME_TACKLES_FOR_LOSS",
+      "GAME_DEFENSE_SACKS",
+      "GAME_ALT_DEFENSE_INTERCEPTIONS",
+      "GAME_ALT_DEFENSE_SACKS"
+    ],
+    "K": ["GAME_FIELD_GOALS_MADE", "GAME_PUNTS"]
+  },
+
+  "default_by_usage": "GAME_PASSING_YARDS"
+}

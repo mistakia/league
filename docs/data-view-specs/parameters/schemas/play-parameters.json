@@ -1,0 +1,12 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://xo.football/schemas/play-parameters.json",
+  "title": "NFL Play Column Parameters",
+  "description": "Parameters specific to NFL play-by-play data analysis",
+  "version": "1.0.0",
+
+  "_source_reference": {
+    "file": "libs-shared/nfl-plays-column-params.mjs",
+    "note": "This schema documents parameters defined in the source file. The source file remains the authoritative implementation."
+  }
+}

@@ -1,0 +1,208 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "https://xo.football/schemas/player-basic.json",
+  "title": "Player Basic Information Columns",
+  "description": "Basic player demographic and physical attributes",
+  "version": "1.0.0",
+  "family_id": "player_basic",
+
+  "family_metadata": {
+    "table_name": "player",
+    "cache_strategy": "static_long_ttl",
+    "description": "Demographic, physical attributes, and identification data for NFL players"
+  },
+
+  "common_parameters": {
+    "$ref": "../parameters/schemas/common-parameters.json#/parameters/case_insensitive"
+  },
+
+  "columns": {
+    "player_name": {
+      "description": "Player's full name (first + last)",
+      "parameters": ["case_insensitive"],
+      "supported_rate_types": [],
+      "supported_splits": [],
+      "data_type": "string"
+    },
+
+    "player_position": {
+      "description": "Player's primary position",
+      "parameters": ["case_insensitive"],
+      "supported_rate_types": [],
+      "supported_splits": [],
+      "data_type": "string",
+      "common_values": ["QB", "RB", "FB", "WR", "TE", "K", "DEF"]
+    },
+
+    "player_height": {
+      "description": "Player's height in inches",
+      "parameters": [],
+      "supported_rate_types": [],
+      "supported_splits": [],
+      "data_type": "number"
+    },
+
+    "player_weight": {
+      "description": "Player's weight in pounds",
+      "parameters": [],
+      "supported_rate_types": [],
+      "supported_splits": [],
+      "data_type": "number"
+    },
+
+    "player_age": {
+      "description": "Player's current age in years",
+      "parameters": ["year"],
+      "supported_rate_types": [],
+      "supported_splits": ["year"],
+      "data_type": "number"
+    },
+
+    "player_draft_round": {
+      "description": "NFL draft round (1-7)",
+      "parameters": [],
+      "supported_rate_types": [],
+      "supported_splits": [],
+      "data_type": "number"
+    },
+
+    "player_draft_pick": {
+      "description": "Overall draft pick number",
+      "parameters": [],
+      "supported_rate_types": [],
+      "supported_splits": [],
+      "data_type": "number"
+    },
+
+    "player_college": {
+      "description": "College attended",
+      "parameters": ["case_insensitive"],
+      "supported_rate_types": [],
+      "supported_splits": [],
+      "data_type": "string"
+    },
+
+    "player_current_nfl_team": {
+      "description": "Current NFL team abbreviation",
+      "parameters": [],
+      "supported_rate_types": [],
+      "supported_splits": [],
+      "data_type": "string"
+    },
+
+    "player_years_pro": {
+      "description": "Years of professional experience",
+      "parameters": ["year"],
+      "supported_rate_types": [],
+      "supported_splits": ["year"],
+      "data_type": "number"
+    }
+  },
+
+  "external_identifiers": {
+    "player_nfl_id": {
+      "description": "Official NFL player identifier",
+      "parameters": [],
+      "supported_rate_types": [],
+      "supported_splits": [],
+      "data_type": "string"
+    },
+
+    "player_esbid": {
+      "description": "ESPN player identifier",
+      "parameters": [],
+      "supported_rate_types": [],
+      "supported_splits": [],
+      "data_type": "string"
+    },
+
+    "player_gsisid": {
+      "description": "NFL GSIS player identifier",
+      "parameters": [],
+      "supported_rate_types": [],
+      "supported_splits": [],
+      "data_type": "string"
+    },
+
+    "player_sleeper_id": {
+      "description": "Sleeper platform player identifier",
+      "parameters": [],
+      "supported_rate_types": [],
+      "supported_splits": [],
+      "data_type": "string"
+    },
+
+    "player_espn_id": {
+      "description": "ESPN fantasy player identifier",
+      "parameters": [],
+      "supported_rate_types": [],
+      "supported_splits": [],
+      "data_type": "string"
+    },
+
+    "player_yahoo_id": {
+      "description": "Yahoo fantasy player identifier",
+      "parameters": [],
+      "supported_rate_types": [],
+      "supported_splits": [],
+      "data_type": "string"
+    }
+  },
+
+  "calculated_metrics": {
+    "player_body_mass_index": {
+      "description": "Body Mass Index calculated from height and weight",
+      "parameters": [],
+      "supported_rate_types": [],
+      "supported_splits": [],
+      "data_type": "number"
+    },
+
+    "player_speed_score": {
+      "description": "Speed score metric combining weight and 40-yard dash",
+      "parameters": [],
+      "supported_rate_types": [],
+      "supported_splits": [],
+      "data_type": "number"
+    },
+
+    "player_height_adjusted_speed_score": {
+      "description": "Speed score adjusted for position-specific height",
+      "parameters": [],
+      "supported_rate_types": [],
+      "supported_splits": [],
+      "data_type": "number"
+    }
+  },
+
+  "usage_patterns": {
+    "identification": {
+      "description": "Player identification in data views",
+      "typical_columns": [
+        "player_name",
+        "player_position",
+        "player_current_nfl_team"
+      ],
+      "use_as": "prefix_columns"
+    },
+    "demographic_analysis": {
+      "description": "Physical and demographic analysis",
+      "typical_columns": [
+        "player_age",
+        "player_height",
+        "player_weight",
+        "player_college"
+      ],
+      "filters": ["position-based filtering", "age ranges", "college groupings"]
+    },
+    "draft_analysis": {
+      "description": "Draft-related analysis",
+      "typical_columns": [
+        "player_draft_round",
+        "player_draft_pick",
+        "player_years_pro"
+      ],
+      "use_cases": ["rookie analysis", "draft class comparisons"]
+    }
+  }
+}
