@@ -18,14 +18,14 @@ const router = express.Router()
 
 /**
  * @swagger
- * /teams/{teamId}:
+ * /api/teams/{teamId}:
  *   put:
  *     tags:
  *       - Teams
- *     summary: Update team settings
+ *     summary: Update fantasy team settings
  *     description: |
- *       Update team configuration including name, abbreviation, logo, and contact information.
- *       Only team owners can update their team settings.
+ *       Update fantasy team configuration including name, abbreviation, logo, and contact information.
+ *       Only fantasy team owners can update their team settings.
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -50,17 +50,17 @@ const router = express.Router()
  *               - value
  *           examples:
  *             updateName:
- *               summary: Update team name
+ *               summary: Update fantasy team name
  *               value:
  *                 field: "name"
  *                 value: "Dynasty Warriors"
  *             updateAbbreviation:
- *               summary: Update team abbreviation
+ *               summary: Update fantasy team abbreviation
  *               value:
  *                 field: "abbrv"
  *                 value: "DW"
  *             updateLogo:
- *               summary: Update team logo
+ *               summary: Update fantasy team logo
  *               value:
  *                 field: "image"
  *                 value: "https://example.com/logo.png"

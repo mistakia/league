@@ -2429,6 +2429,1043 @@ const options = {
             'status',
             'timestamp'
           ]
+        },
+        // New schemas from documented endpoints
+        TeamForecast: {
+          type: 'object',
+          description: 'Fantasy team playoff and championship odds forecasts',
+          properties: {
+            playoff_odds: {
+              type: 'number',
+              nullable: true,
+              description: 'Current playoff odds (0-1)',
+              example: 0.85
+            },
+            division_odds: {
+              type: 'number',
+              nullable: true,
+              description: 'Current division championship odds (0-1)',
+              example: 0.45
+            },
+            bye_odds: {
+              type: 'number',
+              nullable: true,
+              description: 'Current playoff bye odds (0-1)',
+              example: 0.25
+            },
+            championship_odds: {
+              type: 'number',
+              nullable: true,
+              description: 'Current league championship odds (0-1)',
+              example: 0.12
+            },
+            playoff_odds_with_win: {
+              type: 'number',
+              nullable: true,
+              description: 'Playoff odds if team wins next game (0-1)',
+              example: 0.92
+            },
+            division_odds_with_win: {
+              type: 'number',
+              nullable: true,
+              description:
+                'Division championship odds if team wins next game (0-1)',
+              example: 0.58
+            },
+            bye_odds_with_win: {
+              type: 'number',
+              nullable: true,
+              description: 'Playoff bye odds if team wins next game (0-1)',
+              example: 0.35
+            },
+            championship_odds_with_win: {
+              type: 'number',
+              nullable: true,
+              description:
+                'League championship odds if team wins next game (0-1)',
+              example: 0.18
+            },
+            playoff_odds_with_loss: {
+              type: 'number',
+              nullable: true,
+              description: 'Playoff odds if team loses next game (0-1)',
+              example: 0.71
+            },
+            division_odds_with_loss: {
+              type: 'number',
+              nullable: true,
+              description:
+                'Division championship odds if team loses next game (0-1)',
+              example: 0.28
+            },
+            bye_odds_with_loss: {
+              type: 'number',
+              nullable: true,
+              description: 'Playoff bye odds if team loses next game (0-1)',
+              example: 0.15
+            },
+            championship_odds_with_loss: {
+              type: 'number',
+              nullable: true,
+              description:
+                'League championship odds if team loses next game (0-1)',
+              example: 0.08
+            }
+          }
+        },
+        DraftPick: {
+          type: 'object',
+          description: 'Fantasy draft pick information',
+          properties: {
+            uid: {
+              type: 'integer',
+              description: 'Draft pick ID',
+              example: 1542
+            },
+            tid: {
+              type: 'integer',
+              description: 'Team ID that owns the pick',
+              example: 13
+            },
+            lid: {
+              type: 'integer',
+              description: 'League ID',
+              example: 2
+            },
+            year: {
+              type: 'integer',
+              description: 'Draft year',
+              example: 2025
+            },
+            round: {
+              type: 'integer',
+              description: 'Draft round (1-based)',
+              example: 1
+            },
+            pick: {
+              type: 'integer',
+              description: 'Pick number within round',
+              example: 3
+            },
+            otid: {
+              type: 'integer',
+              nullable: true,
+              description: 'Original team ID (if pick was traded)',
+              example: 15
+            },
+            pid: {
+              type: 'string',
+              nullable: true,
+              description: 'Player ID if pick has been used',
+              example: null
+            }
+          }
+        },
+        TeamWithForecast: {
+          allOf: [
+            { $ref: '#/components/schemas/Team' },
+            { $ref: '#/components/schemas/TeamForecast' },
+            {
+              type: 'object',
+              properties: {
+                picks: {
+                  type: 'array',
+                  items: {
+                    $ref: '#/components/schemas/DraftPick'
+                  },
+                  description: 'Unused draft picks owned by this team'
+                },
+                teamtext: {
+                  type: 'string',
+                  nullable: true,
+                  description:
+                    "Team text channel/communication setting (only for authenticated user's teams)",
+                  example: 'dynasty-warriors'
+                },
+                teamvoice: {
+                  type: 'string',
+                  nullable: true,
+                  description:
+                    "Team voice channel/communication setting (only for authenticated user's teams)",
+                  example: 'dynasty-warriors-voice'
+                },
+                leaguetext: {
+                  type: 'string',
+                  nullable: true,
+                  description:
+                    "League text channel/communication setting (only for authenticated user's teams)",
+                  example: 'teflon-league'
+                }
+              }
+            }
+          ]
+        },
+        CreateTeamRequest: {
+          type: 'object',
+          required: ['leagueId'],
+          properties: {
+            leagueId: {
+              type: 'integer',
+              description: 'League ID to create team in',
+              example: 2
+            }
+          }
+        },
+        CreateTeamResponse: {
+          type: 'object',
+          properties: {
+            team: {
+              $ref: '#/components/schemas/Team'
+            },
+            roster: {
+              type: 'object',
+              description: 'Initial roster created for the team',
+              properties: {
+                uid: {
+                  type: 'integer',
+                  description: 'Roster ID',
+                  example: 1234
+                },
+                tid: {
+                  type: 'integer',
+                  description: 'Team ID',
+                  example: 13
+                },
+                lid: {
+                  type: 'integer',
+                  description: 'League ID',
+                  example: 2
+                },
+                week: {
+                  type: 'integer',
+                  description: 'Current week',
+                  example: 1
+                },
+                year: {
+                  type: 'integer',
+                  description: 'Current year',
+                  example: 2024
+                }
+              }
+            }
+          }
+        },
+        DeleteTeamRequest: {
+          type: 'object',
+          required: ['teamId', 'leagueId'],
+          properties: {
+            teamId: {
+              type: 'integer',
+              description: 'Team ID to delete',
+              example: 13
+            },
+            leagueId: {
+              type: 'integer',
+              description: 'League ID the team belongs to',
+              example: 2
+            }
+          }
+        },
+        DeleteTeamResponse: {
+          type: 'object',
+          properties: {
+            rosters: {
+              type: 'integer',
+              description: 'Number of roster records deleted',
+              example: 1
+            },
+            teams: {
+              type: 'integer',
+              description: 'Number of team records deleted',
+              example: 1
+            },
+            transactions: {
+              type: 'integer',
+              description: 'Number of transaction records deleted',
+              example: 45
+            }
+          }
+        },
+        TeamsResponse: {
+          type: 'object',
+          properties: {
+            teams: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/TeamWithForecast'
+              },
+              description: 'Array of teams with forecasts and picks'
+            }
+          }
+        },
+        DataView: {
+          type: 'object',
+          properties: {
+            view_id: {
+              type: 'string',
+              format: 'uuid',
+              description: 'Unique identifier for the data view',
+              example: 'a1b2c3d4-5678-90ab-cdef-123456789012'
+            },
+            view_name: {
+              type: 'string',
+              minLength: 1,
+              maxLength: 255,
+              description: 'Name of the data view',
+              example: 'Weekly QB Rankings'
+            },
+            view_description: {
+              type: 'string',
+              minLength: 1,
+              maxLength: 1000,
+              nullable: true,
+              description: 'Description of the data view',
+              example: 'Top quarterback rankings for the current week'
+            },
+            table_state: {
+              $ref: '#/components/schemas/TableState'
+            },
+            created_at: {
+              type: 'string',
+              format: 'date-time',
+              description: 'When the data view was created',
+              example: '2024-01-15T10:30:00Z'
+            },
+            updated_at: {
+              type: 'string',
+              format: 'date-time',
+              description: 'When the data view was last updated',
+              example: '2024-01-15T14:22:00Z'
+            },
+            user_id: {
+              type: 'integer',
+              description: 'ID of the user who created the data view',
+              example: 123
+            },
+            view_username: {
+              type: 'string',
+              nullable: true,
+              description: 'Username of the user who created the data view',
+              example: 'johndoe'
+            }
+          },
+          required: ['view_id', 'view_name', 'table_state', 'user_id']
+        },
+        TableState: {
+          type: 'object',
+          properties: {
+            offset: {
+              type: 'integer',
+              minimum: 0,
+              description: 'Number of rows to skip for pagination',
+              example: 0
+            },
+            limit: {
+              type: 'integer',
+              minimum: 1,
+              maximum: 2000,
+              description: 'Maximum number of rows to return',
+              example: 100
+            },
+            sort: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/SortColumn'
+              },
+              description: 'Sort configuration for the data view'
+            },
+            columns: {
+              type: 'array',
+              items: {
+                oneOf: [
+                  {
+                    type: 'string',
+                    description: 'Column ID as string',
+                    example: 'player_name'
+                  },
+                  {
+                    $ref: '#/components/schemas/ColumnConfig'
+                  }
+                ]
+              },
+              description: 'Columns to include in the data view'
+            },
+            where: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/WhereClause'
+              },
+              description: 'Filter conditions for the data view'
+            },
+            splits: {
+              type: 'array',
+              items: {
+                type: 'string'
+              },
+              description: 'Split configurations for data grouping',
+              example: ['week', 'team']
+            },
+            prefix_columns: {
+              type: 'array',
+              items: {
+                type: 'string'
+              },
+              description: 'Columns to prefix in the output',
+              example: ['player_', 'team_']
+            }
+          }
+        },
+        SortColumn: {
+          type: 'object',
+          properties: {
+            column_id: {
+              type: 'string',
+              description: 'ID of the column to sort by',
+              example: 'fantasy_points'
+            },
+            desc: {
+              type: 'boolean',
+              description: 'Whether to sort in descending order',
+              example: true
+            }
+          },
+          required: ['column_id', 'desc']
+        },
+        ColumnConfig: {
+          type: 'object',
+          properties: {
+            column_id: {
+              type: 'string',
+              description: 'ID of the column',
+              example: 'player_projected_points'
+            },
+            params: {
+              type: 'object',
+              description: 'Additional parameters for the column',
+              example: { week: 4, year: 2024 }
+            }
+          },
+          required: ['column_id']
+        },
+        WhereClause: {
+          type: 'object',
+          properties: {
+            column_id: {
+              type: 'string',
+              description: 'ID of the column to filter',
+              example: 'position'
+            },
+            operator: {
+              type: 'string',
+              enum: [
+                '=',
+                '!=',
+                '>',
+                '>=',
+                '<',
+                '<=',
+                'ILIKE',
+                'NOT ILIKE',
+                'LIKE',
+                'NOT LIKE',
+                'IS NULL',
+                'IS NOT NULL',
+                'IN',
+                'NOT IN'
+              ],
+              description: 'Comparison operator',
+              example: '='
+            },
+            value: {
+              oneOf: [
+                { type: 'string' },
+                { type: 'number' },
+                {
+                  type: 'array',
+                  items: {
+                    oneOf: [{ type: 'string' }, { type: 'number' }]
+                  }
+                }
+              ],
+              description:
+                'Value to compare against (not required for NULL operators)',
+              example: 'QB'
+            },
+            params: {
+              type: 'object',
+              description: 'Additional parameters for the filter',
+              example: { case_sensitive: false }
+            }
+          },
+          required: ['column_id', 'operator']
+        },
+        DataViewCreateRequest: {
+          type: 'object',
+          properties: {
+            view_id: {
+              type: 'string',
+              format: 'uuid',
+              description: 'Optional view ID for updating existing view',
+              example: 'a1b2c3d4-5678-90ab-cdef-123456789012'
+            },
+            view_name: {
+              type: 'string',
+              minLength: 1,
+              maxLength: 255,
+              description: 'Name of the data view',
+              example: 'My QB Rankings'
+            },
+            view_description: {
+              type: 'string',
+              minLength: 1,
+              maxLength: 1000,
+              description: 'Description of the data view',
+              example: 'Custom quarterback rankings for week 4'
+            },
+            table_state: {
+              $ref: '#/components/schemas/TableState'
+            }
+          },
+          required: ['view_name', 'view_description', 'table_state']
+        },
+        DataViewSearchRequest: {
+          type: 'object',
+          properties: {
+            where: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/WhereClause'
+              },
+              description: 'Filter conditions for the search'
+            },
+            columns: {
+              type: 'array',
+              items: {
+                oneOf: [
+                  { type: 'string' },
+                  { $ref: '#/components/schemas/ColumnConfig' }
+                ]
+              },
+              description: 'Columns to include in the results'
+            },
+            sort: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/SortColumn'
+              },
+              description: 'Sort configuration for the results'
+            },
+            offset: {
+              type: 'integer',
+              minimum: 0,
+              description: 'Number of rows to skip for pagination',
+              example: 0
+            },
+            prefix_columns: {
+              type: 'array',
+              items: {
+                type: 'string'
+              },
+              description: 'Columns to prefix in the output'
+            },
+            splits: {
+              type: 'array',
+              items: {
+                type: 'string'
+              },
+              description: 'Split configurations for data grouping'
+            }
+          },
+          required: ['columns']
+        },
+        DataViewResults: {
+          type: 'array',
+          items: {
+            type: 'object',
+            additionalProperties: true,
+            description: 'Dynamic object containing the requested data columns'
+          },
+          description: 'Array of data results matching the search criteria',
+          example: [
+            {
+              player_name: 'Patrick Mahomes',
+              position: 'QB',
+              team: 'KC',
+              fantasy_points: 24.5
+            },
+            {
+              player_name: 'Josh Allen',
+              position: 'QB',
+              team: 'BUF',
+              fantasy_points: 22.1
+            }
+          ]
+        },
+        DeleteResponse: {
+          type: 'object',
+          properties: {
+            success: {
+              type: 'boolean',
+              description: 'Whether the deletion was successful',
+              example: true
+            }
+          },
+          required: ['success']
+        },
+        BackgroundJob: {
+          type: 'object',
+          properties: {
+            id: {
+              type: 'string',
+              description: 'Unique job identifier',
+              example: '1640995200_DATA_IMPORT'
+            },
+            type: {
+              type: 'integer',
+              description: 'Job type ID corresponding to job_types constants',
+              example: 1,
+              enum: [
+                1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18,
+                19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34,
+                35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45, 46, 47, 48, 49, 50,
+                51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65, 66,
+                67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82,
+                83, 84, 85, 86, 87
+              ]
+            },
+            succ: {
+              type: 'boolean',
+              description: 'Whether the job execution was successful',
+              example: true
+            },
+            timestamp: {
+              type: 'integer',
+              description: 'Unix timestamp of when the job was executed',
+              example: 1640995200
+            },
+            reason: {
+              type: 'string',
+              nullable: true,
+              description:
+                'Failure reason or error message (only present when succ is false)',
+              example: 'Database connection timeout'
+            }
+          },
+          required: ['id', 'type', 'succ', 'timestamp']
+        },
+        SystemHealthError: {
+          type: 'object',
+          properties: {
+            job: {
+              type: 'string',
+              description: 'Human-readable job title that failed',
+              example: 'Active Roster Free Agency Waivers'
+            },
+            reason: {
+              type: 'string',
+              description: 'Reason for the job failure',
+              example: 'Database connection timeout'
+            },
+            timestamp: {
+              type: 'string',
+              description: 'Formatted timestamp of when the failure occurred',
+              example: '2025/01/17 10:30'
+            }
+          },
+          required: ['job', 'reason', 'timestamp']
+        },
+        SystemHealthStatus: {
+          type: 'object',
+          properties: {
+            status: {
+              type: 'string',
+              enum: ['operational'],
+              description: 'System operational status',
+              example: 'operational'
+            }
+          },
+          required: ['status']
+        },
+        SystemHealthErrors: {
+          type: 'object',
+          properties: {
+            errors: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/SystemHealthError'
+              },
+              description: 'List of system errors from failed background jobs'
+            }
+          },
+          required: ['errors']
+        },
+        LeagueSettings: {
+          type: 'object',
+          description: 'Complete league configuration settings',
+          properties: {
+            name: {
+              type: 'string',
+              description: 'League name',
+              example: 'Dynasty Warriors League'
+            },
+            num_teams: {
+              type: 'integer',
+              minimum: 4,
+              maximum: 32,
+              description: 'Number of teams in the league',
+              example: 12
+            },
+            cap: {
+              type: 'integer',
+              minimum: 0,
+              description: 'Salary cap limit',
+              example: 200
+            },
+            faab: {
+              type: 'integer',
+              minimum: 0,
+              description: 'Free agent acquisition budget',
+              example: 100
+            },
+            sqb: {
+              type: 'integer',
+              minimum: 0,
+              description: 'Starting QB roster slots',
+              example: 1
+            },
+            srb: {
+              type: 'integer',
+              minimum: 0,
+              description: 'Starting RB roster slots',
+              example: 2
+            },
+            swr: {
+              type: 'integer',
+              minimum: 0,
+              description: 'Starting WR roster slots',
+              example: 2
+            },
+            ste: {
+              type: 'integer',
+              minimum: 0,
+              description: 'Starting TE roster slots',
+              example: 1
+            },
+            sdst: {
+              type: 'integer',
+              minimum: 0,
+              description: 'Starting DST roster slots',
+              example: 1
+            },
+            sk: {
+              type: 'integer',
+              minimum: 0,
+              description: 'Starting K roster slots',
+              example: 1
+            },
+            bench: {
+              type: 'integer',
+              minimum: 0,
+              description: 'Bench roster slots',
+              example: 8
+            },
+            ps: {
+              type: 'integer',
+              minimum: 0,
+              description: 'Practice squad roster slots',
+              example: 4
+            },
+            ir: {
+              type: 'integer',
+              minimum: 0,
+              description: 'Injured reserve roster slots',
+              example: 2
+            },
+            py: {
+              type: 'number',
+              format: 'float',
+              description: 'Points per passing yard',
+              example: 0.04
+            },
+            tdp: {
+              type: 'integer',
+              description: 'Points per passing touchdown',
+              example: 4
+            },
+            ry: {
+              type: 'number',
+              format: 'float',
+              description: 'Points per rushing yard',
+              example: 0.1
+            },
+            tdr: {
+              type: 'integer',
+              description: 'Points per rushing touchdown',
+              example: 6
+            },
+            rec: {
+              type: 'number',
+              format: 'float',
+              description: 'Points per reception',
+              example: 0.5
+            },
+            recy: {
+              type: 'number',
+              format: 'float',
+              description: 'Points per receiving yard',
+              example: 0.1
+            },
+            tdrec: {
+              type: 'integer',
+              description: 'Points per receiving touchdown',
+              example: 6
+            },
+            espn_id: {
+              type: 'integer',
+              description: 'ESPN league ID for data sync',
+              example: 12345
+            },
+            sleeper_id: {
+              type: 'integer',
+              description: 'Sleeper league ID for data sync',
+              example: 67890
+            },
+            mfl_id: {
+              type: 'integer',
+              description: 'MyFantasyLeague ID for data sync',
+              example: 54321
+            },
+            fleaflicker_id: {
+              type: 'integer',
+              description: 'Fleaflicker league ID for data sync',
+              example: 98765
+            }
+          }
+        },
+        LeagueSettingsUpdate: {
+          type: 'object',
+          description: 'League settings update request',
+          properties: {
+            name: {
+              type: 'string',
+              description: 'League name',
+              example: 'Dynasty Warriors League'
+            },
+            num_teams: {
+              type: 'integer',
+              minimum: 4,
+              maximum: 32,
+              description: 'Number of teams in the league'
+            },
+            cap: {
+              type: 'integer',
+              minimum: 0,
+              description: 'Salary cap limit'
+            },
+            faab: {
+              type: 'integer',
+              minimum: 0,
+              description: 'Free agent acquisition budget'
+            },
+            py: {
+              type: 'number',
+              format: 'float',
+              description: 'Points per passing yard'
+            },
+            tdp: {
+              type: 'integer',
+              description: 'Points per passing touchdown'
+            },
+            rec: {
+              type: 'number',
+              format: 'float',
+              description: 'Points per reception'
+            }
+          }
+        },
+        CreateTradeRequest: {
+          type: 'object',
+          required: ['propose_tid', 'accept_tid'],
+          properties: {
+            propose_tid: {
+              type: 'integer',
+              description: 'Proposing team ID',
+              example: 13
+            },
+            accept_tid: {
+              type: 'integer',
+              description: 'Accepting team ID',
+              example: 14
+            },
+            proposingTeamPlayers: {
+              oneOf: [
+                { type: 'string' },
+                {
+                  type: 'array',
+                  items: { type: 'string' }
+                }
+              ],
+              description: 'Player ID(s) from proposing team',
+              example: ['4017', '3892']
+            },
+            acceptingTeamPlayers: {
+              oneOf: [
+                { type: 'string' },
+                {
+                  type: 'array',
+                  items: { type: 'string' }
+                }
+              ],
+              description: 'Player ID(s) from accepting team',
+              example: ['2041']
+            },
+            proposingTeamPicks: {
+              oneOf: [
+                { type: 'integer' },
+                {
+                  type: 'array',
+                  items: { type: 'integer' }
+                }
+              ],
+              description: 'Draft pick ID(s) from proposing team',
+              example: [1542]
+            },
+            acceptingTeamPicks: {
+              oneOf: [
+                { type: 'integer' },
+                {
+                  type: 'array',
+                  items: { type: 'integer' }
+                }
+              ],
+              description: 'Draft pick ID(s) from accepting team',
+              example: [1543]
+            },
+            releasePlayers: {
+              oneOf: [
+                { type: 'string' },
+                {
+                  type: 'array',
+                  items: { type: 'string' }
+                }
+              ],
+              description: 'Player ID(s) to release from proposing team',
+              example: ['1889']
+            }
+          }
+        },
+        TradesListResponse: {
+          type: 'object',
+          description: 'List of trade proposals',
+          example: [
+            {
+              uid: 1234,
+              lid: 2,
+              propose_tid: 13,
+              accept_tid: 14,
+              userid: 5,
+              proposed: 1698765432,
+              accepted: null,
+              rejected: null,
+              cancelled: null,
+              vetoed: null,
+              proposingTeamPlayers: ['4017', '3892'],
+              acceptingTeamPlayers: ['2041'],
+              proposingTeamPicks: [],
+              acceptingTeamPicks: [],
+              proposingTeamReleasePlayers: [],
+              acceptingTeamReleasePlayers: []
+            }
+          ]
+        },
+        Trade: {
+          type: 'object',
+          properties: {
+            uid: {
+              type: 'integer',
+              description: 'Trade ID',
+              example: 1234
+            },
+            lid: {
+              type: 'integer',
+              description: 'League ID',
+              example: 2
+            },
+            propose_tid: {
+              type: 'integer',
+              description: 'Proposing team ID',
+              example: 13
+            },
+            accept_tid: {
+              type: 'integer',
+              description: 'Accepting team ID',
+              example: 14
+            },
+            userid: {
+              type: 'integer',
+              description: 'User ID who proposed the trade',
+              example: 5
+            },
+            proposed: {
+              type: 'integer',
+              description: 'Unix timestamp when trade was proposed',
+              example: 1698765432
+            },
+            accepted: {
+              type: 'integer',
+              nullable: true,
+              description: 'Unix timestamp when trade was accepted',
+              example: null
+            },
+            rejected: {
+              type: 'integer',
+              nullable: true,
+              description: 'Unix timestamp when trade was rejected',
+              example: null
+            },
+            cancelled: {
+              type: 'integer',
+              nullable: true,
+              description: 'Unix timestamp when trade was cancelled',
+              example: null
+            },
+            vetoed: {
+              type: 'integer',
+              nullable: true,
+              description: 'Unix timestamp when trade was vetoed',
+              example: null
+            },
+            proposingTeamPlayers: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Player IDs from proposing team'
+            },
+            acceptingTeamPlayers: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Player IDs from accepting team'
+            },
+            proposingTeamPicks: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/DraftPick' },
+              description: 'Draft picks from proposing team'
+            },
+            acceptingTeamPicks: {
+              type: 'array',
+              items: { $ref: '#/components/schemas/DraftPick' },
+              description: 'Draft picks from accepting team'
+            },
+            proposingTeamReleasePlayers: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Player IDs to be released by proposing team'
+            },
+            acceptingTeamReleasePlayers: {
+              type: 'array',
+              items: { type: 'string' },
+              description: 'Player IDs to be released by accepting team'
+            }
+          }
         }
       },
       responses: {
@@ -2557,10 +3594,86 @@ const options = {
           description:
             'Season type (REG=Regular, POST=Playoffs, PRE=Preseason)',
           example: 'REG'
+        },
+        // New parameters from documented endpoints
+        dataViewId: {
+          name: 'data_view_id',
+          in: 'path',
+          required: true,
+          schema: {
+            type: 'string',
+            format: 'uuid'
+          },
+          description: 'Unique identifier for the data view',
+          example: 'a1b2c3d4-5678-90ab-cdef-123456789012'
+        },
+        viewId: {
+          name: 'view_id',
+          in: 'path',
+          required: true,
+          schema: {
+            type: 'string',
+            format: 'uuid'
+          },
+          description: 'Unique identifier for the data view',
+          example: 'a1b2c3d4-5678-90ab-cdef-123456789012'
+        },
+        exportFormat: {
+          name: 'export_format',
+          in: 'path',
+          required: true,
+          schema: {
+            type: 'string',
+            enum: ['csv', 'json']
+          },
+          description: 'Format for exporting the data view',
+          example: 'csv'
+        },
+        ignoreCache: {
+          name: 'ignore_cache',
+          in: 'query',
+          required: false,
+          schema: {
+            type: 'boolean'
+          },
+          description: 'Whether to ignore cached results and fetch fresh data',
+          example: false
+        },
+        exportLimit: {
+          name: 'limit',
+          in: 'query',
+          required: false,
+          schema: {
+            type: 'integer',
+            minimum: 1
+          },
+          description: 'Maximum number of records to export',
+          example: 1000
+        },
+        userId: {
+          name: 'user_id',
+          in: 'query',
+          required: false,
+          schema: {
+            type: 'integer'
+          },
+          description: 'Filter data views by user ID',
+          example: 123
+        },
+        username: {
+          name: 'username',
+          in: 'query',
+          required: false,
+          schema: {
+            type: 'string'
+          },
+          description: 'Filter data views by username',
+          example: 'johndoe'
         }
       }
     },
     tags: [
+      // Public API Tags
       {
         name: 'Authentication',
         description: 'User authentication endpoints'
@@ -2571,11 +3684,11 @@ const options = {
       },
       {
         name: 'Leagues',
-        description: 'League management endpoints'
+        description: 'Fantasy League management endpoints'
       },
       {
         name: 'Teams',
-        description: 'Team management endpoints'
+        description: 'Fantasy Team management endpoints'
       },
       {
         name: 'Projections',
@@ -2596,11 +3709,6 @@ const options = {
       {
         name: 'Wagers',
         description: 'Betting wager endpoints'
-      },
-      {
-        name: 'Cache',
-        description:
-          'Cache management endpoints for storing and retrieving temporary data'
       },
       {
         name: 'Data Views',
@@ -2630,6 +3738,48 @@ const options = {
         name: 'Utilities',
         description:
           'Utility endpoints for URL shortening and other helper functions'
+      },
+      // Internal/Administrative API Tags
+      {
+        name: 'System',
+        description: 'System monitoring and health check endpoints',
+        'x-displayName': 'System (Internal)'
+      },
+      {
+        name: 'Cache',
+        description: 'Cache management endpoints (admin only)',
+        'x-displayName': 'Cache Management (Internal)'
+      },
+      {
+        name: 'Error Reporting',
+        description: 'Client error reporting endpoints (internal)',
+        'x-displayName': 'Error Reporting (Internal)'
+      }
+    ],
+    'x-tagGroups': [
+      {
+        name: 'Public API',
+        tags: [
+          'Authentication',
+          'Players',
+          'Leagues',
+          'Teams',
+          'Projections',
+          'Schedule',
+          'Stats',
+          'Markets',
+          'Wagers',
+          'Data Views',
+          'Waivers',
+          'Settings',
+          'Plays',
+          'Scoreboard',
+          'Utilities'
+        ]
+      },
+      {
+        name: 'Internal/Administrative API',
+        tags: ['System', 'Cache', 'Error Reporting']
       }
     ]
   },

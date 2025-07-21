@@ -7,7 +7,7 @@ const router = express.Router()
 
 /**
  * @swagger
- * /errors:
+ * /api/errors:
  *   post:
  *     summary: Report client error
  *     description: |
@@ -20,7 +20,7 @@ const router = express.Router()
  *
  *       An email notification is sent to the admin email address configured in the system.
  *     tags:
- *       - System
+ *       - Error Reporting
  *     requestBody:
  *       required: true
  *       content:

@@ -3,7 +3,7 @@ const router = express.Router()
 
 /**
  * @swagger
- * /settings/sources/{sourceId}:
+ * /api/settings/sources/{sourceId}:
  *   put:
  *     tags:
  *       - Settings

@@ -83,10 +83,10 @@ const router = express.Router()
  *       required:
  *         - errors
  *
- * /status:
+ * /api/status:
  *   get:
  *     tags:
- *       - Utilities
+ *       - System
  *     summary: Get system status and background job information
  *     description: |
  *       Retrieve detailed information about all background jobs and their execution status.
@@ -97,7 +97,7 @@ const router = express.Router()
  *       - Waiver processing (Free Agency, Poaching, Practice Squad)
  *       - Data imports (Players, Games, Plays, Projections)
  *       - Betting odds collection (DraftKings, FanDuel, Caesars, etc.)
- *       - League management (Rosters, Draft Picks, Schedules)
+ *       - Fantasy league management (Rosters, Draft Picks, Schedules)
  *       - Analytics processing (Stats, Projections, Market Analysis)
  *     operationId: getSystemStatus
  *     responses:
@@ -149,10 +149,10 @@ router.get('/?', async (req, res) => {
 
 /**
  * @swagger
- * /status/overall:
+ * /api/status/overall:
  *   get:
  *     tags:
- *       - Utilities
+ *       - System
  *     summary: Get overall system health status
  *     description: |
  *       Get a high-level overview of system health status. This endpoint provides a simplified
