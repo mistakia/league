@@ -24,7 +24,7 @@ const swaggerOptions = {
 
 /**
  * @swagger
- * /docs:
+ * /api/docs:
  *   get:
  *     summary: Serve API documentation interface
  *     description: |

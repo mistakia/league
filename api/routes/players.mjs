@@ -30,7 +30,7 @@ if (process.env.NODE_ENV !== 'test') {
 
 /**
  * @swagger
- * /players:
+ * /api/players:
  *   post:
  *     tags:
  *       - Players
@@ -211,7 +211,7 @@ router.post('/?', async (req, res) => {
 
 /**
  * @swagger
- * /players/{pid}:
+ * /api/players/{pid}:
  *   get:
  *     tags:
  *       - Players
@@ -354,7 +354,7 @@ router.get('/:pid', async (req, res) => {
 
 /**
  * @swagger
- * /players/{pid}/practices:
+ * /api/players/{pid}/practices:
  *   get:
  *     tags:
  *       - Players
@@ -530,7 +530,7 @@ router.get('/:pid/practices/?', async (req, res) => {
 
 /**
  * @swagger
- * /players/{pid}/gamelogs:
+ * /api/players/{pid}/gamelogs:
  *   get:
  *     tags:
  *       - Players
@@ -817,7 +817,7 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
 
 /**
  * @swagger
- * /players/{pid}/markets:
+ * /api/players/{pid}/markets:
  *   get:
  *     tags:
  *       - Players

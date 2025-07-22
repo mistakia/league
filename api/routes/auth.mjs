@@ -9,7 +9,7 @@ const router = express.Router()
 
 /**
  * @swagger
- * /auth/login:
+ * /api/auth/login:
  *   post:
  *     tags:
  *       - Authentication
@@ -81,7 +81,7 @@ router.post('/login', async (req, res) => {
 
 /**
  * @swagger
- * /auth/register:
+ * /api/auth/register:
  *   post:
  *     tags:
  *       - Authentication
@@ -264,7 +264,7 @@ router.post('/register', async (req, res) => {
 
 /**
  * @swagger
- * /auth/reset-password:
+ * /api/auth/reset-password:
  *   post:
  *     tags:
  *       - Authentication

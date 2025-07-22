@@ -23,7 +23,7 @@ if (process.env.NODE_ENV !== 'test') {
 
 /**
  * @swagger
- * /leagues/{leagueId}/players:
+ * /api/leagues/{leagueId}/players:
  *   get:
  *     summary: Get all players for a fantasy league
  *     description: |
@@ -60,13 +60,13 @@ if (process.env.NODE_ENV !== 'test') {
  *                     properties:
  *                       bid:
  *                         type: number
- *                         description: 'User\'s restricted free agency bid amount (only present if authenticated and bid exists)'
+ *                         description: "User's restricted free agency bid amount (only present if authenticated and bid exists)"
  *                         example: 25
  *                       restricted_free_agency_conditional_releases:
  *                         type: array
  *                         items:
  *                           type: string
- *                         description: 'List of player IDs that would be released if this bid is successful (only present if authenticated and releases exist)'
+ *                         description: "List of player IDs that would be released if this bid is successful (only present if authenticated and releases exist)"
  *                         example: ['JACO-MYER-2020-1996-09-10', 'DANT-JONE-2019-1994-12-29']
  *             examples:
  *               unauthenticated_response:

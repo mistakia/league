@@ -186,7 +186,7 @@ For complex aggregations that benefit from CTEs (see [Fantasy Points Column Defi
 The complete request schema is documented in [`data-view-request-schema.json`](./data-view-request-schema.json). Performance guidelines and parameter compatibility rules are available in the [`data-view-specs/`](./data-view-specs/) folder.
 
 ```javascript
-POST /data_views/search
+POST /data-views/search
 {
   columns: Array<ColumnConfig>,           // Main data columns
   prefix_columns: Array<ColumnConfig>,    // Additional columns (e.g., player info)
