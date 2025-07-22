@@ -494,9 +494,17 @@ const format_market = async ({
 
     const is_player_selection =
       draftkings_selection.participants?.[0]?.type === 'Player'
-    const draftkings_player_name = is_player_selection
+    let draftkings_player_name = is_player_selection
       ? draftkings_selection.participants[0].name
       : null
+
+    // For futures markets, extract player name from event name if no participant data
+    if (!draftkings_player_name && draftkings_event?.name) {
+      draftkings_player_name = draftkings.extract_player_name_from_event(
+        draftkings_event.name
+      )
+    }
+
     if (draftkings_player_name) {
       const player_search_params = {
         name: draftkings_player_name,
@@ -590,7 +598,7 @@ const format_market = async ({
     source_market_name: `${draftkings_offer_category.name.trim()} - ${draftkings_offer_sub_category.name} - ${draftkings_market.name} (categoryId: ${draftkings_offer_category.offerCategoryId}, subcategoryId: ${draftkings_offer_sub_category.subcategoryId}, betOfferTypeId: ${draftkings_market.marketType?.betOfferTypeId})`,
 
     esbid: nfl_game ? nfl_game.esbid : null,
-    year: nfl_game ? nfl_game.year : null,
+    year: nfl_game ? nfl_game.year : constants.season.year,
     source_event_id: draftkings_market.eventId,
     source_event_name: draftkings_event?.name || null,
 

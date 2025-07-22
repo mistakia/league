@@ -36,6 +36,25 @@ export const get_team_from_participant = ({ participant, participantType }) => {
   return team
 }
 
+export const extract_player_name_from_event = (event_name) => {
+  if (!event_name || typeof event_name !== 'string') {
+    return null
+  }
+
+  // Match pattern: "NFL 20XX/XX - Player Name"
+  // Examples: "NFL 2025/26 - Kyler Murray", "NFL 2024/25 - Josh Allen"
+  const nfl_futures_pattern = /^NFL\s+20\d{2}\/\d{2}\s+-\s+(.+)$/
+  const match = event_name.match(nfl_futures_pattern)
+
+  if (match && match[1]) {
+    const player_name = match[1].trim()
+    log(`Extracted player name from NFL futures event: ${player_name}`)
+    return player_name
+  }
+
+  return null
+}
+
 const get_draftkings_config = async () => {
   const config_row = await db('config')
     .where({ key: 'draftkings_config' })
