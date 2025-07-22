@@ -146,7 +146,7 @@ const router = express.Router({ mergeParams: true })
  *       - Used picks have pid and selection_timestamp populated
  *       - Original team ID (otid) shows if pick was traded
  *     tags:
- *       - Leagues
+ *       - Fantasy Leagues
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *       - name: year
@@ -257,7 +257,7 @@ router.get('/?', async (req, res) => {
  *       - Broadcasts pick to league via WebSocket
  *       - Sends notification to league members
  *     tags:
- *       - Leagues
+ *       - Fantasy Leagues
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *     security:

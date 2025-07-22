@@ -175,7 +175,7 @@ const router = express.Router({ mergeParams: true })
  *       - May include private roster information or management options
  *       - Enhanced data for team owners
  *     tags:
- *       - Leagues
+ *       - Fantasy Leagues
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *       - name: year
@@ -275,7 +275,7 @@ router.get('/?', async (req, res) => {
  *       - Respects league roster size limits
  *       - Enforces salary cap constraints
  *     tags:
- *       - Leagues
+ *       - Fantasy Leagues
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *     security:
@@ -511,7 +511,7 @@ router.post('/?', async (req, res) => {
  *       - Updates all relevant transaction records
  *       - Ensures cap compliance after update
  *     tags:
- *       - Leagues
+ *       - Fantasy Leagues
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *     security:
@@ -719,7 +719,7 @@ router.put('/?', async (req, res) => {
  *       - Updates team salary cap calculations
  *       - Clears roster slot for new player
  *     tags:
- *       - Leagues
+ *       - Fantasy Leagues
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *     security:

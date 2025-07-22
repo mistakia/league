@@ -12,7 +12,10 @@ const router = express.Router()
  * @property {string} customSiteTitle - Custom title for the documentation page
  * @property {string} customfavIcon - Custom favicon for the documentation page
  */
-const swaggerOptions = {
+const swagger_options = {
+  swaggerOptions: {
+    docExpansion: 'none'
+  },
   explorer: true,
   customCss: `
     .swagger-ui .topbar { display: none }
@@ -50,15 +53,6 @@ const swaggerOptions = {
  *         $ref: '#/components/responses/BadRequestError'
  *       '500':
  *         $ref: '#/components/responses/InternalServerError'
- *     x-code-samples:
- *       - lang: 'JavaScript'
- *         source: |
- *           // Access the documentation in your browser
- *           window.location.href = '/api/docs';
- *       - lang: 'curl'
- *         source: |
- *           # Open the API documentation
- *           curl -X GET "http://localhost:3000/api/docs"
  */
 
 // Mount Swagger UI middleware
@@ -85,6 +79,6 @@ router.use('/', swaggerUi.serve)
  * @returns {Error} 404 - Documentation not found
  * @returns {Error} 500 - Internal server error
  */
-router.get('/', swaggerUi.setup(specs, swaggerOptions))
+router.get('/', swaggerUi.setup(specs, swagger_options))
 
 export default router

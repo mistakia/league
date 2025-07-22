@@ -246,7 +246,7 @@ export const getTrade = async (req, res) => {
  *       - **Releases**: Players that must be released for roster space
  *       - **Status**: Current state of the trade proposal
  *     tags:
- *       - Leagues
+ *       - Fantasy Leagues
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *       - name: tradeId
@@ -359,7 +359,7 @@ router.get('/?', getTrade)
  *       - Cancels RFA bids for traded players
  *       - Processes active poaching claims
  *     tags:
- *       - Leagues
+ *       - Fantasy Leagues
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *       - name: tradeId
@@ -986,7 +986,7 @@ router.post(
  *       - Trade must be in pending status (not already processed)
  *       - User must be authenticated
  *     tags:
- *       - Leagues
+ *       - Fantasy Leagues
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *       - name: tradeId
@@ -1117,7 +1117,7 @@ router.post(
  *       - Want to modify trade terms (requires new proposal)
  *       - No longer need the trade
  *     tags:
- *       - Leagues
+ *       - Fantasy Leagues
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *       - name: tradeId
@@ -1254,7 +1254,7 @@ router.post(
  *       - Violation of league rules
  *       - Competitive balance concerns
  *     tags:
- *       - Leagues
+ *       - Fantasy Leagues
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *       - name: tradeId

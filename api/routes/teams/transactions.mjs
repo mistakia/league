@@ -10,7 +10,7 @@ const router = express.Router({ mergeParams: true })
  * /teams/{teamId}/transactions/reserve:
  *   get:
  *     tags:
- *       - Teams
+ *       - Fantasy Teams
  *     summary: Get reserve transactions
  *     description: |
  *       Get all transactions for players currently on injured reserve.

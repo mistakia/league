@@ -15,7 +15,7 @@ const router = express.Router({ mergeParams: true })
  * /teams/{teamId}/lineups:
  *   get:
  *     tags:
- *       - Teams
+ *       - Fantasy Teams
  *     summary: Get fantasy team lineup
  *     description: |
  *       Get the fantasy team's lineup for a specific week and year.
@@ -76,7 +76,7 @@ router.get('/?', async (req, res) => {
  * @swagger
  *   put:
  *     tags:
- *       - Teams
+ *       - Fantasy Teams
  *     summary: Update fantasy team lineup
  *     description: |
  *       Update the fantasy team's lineup by moving players to different slots.

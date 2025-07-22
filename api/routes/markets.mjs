@@ -159,7 +159,7 @@ const prop_markets_base_query_validator = v.compile(
  *           type: integer
  *           minimum: 1
  *           maximum: 1000
- *           default: 1000
+ *           default: 100
  *         description: Number of markets to return
  *       - name: offset
  *         in: query
@@ -384,7 +384,7 @@ router.get('/?', async (req, res) => {
  *           type: integer
  *           minimum: 1
  *           maximum: 1000
- *           default: 1000
+ *           default: 100
  *         description: Maximum number of historical records to return
  *       - name: offset
  *         in: query
@@ -561,7 +561,7 @@ router.get('/:source_market_id/history', async (req, res) => {
  *           type: integer
  *           minimum: 1
  *           maximum: 1000
- *           default: 1000
+ *           default: 100
  *         description: Maximum number of markets to return
  *       - name: offset
  *         in: query
@@ -781,7 +781,7 @@ router.get('/players/:pid', async (req, res) => {
  *           type: integer
  *           minimum: 1
  *           maximum: 1000
- *           default: 1000
+ *           default: 100
  *         description: Maximum number of markets to return
  *       - name: offset
  *         in: query

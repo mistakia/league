@@ -247,7 +247,7 @@ const router = express.Router({
  *       - Can query historical team data from previous seasons
  *       - Validates year range (1990 to current season)
  *     tags:
- *       - Teams
+ *       - Fantasy Teams
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *       - name: year
@@ -453,7 +453,7 @@ router.get('/?', async (req, res) => {
  *       - Salary cap: Inherited from league settings
  *       - FAAB budget: Inherited from league settings
  *     tags:
- *       - Teams
+ *       - Fantasy Teams
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *     security:
@@ -628,7 +628,7 @@ router.post('/?', async (req, res) => {
  *       - All team data, including historical records, will be permanently lost
  *       - Consider carefully before deleting teams with significant history
  *     tags:
- *       - Teams
+ *       - Fantasy Teams
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *     security:

@@ -6,7 +6,7 @@ const options = {
   definition: {
     openapi: '3.0.0',
     info: {
-      title: 'xo.football League API',
+      title: 'xo.football API',
       version: '0.1.0-alpha',
       description:
         '**UNSTABLE API - UNDER HEAVY DEVELOPMENT**\n\nThis API is currently in active development and is not yet stable. Breaking changes are expected, and endpoints may be moved, renamed, or removed without notice. Use at your own risk in production environments.\n\nOpen-source fantasy football league management platform API with advanced analytics and betting market integration.',
@@ -3675,20 +3675,17 @@ const options = {
     tags: [
       // Public API Tags
       {
-        name: 'Authentication',
-        description: 'User authentication endpoints'
-      },
-      {
         name: 'Players',
         description: 'Player data and statistics endpoints'
       },
       {
-        name: 'Leagues',
-        description: 'Fantasy League management endpoints'
+        name: 'Plays',
+        description:
+          'NFL play-by-play data endpoints for retrieving detailed game information'
       },
       {
-        name: 'Teams',
-        description: 'Fantasy Team management endpoints'
+        name: 'Markets',
+        description: 'Betting market endpoints'
       },
       {
         name: 'Projections',
@@ -3699,21 +3696,36 @@ const options = {
         description: 'NFL schedule endpoints'
       },
       {
-        name: 'Stats',
-        description: 'Player and team statistics endpoints'
+        name: 'Data Views',
+        description:
+          'Custom data view management endpoints for creating, saving, and sharing table configurations'
       },
       {
-        name: 'Markets',
-        description: 'Betting market endpoints'
+        name: 'Stats',
+        description: 'Player and team statistics endpoints'
       },
       {
         name: 'Wagers',
         description: 'Betting wager endpoints'
       },
       {
-        name: 'Data Views',
-        description:
-          'Custom data view management endpoints for creating, saving, and sharing table configurations'
+        name: 'Scoreboard',
+        description: 'Live game data and scoreboard information endpoints'
+      },
+
+      {
+        name: 'Authentication',
+        description: 'User authentication endpoints'
+      },
+
+      // Fantasy Football Leagues
+      {
+        name: 'Fantasy Leagues',
+        description: 'Fantasy League management endpoints'
+      },
+      {
+        name: 'Fantasy Teams',
+        description: 'Fantasy Team management endpoints'
       },
       {
         name: 'Waivers',
@@ -3726,15 +3738,6 @@ const options = {
           'User settings and configuration endpoints for personalizing projection sources and application preferences'
       },
       {
-        name: 'Plays',
-        description:
-          'NFL play-by-play data endpoints for retrieving detailed game information'
-      },
-      {
-        name: 'Scoreboard',
-        description: 'Live game data and scoreboard information endpoints'
-      },
-      {
         name: 'Utilities',
         description:
           'Utility endpoints for URL shortening and other helper functions'
@@ -3742,44 +3745,15 @@ const options = {
       // Internal/Administrative API Tags
       {
         name: 'System',
-        description: 'System monitoring and health check endpoints',
-        'x-displayName': 'System (Internal)'
+        description: 'System monitoring and health check endpoints'
       },
       {
         name: 'Cache',
-        description: 'Cache management endpoints (admin only)',
-        'x-displayName': 'Cache Management (Internal)'
+        description: 'Cache management endpoints (admin only)'
       },
       {
         name: 'Error Reporting',
-        description: 'Client error reporting endpoints (internal)',
-        'x-displayName': 'Error Reporting (Internal)'
-      }
-    ],
-    'x-tagGroups': [
-      {
-        name: 'Public API',
-        tags: [
-          'Authentication',
-          'Players',
-          'Leagues',
-          'Teams',
-          'Projections',
-          'Schedule',
-          'Stats',
-          'Markets',
-          'Wagers',
-          'Data Views',
-          'Waivers',
-          'Settings',
-          'Plays',
-          'Scoreboard',
-          'Utilities'
-        ]
-      },
-      {
-        name: 'Internal/Administrative API',
-        tags: ['System', 'Cache', 'Error Reporting']
+        description: 'Client error reporting endpoints (internal)'
       }
     ]
   },

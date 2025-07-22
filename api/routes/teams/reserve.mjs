@@ -10,7 +10,7 @@ const router = express.Router({ mergeParams: true })
  * /teams/{teamId}/reserve:
  *   post:
  *     tags:
- *       - Teams
+ *       - Fantasy Teams
  *     summary: Move player to injured reserve
  *     description: |
  *       Move a player to injured reserve (IR) or long-term IR.

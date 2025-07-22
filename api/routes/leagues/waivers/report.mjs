@@ -120,7 +120,7 @@ n *           description: Waiver order priority
  *       - Planning future waiver strategy
  *       - League transparency and fairness verification
  *     tags:
- *       - Leagues
+ *       - Fantasy Leagues
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *       - name: processed

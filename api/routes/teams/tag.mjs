@@ -18,7 +18,7 @@ const router = express.Router({ mergeParams: true })
  * /teams/{teamId}/tag:
  *   post:
  *     tags:
- *       - Teams
+ *       - Fantasy Teams
  *     summary: Tag a player
  *     description: |
  *       Apply a tag to a player (franchise, transition, etc.).
@@ -230,7 +230,7 @@ router.post('/?', async (req, res) => {
  * @swagger
  *   delete:
  *     tags:
- *       - Teams
+ *       - Fantasy Teams
  *     summary: Remove player tag
  *     description: |
  *       Remove a tag from a player. Player must be on active roster.

@@ -68,7 +68,7 @@ const router = express.Router({ mergeParams: true })
  *       - Understanding positional value curves
  *       - Comparing current vs. future picks
  *     tags:
- *       - Leagues
+ *       - Fantasy Leagues
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *     responses:

@@ -11,7 +11,7 @@ const router = express.Router({ mergeParams: true })
  * /teams/{teamId}/players:
  *   get:
  *     tags:
- *       - Teams
+ *       - Fantasy Teams
  *     summary: Get fantasy team players
  *     description: |
  *       Get all players on the fantasy team roster with their current information.

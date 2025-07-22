@@ -127,7 +127,7 @@ const router = express.Router({ mergeParams: true })
  *       - Configurable offset for browsing history
  *       - Ordered by timestamp (newest first)
  *     tags:
- *       - Leagues
+ *       - Fantasy Leagues
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *       - name: limit
@@ -312,7 +312,7 @@ router.get('/?', async (req, res) => {
  *       - Automatically calculated from current time
  *       - Captures recent roster activity patterns
  *     tags:
- *       - Leagues
+ *       - Fantasy Leagues
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *     responses:
@@ -413,7 +413,7 @@ router.get('/release', async (req, res) => {
  *       - Roster management history
  *       - Contract and salary cap analysis
  *     tags:
- *       - Leagues
+ *       - Fantasy Leagues
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *       - name: tid

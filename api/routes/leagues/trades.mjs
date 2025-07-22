@@ -120,7 +120,7 @@ const router = express.Router({ mergeParams: true })
  *       - **Releases**: Players to be released for roster space
  *       - **Status**: Current state of each trade proposal
  *     tags:
- *       - Leagues
+ *       - Fantasy Leagues
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *       - name: teamId
@@ -296,7 +296,7 @@ router.get('/?', async (req, res) => {
  *       - Sets proposal timestamp and proposing user
  *       - Returns complete trade details for review
  *     tags:
- *       - Leagues
+ *       - Fantasy Leagues
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *     security:
