@@ -106,7 +106,7 @@ const router = express.Router()
  *               v: "BAL"
  *               h: "KC"
  *
- * /api/schedule:
+ * /schedule:
  *   get:
  *     tags:
  *       - Schedule
