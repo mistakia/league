@@ -111,7 +111,7 @@ const router = express.Router({ mergeParams: true })
 
 /**
  * @swagger
- * /api/leagues/{leagueId}/matchups:
+ * /leagues/{leagueId}/matchups:
  *   post:
  *     summary: Generate league schedule (Commissioner only)
  *     description: |
@@ -220,7 +220,7 @@ router.post('/?', async (req, res) => {
 
 /**
  * @swagger
- * /api/leagues/{leagueId}/matchups:
+ * /leagues/{leagueId}/matchups:
  *   get:
  *     summary: Get fantasy league schedule and matchups
  *     description: |

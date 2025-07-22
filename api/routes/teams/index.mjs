@@ -18,7 +18,7 @@ const router = express.Router()
 
 /**
  * @swagger
- * /api/teams/{teamId}:
+ * /teams/{teamId}:
  *   put:
  *     tags:
  *       - Teams

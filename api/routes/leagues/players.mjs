@@ -23,7 +23,7 @@ if (process.env.NODE_ENV !== 'test') {
 
 /**
  * @swagger
- * /api/leagues/{leagueId}/players:
+ * /leagues/{leagueId}/players:
  *   get:
  *     summary: Get all players for a fantasy league
  *     description: |

@@ -8,7 +8,7 @@ const router = express.Router()
 
 /**
  * @swagger
- * /api/me:
+ * /me:
  *   get:
  *     summary: Get current user profile
  *     description: Retrieves the complete profile for the authenticated user, including personal information, team memberships, leagues, pending waivers, poaches, and projection source preferences. This endpoint provides all the data needed to populate the user dashboard.
@@ -317,7 +317,7 @@ router.get('/?', async (req, res) => {
 
 /**
  * @swagger
- * /api/me:
+ * /me:
  *   put:
  *     summary: Update current user profile
  *     description: Updates specific fields of the authenticated user's profile. Supports updating email, password, username, watchlist, and notification preferences. Includes validation for email format, username requirements, and prevents duplicate usernames/emails.

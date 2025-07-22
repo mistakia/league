@@ -122,7 +122,7 @@ const router = express.Router({ mergeParams: true })
 
 /**
  * @swagger
- * /api/leagues/{leagueId}/draft:
+ * /leagues/{leagueId}/draft:
  *   get:
  *     summary: Get fantasy league draft picks
  *     description: |
@@ -210,7 +210,7 @@ router.get('/?', async (req, res) => {
 
 /**
  * @swagger
- * /api/leagues/{leagueId}/draft:
+ * /leagues/{leagueId}/draft:
  *   post:
  *     summary: Make a draft pick
  *     description: |

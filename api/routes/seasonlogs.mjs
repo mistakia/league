@@ -6,7 +6,7 @@ const router = express.Router()
 
 /**
  * @swagger
- * /api/seasonlogs/teams:
+ * /seasonlogs/teams:
  *   get:
  *     tags:
  *       - Stats

@@ -38,7 +38,7 @@ const router = express.Router()
 
 /**
  * @swagger
- * /api/leagues/{leagueId}:
+ * /leagues/{leagueId}:
  *   put:
  *     tags:
  *       - Leagues
@@ -217,7 +217,7 @@ router.put('/:leagueId', async (req, res) => {
 
 /**
  * @swagger
- * /api/leagues/{leagueId}:
+ * /leagues/{leagueId}:
  *   get:
  *     tags:
  *       - Leagues
@@ -289,7 +289,7 @@ router.get('/:leagueId/?', async (req, res) => {
 
 /**
  * @swagger
- * /api/leagues/{leagueId}/seasons/{year}:
+ * /leagues/{leagueId}/seasons/{year}:
  *   get:
  *     tags:
  *       - Leagues

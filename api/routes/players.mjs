@@ -30,7 +30,7 @@ if (process.env.NODE_ENV !== 'test') {
 
 /**
  * @swagger
- * /api/players:
+ * /players:
  *   post:
  *     tags:
  *       - Players
@@ -97,7 +97,6 @@ if (process.env.NODE_ENV !== 'test') {
  *                         nullable: true
  *                         description: User's current bid on player in restricted free agency (only present when authenticated and bidding is active)
  *                         example: 150
- *                         minimum: 0
  *                       restricted_free_agency_conditional_releases:
  *                         type: array
  *                         items:
@@ -211,7 +210,7 @@ router.post('/?', async (req, res) => {
 
 /**
  * @swagger
- * /api/players/{pid}:
+ * /players/{pid}:
  *   get:
  *     tags:
  *       - Players
@@ -354,7 +353,7 @@ router.get('/:pid', async (req, res) => {
 
 /**
  * @swagger
- * /api/players/{pid}/practices:
+ * /players/{pid}/practices:
  *   get:
  *     tags:
  *       - Players
@@ -530,7 +529,7 @@ router.get('/:pid/practices/?', async (req, res) => {
 
 /**
  * @swagger
- * /api/players/{pid}/gamelogs:
+ * /players/{pid}/gamelogs:
  *   get:
  *     tags:
  *       - Players
@@ -817,7 +816,7 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
 
 /**
  * @swagger
- * /api/players/{pid}/markets:
+ * /players/{pid}/markets:
  *   get:
  *     tags:
  *       - Players

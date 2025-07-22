@@ -3,7 +3,7 @@ const router = express.Router()
 
 /**
  * @swagger
- * /api/sources:
+ * /sources:
  *   get:
  *     tags:
  *       - Projections
@@ -57,7 +57,7 @@ router.get('/?', async (req, res) => {
 
 /**
  * @swagger
- * /api/sources/{sourceid}:
+ * /sources/{sourceid}:
  *   put:
  *     tags:
  *       - Projections

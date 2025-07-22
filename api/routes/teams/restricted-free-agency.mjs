@@ -13,7 +13,7 @@ const router = express.Router({ mergeParams: true })
 
 /**
  * @swagger
- * /api/teams/{teamId}/tag/restricted-free-agency:
+ * /teams/{teamId}/tag/restricted-free-agency:
  *   get:
  *     tags:
  *       - Teams
@@ -966,7 +966,7 @@ router.put('/?', async (req, res) => {
 
 /**
  * @swagger
- * /api/teams/{teamId}/tag/restricted-free-agency/nominate:
+ * /teams/{teamId}/tag/restricted-free-agency/nominate:
  *   post:
  *     tags:
  *       - Teams

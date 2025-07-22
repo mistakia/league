@@ -7,7 +7,7 @@ const router = express.Router()
 
 /**
  * @swagger
- * /api/stats/gamelogs/players:
+ * /stats/gamelogs/players:
  *   get:
  *     tags:
  *       - Stats

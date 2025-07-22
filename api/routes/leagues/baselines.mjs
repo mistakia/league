@@ -3,7 +3,7 @@ const router = express.Router({ mergeParams: true })
 
 /**
  * @swagger
- * /api/leagues/{leagueId}/baselines:
+ * /leagues/{leagueId}/baselines:
  *   get:
  *     summary: Get fantasy league baseline calculations
  *     description: |

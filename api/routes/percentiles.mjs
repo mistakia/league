@@ -4,7 +4,7 @@ const router = express.Router()
 
 /**
  * @swagger
- * /api/percentiles/{percentile_key}:
+ * /percentiles/{percentile_key}:
  *   get:
  *     summary: Get percentile data by key
  *     description: |

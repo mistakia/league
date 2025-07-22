@@ -7,7 +7,7 @@ const router = express.Router()
 
 /**
  * @swagger
- * /api/errors:
+ * /errors:
  *   post:
  *     summary: Report client error
  *     description: |

@@ -7,7 +7,7 @@ const router = express.Router()
 
 /**
  * @swagger
- * /api/scoreboard:
+ * /scoreboard:
  *   get:
  *     tags:
  *       - Scoreboard

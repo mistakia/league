@@ -83,7 +83,7 @@ const router = express.Router()
  *       required:
  *         - errors
  *
- * /api/status:
+ * /status:
  *   get:
  *     tags:
  *       - System
@@ -149,7 +149,7 @@ router.get('/?', async (req, res) => {
 
 /**
  * @swagger
- * /api/status/overall:
+ * /status/overall:
  *   get:
  *     tags:
  *       - System

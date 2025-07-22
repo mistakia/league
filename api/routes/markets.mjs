@@ -104,7 +104,7 @@ const prop_markets_base_query_validator = v.compile(
 
 /**
  * @swagger
- * /api/markets:
+ * /markets:
  *   get:
  *     tags:
  *       - Markets
@@ -348,7 +348,7 @@ router.get('/?', async (req, res) => {
 
 /**
  * @swagger
- * /api/markets/{source_market_id}/history:
+ * /markets/{source_market_id}/history:
  *   get:
  *     tags:
  *       - Markets
@@ -523,7 +523,7 @@ router.get('/:source_market_id/history', async (req, res) => {
 
 /**
  * @swagger
- * /api/markets/players/{pid}:
+ * /markets/players/{pid}:
  *   get:
  *     tags:
  *       - Markets
@@ -744,7 +744,7 @@ router.get('/players/:pid', async (req, res) => {
 
 /**
  * @swagger
- * /api/markets/games/{esbid}:
+ * /markets/games/{esbid}:
  *   get:
  *     tags:
  *       - Markets
@@ -930,7 +930,7 @@ router.get('/games/:esbid', async (req, res) => {
 
 /**
  * @swagger
- * /api/markets/{source_market_id}:
+ * /markets/{source_market_id}:
  *   get:
  *     tags:
  *       - Markets

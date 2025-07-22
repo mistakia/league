@@ -159,7 +159,7 @@ const router = express.Router()
 
 /**
  * @swagger
- * /api/leagues/{leagueId}/settings:
+ * /leagues/{leagueId}/settings:
  *   get:
  *     summary: Get league settings and configuration
  *     description: |
