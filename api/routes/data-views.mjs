@@ -44,13 +44,13 @@ function convert_to_html_table(objArray, view_name) {
 
   const headers = Object.keys(array[0])
   const title = view_name || 'Data Export'
-  
+
   return `<!DOCTYPE html>
 <html><head><title>${title}</title></head><body>
 <h1>${title}</h1>
 <table border="1">
-<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
-${array.map(row => `<tr>${headers.map(h => `<td>${String(row[h] ?? '')}</td>`).join('')}</tr>`).join('')}
+<tr>${headers.map((h) => `<th>${h}</th>`).join('')}</tr>
+${array.map((row) => `<tr>${headers.map((h) => `<td>${String(row[h] ?? '')}</td>`).join('')}</tr>`).join('')}
 </table>
 </body></html>`
 }
@@ -1126,7 +1126,10 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
         )
         break
       case 'html':
-        formatted_results = convert_to_html_table(data_view_results, view.view_name)
+        formatted_results = convert_to_html_table(
+          data_view_results,
+          view.view_name
+        )
         res.setHeader('Content-Type', 'text/html')
         res.setHeader(
           'Content-Disposition',
