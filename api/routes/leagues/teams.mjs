@@ -225,7 +225,7 @@ const router = express.Router({
 
 /**
  * @swagger
- * /api/leagues/{leagueId}/teams:
+ * /leagues/{leagueId}/teams:
  *   get:
  *     summary: Get fantasy league teams
  *     description: |
@@ -422,7 +422,7 @@ router.get('/?', async (req, res) => {
 
 /**
  * @swagger
- * /api/leagues/{leagueId}/teams:
+ * /leagues/{leagueId}/teams:
  *   post:
  *     summary: Create a new team
  *     description: |
@@ -589,7 +589,7 @@ router.post('/?', async (req, res) => {
 
 /**
  * @swagger
- * /api/leagues/{leagueId}/teams:
+ * /leagues/{leagueId}/teams:
  *   delete:
  *     summary: Delete a team
  *     description: |

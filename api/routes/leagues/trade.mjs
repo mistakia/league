@@ -221,7 +221,7 @@ export const getTrade = async (req, res) => {
 
 /**
  * @swagger
- * /api/leagues/{leagueId}/trade/{tradeId}:
+ * /leagues/{leagueId}/trade/{tradeId}:
  *   get:
  *     summary: Get trade details
  *     description: |
@@ -310,7 +310,7 @@ router.get('/?', getTrade)
 
 /**
  * @swagger
- * /api/leagues/{leagueId}/trade/{tradeId}/accept:
+ * /leagues/{leagueId}/trade/{tradeId}/accept:
  *   post:
  *     summary: Accept a trade proposal
  *     description: |
@@ -962,7 +962,7 @@ router.post(
 
 /**
  * @swagger
- * /api/leagues/{leagueId}/trade/{tradeId}/reject:
+ * /leagues/{leagueId}/trade/{tradeId}/reject:
  *   post:
  *     summary: Reject a trade proposal
  *     description: |
@@ -1087,7 +1087,7 @@ router.post(
 
 /**
  * @swagger
- * /api/leagues/{leagueId}/trade/{tradeId}/cancel:
+ * /leagues/{leagueId}/trade/{tradeId}/cancel:
  *   post:
  *     summary: Cancel a trade proposal
  *     description: |
@@ -1218,7 +1218,7 @@ router.post(
 
 /**
  * @swagger
- * /api/leagues/{leagueId}/trade/{tradeId}/veto:
+ * /leagues/{leagueId}/trade/{tradeId}/veto:
  *   post:
  *     summary: Veto a trade proposal
  *     description: |

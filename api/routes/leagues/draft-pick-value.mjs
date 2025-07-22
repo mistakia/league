@@ -30,7 +30,7 @@ const router = express.Router({ mergeParams: true })
 
 /**
  * @swagger
- * /api/leagues/{leagueId}/draft-pick-value:
+ * /leagues/{leagueId}/draft-pick-value:
  *   get:
  *     summary: Get draft pick values for league format
  *     description: |

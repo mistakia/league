@@ -88,7 +88,7 @@ const router = express.Router({ mergeParams: true })
 
 /**
  * @swagger
- * /api/leagues/{leagueId}/transactions:
+ * /leagues/{leagueId}/transactions:
  *   get:
  *     summary: Get fantasy league transactions
  *     description: |
@@ -283,7 +283,7 @@ router.get('/?', async (req, res) => {
 
 /**
  * @swagger
- * /api/leagues/{leagueId}/transactions/release:
+ * /leagues/{leagueId}/transactions/release:
  *   get:
  *     summary: Get recent release-related transactions
  *     description: |
@@ -383,7 +383,7 @@ router.get('/release', async (req, res) => {
 
 /**
  * @swagger
- * /api/leagues/{leagueId}/transactions/teams/{tid}/players/{pid}:
+ * /leagues/{leagueId}/transactions/teams/{tid}/players/{pid}:
  *   get:
  *     summary: Get player transaction history for a team
  *     description: |

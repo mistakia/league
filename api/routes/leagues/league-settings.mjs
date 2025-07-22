@@ -88,7 +88,7 @@
 
 /**
  * @swagger
- * /api/leagues/{leagueId}/league-settings:
+ * /leagues/{leagueId}/league-settings:
  *   get:
  *     summary: Get league settings field definitions and validation rules
  *     description: |

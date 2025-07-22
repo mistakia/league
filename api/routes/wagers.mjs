@@ -90,7 +90,7 @@ const query_params_validator = v.compile({
 
 /**
  * @swagger
- * /api/wagers/{user_id}:
+ * /wagers/{user_id}:
  *   get:
  *     tags:
  *       - Wagers

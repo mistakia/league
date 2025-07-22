@@ -8,30 +8,30 @@ const router = express.Router()
 
 function convert_to_markdown_table(objArray) {
   const array = typeof objArray !== 'object' ? JSON.parse(objArray) : objArray
-  
+
   if (!array.length) {
     return ''
   }
 
   // Get column headers from first object
   const headers = Object.keys(array[0])
-  
+
   // Build markdown table header
   let markdown = '| ' + headers.join(' | ') + ' |\n'
-  
+
   // Add separator row
   markdown += '| ' + headers.map(() => '---').join(' | ') + ' |\n'
-  
+
   // Add data rows
   for (const row of array) {
-    const values = headers.map(header => {
+    const values = headers.map((header) => {
       const value = row[header]
       // Escape pipe characters in cell values
       return String(value ?? '').replace(/\|/g, '\\|')
     })
     markdown += '| ' + values.join(' | ') + ' |\n'
   }
-  
+
   return markdown
 }
 
@@ -356,7 +356,7 @@ function convert_to_markdown_table(objArray) {
 
 /**
  * @swagger
- * /api/data-views:
+ * /data-views:
  *   get:
  *     summary: List data views
  *     description: |
@@ -431,7 +431,7 @@ router.get('/?', async (req, res) => {
 
 /**
  * @swagger
- * /api/data-views/{data_view_id}:
+ * /data-views/{data_view_id}:
  *   get:
  *     summary: Get a specific data view
  *     description: |
@@ -499,7 +499,7 @@ router.get('/:data_view_id', async (req, res) => {
 
 /**
  * @swagger
- * /api/data-views:
+ * /data-views:
  *   post:
  *     summary: Create or update a data view
  *     description: |
@@ -686,7 +686,7 @@ router.post('/?', async (req, res) => {
 
 /**
  * @swagger
- * /api/data-views/{view_id}:
+ * /data-views/{view_id}:
  *   delete:
  *     summary: Delete a data view
  *     description: |
@@ -777,7 +777,7 @@ router.delete('/:view_id', async (req, res) => {
 
 /**
  * @swagger
- * /api/data-views/search:
+ * /data-views/search:
  *   post:
  *     summary: Search and retrieve data view results
  *     description: |
@@ -903,7 +903,7 @@ router.post('/search/?', async (req, res) => {
 
 /**
  * @swagger
- * /api/data-views/export/{view_id}/{export_format}:
+ * /data-views/export/{view_id}/{export_format}:
  *   get:
  *     summary: Export data view results
  *     description: |

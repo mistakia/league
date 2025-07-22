@@ -8,7 +8,7 @@ const cache_path = path.join(os.homedir(), './cache')
 
 /**
  * @swagger
- * /api/cache/{cache_key}:
+ * /cache/{cache_key}:
  *   get:
  *     summary: Retrieve cached data
  *     description: |
@@ -114,7 +114,7 @@ router.get('/:cache_key(*)', async (req, res) => {
 
 /**
  * @swagger
- * /api/cache/{cache_key}:
+ * /cache/{cache_key}:
  *   post:
  *     summary: Store data in cache
  *     description: |

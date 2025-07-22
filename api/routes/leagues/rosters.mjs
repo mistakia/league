@@ -144,7 +144,7 @@ const router = express.Router({ mergeParams: true })
 
 /**
  * @swagger
- * /api/leagues/{leagueId}/rosters:
+ * /leagues/{leagueId}/rosters:
  *   get:
  *     summary: Get fantasy league rosters
  *     description: |
@@ -236,7 +236,7 @@ router.get('/?', async (req, res) => {
 
 /**
  * @swagger
- * /api/leagues/{leagueId}/rosters:
+ * /leagues/{leagueId}/rosters:
  *   post:
  *     summary: Add player to roster (Commissioner only)
  *     description: |
@@ -475,7 +475,7 @@ router.post('/?', async (req, res) => {
 
 /**
  * @swagger
- * /api/leagues/{leagueId}/rosters:
+ * /leagues/{leagueId}/rosters:
  *   put:
  *     summary: Update player salary value (Commissioner only)
  *     description: |
@@ -678,7 +678,7 @@ router.put('/?', async (req, res) => {
 
 /**
  * @swagger
- * /api/leagues/{leagueId}/rosters:
+ * /leagues/{leagueId}/rosters:
  *   delete:
  *     summary: Remove player from roster (Commissioner only)
  *     description: |

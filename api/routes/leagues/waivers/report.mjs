@@ -79,7 +79,7 @@ n *           description: Waiver order priority
 
 /**
  * @swagger
- * /api/leagues/{leagueId}/waivers/report:
+ * /leagues/{leagueId}/waivers/report:
  *   get:
  *     summary: Get waiver wire processing report
  *     description: |

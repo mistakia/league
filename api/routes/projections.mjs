@@ -7,7 +7,7 @@ const router = express.Router()
 
 /**
  * @swagger
- * /api/projections:
+ * /projections:
  *   get:
  *     tags:
  *       - Projections
@@ -120,7 +120,7 @@ router.get('/?', async (req, res) => {
 
 /**
  * @swagger
- * /api/projections/{pid}:
+ * /projections/{pid}:
  *   get:
  *     tags:
  *       - Projections
@@ -208,7 +208,7 @@ router.get('/:pid/?', async (req, res) => {
 
 /**
  * @swagger
- * /api/projections/{pid}:
+ * /projections/{pid}:
  *   put:
  *     tags:
  *       - Projections
@@ -433,7 +433,7 @@ router.put(
 
 /**
  * @swagger
- * /api/projections/{pid}:
+ * /projections/{pid}:
  *   delete:
  *     tags:
  *       - Projections
