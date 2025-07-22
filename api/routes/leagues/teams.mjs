@@ -225,11 +225,11 @@ const router = express.Router({
 
 /**
  * @swagger
- * /leagues/{leagueId}/teams:
+ * /api/leagues/{leagueId}/teams:
  *   get:
- *     summary: Get league teams
+ *     summary: Get fantasy league teams
  *     description: |
- *       Retrieves all teams in a league with their current forecasts, draft picks, and optionally user-specific communication settings.
+ *       Retrieves all fantasy teams in a fantasy league with their current forecasts, draft picks, and optionally user-specific communication settings.
  *
  *       **Key Features:**
  *       - Returns basic team information (name, abbreviation, salary cap, etc.)
@@ -422,7 +422,7 @@ router.get('/?', async (req, res) => {
 
 /**
  * @swagger
- * /leagues/{leagueId}/teams:
+ * /api/leagues/{leagueId}/teams:
  *   post:
  *     summary: Create a new team
  *     description: |
@@ -589,7 +589,7 @@ router.post('/?', async (req, res) => {
 
 /**
  * @swagger
- * /leagues/{leagueId}/teams:
+ * /api/leagues/{leagueId}/teams:
  *   delete:
  *     summary: Delete a team
  *     description: |

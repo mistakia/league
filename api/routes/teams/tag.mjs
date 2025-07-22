@@ -15,7 +15,7 @@ const router = express.Router({ mergeParams: true })
 
 /**
  * @swagger
- * /teams/{teamId}/tag:
+ * /api/teams/{teamId}/tag:
  *   post:
  *     tags:
  *       - Teams

@@ -356,7 +356,7 @@ function convert_to_markdown_table(objArray) {
 
 /**
  * @swagger
- * /data_views:
+ * /api/data-views:
  *   get:
  *     summary: List data views
  *     description: |
@@ -431,7 +431,7 @@ router.get('/?', async (req, res) => {
 
 /**
  * @swagger
- * /data_views/{data_view_id}:
+ * /api/data-views/{data_view_id}:
  *   get:
  *     summary: Get a specific data view
  *     description: |
@@ -499,7 +499,7 @@ router.get('/:data_view_id', async (req, res) => {
 
 /**
  * @swagger
- * /data_views:
+ * /api/data-views:
  *   post:
  *     summary: Create or update a data view
  *     description: |
@@ -686,7 +686,7 @@ router.post('/?', async (req, res) => {
 
 /**
  * @swagger
- * /data_views/{view_id}:
+ * /api/data-views/{view_id}:
  *   delete:
  *     summary: Delete a data view
  *     description: |
@@ -777,7 +777,7 @@ router.delete('/:view_id', async (req, res) => {
 
 /**
  * @swagger
- * /data_views/search:
+ * /api/data-views/search:
  *   post:
  *     summary: Search and retrieve data view results
  *     description: |
@@ -903,7 +903,7 @@ router.post('/search/?', async (req, res) => {
 
 /**
  * @swagger
- * /data_views/export/{view_id}/{export_format}:
+ * /api/data-views/export/{view_id}/{export_format}:
  *   get:
  *     summary: Export data view results
  *     description: |

@@ -15,7 +15,7 @@ const get_url_hash = (url) => {
 
 /**
  * @swagger
- * /shorten_url:
+ * /u:
  *   post:
  *     tags:
  *       - Utilities
@@ -108,7 +108,7 @@ router.post('/?', async (req, res) => {
 
 /**
  * @swagger
- * /shorten_url/{hash}:
+ * /u/{hash}:
  *   get:
  *     tags:
  *       - Utilities

@@ -7,13 +7,13 @@ const router = express.Router({ mergeParams: true })
 
 /**
  * @swagger
- * /teams/{teamId}/cutlist:
+ * /api/teams/{teamId}/cutlist:
  *   get:
  *     tags:
  *       - Teams
- *     summary: Get team cutlist
+ *     summary: Get fantasy team cutlist
  *     description: |
- *       Get the ordered list of players on the team's cutlist for automated cuts.
+ *       Get the ordered list of players on the fantasy team's cutlist for automated cuts.
  *       Cutlist determines order of player releases during roster moves.
  *     security:
  *       - bearerAuth: []
@@ -74,9 +74,9 @@ router.get('/?', async (req, res) => {
  *   post:
  *     tags:
  *       - Teams
- *     summary: Update team cutlist
+ *     summary: Update fantasy team cutlist
  *     description: |
- *       Set the ordered list of players on the team's cutlist for automated cuts.
+ *       Set the ordered list of players on the fantasy team's cutlist for automated cuts.
  *       Players must be on the team roster and not restricted free agents.
  *     security:
  *       - bearerAuth: []

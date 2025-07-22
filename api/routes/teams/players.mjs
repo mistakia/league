@@ -8,14 +8,14 @@ const router = express.Router({ mergeParams: true })
 
 /**
  * @swagger
- * /teams/{teamId}/players:
+ * /api/teams/{teamId}/players:
  *   get:
  *     tags:
  *       - Teams
- *     summary: Get team players
+ *     summary: Get fantasy team players
  *     description: |
- *       Get all players on the team roster with their current information.
- *       Includes restricted free agency bid information for team managers.
+ *       Get all players on the fantasy team roster with their current information.
+ *       Includes restricted free agency bid information for fantasy team managers.
  *     security:
  *       - bearerAuth: []
  *     parameters:

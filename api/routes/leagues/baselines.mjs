@@ -3,11 +3,11 @@ const router = express.Router({ mergeParams: true })
 
 /**
  * @swagger
- * /leagues/{leagueId}/baselines:
+ * /api/leagues/{leagueId}/baselines:
  *   get:
- *     summary: Get league baseline calculations
+ *     summary: Get fantasy league baseline calculations
  *     description: |
- *       Retrieves baseline player calculations for a specific league. Baselines represent the fantasy points scored by replacement-level players at each position, used to calculate "points above replacement" (PAR) values.
+ *       Retrieves baseline player calculations for a specific fantasy league. Baselines represent the fantasy points scored by replacement-level players at each position, used to calculate "points above replacement" (PAR) values.
  *
  *       This endpoint provides the foundational data for advanced fantasy football analytics, helping determine which players provide value above what's freely available on the waiver wire.
  *     tags:

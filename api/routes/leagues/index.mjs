@@ -38,14 +38,14 @@ const router = express.Router()
 
 /**
  * @swagger
- * /leagues/{leagueId}:
+ * /api/leagues/{leagueId}:
  *   put:
  *     tags:
  *       - Leagues
- *     summary: Update league settings
+ *     summary: Update fantasy league settings
  *     description: |
- *       Update league configuration settings. Only the league commissioner can update settings.
- *       Supports updating various league attributes including roster configuration, scoring settings,
+ *       Update fantasy league configuration settings. Only the fantasy league commissioner can update settings.
+ *       Supports updating various fantasy league attributes including roster configuration, scoring settings,
  *       and external platform integrations.
  *     security:
  *       - bearerAuth: []
@@ -75,7 +75,7 @@ const router = express.Router()
  *               - value
  *           examples:
  *             updateLeagueName:
- *               summary: Update league name
+ *               summary: Update fantasy league name
  *               value:
  *                 field: name
  *                 value: "My Fantasy League"
@@ -217,11 +217,11 @@ router.put('/:leagueId', async (req, res) => {
 
 /**
  * @swagger
- * /leagues/{leagueId}:
+ * /api/leagues/{leagueId}:
  *   get:
  *     tags:
  *       - Leagues
- *     summary: Get league details
+ *     summary: Get fantasy league details
  *     description: |
  *       Retrieve detailed information about a specific fantasy league including
  *       league settings, roster configuration, scoring format, and available seasons.
@@ -289,13 +289,13 @@ router.get('/:leagueId/?', async (req, res) => {
 
 /**
  * @swagger
- * /leagues/{leagueId}/seasons/{year}:
+ * /api/leagues/{leagueId}/seasons/{year}:
  *   get:
  *     tags:
  *       - Leagues
- *     summary: Get league season details
+ *     summary: Get fantasy league season details
  *     description: |
- *       Retrieve league information for a specific season including league settings,
+ *       Retrieve fantasy league information for a specific season including fantasy league settings,
  *       roster configuration, and scoring format as configured for that year.
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
