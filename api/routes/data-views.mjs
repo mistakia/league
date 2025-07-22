@@ -35,6 +35,26 @@ function convert_to_markdown_table(objArray) {
   return markdown
 }
 
+function convert_to_html_table(objArray, view_name) {
+  const array = typeof objArray !== 'object' ? JSON.parse(objArray) : objArray
+
+  if (!array.length) {
+    return '<html><body><h1>No data available</h1></body></html>'
+  }
+
+  const headers = Object.keys(array[0])
+  const title = view_name || 'Data Export'
+  
+  return `<!DOCTYPE html>
+<html><head><title>${title}</title></head><body>
+<h1>${title}</h1>
+<table border="1">
+<tr>${headers.map(h => `<th>${h}</th>`).join('')}</tr>
+${array.map(row => `<tr>${headers.map(h => `<td>${String(row[h] ?? '')}</td>`).join('')}</tr>`).join('')}
+</table>
+</body></html>`
+}
+
 /**
  * @swagger
  * components:
@@ -312,7 +332,7 @@ function convert_to_markdown_table(objArray) {
  *       required: true
  *       schema:
  *         type: string
- *         enum: [csv, json, md]
+ *         enum: [csv, json, md, html]
  *       description: 'Format for exporting the data view'
  *       example: 'csv'
  *
@@ -911,7 +931,7 @@ router.post('/search/?', async (req, res) => {
  *       The data view configuration (table state) is used to generate the results,
  *       which are then formatted and returned as a downloadable file.
  *
- *       **Supported formats**: CSV, JSON, Markdown
+ *       **Supported formats**: CSV, JSON, Markdown, HTML
  *
  *       **Caching**: Results are cached for performance unless `ignore_cache=true`
  *       is specified. Cache expiration is handled automatically.
@@ -963,6 +983,11 @@ router.post('/search/?', async (req, res) => {
  *               | Patrick Mahomes | QB | 24.5 | KC |
  *               | Josh Allen | QB | 22.1 | BUF |
  *               | Lamar Jackson | QB | 21.8 | BAL |
+ *           text/html:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *             description: 'HTML page with styled table containing the data'
  *       '400':
  *         description: Invalid request parameters
  *         content:
@@ -1000,7 +1025,7 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
     }
 
     // Validate export_format
-    const valid_formats = ['csv', 'json', 'md']
+    const valid_formats = ['csv', 'json', 'md', 'html']
     if (!valid_formats.includes(export_format)) {
       return res.status(400).send({ error: 'invalid export_format' })
     }
@@ -1080,7 +1105,7 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
         res.setHeader('Content-Type', 'text/csv')
         res.setHeader(
           'Content-Disposition',
-          `attachment filename=${file_name}.csv`
+          `attachment; filename="${file_name}.csv"`
         )
         break
       }
@@ -1089,7 +1114,7 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
         res.setHeader('Content-Type', 'application/json')
         res.setHeader(
           'Content-Disposition',
-          `attachment filename=${file_name}.json`
+          `attachment; filename="${file_name}.json"`
         )
         break
       case 'md':
@@ -1097,7 +1122,15 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
         res.setHeader('Content-Type', 'text/markdown')
         res.setHeader(
           'Content-Disposition',
-          `attachment filename=${file_name}.md`
+          `attachment; filename="${file_name}.md"`
+        )
+        break
+      case 'html':
+        formatted_results = convert_to_html_table(data_view_results, view.view_name)
+        res.setHeader('Content-Type', 'text/html')
+        res.setHeader(
+          'Content-Disposition',
+          `attachment; filename="${file_name}.html"`
         )
         break
     }
