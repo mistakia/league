@@ -154,7 +154,7 @@ const router = express.Router({ mergeParams: true })
  *       - Creates appropriate playoff bracket size
  *       - Handles league format requirements
  *     tags:
- *       - Leagues
+ *       - Fantasy Leagues
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *     security:
@@ -262,7 +262,7 @@ router.post('/?', async (req, res) => {
  *       - Can retrieve historical schedules
  *       - Useful for comparing season formats
  *     tags:
- *       - Leagues
+ *       - Fantasy Leagues
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *       - name: year

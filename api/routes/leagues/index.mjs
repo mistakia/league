@@ -41,7 +41,7 @@ const router = express.Router()
  * /leagues/{leagueId}:
  *   put:
  *     tags:
- *       - Leagues
+ *       - Fantasy Leagues
  *     summary: Update fantasy league settings
  *     description: |
  *       Update fantasy league configuration settings. Only the fantasy league commissioner can update settings.
@@ -292,7 +292,7 @@ router.get('/:leagueId/?', async (req, res) => {
  * /leagues/{leagueId}/seasons/{year}:
  *   get:
  *     tags:
- *       - Leagues
+ *       - Fantasy Leagues
  *     summary: Get fantasy league season details
  *     description: |
  *       Retrieve fantasy league information for a specific season including fantasy league settings,

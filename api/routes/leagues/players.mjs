@@ -40,7 +40,7 @@ if (process.env.NODE_ENV !== 'test') {
  *       will be included for the user's team.
  *     tags:
  *       - Players
- *       - Leagues
+ *       - Fantasy Leagues
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *     security:

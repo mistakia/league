@@ -19,7 +19,7 @@ const router = express.Router({ mergeParams: true })
  * /teams/{teamId}/deactivate:
  *   post:
  *     tags:
- *       - Teams
+ *       - Fantasy Teams
  *     summary: Deactivate a player to practice squad
  *     description: |
  *       Move a player from active roster to practice squad. Player must be eligible

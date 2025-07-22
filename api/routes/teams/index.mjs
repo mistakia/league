@@ -21,7 +21,7 @@ const router = express.Router()
  * /teams/{teamId}:
  *   put:
  *     tags:
- *       - Teams
+ *       - Fantasy Teams
  *     summary: Update fantasy team settings
  *     description: |
  *       Update fantasy team configuration including name, abbreviation, logo, and contact information.

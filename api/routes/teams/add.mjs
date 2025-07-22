@@ -14,7 +14,7 @@ const router = express.Router({ mergeParams: true })
  * /teams/{teamId}/add:
  *   post:
  *     tags:
- *       - Teams
+ *       - Fantasy Teams
  *     summary: Add a free agent player
  *     description: |
  *       Add a free agent player to team roster. Can add to bench or practice squad.

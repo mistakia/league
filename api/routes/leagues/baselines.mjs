@@ -11,7 +11,7 @@ const router = express.Router({ mergeParams: true })
  *
  *       This endpoint provides the foundational data for advanced fantasy football analytics, helping determine which players provide value above what's freely available on the waiver wire.
  *     tags:
- *       - Leagues
+ *       - Fantasy Leagues
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *     responses:

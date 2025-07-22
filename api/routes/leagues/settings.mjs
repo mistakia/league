@@ -191,7 +191,7 @@ const router = express.Router()
  *       - Team owners see read-only configuration
  *       - Settings affect all league operations
  *     tags:
- *       - Leagues
+ *       - Fantasy Leagues
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *     responses:
@@ -275,7 +275,7 @@ const router = express.Router()
  *       - Test major changes in off-season
  *       - Document reasoning for modifications
  *     tags:
- *       - Leagues
+ *       - Fantasy Leagues
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *     security:

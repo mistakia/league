@@ -17,7 +17,7 @@ const get_url_hash = (url) => {
  * @swagger
  * /u:
  *   servers:
- *     - url: ''
+ *     - url: '/'
  *       description: Root path
  *   post:
  *     tags:

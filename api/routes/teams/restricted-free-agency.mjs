@@ -16,7 +16,7 @@ const router = express.Router({ mergeParams: true })
  * /teams/{teamId}/tag/restricted-free-agency:
  *   get:
  *     tags:
- *       - Teams
+ *       - Fantasy Teams
  *     summary: Get restricted free agency bids
  *     description: |
  *       Get all active restricted free agency bids for the team.
@@ -114,7 +114,7 @@ router.get('/?', async (req, res) => {
  * @swagger
  *   post:
  *     tags:
- *       - Teams
+ *       - Fantasy Teams
  *     summary: Create restricted free agency bid
  *     description: |
  *       Create a restricted free agency bid for a player. Can be either an original
@@ -516,7 +516,7 @@ router.post('/?', async (req, res) => {
  * @swagger
  *   delete:
  *     tags:
- *       - Teams
+ *       - Fantasy Teams
  *     summary: Cancel restricted free agency bid
  *     description: |
  *       Cancel an existing restricted free agency bid.
@@ -683,7 +683,7 @@ router.delete('/?', async (req, res) => {
  * @swagger
  *   put:
  *     tags:
- *       - Teams
+ *       - Fantasy Teams
  *     summary: Update restricted free agency bid
  *     description: |
  *       Update an existing restricted free agency bid amount and/or release players.
@@ -969,7 +969,7 @@ router.put('/?', async (req, res) => {
  * /teams/{teamId}/tag/restricted-free-agency/nominate:
  *   post:
  *     tags:
- *       - Teams
+ *       - Fantasy Teams
  *     summary: Nominate player for restricted free agency
  *     description: |
  *       Nominate a restricted free agent for the bidding process.
@@ -1108,7 +1108,7 @@ router.post('/nominate/?', async (req, res) => {
  * @swagger
  *   delete:
  *     tags:
- *       - Teams
+ *       - Fantasy Teams
  *     summary: Cancel restricted free agency nomination
  *     description: |
  *       Cancel the nomination of a restricted free agent.
