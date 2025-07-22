@@ -6,6 +6,35 @@ import convert_to_csv from '#libs-shared/convert-to-csv.mjs'
 
 const router = express.Router()
 
+function convert_to_markdown_table(objArray) {
+  const array = typeof objArray !== 'object' ? JSON.parse(objArray) : objArray
+  
+  if (!array.length) {
+    return ''
+  }
+
+  // Get column headers from first object
+  const headers = Object.keys(array[0])
+  
+  // Build markdown table header
+  let markdown = '| ' + headers.join(' | ') + ' |\n'
+  
+  // Add separator row
+  markdown += '| ' + headers.map(() => '---').join(' | ') + ' |\n'
+  
+  // Add data rows
+  for (const row of array) {
+    const values = headers.map(header => {
+      const value = row[header]
+      // Escape pipe characters in cell values
+      return String(value ?? '').replace(/\|/g, '\\|')
+    })
+    markdown += '| ' + values.join(' | ') + ' |\n'
+  }
+  
+  return markdown
+}
+
 /**
  * @swagger
  * components:
@@ -283,7 +312,7 @@ const router = express.Router()
  *       required: true
  *       schema:
  *         type: string
- *         enum: [csv, json]
+ *         enum: [csv, json, md]
  *       description: 'Format for exporting the data view'
  *       example: 'csv'
  *
@@ -882,7 +911,7 @@ router.post('/search/?', async (req, res) => {
  *       The data view configuration (table state) is used to generate the results,
  *       which are then formatted and returned as a downloadable file.
  *
- *       **Supported formats**: CSV, JSON
+ *       **Supported formats**: CSV, JSON, Markdown
  *
  *       **Caching**: Results are cached for performance unless `ignore_cache=true`
  *       is specified. Cache expiration is handled automatically.
@@ -924,6 +953,16 @@ router.post('/search/?', async (req, res) => {
  *                 position: 'QB'
  *                 fantasy_points: 22.1
  *                 team: 'BUF'
+ *           text/markdown:
+ *             schema:
+ *               type: string
+ *               format: binary
+ *             example: |
+ *               | player_name | position | fantasy_points | team |
+ *               | --- | --- | --- | --- |
+ *               | Patrick Mahomes | QB | 24.5 | KC |
+ *               | Josh Allen | QB | 22.1 | BUF |
+ *               | Lamar Jackson | QB | 21.8 | BAL |
  *       '400':
  *         description: Invalid request parameters
  *         content:
@@ -961,7 +1000,7 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
     }
 
     // Validate export_format
-    const valid_formats = ['csv', 'json']
+    const valid_formats = ['csv', 'json', 'md']
     if (!valid_formats.includes(export_format)) {
       return res.status(400).send({ error: 'invalid export_format' })
     }
@@ -1051,6 +1090,14 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
         res.setHeader(
           'Content-Disposition',
           `attachment filename=${file_name}.json`
+        )
+        break
+      case 'md':
+        formatted_results = convert_to_markdown_table(data_view_results)
+        res.setHeader('Content-Type', 'text/markdown')
+        res.setHeader(
+          'Content-Disposition',
+          `attachment filename=${file_name}.md`
         )
         break
     }
