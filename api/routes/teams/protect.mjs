@@ -16,7 +16,7 @@ const router = express.Router({ mergeParams: true })
  * /teams/{teamId}/protect:
  *   post:
  *     tags:
- *       - Teams
+ *       - Fantasy Teams
  *     summary: Protect a practice squad player
  *     description: |
  *       Designate a practice squad player as protected from poaching.

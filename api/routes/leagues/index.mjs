@@ -220,7 +220,7 @@ router.put('/:leagueId', async (req, res) => {
  * /leagues/{leagueId}:
  *   get:
  *     tags:
- *       - Leagues
+ *       - Fantasy Leagues
  *     summary: Get fantasy league details
  *     description: |
  *       Retrieve detailed information about a specific fantasy league including

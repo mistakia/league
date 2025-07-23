@@ -133,7 +133,7 @@
  *       - Understanding available customization options
  *       - Implementing league setup wizards
  *     tags:
- *       - Leagues
+ *       - Fantasy Leagues
  *     parameters:
  *       - $ref: '#/components/parameters/leagueId'
  *     responses:

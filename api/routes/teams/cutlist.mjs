@@ -10,7 +10,7 @@ const router = express.Router({ mergeParams: true })
  * /teams/{teamId}/cutlist:
  *   get:
  *     tags:
- *       - Teams
+ *       - Fantasy Teams
  *     summary: Get fantasy team cutlist
  *     description: |
  *       Get the ordered list of players on the fantasy team's cutlist for automated cuts.
@@ -73,7 +73,7 @@ router.get('/?', async (req, res) => {
  * @swagger
  *   post:
  *     tags:
- *       - Teams
+ *       - Fantasy Teams
  *     summary: Update fantasy team cutlist
  *     description: |
  *       Set the ordered list of players on the fantasy team's cutlist for automated cuts.
