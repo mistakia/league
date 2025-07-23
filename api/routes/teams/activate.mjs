@@ -15,7 +15,7 @@ const router = express.Router({ mergeParams: true })
  * /teams/{teamId}/activate:
  *   post:
  *     tags:
- *       - Teams
+ *       - Fantasy Teams
  *     summary: Activate a player
  *     description: |
  *       Activate a player from practice squad or reserve to active roster.

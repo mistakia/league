@@ -21,7 +21,7 @@ const router = express.Router({ mergeParams: true })
  * /teams/{teamId}/release:
  *   post:
  *     tags:
- *       - Teams
+ *       - Fantasy Teams
  *     summary: Release a player
  *     description: |
  *       Release a player from the team roster. Cannot release active roster players
