@@ -1081,8 +1081,10 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
 
     if (!ignore_cache) {
       const cache_value = await redis_cache.get(cache_key)
-      data_view_results = cache_value.data_view_results
-      data_view_metadata = cache_value.data_view_metadata
+      if (cache_value && cache_value.data_view_results) {
+        data_view_results = cache_value.data_view_results
+        data_view_metadata = cache_value.data_view_metadata
+      }
     }
 
     if (!data_view_results) {
