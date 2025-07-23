@@ -20,7 +20,7 @@ class PlayerRow extends Player {
     const {
       playerMap,
       selectedPlayer,
-      isHosted,
+      is_hosted,
       is_logged_in,
       selected, // inherited from Player class
       status,
@@ -110,7 +110,7 @@ class PlayerRow extends Player {
           )}
           {is_logged_in && (
             <div className='player__row-action actions'>
-              {Boolean(isHosted) && (
+              {Boolean(is_hosted) && (
                 <IconButton
                   small
                   text

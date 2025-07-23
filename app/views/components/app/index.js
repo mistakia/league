@@ -30,7 +30,7 @@ const mapStateToProps = createSelector(
 
     return {
       isPending: app.isPending,
-      isHosted: Boolean(league.hosted),
+      is_hosted: Boolean(league.hosted),
       isCommish: app.userId === league.commishid,
       is_auction_live:
         auction_is_started &&

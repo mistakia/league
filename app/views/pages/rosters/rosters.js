@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
@@ -19,12 +19,14 @@ export default function RostersPage({
   league,
   teams,
   ps_drafted_count_max,
+  ps_drafted_threshold_count_max,
   ps_signed_count_max,
   bench_count_max,
   ir_long_term_count_max
 }) {
   const { lid } = useParams()
   const navigate = useNavigate()
+  const [is_psd_expanded, set_is_psd_expanded] = useState(false)
 
   useEffect(() => {
     if (isNaN(lid)) {
@@ -155,13 +157,19 @@ export default function RostersPage({
       )
     }
 
-    for (let i = 0; i < ps_drafted_count_max; i++) {
+    const psd_label_count = is_psd_expanded
+      ? ps_drafted_count_max
+      : ps_drafted_threshold_count_max
+    for (let i = 0; i < psd_label_count; i++) {
       labels.push(
         <div key={`${i}PSD`} className='roster__item'>
           PSD
         </div>
       )
     }
+
+    // Add label for toggle/spacer row
+    labels.push(<div key='PSD_toggle' className='roster__item' />)
   }
 
   if (league.ir) {
@@ -191,9 +199,12 @@ export default function RostersPage({
         {...{
           roster,
           ps_drafted_count_max,
+          ps_drafted_threshold_count_max,
           ps_signed_count_max,
           bench_count_max,
-          ir_long_term_count_max
+          ir_long_term_count_max,
+          is_psd_expanded,
+          set_is_psd_expanded
         }}
       />
     )
@@ -228,6 +239,7 @@ RostersPage.propTypes = {
   league: PropTypes.object,
   export_rosters: PropTypes.func,
   ps_drafted_count_max: PropTypes.number,
+  ps_drafted_threshold_count_max: PropTypes.number,
   ps_signed_count_max: PropTypes.number,
   bench_count_max: PropTypes.number,
   ir_long_term_count_max: PropTypes.number,
