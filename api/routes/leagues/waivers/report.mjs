@@ -61,7 +61,7 @@ const router = express.Router({ mergeParams: true })
  *           example: 1698700000
  *         wo:
  *           type: integer
-n *           description: Waiver order priority
+ *           description: Waiver order priority
  *           example: 5
  *         bid:
  *           type: integer
