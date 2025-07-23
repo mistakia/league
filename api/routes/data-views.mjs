@@ -6,26 +6,53 @@ import convert_to_csv from '#libs-shared/convert-to-csv.mjs'
 
 const router = express.Router()
 
-function convert_to_markdown_table(objArray) {
-  const array = typeof objArray !== 'object' ? JSON.parse(objArray) : objArray
+// Normalize data to ensure all rows have all columns
+function normalize_data_view_results(data_view_results) {
+  if (!data_view_results || !data_view_results.length) {
+    return { fields: [], normalized_results: [] }
+  }
 
-  if (!array.length) {
+  // Collect all unique fields from all rows while preserving order
+  const fields = []
+  const field_set = new Set()
+
+  // First pass: collect fields in the order they appear
+  for (const row of data_view_results) {
+    for (const field of Object.keys(row)) {
+      if (!field_set.has(field)) {
+        field_set.add(field)
+        fields.push(field)
+      }
+    }
+  }
+
+  // Ensure all rows have all fields (with empty string for missing values)
+  const normalized_results = data_view_results.map((row) => {
+    const normalized_row = {}
+    for (const field of fields) {
+      normalized_row[field] = row[field] !== undefined ? row[field] : ''
+    }
+    return normalized_row
+  })
+
+  return { fields, normalized_results }
+}
+
+function convert_to_markdown_table(normalized_results, fields) {
+  if (!normalized_results.length) {
     return ''
   }
 
-  // Get column headers from first object
-  const headers = Object.keys(array[0])
-
   // Build markdown table header
-  let markdown = '| ' + headers.join(' | ') + ' |\n'
+  let markdown = '| ' + fields.join(' | ') + ' |\n'
 
   // Add separator row
-  markdown += '| ' + headers.map(() => '---').join(' | ') + ' |\n'
+  markdown += '| ' + fields.map(() => '---').join(' | ') + ' |\n'
 
   // Add data rows
-  for (const row of array) {
-    const values = headers.map((header) => {
-      const value = row[header]
+  for (const row of normalized_results) {
+    const values = fields.map((field) => {
+      const value = row[field]
       // Escape pipe characters in cell values
       return String(value ?? '').replace(/\|/g, '\\|')
     })
@@ -35,22 +62,29 @@ function convert_to_markdown_table(objArray) {
   return markdown
 }
 
-function convert_to_html_table(objArray, view_name) {
-  const array = typeof objArray !== 'object' ? JSON.parse(objArray) : objArray
-
-  if (!array.length) {
+function convert_to_html_table(normalized_results, fields, view_name) {
+  if (!normalized_results.length) {
     return '<html><body><h1>No data available</h1></body></html>'
   }
 
-  const headers = Object.keys(array[0])
   const title = view_name || 'Data Export'
 
+  // Escape HTML special characters
+  const escape_html = (str) => {
+    return String(str)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#039;')
+  }
+
   return `<!DOCTYPE html>
-<html><head><title>${title}</title></head><body>
-<h1>${title}</h1>
+<html><head><title>${escape_html(title)}</title></head><body>
+<h1>${escape_html(title)}</h1>
 <table border="1">
-<tr>${headers.map((h) => `<th>${h}</th>`).join('')}</tr>
-${array.map((row) => `<tr>${headers.map((h) => `<td>${String(row[h] ?? '')}</td>`).join('')}</tr>`).join('')}
+<tr>${fields.map((h) => `<th>${escape_html(h)}</th>`).join('')}</tr>
+${normalized_results.map((row) => `<tr>${fields.map((h) => `<td>${escape_html(row[h] ?? '')}</td>`).join('')}</tr>`).join('')}
 </table>
 </body></html>`
 }
@@ -1094,13 +1128,19 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
       .replace(/\..+/, '')
     const file_name = `${view.view_name}-${timestamp}`
 
+    // Normalize data once for all export formats
+    const { fields, normalized_results } =
+      normalize_data_view_results(data_view_results)
+
     switch (export_format) {
       case 'csv': {
+        // Create header object with all fields
         const header = {}
-        for (const field of Object.keys(data_view_results[0])) {
+        for (const field of fields) {
           header[field] = field
         }
-        const csv_data = [header, ...data_view_results]
+
+        const csv_data = [header, ...normalized_results]
         formatted_results = convert_to_csv(csv_data)
         res.setHeader('Content-Type', 'text/csv')
         res.setHeader(
@@ -1110,6 +1150,7 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
         break
       }
       case 'json':
+        // For JSON, we can return the original data as-is
         formatted_results = JSON.stringify(data_view_results)
         res.setHeader('Content-Type', 'application/json')
         res.setHeader(
@@ -1118,7 +1159,10 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
         )
         break
       case 'md':
-        formatted_results = convert_to_markdown_table(data_view_results)
+        formatted_results = convert_to_markdown_table(
+          normalized_results,
+          fields
+        )
         res.setHeader('Content-Type', 'text/markdown')
         res.setHeader(
           'Content-Disposition',
@@ -1127,7 +1171,8 @@ router.get('/export/:view_id/:export_format', async (req, res) => {
         break
       case 'html':
         formatted_results = convert_to_html_table(
-          data_view_results,
+          normalized_results,
+          fields,
           view.view_name
         )
         res.setHeader('Content-Type', 'text/html')
