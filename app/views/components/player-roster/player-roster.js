@@ -16,7 +16,7 @@ class PlayerRoster extends Player {
       dragHandle,
       waiverId,
       poachId,
-      isHosted,
+      is_hosted,
       league,
       isBeforeExtensionDeadline,
       isBeforeRestrictedFreeAgencyEnd,
@@ -130,7 +130,7 @@ class PlayerRoster extends Player {
             show_position_bar
           />
           {Boolean(
-            playerMap.get('pid') && isHosted && is_manager_in_league
+            playerMap.get('pid') && is_hosted && is_manager_in_league
           ) && (
             <div className='player__item-menu'>
               <IconButton

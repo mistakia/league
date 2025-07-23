@@ -15,7 +15,7 @@ export default function LeagueHeader({ league, is_in_league }) {
   const isFullPPR = is_ppr_equal && league.rec === 1
 
   // TODO isSalaryCap
-  // TODO isHosted
+  // TODO is_hosted
   // TODO espn/sleeper/mfl
   // TODO isDynasty
   // TODO isRedraft

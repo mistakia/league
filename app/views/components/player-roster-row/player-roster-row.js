@@ -11,46 +11,46 @@ import './player-roster-row.styl'
 class PlayerRosterRow extends Player {
   render = () => {
     const {
-      playerMap,
+      player_map,
       selected,
-      isHosted,
+      is_hosted,
       league,
-      showBid,
+      show_bid,
       practice_signed,
       practice_drafted,
       reserve,
       starter
     } = this.props
 
-    const pid = playerMap.get('pid')
-    const isSelected = pid && selected === pid
-    const classNames = ['roster__item']
-    if (isSelected) classNames.push('selected')
-    if (practice_signed) classNames.push('practice__signed')
-    if (practice_drafted) classNames.push('practice__drafted')
-    if (reserve) classNames.push('reserve')
-    if (starter) classNames.push('starter')
+    const pid = player_map.get('pid')
+    const is_selected = pid && selected === pid
+    const class_names = ['roster__item']
+    if (is_selected) class_names.push('selected')
+    if (practice_signed) class_names.push('practice__signed')
+    if (practice_drafted) class_names.push('practice__drafted')
+    if (reserve) class_names.push('reserve')
+    if (starter) class_names.push('starter')
 
     const deadline = dayjs.unix(league.ext_date)
-    const calculateExtension =
+    const calculate_extension =
       !practice_signed &&
       !practice_drafted &&
       constants.season.now.isBefore(deadline)
-    const extensions = playerMap.get('extensions', 0)
-    const value = playerMap.get('value')
-    const bid = playerMap.get('bid')
-    const salary = calculateExtension
+    const extensions = player_map.get('extensions', 0)
+    const value = player_map.get('value')
+    const bid = player_map.get('bid')
+    const salary = calculate_extension
       ? getExtensionAmount({
-          pos: playerMap.get('pos'),
-          tag: playerMap.get('tag'),
+          pos: player_map.get('pos'),
+          tag: player_map.get('tag'),
           extensions,
           league,
           value
         })
-      : (showBid && bid) || value
+      : (show_bid && bid) || value
 
     return (
-      <div className={classNames.join(' ')}>
+      <div className={class_names.join(' ')}>
         <div className='roster__item-name'>
           <PlayerName pid={pid} />
         </div>
@@ -58,7 +58,7 @@ class PlayerRosterRow extends Player {
           <div className='roster__item-salary metric'>{`$${salary}`}</div>
         )}
         <div className='roster__item-action'>
-          {Boolean(pid && isHosted) && (
+          {Boolean(pid && is_hosted) && (
             <IconButton
               small
               text

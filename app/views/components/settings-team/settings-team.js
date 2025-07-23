@@ -80,12 +80,12 @@ export default class SettingsTeam extends React.Component {
   }
 
   render = () => {
-    const { team, isHosted } = this.props
+    const { team, is_hosted } = this.props
 
     const props = { data: team, on_change: this.onchange }
 
     let teamNotificationSection
-    if (isHosted) {
+    if (is_hosted) {
       teamNotificationSection = (
         <Grid xs={12} item container className='settings__team-notifications'>
           <SettingsSwitch
@@ -156,5 +156,5 @@ export default class SettingsTeam extends React.Component {
 SettingsTeam.propTypes = {
   team: ImmutablePropTypes.record,
   update: PropTypes.func,
-  isHosted: PropTypes.bool
+  is_hosted: PropTypes.bool
 }

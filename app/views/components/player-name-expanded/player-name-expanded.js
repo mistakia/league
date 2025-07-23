@@ -89,7 +89,7 @@ class PlayerNameExpanded extends Player {
   render = () => {
     const {
       playerMap,
-      isHosted,
+      is_hosted,
       hideActions,
       status,
       minimize,
@@ -125,7 +125,7 @@ class PlayerNameExpanded extends Player {
 
     return (
       <div className={classNames.join(' ')}>
-        {Boolean(isHosted && playerMap.get('pid') && !hideActions) && (
+        {Boolean(is_hosted && playerMap.get('pid') && !hideActions) && (
           <div className='player__name-expanded-action'>
             <IconButton
               small

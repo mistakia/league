@@ -28,7 +28,7 @@ export default function App({
   init,
   isPending,
   isCommish,
-  isHosted,
+  is_hosted,
   is_auction_live,
   is_logged_in
 }) {
@@ -70,7 +70,7 @@ export default function App({
       <Notification />
       <SelectedPlayer />
       {is_auction_live && <AuctionControls />}
-      {is_auction_live && isCommish && isHosted && (
+      {is_auction_live && isCommish && is_hosted && (
         <AuctionCommissionerControls />
       )}
     </main>
@@ -81,7 +81,7 @@ App.propTypes = {
   init: PropTypes.func,
   isPending: PropTypes.bool,
   isCommish: PropTypes.bool,
-  isHosted: PropTypes.bool,
+  is_hosted: PropTypes.bool,
   is_auction_live: PropTypes.bool,
   is_logged_in: PropTypes.bool
 }
