@@ -21,8 +21,12 @@ module.exports = {
       path: '/root/league',
       'pre-deploy': 'git pull',
       'pre-deploy-local': '',
-      'post-deploy':
-        'source /root/.bash_profile && /root/.nvm/versions/node/v17.4.0/bin/yarn install && pm2 reload server.pm2.config.js --env production',
+      'post-deploy': [
+        'source /root/.bash_profile',
+        'git submodule update --init private',
+        '/root/.nvm/versions/node/v17.4.0/bin/yarn install',
+        'pm2 reload server.pm2.config.js --env production'
+      ].join(' && '),
       'pre-setup': ''
     }
   }

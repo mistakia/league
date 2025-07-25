@@ -40,7 +40,8 @@
     "#scripts/*": "./scripts/*",
     "#jobs/*": "./jobs/*",
     "#league-import/*": "./league-import/*",
-    "#private/libs-server": "./private/libs-server/index.mjs"
+    "#private/libs-server": "./private/libs-server/index.mjs",
+    "#private/*": "./private/*"
   },
   "dependencies": {
     "@google-cloud/local-auth": "^3.0.1",
