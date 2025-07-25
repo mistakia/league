@@ -24,6 +24,23 @@ import {
 } from '#libs-server/data-views/where-string.mjs'
 import { add_week_opponent_cte_tables } from '#libs-server/data-views/week-opponent-cte-tables.mjs'
 
+let column_param_backwards_compatibility_mappings = {}
+
+try {
+  column_param_backwards_compatibility_mappings = (
+    await import(
+      '#private/column-param-backwards-compatibility-mappings.json',
+      { assert: { type: 'json' } }
+    )
+  ).default
+} catch (error) {
+  // File does not exist or failed to load
+  console.warn(
+    'Backwards compatibility mappings file not found, using empty mapping'
+  )
+  column_param_backwards_compatibility_mappings = {}
+}
+
 const log = debug('data-views')
 
 const rename_rate_type = (rate_type) => {
@@ -50,6 +67,31 @@ const process_rate_type_backwards_compatibility = (params) => {
     }
   }
   return params
+}
+
+const process_column_param_backwards_compatibility = (params) => {
+  if (!params || typeof params !== 'object') return params
+
+  const transformed_params = { ...params }
+  const mappings = column_param_backwards_compatibility_mappings
+
+  // Apply backwards compatibility transformations
+  Object.entries(mappings).forEach(
+    ([legacy_param_name, current_param_name]) => {
+      if (legacy_param_name in transformed_params) {
+        // Log for monitoring deprecated parameter usage
+        log(
+          `Column parameter backwards compatibility: transforming "${legacy_param_name}" to "${current_param_name}"`
+        )
+
+        transformed_params[current_param_name] =
+          transformed_params[legacy_param_name]
+        delete transformed_params[legacy_param_name]
+      }
+    }
+  )
+
+  return transformed_params
 }
 
 const process_cache_info = ({ cache_info, data_view_metadata }) => {
@@ -261,6 +303,24 @@ const process_dynamic_single_week_param = (single_week_param) => {
     return week
   })
   return single_week
+}
+
+const process_params_with_backwards_compatibility = (params) => {
+  if (!params || typeof params !== 'object') return params
+
+  return process_column_param_backwards_compatibility(
+    process_rate_type_backwards_compatibility(process_dynamic_params(params))
+  )
+}
+
+const process_item_params = (item) => {
+  if (typeof item === 'object' && item.params) {
+    return {
+      ...item,
+      params: process_params_with_backwards_compatibility(item.params)
+    }
+  }
+  return item
 }
 
 const get_year_range = (columns, where) => {
@@ -1014,26 +1074,12 @@ export const get_data_view_results_query = async ({
     )
   })
 
-  // backwards compatibility for rate_type
+  // backwards compatibility for rate_type, column params
   // process params and convert dynamic params to static
-  where = where.map((where_clause) => ({
-    ...where_clause,
-    params: process_rate_type_backwards_compatibility(
-      process_dynamic_params(where_clause.params || {})
-    )
-  }))
-
-  columns = columns.map((column) => {
-    if (typeof column === 'object' && column.params) {
-      return {
-        ...column,
-        params: process_rate_type_backwards_compatibility(
-          process_dynamic_params(column.params || {})
-        )
-      }
-    }
-    return column
-  })
+  where = where.map(process_item_params)
+  columns = columns.map(process_item_params)
+  prefix_columns = prefix_columns.map(process_item_params)
+  sort = sort.map(process_item_params)
 
   // Determine primary table first to optimize query structure
   const from_table_config = get_from_table_config({
