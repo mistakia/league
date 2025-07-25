@@ -5,10 +5,10 @@ import Select from '@mui/material/Select'
 import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
 
-export default function SelectYear({ selectYear, year, league }) {
+export default function SelectYear({ select_year, year, league }) {
   const handleChange = (event) => {
     const year = event.target.value
-    selectYear(year)
+    select_year(year)
   }
 
   const selectItems = []
@@ -38,5 +38,5 @@ export default function SelectYear({ selectYear, year, league }) {
 SelectYear.propTypes = {
   league: PropTypes.object,
   year: PropTypes.number,
-  selectYear: PropTypes.func
+  select_year: PropTypes.func
 }

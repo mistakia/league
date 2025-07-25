@@ -1,26 +1,26 @@
 import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
 import { get_app } from '@core/selectors'
-import { appActions } from './actions'
-import { postRegister, postLogin, fetchAuth } from '@core/api'
+import { app_actions } from './actions'
+import { api_post_register, api_post_login, api_get_auth } from '@core/api'
 import { localStorageAdapter } from '@core/utils'
-import { leagueActions } from '@core/leagues/actions'
+import { league_actions } from '@core/leagues/actions'
 
 export function* init() {
   const { token } = yield select(get_app)
   if (token) {
-    yield call(fetchAuth)
+    yield call(api_get_auth)
   } else {
-    yield put(leagueActions.load_league())
+    yield put(league_actions.load_league())
   }
 }
 
 export function* register({ payload }) {
-  yield call(postRegister, payload)
+  yield call(api_post_register, payload)
 }
 
 export function* login({ payload }) {
-  yield call(postLogin, payload)
+  yield call(api_post_login, payload)
 }
 
 export function logout() {
@@ -38,34 +38,34 @@ export function* saveToken({ payload }) {
 // -------------------------------------
 
 export function* watchInitApp() {
-  yield takeLatest(appActions.INIT_APP, init)
+  yield takeLatest(app_actions.INIT_APP, init)
 }
 
 export function* watchRegister() {
-  yield takeLatest(appActions.REGISTER, register)
+  yield takeLatest(app_actions.REGISTER, register)
 }
 
 export function* watchLogin() {
-  yield takeLatest(appActions.LOGIN, login)
+  yield takeLatest(app_actions.LOGIN, login)
 }
 
 export function* watchLogout() {
-  yield takeLatest(appActions.LOGOUT, logout)
+  yield takeLatest(app_actions.LOGOUT, logout)
 }
 
 export function* watchRegisterFulfilled() {
-  yield takeLatest(appActions.REGISTER_FULFILLED, saveToken)
+  yield takeLatest(app_actions.REGISTER_FULFILLED, saveToken)
 }
 
 export function* watchLoginFulfilled() {
-  yield takeLatest(appActions.LOGIN_FULFILLED, saveToken)
+  yield takeLatest(app_actions.LOGIN_FULFILLED, saveToken)
 }
 
 //= ====================================
 //  ROOT
 // -------------------------------------
 
-export const appSagas = [
+export const app_sagas = [
   fork(watchInitApp),
   fork(watchRegister),
   fork(watchLogin),

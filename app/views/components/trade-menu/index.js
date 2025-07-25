@@ -1,19 +1,19 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { tradeActions } from '@core/trade'
-import { get_app, getTrade } from '@core/selectors'
+import { trade_actions } from '@core/trade'
+import { get_app, get_trade } from '@core/selectors'
 
 import TradeMenu from './trade-menu'
 
-const mapStateToProps = createSelector(getTrade, get_app, (trade, app) => ({
+const map_state_to_props = createSelector(get_trade, get_app, (trade, app) => ({
   trades: trade.items.sort((a, b) => b.uid - a.uid),
   selectedTradeId: trade.selectedTradeId,
   teamId: app.teamId
 }))
 
-const mapDispatchToProps = {
-  select: tradeActions.selectTrade
+const map_dispatch_to_props = {
+  select: trade_actions.select_trade
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(TradeMenu)
+export default connect(map_state_to_props, map_dispatch_to_props)(TradeMenu)

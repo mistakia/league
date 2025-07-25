@@ -2,16 +2,16 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import {
-  getTeamsForCurrentLeague,
+  get_teams_for_current_league,
   get_league_teams_value_deltas
 } from '@core/selectors'
 import { league_team_daily_values_actions } from '@core/league-team-daily-values'
 
 import LeagueTeamsValueOverTime from './league-teams-value-over-time'
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   (state) => state.get('league_team_daily_values'),
-  getTeamsForCurrentLeague,
+  get_teams_for_current_league,
   get_league_teams_value_deltas,
   (league_team_daily_values, teams, teams_value_deltas) => ({
     league_team_daily_values,
@@ -20,12 +20,12 @@ const mapStateToProps = createSelector(
   })
 )
 
-const mapDispatchToProps = {
+const map_dispatch_to_props = {
   load_league_team_daily_values:
     league_team_daily_values_actions.load_league_team_daily_values
 }
 
 export default connect(
-  mapStateToProps,
-  mapDispatchToProps
+  map_state_to_props,
+  map_dispatch_to_props
 )(LeagueTeamsValueOverTime)

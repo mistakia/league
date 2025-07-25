@@ -3,10 +3,10 @@ import { takeLatest, fork, call, select, put } from 'redux-saga/effects'
 import { data_views_actions } from './index'
 import { default_data_view_view_id } from './default-data-views'
 import {
-  post_data_view,
-  get_data_views,
-  delete_data_view,
-  get_data_view
+  api_post_data_view,
+  api_get_data_views,
+  api_delete_data_view,
+  api_get_data_view
 } from '@core/api'
 import { send } from '@core/ws'
 import {
@@ -17,7 +17,7 @@ import {
   get_selected_data_view_id
 } from '@core/selectors'
 import { data_view_request_actions } from '@core/data-view-request/actions'
-import { notificationActions } from '@core/notifications/actions'
+import { notification_actions } from '@core/notifications/actions'
 
 function* handle_data_view_request({
   data_view,
@@ -94,7 +94,7 @@ export function* save_data_view({ payload }) {
     params.client_generated_view_id = view_id
   }
 
-  yield call(post_data_view, params)
+  yield call(api_post_data_view, params)
 }
 
 export function* handle_delete_data_view({ payload }) {
@@ -110,7 +110,7 @@ export function* handle_delete_data_view({ payload }) {
     return
   }
 
-  yield call(delete_data_view, { view_id })
+  yield call(api_delete_data_view, { view_id })
 }
 
 export function* load_data_views({ payload }) {
@@ -120,17 +120,17 @@ export function* load_data_views({ payload }) {
   if (request_history[key]) {
     return
   }
-  yield call(get_data_views, { user_id, username })
+  yield call(api_get_data_views, { user_id, username })
 }
 
 export function* load_data_view({ payload }) {
   const { data_view_id } = payload
-  yield call(get_data_view, { data_view_id })
+  yield call(api_get_data_view, { data_view_id })
 }
 
 export function* post_data_view_fulfilled_notification() {
   yield put(
-    notificationActions.show({
+    notification_actions.show({
       message: 'Saved Players Table View',
       severity: 'success'
     })
@@ -146,7 +146,7 @@ export function* handle_delete_data_view_fulfilled({ payload }) {
   }
 
   yield put(
-    notificationActions.show({
+    notification_actions.show({
       message: 'Deleted Players Table View',
       severity: 'success'
     })

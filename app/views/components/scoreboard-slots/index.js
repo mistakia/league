@@ -1,12 +1,12 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getCurrentLeague } from '@core/selectors'
+import { get_current_league } from '@core/selectors'
 
 import ScoreboardSlots from './scoreboard-slots'
 
-const mapStateToProps = createSelector(getCurrentLeague, (league) => ({
+const map_state_to_props = createSelector(get_current_league, (league) => ({
   league
 }))
 
-export default connect(mapStateToProps)(ScoreboardSlots)
+export default connect(map_state_to_props)(ScoreboardSlots)

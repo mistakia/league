@@ -8,7 +8,7 @@ import {
   verifyRestrictedFreeAgency,
   verifyUserTeam
 } from '#libs-server'
-import trade, { getTrade } from './trade.mjs'
+import trade, { get_trade } from './trade.mjs'
 
 const router = express.Router({ mergeParams: true })
 
@@ -683,7 +683,7 @@ router.post(
       res.status(500).send({ error: error.toString() })
     }
   },
-  getTrade
+  get_trade
 )
 
 router.use('/:tradeId([0-9]+)', trade)

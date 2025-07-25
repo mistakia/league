@@ -5,8 +5,8 @@ import { getSelectedPlayer } from '@core/selectors'
 
 import SelectedPlayerEfficiencyStats from './selected-player-efficiency-stats'
 
-const mapStateToProps = createSelector(getSelectedPlayer, (playerMap) => ({
+const map_state_to_props = createSelector(getSelectedPlayer, (playerMap) => ({
   playerMap
 }))
 
-export default connect(mapStateToProps)(SelectedPlayerEfficiencyStats)
+export default connect(map_state_to_props)(SelectedPlayerEfficiencyStats)

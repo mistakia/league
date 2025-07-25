@@ -1,17 +1,20 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getPlayers, getTeamsForCurrentLeague } from '@core/selectors'
+import {
+  get_players_state,
+  get_teams_for_current_league
+} from '@core/selectors'
 
 import HighlightTeam from './highlight-team'
 
-const mapStateToProps = createSelector(
-  getPlayers,
-  getTeamsForCurrentLeague,
+const map_state_to_props = createSelector(
+  get_players_state,
+  get_teams_for_current_league,
   (players, teams) => ({
     highlight_teamIds: players.get('highlight_teamIds'),
     teams
   })
 )
 
-export default connect(mapStateToProps)(HighlightTeam)
+export default connect(map_state_to_props)(HighlightTeam)

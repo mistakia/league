@@ -2,10 +2,10 @@ import { Map, List, Set } from 'immutable'
 
 import { player_actions } from './actions'
 import { createPlayer } from './player'
-import { statActions } from '@core/stats'
+import { stat_actions } from '@core/stats'
 import { roster_actions } from '@core/rosters'
-import { auctionActions } from '@core/auction'
-import { appActions } from '@core/app'
+import { auction_actions } from '@core/auction'
+import { app_actions } from '@core/app'
 import { data_view_request_actions } from '@core/data-view-request/actions'
 import DefaultPlayersViews, {
   default_players_view_key,
@@ -49,9 +49,9 @@ const initialState = new Map({
   ...default_player_filter_options
 })
 
-export function playersReducer(state = initialState, { payload, type }) {
+export function players_reducer(state = initialState, { payload, type }) {
   switch (type) {
-    case appActions.AUTH_FULFILLED: {
+    case app_actions.AUTH_FULFILLED: {
       const league = payload.data.leagues[0]
       if (league) {
         return state.merge({
@@ -109,7 +109,7 @@ export function playersReducer(state = initialState, { payload, type }) {
     case player_actions.PLAYERS_SELECT_PLAYER:
       return state.merge({ selected: payload.pid })
 
-    case auctionActions.AUCTION_SELECT_PLAYER:
+    case auction_actions.AUCTION_SELECT_PLAYER:
     case player_actions.PLAYERS_DESELECT_PLAYER:
       return state.merge({ selected: null })
 
@@ -146,7 +146,7 @@ export function playersReducer(state = initialState, { payload, type }) {
         })
       })
 
-    case statActions.FILTER_STATS:
+    case stat_actions.FILTER_STATS:
       return state.withMutations((state) => {
         state.set('isPending', true)
         const stats = constants.createFullStats()
@@ -366,7 +366,7 @@ export function playersReducer(state = initialState, { payload, type }) {
         null
       )
 
-    case auctionActions.AUCTION_PROCESSED: {
+    case auction_actions.AUCTION_PROCESSED: {
       const { tid, pid, value, type } = payload
       return state.mergeIn(['items', pid], {
         value,

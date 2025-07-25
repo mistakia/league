@@ -1,6 +1,6 @@
 export * as actions_utils from './actions-utils'
 export { localStorageAdapter } from './local-storage'
-export { fuzzySearch } from './fuzzy-search'
+export { fuzzy_search } from './fuzzy-search'
 export { timeago } from './timeago'
 export { default as useTraceUpdate } from './use-trace-update'
 export { create_debug_selector } from './create-debug-selector'

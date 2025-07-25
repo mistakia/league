@@ -1,24 +1,26 @@
 import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
 import {
-  getSelectedPlayersPageView,
-  getCurrentLeague,
-  getStats,
+  get_selected_players_page_view,
+  get_current_league,
+  get_stats_state,
   get_request_history
 } from '@core/selectors'
 import { player_actions } from '@core/players'
-import { statActions } from './actions'
-import { getChartedPlays } from '@core/api'
+import { stat_actions } from './actions'
+import { api_get_charted_plays } from '@core/api'
 
 export function* loadChartedPlays() {
-  const selected_players_page_view = yield select(getSelectedPlayersPageView)
+  const selected_players_page_view = yield select(
+    get_selected_players_page_view
+  )
   const should_load = selected_players_page_view.fields.find((field) =>
     field.includes('stats.')
   )
 
   if (should_load) {
     const request_history = yield select(get_request_history)
-    const stats = yield select(getStats)
+    const stats = yield select(get_stats_state)
     const { years } = stats.toJS()
 
     const request_key = `GET_CHARTED_PLAYS_${years.join('_')}`
@@ -27,7 +29,7 @@ export function* loadChartedPlays() {
       return
     }
 
-    yield call(getChartedPlays, { years })
+    yield call(api_get_charted_plays, { years })
   }
 }
 
@@ -49,8 +51,8 @@ export function* calculateStats() {
     qualifiers,
     yardline_start,
     yardline_end
-  } = yield select(getStats)
-  const league = yield select(getCurrentLeague)
+  } = yield select(get_stats_state)
+  const league = yield select(get_current_league)
   const filtered = plays.filter((play) => {
     if (!weeks.includes(play.week)) return false
     if (!days.includes(play.day)) return false
@@ -81,7 +83,7 @@ export function* calculateStats() {
 // -------------------------------------
 
 export function* watch_init_charted_plays() {
-  yield takeLatest(statActions.INIT_CHARTED_PLAYS, loadChartedPlays)
+  yield takeLatest(stat_actions.INIT_CHARTED_PLAYS, loadChartedPlays)
 }
 
 export function* watchSetPlayersView() {
@@ -89,26 +91,26 @@ export function* watchSetPlayersView() {
 }
 
 export function* watchGetChartedPlaysFulfilled() {
-  yield takeLatest(statActions.GET_CHARTED_PLAYS_FULFILLED, calculateStats)
+  yield takeLatest(stat_actions.GET_CHARTED_PLAYS_FULFILLED, calculateStats)
 }
 
 export function* watchUpdateQualifier() {
-  yield takeLatest(statActions.UPDATE_QUALIFIER, calculateStats)
+  yield takeLatest(stat_actions.UPDATE_QUALIFIER, calculateStats)
 }
 
 export function* watchFilterStats() {
-  yield takeLatest(statActions.FILTER_STATS, filterPlays)
+  yield takeLatest(stat_actions.FILTER_STATS, filterPlays)
 }
 
 export function* watchFilterStatsYardline() {
-  yield takeLatest(statActions.FILTER_STATS_YARDLINE, calculateStats)
+  yield takeLatest(stat_actions.FILTER_STATS_YARDLINE, calculateStats)
 }
 
 //= ====================================
 //  ROOT
 // -------------------------------------
 
-export const statSagas = [
+export const stat_sagas = [
   fork(watchSetPlayersView),
   fork(watch_init_charted_plays),
   fork(watchGetChartedPlaysFulfilled),

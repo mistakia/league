@@ -2,31 +2,31 @@ import { fork, takeLatest, call, select } from 'redux-saga/effects'
 
 import { player_actions } from '@core/players'
 import { get_app } from '@core/selectors'
-import { getDraftPickValue } from '@core/api'
-import { tradeActions } from '@core/trade'
-import { draftPickValueActions } from './actions'
+import { api_get_draft_pick_value } from '@core/api'
+import { trade_actions } from '@core/trade'
+import { draft_pick_value_actions } from './actions'
 
-export function* loadDraftPickValue() {
+export function* load_draft_pick_value() {
   const { leagueId } = yield select(get_app)
-  yield call(getDraftPickValue, { leagueId })
+  yield call(api_get_draft_pick_value, { leagueId })
 }
 
 //= ====================================
 //  WATCHERS
 // -------------------------------------
 
-export function* watchPlayersSelectPlayer() {
-  yield takeLatest(player_actions.PLAYERS_SELECT_PLAYER, loadDraftPickValue)
+export function* watch_players_select_player() {
+  yield takeLatest(player_actions.PLAYERS_SELECT_PLAYER, load_draft_pick_value)
 }
 
-export function* watchLoadTrades() {
-  yield takeLatest(tradeActions.LOAD_TRADES, loadDraftPickValue)
+export function* watch_load_trades() {
+  yield takeLatest(trade_actions.LOAD_TRADES, load_draft_pick_value)
 }
 
-export function* watchLoadDraftPickValue() {
+export function* watch_load_draft_pick_value() {
   yield takeLatest(
-    draftPickValueActions.LOAD_DRAFT_PICK_VALUE,
-    loadDraftPickValue
+    draft_pick_value_actions.LOAD_DRAFT_PICK_VALUE,
+    load_draft_pick_value
   )
 }
 
@@ -34,8 +34,8 @@ export function* watchLoadDraftPickValue() {
 //  ROOT
 // -------------------------------------
 
-export const draftPickValueSagas = [
-  fork(watchPlayersSelectPlayer),
-  fork(watchLoadTrades),
-  fork(watchLoadDraftPickValue)
+export const draft_pick_value_sagas = [
+  fork(watch_players_select_player),
+  fork(watch_load_trades),
+  fork(watch_load_draft_pick_value)
 ]

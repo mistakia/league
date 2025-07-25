@@ -3,17 +3,17 @@ import { createSelector } from 'reselect'
 
 import { Roster } from '@libs-shared'
 import {
-  getRostersForCurrentLeague,
-  getTeamsForCurrentLeague,
-  getCurrentLeague
+  get_rosters_for_current_league,
+  get_teams_for_current_league,
+  get_current_league
 } from '@core/selectors'
 
 import DashboardTeamSummarySalary from './dashboard-team-summary-salary'
 
-const mapStateToProps = createSelector(
-  getRostersForCurrentLeague,
-  getTeamsForCurrentLeague,
-  getCurrentLeague,
+const map_state_to_props = createSelector(
+  get_rosters_for_current_league,
+  get_teams_for_current_league,
+  get_current_league,
   (records, teams, league) => {
     const rosterRecords = records.toList().toJS()
     const rosters = rosterRecords.map(
@@ -29,4 +29,4 @@ const mapStateToProps = createSelector(
   }
 )
 
-export default connect(mapStateToProps)(DashboardTeamSummarySalary)
+export default connect(map_state_to_props)(DashboardTeamSummarySalary)

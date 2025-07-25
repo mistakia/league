@@ -13,7 +13,7 @@ export default class DraftPlayer extends React.Component {
   }
 
   render = () => {
-    const { playerMap, selected, isDrafted, index, watchlist, style } =
+    const { playerMap, selected, is_player_drafted, index, watchlist, style } =
       this.props
 
     const pid = playerMap.get('pid')
@@ -22,7 +22,7 @@ export default class DraftPlayer extends React.Component {
       classNames.push('selected')
     }
 
-    if (isDrafted) {
+    if (is_player_drafted) {
       classNames.push('drafted')
     } else if (watchlist.has(pid)) {
       classNames.push('watchlist')
@@ -56,7 +56,7 @@ DraftPlayer.propTypes = {
   select: PropTypes.func,
   playerMap: ImmutablePropTypes.map,
   selected: PropTypes.string,
-  isDrafted: PropTypes.bool,
+  is_player_drafted: PropTypes.bool,
   index: PropTypes.number,
   watchlist: ImmutablePropTypes.set,
   style: PropTypes.object

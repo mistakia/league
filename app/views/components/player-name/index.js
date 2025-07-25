@@ -1,22 +1,22 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getPlayerById, getPlayers } from '@core/selectors'
+import { getPlayerById, get_players_state } from '@core/selectors'
 import { player_actions } from '@core/players'
 
 import PlayerName from './player-name'
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   getPlayerById,
-  getPlayers,
+  get_players_state,
   (playerMap, players) => ({
     playerMap,
     isOnCutlist: players.get('cutlist').includes(playerMap.get('pid'))
   })
 )
 
-const mapDispatchToProps = {
+const map_dispatch_to_props = {
   select: player_actions.select_player
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(PlayerName)
+export default connect(map_state_to_props, map_dispatch_to_props)(PlayerName)

@@ -3,17 +3,17 @@ import { createSelector } from 'reselect'
 import dayjs from 'dayjs'
 
 import {
-  getSelectedMatchupTeams,
+  get_selected_matchup_teams,
   getPlaysByMatchupId,
   getStartersByMatchupId
 } from '@core/selectors'
 
 import ScoreboardOverTime from './scoreboard-over-time'
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   getPlaysByMatchupId,
   getStartersByMatchupId,
-  getSelectedMatchupTeams,
+  get_selected_matchup_teams,
   (plays, starters, teams) => {
     const breaks = []
     const week = starters.matchup.week
@@ -138,4 +138,4 @@ const mapStateToProps = createSelector(
   }
 )
 
-export default connect(mapStateToProps)(ScoreboardOverTime)
+export default connect(map_state_to_props)(ScoreboardOverTime)

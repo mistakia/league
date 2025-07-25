@@ -1,4 +1,4 @@
-import { apiRequest } from '@core/api/service'
+import { api_request } from '@core/api/service'
 
 import { BASE_URL } from '@core/constants'
 
@@ -9,7 +9,7 @@ export default async function shorten_url(url) {
     ...POST(data)
   })
 
-  const { request } = apiRequest(shorten_url_api, { url })
+  const { request } = api_request(shorten_url_api, { url })
 
   try {
     const response = await request()

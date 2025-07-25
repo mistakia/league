@@ -1,11 +1,11 @@
 import { connect } from 'react-redux'
 
-import { matchupsActions } from '@core/matchups'
+import { matchups_actions } from '@core/matchups'
 
 import Filter from '@components/filter'
 
-const mapDispatchToProps = {
-  filter: matchupsActions.filter
+const map_dispatch_to_props = {
+  filter: matchups_actions.filter
 }
 
-export default connect(null, mapDispatchToProps)(Filter)
+export default connect(null, map_dispatch_to_props)(Filter)

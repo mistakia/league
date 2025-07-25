@@ -1,8 +1,8 @@
-export const notificationActions = {
+export const notification_actions = {
   SHOW_NOTIFICATION: 'SHOW_NOTIFICATION',
 
   show: ({ message, severity }) => ({
-    type: notificationActions.SHOW_NOTIFICATION,
+    type: notification_actions.SHOW_NOTIFICATION,
     payload: {
       message,
       severity

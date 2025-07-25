@@ -3,21 +3,21 @@ import { createSelector } from 'reselect'
 
 import {
   get_app,
-  getAuction,
+  get_auction_state,
   isTeamConnected,
-  getTeamBid,
+  get_team_free_agency_auction_bid,
   get_team_by_id_for_current_year,
   getRosterByTeamId
 } from '@core/selectors'
 
 import AuctionTeam from './auction-team'
 
-const mapStateToProps = createSelector(
-  getAuction,
+const map_state_to_props = createSelector(
+  get_auction_state,
   get_team_by_id_for_current_year,
   isTeamConnected,
   getRosterByTeamId,
-  getTeamBid,
+  get_team_free_agency_auction_bid,
   get_app,
   (auction, team, isConnected, roster, bid, app) => ({
     team,
@@ -32,4 +32,4 @@ const mapStateToProps = createSelector(
   })
 )
 
-export default connect(mapStateToProps)(AuctionTeam)
+export default connect(map_state_to_props)(AuctionTeam)

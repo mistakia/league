@@ -7,7 +7,7 @@ const LOGIN_URL =
 const LEAGUES_URL = (swid) =>
   `https://fan.api.espn.com/apis/v2/fans/${swid}?displayEvents=true&displayNow=true&displayRecs=true&recLimit=5&context=fantasy&source=espncom-fantasy&lang=en&section=espn&region=us`
 
-export const getApiKey = async () => {
+export const get_espn_api_key = async () => {
   const apiKey = await fetch(API_URL, {
     method: 'POST',
     headers: {
@@ -18,8 +18,8 @@ export const getApiKey = async () => {
   return apiKey
 }
 
-export const getCookies = async ({ username, password }) => {
-  const apiKey = await getApiKey()
+export const get_espn_cookies = async ({ username, password }) => {
+  const apiKey = await get_espn_api_key()
   const data = await fetch(LOGIN_URL, {
     method: 'POST',
     headers: {
@@ -36,8 +36,8 @@ export const getCookies = async ({ username, password }) => {
   return { s2, swid }
 }
 
-export const getLeagues = async (credentials) => {
-  const cookies = await getCookies(credentials)
+export const get_espn_leagues = async (credentials) => {
+  const cookies = await get_espn_cookies(credentials)
 
   const data = await fetch(LEAGUES_URL(cookies.swid)).then((res) => res.json())
   const { preferences } = data

@@ -1,14 +1,14 @@
 import { createSelector } from 'reselect'
 import { List } from 'immutable'
 
-import { percentileActions } from '@core/percentiles'
+import { percentile_actions } from '@core/percentiles'
 import { constants } from '@libs-shared'
 import { store } from '@core/store.js'
-import { getGameByTeam, get_seasonlogs } from '@core/selectors'
+import { get_game_by_team, get_seasonlogs } from '@core/selectors'
 import PlayerRowOpponent from '@components/player-row-opponent'
-import { seasonlogsActions } from '@core/seasonlogs/actions'
+import { seasonlogs_actions } from '@core/seasonlogs/actions'
 
-export const getPlayerFields = createSelector(
+export const get_player_fields = createSelector(
   (state) =>
     state.getIn(['players', 'week'], new List([constants.week])).get(0),
   (state) => state,
@@ -24,10 +24,10 @@ export const getPlayerFields = createSelector(
 // component - optional
 // header_className - optional
 
-// getValue - optional
+// get_player_field_value - optional
 // player_value_path - optional
 
-// getPercentileKey - optional
+// get_percentile_key - optional
 // percentile_key - optional
 // percentile_field - optional
 
@@ -35,8 +35,8 @@ export const getPlayerFields = createSelector(
 function PlayerFields({ week, state }) {
   const opponent_field = (stat_field) => {
     return {
-      getPercentileKey: (playerMap) => {
-        const pos = playerMap.get('pos')
+      get_percentile_key: (player_map) => {
+        const pos = player_map.get('pos')
         return `${pos}_AGAINST_ADJ`
       },
       fixed: 1,
@@ -45,14 +45,14 @@ function PlayerFields({ week, state }) {
         const positions = state.getIn(['players', 'positions'])
         positions.forEach((pos) => {
           const percentile_key = `${pos}_AGAINST_ADJ`
-          store.dispatch(percentileActions.load_percentiles(percentile_key))
+          store.dispatch(percentile_actions.load_percentiles(percentile_key))
         })
-        store.dispatch(seasonlogsActions.load_nfl_team_seasonlogs())
+        store.dispatch(seasonlogs_actions.load_nfl_team_seasonlogs())
       },
-      getValue: (playerMap) => {
-        const nfl_team = playerMap.get('team')
-        const pos = playerMap.get('pos')
-        const game = getGameByTeam(state, { nfl_team, week })
+      get_player_field_value: (player_map) => {
+        const nfl_team = player_map.get('team')
+        const pos = player_map.get('pos')
+        const game = get_game_by_team(state, { nfl_team, week })
         const seasonlogs = get_seasonlogs(state)
         if (!game) {
           return null
@@ -77,9 +77,9 @@ function PlayerFields({ week, state }) {
       csv_header: 'Opponent',
       component: PlayerRowOpponent,
       header_className: 'game-opponent',
-      getValue: (playerMap) => {
-        const nfl_team = playerMap.get('team')
-        const game = getGameByTeam(state, { nfl_team, week })
+      get_player_field_value: (player_map) => {
+        const nfl_team = player_map.get('team')
+        const game = get_game_by_team(state, { nfl_team, week })
         if (!game) {
           return null
         }
@@ -93,8 +93,8 @@ function PlayerFields({ week, state }) {
       category: 'matchup',
       column_header: 'Strength',
       csv_header: 'Opponent Strength',
-      getPercentileKey: (playerMap) => {
-        const pos = playerMap.get('pos')
+      get_percentile_key: (player_map) => {
+        const pos = player_map.get('pos')
         return `${pos}_AGAINST_ADJ`
       },
       percentile_field: 'pts',
@@ -104,14 +104,14 @@ function PlayerFields({ week, state }) {
         const positions = state.getIn(['players', 'positions'])
         positions.forEach((pos) => {
           const percentile_key = `${pos}_AGAINST_ADJ`
-          store.dispatch(percentileActions.load_percentiles(percentile_key))
+          store.dispatch(percentile_actions.load_percentiles(percentile_key))
         })
-        store.dispatch(seasonlogsActions.load_nfl_team_seasonlogs())
+        store.dispatch(seasonlogs_actions.load_nfl_team_seasonlogs())
       },
-      getValue: (playerMap) => {
-        const nfl_team = playerMap.get('team')
-        const pos = playerMap.get('pos')
-        const game = getGameByTeam(state, { nfl_team, week })
+      get_player_field_value: (player_map) => {
+        const nfl_team = player_map.get('team')
+        const pos = player_map.get('pos')
+        const game = get_game_by_team(state, { nfl_team, week })
         const seasonlogs = get_seasonlogs(state)
         if (!game) {
           return null

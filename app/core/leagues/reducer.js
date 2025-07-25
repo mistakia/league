@@ -1,26 +1,26 @@
 import { Map, List } from 'immutable'
 
-import { appActions } from '@core/app'
+import { app_actions } from '@core/app'
 import { createLeague, League } from './league'
-import { teamActions } from '@core/teams'
-import { leagueActions } from './actions'
-import { constants, createDefaultLeague } from '@libs-shared'
+import { team_actions } from '@core/teams'
+import { league_actions } from './actions'
+import { constants, create_default_league } from '@libs-shared'
 
 const initialState = new Map().set(
   constants.DEFAULTS.LEAGUE_ID,
-  new League(createDefaultLeague({ isLoaded: true }))
+  new League(create_default_league({ isLoaded: true }))
 )
 
-export function leaguesReducer(state = initialState, { payload, type }) {
+export function leagues_reducer(state = initialState, { payload, type }) {
   switch (type) {
-    case appActions.AUTH_FULFILLED:
+    case app_actions.AUTH_FULFILLED:
       return state.withMutations((state) => {
         payload.data.leagues.forEach((l) =>
           state.set(l.uid, createLeague({ isLoaded: true, ...l }))
         )
       })
 
-    case leagueActions.GET_LEAGUE_PENDING: {
+    case league_actions.GET_LEAGUE_PENDING: {
       if (state.has(payload.opts.leagueId)) {
         return state.setIn([payload.opts.leagueId, 'isLoading'], true)
       } else {
@@ -31,16 +31,16 @@ export function leaguesReducer(state = initialState, { payload, type }) {
       }
     }
 
-    case leagueActions.GET_LEAGUE_FAILED:
+    case league_actions.GET_LEAGUE_FAILED:
       return state.setIn([payload.opts.leagueId, 'isLoading'], false)
 
-    case leagueActions.GET_LEAGUE_FULFILLED:
+    case league_actions.GET_LEAGUE_FULFILLED:
       return state.set(
         payload.data.uid,
         createLeague({ isLoaded: true, ...payload.data })
       )
 
-    case teamActions.GET_TEAMS_FULFILLED: {
+    case team_actions.GET_TEAMS_FULFILLED: {
       const teamIds = payload.data.teams.map((t) => t.uid)
       if (state.hasIn([payload.opts.leagueId, 'uid'])) {
         return state.setIn([payload.opts.leagueId, 'teams'], new List(teamIds))
@@ -52,14 +52,14 @@ export function leaguesReducer(state = initialState, { payload, type }) {
       }
     }
 
-    case leagueActions.SET_LEAGUE:
-    case leagueActions.PUT_LEAGUE_FULFILLED:
+    case league_actions.SET_LEAGUE:
+    case league_actions.PUT_LEAGUE_FULFILLED:
       return state.setIn(
         [payload.opts.leagueId, payload.opts.field],
         payload.data ? payload.data.value : payload.opts.value
       )
 
-    case appActions.LOGOUT:
+    case app_actions.LOGOUT:
       return initialState
 
     default:

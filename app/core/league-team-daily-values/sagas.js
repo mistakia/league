@@ -1,7 +1,7 @@
 import { fork, takeLatest, call, select } from 'redux-saga/effects'
 
 import { league_team_daily_values_actions } from './actions'
-import { get_league_team_daily_values } from '@core/api'
+import { api_get_league_team_daily_values } from '@core/api'
 import { get_app, get_request_history } from '@core/selectors'
 
 export function* load() {
@@ -10,7 +10,7 @@ export function* load() {
   const request_history = yield select(get_request_history)
   const key = `GET_LEAGUE_TEAM_DAILY_VALUES_${leagueId}`
   if (!request_history.has(key)) {
-    yield call(get_league_team_daily_values, { leagueId })
+    yield call(api_get_league_team_daily_values, { leagueId })
   }
 }
 
@@ -18,7 +18,7 @@ export function* load() {
 //  WATCHERS
 // -------------------------------------
 
-export function* watchLoadLeagueTeamDailyValues() {
+export function* watch_load_league_team_daily_values() {
   yield takeLatest(
     league_team_daily_values_actions.LOAD_LEAGUE_TEAM_DAILY_VALUES,
     load
@@ -30,5 +30,5 @@ export function* watchLoadLeagueTeamDailyValues() {
 // -------------------------------------
 
 export const league_team_daily_values_sagas = [
-  fork(watchLoadLeagueTeamDailyValues)
+  fork(watch_load_league_team_daily_values)
 ]

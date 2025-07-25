@@ -3,22 +3,22 @@ import { createSelector } from 'reselect'
 
 import {
   getWaiverById,
-  getCurrentPlayers,
-  getCurrentTeamRosterRecord,
-  getCurrentLeague,
-  getCurrentTeam,
+  get_current_players_for_league,
+  get_current_team_roster_record,
+  get_current_league,
+  get_current_team,
   getPlayerStatus
 } from '@core/selectors'
-import { waiverActions } from '@core/waivers'
+import { waiver_actions } from '@core/waivers'
 
 import WaiverConfirmation from './waiver-confirmation'
 
-const mapStateToProps = createSelector(
-  getCurrentPlayers,
-  getCurrentTeamRosterRecord,
-  getCurrentLeague,
+const map_state_to_props = createSelector(
+  get_current_players_for_league,
+  get_current_team_roster_record,
+  get_current_league,
   getPlayerStatus,
-  getCurrentTeam,
+  get_current_team,
   getWaiverById,
   (rosterPlayers, roster, league, status, team, waiver) => ({
     rosterPlayers,
@@ -30,9 +30,12 @@ const mapStateToProps = createSelector(
   })
 )
 
-const mapDispatchToProps = {
-  claim: waiverActions.claim,
-  update: waiverActions.update
+const map_dispatch_to_props = {
+  claim: waiver_actions.claim,
+  update: waiver_actions.update
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(WaiverConfirmation)
+export default connect(
+  map_state_to_props,
+  map_dispatch_to_props
+)(WaiverConfirmation)

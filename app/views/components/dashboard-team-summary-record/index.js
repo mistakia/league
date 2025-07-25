@@ -1,17 +1,17 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { get_app, getOverallStandings } from '@core/selectors'
+import { get_app, get_overall_standings } from '@core/selectors'
 
 import DashboardTeamSummaryRecord from './dashboard-team-summary-record'
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   get_app,
-  getOverallStandings,
+  get_overall_standings,
   (app, standings) => {
     const overall = standings.divisionLeaders.concat(standings.wildcardTeams)
     return { standings, overall }
   }
 )
 
-export default connect(mapStateToProps)(DashboardTeamSummaryRecord)
+export default connect(map_state_to_props)(DashboardTeamSummaryRecord)

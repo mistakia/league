@@ -1,12 +1,12 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getPercentiles } from '@core/selectors'
+import { get_percentiles } from '@core/selectors'
 
 import PercentileMetric from './percentile-metric'
 
-const mapStateToProps = createSelector(getPercentiles, (percentiles) => ({
+const map_state_to_props = createSelector(get_percentiles, (percentiles) => ({
   percentiles
 }))
 
-export default connect(mapStateToProps)(PercentileMetric)
+export default connect(map_state_to_props)(PercentileMetric)

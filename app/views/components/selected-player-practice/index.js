@@ -7,7 +7,7 @@ import { player_actions } from '@core/players'
 
 import SelectedPlayerPractice from './selected-player-practice'
 
-const mapStateToProps = createSelector(getSelectedPlayer, (playerMap) => {
+const map_state_to_props = createSelector(getSelectedPlayer, (playerMap) => {
   const practice = playerMap.get('practice', new List())
   const sorted = practice.sort((a, b) => b.year - a.year || b.week - a.week)
 
@@ -17,11 +17,11 @@ const mapStateToProps = createSelector(getSelectedPlayer, (playerMap) => {
   }
 })
 
-const mapDispatchToProps = {
+const map_dispatch_to_props = {
   load: player_actions.load_player_practices
 }
 
 export default connect(
-  mapStateToProps,
-  mapDispatchToProps
+  map_state_to_props,
+  map_dispatch_to_props
 )(SelectedPlayerPractice)

@@ -1,11 +1,11 @@
 import { connect } from 'react-redux'
 
-import { auctionActions } from '@core/auction'
+import { auction_actions } from '@core/auction'
 
 import Filter from '@components/filter'
 
-const mapDispatchToProps = {
-  filter: auctionActions.filter
+const map_dispatch_to_props = {
+  filter: auction_actions.filter
 }
 
-export default connect(null, mapDispatchToProps)(Filter)
+export default connect(null, map_dispatch_to_props)(Filter)

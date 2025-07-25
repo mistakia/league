@@ -1,17 +1,17 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getTransactions, getTeamsForCurrentLeague } from '@core/selectors'
+import { get_transactions, get_teams_for_current_league } from '@core/selectors'
 
 import TransactionTeamFilter from './transaction-team-filter'
 
-const mapStateToProps = createSelector(
-  getTransactions,
-  getTeamsForCurrentLeague,
+const map_state_to_props = createSelector(
+  get_transactions,
+  get_teams_for_current_league,
   (transactions, leagueTeams) => ({
     teams: transactions.teams,
     leagueTeams: leagueTeams.toList()
   })
 )
 
-export default connect(mapStateToProps)(TransactionTeamFilter)
+export default connect(map_state_to_props)(TransactionTeamFilter)

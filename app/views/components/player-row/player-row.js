@@ -60,11 +60,11 @@ class PlayerRow extends Player {
           const Component = field_info.component
           group_items.push(<Component {...{ nfl_team, pos, week }} />)
         } else {
-          const value = field_info.getValue
-            ? field_info.getValue(playerMap)
+          const value = field_info.get_player_field_value
+            ? field_info.get_player_field_value(playerMap)
             : playerMap.getIn(field_info.key_path)
-          const percentile_key = field_info.getPercentileKey
-            ? field_info.getPercentileKey(playerMap)
+          const percentile_key = field_info.get_percentile_key
+            ? field_info.get_percentile_key(playerMap)
             : field_info.percentile_key
           group_items.push(
             <PercentileMetric

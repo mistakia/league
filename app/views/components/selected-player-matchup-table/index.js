@@ -3,25 +3,25 @@ import { createSelector } from 'reselect'
 
 import { constants, calculatePoints } from '@libs-shared'
 import {
-  getCurrentLeague,
+  get_current_league,
   getSelectedPlayer,
   getSelectedPlayerGame,
-  getPlayerGamelogs,
-  getGamelogs,
+  get_player_gamelogs,
+  get_gamelogs_state,
   get_seasonlogs,
   get_app
 } from '@core/selectors'
-import { gamelogsActions } from '@core/gamelogs'
-import { percentileActions } from '@core/percentiles'
+import { gamelogs_actions } from '@core/gamelogs'
+import { percentile_actions } from '@core/percentiles'
 
 import SelectedPlayerMatchupTable from './selected-player-matchup-table'
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   getSelectedPlayer,
   getSelectedPlayerGame,
-  getPlayerGamelogs,
-  getCurrentLeague,
-  getGamelogs,
+  get_player_gamelogs,
+  get_current_league,
+  get_gamelogs_state,
   get_seasonlogs,
   get_app,
   (playerMap, game, logs, league, gamelogState, seasonlogs, app) => {
@@ -74,12 +74,12 @@ const mapStateToProps = createSelector(
   }
 )
 
-const mapDispatchToProps = {
-  load_percentiles: percentileActions.load_percentiles,
-  load_players_gamelogs: gamelogsActions.load_players_gamelogs
+const map_dispatch_to_props = {
+  load_percentiles: percentile_actions.load_percentiles,
+  load_players_gamelogs: gamelogs_actions.load_players_gamelogs
 }
 
 export default connect(
-  mapStateToProps,
-  mapDispatchToProps
+  map_state_to_props,
+  map_dispatch_to_props
 )(SelectedPlayerMatchupTable)

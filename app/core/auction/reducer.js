@@ -1,8 +1,8 @@
 import { Record, List } from 'immutable'
 
 import { constants } from '@libs-shared'
-import { auctionActions } from './actions'
-import { appActions } from '@core/app'
+import { auction_actions } from './actions'
+import { app_actions } from '@core/app'
 
 const initialState = new Record({
   isPaused: true,
@@ -28,28 +28,28 @@ const initialState = new Record({
   pause_on_team_disconnect: true
 })
 
-export function auctionReducer(state = initialState(), { payload, type }) {
+export function auction_reducer(state = initialState(), { payload, type }) {
   switch (type) {
-    case auctionActions.AUCTION_SEARCH_PLAYERS:
+    case auction_actions.AUCTION_SEARCH_PLAYERS:
       return state.merge({
         search: payload.value
       })
 
-    case auctionActions.AUCTION_CONNECTED:
+    case auction_actions.AUCTION_CONNECTED:
       return state.merge({
         connected: new List(payload.connected)
       })
 
-    case auctionActions.AUCTION_TOGGLE_MUTED:
+    case auction_actions.AUCTION_TOGGLE_MUTED:
       return state.merge({ muted: !state.muted })
 
-    case auctionActions.AUCTION_RELEASE_LOCK:
+    case auction_actions.AUCTION_RELEASE_LOCK:
       return state.merge({ isLocked: false })
 
-    case auctionActions.AUCTION_FILTER:
+    case auction_actions.AUCTION_FILTER:
       return state.merge({ [payload.type]: new List(payload.values) })
 
-    case auctionActions.AUCTION_START: {
+    case auction_actions.AUCTION_START: {
       const latest = state.transactions.first()
       return state.merge({
         isPaused: false,
@@ -60,13 +60,13 @@ export function auctionReducer(state = initialState(), { payload, type }) {
       })
     }
 
-    case auctionActions.AUCTION_SELECT_PLAYER:
+    case auction_actions.AUCTION_SELECT_PLAYER:
       return state.merge({
         selected_pid: payload.pid,
         bid: 0
       })
 
-    case auctionActions.AUCTION_BID:
+    case auction_actions.AUCTION_BID:
       return state.merge({
         selected_pid: null,
         isPaused: false,
@@ -77,12 +77,12 @@ export function auctionReducer(state = initialState(), { payload, type }) {
         isLocked: true
       })
 
-    case auctionActions.AUCTION_SUBMIT_BID:
+    case auction_actions.AUCTION_SUBMIT_BID:
       return state.merge({
         isLocked: true
       })
 
-    case auctionActions.AUCTION_PROCESSED:
+    case auction_actions.AUCTION_PROCESSED:
       return state.merge({
         selected_pid: null,
         isPaused: false,
@@ -92,18 +92,18 @@ export function auctionReducer(state = initialState(), { payload, type }) {
         timer: Math.round((Date.now() + state.nominationTimer) / 1000)
       })
 
-    case auctionActions.AUCTION_PAUSED:
+    case auction_actions.AUCTION_PAUSED:
       return state.merge({
         isPaused: true,
         timer: null
       })
 
-    case auctionActions.AUCTION_NOMINATION_INFO: {
+    case auction_actions.AUCTION_NOMINATION_INFO: {
       const { nominatingTeamId } = payload
       return state.merge({ nominatingTeamId })
     }
 
-    case auctionActions.AUCTION_INIT: {
+    case auction_actions.AUCTION_INIT: {
       const latest = payload.transactions[0]
       return state.merge({
         bid:
@@ -126,27 +126,27 @@ export function auctionReducer(state = initialState(), { payload, type }) {
       })
     }
 
-    case auctionActions.AUCTION_CONFIG:
+    case auction_actions.AUCTION_CONFIG:
       return state.merge({
         pause_on_team_disconnect: payload.pause_on_team_disconnect
       })
 
-    case auctionActions.AUCTION_COMPLETE:
+    case auction_actions.AUCTION_COMPLETE:
       return state.merge({ isComplete: true })
 
-    case auctionActions.SET_OPTIMAL_LINEUP:
+    case auction_actions.SET_OPTIMAL_LINEUP:
       return state.merge({
         lineupPlayers: new List(payload.feasible ? payload.pids : []),
         lineupPoints: payload.result,
         lineupFeasible: payload.feasible
       })
 
-    case auctionActions.SET_AUCTION_BUDGET:
+    case auction_actions.SET_AUCTION_BUDGET:
       return state.merge({
         lineupBudget: payload.budget
       })
 
-    case appActions.AUTH_FULFILLED:
+    case app_actions.AUTH_FULFILLED:
       if (!payload.data.leagues.length) {
         return state
       }

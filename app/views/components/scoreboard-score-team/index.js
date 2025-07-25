@@ -5,8 +5,11 @@ import { getScoreboardByTeamId } from '@core/selectors'
 
 import ScoreboardScoreTeam from './scoreboard-score-team'
 
-const mapStateToProps = createSelector(getScoreboardByTeamId, (scoreboard) => ({
-  scoreboard
-}))
+const map_state_to_props = createSelector(
+  getScoreboardByTeamId,
+  (scoreboard) => ({
+    scoreboard
+  })
+)
 
-export default connect(mapStateToProps)(ScoreboardScoreTeam)
+export default connect(map_state_to_props)(ScoreboardScoreTeam)

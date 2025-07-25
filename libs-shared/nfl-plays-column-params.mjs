@@ -1081,7 +1081,7 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.FORMATION_PERSONNEL]
   },
 
-  box_ngs: {
+  box_defenders: {
     min: 0,
     max: 11,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -1093,13 +1093,13 @@ export default {
       }
     ]
   },
-  pru_ngs: {
+  pru: {
     min: 0,
     max: 11,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.DEFENSE]
   },
-  air_yards_ngs: {
+  air_yards: {
     min: -99,
     max: 99,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
@@ -1111,14 +1111,14 @@ export default {
       }
     ]
   },
-  // TODO allow decimal precision for time_to_throw_ngs
-  time_to_throw_ngs: {
+  // TODO allow decimal precision for time_to_throw
+  time_to_throw: {
     min: 0,
     max: 30,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.PASSING]
   },
-  route_ngs: {
+  route: {
     values: [
       'SLANT',
       'SCREEN',
@@ -1147,12 +1147,12 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.RECEIVING]
   },
-  man_zone_ngs: {
+  man_zone: {
     values: ['MAN_COVERAGE', 'ZONE_COVERAGE'],
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.COVERAGE]
   },
-  cov_type_ngs: {
+  cov_type: {
     values: [
       '2_MAN',
       'COVER_0',
@@ -1694,7 +1694,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PRESSURE]
   },
-  qb_pressure_ngs: {
+  qb_pressure_tracking: {
     data_type: table_constants.TABLE_DATA_TYPES.BOOLEAN,
     groups: [COLUMN_PARAM_GROUPS.PRESSURE]
   },
@@ -1919,7 +1919,7 @@ export default {
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,
     groups: [COLUMN_PARAM_GROUPS.DEFENSE]
   },
-  box_defenders: {
+  box_defenders_charted: {
     min: 0,
     max: 11,
     data_type: table_constants.TABLE_DATA_TYPES.RANGE,

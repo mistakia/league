@@ -10,7 +10,7 @@ import {
   processPoach,
   sendNotifications
 } from '#libs-server'
-import { constants, Roster, getFreeAgentPeriod } from '#libs-shared'
+import { constants, Roster, get_free_agent_period } from '#libs-shared'
 
 const router = express.Router()
 
@@ -85,7 +85,7 @@ router.post('/?', async (req, res) => {
       !constants.season.isRegularSeason &&
       league.free_agency_live_auction_start
     ) {
-      const faPeriod = getFreeAgentPeriod(league)
+      const faPeriod = get_free_agent_period(league)
       if (constants.season.now.isBetween(faPeriod.start, faPeriod.end)) {
         return res.status(400).send({ error: 'Player on Sanctuary Period' })
       }

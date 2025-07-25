@@ -71,7 +71,7 @@ SortablePlayerRoster.propTypes = {
 }
 
 export default function DashboardPlayersTable({
-  isBeforeExtensionDeadline,
+  is_before_extension_deadline,
   items = [],
   cutlist,
   title,
@@ -204,7 +204,7 @@ export default function DashboardPlayersTable({
     )
   }
 
-  const baseYear = isBeforeExtensionDeadline
+  const baseYear = is_before_extension_deadline
     ? constants.year - 1
     : constants.year
 
@@ -240,7 +240,7 @@ export default function DashboardPlayersTable({
                 {!isRestrictedFreeAgency && (
                   <div className='table__cell'>{baseYear}</div>
                 )}
-                {!isPoach && isOffseason && isBeforeExtensionDeadline && (
+                {!isPoach && isOffseason && is_before_extension_deadline && (
                   <div className='table__cell'>{baseYear + 1}</div>
                 )}
                 {/* {!isPoach && isOffseason && (
@@ -295,7 +295,7 @@ export default function DashboardPlayersTable({
               </div>
             </div>
           )}
-          {isBeforeExtensionDeadline && (
+          {is_before_extension_deadline && (
             <>
               <div className='table__cell'>
                 <PlayerRosterHeader
@@ -367,7 +367,7 @@ export default function DashboardPlayersTable({
           <PlayerRosterTotal
             players={total}
             reorder={showReorder}
-            isBeforeExtensionDeadline={isBeforeExtensionDeadline}
+            is_before_extension_deadline={is_before_extension_deadline}
             {...{ percentiles, is_team_manager }}
           />
         )}
@@ -378,7 +378,7 @@ export default function DashboardPlayersTable({
 }
 
 DashboardPlayersTable.propTypes = {
-  isBeforeExtensionDeadline: PropTypes.bool,
+  is_before_extension_deadline: PropTypes.bool,
   items: PropTypes.array,
   title: PropTypes.node,
   poaches: ImmutablePropTypes.list,

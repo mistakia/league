@@ -6,12 +6,15 @@ import { player_actions } from '@core/players'
 
 import EditableProjection from './editable-projection'
 
-const mapStateToProps = createSelector(get_app, (app) => ({
+const map_state_to_props = createSelector(get_app, (app) => ({
   userId: app.userId
 }))
 
-const mapDispatchToProps = {
+const map_dispatch_to_props = {
   save: player_actions.save_projection
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(EditableProjection)
+export default connect(
+  map_state_to_props,
+  map_dispatch_to_props
+)(EditableProjection)

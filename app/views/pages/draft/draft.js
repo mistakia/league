@@ -34,7 +34,7 @@ export default function DraftPage({
   load_draft,
   load_all_players,
   load_league,
-  loadTeams,
+  load_teams,
   is_draft_complete
 }) {
   const { lid } = useParams()
@@ -50,8 +50,8 @@ export default function DraftPage({
     load_draft()
     load_all_players()
     load_league()
-    loadTeams(lid)
-  }, [load_draft, load_all_players, load_league, loadTeams, lid])
+    load_teams(lid)
+  }, [load_draft, load_all_players, load_league, load_teams, lid])
 
   useEffect(() => {
     scroll_to_pick()
@@ -67,7 +67,7 @@ export default function DraftPage({
       )} ${selectedPlayerMap.get('lname')} (${selectedPlayerMap.get(
         'pos'
       )}) with the #${nextPick.pick} pick in the ${constants.year} draft.`,
-      onConfirm: draft_player
+      on_confirm_func: draft_player
     })
   }
   const { positions } = constants
@@ -202,7 +202,7 @@ export default function DraftPage({
   const formattedPlayerHeight = playerHeight
     ? `${Math.floor(playerHeight / 12)}-${playerHeight % 12}`
     : '-'
-  const isDrafted = drafted.includes(p.get('pid'))
+  const is_player_drafted = drafted.includes(p.get('pid'))
   const selected = (
     <div className='draft__selected'>
       <div className='draft__selected-head'>
@@ -216,7 +216,7 @@ export default function DraftPage({
           <div>{p.get('team')}</div>
           {Boolean(p.get('jnum')) && <div>#{p.get('jnum')}</div>}
         </div>
-        {draftActive && onTheClock && !isDrafted && (
+        {draftActive && onTheClock && !is_player_drafted && (
           <div className='draft__selected-action'>
             <Button onClick={handleDraft}>Draft</Button>
           </div>
@@ -393,7 +393,7 @@ DraftPage.propTypes = {
   nextPick: PropTypes.object,
   load_all_players: PropTypes.func,
   load_league: PropTypes.func,
-  loadTeams: PropTypes.func,
+  load_teams: PropTypes.func,
   players: ImmutablePropTypes.list,
   picks: ImmutablePropTypes.list,
   league: PropTypes.object,

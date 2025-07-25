@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 
 import { season } from './constants.mjs'
 
-export default function getFreeAgentPeriod({
+export default function get_free_agent_period({
   free_agency_period_start,
   free_agency_period_end,
   free_agency_live_auction_start,

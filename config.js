@@ -3,5 +3,5 @@ const { hideBin } = require('yargs/helpers')
 const argv = yargs(hideBin(process.argv)).argv
 
 const env = process.env.NODE_ENV || 'development'
-const configPath = argv.config || `./config.${env}`
-module.exports = require(configPath)
+const config_path = argv.config || `./config.${env}`
+module.exports = require(config_path)

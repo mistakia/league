@@ -2,7 +2,7 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { constants } from '@libs-shared'
-import { getTransactions } from '@core/selectors'
+import { get_transactions } from '@core/selectors'
 
 import LeagueRecentTransactions from './league-recent-transactions'
 
@@ -14,7 +14,7 @@ const signing_types = [
   constants.transactions.PRACTICE_ADD
 ]
 
-const mapStateToProps = createSelector(getTransactions, (transactions) => {
+const map_state_to_props = createSelector(get_transactions, (transactions) => {
   const items = transactions.get('items')
   const signings = items.filter((i) => signing_types.includes(i.type))
   const releases = items.filter(
@@ -27,4 +27,4 @@ const mapStateToProps = createSelector(getTransactions, (transactions) => {
   }
 })
 
-export default connect(mapStateToProps)(LeagueRecentTransactions)
+export default connect(map_state_to_props)(LeagueRecentTransactions)

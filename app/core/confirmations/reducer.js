@@ -1,6 +1,6 @@
 import { Record } from 'immutable'
 
-import { confirmationActions } from './actions'
+import { confirmation_actions } from './actions'
 
 const ConfirmationState = new Record({
   id: null,
@@ -8,18 +8,18 @@ const ConfirmationState = new Record({
   data: null,
   description: null,
   component: null,
-  onConfirm: null
+  on_confirm_func: null
 })
 
-export function confirmationReducer(
+export function confirmation_reducer(
   state = new ConfirmationState(),
   { payload, type }
 ) {
   switch (type) {
-    case confirmationActions.SHOW_CONFIRMATION:
+    case confirmation_actions.SHOW_CONFIRMATION:
       return state.merge(payload)
 
-    case confirmationActions.CANCEL_CONFIRMATION:
+    case confirmation_actions.CANCEL_CONFIRMATION:
       return ConfirmationState()
 
     default:

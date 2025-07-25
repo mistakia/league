@@ -1,20 +1,20 @@
 import { call, takeLatest, fork, select } from 'redux-saga/effects'
 
 import { constants } from '@libs-shared'
-import { appActions } from '@core/app'
-import { get_app, getTransactions, get_player_maps } from '@core/selectors'
-import { transactionsActions } from './actions'
+import { app_actions } from '@core/app'
+import { get_app, get_transactions, get_player_maps } from '@core/selectors'
+import { transactions_actions } from './actions'
 import { TRANSACTIONS_PER_LOAD } from '@core/constants'
 import {
-  fetchTransactions,
-  fetchPlayers,
-  getReleaseTransactions,
-  getReserveTransactions
+  api_get_transactions,
+  api_get_players,
+  api_get_release_transactions,
+  api_get_reserve_transactions
 } from '@core/api'
 
 export function* load({ payload }) {
   const { leagueId } = payload
-  const transactions = yield select(getTransactions)
+  const transactions = yield select(get_transactions)
   const offset = transactions.items.size
   const types = transactions.types.toJS()
   const teams = transactions.teams.toJS()
@@ -25,18 +25,18 @@ export function* load({ payload }) {
     types,
     teams
   }
-  yield call(fetchTransactions, params)
+  yield call(api_get_transactions, params)
 }
 
 export function* loadReleaseTransactions() {
   const { leagueId } = yield select(get_app)
-  if (leagueId) yield call(getReleaseTransactions, { leagueId })
+  if (leagueId) yield call(api_get_release_transactions, { leagueId })
 }
 
 export function* loadReserveTransactions() {
   const { leagueId, teamId } = yield select(get_app)
   if (leagueId && teamId)
-    yield call(getReserveTransactions, { leagueId, teamId })
+    yield call(api_get_reserve_transactions, { leagueId, teamId })
 }
 
 export function* loadPlayers({ payload }) {
@@ -44,11 +44,11 @@ export function* loadPlayers({ payload }) {
   const missing = payload.data.filter((p) => !players.getIn([p.pid, 'fname']))
   if (missing.length) {
     const { leagueId } = yield select(get_app)
-    yield call(fetchPlayers, { leagueId, pids: missing.map((p) => p.pid) })
+    yield call(api_get_players, { leagueId, pids: missing.map((p) => p.pid) })
   }
 }
 
-export function* loadRecentTransactions() {
+export function* load_recent_transactions() {
   const { leagueId } = yield select(get_app)
   const params = {
     leagueId,
@@ -61,7 +61,7 @@ export function* loadRecentTransactions() {
     ],
     since: Math.round(Date.now() / 1000) - 2592000 // last 30 days
   }
-  yield call(fetchTransactions, params)
+  yield call(api_get_transactions, params)
 }
 
 //= ====================================
@@ -69,30 +69,30 @@ export function* loadRecentTransactions() {
 // -------------------------------------
 
 export function* watchLoadTransactions() {
-  yield takeLatest(transactionsActions.LOAD_TRANSACTIONS, load)
+  yield takeLatest(transactions_actions.LOAD_TRANSACTIONS, load)
 }
 
 export function* watchLoadNextTransactions() {
-  yield takeLatest(transactionsActions.LOAD_NEXT_TRANSACTIONS, load)
+  yield takeLatest(transactions_actions.LOAD_NEXT_TRANSACTIONS, load)
 }
 
 export function* watchFilterTransactions() {
-  yield takeLatest(transactionsActions.FILTER_TRANSACTIONS, load)
+  yield takeLatest(transactions_actions.FILTER_TRANSACTIONS, load)
 }
 
 export function* watchAuthFulfilled() {
-  yield takeLatest(appActions.AUTH_FULFILLED, loadReleaseTransactions)
-  yield takeLatest(appActions.AUTH_FULFILLED, loadReserveTransactions)
+  yield takeLatest(app_actions.AUTH_FULFILLED, loadReleaseTransactions)
+  yield takeLatest(app_actions.AUTH_FULFILLED, loadReserveTransactions)
 }
 
 export function* watchGetTransactionsFulfilled() {
-  yield takeLatest(transactionsActions.GET_TRANSACTIONS_FULFILLED, loadPlayers)
+  yield takeLatest(transactions_actions.GET_TRANSACTIONS_FULFILLED, loadPlayers)
 }
 
 export function* watchLoadRecentTransactions() {
   yield takeLatest(
-    transactionsActions.LOAD_RECENT_TRANSACTIONS,
-    loadRecentTransactions
+    transactions_actions.LOAD_RECENT_TRANSACTIONS,
+    load_recent_transactions
   )
 }
 
@@ -100,7 +100,7 @@ export function* watchLoadRecentTransactions() {
 //  ROOT
 // -------------------------------------
 
-export const transactionSagas = [
+export const transaction_sagas = [
   fork(watchLoadTransactions),
   fork(watchLoadNextTransactions),
   fork(watchFilterTransactions),

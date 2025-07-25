@@ -180,30 +180,31 @@ export const player_actions = {
   ...create_api_action_types('GET_PLAYER_BETTING_MARKETS')
 }
 
-export const playersSearchActions = create_api_actions('SEARCH_PLAYERS')
-export const playersRequestActions = create_api_actions('FETCH_PLAYERS')
-export const allPlayersRequestActions = create_api_actions('FETCH_ALL_PLAYERS')
-export const leaguePlayersRequestActions = create_api_actions(
+export const players_search_actions = create_api_actions('SEARCH_PLAYERS')
+export const players_request_actions = create_api_actions('FETCH_PLAYERS')
+export const all_players_request_actions =
+  create_api_actions('FETCH_ALL_PLAYERS')
+export const league_players_request_actions = create_api_actions(
   'FETCH_LEAGUE_PLAYERS'
 )
-export const teamPlayersRequestActions =
+export const team_players_request_actions =
   create_api_actions('FETCH_TEAM_PLAYERS')
-export const getPlayerActions = create_api_actions('GET_PLAYER')
-export const putProjectionActions = create_api_actions('PUT_PROJECTION')
-export const delProjectionActions = create_api_actions('DEL_PROJECTION')
-export const getCutlistActions = create_api_actions('GET_CUTLIST')
-export const postCutlistActions = create_api_actions('POST_CUTLIST')
-export const getPlayerTransactionsActions = create_api_actions(
+export const get_player_actions = create_api_actions('GET_PLAYER')
+export const put_projection_actions = create_api_actions('PUT_PROJECTION')
+export const del_projection_actions = create_api_actions('DEL_PROJECTION')
+export const get_cutlist_actions = create_api_actions('GET_CUTLIST')
+export const post_cutlist_actions = create_api_actions('POST_CUTLIST')
+export const get_player_transactions_actions = create_api_actions(
   'GET_PLAYER_TRANSACTIONS'
 )
-export const getBaselinesActions = create_api_actions('GET_BASELINES')
-export const getPlayerProjectionsActions = create_api_actions(
+export const get_baselines_actions = create_api_actions('GET_BASELINES')
+export const get_player_projections_actions = create_api_actions(
   'GET_PLAYER_PROJECTIONS'
 )
-export const getPlayerGamelogsActions = create_api_actions(
+export const get_player_gamelogs_actions = create_api_actions(
   'GET_PLAYER_GAMELOGS'
 )
-export const getPlayerPracticesActions = create_api_actions(
+export const get_player_practices_actions = create_api_actions(
   'GET_PLAYER_PRACTICES'
 )
 export const get_player_betting_markets_actions = create_api_actions(

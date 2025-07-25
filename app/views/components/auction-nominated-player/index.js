@@ -3,16 +3,16 @@ import { createSelector } from 'reselect'
 
 import {
   getAvailableSalarySpaceForCurrentLeague,
-  getAuctionInfoForPosition,
+  get_auction_info_for_position,
   getPlayerById
 } from '@core/selectors'
 
 import AuctionNominatedPlayer from './auction-nominated-player'
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   getPlayerById,
   getAvailableSalarySpaceForCurrentLeague,
-  getAuctionInfoForPosition,
+  get_auction_info_for_position,
   (playerMap, league_available_salary_space, auction_info) => {
     const remaining_pts_added =
       auction_info.pts_added.total - auction_info.pts_added.rostered
@@ -30,4 +30,4 @@ const mapStateToProps = createSelector(
   }
 )
 
-export default connect(mapStateToProps)(AuctionNominatedPlayer)
+export default connect(map_state_to_props)(AuctionNominatedPlayer)

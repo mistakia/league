@@ -1,3 +1,3 @@
-export { gamelogsActions, getPlayersGamelogsActions } from './actions'
-export { gamelogSagas } from './sagas'
-export { gamelogsReducer } from './reducer'
+export { gamelogs_actions, get_players_gamelogs_actions } from './actions'
+export { gamelog_sagas } from './sagas'
+export { gamelogs_reducer } from './reducer'

@@ -2,27 +2,27 @@ import { connect } from 'react-redux'
 import dayjs from 'dayjs'
 import { createSelector } from 'reselect'
 
-import { auctionActions } from '@core/auction'
+import { auction_actions } from '@core/auction'
 import {
   get_app,
   getCurrentTeamRoster,
-  getCurrentLeague,
-  getAuction,
-  isNominatedPlayerEligible
+  get_current_league,
+  get_auction_state,
+  is_nominated_player_eligible
 } from '@core/selectors'
-import { notificationActions } from '@core/notifications'
-import { getFreeAgentPeriod } from '@libs-shared'
+import { notification_actions } from '@core/notifications'
+import { get_free_agent_period } from '@libs-shared'
 
 import AuctionMainBid from './auction-main-bid'
 
-const mapStateToProps = createSelector(
-  getAuction,
+const map_state_to_props = createSelector(
+  get_auction_state,
   get_app,
   getCurrentTeamRoster,
-  isNominatedPlayerEligible,
-  getCurrentLeague,
+  is_nominated_player_eligible,
+  get_current_league,
   (auction, app, roster, isEligible, league) => {
-    const faPeriod = getFreeAgentPeriod(league)
+    const faPeriod = get_free_agent_period(league)
     const now = dayjs()
     const isEnded = now.isAfter(faPeriod.end)
     const isStarted = faPeriod.free_agency_live_auction_start.isBefore(now)
@@ -51,10 +51,13 @@ const mapStateToProps = createSelector(
   }
 )
 
-const mapDispatchToProps = {
-  nominate: auctionActions.nominate,
-  bid: auctionActions.bid,
-  showNotification: notificationActions.show
+const map_dispatch_to_props = {
+  nominate: auction_actions.nominate,
+  bid: auction_actions.bid,
+  showNotification: notification_actions.show
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(AuctionMainBid)
+export default connect(
+  map_state_to_props,
+  map_dispatch_to_props
+)(AuctionMainBid)

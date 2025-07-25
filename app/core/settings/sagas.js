@@ -8,21 +8,21 @@ import {
 } from 'redux-saga/effects'
 
 import { get_app } from '@core/selectors'
-import { settingActions } from './actions'
-import { putSetting } from '@core/api'
-import { notificationActions } from '@core/notifications/actions'
+import { setting_actions } from './actions'
+import { api_put_setting } from '@core/api'
+import { notification_actions } from '@core/notifications/actions'
 
 export function* updateSetting({ payload }) {
   const { token } = yield select(get_app)
-  if (token) yield call(putSetting, payload)
-  else yield putResolve(settingActions.set(payload))
+  if (token) yield call(api_put_setting, payload)
+  else yield putResolve(setting_actions.set(payload))
 }
 
 export function* putSettingFulfilled({ payload }) {
   const { opts } = payload
   const { type } = opts
   yield put(
-    notificationActions.show({
+    notification_actions.show({
       message: `${type} saved`,
       severity: 'success'
     })
@@ -34,18 +34,18 @@ export function* putSettingFulfilled({ payload }) {
 // -------------------------------------
 
 export function* watchUpdateSetting() {
-  yield takeLatest(settingActions.UPDATE_SETTING, updateSetting)
+  yield takeLatest(setting_actions.UPDATE_SETTING, updateSetting)
 }
 
 export function* watchPutSettingFulfilled() {
-  yield takeLatest(settingActions.PUT_SETTING_FULFILLED, putSettingFulfilled)
+  yield takeLatest(setting_actions.PUT_SETTING_FULFILLED, putSettingFulfilled)
 }
 
 //= ====================================
 //  ROOT
 // -------------------------------------
 
-export const settingSagas = [
+export const setting_sagas = [
   fork(watchUpdateSetting),
   fork(watchPutSettingFulfilled)
 ]

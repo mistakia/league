@@ -24,7 +24,7 @@ export default class Roster {
 
     this.activeRosterLimit = getActiveRosterLimit(league)
 
-    const isBeforeExtensionDeadline =
+    const is_before_extension_deadline =
       (!constants.season.isRegularSeason && !league.ext_date) ||
       constants.season.now.isBefore(dayjs.unix(league.ext_date))
     for (const {
@@ -40,7 +40,7 @@ export default class Roster {
       restricted_free_agency_tag_announced,
       restricted_free_agency_original_team
     } of roster.players) {
-      const salary = isBeforeExtensionDeadline
+      const salary = is_before_extension_deadline
         ? getExtensionAmount({
             pos,
             tag,

@@ -3,9 +3,9 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 import dayjs from 'dayjs'
 
-import { appActions } from '@core/app'
-import { get_app, getCurrentLeague, getAuction } from '@core/selectors'
-import { getFreeAgentPeriod } from '@libs-shared'
+import { app_actions } from '@core/app'
+import { get_app, get_current_league, get_auction_state } from '@core/selectors'
+import { get_free_agent_period } from '@libs-shared'
 
 import App from './app'
 
@@ -13,12 +13,12 @@ App.propTypes = {
   children: PropTypes.element
 }
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   get_app,
-  getCurrentLeague,
-  getAuction,
+  get_current_league,
+  get_auction_state,
   (app, league, auction) => {
-    const faPeriod = getFreeAgentPeriod(league)
+    const faPeriod = get_free_agent_period(league)
     const now = dayjs()
     const free_agency_live_auction_start = league.free_agency_live_auction_start
       ? dayjs.unix(league.free_agency_live_auction_start)
@@ -41,8 +41,8 @@ const mapStateToProps = createSelector(
   }
 )
 
-const mapDispatchToProps = {
-  init: appActions.init
+const map_dispatch_to_props = {
+  init: app_actions.init
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(App)
+export default connect(map_state_to_props, map_dispatch_to_props)(App)

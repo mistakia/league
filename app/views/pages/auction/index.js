@@ -1,22 +1,22 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getAuction } from '@core/selectors'
+import { get_auction_state } from '@core/selectors'
 import { player_actions } from '@core/players'
-import { leagueActions } from '@core/leagues'
+import { league_actions } from '@core/leagues'
 import { roster_actions } from '@core/rosters'
 
 import AuctionPage from './auction'
 
-const mapStateToProps = createSelector(getAuction, (auction) => ({
+const map_state_to_props = createSelector(get_auction_state, (auction) => ({
   transactions: auction.transactions,
   tids: auction.tids
 }))
 
-const mapDispatchToProps = {
+const map_dispatch_to_props = {
   load_all_players: player_actions.load_all_players,
-  load_league: leagueActions.load_league,
+  load_league: league_actions.load_league,
   load_rosters: roster_actions.load_rosters
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(AuctionPage)
+export default connect(map_state_to_props, map_dispatch_to_props)(AuctionPage)

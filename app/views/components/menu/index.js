@@ -1,14 +1,14 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { appActions } from '@core/app'
-import { get_app, getCurrentLeague } from '@core/selectors'
+import { app_actions } from '@core/app'
+import { get_app, get_current_league } from '@core/selectors'
 
 import AppMenu from './menu'
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   get_app,
-  getCurrentLeague,
+  get_current_league,
   (app, league) => ({
     is_logged_in: Boolean(app.userId),
     leagueId: app.leagueId,
@@ -18,8 +18,8 @@ const mapStateToProps = createSelector(
   })
 )
 
-const mapDispatchToProps = {
-  logout: appActions.logout
+const map_dispatch_to_props = {
+  logout: app_actions.logout
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(AppMenu)
+export default connect(map_state_to_props, map_dispatch_to_props)(AppMenu)

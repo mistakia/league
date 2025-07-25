@@ -1,5 +1,5 @@
 import { Record } from 'immutable'
-import { contextMenuActions } from './actions'
+import { context_menu_actions } from './actions'
 
 const ContextMenuState = new Record({
   id: null,
@@ -9,12 +9,12 @@ const ContextMenuState = new Record({
   data: {}
 })
 
-export function contextMenuReducer(
+export function context_menu_reducer(
   state = new ContextMenuState(),
   { payload, type }
 ) {
   switch (type) {
-    case contextMenuActions.SHOW_CONTEXT_MENU: {
+    case context_menu_actions.SHOW_CONTEXT_MENU: {
       const { id, data, clickX, clickY } = payload
       return state.merge({
         id,
@@ -25,7 +25,7 @@ export function contextMenuReducer(
       })
     }
 
-    case contextMenuActions.HIDE_CONTEXT_MENU:
+    case context_menu_actions.HIDE_CONTEXT_MENU:
       return new ContextMenuState()
 
     default:
