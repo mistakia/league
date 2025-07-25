@@ -1,6 +1,6 @@
 import { Record } from 'immutable'
 
-import { notificationActions } from './actions'
+import { notification_actions } from './actions'
 
 const NotificationState = new Record({
   message: null,
@@ -8,12 +8,12 @@ const NotificationState = new Record({
   key: null
 })
 
-export function notificationReducer(
+export function notification_reducer(
   state = new NotificationState(),
   { payload, type }
 ) {
   switch (type) {
-    case notificationActions.SHOW_NOTIFICATION:
+    case notification_actions.SHOW_NOTIFICATION:
       return state.merge({ key: new Date().getTime(), ...payload })
 
     default:

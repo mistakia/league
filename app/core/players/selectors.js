@@ -1,22 +1,26 @@
 import { createSelector } from 'reselect'
 
-import { getPlayerFields } from '@core/player-fields'
+import { get_player_fields } from '@core/player-fields'
 import { constants } from '@libs-shared'
 import {
-  getStats,
-  getActiveRosterPlayerIdsForCurrentLeague,
-  getInjuredReservePlayerIdsForCurrentLeague,
-  getPracticeSquadPlayerIdsForCurrentLeague,
-  getPracticeSquadUnprotectedPlayerIdsForCurrentLeague,
-  getPracticeSquadProtectedPlayerIdsForCurrentLeague,
-  getRosteredPlayerIdsForCurrentLeague,
-  getSelectedPlayersPageView
+  get_stats_state,
+  get_active_roster_player_ids_for_current_league,
+  get_injured_reserve_player_ids_for_current_league,
+  get_practice_squad_player_ids_for_current_league,
+  get_practice_squad_unprotected_player_ids_for_current_league,
+  get_practice_squad_protected_player_ids_for_current_league,
+  get_rostered_player_ids_for_current_league,
+  get_selected_players_page_view
 } from '@core/selectors'
-import { fuzzySearch } from '@core/utils'
+import { fuzzy_search } from '@core/utils'
 
-function descendingComparator(a, b, key_path = [], getValue) {
-  const aValue = getValue ? getValue(a) : a.getIn(key_path)
-  const bValue = getValue ? getValue(b) : b.getIn(key_path)
+function descendingComparator(a, b, key_path = [], get_player_field_value) {
+  const aValue = get_player_field_value
+    ? get_player_field_value(a)
+    : a.getIn(key_path)
+  const bValue = get_player_field_value
+    ? get_player_field_value(b)
+    : b.getIn(key_path)
   if (typeof bValue === 'undefined' || bValue === null) {
     return -1
   }
@@ -41,7 +45,7 @@ function getComparator(order, key_path, get_value_func) {
 }
 
 export function getFilteredPlayers(state) {
-  const { qualifiers } = getStats(state)
+  const { qualifiers } = get_stats_state(state)
   const pState = state.get('players')
   let filtered = pState.get('items')
   const search = pState.get('search')
@@ -109,7 +113,7 @@ export function getFilteredPlayers(state) {
 
   if (search) {
     filtered = filtered.filter((playerMap) =>
-      fuzzySearch(search, playerMap.get('name'))
+      fuzzy_search(search, playerMap.get('name'))
     )
   }
 
@@ -125,16 +129,16 @@ export function getFilteredPlayers(state) {
   const availability = pState.get('availability')
   if (availability.size !== constants.availability.length) {
     const activeRosterPlayerIds =
-      getActiveRosterPlayerIdsForCurrentLeague(state)
-    const rosteredPlayerIds = getRosteredPlayerIdsForCurrentLeague(state)
+      get_active_roster_player_ids_for_current_league(state)
+    const rosteredPlayerIds = get_rostered_player_ids_for_current_league(state)
     const practiceSquadPlayerIds =
-      getPracticeSquadPlayerIdsForCurrentLeague(state)
+      get_practice_squad_player_ids_for_current_league(state)
     const practiceSquadUnprotectedPlayerIds =
-      getPracticeSquadUnprotectedPlayerIdsForCurrentLeague(state)
+      get_practice_squad_unprotected_player_ids_for_current_league(state)
     const practiceSquadProtectedPlayerIds =
-      getPracticeSquadProtectedPlayerIdsForCurrentLeague(state)
+      get_practice_squad_protected_player_ids_for_current_league(state)
     const injuredReservePlayerIds =
-      getInjuredReservePlayerIdsForCurrentLeague(state)
+      get_injured_reserve_player_ids_for_current_league(state)
     filtered = filtered.filter((playerMap) => {
       if (
         availability.includes('ACTIVE ROSTER') &&
@@ -226,10 +230,11 @@ export function getFilteredPlayers(state) {
     )
   }
 
-  const player_view_fields = getPlayerFields(state)
+  const player_view_fields = get_player_fields(state)
   const order_by = pState.get('orderBy')
   const order_by_key_path = player_view_fields[order_by].key_path
-  const order_by_value_func = player_view_fields[order_by].getValue
+  const order_by_value_func =
+    player_view_fields[order_by].get_player_field_value
   const sorted = filtered.sort(
     getComparator(pState.get('order'), order_by_key_path, order_by_value_func)
   )
@@ -237,8 +242,8 @@ export function getFilteredPlayers(state) {
 }
 
 export const getSelectedViewGroupedFields = createSelector(
-  getSelectedPlayersPageView,
-  getPlayerFields,
+  get_selected_players_page_view,
+  get_player_fields,
   (selected_players_page_view, fields) => {
     return selected_players_page_view.fields.reduce((groups, field) => {
       const field_info = fields[field]

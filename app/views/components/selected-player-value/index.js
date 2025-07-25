@@ -6,7 +6,7 @@ import { constants } from '@libs-shared'
 
 import SelectedPlayerValue from './selected-player-value'
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   getSelectedPlayer,
   getBaselines,
   (playerMap, baselines) => {
@@ -54,4 +54,4 @@ const mapStateToProps = createSelector(
   }
 )
 
-export default connect(mapStateToProps)(SelectedPlayerValue)
+export default connect(map_state_to_props)(SelectedPlayerValue)

@@ -2,41 +2,41 @@ import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
 import {
   get_app,
-  getWaivers,
-  getWaiverPlayersForCurrentTeam,
+  get_waivers,
+  get_waiver_players_for_current_team,
   get_player_maps,
   get_request_history
 } from '@core/selectors'
-import { waiverActions } from './actions'
+import { waiver_actions } from './actions'
 import {
-  postWaiver,
-  putWaiver,
-  postCancelWaiver,
-  postWaiverOrder,
-  fetchWaivers,
-  getWaiverReport,
-  fetchPlayers
+  api_post_waiver,
+  api_put_waiver,
+  api_post_cancel_waiver,
+  api_post_waiver_order,
+  api_get_waivers,
+  api_get_waiver_report,
+  api_get_players
 } from '@core/api'
-import { notificationActions } from '@core/notifications'
+import { notification_actions } from '@core/notifications'
 
 export function* claim({ payload }) {
   const { leagueId, teamId } = yield select(get_app)
-  yield call(postWaiver, { leagueId, teamId, ...payload })
+  yield call(api_post_waiver, { leagueId, teamId, ...payload })
 }
 
 export function* update({ payload }) {
   const { leagueId, teamId } = yield select(get_app)
-  yield call(putWaiver, { leagueId, teamId, ...payload })
+  yield call(api_put_waiver, { leagueId, teamId, ...payload })
 }
 
 export function* cancel({ payload }) {
   const { leagueId, teamId } = yield select(get_app)
-  yield call(postCancelWaiver, { leagueId, teamId, ...payload })
+  yield call(api_post_cancel_waiver, { leagueId, teamId, ...payload })
 }
 
 export function* reorder({ payload }) {
   const { leagueId, teamId } = yield select(get_app)
-  const teamWaivers = yield select(getWaiverPlayersForCurrentTeam)
+  const teamWaivers = yield select(get_waiver_players_for_current_team)
   const { oldIndex, newIndex, type } = payload
   const items = teamWaivers[type]
   const waiver = items.get(oldIndex)
@@ -51,12 +51,12 @@ export function* reorder({ payload }) {
   }
   const waivers = newWaiver.map((w, index) => w.uid).toJS()
   const reset = items.map(({ uid, po }) => ({ uid, po }))
-  yield call(postWaiverOrder, { leagueId, teamId, waivers, reset })
+  yield call(api_post_waiver_order, { leagueId, teamId, waivers, reset })
 }
 
 export function* waiverNotification() {
   yield put(
-    notificationActions.show({
+    notification_actions.show({
       message: 'Waiver Submitted',
       severity: 'success'
     })
@@ -65,7 +65,7 @@ export function* waiverNotification() {
 
 export function* waiverOrderNotification() {
   yield put(
-    notificationActions.show({
+    notification_actions.show({
       message: 'Waiver Order Updated',
       severity: 'success'
     })
@@ -74,7 +74,7 @@ export function* waiverOrderNotification() {
 
 export function* cancelWaiverNotification() {
   yield put(
-    notificationActions.show({
+    notification_actions.show({
       message: 'Waiver Cancelled',
       severity: 'success'
     })
@@ -83,7 +83,7 @@ export function* cancelWaiverNotification() {
 
 export function* updateNotification() {
   yield put(
-    notificationActions.show({
+    notification_actions.show({
       message: 'Waiver Updated',
       severity: 'success'
     })
@@ -92,7 +92,7 @@ export function* updateNotification() {
 
 export function* loadWaivers() {
   const { leagueId, teamId } = yield select(get_app)
-  const state = yield select(getWaivers)
+  const state = yield select(get_waivers)
   const type = state.get('type').get(0)
   const key = `GET_WAIVERS_${leagueId}_${teamId}_${type}`
   const request_history = yield select(get_request_history)
@@ -100,18 +100,18 @@ export function* loadWaivers() {
     return
   }
 
-  yield call(fetchWaivers, { leagueId, teamId, type })
+  yield call(api_get_waivers, { leagueId, teamId, type })
 }
 
 export function* loadWaiverReport() {
   const { leagueId, teamId } = yield select(get_app)
-  const state = yield select(getWaivers)
+  const state = yield select(get_waivers)
   const type = state.get('type').get(0)
   const processed = state.get('processed').get(0)
   if (!processed) return
 
   const opts = { leagueId, teamId, type, processed }
-  yield call(getWaiverReport, opts)
+  yield call(api_get_waiver_report, opts)
 }
 
 export function* filterWaivers({ payload }) {
@@ -127,7 +127,7 @@ export function* loadPlayers({ payload }) {
   const missing = payload.data.filter((p) => !players.getIn([p.pid, 'fname']))
   if (missing.length) {
     const { leagueId } = yield select(get_app)
-    yield call(fetchPlayers, { leagueId, pids: missing.map((p) => p.pid) })
+    yield call(api_get_players, { leagueId, pids: missing.map((p) => p.pid) })
   }
 }
 
@@ -136,64 +136,64 @@ export function* loadPlayers({ payload }) {
 // -------------------------------------
 
 export function* watchClaim() {
-  yield takeLatest(waiverActions.WAIVER_CLAIM, claim)
+  yield takeLatest(waiver_actions.WAIVER_CLAIM, claim)
 }
 
 export function* watchCancelClaim() {
-  yield takeLatest(waiverActions.CANCEL_CLAIM, cancel)
+  yield takeLatest(waiver_actions.CANCEL_CLAIM, cancel)
 }
 
 export function* watchReorderWaivers() {
-  yield takeLatest(waiverActions.REORDER_WAIVERS, reorder)
+  yield takeLatest(waiver_actions.REORDER_WAIVERS, reorder)
 }
 
 export function* watchPostWaiverFulfilled() {
-  yield takeLatest(waiverActions.POST_WAIVER_FULFILLED, waiverNotification)
+  yield takeLatest(waiver_actions.POST_WAIVER_FULFILLED, waiverNotification)
 }
 
 export function* watchPostWaiverOrderFulfilled() {
   yield takeLatest(
-    waiverActions.POST_WAIVER_ORDER_FULFILLED,
+    waiver_actions.POST_WAIVER_ORDER_FULFILLED,
     waiverOrderNotification
   )
 }
 
 export function* watchPostCancelWaiverFulfilled() {
   yield takeLatest(
-    waiverActions.POST_CANCEL_WAIVER_FULFILLED,
+    waiver_actions.POST_CANCEL_WAIVER_FULFILLED,
     cancelWaiverNotification
   )
 }
 
-export function* watchGetWaiversFulfilled() {
-  yield takeLatest(waiverActions.GET_WAIVERS_FULFILLED, loadWaiverReport)
+export function* watch_get_waivers_fulfilled() {
+  yield takeLatest(waiver_actions.GET_WAIVERS_FULFILLED, loadWaiverReport)
 }
 
 export function* watchLoadWaivers() {
-  yield takeLatest(waiverActions.LOAD_WAIVERS, loadWaivers)
+  yield takeLatest(waiver_actions.LOAD_WAIVERS, loadWaivers)
 }
 
 export function* watchFilterWaivers() {
-  yield takeLatest(waiverActions.FILTER_WAIVERS, filterWaivers)
+  yield takeLatest(waiver_actions.FILTER_WAIVERS, filterWaivers)
 }
 
 export function* watchUpdateClaim() {
-  yield takeLatest(waiverActions.UPDATE_WAIVER_CLAIM, update)
+  yield takeLatest(waiver_actions.UPDATE_WAIVER_CLAIM, update)
 }
 
 export function* watchPutWaiverFulfilled() {
-  yield takeLatest(waiverActions.PUT_WAIVER_FULFILLED, updateNotification)
+  yield takeLatest(waiver_actions.PUT_WAIVER_FULFILLED, updateNotification)
 }
 
 export function* watchWaiverReportFulfilled() {
-  yield takeLatest(waiverActions.GET_WAIVER_REPORT_FULFILLED, loadPlayers)
+  yield takeLatest(waiver_actions.GET_WAIVER_REPORT_FULFILLED, loadPlayers)
 }
 
 //= ====================================
 //  ROOT
 // -------------------------------------
 
-export const waiverSagas = [
+export const waiver_sagas = [
   fork(watchClaim),
   fork(watchUpdateClaim),
   fork(watchCancelClaim),
@@ -203,7 +203,7 @@ export const waiverSagas = [
   fork(watchPostCancelWaiverFulfilled),
   fork(watchPutWaiverFulfilled),
 
-  fork(watchGetWaiversFulfilled),
+  fork(watch_get_waivers_fulfilled),
   fork(watchFilterWaivers),
 
   fork(watchLoadWaivers),

@@ -1,7 +1,7 @@
 import generate_league_format_hash from './generate-league-format-hash.mjs'
 import generate_scoring_format_hash from './generate-scoring-format-hash.mjs'
 
-const createDefaultLeague = ({ commishid = 0 } = {}) => {
+const create_default_league = ({ commishid = 0 } = {}) => {
   const league_params = {
     commishid,
     name: 'SUPERFLEX DYNASTY LEAGUE',
@@ -67,4 +67,4 @@ const createDefaultLeague = ({ commishid = 0 } = {}) => {
   return league_params
 }
 
-export default createDefaultLeague
+export default create_default_league

@@ -1,7 +1,7 @@
 import debug from 'debug'
 
 import db from '#db'
-import { constants, Errors, getFreeAgentPeriod } from '#libs-shared'
+import { constants, Errors, get_free_agent_period } from '#libs-shared'
 import {
   submitAcquisition,
   resetWaiverOrder,
@@ -51,7 +51,7 @@ const run = async ({ daily = false } = {}) => {
       const league = await getLeague({ lid })
 
       if (league.free_agency_live_auction_start) {
-        const faPeriod = getFreeAgentPeriod(league)
+        const faPeriod = get_free_agent_period(league)
         if (
           constants.season.now.isBefore(faPeriod.free_agency_live_auction_start)
         ) {

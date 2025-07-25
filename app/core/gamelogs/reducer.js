@@ -1,15 +1,15 @@
 import { Map } from 'immutable'
 
-import { gamelogsActions } from './actions'
+import { gamelogs_actions } from './actions'
 import { player_actions } from '@core/players'
 
 const initialState = new Map({
   players: new Map()
 })
 
-export function gamelogsReducer(state = initialState, { payload, type }) {
+export function gamelogs_reducer(state = initialState, { payload, type }) {
   switch (type) {
-    case gamelogsActions.GET_PLAYERS_GAMELOGS_FULFILLED:
+    case gamelogs_actions.GET_PLAYERS_GAMELOGS_FULFILLED:
       return state.withMutations((state) => {
         payload.data.forEach((g) =>
           state.setIn(

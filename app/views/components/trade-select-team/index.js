@@ -1,19 +1,19 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { tradeActions } from '@core/trade'
+import { trade_actions } from '@core/trade'
 import {
-  getTeamsForCurrentLeague,
+  get_teams_for_current_league,
   get_app,
-  getCurrentTrade
+  get_current_trade
 } from '@core/selectors'
 
 import TradeSelectTeam from './trade-select-team'
 
-const mapStateToProps = createSelector(
-  getTeamsForCurrentLeague,
+const map_state_to_props = createSelector(
+  get_teams_for_current_league,
   get_app,
-  getCurrentTrade,
+  get_current_trade,
   (teams, app, trade) => ({
     teams: teams
       .filter((t) => t.uid !== app.teamId)
@@ -23,8 +23,11 @@ const mapStateToProps = createSelector(
   })
 )
 
-const mapDispatchToProps = {
-  select: tradeActions.selectTeam
+const map_dispatch_to_props = {
+  select: trade_actions.select_team
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(TradeSelectTeam)
+export default connect(
+  map_state_to_props,
+  map_dispatch_to_props
+)(TradeSelectTeam)

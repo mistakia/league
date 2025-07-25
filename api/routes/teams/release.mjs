@@ -4,7 +4,7 @@ import {
   constants,
   isSlotActive,
   Roster,
-  getFreeAgentPeriod
+  get_free_agent_period
 } from '#libs-shared'
 import {
   verifyUserTeam,
@@ -153,7 +153,7 @@ router.post('/?', async (req, res) => {
       const rosterPlayer = roster.get(pid)
       const isOnActiveRoster = isSlotActive(rosterPlayer.slot)
 
-      const faPeriod = getFreeAgentPeriod(league)
+      const faPeriod = get_free_agent_period(league)
       if (
         constants.season.now.isAfter(faPeriod.start) &&
         constants.season.now.isBefore(faPeriod.end) &&

@@ -4,18 +4,18 @@ import { List } from 'immutable'
 
 import {
   getSelectedPlayer,
-  getCurrentLeague,
-  isBeforeExtensionDeadline
+  get_current_league,
+  is_before_extension_deadline
 } from '@core/selectors'
 import { constants, getExtensionAmount } from '@libs-shared'
 import { player_actions } from '@core/players'
 
 import SelectedPlayerTransactions from './selected-player-transactions'
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   getSelectedPlayer,
-  getCurrentLeague,
-  isBeforeExtensionDeadline,
+  get_current_league,
+  is_before_extension_deadline,
   (player_map, league, is_before_extension_deadline) => {
     const transactions = player_map.get('transactions', new List())
     const teams = {}
@@ -81,7 +81,7 @@ const mapStateToProps = createSelector(
       playerMap: player_map,
       teams,
       maxTransaction: max_transaction,
-      isBeforeExtensionDeadline: is_before_extension_deadline,
+      is_before_extension_deadline,
       draft_transaction,
       extension_salaries,
       extensions,
@@ -91,11 +91,11 @@ const mapStateToProps = createSelector(
   }
 )
 
-const mapDispatchToProps = {
+const map_dispatch_to_props = {
   load: player_actions.load_player_transactions
 }
 
 export default connect(
-  mapStateToProps,
-  mapDispatchToProps
+  map_state_to_props,
+  map_dispatch_to_props
 )(SelectedPlayerTransactions)

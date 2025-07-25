@@ -1,19 +1,19 @@
 import { call, takeLatest, fork, select } from 'redux-saga/effects'
 
-import { get_app, getTrade, getTradeSelectedTeamId } from '@core/selectors'
-import { tradeActions } from './actions'
+import { get_app, get_trade, get_trade_selected_team_id } from '@core/selectors'
+import { trade_actions } from './actions'
 import {
-  postProposeTrade,
-  postAcceptTrade,
-  postCancelTrade,
-  postRejectTrade,
-  getTrades
+  api_post_propose_trade,
+  api_post_accept_trade,
+  api_post_cancel_trade,
+  api_post_reject_trade,
+  api_get_trades
 } from '@core/api'
 
 export function* propose() {
   const { teamId, leagueId } = yield select(get_app)
-  const accept_tid = yield select(getTradeSelectedTeamId)
-  const trade = yield select(getTrade)
+  const accept_tid = yield select(get_trade_selected_team_id)
+  const trade = yield select(get_trade)
 
   const params = {
     proposingTeamPlayers: trade.proposingTeamPlayers.toJS(),
@@ -25,32 +25,32 @@ export function* propose() {
     accept_tid,
     leagueId
   }
-  yield call(postProposeTrade, params)
+  yield call(api_post_propose_trade, params)
 }
 
 export function* load() {
   const { teamId, leagueId } = yield select(get_app)
-  yield call(getTrades, { leagueId, teamId })
+  yield call(api_get_trades, { leagueId, teamId })
 }
 
 export function* cancel() {
-  const { selectedTradeId } = yield select(getTrade)
+  const { selectedTradeId } = yield select(get_trade)
   const { leagueId } = yield select(get_app)
-  yield call(postCancelTrade, { leagueId, tradeId: selectedTradeId })
+  yield call(api_post_cancel_trade, { leagueId, tradeId: selectedTradeId })
 }
 
 export function* reject() {
-  const { selectedTradeId } = yield select(getTrade)
+  const { selectedTradeId } = yield select(get_trade)
   const { leagueId } = yield select(get_app)
-  yield call(postRejectTrade, { leagueId, tradeId: selectedTradeId })
+  yield call(api_post_reject_trade, { leagueId, tradeId: selectedTradeId })
 }
 
 export function* accept() {
   const { teamId, leagueId } = yield select(get_app)
-  const { selectedTradeId } = yield select(getTrade)
-  const trade = yield select(getTrade)
+  const { selectedTradeId } = yield select(get_trade)
+  const trade = yield select(get_trade)
   const releasePlayers = trade.releasePlayers.toJS()
-  yield call(postAcceptTrade, {
+  yield call(api_post_accept_trade, {
     teamId,
     leagueId,
     releasePlayers,
@@ -63,30 +63,30 @@ export function* accept() {
 // -------------------------------------
 
 export function* watchProposeTrade() {
-  yield takeLatest(tradeActions.PROPOSE_TRADE, propose)
+  yield takeLatest(trade_actions.PROPOSE_TRADE, propose)
 }
 
 export function* watchLoadTrades() {
-  yield takeLatest(tradeActions.LOAD_TRADES, load)
+  yield takeLatest(trade_actions.LOAD_TRADES, load)
 }
 
 export function* watchCancelTrade() {
-  yield takeLatest(tradeActions.CANCEL_TRADE, cancel)
+  yield takeLatest(trade_actions.CANCEL_TRADE, cancel)
 }
 
 export function* watchAcceptTrade() {
-  yield takeLatest(tradeActions.ACCEPT_TRADE, accept)
+  yield takeLatest(trade_actions.ACCEPT_TRADE, accept)
 }
 
 export function* watchRejectTrade() {
-  yield takeLatest(tradeActions.REJECT_TRADE, reject)
+  yield takeLatest(trade_actions.REJECT_TRADE, reject)
 }
 
 //= ====================================
 //  ROOT
 // -------------------------------------
 
-export const tradeSagas = [
+export const trade_sagas = [
   fork(watchProposeTrade),
   fork(watchLoadTrades),
   fork(watchCancelTrade),

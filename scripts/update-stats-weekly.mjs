@@ -4,7 +4,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, createDefaultLeague } from '#libs-shared'
+import { constants, create_default_league } from '#libs-shared'
 import { is_main, getLeague } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -67,7 +67,7 @@ const update_stats_weekly = async ({ week } = {}) => {
   await generate_player_gamelogs({ week })
 
   // process default league
-  const default_league = createDefaultLeague()
+  const default_league = create_default_league()
   const {
     league_format_hash: default_league_format_hash,
     scoring_format_hash: default_scoring_format_hash

@@ -5,10 +5,10 @@ import { getSelectedPlayer, get_app } from '@core/selectors'
 
 import SelectedPlayerLineupImpact from './selected-player-lineup-impact'
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   getSelectedPlayer,
   get_app,
   (playerMap, app) => ({ playerMap, is_logged_in: Boolean(app.userId) })
 )
 
-export default connect(mapStateToProps)(SelectedPlayerLineupImpact)
+export default connect(map_state_to_props)(SelectedPlayerLineupImpact)

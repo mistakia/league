@@ -9,7 +9,7 @@ import {
   groupBy,
   constants,
   getPlayerCountBySlot,
-  getEligibleSlots
+  get_eligible_slots
 } from '#libs-shared'
 import { getLeague, is_main } from '#libs-server'
 import db from '#db'
@@ -180,7 +180,7 @@ if (is_main(import.meta.url)) {
       }
 
       for (const player of result) {
-        const eligibleSlots = getEligibleSlots({ pos: player.pos, league })
+        const eligibleSlots = get_eligible_slots({ pos: player.pos, league })
         for (const slot of eligibleSlots) {
           if (starters_pool[slot].length < playerCountBySlot[slot]) {
             starters_pool[slot].push(player)

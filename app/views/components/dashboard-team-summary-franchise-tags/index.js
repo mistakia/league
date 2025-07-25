@@ -1,12 +1,12 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getCurrentLeague } from '@core/selectors'
+import { get_current_league } from '@core/selectors'
 
 import DashboardTeamSummaryFranchiseTags from './dashboard-team-summary-franchise-tags'
 
-const mapStateToProps = createSelector(getCurrentLeague, (league) => ({
+const map_state_to_props = createSelector(get_current_league, (league) => ({
   league
 }))
 
-export default connect(mapStateToProps)(DashboardTeamSummaryFranchiseTags)
+export default connect(map_state_to_props)(DashboardTeamSummaryFranchiseTags)

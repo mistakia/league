@@ -1756,10 +1756,10 @@ const options = {
                   description: 'Yards gained after any contact',
                   example: 3
                 },
-                cov_type_ngs: {
+                cov_type: {
                   type: 'string',
                   nullable: true,
-                  description: 'Coverage type (NGS)',
+                  description: 'Coverage type',
                   example: 'MAN'
                 },
                 sep: {

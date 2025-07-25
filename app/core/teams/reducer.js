@@ -1,19 +1,19 @@
 import { Map } from 'immutable'
 
-import { appActions } from '@core/app'
+import { app_actions } from '@core/app'
 import { createTeam } from './team'
-import { teamActions } from './actions'
-import { auctionActions } from '@core/auction'
+import { team_actions } from './actions'
+import { auction_actions } from '@core/auction'
 import { draft_actions } from '@core/draft'
-import { tradeActions } from '@core/trade'
+import { trade_actions } from '@core/trade'
 import { constants } from '@libs-shared'
 
 const initialState = new Map()
 
-export function teamsReducer(state = initialState, { payload, type }) {
+export function teams_reducer(state = initialState, { payload, type }) {
   switch (type) {
-    case appActions.AUTH_FULFILLED:
-    case teamActions.GET_TEAMS_FULFILLED:
+    case app_actions.AUTH_FULFILLED:
+    case team_actions.GET_TEAMS_FULFILLED:
       return state.withMutations((state) => {
         const year = payload.opts.year || constants.year
         payload.data.teams.forEach((t) => {
@@ -43,16 +43,16 @@ export function teamsReducer(state = initialState, { payload, type }) {
         })
       })
 
-    case appActions.LOGOUT:
+    case app_actions.LOGOUT:
       return initialState
 
-    case auctionActions.AUCTION_PROCESSED: {
+    case auction_actions.AUCTION_PROCESSED: {
       const newCap =
         state.getIn([constants.year, payload.tid, 'cap']) - payload.value
       return state.setIn([constants.year, payload.tid, 'cap'], newCap)
     }
 
-    case teamActions.PUT_TEAM_FULFILLED:
+    case team_actions.PUT_TEAM_FULFILLED:
       return state.setIn(
         [constants.year, payload.opts.teamId, payload.opts.field],
         payload.data.value
@@ -69,7 +69,7 @@ export function teamsReducer(state = initialState, { payload, type }) {
       )
     }
 
-    case tradeActions.POST_TRADE_ACCEPT_FULFILLED:
+    case trade_actions.POST_TRADE_ACCEPT_FULFILLED:
       if (
         !payload.data.acceptingTeamPicks.length &&
         !payload.data.proposingTeamPicks.length
@@ -134,16 +134,16 @@ export function teamsReducer(state = initialState, { payload, type }) {
         }
       })
 
-    case teamActions.POST_TEAMS_FULFILLED:
+    case team_actions.POST_TEAMS_FULFILLED:
       return state.setIn(
         [constants.year, payload.data.team.uid],
         createTeam(payload.data.team)
       )
 
-    case teamActions.DELETE_TEAMS_FULFILLED:
+    case team_actions.DELETE_TEAMS_FULFILLED:
       return state.deleteIn([constants.year, payload.opts.teamId])
 
-    case teamActions.GET_LEAGUE_TEAM_STATS_FULFILLED:
+    case team_actions.GET_LEAGUE_TEAM_STATS_FULFILLED:
       return state.withMutations((state) => {
         payload.data.forEach((stats) => {
           if (state.hasIn([payload.opts.year, stats.tid, 'uid'])) {

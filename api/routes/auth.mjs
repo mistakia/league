@@ -141,8 +141,8 @@ router.post('/register', async (req, res) => {
     const { email, password, invite_code } = req.body
     let username = req.body.username
 
-    const teamId = req.body.teamId ? parseInt(req.body.teamId, 10) : null
-    const leagueId = req.body.leagueId ? parseInt(req.body.leagueId, 10) : null
+    const team_id = req.body.teamId ? parseInt(req.body.teamId, 10) : null
+    const league_id = req.body.leagueId ? parseInt(req.body.leagueId, 10) : null
 
     if (!password) {
       return res.status(400).send({ error: 'missing password param' })
@@ -154,8 +154,8 @@ router.post('/register', async (req, res) => {
         return res.status(400).send({ error: result[0].message })
       }
 
-      const emailExists = await db('users').where({ email })
-      if (emailExists.length) {
+      const email_exists = await db('users').where({ email })
+      if (email_exists.length) {
         return res.status(400).send({ error: 'email exists' })
       }
     }
@@ -178,8 +178,8 @@ router.post('/register', async (req, res) => {
       return res.status(400).send({ error: result[0].message })
     }
 
-    const usernameExists = await db('users').where({ username })
-    if (usernameExists.length) {
+    const username_exists = await db('users').where({ username })
+    if (username_exists.length) {
       return res.status(400).send({ error: 'username exists' })
     }
 
@@ -206,18 +206,18 @@ router.post('/register', async (req, res) => {
         .send({ error: 'invite code has reached maximum uses' })
     }
 
-    if (leagueId) {
-      const league = getLeague({ lid: leagueId })
+    if (league_id) {
+      const league = getLeague({ lid: league_id })
       if (!league) {
         return res.status(400).send({ error: 'league does not exist' })
       }
 
       const teams = await db('teams').where({
-        lid: leagueId,
+        lid: league_id,
         year: constants.season.year
       })
-      if (teamId) {
-        if (!teams.find((t) => t.uid === teamId)) {
+      if (team_id) {
+        if (!teams.find((t) => t.uid === team_id)) {
           return res.status(400).send({ error: 'team does not exist' })
         }
       } else if (teams.length === league.num_teams) {
@@ -226,36 +226,36 @@ router.post('/register', async (req, res) => {
     }
 
     const salt = await bcrypt.genSalt(10)
-    const hashedPassword = await bcrypt.hash(password, salt)
+    const hashed_password = await bcrypt.hash(password, salt)
     const users = await db('users')
       .insert({
         email,
-        password: hashedPassword,
+        password: hashed_password,
         username,
         invite_code
       })
       .returning('id')
-    const userId = users[0].id
+    const user_id = users[0].id
 
     // Update invite code usage
     await db('invite_codes')
       .where({ code: invite_code })
       .update({
-        used_by: userId,
+        used_by: user_id,
         used_at: db.fn.now(),
         uses_count: db.raw('uses_count + 1')
       })
 
-    if (leagueId && teamId) {
+    if (league_id && team_id) {
       await db('users_teams').insert({
-        userid: userId,
-        tid: teamId,
+        userid: user_id,
+        tid: team_id,
         year: constants.season.year
       })
     }
 
-    const token = jwt.sign({ userId }, config.jwt.secret)
-    res.json({ token, userId })
+    const token = jwt.sign({ userId: user_id }, config.jwt.secret)
+    res.json({ token, userId: user_id })
   } catch (err) {
     logger(err)
     res.status(500).send({ error: err.toString() })

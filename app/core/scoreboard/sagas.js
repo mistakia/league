@@ -1,8 +1,8 @@
 import { call, takeLatest, fork, select } from 'redux-saga/effects'
 
-import { getScoreboard, getScoreboardUpdated } from '@core/selectors'
-import { scoreboardActions } from './actions'
-import { playActions } from '@core/plays'
+import { get_scoreboard, getScoreboardUpdated } from '@core/selectors'
+import { scoreboard_actions } from './actions'
+import { play_actions } from '@core/plays'
 import { send, wsActions } from '@core/ws'
 import { constants } from '@libs-shared'
 
@@ -11,13 +11,13 @@ export function* register() {
   const updated = yield select(getScoreboardUpdated)
   console.log(`register scoreboard ${updated}`)
   send({
-    type: scoreboardActions.SCOREBOARD_REGISTER,
+    type: scoreboard_actions.SCOREBOARD_REGISTER,
     payload: { updated }
   })
 }
 
 export function* reregister() {
-  const state = yield select(getScoreboard)
+  const state = yield select(get_scoreboard)
   const isLoaded = state.get('isLoaded')
   if (isLoaded) {
     yield call(register)
@@ -29,11 +29,11 @@ export function* reregister() {
 // -------------------------------------
 
 export function* watchGetScoreboardFulfilled() {
-  yield takeLatest(playActions.GET_PLAYSTATS_FULFILLED, register)
+  yield takeLatest(play_actions.GET_PLAYSTATS_FULFILLED, register)
 }
 
 export function* watchUpdateScoreboardPlays() {
-  yield takeLatest(scoreboardActions.UPDATE_SCOREBOARD_PLAYS, register)
+  yield takeLatest(scoreboard_actions.UPDATE_SCOREBOARD_PLAYS, register)
 }
 
 export function* watchWebSocketReconnected() {
@@ -44,7 +44,7 @@ export function* watchWebSocketReconnected() {
 //  ROOT
 // -------------------------------------
 
-export const scoreboardSagas = [
+export const scoreboard_sagas = [
   fork(watchGetScoreboardFulfilled),
   fork(watchUpdateScoreboardPlays),
   fork(watchWebSocketReconnected)

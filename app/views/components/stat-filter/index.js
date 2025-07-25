@@ -1,10 +1,10 @@
 import { connect } from 'react-redux'
-import { statActions } from '@core/stats'
+import { stat_actions } from '@core/stats'
 
 import Filter from '@components/filter'
 
-const mapDispatchToProps = {
-  filter: statActions.filter
+const map_dispatch_to_props = {
+  filter: stat_actions.filter
 }
 
-export default connect(null, mapDispatchToProps)(Filter)
+export default connect(null, map_dispatch_to_props)(Filter)

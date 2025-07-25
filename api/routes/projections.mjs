@@ -97,9 +97,9 @@ router.get('/?', async (req, res) => {
       cache.set('projections', projections, 14400) // 4 hours
     }
 
-    let userProjections = []
+    let user_projections = []
     if (req.auth) {
-      userProjections = await db('projections_index')
+      user_projections = await db('projections_index')
         .select('projections.*')
         .join('player', 'projections.pid', 'player.pid')
         .whereIn('player.pos', constants.positions)
@@ -111,7 +111,7 @@ router.get('/?', async (req, res) => {
         })
     }
 
-    res.send(projections.concat(userProjections))
+    res.send(projections.concat(user_projections))
   } catch (error) {
     logger(error)
     res.status(500).send({ error: error.toString() })
@@ -407,7 +407,7 @@ router.put(
           timestamp: new Date()
         })
       } else {
-        const insert = {
+        const insert_data = {
           [type]: value,
           userid: userId,
           pid,
@@ -415,10 +415,10 @@ router.put(
           year: constants.season.year,
           seas_type
         }
-        await db('projections_index').insert(insert)
+        await db('projections_index').insert(insert_data)
 
         await db('projections').insert({
-          ...insert,
+          ...insert_data,
           timestamp: new Date()
         })
       }

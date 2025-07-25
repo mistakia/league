@@ -1,21 +1,21 @@
 import { List, Map } from 'immutable'
 
-import { statusActions } from './actions'
+import { status_actions } from './actions'
 
 const initialState = new Map({
   is_loading: false,
   jobs: new List()
 })
 
-export function statusReducer(state = initialState, { payload, type }) {
+export function status_reducer(state = initialState, { payload, type }) {
   switch (type) {
-    case statusActions.GET_STATUS_PENDING:
+    case status_actions.GET_STATUS_PENDING:
       return state.set('is_loading', true)
 
-    case statusActions.GET_STATUS_FAILED:
+    case status_actions.GET_STATUS_FAILED:
       return state.set('is_loading', false)
 
-    case statusActions.GET_STATUS_FULFILLED:
+    case status_actions.GET_STATUS_FULFILLED:
       return state.set('is_loading', false).set('jobs', new List(payload.data))
 
     default:

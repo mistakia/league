@@ -1,12 +1,12 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getStats } from '@core/selectors'
+import { get_stats_state } from '@core/selectors'
 
 import StatYearsFilter from './stat-years-filter'
 
-const mapStateToProps = createSelector(getStats, (stats) => ({
+const map_state_to_props = createSelector(get_stats_state, (stats) => ({
   years: stats.years
 }))
 
-export default connect(mapStateToProps)(StatYearsFilter)
+export default connect(map_state_to_props)(StatYearsFilter)

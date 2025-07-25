@@ -1,16 +1,16 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getAuction, getCurrentLeague } from '@core/selectors'
-import { auctionActions } from '@core/auction'
-import { leagueActions } from '@core/leagues'
+import { get_auction_state, get_current_league } from '@core/selectors'
+import { auction_actions } from '@core/auction'
+import { league_actions } from '@core/leagues'
 
 import AuctionControls from './auction-controls'
 
-const mapStateToProps = createSelector(
-  getAuction,
+const map_state_to_props = createSelector(
+  get_auction_state,
   (state) => state.getIn(['app', 'userId']),
-  getCurrentLeague,
+  get_current_league,
   (auction, userId, league) => ({
     tids: auction.tids,
     is_logged_in: Boolean(userId),
@@ -18,9 +18,12 @@ const mapStateToProps = createSelector(
   })
 )
 
-const mapDispatchToProps = {
-  join: auctionActions.join,
-  load_league: leagueActions.load_league
+const map_dispatch_to_props = {
+  join: auction_actions.join,
+  load_league: league_actions.load_league
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(AuctionControls)
+export default connect(
+  map_state_to_props,
+  map_dispatch_to_props
+)(AuctionControls)

@@ -10,22 +10,22 @@ import {
 
 const router = express.Router()
 
-const leagueIds = [0, 1]
-const loadPlayers = async () => {
-  for (const leagueId of leagueIds) {
+const league_ids = [0, 1]
+const load_players = async () => {
+  for (const league_id of league_ids) {
     const players = await getPlayers({
-      leagueId,
+      leagueId: league_id,
       include_all_active_players: true
     })
-    const cacheKey = `/players/${leagueId}`
-    cache.set(cacheKey, players, 1800) // 30 mins
+    const cache_key = `/players/${league_id}`
+    cache.set(cache_key, players, 1800) // 30 mins
   }
 }
 
 if (process.env.NODE_ENV !== 'test') {
-  loadPlayers()
+  load_players()
 
-  cron.schedule('*/5 * * * *', loadPlayers)
+  cron.schedule('*/5 * * * *', load_players)
 }
 
 /**
@@ -153,7 +153,7 @@ router.post('/?', async (req, res) => {
   try {
     const search = req.body.q
     const { leagueId } = req.body
-    const userId = req.auth ? req.auth.userId : null
+    const user_id = req.auth ? req.auth.userId : null
     const pids = Array.isArray(req.body.pids)
       ? req.body.pids
       : req.body.pids
@@ -183,8 +183,11 @@ router.post('/?', async (req, res) => {
       }
     }
 
-    if (userId) {
-      const bids = await getRestrictedFreeAgencyBids({ userId, leagueId })
+    if (user_id) {
+      const bids = await getRestrictedFreeAgencyBids({
+        userId: user_id,
+        leagueId
+      })
       if (bids.length) {
         const bid_map = new Map(bids.map((b) => [b.pid, b.bid]))
         const releases_map = new Map(
@@ -320,8 +323,8 @@ router.get('/:pid', async (req, res) => {
   try {
     const { pid } = req.params
 
-    const cacheKey = `/player/${pid}`
-    const cached_player_row = cache.get(cacheKey)
+    const cache_key = `/player/${pid}`
+    const cached_player_row = cache.get(cache_key)
     if (cached_player_row) {
       return res.send(cached_player_row)
     }
@@ -343,7 +346,7 @@ router.get('/:pid', async (req, res) => {
     // advanced rushing
     // - yardage by direction
 
-    cache.set(cacheKey, player_row, 1800) // 30 mins
+    cache.set(cache_key, player_row, 1800) // 30 mins
     res.send(player_row)
   } catch (error) {
     logger(error)
@@ -696,7 +699,7 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { pid } = req.params
-    const leagueId = Number(req.query.leagueId || 0) || 0
+    const league_id = Number(req.query.leagueId || 0) || 0
     const include_rushing = req.query.rushing === 'true'
     const include_passing = req.query.passing === 'true'
     const include_receiving = req.query.receiving === 'true'
@@ -709,7 +712,7 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
       .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
       .where('player_gamelogs.pid', pid)
 
-    const league = await getLeague({ lid: leagueId })
+    const league = await getLeague({ lid: league_id })
 
     if (!league) {
       return res.status(400).send({ error: 'invalid leagueId' })

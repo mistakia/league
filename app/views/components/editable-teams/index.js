@@ -3,17 +3,17 @@ import { createSelector } from 'reselect'
 
 import {
   get_app,
-  getCurrentLeague,
-  getTeamsForCurrentLeague
+  get_current_league,
+  get_teams_for_current_league
 } from '@core/selectors'
-import { teamActions } from '@core/teams'
+import { team_actions } from '@core/teams'
 
 import EditableTeams from './editable-teams'
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   get_app,
-  getCurrentLeague,
-  getTeamsForCurrentLeague,
+  get_current_league,
+  get_teams_for_current_league,
   (app, league, teams) => ({
     isCommish: app.userId === league.commishid,
     league,
@@ -21,9 +21,9 @@ const mapStateToProps = createSelector(
   })
 )
 
-const mapDispatchToProps = {
-  add: teamActions.add,
-  delete: teamActions.delete
+const map_dispatch_to_props = {
+  add: team_actions.add,
+  delete: team_actions.delete
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(EditableTeams)
+export default connect(map_state_to_props, map_dispatch_to_props)(EditableTeams)

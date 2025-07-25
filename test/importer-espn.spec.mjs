@@ -1,7 +1,11 @@
 /* global describe it */
 
 import * as chai from 'chai'
-import { getApiKey, getCookies, getLeagues } from '#league-import/espn.mjs'
+import {
+  get_espn_api_key,
+  get_espn_cookies,
+  get_espn_leagues
+} from '#league-import/espn.mjs'
 
 const should = chai.should()
 const expect = chai.expect
@@ -10,12 +14,12 @@ describe('IMPORTER ESPN', function () {
   this.timeout(60 * 1000)
 
   it('get api key', async () => {
-    const apiKey = await getApiKey()
+    const apiKey = await get_espn_api_key()
     should.exist(apiKey)
   })
 
   it('get cookies', async () => {
-    const { s2, swid } = await getCookies({
+    const { s2, swid } = await get_espn_cookies({
       username: 'teflonleague@gmail.com',
       password: 'meTaAGHSr8vZma6'
     })
@@ -24,7 +28,7 @@ describe('IMPORTER ESPN', function () {
   })
 
   it('get list of leagues', async () => {
-    const leagues = await getLeagues({
+    const leagues = await get_espn_leagues({
       username: 'teflonleague@gmail.com',
       password: 'meTaAGHSr8vZma6'
     })

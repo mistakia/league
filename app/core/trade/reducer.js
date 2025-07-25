@@ -1,7 +1,7 @@
 import { Record, List, Map } from 'immutable'
 
-import { createTrade } from './trade'
-import { tradeActions } from './actions'
+import { create_trade } from './trade'
+import { trade_actions } from './actions'
 
 const initialState = new Record({
   teamId: null,
@@ -16,62 +16,62 @@ const initialState = new Record({
   acceptingTeamLineups: new Map()
 })
 
-export function tradeReducer(state = initialState(), { payload, type }) {
+export function trade_reducer(state = initialState(), { payload, type }) {
   switch (type) {
-    case tradeActions.TRADE_SELECT_TEAM:
+    case trade_actions.TRADE_SELECT_TEAM:
       return state.merge({
         teamId: payload.teamId,
         acceptingTeamPlayers: new List(),
         acceptingTeamPicks: new List()
       })
 
-    case tradeActions.TRADE_SET_PROJECTED_LINEUPS:
+    case trade_actions.TRADE_SET_PROJECTED_LINEUPS:
       return state.merge({
         proposingTeamLineups: new Map(payload.proposingTeamLineups),
         acceptingTeamLineups: new Map(payload.acceptingTeamLineups)
       })
 
-    case tradeActions.TRADE_SET_RELEASE_PLAYERS:
+    case trade_actions.TRADE_SET_RELEASE_PLAYERS:
       return state.merge({
         releasePlayers: new List(payload.players)
       })
 
-    case tradeActions.TRADE_SET_ACCEPTING_TEAM_PLAYERS:
+    case trade_actions.TRADE_SET_ACCEPTING_TEAM_PLAYERS:
       return state.merge({
         acceptingTeamPlayers: new List(payload.players)
       })
 
-    case tradeActions.TRADE_SET_PROPOSING_TEAM_PLAYERS:
+    case trade_actions.TRADE_SET_PROPOSING_TEAM_PLAYERS:
       return state.merge({
         proposingTeamPlayers: new List(payload.players)
       })
 
-    case tradeActions.TRADE_SET_PROPOSING_TEAM_PICKS:
+    case trade_actions.TRADE_SET_PROPOSING_TEAM_PICKS:
       return state.merge({
         proposingTeamPicks: new List(payload.picks)
       })
 
-    case tradeActions.TRADE_SET_ACCEPTING_TEAM_PICKS:
+    case trade_actions.TRADE_SET_ACCEPTING_TEAM_PICKS:
       return state.merge({
         acceptingTeamPicks: new List(payload.picks)
       })
 
-    case tradeActions.POST_TRADE_ACCEPT_FULFILLED:
-    case tradeActions.POST_TRADE_CANCEL_FULFILLED:
-    case tradeActions.POST_TRADE_PROPOSE_FULFILLED:
+    case trade_actions.POST_TRADE_ACCEPT_FULFILLED:
+    case trade_actions.POST_TRADE_CANCEL_FULFILLED:
+    case trade_actions.POST_TRADE_PROPOSE_FULFILLED:
       return state.merge({
         selectedTradeId: payload.data.uid,
-        items: state.items.set(payload.data.uid, createTrade(payload.data))
+        items: state.items.set(payload.data.uid, create_trade(payload.data))
       })
 
-    case tradeActions.GET_TRADES_FULFILLED:
+    case trade_actions.GET_TRADES_FULFILLED:
       return state.withMutations((state) => {
         payload.data.forEach((t) =>
-          state.setIn(['items', t.uid], createTrade(t))
+          state.setIn(['items', t.uid], create_trade(t))
         )
       })
 
-    case tradeActions.SELECT_TRADE:
+    case trade_actions.SELECT_TRADE:
       return state.merge({
         selectedTradeId: payload.tradeId,
         releasePlayers: new List(),

@@ -1,7 +1,11 @@
 import express from 'express'
 
 import { constants, Roster } from '#libs-shared'
-import { getLeague, getRoster, getRosters } from '#libs-server'
+import {
+  getLeague,
+  getRoster,
+  get_laegue_rosters_from_database
+} from '#libs-server'
 
 const router = express.Router({ mergeParams: true })
 
@@ -222,7 +226,7 @@ router.get('/?', async (req, res) => {
   try {
     const { leagueId } = req.params
     const { year } = req.query
-    const rosters = await getRosters({
+    const rosters = await get_laegue_rosters_from_database({
       lid: leagueId,
       userId: req.auth ? req.auth.userId : null,
       year

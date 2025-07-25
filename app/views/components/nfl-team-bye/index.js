@@ -5,6 +5,6 @@ import { getByeByTeam } from '@core/selectors'
 
 import NFLTeamBye from './nfl-team-bye'
 
-const mapStateToProps = createSelector(getByeByTeam, (bye) => ({ bye }))
+const map_state_to_props = createSelector(getByeByTeam, (bye) => ({ bye }))
 
-export default connect(mapStateToProps)(NFLTeamBye)
+export default connect(map_state_to_props)(NFLTeamBye)

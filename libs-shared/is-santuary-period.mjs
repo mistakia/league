@@ -1,5 +1,5 @@
 import { season } from './constants.mjs'
-import getFreeAgentPeriod from './get-free-agent-period.mjs'
+import get_free_agent_period from './get-free-agent-period.mjs'
 
 export default function isSantuaryPeriod(league) {
   // If there is no extension date or its before, then it is santuary period
@@ -10,7 +10,7 @@ export default function isSantuaryPeriod(league) {
   }
 
   if (league.free_agency_live_auction_start) {
-    const faPeriod = getFreeAgentPeriod(league)
+    const faPeriod = get_free_agent_period(league)
     if (season.now.isBetween(faPeriod.start, faPeriod.end)) {
       return true
     }

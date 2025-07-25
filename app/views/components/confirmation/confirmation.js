@@ -27,7 +27,7 @@ import './confirmation.styl'
 
 export default class Confirmation extends React.Component {
   handleClick = (args) => {
-    this.props.info.onConfirm(args)
+    this.props.info.on_confirm_func(args)
     this.props.cancel()
   }
 

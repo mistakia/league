@@ -192,8 +192,15 @@ router.post('/?', async (req, res) => {
   try {
     const { leagueId, teamId, userId, error } = req.body
     const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress
-    const userAgent = req.headers['user-agent']
-    const message = { leagueId, teamId, userId, error, ip, userAgent }
+    const user_agent = req.headers['user-agent']
+    const message = {
+      leagueId,
+      teamId,
+      userId,
+      error,
+      ip,
+      userAgent: user_agent
+    }
     logger(message)
     await sendEmail({
       to: config.email.admin,

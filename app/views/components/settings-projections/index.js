@@ -1,12 +1,12 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getSources } from '@core/sources'
+import { get_sources_state } from '@core/sources'
 
 import SettingsProjections from './settings-projections'
 
-const mapStateToProps = createSelector(getSources, (sources) => ({
+const map_state_to_props = createSelector(get_sources_state, (sources) => ({
   sourceIds: sources.toList().map((s) => s.uid)
 }))
 
-export default connect(mapStateToProps)(SettingsProjections)
+export default connect(map_state_to_props)(SettingsProjections)

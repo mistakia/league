@@ -10,78 +10,78 @@ import {
 } from 'redux-saga/effects'
 import { Map } from 'immutable'
 
-import { appActions } from '@core/app'
+import { app_actions } from '@core/app'
 import {
   get_app,
   get_router,
   get_player_maps,
-  getPlayers,
-  getCurrentLeague,
-  getSources,
-  getRostersForCurrentLeague,
+  get_players_state,
+  get_current_league,
+  get_sources_state,
+  get_rosters_for_current_league,
   get_request_history
 } from '@core/selectors'
-import { notificationActions } from '@core/notifications'
+import { notification_actions } from '@core/notifications'
 import {
-  getCutlist,
-  postCutlist,
-  getTeamPlayers,
-  getLeaguePlayers,
-  fetchPlayers,
-  fetchAllPlayers,
-  searchPlayers,
-  getPlayer,
-  putProjection,
-  delProjection,
-  putSetting,
-  get_player_transactions,
-  getBaselines,
-  get_player_projections,
-  getPlayerGamelogs,
-  getPlayerPractices,
-  get_player_betting_markets
+  api_get_cutlist,
+  api_post_cutlist,
+  api_get_team_players,
+  api_get_league_players,
+  api_get_players,
+  api_get_all_players,
+  api_search_players,
+  api_get_player,
+  api_put_projection,
+  api_delete_projection,
+  api_put_setting,
+  api_get_player_transactions,
+  api_get_baselines,
+  api_get_player_projections,
+  api_get_player_gamelogs,
+  api_get_player_practices,
+  api_get_player_betting_markets
 } from '@core/api'
 import { draft_actions } from '@core/draft'
 import { player_actions } from './actions'
-import { leagueActions } from '@core/leagues'
-import { sourceActions } from '@core/sources'
+import { league_actions } from '@core/leagues'
+import { source_actions } from '@core/sources'
 import { roster_actions } from '@core/rosters'
-import { auctionActions } from '@core/auction'
+import { auction_actions } from '@core/auction'
 import DefaultPlayersViews from './default-players-views'
 
 export function* load_all_players() {
-  const state = yield select(getPlayers)
+  const state = yield select(get_players_state)
   const is_loaded = state.get('allPlayersLoaded', false)
   const is_pending = state.get('allPlayersPending', false)
   if (is_loaded || is_pending) return
   const { leagueId } = yield select(get_app)
-  yield call(fetchAllPlayers, { leagueId })
+  yield call(api_get_all_players, { leagueId })
 }
 
 export function* load_team_players({ payload }) {
   const { teamId, leagueId } = payload
-  yield call(getTeamPlayers, { teamId, leagueId })
+  yield call(api_get_team_players, { teamId, leagueId })
 }
 
 export function* load_league_players() {
-  const state = yield select(getPlayers)
+  const state = yield select(get_players_state)
   const is_loaded = state.get('leaguePlayersLoaded', false)
   const is_pending = state.get('leaguePlayersPending', false)
   if (is_loaded || is_pending) return
   const { leagueId } = yield select(get_app)
-  yield call(getLeaguePlayers, { leagueId })
+  yield call(api_get_league_players, { leagueId })
 }
 
 export function* search() {
   const { leagueId } = yield select(get_app)
-  const players = yield select(getPlayers)
+  const players = yield select(get_players_state)
   const q = players.get('search')
-  yield call(searchPlayers, { q, leagueId })
+  yield call(api_search_players, { q, leagueId })
 }
 
 // TODO disable this for now — do not need this on load
 // export function* initLeaguePlayers() {
-//   const league = yield select(getCurrentLeague)
+//   const league = yield select(get_current_league)
 //   if (!league.processed_at) {
 //     yield call(calculateValues)
 //   }
@@ -89,15 +89,17 @@ export function* search() {
 
 export function* calculateValues() {
   yield put(
-    notificationActions.show({
+    notification_actions.show({
       message: 'Calculating values'
     })
   )
   const { userId } = yield select(get_app)
-  const league = yield select(getCurrentLeague)
+  const league = yield select(get_current_league)
   const players = yield select(get_player_maps)
-  const sources = yield select(getSources)
-  const roster_rows = (yield select(getRostersForCurrentLeague)).toList().toJS()
+  const sources = yield select(get_sources_state)
+  const roster_rows = (yield select(get_rosters_for_current_league))
+    .toList()
+    .toJS()
 
   const { default: Worker } = yield call(
     () => import('workerize-loader?inline!../worker') // eslint-disable-line import/no-webpack-loader-syntax
@@ -118,7 +120,7 @@ export function* calculateValues() {
 
 export function* toggle_order({ payload }) {
   const { orderBy } = payload
-  const players = yield select(getPlayers)
+  const players = yield select(get_players_state)
   const selected_view = players.get('selected_players_page_view')
   const current_order_by = players.get('orderBy')
   const current_order = players.get('order')
@@ -152,7 +154,7 @@ export function* toggle_order({ payload }) {
 export function* save_projection({ payload }) {
   const { token } = yield select(get_app)
   const { value, type, pid, userId, week } = payload
-  if (token) yield call(putProjection, { value, type, pid, userId, week })
+  if (token) yield call(api_put_projection, { value, type, pid, userId, week })
   else
     yield putResolve(
       player_actions.set_projection({ value, type, pid, userId, week })
@@ -162,20 +164,20 @@ export function* save_projection({ payload }) {
 
 export function* load_player({ payload }) {
   const { pid } = payload
-  yield call(getPlayer, { pid })
+  yield call(api_get_player, { pid })
 }
 
 export function* delete_projection({ payload }) {
   const { pid, week } = payload
   const { userId, token } = yield select(get_app)
-  if (token) yield call(delProjection, { userId, week, pid })
+  if (token) yield call(api_delete_projection, { userId, week, pid })
   else yield putResolve(player_actions.remove_projection({ pid, week }))
   yield call(calculateValues)
 }
 
 export function* init({ payload }) {
   const app = yield select(get_app)
-  const league = yield select(getCurrentLeague)
+  const league = yield select(get_current_league)
   const router = yield select(get_router)
 
   // determine what players to load (all_active, league, team)
@@ -203,7 +205,7 @@ export function* init({ payload }) {
       payload: { teamId: team_id, leagueId: league_id }
     })
   }
-  if (league.uid) yield fork(getBaselines, { leagueId: league.uid })
+  if (league.uid) yield fork(api_get_baselines, { leagueId: league.uid })
   if (app.teamId) yield fork(fetch_cutlist)
 
   const { watchlist } = payload.data.user
@@ -222,34 +224,34 @@ export function* init({ payload }) {
     payload.data.poaches.forEach((p) => pids.push(p.pid))
     const { leagueId } = yield select(get_app)
     if (pids.length) {
-      yield call(fetchPlayers, { leagueId, pids })
+      yield call(api_get_players, { leagueId, pids })
     }
   }
 }
 
 export function* put_watchlist({ payload }) {
-  const players = yield select(getPlayers)
+  const players = yield select(get_players_state)
   const watchlist = players.get('watchlist').toArray()
   const plaintext = watchlist.toString()
   const params = { type: 'watchlist', value: plaintext }
-  yield call(putSetting, params)
+  yield call(api_put_setting, params)
 }
 
 export function* fetch_cutlist() {
   const { teamId } = yield select(get_app)
-  yield call(getCutlist, { teamId })
+  yield call(api_get_cutlist, { teamId })
 }
 
 export function* update_cutlist() {
-  const players = yield select(getPlayers)
+  const players = yield select(get_players_state)
   const cutlist = players.get('cutlist').toArray()
   const { teamId, leagueId } = yield select(get_app)
-  yield call(postCutlist, { pids: cutlist, teamId, leagueId })
+  yield call(api_post_cutlist, { pids: cutlist, teamId, leagueId })
 }
 
 export function* cutlist_notification() {
   yield put(
-    notificationActions.show({
+    notification_actions.show({
       message: 'Updated Cutlist',
       severity: 'success'
     })
@@ -259,12 +261,12 @@ export function* cutlist_notification() {
 export function* fetch_player_transactions({ payload }) {
   const { leagueId } = yield select(get_app)
   const { pid } = payload
-  yield call(get_player_transactions, { pid, leagueId })
+  yield call(api_get_player_transactions, { pid, leagueId })
 }
 
 export function* fetch_player_projections({ payload }) {
   const { pid } = payload
-  yield call(get_player_projections, { pid })
+  yield call(api_get_player_projections, { pid })
 }
 
 export function* load_player_gamelogs({ payload }) {
@@ -285,12 +287,12 @@ export function* load_player_gamelogs({ payload }) {
       params.receiving = true
       break
   }
-  yield call(getPlayerGamelogs, { pid, params })
+  yield call(api_get_player_gamelogs, { pid, params })
 }
 
 export function* load_player_practices({ payload }) {
   const { pid } = payload
-  yield call(getPlayerPractices, { pid })
+  yield call(api_get_player_practices, { pid })
 }
 
 export function* load_player_betting_markets({ payload }) {
@@ -300,7 +302,7 @@ export function* load_player_betting_markets({ payload }) {
     `GET_PLAYER_BETTING_MARKETS_${pid}`
   )
   if (is_pending_or_fulfilled) return
-  yield call(get_player_betting_markets, { pid })
+  yield call(api_get_player_betting_markets, { pid })
 }
 
 export function* load_missing_roster_players({ payload }) {
@@ -319,7 +321,7 @@ export function* load_missing_roster_players({ payload }) {
   }
 
   if (pids.length) {
-    yield call(fetchPlayers, { pids, leagueId })
+    yield call(api_get_players, { pids, leagueId })
   }
 }
 
@@ -328,11 +330,11 @@ export function* load_missing_roster_players({ payload }) {
 // -------------------------------------
 
 export function* watch_auth_fulfilled() {
-  yield takeLatest(appActions.AUTH_FULFILLED, init)
+  yield takeLatest(app_actions.AUTH_FULFILLED, init)
 }
 
 export function* watch_auth_failed() {
-  yield takeLatest(appActions.AUTH_FAILED, load_all_players)
+  yield takeLatest(app_actions.AUTH_FAILED, load_all_players)
 }
 
 export function* watch_players_page_order() {
@@ -352,23 +354,23 @@ export function* watch_select_player() {
 }
 
 export function* watch_auction_select_player() {
-  yield takeLatest(auctionActions.AUCTION_SELECT_PLAYER, load_player)
+  yield takeLatest(auction_actions.AUCTION_SELECT_PLAYER, load_player)
 }
 
 export function* watch_set_league() {
-  yield takeLatest(leagueActions.SET_LEAGUE, calculateValues)
+  yield takeLatest(league_actions.SET_LEAGUE, calculateValues)
 }
 
 export function* watch_put_league_fulfilled() {
-  yield takeLatest(leagueActions.PUT_LEAGUE_FULFILLED, calculateValues)
+  yield takeLatest(league_actions.PUT_LEAGUE_FULFILLED, calculateValues)
 }
 
 export function* watch_set_source() {
-  yield takeLatest(sourceActions.SET_SOURCE, calculateValues)
+  yield takeLatest(source_actions.SET_SOURCE, calculateValues)
 }
 
 export function* watch_put_source_fulfilled() {
-  yield takeLatest(sourceActions.PUT_SOURCE_FULFILLED, calculateValues)
+  yield takeLatest(source_actions.PUT_SOURCE_FULFILLED, calculateValues)
 }
 
 export function* watch_delete_projection() {
@@ -463,7 +465,7 @@ export function* watch_get_rosters_fulfilled() {
 //  ROOT
 // -------------------------------------
 
-export const playerSagas = [
+export const player_sagas = [
   fork(watch_auth_fulfilled),
   fork(watch_auth_failed),
   fork(watch_set_league),

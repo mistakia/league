@@ -37,10 +37,10 @@ import player_pfr_season_value_table_fields from './player-pfr-season-value-tabl
 // component - optional
 // header_className - optional
 
-// getValue - optional
+// get_player_field_value - optional
 // player_value_path - optional
 
-// getPercentileKey - optional
+// get_percentile_key - optional
 // percentile_key - optional
 // percentile_field - optional
 

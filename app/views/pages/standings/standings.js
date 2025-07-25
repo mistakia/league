@@ -171,7 +171,7 @@ Overall.propTypes = {
 }
 
 export default function StandingsPage({
-  loadLeagueTeamStats,
+  load_league_team_stats,
   standings,
   division_teams_sorted,
   year,
@@ -187,8 +187,8 @@ export default function StandingsPage({
   }, [lid, navigate])
 
   useEffect(() => {
-    loadLeagueTeamStats(lid)
-  }, [year, lid, loadLeagueTeamStats])
+    load_league_team_stats(lid)
+  }, [year, lid, load_league_team_stats])
 
   const is_current_year = year === constants.year
 
@@ -222,7 +222,7 @@ export default function StandingsPage({
 
 StandingsPage.propTypes = {
   standings: PropTypes.object,
-  loadLeagueTeamStats: PropTypes.func,
+  load_league_team_stats: PropTypes.func,
   year: PropTypes.number,
   division_teams_sorted: ImmutablePropTypes.map,
   league: PropTypes.object

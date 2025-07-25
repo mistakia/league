@@ -5,14 +5,15 @@ import { constants } from '#libs-shared'
 
 export default async function ({ league, pids }) {
   const now = dayjs()
-  const isBeforeRestrictedFreeAgencyStart =
+  const is_before_restricted_free_agency_start =
     (!constants.season.isRegularSeason && !league.tran_start) ||
     (league.tran_start && now.isBefore(dayjs.unix(league.tran_start)))
-  const isBeforeRestrictedFreeAgencyEnd =
+  const is_before_restricted_free_agency_end =
     (!constants.season.isRegularSeason && !league.tran_end) ||
     (league.tran_end && now.isBefore(dayjs.unix(league.tran_end)))
   const isRestrictedFreeAgency =
-    !isBeforeRestrictedFreeAgencyStart && isBeforeRestrictedFreeAgencyEnd
+    !is_before_restricted_free_agency_start &&
+    is_before_restricted_free_agency_end
 
   if (isRestrictedFreeAgency) {
     const restrictedFreeAgencyBids = await db('restricted_free_agency_bids')

@@ -4,8 +4,8 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import { connect as connectRedux } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { contextMenuActions } from '@core/context-menu'
-import { get_context_menu_info, getCurrentLeague } from '@core/selectors'
+import { context_menu_actions } from '@core/context-menu'
+import { get_context_menu_info, get_current_league } from '@core/selectors'
 import { player_actions } from '@core/players'
 
 import './player.styl'
@@ -35,9 +35,9 @@ Player.propTypes = {
   select: PropTypes.func
 }
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   get_context_menu_info,
-  getCurrentLeague,
+  get_current_league,
   (contextMenu, league) => ({
     selected: contextMenu.getIn(['data', 'pid']),
     league,
@@ -45,12 +45,12 @@ const mapStateToProps = createSelector(
   })
 )
 
-const mapDispatchToProps = {
-  showContext: contextMenuActions.show,
+const map_dispatch_to_props = {
+  showContext: context_menu_actions.show,
   select: player_actions.select_player
 }
 
 export function connect(Component) {
-  return connectRedux(mapStateToProps, mapDispatchToProps)(Component)
+  return connectRedux(map_state_to_props, map_dispatch_to_props)(Component)
 }
 export default connect(Player)

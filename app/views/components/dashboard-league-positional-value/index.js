@@ -2,16 +2,16 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import {
-  getTeamsForCurrentLeague,
+  get_teams_for_current_league,
   get_positions_for_current_league,
   getRosterPositionalValueByTeamId
 } from '@core/selectors'
 
 import DashboardLeaguePositionalValue from './dashboard-league-positional-value'
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   getRosterPositionalValueByTeamId,
-  getTeamsForCurrentLeague,
+  get_teams_for_current_league,
   get_positions_for_current_league,
   (summary, teams, league_positions) => ({
     summary,
@@ -20,4 +20,4 @@ const mapStateToProps = createSelector(
   })
 )
 
-export default connect(mapStateToProps)(DashboardLeaguePositionalValue)
+export default connect(map_state_to_props)(DashboardLeaguePositionalValue)

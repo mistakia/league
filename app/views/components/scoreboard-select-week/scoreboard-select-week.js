@@ -5,11 +5,11 @@ import Select from '@mui/material/Select'
 import InputLabel from '@mui/material/InputLabel'
 import MenuItem from '@mui/material/MenuItem'
 
-export default function ScoreboardSelectWeek({ selectWeek, week, weeks }) {
+export default function ScoreboardSelectWeek({ select_week, week, weeks }) {
   if (!week) return null
   if (!weeks.length) return null
 
-  const handleChange = (event) => selectWeek(event.target.value)
+  const handleChange = (event) => select_week(event.target.value)
   const menuItems = []
   weeks.forEach((week, index) => {
     menuItems.push(
@@ -39,7 +39,7 @@ export default function ScoreboardSelectWeek({ selectWeek, week, weeks }) {
 }
 
 ScoreboardSelectWeek.propTypes = {
-  selectWeek: PropTypes.func,
+  select_week: PropTypes.func,
   week: PropTypes.number,
   weeks: PropTypes.array
 }

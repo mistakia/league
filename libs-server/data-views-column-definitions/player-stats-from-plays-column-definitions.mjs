@@ -523,9 +523,9 @@ export default {
   player_average_box_defenders_per_rush_attempt_from_plays:
     player_stat_from_plays({
       pid_columns: ['bc_pid'],
-      with_select_string: `CAST(ROUND(AVG(CASE WHEN bc_pid IS NOT NULL THEN box_ngs ELSE NULL END)::decimal, 2) AS decimal)`,
+      with_select_string: `CAST(ROUND(AVG(CASE WHEN bc_pid IS NOT NULL THEN box_defenders ELSE NULL END)::decimal, 2) AS decimal)`,
       stat_name: 'average_box_defenders_per_rush_att_from_plays',
-      numerator_select: `AVG(CASE WHEN bc_pid IS NOT NULL THEN box_ngs ELSE NULL END)`,
+      numerator_select: `AVG(CASE WHEN bc_pid IS NOT NULL THEN box_defenders ELSE NULL END)`,
       denominator_select: `SUM(CASE WHEN bc_pid IS NOT NULL THEN 1 ELSE 0 END)`,
       has_numerator_denominator: true,
       supported_rate_types: []
@@ -868,13 +868,13 @@ export default {
 
   player_quarterback_pressures_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    with_select_string: `SUM(CASE WHEN qb_pressure_ngs = true OR qb_pressure = true THEN 1 ELSE 0 END)`,
+    with_select_string: `SUM(CASE WHEN qb_pressure_tracking = true OR qb_pressure = true THEN 1 ELSE 0 END)`,
     stat_name: 'quarterback_pressures_from_plays'
   }),
 
   player_time_to_throw_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
-    with_select_string: `AVG(CASE WHEN time_to_throw_ngs IS NOT NULL AND (sk IS NULL OR sk = false) THEN time_to_throw_ngs ELSE NULL END)`,
+    with_select_string: `AVG(CASE WHEN time_to_throw IS NOT NULL AND (sk IS NULL OR sk = false) THEN time_to_throw ELSE NULL END)`,
     stat_name: 'time_to_throw_from_plays'
   })
 }

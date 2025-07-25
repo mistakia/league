@@ -1,6 +1,6 @@
 import { Record } from 'immutable'
 
-import { Matchup, createMatchup } from '@core/matchups/matchup'
+import { Matchup, create_matchup } from '@core/matchups/matchup'
 
 export const Scoreboard = new Record({
   tid: null,
@@ -10,7 +10,7 @@ export const Scoreboard = new Record({
   matchup: new Matchup()
 })
 
-export const createScoreboard = ({
+export const create_scoreboard = ({
   tid,
   points,
   projected,
@@ -22,6 +22,6 @@ export const createScoreboard = ({
     points,
     projected,
     minutes,
-    matchup: createMatchup(matchup)
+    matchup: create_matchup(matchup)
   })
 }

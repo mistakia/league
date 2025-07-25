@@ -1,3 +1,3 @@
-export { statSagas } from './sagas'
-export { statsReducer } from './reducer'
-export { statActions, getChartedPlaysActions } from './actions'
+export { stat_sagas } from './sagas'
+export { stats_reducer } from './reducer'
+export { stat_actions, get_charted_plays_actions } from './actions'

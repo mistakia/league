@@ -2,54 +2,54 @@ import { takeLatest, fork, select, delay, put, call } from 'redux-saga/effects'
 
 import {
   get_player_maps,
-  getPlayers,
+  get_players_state,
   get_app,
-  getAuction,
-  getCurrentLeague,
-  getRosteredPlayerIdsForCurrentLeague,
-  getCurrentPlayers,
+  get_auction_state,
+  get_current_league,
+  get_rostered_player_ids_for_current_league,
+  get_current_players_for_league,
   getPlayersForWatchlist
 } from '@core/selectors'
-import { auctionActions } from './actions'
+import { auction_actions } from './actions'
 import { send } from '@core/ws'
-import { constants, getEligibleSlots } from '@libs-shared'
+import { constants, get_eligible_slots } from '@libs-shared'
 import { beep } from '@core/audio'
 
 export function* optimize() {
-  const league = yield select(getCurrentLeague)
+  const league = yield select(get_current_league)
   const watchlist = yield select(getPlayersForWatchlist)
 
   // make sure player values have been calculated
-  const pState = yield select(getPlayers)
-  const baselines = pState.get('baselines')
+  const p_state = yield select(get_players_state)
+  const baselines = p_state.get('baselines')
   if (!baselines.size) {
     return
   }
 
-  const rostered_pids = yield select(getRosteredPlayerIdsForCurrentLeague)
-  const sortedWatchlist = watchlist
-    .filter((pMap) => !rostered_pids.includes(pMap.get('pid')))
+  const rostered_pids = yield select(get_rostered_player_ids_for_current_league)
+  const sorted_watchlist = watchlist
+    .filter((p_map) => !rostered_pids.includes(p_map.get('pid')))
     .sort(
       (a, b) =>
         b.getIn(['points', 'total'], 0) - a.getIn(['points', 'total'], 0)
     )
-  const currentPlayers = yield select(getCurrentPlayers)
+  const current_players = yield select(get_current_players_for_league)
 
-  const defaultLimit = {
+  const default_limit = {
     fa: {
-      max: currentPlayers.roster.availableSpace
+      max: current_players.roster.availableSpace
     },
     value: {
       // TODO - adjust based on bench depth
-      max: Math.min(currentPlayers.roster.availableCap, league.cap * 0.8)
+      max: Math.min(current_players.roster.availableCap, league.cap * 0.8)
     }
   }
 
-  const formatAuctionPlayer = (playerMap) => ({
-    pid: playerMap.get('pid'),
-    pos: playerMap.get('pos'),
-    market_salary: playerMap.getIn(['market_salary', '0'], 0),
-    points: playerMap.getIn(['points', '0', 'total'], 0)
+  const format_auction_player = (player_map) => ({
+    pid: player_map.get('pid'),
+    pos: player_map.get('pos'),
+    market_salary: player_map.getIn(['market_salary', '0'], 0),
+    points: player_map.getIn(['points', '0', 'total'], 0)
   })
 
   // optimze lineup using current players and watchlist
@@ -58,9 +58,9 @@ export function* optimize() {
   )
   const worker = new Worker()
   let result = yield call(worker.optimizeAuctionLineup, {
-    limits: defaultLimit,
-    players: sortedWatchlist.map(formatAuctionPlayer).toJS(),
-    active: currentPlayers.active.map(formatAuctionPlayer).toJS(),
+    limits: default_limit,
+    players: sorted_watchlist.map(format_auction_player).toJS(),
+    active: current_players.active.map(format_auction_player).toJS(),
     league
   })
   let starter_pids = Object.keys(result).filter(
@@ -68,31 +68,31 @@ export function* optimize() {
       r.match(constants.player_pid_regex) || r.match(constants.team_pid_regex)
   )
 
-  const rosterConstraints = {}
+  const roster_constraints = {}
   for (const pos of constants.positions) {
-    rosterConstraints[pos] = {
-      max: getEligibleSlots({ pos, league }).length,
+    roster_constraints[pos] = {
+      max: get_eligible_slots({ pos, league }).length,
       min: league[`s${pos.toLowerCase()}`]
     }
   }
 
-  const starterLimit = Object.keys(league)
+  const starter_limit = Object.keys(league)
     .filter((k) => k.startsWith('s'))
     .map((k) => league[k])
     .reduce((a, b) => a + b)
 
   // if lineup incomplete, optimize with available players
-  if (starter_pids.length < starterLimit) {
+  if (starter_pids.length < starter_limit) {
     const limits = {
-      ...defaultLimit
+      ...default_limit
     }
     for (const pid of starter_pids) {
       limits[pid] = { min: 1 }
     }
 
-    const playerMaps = yield select(get_player_maps)
-    const availablePlayers = playerMaps
-      .filter((pMap) => !rostered_pids.includes(pMap.get('pid')))
+    const player_maps = yield select(get_player_maps)
+    const available_players = player_maps
+      .filter((p_map) => !rostered_pids.includes(p_map.get('pid')))
       .sort(
         (a, b) =>
           b.getIn(['points', 'total'], 0) - a.getIn(['points', 'total'], 0)
@@ -101,8 +101,8 @@ export function* optimize() {
 
     result = yield call(worker.optimizeAuctionLineup, {
       limits,
-      players: availablePlayers.map(formatAuctionPlayer).toJS(),
-      active: currentPlayers.active.map(formatAuctionPlayer).toJS(),
+      players: available_players.map(format_auction_player).toJS(),
+      active: current_players.active.map(format_auction_player).toJS(),
       league
     })
   }
@@ -112,14 +112,14 @@ export function* optimize() {
       r.match(constants.player_pid_regex) || r.match(constants.team_pid_regex)
   )
   yield put(
-    auctionActions.setOptimalLineup({
+    auction_actions.setOptimalLineup({
       pids: starter_pids,
       ...result
     })
   )
 }
 
-export function* joinAuction({ type }) {
+export function* join_auction({ type }) {
   const { leagueId, teamId, clientId } = yield select(get_app)
   const message = {
     type,
@@ -128,16 +128,16 @@ export function* joinAuction({ type }) {
   send(message)
 }
 
-export function* releaseLock() {
+export function* release_lock() {
   yield delay(1500)
-  yield put(auctionActions.release())
+  yield put(auction_actions.release())
 }
 
-export function* submitBid({ payload }) {
+export function* submit_bid({ payload }) {
   const { userId, teamId } = yield select(get_app)
-  const { nominated_pid, bid } = yield select(getAuction)
+  const { nominated_pid, bid } = yield select(get_auction_state)
   if (payload.value <= bid) {
-    yield put(auctionActions.release())
+    yield put(auction_actions.release())
     // TODO notify user
     return
   }
@@ -145,7 +145,7 @@ export function* submitBid({ payload }) {
   const { value } = payload
 
   const message = {
-    type: auctionActions.AUCTION_BID,
+    type: auction_actions.AUCTION_BID,
     payload: {
       userid: userId,
       tid: teamId,
@@ -154,15 +154,15 @@ export function* submitBid({ payload }) {
     }
   }
   send(message)
-  yield call(releaseLock)
+  yield call(release_lock)
 }
 
-export function* submitNomination({ payload }) {
+export function* submit_nomination({ payload }) {
   const { userId, teamId } = yield select(get_app)
-  const { selected_pid } = yield select(getAuction)
+  const { selected_pid } = yield select(get_auction_state)
   const { value } = payload
   const message = {
-    type: auctionActions.AUCTION_SUBMIT_NOMINATION,
+    type: auction_actions.AUCTION_SUBMIT_NOMINATION,
     payload: {
       userid: userId,
       tid: teamId,
@@ -174,81 +174,81 @@ export function* submitNomination({ payload }) {
 }
 
 export function resume() {
-  send({ type: auctionActions.AUCTION_RESUME })
+  send({ type: auction_actions.AUCTION_RESUME })
 }
 
 export function pause() {
-  send({ type: auctionActions.AUCTION_PAUSE })
+  send({ type: auction_actions.AUCTION_PAUSE })
 }
 
-export function* soundNotification() {
-  const { muted } = yield select(getAuction)
+export function* sound_notification() {
+  const { muted } = yield select(get_auction_state)
   if (!muted) {
     beep()
   }
 }
 
 export function toggle_pause_on_team_disconnect() {
-  send({ type: auctionActions.AUCTION_TOGGLE_PAUSE_ON_TEAM_DISCONNECT })
+  send({ type: auction_actions.AUCTION_TOGGLE_PAUSE_ON_TEAM_DISCONNECT })
 }
 
 //= ====================================
 //  WATCHERS
 // -------------------------------------
 
-export function* watchAuctionJoin() {
-  yield takeLatest(auctionActions.AUCTION_JOIN, joinAuction)
+export function* watch_auction_join() {
+  yield takeLatest(auction_actions.AUCTION_JOIN, join_auction)
 }
 
-export function* watchAuctionSubmitBid() {
-  yield takeLatest(auctionActions.AUCTION_SUBMIT_BID, submitBid)
+export function* watch_auction_submit_bid() {
+  yield takeLatest(auction_actions.AUCTION_SUBMIT_BID, submit_bid)
 }
 
-export function* watchAuctionSubmitNomination() {
-  yield takeLatest(auctionActions.AUCTION_SUBMIT_NOMINATION, submitNomination)
+export function* watch_auction_submit_nomination() {
+  yield takeLatest(auction_actions.AUCTION_SUBMIT_NOMINATION, submit_nomination)
 }
 
-export function* watchAuctionBid() {
-  yield takeLatest(auctionActions.AUCTION_BID, releaseLock)
+export function* watch_auction_bid() {
+  yield takeLatest(auction_actions.AUCTION_BID, release_lock)
 }
 
-/* export function* watchInitAuctionLineup() {
+/* export function* watch_init_auction_lineup() {
  *   while (true) {
  *     yield all([
  *       take(player_actions.FETCH_ALL_PLAYERS_FULFILLED),
- *       take(auctionActions.AUCTION_JOIN)
+ *       take(auction_actions.AUCTION_JOIN)
  *     ])
  *     yield call(optimize)
  *   }
  * }
  *  */
-/* export function* watchToggleWatchlist() {
+/* export function* watch_toggle_watchlist() {
  *   yield takeLatest(player_actions.TOGGLE_WATCHLIST, optimize)
  * }
  *
- * export function* watchSetAuctionBudget() {
- *   yield takeLatest(auctionActions.SET_AUCTION_BUDGET, optimize)
+ * export function* watch_set_auction_budget() {
+ *   yield takeLatest(auction_actions.SET_AUCTION_BUDGET, optimize)
  * }
  *  */
-export function* watchAuctionPause() {
-  yield takeLatest(auctionActions.AUCTION_PAUSE, pause)
+export function* watch_auction_pause() {
+  yield takeLatest(auction_actions.AUCTION_PAUSE, pause)
 }
 
-export function* watchAuctionResume() {
-  yield takeLatest(auctionActions.AUCTION_RESUME, resume)
+export function* watch_auction_resume() {
+  yield takeLatest(auction_actions.AUCTION_RESUME, resume)
 }
 
-export function* watchAuctionStart() {
-  yield takeLatest(auctionActions.AUCTION_START, soundNotification)
+export function* watch_auction_start() {
+  yield takeLatest(auction_actions.AUCTION_START, sound_notification)
 }
 
-export function* watchAuctionPaused() {
-  yield takeLatest(auctionActions.AUCTION_PAUSED, soundNotification)
+export function* watch_auction_paused() {
+  yield takeLatest(auction_actions.AUCTION_PAUSED, sound_notification)
 }
 
-export function* watchAuctionTogglePauseOnTeamDisconnect() {
+export function* watch_auction_toggle_pause_on_team_disconnect() {
   yield takeLatest(
-    auctionActions.AUCTION_TOGGLE_PAUSE_ON_TEAM_DISCONNECT,
+    auction_actions.AUCTION_TOGGLE_PAUSE_ON_TEAM_DISCONNECT,
     toggle_pause_on_team_disconnect
   )
 }
@@ -258,17 +258,17 @@ export function* watchAuctionTogglePauseOnTeamDisconnect() {
 // -------------------------------------
 
 // TODO - auto rejoin auction on websocket reconnection
-export const auctionSagas = [
-  fork(watchAuctionJoin),
-  fork(watchAuctionSubmitBid),
-  fork(watchAuctionSubmitNomination),
-  fork(watchAuctionBid),
-  // fork(watchInitAuctionLineup),
-  // fork(watchToggleWatchlist),
-  // fork(watchSetAuctionBudget),
-  fork(watchAuctionPause),
-  fork(watchAuctionResume),
-  fork(watchAuctionStart),
-  fork(watchAuctionPaused),
-  fork(watchAuctionTogglePauseOnTeamDisconnect)
+export const auction_sagas = [
+  fork(watch_auction_join),
+  fork(watch_auction_submit_bid),
+  fork(watch_auction_submit_nomination),
+  fork(watch_auction_bid),
+  // fork(watch_init_auction_lineup),
+  // fork(watch_toggle_watchlist),
+  // fork(watch_set_auction_budget),
+  fork(watch_auction_pause),
+  fork(watch_auction_resume),
+  fork(watch_auction_start),
+  fork(watch_auction_paused),
+  fork(watch_auction_toggle_pause_on_team_disconnect)
 ]

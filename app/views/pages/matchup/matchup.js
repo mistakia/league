@@ -27,8 +27,8 @@ export default function MatchupPage({
   loadMatchups,
   load_league_players,
   load_rosters_for_year,
-  selectWeek,
-  selectYear,
+  select_week,
+  select_year,
   select_matchup,
   load_season
 }) {
@@ -55,11 +55,18 @@ export default function MatchupPage({
 
     if (matchupId)
       select_matchup({ matchupId, year: seas_year, week: seas_week })
-    else if (seas_week) selectWeek(seas_week)
-    else if (seas_year) selectYear(seas_year)
+    else if (seas_week) select_week(seas_week)
+    else if (seas_year) select_year(seas_year)
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [seas_year, seas_week, matchupId, selectYear, selectWeek, select_matchup])
+  }, [
+    seas_year,
+    seas_week,
+    matchupId,
+    select_year,
+    select_week,
+    select_matchup
+  ])
 
   useEffect(() => {
     if (isNaN(lid)) {
@@ -176,8 +183,8 @@ MatchupPage.propTypes = {
   year: PropTypes.number,
   week: PropTypes.number,
   matchup: ImmutablePropTypes.record,
-  selectYear: PropTypes.func,
-  selectWeek: PropTypes.func,
+  select_year: PropTypes.func,
+  select_week: PropTypes.func,
   loadMatchups: PropTypes.func,
   select_matchup: PropTypes.func,
   load_rosters_for_year: PropTypes.func,

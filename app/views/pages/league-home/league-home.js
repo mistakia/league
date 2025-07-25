@@ -20,7 +20,7 @@ import {
   constants,
   isReserveEligible,
   isReserveCovEligible,
-  getFreeAgentPeriod
+  get_free_agent_period
 } from '@libs-shared'
 import { get_restricted_free_agency_notices } from '@core/utils/restricted-free-agency-notices'
 
@@ -28,17 +28,17 @@ import './league-home.styl'
 
 export default function LeagueHomePage({
   players,
-  restrictedFreeAgencyPlayers,
+  restricted_free_agency_players,
   cutlist,
   league,
   waivers,
   poaches,
   teamId,
-  isBeforeRestrictedFreeAgencyEnd,
+  is_before_restricted_free_agency_end,
   load_league_players,
-  loadDraftPickValue,
-  loadRecentTransactions,
-  loadTeams,
+  load_draft_pick_value,
+  load_recent_transactions,
+  load_teams,
   load_rosters,
   leagueId,
   percentiles,
@@ -59,18 +59,18 @@ export default function LeagueHomePage({
   }, [lid, navigate])
 
   useEffect(() => {
-    if (leagueId) loadTeams(leagueId)
+    if (leagueId) load_teams(leagueId)
     if (leagueId) load_rosters(leagueId)
     load_league_players()
-    loadDraftPickValue()
-    loadRecentTransactions()
+    load_draft_pick_value()
+    load_recent_transactions()
   }, [
     leagueId,
-    loadTeams,
+    load_teams,
     load_rosters,
     load_league_players,
-    loadDraftPickValue,
-    loadRecentTransactions
+    load_draft_pick_value,
+    load_recent_transactions
   ])
 
   const rfa_notices = useMemo(
@@ -79,21 +79,21 @@ export default function LeagueHomePage({
         league,
         teams,
         team_id: teamId,
-        restricted_free_agency_players: restrictedFreeAgencyPlayers,
+        restricted_free_agency_players,
         is_team_manager
       }),
-    [league, teams, teamId, restrictedFreeAgencyPlayers, is_team_manager]
+    [league, teams, teamId, restricted_free_agency_players, is_team_manager]
   )
 
   const notice_items = [...rfa_notices]
 
   if (league.free_agency_live_auction_start) {
-    const faPeriod = getFreeAgentPeriod(league)
-    if (constants.season.now.isBefore(faPeriod.start)) {
+    const fa_period = get_free_agent_period(league)
+    if (constants.season.now.isBefore(fa_period.start)) {
       notice_items.push(
         <Alert key='fa-period' severity='info'>
           <AlertTitle>
-            Free Agency (FA) period begins {dayjs().to(faPeriod.start)}
+            Free Agency (FA) period begins {dayjs().to(fa_period.start)}
           </AlertTitle>
           The player pool will lock in preparation for the auction. You will not
           be able to release any players once the FA period begins. Any players
@@ -101,7 +101,7 @@ export default function LeagueHomePage({
           enter a starting lineup for the first six weeks of the season.
           <br />
           <br />
-          {faPeriod.start.local().format('[Starts] l [at] LT z')}
+          {fa_period.start.local().format('[Starts] l [at] LT z')}
         </Alert>
       )
     }
@@ -118,10 +118,10 @@ export default function LeagueHomePage({
       )
   }
 
-  const restrictedFreeAgencyItems = []
+  const restricted_free_agency_items = []
   const active_free_agent_items = []
   const nominated_free_agent_items = []
-  restrictedFreeAgencyPlayers.forEach((playerMap, index) => {
+  restricted_free_agency_players.forEach((playerMap, index) => {
     const is_processed = playerMap.get('restricted_free_agency_tag_processed')
     if (is_processed) {
       return
@@ -150,7 +150,7 @@ export default function LeagueHomePage({
         />
       )
     } else {
-      restrictedFreeAgencyItems.push(
+      restricted_free_agency_items.push(
         <PlayerRoster
           key={index}
           playerMap={playerMap}
@@ -209,7 +209,7 @@ export default function LeagueHomePage({
     notice_items.push(<PoachNotice key={playerMap.get('pid')} poach={poach} />)
   }
 
-  const teamPoaches = poaches.filter((p) => p.tid === teamId)
+  const team_poaches = poaches.filter((p) => p.tid === teamId)
 
   const body = (
     <div className='league-container league__home'>
@@ -239,12 +239,12 @@ export default function LeagueHomePage({
             />
           </Grid>
         )}
-        {isBeforeRestrictedFreeAgencyEnd &&
-          Boolean(restrictedFreeAgencyPlayers.size) && (
+        {is_before_restricted_free_agency_end &&
+          Boolean(restricted_free_agency_players.size) && (
             <Grid item xs={12}>
               <DashboardPlayersTable
                 title='Restricted Free Agents'
-                items={restrictedFreeAgencyItems}
+                items={restricted_free_agency_items}
                 isRestrictedFreeAgency
                 {...{ percentiles }}
               />
@@ -277,11 +277,11 @@ export default function LeagueHomePage({
             />
           </Grid>
         )}
-        {Boolean(teamPoaches.size) && (
+        {Boolean(team_poaches.size) && (
           <Grid item xs={12}>
             <DashboardPlayersTable
               title='Poaching Claims'
-              poaches={teamPoaches}
+              poaches={team_poaches}
             />
           </Grid>
         )}
@@ -318,17 +318,17 @@ export default function LeagueHomePage({
 
 LeagueHomePage.propTypes = {
   players: PropTypes.object,
-  restrictedFreeAgencyPlayers: ImmutablePropTypes.map,
+  restricted_free_agency_players: ImmutablePropTypes.map,
   cutlist: ImmutablePropTypes.list,
   league: PropTypes.object,
   waivers: PropTypes.object,
   load_league_players: PropTypes.func,
-  loadDraftPickValue: PropTypes.func,
+  load_draft_pick_value: PropTypes.func,
   poaches: ImmutablePropTypes.list,
   teamId: PropTypes.number,
-  isBeforeRestrictedFreeAgencyEnd: PropTypes.bool,
-  loadRecentTransactions: PropTypes.func,
-  loadTeams: PropTypes.func,
+  is_before_restricted_free_agency_end: PropTypes.bool,
+  load_recent_transactions: PropTypes.func,
+  load_teams: PropTypes.func,
   leagueId: PropTypes.number,
   load_rosters: PropTypes.func,
   percentiles: PropTypes.object,

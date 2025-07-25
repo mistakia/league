@@ -4,8 +4,8 @@ import { player_actions } from '@core/players'
 
 import SelectedPlayerProjection from './selected-player-projection'
 
-const mapDispatchToProps = {
+const map_dispatch_to_props = {
   delete_projection: player_actions.delete_projection
 }
 
-export default connect(null, mapDispatchToProps)(SelectedPlayerProjection)
+export default connect(null, map_dispatch_to_props)(SelectedPlayerProjection)

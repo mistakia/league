@@ -1,10 +1,10 @@
 import { Map } from 'immutable'
 import dayjs from 'dayjs'
 
-import { playActions } from '@core/plays'
-import { scoreboardActions } from './actions'
+import { play_actions } from '@core/plays'
+import { scoreboard_actions } from './actions'
 import { constants } from '@libs-shared'
-import { matchupsActions } from '@core/matchups'
+import { matchups_actions } from '@core/matchups'
 
 const current_week = Math.min(constants.week, constants.season.finalWeek)
 const initial_week = Math.max(
@@ -17,19 +17,19 @@ const initialState = new Map({
   week: initial_week
 })
 
-export function scoreboardReducer(state = initialState, { payload, type }) {
+export function scoreboard_reducer(state = initialState, { payload, type }) {
   switch (type) {
-    case scoreboardActions.UPDATE_SCOREBOARD_PLAYS:
-    case scoreboardActions.GET_SCOREBOARD_FULFILLED:
-    case playActions.GET_PLAYSTATS_FULFILLED:
+    case scoreboard_actions.UPDATE_SCOREBOARD_PLAYS:
+    case scoreboard_actions.GET_SCOREBOARD_FULFILLED:
+    case play_actions.GET_PLAYSTATS_FULFILLED:
       return state.set('isLoaded', true)
 
-    case scoreboardActions.SCOREBOARD_SELECT_WEEK:
+    case scoreboard_actions.SCOREBOARD_SELECT_WEEK:
       return state.merge({
         week: payload.week
       })
 
-    case matchupsActions.SELECT_MATCHUP:
+    case matchups_actions.SELECT_MATCHUP:
       if (payload.week === null || payload.week === undefined) {
         return state
       }

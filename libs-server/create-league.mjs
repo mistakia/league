@@ -1,13 +1,13 @@
 import db from '#db'
 import {
   constants,
-  createDefaultLeague,
+  create_default_league,
   generate_league_format_hash,
   generate_scoring_format_hash
 } from '#libs-shared'
 
 export default async function ({ lid, commishid, ...params } = {}) {
-  const default_league_params = createDefaultLeague({ commishid })
+  const default_league_params = create_default_league({ commishid })
   const league_params = Object.assign({}, default_league_params, params)
 
   const league = {

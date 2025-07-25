@@ -8,7 +8,7 @@ import {
   Roster,
   getDraftDates,
   isSantuaryPeriod,
-  getFreeAgentPeriod
+  get_free_agent_period
 } from '#libs-shared'
 import {
   getRoster,
@@ -386,7 +386,7 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
 
-    const faPeriod = getFreeAgentPeriod(league)
+    const faPeriod = get_free_agent_period(league)
 
     // check free agency waivers
     if (

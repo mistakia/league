@@ -4301,8 +4301,8 @@ CREATE TABLE public.nfl_plays (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -4391,7 +4391,7 @@ CREATE TABLE public.nfl_plays (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -4540,12 +4540,12 @@ CREATE TABLE public.nfl_plays (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -4572,14 +4572,14 @@ CREATE TABLE public.nfl_plays (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -4590,13 +4590,13 @@ CREATE TABLE public.nfl_plays (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -5165,10 +5165,10 @@ COMMENT ON COLUMN public.nfl_plays.def_to_rem IS 'Number of timeouts remaining f
 
 
 --
--- Name: COLUMN nfl_plays.qb_pressure_ngs; Type: COMMENT; Schema: public; Owner: -
+-- Name: COLUMN nfl_plays.qb_pressure_tracking; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.qb_pressure_ngs IS 'QB pressure (NGS)';
+COMMENT ON COLUMN public.nfl_plays.qb_pressure_tracking IS 'QB pressure (tracking)';
 
 
 --
@@ -5204,8 +5204,8 @@ CREATE TABLE public.nfl_plays_current_week (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -5444,12 +5444,12 @@ CREATE TABLE public.nfl_plays_current_week (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -5501,7 +5501,7 @@ CREATE TABLE public.nfl_plays_passer (
     is_completion boolean,
     is_turnover_td boolean,
     lateral_distance numeric(10,2),
-    time_to_throw_ngs numeric(10,3),
+    time_to_throw numeric(10,3),
     air_time numeric(10,3),
     max_passing_speed numeric(10,4),
     avg_passing_speed numeric(10,4),
@@ -5680,8 +5680,8 @@ CREATE TABLE public.nfl_plays_year_2000 (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -5770,7 +5770,7 @@ CREATE TABLE public.nfl_plays_year_2000 (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -5919,12 +5919,12 @@ CREATE TABLE public.nfl_plays_year_2000 (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -5951,14 +5951,14 @@ CREATE TABLE public.nfl_plays_year_2000 (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -5969,13 +5969,13 @@ CREATE TABLE public.nfl_plays_year_2000 (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -6015,8 +6015,8 @@ CREATE TABLE public.nfl_plays_year_2001 (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -6105,7 +6105,7 @@ CREATE TABLE public.nfl_plays_year_2001 (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -6254,12 +6254,12 @@ CREATE TABLE public.nfl_plays_year_2001 (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -6286,14 +6286,14 @@ CREATE TABLE public.nfl_plays_year_2001 (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -6304,13 +6304,13 @@ CREATE TABLE public.nfl_plays_year_2001 (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -6350,8 +6350,8 @@ CREATE TABLE public.nfl_plays_year_2002 (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -6440,7 +6440,7 @@ CREATE TABLE public.nfl_plays_year_2002 (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -6589,12 +6589,12 @@ CREATE TABLE public.nfl_plays_year_2002 (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -6621,14 +6621,14 @@ CREATE TABLE public.nfl_plays_year_2002 (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -6639,13 +6639,13 @@ CREATE TABLE public.nfl_plays_year_2002 (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -6685,8 +6685,8 @@ CREATE TABLE public.nfl_plays_year_2003 (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -6775,7 +6775,7 @@ CREATE TABLE public.nfl_plays_year_2003 (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -6924,12 +6924,12 @@ CREATE TABLE public.nfl_plays_year_2003 (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -6956,14 +6956,14 @@ CREATE TABLE public.nfl_plays_year_2003 (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -6974,13 +6974,13 @@ CREATE TABLE public.nfl_plays_year_2003 (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -7020,8 +7020,8 @@ CREATE TABLE public.nfl_plays_year_2004 (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -7110,7 +7110,7 @@ CREATE TABLE public.nfl_plays_year_2004 (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -7259,12 +7259,12 @@ CREATE TABLE public.nfl_plays_year_2004 (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -7291,14 +7291,14 @@ CREATE TABLE public.nfl_plays_year_2004 (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -7309,13 +7309,13 @@ CREATE TABLE public.nfl_plays_year_2004 (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -7355,8 +7355,8 @@ CREATE TABLE public.nfl_plays_year_2005 (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -7445,7 +7445,7 @@ CREATE TABLE public.nfl_plays_year_2005 (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -7594,12 +7594,12 @@ CREATE TABLE public.nfl_plays_year_2005 (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -7626,14 +7626,14 @@ CREATE TABLE public.nfl_plays_year_2005 (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -7644,13 +7644,13 @@ CREATE TABLE public.nfl_plays_year_2005 (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -7690,8 +7690,8 @@ CREATE TABLE public.nfl_plays_year_2006 (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -7780,7 +7780,7 @@ CREATE TABLE public.nfl_plays_year_2006 (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -7929,12 +7929,12 @@ CREATE TABLE public.nfl_plays_year_2006 (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -7961,14 +7961,14 @@ CREATE TABLE public.nfl_plays_year_2006 (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -7979,13 +7979,13 @@ CREATE TABLE public.nfl_plays_year_2006 (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -8025,8 +8025,8 @@ CREATE TABLE public.nfl_plays_year_2007 (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -8115,7 +8115,7 @@ CREATE TABLE public.nfl_plays_year_2007 (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -8264,12 +8264,12 @@ CREATE TABLE public.nfl_plays_year_2007 (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -8296,14 +8296,14 @@ CREATE TABLE public.nfl_plays_year_2007 (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -8314,13 +8314,13 @@ CREATE TABLE public.nfl_plays_year_2007 (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -8360,8 +8360,8 @@ CREATE TABLE public.nfl_plays_year_2008 (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -8450,7 +8450,7 @@ CREATE TABLE public.nfl_plays_year_2008 (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -8599,12 +8599,12 @@ CREATE TABLE public.nfl_plays_year_2008 (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -8631,14 +8631,14 @@ CREATE TABLE public.nfl_plays_year_2008 (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -8649,13 +8649,13 @@ CREATE TABLE public.nfl_plays_year_2008 (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -8695,8 +8695,8 @@ CREATE TABLE public.nfl_plays_year_2009 (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -8785,7 +8785,7 @@ CREATE TABLE public.nfl_plays_year_2009 (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -8934,12 +8934,12 @@ CREATE TABLE public.nfl_plays_year_2009 (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -8966,14 +8966,14 @@ CREATE TABLE public.nfl_plays_year_2009 (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -8984,13 +8984,13 @@ CREATE TABLE public.nfl_plays_year_2009 (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -9030,8 +9030,8 @@ CREATE TABLE public.nfl_plays_year_2010 (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -9120,7 +9120,7 @@ CREATE TABLE public.nfl_plays_year_2010 (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -9269,12 +9269,12 @@ CREATE TABLE public.nfl_plays_year_2010 (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -9301,14 +9301,14 @@ CREATE TABLE public.nfl_plays_year_2010 (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -9319,13 +9319,13 @@ CREATE TABLE public.nfl_plays_year_2010 (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -9365,8 +9365,8 @@ CREATE TABLE public.nfl_plays_year_2011 (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -9455,7 +9455,7 @@ CREATE TABLE public.nfl_plays_year_2011 (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -9604,12 +9604,12 @@ CREATE TABLE public.nfl_plays_year_2011 (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -9636,14 +9636,14 @@ CREATE TABLE public.nfl_plays_year_2011 (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -9654,13 +9654,13 @@ CREATE TABLE public.nfl_plays_year_2011 (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -9700,8 +9700,8 @@ CREATE TABLE public.nfl_plays_year_2012 (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -9790,7 +9790,7 @@ CREATE TABLE public.nfl_plays_year_2012 (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -9939,12 +9939,12 @@ CREATE TABLE public.nfl_plays_year_2012 (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -9971,14 +9971,14 @@ CREATE TABLE public.nfl_plays_year_2012 (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -9989,13 +9989,13 @@ CREATE TABLE public.nfl_plays_year_2012 (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -10035,8 +10035,8 @@ CREATE TABLE public.nfl_plays_year_2013 (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -10125,7 +10125,7 @@ CREATE TABLE public.nfl_plays_year_2013 (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -10274,12 +10274,12 @@ CREATE TABLE public.nfl_plays_year_2013 (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -10306,14 +10306,14 @@ CREATE TABLE public.nfl_plays_year_2013 (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -10324,13 +10324,13 @@ CREATE TABLE public.nfl_plays_year_2013 (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -10370,8 +10370,8 @@ CREATE TABLE public.nfl_plays_year_2014 (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -10460,7 +10460,7 @@ CREATE TABLE public.nfl_plays_year_2014 (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -10609,12 +10609,12 @@ CREATE TABLE public.nfl_plays_year_2014 (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -10641,14 +10641,14 @@ CREATE TABLE public.nfl_plays_year_2014 (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -10659,13 +10659,13 @@ CREATE TABLE public.nfl_plays_year_2014 (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -10705,8 +10705,8 @@ CREATE TABLE public.nfl_plays_year_2015 (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -10795,7 +10795,7 @@ CREATE TABLE public.nfl_plays_year_2015 (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -10944,12 +10944,12 @@ CREATE TABLE public.nfl_plays_year_2015 (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -10976,14 +10976,14 @@ CREATE TABLE public.nfl_plays_year_2015 (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -10994,13 +10994,13 @@ CREATE TABLE public.nfl_plays_year_2015 (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -11040,8 +11040,8 @@ CREATE TABLE public.nfl_plays_year_2016 (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -11130,7 +11130,7 @@ CREATE TABLE public.nfl_plays_year_2016 (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -11279,12 +11279,12 @@ CREATE TABLE public.nfl_plays_year_2016 (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -11311,14 +11311,14 @@ CREATE TABLE public.nfl_plays_year_2016 (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -11329,13 +11329,13 @@ CREATE TABLE public.nfl_plays_year_2016 (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -11375,8 +11375,8 @@ CREATE TABLE public.nfl_plays_year_2017 (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -11465,7 +11465,7 @@ CREATE TABLE public.nfl_plays_year_2017 (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -11614,12 +11614,12 @@ CREATE TABLE public.nfl_plays_year_2017 (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -11646,14 +11646,14 @@ CREATE TABLE public.nfl_plays_year_2017 (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -11664,13 +11664,13 @@ CREATE TABLE public.nfl_plays_year_2017 (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -11710,8 +11710,8 @@ CREATE TABLE public.nfl_plays_year_2018 (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -11800,7 +11800,7 @@ CREATE TABLE public.nfl_plays_year_2018 (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -11949,12 +11949,12 @@ CREATE TABLE public.nfl_plays_year_2018 (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -11981,14 +11981,14 @@ CREATE TABLE public.nfl_plays_year_2018 (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -11999,13 +11999,13 @@ CREATE TABLE public.nfl_plays_year_2018 (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -12045,8 +12045,8 @@ CREATE TABLE public.nfl_plays_year_2019 (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -12135,7 +12135,7 @@ CREATE TABLE public.nfl_plays_year_2019 (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -12284,12 +12284,12 @@ CREATE TABLE public.nfl_plays_year_2019 (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -12316,14 +12316,14 @@ CREATE TABLE public.nfl_plays_year_2019 (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -12334,13 +12334,13 @@ CREATE TABLE public.nfl_plays_year_2019 (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -12380,8 +12380,8 @@ CREATE TABLE public.nfl_plays_year_2020 (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -12470,7 +12470,7 @@ CREATE TABLE public.nfl_plays_year_2020 (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -12619,12 +12619,12 @@ CREATE TABLE public.nfl_plays_year_2020 (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -12651,14 +12651,14 @@ CREATE TABLE public.nfl_plays_year_2020 (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -12669,13 +12669,13 @@ CREATE TABLE public.nfl_plays_year_2020 (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -12715,8 +12715,8 @@ CREATE TABLE public.nfl_plays_year_2021 (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -12805,7 +12805,7 @@ CREATE TABLE public.nfl_plays_year_2021 (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -12954,12 +12954,12 @@ CREATE TABLE public.nfl_plays_year_2021 (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -12986,14 +12986,14 @@ CREATE TABLE public.nfl_plays_year_2021 (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -13004,13 +13004,13 @@ CREATE TABLE public.nfl_plays_year_2021 (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -13050,8 +13050,8 @@ CREATE TABLE public.nfl_plays_year_2022 (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -13140,7 +13140,7 @@ CREATE TABLE public.nfl_plays_year_2022 (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -13289,12 +13289,12 @@ CREATE TABLE public.nfl_plays_year_2022 (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -13321,14 +13321,14 @@ CREATE TABLE public.nfl_plays_year_2022 (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -13339,13 +13339,13 @@ CREATE TABLE public.nfl_plays_year_2022 (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -13385,8 +13385,8 @@ CREATE TABLE public.nfl_plays_year_2023 (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -13475,7 +13475,7 @@ CREATE TABLE public.nfl_plays_year_2023 (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -13624,12 +13624,12 @@ CREATE TABLE public.nfl_plays_year_2023 (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -13656,14 +13656,14 @@ CREATE TABLE public.nfl_plays_year_2023 (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -13674,13 +13674,13 @@ CREATE TABLE public.nfl_plays_year_2023 (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -13720,8 +13720,8 @@ CREATE TABLE public.nfl_plays_year_2024 (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -13810,7 +13810,7 @@ CREATE TABLE public.nfl_plays_year_2024 (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -13959,12 +13959,12 @@ CREATE TABLE public.nfl_plays_year_2024 (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -13991,14 +13991,14 @@ CREATE TABLE public.nfl_plays_year_2024 (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -14009,13 +14009,13 @@ CREATE TABLE public.nfl_plays_year_2024 (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -14055,8 +14055,8 @@ CREATE TABLE public.nfl_plays_year_2025 (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -14145,7 +14145,7 @@ CREATE TABLE public.nfl_plays_year_2025 (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -14294,12 +14294,12 @@ CREATE TABLE public.nfl_plays_year_2025 (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -14326,14 +14326,14 @@ CREATE TABLE public.nfl_plays_year_2025 (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -14344,13 +14344,13 @@ CREATE TABLE public.nfl_plays_year_2025 (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -14390,8 +14390,8 @@ CREATE TABLE public.nfl_plays_year_2026 (
     yards_to_go integer,
     off_formation character varying(100),
     off_personnel character varying(100),
-    box_ngs integer,
-    pru_ngs integer,
+    box_defenders integer,
+    pru integer,
     def_personnel character varying(100),
     game_clock_start character varying(10),
     drive_seq integer,
@@ -14480,7 +14480,7 @@ CREATE TABLE public.nfl_plays_year_2026 (
     back smallint,
     xlm smallint,
     db smallint,
-    box_defenders smallint,
+    box_defenders_charted smallint,
     boxdb smallint,
     pass_rushers smallint,
     blitzers smallint,
@@ -14629,12 +14629,12 @@ CREATE TABLE public.nfl_plays_year_2026 (
     pass_oe numeric(16,12),
     cp numeric(16,12),
     cpoe numeric(16,12),
-    air_yards_ngs numeric(8,4),
-    time_to_throw_ngs numeric(8,4),
-    route_ngs character varying(100),
-    man_zone_ngs character varying(100),
-    cov_type_ngs character varying(100),
-    qb_pressure_ngs boolean,
+    air_yards numeric(8,4),
+    time_to_throw numeric(8,4),
+    route character varying(100),
+    man_zone character varying(100),
+    cov_type character varying(100),
+    qb_pressure_tracking boolean,
     starting_hash public.hash_position,
     ftn_play_id numeric,
     qb_position public.qb_position,
@@ -14661,14 +14661,14 @@ CREATE TABLE public.nfl_plays_year_2026 (
     tackle_assist_4_gsis character varying(36),
     tackle_assist_4_pid character varying(25),
     pass_location public.play_direction,
-    play_direction_ngs character varying(10),
+    play_direction character varying(10),
     ep_ngs numeric(16,12),
     epa_ngs numeric(16,12),
-    home_win_prob_pre_ngs numeric(16,12),
-    home_win_prob_post_ngs numeric(16,12),
-    away_win_prob_pre_ngs numeric(16,12),
-    away_win_prob_post_ngs numeric(16,12),
-    receiver_alignment_ngs character varying(10),
+    home_win_prob_pre numeric(16,12),
+    home_win_prob_post numeric(16,12),
+    away_win_prob_pre numeric(16,12),
+    away_win_prob_post numeric(16,12),
+    receiver_alignment character varying(10),
     num_qb smallint,
     num_rb smallint,
     num_wr smallint,
@@ -14679,13 +14679,13 @@ CREATE TABLE public.nfl_plays_year_2026 (
     num_db smallint,
     avg_pass_rusher_distance_to_qb numeric(16,12),
     num_high_safeties smallint,
-    safety_shell_ngs character varying(20),
-    num_shifted_players_ngs smallint,
-    pass_prob_tracking_ngs numeric(16,12),
-    pass_prob_non_tracking_ngs numeric(16,12),
+    safety_shell character varying(20),
+    num_shifted_players smallint,
+    pass_prob_tracking numeric(16,12),
+    pass_prob_non_tracking numeric(16,12),
     avg_height numeric(5,2),
     total_weight integer,
-    qb_position_ngs character varying(50),
+    qb_position_tracking character varying(50),
     run_gap public.run_gap,
     yards_created smallint,
     yards_blocked smallint,
@@ -23833,7 +23833,7 @@ CREATE INDEX idx_nfl_plays_bc_pid ON ONLY public.nfl_plays USING btree (bc_pid);
 -- Name: idx_nfl_plays_box_defenders; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_box_defenders ON ONLY public.nfl_plays USING btree (box_defenders);
+CREATE INDEX idx_nfl_plays_box_defenders ON ONLY public.nfl_plays USING btree (box_defenders_charted);
 
 
 --
@@ -23959,7 +23959,7 @@ CREATE INDEX idx_nfl_plays_qtr ON ONLY public.nfl_plays USING btree (qtr);
 -- Name: idx_nfl_plays_route_ngs; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX idx_nfl_plays_route_ngs ON ONLY public.nfl_plays USING btree (route_ngs);
+CREATE INDEX idx_nfl_plays_route_ngs ON ONLY public.nfl_plays USING btree (route);
 
 
 --
@@ -24729,7 +24729,7 @@ CREATE INDEX nfl_plays_year_2000_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON p
 -- Name: nfl_plays_year_2000_box_defenders_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_box_defenders_idx ON public.nfl_plays_year_2000 USING btree (box_defenders);
+CREATE INDEX nfl_plays_year_2000_box_defenders_idx ON public.nfl_plays_year_2000 USING btree (box_defenders_charted);
 
 
 --
@@ -24834,7 +24834,7 @@ CREATE INDEX nfl_plays_year_2000_qtr_idx ON public.nfl_plays_year_2000 USING btr
 -- Name: nfl_plays_year_2000_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_route_ngs_idx ON public.nfl_plays_year_2000 USING btree (route_ngs);
+CREATE INDEX nfl_plays_year_2000_route_ngs_idx ON public.nfl_plays_year_2000 USING btree (route);
 
 
 --
@@ -25051,7 +25051,7 @@ CREATE INDEX nfl_plays_year_2001_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON p
 -- Name: nfl_plays_year_2001_box_defenders_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_box_defenders_idx ON public.nfl_plays_year_2001 USING btree (box_defenders);
+CREATE INDEX nfl_plays_year_2001_box_defenders_idx ON public.nfl_plays_year_2001 USING btree (box_defenders_charted);
 
 
 --
@@ -25156,7 +25156,7 @@ CREATE INDEX nfl_plays_year_2001_qtr_idx ON public.nfl_plays_year_2001 USING btr
 -- Name: nfl_plays_year_2001_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_route_ngs_idx ON public.nfl_plays_year_2001 USING btree (route_ngs);
+CREATE INDEX nfl_plays_year_2001_route_ngs_idx ON public.nfl_plays_year_2001 USING btree (route);
 
 
 --
@@ -25373,7 +25373,7 @@ CREATE INDEX nfl_plays_year_2002_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON p
 -- Name: nfl_plays_year_2002_box_defenders_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_box_defenders_idx ON public.nfl_plays_year_2002 USING btree (box_defenders);
+CREATE INDEX nfl_plays_year_2002_box_defenders_idx ON public.nfl_plays_year_2002 USING btree (box_defenders_charted);
 
 
 --
@@ -25478,7 +25478,7 @@ CREATE INDEX nfl_plays_year_2002_qtr_idx ON public.nfl_plays_year_2002 USING btr
 -- Name: nfl_plays_year_2002_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_route_ngs_idx ON public.nfl_plays_year_2002 USING btree (route_ngs);
+CREATE INDEX nfl_plays_year_2002_route_ngs_idx ON public.nfl_plays_year_2002 USING btree (route);
 
 
 --
@@ -25695,7 +25695,7 @@ CREATE INDEX nfl_plays_year_2003_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON p
 -- Name: nfl_plays_year_2003_box_defenders_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_box_defenders_idx ON public.nfl_plays_year_2003 USING btree (box_defenders);
+CREATE INDEX nfl_plays_year_2003_box_defenders_idx ON public.nfl_plays_year_2003 USING btree (box_defenders_charted);
 
 
 --
@@ -25800,7 +25800,7 @@ CREATE INDEX nfl_plays_year_2003_qtr_idx ON public.nfl_plays_year_2003 USING btr
 -- Name: nfl_plays_year_2003_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_route_ngs_idx ON public.nfl_plays_year_2003 USING btree (route_ngs);
+CREATE INDEX nfl_plays_year_2003_route_ngs_idx ON public.nfl_plays_year_2003 USING btree (route);
 
 
 --
@@ -26017,7 +26017,7 @@ CREATE INDEX nfl_plays_year_2004_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON p
 -- Name: nfl_plays_year_2004_box_defenders_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_box_defenders_idx ON public.nfl_plays_year_2004 USING btree (box_defenders);
+CREATE INDEX nfl_plays_year_2004_box_defenders_idx ON public.nfl_plays_year_2004 USING btree (box_defenders_charted);
 
 
 --
@@ -26122,7 +26122,7 @@ CREATE INDEX nfl_plays_year_2004_qtr_idx ON public.nfl_plays_year_2004 USING btr
 -- Name: nfl_plays_year_2004_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_route_ngs_idx ON public.nfl_plays_year_2004 USING btree (route_ngs);
+CREATE INDEX nfl_plays_year_2004_route_ngs_idx ON public.nfl_plays_year_2004 USING btree (route);
 
 
 --
@@ -26339,7 +26339,7 @@ CREATE INDEX nfl_plays_year_2005_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON p
 -- Name: nfl_plays_year_2005_box_defenders_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_box_defenders_idx ON public.nfl_plays_year_2005 USING btree (box_defenders);
+CREATE INDEX nfl_plays_year_2005_box_defenders_idx ON public.nfl_plays_year_2005 USING btree (box_defenders_charted);
 
 
 --
@@ -26444,7 +26444,7 @@ CREATE INDEX nfl_plays_year_2005_qtr_idx ON public.nfl_plays_year_2005 USING btr
 -- Name: nfl_plays_year_2005_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_route_ngs_idx ON public.nfl_plays_year_2005 USING btree (route_ngs);
+CREATE INDEX nfl_plays_year_2005_route_ngs_idx ON public.nfl_plays_year_2005 USING btree (route);
 
 
 --
@@ -26661,7 +26661,7 @@ CREATE INDEX nfl_plays_year_2006_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON p
 -- Name: nfl_plays_year_2006_box_defenders_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_box_defenders_idx ON public.nfl_plays_year_2006 USING btree (box_defenders);
+CREATE INDEX nfl_plays_year_2006_box_defenders_idx ON public.nfl_plays_year_2006 USING btree (box_defenders_charted);
 
 
 --
@@ -26766,7 +26766,7 @@ CREATE INDEX nfl_plays_year_2006_qtr_idx ON public.nfl_plays_year_2006 USING btr
 -- Name: nfl_plays_year_2006_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_route_ngs_idx ON public.nfl_plays_year_2006 USING btree (route_ngs);
+CREATE INDEX nfl_plays_year_2006_route_ngs_idx ON public.nfl_plays_year_2006 USING btree (route);
 
 
 --
@@ -26983,7 +26983,7 @@ CREATE INDEX nfl_plays_year_2007_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON p
 -- Name: nfl_plays_year_2007_box_defenders_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_box_defenders_idx ON public.nfl_plays_year_2007 USING btree (box_defenders);
+CREATE INDEX nfl_plays_year_2007_box_defenders_idx ON public.nfl_plays_year_2007 USING btree (box_defenders_charted);
 
 
 --
@@ -27088,7 +27088,7 @@ CREATE INDEX nfl_plays_year_2007_qtr_idx ON public.nfl_plays_year_2007 USING btr
 -- Name: nfl_plays_year_2007_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_route_ngs_idx ON public.nfl_plays_year_2007 USING btree (route_ngs);
+CREATE INDEX nfl_plays_year_2007_route_ngs_idx ON public.nfl_plays_year_2007 USING btree (route);
 
 
 --
@@ -27305,7 +27305,7 @@ CREATE INDEX nfl_plays_year_2008_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON p
 -- Name: nfl_plays_year_2008_box_defenders_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_box_defenders_idx ON public.nfl_plays_year_2008 USING btree (box_defenders);
+CREATE INDEX nfl_plays_year_2008_box_defenders_idx ON public.nfl_plays_year_2008 USING btree (box_defenders_charted);
 
 
 --
@@ -27410,7 +27410,7 @@ CREATE INDEX nfl_plays_year_2008_qtr_idx ON public.nfl_plays_year_2008 USING btr
 -- Name: nfl_plays_year_2008_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_route_ngs_idx ON public.nfl_plays_year_2008 USING btree (route_ngs);
+CREATE INDEX nfl_plays_year_2008_route_ngs_idx ON public.nfl_plays_year_2008 USING btree (route);
 
 
 --
@@ -27627,7 +27627,7 @@ CREATE INDEX nfl_plays_year_2009_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON p
 -- Name: nfl_plays_year_2009_box_defenders_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_box_defenders_idx ON public.nfl_plays_year_2009 USING btree (box_defenders);
+CREATE INDEX nfl_plays_year_2009_box_defenders_idx ON public.nfl_plays_year_2009 USING btree (box_defenders_charted);
 
 
 --
@@ -27732,7 +27732,7 @@ CREATE INDEX nfl_plays_year_2009_qtr_idx ON public.nfl_plays_year_2009 USING btr
 -- Name: nfl_plays_year_2009_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_route_ngs_idx ON public.nfl_plays_year_2009 USING btree (route_ngs);
+CREATE INDEX nfl_plays_year_2009_route_ngs_idx ON public.nfl_plays_year_2009 USING btree (route);
 
 
 --
@@ -27949,7 +27949,7 @@ CREATE INDEX nfl_plays_year_2010_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON p
 -- Name: nfl_plays_year_2010_box_defenders_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_box_defenders_idx ON public.nfl_plays_year_2010 USING btree (box_defenders);
+CREATE INDEX nfl_plays_year_2010_box_defenders_idx ON public.nfl_plays_year_2010 USING btree (box_defenders_charted);
 
 
 --
@@ -28054,7 +28054,7 @@ CREATE INDEX nfl_plays_year_2010_qtr_idx ON public.nfl_plays_year_2010 USING btr
 -- Name: nfl_plays_year_2010_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_route_ngs_idx ON public.nfl_plays_year_2010 USING btree (route_ngs);
+CREATE INDEX nfl_plays_year_2010_route_ngs_idx ON public.nfl_plays_year_2010 USING btree (route);
 
 
 --
@@ -28271,7 +28271,7 @@ CREATE INDEX nfl_plays_year_2011_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON p
 -- Name: nfl_plays_year_2011_box_defenders_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_box_defenders_idx ON public.nfl_plays_year_2011 USING btree (box_defenders);
+CREATE INDEX nfl_plays_year_2011_box_defenders_idx ON public.nfl_plays_year_2011 USING btree (box_defenders_charted);
 
 
 --
@@ -28376,7 +28376,7 @@ CREATE INDEX nfl_plays_year_2011_qtr_idx ON public.nfl_plays_year_2011 USING btr
 -- Name: nfl_plays_year_2011_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_route_ngs_idx ON public.nfl_plays_year_2011 USING btree (route_ngs);
+CREATE INDEX nfl_plays_year_2011_route_ngs_idx ON public.nfl_plays_year_2011 USING btree (route);
 
 
 --
@@ -28593,7 +28593,7 @@ CREATE INDEX nfl_plays_year_2012_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON p
 -- Name: nfl_plays_year_2012_box_defenders_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_box_defenders_idx ON public.nfl_plays_year_2012 USING btree (box_defenders);
+CREATE INDEX nfl_plays_year_2012_box_defenders_idx ON public.nfl_plays_year_2012 USING btree (box_defenders_charted);
 
 
 --
@@ -28698,7 +28698,7 @@ CREATE INDEX nfl_plays_year_2012_qtr_idx ON public.nfl_plays_year_2012 USING btr
 -- Name: nfl_plays_year_2012_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_route_ngs_idx ON public.nfl_plays_year_2012 USING btree (route_ngs);
+CREATE INDEX nfl_plays_year_2012_route_ngs_idx ON public.nfl_plays_year_2012 USING btree (route);
 
 
 --
@@ -28915,7 +28915,7 @@ CREATE INDEX nfl_plays_year_2013_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON p
 -- Name: nfl_plays_year_2013_box_defenders_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_box_defenders_idx ON public.nfl_plays_year_2013 USING btree (box_defenders);
+CREATE INDEX nfl_plays_year_2013_box_defenders_idx ON public.nfl_plays_year_2013 USING btree (box_defenders_charted);
 
 
 --
@@ -29020,7 +29020,7 @@ CREATE INDEX nfl_plays_year_2013_qtr_idx ON public.nfl_plays_year_2013 USING btr
 -- Name: nfl_plays_year_2013_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_route_ngs_idx ON public.nfl_plays_year_2013 USING btree (route_ngs);
+CREATE INDEX nfl_plays_year_2013_route_ngs_idx ON public.nfl_plays_year_2013 USING btree (route);
 
 
 --
@@ -29237,7 +29237,7 @@ CREATE INDEX nfl_plays_year_2014_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON p
 -- Name: nfl_plays_year_2014_box_defenders_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_box_defenders_idx ON public.nfl_plays_year_2014 USING btree (box_defenders);
+CREATE INDEX nfl_plays_year_2014_box_defenders_idx ON public.nfl_plays_year_2014 USING btree (box_defenders_charted);
 
 
 --
@@ -29342,7 +29342,7 @@ CREATE INDEX nfl_plays_year_2014_qtr_idx ON public.nfl_plays_year_2014 USING btr
 -- Name: nfl_plays_year_2014_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_route_ngs_idx ON public.nfl_plays_year_2014 USING btree (route_ngs);
+CREATE INDEX nfl_plays_year_2014_route_ngs_idx ON public.nfl_plays_year_2014 USING btree (route);
 
 
 --
@@ -29559,7 +29559,7 @@ CREATE INDEX nfl_plays_year_2015_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON p
 -- Name: nfl_plays_year_2015_box_defenders_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_box_defenders_idx ON public.nfl_plays_year_2015 USING btree (box_defenders);
+CREATE INDEX nfl_plays_year_2015_box_defenders_idx ON public.nfl_plays_year_2015 USING btree (box_defenders_charted);
 
 
 --
@@ -29664,7 +29664,7 @@ CREATE INDEX nfl_plays_year_2015_qtr_idx ON public.nfl_plays_year_2015 USING btr
 -- Name: nfl_plays_year_2015_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_route_ngs_idx ON public.nfl_plays_year_2015 USING btree (route_ngs);
+CREATE INDEX nfl_plays_year_2015_route_ngs_idx ON public.nfl_plays_year_2015 USING btree (route);
 
 
 --
@@ -29881,7 +29881,7 @@ CREATE INDEX nfl_plays_year_2016_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON p
 -- Name: nfl_plays_year_2016_box_defenders_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_box_defenders_idx ON public.nfl_plays_year_2016 USING btree (box_defenders);
+CREATE INDEX nfl_plays_year_2016_box_defenders_idx ON public.nfl_plays_year_2016 USING btree (box_defenders_charted);
 
 
 --
@@ -29986,7 +29986,7 @@ CREATE INDEX nfl_plays_year_2016_qtr_idx ON public.nfl_plays_year_2016 USING btr
 -- Name: nfl_plays_year_2016_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_route_ngs_idx ON public.nfl_plays_year_2016 USING btree (route_ngs);
+CREATE INDEX nfl_plays_year_2016_route_ngs_idx ON public.nfl_plays_year_2016 USING btree (route);
 
 
 --
@@ -30203,7 +30203,7 @@ CREATE INDEX nfl_plays_year_2017_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON p
 -- Name: nfl_plays_year_2017_box_defenders_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_box_defenders_idx ON public.nfl_plays_year_2017 USING btree (box_defenders);
+CREATE INDEX nfl_plays_year_2017_box_defenders_idx ON public.nfl_plays_year_2017 USING btree (box_defenders_charted);
 
 
 --
@@ -30308,7 +30308,7 @@ CREATE INDEX nfl_plays_year_2017_qtr_idx ON public.nfl_plays_year_2017 USING btr
 -- Name: nfl_plays_year_2017_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_route_ngs_idx ON public.nfl_plays_year_2017 USING btree (route_ngs);
+CREATE INDEX nfl_plays_year_2017_route_ngs_idx ON public.nfl_plays_year_2017 USING btree (route);
 
 
 --
@@ -30525,7 +30525,7 @@ CREATE INDEX nfl_plays_year_2018_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON p
 -- Name: nfl_plays_year_2018_box_defenders_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_box_defenders_idx ON public.nfl_plays_year_2018 USING btree (box_defenders);
+CREATE INDEX nfl_plays_year_2018_box_defenders_idx ON public.nfl_plays_year_2018 USING btree (box_defenders_charted);
 
 
 --
@@ -30630,7 +30630,7 @@ CREATE INDEX nfl_plays_year_2018_qtr_idx ON public.nfl_plays_year_2018 USING btr
 -- Name: nfl_plays_year_2018_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_route_ngs_idx ON public.nfl_plays_year_2018 USING btree (route_ngs);
+CREATE INDEX nfl_plays_year_2018_route_ngs_idx ON public.nfl_plays_year_2018 USING btree (route);
 
 
 --
@@ -30847,7 +30847,7 @@ CREATE INDEX nfl_plays_year_2019_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON p
 -- Name: nfl_plays_year_2019_box_defenders_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_box_defenders_idx ON public.nfl_plays_year_2019 USING btree (box_defenders);
+CREATE INDEX nfl_plays_year_2019_box_defenders_idx ON public.nfl_plays_year_2019 USING btree (box_defenders_charted);
 
 
 --
@@ -30952,7 +30952,7 @@ CREATE INDEX nfl_plays_year_2019_qtr_idx ON public.nfl_plays_year_2019 USING btr
 -- Name: nfl_plays_year_2019_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_route_ngs_idx ON public.nfl_plays_year_2019 USING btree (route_ngs);
+CREATE INDEX nfl_plays_year_2019_route_ngs_idx ON public.nfl_plays_year_2019 USING btree (route);
 
 
 --
@@ -31169,7 +31169,7 @@ CREATE INDEX nfl_plays_year_2020_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON p
 -- Name: nfl_plays_year_2020_box_defenders_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_box_defenders_idx ON public.nfl_plays_year_2020 USING btree (box_defenders);
+CREATE INDEX nfl_plays_year_2020_box_defenders_idx ON public.nfl_plays_year_2020 USING btree (box_defenders_charted);
 
 
 --
@@ -31274,7 +31274,7 @@ CREATE INDEX nfl_plays_year_2020_qtr_idx ON public.nfl_plays_year_2020 USING btr
 -- Name: nfl_plays_year_2020_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_route_ngs_idx ON public.nfl_plays_year_2020 USING btree (route_ngs);
+CREATE INDEX nfl_plays_year_2020_route_ngs_idx ON public.nfl_plays_year_2020 USING btree (route);
 
 
 --
@@ -31491,7 +31491,7 @@ CREATE INDEX nfl_plays_year_2021_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON p
 -- Name: nfl_plays_year_2021_box_defenders_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_box_defenders_idx ON public.nfl_plays_year_2021 USING btree (box_defenders);
+CREATE INDEX nfl_plays_year_2021_box_defenders_idx ON public.nfl_plays_year_2021 USING btree (box_defenders_charted);
 
 
 --
@@ -31596,7 +31596,7 @@ CREATE INDEX nfl_plays_year_2021_qtr_idx ON public.nfl_plays_year_2021 USING btr
 -- Name: nfl_plays_year_2021_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_route_ngs_idx ON public.nfl_plays_year_2021 USING btree (route_ngs);
+CREATE INDEX nfl_plays_year_2021_route_ngs_idx ON public.nfl_plays_year_2021 USING btree (route);
 
 
 --
@@ -31813,7 +31813,7 @@ CREATE INDEX nfl_plays_year_2022_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON p
 -- Name: nfl_plays_year_2022_box_defenders_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_box_defenders_idx ON public.nfl_plays_year_2022 USING btree (box_defenders);
+CREATE INDEX nfl_plays_year_2022_box_defenders_idx ON public.nfl_plays_year_2022 USING btree (box_defenders_charted);
 
 
 --
@@ -31918,7 +31918,7 @@ CREATE INDEX nfl_plays_year_2022_qtr_idx ON public.nfl_plays_year_2022 USING btr
 -- Name: nfl_plays_year_2022_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_route_ngs_idx ON public.nfl_plays_year_2022 USING btree (route_ngs);
+CREATE INDEX nfl_plays_year_2022_route_ngs_idx ON public.nfl_plays_year_2022 USING btree (route);
 
 
 --
@@ -32135,7 +32135,7 @@ CREATE INDEX nfl_plays_year_2023_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON p
 -- Name: nfl_plays_year_2023_box_defenders_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_box_defenders_idx ON public.nfl_plays_year_2023 USING btree (box_defenders);
+CREATE INDEX nfl_plays_year_2023_box_defenders_idx ON public.nfl_plays_year_2023 USING btree (box_defenders_charted);
 
 
 --
@@ -32240,7 +32240,7 @@ CREATE INDEX nfl_plays_year_2023_qtr_idx ON public.nfl_plays_year_2023 USING btr
 -- Name: nfl_plays_year_2023_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_route_ngs_idx ON public.nfl_plays_year_2023 USING btree (route_ngs);
+CREATE INDEX nfl_plays_year_2023_route_ngs_idx ON public.nfl_plays_year_2023 USING btree (route);
 
 
 --
@@ -32457,7 +32457,7 @@ CREATE INDEX nfl_plays_year_2024_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON p
 -- Name: nfl_plays_year_2024_box_defenders_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_box_defenders_idx ON public.nfl_plays_year_2024 USING btree (box_defenders);
+CREATE INDEX nfl_plays_year_2024_box_defenders_idx ON public.nfl_plays_year_2024 USING btree (box_defenders_charted);
 
 
 --
@@ -32562,7 +32562,7 @@ CREATE INDEX nfl_plays_year_2024_qtr_idx ON public.nfl_plays_year_2024 USING btr
 -- Name: nfl_plays_year_2024_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_route_ngs_idx ON public.nfl_plays_year_2024 USING btree (route_ngs);
+CREATE INDEX nfl_plays_year_2024_route_ngs_idx ON public.nfl_plays_year_2024 USING btree (route);
 
 
 --
@@ -32779,7 +32779,7 @@ CREATE INDEX nfl_plays_year_2025_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON p
 -- Name: nfl_plays_year_2025_box_defenders_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_box_defenders_idx ON public.nfl_plays_year_2025 USING btree (box_defenders);
+CREATE INDEX nfl_plays_year_2025_box_defenders_idx ON public.nfl_plays_year_2025 USING btree (box_defenders_charted);
 
 
 --
@@ -32884,7 +32884,7 @@ CREATE INDEX nfl_plays_year_2025_qtr_idx ON public.nfl_plays_year_2025 USING btr
 -- Name: nfl_plays_year_2025_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_route_ngs_idx ON public.nfl_plays_year_2025 USING btree (route_ngs);
+CREATE INDEX nfl_plays_year_2025_route_ngs_idx ON public.nfl_plays_year_2025 USING btree (route);
 
 
 --
@@ -33101,7 +33101,7 @@ CREATE INDEX nfl_plays_year_2026_bc_pid_psr_pid_trg_pid_player_fuml_pid_idx ON p
 -- Name: nfl_plays_year_2026_box_defenders_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_box_defenders_idx ON public.nfl_plays_year_2026 USING btree (box_defenders);
+CREATE INDEX nfl_plays_year_2026_box_defenders_idx ON public.nfl_plays_year_2026 USING btree (box_defenders_charted);
 
 
 --
@@ -33206,7 +33206,7 @@ CREATE INDEX nfl_plays_year_2026_qtr_idx ON public.nfl_plays_year_2026 USING btr
 -- Name: nfl_plays_year_2026_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_route_ngs_idx ON public.nfl_plays_year_2026 USING btree (route_ngs);
+CREATE INDEX nfl_plays_year_2026_route_ngs_idx ON public.nfl_plays_year_2026 USING btree (route);
 
 
 --

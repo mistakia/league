@@ -1,11 +1,11 @@
 import { connect } from 'react-redux'
 
-import { auctionActions } from '@core/auction'
+import { auction_actions } from '@core/auction'
 
 import Timer from './timer'
 
-const mapDispatchToProps = {
-  soundNotification: auctionActions.soundNotification
+const map_dispatch_to_props = {
+  soundNotification: auction_actions.soundNotification
 }
 
-export default connect(null, mapDispatchToProps)(Timer)
+export default connect(null, map_dispatch_to_props)(Timer)

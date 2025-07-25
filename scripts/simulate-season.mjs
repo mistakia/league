@@ -6,7 +6,7 @@ import dayOfYear from 'dayjs/plugin/dayOfYear.js'
 
 import db from '#db'
 import { constants, simulate } from '#libs-shared'
-import { getRosters, is_main } from '#libs-server'
+import { get_laegue_rosters_from_database, is_main } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 dayjs.extend(dayOfYear)
@@ -35,7 +35,7 @@ const simulate_season = async (lid) => {
     return
   }
 
-  const rosterRows = await getRosters({ lid })
+  const rosterRows = await get_laegue_rosters_from_database({ lid })
   const tids = teamRows.map((t) => t.uid)
   const teamStats = await db('league_team_seasonlogs')
     .where('year', constants.season.year)
