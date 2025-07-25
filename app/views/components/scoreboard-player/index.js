@@ -4,15 +4,15 @@ import { createSelector } from 'reselect'
 import {
   getPlayerById,
   getScoreboardGamelogByPlayerId,
-  getScoreboard
+  get_scoreboard
 } from '@core/selectors'
 
 import ScoreboardPlayer from './scoreboard-player'
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   getPlayerById,
   getScoreboardGamelogByPlayerId,
-  getScoreboard,
+  get_scoreboard,
   (playerMap, gamelog, scoreboard) => ({
     playerMap,
     gamelog,
@@ -20,4 +20,4 @@ const mapStateToProps = createSelector(
   })
 )
 
-export default connect(mapStateToProps)(ScoreboardPlayer)
+export default connect(map_state_to_props)(ScoreboardPlayer)

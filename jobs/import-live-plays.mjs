@@ -4,7 +4,7 @@ import { constants } from '#libs-shared'
 import { wait } from '#libs-server'
 // import import_plays_nfl_v3 from '#scripts/import-plays-nfl-v3.mjs'
 import import_plays_nfl_v1 from '#scripts/import-plays-nfl-v1.mjs'
-// import import_plays_ngs from '#scripts/import-plays-ngs.mjs'
+
 import update_stats_weekly from '#scripts/update-stats-weekly.mjs'
 
 const log = debug('import-live-plays')
@@ -40,11 +40,7 @@ export default async function () {
         ignore_cache: true
       })
 
-      // const all_games_skipped_ngs = await import_plays_ngs()
-
-      all_games_skipped =
-        /* all_games_skipped_nfl_v3 && all_games_skipped_ngs && */
-        all_games_skipped_vfl_v1
+      all_games_skipped = all_games_skipped_vfl_v1
     } catch (error) {
       log(error)
     }

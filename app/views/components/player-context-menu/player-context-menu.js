@@ -48,7 +48,7 @@ export default function PlayerContextMenu({
       )} (${playerMap.get(
         'pos'
       )}) will be designated as protected. This will protect the player from poaches but you will not be able to activate or release this player until the off-season.`,
-      onConfirm: () => protect(playerMap.get('pid'))
+      on_confirm_func: () => protect(playerMap.get('pid'))
     })
     hide()
   }
@@ -79,7 +79,7 @@ export default function PlayerContextMenu({
       description: `Your claim for ${playerMap.get('fname')} ${playerMap.get(
         'lname'
       )} (${playerMap.get('pos')}) will no longer be processed.`,
-      onConfirm: () => cancelClaim(waiverId)
+      on_confirm_func: () => cancelClaim(waiverId)
     })
     hide()
   }
@@ -145,7 +145,7 @@ export default function PlayerContextMenu({
       )} (${playerMap.get(
         'pos'
       )}) will be placed on Reserves/COV. He will not be available to use in lineups until he's activated.`,
-      onConfirm: () =>
+      on_confirm_func: () =>
         reserve({
           reserve_pid: playerMap.get('pid'),
           slot: constants.slots.COV
@@ -162,7 +162,7 @@ export default function PlayerContextMenu({
       )} (${playerMap.get(
         'pos'
       )}) will be released and placed on waivers for 24 hours before becoming a free agent.`,
-      onConfirm: () => release(playerMap.get('pid'))
+      on_confirm_func: () => release(playerMap.get('pid'))
     })
     hide()
   }

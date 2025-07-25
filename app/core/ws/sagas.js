@@ -1,7 +1,7 @@
 import { call, takeLatest, select, fork, delay, put } from 'redux-saga/effects'
 
 import { wsActions } from './actions'
-import { appActions } from '@core/app'
+import { app_actions } from '@core/app'
 import { get_app } from '@core/selectors'
 import { openWS, closeWS, isOpen } from './service'
 
@@ -37,11 +37,11 @@ export function* reconnect() {
 // -------------------------------------
 
 export function* watchLogout() {
-  yield takeLatest(appActions.LOGOUT, disconnect)
+  yield takeLatest(app_actions.LOGOUT, disconnect)
 }
 
 export function* watchAuthFulfilled() {
-  yield takeLatest(appActions.AUTH_FULFILLED, connect_auth)
+  yield takeLatest(app_actions.AUTH_FULFILLED, connect_auth)
 }
 
 export function* watchWebSocketClose() {
@@ -49,14 +49,14 @@ export function* watchWebSocketClose() {
 }
 
 export function* watch_init_app() {
-  yield takeLatest(appActions.INIT_APP, connect)
+  yield takeLatest(app_actions.INIT_APP, connect)
 }
 
 //= ====================================
 //  ROOT
 // -------------------------------------
 
-export const wsSagas = [
+export const ws_sagas = [
   fork(watchAuthFulfilled),
   fork(watchLogout),
   fork(watchWebSocketClose),

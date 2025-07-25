@@ -1,12 +1,12 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getPlayers } from '@core/selectors'
+import { get_players_state } from '@core/selectors'
 
 import ExperienceFilter from './experience-filter'
 
-const mapStateToProps = createSelector(getPlayers, (players) => ({
+const map_state_to_props = createSelector(get_players_state, (players) => ({
   experience: players.get('experience')
 }))
 
-export default connect(mapStateToProps)(ExperienceFilter)
+export default connect(map_state_to_props)(ExperienceFilter)

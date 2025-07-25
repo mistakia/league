@@ -1,10 +1,13 @@
 import { List } from 'immutable'
 
-import { draftPickValueActions } from './actions'
+import { draft_pick_value_actions } from './actions'
 
-export function draftPickValueReducer(state = new List(), { payload, type }) {
+export function draft_pick_value_reducer(
+  state = new List(),
+  { payload, type }
+) {
   switch (type) {
-    case draftPickValueActions.GET_DRAFT_PICK_VALUE_FULFILLED:
+    case draft_pick_value_actions.GET_DRAFT_PICK_VALUE_FULFILLED:
       return new List(payload.data)
 
     default:

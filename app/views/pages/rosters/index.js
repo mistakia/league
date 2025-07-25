@@ -3,21 +3,21 @@ import { createSelector } from 'reselect'
 
 import { roster_actions } from '@core/rosters'
 import {
-  getTeamsForCurrentLeague,
-  getRostersForCurrentLeague,
-  getCurrentLeague,
-  getPlayers
+  get_teams_for_current_league,
+  get_rosters_for_current_league,
+  get_current_league,
+  get_players_state
 } from '@core/selectors'
 import { constants } from '@libs-shared'
 import { player_actions } from '@core/players'
 
 import RostersPage from './rosters'
 
-const mapStateToProps = createSelector(
-  getRostersForCurrentLeague,
-  getCurrentLeague,
-  getTeamsForCurrentLeague,
-  getPlayers,
+const map_state_to_props = createSelector(
+  get_rosters_for_current_league,
+  get_current_league,
+  get_teams_for_current_league,
+  get_players_state,
   (rosters, league, teams, players) => {
     let ps_drafted_count_max = 0
     let ps_drafted_threshold_count_max = 0
@@ -79,10 +79,10 @@ const mapStateToProps = createSelector(
   }
 )
 
-const mapDispatchToProps = {
+const map_dispatch_to_props = {
   export_rosters: roster_actions.export_rosters,
   load_league_players: player_actions.load_league_players,
   load_rosters: roster_actions.load_rosters
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(RostersPage)
+export default connect(map_state_to_props, map_dispatch_to_props)(RostersPage)

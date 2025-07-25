@@ -1,9 +1,9 @@
 import { fork, select, call, takeEvery } from 'redux-saga/effects'
 
-import { getPlayersGamelogs } from '@core/api'
+import { api_get_players_gamelogs } from '@core/api'
 import { get_app, get_request_history } from '@core/selectors'
-import { matchupsActions } from '@core/matchups'
-import { gamelogsActions } from './actions'
+import { matchups_actions } from '@core/matchups'
+import { gamelogs_actions } from './actions'
 import { constants } from '@libs-shared'
 
 export function* load({ payload }) {
@@ -65,7 +65,7 @@ export function* load({ payload }) {
   }_${opponent || 'X'}_${position || 'X'}`
 
   if (!request_history.has(key)) {
-    yield call(getPlayersGamelogs, params)
+    yield call(api_get_players_gamelogs, params)
   }
 }
 
@@ -73,19 +73,19 @@ export function* load({ payload }) {
 //  WATCHERS
 // -------------------------------------
 
-export function* watchLoadMatchups() {
-  yield takeEvery(matchupsActions.LOAD_MATCHUPS, load)
+export function* watch_load_matchups() {
+  yield takeEvery(matchups_actions.LOAD_MATCHUPS, load)
 }
 
-export function* watchLoadPlayerGamelogs() {
-  yield takeEvery(gamelogsActions.LOAD_PLAYERS_GAMELOGS, load)
+export function* watch_load_player_gamelogs() {
+  yield takeEvery(gamelogs_actions.LOAD_PLAYERS_GAMELOGS, load)
 }
 
 //= ====================================
 //  ROOT
 // -------------------------------------
 
-export const gamelogSagas = [
-  fork(watchLoadMatchups),
-  fork(watchLoadPlayerGamelogs)
+export const gamelog_sagas = [
+  fork(watch_load_matchups),
+  fork(watch_load_player_gamelogs)
 ]

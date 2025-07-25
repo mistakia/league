@@ -1,12 +1,12 @@
 import { Record, List } from 'immutable'
 import Bugsnag from '@bugsnag/js'
 
-import { appActions } from './actions'
-import { settingActions } from '@core/settings'
+import { app_actions } from './actions'
+import { setting_actions } from '@core/settings'
 import { constants, uuidv4 } from '@libs-shared'
 import { roster_actions } from '@core/rosters'
-import { teamActions } from '@core/teams'
-import { matchupsActions } from '@core/matchups'
+import { team_actions } from '@core/teams'
+import { matchups_actions } from '@core/matchups'
 import { data_views_actions, default_data_view_view_id } from '@core/data-views'
 import { create_user_record, User } from './user'
 
@@ -25,13 +25,13 @@ const initialState = new Record({
   leagueIds: new List([constants.DEFAULTS.LEAGUE_ID]),
   selected_data_view_id: default_data_view_view_id,
 
-  isLoadingRosters: null,
-  isLoadedRosters: null
+  is_loading_rosters: null,
+  is_loaded_rosters: null
 })
 
-export function appReducer(state = initialState(), { payload, type }) {
+export function app_reducer(state = initialState(), { payload, type }) {
   switch (type) {
-    case appActions.INIT_APP:
+    case app_actions.INIT_APP:
       return state.merge({
         token: payload.token,
         isPending: Boolean(payload.token),
@@ -39,33 +39,33 @@ export function appReducer(state = initialState(), { payload, type }) {
       })
 
     case roster_actions.GET_ROSTERS_PENDING:
-      return state.set('isLoadingRosters', payload.opts.leagueId)
+      return state.set('is_loading_rosters', payload.opts.leagueId)
 
     case roster_actions.GET_ROSTERS_FAILED:
-      return state.set('isLoadingRosters', null)
+      return state.set('is_loading_rosters', null)
 
     case roster_actions.GET_ROSTERS_FULFILLED:
       return state.withMutations((state) => {
-        state.set('isLoadingRosters', null)
-        state.set('isLoadedRosters', payload.opts.leagueId)
+        state.set('is_loading_rosters', null)
+        state.set('is_loaded_rosters', payload.opts.leagueId)
       })
 
-    case teamActions.GET_TEAMS_FULFILLED:
+    case team_actions.GET_TEAMS_FULFILLED:
       return state.withMutations((state) => {
         const teamId = state.get('teamId')
         const team = payload.data.teams.find((t) => t.uid === teamId)
         if (!team) state.set('teamId', null)
       })
 
-    case appActions.LOGOUT:
+    case app_actions.LOGOUT:
       return initialState().merge({ isPending: false })
 
-    case appActions.AUTH_FAILED:
+    case app_actions.AUTH_FAILED:
       return state.merge({
         isPending: false
       })
 
-    case appActions.AUTH_FULFILLED:
+    case app_actions.AUTH_FULFILLED:
       Bugsnag.setUser(payload.data.user.id, payload.data.user.email)
       return state.withMutations((state) => {
         const currentLeagueId = state.get('leagueId')
@@ -94,38 +94,38 @@ export function appReducer(state = initialState(), { payload, type }) {
         })
       })
 
-    case appActions.REGISTER_FAILED:
-    case appActions.LOGIN_FAILED:
+    case app_actions.REGISTER_FAILED:
+    case app_actions.LOGIN_FAILED:
       return state.merge({
         isUpdating: false,
         authError: payload.error
       })
 
-    case appActions.REGISTER_PENDING:
-    case appActions.LOGIN_PENDING:
+    case app_actions.REGISTER_PENDING:
+    case app_actions.LOGIN_PENDING:
       return state.merge({ isUpdating: true })
 
-    case appActions.REGISTER_FULFILLED:
-    case appActions.LOGIN_FULFILLED:
+    case app_actions.REGISTER_FULFILLED:
+    case app_actions.LOGIN_FULFILLED:
       return state.merge({
         isUpdating: false,
         token: payload.data.token
       })
 
-    case settingActions.SET_SETTING:
-    case settingActions.PUT_SETTING_FULFILLED:
+    case setting_actions.SET_SETTING:
+    case setting_actions.PUT_SETTING_FULFILLED:
       return state.merge({
         [payload.opts.type]: payload.data
           ? payload.data.value
           : payload.opts.value
       })
 
-    case appActions.SELECT_YEAR:
+    case app_actions.SELECT_YEAR:
       return state.merge({
         year: payload.year
       })
 
-    case matchupsActions.SELECT_MATCHUP:
+    case matchups_actions.SELECT_MATCHUP:
       if (payload.year === null || payload.year === undefined) {
         return state
       }

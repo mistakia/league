@@ -11,9 +11,9 @@ export let ws = null
 let messages = []
 let interval = null
 
-const keepaliveMessage = JSON.stringify({ type: 'KEEPALIVE' })
+const keepalive_message = JSON.stringify({ type: 'KEEPALIVE' })
 const keepalive = () => {
-  if (ws && ws.readyState === 1) ws.send(keepaliveMessage)
+  if (ws && ws.readyState === 1) ws.send(keepalive_message)
 }
 
 export const openWS = (params) => {

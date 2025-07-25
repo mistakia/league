@@ -1,12 +1,12 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getWaivers } from '@core/selectors'
+import { get_waivers } from '@core/selectors'
 
 import WaiverTypeFilter from './waiver-type-filter'
 
-const mapStateToProps = createSelector(getWaivers, (waivers) => ({
+const map_state_to_props = createSelector(get_waivers, (waivers) => ({
   type: waivers.get('type')
 }))
 
-export default connect(mapStateToProps)(WaiverTypeFilter)
+export default connect(map_state_to_props)(WaiverTypeFilter)

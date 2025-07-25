@@ -1,11 +1,11 @@
 import { Map, List } from 'immutable'
 
-import { matchupsActions } from './actions'
-import { teamActions } from '@core/teams'
-import { appActions } from '@core/app'
-import { scoreboardActions } from '@core/scoreboard'
+import { matchups_actions } from './actions'
+import { team_actions } from '@core/teams'
+import { app_actions } from '@core/app'
+import { scoreboard_actions } from '@core/scoreboard'
 import { constants, groupBy } from '@libs-shared'
-import { createMatchup } from './matchup'
+import { create_matchup } from './matchup'
 
 const initialState = new Map({
   isPending: false,
@@ -16,32 +16,32 @@ const initialState = new Map({
   playoffs: new List()
 })
 
-export function matchupsReducer(state = initialState, { payload, type }) {
+export function matchups_reducer(state = initialState, { payload, type }) {
   switch (type) {
-    case matchupsActions.SELECT_MATCHUP:
+    case matchups_actions.SELECT_MATCHUP:
       return state.merge({ selected: payload.matchupId })
 
-    case matchupsActions.GET_MATCHUPS_FAILED:
+    case matchups_actions.GET_MATCHUPS_FAILED:
       return state.merge({ isPending: false })
 
-    case matchupsActions.GET_MATCHUPS_PENDING:
+    case matchups_actions.GET_MATCHUPS_PENDING:
       return state.merge({ isPending: true })
 
-    case teamActions.GET_TEAMS_FULFILLED:
+    case team_actions.GET_TEAMS_FULFILLED:
       return state.merge({
         teams: new List(payload.data.teams.map((t) => t.uid))
       })
 
-    case scoreboardActions.SCOREBOARD_SELECT_WEEK:
-    case appActions.SELECT_YEAR:
+    case scoreboard_actions.SCOREBOARD_SELECT_WEEK:
+    case app_actions.SELECT_YEAR:
       return state.merge({
         selected: null
       })
 
-    case matchupsActions.GET_MATCHUPS_FULFILLED: {
+    case matchups_actions.GET_MATCHUPS_FULFILLED: {
       return state.withMutations((state) => {
         payload.data.matchups.forEach((m) => {
-          const matchup = createMatchup({
+          const matchup = create_matchup({
             ...m,
             tids: [m.hid, m.aid],
             type: constants.matchups.H2H,
@@ -63,7 +63,7 @@ export function matchupsReducer(state = initialState, { payload, type }) {
           const projections = playoffs[gid].map((p) => p.projection)
           state.updateIn(['playoffs'], (arr) =>
             arr.push(
-              createMatchup({
+              create_matchup({
                 ...playoffs[gid][0],
                 tids,
                 type: constants.matchups.TOURNAMENT,
@@ -77,7 +77,7 @@ export function matchupsReducer(state = initialState, { payload, type }) {
       })
     }
 
-    case matchupsActions.FILTER_MATCHUPS:
+    case matchups_actions.FILTER_MATCHUPS:
       return state.merge({
         [payload.type]: new List(payload.values)
       })

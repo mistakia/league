@@ -8,7 +8,7 @@ import Tooltip from '@mui/material/Tooltip'
 
 import PageLayout from '@layouts/page'
 import PercentileMetric from '@components/percentile-metric'
-import { constants, getEligibleSlots, toPercent } from '@libs-shared'
+import { constants, get_eligible_slots, toPercent } from '@libs-shared'
 import SelectYear from '@components/select-year'
 
 import './stats.styl'
@@ -228,7 +228,7 @@ SummaryRow.propTypes = {
 }
 
 function PositionRow({ team, percentiles, year, key }) {
-  const positionCells = constants.positions.map((position) => {
+  const position_cells = constants.positions.map((position) => {
     const key = `pPos${position}`
     const value = team.getIn(['stats', key], 0)
     const percentile = percentiles[key]
@@ -248,7 +248,7 @@ function PositionRow({ team, percentiles, year, key }) {
   return (
     <div key={key} className='table__row'>
       <div className='table__cell text lead-cell'>{team.name}</div>
-      {positionCells}
+      {position_cells}
     </div>
   )
 }
@@ -261,7 +261,7 @@ PositionRow.propTypes = {
 }
 
 function SlotRow({ team, slots, percentiles, key }) {
-  const slotCells = slots.map((s) => {
+  const slot_cells = slots.map((s) => {
     const slot = constants.slots[s]
     const key = `pSlot${slot}`
     const value = team.getIn(['stats', key], 0)
@@ -286,7 +286,7 @@ function SlotRow({ team, slots, percentiles, key }) {
       <div className='table__cell text lead-cell sticky__column'>
         {team.name}
       </div>
-      {slotCells}
+      {slot_cells}
     </div>
   )
 }
@@ -303,7 +303,7 @@ export default function StatsPage({
   teams,
   percentiles,
   year,
-  loadLeagueTeamStats,
+  load_league_team_stats,
   league_user_historical_ranks,
   load_league_careerlogs,
   careerlog_percentiles
@@ -318,34 +318,34 @@ export default function StatsPage({
   }, [lid, navigate])
 
   useEffect(() => {
-    loadLeagueTeamStats()
+    load_league_team_stats()
     load_league_careerlogs(lid)
-  }, [year, loadLeagueTeamStats, load_league_careerlogs, lid])
+  }, [year, load_league_team_stats, load_league_careerlogs, lid])
 
-  const slotHeaders = []
-  const eligibleStarterSlots = getEligibleSlots({ pos: 'ALL', league })
-  const slots = [...new Set(eligibleStarterSlots)]
+  const slot_headers = []
+  const eligible_starter_slots = get_eligible_slots({ pos: 'ALL', league })
+  const slots = [...new Set(eligible_starter_slots)]
   for (const slot of slots) {
-    slotHeaders.push(
+    slot_headers.push(
       <div key={`slot_${slot}`} className='table__cell metric'>
         {constants.slotName[constants.slots[slot]]}
       </div>
     )
-    slotHeaders.push(
+    slot_headers.push(
       <div key={`slot_${slot}_pct`} className='table__cell metric'>
         %
       </div>
     )
   }
 
-  const positionHeaders = []
+  const position_headers = []
   constants.positions.forEach((position) => {
-    positionHeaders.push(
+    position_headers.push(
       <div key={`position_${position}`} className='table__cell metric'>
         {position}
       </div>
     )
-    positionHeaders.push(
+    position_headers.push(
       <div key={`position_${position}_pct`} className='table__cell metric'>
         %
       </div>
@@ -358,9 +358,9 @@ export default function StatsPage({
       b.getIn(['stats', 'pf'], 0) - a.getIn(['stats', 'pf'], 0)
   )
 
-  const summaryRows = []
+  const summary_rows = []
   for (const team of sorted.valueSeq()) {
-    summaryRows.push(
+    summary_rows.push(
       <SummaryRow
         key={`summary_${team.uid}`}
         team={team}
@@ -370,9 +370,9 @@ export default function StatsPage({
     )
   }
 
-  const slotRows = []
+  const slot_rows = []
   for (const team of sorted.valueSeq()) {
-    slotRows.push(
+    slot_rows.push(
       <SlotRow
         key={`slot_${team.uid}`}
         team={team}
@@ -382,9 +382,9 @@ export default function StatsPage({
     )
   }
 
-  const positionRows = []
+  const position_rows = []
   for (const team of sorted.valueSeq()) {
-    positionRows.push(
+    position_rows.push(
       <PositionRow
         key={`position_${team.uid}`}
         team={team}
@@ -428,7 +428,7 @@ export default function StatsPage({
               </div>
               {season_stats_header_items}
             </div>
-            <div className='table__body'>{summaryRows}</div>
+            <div className='table__body'>{summary_rows}</div>
           </div>
         </div>
         <div className='section'>
@@ -440,9 +440,9 @@ export default function StatsPage({
               <div className='table__cell text lead-cell sticky__column'>
                 Team
               </div>
-              {slotHeaders}
+              {slot_headers}
             </div>
-            <div className='table__body'>{slotRows}</div>
+            <div className='table__body'>{slot_rows}</div>
           </div>
         </div>
         <div className='section'>
@@ -454,9 +454,9 @@ export default function StatsPage({
               <div className='table__cell text lead-cell sticky__column'>
                 Team
               </div>
-              {positionHeaders}
+              {position_headers}
             </div>
-            <div className='table__body'>{positionRows}</div>
+            <div className='table__body'>{position_rows}</div>
           </div>
         </div>
       </>
@@ -529,7 +529,7 @@ StatsPage.propTypes = {
   league: PropTypes.object,
   percentiles: PropTypes.object,
   year: PropTypes.number,
-  loadLeagueTeamStats: PropTypes.func,
+  load_league_team_stats: PropTypes.func,
   league_user_historical_ranks: PropTypes.array,
   load_league_careerlogs: PropTypes.func,
   careerlog_percentiles: PropTypes.object

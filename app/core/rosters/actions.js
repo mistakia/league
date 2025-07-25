@@ -178,26 +178,28 @@ export const roster_actions = {
   })
 }
 
-export const getRostersActions = create_api_actions('GET_ROSTERS')
-export const putRosterActions = create_api_actions('PUT_ROSTER')
-export const postActivateActions = create_api_actions('POST_ACTIVATE')
-export const postDeactivateActions = create_api_actions('POST_DEACTIVATE')
-export const postProtectActions = create_api_actions('POST_PROTECT')
-export const putRostersActions = create_api_actions('PUT_ROSTERS')
-export const postRostersActions = create_api_actions('POST_ROSTERS')
-export const deleteRostersActions = create_api_actions('DELETE_ROSTERS')
-export const postAddFreeAgentActions = create_api_actions('POST_ADD_FREE_AGENT')
-export const postReserveActions = create_api_actions('POST_RESERVE')
-export const postReleaseActions = create_api_actions('POST_RELEASE')
-export const postTagActions = create_api_actions('POST_TAG')
-export const deleteTagActions = create_api_actions('DELETE_TAG')
-export const postRestrictedFreeAgencyTagActions = create_api_actions(
+export const get_rosters_actions = create_api_actions('GET_ROSTERS')
+export const put_roster_actions = create_api_actions('PUT_ROSTER')
+export const post_activate_actions = create_api_actions('POST_ACTIVATE')
+export const post_deactivate_actions = create_api_actions('POST_DEACTIVATE')
+export const post_protect_actions = create_api_actions('POST_PROTECT')
+export const put_rosters_actions = create_api_actions('PUT_ROSTERS')
+export const post_rosters_actions = create_api_actions('POST_ROSTERS')
+export const delete_rosters_actions = create_api_actions('DELETE_ROSTERS')
+export const post_add_free_agent_actions = create_api_actions(
+  'POST_ADD_FREE_AGENT'
+)
+export const post_reserve_actions = create_api_actions('POST_RESERVE')
+export const post_release_actions = create_api_actions('POST_RELEASE')
+export const post_tag_actions = create_api_actions('POST_TAG')
+export const delete_tag_actions = create_api_actions('DELETE_TAG')
+export const post_restricted_free_agency_tag_actions = create_api_actions(
   'POST_RESTRICTED_FREE_AGENCY_TAG'
 )
-export const putRestrictedFreeAgencyTagActions = create_api_actions(
+export const put_restricted_free_agency_tag_actions = create_api_actions(
   'PUT_RESTRICTED_FREE_AGENCY_TAG'
 )
-export const deleteRestrictedFreeAgencyTagActions = create_api_actions(
+export const delete_restricted_free_agency_tag_actions = create_api_actions(
   'DELETE_RESTRICTED_FREE_AGENCY_TAG'
 )
 export const post_restricted_free_agent_nomination_actions = create_api_actions(

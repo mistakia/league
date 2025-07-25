@@ -29,7 +29,7 @@ export default function PoachNotice({
       )} (${playerMap.get(
         'pos'
       )}) will be poached. Are you sure you want to proceed? This will remove the player from your roster and add them to the roster of the team that submitted the poach.`,
-      onConfirm: () => process_poach(poach.get('uid'))
+      on_confirm_func: () => process_poach(poach.get('uid'))
     })
   }
 

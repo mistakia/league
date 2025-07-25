@@ -1,13 +1,13 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getTeamEvents, getLeagueEvents } from '@core/selectors'
+import { getTeamEvents, get_league_events } from '@core/selectors'
 
 import LeagueScheduleList from './league-schedule-list'
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   getTeamEvents,
-  getLeagueEvents,
+  get_league_events,
   (teamEvents, leagueEvents) => {
     const events = teamEvents
       .concat(leagueEvents)
@@ -17,4 +17,4 @@ const mapStateToProps = createSelector(
   }
 )
 
-export default connect(mapStateToProps)(LeagueScheduleList)
+export default connect(map_state_to_props)(LeagueScheduleList)

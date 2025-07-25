@@ -10,8 +10,8 @@ export default class PlayerRosterTotal extends React.Component {
       players,
       league,
       reorder,
-      isBeforeExtensionDeadline,
-      isBeforeRestrictedFreeAgencyEnd,
+      is_before_extension_deadline,
+      is_before_restricted_free_agency_end,
       is_team_manager
     } = this.props
 
@@ -37,7 +37,7 @@ export default class PlayerRosterTotal extends React.Component {
         tag === constants.tags.RESTRICTED_FREE_AGENCY
       const extendedSalary = getExtensionAmount({
         pos: playerMap.get('pos'),
-        tag: isBeforeExtensionDeadline ? tag : constants.tags.REGULAR,
+        tag: is_before_extension_deadline ? tag : constants.tags.REGULAR,
         extensions,
         league,
         value,
@@ -53,12 +53,12 @@ export default class PlayerRosterTotal extends React.Component {
       )
       const savings = hasProjections
         ? projectedSalary -
-          (isBeforeExtensionDeadline ? extendedSalary : bid || value)
+          (is_before_extension_deadline ? extendedSalary : bid || value)
         : 0
 
-      const salary = isBeforeExtensionDeadline
+      const salary = is_before_extension_deadline
         ? value
-        : isBeforeRestrictedFreeAgencyEnd &&
+        : is_before_restricted_free_agency_end &&
             isRestrictedFreeAgent &&
             is_team_manager &&
             !is_restricted_free_agent_tag_processed
@@ -88,7 +88,7 @@ export default class PlayerRosterTotal extends React.Component {
             <div className='metric table__cell'>
               ${baseSalaryTotal.toFixed(0)}
             </div>
-            {isOffseason && isBeforeExtensionDeadline && (
+            {isOffseason && is_before_extension_deadline && (
               <div className='metric table__cell'>${extendedSalaryTotal}</div>
             )}
             {/* {isOffseason && <div className='metric table__cell'>-</div>} */}
@@ -106,7 +106,7 @@ export default class PlayerRosterTotal extends React.Component {
             )}
           </div>
         </div>
-        {isBeforeExtensionDeadline && (
+        {is_before_extension_deadline && (
           <>
             <div className='table__cell'>-</div>
             <div className='row__group'>
@@ -157,7 +157,7 @@ PlayerRosterTotal.propTypes = {
   players: ImmutablePropTypes.list,
   reorder: PropTypes.bool,
   league: PropTypes.object,
-  isBeforeExtensionDeadline: PropTypes.bool,
-  isBeforeRestrictedFreeAgencyEnd: PropTypes.bool,
+  is_before_extension_deadline: PropTypes.bool,
+  is_before_restricted_free_agency_end: PropTypes.bool,
   is_team_manager: PropTypes.bool
 }

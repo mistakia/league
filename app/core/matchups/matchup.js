@@ -21,7 +21,7 @@ export const Matchup = new Record({
   projections: new List()
 })
 
-export function createMatchup({
+export function create_matchup({
   uid,
   tids,
   hid,

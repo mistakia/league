@@ -1,17 +1,20 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getFilteredMatchups } from '@core/selectors'
-import { matchupsActions } from '@core/matchups'
+import { get_filtered_matchups } from '@core/selectors'
+import { matchups_actions } from '@core/matchups'
 
 import SchedulePage from './schedule'
 
-const mapStateToProps = createSelector(getFilteredMatchups, (matchups) => ({
-  matchups
-}))
+const map_state_to_props = createSelector(
+  get_filtered_matchups,
+  (matchups) => ({
+    matchups
+  })
+)
 
-const mapDispatchToProps = {
-  load: matchupsActions.loadMatchups
+const map_dispatch_to_props = {
+  load: matchups_actions.loadMatchups
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(SchedulePage)
+export default connect(map_state_to_props, map_dispatch_to_props)(SchedulePage)

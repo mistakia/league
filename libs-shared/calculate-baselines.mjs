@@ -1,7 +1,7 @@
 import Roster from './roster.mjs'
 import * as constants from './constants.mjs'
 import sum from './sum.mjs'
-import getEligibleSlots from './get-eligible-slots.mjs'
+import get_eligible_slots from './get-eligible-slots.mjs'
 import getPlayerCountBySlot from './get-player-count-by-slot.mjs'
 
 const getWorseStarterForPosition = ({
@@ -13,7 +13,7 @@ const getWorseStarterForPosition = ({
   let minTotal = Infinity
   let selectedPlayer = null
 
-  const eligibleSlots = getEligibleSlots({ pos: position, league })
+  const eligibleSlots = get_eligible_slots({ pos: position, league })
   for (const slot of eligibleSlots) {
     const slotId = constants.slots[slot]
     const players = groupedStarters[slotId]
@@ -59,7 +59,7 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
 
   // get starters & optimize starting lineup
   const starters = []
-  const eligibleSlots = getEligibleSlots({ pos: 'ALL', league })
+  const eligibleSlots = get_eligible_slots({ pos: 'ALL', league })
   for (const roster of rosters) {
     // get players for roster
     const pids = roster.active.map((p) => p.pid)
@@ -80,7 +80,7 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
 
       // set starting lineup with best players on roster
       for (const player of players) {
-        const eligibleSlots = getEligibleSlots({ pos: player.pos, league })
+        const eligibleSlots = get_eligible_slots({ pos: player.pos, league })
         for (const slot of eligibleSlots) {
           if (roster.hasOpenSlot(constants.slots[slot])) {
             roster.removePlayer(player.pid)
@@ -113,7 +113,7 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
 
     let added = false
     for (const roster of rosters) {
-      const eligibleSlots = getEligibleSlots({ pos: player.pos, league })
+      const eligibleSlots = get_eligible_slots({ pos: player.pos, league })
       for (const slot of eligibleSlots) {
         if (roster.hasOpenSlot(constants.slots[slot])) {
           if (!roster.availableSpace) {

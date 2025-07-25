@@ -1,7 +1,7 @@
 import { fork, takeLatest, call, select } from 'redux-saga/effects'
 
 import { player_actions } from '@core/players'
-import { getPlays, getPlayStats } from '@core/api'
+import { api_get_plays, api_get_play_stats } from '@core/api'
 import { constants } from '@libs-shared'
 import { get_request_history } from '@core/selectors'
 export function* loadPlays() {
@@ -11,15 +11,15 @@ export function* loadPlays() {
     return
   }
 
-  yield call(getPlays)
-  yield call(getPlayStats)
+  yield call(api_get_plays)
+  yield call(api_get_play_stats)
 }
 
 //= ====================================
 //  WATCHERS
 // -------------------------------------
 
-export function* watchFetchPlayersFulfilled() {
+export function* watch_fetch_players_fulfilled() {
   if (constants.isRegularSeason) {
     yield takeLatest(
       [
@@ -36,4 +36,4 @@ export function* watchFetchPlayersFulfilled() {
 //  ROOT
 // -------------------------------------
 
-export const playSagas = [fork(watchFetchPlayersFulfilled)]
+export const play_sagas = [fork(watch_fetch_players_fulfilled)]

@@ -1,5 +1,5 @@
 import db from '#db'
-import { constants, createDefaultLeague } from '#libs-shared'
+import { constants, create_default_league } from '#libs-shared'
 
 async function get_league_divisions({ lid, year }) {
   const divisions = await db('league_divisions')
@@ -16,7 +16,7 @@ export default async function ({ lid, year = constants.season.year } = {}) {
   lid = Number(lid)
 
   if (!lid) {
-    const league = createDefaultLeague()
+    const league = create_default_league()
     return { uid: 0, ...league }
   }
 

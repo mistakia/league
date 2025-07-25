@@ -1,13 +1,13 @@
 import { Map } from 'immutable'
 
-import { playActions } from './actions'
-import { scoreboardActions } from '@core/scoreboard'
+import { play_actions } from './actions'
+import { scoreboard_actions } from '@core/scoreboard'
 
-export function playsReducer(state = new Map(), { payload, type }) {
+export function plays_reducer(state = new Map(), { payload, type }) {
   switch (type) {
-    case scoreboardActions.UPDATE_SCOREBOARD_PLAYS:
-    case scoreboardActions.GET_SCOREBOARD_FULFILLED:
-    case playActions.GET_PLAYS_FULFILLED:
+    case scoreboard_actions.UPDATE_SCOREBOARD_PLAYS:
+    case scoreboard_actions.GET_SCOREBOARD_FULFILLED:
+    case play_actions.GET_PLAYS_FULFILLED:
       return state.withMutations((state) => {
         payload.data.forEach((play) => {
           state.setIn([play.week, `${play.esbid}:${play.playId}`], {
@@ -17,7 +17,7 @@ export function playsReducer(state = new Map(), { payload, type }) {
         })
       })
 
-    case playActions.GET_PLAYSTATS_FULFILLED:
+    case play_actions.GET_PLAYSTATS_FULFILLED:
       return state.withMutations((state) => {
         payload.data.forEach((playStat) => {
           state.mergeIn(

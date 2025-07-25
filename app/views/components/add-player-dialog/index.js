@@ -4,21 +4,24 @@ import { createSelector } from 'reselect'
 import { roster_actions } from '@core/rosters'
 import {
   getAvailablePlayersForCurrentLeague,
-  getRostersForCurrentLeague,
-  getCurrentLeague
+  get_rosters_for_current_league,
+  get_current_league
 } from '@core/selectors'
 
 import AddPlayerDialog from './add-player-dialog'
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   getAvailablePlayersForCurrentLeague,
-  getRostersForCurrentLeague,
-  getCurrentLeague,
+  get_rosters_for_current_league,
+  get_current_league,
   (players, rosters, league) => ({ players, rosters, league })
 )
 
-const mapDispatchToProps = {
+const map_dispatch_to_props = {
   add: roster_actions.add
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(AddPlayerDialog)
+export default connect(
+  map_state_to_props,
+  map_dispatch_to_props
+)(AddPlayerDialog)

@@ -7,7 +7,7 @@ import { player_actions } from '@core/players/actions'
 
 import SelectedPlayerMarkets from './selected-player-markets'
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   get_player_maps,
   (state) => state.getIn(['players', 'selected']),
   (player_maps, selected_player_id) => {
@@ -28,11 +28,11 @@ const mapStateToProps = createSelector(
   }
 )
 
-const mapDispatchToProps = {
+const map_dispatch_to_props = {
   load_player_betting_markets: player_actions.load_player_betting_markets
 }
 
 export default connect(
-  mapStateToProps,
-  mapDispatchToProps
+  map_state_to_props,
+  map_dispatch_to_props
 )(SelectedPlayerMarkets)

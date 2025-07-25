@@ -1,4 +1,4 @@
-const getEligibleSlots = ({ pos, ps, bench, ir, league }) => {
+const get_eligible_slots = ({ pos, ps, bench, ir, league }) => {
   let eligible = []
 
   if (pos) {
@@ -68,4 +68,4 @@ const getEligibleSlots = ({ pos, ps, bench, ir, league }) => {
   return eligible
 }
 
-export default getEligibleSlots
+export default get_eligible_slots

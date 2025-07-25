@@ -9,8 +9,8 @@ import { constants } from '@libs-shared'
 import 'react-virtualized-compat/styles.css'
 
 document.addEventListener('DOMContentLoaded', () => {
-  const rootElement = document.getElementById('root')
-  const root = createRoot(rootElement)
+  const root_element = document.getElementById('root')
+  const root = createRoot(root_element)
   root.render(<Root />)
 
   console.log(`Year: ${constants.year}`)

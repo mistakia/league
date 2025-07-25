@@ -2,7 +2,7 @@ import React from 'react'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getCurrentTeamRosterRecord } from '@core/selectors'
+import { get_current_team_roster_record } from '@core/selectors'
 import render from './lineups'
 
 class LineupsPage extends React.Component {
@@ -11,9 +11,9 @@ class LineupsPage extends React.Component {
   }
 }
 
-const mapStateToProps = createSelector(
-  getCurrentTeamRosterRecord,
+const map_state_to_props = createSelector(
+  get_current_team_roster_record,
   (roster) => ({ roster })
 )
 
-export default connect(mapStateToProps)(LineupsPage)
+export default connect(map_state_to_props)(LineupsPage)

@@ -1,6 +1,6 @@
 import { Record, List, Map } from 'immutable'
 
-import { statActions } from './actions'
+import { stat_actions } from './actions'
 import { player_actions } from '@core/players'
 import { constants } from '@libs-shared'
 
@@ -19,18 +19,18 @@ const initialState = new Record({
   teamStatsPercentiles: new Record({})
 })
 
-export function statsReducer(state = initialState(), { payload, type }) {
+export function stats_reducer(state = initialState(), { payload, type }) {
   switch (type) {
-    case statActions.UPDATE_QUALIFIER:
+    case stat_actions.UPDATE_QUALIFIER:
       return state.setIn(
         ['qualifiers', payload.qualifier, 'value'],
         payload.value
       )
 
-    case statActions.GET_CHARTED_PLAYS_PENDING:
+    case stat_actions.GET_CHARTED_PLAYS_PENDING:
       return state.merge({ isPending: true })
 
-    case statActions.GET_CHARTED_PLAYS_FAILED:
+    case stat_actions.GET_CHARTED_PLAYS_FAILED:
       return state.merge({ isPending: false })
 
     case player_actions.SET_PLAYER_STATS:
@@ -38,21 +38,21 @@ export function statsReducer(state = initialState(), { payload, type }) {
         isPending: false
       })
 
-    case statActions.SET_TEAM_STATS_PERCENTILES:
+    case stat_actions.SET_TEAM_STATS_PERCENTILES:
       return state.merge({ teamStatsPercentiles: payload.percentiles })
 
-    case statActions.FILTER_STATS:
+    case stat_actions.FILTER_STATS:
       return state.merge({ [payload.type]: new List(payload.values) })
 
-    case statActions.FILTER_STATS_YARDLINE:
+    case stat_actions.FILTER_STATS_YARDLINE:
       return state.merge({ ...payload })
 
-    case statActions.GET_CHARTED_PLAYS_FULFILLED:
+    case stat_actions.GET_CHARTED_PLAYS_FULFILLED:
       return state.merge({
         plays: new List(payload.data)
       })
 
-    case statActions.GET_TEAM_STATS_FULFILLED:
+    case stat_actions.GET_TEAM_STATS_FULFILLED:
       return state.merge({
         teamStats: new List(payload.data)
       })

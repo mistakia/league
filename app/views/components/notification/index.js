@@ -5,8 +5,8 @@ import { get_notification_info } from '@core/selectors'
 
 import Notification from './notification'
 
-const mapStateToProps = createSelector(get_notification_info, (info) => ({
+const map_state_to_props = createSelector(get_notification_info, (info) => ({
   info
 }))
 
-export default connect(mapStateToProps)(Notification)
+export default connect(map_state_to_props)(Notification)

@@ -10,62 +10,62 @@ import {
 import { Map } from 'immutable'
 
 import { roster_actions } from './actions'
-import { tradeActions } from '@core/trade'
-import { notificationActions } from '@core/notifications'
+import { trade_actions } from '@core/trade'
+import { notification_actions } from '@core/notifications'
 import {
-  getRosters,
-  putRoster,
-  postActivate,
-  postDeactivate,
-  postProtect,
-  postRosters,
-  deleteRosters,
-  putRosters,
-  postAddFreeAgent,
-  postReserve,
-  postRelease,
-  postTag,
-  deleteTag,
-  postRestrictedFreeAgencyTag,
-  deleteRestrictedFreeAgencyTag,
-  putRestrictedFreeAgencyTag,
-  post_restricted_free_agent_nomination,
-  delete_restricted_free_agent_nomination
+  api_get_rosters,
+  api_put_roster,
+  api_post_activate,
+  api_post_deactivate,
+  api_post_protect,
+  api_post_rosters,
+  api_delete_rosters,
+  api_put_rosters,
+  api_post_add_free_agent,
+  api_post_reserve,
+  api_post_release,
+  api_post_tag,
+  api_delete_tag,
+  api_post_restricted_free_agency_tag,
+  api_delete_restricted_free_agency_tag,
+  api_put_restricted_free_agency_tag,
+  api_post_restricted_free_agent_nomination,
+  api_delete_restricted_free_agent_nomination
 } from '@core/api'
-import { appActions } from '@core/app'
+import { app_actions } from '@core/app'
 import {
   get_app,
-  getPlayers,
+  get_players_state,
   get_player_maps,
-  getCurrentTradePlayers,
-  getProposingTeamTradedRosterPlayers,
-  getAcceptingTeamTradedRosterPlayers,
+  get_current_trade_players,
+  get_proposing_team_traded_roster_players,
+  get_accepting_team_traded_roster_players,
   getActivePlayersByRosterForCurrentLeague,
-  getRostersForCurrentLeague,
-  getCurrentTeamRosterRecord,
-  getCurrentPlayers,
+  get_rosters_for_current_league,
+  get_current_team_roster_record,
+  get_current_players_for_league,
   getPoachPlayersForCurrentTeam,
-  getWaiverPlayersForCurrentTeam,
-  getCurrentLeague,
+  get_waiver_players_for_current_team,
+  get_current_league,
   get_team_by_id_for_current_year
 } from '@core/selectors'
 import { constants } from '@libs-shared'
 import { player_actions } from '@core/players'
-import { poachActions } from '@core/poaches'
-import { waiverActions } from '@core/waivers'
+import { poach_actions } from '@core/poaches'
+import { waiver_actions } from '@core/waivers'
 import { csv } from '@core/export'
-import { teamActions } from '@core/teams'
+import { team_actions } from '@core/teams'
 
 export function* initRosters() {
   const { leagueId } = yield select(get_app)
-  if (leagueId) yield call(getRosters, { leagueId })
+  if (leagueId) yield call(api_get_rosters, { leagueId })
 }
 
 export function* load_rosters({ payload }) {
   const { leagueId } = payload
   const state = yield select()
-  const isLoading = state.getIn(['app', 'isLoadingRosters'])
-  const isLoaded = state.getIn(['app', 'isLoadedRosters'])
+  const isLoading = state.getIn(['app', 'is_loading_rosters'])
+  const isLoaded = state.getIn(['app', 'is_loaded_rosters'])
 
   if (!leagueId) return
 
@@ -73,38 +73,38 @@ export function* load_rosters({ payload }) {
     return
   }
 
-  yield call(getRosters, { leagueId })
+  yield call(api_get_rosters, { leagueId })
 }
 
 export function* load_rosters_ignore_cache() {
   const { leagueId } = yield select(get_app)
-  yield call(getRosters, { leagueId })
+  yield call(api_get_rosters, { leagueId })
 }
 
 export function* load_rosters_for_year({ payload }) {
   const { year } = payload
   const { leagueId } = yield select(get_app)
-  yield call(getRosters, { leagueId, year })
+  yield call(api_get_rosters, { leagueId, year })
 }
 
 export function* updateRosterPlayerSlot({ payload }) {
   const { teamId, leagueId } = yield select(get_app)
-  yield call(putRoster, { teamId, leagueId, ...payload })
+  yield call(api_put_roster, { teamId, leagueId, ...payload })
 }
 
 export function* activate({ payload }) {
   const { teamId, leagueId } = yield select(get_app)
-  yield call(postActivate, { teamId, leagueId, ...payload })
+  yield call(api_post_activate, { teamId, leagueId, ...payload })
 }
 
 export function* deactivate({ payload }) {
   const { teamId, leagueId } = yield select(get_app)
-  yield call(postDeactivate, { teamId, leagueId, ...payload })
+  yield call(api_post_deactivate, { teamId, leagueId, ...payload })
 }
 
 export function* protect({ payload }) {
   const { teamId, leagueId } = yield select(get_app)
-  yield call(postProtect, { teamId, leagueId, ...payload })
+  yield call(api_post_protect, { teamId, leagueId, ...payload })
 }
 
 export function* setWaiverPlayerLineupContribution({ payload }) {
@@ -120,7 +120,7 @@ export function* setSelectedPlayerLineupContribution({ payload }) {
 }
 
 export function* setPlayerLineupContribution({ pid }) {
-  const currentRoster = yield select(getCurrentTeamRosterRecord)
+  const currentRoster = yield select(get_current_team_roster_record)
   const week = Math.max(constants.week, 1)
   if (!currentRoster.getIn(['lineups', `${week}`])) {
     yield take(roster_actions.SET_LINEUPS)
@@ -133,11 +133,11 @@ export function* setPlayerLineupContribution({ pid }) {
 }
 
 export function* calculatePlayerLineupContribution({ playerMap }) {
-  const currentRosterPlayers = yield select(getCurrentPlayers)
-  const league = yield select(getCurrentLeague)
-  const baselines = (yield select(getPlayers)).get('baselines')
+  const currentRosterPlayers = yield select(get_current_players_for_league)
+  const league = yield select(get_current_league)
+  const baselines = (yield select(get_players_state)).get('baselines')
   const playerItems = yield select(get_player_maps)
-  const currentRoster = yield select(getCurrentTeamRosterRecord)
+  const currentRoster = yield select(get_current_team_roster_record)
 
   const playerData = {
     starts: 0,
@@ -222,7 +222,7 @@ export function* calculatePlayerLineupContribution({ playerMap }) {
 }
 
 export function* projectContributions() {
-  const currentRosterPlayers = yield select(getCurrentPlayers)
+  const currentRosterPlayers = yield select(get_current_players_for_league)
 
   const projectedContribution = {}
   for (const playerMap of currentRosterPlayers.players) {
@@ -243,7 +243,7 @@ export function* projectContributions() {
     claimContribution[playerMap.get('pid')] = playerData
   }
 
-  const claims = yield select(getWaiverPlayersForCurrentTeam)
+  const claims = yield select(get_waiver_players_for_current_team)
   const claimTypes = ['active', 'poach', 'practice']
   for (const type of claimTypes) {
     for (const { playerMap } of claims[type].values()) {
@@ -259,12 +259,12 @@ export function* projectContributions() {
 
 export function* project_lineups() {
   yield put(
-    notificationActions.show({
+    notification_actions.show({
       message: 'Projecting Lineups'
     })
   )
 
-  const league = yield select(getCurrentLeague)
+  const league = yield select(get_current_league)
   const rosters = yield select(getActivePlayersByRosterForCurrentLeague)
   const lineups = {}
 
@@ -288,13 +288,13 @@ export function* project_lineups() {
 
 export function* projectTrade() {
   // TODO - make sure player values and projections have been calculated
-  const league = yield select(getCurrentLeague)
+  const league = yield select(get_current_league)
   const { default: Worker } = yield call(
     () => import('workerize-loader?inline!../worker') // eslint-disable-line import/no-webpack-loader-syntax
   )
   const worker = new Worker()
   const proposingTeamTradedPlayers = yield select(
-    getProposingTeamTradedRosterPlayers
+    get_proposing_team_traded_roster_players
   )
   const proposingTeamLineups = yield call(worker.workerOptimizeLineup, {
     players: proposingTeamTradedPlayers.map((p) => p.toJS()),
@@ -303,7 +303,7 @@ export function* projectTrade() {
   })
 
   const acceptingTeamTradedPlayers = yield select(
-    getAcceptingTeamTradedRosterPlayers
+    get_accepting_team_traded_roster_players
   )
   const acceptingTeamLineups = yield call(worker.workerOptimizeLineup, {
     players: acceptingTeamTradedPlayers.map((p) => p.toJS()),
@@ -312,14 +312,14 @@ export function* projectTrade() {
   })
   worker.terminate()
   yield put(
-    tradeActions.setProjectedLineups({
+    trade_actions.set_projected_lineups({
       proposingTeamLineups,
       acceptingTeamLineups
     })
   )
 
   const projectedContribution = {}
-  const tradePlayers = yield select(getCurrentTradePlayers)
+  const tradePlayers = yield select(get_current_trade_players)
   const playerMaps = tradePlayers.acceptingTeamPlayers
     .concat(tradePlayers.proposingTeamPlayers)
     .concat(tradePlayers.acceptingTeamReleasePlayers)
@@ -335,47 +335,47 @@ export function* projectTrade() {
 
 export function* add_tag({ payload }) {
   const { teamId, leagueId } = yield select(get_app)
-  yield call(postTag, { teamId, leagueId, ...payload })
+  yield call(api_post_tag, { teamId, leagueId, ...payload })
 }
 
 export function* removeTag({ payload }) {
   const { teamId, leagueId } = yield select(get_app)
-  yield call(deleteTag, { teamId, leagueId, ...payload })
+  yield call(api_delete_tag, { teamId, leagueId, ...payload })
 }
 
 export function* addPlayer({ payload }) {
   const { leagueId } = yield select(get_app)
-  yield call(postRosters, { leagueId, ...payload })
+  yield call(api_post_rosters, { leagueId, ...payload })
 }
 
 export function* removePlayer({ payload }) {
   const { leagueId } = yield select(get_app)
-  yield call(deleteRosters, { leagueId, ...payload })
+  yield call(api_delete_rosters, { leagueId, ...payload })
 }
 
 export function* updatePlayer({ payload }) {
   const { leagueId } = yield select(get_app)
-  yield call(putRosters, { leagueId, ...payload })
+  yield call(api_put_rosters, { leagueId, ...payload })
 }
 
 export function* add_free_agent({ payload }) {
   const { leagueId, teamId } = yield select(get_app)
-  yield call(postAddFreeAgent, { leagueId, teamId, ...payload })
+  yield call(api_post_add_free_agent, { leagueId, teamId, ...payload })
 }
 
 export function* reserve({ payload }) {
   const { leagueId, teamId } = yield select(get_app)
-  yield call(postReserve, { leagueId, teamId, ...payload })
+  yield call(api_post_reserve, { leagueId, teamId, ...payload })
 }
 
 export function* release({ payload }) {
   const { leagueId, teamId } = yield select(get_app)
-  yield call(postRelease, { leagueId, teamId, ...payload })
+  yield call(api_post_release, { leagueId, teamId, ...payload })
 }
 
 export function* releaseNotification() {
   yield put(
-    notificationActions.show({
+    notification_actions.show({
       message: 'Player released',
       severity: 'success'
     })
@@ -384,7 +384,7 @@ export function* releaseNotification() {
 
 export function* protectNotification() {
   yield put(
-    notificationActions.show({
+    notification_actions.show({
       message: 'Player designated',
       severity: 'success'
     })
@@ -393,7 +393,7 @@ export function* protectNotification() {
 
 export function* tagNotification() {
   yield put(
-    notificationActions.show({
+    notification_actions.show({
       message: 'Player tagged',
       severity: 'success'
     })
@@ -402,7 +402,7 @@ export function* tagNotification() {
 
 export function* restrictedFreeAgencyPlacedNotification() {
   yield put(
-    notificationActions.show({
+    notification_actions.show({
       message: 'Restricted Free Agency Tag Placed',
       severity: 'success'
     })
@@ -411,7 +411,7 @@ export function* restrictedFreeAgencyPlacedNotification() {
 
 export function* restrictedFreeAgencyRemovedNotification() {
   yield put(
-    notificationActions.show({
+    notification_actions.show({
       message: 'Restricted Free Agency Bid Cancelled',
       severity: 'success'
     })
@@ -420,7 +420,7 @@ export function* restrictedFreeAgencyRemovedNotification() {
 
 export function* post_restricted_free_agent_nomination_notification() {
   yield put(
-    notificationActions.show({
+    notification_actions.show({
       message: 'Restricted Free Agent Nomination Designated',
       severity: 'success'
     })
@@ -429,7 +429,7 @@ export function* post_restricted_free_agent_nomination_notification() {
 
 export function* delete_restricted_free_agent_nomination_notification() {
   yield put(
-    notificationActions.show({
+    notification_actions.show({
       message: 'Restricted Free Agent Nomination Cancelled',
       severity: 'success'
     })
@@ -438,22 +438,34 @@ export function* delete_restricted_free_agent_nomination_notification() {
 
 export function* add_restricted_free_agency_tag({ payload }) {
   const { leagueId, teamId } = yield select(get_app)
-  yield call(postRestrictedFreeAgencyTag, { leagueId, teamId, ...payload })
+  yield call(api_post_restricted_free_agency_tag, {
+    leagueId,
+    teamId,
+    ...payload
+  })
 }
 
 export function* remove_restricted_free_agency_tag({ payload }) {
   const { leagueId, teamId } = yield select(get_app)
-  yield call(deleteRestrictedFreeAgencyTag, { leagueId, teamId, ...payload })
+  yield call(api_delete_restricted_free_agency_tag, {
+    leagueId,
+    teamId,
+    ...payload
+  })
 }
 
 export function* update_restricted_free_agency_tag({ payload }) {
   const { leagueId, teamId } = yield select(get_app)
-  yield call(putRestrictedFreeAgencyTag, { leagueId, teamId, ...payload })
+  yield call(api_put_restricted_free_agency_tag, {
+    leagueId,
+    teamId,
+    ...payload
+  })
 }
 
 export function* export_rosters() {
-  const league = yield select(getCurrentLeague)
-  const rosters = yield select(getRostersForCurrentLeague)
+  const league = yield select(get_current_league)
+  const rosters = yield select(get_rosters_for_current_league)
   const playerMaps = yield select(get_player_maps)
   const projectionType = constants.isRegularSeason ? 'ros' : '0'
 
@@ -504,13 +516,21 @@ export function* export_rosters() {
 export function* nominate_restricted_free_agent({ payload }) {
   const { pid } = payload
   const { teamId, leagueId } = yield select(get_app)
-  yield call(post_restricted_free_agent_nomination, { teamId, leagueId, pid })
+  yield call(api_post_restricted_free_agent_nomination, {
+    teamId,
+    leagueId,
+    pid
+  })
 }
 
 export function* unnominate_restricted_free_agent({ payload }) {
   const { pid } = payload
   const { teamId, leagueId } = yield select(get_app)
-  yield call(delete_restricted_free_agent_nomination, { teamId, leagueId, pid })
+  yield call(api_delete_restricted_free_agent_nomination, {
+    teamId,
+    leagueId,
+    pid
+  })
 }
 
 //= ====================================
@@ -537,7 +557,7 @@ export function* watchProtectPlayer() {
 }
 
 export function* watchAuthFulfilled() {
-  yield takeLatest(appActions.AUTH_FULFILLED, initRosters)
+  yield takeLatest(app_actions.AUTH_FULFILLED, initRosters)
 }
 
 export function* watchProjectLineups() {
@@ -581,14 +601,14 @@ export function* watchPlayersSelectPlayer() {
 
 export function* watchPostWaiverFulfilled() {
   yield takeLatest(
-    waiverActions.POST_WAIVER_FULFILLED,
+    waiver_actions.POST_WAIVER_FULFILLED,
     setWaiverPlayerLineupContribution
   )
 }
 
 export function* watchPostPoachFulfilled() {
   yield takeLatest(
-    poachActions.POST_POACH_FULFILLED,
+    poach_actions.POST_POACH_FULFILLED,
     setPoachPlayerLineupContribution
   )
 }
@@ -610,19 +630,19 @@ export function* watchPostTagFulfilled() {
 }
 
 export function* watchTradeSetProposingTeamPlayers() {
-  yield takeLatest(tradeActions.TRADE_SET_PROPOSING_TEAM_PLAYERS, projectTrade)
+  yield takeLatest(trade_actions.TRADE_SET_PROPOSING_TEAM_PLAYERS, projectTrade)
 }
 
 export function* watchTradeSetAcceptingTeamPlayers() {
-  yield takeLatest(tradeActions.TRADE_SET_ACCEPTING_TEAM_PLAYERS, projectTrade)
+  yield takeLatest(trade_actions.TRADE_SET_ACCEPTING_TEAM_PLAYERS, projectTrade)
 }
 
 export function* watchTradeSelectTeam() {
-  yield takeLatest(tradeActions.TRADE_SELECT_TEAM, projectTrade)
+  yield takeLatest(trade_actions.TRADE_SELECT_TEAM, projectTrade)
 }
 
 export function* watchSelectTrade() {
-  yield takeLatest(tradeActions.SELECT_TRADE, projectTrade)
+  yield takeLatest(trade_actions.SELECT_TRADE, projectTrade)
 }
 
 export function* watchAddTag() {
@@ -684,11 +704,11 @@ export function* watchLoadRosters() {
 }
 
 export function* watchLoadTeams() {
-  yield takeLatest(teamActions.LOAD_TEAMS, load_rosters)
+  yield takeLatest(team_actions.LOAD_TEAMS, load_rosters)
 }
 
 export function* watchSelectYear() {
-  yield takeLatest(appActions.SELECT_YEAR, load_rosters_for_year)
+  yield takeLatest(app_actions.SELECT_YEAR, load_rosters_for_year)
 }
 
 export function* watch_load_rosters_for_year() {
@@ -697,7 +717,7 @@ export function* watch_load_rosters_for_year() {
 
 export function* watchPostProcessPoachFulfilled() {
   yield takeLatest(
-    poachActions.POST_PROCESS_POACH_FULFILLED,
+    poach_actions.POST_PROCESS_POACH_FULFILLED,
     load_rosters_ignore_cache
   )
 }
@@ -733,7 +753,7 @@ export function* watch_delete_restricted_free_agent_nomination_fulfilled() {
 //  ROOT
 // -------------------------------------
 
-export const rosterSagas = [
+export const roster_sagas = [
   fork(watchUpdateRosterPlayerSlot),
   fork(watchActivatePlayer),
   fork(watchDeactivatePlayer),

@@ -1,10 +1,12 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getGameByTeam } from '@core/selectors'
+import { get_game_by_team } from '@core/selectors'
 
 import PlayerRowOpponent from './player-row-opponent'
 
-const mapStateToProps = createSelector(getGameByTeam, (game) => ({ game }))
+const map_state_to_props = createSelector(get_game_by_team, (game) => ({
+  game
+}))
 
-export default connect(mapStateToProps)(PlayerRowOpponent)
+export default connect(map_state_to_props)(PlayerRowOpponent)

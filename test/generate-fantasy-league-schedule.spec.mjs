@@ -2,12 +2,12 @@
 
 import * as chai from 'chai'
 
-import { getSchedule } from '#libs-server'
+import { generate_fantasy_league_schedule } from '#libs-server'
 import { constants } from '#libs-shared'
 
 chai.should()
 
-describe('UTILS getSchedule', function () {
+describe('UTILS generate_fantasy_league_schedule', function () {
   it('generates a valid schedule for 12 teams and 4 divisions', () => {
     const teams = []
     const schedulePerTeam = {}
@@ -19,7 +19,7 @@ describe('UTILS getSchedule', function () {
       })
     }
 
-    const schedule = getSchedule(teams)
+    const schedule = generate_fantasy_league_schedule(teams)
 
     schedule.should.have.lengthOf(constants.season.regularSeasonFinalWeek)
     for (const value of schedule.values()) {
@@ -58,7 +58,7 @@ describe('UTILS getSchedule', function () {
       })
     }
 
-    const schedule = getSchedule(teams)
+    const schedule = generate_fantasy_league_schedule(teams)
     schedule.should.have.lengthOf(constants.season.regularSeasonFinalWeek)
 
     for (const value of schedule.values()) {

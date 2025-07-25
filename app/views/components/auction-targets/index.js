@@ -4,26 +4,26 @@ import { List } from 'immutable'
 
 import {
   get_app,
-  getAuction,
-  getAuctionTargetPlayers,
-  getCurrentPlayers,
-  getRosteredPlayerIdsForCurrentLeague,
-  getPlayers,
-  getCurrentLeague
+  get_auction_state,
+  get_auction_target_players,
+  get_current_players_for_league,
+  get_rostered_player_ids_for_current_league,
+  get_players_state,
+  get_current_league
 } from '@core/selectors'
-import { auctionActions } from '@core/auction'
+import { auction_actions } from '@core/auction'
 import { constants } from '@libs-shared'
 
 import AuctionTargets from './auction-targets'
 
-const mapStateToProps = createSelector(
-  getAuction,
-  getAuctionTargetPlayers,
-  getCurrentPlayers,
-  getRosteredPlayerIdsForCurrentLeague,
-  getPlayers,
+const map_state_to_props = createSelector(
+  get_auction_state,
+  get_auction_target_players,
+  get_current_players_for_league,
+  get_rostered_player_ids_for_current_league,
+  get_players_state,
   get_app,
-  getCurrentLeague,
+  get_current_league,
   (auction, players, team, rosteredPlayerIds, playerState, app, league) => {
     const playersByPosition = {}
     for (const position of constants.positions) {
@@ -68,10 +68,13 @@ const mapStateToProps = createSelector(
   }
 )
 
-const mapDispatchToProps = {
-  search: auctionActions.search,
-  toggleMuted: auctionActions.toggleMuted,
-  select: auctionActions.select
+const map_dispatch_to_props = {
+  search: auction_actions.search,
+  toggleMuted: auction_actions.toggleMuted,
+  select: auction_actions.select
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(AuctionTargets)
+export default connect(
+  map_state_to_props,
+  map_dispatch_to_props
+)(AuctionTargets)

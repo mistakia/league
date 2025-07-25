@@ -1,19 +1,19 @@
-export const confirmationActions = {
+export const confirmation_actions = {
   SHOW_CONFIRMATION: 'SHOW_CONFIRMATION',
   CANCEL_CONFIRMATION: 'CANCEL_CONFIRMATION',
 
-  show: ({ title, description, id, onConfirm, data }) => ({
-    type: confirmationActions.SHOW_CONFIRMATION,
+  show: ({ title, description, id, on_confirm_func, data }) => ({
+    type: confirmation_actions.SHOW_CONFIRMATION,
     payload: {
       title,
       data,
       description,
       id,
-      onConfirm
+      on_confirm_func
     }
   }),
 
   cancel: () => ({
-    type: confirmationActions.CANCEL_CONFIRMATION
+    type: confirmation_actions.CANCEL_CONFIRMATION
   })
 }

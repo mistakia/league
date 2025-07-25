@@ -5,8 +5,8 @@ import { get_source_by_id } from '@core/selectors'
 
 import Source from './source'
 
-const mapStateToProps = createSelector(get_source_by_id, (source) => ({
+const map_state_to_props = createSelector(get_source_by_id, (source) => ({
   source
 }))
 
-export default connect(mapStateToProps)(Source)
+export default connect(map_state_to_props)(Source)

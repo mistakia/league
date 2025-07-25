@@ -1,27 +1,27 @@
 import { call, takeLatest, fork, select, put } from 'redux-saga/effects'
 
-import { teamActions } from './actions'
-import { appActions } from '@core/app'
+import { team_actions } from './actions'
+import { app_actions } from '@core/app'
 import { get_app, get_request_history } from '@core/selectors'
 import {
-  getTeams,
-  putTeam,
-  postTeams,
-  deleteTeams,
-  getLeagueTeamStats
+  api_get_teams,
+  api_put_team,
+  api_post_teams,
+  api_delete_teams,
+  api_get_league_team_stats
 } from '@core/api'
-import { notificationActions } from '@core/notifications'
-import { transactionsActions } from '@core/transactions'
-import { waiverActions } from '@core/waivers'
-import { matchupsActions } from '@core/matchups'
+import { notification_actions } from '@core/notifications'
+import { transactions_actions } from '@core/transactions'
+import { waiver_actions } from '@core/waivers'
+import { matchups_actions } from '@core/matchups'
 import { roster_actions } from '@core/rosters'
 
 export function* initTeams() {
   const { leagueId } = yield select(get_app)
-  if (leagueId) yield call(getTeams, { leagueId })
+  if (leagueId) yield call(api_get_teams, { leagueId })
 }
 
-export function* loadTeams() {
+export function* load_teams() {
   const { leagueId, year } = yield select(get_app)
   const request_history = yield select(get_request_history)
 
@@ -31,16 +31,16 @@ export function* loadTeams() {
 
   if (!leagueId) return
 
-  yield call(getTeams, { leagueId, year })
+  yield call(api_get_teams, { leagueId, year })
 }
 
 export function* updateTeam({ payload }) {
-  yield call(putTeam, payload)
+  yield call(api_put_team, payload)
 }
 
 export function* saveNotification() {
   yield put(
-    notificationActions.show({
+    notification_actions.show({
       message: 'Team setting saved',
       severity: 'success'
     })
@@ -49,18 +49,18 @@ export function* saveNotification() {
 
 export function* addTeam() {
   const { leagueId } = yield select(get_app)
-  yield call(postTeams, { leagueId })
+  yield call(api_post_teams, { leagueId })
 }
 
 export function* deleteTeam({ payload }) {
   const { leagueId } = yield select(get_app)
   const { teamId } = payload
-  yield call(deleteTeams, { leagueId, teamId })
+  yield call(api_delete_teams, { leagueId, teamId })
 }
 
 export function* addNotification() {
   yield put(
-    notificationActions.show({
+    notification_actions.show({
       message: 'Team Added',
       severity: 'success'
     })
@@ -69,17 +69,17 @@ export function* addNotification() {
 
 export function* deleteNotification() {
   yield put(
-    notificationActions.show({
+    notification_actions.show({
       message: 'Team Deleted',
       severity: 'success'
     })
   )
 }
 
-export function* loadLeagueTeamStats({ payload }) {
+export function* load_league_team_stats({ payload }) {
   const { leagueId, year } = yield select(get_app)
-  yield call(loadTeams)
-  yield call(getLeagueTeamStats, { leagueId, year })
+  yield call(load_teams)
+  yield call(api_get_league_team_stats, { leagueId, year })
 }
 
 //= ====================================
@@ -87,66 +87,66 @@ export function* loadLeagueTeamStats({ payload }) {
 // -------------------------------------
 
 export function* watchAuthFulfilled() {
-  yield takeLatest(appActions.AUTH_FULFILLED, initTeams)
+  yield takeLatest(app_actions.AUTH_FULFILLED, initTeams)
 }
 
 export function* watchUpdateTeam() {
-  yield takeLatest(teamActions.UPDATE_TEAM, updateTeam)
+  yield takeLatest(team_actions.UPDATE_TEAM, updateTeam)
 }
 
 export function* watchPutTeamFulfilled() {
-  yield takeLatest(teamActions.PUT_TEAM_FULFILLED, saveNotification)
+  yield takeLatest(team_actions.PUT_TEAM_FULFILLED, saveNotification)
 }
 
 export function* watchDeleteTeam() {
-  yield takeLatest(teamActions.DELETE_TEAM, deleteTeam)
+  yield takeLatest(team_actions.DELETE_TEAM, deleteTeam)
 }
 
 export function* watchAddTeam() {
-  yield takeLatest(teamActions.ADD_TEAM, addTeam)
+  yield takeLatest(team_actions.ADD_TEAM, addTeam)
 }
 
 export function* watchPostTeamsFulfilled() {
-  yield takeLatest(teamActions.POST_TEAMS_FULFILLED, addNotification)
+  yield takeLatest(team_actions.POST_TEAMS_FULFILLED, addNotification)
 }
 
 export function* watchDeleteTeamsFulfilled() {
-  yield takeLatest(teamActions.DELETE_TEAMS_FULFILLED, deleteNotification)
+  yield takeLatest(team_actions.DELETE_TEAMS_FULFILLED, deleteNotification)
 }
 
 export function* watchLoadLeagueTeamStats() {
-  yield takeLatest(teamActions.LOAD_LEAGUE_TEAM_STATS, loadLeagueTeamStats)
+  yield takeLatest(team_actions.LOAD_LEAGUE_TEAM_STATS, load_league_team_stats)
 }
 
 export function* watchLoadTransactions() {
-  yield takeLatest(transactionsActions.LOAD_TRANSACTIONS, loadTeams)
+  yield takeLatest(transactions_actions.LOAD_TRANSACTIONS, load_teams)
 }
 
 export function* watchLoadWaivers() {
-  yield takeLatest(waiverActions.LOAD_WAIVERS, loadTeams)
+  yield takeLatest(waiver_actions.LOAD_WAIVERS, load_teams)
 }
 
 export function* watchLoadMatchups() {
-  yield takeLatest(matchupsActions.LOAD_MATCHUPS, loadTeams)
+  yield takeLatest(matchups_actions.LOAD_MATCHUPS, load_teams)
 }
 
 export function* watchLoadRosters() {
-  yield takeLatest(roster_actions.LOAD_ROSTERS, loadTeams)
+  yield takeLatest(roster_actions.LOAD_ROSTERS, load_teams)
 }
 
 export function* watchLoadTeams() {
-  yield takeLatest(teamActions.LOAD_TEAMS, loadTeams)
+  yield takeLatest(team_actions.LOAD_TEAMS, load_teams)
 }
 
 export function* watch_select_year() {
-  yield takeLatest(appActions.SELECT_YEAR, loadTeams)
+  yield takeLatest(app_actions.SELECT_YEAR, load_teams)
 }
 
 //= ====================================
 //  ROOT
 // -------------------------------------
 
-export const teamSagas = [
+export const team_sagas = [
   fork(watchAuthFulfilled),
   fork(watchUpdateTeam),
   fork(watchPutTeamFulfilled),

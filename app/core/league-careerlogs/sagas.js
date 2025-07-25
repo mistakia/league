@@ -2,7 +2,7 @@ import { fork, call, select, takeLatest } from 'redux-saga/effects'
 
 import { league_careerlogs_actions } from './actions'
 import { get_request_history } from '@core/selectors'
-import { get_league_careerlogs } from '@core/api'
+import { api_get_league_careerlogs } from '@core/api'
 
 export function* load_league_careerlogs({ payload }) {
   const { leagueId } = payload
@@ -12,7 +12,7 @@ export function* load_league_careerlogs({ payload }) {
     return
   }
 
-  yield call(get_league_careerlogs, { leagueId })
+  yield call(api_get_league_careerlogs, { leagueId })
 }
 
 //= ====================================

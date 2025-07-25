@@ -5,7 +5,7 @@ export { default as sendGroupmeMessage } from './send-groupme-message.mjs'
 export { default as find_player_row } from './find-player-row.mjs'
 export { default as updatePlayer } from './update-player.mjs'
 export { default as update_player_id } from './update-player-id.mjs'
-export { default as getSchedule } from './get-schedule.mjs'
+export { default as generate_fantasy_league_schedule } from './generate-fantasy-league-schedule.mjs'
 export { default as getTeam } from './get-team.mjs'
 export { default as isPlayerOnWaivers } from './is-player-on-waivers.mjs'
 export { default as isPlayerRostered } from './is-player-rostered.mjs'
@@ -41,7 +41,7 @@ export { default as getJobs } from './get-jobs.mjs'
 export { default as getLastTransaction } from './get-last-transaction.mjs'
 export { default as get_player_transactions } from './get-player-transactions.mjs'
 export { default as getPlayers } from './get-players.mjs'
-export { default as getRosters } from './get-rosters.mjs'
+export { default as get_laegue_rosters_from_database } from './get-league-rosters-from-database.mjs'
 export { default as getAcquisitionTransaction } from './get-acquisition-transaction.mjs'
 export { default as getPlay } from './get-play.mjs'
 export { default as is_main } from './is-main.mjs'
@@ -59,7 +59,7 @@ export * as fantasylife from './fantasylife.mjs'
 export { default as getRestrictedFreeAgencyBids } from './get-restricted-free-agency-bids.mjs'
 export { wait } from './wait.mjs'
 export * as nfl from './nfl.mjs'
-export * as ngs from './ngs.mjs'
+
 export * as gambet from './gambet.mjs'
 export * as cache from './cache.mjs'
 export * as betrivers from './betrivers.mjs'
@@ -143,7 +143,7 @@ export const getChartedPlayByPlayQuery = (db) =>
       'nfl_plays.yards_after_any_contact',
       'nfl_games.week',
       'nfl_games.day',
-      'nfl_plays.cov_type_ngs',
+      'nfl_plays.cov_type',
       'nfl_plays.sep',
       'nfl_plays.ydl_100'
     )

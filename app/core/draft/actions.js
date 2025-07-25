@@ -21,5 +21,5 @@ export const draft_actions = {
   draft_player: create_toggle_action('DRAFT_PLAYER')
 }
 
-export const getDraftActions = create_api_actions('GET_DRAFT')
-export const postDraftActions = create_api_actions('POST_DRAFT')
+export const get_draft_actions = create_api_actions('GET_DRAFT')
+export const post_draft_actions = create_api_actions('POST_DRAFT')

@@ -12,23 +12,23 @@ import './trade-team-summary.styl'
 function Percentage(type, analysis) {
   if (!analysis.after[type] || !analysis.before[type]) return '-'
   const delta = analysis.after[type] - analysis.before[type]
-  const isPositive = delta >= 0
-  const sign = isPositive ? '+' : '-'
-  const deltaPct = ((delta / analysis.before[type]) * 100 || 0).toFixed(1)
-  const classNames = ['trade__percentage']
-  if (isPositive) {
-    classNames.push('positive')
+  const is_positive = delta >= 0
+  const sign = is_positive ? '+' : '-'
+  const delta_pct = ((delta / analysis.before[type]) * 100 || 0).toFixed(1)
+  const class_names = ['trade__percentage']
+  if (is_positive) {
+    class_names.push('positive')
   } else {
-    classNames.push('negative')
+    class_names.push('negative')
 
-    if (deltaPct > -1.5) {
-      classNames.push('warning')
+    if (delta_pct > -1.5) {
+      class_names.push('warning')
     }
   }
 
   return (
-    <div className={classNames.join(' ')}>
-      {`${sign}${Math.abs(deltaPct)}%`}
+    <div className={class_names.join(' ')}>
+      {`${sign}${Math.abs(delta_pct)}%`}
     </div>
   )
 }
@@ -37,11 +37,11 @@ export default class TradeTeamSummary extends React.Component {
   render = () => {
     const { analysis } = this.props
 
-    const pctPoints = Percentage('points', analysis)
-    const pctValue = Percentage('value', analysis)
-    const pctValueAdj = Percentage('value_adj', analysis)
-    const pctDraftValue = Percentage('draft_value', analysis)
-    const pctPlayerValue = Percentage('player_value', analysis)
+    const pct_points = Percentage('points', analysis)
+    const pct_value = Percentage('value', analysis)
+    const pct_value_adj = Percentage('value_adj', analysis)
+    const pct_draft_value = Percentage('draft_value', analysis)
+    const pct_player_value = Percentage('player_value', analysis)
 
     return (
       <>
@@ -64,7 +64,7 @@ export default class TradeTeamSummary extends React.Component {
                     {analysis.after.points || analysis.before.points || '-'}
                   </div>
                 </TableCell>
-                <TableCell>{pctPoints}</TableCell>
+                <TableCell>{pct_points}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell component='th' scope='row'>
@@ -77,7 +77,7 @@ export default class TradeTeamSummary extends React.Component {
                       : '-'}
                   </div>
                 </TableCell>
-                <TableCell>{pctValue}</TableCell>
+                <TableCell>{pct_value}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell component='th' scope='row'>
@@ -90,7 +90,7 @@ export default class TradeTeamSummary extends React.Component {
                       : '-'}
                   </div>
                 </TableCell>
-                <TableCell>{pctPlayerValue}</TableCell>
+                <TableCell>{pct_player_value}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell component='th' scope='row'>
@@ -103,7 +103,7 @@ export default class TradeTeamSummary extends React.Component {
                       : '-'}
                   </div>
                 </TableCell>
-                <TableCell>{pctValueAdj}</TableCell>
+                <TableCell>{pct_value_adj}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell component='th' scope='row'>
@@ -116,7 +116,7 @@ export default class TradeTeamSummary extends React.Component {
                       : '-'}
                   </div>
                 </TableCell>
-                <TableCell>{pctDraftValue}</TableCell>
+                <TableCell>{pct_draft_value}</TableCell>
               </TableRow>
               <TableRow>
                 <TableCell component='th' scope='row'>

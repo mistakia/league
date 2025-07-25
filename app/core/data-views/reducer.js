@@ -1,6 +1,6 @@
 import Immutable, { Map } from 'immutable'
 
-import { appActions } from '@core/app/actions'
+import { app_actions } from '@core/app/actions'
 import { data_views_actions } from './index'
 import { default_data_views } from './default-data-views'
 import { data_view_request_actions } from '@core/data-view-request/actions'
@@ -66,7 +66,7 @@ export function data_views_reducer(
       return state.delete(view_id)
     }
 
-    case appActions.AUTH_FULFILLED: {
+    case app_actions.AUTH_FULFILLED: {
       const leagueId = payload.data.leagues.length
         ? payload.data.leagues[0].uid
         : undefined

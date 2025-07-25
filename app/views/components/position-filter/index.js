@@ -1,12 +1,15 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getPlayers, get_positions_for_current_league } from '@core/selectors'
+import {
+  get_players_state,
+  get_positions_for_current_league
+} from '@core/selectors'
 
 import PositionFilter from './position-filter'
 
-const mapStateToProps = createSelector(
-  getPlayers,
+const map_state_to_props = createSelector(
+  get_players_state,
   get_positions_for_current_league,
   (players, league_positions) => ({
     positions: players.get('positions'),
@@ -14,4 +17,4 @@ const mapStateToProps = createSelector(
   })
 )
 
-export default connect(mapStateToProps)(PositionFilter)
+export default connect(map_state_to_props)(PositionFilter)

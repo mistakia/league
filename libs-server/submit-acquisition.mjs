@@ -5,7 +5,7 @@ import {
   constants,
   Roster,
   getDraftDates,
-  getFreeAgentPeriod
+  get_free_agent_period
 } from '#libs-shared'
 import sendNotifications from './send-notifications.mjs'
 import getRoster from './get-roster.mjs'
@@ -107,7 +107,7 @@ export default async function ({
     // check if during free agency period for veterans
     if (player_row.nfl_draft_year !== constants.season.year) {
       if (league.free_agency_live_auction_start) {
-        const faPeriod = getFreeAgentPeriod(league)
+        const faPeriod = get_free_agent_period(league)
         if (
           constants.season.now.isBefore(faPeriod.free_agency_live_auction_start)
         ) {

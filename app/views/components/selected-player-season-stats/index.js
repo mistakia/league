@@ -9,17 +9,17 @@ import { player_actions } from '@core/players'
 
 import SelectedPlayerSeasonStats from './selected-player-season-stats'
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   getSelectedPlayer,
   getGamesByYearForSelectedPlayer,
   (playerMap, stats) => ({ playerMap, stats })
 )
 
-const mapDispatchToProps = {
+const map_dispatch_to_props = {
   load: player_actions.load_player_gamelogs
 }
 
 export default connect(
-  mapStateToProps,
-  mapDispatchToProps
+  map_state_to_props,
+  map_dispatch_to_props
 )(SelectedPlayerSeasonStats)

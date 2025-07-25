@@ -18,8 +18,8 @@ class PlayerRoster extends Player {
       poachId,
       is_hosted,
       league,
-      isBeforeExtensionDeadline,
-      isBeforeRestrictedFreeAgencyEnd,
+      is_before_extension_deadline,
+      is_before_restricted_free_agency_end,
       isRestrictedFreeAgency,
       percentiles = {},
       is_manager_in_league,
@@ -38,9 +38,9 @@ class PlayerRoster extends Player {
 
     const value = playerMap.get('value', 0)
     const bid = playerMap.get('bid')
-    const salary = isBeforeExtensionDeadline
+    const salary = is_before_extension_deadline
       ? value
-      : isBeforeRestrictedFreeAgencyEnd &&
+      : is_before_restricted_free_agency_end &&
           !is_restricted_free_agent_tag_processed &&
           isRestrictedFreeAgent &&
           (is_team_manager || isRestrictedFreeAgency)
@@ -54,7 +54,7 @@ class PlayerRoster extends Player {
       : getExtensionAmount({
           pos,
           slot,
-          tag: isBeforeExtensionDeadline ? tag : constants.tags.REGULAR,
+          tag: is_before_extension_deadline ? tag : constants.tags.REGULAR,
           extensions,
           league,
           value,
@@ -68,7 +68,7 @@ class PlayerRoster extends Player {
       if (!hasProjections) return null
       if (isRestrictedFreeAgency || isRestrictedFreeAgent)
         return typeof bid === 'number' ? market_salary - bid : null
-      if (isBeforeExtensionDeadline) return market_salary - extendedSalary
+      if (is_before_extension_deadline) return market_salary - extendedSalary
       return market_salary - value
     }
     const savings = get_savings()
@@ -103,7 +103,7 @@ class PlayerRoster extends Player {
       value
     })
 
-    if (isBeforeExtensionDeadline) {
+    if (is_before_extension_deadline) {
       const is_rookie = playerMap.get('nfl_draft_year') >= constants.year - 1
       if (is_rookie) {
         rookie_tag_savings =
@@ -183,7 +183,7 @@ class PlayerRoster extends Player {
                   prefix='$'
                 />
               )}
-              {!isPoach && isOffseason && isBeforeExtensionDeadline && (
+              {!isPoach && isOffseason && is_before_extension_deadline && (
                 <PercentileMetric
                   scaled
                   value={extendedSalary}
@@ -218,7 +218,7 @@ class PlayerRoster extends Player {
             </div>
           </div>
         )}
-        {isBeforeExtensionDeadline && (
+        {is_before_extension_deadline && (
           <>
             <div className='metric table__cell'>{regular_extended_salary}</div>
             <div className='row__group'>

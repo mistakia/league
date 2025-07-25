@@ -1,11 +1,11 @@
-export { tradeReducer } from './reducer'
+export { trade_reducer } from './reducer'
 export {
-  tradeActions,
-  postTradeProposeActions,
-  getTradesActions,
-  postTradeAcceptActions,
-  postTradeCancelActions,
-  postTradeRejectActions
+  trade_actions,
+  post_trade_propose_actions,
+  get_trades_actions,
+  post_trade_accept_actions,
+  post_trade_cancel_actions,
+  post_trade_reject_actions
 } from './actions'
-export { tradeSagas } from './sagas'
-export { createTrade } from './trade'
+export { trade_sagas } from './sagas'
+export { create_trade } from './trade'
