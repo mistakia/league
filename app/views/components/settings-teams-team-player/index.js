@@ -1,13 +1,13 @@
 import { connect } from 'react-redux'
 
 import { roster_actions } from '@core/rosters'
-import { confirmationActions } from '@core/confirmations'
+import { confirmation_actions } from '@core/confirmations'
 
 import SettingsTeamsTeamPlayer from './settings-teams-team-player'
 
-const mapDispatchToProps = {
+const map_dispatch_to_props = {
   remove: roster_actions.remove,
-  showConfirmation: confirmationActions.show
+  showConfirmation: confirmation_actions.show
 }
 
-export default connect(null, mapDispatchToProps)(SettingsTeamsTeamPlayer)
+export default connect(null, map_dispatch_to_props)(SettingsTeamsTeamPlayer)

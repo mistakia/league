@@ -1,8 +1,8 @@
 export {
-  appActions,
-  authActions,
-  registerActions,
-  loginActions
+  app_actions,
+  auth_actions,
+  register_actions,
+  login_actions
 } from './actions'
-export { appReducer } from './reducer'
-export { appSagas } from './sagas'
+export { app_reducer } from './reducer'
+export { app_sagas } from './sagas'

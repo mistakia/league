@@ -1,14 +1,14 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getStats, getSelectedPlayer } from '@core/selectors'
+import { get_stats_state, getSelectedPlayer } from '@core/selectors'
 
 import SelectedPlayerTeamStats from './selected-player-team-stats'
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   getSelectedPlayer,
-  getStats,
+  get_stats_state,
   (playerMap, stats) => ({ team: playerMap.get('team'), stats })
 )
 
-export default connect(mapStateToProps)(SelectedPlayerTeamStats)
+export default connect(map_state_to_props)(SelectedPlayerTeamStats)

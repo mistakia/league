@@ -3,7 +3,7 @@ import { createSelector } from 'reselect'
 import Bugsnag from '@bugsnag/js'
 
 import {
-  getStats,
+  get_stats_state,
   get_selected_data_view,
   get_teams_for_current_year,
   get_data_views
@@ -78,10 +78,10 @@ const get_players_percentiles = createSelector(
   }
 )
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   (state) => state.getIn(['players', 'allPlayersPending']),
   (state) => state.getIn(['app', 'userId']),
-  getStats,
+  get_stats_state,
   get_data_views_fields,
   get_selected_data_view,
   get_data_views,
@@ -129,7 +129,7 @@ const mapStateToProps = createSelector(
   })
 )
 
-const mapDispatchToProps = {
+const map_dispatch_to_props = {
   data_view_changed: data_views_actions.data_view_changed,
   set_selected_data_view: data_views_actions.set_selected_data_view,
   delete_data_view: data_views_actions.delete_data_view,
@@ -139,4 +139,4 @@ const mapDispatchToProps = {
   load_data_view: data_views_actions.load_data_view
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(DataViewsPage)
+export default connect(map_state_to_props, map_dispatch_to_props)(DataViewsPage)

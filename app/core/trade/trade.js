@@ -19,7 +19,7 @@ export const Trade = new Record({
   acceptingTeamReleasePlayers: new List()
 })
 
-export function createTrade({
+export function create_trade({
   uid,
   propose_tid,
   accept_tid,

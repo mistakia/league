@@ -1,10 +1,10 @@
 /* eslint global-require: off, import/no-extraneous-dependencies: off */
 
-const developmentEnvironments = ['development', 'test']
+const development_environments = ['development', 'test']
 
-const developmentPlugins = [require('react-hot-loader/babel')]
+const development_plugins = [require('react-hot-loader/babel')]
 
-const productionPlugins = [
+const production_plugins = [
   require('babel-plugin-dev-expression'),
 
   // babel-preset-react-optimize
@@ -16,7 +16,7 @@ const productionPlugins = [
 module.exports = (api) => {
   // See docs about api at https://babeljs.io/docs/en/config-files#apicache
 
-  const development = api.env(developmentEnvironments)
+  const development = api.env(development_environments)
 
   return {
     presets: [
@@ -47,7 +47,7 @@ module.exports = (api) => {
         }
       ],
 
-      ...(development ? developmentPlugins : productionPlugins)
+      ...(development ? development_plugins : production_plugins)
     ]
   }
 }

@@ -48,7 +48,7 @@ export default class SettingsTeamsTeam extends React.Component {
       title: 'Delete Team',
       description:
         'Remove team from league and permanently delete team & roster data',
-      onConfirm: () => this.props.delete(this.props.team.uid)
+      on_confirm_func: () => this.props.delete(this.props.team.uid)
     })
   }
 

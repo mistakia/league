@@ -10,7 +10,7 @@ import ArrowDropDownIcon from '@mui/icons-material/ArrowDropDown'
 import ClickAwayListener from '@mui/material/ClickAwayListener'
 import Paper from '@mui/material/Paper'
 
-import { fuzzySearch } from '@core/utils'
+import { fuzzy_search } from '@core/utils'
 import PlayersViewManager from '@components/players-view-manager'
 
 import './players-view-menu.styl'
@@ -58,7 +58,7 @@ export default function PlayersViewMenu({
    * }
    */
   const filtered_views = input_value
-    ? players_page_views.filter((view) => fuzzySearch(input_value, view.name))
+    ? players_page_views.filter((view) => fuzzy_search(input_value, view.name))
     : players_page_views
 
   const filtered_items = filtered_views.toList().map((view, index) => (

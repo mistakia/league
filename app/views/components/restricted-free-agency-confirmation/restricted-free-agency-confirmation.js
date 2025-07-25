@@ -84,7 +84,7 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
 
   get_max_bid = () => {
     const available_salary = this.props.team.roster.availableCap
-    const { playerMap, cutlistTotalSalary } = this.props
+    const { playerMap, cutlist_total_salary } = this.props
     const value = playerMap.get('value', 0)
     const bid = playerMap.get('bid', 0)
     const player_salary = bid || value
@@ -102,7 +102,7 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
     }, 0)
 
     const salary_space_total =
-      available_salary + cutlistTotalSalary + release_total_salary
+      available_salary + cutlist_total_salary + release_total_salary
     const on_cutlist = this.props.cutlist.includes(playerMap.get('pid'))
     return (
       salary_space_total +
@@ -337,7 +337,7 @@ RestrictedFreeAgencyConfirmation.propTypes = {
   onClose: PropTypes.func,
   team: PropTypes.object,
   playerMap: ImmutablePropTypes.map,
-  cutlistTotalSalary: PropTypes.number,
+  cutlist_total_salary: PropTypes.number,
   cutlist: ImmutablePropTypes.list,
   add_restricted_free_agency_tag: PropTypes.func,
   update_restricted_free_agency_tag: PropTypes.func

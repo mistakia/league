@@ -1,18 +1,21 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { statActions } from '@core/stats'
-import { getStats } from '@core/selectors'
+import { stat_actions } from '@core/stats'
+import { get_stats_state } from '@core/selectors'
 
 import StatYardlineFilter from './stat-yardline-filter'
 
-const mapStateToProps = createSelector(getStats, (stats) => ({
+const map_state_to_props = createSelector(get_stats_state, (stats) => ({
   yardline_start: stats.yardline_start,
   yardline_end: stats.yardline_end
 }))
 
-const mapDispatchToProps = {
-  filter_yardline: statActions.filter_yardline
+const map_dispatch_to_props = {
+  filter_yardline: stat_actions.filter_yardline
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(StatYardlineFilter)
+export default connect(
+  map_state_to_props,
+  map_dispatch_to_props
+)(StatYardlineFilter)

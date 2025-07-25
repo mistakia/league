@@ -5,8 +5,8 @@ import { getPlaysByMatchupId } from '@core/selectors'
 
 import ScoreboardPlayByPlay from './scoreboard-play-by-play'
 
-const mapStateToProps = createSelector(getPlaysByMatchupId, (plays) => ({
+const map_state_to_props = createSelector(getPlaysByMatchupId, (plays) => ({
   plays
 }))
 
-export default connect(mapStateToProps)(ScoreboardPlayByPlay)
+export default connect(map_state_to_props)(ScoreboardPlayByPlay)

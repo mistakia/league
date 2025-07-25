@@ -6,15 +6,15 @@ import { player_actions } from '@core/players'
 
 import SelectedPlayerSeasonProjections from './selected-player-projections'
 
-const mapStateToProps = createSelector(getSelectedPlayer, (playerMap) => ({
+const map_state_to_props = createSelector(getSelectedPlayer, (playerMap) => ({
   playerMap
 }))
 
-const mapDispatchToProps = {
+const map_dispatch_to_props = {
   load: player_actions.load_player_projections
 }
 
 export default connect(
-  mapStateToProps,
-  mapDispatchToProps
+  map_state_to_props,
+  map_dispatch_to_props
 )(SelectedPlayerSeasonProjections)

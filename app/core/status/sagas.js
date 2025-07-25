@@ -1,22 +1,22 @@
 import { call, takeLatest, fork } from 'redux-saga/effects'
 
-import { statusActions } from './actions'
-import { getStatus } from '@core/api'
+import { status_actions } from './actions'
+import { api_get_status } from '@core/api'
 
-export function* loadStatus() {
-  yield call(getStatus)
+export function* load_status() {
+  yield call(api_get_status)
 }
 
 //= ====================================
 //  WATCHERS
 // -------------------------------------
 
-export function* watchLoadStatus() {
-  yield takeLatest(statusActions.LOAD_STATUS, loadStatus)
+export function* watch_load_status() {
+  yield takeLatest(status_actions.LOAD_STATUS, load_status)
 }
 
 //= ====================================
 //  ROOT
 // -------------------------------------
 
-export const statusSagas = [fork(watchLoadStatus)]
+export const status_sagas = [fork(watch_load_status)]

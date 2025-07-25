@@ -3,16 +3,16 @@ import { createSelector } from 'reselect'
 
 import {
   get_team_by_id_for_current_year,
-  getCurrentLeague,
+  get_current_league,
   getRosterByTeamId,
   getGroupedPlayersByTeamId,
-  isRestrictedFreeAgencyPeriod,
-  isBeforeExtensionDeadline,
-  getCutlistPlayers,
+  is_restricted_free_agency_period,
+  is_before_extension_deadline,
+  get_cutlist_players,
   get_app,
-  getPoachPlayersForCurrentLeague,
-  getTeamsForCurrentLeague,
-  getRestrictedFreeAgencyPlayers
+  get_poach_players_for_current_league,
+  get_teams_for_current_league,
+  get_restricted_free_agency_players
 } from '@core/selectors'
 import {
   constants,
@@ -23,30 +23,30 @@ import { player_actions } from '@core/players'
 
 import LeagueTeam from './league-team'
 
-const mapStateToProps = createSelector(
-  getCurrentLeague,
+const map_state_to_props = createSelector(
+  get_current_league,
   getRosterByTeamId,
   get_team_by_id_for_current_year,
   getGroupedPlayersByTeamId,
-  isRestrictedFreeAgencyPeriod,
-  isBeforeExtensionDeadline,
-  getCutlistPlayers,
+  is_restricted_free_agency_period,
+  is_before_extension_deadline,
+  get_cutlist_players,
   get_app,
-  getPoachPlayersForCurrentLeague,
-  getTeamsForCurrentLeague,
-  getRestrictedFreeAgencyPlayers,
+  get_poach_players_for_current_league,
+  get_teams_for_current_league,
+  get_restricted_free_agency_players,
   (
     league,
     roster,
     team,
     players,
-    isRestrictedFreeAgencyPeriod,
-    isBeforeExtensionDeadline,
+    is_restricted_free_agency_period,
+    is_before_extension_deadline,
     cutlist,
     app,
     poaches,
     teams,
-    restrictedFreeAgencyPlayers
+    restricted_free_agency_players
   ) => {
     const projectionType = constants.season.isRegularSeason ? 'ros' : '0'
     const items = []
@@ -63,22 +63,22 @@ const mapStateToProps = createSelector(
       const extendedSalary = getExtensionAmount({
         pos,
         slot,
-        tag: isBeforeExtensionDeadline ? tag : constants.tags.REGULAR,
+        tag: is_before_extension_deadline ? tag : constants.tags.REGULAR,
         extensions,
         league,
         value,
         bid
       })
       const savings =
-        !isRestrictedFreeAgencyPeriod || bid || !isRestrictedFreeAgent
+        !is_restricted_free_agency_period || bid || !isRestrictedFreeAgent
           ? market_salary -
-            (isBeforeExtensionDeadline ? extendedSalary : bid || value)
+            (is_before_extension_deadline ? extendedSalary : bid || value)
           : null
 
       let rookie_tag_savings = null
       let franchise_tag_savings = null
 
-      if (isBeforeExtensionDeadline) {
+      if (is_before_extension_deadline) {
         const regular_extended_salary = getExtensionAmount({
           pos,
           slot,
@@ -152,13 +152,13 @@ const mapStateToProps = createSelector(
       is_team_manager: app.teamId === team.uid,
       poaches,
       teams,
-      restrictedFreeAgencyPlayers
+      restricted_free_agency_players
     }
   }
 )
 
-const mapDispatchToProps = {
+const map_dispatch_to_props = {
   load_team_players: player_actions.load_team_players
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(LeagueTeam)
+export default connect(map_state_to_props, map_dispatch_to_props)(LeagueTeam)

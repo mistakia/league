@@ -36,7 +36,7 @@ export default function LeagueTeam({
   is_team_manager,
   poaches,
   teams,
-  restrictedFreeAgencyPlayers
+  restricted_free_agency_players
 }) {
   const { lid, tid } = useParams()
 
@@ -145,10 +145,10 @@ export default function LeagueTeam({
         league,
         teams,
         team_id: teamId,
-        restricted_free_agency_players: restrictedFreeAgencyPlayers,
+        restricted_free_agency_players,
         is_team_manager
       }),
-    [league, teams, teamId, restrictedFreeAgencyPlayers, is_team_manager]
+    [league, teams, teamId, restricted_free_agency_players, is_team_manager]
   )
 
   const notice_items = [...rfa_notices]
@@ -309,5 +309,5 @@ LeagueTeam.propTypes = {
   is_team_manager: PropTypes.bool,
   poaches: ImmutablePropTypes.list,
   teams: ImmutablePropTypes.list,
-  restrictedFreeAgencyPlayers: ImmutablePropTypes.list
+  restricted_free_agency_players: ImmutablePropTypes.list
 }

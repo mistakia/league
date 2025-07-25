@@ -2,14 +2,14 @@ import { Map } from 'immutable'
 
 import { roster_actions } from './actions'
 import { createRoster } from './roster'
-import { appActions } from '@core/app'
+import { app_actions } from '@core/app'
 import { constants } from '@libs-shared'
-import { auctionActions } from '@core/auction'
-import { teamActions } from '@core/teams'
+import { auction_actions } from '@core/auction'
+import { team_actions } from '@core/teams'
 
-export function rostersReducer(state = new Map(), { payload, type }) {
+export function rosters_reducer(state = new Map(), { payload, type }) {
   switch (type) {
-    case appActions.LOGOUT:
+    case app_actions.LOGOUT:
       return new Map()
 
     case roster_actions.GET_ROSTERS_FULFILLED:
@@ -19,7 +19,7 @@ export function rostersReducer(state = new Map(), { payload, type }) {
         )
       })
 
-    case auctionActions.AUCTION_PROCESSED: {
+    case auction_actions.AUCTION_PROCESSED: {
       const { tid, pid, rid, pos, userid, value, type, year, timestamp, lid } =
         payload
       return state.updateIn(
@@ -197,13 +197,13 @@ export function rostersReducer(state = new Map(), { payload, type }) {
         }
       })
 
-    case teamActions.POST_TEAMS_FULFILLED:
+    case team_actions.POST_TEAMS_FULFILLED:
       return state.setIn(
         [payload.data.team.uid, constants.year, constants.week],
         createRoster(payload.data.roster)
       )
 
-    case teamActions.DELETE_TEAMS_FULFILLED:
+    case team_actions.DELETE_TEAMS_FULFILLED:
       return state.delete(payload.opts.teamId)
 
     case roster_actions.POST_ROSTERS_FULFILLED: {

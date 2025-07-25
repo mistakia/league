@@ -1,20 +1,23 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getTransactions } from '@core/selectors'
-import { transactionsActions } from '@core/transactions'
+import { get_transactions } from '@core/selectors'
+import { transactions_actions } from '@core/transactions'
 
 import TransactionsPage from './transactions'
 
-const mapStateToProps = createSelector(getTransactions, (transactions) => ({
+const map_state_to_props = createSelector(get_transactions, (transactions) => ({
   transactions: transactions.items,
   isPending: transactions.isPending,
   hasMore: transactions.hasMore
 }))
 
-const mapDispatchToProps = {
-  load: transactionsActions.load,
-  loadNext: transactionsActions.loadNext
+const map_dispatch_to_props = {
+  load: transactions_actions.load,
+  load_next_transactions: transactions_actions.load_next_transactions
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(TransactionsPage)
+export default connect(
+  map_state_to_props,
+  map_dispatch_to_props
+)(TransactionsPage)

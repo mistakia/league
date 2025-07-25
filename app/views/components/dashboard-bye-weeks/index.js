@@ -1,13 +1,13 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getSchedule, getGroupedPlayersByTeamId } from '@core/selectors'
+import { get_schedule_state, getGroupedPlayersByTeamId } from '@core/selectors'
 
 import DashboardByeWeeks from './dashboard-bye-weeks'
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   getGroupedPlayersByTeamId,
-  getSchedule,
+  get_schedule_state,
   (team, schedule) => {
     const byes = {}
     for (const playerMap of team.active) {
@@ -29,4 +29,4 @@ const mapStateToProps = createSelector(
   }
 )
 
-export default connect(mapStateToProps)(DashboardByeWeeks)
+export default connect(map_state_to_props)(DashboardByeWeeks)

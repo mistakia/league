@@ -1,25 +1,28 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getCurrentLeague, getCurrentPlayers } from '@core/selectors'
+import {
+  get_current_league,
+  get_current_players_for_league
+} from '@core/selectors'
 import { roster_actions } from '@core/rosters'
 
 import RemoveTagConfirmation from './remove-tag-confirmation'
 
-const mapStateToProps = createSelector(
-  getCurrentLeague,
-  getCurrentPlayers,
+const map_state_to_props = createSelector(
+  get_current_league,
+  get_current_players_for_league,
   (league, team) => ({
     league,
     team
   })
 )
 
-const mapDispatchToProps = {
+const map_dispatch_to_props = {
   remove: roster_actions.removeTag
 }
 
 export default connect(
-  mapStateToProps,
-  mapDispatchToProps
+  map_state_to_props,
+  map_dispatch_to_props
 )(RemoveTagConfirmation)

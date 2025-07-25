@@ -1,17 +1,20 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getMatchups, getTeamsForCurrentLeague } from '@core/selectors'
+import {
+  get_matchups_state,
+  get_teams_for_current_league
+} from '@core/selectors'
 
 import ScheduleTeamsFilter from './schedule-teams-filter'
 
-const mapStateToProps = createSelector(
-  getMatchups,
-  getTeamsForCurrentLeague,
+const map_state_to_props = createSelector(
+  get_matchups_state,
+  get_teams_for_current_league,
   (matchups, teams) => ({
     matchup_teams: matchups.get('teams'),
     league_teams: teams.toList()
   })
 )
 
-export default connect(mapStateToProps)(ScheduleTeamsFilter)
+export default connect(map_state_to_props)(ScheduleTeamsFilter)

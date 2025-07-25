@@ -11,11 +11,11 @@ import LeagueTeamHistoricalRanks from '@components/league-team-historical-ranks'
 import './team.styl'
 
 export default function TeamPage({
-  loadTeams,
-  loadLeagueTeamStats,
+  load_teams,
+  load_league_team_stats,
   load_league_players,
   teams,
-  loadDraftPickValue,
+  load_draft_pick_value,
   load_league_careerlogs
 }) {
   const { lid, tid } = useParams()
@@ -26,18 +26,18 @@ export default function TeamPage({
       return navigate('/', { replace: true })
     }
 
-    loadTeams(lid)
+    load_teams(lid)
     load_league_players(lid)
-    loadDraftPickValue()
-    loadLeagueTeamStats(lid)
+    load_draft_pick_value()
+    load_league_team_stats(lid)
     load_league_careerlogs(lid)
   }, [
     lid,
     tid,
-    loadTeams,
+    load_teams,
     load_league_players,
-    loadDraftPickValue,
-    loadLeagueTeamStats,
+    load_draft_pick_value,
+    load_league_team_stats,
     load_league_careerlogs,
     navigate
   ])
@@ -70,10 +70,10 @@ export default function TeamPage({
 }
 
 TeamPage.propTypes = {
-  loadTeams: PropTypes.func,
-  loadLeagueTeamStats: PropTypes.func,
+  load_teams: PropTypes.func,
+  load_league_team_stats: PropTypes.func,
   load_league_players: PropTypes.func,
   teams: ImmutablePropTypes.map,
-  loadDraftPickValue: PropTypes.func,
+  load_draft_pick_value: PropTypes.func,
   load_league_careerlogs: PropTypes.func
 }

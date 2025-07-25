@@ -5,17 +5,17 @@ import { createSelector } from 'reselect'
 
 import {
   get_app,
-  getCurrentTrade,
-  getCurrentTradePlayers,
-  getTradeIsValid,
-  getCurrentTradeAnalysis,
-  getProposingTeamPlayers,
-  getAcceptingTeamPlayers,
-  getAcceptingTeam,
-  getProposingTeam,
-  getProposingTeamRoster
+  get_current_trade,
+  get_current_trade_players,
+  get_trade_is_valid,
+  get_current_trade_analysis,
+  get_proposing_team_players,
+  get_accepting_team_players,
+  get_accepting_team,
+  get_proposing_team,
+  get_proposing_team_roster
 } from '@core/selectors'
-import { tradeActions } from '@core/trade'
+import { trade_actions } from '@core/trade'
 import { player_actions } from '@core/players'
 
 import render from './trade'
@@ -31,7 +31,7 @@ class TradePage extends React.Component {
 
   handleReleaseChange = (event, value) => {
     const playerIds = value.map((p) => p.id)
-    this.props.setReleasePlayers(playerIds)
+    this.props.set_release_players(playerIds)
   }
 
   handleProposeChange = (event, value) => {
@@ -39,8 +39,8 @@ class TradePage extends React.Component {
     const picks = value.filter((p) => p.type === 'pick')
     const playerIds = players.map((p) => p.id)
     const pickIds = picks.map((p) => p.id)
-    this.props.setProposingTeamPlayers(playerIds)
-    this.props.setProposingTeamPicks(pickIds)
+    this.props.set_proposing_team_players(playerIds)
+    this.props.set_proposing_team_picks(pickIds)
   }
 
   handleAcceptChange = (event, value) => {
@@ -48,8 +48,8 @@ class TradePage extends React.Component {
     const picks = value.filter((p) => p.type === 'pick')
     const playerIds = players.map((p) => p.id)
     const pickIds = picks.map((p) => p.id)
-    this.props.setAcceptingTeamPlayers(playerIds)
-    this.props.setAcceptingTeamPicks(pickIds)
+    this.props.set_accepting_team_players(playerIds)
+    this.props.set_accepting_team_picks(pickIds)
   }
 
   componentDidMount = () => {
@@ -57,19 +57,19 @@ class TradePage extends React.Component {
     this.props.load_league_players()
   }
 
-  handleReleasePlayerClick = (pid) => this.props.setReleasePlayers(pid)
+  handleReleasePlayerClick = (pid) => this.props.set_release_players(pid)
 
   handleProposingTeamPlayerClick = (pid) =>
-    this.props.setProposingTeamPlayers(pid)
+    this.props.set_proposing_team_players(pid)
 
   handleAcceptingTeamPlayerClick = (pid) =>
-    this.props.setAcceptingTeamPlayers(pid)
+    this.props.set_accepting_team_players(pid)
 
   handleProposingTeamPickClick = (pick) =>
-    this.props.setProposingTeamPicks(pick)
+    this.props.set_proposing_team_picks(pick)
 
   handleAcceptingTeamPickClick = (pick) =>
-    this.props.setAcceptingTeamPicks(pick)
+    this.props.set_accepting_team_picks(pick)
 
   render = () => {
     return render.call(this)
@@ -77,30 +77,30 @@ class TradePage extends React.Component {
 }
 
 TradePage.propTypes = {
-  setReleasePlayers: PropTypes.func,
-  setProposingTeamPlayers: PropTypes.func,
-  setProposingTeamPicks: PropTypes.func,
-  setAcceptingTeamPlayers: PropTypes.func,
-  setAcceptingTeamPicks: PropTypes.func,
+  set_release_players: PropTypes.func,
+  set_proposing_team_players: PropTypes.func,
+  set_proposing_team_picks: PropTypes.func,
+  set_accepting_team_players: PropTypes.func,
+  set_accepting_team_picks: PropTypes.func,
   load: PropTypes.func,
   load_league_players: PropTypes.func
 }
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   get_app,
 
-  getCurrentTrade,
-  getCurrentTradePlayers,
-  getTradeIsValid,
+  get_current_trade,
+  get_current_trade_players,
+  get_trade_is_valid,
 
-  getProposingTeam,
-  getProposingTeamPlayers,
-  getProposingTeamRoster,
+  get_proposing_team,
+  get_proposing_team_players,
+  get_proposing_team_roster,
 
-  getAcceptingTeam,
-  getAcceptingTeamPlayers,
+  get_accepting_team,
+  get_accepting_team_players,
 
-  getCurrentTradeAnalysis,
+  get_current_trade_analysis,
   (
     app,
 
@@ -133,14 +133,14 @@ const mapStateToProps = createSelector(
   })
 )
 
-const mapDispatchToProps = {
-  load: tradeActions.load,
-  setReleasePlayers: tradeActions.setReleasePlayers,
-  setProposingTeamPlayers: tradeActions.setProposingTeamPlayers,
-  setAcceptingTeamPlayers: tradeActions.setAcceptingTeamPlayers,
-  setProposingTeamPicks: tradeActions.setProposingTeamPicks,
-  setAcceptingTeamPicks: tradeActions.setAcceptingTeamPicks,
+const map_dispatch_to_props = {
+  load: trade_actions.load,
+  set_release_players: trade_actions.set_release_players,
+  set_proposing_team_players: trade_actions.set_proposing_team_players,
+  set_accepting_team_players: trade_actions.set_accepting_team_players,
+  set_proposing_team_picks: trade_actions.set_proposing_team_picks,
+  set_accepting_team_picks: trade_actions.set_accepting_team_picks,
   load_league_players: player_actions.load_league_players
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(TradePage)
+export default connect(map_state_to_props, map_dispatch_to_props)(TradePage)

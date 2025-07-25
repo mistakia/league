@@ -13,7 +13,6 @@ module.exports = {
   pff: '', // cookies for pff
   nfl_api_url: '',
   nfl_combine_profiles_url: '',
-  ngs_api_url: '',
   mflUserAgent: '',
   sportradar_api: '',
   espn_api_v2_url: '',

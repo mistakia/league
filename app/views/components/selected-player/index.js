@@ -6,19 +6,19 @@ import {
   getSelectedPlayer,
   get_app,
   getAvailableSalarySpaceForCurrentLeague,
-  getAuctionInfoForPosition,
-  getCurrentLeague
+  get_auction_info_for_position,
+  get_current_league
 } from '@core/selectors'
-import { getFreeAgentPeriod, constants } from '@libs-shared'
+import { get_free_agent_period, constants } from '@libs-shared'
 
 import SelectedPlayer from './selected-player'
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   getSelectedPlayer,
   get_app,
   getAvailableSalarySpaceForCurrentLeague,
-  getAuctionInfoForPosition,
-  getCurrentLeague,
+  get_auction_info_for_position,
+  get_current_league,
   (playerMap, app, league_available_salary_space, auction_info, league) => {
     const remaining_pts_added =
       auction_info.pts_added.total - auction_info.pts_added.rostered
@@ -29,7 +29,7 @@ const mapStateToProps = createSelector(
       0
     )
 
-    const free_agency_period_dates = getFreeAgentPeriod(league)
+    const free_agency_period_dates = get_free_agent_period(league)
     const is_before_live_auction_end =
       constants.season.now.isBefore(free_agency_period_dates.end) &&
       (free_agency_period_dates.free_agency_live_auction_end
@@ -48,9 +48,12 @@ const mapStateToProps = createSelector(
   }
 )
 
-const mapDispatchToProps = {
+const map_dispatch_to_props = {
   deselect: player_actions.deselect_player,
   load_all_players: player_actions.load_all_players
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(SelectedPlayer)
+export default connect(
+  map_state_to_props,
+  map_dispatch_to_props
+)(SelectedPlayer)

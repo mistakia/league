@@ -1,8 +1,8 @@
-export { matchupsReducer } from './reducer'
-export { matchupSagas } from './sagas'
+export { matchups_reducer } from './reducer'
+export { matchup_sagas } from './sagas'
 export {
-  matchupsActions,
-  getMatchupsActions,
-  postMatchupsActions
+  matchups_actions,
+  get_matchups_actions,
+  post_matchups_actions
 } from './actions'
-export { Matchup, createMatchup } from './matchup'
+export { Matchup, create_matchup } from './matchup'

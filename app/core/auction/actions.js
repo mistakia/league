@@ -1,4 +1,4 @@
-export const auctionActions = {
+export const auction_actions = {
   AUCTION_JOIN: 'AUCTION_JOIN',
 
   AUCTION_ERROR: 'AUCTION_ERROR',
@@ -35,15 +35,15 @@ export const auctionActions = {
   SOUND_NOTIFICATION: 'SOUND_NOTIFICATION',
 
   soundNotification: () => ({
-    type: auctionActions.SOUND_NOTIFICATION
+    type: auction_actions.SOUND_NOTIFICATION
   }),
 
   toggleMuted: () => ({
-    type: auctionActions.AUCTION_TOGGLE_MUTED
+    type: auction_actions.AUCTION_TOGGLE_MUTED
   }),
 
   setOptimalLineup: ({ pids, feasible, result }) => ({
-    type: auctionActions.SET_OPTIMAL_LINEUP,
+    type: auction_actions.SET_OPTIMAL_LINEUP,
     payload: {
       pids,
       feasible,
@@ -52,18 +52,18 @@ export const auctionActions = {
   }),
 
   setBudget: (budget) => ({
-    type: auctionActions.SET_AUCTION_BUDGET,
+    type: auction_actions.SET_AUCTION_BUDGET,
     payload: {
       budget
     }
   }),
 
   release: () => ({
-    type: auctionActions.AUCTION_RELEASE_LOCK
+    type: auction_actions.AUCTION_RELEASE_LOCK
   }),
 
   filter: ({ type, values }) => ({
-    type: auctionActions.AUCTION_FILTER,
+    type: auction_actions.AUCTION_FILTER,
     payload: {
       type,
       values
@@ -71,46 +71,46 @@ export const auctionActions = {
   }),
 
   search: (value) => ({
-    type: auctionActions.AUCTION_SEARCH_PLAYERS,
+    type: auction_actions.AUCTION_SEARCH_PLAYERS,
     payload: {
       value
     }
   }),
 
   select: (pid) => ({
-    type: auctionActions.AUCTION_SELECT_PLAYER,
+    type: auction_actions.AUCTION_SELECT_PLAYER,
     payload: {
       pid
     }
   }),
 
   nominate: (value) => ({
-    type: auctionActions.AUCTION_SUBMIT_NOMINATION,
+    type: auction_actions.AUCTION_SUBMIT_NOMINATION,
     payload: {
       value
     }
   }),
 
   bid: (value) => ({
-    type: auctionActions.AUCTION_SUBMIT_BID,
+    type: auction_actions.AUCTION_SUBMIT_BID,
     payload: {
       value
     }
   }),
 
   join: () => ({
-    type: auctionActions.AUCTION_JOIN
+    type: auction_actions.AUCTION_JOIN
   }),
 
   pause: () => ({
-    type: auctionActions.AUCTION_PAUSE
+    type: auction_actions.AUCTION_PAUSE
   }),
 
   resume: () => ({
-    type: auctionActions.AUCTION_RESUME
+    type: auction_actions.AUCTION_RESUME
   }),
 
   toggle_pause_on_team_disconnect: () => ({
-    type: auctionActions.AUCTION_TOGGLE_PAUSE_ON_TEAM_DISCONNECT
+    type: auction_actions.AUCTION_TOGGLE_PAUSE_ON_TEAM_DISCONNECT
   })
 }

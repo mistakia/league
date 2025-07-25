@@ -1,4 +1,4 @@
-import getEligibleSlots from './get-eligible-slots.mjs'
+import get_eligible_slots from './get-eligible-slots.mjs'
 import * as constants from './constants.mjs'
 
 const getPositionCount = (players) =>
@@ -8,7 +8,7 @@ export default function ({ positions, league }) {
   const rosterConstraints = {}
   for (const pos of constants.positions) {
     rosterConstraints[pos] = {
-      max: getEligibleSlots({ pos, league }).length,
+      max: get_eligible_slots({ pos, league }).length,
       min: league[`s${pos.toLowerCase()}`]
     }
   }

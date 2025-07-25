@@ -2,16 +2,16 @@ import { List } from 'immutable'
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getCurrentLeague } from '@core/selectors'
+import { get_current_league } from '@core/selectors'
 
 import LeagueTeamValueOverTime from './league-team-value-over-time'
 
 const timestamp_1y_cutoff = Date.now() - 365 * 24 * 60 * 60 * 1000
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   (state) => state.get('league_team_daily_values'),
   (state, props) => props.tid,
-  getCurrentLeague,
+  get_current_league,
   (league_team_daily_values, tid, league) => {
     const league_total_due_amount = league.num_teams * league.season_due_amount
     const filtered_values = league_team_daily_values
@@ -32,4 +32,4 @@ const mapStateToProps = createSelector(
   }
 )
 
-export default connect(mapStateToProps)(LeagueTeamValueOverTime)
+export default connect(map_state_to_props)(LeagueTeamValueOverTime)

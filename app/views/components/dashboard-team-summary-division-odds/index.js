@@ -1,13 +1,13 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { get_app, getTeamsForCurrentLeague } from '@core/selectors'
+import { get_app, get_teams_for_current_league } from '@core/selectors'
 
 import DashboardTeamSummaryDivisionOdds from './dashboard-team-summary-division-odds'
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   get_app,
-  getTeamsForCurrentLeague,
+  get_teams_for_current_league,
   (app, teams) => {
     const list = teams.toList()
     const sorted = list.sort((a, b) => b.division_odds - a.division_odds)
@@ -15,4 +15,4 @@ const mapStateToProps = createSelector(
   }
 )
 
-export default connect(mapStateToProps)(DashboardTeamSummaryDivisionOdds)
+export default connect(map_state_to_props)(DashboardTeamSummaryDivisionOdds)

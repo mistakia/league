@@ -13,7 +13,7 @@ export default class SettingsTeamsTeamPlayer extends React.Component {
       title: 'Remove player',
       description:
         'Player will be removed from roster and any related transactions',
-      onConfirm: () =>
+      on_confirm_func: () =>
         this.props.remove({
           pid: this.props.pid,
           teamId: this.props.teamId

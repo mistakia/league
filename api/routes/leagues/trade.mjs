@@ -151,7 +151,7 @@ const router = express.Router({ mergeParams: true })
  *           example: ["2041", "1889"]
  */
 
-export const getTrade = async (req, res) => {
+export const get_trade = async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { tradeId } = req.params
@@ -306,7 +306,7 @@ export const getTrade = async (req, res) => {
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
-router.get('/?', getTrade)
+router.get('/?', get_trade)
 
 /**
  * @swagger
@@ -957,7 +957,7 @@ router.post(
       res.status(500).send({ error: error.toString() })
     }
   },
-  getTrade
+  get_trade
 )
 
 /**
@@ -1082,7 +1082,7 @@ router.post(
       res.status(500).send({ error: error.toString() })
     }
   },
-  getTrade
+  get_trade
 )
 
 /**
@@ -1213,7 +1213,7 @@ router.post(
       res.status(500).send({ error: error.toString() })
     }
   },
-  getTrade
+  get_trade
 )
 
 /**
@@ -1340,7 +1340,7 @@ router.post(
       res.status(500).send({ error: error.toString() })
     }
   },
-  getTrade
+  get_trade
 )
 
 export default router

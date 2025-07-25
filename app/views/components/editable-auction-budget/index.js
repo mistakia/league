@@ -1,19 +1,19 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { getAuction, auctionActions } from '@core/auction'
+import { get_auction_state, auction_actions } from '@core/auction'
 
 import EditableAuctionBudget from './editable-auction-budget'
 
-const mapStateToProps = createSelector(getAuction, (auction) => ({
+const map_state_to_props = createSelector(get_auction_state, (auction) => ({
   budget: auction.lineupBudget
 }))
 
-const mapDispatchToProps = {
-  set: auctionActions.setBudget
+const map_dispatch_to_props = {
+  set: auction_actions.setBudget
 }
 
 export default connect(
-  mapStateToProps,
-  mapDispatchToProps
+  map_state_to_props,
+  map_dispatch_to_props
 )(EditableAuctionBudget)

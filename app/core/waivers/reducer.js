@@ -1,8 +1,8 @@
 import { Map, List } from 'immutable'
 
 import { constants } from '@libs-shared'
-import { waiverActions } from './actions'
-import { appActions } from '@core/app'
+import { waiver_actions } from './actions'
+import { app_actions } from '@core/app'
 import { createWaiver } from './waiver'
 
 const initialState = new Map({
@@ -14,9 +14,9 @@ const initialState = new Map({
   isPending: false
 })
 
-export function waiversReducer(state = initialState, { payload, type }) {
+export function waivers_reducer(state = initialState, { payload, type }) {
   switch (type) {
-    case waiverActions.POST_WAIVER_FULFILLED:
+    case waiver_actions.POST_WAIVER_FULFILLED:
       return state.withMutations((state) => {
         state.setIn(
           ['teams', payload.data.tid, payload.data.uid],
@@ -24,7 +24,7 @@ export function waiversReducer(state = initialState, { payload, type }) {
         )
       })
 
-    case waiverActions.PUT_WAIVER_FULFILLED: {
+    case waiver_actions.PUT_WAIVER_FULFILLED: {
       const uid = parseInt(payload.data.uid, 10)
       return state.mergeIn(['teams', payload.opts.teamId, uid], {
         bid: payload.data.bid,
@@ -32,31 +32,31 @@ export function waiversReducer(state = initialState, { payload, type }) {
       })
     }
 
-    case appActions.AUTH_FULFILLED:
+    case app_actions.AUTH_FULFILLED:
       return state.withMutations((state) => {
         payload.data.waivers.forEach((waiver) => {
           state.setIn(['teams', waiver.tid, waiver.uid], createWaiver(waiver))
         })
       })
 
-    case waiverActions.POST_WAIVER_ORDER_PENDING:
+    case waiver_actions.POST_WAIVER_ORDER_PENDING:
       return state.withMutations((state) => {
         for (const [index, wid] of payload.opts.waivers.entries()) {
           state.setIn(['teams', payload.opts.teamId, wid, 'po'], index)
         }
       })
 
-    case waiverActions.POST_WAIVER_ORDER_FAILED:
+    case waiver_actions.POST_WAIVER_ORDER_FAILED:
       return state.withMutations((state) => {
         for (const w of payload.opts.reset) {
           state.setIn(['teams', payload.opts.teamId, w.uid, 'po'], w.po)
         }
       })
 
-    case waiverActions.POST_CANCEL_WAIVER_FULFILLED:
+    case waiver_actions.POST_CANCEL_WAIVER_FULFILLED:
       return state.deleteIn(['teams', payload.data.tid, payload.data.uid])
 
-    case waiverActions.GET_WAIVERS_FULFILLED:
+    case waiver_actions.GET_WAIVERS_FULFILLED:
       return state.merge({
         isPending: false,
         processed: payload.data.length
@@ -65,25 +65,25 @@ export function waiversReducer(state = initialState, { payload, type }) {
         processingTimes: new List(payload.data.map((p) => p.processed))
       })
 
-    case waiverActions.GET_WAIVERS_PENDING:
-    case waiverActions.GET_WAIVER_REPORT_PENDING:
+    case waiver_actions.GET_WAIVERS_PENDING:
+    case waiver_actions.GET_WAIVER_REPORT_PENDING:
       return state.merge({
         isPending: true
       })
 
-    case waiverActions.GET_WAIVERS_FAILED:
-    case waiverActions.GET_WAIVER_REPORT_FAILED:
+    case waiver_actions.GET_WAIVERS_FAILED:
+    case waiver_actions.GET_WAIVER_REPORT_FAILED:
       return state.merge({
         isPending: false
       })
 
-    case waiverActions.GET_WAIVER_REPORT_FULFILLED:
+    case waiver_actions.GET_WAIVER_REPORT_FULFILLED:
       return state.merge({
         report: new List(payload.data.map((p) => createWaiver(p))),
         isPending: false
       })
 
-    case waiverActions.FILTER_WAIVERS:
+    case waiver_actions.FILTER_WAIVERS:
       return state.merge({
         isPending: true,
         report: new List(),

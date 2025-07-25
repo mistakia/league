@@ -2,19 +2,19 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { get_app } from '@core/selectors'
-import { settingActions } from '@core/settings/actions'
+import { setting_actions } from '@core/settings/actions'
 
 import UserSettingsNotifications from './user-settings-notifications'
 
-const mapStateToProps = createSelector(get_app, (app) => ({
+const map_state_to_props = createSelector(get_app, (app) => ({
   user: app.user
 }))
 
-const mapDispatchToProps = {
-  update: settingActions.update
+const map_dispatch_to_props = {
+  update: setting_actions.update
 }
 
 export default connect(
-  mapStateToProps,
-  mapDispatchToProps
+  map_state_to_props,
+  map_dispatch_to_props
 )(UserSettingsNotifications)

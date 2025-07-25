@@ -35,7 +35,7 @@ const MatchupPage = lazy(() => import('@pages/matchup'))
 const UserSettingsPage = lazy(() => import('@pages/user-settings'))
 const ErrorTest = lazy(() => import('@components/error-test'))
 
-const mapStateToProps = createSelector(get_app, (app) => ({ app }))
+const map_state_to_props = createSelector(get_app, (app) => ({ app }))
 
 const Routes = ({ app }) => {
   const location = useLocation()
@@ -115,4 +115,4 @@ Routes.propTypes = {
   app: ImmutablePropTypes.record
 }
 
-export default connect(mapStateToProps)(Routes)
+export default connect(map_state_to_props)(Routes)

@@ -1,19 +1,19 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { appActions } from '@core/app'
+import { app_actions } from '@core/app'
 import { get_app } from '@core/selectors'
 
 import AuthPage from './auth'
 
-const mapStateToProps = createSelector(get_app, (app) => ({
+const map_state_to_props = createSelector(get_app, (app) => ({
   isPending: app.isPending,
   authError: app.authError
 }))
 
-const mapDispatchToProps = {
-  login: appActions.login,
-  register: appActions.register
+const map_dispatch_to_props = {
+  login: app_actions.login,
+  register: app_actions.register
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(AuthPage)
+export default connect(map_state_to_props, map_dispatch_to_props)(AuthPage)

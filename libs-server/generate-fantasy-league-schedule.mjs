@@ -91,7 +91,7 @@ const has_duplicate_consecutive_weeks = (schedule) => {
   return false
 }
 
-const getSchedule = (teams, random_seed) => {
+const generate_fantasy_league_schedule = (teams, random_seed) => {
   const num_weeks = constants.season.regularSeasonFinalWeek
 
   const divisions = {}
@@ -197,4 +197,4 @@ const getSchedule = (teams, random_seed) => {
   return schedule
 }
 
-export default getSchedule
+export default generate_fantasy_league_schedule

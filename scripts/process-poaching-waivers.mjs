@@ -2,7 +2,7 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { constants, Errors, getFreeAgentPeriod } from '#libs-shared'
+import { constants, Errors, get_free_agent_period } from '#libs-shared'
 import {
   sendNotifications,
   submitPoach,
@@ -53,7 +53,7 @@ const run = async ({ daily = false } = {}) => {
 
   for (const lid of leagueIds) {
     const league = await getLeague({ lid })
-    const free_agency_period = getFreeAgentPeriod(league)
+    const free_agency_period = get_free_agent_period(league)
     if (
       !constants.season.isRegularSeason &&
       constants.season.now.isAfter(free_agency_period.start) &&

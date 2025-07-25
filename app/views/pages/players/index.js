@@ -2,14 +2,14 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import {
-  getStats,
-  getSelectedPlayersPageView,
+  get_stats_state,
+  get_selected_players_page_view,
   is_player_filter_options_changed
 } from '@core/selectors'
-import { getPlayerFields } from '@core/player-fields'
+import { get_player_fields } from '@core/player-fields'
 import { player_actions } from '@core/players'
 import { roster_actions } from '@core/rosters'
-import { statActions } from '@core/stats'
+import { stat_actions } from '@core/stats'
 import {
   getSelectedViewGroupedFields,
   getFilteredPlayers
@@ -17,17 +17,17 @@ import {
 
 import PlayersPage from './players'
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   getFilteredPlayers,
   (state) => state.getIn(['players', 'allPlayersPending']),
   (state) => state.getIn(['players', 'search']),
   (state) => state.getIn(['players', 'order']),
   (state) => state.getIn(['players', 'orderBy']),
   (state) => state.getIn(['app', 'userId']),
-  getStats,
-  getSelectedPlayersPageView,
+  get_stats_state,
+  get_selected_players_page_view,
   getSelectedViewGroupedFields,
-  getPlayerFields,
+  get_player_fields,
   is_player_filter_options_changed,
   (
     players,
@@ -67,12 +67,12 @@ const mapStateToProps = createSelector(
   })
 )
 
-const mapDispatchToProps = {
+const map_dispatch_to_props = {
   search: player_actions.search,
   reset_player_filter_options: player_actions.reset_player_filter_options,
   load_rosters: roster_actions.load_rosters,
   load_all_players: player_actions.load_all_players,
-  init_charted_plays: statActions.init_charted_plays
+  init_charted_plays: stat_actions.init_charted_plays
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(PlayersPage)
+export default connect(map_state_to_props, map_dispatch_to_props)(PlayersPage)

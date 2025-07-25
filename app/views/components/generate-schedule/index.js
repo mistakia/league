@@ -1,11 +1,11 @@
 import { connect } from 'react-redux'
 
-import { matchupsActions } from '@core/matchups'
+import { matchups_actions } from '@core/matchups'
 
 import GenerateSchedule from './generate-schedule'
 
-const mapDispatchToProps = {
-  generate: matchupsActions.generate
+const map_dispatch_to_props = {
+  generate: matchups_actions.generate
 }
 
-export default connect(null, mapDispatchToProps)(GenerateSchedule)
+export default connect(null, map_dispatch_to_props)(GenerateSchedule)

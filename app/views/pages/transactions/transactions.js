@@ -22,7 +22,7 @@ export default function TransactionsPage({
   transactions,
   isPending,
   hasMore,
-  loadNext,
+  load_next_transactions,
   load
 }) {
   const navigate = useNavigate()
@@ -71,7 +71,7 @@ export default function TransactionsPage({
   const loadMoreRows = isPending
     ? () => {}
     : () => {
-        loadNext(lid)
+        load_next_transactions(lid)
       }
   const rowCount = hasMore ? transactions.size + 1 : transactions.size
 
@@ -115,5 +115,5 @@ TransactionsPage.propTypes = {
   transactions: ImmutablePropTypes.list,
   isPending: PropTypes.bool,
   hasMore: PropTypes.bool,
-  loadNext: PropTypes.func
+  load_next_transactions: PropTypes.func
 }

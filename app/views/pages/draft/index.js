@@ -10,30 +10,30 @@ import {
 import { draft_actions } from '@core/draft'
 import {
   get_app,
-  getCurrentLeague,
-  getSelectedDraftPlayer,
-  getDraft,
+  get_current_league,
+  get_selected_draft_player,
+  get_draft_state,
   getPicks,
-  getNextPick,
-  getLastPick,
+  get_rookie_draft_next_pick,
+  get_rookie_draft_last_pick,
   getRookiePlayers
 } from '@core/selectors'
 import { player_actions } from '@core/players'
-import { confirmationActions } from '@core/confirmations'
-import { leagueActions } from '@core/leagues'
-import { teamActions } from '@core/teams'
+import { confirmation_actions } from '@core/confirmations'
+import { league_actions } from '@core/leagues'
+import { team_actions } from '@core/teams'
 
 import DraftPage from './draft'
 
-const mapStateToProps = createSelector(
+const map_state_to_props = createSelector(
   getRookiePlayers,
-  getSelectedDraftPlayer,
-  getNextPick,
-  getDraft,
+  get_selected_draft_player,
+  get_rookie_draft_next_pick,
+  get_draft_state,
   getPicks,
-  getCurrentLeague,
+  get_current_league,
   get_app,
-  getLastPick,
+  get_rookie_draft_last_pick,
   (
     players,
     selectedPlayerMap,
@@ -88,13 +88,13 @@ const mapStateToProps = createSelector(
   }
 )
 
-const mapDispatchToProps = {
+const map_dispatch_to_props = {
   load_draft: draft_actions.load_draft,
   draft_player: draft_actions.draft_player,
-  showConfirmation: confirmationActions.show,
+  showConfirmation: confirmation_actions.show,
   load_all_players: player_actions.load_all_players,
-  load_league: leagueActions.load_league,
-  loadTeams: teamActions.loadTeams
+  load_league: league_actions.load_league,
+  load_teams: team_actions.load_teams
 }
 
-export default connect(mapStateToProps, mapDispatchToProps)(DraftPage)
+export default connect(map_state_to_props, map_dispatch_to_props)(DraftPage)
