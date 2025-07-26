@@ -853,6 +853,12 @@ export default {
       supported_rate_types: []
     }),
 
+  player_total_expected_points_added_from_plays: player_stat_from_plays({
+    pid_columns: ['psr_pid', 'bc_pid', 'trg_pid'],
+    with_select_string: `SUM(epa)`,
+    stat_name: 'total_expected_points_added_from_plays'
+  }),
+
   player_passing_expected_points_added_from_plays: player_stat_from_plays({
     pid_columns: ['psr_pid'],
     with_select_string: `SUM(epa)`,

@@ -456,6 +456,14 @@ export default {
     'Team Rushing Touchdowns (calculated from play-by-play data)',
   team_expected_points_added_from_plays:
     'Team Expected Points Added (calculated from play-by-play data)',
+
+  player_passing_expected_points_added_from_plays:
+    'The Expected Points Added (EPA) by the player on passing plays (calculated from play-by-play data)',
+  player_rushing_and_receiving_expected_points_added_from_plays:
+    'The Expected Points Added (EPA) by the player on rushing and receiving plays (calculated from play-by-play data)',
+  player_total_expected_points_added_from_plays:
+    'The total Expected Points Added (EPA) by the player on all plays they were involved in - combines passing, rushing, and receiving EPA (calculated from play-by-play data)',
+
   team_win_percentage_added_from_plays:
     'Team Win Percentage Added (calculated from play-by-play data)',
   team_success_rate_from_plays:

@@ -591,6 +591,15 @@ export default {
       fixed: 1
     }),
 
+  player_total_expected_points_added_from_plays:
+    offensive_player_from_play_field({
+      column_title: 'Total Expected Points Added (By Play)',
+      column_groups: [COLUMN_GROUPS.ADVANCED],
+      header_label: 'EPA',
+      player_value_path: 'total_expected_points_added_from_plays',
+      fixed: 2
+    }),
+
   player_passing_expected_points_added_from_plays:
     offensive_player_from_play_field({
       column_title: 'Passing Expected Points Added (By Play)',
