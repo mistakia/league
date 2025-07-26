@@ -42,10 +42,17 @@ export default class SelectedPlayerSeasonProjections extends React.Component {
       )
     }
 
-    const projections_by_week = groupBy(projections, 'week')
+    // Filter out average projections from the projections array since they get their own row
+    const filtered_projections = projections.filter(
+      (p) => p.sourceid !== constants.sources.AVERAGE
+    )
+    const projections_by_week = groupBy(filtered_projections, 'week')
+
     for (const week_key in projections_by_week) {
       const week = parseInt(week_key, 10)
       if (week !== constants.week) continue
+
+      const average_projections = playerMap.getIn(['projection', `${week}`], {})
 
       tables.push(
         <SelectedPlayerProjection
@@ -54,7 +61,7 @@ export default class SelectedPlayerSeasonProjections extends React.Component {
           projections={projections_by_week[week]}
           pid={pid}
           pos={pos}
-          projection={playerMap.getIn(['projection', week], {})}
+          projection={average_projections}
         />
       )
     }
