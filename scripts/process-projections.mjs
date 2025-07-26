@@ -15,7 +15,7 @@ import {
 } from '#libs-shared'
 import {
   get_league_format,
-  getProjections,
+  get_player_projections,
   getPlayers,
   getRoster,
   getLeague,
@@ -39,7 +39,7 @@ const timestamp = Math.round(Date.now() / 1000)
 
 const process_average_projections = async ({ year, seas_type = 'REG' }) => {
   log(`processing projections for year ${year} and seas_type ${seas_type}`)
-  const projections = await getProjections({ year, seas_type })
+  const projections = await get_player_projections({ year, seas_type })
   log(`fetched ${projections.length} projections`)
   const projections_by_pid = groupBy(projections, 'pid')
   const projection_pids = Object.keys(projections_by_pid)
@@ -371,7 +371,7 @@ const process_league = async ({ year, lid }) => {
   }
 
   // get projections for current week
-  const projections = await getProjections()
+  const projections = await get_player_projections()
 
   const projections_by_pid = groupBy(projections, 'pid')
   const projection_pids = Object.keys(projections_by_pid)

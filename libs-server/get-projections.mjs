@@ -1,11 +1,12 @@
 import { constants } from '#libs-shared'
 import db from '#db'
 
-export default async function ({
+export default async function get_player_projections({
   year = constants.season.year,
   week = constants.season.nfl_seas_week,
   seas_type = 'REG',
-  pids = []
+  pids = [],
+  include_averages = false
 } = {}) {
   if (!pids.length) {
     const players = await db('player')
@@ -23,8 +24,11 @@ export default async function ({
       userid: 0,
       seas_type
     })
-    .whereNot('sourceid', constants.sources.AVERAGE)
     .where('week', '>=', week)
+
+  if (!include_averages) {
+    query.whereNot('sourceid', constants.sources.AVERAGE)
+  }
 
   return query
 }

@@ -1,7 +1,7 @@
 import express from 'express'
 
 import { constants } from '#libs-shared'
-import { getProjections } from '#libs-server'
+import { get_player_projections } from '#libs-server'
 
 const router = express.Router()
 
@@ -198,7 +198,10 @@ router.get('/:pid/?', async (req, res) => {
   const { logger } = req.app.locals
   try {
     const { pid } = req.params
-    const projections = await getProjections({ pids: [pid] })
+    const projections = await get_player_projections({
+      pids: [pid],
+      include_averages: true
+    })
     res.send(projections)
   } catch (error) {
     logger(error)

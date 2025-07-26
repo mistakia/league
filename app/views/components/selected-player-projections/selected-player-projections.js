@@ -10,7 +10,7 @@ import SelectedPlayerProjection from '@components/selected-player-projection'
 export default class SelectedPlayerSeasonProjections extends React.Component {
   componentDidMount() {
     const pid = this.props.playerMap.get('pid')
-    this.props.load(pid)
+    this.props.load({ pid })
   }
 
   render = () => {

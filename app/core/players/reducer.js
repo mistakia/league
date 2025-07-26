@@ -528,11 +528,39 @@ export function players_reducer(state = initialState, { payload, type }) {
 
     case player_actions.GET_PLAYER_PROJECTIONS_FULFILLED:
       return state.withMutations((state) => {
+        const projections = payload.data
         state.setIn(
           ['items', payload.opts.pid, 'projections'],
-          new List(payload.data)
+          new List(projections)
         )
         state.setIn(['items', payload.opts.pid, 'loading_projections'], false)
+
+        // Extract average projections (sourceid: 18) and store in projection field
+        const average_projections = {}
+        projections.forEach((projection) => {
+          if (projection.sourceid === constants.sources.AVERAGE) {
+            const week = projection.week
+            // Create a copy of the projection without metadata fields
+            const {
+              sourceid,
+              pid,
+              userid,
+              year,
+              seas_type,
+              timestamp,
+              ...stats
+            } = projection
+            average_projections[week] = stats
+          }
+        })
+
+        // Set the average projections in the projection field
+        if (Object.keys(average_projections).length > 0) {
+          state.setIn(
+            ['items', payload.opts.pid, 'projection'],
+            new Map(average_projections)
+          )
+        }
       })
 
     case player_actions.RESET_PLAYER_FILTER_OPTIONS:
