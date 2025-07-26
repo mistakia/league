@@ -81,11 +81,15 @@ const import_rts_adp = async ({
         adp_inserts.push({
           pid: player_row.pid,
           pos: player_row.pos,
-          week: 0,
           year,
-          avg: Number(player.avg),
+          adp: Number(player.avg),
+          min_pick: null,
+          max_pick: null,
+          std_dev: null,
+          sample_size: null,
+          percent_drafted: null,
           source_id: 'RTS',
-          ranking_type
+          adp_type: ranking_type
         })
       } else {
         unmatched_players.push(player)
@@ -132,11 +136,15 @@ const import_rts_adp = async ({
         adp_inserts.push({
           pid: player_row.pid,
           pos: player_row.pos,
-          week: 0,
           year,
-          avg: Number(player.avg),
+          adp: Number(player.avg),
+          min_pick: null,
+          max_pick: null,
+          std_dev: null,
+          sample_size: null,
+          percent_drafted: null,
           source_id: 'RTS',
-          ranking_type
+          adp_type: ranking_type
         })
       } else {
         log(
@@ -159,9 +167,9 @@ const import_rts_adp = async ({
         items: adp_inserts,
         batch_size: BATCH_SIZE,
         save: async (batch) => {
-          await db('player_rankings_index')
+          await db('player_adp_index')
             .insert(batch)
-            .onConflict(['year', 'week', 'source_id', 'ranking_type', 'pid'])
+            .onConflict(['year', 'source_id', 'adp_type', 'pid'])
             .merge()
         }
       })
@@ -169,7 +177,7 @@ const import_rts_adp = async ({
         items: adp_inserts.map((i) => ({ ...i, timestamp })),
         batch_size: BATCH_SIZE,
         save: async (batch) => {
-          await db('player_rankings').insert(batch)
+          await db('player_adp_history').insert(batch)
         }
       })
     }

@@ -51,8 +51,8 @@ const format_projection = (projection_item) => ({
     (projection_item.stats.rush_2pt || 0)
 })
 
-const create_ranking_entries = ({ player_row, adp }) => {
-  const ranking_types = [
+const create_adp_entries = ({ player_row, adp }) => {
+  const adp_types = [
     { type: 'STANDARD_REDRAFT', adp_key: 'adp_std' },
     { type: 'PPR_REDRAFT', adp_key: 'adp_ppr' },
     { type: 'HALF_PPR_REDRAFT', adp_key: 'adp_half_ppr' },
@@ -73,20 +73,21 @@ const create_ranking_entries = ({ player_row, adp }) => {
     { type: 'HALF_PPR_SUPERFLEX_ROOKIE', adp_key: 'adp_rookie' }
   ]
 
-  return ranking_types.map(({ type, adp_key }) => ({
-    pid: player_row.pid,
-    pos: player_row.pos,
-    week: 0,
-    year: constants.season.year,
-    avg: adp[adp_key],
-    min: null,
-    max: null,
-    std: null,
-    overall_rank: null,
-    position_rank: null,
-    source_id: 'SLEEPER',
-    ranking_type: type
-  }))
+  return adp_types
+    .filter(({ adp_key }) => adp[adp_key] != null) // Only include if ADP value exists
+    .map(({ type, adp_key }) => ({
+      pid: player_row.pid,
+      pos: player_row.pos,
+      year: constants.season.year,
+      adp: adp[adp_key],
+      min_pick: null,
+      max_pick: null,
+      std_dev: null,
+      sample_size: null,
+      percent_drafted: null,
+      source_id: 'SLEEPER',
+      adp_type: type
+    }))
 }
 
 const process_matched_player = ({
@@ -98,12 +99,12 @@ const process_matched_player = ({
   const adp = format_adp(projection)
   const proj = format_projection(projection)
 
-  // Create multiple ranking entries
-  const ranking_entries = create_ranking_entries({
+  // Create multiple ADP entries
+  const adp_entries = create_adp_entries({
     player_row,
     adp
   })
-  adp_inserts.push(...ranking_entries)
+  adp_inserts.push(...adp_entries)
 
   // Insert into projections_index and projections
   projection_inserts.push({
@@ -245,14 +246,14 @@ const import_sleeper_adp_and_projections = async ({
   }
 
   if (adp_inserts.length) {
-    log(`Inserting ${adp_inserts.length} ADP rankings into database`)
+    log(`Inserting ${adp_inserts.length} ADP entries into database`)
     await batch_insert({
       items: adp_inserts,
       batch_size: BATCH_SIZE,
       save: async (batch) => {
-        await db('player_rankings_index')
+        await db('player_adp_index')
           .insert(batch)
-          .onConflict(['year', 'week', 'source_id', 'ranking_type', 'pid'])
+          .onConflict(['year', 'source_id', 'adp_type', 'pid'])
           .merge()
       }
     })
@@ -260,7 +261,7 @@ const import_sleeper_adp_and_projections = async ({
       items: adp_inserts.map((i) => ({ ...i, timestamp })),
       batch_size: BATCH_SIZE,
       save: async (batch) => {
-        await db('player_rankings').insert(batch)
+        await db('player_adp_history').insert(batch)
       }
     })
   }

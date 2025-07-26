@@ -1,6 +1,11 @@
 {
   "permissions": {
-    "allow": ["Bash(grep:*)", "Bash(yarn test:*)", "Bash(find:*)"],
+    "allow": [
+      "Bash(grep:*)",
+      "Bash(yarn test:*)",
+      "Bash(find:*)",
+      "mcp__postgres-league__query"
+    ],
     "deny": []
   }
 }
