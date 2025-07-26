@@ -17,7 +17,13 @@ export default function (str) {
   if (clean_str.includes("'")) {
     const s = clean_str.split("'")
     const feet = Number(s[0])
-    const inches = Number(s[1]) || 0
+    let inches = 0
+
+    if (s[1]) {
+      // Remove any quotes and whitespace from the inches part
+      const inches_str = s[1].replace(/"/g, '').trim()
+      inches = Number(inches_str) || 0
+    }
 
     return feet * 12 + inches
   } else if (clean_str.includes('-')) {
