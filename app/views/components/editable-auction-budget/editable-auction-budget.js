@@ -26,7 +26,7 @@ export default class EditableAuctionBudget extends React.Component {
       return this.setState({ invalid: true, helper: 'should be an integer' })
     }
 
-    const int = parseInt(value, 10)
+    const int = Number(value)
     if (int < 0) {
       this.setState({ invalid: true, helper: 'should be a positive integer' })
     } else {

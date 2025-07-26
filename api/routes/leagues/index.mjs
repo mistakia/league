@@ -133,7 +133,7 @@ router.put('/:leagueId', async (req, res) => {
     }
 
     // verify leagueId
-    const lid = parseInt(leagueId, 10)
+    const lid = Number(leagueId)
     const league = await getLeague({ lid })
     if (!league) {
       return res.status(400).send({ error: 'invalid leagueId' })
@@ -164,7 +164,7 @@ router.put('/:leagueId', async (req, res) => {
       if (float_fields.indexOf(field) >= 0) {
         value = parseFloat(value)
       } else {
-        value = parseInt(value, 10)
+        value = Number(value)
       }
 
       if (positive_integer_fields.indexOf(field) >= 0 && value < 0) {

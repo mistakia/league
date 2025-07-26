@@ -188,7 +188,7 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
         for (const teamId in payload.lineups) {
           const lineups = payload.lineups[teamId]
           for (const week in lineups) {
-            const tid = parseInt(teamId, 10)
+            const tid = Number(teamId)
             state.setIn(
               [tid, constants.year, constants.week, 'lineups', week],
               lineups[week]

@@ -49,7 +49,7 @@ export default class SelectedPlayerSeasonProjections extends React.Component {
     const projections_by_week = groupBy(filtered_projections, 'week')
 
     for (const week_key in projections_by_week) {
-      const week = parseInt(week_key, 10)
+      const week = Number(week_key)
       if (week !== constants.week) continue
 
       const average_projections = playerMap.getIn(['projection', `${week}`], {})

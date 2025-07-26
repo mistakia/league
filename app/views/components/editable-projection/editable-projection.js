@@ -8,7 +8,7 @@ export default class EditableProjection extends React.Component {
   onchange = (value) => {
     this.props.save({
       value,
-      week: parseInt(this.props.week, 10),
+      week: Number(this.props.week),
       userId: this.props.userId,
       type: this.props.type,
       pid: this.props.playerMap.get('pid')

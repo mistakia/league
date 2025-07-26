@@ -16,14 +16,14 @@ export default function (str) {
 
   if (clean_str.includes("'")) {
     const s = clean_str.split("'")
-    const feet = parseInt(s[0], 10)
-    const inches = parseInt(s[1], 10) || 0
+    const feet = Number(s[0])
+    const inches = Number(s[1]) || 0
 
     return feet * 12 + inches
   } else if (clean_str.includes('-')) {
     const s = clean_str.split('-')
-    const feet = parseInt(s[0], 10)
-    const inches = parseInt(s[1], 10) || 0
+    const feet = Number(s[0])
+    const inches = Number(s[1]) || 0
 
     return feet * 12 + inches
   } else if (clean_str.includes('/')) {
@@ -32,15 +32,15 @@ export default function (str) {
     const match = clean_str.match(fraction_regex)
 
     if (match) {
-      const whole_number = parseInt(match[1], 10)
-      const numerator = parseInt(match[2], 10)
-      const denominator = parseInt(match[3], 10)
+      const whole_number = Number(match[1])
+      const numerator = Number(match[2])
+      const denominator = Number(match[3])
 
       return whole_number + numerator / denominator
     }
 
-    return parseInt(clean_str, 10)
+    return Number(clean_str)
   } else {
-    return parseInt(clean_str, 10)
+    return Number(clean_str)
   }
 }

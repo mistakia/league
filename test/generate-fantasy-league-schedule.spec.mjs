@@ -33,7 +33,7 @@ describe('UTILS generate_fantasy_league_schedule', function () {
       arr.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map())
 
     for (const teamid in schedulePerTeam) {
-      const team = teams.find((t) => t.uid === parseInt(teamid, 10))
+      const team = teams.find((t) => t.uid === Number(teamid))
       const count = countMatchups(schedulePerTeam[teamid])
       for (const [opponent, occurences] of count.entries()) {
         const oppoTeam = teams.find((t) => t.uid === opponent)
@@ -72,7 +72,7 @@ describe('UTILS generate_fantasy_league_schedule', function () {
       arr.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map())
 
     for (const teamid in schedulePerTeam) {
-      const team = teams.find((t) => t.uid === parseInt(teamid, 10))
+      const team = teams.find((t) => t.uid === Number(teamid))
       const count = countMatchups(schedulePerTeam[teamid])
       for (const [opponent, occurences] of count.entries()) {
         const oppoTeam = teams.find((t) => t.uid === opponent)

@@ -29,7 +29,7 @@ export default function DashboardLeaguePositionalValue({
     // Prepare team names
     const team_names = []
     for (const { tid } of summary.sorted_tids) {
-      const id = parseInt(tid, 10)
+      const id = Number(tid)
       const name = teams.getIn([id, 'name'])
       team_names.push(name || '')
     }
@@ -41,7 +41,7 @@ export default function DashboardLeaguePositionalValue({
     for (const position of league_positions) {
       const data = []
       for (const { tid } of summary.sorted_tids) {
-        const rounded = parseInt(summary.rosters[tid][position].toFixed(1), 10)
+        const rounded = Number(summary.rosters[tid][position].toFixed(1))
         data.push(rounded)
       }
       chart_series.push({
@@ -58,7 +58,7 @@ export default function DashboardLeaguePositionalValue({
       const draft_value = summary.rosters[tid].DRAFT
         ? summary.rosters[tid].DRAFT.toFixed(1)
         : 0
-      const rounded = parseInt(draft_value, 10)
+      const rounded = Number(draft_value)
       draft_data.push(rounded)
     }
     chart_series.push({
@@ -190,7 +190,7 @@ export default function DashboardLeaguePositionalValue({
                   const original_data = current_series.userOptions.data
 
                   for (const item of sorted_teams) {
-                    const team_index = parseInt(item[0], 10)
+                    const team_index = Number(item[0])
                     const point_value = original_data[team_index]
                     data.push(point_value)
                   }

@@ -50,7 +50,7 @@ router.get('/?', async (req, res) => {
       return res.status(401).send({ error: 'invalid token' })
     }
 
-    const tid = parseInt(teamId, 10)
+    const tid = Number(teamId)
 
     const teams = await db('users_teams').where({
       userid: req.auth.userId,
@@ -227,7 +227,7 @@ router.put('/?', async (req, res) => {
     if (!league) {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
-    const tid = parseInt(teamId, 10)
+    const tid = Number(teamId)
 
     const rosterRow = await getRoster({ tid, week, year })
     const roster = new Roster({ roster: rosterRow, league })

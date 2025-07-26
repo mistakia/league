@@ -146,7 +146,7 @@ const analyze_table_coverage = async (
       WHERE ${hash_column} = ?
     `
     const exists_result = await db.raw(exists_query, [format_hash])
-    const record_count = parseInt(exists_result.rows[0].count)
+    const record_count = Number(exists_result.rows[0].count)
 
     if (record_count === 0) {
       return {
@@ -172,7 +172,7 @@ const analyze_table_coverage = async (
       const time_result = await db.raw(time_query, [format_hash])
       coverage[time_col] = time_result.rows.map((row) => ({
         [time_col]: row[time_col],
-        count: parseInt(row.count)
+        count: Number(row.count)
       }))
     }
 
@@ -186,7 +186,7 @@ const analyze_table_coverage = async (
           WHERE ${hash_column} = ?
         `
         const player_result = await db.raw(player_query, [format_hash])
-        coverage.unique_players = parseInt(player_result.rows[0].unique_count)
+        coverage.unique_players = Number(player_result.rows[0].unique_count)
       } else if (col === 'lid') {
         // For league data, get unique league count
         const league_query = `
@@ -195,7 +195,7 @@ const analyze_table_coverage = async (
           WHERE ${hash_column} = ?
         `
         const league_result = await db.raw(league_query, [format_hash])
-        coverage.unique_leagues = parseInt(league_result.rows[0].unique_count)
+        coverage.unique_leagues = Number(league_result.rows[0].unique_count)
       }
     }
 

@@ -65,7 +65,7 @@ const map_state_to_props = createSelector(
 
       for (const [tid, points] of Object.entries(teamPoints)) {
         if (points || isLast) {
-          const team = data.find((t) => t.team.uid === parseInt(tid, 10))
+          const team = data.find((t) => t.team.uid === Number(tid))
           if (!team) continue
           const last = team.projection[team.projection.length - 1]
           if (!last || last[0] < start.valueOf()) {
@@ -108,7 +108,7 @@ const map_state_to_props = createSelector(
 
       for (const [tid, points] of Object.entries(teamPoints)) {
         if (points) {
-          const team = data.find((t) => t.team.uid === parseInt(tid, 10))
+          const team = data.find((t) => t.team.uid === Number(tid))
           if (!team) continue
 
           team.points += points

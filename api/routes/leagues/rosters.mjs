@@ -434,7 +434,7 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'exceeds roster limits' })
     }
 
-    const val = parseInt(value, 10)
+    const val = Number(value)
     if (roster.availableCap < val) {
       return res.status(400).send({ error: 'exceeds cap space' })
     }
@@ -657,7 +657,7 @@ router.put('/?', async (req, res) => {
     const rosterRow = await getRoster({ tid: teamId })
     const roster = new Roster({ roster: rosterRow, league })
     roster.removePlayer(pid)
-    const val = parseInt(value, 10)
+    const val = Number(value)
     if (roster.availableCap < val) {
       return res.status(400).send({ error: 'exceeds cap space' })
     }

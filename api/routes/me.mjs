@@ -248,7 +248,7 @@ router.get('/?', async (req, res) => {
     const divisionsByLeagueId = groupBy(divisions, 'lid')
 
     for (const lid in seasonsByLeagueId) {
-      const league = leagues.find((l) => l.uid === parseInt(lid, 10))
+      const league = leagues.find((l) => l.uid === Number(lid))
       league.years = seasonsByLeagueId[lid].map((s) => s.year)
 
       // Add divisions to the league

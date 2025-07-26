@@ -13,14 +13,14 @@ const calculateStatsFromPlays = (plays) => {
   const playerToTeam = {}
 
   const addTeamStat = (team, stat, value) => {
-    value = parseInt(value, 10)
+    value = Number(value)
     teams[team] = teams[team] || constants.createFullStats()
     teams[team][stat] += value
   }
 
   const addStat = (pid, stat, value) => {
     if (!pid) return
-    value = parseInt(value, 10)
+    value = Number(value)
 
     if (isNaN(value)) {
       // TODO log warning

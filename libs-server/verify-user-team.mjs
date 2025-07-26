@@ -5,7 +5,7 @@ export default async function ({ userId, leagueId, teamId, requireLeague }) {
   if (!teamId) {
     throw new Error('missing teamId')
   }
-  const tid = parseInt(teamId, 10)
+  const tid = Number(teamId)
 
   if (isNaN(tid)) {
     throw new Error('invalid teamId')
@@ -15,7 +15,7 @@ export default async function ({ userId, leagueId, teamId, requireLeague }) {
     throw new Error('missing leagueId')
   }
 
-  const lid = parseInt(leagueId, 10)
+  const lid = Number(leagueId)
 
   // verify team belongs to user
   const userTeams = await db('teams')

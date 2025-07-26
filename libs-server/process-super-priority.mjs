@@ -146,9 +146,9 @@ export default async function process_super_priority({
 
 const main = async () => {
   const pid = process.argv[2]
-  const original_tid = parseInt(process.argv[3])
-  const lid = parseInt(process.argv[4]) || 1
-  const super_priority_uid = parseInt(process.argv[5])
+  const original_tid = Number(process.argv[3])
+  const lid = Number(process.argv[4]) || 1
+  const super_priority_uid = Number(process.argv[5])
 
   if (!pid || !original_tid || !super_priority_uid) {
     console.log(

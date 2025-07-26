@@ -43,8 +43,8 @@ const import_espn_line_win_rates = async () => {
         player_name: player_link.text(),
         espn_id: Number(espn_id) || null,
         team: fixTeam($(cells[2]).text()),
-        wins: parseInt($(cells[3]).text(), 10),
-        plays: parseInt($(cells[4]).text(), 10),
+        wins: Number($(cells[3]).text()),
+        plays: Number($(cells[4]).text()),
         [win_rate_key]: parseFloat($(cells[5]).text()) / 100,
         double_team_pct: parseFloat($(cells[6]).text()) / 100
       }

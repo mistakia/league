@@ -598,7 +598,7 @@ router.delete('/?', async (req, res) => {
       return res.status(400).send({ error: 'missing leagueId' })
     }
 
-    const tid = parseInt(teamId, 10)
+    const tid = Number(teamId)
 
     // verify teamId, leagueId belongs to user
     try {
@@ -768,7 +768,7 @@ router.put('/?', async (req, res) => {
     const { teamId } = req.params
     const { pid, leagueId } = req.body
     let { release } = req.body
-    const bid = parseInt(req.body.bid || 0, 10)
+    const bid = Number(req.body.bid || 0)
 
     if (!Array.isArray(release)) {
       release = release ? [release] : []
@@ -797,7 +797,7 @@ router.put('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid bid' })
     }
 
-    const tid = parseInt(teamId, 10)
+    const tid = Number(teamId)
 
     // verify teamId, leagueId belongs to user
     try {
@@ -1039,7 +1039,7 @@ router.post('/nominate/?', async (req, res) => {
       return res.status(400).send({ error: 'missing leagueId' })
     }
 
-    const tid = parseInt(teamId, 10)
+    const tid = Number(teamId)
 
     // verify teamId, leagueId belongs to user
     try {
@@ -1178,7 +1178,7 @@ router.delete('/nominate/?', async (req, res) => {
       return res.status(400).send({ error: 'missing leagueId' })
     }
 
-    const tid = parseInt(teamId, 10)
+    const tid = Number(teamId)
 
     // verify teamId, leagueId belongs to user
     try {

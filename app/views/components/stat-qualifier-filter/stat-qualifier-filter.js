@@ -25,7 +25,7 @@ export default class StatQualifierFilter extends React.Component {
     const { value } = event.target
     this.setState({ value })
 
-    if (isNaN(value) || parseInt(value, 10) < 0) {
+    if (isNaN(value) || Number(value) < 0) {
       return this.setState({
         invalid: true,
         helper: 'should be greater than 1'

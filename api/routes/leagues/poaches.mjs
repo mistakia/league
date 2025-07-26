@@ -18,7 +18,7 @@ router.post('/?', async (req, res) => {
   const { db, logger, broadcast } = req.app.locals
   try {
     const { pid, release, leagueId } = req.body
-    const teamId = parseInt(req.body.teamId, 10)
+    const teamId = Number(req.body.teamId)
 
     if (constants.season.week > constants.season.finalWeek) {
       return res.status(400).send({ error: 'player is locked' })
@@ -164,7 +164,7 @@ router.put('/:poachId', async (req, res) => {
       return res.status(400).send({ error: error.message })
     }
 
-    const tid = parseInt(teamId, 10)
+    const tid = Number(teamId)
     const league = await getLeague({ lid: leagueId })
     if (!league) {
       return res.status(400).send({ error: 'invalid leagueId' })

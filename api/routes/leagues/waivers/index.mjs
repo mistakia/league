@@ -142,7 +142,7 @@ router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { leagueId } = req.params
-    const type = parseInt(req.query.type, 10)
+    const type = Number(req.query.type)
 
     if (!type) {
       return res.status(400).send({ error: 'missing type' })
@@ -268,7 +268,7 @@ router.post('/?', async (req, res) => {
   try {
     const { pid, leagueId, type, teamId, super_priority } = req.body
     let { release } = req.body
-    let bid = parseInt(req.body.bid || 0, 10)
+    let bid = Number(req.body.bid || 0)
 
     if (!req.auth) {
       return res.status(401).send({ error: 'invalid token' })
@@ -316,7 +316,7 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid bid' })
     }
 
-    const tid = parseInt(teamId, 10)
+    const tid = Number(teamId)
 
     // verify teamId, leagueId belongs to user
     try {
@@ -714,7 +714,7 @@ router.put('/order', async (req, res) => {
       return res.status(400).send({ error: error.message })
     }
 
-    const tid = parseInt(teamId, 10)
+    const tid = Number(teamId)
 
     const result = []
     for (const [index, waiverId] of waivers.entries()) {
@@ -800,7 +800,7 @@ router.put('/:waiverId', async (req, res) => {
     const { waiverId } = req.params
     const { teamId, leagueId } = req.body
     let { release } = req.body
-    const bid = parseInt(req.body.bid || 0, 10)
+    const bid = Number(req.body.bid || 0)
 
     if (!req.auth) {
       return res.status(401).send({ error: 'invalid token' })
@@ -838,7 +838,7 @@ router.put('/:waiverId', async (req, res) => {
       return res.status(400).send({ error: error.message })
     }
 
-    const tid = parseInt(teamId, 10)
+    const tid = Number(teamId)
 
     // verify waiverId belongs to teamId
     const waivers = await db('waivers')
@@ -977,7 +977,7 @@ router.post('/:waiverId/cancel', async (req, res) => {
       return res.status(400).send({ error: 'invalid waiverId' })
     }
 
-    const waiverId = parseInt(req.params.waiverId, 10)
+    const waiverId = Number(req.params.waiverId)
     const { teamId, leagueId } = req.body
 
     if (!teamId) {
@@ -1000,7 +1000,7 @@ router.post('/:waiverId/cancel', async (req, res) => {
       return res.status(400).send({ error: error.message })
     }
 
-    const tid = parseInt(teamId, 10)
+    const tid = Number(teamId)
 
     // verify waiverId belongs to teamId
     const waivers = await db('waivers')

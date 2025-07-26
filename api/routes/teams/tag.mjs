@@ -116,7 +116,7 @@ router.post('/?', async (req, res) => {
     }
 
     const validTags = Object.values(constants.tags)
-    tag = parseInt(tag, 10)
+    tag = Number(tag)
     if (!validTags.includes(tag)) {
       return res.status(400).send({ error: 'invalid tag' })
     }
@@ -133,7 +133,7 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: error.message })
     }
 
-    const tid = parseInt(teamId, 10)
+    const tid = Number(teamId)
 
     const league = await getLeague({ lid: leagueId })
     if (!league) {
@@ -315,7 +315,7 @@ router.delete('/?', async (req, res) => {
       return res.status(400).send({ error: error.message })
     }
 
-    const tid = parseInt(teamId, 10)
+    const tid = Number(teamId)
 
     const league = await getLeague({ lid: leagueId })
     if (!league) {
