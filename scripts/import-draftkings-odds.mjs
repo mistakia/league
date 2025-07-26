@@ -618,7 +618,7 @@ const parse_filters = async () => {
   if (argv.categories) {
     const category_ids = argv.categories
       .split(',')
-      .map((id) => parseInt(id))
+      .map((id) => Number(id))
       .filter((id) => !isNaN(id))
     category_filter = category_ids.length > 0 ? category_ids : null
   }
@@ -626,7 +626,7 @@ const parse_filters = async () => {
   if (argv.subcategories) {
     const subcategory_ids = argv.subcategories
       .split(',')
-      .map((id) => parseInt(id))
+      .map((id) => Number(id))
       .filter((id) => !isNaN(id))
     subcategory_filter = subcategory_ids.length > 0 ? subcategory_ids : null
   }

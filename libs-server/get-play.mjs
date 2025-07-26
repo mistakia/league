@@ -48,7 +48,7 @@ export default async function ({
   }
 
   if (qtr) {
-    query.where({ qtr: parseInt(qtr, 10) })
+    query.where({ qtr: Number(qtr) })
   }
 
   if (game_clock_start) {
@@ -56,7 +56,7 @@ export default async function ({
   }
 
   if (dwn) {
-    query.where({ dwn: parseInt(dwn, 10) })
+    query.where({ dwn: Number(dwn) })
   }
 
   if (play_type) {

@@ -374,7 +374,7 @@ router.put(
       }
 
       if (typeof value !== 'undefined') {
-        value = parseInt(value, 10)
+        value = Number(value)
 
         if (isNaN(value) || value % 1 !== 0) {
           return res.status(400).send({ error: 'invalid value' })

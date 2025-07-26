@@ -260,7 +260,7 @@ router.get('/?', async (req, res) => {
   try {
     const { leagueId } = req.params
     const { processed, teamId } = req.query
-    const type = parseInt(req.query.type, 10)
+    const type = Number(req.query.type)
 
     if (!processed) {
       return res.status(400).send({ error: 'missing processed' })
@@ -284,7 +284,7 @@ router.get('/?', async (req, res) => {
 
     // verify teamId and get failed bids for teamId
     if (teamId) {
-      const tid = parseInt(teamId, 10)
+      const tid = Number(teamId)
 
       // verify teamId, leagueId belongs to user
       try {

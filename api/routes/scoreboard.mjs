@@ -73,7 +73,7 @@ const router = express.Router()
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const week = parseInt(req.query.week || constants.season.week, 10)
+    const week = Number(req.query.week || constants.season.week)
 
     if (isNaN(week)) {
       return res.status(400).send({ error: 'invalid week' })

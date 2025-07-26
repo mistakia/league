@@ -38,8 +38,8 @@ export default function EditableLeagueField({
         return set_value(defaultValue)
       }
 
-      value = parseInt(value, 10)
-      defaultValue = parseInt(defaultValue, 10)
+      value = Number(value)
+      defaultValue = Number(defaultValue)
     } else if (type === 'float') {
       if (isNaN(value)) {
         set_helper_text('not a number')

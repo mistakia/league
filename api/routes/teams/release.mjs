@@ -127,8 +127,8 @@ router.post('/?', async (req, res) => {
     } catch (error) {
       return res.status(400).send({ error: error.message })
     }
-    const tid = parseInt(teamId, 10)
-    const lid = parseInt(leagueId, 10)
+    const tid = Number(teamId)
+    const lid = Number(leagueId)
 
     // verify player id
     const player_rows = await db('player').where({ pid }).limit(1)

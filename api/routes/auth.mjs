@@ -141,8 +141,8 @@ router.post('/register', async (req, res) => {
     const { email, password, invite_code } = req.body
     let username = req.body.username
 
-    const team_id = req.body.teamId ? parseInt(req.body.teamId, 10) : null
-    const league_id = req.body.leagueId ? parseInt(req.body.leagueId, 10) : null
+    const team_id = req.body.teamId ? Number(req.body.teamId) : null
+    const league_id = req.body.leagueId ? Number(req.body.leagueId) : null
 
     if (!password) {
       return res.status(400).send({ error: 'missing password param' })

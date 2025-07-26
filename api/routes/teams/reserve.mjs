@@ -137,7 +137,7 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: error.message })
     }
 
-    const tid = parseInt(teamId, 10)
+    const tid = Number(teamId)
     let data
     try {
       data = await submitReserve({

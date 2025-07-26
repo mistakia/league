@@ -44,7 +44,7 @@ export default class AuctionMainBid extends React.Component {
   }
 
   handleChange = (event) => {
-    const value = event.target.value ? parseInt(event.target.value, 10) : ''
+    const value = event.target.value ? Number(event.target.value) : ''
     if (value && !Number.isInteger(value)) {
       return
     }

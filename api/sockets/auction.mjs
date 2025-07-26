@@ -131,7 +131,7 @@ export default class Auction {
       this.broadcast({
         type: 'AUCTION_CONNECTED',
         payload: {
-          connected: Object.keys(this._connected).map((k) => parseInt(k, 10))
+          connected: Object.keys(this._connected).map((k) => Number(k))
         }
       })
     })

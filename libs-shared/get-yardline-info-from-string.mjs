@@ -17,7 +17,7 @@ export default function getYardlineInfoFromString(str) {
 
   const results = str.match(re)
   const side = results[1]
-  const number = parseInt(results[2], 10)
+  const number = Number(results[2])
 
   if (number === 50) {
     return {

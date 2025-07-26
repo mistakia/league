@@ -378,7 +378,7 @@ router.post('/?', async (req, res) => {
     } catch (error) {
       return res.status(400).send({ error: error.message })
     }
-    const lid = parseInt(leagueId, 10)
+    const lid = Number(leagueId)
 
     // make sure draft has started
     const league = await getLeague({ lid })

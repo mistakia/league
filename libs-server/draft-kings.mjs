@@ -99,7 +99,7 @@ export const extract_year_from_market_name = (source_market_name) => {
   const season_match = source_market_name.match(season_pattern)
 
   if (season_match && season_match[1]) {
-    const year = parseInt(season_match[1], 10)
+    const year = Number(season_match[1])
     log(
       `Extracted year from season pattern: ${year} from "${source_market_name}"`
     )

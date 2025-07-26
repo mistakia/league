@@ -57,8 +57,8 @@ const fetch_cbs_data = async (url) => {
         .text()
         .trim()
       const adp = parseFloat($(cells[3]).text().trim())
-      const high_adp = parseInt($(cells[4]).text().split('/')[0].trim())
-      const low_adp = parseInt($(cells[4]).text().split('/')[1].trim())
+      const high_adp = Number($(cells[4]).text().split('/')[0].trim())
+      const low_adp = Number($(cells[4]).text().split('/')[1].trim())
       const percent_drafted = parseFloat($(cells[5]).text().trim())
 
       return {

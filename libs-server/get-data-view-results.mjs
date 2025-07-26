@@ -227,13 +227,13 @@ const process_dynamic_year_param = (year_param) => {
     if (typeof year === 'object') {
       switch (year.dynamic_type) {
         case 'last_n_years': {
-          const n = Number(year.value || 3)
+          const n = parseInt(year.value || 3, 10)
           return Array.from({ length: n }, (_, i) =>
             Math.max(min_year, current_year - i)
           )
         }
         case 'next_n_years': {
-          const n = Number(year.value || 3)
+          const n = parseInt(year.value || 3, 10)
           return Array.from({ length: n }, (_, i) =>
             Math.min(max_year, current_year + i + 1)
           )
@@ -244,7 +244,7 @@ const process_dynamic_year_param = (year_param) => {
           return []
       }
     }
-    const numeric_year = Number(year)
+    const numeric_year = parseInt(year, 10)
     return isNaN(numeric_year)
       ? []
       : Math.max(min_year, Math.min(max_year, numeric_year))
@@ -264,13 +264,13 @@ const process_dynamic_week_param = (week_param) => {
     if (typeof week === 'object') {
       switch (week.dynamic_type) {
         case 'last_n_weeks': {
-          const n = Number(week.value || 3)
+          const n = parseInt(week.value || 3, 10)
           return Array.from({ length: n }, (_, i) =>
             Math.max(min_week, current_week - i)
           )
         }
         case 'next_n_weeks': {
-          const n = Number(week.value || 3)
+          const n = parseInt(week.value || 3, 10)
           return Array.from({ length: n }, (_, i) =>
             Math.min(max_week, current_week + i + 1)
           )
@@ -281,7 +281,7 @@ const process_dynamic_week_param = (week_param) => {
           return []
       }
     }
-    const numeric_week = Number(week)
+    const numeric_week = parseInt(week, 10)
     return isNaN(numeric_week)
       ? []
       : Math.max(min_week, Math.min(max_week, numeric_week))
@@ -334,7 +334,7 @@ const get_year_range = (columns, where) => {
         ? params.year
         : [params.year]
       year_array.forEach((year) => {
-        const parsed_year = parseInt(year)
+        const parsed_year = parseInt(year, 10)
         if (parsed_year <= constants.season.year) {
           years.add(parsed_year)
         }

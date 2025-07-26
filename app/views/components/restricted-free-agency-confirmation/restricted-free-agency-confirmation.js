@@ -119,7 +119,7 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
     } else if (value < 0) {
       this.setState({ error: true, bid_exceeds_max: false })
     } else {
-      const bid_exceeds_max = parseInt(value, 10) > max_bid
+      const bid_exceeds_max = Number(value) > max_bid
       this.setState({
         error: false,
         bid_exceeds_max
@@ -133,7 +133,7 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
     const pids = value.map((p) => p.id)
     this.setState({ release_ids: pids }, () => {
       // Recalculate if bid exceeds max after release changes
-      const current_bid = parseInt(this.state.bid, 10)
+      const current_bid = Number(this.state.bid)
       if (current_bid > 0) {
         const max_bid = this.get_max_bid()
         const bid_exceeds_max = current_bid > max_bid
@@ -165,7 +165,7 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
         release: this.state.release_ids,
         playerTid: player_tid,
         teamId: tid,
-        bid: parseInt(bid, 10),
+        bid: Number(bid),
         remove: untag
       }
 
