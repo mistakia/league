@@ -82,13 +82,15 @@ const import_mfl_adp = async ({
         adp_inserts.push({
           pid: player_row.pid,
           pos: player_row.pos,
-          week: 0,
           year,
-          avg: player.average_pick,
-          min: player.min_pick,
-          max: player.max_pick,
+          adp: player.average_pick,
+          min_pick: player.min_pick,
+          max_pick: player.max_pick,
+          std_dev: null,
+          sample_size: player.drafts_selected_in,
+          percent_drafted: player.draft_sel_pct,
           source_id: 'MFL',
-          ranking_type
+          adp_type: ranking_type
         })
       } else {
         unmatched_players.push(player)
@@ -161,9 +163,9 @@ const import_mfl_adp = async ({
         items: adp_inserts,
         batch_size: BATCH_SIZE,
         save: async (batch) => {
-          await db('player_rankings_index')
+          await db('player_adp_index')
             .insert(batch)
-            .onConflict(['year', 'week', 'source_id', 'ranking_type', 'pid'])
+            .onConflict(['year', 'source_id', 'adp_type', 'pid'])
             .merge()
         }
       })
@@ -171,7 +173,7 @@ const import_mfl_adp = async ({
         items: adp_inserts.map((i) => ({ ...i, timestamp })),
         batch_size: BATCH_SIZE,
         save: async (batch) => {
-          await db('player_rankings').insert(batch)
+          await db('player_adp_history').insert(batch)
         }
       })
     }

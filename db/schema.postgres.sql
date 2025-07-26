@@ -1555,6 +1555,12 @@ DROP INDEX IF EXISTS public.idx_player_fname;
 DROP INDEX IF EXISTS public.idx_player_college_seasonlogs_season;
 DROP INDEX IF EXISTS public.idx_player_college_seasonlogs_pid;
 DROP INDEX IF EXISTS public.idx_player_college_careerlogs_pid;
+DROP INDEX IF EXISTS public.idx_player_adp_index_year;
+DROP INDEX IF EXISTS public.idx_player_adp_index_source_type;
+DROP INDEX IF EXISTS public.idx_player_adp_index_pid;
+DROP INDEX IF EXISTS public.idx_player_adp_history_timestamp;
+DROP INDEX IF EXISTS public.idx_player_adp_history_source_type;
+DROP INDEX IF EXISTS public.idx_player_adp_history_pid;
 DROP INDEX IF EXISTS public.idx_placed_wagers_userid;
 DROP INDEX IF EXISTS public.idx_placed_wagers_placed_at;
 DROP INDEX IF EXISTS public.idx_opening_days_year_opening_day;
@@ -1773,6 +1779,7 @@ ALTER TABLE IF EXISTS ONLY public.player_college_careerlogs DROP CONSTRAINT IF E
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_cfbref_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_cbs_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_aliases DROP CONSTRAINT IF EXISTS player_aliases_pkey;
+ALTER TABLE IF EXISTS ONLY public.player_adp_index DROP CONSTRAINT IF EXISTS player_adp_index_unique;
 ALTER TABLE IF EXISTS ONLY public.pff_player_seasonlogs DROP CONSTRAINT IF EXISTS pff_player_seasonlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.pff_player_seasonlogs_changelog DROP CONSTRAINT IF EXISTS pff_player_seasonlogs_changelog_pkey;
 ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_index DROP CONSTRAINT IF EXISTS ngs_prospect_scores_index_pkey;
@@ -1905,7 +1912,7 @@ DROP TABLE IF EXISTS public.player_salaries;
 DROP TABLE IF EXISTS public.player_rushing_gamelogs;
 DROP TABLE IF EXISTS public.player_receiving_gamelogs;
 DROP TABLE IF EXISTS public.player_rankings_index;
-DROP TABLE IF EXISTS public.player_rankings;
+DROP TABLE IF EXISTS public.player_rankings_history;
 DROP TABLE IF EXISTS public.player_prospect_profile;
 DROP TABLE IF EXISTS public.player_passing_gamelogs;
 DROP TABLE IF EXISTS public.player_gamelogs_year_2026;
@@ -1944,6 +1951,8 @@ DROP TABLE IF EXISTS public.player_college_careerlogs;
 DROP SEQUENCE IF EXISTS public.player_changelog_uid_seq;
 DROP TABLE IF EXISTS public.player_changelog;
 DROP TABLE IF EXISTS public.player_aliases;
+DROP TABLE IF EXISTS public.player_adp_index;
+DROP TABLE IF EXISTS public.player_adp_history;
 DROP TABLE IF EXISTS public.player;
 DROP TABLE IF EXISTS public.play_changelog;
 DROP SEQUENCE IF EXISTS public.placed_wagers_wager_id_seq;
@@ -2104,6 +2113,52 @@ DROP TYPE IF EXISTS public.espn_win_rate_type;
 DROP TYPE IF EXISTS public.draft_ranking_type;
 DROP TYPE IF EXISTS public.dfs_source_id;
 DROP TYPE IF EXISTS public.coverage_type;
+DROP TYPE IF EXISTS public.adp_type;
+DROP TYPE IF EXISTS public.adp_source_id;
+--
+-- Name: adp_source_id; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.adp_source_id AS ENUM (
+    'SLEEPER',
+    'ESPN',
+    'YAHOO',
+    'MFL',
+    'NFL',
+    'CBS',
+    'UNDERDOG',
+    'DRAFTKINGS',
+    'RTS'
+);
+
+
+--
+-- Name: adp_type; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.adp_type AS ENUM (
+    'STANDARD_REDRAFT',
+    'PPR_REDRAFT',
+    'HALF_PPR_REDRAFT',
+    'STANDARD_SUPERFLEX_REDRAFT',
+    'PPR_SUPERFLEX_REDRAFT',
+    'HALF_PPR_SUPERFLEX_REDRAFT',
+    'STANDARD_DYNASTY',
+    'PPR_DYNASTY',
+    'HALF_PPR_DYNASTY',
+    'STANDARD_SUPERFLEX_DYNASTY',
+    'PPR_SUPERFLEX_DYNASTY',
+    'HALF_PPR_SUPERFLEX_DYNASTY',
+    'STANDARD_ROOKIE',
+    'PPR_ROOKIE',
+    'HALF_PPR_ROOKIE',
+    'STANDARD_SUPERFLEX_ROOKIE',
+    'PPR_SUPERFLEX_ROOKIE',
+    'HALF_PPR_SUPERFLEX_ROOKIE',
+    'BESTBALL'
+);
+
+
 --
 -- Name: coverage_type; Type: TYPE; Schema: public; Owner: -
 --
@@ -15892,6 +15947,101 @@ COMMENT ON COLUMN public.player.contract_inflated_guaranteed IS 'Inflated guaran
 
 
 --
+-- Name: player_adp_history; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_adp_history (
+    pid character varying(25),
+    pos character varying(4) NOT NULL,
+    year smallint,
+    adp numeric(5,2),
+    min_pick integer,
+    max_pick integer,
+    std_dev numeric(5,2),
+    sample_size integer,
+    percent_drafted numeric(5,2),
+    "timestamp" integer NOT NULL,
+    source_id public.adp_source_id,
+    adp_type public.adp_type NOT NULL
+);
+
+
+--
+-- Name: TABLE player_adp_history; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.player_adp_history IS 'Historical ADP data with timestamps for trend analysis';
+
+
+--
+-- Name: player_adp_index; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.player_adp_index (
+    pid character varying(25) NOT NULL,
+    pos character varying(4) NOT NULL,
+    year smallint NOT NULL,
+    adp numeric(5,2),
+    min_pick integer,
+    max_pick integer,
+    std_dev numeric(5,2),
+    sample_size integer,
+    percent_drafted numeric(5,2),
+    source_id public.adp_source_id NOT NULL,
+    adp_type public.adp_type NOT NULL
+);
+
+
+--
+-- Name: TABLE player_adp_index; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.player_adp_index IS 'Current ADP data indexed for quick access';
+
+
+--
+-- Name: COLUMN player_adp_index.adp; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_adp_index.adp IS 'Average draft position';
+
+
+--
+-- Name: COLUMN player_adp_index.min_pick; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_adp_index.min_pick IS 'Earliest draft position observed';
+
+
+--
+-- Name: COLUMN player_adp_index.max_pick; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_adp_index.max_pick IS 'Latest draft position observed';
+
+
+--
+-- Name: COLUMN player_adp_index.std_dev; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_adp_index.std_dev IS 'Standard deviation of draft positions';
+
+
+--
+-- Name: COLUMN player_adp_index.sample_size; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_adp_index.sample_size IS 'Number of drafts contributing to ADP calculation';
+
+
+--
+-- Name: COLUMN player_adp_index.percent_drafted; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_adp_index.percent_drafted IS 'Percentage of drafts where player was selected';
+
+
+--
 -- Name: player_aliases; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -19593,10 +19743,10 @@ CREATE TABLE public.player_prospect_profile (
 
 
 --
--- Name: player_rankings; Type: TABLE; Schema: public; Owner: -
+-- Name: player_rankings_history; Type: TABLE; Schema: public; Owner: -
 --
 
-CREATE TABLE public.player_rankings (
+CREATE TABLE public.player_rankings_history (
     pid character varying(25),
     pos character varying(4) NOT NULL,
     week smallint NOT NULL,
@@ -22569,6 +22719,14 @@ ALTER TABLE ONLY public.pff_player_seasonlogs
 
 
 --
+-- Name: player_adp_index player_adp_index_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player_adp_index
+    ADD CONSTRAINT player_adp_index_unique UNIQUE (year, source_id, adp_type, pid);
+
+
+--
 -- Name: player_aliases player_aliases_pkey; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -24156,6 +24314,48 @@ CREATE INDEX idx_placed_wagers_placed_at ON public.placed_wagers USING btree (pl
 --
 
 CREATE INDEX idx_placed_wagers_userid ON public.placed_wagers USING btree (userid);
+
+
+--
+-- Name: idx_player_adp_history_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_adp_history_pid ON public.player_adp_history USING btree (pid);
+
+
+--
+-- Name: idx_player_adp_history_source_type; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_adp_history_source_type ON public.player_adp_history USING btree (source_id, adp_type);
+
+
+--
+-- Name: idx_player_adp_history_timestamp; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_adp_history_timestamp ON public.player_adp_history USING btree ("timestamp");
+
+
+--
+-- Name: idx_player_adp_index_pid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_adp_index_pid ON public.player_adp_index USING btree (pid);
+
+
+--
+-- Name: idx_player_adp_index_source_type; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_adp_index_source_type ON public.player_adp_index USING btree (source_id, adp_type);
+
+
+--
+-- Name: idx_player_adp_index_year; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_adp_index_year ON public.player_adp_index USING btree (year);
 
 
 --

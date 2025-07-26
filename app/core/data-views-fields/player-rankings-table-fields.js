@@ -6,7 +6,7 @@ const { single_year, single_week } = common_column_params
 
 const create_player_rankings_field = (props) => ({
   ...props,
-  column_groups: [COLUMN_GROUPS.RANKINGS_ADP],
+  column_groups: [COLUMN_GROUPS.RANKINGS],
   size: 70,
   data_type: table_constants.TABLE_DATA_TYPES.NUMBER,
   column_params: {
