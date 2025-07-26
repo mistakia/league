@@ -113,7 +113,7 @@ const import_individual_fantasypros_weekly_rankings = async ({
       .insert(inserts)
       .onConflict(['year', 'week', 'source_id', 'ranking_type', 'pid'])
       .merge()
-    await db('player_rankings').insert(
+    await db('player_rankings_history').insert(
       inserts.map((i) => ({ ...i, timestamp }))
     )
   }

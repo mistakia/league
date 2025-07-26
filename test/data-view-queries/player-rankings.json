@@ -1,6 +1,6 @@
 {
-  "name": "player_rankings",
-  "description": "Test case for player_rankings",
+  "name": "player_rankings_history",
+  "description": "Test case for player_rankings_history",
   "request": {
     "columns": [
       {
