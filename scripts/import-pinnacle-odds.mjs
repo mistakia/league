@@ -1,6 +1,7 @@
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+import fs from 'fs-extra'
 import dayjs from 'dayjs'
 import oddslib from 'oddslib'
 
@@ -16,34 +17,118 @@ import {
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const argv = yargs(hideBin(process.argv))
+  .option('dry', {
+    describe: 'Dry run - do not insert to database',
+    type: 'boolean',
+    default: false
+  })
+  .option('ignore-cache', {
+    describe: 'Ignore cache and fetch fresh data',
+    type: 'boolean',
+    default: false
+  })
+  .option('ignore-wait', {
+    describe: 'Ignore wait time between requests',
+    type: 'boolean',
+    default: false
+  })
+  .option('save', {
+    describe: 'Save JSON files to tmp directory',
+    type: 'boolean',
+    default: false
+  })
+  .help('h')
+  .alias('h', 'help').argv
+
 const log = debug('import-pinnacle-odds')
 debug.enable(
   'import-pinnacle-odds,pinnacle,get-player,insert-prop-market,insert-prop-market-selections'
 )
 
+const format_source_event_name = ({
+  is_valid_matchup,
+  away_team,
+  home_team,
+  pinnacle_matchup,
+  pinnacle_matchup_special_category,
+  pinnacle_matchup_special_description
+}) => {
+  if (is_valid_matchup) {
+    return `${away_team} @ ${home_team}`
+  }
+  if (pinnacle_matchup.special) {
+    return `${pinnacle_matchup_special_category} - ${pinnacle_matchup_special_description}`
+  }
+  return null
+}
+
+const process_market_odds = async (
+  pinnacle_matchup,
+  pinnacle_markets,
+  timestamp,
+  nfl_games,
+  unmatched_markets,
+  unmatched_combinations
+) => {
+  const formatted_markets = []
+
+  for (const odds_data of pinnacle_markets) {
+    // Convert odds structure to match expected format
+    const market_selection_odds = odds_data.prices.map((price) => ({
+      participantId: price.participantId || price.designation,
+      price: price.price,
+      points: price.points || null
+    }))
+
+    // Create market with odds metadata
+    const extended_pinnacle_matchup = {
+      ...pinnacle_matchup,
+      pinnacle_odds_type: odds_data.type,
+      pinnacle_odds_key: odds_data.key,
+      is_alternate_pinnacle_market: odds_data.isAlternate || false
+    }
+
+    const formatted_market = await format_market({
+      pinnacle_matchup: extended_pinnacle_matchup,
+      market_selection_odds,
+      timestamp,
+      nfl_games,
+      unmatched_markets,
+      unmatched_combinations
+    })
+
+    formatted_markets.push(formatted_market)
+  }
+
+  return formatted_markets
+}
+
 const format_market = async ({
-  pinnacle_market,
+  pinnacle_matchup,
   market_selection_odds,
   timestamp,
-  nfl_games = []
+  nfl_games = [],
+  unmatched_markets,
+  unmatched_combinations
 }) => {
   let nfl_game
   const selections = []
 
-  // Extract home and away teams from parent object
-  const home_team = pinnacle_market.parent.participants.find(
-    (p) => p.alignment === 'home'
-  )?.name
-  const away_team = pinnacle_market.parent.participants.find(
-    (p) => p.alignment === 'away'
-  )?.name
+  const source_market_id = `${pinnacle_matchup.id}/${pinnacle_matchup.pinnacle_odds_key}`
 
-  const teams = [fixTeam(home_team), fixTeam(away_team)]
+  // Extract home and away teams from market participants
+  const participants = pinnacle_matchup.participants || []
+  const home_team = participants.find((p) => p.alignment === 'home')?.name
+  const away_team = participants.find((p) => p.alignment === 'away')?.name
+
+  const is_valid_matchup =
+    pinnacle_matchup.type === 'matchup' && home_team && away_team
+  const teams = is_valid_matchup ? [fixTeam(home_team), fixTeam(away_team)] : []
 
   if (home_team && away_team) {
     const { week, seas_type } = constants.season.calculate_week(
-      dayjs(pinnacle_market.parent.startTime)
+      dayjs(pinnacle_matchup.startTime)
     )
     nfl_game = nfl_games.find(
       (game) =>
@@ -55,12 +140,18 @@ const format_market = async ({
     )
   }
 
-  const special_category = pinnacle_market.special?.category
-  const special_description = pinnacle_market.special?.description
+  const pinnacle_matchup_special_description =
+    pinnacle_matchup.special?.description
+  const pinnacle_matchup_special_category = pinnacle_matchup.special?.category
 
   let player_row = null
-  if (special_category === 'Player Props' && special_description) {
-    const player_name_string = special_description.split('(')[0].trim()
+  if (
+    pinnacle_matchup_special_category === 'Player Props' &&
+    pinnacle_matchup_special_description
+  ) {
+    const player_name_string = pinnacle_matchup_special_description
+      .split('(')[0]
+      .trim()
     try {
       player_row = await find_player_row({
         name: player_name_string,
@@ -74,11 +165,22 @@ const format_market = async ({
   }
 
   for (const selection of market_selection_odds) {
-    const pinnnacle_market_participant = pinnacle_market.participants.find(
-      (p) => p.id === selection.participantId
-    )
+    let pinnacle_matchup_participant
+    let market_participant_name
 
-    const market_participant_name = pinnnacle_market_participant?.name
+    // For matchup markets, participants don't have IDs and should be matched by alignment
+    if (pinnacle_matchup.type === 'matchup') {
+      pinnacle_matchup_participant = pinnacle_matchup.participants.find(
+        (p) => p.alignment === selection.participantId
+      )
+      market_participant_name = pinnacle_matchup_participant?.name
+    } else {
+      // For special markets, match by participant ID
+      pinnacle_matchup_participant = pinnacle_matchup.participants.find(
+        (p) => p.id === selection.participantId
+      )
+      market_participant_name = pinnacle_matchup_participant?.name
+    }
 
     // filter some common non player values
     const filtered_name = market_participant_name
@@ -110,7 +212,7 @@ const format_market = async ({
 
     selections.push({
       source_id: 'PINNACLE',
-      source_market_id: pinnacle_market.id,
+      source_market_id,
       source_selection_id: selection.participantId,
 
       selection_pid: player_row?.pid || null,
@@ -122,24 +224,56 @@ const format_market = async ({
     })
   }
 
+  const market_type = pinnacle.get_market_type({
+    is_alternate_pinnacle_market: pinnacle_matchup.is_alternate_pinnacle_market,
+    pinnacle_matchup_type: pinnacle_matchup.type,
+    pinnacle_matchup_units: pinnacle_matchup.units,
+    pinnacle_special_description: pinnacle_matchup_special_description,
+    pinnacle_special_category: pinnacle_matchup_special_category,
+    pinnacle_odds_type: pinnacle_matchup.pinnacle_odds_type
+  })
+
+  // Track unmatched markets
+  if (!market_type) {
+    const combination_key = `${pinnacle_matchup.type}/${pinnacle_matchup_special_category}/${pinnacle_matchup_special_description}/${pinnacle_matchup.pinnacle_odds_type}/${pinnacle_matchup.units}/${pinnacle_matchup.is_alternate_pinnacle_market}`
+
+    unmatched_markets.add(source_market_id)
+
+    if (!unmatched_combinations.has(combination_key)) {
+      unmatched_combinations.set(combination_key, {
+        matchup_type: pinnacle_matchup.type,
+        special_category: pinnacle_matchup_special_category,
+        special_description: pinnacle_matchup_special_description,
+        odds_type: pinnacle_matchup.pinnacle_odds_type,
+        units: pinnacle_matchup.units,
+        is_alternate: pinnacle_matchup.is_alternate_pinnacle_market,
+        count: 0
+      })
+    }
+    unmatched_combinations.get(combination_key).count++
+  }
+
   return {
-    market_type: pinnacle.get_market_type({
-      type: pinnacle_market.type,
-      units: pinnacle_market.units,
-      category: special_category
-    }),
+    market_type,
 
     source_id: 'PINNACLE',
-    source_market_id: pinnacle_market.id,
-    source_market_name: `type: ${pinnacle_market.type} / units: ${pinnacle_market.units} / category: ${special_category} / description: ${special_description}`,
+    source_market_id,
+    source_market_name: `type: ${pinnacle_matchup.type} / units: ${pinnacle_matchup.units} / category: ${pinnacle_matchup_special_category} / description: ${pinnacle_matchup_special_description}`,
 
     esbid: nfl_game ? nfl_game.esbid : null,
-    year: nfl_game ? nfl_game.year : null,
-    source_event_id: pinnacle_market.parentId,
-    source_event_name: `${away_team} @ ${home_team}`,
+    year: nfl_game ? nfl_game.year : constants.season.year,
+    source_event_id: pinnacle_matchup.id,
+    source_event_name: format_source_event_name({
+      is_valid_matchup,
+      away_team,
+      home_team,
+      pinnacle_matchup,
+      pinnacle_matchup_special_category,
+      pinnacle_matchup_special_description
+    }),
 
     open: true,
-    live: pinnacle_market.isLive,
+    live: pinnacle_matchup.isLive,
     selection_count: market_selection_odds.length,
 
     timestamp,
@@ -150,133 +284,160 @@ const format_market = async ({
 const import_pinnacle_odds = async ({
   dry_run = false,
   ignore_cache = false,
-  ignore_wait = false
+  ignore_wait = false,
+  save = false
 } = {}) => {
   console.time('import-pinnacle-odds')
 
   const timestamp = Math.round(Date.now() / 1000)
   const formatted_markets = []
+  const all_matchups_with_markets = []
 
   const nfl_games = await db('nfl_games').where({
     year: constants.season.year
   })
 
-  const markets = await pinnacle.get_nfl_markets({ ignore_cache })
+  const pinnacle_matchups = await pinnacle.get_nfl_matchups({ ignore_cache })
 
   const unique_categories = new Set()
   const unique_descriptions = new Set()
   const unique_types = new Set()
   const unique_units_by_category = {}
-  const unique_participant_names = new Set()
+  const unique_odds_types = new Set()
+  const unique_units = new Set()
 
-  for (const market of markets) {
-    if (market.special) {
-      const category = market.special.category
-      unique_categories.add(category)
-      unique_descriptions.add(market.special.description)
+  // Track unmatched markets
+  const unmatched_markets = new Set()
+  const unmatched_combinations = new Map()
 
-      if (!unique_units_by_category[category]) {
-        unique_units_by_category[category] = new Set()
+  for (const pinnacle_matchup of pinnacle_matchups) {
+    if (pinnacle_matchup.special) {
+      const pinnacle_matchup_category = pinnacle_matchup.special.category
+      unique_categories.add(pinnacle_matchup_category)
+      unique_descriptions.add(pinnacle_matchup.special.description)
+
+      if (!unique_units_by_category[pinnacle_matchup_category]) {
+        unique_units_by_category[pinnacle_matchup_category] = new Set()
       }
-      if (market.units) {
-        unique_units_by_category[category].add(market.units)
+      if (pinnacle_matchup.units) {
+        unique_units_by_category[pinnacle_matchup_category].add(
+          pinnacle_matchup.units
+        )
       }
     }
-    unique_types.add(market.type)
-    if (market.participants) {
-      market.participants.forEach((participant) => {
-        if (participant.name) {
-          unique_participant_names.add(participant.name)
-        }
-      })
+    unique_types.add(pinnacle_matchup.type)
+
+    // Track additional unique values for market matching
+    if (pinnacle_matchup.units) {
+      unique_units.add(pinnacle_matchup.units)
     }
   }
 
-  // log('Unique descriptions:', Array.from(unique_descriptions))
-  // log('Unique categories:', Array.from(unique_categories))
-  // log('Unique types:', Array.from(unique_types))
-  log('Unique units by category:')
-  for (const [category, units] of Object.entries(unique_units_by_category)) {
-    log(`  ${category}:`, Array.from(units))
-  }
-  // log('Unique participant names:', Array.from(unique_participant_names))
+  log(`found ${pinnacle_matchups.length} matchups to process`)
 
-  const market_parent_ids = new Set()
+  for (const pinnacle_matchup of pinnacle_matchups) {
+    const pinnacle_matchup_type_label =
+      pinnacle_matchup.type === 'special'
+        ? `${pinnacle_matchup.special?.category} - ${pinnacle_matchup.special?.description}`
+        : `matchup id: ${pinnacle_matchup.id}`
 
-  markets.forEach((market) => {
-    if (!market.parentId) {
-      return
-    }
-    market_parent_ids.add(market.parentId)
-  })
+    log(
+      `fetching odds for ${pinnacle_matchup.type} matchup: ${pinnacle_matchup_type_label}`
+    )
 
-  log(`found ${market_parent_ids.size} market parent ids`)
-
-  if (!ignore_wait) {
-    await wait(5000)
-  }
-
-  const market_selection_odds_by_parent_id = {}
-  const market_selection_by_participant_id = {}
-
-  for (const market_parent_id of Array.from(market_parent_ids)) {
-    log(`fetching market odds for market parent id: ${market_parent_id}`)
-    const market_odds = await pinnacle.get_market_odds({
-      market_parent_id,
+    const pinnacle_markets = await pinnacle.get_market_odds({
+      matchup_id: pinnacle_matchup.id,
       ignore_cache
     })
 
-    if (!market_odds || market_odds.length === 0) {
-      log(`no market odds found for market parent id: ${market_parent_id}`)
+    if (!pinnacle_markets || pinnacle_markets.length === 0) {
+      log(
+        `no market odds found for ${pinnacle_matchup.type} matchup: ${pinnacle_matchup.id}`
+      )
       continue
     }
 
-    market_selection_odds_by_parent_id[market_parent_id] = market_odds
-
-    for (const market_selection_odds of market_odds) {
-      for (const selection of market_selection_odds.prices) {
-        const participant_id = selection.participantId
-        if (participant_id) {
-          market_selection_by_participant_id[participant_id] = selection
-        }
+    // Track unique odds types from markets
+    pinnacle_markets.forEach((market) => {
+      if (market.type) {
+        unique_odds_types.add(market.type)
       }
+    })
+
+    // Merge matchup with its markets for complete data structure
+    const matchup_with_markets = {
+      ...pinnacle_matchup,
+      markets: pinnacle_markets
     }
+    all_matchups_with_markets.push(matchup_with_markets)
+
+    const market_formatted_results = await process_market_odds(
+      pinnacle_matchup,
+      pinnacle_markets,
+      timestamp,
+      nfl_games,
+      unmatched_markets,
+      unmatched_combinations
+    )
+
+    formatted_markets.push(...market_formatted_results)
 
     if (!ignore_wait) {
       await wait(5000)
     }
   }
 
-  for (const market of markets) {
-    if (!market.parentId) continue
+  if (save) {
+    await fs.writeFile(
+      `./tmp/pinnacle-markets-${timestamp}.json`,
+      JSON.stringify(all_matchups_with_markets, null, 2)
+    )
 
-    const parent_market_selection_odds =
-      market_selection_odds_by_parent_id[market.parentId]
-    if (!parent_market_selection_odds) continue
+    await fs.writeFile(
+      `./tmp/pinnacle-markets-formatted-${timestamp}.json`,
+      JSON.stringify(formatted_markets, null, 2)
+    )
 
-    const market_selection_odds = market.participants
-      .map((participant) => {
-        if (!participant.id) {
-          log(`participant has no id: ${participant}`)
-          return null
-        }
-        const selection = market_selection_by_participant_id[participant.id]
-        if (!selection) {
-          log(`could not find selection for participant id: ${participant.id}`)
-          return null
-        }
-        return selection
-      })
-      .filter(Boolean)
+    log(`Saved raw matchups to ./tmp/pinnacle-matchups-${timestamp}.json`)
+    log(`Saved raw markets to ./tmp/pinnacle-markets-${timestamp}.json`)
+    log(
+      `Saved matchups with markets to ./tmp/pinnacle-matchups-with-markets-${timestamp}.json`
+    )
+    log(
+      `Saved formatted data to ./tmp/pinnacle-markets-formatted-${timestamp}.json`
+    )
+  }
 
-    const formatted_market = await format_market({
-      pinnacle_market: market,
-      market_selection_odds,
-      timestamp,
-      nfl_games
-    })
+  log('\n=== UNIQUE VALUES SUMMARY ===')
+  log('Unique categories:', Array.from(unique_categories))
+  log('Unique types:', Array.from(unique_types))
+  log('Unique odds types:', Array.from(unique_odds_types))
+  log('Unique units:', Array.from(unique_units))
+  log('Unique units by category:')
+  for (const [category, units] of Object.entries(unique_units_by_category)) {
+    log(`  ${category}:`, Array.from(units))
+  }
+  log(
+    'Unique descriptions (first 10):',
+    Array.from(unique_descriptions).slice(0, 10)
+  )
 
-    formatted_markets.push(formatted_market)
+  // Output unmatched markets summary
+  if (unmatched_markets.size > 0) {
+    log(`\n=== UNMATCHED MARKETS SUMMARY ===`)
+    log(`Total unmatched markets: ${unmatched_markets.size}`)
+    log(`Total unmatched combinations: ${unmatched_combinations.size}`)
+
+    log(`\n=== UNMATCHED COMBINATIONS ===`)
+    for (const [, combination] of unmatched_combinations) {
+      log(`\nCombination (${combination.count} occurrences):`)
+      log(`  Matchup Type: ${combination.matchup_type}`)
+      log(`  Special Category: ${combination.special_category}`)
+      log(`  Special Description: ${combination.special_description}`)
+      log(`  Odds Type: ${combination.odds_type}`)
+      log(`  Units: ${combination.units}`)
+      log(`  Is Alternate: ${combination.is_alternate}`)
+    }
   }
 
   if (dry_run) {
@@ -298,7 +459,8 @@ export const job = async () => {
     await import_pinnacle_odds({
       dry_run: argv.dry,
       ignore_cache: argv.ignore_cache,
-      ignore_wait: argv.ignore_wait
+      ignore_wait: argv.ignore_wait,
+      save: argv.save
     })
   } catch (err) {
     error = err
