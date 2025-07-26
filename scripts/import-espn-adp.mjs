@@ -64,11 +64,15 @@ const import_espn_adp = async ({
       adp_inserts.push({
         pid: player_row.pid,
         pos: player_row.pos,
-        week: 0,
         year,
-        avg: player.average_draft_position,
+        adp: player.average_draft_position,
+        min_pick: null,
+        max_pick: null,
+        std_dev: null,
+        sample_size: null,
+        percent_drafted: player.percent_owned,
         source_id: 'ESPN',
-        ranking_type: 'PPR_REDRAFT'
+        adp_type: 'PPR_REDRAFT'
       })
     } else {
       unmatched_players.push(player)
@@ -115,11 +119,15 @@ const import_espn_adp = async ({
       adp_inserts.push({
         pid: player_row.pid,
         pos: player_row.pos,
-        week: 0,
         year,
-        avg: player.average_draft_position,
+        adp: player.average_draft_position,
+        min_pick: null,
+        max_pick: null,
+        std_dev: null,
+        sample_size: null,
+        percent_drafted: player.percent_owned,
         source_id: 'ESPN',
-        ranking_type: 'PPR_REDRAFT'
+        adp_type: 'PPR_REDRAFT'
       })
     }
   }
@@ -136,9 +144,9 @@ const import_espn_adp = async ({
       items: adp_inserts,
       batch_size: BATCH_SIZE,
       save: async (batch) => {
-        await db('player_rankings_index')
+        await db('player_adp_index')
           .insert(batch)
-          .onConflict(['year', 'week', 'source_id', 'ranking_type', 'pid'])
+          .onConflict(['year', 'source_id', 'adp_type', 'pid'])
           .merge()
       }
     })
@@ -146,7 +154,7 @@ const import_espn_adp = async ({
       items: adp_inserts.map((i) => ({ ...i, timestamp })),
       batch_size: BATCH_SIZE,
       save: async (batch) => {
-        await db('player_rankings').insert(batch)
+        await db('player_adp_history').insert(batch)
       }
     })
   }

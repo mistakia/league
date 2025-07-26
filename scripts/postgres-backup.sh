@@ -60,7 +60,6 @@ waivers
 placed_wagers
 urls
 user_data_views
-league_divisions
 league_user_careerlogs
 league_team_careerlogs
 invite_codes
@@ -111,7 +110,10 @@ player
 player_aliases
 players_status
 practice
-player_rankings
+player_rankings_history
+player_rankings_index
+player_adp_index
+player_adp_history
 player_seasonlogs
 pff_player_seasonlogs
 pff_player_seasonlogs_changelog
@@ -124,7 +126,6 @@ nfl_plays_player
 nfl_plays_receiver
 nfl_plays_rusher
 player_salaries
-player_rankings_index
 "
 
 db_betting_tables="

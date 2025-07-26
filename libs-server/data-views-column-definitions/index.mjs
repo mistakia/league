@@ -19,6 +19,7 @@ import player_contract_column_definitions from './player-contract-column-definit
 import player_pff_seasonlogs_column_definitions from './player-pff-seasonlogs-column-definitions.mjs'
 import player_dfs_salaries_column_definitions from './player-dfs-salaries-column-definitions.mjs'
 import player_rankings_column_definitions from './player-rankings-column-definitions.mjs'
+import player_adp_column_definitions from './player-adp-column-definitions.mjs'
 import player_practice_column_definitions from './player-practice-column-definitions.mjs'
 import espn_line_win_rates_column_definitions from './espn-line-win-rates-column-definitions.mjs'
 import game_column_definitions from './game-column-definitions.mjs'
@@ -49,6 +50,7 @@ export default {
   ...player_pff_seasonlogs_column_definitions,
   ...player_dfs_salaries_column_definitions,
   ...player_rankings_column_definitions,
+  ...player_adp_column_definitions,
   ...player_practice_column_definitions,
   ...espn_line_win_rates_column_definitions,
   ...game_column_definitions,
