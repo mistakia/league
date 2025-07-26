@@ -3,13 +3,18 @@ import dayjs from 'dayjs'
 
 import {
   player_prop_types,
-  team_game_market_types
+  team_game_market_types,
+  awards_prop_types,
+  futures_types,
+  team_season_types,
+  game_props_types,
+  division_specials_types
 } from '#libs-shared/bookmaker-constants.mjs'
+import { constants, fixTeam } from '#libs-shared'
 import { randomUUID as uuidv4 } from 'crypto'
 import { wait } from '#libs-server'
 import WebSocket from 'ws'
 import db from '#db'
-import { fixTeam } from '#libs-shared'
 import { fetch_with_retry } from '#libs-server/proxy-manager.mjs'
 
 const log = debug('draft-kings')
@@ -81,6 +86,60 @@ export const format_selection_type = (selection_name) => {
     return 'OVER'
   }
 
+  return null
+}
+
+export const extract_year_from_market_name = (source_market_name) => {
+  if (!source_market_name || typeof source_market_name !== 'string') {
+    return null
+  }
+
+  // Match explicit season patterns like "2025/26", "2024/25"
+  const season_pattern = /(20\d{2})\/\d{2}/
+  const season_match = source_market_name.match(season_pattern)
+
+  if (season_match && season_match[1]) {
+    const year = parseInt(season_match[1], 10)
+    log(
+      `Extracted year from season pattern: ${year} from "${source_market_name}"`
+    )
+    return year
+  }
+
+  // For markets containing "Regular Season" without explicit year, default to current season year
+  if (source_market_name.toLowerCase().includes('regular season')) {
+    log(
+      `Regular Season market detected, defaulting to ${constants.season.year}: "${source_market_name}"`
+    )
+    return constants.season.year
+  }
+
+  // For game props and futures without explicit years, default to current season year
+  // This covers markets like "Game Props - Overtime", "Futures - Champion", etc.
+  const game_prop_patterns = [
+    /game props/i,
+    /overtime/i,
+    /safety/i,
+    /futures/i,
+    /champion/i,
+    /winner/i,
+    /mvp/i,
+    /player futures/i,
+    /division specials/i,
+    /awards/i
+  ]
+
+  for (const pattern of game_prop_patterns) {
+    if (pattern.test(source_market_name)) {
+      log(
+        `Game prop/futures market detected, defaulting to ${constants.season.year}: "${source_market_name}"`
+      )
+      return constants.season.year
+    }
+  }
+
+  // If no year can be determined, return null
+  log(`Could not extract year from market name: "${source_market_name}"`)
   return null
 }
 
@@ -321,6 +380,165 @@ export const get_market_type_offer_1595 = (subcategoryId) => {
   }
 }
 
+export const get_market_type_offer_787 = (subcategoryId) => {
+  switch (subcategoryId) {
+    case 13339:
+      return awards_prop_types.SEASON_MVP
+
+    case 13340:
+      return awards_prop_types.OFFENSIVE_PLAYER_OF_THE_YEAR
+
+    case 13341:
+      return awards_prop_types.DEFENSIVE_PLAYER_OF_THE_YEAR
+
+    case 13342:
+      return awards_prop_types.OFFENSIVE_ROOKIE_OF_THE_YEAR
+
+    case 13343:
+      return awards_prop_types.DEFENSIVE_ROOKIE_OF_THE_YEAR
+
+    case 13344:
+      return awards_prop_types.COACH_OF_THE_YEAR
+
+    case 13345:
+      return awards_prop_types.COMEBACK_PLAYER_OF_THE_YEAR
+
+    case 18166:
+      return awards_prop_types.PROTECTOR_OF_THE_YEAR
+
+    case 15907:
+      return awards_prop_types.MVP_AND_SUPER_BOWL_WINNER
+
+    default:
+      log(`unknown offercategoryId 787 subcategoryId ${subcategoryId}`)
+      return null
+  }
+}
+
+export const get_market_type_offer_529 = (subcategoryId) => {
+  switch (subcategoryId) {
+    case 10500:
+      return futures_types.SUPER_BOWL_WINNER
+
+    case 4651:
+      return futures_types.CONFERENCE_WINNER
+
+    case 5629:
+      return futures_types.DIVISION_WINNER
+
+    case 9159:
+      return futures_types.STAGE_OF_ELIMINATION
+
+    case 10249:
+      return futures_types.EXACT_RESULT
+
+    case 7302:
+      return futures_types.NAME_THE_FINALISTS
+
+    case 10107:
+      return futures_types.NUMBER_1_SEED
+
+    case 15901:
+      return futures_types.WINNING_CONFERENCE
+
+    case 6447:
+      return futures_types.CHAMPION_SPECIALS
+
+    default:
+      log(`unknown offercategoryId 529 subcategoryId ${subcategoryId}`)
+      return null
+  }
+}
+
+export const get_market_type_offer_1286 = (subcategoryId) => {
+  switch (subcategoryId) {
+    case 17455:
+      return team_season_types.TEAM_REGULAR_SEASON_WINS
+
+    case 13356:
+      return team_season_types.TEAM_EXACT_REGULAR_SEASON_WINS
+
+    case 13365:
+      return team_season_types.TEAM_MOST_REGULAR_SEASON_WINS
+
+    case 13367:
+      return team_season_types.TEAM_FEWEST_REGULAR_SEASON_WINS
+
+    case 13364:
+      return team_season_types.TEAM_LONGEST_WINNING_STREAK
+
+    case 13360:
+      return team_season_types.TEAM_PERFECT_SEASON
+
+    case 13368:
+      return team_season_types.TEAM_WINLESS_SEASON
+
+    default:
+      log(`unknown offercategoryId 1286 subcategoryId ${subcategoryId}`)
+      return null
+  }
+}
+
+export const get_market_type_offer_1076 = (subcategoryId) => {
+  switch (subcategoryId) {
+    case 15399:
+      return team_season_types.TEAM_TO_MAKE_PLAYOFFS
+
+    case 15398:
+      return team_season_types.TEAM_TO_MISS_PLAYOFFS
+
+    default:
+      log(`unknown offercategoryId 1076 subcategoryId ${subcategoryId}`)
+      return null
+  }
+}
+
+export const get_market_type_offer_528 = (subcategoryId) => {
+  switch (subcategoryId) {
+    case 13459:
+      return game_props_types.GAME_OVERTIME
+
+    case 9590:
+      return game_props_types.GAME_TWO_POINT_CONVERSION
+
+    case 4659:
+      return game_props_types.GAME_TOTAL_POINTS_ODD_EVEN
+
+    case 9567:
+      return game_props_types.GAME_RACE_TO_POINTS
+
+    case 9325:
+      return game_props_types.GAME_LAST_TO_SCORE
+
+    case 5873:
+      return game_props_types.GAME_WINNING_MARGIN
+
+    default:
+      log(`unknown subcategory for offer category 528: ${subcategoryId}`)
+      return null
+  }
+}
+
+export const get_market_type_offer_820 = (subcategoryId) => {
+  switch (subcategoryId) {
+    case 7624:
+      return division_specials_types.DIVISION_WINS
+
+    case 13041:
+      return division_specials_types.DIVISION_FINISHING_POSITION
+
+    case 13206:
+      return division_specials_types.DIVISION_LEADER_PASSING_YARDS
+
+    case 13297:
+      return division_specials_types.DIVISION_LEADER_RUSHING_YARDS
+
+    default:
+      log(`unknown subcategory for offer category 820: ${subcategoryId}`)
+      return null
+  }
+}
+
 const get_market_type_offer_492 = ({ subcategoryId, betOfferTypeId }) => {
   if (subcategoryId === 4518 && betOfferTypeId) {
     switch (betOfferTypeId) {
@@ -380,11 +598,17 @@ export const get_market_type = ({
     case 492:
       return get_market_type_offer_492({ subcategoryId, betOfferTypeId })
 
+    case 529:
+      return get_market_type_offer_529(subcategoryId)
+
     case 530:
       return get_market_type_offer_530(subcategoryId)
 
     case 634:
       return get_market_type_offer_634(subcategoryId)
+
+    case 787:
+      return get_market_type_offer_787(subcategoryId)
 
     case 1000:
       return get_market_type_offer_1000(subcategoryId)
@@ -398,8 +622,14 @@ export const get_market_type = ({
     case 1003:
       return get_market_type_offer_1003(subcategoryId)
 
+    case 1076:
+      return get_market_type_offer_1076(subcategoryId)
+
     case 1163:
       return get_market_type_offer_1163(subcategoryId)
+
+    case 1286:
+      return get_market_type_offer_1286(subcategoryId)
 
     case 1342:
       return get_market_type_offer_1342(subcategoryId)
@@ -409,6 +639,12 @@ export const get_market_type = ({
 
     case 1759:
       return get_market_type_offer_1759(subcategoryId)
+
+    case 528:
+      return get_market_type_offer_528(subcategoryId)
+
+    case 820:
+      return get_market_type_offer_820(subcategoryId)
 
     default:
       log(`unknown offerCategoryId ${offerCategoryId}`)
