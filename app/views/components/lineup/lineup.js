@@ -20,16 +20,16 @@ export default class Lineup extends React.Component {
     this.setState({ selected_player_slot })
   }
 
-  handleUpdate = ({ slot, playerMap = new Map() }) => {
+  handleUpdate = ({ slot, player_map = new Map() }) => {
     const players = [{ slot, pid: this.state.selected_player_slot.pid }]
-    const pid = playerMap.get('pid')
+    const pid = player_map.get('pid')
     if (pid) {
       const { league, roster } = this.props
       const r = new Roster({ roster: roster.toJS(), league })
       const selectedSlot = this.state.selected_player_slot.slot
       const slot = r.isEligibleForSlot({
         slot: selectedSlot,
-        pos: playerMap.get('pos')
+        pos: player_map.get('pos')
       })
         ? selectedSlot
         : constants.slots.BENCH

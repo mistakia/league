@@ -42,11 +42,11 @@ export default function AuctionTargets({
   show_dst
 }) {
   const AuctionPlayerRow = ({ index, key, pos, style }) => {
-    const playerMap = pos
+    const player_map = pos
       ? playersByPosition[pos].get(index, new Map())
       : players.get(index, new Map())
     const classNames = ['auction__targets-player']
-    const pid = playerMap.get('pid')
+    const pid = player_map.get('pid')
     const rosterSlot = team.roster.get(pid)
 
     let isNominatable = false
@@ -66,7 +66,7 @@ export default function AuctionTargets({
     if (lineupPlayerIds.includes(pid)) classNames.push('optimal')
     const salary = rosterSlot
       ? rosterSlot.value
-      : playerMap.getIn(['market_salary', '0'], 0)
+      : player_map.getIn(['market_salary', '0'], 0)
 
     return (
       <div {...{ key, style }}>
@@ -83,7 +83,7 @@ export default function AuctionTargets({
           <PlayerName pid={pid} hidePosition />
           <PlayerWatchlistAction pid={pid} />
           <div className='auction__targets-player-bye'>
-            <NFLTeamBye nfl_team={playerMap.get('team')} />
+            <NFLTeamBye nfl_team={player_map.get('team')} />
           </div>
           <div className='auction__targets-player-salary metric'>
             {salary ? `$${salary}` : ''}

@@ -78,7 +78,7 @@ const map_state_to_props = createSelector(
 
     return {
       league,
-      playerMap: player_map,
+      player_map,
       teams,
       maxTransaction: max_transaction,
       is_before_extension_deadline,

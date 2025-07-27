@@ -138,9 +138,14 @@ export default function DraftPage({
       a.getIn(['pts_added', '0'], constants.default_points_added)
   )
   const allRow = ({ index, key, ...params }) => {
-    const playerMap = sorted.get(index)
+    const player_map = sorted.get(index)
     return (
-      <DraftPlayer key={key} index={index} playerMap={playerMap} {...params} />
+      <DraftPlayer
+        key={key}
+        index={index}
+        player_map={player_map}
+        {...params}
+      />
     )
   }
 
@@ -160,9 +165,14 @@ export default function DraftPage({
   }
 
   const positionRow = ({ index, key, pos, ...params }) => {
-    const playerMap = items[pos][index]
+    const player_map = items[pos][index]
     return (
-      <DraftPlayer key={key} index={index} playerMap={playerMap} {...params} />
+      <DraftPlayer
+        key={key}
+        index={index}
+        player_map={player_map}
+        {...params}
+      />
     )
   }
 

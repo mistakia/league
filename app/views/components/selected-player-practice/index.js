@@ -7,12 +7,12 @@ import { player_actions } from '@core/players'
 
 import SelectedPlayerPractice from './selected-player-practice'
 
-const map_state_to_props = createSelector(getSelectedPlayer, (playerMap) => {
-  const practice = playerMap.get('practice', new List())
+const map_state_to_props = createSelector(getSelectedPlayer, (player_map) => {
+  const practice = player_map.get('practice', new List())
   const sorted = practice.sort((a, b) => b.year - a.year || b.week - a.week)
 
   return {
-    playerMap,
+    player_map,
     practices: sorted
   }
 })

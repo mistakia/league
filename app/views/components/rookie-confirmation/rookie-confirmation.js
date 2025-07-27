@@ -32,7 +32,7 @@ export default class RookieConfirmation extends React.Component {
     const tagged_players = team.roster.getPlayersByTag(constants.tags.ROOKIE)
     tagged_players.forEach(({ pid }) => {
       const taggedPlayerMap = team.players.find(
-        (playerMap) => playerMap.get('pid') === pid
+        (player_map) => player_map.get('pid') === pid
       )
       this._untags.push(taggedPlayerMap)
     })
@@ -45,7 +45,7 @@ export default class RookieConfirmation extends React.Component {
 
   handleSubmit = () => {
     const { untag, error } = this.state
-    const pid = this.props.playerMap.get('pid')
+    const pid = this.props.player_map.get('pid')
 
     if (!this._isEligible && !untag) {
       return this.setState({ missingUntag: true })
@@ -60,7 +60,7 @@ export default class RookieConfirmation extends React.Component {
   }
 
   render = () => {
-    const { playerMap } = this.props
+    const { player_map } = this.props
 
     const menuItems = []
     for (const taggedPlayerMap of this._untags) {
@@ -77,7 +77,7 @@ export default class RookieConfirmation extends React.Component {
         <DialogTitle>Rookie Tag</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {`Apply Rookie Tag to ${playerMap.get('name')} (${playerMap.get(
+            {`Apply Rookie Tag to ${player_map.get('name')} (${player_map.get(
               'pos'
             )})`}
           </DialogContentText>
@@ -114,6 +114,6 @@ export default class RookieConfirmation extends React.Component {
 RookieConfirmation.propTypes = {
   team: PropTypes.object,
   add: PropTypes.func,
-  playerMap: ImmutablePropTypes.map,
+  player_map: ImmutablePropTypes.map,
   onClose: PropTypes.func
 }

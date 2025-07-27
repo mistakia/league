@@ -18,7 +18,7 @@ import TransactionRow from '@components/transaction-row'
 import './selected-player-transactions.styl'
 
 export default function SelectedPlayerTransactions({
-  playerMap,
+  player_map,
   teams,
   maxTransaction,
   load,
@@ -29,10 +29,10 @@ export default function SelectedPlayerTransactions({
   loadingTransactions
 }) {
   useEffect(() => {
-    load({ pid: playerMap.get('pid') })
-  }, [load, playerMap])
+    load({ pid: player_map.get('pid') })
+  }, [load, player_map])
 
-  const transactions = playerMap.get('transactions', new List())
+  const transactions = player_map.get('transactions', new List())
 
   if (loadingTransactions && !transactions.size) {
     return <LinearProgress />
@@ -102,7 +102,7 @@ export default function SelectedPlayerTransactions({
     <div className='selected__player-transactions-body'>
       <div className='selected__player-transactions-all'>{items}</div>
       <div className='selected__player-transactions-summary'>
-        {playerMap.get('tid') && (
+        {player_map.get('tid') && (
           <TableContainer>
             <Table size='small'>
               <TableBody>
@@ -188,7 +188,7 @@ export default function SelectedPlayerTransactions({
 }
 
 SelectedPlayerTransactions.propTypes = {
-  playerMap: ImmutablePropTypes.map,
+  player_map: ImmutablePropTypes.map,
   teams: PropTypes.object,
   maxTransaction: PropTypes.object,
   load: PropTypes.func,

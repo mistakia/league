@@ -11,7 +11,7 @@ import './player-slot.styl'
 export default class PlayerSlot extends React.Component {
   render() {
     const {
-      playerMap,
+      player_map,
       slot,
       handleSelect,
       selected_player_slot,
@@ -23,7 +23,7 @@ export default class PlayerSlot extends React.Component {
       (key) => constants.slots[key] === slot
     )
     const slotName = constants.slotName[slot]
-    const pid = playerMap.get('pid')
+    const pid = player_map.get('pid')
 
     let action
     if (constants.week > constants.season.finalWeek) {
@@ -32,7 +32,9 @@ export default class PlayerSlot extends React.Component {
       action = (
         <Button
           disabled={isLocked}
-          onClick={() => handleSelect({ slot, pid, pos: playerMap.get('pos') })}
+          onClick={() =>
+            handleSelect({ slot, pid, pos: player_map.get('pos') })
+          }
           small
         >
           {isLocked ? 'Locked' : 'Move'}
@@ -50,7 +52,7 @@ export default class PlayerSlot extends React.Component {
         slotPositions.includes(selected_player_slot.pos)
       ) {
         action = (
-          <Button onClick={() => handleUpdate({ slot, playerMap })} small>
+          <Button onClick={() => handleUpdate({ slot, player_map })} small>
             Here
           </Button>
         )
@@ -96,7 +98,7 @@ export default class PlayerSlot extends React.Component {
 
     const passing = []
     for (const stat of ['pa', 'pc', 'py', 'ints', 'tdp']) {
-      const value = playerMap.getIn(['projection', `${week}`, stat], 0)
+      const value = player_map.getIn(['projection', `${week}`, stat], 0)
       if (value) {
         passing.push(`${value.toFixed(1)} ${statSuffix[stat]}`)
       }
@@ -104,7 +106,7 @@ export default class PlayerSlot extends React.Component {
 
     const rushing = []
     for (const stat of ['ra', 'ry', 'tdr', 'fuml']) {
-      const value = playerMap.getIn(['projection', `${week}`, stat], 0)
+      const value = player_map.getIn(['projection', `${week}`, stat], 0)
       if (value) {
         rushing.push(`${value.toFixed(1)} ${statSuffix[stat]}`)
       }
@@ -112,13 +114,13 @@ export default class PlayerSlot extends React.Component {
 
     const receiving = []
     for (const stat of ['trg', 'rec', 'recy', 'tdrec']) {
-      const value = playerMap.getIn(['projection', `${week}`, stat], 0)
+      const value = player_map.getIn(['projection', `${week}`, stat], 0)
       if (value) {
         receiving.push(`${value.toFixed(1)} ${statSuffix[stat]}`)
       }
     }
 
-    const projectedPoints = playerMap.getIn(['points', `${week}`, 'total'], 0)
+    const projectedPoints = player_map.getIn(['points', `${week}`, 'total'], 0)
 
     return (
       <div className={classNames.join(' ')}>
@@ -155,7 +157,7 @@ export default class PlayerSlot extends React.Component {
 }
 
 PlayerSlot.propTypes = {
-  playerMap: ImmutablePropTypes.map,
+  player_map: ImmutablePropTypes.map,
   slot: PropTypes.number,
   handleSelect: PropTypes.func,
   selected_player_slot: PropTypes.object,

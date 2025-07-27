@@ -37,10 +37,10 @@ export default class TradeSelectItems extends React.Component {
     } = this.props
 
     const options = []
-    players.forEach((playerMap) => {
+    players.forEach((player_map) => {
       options.push({
-        id: playerMap.get('pid'),
-        label: playerMap.get('name'),
+        id: player_map.get('pid'),
+        label: player_map.get('name'),
         type: 'player'
       })
     })
@@ -53,10 +53,10 @@ export default class TradeSelectItems extends React.Component {
     })
 
     const value = []
-    selectedPlayers.forEach((playerMap) => {
+    selectedPlayers.forEach((player_map) => {
       value.push({
-        id: playerMap.get('pid'),
-        label: playerMap.get('name'),
+        id: player_map.get('pid'),
+        label: player_map.get('name'),
         type: 'player'
       })
     })

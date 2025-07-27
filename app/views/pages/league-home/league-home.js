@@ -121,21 +121,21 @@ export default function LeagueHomePage({
   const restricted_free_agency_items = []
   const active_free_agent_items = []
   const nominated_free_agent_items = []
-  restricted_free_agency_players.forEach((playerMap, index) => {
-    const is_processed = playerMap.get('restricted_free_agency_tag_processed')
+  restricted_free_agency_players.forEach((player_map, index) => {
+    const is_processed = player_map.get('restricted_free_agency_tag_processed')
     if (is_processed) {
       return
     }
 
-    const is_announced = playerMap.get('restricted_free_agency_tag_announced')
+    const is_announced = player_map.get('restricted_free_agency_tag_announced')
     const is_active = !is_processed && is_announced
-    const is_nominated = playerMap.get('restricted_free_agency_tag_nominated')
+    const is_nominated = player_map.get('restricted_free_agency_tag_nominated')
 
     if (is_active) {
       active_free_agent_items.push(
         <PlayerRoster
           key={index}
-          playerMap={playerMap}
+          player_map={player_map}
           isRestrictedFreeAgency
           {...{ percentiles }}
         />
@@ -144,7 +144,7 @@ export default function LeagueHomePage({
       nominated_free_agent_items.push(
         <PlayerRoster
           key={index}
-          playerMap={playerMap}
+          player_map={player_map}
           isRestrictedFreeAgency
           {...{ percentiles }}
         />
@@ -153,7 +153,7 @@ export default function LeagueHomePage({
       restricted_free_agency_items.push(
         <PlayerRoster
           key={index}
-          playerMap={playerMap}
+          player_map={player_map}
           isRestrictedFreeAgency
           {...{ percentiles }}
         />
@@ -161,19 +161,19 @@ export default function LeagueHomePage({
     }
   })
 
-  for (const playerMap of [...players.ir, ...players.ir_long_term]) {
-    if (!playerMap.get('pid')) continue
+  for (const player_map of [...players.ir, ...players.ir_long_term]) {
+    if (!player_map.get('pid')) continue
 
     if (
       !isReserveEligible({
-        nfl_status: playerMap.get('nfl_status'),
-        injury_status: playerMap.get('injury_status')
+        nfl_status: player_map.get('nfl_status'),
+        injury_status: player_map.get('injury_status')
       })
     ) {
       notice_items.push(
-        <Alert key={playerMap.get('pid')} severity='error'>
+        <Alert key={player_map.get('pid')} severity='error'>
           <AlertTitle>
-            {playerMap.get('name', 'N/A')} not eligible for Reserve/IR
+            {player_map.get('name', 'N/A')} not eligible for Reserve/IR
           </AlertTitle>
           You will need to activate or release him before you can make any
           acquisitions or claims.
@@ -182,18 +182,18 @@ export default function LeagueHomePage({
     }
   }
 
-  for (const playerMap of players.cov) {
-    if (!playerMap.get('pid')) continue
+  for (const player_map of players.cov) {
+    if (!player_map.get('pid')) continue
 
     if (
       !isReserveCovEligible({
-        nfl_status: playerMap.get('nfl_status')
+        nfl_status: player_map.get('nfl_status')
       })
     ) {
       notice_items.push(
-        <Alert key={playerMap.get('pid')} severity='error'>
+        <Alert key={player_map.get('pid')} severity='error'>
           <AlertTitle>
-            {playerMap.get('name', 'N/A')} not eligible for Reserve/COVID-19
+            {player_map.get('name', 'N/A')} not eligible for Reserve/COVID-19
           </AlertTitle>
           You will need to activate or release him before you can make any
           acquisitions or claims.
@@ -203,10 +203,10 @@ export default function LeagueHomePage({
   }
 
   for (const poach of poaches) {
-    const playerMap = poach.get('playerMap')
-    if (!playerMap) continue
+    const player_map = poach.get('player_map')
+    if (!player_map) continue
 
-    notice_items.push(<PoachNotice key={playerMap.get('pid')} poach={poach} />)
+    notice_items.push(<PoachNotice key={player_map.get('pid')} poach={poach} />)
   }
 
   const team_poaches = poaches.filter((p) => p.tid === teamId)

@@ -24,12 +24,12 @@ const map_state_to_props = createSelector(
   get_gamelogs_state,
   get_seasonlogs,
   get_app,
-  (playerMap, game, logs, league, gamelogState, seasonlogs, app) => {
+  (player_map, game, logs, league, gamelogState, seasonlogs, app) => {
     if (!game) {
       return {}
     }
-    const opponent = playerMap.get('team') === game.h ? game.v : game.h
-    const position = playerMap.get('pos')
+    const opponent = player_map.get('team') === game.h ? game.v : game.h
+    const position = player_map.get('pos')
     const gamelogs = logs
       .filter(
         (g) =>

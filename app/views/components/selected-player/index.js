@@ -19,11 +19,11 @@ const map_state_to_props = createSelector(
   getAvailableSalarySpaceForCurrentLeague,
   get_auction_info_for_position,
   get_current_league,
-  (playerMap, app, league_available_salary_space, auction_info, league) => {
+  (player_map, app, league_available_salary_space, auction_info, league) => {
     const remaining_pts_added =
       auction_info.pts_added.total - auction_info.pts_added.rostered
     const rate = league_available_salary_space / remaining_pts_added
-    const player_pts_added = playerMap.getIn(['pts_added', '0'], 0)
+    const player_pts_added = player_map.getIn(['pts_added', '0'], 0)
     const market_salary_adjusted = Math.max(
       Math.round(player_pts_added * rate) || 0,
       0
@@ -39,7 +39,7 @@ const map_state_to_props = createSelector(
         : true)
 
     return {
-      playerMap,
+      player_map,
       market_salary_adjusted,
       is_logged_in: Boolean(app.userId),
       is_hosted_league: Boolean(league.hosted),

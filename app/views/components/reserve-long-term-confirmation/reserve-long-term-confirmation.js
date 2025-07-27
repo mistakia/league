@@ -11,12 +11,12 @@ import Button from '@components/button'
 import { constants } from '@libs-shared'
 
 export default function ReserveLongTermConfirmation({
-  playerMap,
+  player_map,
   reserve,
   onClose
 }) {
   const handle_submit = () => {
-    const reserve_pid = playerMap.get('pid')
+    const reserve_pid = player_map.get('pid')
     reserve({ reserve_pid, slot: constants.slots.IR_LONG_TERM })
     onClose()
   }
@@ -26,9 +26,9 @@ export default function ReserveLongTermConfirmation({
       <DialogTitle>Designate Reserve/IR (Long Term)</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          {`${playerMap.get('fname')} ${playerMap.get(
+          {`${player_map.get('fname')} ${player_map.get(
             'lname'
-          )} (${playerMap.get(
+          )} (${player_map.get(
             'pos'
           )}) will be placed on Reserves/IR (Long Term). You will not be able to activate him until the offseason.`}
         </DialogContentText>
@@ -48,5 +48,5 @@ export default function ReserveLongTermConfirmation({
 ReserveLongTermConfirmation.propTypes = {
   onClose: PropTypes.func,
   reserve: PropTypes.func,
-  playerMap: ImmutablePropTypes.map
+  player_map: ImmutablePropTypes.map
 }

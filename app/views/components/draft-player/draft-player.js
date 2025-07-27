@@ -9,14 +9,14 @@ import './draft-player.styl'
 
 export default class DraftPlayer extends React.Component {
   handleClick = () => {
-    this.props.select(this.props.playerMap.get('pid'))
+    this.props.select(this.props.player_map.get('pid'))
   }
 
   render = () => {
-    const { playerMap, selected, is_player_drafted, index, watchlist, style } =
+    const { player_map, selected, is_player_drafted, index, watchlist, style } =
       this.props
 
-    const pid = playerMap.get('pid')
+    const pid = player_map.get('pid')
     const classNames = ['player-draft__item']
     if (selected === pid) {
       classNames.push('selected')
@@ -28,7 +28,7 @@ export default class DraftPlayer extends React.Component {
       classNames.push('watchlist')
     }
 
-    const value = playerMap.getIn(['market_salary', '0'])
+    const value = player_map.getIn(['market_salary', '0'])
 
     return (
       <div style={style}>
@@ -38,12 +38,12 @@ export default class DraftPlayer extends React.Component {
           </div>
           <div className='player-draft__item-index'>{index + 1}.</div>
           <div className='player-draft__item-name'>
-            <span>{playerMap.get('pname')}</span>
-            <NFLTeam team={playerMap.get('team')} />
+            <span>{player_map.get('pname')}</span>
+            <NFLTeam team={player_map.get('team')} />
           </div>
           <div className='player-draft__item-metric'>
             {value
-              ? `$${Math.round(playerMap.getIn(['market_salary', '0']))}`
+              ? `$${Math.round(player_map.getIn(['market_salary', '0']))}`
               : null}
           </div>
         </div>
@@ -54,7 +54,7 @@ export default class DraftPlayer extends React.Component {
 
 DraftPlayer.propTypes = {
   select: PropTypes.func,
-  playerMap: ImmutablePropTypes.map,
+  player_map: ImmutablePropTypes.map,
   selected: PropTypes.string,
   is_player_drafted: PropTypes.bool,
   index: PropTypes.number,

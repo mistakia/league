@@ -12,24 +12,24 @@ import { constants } from '@libs-shared'
 
 export default class RemoveTagConfirmation extends React.Component {
   handleSubmit = () => {
-    const pid = this.props.playerMap.get('pid')
+    const pid = this.props.player_map.get('pid')
     const { tid } = this.props.team.roster
     this.props.remove({ pid, teamId: tid })
     this.props.onClose()
   }
 
   render() {
-    const { playerMap } = this.props
-    const tagType = constants.tagsDetail[playerMap.get('tag')]
+    const { player_map } = this.props
+    const tagType = constants.tagsDetail[player_map.get('tag')]
 
     return (
       <Dialog open onClose={this.props.onClose}>
         <DialogTitle>{`Remove ${tagType} Tag`}</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {`Remove ${tagType} Tag from ${playerMap.get(
+            {`Remove ${tagType} Tag from ${player_map.get(
               'name'
-            )} (${playerMap.get('pos')})`}
+            )} (${player_map.get('pos')})`}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -46,7 +46,7 @@ export default class RemoveTagConfirmation extends React.Component {
 }
 
 RemoveTagConfirmation.propTypes = {
-  playerMap: ImmutablePropTypes.map,
+  player_map: ImmutablePropTypes.map,
   team: PropTypes.object,
   remove: PropTypes.func,
   onClose: PropTypes.func

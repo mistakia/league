@@ -15,8 +15,8 @@ const map_state_to_props = createSelector(
   getSelectedPlayer,
   getGamelogsForSelectedPlayer,
   get_current_league,
-  (playerMap, gamelogs, league) => {
-    const position = playerMap.get('pos')
+  (player_map, gamelogs, league) => {
+    const position = player_map.get('pos')
     gamelogs = gamelogs.map((gamelog) => {
       let points
       if (!gamelog.points) {
@@ -31,7 +31,7 @@ const map_state_to_props = createSelector(
 
     const years = groupBy(gamelogs, 'year')
 
-    return { playerMap, years }
+    return { player_map, years }
   }
 )
 

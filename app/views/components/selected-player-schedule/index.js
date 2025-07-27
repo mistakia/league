@@ -16,8 +16,8 @@ const map_state_to_props = createSelector(
   getSelectedPlayerGames,
   get_seasonlogs,
   get_schedule_state,
-  (playerMap, games, seasonlogs, schedule) => ({
-    playerMap,
+  (player_map, games, seasonlogs, schedule) => ({
+    player_map,
     games,
     seasonlogs,
     schedule

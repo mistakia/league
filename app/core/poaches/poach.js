@@ -7,7 +7,7 @@ export const Poach = new Record({
   processed: null,
   release: new List(),
   submitted: null,
-  playerMap: new Map(),
+  player_map: new Map(),
   player_tid: null
 })
 

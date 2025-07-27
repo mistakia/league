@@ -16,7 +16,7 @@ import { constants } from '@libs-shared'
 
 export default function ReserveConfirmation({
   team,
-  playerMap,
+  player_map,
   reserve,
   onClose
 }) {
@@ -28,8 +28,8 @@ export default function ReserveConfirmation({
 
   const reserve_pids = team.roster.reserve.map((p) => p.pid)
   for (const pid of reserve_pids) {
-    const playerMap = team.players.find((p) => p.get('pid') === pid)
-    activatable.push(playerMap)
+    const player_map = team.players.find((p) => p.get('pid') === pid)
+    activatable.push(player_map)
   }
 
   const handle_select_activate = (event) => {
@@ -39,7 +39,7 @@ export default function ReserveConfirmation({
   }
 
   const handle_submit = () => {
-    const reserve_pid = playerMap.get('pid')
+    const reserve_pid = player_map.get('pid')
 
     if (!has_reserve_space && !activate_pid) {
       return set_missing_activate(true)
@@ -66,9 +66,9 @@ export default function ReserveConfirmation({
       <DialogTitle>Designate Reserve</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          {`${playerMap.get('fname')} ${playerMap.get(
+          {`${player_map.get('fname')} ${player_map.get(
             'lname'
-          )} (${playerMap.get(
+          )} (${player_map.get(
             'pos'
           )}) will be placed on Reserves/IR. He will not be available to use in lineups until he's activated.`}
         </DialogContentText>
@@ -110,6 +110,6 @@ export default function ReserveConfirmation({
 ReserveConfirmation.propTypes = {
   onClose: PropTypes.func,
   reserve: PropTypes.func,
-  playerMap: ImmutablePropTypes.map,
+  player_map: ImmutablePropTypes.map,
   team: PropTypes.object
 }

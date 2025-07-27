@@ -9,18 +9,18 @@ import SelectedPlayerProjection from '@components/selected-player-projection'
 
 export default class SelectedPlayerSeasonProjections extends React.Component {
   componentDidMount() {
-    const pid = this.props.playerMap.get('pid')
+    const pid = this.props.player_map.get('pid')
     this.props.load({ pid })
   }
 
   render = () => {
-    const { playerMap } = this.props
+    const { player_map } = this.props
 
-    const pid = playerMap.get('pid')
-    const pos = playerMap.get('pos')
-    const loading_projections = playerMap.get('loading_projections')
+    const pid = player_map.get('pid')
+    const pos = player_map.get('pos')
+    const loading_projections = player_map.get('loading_projections')
     const tables = []
-    const projections = playerMap.get('projections', new List()).toJS()
+    const projections = player_map.get('projections', new List()).toJS()
     if (loading_projections) {
       return <LinearProgress />
     }
@@ -52,7 +52,10 @@ export default class SelectedPlayerSeasonProjections extends React.Component {
       const week = Number(week_key)
       if (week !== constants.week) continue
 
-      const average_projections = playerMap.getIn(['projection', `${week}`], {})
+      const average_projections = player_map.getIn(
+        ['projection', `${week}`],
+        {}
+      )
 
       tables.push(
         <SelectedPlayerProjection
@@ -71,6 +74,6 @@ export default class SelectedPlayerSeasonProjections extends React.Component {
 }
 
 SelectedPlayerSeasonProjections.propTypes = {
-  playerMap: ImmutablePropTypes.map,
+  player_map: ImmutablePropTypes.map,
   load: PropTypes.func
 }

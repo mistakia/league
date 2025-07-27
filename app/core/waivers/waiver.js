@@ -10,7 +10,7 @@ export const Waiver = new Record({
   reason: null,
   bid: null,
   type: null,
-  playerMap: new Map()
+  player_map: new Map()
 })
 
 export function createWaiver({

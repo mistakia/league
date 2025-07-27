@@ -7,22 +7,22 @@ import Avatar from '@mui/material/Avatar'
 import './player-headshot.styl'
 
 export default function PlayerHeadshot({
-  playerMap,
+  player_map,
   width = 48,
   square = false,
   position
 }) {
-  const isTeam = playerMap.get('pos') === 'DST'
+  const isTeam = player_map.get('pos') === 'DST'
   const height = Math.round((width * 70) / 96)
 
   let src
   if (isTeam) {
-    const pid = playerMap.get('pid')
+    const pid = player_map.get('pid')
     src = `https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/${pid}.png&h=${
       height * 2
     }&w=${height * 2}`
   } else {
-    const espn_id = playerMap.get('espn_id')
+    const espn_id = player_map.get('espn_id')
     src = espn_id
       ? `https://a.espncdn.com/combiner/i?img=/i/headshots/nfl/players/full/${espn_id}.png&w=${
           width * 2
@@ -53,7 +53,7 @@ export default function PlayerHeadshot({
 }
 
 PlayerHeadshot.propTypes = {
-  playerMap: ImmutablePropTypes.map,
+  player_map: ImmutablePropTypes.map,
   width: PropTypes.number,
   square: PropTypes.bool,
   position: PropTypes.string

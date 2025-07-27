@@ -17,7 +17,7 @@ const getHeadshotWidth = () => {
 }
 
 export default function AuctionNominatedPlayer({
-  playerMap,
+  player_map,
   market_salary_adjusted
 }) {
   const [headshot_width, set_headshot_width] = useState(getHeadshotWidth())
@@ -35,24 +35,24 @@ export default function AuctionNominatedPlayer({
       <div className='nominated__player'>
         <PlayerName
           large
-          playerMap={playerMap}
+          player_map={player_map}
           headshot_width={headshot_width}
         />
       </div>
       <div className='nominated__player-details'>
         <div className='selected__player-header-item'>
-          <label>Market</label>${playerMap.getIn(['market_salary', '0'], 0)}
+          <label>Market</label>${player_map.getIn(['market_salary', '0'], 0)}
         </div>
         <div className='selected__player-header-item'>
           <label>Adjusted</label>${market_salary_adjusted}
         </div>
         <div className='selected__player-header-item'>
           <label>Bye</label>
-          <NFLTeamBye nfl_team={playerMap.get('team')} />
+          <NFLTeamBye nfl_team={player_map.get('team')} />
         </div>
         <div className='selected__player-header-item'>
           <label>Age</label>
-          <PlayerAge date={playerMap.get('dob')} />
+          <PlayerAge date={player_map.get('dob')} />
         </div>
       </div>
     </div>
@@ -60,6 +60,6 @@ export default function AuctionNominatedPlayer({
 }
 
 AuctionNominatedPlayer.propTypes = {
-  playerMap: ImmutablePropTypes.map,
+  player_map: ImmutablePropTypes.map,
   market_salary_adjusted: PropTypes.number
 }

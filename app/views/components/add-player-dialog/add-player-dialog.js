@@ -69,12 +69,12 @@ export default class AddPlayerDialog extends React.Component {
   render = () => {
     const { players } = this.props
 
-    const sorted = players.sortBy((playerMap) => playerMap.get('name', 0))
+    const sorted = players.sortBy((player_map) => player_map.get('name', 0))
     const menuItems = [<option key='default' value='' />]
-    for (const [index, playerMap] of sorted.entries()) {
+    for (const [index, player_map] of sorted.entries()) {
       menuItems.push(
-        <option key={index} value={playerMap.get('pid')}>
-          {playerMap.get('name')} ({playerMap.get('pos')})
+        <option key={index} value={player_map.get('pid')}>
+          {player_map.get('name')} ({player_map.get('pos')})
         </option>
       )
     }

@@ -11,7 +11,7 @@ const map_state_to_props = createSelector(
   getPlayerById,
   getGameStatusByPlayerId,
   (state) => state.getIn(['app', 'year'], constants.year),
-  (playerMap, status, selected_year) => ({ playerMap, status, selected_year })
+  (player_map, status, selected_year) => ({ player_map, status, selected_year })
 )
 
 const map_dispatch_to_props = {

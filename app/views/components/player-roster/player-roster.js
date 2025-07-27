@@ -10,7 +10,7 @@ import PercentileMetric from '@components/percentile-metric'
 class PlayerRoster extends Player {
   render() {
     const {
-      playerMap,
+      player_map,
       selected,
       claim,
       dragHandle,
@@ -30,14 +30,14 @@ class PlayerRoster extends Player {
     const isPoach = Boolean(poachId)
     const isClaim = isWaiver || isPoach
     const { isRegularSeason, isOffseason } = constants
-    const tag = playerMap.get('tag')
+    const tag = player_map.get('tag')
     const isRestrictedFreeAgent = tag === constants.tags.RESTRICTED_FREE_AGENCY
-    const is_restricted_free_agent_tag_processed = playerMap.get(
+    const is_restricted_free_agent_tag_processed = player_map.get(
       'restricted_free_agency_tag_processed'
     )
 
-    const value = playerMap.get('value', 0)
-    const bid = playerMap.get('bid')
+    const value = player_map.get('value', 0)
+    const bid = player_map.get('bid')
     const salary = is_before_extension_deadline
       ? value
       : is_before_restricted_free_agency_end &&
@@ -46,9 +46,9 @@ class PlayerRoster extends Player {
           (is_team_manager || isRestrictedFreeAgency)
         ? bid
         : value
-    const extensions = playerMap.get('extensions', 0)
-    const pos = playerMap.get('pos', '')
-    const slot = playerMap.get('slot')
+    const extensions = player_map.get('extensions', 0)
+    const pos = player_map.get('pos', '')
+    const slot = player_map.get('slot')
     const extendedSalary = isRestrictedFreeAgency
       ? bid
       : getExtensionAmount({
@@ -61,9 +61,9 @@ class PlayerRoster extends Player {
           bid
         })
     const projectionType = isRegularSeason ? 'ros' : '0'
-    const hasProjections = playerMap.hasIn(['market_salary', projectionType])
-    const market_salary = playerMap.getIn(['market_salary', projectionType], 0)
-    // const market_salary_adj = playerMap.get('market_salary_adj', 0)
+    const hasProjections = player_map.hasIn(['market_salary', projectionType])
+    const market_salary = player_map.getIn(['market_salary', projectionType], 0)
+    // const market_salary_adj = player_map.get('market_salary_adj', 0)
     const get_savings = () => {
       if (!hasProjections) return null
       if (isRestrictedFreeAgency || isRestrictedFreeAgent)
@@ -73,22 +73,22 @@ class PlayerRoster extends Player {
     }
     const savings = get_savings()
 
-    const pts_added = playerMap.getIn(['pts_added', projectionType], 0)
-    const salary_adj_pts_added = playerMap.getIn(
+    const pts_added = player_map.getIn(['pts_added', projectionType], 0)
+    const salary_adj_pts_added = player_map.getIn(
       ['salary_adj_pts_added', projectionType],
       0
     )
     const week = Math.max(constants.week, 1)
-    const weekPoints = playerMap.getIn(['points', `${week}`, 'total'], 0)
-    const projected_starts = playerMap.getIn(['lineups', 'starts'], 0)
-    const startPoints = playerMap.getIn(['lineups', 'sp'], 0)
-    const benchPoints = playerMap.getIn(['lineups', 'bp'], 0)
-    const points_added = playerMap.get('points_added', 0)
-    const points_added_rnk = playerMap.get('points_added_rnk', null)
-    const points_added_pos_rnk = playerMap.get('points_added_pos_rnk', null)
+    const weekPoints = player_map.getIn(['points', `${week}`, 'total'], 0)
+    const projected_starts = player_map.getIn(['lineups', 'starts'], 0)
+    const startPoints = player_map.getIn(['lineups', 'sp'], 0)
+    const benchPoints = player_map.getIn(['lineups', 'bp'], 0)
+    const points_added = player_map.get('points_added', 0)
+    const points_added_rnk = player_map.get('points_added_rnk', null)
+    const points_added_pos_rnk = player_map.get('points_added_pos_rnk', null)
 
     const classNames = ['player__item', 'table__row']
-    if (selected === playerMap.get('pid')) classNames.push('selected')
+    if (selected === player_map.get('pid')) classNames.push('selected')
     if (isWaiver) classNames.push('waiver')
     if (isClaim) classNames.push('claim')
 
@@ -104,7 +104,7 @@ class PlayerRoster extends Player {
     })
 
     if (is_before_extension_deadline) {
-      const is_rookie = playerMap.get('nfl_draft_year') >= constants.year - 1
+      const is_rookie = player_map.get('nfl_draft_year') >= constants.year - 1
       if (is_rookie) {
         rookie_tag_savings =
           Math.max(regular_extended_salary - value, 0) || null
@@ -122,7 +122,7 @@ class PlayerRoster extends Player {
         {dragHandle}
         <div className='table__cell text sticky__column lead-cell'>
           <PlayerName
-            pid={playerMap.get('pid')}
+            pid={player_map.get('pid')}
             waiverId={waiverId}
             poachId={poachId}
             hideActions={isPoach}
@@ -130,7 +130,7 @@ class PlayerRoster extends Player {
             show_position_bar
           />
           {Boolean(
-            playerMap.get('pid') && is_hosted && is_manager_in_league
+            player_map.get('pid') && is_hosted && is_manager_in_league
           ) && (
             <div className='player__item-menu'>
               <IconButton
@@ -159,7 +159,7 @@ class PlayerRoster extends Player {
         )}
         {Boolean(isRestrictedFreeAgency) && (
           <div className='table__cell player__item-team'>
-            <TeamName abbrv tid={playerMap.get('tid')} />
+            <TeamName abbrv tid={player_map.get('tid')} />
           </div>
         )}
         {Boolean(isRestrictedFreeAgency) && (
