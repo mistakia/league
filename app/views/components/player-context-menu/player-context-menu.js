@@ -28,7 +28,6 @@ export default function PlayerContextMenu({
   nominate_restricted_free_agent,
   unnominate_restricted_free_agent
 }) {
-  console.log({ status })
   const handleDeactivate = () => {
     showConfirmation({
       id: 'DEACTIVATE',
