@@ -74,7 +74,7 @@ export const get_market_type = (stat_type) => {
       return player_prop_types.GAME_PASSING_RUSHING_RECEIVING_TOUCHDOWNS
 
     case 'Rush+Rec TDs':
-      return player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
+      return player_prop_types.ANYTIME_TOUCHDOWN
 
     case 'Sacks':
       return player_prop_types.GAME_DEFENSE_SACKS

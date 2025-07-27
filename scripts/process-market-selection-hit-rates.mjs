@@ -450,7 +450,7 @@ const get_metric_result_value = (player_gamelog, market_type) => {
     case player_game_prop_types.GAME_PASSING_ATTEMPTS:
       return player_gamelog.pa
 
-    case player_game_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS:
+    case player_game_prop_types.ANYTIME_TOUCHDOWN:
       return player_gamelog.tdr + player_gamelog.tdrec
 
     case player_game_prop_types.GAME_PASSING_RUSHING_YARDS:
