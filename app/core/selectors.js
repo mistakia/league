@@ -839,11 +839,22 @@ export function get_filtered_matchups(state) {
   const teams = matchups.get('teams')
   const weeks = matchups.get('weeks')
   const year = state.getIn(['app', 'year'], constants.year)
-  const filtered = items.filter(
-    (m) =>
-      teams.includes(m.aid) ||
-      (teams.includes(m.hid) && m.year === year && weeks.includes(m.week))
-  )
+  const filtered = items.filter((m) => {
+    // Always apply year filter first
+    if (m.year !== year) return false
+
+    // Apply team filter if teams are selected
+    if (teams.size > 0) {
+      if (!teams.includes(m.aid) && !teams.includes(m.hid)) return false
+    }
+
+    // Apply week filter if weeks are selected
+    if (weeks.size > 0) {
+      if (!weeks.includes(m.week)) return false
+    }
+
+    return true
+  })
   return filtered
 }
 
