@@ -25,10 +25,10 @@ const map_state_to_props = createSelector(
   get_auction_state,
   get_app,
   get_current_league,
-  (playerMap, status, players, auction, app, league) => ({
-    playerMap,
+  (player_map, status, players, auction, app, league) => ({
+    player_map,
     status,
-    isOnCutlist: players.get('cutlist').includes(playerMap.get('pid')),
+    isOnCutlist: players.get('cutlist').includes(player_map.get('pid')),
     isNominating:
       !auction.isPaused &&
       !auction.nominated_pid &&

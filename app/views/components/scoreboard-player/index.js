@@ -13,8 +13,8 @@ const map_state_to_props = createSelector(
   getPlayerById,
   getScoreboardGamelogByPlayerId,
   get_scoreboard,
-  (playerMap, gamelog, scoreboard) => ({
-    playerMap,
+  (player_map, gamelog, scoreboard) => ({
+    player_map,
     gamelog,
     week: scoreboard.get('week')
   })

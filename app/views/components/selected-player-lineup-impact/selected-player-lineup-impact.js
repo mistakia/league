@@ -8,7 +8,7 @@ import { constants } from '@libs-shared'
 
 export default class SelectedPlayerLineupImpact extends React.Component {
   render = () => {
-    const { is_logged_in, playerMap } = this.props
+    const { is_logged_in, player_map } = this.props
 
     if (!is_logged_in) {
       return <div>Must be logged in.</div>
@@ -16,16 +16,16 @@ export default class SelectedPlayerLineupImpact extends React.Component {
 
     const spData = []
     const bpData = []
-    for (const week in playerMap.getIn(['lineups', 'weeks'], {})) {
+    for (const week in player_map.getIn(['lineups', 'weeks'], {})) {
       if (week >= constants.week) {
         spData.push(
           parseFloat(
-            playerMap.getIn(['lineups', 'weeks', week, 'sp'], 0).toFixed(1)
+            player_map.getIn(['lineups', 'weeks', week, 'sp'], 0).toFixed(1)
           )
         )
         bpData.push(
           parseFloat(
-            playerMap.getIn(['lineups', 'weeks', week, 'bp'], 0).toFixed(1)
+            player_map.getIn(['lineups', 'weeks', week, 'bp'], 0).toFixed(1)
           )
         )
       }
@@ -87,5 +87,5 @@ export default class SelectedPlayerLineupImpact extends React.Component {
 
 SelectedPlayerLineupImpact.propTypes = {
   is_logged_in: PropTypes.bool,
-  playerMap: ImmutablePropTypes.map
+  player_map: ImmutablePropTypes.map
 }

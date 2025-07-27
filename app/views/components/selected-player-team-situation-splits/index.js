@@ -8,7 +8,7 @@ import SelectedPlayerTeamSituationSplits from './selected-player-team-situation-
 const map_state_to_props = createSelector(
   getSelectedPlayer,
   get_stats_state,
-  (playerMap, stats) => ({ team: playerMap.get('team'), stats })
+  (player_map, stats) => ({ team: player_map.get('team'), stats })
 )
 
 export default connect(map_state_to_props)(SelectedPlayerTeamSituationSplits)

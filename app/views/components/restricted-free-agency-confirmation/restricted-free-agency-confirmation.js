@@ -26,15 +26,15 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
   constructor(props) {
     super(props)
 
-    const { team, playerMap } = props
+    const { team, player_map } = props
 
     this.state = {
-      release_ids: playerMap.get(
+      release_ids: player_map.get(
         'restricted_free_agency_conditional_releases',
         []
       ),
       untag: '',
-      bid: playerMap.get('bid', 0),
+      bid: player_map.get('bid', 0),
       error: false,
       missing_release: false,
       missing_untag: false,
@@ -56,14 +56,14 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
       this._untags.push(player_map)
     }
 
-    const pid = playerMap.get('pid')
-    const bid = playerMap.get('bid')
+    const pid = player_map.get('pid')
+    const bid = player_map.get('bid')
     const restricted_free_agency_bid_exists =
       bid !== null && bid !== undefined && Number(bid) >= 0
     this._isUpdate = Boolean(
       tagged_pids.includes(pid) || restricted_free_agency_bid_exists
     )
-    this._isOriginalTeam = team.roster.tid === playerMap.get('tid')
+    this._isOriginalTeam = team.roster.tid === player_map.get('tid')
     // TODO - check roster size limit eligiblity
     this._isEligible =
       this._isUpdate ||
@@ -73,7 +73,7 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
       })
 
     // Check if initial bid exceeds max bid
-    const initial_bid = playerMap.get('bid', 0)
+    const initial_bid = player_map.get('bid', 0)
     if (initial_bid > 0) {
       const max_bid = this.get_max_bid()
       if (initial_bid > max_bid) {
@@ -84,9 +84,9 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
 
   get_max_bid = () => {
     const available_salary = this.props.team.roster.availableCap
-    const { playerMap, cutlist_total_salary } = this.props
-    const value = playerMap.get('value', 0)
-    const bid = playerMap.get('bid', 0)
+    const { player_map, cutlist_total_salary } = this.props
+    const value = player_map.get('value', 0)
+    const bid = player_map.get('bid', 0)
     const player_salary = bid || value
 
     const not_in_cutlist = this.state.release_ids.filter(
@@ -103,7 +103,7 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
 
     const salary_space_total =
       available_salary + cutlist_total_salary + release_total_salary
-    const on_cutlist = this.props.cutlist.includes(playerMap.get('pid'))
+    const on_cutlist = this.props.cutlist.includes(player_map.get('pid'))
     return (
       salary_space_total +
       (this._isOriginalTeam && !on_cutlist ? player_salary : 0)
@@ -150,8 +150,8 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
   handleSubmit = () => {
     const { untag, error, bid } = this.state
     const { tid } = this.props.team.roster
-    const pid = this.props.playerMap.get('pid')
-    const player_tid = this.props.playerMap.get('tid')
+    const pid = this.props.player_map.get('pid')
+    const player_tid = this.props.player_map.get('tid')
 
     if (!this._isEligible && !untag) {
       return this.setState({ missing_untag: true })
@@ -180,7 +180,7 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
   }
 
   render = () => {
-    const { team, playerMap } = this.props
+    const { team, player_map } = this.props
 
     const menu_items = []
     for (const r_player_map of this._untags) {
@@ -193,7 +193,7 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
     }
 
     const options = []
-    const pid = playerMap.get('pid')
+    const pid = player_map.get('pid')
     team.players.forEach((player_map) => {
       const pid_i = player_map.get('pid')
       if (pid_i === pid) {
@@ -265,7 +265,7 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
         <DialogTitle>Restricted Free Agent Tag</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {`Place Restricted Free Agent bid on ${playerMap.get('name')} (${playerMap.get(
+            {`Place Restricted Free Agent bid on ${player_map.get('name')} (${player_map.get(
               'pos'
             )})`}
           </DialogContentText>
@@ -336,7 +336,7 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
 RestrictedFreeAgencyConfirmation.propTypes = {
   onClose: PropTypes.func,
   team: PropTypes.object,
-  playerMap: ImmutablePropTypes.map,
+  player_map: ImmutablePropTypes.map,
   cutlist_total_salary: PropTypes.number,
   cutlist: ImmutablePropTypes.list,
   add_restricted_free_agency_tag: PropTypes.func,

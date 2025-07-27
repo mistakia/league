@@ -11,7 +11,7 @@ import PercentileMetric from '@components/percentile-metric'
 import './selected-player-schedule.styl'
 
 export default function SelectedPlayerSchedule({
-  playerMap,
+  player_map,
   games,
   seasonlogs,
   schedule,
@@ -21,8 +21,8 @@ export default function SelectedPlayerSchedule({
     load_nfl_team_seasonlogs()
   }, [load_nfl_team_seasonlogs])
 
-  const pos = playerMap.get('pos')
-  const team = playerMap.get('team')
+  const pos = player_map.get('pos')
+  const team = player_map.get('team')
   const current_week = Math.max(constants.week, 1)
   const [selected_week, set_selected_week] = useState(current_week)
 
@@ -90,7 +90,7 @@ export default function SelectedPlayerSchedule({
 }
 
 SelectedPlayerSchedule.propTypes = {
-  playerMap: ImmutablePropTypes.map,
+  player_map: ImmutablePropTypes.map,
   games: PropTypes.array,
   seasonlogs: ImmutablePropTypes.map,
   schedule: ImmutablePropTypes.map,

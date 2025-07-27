@@ -9,7 +9,7 @@ import './draft-pick.styl'
 
 export default class DraftPick extends React.Component {
   render() {
-    const { playerMap, pick, team, isActive, isUser } = this.props
+    const { player_map, pick, team, isActive, isUser } = this.props
 
     const classNames = ['draft__pick']
     if (isActive && !pick.pid) {
@@ -20,7 +20,7 @@ export default class DraftPick extends React.Component {
       classNames.push('user')
     }
 
-    const pos = playerMap.get('pos')
+    const pos = player_map.get('pos')
     if (pos) classNames.push(pos)
 
     return (
@@ -30,13 +30,13 @@ export default class DraftPick extends React.Component {
         </div>
         <div className='draft__pick-num pick'>{`#${pick.pick}`}</div>
         <div className='draft__pick-main'>
-          {Boolean(playerMap.get('pid')) && (
+          {Boolean(player_map.get('pid')) && (
             <div className='draft__pick-player'>
               <div className='draft__pick-player-name last'>
-                {playerMap.get('lname')}
+                {player_map.get('lname')}
               </div>
               <div className='draft__pick-player-name first'>
-                {playerMap.get('fname')}
+                {player_map.get('fname')}
               </div>
             </div>
           )}
@@ -61,7 +61,7 @@ export default class DraftPick extends React.Component {
 }
 
 DraftPick.propTypes = {
-  playerMap: ImmutablePropTypes.map,
+  player_map: ImmutablePropTypes.map,
   pick: PropTypes.object,
   team: ImmutablePropTypes.record,
   isActive: PropTypes.bool,

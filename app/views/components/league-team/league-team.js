@@ -66,75 +66,75 @@ export default function LeagueTeam({
   const cutlist_pids = cutlist.map((cMap) => cMap.get('pid')).toJS()
   for (const position in groups) {
     const players = groups[position]
-    for (const playerMap of players) {
-      if (!playerMap.get('pid')) continue
+    for (const player_map of players) {
+      if (!player_map.get('pid')) continue
       if (
         !constants.isRegularSeason &&
-        cutlist_pids.includes(playerMap.get('pid'))
+        cutlist_pids.includes(player_map.get('pid'))
       )
         continue
 
-      activePlayers = activePlayers.push(playerMap)
+      activePlayers = activePlayers.push(player_map)
       activeItems.push(
         <PlayerRoster
-          key={playerMap.get('pid')}
-          {...{ playerMap, percentiles, is_team_manager }}
+          key={player_map.get('pid')}
+          {...{ player_map, percentiles, is_team_manager }}
         />
       )
     }
   }
 
   const practice_signed_items = []
-  for (const playerMap of players.practice_signed) {
-    if (!playerMap.get('pid')) continue
+  for (const player_map of players.practice_signed) {
+    if (!player_map.get('pid')) continue
     practice_signed_items.push(
       <PlayerRoster
-        key={playerMap.get('pid')}
-        {...{ playerMap, percentiles }}
+        key={player_map.get('pid')}
+        {...{ player_map, percentiles }}
       />
     )
   }
 
   const practice_drafted_items = []
-  for (const playerMap of players.practice_drafted) {
-    if (!playerMap.get('pid')) continue
+  for (const player_map of players.practice_drafted) {
+    if (!player_map.get('pid')) continue
     practice_drafted_items.push(
       <PlayerRoster
-        key={playerMap.get('pid')}
-        {...{ playerMap, percentiles }}
+        key={player_map.get('pid')}
+        {...{ player_map, percentiles }}
       />
     )
   }
 
   const reserveIRItems = []
-  for (const playerMap of players.ir) {
-    if (!playerMap.get('pid')) continue
+  for (const player_map of players.ir) {
+    if (!player_map.get('pid')) continue
     reserveIRItems.push(
       <PlayerRoster
-        key={playerMap.get('pid')}
-        {...{ playerMap, percentiles }}
+        key={player_map.get('pid')}
+        {...{ player_map, percentiles }}
       />
     )
   }
 
   const reserveIRLongTermItems = []
-  for (const playerMap of players.ir_long_term) {
-    if (!playerMap.get('pid')) continue
+  for (const player_map of players.ir_long_term) {
+    if (!player_map.get('pid')) continue
     reserveIRLongTermItems.push(
       <PlayerRoster
-        key={playerMap.get('pid')}
-        {...{ playerMap, percentiles }}
+        key={player_map.get('pid')}
+        {...{ player_map, percentiles }}
       />
     )
   }
 
   const reserveCOVItems = []
-  for (const playerMap of players.cov) {
-    if (!playerMap.get('pid')) continue
+  for (const player_map of players.cov) {
+    if (!player_map.get('pid')) continue
     reserveCOVItems.push(
       <PlayerRoster
-        key={playerMap.get('pid')}
-        {...{ playerMap, percentiles }}
+        key={player_map.get('pid')}
+        {...{ player_map, percentiles }}
       />
     )
   }
@@ -154,18 +154,18 @@ export default function LeagueTeam({
   const notice_items = [...rfa_notices]
 
   // Add reserve notices
-  for (const playerMap of [...players.ir, ...players.ir_long_term]) {
-    if (!playerMap.get('pid')) continue
+  for (const player_map of [...players.ir, ...players.ir_long_term]) {
+    if (!player_map.get('pid')) continue
 
     if (
       !isReserveEligible({
-        nfl_status: playerMap.get('nfl_status'),
-        injury_status: playerMap.get('injury_status')
+        nfl_status: player_map.get('nfl_status'),
+        injury_status: player_map.get('injury_status')
       })
     ) {
       notice_items.push(
-        <Alert key={playerMap.get('pid')} severity='error'>
-          {playerMap.get('name', 'N/A')} is not eligible for Reserve/IR
+        <Alert key={player_map.get('pid')} severity='error'>
+          {player_map.get('name', 'N/A')} is not eligible for Reserve/IR
           {is_team_manager
             ? '. You will need to activate or release him before you can make any acquisitions or claims.'
             : ''}
@@ -174,17 +174,17 @@ export default function LeagueTeam({
     }
   }
 
-  for (const playerMap of players.cov) {
-    if (!playerMap.get('pid')) continue
+  for (const player_map of players.cov) {
+    if (!player_map.get('pid')) continue
 
     if (
       !isReserveCovEligible({
-        nfl_status: playerMap.get('nfl_status')
+        nfl_status: player_map.get('nfl_status')
       })
     ) {
       notice_items.push(
-        <Alert key={playerMap.get('pid')} severity='error'>
-          {playerMap.get('name', 'N/A')} is not eligible for Reserve/COVID-19
+        <Alert key={player_map.get('pid')} severity='error'>
+          {player_map.get('name', 'N/A')} is not eligible for Reserve/COVID-19
           {is_team_manager
             ? '. You will need to activate or release him before you can make any acquisitions or claims.'
             : ''}
@@ -195,13 +195,13 @@ export default function LeagueTeam({
 
   // Add poach notices
   for (const poach of poaches) {
-    const playerMap = poach.get('playerMap')
-    if (!playerMap) continue
+    const player_map = poach.get('player_map')
+    if (!player_map) continue
 
     const player_tid = poach.get('player_tid')
     if (player_tid !== teamId) continue
 
-    notice_items.push(<PoachNotice key={playerMap.get('pid')} poach={poach} />)
+    notice_items.push(<PoachNotice key={player_map.get('pid')} poach={poach} />)
   }
 
   return (

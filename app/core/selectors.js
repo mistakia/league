@@ -210,10 +210,10 @@ export const get_auction_target_players = createSelector(
     filtered = filtered.filter(
       (pMap) => !rostered_pids.includes(pMap.get('pid'))
     )
-    for (const playerMap of currentPlayers.active) {
-      const pid = playerMap.get('pid')
+    for (const player_map of currentPlayers.active) {
+      const pid = player_map.get('pid')
       if (!pid) continue
-      filtered = filtered.set(pid, playerMap)
+      filtered = filtered.set(pid, player_map)
     }
 
     const search = auction.get('search')
@@ -276,11 +276,12 @@ export const get_auction_info_for_position = createSelector(
       0
     )
     const retail = active_rostered.reduce(
-      (sum, playerMap) => sum + (playerMap.getIn(['market_salary', '0']) || 0),
+      (sum, player_map) =>
+        sum + (player_map.getIn(['market_salary', '0']) || 0),
       0
     )
     const actual = active_rostered.reduce(
-      (sum, playerMap) => sum + (playerMap.get('value') || 0),
+      (sum, player_map) => sum + (player_map.get('value') || 0),
       0
     )
     return {
@@ -312,12 +313,12 @@ export const is_nominated_player_eligible = createSelector(
       return false
     }
 
-    const playerMap = playerMaps.get(pid)
-    if (!playerMap) {
+    const player_map = playerMaps.get(pid)
+    if (!player_map) {
       return false
     }
 
-    const pos = playerMap.get('pos')
+    const pos = player_map.get('pos')
     if (!pos) {
       return false
     }
@@ -412,8 +413,8 @@ export const get_selected_draft_player = createSelector(
   }
 )
 
-export function is_player_drafted(state, { pid, playerMap = new Map() }) {
-  pid = pid || playerMap.get('pid')
+export function is_player_drafted(state, { pid, player_map = new Map() }) {
+  pid = pid || player_map.get('pid')
   if (!pid) {
     return false
   }
@@ -975,14 +976,14 @@ export function get_cutlist_total_salary(state) {
   const league = get_current_league(state)
   const isBeforeExtension = is_before_extension_deadline(state)
 
-  return playerMaps.reduce((sum, playerMap) => {
-    const value = playerMap.get('value')
-    const extensions = playerMap.get('extensions', 0)
-    const bid = playerMap.get('bid', 0)
+  return playerMaps.reduce((sum, player_map) => {
+    const value = player_map.get('value')
+    const extensions = player_map.get('extensions', 0)
+    const bid = player_map.get('bid', 0)
     const salary = isBeforeExtension
       ? getExtensionAmount({
-          pos: playerMap.get('pos'),
-          tag: playerMap.get('tag'),
+          pos: player_map.get('pos'),
+          tag: player_map.get('tag'),
           extensions,
           league,
           value,
@@ -1000,13 +1001,13 @@ export function getSelectedPlayer(state) {
 }
 
 export function getSelectedPlayerGame(state, { week }) {
-  const playerMap = getSelectedPlayer(state)
-  return get_game_by_team(state, { nfl_team: playerMap.get('team'), week })
+  const player_map = getSelectedPlayer(state)
+  return get_game_by_team(state, { nfl_team: player_map.get('team'), week })
 }
 
 export function getSelectedPlayerGames(state) {
-  const playerMap = getSelectedPlayer(state)
-  return getGamesByTeam(state, { nfl_team: playerMap.get('team') })
+  const player_map = getSelectedPlayer(state)
+  return getGamesByTeam(state, { nfl_team: player_map.get('team') })
 }
 
 // used by editable baseline component
@@ -1029,15 +1030,15 @@ export const getRookiePlayers = createSelector(get_player_maps, (playerMaps) =>
     .toList()
 )
 
-export function getPlayerById(state, { pid, playerMap }) {
-  if (playerMap) return playerMap
+export function getPlayerById(state, { pid, player_map }) {
+  if (player_map) return player_map
   const playerMaps = get_player_maps(state)
-  return playerMaps.get(pid) || new Map()
+  return playerMaps.get(pid, Map())
 }
 
 export function getGamesByYearForSelectedPlayer(state) {
   const pid = state.get('players').get('selected')
-  const playerMap = getPlayerById(state, { pid })
+  const player_map = getPlayerById(state, { pid })
   const gamelogs = get_player_gamelogs(state)
   const games = gamelogs.filter((p) => p.pid === pid && p.seas_type === 'REG')
 
@@ -1066,7 +1067,7 @@ export function getGamesByYearForSelectedPlayer(state) {
     }, initialValue)
     const points = calculatePoints({
       stats: sum,
-      position: playerMap.get('pos'),
+      position: player_map.get('pos'),
       league: league.toJS()
     })
     sum.total = points.total
@@ -1085,14 +1086,14 @@ export const isPlayerOnReleaseWaivers = createSelector(
   }
 )
 
-export function isPlayerReserveEligible(state, { playerMap }) {
+export function isPlayerReserveEligible(state, { player_map }) {
   const reserve = {
     ir: false,
     cov: false
   }
 
-  const nfl_status = playerMap.get('nfl_status')
-  const injury_status = playerMap.get('injury_status')
+  const nfl_status = player_map.get('nfl_status')
+  const injury_status = player_map.get('injury_status')
 
   if (
     isReserveEligible({
@@ -1114,24 +1115,24 @@ export function isPlayerReserveEligible(state, { playerMap }) {
   return reserve
 }
 
-export function isPlayerLocked(state, { playerMap = new Map(), pid }) {
+export function isPlayerLocked(state, { player_map = new Map(), pid }) {
   if (constants.week > constants.season.finalWeek) {
     return true
   }
 
   if (pid) {
-    playerMap = getPlayerById(state, { pid })
+    player_map = getPlayerById(state, { pid })
   }
 
-  if (!playerMap.get('pid')) {
+  if (!player_map.get('pid')) {
     return false
   }
 
-  if (playerMap.get('nfl_status') === constants.player_nfl_status.INACTIVE) {
+  if (player_map.get('nfl_status') === constants.player_nfl_status.INACTIVE) {
     return false
   }
 
-  const game = get_game_by_team(state, { nfl_team: playerMap.get('team') })
+  const game = get_game_by_team(state, { nfl_team: player_map.get('team') })
   if (!game) {
     return false
   }
@@ -1148,9 +1149,9 @@ export function isPlayerLocked(state, { playerMap = new Map(), pid }) {
   return false
 }
 
-export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
+export function getPlayerStatus(state, { player_map = new Map(), pid }) {
   if (pid) {
-    playerMap = getPlayerById(state, { pid })
+    player_map = getPlayerById(state, { pid })
   }
 
   const status = {
@@ -1193,15 +1194,15 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
     }
   }
 
-  if (!playerMap.get('pid')) {
+  if (!player_map.get('pid')) {
     return status
   }
 
   const league = get_current_league(state)
-  const playerTag = playerMap.get('tag')
-  const playerSlot = playerMap.get('slot')
-  const playerId = playerMap.get('pid')
-  const bid = playerMap.get('bid')
+  const playerTag = player_map.get('tag')
+  const playerSlot = player_map.get('slot')
+  const playerId = player_map.get('pid')
+  const bid = player_map.get('bid')
   status.restricted_free_agent_bid_exists =
     bid !== null && bid !== undefined && Number(bid) >= 0
   status.tagged.rookie = playerTag === constants.tags.ROOKIE
@@ -1211,17 +1212,17 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
   status.protected =
     playerSlot === constants.slots.PSP || playerSlot === constants.slots.PSDP
   status.starter = constants.starterSlots.includes(playerSlot)
-  status.locked = isPlayerLocked(state, { playerMap })
+  status.locked = isPlayerLocked(state, { player_map })
   status.active = isSlotActive(playerSlot)
 
-  const isFreeAgent = isPlayerFreeAgent(state, { playerMap })
+  const isFreeAgent = isPlayerFreeAgent(state, { player_map })
   status.fa = isFreeAgent
   if (isFreeAgent) {
     const { isWaiverPeriod, isRegularSeason } = constants.season
     if (isRegularSeason && isWaiverPeriod) {
       status.waiver.active = true
       const isPracticeSquadEligible = isPlayerPracticeSquadEligible(state, {
-        playerMap
+        player_map
       })
       if (isPracticeSquadEligible) status.waiver.practice = true
     } else if (is_free_agent_period(state)) {
@@ -1233,7 +1234,7 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
       })
       const draft = is_after_rookie_draft(state)
       const isPracticeSquadEligible = isPlayerPracticeSquadEligible(state, {
-        playerMap
+        player_map
       })
       if (onReleaseWaivers) {
         if (isRegularSeason) status.waiver.active = true
@@ -1252,7 +1253,7 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
   } else {
     const roster = getCurrentTeamRoster(state)
 
-    const restricted_free_agency_tag_processed = playerMap.get(
+    const restricted_free_agency_tag_processed = player_map.get(
       'restricted_free_agency_tag_processed'
     )
 
@@ -1263,10 +1264,10 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
       status.eligible.restrictedFreeAgencyBid = true
     }
 
-    status.tagged.restricted_free_agency_nominated = playerMap.get(
+    status.tagged.restricted_free_agency_nominated = player_map.get(
       'restricted_free_agency_tag_nominated'
     )
-    status.tagged.restricted_free_agency_announced = playerMap.get(
+    status.tagged.restricted_free_agency_announced = player_map.get(
       'restricted_free_agency_tag_announced'
     )
 
@@ -1277,7 +1278,7 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
       //     was player a rookie last year
       //     otherwise are they a rookie now
       const isBeforeExtension = is_before_extension_deadline(state)
-      const draft_year = playerMap.get('nfl_draft_year')
+      const draft_year = player_map.get('nfl_draft_year')
       if (isBeforeExtension && draft_year === constants.year - 1) {
         status.eligible.rookieTag = true
       } else if (draft_year === constants.year) {
@@ -1318,12 +1319,12 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
         }
       }
 
-      if (isPlayerPracticeSquadEligible(state, { playerMap })) {
+      if (isPlayerPracticeSquadEligible(state, { player_map })) {
         status.eligible.ps = true
       }
 
       if (!status.protected && constants.week <= constants.season.finalWeek) {
-        const reserve = isPlayerReserveEligible(state, { playerMap })
+        const reserve = isPlayerReserveEligible(state, { player_map })
         if (
           reserve.ir &&
           playerSlot !== constants.slots.IR &&
@@ -1344,7 +1345,7 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
           status.reserve.cov = true
         }
       }
-    } else if (isPlayerOnPracticeSquad(state, { playerMap })) {
+    } else if (isPlayerOnPracticeSquad(state, { player_map })) {
       const is_sanctuary_period = isSantuaryPeriod(league)
       // make sure player is unprotected and it is not a santuary period
       if (
@@ -1385,9 +1386,9 @@ export function getPlayerStatus(state, { playerMap = new Map(), pid }) {
 
 export function isPlayerPracticeSquadEligible(
   state,
-  { playerMap = new Map() }
+  { player_map = new Map() }
 ) {
-  const pid = playerMap.get('pid')
+  const pid = player_map.get('pid')
   if (!pid) {
     return false
   }
@@ -1399,7 +1400,7 @@ export function isPlayerPracticeSquadEligible(
     constants.transactions.RESERVE_IR,
     constants.transactions.RESERVE_COV
   ]
-  const type = playerMap.get('type')
+  const type = player_map.get('type')
   if (type && !acceptable_types.includes(type)) {
     return false
   }
@@ -1412,8 +1413,8 @@ export function isPlayerPracticeSquadEligible(
   if (
     !rosterInfo.tid && // not on a team
     !constants.isRegularSeason && // during the offseason
-    playerMap.get('nfl_draft_year') !== constants.year && // not a rookie
-    playerMap.get('team') !== 'INA' // not on a nfl team
+    player_map.get('nfl_draft_year') !== constants.year && // not a rookie
+    player_map.get('team') !== 'INA' // not on a nfl team
   ) {
     return false
   }
@@ -1426,7 +1427,7 @@ export function isPlayerPracticeSquadEligible(
   }
 
   // not eligible if already on pracice squad
-  const onPracticeSquad = isPlayerOnPracticeSquad(state, { playerMap })
+  const onPracticeSquad = isPlayerOnPracticeSquad(state, { player_map })
   if (onPracticeSquad) {
     return false
   }
@@ -1516,19 +1517,20 @@ export function is_player_filter_options_changed(state) {
   return false
 }
 
-export function get_plays_for_player(state, { playerMap, week }) {
+export function get_plays_for_player(state, { player_map, week }) {
   const plays = get_plays(state, { week })
   const formatted = plays.valueSeq().toList()
 
-  const playerTeam = playerMap.get('team')
-  if (playerMap.get('pos') === 'DST') {
+  const playerTeam = player_map.get('team')
+  if (player_map.get('pos') === 'DST') {
     return formatted.filter((p) => {
       if (fixTeam(p.h) !== playerTeam && fixTeam(p.v) !== playerTeam) {
         return false
       }
 
       return (
-        (Boolean(p.pos_team) && fixTeam(p.pos_team) !== playerMap.get('pid')) ||
+        (Boolean(p.pos_team) &&
+          fixTeam(p.pos_team) !== player_map.get('pid')) ||
         p.play_type_nfl === 'PUNT' ||
         p.play_type_nfl === 'KICK_OFF' ||
         p.play_type_nfl === 'XP_KICK'
@@ -1550,8 +1552,8 @@ export function get_plays_for_player(state, { playerMap, week }) {
 
     const playStats = play.playStats.filter(
       (ps) =>
-        (ps.gsisId && ps.gsisId === playerMap.get('gsisid')) ||
-        (ps.gsispid && ps.gsispid === playerMap.get('gsispid'))
+        (ps.gsisId && ps.gsisId === player_map.get('gsisid')) ||
+        (ps.gsispid && ps.gsispid === player_map.get('gsispid'))
     )
 
     if (!playStats.length) continue
@@ -1592,8 +1594,8 @@ export function getPoachPlayersForCurrentTeam(state) {
   for (const poach of poaches.valueSeq()) {
     if (poach.tid !== teamId) continue
     const pid = poach.pid
-    const playerMap = getPlayerById(state, { pid })
-    poachPlayers.push(poach.set('playerMap', playerMap))
+    const player_map = getPlayerById(state, { pid })
+    poachPlayers.push(poach.set('player_map', player_map))
   }
 
   return new List(poachPlayers)
@@ -1610,20 +1612,20 @@ export function get_poach_players_for_current_league(state) {
       continue
     }
 
-    const playerMap = getPlayerById(state, { pid })
+    const player_map = getPlayerById(state, { pid })
 
-    const slot = playerMap.get('slot')
+    const slot = player_map.get('slot')
     if (slot !== constants.slots.PS && slot !== constants.slots.PSD) {
       poaches = poaches.delete(pid)
       continue
     }
 
-    poaches = poaches.setIn([pid, 'playerMap'], playerMap)
+    poaches = poaches.setIn([pid, 'player_map'], player_map)
     if (poach.release.size) {
       const releases = []
       for (const pid of poach.release) {
-        const playerMap = getPlayerById(state, { pid })
-        releases.push(playerMap)
+        const player_map = getPlayerById(state, { pid })
+        releases.push(player_map)
       }
       poaches = poaches.setIn([pid, 'release'], new List(releases))
     }
@@ -1640,8 +1642,8 @@ export function getFilteredProps(state) {
   const items = props.toJS()
 
   for (const prop of items) {
-    const playerMap = getPlayerById(state, { pid: prop.pid })
-    const proj = playerMap.getIn(['projection', `${prop.week}`], {})
+    const player_map = getPlayerById(state, { pid: prop.pid })
+    const proj = player_map.getIn(['projection', `${prop.week}`], {})
     switch (prop.prop_type) {
       case bookmaker_constants.player_prop_types.GAME_PASSING_YARDS:
         prop.proj = proj.py
@@ -1736,8 +1738,8 @@ export const getPlayersByTeamId = createSelector(
 export function getStartersByTeamId(state, { tid, week }) {
   const roster = getRosterByTeamId(state, { tid, week })
   return roster.starters.map(({ pid, slot }) => {
-    const playerMap = getPlayerById(state, { pid })
-    return playerMap.set('slot', slot)
+    const player_map = getPlayerById(state, { pid })
+    return player_map.set('slot', slot)
   })
 }
 
@@ -1783,9 +1785,9 @@ export function getActivePlayersByRosterForCurrentLeague(state) {
 
 export function getRosterInfoForPlayerId(
   state,
-  { pid, playerMap = new Map() }
+  { pid, player_map = new Map() }
 ) {
-  pid = pid || playerMap.get('pid')
+  pid = pid || player_map.get('pid')
   if (!pid) {
     return {}
   }
@@ -1860,14 +1862,14 @@ export const get_injured_reserve_player_ids_for_current_league = createSelector(
   }
 )
 
-export function isPlayerFreeAgent(state, { playerMap }) {
+export function isPlayerFreeAgent(state, { player_map }) {
   const rostered = get_rostered_player_ids_for_current_league(state)
-  return !rostered.includes(playerMap.get('pid'))
+  return !rostered.includes(player_map.get('pid'))
 }
 
-export function isPlayerOnPracticeSquad(state, { playerMap }) {
+export function isPlayerOnPracticeSquad(state, { player_map }) {
   const practiceSquads = get_practice_squad_player_ids_for_current_league(state)
-  return practiceSquads.includes(playerMap.get('pid'))
+  return practiceSquads.includes(player_map.get('pid'))
 }
 
 export const getCurrentTeamRoster = createSelector(
@@ -2114,8 +2116,8 @@ export function get_current_players_for_league(state) {
 }
 
 export function getGameByPlayerId(state, { pid, week }) {
-  const playerMap = getPlayerById(state, { pid })
-  return get_game_by_team(state, { nfl_team: playerMap.get('team'), week })
+  const player_map = getPlayerById(state, { pid })
+  return get_game_by_team(state, { nfl_team: player_map.get('team'), week })
 }
 
 export function getByeByTeam(state, { nfl_team }) {
@@ -2162,8 +2164,8 @@ export function getSelectedMatchupScoreboards(state) {
 export function getPointsByTeamId(state, { tid, week }) {
   let points = 0
   const starterMaps = getStartersByTeamId(state, { tid, week })
-  starterMaps.forEach((playerMap) => {
-    const gamelog = get_gamelog_for_player(state, { playerMap, week })
+  starterMaps.forEach((player_map) => {
+    const gamelog = get_gamelog_for_player(state, { player_map, week })
     if (gamelog) points += gamelog.total
   })
   return points
@@ -2250,15 +2252,15 @@ export function getScoreboardByTeamId(state, { tid, matchupId }) {
     tid,
     week: isFuture ? constants.week : matchup.week
   })
-  for (const playerMap of starterMaps) {
+  for (const player_map of starterMaps) {
     const gamelog = get_gamelog_for_player(state, {
-      playerMap,
+      player_map,
       week: matchup.week
     })
     if (gamelog) {
       points += gamelog.total
       const gameStatus = getGameStatusByPlayerId(state, {
-        pid: playerMap.get('pid'),
+        pid: player_map.get('pid'),
         week: matchup.week
       })
       if (gameStatus && gameStatus.lastPlay) {
@@ -2275,7 +2277,7 @@ export function getScoreboardByTeamId(state, { tid, matchupId }) {
     }
     const add = gamelog
       ? gamelog.total
-      : playerMap.getIn(['points', `${matchup.week}`, 'total'], 0)
+      : player_map.getIn(['points', `${matchup.week}`, 'total'], 0)
 
     projected += add
   }
@@ -2311,29 +2313,29 @@ export function getStartersByMatchupId(state, { mid }) {
   const playerMaps = Object.values(teams).flat()
 
   const games = {}
-  for (const playerMap of playerMaps) {
-    if (!playerMap.get('pid')) continue
+  for (const player_map of playerMaps) {
+    if (!player_map.get('pid')) continue
     const game = get_game_by_team(state, {
-      nfl_team: playerMap.get('team'),
+      nfl_team: player_map.get('team'),
       week: matchup.week
     })
     if (!game) continue
     const dateStr = `${game.date} ${game.time_est}`
     if (!games[dateStr]) games[dateStr] = []
-    games[dateStr].push(playerMap)
+    games[dateStr].push(player_map)
   }
 
   return { matchup, games, teams }
 }
 
 export function getScoreboardGamelogByPlayerId(state, { pid }) {
-  const playerMap = getPlayerById(state, { pid })
+  const player_map = getPlayerById(state, { pid })
 
-  if (!playerMap.get('pid')) return
+  if (!player_map.get('pid')) return
 
   const week = state.getIn(['scoreboard', 'week'])
   const year = state.getIn(['app', 'year'])
-  return get_gamelog_for_player(state, { playerMap, week, year })
+  return get_gamelog_for_player(state, { player_map, week, year })
 }
 
 export function getPlaysByMatchupId(state, { mid }) {
@@ -2382,27 +2384,27 @@ export function getPlaysByMatchupId(state, { mid }) {
     const playStats = play.playStats.filter((p) => p.gsispid || p.gsisId)
     const grouped = {}
     for (const playStat of playStats) {
-      const playerMap = playerMaps.find((pMap) => {
+      const player_map = playerMaps.find((pMap) => {
         if (playStat.gsispid && pMap.get('gsispid', false) === playStat.gsispid)
           return true
         if (playStat.gsisId && pMap.get('gsisid', false) === playStat.gsisId)
           return true
         return false
       })
-      if (!playerMap) continue
-      const pid = playerMap.get('pid')
+      if (!player_map) continue
+      const pid = player_map.get('pid')
       if (!grouped[pid]) grouped[pid] = []
       grouped[pid].push(playStat)
     }
     const points = {}
     const stats = {}
     for (const pid in grouped) {
-      const playerMap = playerMaps.find((pMap) => pMap.get('pid') === pid)
+      const player_map = playerMaps.find((pMap) => pMap.get('pid') === pid)
       const playStats = grouped[pid]
       stats[pid] = calculateStatsFromPlayStats(playStats)
       points[pid] = calculatePoints({
         stats: stats[pid],
-        position: playerMap.get('pos'),
+        position: player_map.get('pos'),
         league
       })
     }
@@ -2452,7 +2454,7 @@ export function getGameStatusByPlayerId(state, { pid, week = constants.week }) {
   }
 
   const plays = get_plays(state, { week })
-  const playerMap = getPlayerById(state, { pid })
+  const player_map = getPlayerById(state, { pid })
   const play = plays.find((p) => {
     if (!p.pos_team) return false
 
@@ -2470,7 +2472,7 @@ export function getGameStatusByPlayerId(state, { pid, week = constants.week }) {
     return { game, lastPlay }
   }
 
-  const hasPossession = fixTeam(lastPlay.pos_team) === playerMap.get('team')
+  const hasPossession = fixTeam(lastPlay.pos_team) === player_map.get('team')
   const yardline = getYardline(
     lastPlay.ydl_end || lastPlay.ydl_start,
     lastPlay.pos_team
@@ -2489,8 +2491,8 @@ export function getGameStatusByPlayerId(state, { pid, week = constants.week }) {
 export const getGamelogsForSelectedPlayer = createSelector(
   getSelectedPlayer,
   get_player_gamelogs,
-  (playerMap, gamelogs) => {
-    const pid = playerMap.get('pid')
+  (player_map, gamelogs) => {
+    const pid = player_map.get('pid')
     const games = gamelogs
       .filter((p) => p.pid === pid)
       .sort((a, b) => b.timestamp - a.timestamp)
@@ -2557,9 +2559,9 @@ export function get_league_teams_value_deltas(state) {
 
 export function get_gamelog_for_player(
   state,
-  { playerMap, week, year = constants.year }
+  { player_map, week, year = constants.year }
 ) {
-  if (!playerMap || !playerMap.get('pid')) return null
+  if (!player_map || !player_map.get('pid')) return null
 
   const league = get_current_league(state)
 
@@ -2577,18 +2579,18 @@ export function get_gamelog_for_player(
     }
   }
 
-  const pid = playerMap.get('pid')
+  const pid = player_map.get('pid')
   const gamelog = get_gamelog_by_player_id(state, { pid, week, year })
   if (gamelog) return process(gamelog)
 
   // TODO should handle year
-  const plays = get_plays_for_player(state, { playerMap, week }).toJS()
+  const plays = get_plays_for_player(state, { player_map, week }).toJS()
   if (!plays.length) return null
 
-  const pos = playerMap.get('pos')
+  const pos = player_map.get('pos')
   const stats =
     pos === 'DST'
-      ? calculateDstStatsFromPlays(plays, playerMap.get('team'))
+      ? calculateDstStatsFromPlays(plays, player_map.get('team'))
       : calculateStatsFromPlayStats(plays.flatMap((p) => p.playStats))
   const play = plays.find((p) => p.possessionTeam)
   const opp = play
@@ -2722,16 +2724,16 @@ export function get_trade_is_valid(state) {
   release_pids.forEach((pid) => roster.removePlayer(pid))
   remove_pids.forEach((pid) => roster.removePlayer(pid))
   for (const pid of add_pids) {
-    const playerMap = playerMaps.get(pid)
-    const hasOpenBenchSlot = roster.hasOpenBenchSlot(playerMap.get('pos'))
+    const player_map = playerMaps.get(pid)
+    const hasOpenBenchSlot = roster.hasOpenBenchSlot(player_map.get('pos'))
     if (!hasOpenBenchSlot) {
       return false
     }
     roster.addPlayer({
       slot: constants.slots.BENCH,
       pid,
-      pos: playerMap.get('pos'),
-      value: playerMap.get('value')
+      pos: player_map.get('pos'),
+      value: player_map.get('value')
     })
   }
 
@@ -3080,13 +3082,13 @@ export const get_waiver_players_for_current_team = createSelector(
   (teamWaivers, player_maps) => {
     for (const waiver of teamWaivers.values()) {
       const pid = waiver.pid
-      const playerMap = player_maps.get(pid, new Map())
-      teamWaivers = teamWaivers.setIn([waiver.uid, 'playerMap'], playerMap)
+      const player_map = player_maps.get(pid, new Map())
+      teamWaivers = teamWaivers.setIn([waiver.uid, 'player_map'], player_map)
       if (waiver.release.size) {
         const releases = []
         for (const pid of waiver.release) {
-          const playerMap = player_maps.get(pid, new Map())
-          releases.push(playerMap)
+          const player_map = player_maps.get(pid, new Map())
+          releases.push(player_map)
         }
         teamWaivers = teamWaivers.setIn(
           [waiver.uid, 'release'],

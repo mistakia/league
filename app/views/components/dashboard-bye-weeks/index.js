@@ -10,10 +10,10 @@ const map_state_to_props = createSelector(
   get_schedule_state,
   (team, schedule) => {
     const byes = {}
-    for (const playerMap of team.active) {
-      const bye = schedule.getIn(['teams', playerMap.get('team'), 'bye']) || 0
+    for (const player_map of team.active) {
+      const bye = schedule.getIn(['teams', player_map.get('team'), 'bye']) || 0
       if (!byes[bye]) byes[bye] = []
-      byes[bye].push(playerMap)
+      byes[bye].push(player_map)
     }
 
     Object.keys(byes).forEach((bye, idx) => {

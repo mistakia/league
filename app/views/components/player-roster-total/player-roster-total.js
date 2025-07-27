@@ -28,27 +28,27 @@ export default class PlayerRosterTotal extends React.Component {
     let weekPointsTotal = 0
     let points_added = 0
 
-    players.forEach((playerMap) => {
-      const extensions = playerMap.get('extensions', 0)
-      const value = playerMap.get('value', 0)
-      const bid = playerMap.get('bid', 0)
-      const tag = playerMap.get('tag')
+    players.forEach((player_map) => {
+      const extensions = player_map.get('extensions', 0)
+      const value = player_map.get('value', 0)
+      const bid = player_map.get('bid', 0)
+      const tag = player_map.get('tag')
       const isRestrictedFreeAgent =
         tag === constants.tags.RESTRICTED_FREE_AGENCY
       const extendedSalary = getExtensionAmount({
-        pos: playerMap.get('pos'),
+        pos: player_map.get('pos'),
         tag: is_before_extension_deadline ? tag : constants.tags.REGULAR,
         extensions,
         league,
         value,
         bid
       })
-      const projectedSalary = playerMap.getIn(
+      const projectedSalary = player_map.getIn(
         ['market_salary', projectionType],
         0
       )
-      const hasProjections = playerMap.hasIn(['market_salary', projectionType])
-      const is_restricted_free_agent_tag_processed = playerMap.get(
+      const hasProjections = player_map.hasIn(['market_salary', projectionType])
+      const is_restricted_free_agent_tag_processed = player_map.get(
         'restricted_free_agency_tag_processed'
       )
       const savings = hasProjections
@@ -70,13 +70,13 @@ export default class PlayerRosterTotal extends React.Component {
       savingsTotal = savingsTotal + Math.max(savings, 0)
       valueTotal =
         valueTotal +
-        Math.max(playerMap.getIn(['pts_added', projectionType], 0), 0)
+        Math.max(player_map.getIn(['pts_added', projectionType], 0), 0)
       valueAdjTotal =
         valueAdjTotal +
-        playerMap.getIn(['salary_adj_pts_added', projectionType], 0)
+        player_map.getIn(['salary_adj_pts_added', projectionType], 0)
       weekPointsTotal =
-        weekPointsTotal + playerMap.getIn(['points', `${week}`, 'total'], 0)
-      points_added = points_added + playerMap.get('points_added', 0)
+        weekPointsTotal + player_map.getIn(['points', `${week}`, 'total'], 0)
+      points_added = points_added + player_map.get('points_added', 0)
     })
 
     return (

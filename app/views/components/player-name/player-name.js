@@ -13,19 +13,19 @@ import PlayerHeadshot from '@components/player-headshot'
 
 import './player-name.styl'
 
-function PlayerLarge({ playerMap, handleClick, width, square = false }) {
-  const player_number = playerMap.get('jnum')
+function PlayerLarge({ player_map, handleClick, width, square = false }) {
+  const player_number = player_map.get('jnum')
   return (
     <div className='player__name large'>
       <div className='player__name-headshot'>
-        <PlayerHeadshot playerMap={playerMap} width={width} square={square} />
+        <PlayerHeadshot player_map={player_map} width={width} square={square} />
       </div>
       <div className='player__name-lead'>
-        <div className='player__name-first'>{playerMap.get('fname')}</div>
-        <div className='player__name-last'>{playerMap.get('lname')}</div>
+        <div className='player__name-first'>{player_map.get('fname')}</div>
+        <div className='player__name-last'>{player_map.get('lname')}</div>
         <div className='player__name-meta'>
-          <Position pos={playerMap.get('pos')} />
-          <NFLTeam team={playerMap.get('team')} />
+          <Position pos={player_map.get('pos')} />
+          <NFLTeam team={player_map.get('team')} />
           {Boolean(player_number) && <span>#{player_number}</span>}
         </div>
       </div>
@@ -34,7 +34,7 @@ function PlayerLarge({ playerMap, handleClick, width, square = false }) {
 }
 
 PlayerLarge.propTypes = {
-  playerMap: ImmutablePropTypes.map,
+  player_map: ImmutablePropTypes.map,
   handleClick: PropTypes.func,
   width: PropTypes.number,
   square: PropTypes.bool
@@ -42,7 +42,7 @@ PlayerLarge.propTypes = {
 
 export default function PlayerName({
   select,
-  playerMap,
+  player_map,
   isOnCutlist,
   headshot_width,
   headshot_square,
@@ -63,13 +63,13 @@ export default function PlayerName({
     }
   }, [])
 
-  const handleClick = () => select(playerMap.get('pid'))
+  const handleClick = () => select(player_map.get('pid'))
 
   if (large) {
     return (
       <PlayerLarge
         {...{
-          playerMap,
+          player_map,
           handleClick,
           square: headshot_square,
           width: headshot_width
@@ -78,36 +78,36 @@ export default function PlayerName({
     )
   }
 
-  const slot = playerMap.get('slot')
+  const slot = player_map.get('slot')
 
   return (
     <>
       <div className='player__name cursor' onClick={handleClick}>
         {!hidePosition && (
           <div className='player__name-position'>
-            <Position pos={playerMap.get('pos')} />
+            <Position pos={player_map.get('pos')} />
           </div>
         )}
         {Boolean(headshot_width) && (
           <div className='player__name-headshot'>
             <PlayerHeadshot
-              playerMap={playerMap}
+              player_map={player_map}
               width={headshot_width}
               square={headshot_square}
               position={
-                show_position_bar && is_mobile ? playerMap.get('pos') : null
+                show_position_bar && is_mobile ? player_map.get('pos') : null
               }
             />
           </div>
         )}
         <div className='player__name-main'>
           <div className='player__name-top'>
-            <span>{playerMap.get('pname')}</span>
-            {constants.year === playerMap.get('nfl_draft_year') && (
+            <span>{player_map.get('pname')}</span>
+            {constants.year === player_map.get('nfl_draft_year') && (
               <PlayerLabel label='R' type='rookie' description='Rookie' />
             )}
           </div>
-          <NFLTeam team={playerMap.get('team')} />
+          <NFLTeam team={player_map.get('team')} />
         </div>
       </div>
       <div className='player__name-label'>
@@ -117,15 +117,15 @@ export default function PlayerName({
         {isOnCutlist && (
           <PlayerLabel label={<NotInterestedIcon />} description='Cutlist' />
         )}
-        <PlayerStatus playerMap={playerMap} />
-        <PlayerTag tag={playerMap.get('tag')} />
+        <PlayerStatus player_map={player_map} />
+        <PlayerTag tag={player_map.get('tag')} />
       </div>
     </>
   )
 }
 
 PlayerName.propTypes = {
-  playerMap: ImmutablePropTypes.map,
+  player_map: ImmutablePropTypes.map,
   headshot_width: PropTypes.number,
   select: PropTypes.func,
   isOnCutlist: PropTypes.bool,

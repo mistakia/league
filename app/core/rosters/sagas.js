@@ -126,13 +126,13 @@ export function* setPlayerLineupContribution({ pid }) {
     yield take(roster_actions.SET_LINEUPS)
   }
   const projectedContribution = {}
-  const playerMap = (yield select(get_player_maps)).get(pid)
-  const result = yield call(calculatePlayerLineupContribution, { playerMap })
+  const player_map = (yield select(get_player_maps)).get(pid)
+  const result = yield call(calculatePlayerLineupContribution, { player_map })
   projectedContribution[pid] = result
   yield put(player_actions.set_projected_contribution(projectedContribution))
 }
 
-export function* calculatePlayerLineupContribution({ playerMap }) {
+export function* calculatePlayerLineupContribution({ player_map }) {
   const currentRosterPlayers = yield select(get_current_players_for_league)
   const league = yield select(get_current_league)
   const baselines = (yield select(get_players_state)).get('baselines')
@@ -147,13 +147,13 @@ export function* calculatePlayerLineupContribution({ playerMap }) {
   }
 
   // run lineup optimizer without player
-  const pid = playerMap.get('pid')
+  const pid = player_map.get('pid')
   const isActive = currentRosterPlayers.active.find(
     (pMap) => pMap.get('pid') === pid
   )
   const playerPool = isActive
     ? currentRosterPlayers.active.filter((pMap) => pMap.get('pid') !== pid)
-    : currentRosterPlayers.active.push(playerMap)
+    : currentRosterPlayers.active.push(player_map)
 
   const { default: Worker } = yield call(
     () => import('workerize-loader?inline!../worker') // eslint-disable-line import/no-webpack-loader-syntax
@@ -172,7 +172,7 @@ export function* calculatePlayerLineupContribution({ playerMap }) {
       bp: 0
     }
 
-    const projectedPoints = playerMap.getIn(['points', week, 'total'])
+    const projectedPoints = player_map.getIn(['points', week, 'total'])
     if (!projectedPoints) {
       playerData.weeks[week] = weekData
       continue
@@ -203,7 +203,7 @@ export function* calculatePlayerLineupContribution({ playerMap }) {
     } else {
       const baselinePlayerId = baselines.getIn([
         week,
-        playerMap.get('pos'),
+        player_map.get('pos'),
         'available'
       ])
       const baselinePlayer = playerItems.get(baselinePlayerId, new Map())
@@ -225,32 +225,32 @@ export function* projectContributions() {
   const currentRosterPlayers = yield select(get_current_players_for_league)
 
   const projectedContribution = {}
-  for (const playerMap of currentRosterPlayers.players) {
+  for (const player_map of currentRosterPlayers.players) {
     const playerData = yield call(calculatePlayerLineupContribution, {
-      playerMap
+      player_map
     })
-    projectedContribution[playerMap.get('pid')] = playerData
+    projectedContribution[player_map.get('pid')] = playerData
   }
 
   yield put(player_actions.set_projected_contribution(projectedContribution))
 
   const claimContribution = {}
   const poaches = yield select(getPoachPlayersForCurrentTeam)
-  for (const { playerMap } of poaches.values()) {
+  for (const { player_map } of poaches.values()) {
     const playerData = yield call(calculatePlayerLineupContribution, {
-      playerMap
+      player_map
     })
-    claimContribution[playerMap.get('pid')] = playerData
+    claimContribution[player_map.get('pid')] = playerData
   }
 
   const claims = yield select(get_waiver_players_for_current_team)
   const claimTypes = ['active', 'poach', 'practice']
   for (const type of claimTypes) {
-    for (const { playerMap } of claims[type].values()) {
+    for (const { player_map } of claims[type].values()) {
       const playerData = yield call(calculatePlayerLineupContribution, {
-        playerMap
+        player_map
       })
-      claimContribution[playerMap.get('pid')] = playerData
+      claimContribution[player_map.get('pid')] = playerData
     }
   }
 
@@ -324,11 +324,11 @@ export function* projectTrade() {
     .concat(tradePlayers.proposingTeamPlayers)
     .concat(tradePlayers.acceptingTeamReleasePlayers)
     .concat(tradePlayers.proposingTeamReleasePlayers)
-  for (const playerMap of playerMaps) {
+  for (const player_map of playerMaps) {
     const playerData = yield call(calculatePlayerLineupContribution, {
-      playerMap
+      player_map
     })
-    projectedContribution[playerMap.get('pid')] = playerData
+    projectedContribution[player_map.get('pid')] = playerData
   }
   yield put(player_actions.set_projected_contribution(projectedContribution))
 }
@@ -473,22 +473,22 @@ export function* export_rosters() {
   for (const [tid, roster] of rosters.entrySeq()) {
     const team = yield select(get_team_by_id_for_current_year, { tid })
     for (const rosterPlayer of roster.players) {
-      const playerMap = playerMaps.get(rosterPlayer.pid)
+      const player_map = playerMaps.get(rosterPlayer.pid)
       data.push({
         tid,
         team: team.name,
         salary: rosterPlayer.value,
         market_salary: (
-          playerMap.getIn(['market_salary', projectionType]) || 0
+          player_map.getIn(['market_salary', projectionType]) || 0
         ).toFixed(0),
-        player: playerMap.get('pname'),
-        playerid: playerMap.get('pid'),
-        pos: playerMap.get('pos'),
+        player: player_map.get('pname'),
+        playerid: player_map.get('pid'),
+        pos: player_map.get('pos'),
         last_transaction_timestamp: rosterPlayer.timestamp,
         last_transaction_type: constants.transactionsDetail[rosterPlayer.type],
         slot: constants.slotName[rosterPlayer.slot],
-        draft_year: playerMap.get('nfl_draft_year'),
-        player_team: playerMap.get('team')
+        draft_year: player_map.get('nfl_draft_year'),
+        player_team: player_map.get('team')
       })
     }
   }

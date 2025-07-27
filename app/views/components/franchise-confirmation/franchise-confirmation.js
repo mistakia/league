@@ -32,10 +32,10 @@ export default class FranchiseConfirmation extends React.Component {
     const tagged_players = team.roster.getPlayersByTag(constants.tags.FRANCHISE)
     const tagged_pids = tagged_players.map((p) => p.pid)
     for (const pid of tagged_pids) {
-      const playerMap = team.players.find(
-        (playerMap) => playerMap.get('pid') === pid
+      const player_map = team.players.find(
+        (player_map) => player_map.get('pid') === pid
       )
-      this._untags.push(playerMap)
+      this._untags.push(player_map)
     }
   }
 
@@ -46,7 +46,7 @@ export default class FranchiseConfirmation extends React.Component {
 
   handleSubmit = () => {
     const { untag, error } = this.state
-    const pid = this.props.playerMap.get('pid')
+    const pid = this.props.player_map.get('pid')
 
     if (!this._isEligible && !untag) {
       return this.setState({ missingUntag: true })
@@ -65,7 +65,7 @@ export default class FranchiseConfirmation extends React.Component {
   }
 
   render = () => {
-    const { playerMap } = this.props
+    const { player_map } = this.props
 
     const menuItems = []
     for (const rPlayerMap of this._untags) {
@@ -82,7 +82,7 @@ export default class FranchiseConfirmation extends React.Component {
         <DialogTitle>Franchise Tag</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {`Apply Franchise Tag to ${playerMap.get('name')} (${playerMap.get(
+            {`Apply Franchise Tag to ${player_map.get('name')} (${player_map.get(
               'pos'
             )})`}
           </DialogContentText>
@@ -120,5 +120,5 @@ FranchiseConfirmation.propTypes = {
   team: PropTypes.object,
   onClose: PropTypes.func,
   add: PropTypes.func,
-  playerMap: ImmutablePropTypes.map
+  player_map: ImmutablePropTypes.map
 }

@@ -7,8 +7,8 @@ import PlayerSelectedRowHeader from '@components/player-selected-row-header'
 
 export default class SelectedPlayerSeasonStats extends React.Component {
   componentDidMount = () => {
-    const pid = this.props.playerMap.get('pid')
-    const position = this.props.playerMap.get('pos')
+    const pid = this.props.player_map.get('pid')
+    const position = this.props.player_map.get('pos')
     this.props.load({ pid, position })
   }
 
@@ -52,6 +52,6 @@ export default class SelectedPlayerSeasonStats extends React.Component {
 SelectedPlayerSeasonStats.propTypes = {
   stats: PropTypes.object,
   pos: PropTypes.string,
-  playerMap: ImmutablePropTypes.map,
+  player_map: ImmutablePropTypes.map,
   load: PropTypes.func
 }

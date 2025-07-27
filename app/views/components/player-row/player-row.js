@@ -18,7 +18,7 @@ import './player-row.styl'
 class PlayerRow extends Player {
   render = () => {
     const {
-      playerMap,
+      player_map,
       selectedPlayer,
       is_hosted,
       is_logged_in,
@@ -32,11 +32,11 @@ class PlayerRow extends Player {
       week
     } = this.props
 
-    const pid = playerMap.get('pid')
-    const tid = playerMap.get('tid')
+    const pid = player_map.get('pid')
+    const tid = player_map.get('tid')
     const team = teams.get(tid, new Team())
-    const nfl_team = playerMap.get('team')
-    const pos = playerMap.get('pos')
+    const nfl_team = player_map.get('team')
+    const pos = player_map.get('pos')
     const isRostered = Boolean(tid)
     const isSelected = selectedPlayer === pid || selected === pid
 
@@ -50,7 +50,9 @@ class PlayerRow extends Player {
     // TODO add baseline__player className
 
     const name =
-      window.innerWidth <= 600 ? playerMap.get('pname') : playerMap.get('name')
+      window.innerWidth <= 600
+        ? player_map.get('pname')
+        : player_map.get('name')
 
     const field_items = []
     selected_view_grouped_fields.forEach((group, index) => {
@@ -61,10 +63,10 @@ class PlayerRow extends Player {
           group_items.push(<Component {...{ nfl_team, pos, week }} />)
         } else {
           const value = field_info.get_player_field_value
-            ? field_info.get_player_field_value(playerMap)
-            : playerMap.getIn(field_info.key_path)
+            ? field_info.get_player_field_value(player_map)
+            : player_map.getIn(field_info.key_path)
           const percentile_key = field_info.get_percentile_key
-            ? field_info.get_percentile_key(playerMap)
+            ? field_info.get_percentile_key(player_map)
             : field_info.percentile_key
           group_items.push(
             <PercentileMetric
@@ -98,14 +100,14 @@ class PlayerRow extends Player {
           </div>
           <div className='player__row-name cursor' onClick={this.handleClick}>
             <span>{name}</span>
-            {constants.year === playerMap.get('nfl_draft_year') && (
+            {constants.year === player_map.get('nfl_draft_year') && (
               <PlayerLabel label='R' type='rookie' description='Rookie' />
             )}
             <NFLTeam team={nfl_team} />
           </div>
           {is_logged_in && (
             <div className='player__row-tag'>
-              <PlayerTag tag={playerMap.get('tag')} />
+              <PlayerTag tag={player_map.get('tag')} />
             </div>
           )}
           {is_logged_in && (

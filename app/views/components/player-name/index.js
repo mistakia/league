@@ -9,9 +9,9 @@ import PlayerName from './player-name'
 const map_state_to_props = createSelector(
   getPlayerById,
   get_players_state,
-  (playerMap, players) => ({
-    playerMap,
-    isOnCutlist: players.get('cutlist').includes(playerMap.get('pid'))
+  (player_map, players) => ({
+    player_map,
+    isOnCutlist: players.get('cutlist').includes(player_map.get('pid'))
   })
 )
 

@@ -9,7 +9,7 @@ import ButtonGroup from '@mui/material/ButtonGroup'
 import { constants } from '@libs-shared'
 
 export default function PlayerContextMenu({
-  playerMap,
+  player_map,
   status,
   hide,
   showConfirmation,
@@ -33,8 +33,8 @@ export default function PlayerContextMenu({
     showConfirmation({
       id: 'DEACTIVATE',
       data: {
-        playerMap,
-        pid: playerMap.get('pid')
+        player_map,
+        pid: player_map.get('pid')
       }
     })
     hide()
@@ -43,12 +43,12 @@ export default function PlayerContextMenu({
   const handleProtect = () => {
     showConfirmation({
       title: 'Designate Protected',
-      description: `${playerMap.get('fname')} ${playerMap.get(
+      description: `${player_map.get('fname')} ${player_map.get(
         'lname'
-      )} (${playerMap.get(
+      )} (${player_map.get(
         'pos'
       )}) will be designated as protected. This will protect the player from poaches but you will not be able to activate or release this player until the off-season.`,
-      on_confirm_func: () => protect(playerMap.get('pid'))
+      on_confirm_func: () => protect(player_map.get('pid'))
     })
     hide()
   }
@@ -57,7 +57,7 @@ export default function PlayerContextMenu({
     showConfirmation({
       id: 'ACTIVATE',
       data: {
-        playerMap
+        player_map
       }
     })
     hide()
@@ -67,7 +67,7 @@ export default function PlayerContextMenu({
     showConfirmation({
       id: 'WAIVER',
       data: {
-        playerMap
+        player_map
       }
     })
     hide()
@@ -76,9 +76,9 @@ export default function PlayerContextMenu({
   const handleCancelWaiver = () => {
     showConfirmation({
       title: 'Cancel claim',
-      description: `Your claim for ${playerMap.get('fname')} ${playerMap.get(
+      description: `Your claim for ${player_map.get('fname')} ${player_map.get(
         'lname'
-      )} (${playerMap.get('pos')}) will no longer be processed.`,
+      )} (${player_map.get('pos')}) will no longer be processed.`,
       on_confirm_func: () => cancelClaim(waiverId)
     })
     hide()
@@ -89,7 +89,7 @@ export default function PlayerContextMenu({
       id: 'WAIVER',
       data: {
         waiverId,
-        playerMap
+        player_map
       }
     })
     hide()
@@ -99,7 +99,7 @@ export default function PlayerContextMenu({
     showConfirmation({
       id: 'POACH',
       data: {
-        playerMap,
+        player_map,
         poachId
       }
     })
@@ -110,7 +110,7 @@ export default function PlayerContextMenu({
     showConfirmation({
       id: 'ADD_FREE_AGENT',
       data: {
-        playerMap,
+        player_map,
         practice
       }
     })
@@ -121,7 +121,7 @@ export default function PlayerContextMenu({
     showConfirmation({
       id: 'RESERVE',
       data: {
-        playerMap
+        player_map
       }
     })
     hide()
@@ -131,7 +131,7 @@ export default function PlayerContextMenu({
     showConfirmation({
       id: 'RESERVE_IR_LONG_TERM',
       data: {
-        playerMap
+        player_map
       }
     })
     hide()
@@ -140,14 +140,14 @@ export default function PlayerContextMenu({
   const handleReserveCOV = () => {
     showConfirmation({
       title: 'Roster Reserve',
-      description: `${playerMap.get('fname')} ${playerMap.get(
+      description: `${player_map.get('fname')} ${player_map.get(
         'lname'
-      )} (${playerMap.get(
+      )} (${player_map.get(
         'pos'
       )}) will be placed on Reserves/COV. He will not be available to use in lineups until he's activated.`,
       on_confirm_func: () =>
         reserve({
-          reserve_pid: playerMap.get('pid'),
+          reserve_pid: player_map.get('pid'),
           slot: constants.slots.COV
         })
     })
@@ -157,12 +157,12 @@ export default function PlayerContextMenu({
   const handleRelease = () => {
     showConfirmation({
       title: 'Release Player',
-      description: `${playerMap.get('fname')} ${playerMap.get(
+      description: `${player_map.get('fname')} ${player_map.get(
         'lname'
-      )} (${playerMap.get(
+      )} (${player_map.get(
         'pos'
       )}) will be released and placed on waivers for 24 hours before becoming a free agent.`,
-      on_confirm_func: () => release(playerMap.get('pid'))
+      on_confirm_func: () => release(player_map.get('pid'))
     })
     hide()
   }
@@ -171,7 +171,7 @@ export default function PlayerContextMenu({
     showConfirmation({
       id: 'FRANCHISE',
       data: {
-        playerMap
+        player_map
       }
     })
     hide()
@@ -181,7 +181,7 @@ export default function PlayerContextMenu({
     showConfirmation({
       id: 'ROOKIE',
       data: {
-        playerMap
+        player_map
       }
     })
     hide()
@@ -191,7 +191,7 @@ export default function PlayerContextMenu({
     showConfirmation({
       id: 'REMOVE_TAG',
       data: {
-        playerMap
+        player_map
       }
     })
     hide()
@@ -201,7 +201,7 @@ export default function PlayerContextMenu({
     showConfirmation({
       id: 'RESTRICTED_FREE_AGENCY',
       data: {
-        playerMap
+        player_map
       }
     })
     hide()
@@ -211,30 +211,30 @@ export default function PlayerContextMenu({
     showConfirmation({
       id: 'REMOVE_RESTRICTED_FREE_AGENCY_TAG',
       data: {
-        playerMap
+        player_map
       }
     })
     hide()
   }
 
   const handleCutlist = () => {
-    const pid = playerMap.get('pid')
+    const pid = player_map.get('pid')
     toggle_cutlist(pid)
     hide()
   }
 
   const handleNominate = () => {
-    nominate_pid(playerMap.get('pid'))
+    nominate_pid(player_map.get('pid'))
     hide()
   }
 
   const handle_nominate_restricted_free_agent = () => {
-    nominate_restricted_free_agent(playerMap.get('pid'))
+    nominate_restricted_free_agent(player_map.get('pid'))
     hide()
   }
 
   const handle_unnominate_restricted_free_agent = () => {
-    unnominate_restricted_free_agent(playerMap.get('pid'))
+    unnominate_restricted_free_agent(player_map.get('pid'))
     hide()
   }
 
@@ -476,7 +476,7 @@ export default function PlayerContextMenu({
 }
 
 PlayerContextMenu.propTypes = {
-  playerMap: ImmutablePropTypes.map,
+  player_map: ImmutablePropTypes.map,
   status: PropTypes.object,
   hide: PropTypes.func,
   showConfirmation: PropTypes.func,

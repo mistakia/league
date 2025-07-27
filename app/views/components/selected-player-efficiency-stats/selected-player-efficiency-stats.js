@@ -90,11 +90,11 @@ const defense = () => (
 
 export default class SelectedPlayerEfficiencyStats extends React.Component {
   render = () => {
-    const { playerMap } = this.props
+    const { player_map } = this.props
     const stats = (
-      playerMap.get('stats', new Map()) || new Map(constants.createFullStats())
+      player_map.get('stats', new Map()) || new Map(constants.createFullStats())
     ).toJS()
-    const pos = playerMap.get('pos')
+    const pos = player_map.get('pos')
 
     return (
       <div>
@@ -109,5 +109,5 @@ export default class SelectedPlayerEfficiencyStats extends React.Component {
 }
 
 SelectedPlayerEfficiencyStats.propTypes = {
-  playerMap: ImmutablePropTypes.map
+  player_map: ImmutablePropTypes.map
 }

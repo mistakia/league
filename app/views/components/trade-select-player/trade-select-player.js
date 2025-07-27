@@ -11,20 +11,20 @@ import './trade-select-player.styl'
 
 export default class TradeSelectPlayer extends React.Component {
   render = () => {
-    const { playerMap, isSelected } = this.props
+    const { player_map, isSelected } = this.props
     const classNames = ['trade__select-player']
     if (isSelected) classNames.push('selected')
     return (
       <div className={classNames.join(' ')}>
         <div className='player__name-position'>
-          <Position pos={playerMap.get('pos')} />
+          <Position pos={player_map.get('pos')} />
         </div>
         <div className='player__name-main'>
-          <span>{playerMap.get('pname')}</span>
-          {constants.year === playerMap.get('nfl_draft_year') && (
+          <span>{player_map.get('pname')}</span>
+          {constants.year === player_map.get('nfl_draft_year') && (
             <PlayerLabel label='R' type='rookie' description='Rookie' />
           )}
-          <NFLTeam team={playerMap.get('team')} />
+          <NFLTeam team={player_map.get('team')} />
         </div>
       </div>
     )
@@ -32,6 +32,6 @@ export default class TradeSelectPlayer extends React.Component {
 }
 
 TradeSelectPlayer.propTypes = {
-  playerMap: ImmutablePropTypes.map,
+  player_map: ImmutablePropTypes.map,
   isSelected: PropTypes.bool
 }

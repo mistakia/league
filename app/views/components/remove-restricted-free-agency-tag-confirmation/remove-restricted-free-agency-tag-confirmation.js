@@ -11,23 +11,23 @@ import Button from '@components/button'
 
 export default class RemoveRestrictedFreeAgencyTagConfirmation extends React.Component {
   handleSubmit = () => {
-    const pid = this.props.playerMap.get('pid')
+    const pid = this.props.player_map.get('pid')
     const { tid } = this.props.team.roster
     this.props.remove({ pid, teamId: tid })
     this.props.onClose()
   }
 
   render() {
-    const { playerMap } = this.props
+    const { player_map } = this.props
 
     return (
       <Dialog open onClose={this.props.onClose}>
         <DialogTitle>Remove Restricted Free Agency Bid</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {`Remove Restricted Free Agency Bid on ${playerMap.get(
+            {`Remove Restricted Free Agency Bid on ${player_map.get(
               'name'
-            )} (${playerMap.get('pos')})`}
+            )} (${player_map.get('pos')})`}
           </DialogContentText>
         </DialogContent>
         <DialogActions>
@@ -44,7 +44,7 @@ export default class RemoveRestrictedFreeAgencyTagConfirmation extends React.Com
 }
 
 RemoveRestrictedFreeAgencyTagConfirmation.propTypes = {
-  playerMap: ImmutablePropTypes.map,
+  player_map: ImmutablePropTypes.map,
   team: PropTypes.object,
   remove: PropTypes.func,
   onClose: PropTypes.func

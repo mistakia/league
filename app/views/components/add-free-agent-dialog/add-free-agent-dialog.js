@@ -19,9 +19,9 @@ export default class AddFreeAgentDialog extends React.Component {
     super(props)
 
     const releases = []
-    const { league, playerMap, practice } = props
+    const { league, player_map, practice } = props
     const r = new Roster({ roster: props.roster.toJS(), league })
-    const pos = playerMap.get('pos')
+    const pos = player_map.get('pos')
 
     if (practice) {
       props.rosterPlayers.practice.forEach((practicePlayerMap) => {
@@ -57,7 +57,7 @@ export default class AddFreeAgentDialog extends React.Component {
   }
 
   handleSubmit = () => {
-    const { playerMap, practice } = this.props
+    const { player_map, practice } = this.props
     const { release } = this.state
 
     if (!this._isPlayerEligible && !release) {
@@ -65,7 +65,7 @@ export default class AddFreeAgentDialog extends React.Component {
     }
 
     this.props.add_free_agent({
-      pid: playerMap.get('pid'),
+      pid: player_map.get('pid'),
       release,
       slot: practice ? constants.slots.PS : constants.slots.BENCH
     })
@@ -73,7 +73,7 @@ export default class AddFreeAgentDialog extends React.Component {
   }
 
   render = () => {
-    const { playerMap, practice } = this.props
+    const { player_map, practice } = this.props
 
     const menuItems = []
     if (!this._isPlayerEligible) {
@@ -87,7 +87,7 @@ export default class AddFreeAgentDialog extends React.Component {
       }
     }
 
-    let text = `Sign ${playerMap.get('name')} (${playerMap.get(
+    let text = `Sign ${player_map.get('name')} (${player_map.get(
       'pos'
     )}) to a salary of $0 and add them to the `
     if (practice) text += 'practice squad.'
@@ -130,7 +130,7 @@ export default class AddFreeAgentDialog extends React.Component {
 
 AddFreeAgentDialog.propTypes = {
   league: PropTypes.object,
-  playerMap: ImmutablePropTypes.map,
+  player_map: ImmutablePropTypes.map,
   practice: PropTypes.bool,
   roster: ImmutablePropTypes.record,
   rosterPlayers: PropTypes.object,

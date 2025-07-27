@@ -18,7 +18,7 @@ import { constants } from '@libs-shared'
 export default function DeactivateConfirmation({
   onClose,
   deactivate,
-  playerMap,
+  player_map,
   team,
   pid,
   load_player_transactions
@@ -35,7 +35,7 @@ export default function DeactivateConfirmation({
   }
 
   const handleSubmit = () => {
-    const deactivate_pid = playerMap.get('pid')
+    const deactivate_pid = player_map.get('pid')
 
     deactivate({
       deactivate_pid,
@@ -45,7 +45,7 @@ export default function DeactivateConfirmation({
     onClose()
   }
 
-  const player_transactions = playerMap.get('transactions', new List())
+  const player_transactions = player_map.get('transactions', new List())
   const isDraftedRookie = Boolean(
     player_transactions.filter(
       (t) =>
@@ -58,7 +58,7 @@ export default function DeactivateConfirmation({
   const releaseItems = []
   for (const { pid } of team.roster.practice_signed) {
     const release_player_map = team.players.find(
-      (playerMap) => playerMap.get('pid') === pid
+      (player_map) => player_map.get('pid') === pid
     )
     releaseItems.push(
       <MenuItem key={pid} value={pid}>
@@ -72,9 +72,9 @@ export default function DeactivateConfirmation({
       <DialogTitle>Deactivate Player</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          {`${playerMap.get('fname')} ${playerMap.get(
+          {`${player_map.get('fname')} ${player_map.get(
             'lname'
-          )} (${playerMap.get(
+          )} (${player_map.get(
             'pos'
           )}) will be placed on the practice squad. He will not be available to use in lineups until he's reactivated.`}
         </DialogContentText>
@@ -118,7 +118,7 @@ export default function DeactivateConfirmation({
 DeactivateConfirmation.propTypes = {
   onClose: PropTypes.func,
   deactivate: PropTypes.func,
-  playerMap: ImmutablePropTypes.map,
+  player_map: ImmutablePropTypes.map,
   team: PropTypes.object,
   load_player_transactions: PropTypes.func,
   pid: PropTypes.string

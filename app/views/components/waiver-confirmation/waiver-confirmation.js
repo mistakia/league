@@ -25,7 +25,7 @@ import './waiver-confirmation.styl'
 export default function WaiverConfirmation({
   waiver,
   league,
-  playerMap,
+  player_map,
   roster,
   rosterPlayers,
   team,
@@ -59,7 +59,7 @@ export default function WaiverConfirmation({
 
   const has_bench_space = (isActiveRoster) =>
     isActiveRoster
-      ? ros.hasOpenBenchSlot(playerMap.get('pos'))
+      ? ros.hasOpenBenchSlot(player_map.get('pos'))
       : ros.hasOpenPracticeSquadSlot()
   const ros = new Roster({ roster: roster.toJS(), league })
 
@@ -128,7 +128,7 @@ export default function WaiverConfirmation({
   }
 
   const handleSubmit = () => {
-    const pid = playerMap.get('pid')
+    const pid = player_map.get('pid')
 
     if (!waiver_type) {
       return set_missing_type(true)
@@ -249,7 +249,7 @@ export default function WaiverConfirmation({
       <DialogTitle>Waiver Claim</DialogTitle>
       <DialogContent>
         <DialogContentText>
-          {`Add ${playerMap.get('name')} (${playerMap.get('pos')})`}
+          {`Add ${player_map.get('name')} (${player_map.get('pos')})`}
         </DialogContentText>
         <div className='confirmation__inputs'>
           {waiver_type === constants.waivers.FREE_AGENCY && (
@@ -310,7 +310,7 @@ export default function WaiverConfirmation({
 }
 
 WaiverConfirmation.propTypes = {
-  playerMap: ImmutablePropTypes.map,
+  player_map: ImmutablePropTypes.map,
   rosterPlayers: PropTypes.object,
   waiver: PropTypes.object,
   roster: ImmutablePropTypes.record,

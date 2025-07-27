@@ -8,16 +8,16 @@ import './scoreboard-player.styl'
 
 class ScoreboardPlayer extends Player {
   render = () => {
-    const { playerMap, gamelog, week } = this.props
+    const { player_map, gamelog, week } = this.props
 
     const classNames = ['scoreboard__player']
     if (!gamelog) classNames.push('projection')
 
     const points = gamelog
       ? (gamelog.total || 0).toFixed(1)
-      : playerMap.getIn(['points', `${week}`, 'total'], 0).toFixed(1)
+      : player_map.getIn(['points', `${week}`, 'total'], 0).toFixed(1)
 
-    const pid = playerMap.get('pid')
+    const pid = player_map.get('pid')
     return (
       <div className={classNames.join(' ')}>
         <div className='scoreboard__player-body'>

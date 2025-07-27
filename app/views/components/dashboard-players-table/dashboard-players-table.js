@@ -53,7 +53,7 @@ const SortablePlayerRoster = ({ waiver, percentiles, ...props }) => {
         pid={waiver.pid}
         waiverId={waiver.uid}
         claim={waiver}
-        playerMap={waiver.playerMap}
+        player_map={waiver.player_map}
         dragHandle={
           <div {...listeners}>
             <SortableHandle />
@@ -109,7 +109,7 @@ export default function DashboardPlayersTable({
           claim={poach}
           poachId={poach.uid}
           pid={poach.pid}
-          playerMap={poach.playerMap}
+          player_map={poach.player_map}
           {...{ percentiles }}
         />
       )
@@ -170,12 +170,12 @@ export default function DashboardPlayersTable({
             items={cutlist.map((p) => p.get('pid'))}
             strategy={verticalListSortingStrategy}
           >
-            {cutlist.map((playerMap) => (
+            {cutlist.map((player_map) => (
               <SortablePlayerRoster
-                key={playerMap.get('pid')}
+                key={player_map.get('pid')}
                 waiver={{
-                  pid: playerMap.get('pid'),
-                  playerMap
+                  pid: player_map.get('pid'),
+                  player_map
                 }}
                 percentiles={percentiles}
               />

@@ -140,15 +140,15 @@ export default function PlayersPage({
       headers[field_info.key] = field_info.csv_header
     }
 
-    const data = players.map((playerMap) => {
+    const data = players.map((player_map) => {
       const item = {
-        name: playerMap.get('name'),
-        team: playerMap.get('team'),
-        pos: playerMap.get('pos')
+        name: player_map.get('name'),
+        team: player_map.get('team'),
+        pos: player_map.get('pos')
       }
 
       for (const field_info of field_infos) {
-        item[field_info.key] = playerMap.getIn(field_info.key_path)
+        item[field_info.key] = player_map.getIn(field_info.key_path)
       }
 
       return item
@@ -171,11 +171,11 @@ export default function PlayersPage({
   const index = page * 25
   players
     .slice(0, index)
-    .forEach((playerMap, idx) =>
+    .forEach((player_map, idx) =>
       rowItems.push(
         <PlayerRow
-          key={playerMap.get('pid')}
-          playerMap={playerMap}
+          key={player_map.get('pid')}
+          player_map={player_map}
           player_row_index={idx}
         />
       )

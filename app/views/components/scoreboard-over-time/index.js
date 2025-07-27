@@ -45,14 +45,14 @@ const map_state_to_props = createSelector(
         teamPoints[t.uid] = 0
       })
 
-      for (const playerMap of playerMaps) {
-        const pid = playerMap.get('pid')
+      for (const player_map of playerMaps) {
+        const pid = player_map.get('pid')
         const team = data.find((t) =>
           t.starters.find((pMap) => pMap.get('pid') === pid)
         )
 
         if (team) {
-          teamPoints[team.team.uid] += playerMap.getIn(
+          teamPoints[team.team.uid] += player_map.getIn(
             ['points', `${week}`, 'total'],
             0
           )

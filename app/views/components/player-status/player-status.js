@@ -4,11 +4,13 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import { constants } from '@libs-shared'
 import PlayerLabel from '@components/player-label'
 
-export default function PlayerStatus({ playerMap }) {
+export default function PlayerStatus({ player_map }) {
   const label =
-    constants.nfl_player_status_abbreviations[playerMap.get('injury_status')] ||
-    constants.nfl_player_status_abbreviations[playerMap.get('game_status')] ||
-    constants.nfl_player_status_abbreviations[playerMap.get('nfl_status')]
+    constants.nfl_player_status_abbreviations[
+      player_map.get('injury_status')
+    ] ||
+    constants.nfl_player_status_abbreviations[player_map.get('game_status')] ||
+    constants.nfl_player_status_abbreviations[player_map.get('nfl_status')]
 
   if (
     label ===
@@ -33,5 +35,5 @@ export default function PlayerStatus({ playerMap }) {
 }
 
 PlayerStatus.propTypes = {
-  playerMap: ImmutablePropTypes.map
+  player_map: ImmutablePropTypes.map
 }

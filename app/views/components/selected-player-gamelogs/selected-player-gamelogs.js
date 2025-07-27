@@ -7,9 +7,9 @@ import PlayerSelectedRowHeader from '@components/player-selected-row-header'
 
 import './selected-player-gamelogs.styl'
 
-export default function SelectedPlayerGamelogs({ playerMap, load, years }) {
-  const pid = playerMap.get('pid')
-  const position = playerMap.get('pos')
+export default function SelectedPlayerGamelogs({ player_map, load, years }) {
+  const pid = player_map.get('pid')
+  const position = player_map.get('pos')
 
   useEffect(() => {
     load({ pid, position })
@@ -88,6 +88,6 @@ export default function SelectedPlayerGamelogs({ playerMap, load, years }) {
 
 SelectedPlayerGamelogs.propTypes = {
   years: PropTypes.object,
-  playerMap: ImmutablePropTypes.map,
+  player_map: ImmutablePropTypes.map,
   load: PropTypes.func
 }

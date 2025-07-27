@@ -24,15 +24,15 @@ export default class ActivateConfirmation extends React.Component {
       missing: false
     }
 
-    const { team, playerMap } = props
-    this._hasBenchSpace = team.roster.hasOpenBenchSlot(playerMap.get('pos'))
+    const { team, player_map } = props
+    this._hasBenchSpace = team.roster.hasOpenBenchSlot(player_map.get('pos'))
     this._reserveEligible = []
     this._activePlayers = []
 
     const active_pids = team.roster.active.map((p) => p.pid)
     for (const pid of active_pids) {
       const activePlayerMap = team.players.find(
-        (playerMap) => playerMap.get('pid') === pid
+        (player_map) => player_map.get('pid') === pid
       )
       this._activePlayers.push(activePlayerMap)
       if (
@@ -58,7 +58,7 @@ export default class ActivateConfirmation extends React.Component {
 
   handleSubmit = () => {
     const { reserve_pid, release_pid } = this.state
-    const activate_pid = this.props.playerMap.get('pid')
+    const activate_pid = this.props.player_map.get('pid')
 
     if (!this._hasBenchSpace && !reserve_pid && !release_pid) {
       return this.setState({ missing: true })
@@ -76,7 +76,7 @@ export default class ActivateConfirmation extends React.Component {
   }
 
   render = () => {
-    const { playerMap } = this.props
+    const { player_map } = this.props
 
     const reserveItems = []
     for (const reservePlayerMap of this._reserveEligible) {
@@ -98,7 +98,7 @@ export default class ActivateConfirmation extends React.Component {
       )
     }
 
-    const isReservePlayer = playerMap.get('slot') === constants.slots.IR
+    const isReservePlayer = player_map.get('slot') === constants.slots.IR
     let noBenchSpaceMessage =
       'No active roster space available, make room by releasing a player'
     if (isReservePlayer)
@@ -110,9 +110,9 @@ export default class ActivateConfirmation extends React.Component {
         <DialogTitle>Activate Player</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            {`${playerMap.get('fname')} ${playerMap.get(
+            {`${player_map.get('fname')} ${player_map.get(
               'lname'
-            )} (${playerMap.get(
+            )} (${player_map.get(
               'pos'
             )}) will be placed on the active roster. If the player was not previously activated, activating them will make them ineligible for the practice squad.`}
           </DialogContentText>
@@ -170,6 +170,6 @@ export default class ActivateConfirmation extends React.Component {
 ActivateConfirmation.propTypes = {
   onClose: PropTypes.func,
   activate: PropTypes.func,
-  playerMap: ImmutablePropTypes.map,
+  player_map: ImmutablePropTypes.map,
   team: PropTypes.object
 }

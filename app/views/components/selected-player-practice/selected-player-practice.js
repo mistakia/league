@@ -38,8 +38,12 @@ Row.propTypes = {
   data: PropTypes.object
 }
 
-export default function SelectedPlayerPractice({ playerMap, load, practices }) {
-  const pid = playerMap.get('pid')
+export default function SelectedPlayerPractice({
+  player_map,
+  load,
+  practices
+}) {
+  const pid = player_map.get('pid')
   useEffect(() => {
     if (pid) {
       load(pid)
@@ -79,7 +83,7 @@ export default function SelectedPlayerPractice({ playerMap, load, practices }) {
 }
 
 SelectedPlayerPractice.propTypes = {
-  playerMap: ImmutablePropTypes.map,
+  player_map: ImmutablePropTypes.map,
   load: PropTypes.func,
   practices: ImmutablePropTypes.list
 }

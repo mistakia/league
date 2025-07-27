@@ -15,18 +15,18 @@ export default function PoachNotice({
   process_poach,
   showConfirmation
 }) {
-  const player_map = poach.get('playerMap')
+  const player_map = poach.get('player_map')
   if (!player_map) return null
 
   const processing_time = getPoachProcessingTime(poach.submitted)
 
   const handle_process_poach = (poach) => {
-    const playerMap = poach.get('playerMap')
+    const player_map = poach.get('player_map')
     showConfirmation({
       title: 'Process Poach',
-      description: `${playerMap.get('fname')} ${playerMap.get(
+      description: `${player_map.get('fname')} ${player_map.get(
         'lname'
-      )} (${playerMap.get(
+      )} (${player_map.get(
         'pos'
       )}) will be poached. Are you sure you want to proceed? This will remove the player from your roster and add them to the roster of the team that submitted the poach.`,
       on_confirm_func: () => process_poach(poach.get('uid'))

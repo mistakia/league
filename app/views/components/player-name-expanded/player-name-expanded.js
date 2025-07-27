@@ -33,12 +33,12 @@ function getClock({ desc, game_clock_start, qtr }) {
   }
 }
 
-function GameStatus({ status, playerMap }) {
+function GameStatus({ status, player_map }) {
   if (!constants.isRegularSeason && !status) {
     return null
   }
 
-  if (!playerMap.get('pid')) {
+  if (!player_map.get('pid')) {
     return null
   }
 
@@ -47,7 +47,7 @@ function GameStatus({ status, playerMap }) {
   }
 
   const opponent =
-    playerMap.get('team') === status.game.h
+    player_map.get('team') === status.game.h
       ? `v${status.game.v}`
       : `@${status.game.h}`
 
@@ -82,13 +82,13 @@ function GameStatus({ status, playerMap }) {
 
 GameStatus.propTypes = {
   status: PropTypes.object,
-  playerMap: ImmutablePropTypes.map
+  player_map: ImmutablePropTypes.map
 }
 
 class PlayerNameExpanded extends Player {
   render = () => {
     const {
-      playerMap,
+      player_map,
       is_hosted,
       hideActions,
       status,
@@ -102,12 +102,12 @@ class PlayerNameExpanded extends Player {
 
     const playerName =
       window.innerWidth < 600
-        ? playerMap.get('pname')
-        : `${playerMap.get('fname', '')} ${playerMap.get('lname', '')}`
+        ? player_map.get('pname')
+        : `${player_map.get('fname', '')} ${player_map.get('lname', '')}`
 
-    const player_nfl_status = playerMap.get('nfl_status')
-    const player_game_status = playerMap.get('game_status')
-    const slot = playerMap.get('slot')
+    const player_nfl_status = player_map.get('nfl_status')
+    const player_game_status = player_map.get('game_status')
+    const slot = player_map.get('slot')
 
     // game status should supersede nfl status
     const player_status_label =
@@ -125,7 +125,7 @@ class PlayerNameExpanded extends Player {
 
     return (
       <div className={classNames.join(' ')}>
-        {Boolean(is_hosted && playerMap.get('pid') && !hideActions) && (
+        {Boolean(is_hosted && player_map.get('pid') && !hideActions) && (
           <div className='player__name-expanded-action'>
             <IconButton
               small
@@ -136,7 +136,7 @@ class PlayerNameExpanded extends Player {
           </div>
         )}
         <div className='player__name-headshot'>
-          <PlayerHeadshot playerMap={playerMap} square={headshot_square} />
+          <PlayerHeadshot player_map={player_map} square={headshot_square} />
         </div>
         <div className='player__name-expanded-main'>
           <div
@@ -146,20 +146,20 @@ class PlayerNameExpanded extends Player {
             <div className='player__name-expanded-full-name'>
               {playerName || '-'}
             </div>
-            {constants.year === playerMap.get('nfl_draft_year') && (
+            {constants.year === player_map.get('nfl_draft_year') && (
               <PlayerLabel label='R' type='rookie' description='Rookie' />
             )}
             {(slot === constants.slots.PSP ||
               slot === constants.slots.PSDP) && (
               <PlayerLabel label='P' description='Protected Practice Squad' />
             )}
-            <PlayerTag tag={playerMap.get('tag')} />
+            <PlayerTag tag={player_map.get('tag')} />
           </div>
           <div className='player__name-expanded-row'>
-            <Position pos={playerMap.get('pos')} />
-            <NFLTeam team={playerMap.get('team')} />
+            <Position pos={player_map.get('pos')} />
+            <NFLTeam team={player_map.get('team')} />
             {selected_year === constants.year && (
-              <GameStatus status={status} playerMap={playerMap} />
+              <GameStatus status={status} player_map={player_map} />
             )}
             {player_has_non_active_status && (
               <PlayerLabel
@@ -177,7 +177,7 @@ class PlayerNameExpanded extends Player {
 
 PlayerNameExpanded.propTypes = {
   status: PropTypes.object,
-  playerMap: ImmutablePropTypes.map,
+  player_map: ImmutablePropTypes.map,
   headshot_square: PropTypes.bool
 }
 

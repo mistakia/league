@@ -49,7 +49,7 @@ const getHeadshotWidth = () => {
 const showCollapse = () => window.innerWidth < 750
 
 export default function SelectedPlayer({
-  playerMap,
+  player_map,
   is_logged_in,
   market_salary_adjusted,
   is_before_live_auction_end,
@@ -99,31 +99,31 @@ export default function SelectedPlayer({
   }, [value])
 
   const blacklist = ['0', 'ros']
-  const projWks = playerMap
+  const projWks = player_map
     .get('projection', new Map())
     .keySeq()
     .toArray()
     .filter((week) => !blacklist.includes(week)).length
 
-  const pos = playerMap.get('pos')
-  const pid = playerMap.get('pid')
-  const tid = playerMap.get('tid', false)
-  const player_nfl_status = playerMap.get('nfl_status')
-  const draftNum = playerMap.get('dpos')
-  const draftYear = playerMap.get('nfl_draft_year')
-  const draftRound = playerMap.get('round')
-  const playerValue = playerMap.get('value')
-  const rosPoints = playerMap.getIn(['points', 'ros', 'total'], 0)
+  const pos = player_map.get('pos')
+  const pid = player_map.get('pid')
+  const tid = player_map.get('tid', false)
+  const player_nfl_status = player_map.get('nfl_status')
+  const draftNum = player_map.get('dpos')
+  const draftYear = player_map.get('nfl_draft_year')
+  const draftRound = player_map.get('round')
+  const playerValue = player_map.get('value')
+  const rosPoints = player_map.getIn(['points', 'ros', 'total'], 0)
 
   const external_button_items = []
 
   const has_pfr_link = Boolean(
-    playerMap.get('lname') && playerMap.get('pfr_id')
+    player_map.get('lname') && player_map.get('pfr_id')
   )
   if (has_pfr_link) {
     const open_pfr_link = () => {
       window.open(
-        `https://www.pro-football-reference.com/players/${playerMap.get('lname')[0].toUpperCase()}/${playerMap.get('pfr_id')}.htm`,
+        `https://www.pro-football-reference.com/players/${player_map.get('lname')[0].toUpperCase()}/${player_map.get('pfr_id')}.htm`,
         '_blank'
       )
     }
@@ -134,11 +134,11 @@ export default function SelectedPlayer({
     )
   }
 
-  const has_rotowire_link = Boolean(playerMap.get('rotowire_id'))
+  const has_rotowire_link = Boolean(player_map.get('rotowire_id'))
   if (has_rotowire_link) {
     const open_rotowire_link = () => {
       window.open(
-        `https://rotowire.com/football/player.php?id=${playerMap.get('rotowire_id')}`,
+        `https://rotowire.com/football/player.php?id=${player_map.get('rotowire_id')}`,
         '_blank'
       )
     }
@@ -149,11 +149,11 @@ export default function SelectedPlayer({
     )
   }
 
-  const has_fantasy_data_link = Boolean(playerMap.get('fantasy_data_id'))
+  const has_fantasy_data_link = Boolean(player_map.get('fantasy_data_id'))
   if (has_fantasy_data_link) {
     const open_fantasy_data_link = () => {
       window.open(
-        `https://fantasydata.com/nfl/player-fantasy/${playerMap.get('fantasy_data_id')}`,
+        `https://fantasydata.com/nfl/player-fantasy/${player_map.get('fantasy_data_id')}`,
         '_blank'
       )
     }
@@ -164,11 +164,11 @@ export default function SelectedPlayer({
     )
   }
 
-  const has_espn_link = Boolean(playerMap.get('espn_id'))
+  const has_espn_link = Boolean(player_map.get('espn_id'))
   if (has_espn_link) {
     const open_espn_link = () => {
       window.open(
-        `https://www.espn.com/nfl/player/_/id/${playerMap.get('espn_id')}`,
+        `https://www.espn.com/nfl/player/_/id/${player_map.get('espn_id')}`,
         '_blank'
       )
     }
@@ -179,11 +179,11 @@ export default function SelectedPlayer({
     )
   }
 
-  const has_yahoo_link = Boolean(playerMap.get('yahoo_id'))
+  const has_yahoo_link = Boolean(player_map.get('yahoo_id'))
   if (has_yahoo_link) {
     const open_yahoo_link = () => {
       window.open(
-        `https://sports.yahoo.com/nfl/players/${playerMap.get('yahoo_id')}`,
+        `https://sports.yahoo.com/nfl/players/${player_map.get('yahoo_id')}`,
         '_blank'
       )
     }
@@ -208,7 +208,7 @@ export default function SelectedPlayer({
           large
           headshot_width={headshot_width}
           headshot_square={is_headshot_square}
-          playerMap={playerMap}
+          player_map={player_map}
         />
         <PlayerWatchlistAction pid={pid} />
         <div className='selected__player-header-secondary'>
@@ -224,7 +224,7 @@ export default function SelectedPlayer({
               {player_nfl_status
                 ? constants.nfl_player_status_full[player_nfl_status]
                 : constants.nfl_player_status_full[
-                    playerMap.get('game_status')
+                    player_map.get('game_status')
                   ] || 'Active'}
             </div>
             {is_logged_in && Boolean(tid) && (
@@ -236,7 +236,7 @@ export default function SelectedPlayer({
             {constants.season.isOffseason && (
               <div className='selected__player-header-item'>
                 <label>Market</label>$
-                {playerMap.getIn(['market_salary', '0'], 0)}
+                {player_map.getIn(['market_salary', '0'], 0)}
               </div>
             )}
             {is_logged_in && is_hosted_league && is_before_live_auction_end && (
@@ -251,15 +251,15 @@ export default function SelectedPlayer({
                 <>
                   <div className='selected__player-header-item'>
                     <label>Projected Starts</label>
-                    {playerMap.getIn(['lineups', 'starts'], '-')}
+                    {player_map.getIn(['lineups', 'starts'], '-')}
                   </div>
                   <div className='selected__player-header-item'>
                     <label>Projected Points+</label>
-                    {playerMap.getIn(['lineups', 'sp'], 0).toFixed(1)}
+                    {player_map.getIn(['lineups', 'sp'], 0).toFixed(1)}
                   </div>
                   <div className='selected__player-header-item'>
                     <label>Projected Bench+</label>
-                    {playerMap.getIn(['lineups', 'bp'], 0).toFixed(1)}
+                    {player_map.getIn(['lineups', 'bp'], 0).toFixed(1)}
                   </div>
                 </>
               )}
@@ -275,7 +275,7 @@ export default function SelectedPlayer({
             )}
             <div className='selected__player-header-item'>
               <label>Age</label>
-              <PlayerAge date={playerMap.get('dob')} />
+              <PlayerAge date={player_map.get('dob')} />
             </div>
             {draftNum != null && draftNum !== undefined && (
               <>
@@ -398,7 +398,7 @@ export default function SelectedPlayer({
 
 SelectedPlayer.propTypes = {
   deselect: PropTypes.func,
-  playerMap: ImmutablePropTypes.map,
+  player_map: ImmutablePropTypes.map,
   is_logged_in: PropTypes.bool,
   market_salary_adjusted: PropTypes.number,
   is_before_live_auction_end: PropTypes.bool,

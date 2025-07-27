@@ -12,7 +12,7 @@ import SelectedPlayerSeasonStats from './selected-player-season-stats'
 const map_state_to_props = createSelector(
   getSelectedPlayer,
   getGamesByYearForSelectedPlayer,
-  (playerMap, stats) => ({ playerMap, stats })
+  (player_map, stats) => ({ player_map, stats })
 )
 
 const map_dispatch_to_props = {

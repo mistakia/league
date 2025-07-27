@@ -8,7 +8,7 @@ import DraftPick from './draft-pick'
 const map_state_to_props = createSelector(
   getPlayerById,
   get_team_by_id_for_current_year,
-  (playerMap, team) => ({ playerMap, team })
+  (player_map, team) => ({ player_map, team })
 )
 
 export default connect(map_state_to_props)(DraftPick)

@@ -9,16 +9,16 @@ import SelectedPlayerValue from './selected-player-value'
 const map_state_to_props = createSelector(
   getSelectedPlayer,
   getBaselines,
-  (playerMap, baselines) => {
+  (player_map, baselines) => {
     const baData = []
     const wsData = []
-    const position = playerMap.get('pos')
+    const position = player_map.get('pos')
     for (const week of constants.fantasyWeeks) {
       if (week < constants.week) continue
       baData.push(
         parseFloat(
           (
-            playerMap.getIn(['points', `${week}`, 'total'], 0) -
+            player_map.getIn(['points', `${week}`, 'total'], 0) -
             baselines.getIn([
               `${week}`,
               position,
@@ -33,7 +33,7 @@ const map_state_to_props = createSelector(
       wsData.push(
         parseFloat(
           (
-            playerMap.getIn(['points', `${week}`, 'total'], 0) -
+            player_map.getIn(['points', `${week}`, 'total'], 0) -
             baselines.getIn([
               `${week}`,
               position,
