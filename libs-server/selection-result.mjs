@@ -94,7 +94,7 @@ export const get_selection_result = ({
     // player_game_prop_types.GAME_PASSING_LONGEST_COMPLETION,
     // player_game_prop_types.GAME_LONGEST_RECEPTION,
 
-    case player_game_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS:
+    case player_game_prop_types.ANYTIME_TOUCHDOWN:
       return compare(
         player_gamelog.tdr + player_gamelog.tdrec,
         line,

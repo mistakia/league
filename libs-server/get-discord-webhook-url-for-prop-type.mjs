@@ -45,7 +45,7 @@ export default function (prop_type) {
     case player_prop_types.GAME_LONGEST_RECEPTION:
       return config.discord_props_open_longest_reception_channel_webhook_url
 
-    case player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS:
+    case player_prop_types.ANYTIME_TOUCHDOWN:
       return config.discord_props_open_rushing_receiving_touchdowns_channel_webhook_url
 
     case player_prop_types.GAME_LONGEST_RUSH:

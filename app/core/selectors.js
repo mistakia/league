@@ -1677,8 +1677,7 @@ export function getFilteredProps(state) {
         prop.proj = proj.ra
         break
 
-      case bookmaker_constants.player_prop_types
-        .GAME_RUSHING_RECEIVING_TOUCHDOWNS:
+      case bookmaker_constants.player_prop_types.ANYTIME_TOUCHDOWN:
         prop.proj = proj.tdr + proj.tdrec
         break
 

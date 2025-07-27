@@ -111,7 +111,7 @@ const opponent_allowed_for_prop_is_negative = ({
 
     // player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
     // player_prop_types.GAME_LONGEST_RECEPTION,
-    case player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS:
+    case player_prop_types.ANYTIME_TOUCHDOWN:
       return opponent_seasonlog.tdr + opponent_seasonlog.tdrec < 1
     // player_prop_types.GAME_LONGEST_RUSH,
   }

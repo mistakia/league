@@ -278,7 +278,7 @@ const generate_prop_pairings = async ({
       player_prop_types.GAME_PASSING_ATTEMPTS,
       // player_prop_types.GAME_PASSING_LONGEST_COMPLETION,
       // player_prop_types.GAME_LONGEST_RECEPTION,
-      // player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS,
+      // player_prop_types.ANYTIME_TOUCHDOWN,
       // player_prop_types.GAME_LONGEST_RUSH,
       player_prop_types.GAME_PASSING_RUSHING_YARDS,
       player_prop_types.GAME_ALT_PASSING_TOUCHDOWNS,

@@ -56,7 +56,7 @@ const format_market = async ({
   const selections = []
   const teams = nfl_game ? [nfl_game.h, nfl_game.v] : []
   const use_selection_name = [
-    player_game_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS,
+    player_game_prop_types.ANYTIME_TOUCHDOWN,
     player_game_prop_types.GAME_FIRST_TOUCHDOWN_SCORER,
     player_game_prop_types.GAME_LAST_TOUCHDOWN_SCORER
   ].includes(market_type)

@@ -268,8 +268,7 @@ export const get_market_type_offer_1003 = (subcategoryId) => {
   switch (subcategoryId) {
     case 11819:
     case 12438:
-      // TD Scorers - anytime touchdown scorer (uses rushing+receiving touchdowns)
-      return player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
+      return player_prop_types.ANYTIME_TOUCHDOWN
 
     case 11820:
       return player_prop_types.GAME_FIRST_TEAM_TOUCHDOWN_SCORER

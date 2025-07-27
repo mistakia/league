@@ -56,7 +56,7 @@ export const format_market_type = ({ market_type }) => {
     case 'AMERICAN_FOOTBALL:FTOT:WSLSTTD':
       return player_prop_types.GAME_LAST_TOUCHDOWN_SCORER
     case 'AMERICAN_FOOTBALL:FTOT:WSATD':
-      return player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
+      return player_prop_types.ANYTIME_TOUCHDOWN
 
     case 'AMERICAN_FOOTBALL:FT:C:MOSTPASSINGYARDS':
       return player_prop_types.GAME_LEADER_PASSING_YARDS

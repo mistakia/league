@@ -224,10 +224,7 @@ const player_game_markets = [
     /^PLAYER_[A-Z]_TOTAL_TACKLES_\+_ASSISTS$/,
     player_prop_types.GAME_TACKLES_ASSISTS
   ],
-  [
-    /^ANY_TIME_TOUCHDOWN_SCORER$/,
-    player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
-  ],
+  [/^ANY_TIME_TOUCHDOWN_SCORER$/, player_prop_types.ANYTIME_TOUCHDOWN],
   [
     /^1ST_TEAM_TOUCHDOWN_SCORER$/,
     player_prop_types.GAME_FIRST_TEAM_TOUCHDOWN_SCORER
@@ -472,7 +469,7 @@ export const get_market_details_from_wager = (wager_leg) => {
         return 'FIRST_HALF_SPREAD'
 
       case 'Any Time Touchdown Scorer':
-        return 'RUSHING_RECEIVING_TOUCHDOWNS'
+        return 'ANYTIME_TOUCHDOWN'
 
       case 'Moneyline':
         return 'MONEYLINE'
@@ -520,7 +517,7 @@ export const get_market_details_from_wager = (wager_leg) => {
       case 'RECEPTIONS':
       case 'TOTAL_POINTS':
       case 'FIRST_HALF_TEAM_TOTAL_POINTS':
-      case 'RUSHING_RECEIVING_TOUCHDOWNS':
+      case 'ANYTIME_TOUCHDOWN':
         return check_over_under(over_or_under)
 
       default:
@@ -547,7 +544,7 @@ export const get_market_details_from_wager = (wager_leg) => {
     over_or_under: wager_leg.overOrUnder
   })
 
-  if (metric_name === 'RUSHING_RECEIVING_TOUCHDOWNS') {
+  if (metric_name === 'ANYTIME_TOUCHDOWN') {
     player_name = wager_leg.selectionName
   }
 

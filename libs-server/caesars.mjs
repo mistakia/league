@@ -105,7 +105,7 @@ export const get_market_type = ({
       case '|First Touchdown Scorer|':
         return player_prop_types.GAME_FIRST_TOUCHDOWN_SCORER
       case '|Anytime Touchdown Scorer|':
-        return player_prop_types.GAME_RUSHING_RECEIVING_TOUCHDOWNS
+        return player_prop_types.ANYTIME_TOUCHDOWN
       case '|Last Touchdown Scorer|':
         return player_prop_types.GAME_LAST_TOUCHDOWN_SCORER
 
