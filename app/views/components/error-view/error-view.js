@@ -40,13 +40,12 @@ const ErrorView = ({ error, info }) => {
         <h1>Something unexpected happened</h1>
         <p>This error has been automatically captured and reported.</p>
         <p>
-          Please reach out in our{' '}
+          If you'd like to talk to someone, you can visit our{' '}
           <a href={DISCORD_URL} target='_blank' rel='noopener noreferrer'>
-            Discord support channel
-          </a>{' '}
-          to bring attention to this issue.
+            Discord
+          </a>
+          .
         </p>
-
         <div className='error_details'>
           <h3>Error Details</h3>
           <div className='error_code_container'>
