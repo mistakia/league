@@ -15,6 +15,7 @@ export function createPlayer({
   practice,
   transactions,
   stats,
+  betting_markets,
   ...data
 }) {
   const params = {
@@ -66,6 +67,10 @@ export function createPlayer({
 
   if (stats) {
     params.stats = new Map(stats)
+  }
+
+  if (betting_markets) {
+    params.betting_markets = new List(betting_markets)
   }
 
   return new Map(params)
