@@ -82,7 +82,7 @@ const run = async () => {
         slot: p.slot,
         pid: p.pid,
         pos: p.pos,
-        extensions: p.extensions,
+        extensions: p.extensions, // Use previous week's value for new roster entries
         tid,
         lid,
         year: constants.season.year,
@@ -92,9 +92,8 @@ const run = async () => {
       const updates = overlapping_pids.filter((p) => {
         const item = existing_rows.find((i) => i.pid === p.pid)
         return (
-          item.slot !== p.slot ||
-          item.tag !== p.tag ||
-          item.extensions !== p.extensions
+          item.slot !== p.slot || item.tag !== p.tag
+          // Extensions should persist and not be compared
         )
       })
 
@@ -113,10 +112,9 @@ const run = async () => {
       }
 
       if (updates.length) {
-        for (const { pid, slot, tag, extensions } of updates) {
-          await db('rosters_players')
-            .where({ rid, pid })
-            .update({ slot, tag, extensions })
+        for (const { pid, slot, tag } of updates) {
+          await db('rosters_players').where({ rid, pid }).update({ slot, tag })
+          // Extensions are preserved - not updated
         }
       }
     }
