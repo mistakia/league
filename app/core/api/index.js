@@ -12,6 +12,7 @@ export {
   api_get_draft,
   api_get_teams,
   api_post_draft,
+  api_get_draft_pick_details,
   api_get_player,
   api_get_transactions,
   api_get_matchups,
