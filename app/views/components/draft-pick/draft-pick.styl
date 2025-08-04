@@ -2,12 +2,19 @@
   background white
   position relative
   width 80px
-  height 80px
+  height 84px
   margin-right 3px
   border 1px solid transparent
   border-radius 6px
   flex 0 0 auto
   overflow hidden
+  cursor pointer
+  
+  &:hover
+    border-color rgba(0, 0, 0, 0.23)
+    background rgba(255, 255, 255, 0.8)
+    box-shadow rgba(0, 0, 0, 0.2) 4px 4px 0px 0px
+    
   &.active
     border-color $accentColor
 
@@ -16,36 +23,15 @@
     border-color black
     border-width 2px
 
-  &.QB
-    background tint(red, 25%)
-    .draft__pick-num
-    .draft__pick-player-name
-      color white
-  &.WR
-    background tint(orange, 25%)
-  &.RB
-    background tint(green, 25%)
-    .draft__pick-num
-    .draft__pick-player-name
-      color white
-  &.TE
-    background tint(blue, 25%)
-    .draft__pick-num
-    .draft__pick-player-name
-      color white
-  &.K
-    background tint(grey, 25%)
-  &.DST
-    background tint(black, 25%)
+  // Use consolidated position styling mixin
+  position-background-mixin()
 
 .draft__pick-player
   flex 1
   padding-left 4px
 
 .draft__pick-player-name
-  overflow hidden
-  text-overflow ellipsis
-  white-space nowrap
+  text-truncate()
   font-weight 900
   &.last
     font-size 15px
@@ -75,6 +61,10 @@
   font-size 12px
   flex 0 0 auto
   background white
+  height 20px
+  display flex
+  align-items center
+  padding-left 4px
 
 .draft__pick-window
   flex 1
@@ -85,3 +75,21 @@
   color lighten($textColor, 40)
   &.active
     color $accentColor
+
+.draft__pick-trades
+  position absolute
+  bottom 2px
+  right 2px
+  background rgba(0, 0, 0, 0.1)
+  color rgba(0,0,0,0.7)
+  padding 2px 4px
+  border-radius 4px
+  font-size 10px
+  font-weight 600
+  display flex
+  align-items center
+  gap 2px
+  z-index 2
+  
+  svg
+    font-size 12px

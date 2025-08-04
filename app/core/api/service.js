@@ -120,6 +120,10 @@ export const api = {
     const url = `${API_URL}/leagues/${data.leagueId}/draft`
     return { url, ...POST(data) }
   },
+  get_draft_pick_details({ leagueId, pickId }) {
+    const url = `${API_URL}/leagues/${leagueId}/draft/picks/${pickId}`
+    return { url }
+  },
   get_teams({ leagueId, ...params }) {
     const url = `${API_URL}/leagues/${leagueId}/teams?${queryString.stringify(
       params

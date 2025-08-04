@@ -2621,6 +2621,21 @@ export function get_draft_pick_by_id(state, { pickId }) {
   return {}
 }
 
+export const get_draft_pick_trade_counts = createSelector(
+  get_draft_state,
+  (draft) => {
+    const trade_counts = new Map()
+
+    // Get trade counts from draft picks data (now included in API response)
+    draft.picks.forEach((pick) => {
+      const count = pick.trade_count || 0
+      trade_counts.set(pick.uid, count)
+    })
+
+    return trade_counts
+  }
+)
+
 // gets the overall standings for the current league and year
 export function get_overall_standings(state) {
   const teams = get_teams_for_current_league_and_year(state)
