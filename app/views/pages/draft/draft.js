@@ -57,8 +57,6 @@ export default function DraftPage({
     scroll_to_pick()
   }, [nextPick])
 
-  scroll_to_pick()
-
   const handleDraft = () => {
     showConfirmation({
       title: 'Draft Selection',
@@ -184,8 +182,8 @@ export default function DraftPage({
     const prev_pick = picksSorted.get(pick_index - 1)
     const isPreviousSelectionMade =
       pick.pick === 1 || Boolean(prev_pick && prev_pick.pid)
-    const isUser = pick.tid === teamId
-    const isActive =
+    const is_user = pick.tid === teamId
+    const is_active =
       draftActive &&
       !is_draft_complete &&
       !pick.pid &&
@@ -193,14 +191,17 @@ export default function DraftPage({
       (constants.season.now.isAfter(pick.draftWindow) ||
         isPreviousSelectionMade)
 
+    const trade_count = pick.trade_count || 0
+
     pickItems.push(
       <DraftPick
         key={pick.uid}
         pick={pick}
         pid={pick.pid}
         tid={pick.tid}
-        isUser={isUser}
-        isActive={isActive}
+        is_user={is_user}
+        is_active={is_active}
+        trade_count={trade_count}
       />
     )
 

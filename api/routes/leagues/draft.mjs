@@ -78,6 +78,20 @@ const router = express.Router({ mergeParams: true })
  *           items:
  *             $ref: '#/components/schemas/DraftPick'
  *           description: Array of draft picks
+ *         trade_history_by_pick:
+ *           type: object
+ *           description: Trade history indexed by pick ID
+ *           additionalProperties:
+ *             type: array
+ *             items:
+ *               type: object
+ *         historical_by_position:
+ *           type: object
+ *           description: Historical picks indexed by position
+ *           additionalProperties:
+ *             type: array
+ *             items:
+ *               type: object
  *
  *     MakeDraftPickRequest:
  *       type: object
@@ -168,7 +182,7 @@ const router = express.Router({ mergeParams: true })
  *               $ref: '#/components/schemas/DraftPicksResponse'
  *             examples:
  *               success:
- *                 summary: Draft picks with used and unused picks
+ *                 summary: Draft picks with trade history and historical data
  *                 value:
  *                   picks:
  *                     - uid: 1542
@@ -191,17 +205,148 @@ const router = express.Router({ mergeParams: true })
  *                       otid: 13
  *                       pid: null
  *                       selection_timestamp: null
+ *                   trade_history_by_pick:
+ *                     "1543":
+ *                       - uid: 123
+ *                         propose_tid: 13
+ *                         accept_tid: 14
+ *                         accepted: 1698765000
+ *                         pick_recipient_tid: 14
+ *                   historical_by_position:
+ *                     "3":
+ *                       - uid: 1234
+ *                         year: 2023
+ *                         pick: 3
+ *                         pid: "3456"
+ *                         player:
+ *                           fname: "John"
+ *                           lname: "Doe"
+ *                           pos: "RB"
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
 router.get('/?', async (req, res) => {
-  const { db, logger } = req.app.locals
+  const { logger, db } = req.app.locals
   try {
     const { leagueId } = req.params
     const year = req.query.year || constants.season.year
 
     const picks = await db('draft').where({ lid: leagueId, year })
-    res.send({ picks })
+
+    // Get trade counts for each pick
+    const trade_counts = await db('trades_picks')
+      .select('pickid')
+      .count('tradeid as trade_count')
+      .innerJoin('trades', 'trades.uid', 'trades_picks.tradeid')
+      .whereNotNull('trades.accepted')
+      .whereIn(
+        'pickid',
+        picks.map((p) => p.uid)
+      )
+      .groupBy('pickid')
+
+    // Create a map for quick lookup
+    const trade_count_map = {}
+    trade_counts.forEach((tc) => {
+      trade_count_map[tc.pickid] = parseInt(tc.trade_count)
+    })
+
+    // Add trade_count to each pick
+    const picks_with_trade_counts = picks.map((pick) => ({
+      ...pick,
+      trade_count: trade_count_map[pick.uid] || 0
+    }))
+
+    res.send({ picks: picks_with_trade_counts })
+  } catch (err) {
+    logger(err)
+    res.status(500).send({ error: err.toString() })
+  }
+})
+
+/**
+ * @swagger
+ * /leagues/{leagueId}/draft/picks/{pickId}:
+ *   get:
+ *     summary: Get detailed information for a specific draft pick
+ *     description: |
+ *       Retrieves detailed information for a specific draft pick including trade history
+ *       and historical picks at the same position from previous years.
+ *     tags:
+ *       - Fantasy Leagues
+ *     parameters:
+ *       - $ref: '#/components/parameters/leagueId'
+ *       - name: pickId
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: Draft pick ID
+ *         example: 1542
+ *     responses:
+ *       200:
+ *         description: Successfully retrieved pick details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 trade_history:
+ *                   type: array
+ *                   description: Array of trades involving this pick
+ *                 historical_picks:
+ *                   type: array
+ *                   description: Historical picks at this position from previous years
+ *       404:
+ *         description: Pick not found
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+router.get('/picks/:pickId', async (req, res) => {
+  const { logger, db } = req.app.locals
+  try {
+    const { leagueId, pickId } = req.params
+
+    // Get the pick to find its position
+    const pick = await db('draft').where({ uid: pickId, lid: leagueId }).first()
+    if (!pick) {
+      return res.status(404).send({ error: 'Pick not found' })
+    }
+
+    // Get trade history for this pick
+    const trade_history = await db('trades')
+      .select([
+        'trades.uid',
+        'trades.propose_tid',
+        'trades.accept_tid',
+        'trades.accepted',
+        'trades_picks.pickid'
+      ])
+      .innerJoin('trades_picks', 'trades.uid', 'trades_picks.tradeid')
+      .where('trades_picks.pickid', pickId)
+      .whereNotNull('trades.accepted')
+      .orderBy('trades.accepted', 'asc')
+
+    // Get historical picks at this position from previous years
+    const historical_picks = await db('draft')
+      .select([
+        'draft.uid',
+        'draft.year',
+        'draft.pick',
+        'draft.pid',
+        'draft.tid'
+      ])
+      .where('draft.pick', pick.pick)
+      .where('draft.lid', leagueId)
+      .where('draft.year', '<', pick.year)
+      .whereNotNull('draft.pid')
+      .orderBy('draft.year', 'desc')
+      .limit(5)
+
+    res.send({
+      trade_history,
+      historical_picks
+    })
   } catch (err) {
     logger(err)
     res.status(500).send({ error: err.toString() })

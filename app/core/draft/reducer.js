@@ -1,4 +1,4 @@
-import { List, Record } from 'immutable'
+import { List, Record, Map } from 'immutable'
 
 import { draft_actions } from './actions'
 import { app_actions } from '@core/app'
@@ -11,7 +11,9 @@ const initialState = new Record({
   isPending: false,
   selected: null,
   drafted: new List(),
-  picks: new List()
+  picks: new List(),
+  expanded_pick_id: null,
+  pick_details: new Map() // stores individual pick data by pick_id
 })
 
 export function draft_reducer(state = initialState(), { payload, type }) {
@@ -65,6 +67,27 @@ export function draft_reducer(state = initialState(), { payload, type }) {
         ),
         drafted: state.drafted.push(data.pid)
       })
+    }
+
+    case draft_actions.SET_EXPANDED_PICK_ID:
+      return state.merge({ expanded_pick_id: payload.pick_id })
+
+    case draft_actions.GET_DRAFT_PICK_DETAILS_FULFILLED: {
+      const { pickId } = payload.opts
+      const { trade_history, historical_picks } = payload.data
+
+      return state.setIn(
+        ['pick_details', pickId],
+        new Map({
+          trade_history: new List(
+            trade_history?.map((trade) => new Map(trade)) || []
+          ),
+          historical_picks: new List(
+            historical_picks?.map((pick) => new Map(pick)) || []
+          ),
+          loaded: true
+        })
+      )
     }
 
     default:

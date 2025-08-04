@@ -14,7 +14,7 @@ function Button({
   type = 'button',
   disabled = false,
   isLoading,
-  isActive,
+  is_active,
   small,
   text
 }) {
@@ -25,7 +25,7 @@ function Button({
   if (small) classNames.push('button__small')
   if (text) classNames.push('button__text')
   if (haveCount) classNames.push('button__count')
-  if (isActive) classNames.push('button__active')
+  if (is_active) classNames.push('button__active')
 
   return (
     <button
@@ -45,7 +45,7 @@ Button.propTypes = {
   count: PropTypes.number,
   disabled: PropTypes.bool,
   isLoading: PropTypes.bool,
-  isActive: PropTypes.bool,
+  is_active: PropTypes.bool,
   small: PropTypes.bool,
   text: PropTypes.bool,
   children: PropTypes.node,

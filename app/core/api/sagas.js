@@ -11,7 +11,11 @@ import {
 import { get_app } from '@core/selectors'
 import { get_status_actions } from '@core/status/actions'
 import { get_schedule_actions } from '@core/schedule/actions'
-import { get_draft_actions, post_draft_actions } from '@core/draft/actions'
+import {
+  get_draft_actions,
+  post_draft_actions,
+  get_draft_pick_details_actions
+} from '@core/draft/actions'
 import {
   get_rosters_actions,
   put_roster_actions,
@@ -272,6 +276,11 @@ export const api_post_draft = fetch.bind(
   null,
   api.post_draft,
   post_draft_actions
+)
+export const api_get_draft_pick_details = fetch.bind(
+  null,
+  api.get_draft_pick_details,
+  get_draft_pick_details_actions
 )
 
 export const api_get_teams = fetch.bind(null, api.get_teams, get_teams_actions)
