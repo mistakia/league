@@ -1,0 +1,73 @@
+.draft-pick-item
+  background white
+  position relative
+  width 100%
+  max-width 400px
+  height 90px
+  margin 4px 0
+  border 1px solid rgba(0, 0, 0, 0.12)
+  border-radius 8px
+  overflow hidden
+  display flex
+  flex-direction column
+  transition all 0.2s ease
+    
+  // Use consolidated position styling mixin
+  position-background-mixin()
+
+.draft-pick-item-year
+  position absolute
+  top 6px
+  right 8px
+  font-size 12px
+  font-weight 700
+  opacity 0.9
+  background white
+  color $textColor
+  padding 2px 6px
+  border-radius 4px
+  z-index 2
+
+.draft-pick-item-content
+  flex 1
+  display flex
+  align-items center
+  padding 8px 12px
+  gap 12px
+
+.draft-pick-item-player
+  flex 1
+  overflow hidden
+  
+.draft-pick-item-player-last
+  font-size 16px
+  font-weight 900
+  line-height 20px
+  text-truncate()
+  
+.draft-pick-item-player-first
+  font-size 13px
+  font-weight 600
+  line-height 16px
+  text-truncate()
+  opacity 0.8
+
+.draft-pick-item-empty
+  font-size 14px
+  font-style italic
+  opacity 0.5
+  text-align center
+  width 100%
+  padding 8px
+
+.draft-pick-item-footer
+  background white
+  padding 4px
+  display flex
+  align-items center
+  justify-content left
+  height 24px
+  font-size 12px
+  font-weight 700
+  border-top 1px solid rgba(0, 0, 0, 0.08)
+  letter-spacing 0.5px

@@ -27,6 +27,40 @@ $te_color = tint(blue, 25%)
 $k_color = tint(grey, 25%)
 $dst_color = tint(black, 25%)
 
+// Position styling mixin for consistent position-based backgrounds and text colors
+position-background-mixin()
+  &.QB
+    background $qb_color
+    .draft-pick-item-player-last, .draft-pick-item-player-first, .draft__pick-num, .draft__pick-player-name
+      color white
+      
+  &.WR
+    background $wr_color
+    
+  &.RB
+    background $rb_color
+    .draft-pick-item-player-last, .draft-pick-item-player-first, .draft__pick-num, .draft__pick-player-name
+      color white
+      
+  &.TE
+    background $te_color
+    .draft-pick-item-player-last, .draft-pick-item-player-first, .draft__pick-num, .draft__pick-player-name
+      color white
+      
+  &.K
+    background $k_color
+    
+  &.DST
+    background $dst_color
+    .draft-pick-item-player-last, .draft-pick-item-player-first, .draft__pick-num, .draft__pick-player-name
+      color white
+
+// Text truncation mixin for consistent text overflow handling
+text-truncate()
+  overflow hidden
+  text-overflow ellipsis
+  white-space nowrap
+
 $qbrbwrte_color = tint(red, 25%)
 $rbwrte_color = tint(purple, 25%)
 $rbwr_color = tint(yellow, 25%)
