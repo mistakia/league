@@ -543,6 +543,7 @@ return `t${hash.toString('hex')}`
 - `additional_conditions` (Function): Custom join conditions
 - `join_year` (Boolean): Whether to join on year
 - `join_week` (Boolean): Whether to join on week
+- `skip_week_split_join` (Boolean): Skip automatic week join when table lacks week column
 - `join_on_team` (Boolean): Whether to join on team
 - `on_alias` (String): Alias for ON clause
 - `data_view_options` (Object): Query options with centralized references
