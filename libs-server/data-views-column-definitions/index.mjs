@@ -29,6 +29,7 @@ import player_team_column_definition from './player-team-column-definition.mjs'
 import team_dvoa_column_definitions from './team-dvoa-column-definitions.mjs'
 import nfl_team_seasonlogs_column_definitions from './nfl-team-seasonlogs-column-definitions.mjs'
 import player_pfr_season_value_column_definitions from './player-pfr-season-value-column-definitions.mjs'
+import player_seasonlogs_column_definitions from './player-seasonlogs-column-definitions.mjs'
 
 // TODO include IR_LONG_TERM
 const player_league_roster_status_select = `CASE WHEN rosters_players.slot = ${constants.slots.IR} THEN 'injured_reserve' WHEN rosters_players.slot = ${constants.slots.PS} THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END`
@@ -60,6 +61,7 @@ export default {
   ...team_dvoa_column_definitions,
   ...nfl_team_seasonlogs_column_definitions,
   ...player_pfr_season_value_column_definitions,
+  ...player_seasonlogs_column_definitions,
 
   player_league_roster_status: {
     table_name: 'rosters_players',

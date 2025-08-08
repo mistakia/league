@@ -21,7 +21,8 @@ export default function data_view_join_function(join_arguments) {
     default_year = constants.season.year,
     join_on_team = false,
     join_table_team_field = 'nfl_team',
-    data_view_options = {}
+    data_view_options = {},
+    skip_week_split_join = false
   } = join_arguments
 
   // TODO join_type should be left in some cases where year_offset range is used without a with_where
@@ -137,7 +138,7 @@ export default function data_view_join_function(join_arguments) {
         )
       }
 
-      if (splits.includes('week')) {
+      if (splits.includes('week') && !skip_week_split_join) {
         const week_clause = cast_join_week_to_string
           ? `CAST(${data_view_options.week_reference} AS VARCHAR)`
           : data_view_options.week_reference
