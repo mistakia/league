@@ -1,0 +1,41 @@
+{
+  "name": "player career year with week splits",
+  "description": "Test case for career year column with week splits (same value per week in season)",
+  "request": {
+    "columns": [
+      "player_name",
+      {
+        "column_id": "player_career_year",
+        "params": {
+          "single_year": 2023,
+          "seas_type": "REG"
+        }
+      }
+    ],
+    "splits": ["year", "week"],
+    "where": [
+      {
+        "column_id": "player_career_year",
+        "operator": "=",
+        "value": 1
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "player_name",
+        "desc": false
+      }
+    ],
+    "limit": 10
+  },
+  "tags": [
+    "player",
+    "career",
+    "seasonlogs",
+    "week_splits",
+    "rookie_year",
+    "parameters"
+  ],
+  "timeout_ms": 30000,
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2000,2001,2002,2003,2004,2005,2006,2007,2008,2009,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023,2024,2025]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years), \"player_years_weeks\" as (SELECT player_years.pid, nfl_year_week_timestamp.year, nfl_year_week_timestamp.week FROM player_years INNER JOIN nfl_year_week_timestamp ON player_years.year = nfl_year_week_timestamp.year) select \"player\".\"pid\", player.fname, player.lname, t209f3a217d72274fbedbe4d44e4a5095.career_year as career_year_0, \"player_years\".\"year\", \"player_years_weeks\".\"week\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" inner join \"player_years_weeks\" on \"player_years_weeks\".\"pid\" = \"player\".\"pid\" and \"player_years_weeks\".\"year\" = \"player_years\".\"year\" inner join \"player_seasonlogs\" as \"t400d8fd8d99658efbdbc325edea87166\" on \"t400d8fd8d99658efbdbc325edea87166\".\"pid\" = \"player\".\"pid\" and t400d8fd8d99658efbdbc325edea87166.year = player_years.year and t400d8fd8d99658efbdbc325edea87166.seas_type = 'REG' left join \"player_seasonlogs\" as \"t209f3a217d72274fbedbe4d44e4a5095\" on \"t209f3a217d72274fbedbe4d44e4a5095\".\"pid\" = \"player\".\"pid\" and t209f3a217d72274fbedbe4d44e4a5095.year = player_years.year and t209f3a217d72274fbedbe4d44e4a5095.seas_type = 'REG' where t400d8fd8d99658efbdbc325edea87166.career_year = '1' group by player.fname, player.lname, t209f3a217d72274fbedbe4d44e4a5095.career_year, \"player_years\".\"year\", \"player_years_weeks\".\"week\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by \"player\".\"pid\" asc limit 10"
+}

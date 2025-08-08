@@ -1,0 +1,33 @@
+{
+  "name": "player career year basic display",
+  "description": "Test case for basic career year column display",
+  "request": {
+    "columns": [
+      "player_name",
+      {
+        "column_id": "player_career_year",
+        "params": {
+          "single_year": 2023,
+          "seas_type": "REG"
+        }
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_career_year",
+        "operator": ">=",
+        "value": 1
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "player_career_year",
+        "desc": false
+      }
+    ],
+    "limit": 10
+  },
+  "expected_query": "select \"player\".\"pid\", player.fname, player.lname, t209f3a217d72274fbedbe4d44e4a5095.career_year as career_year_0, \"player\".\"pos\" from \"player\" inner join \"player_seasonlogs\" as \"t400d8fd8d99658efbdbc325edea87166\" on \"t400d8fd8d99658efbdbc325edea87166\".\"pid\" = \"player\".\"pid\" and t400d8fd8d99658efbdbc325edea87166.seas_type = 'REG' and t400d8fd8d99658efbdbc325edea87166.year = 2024 left join \"player_seasonlogs\" as \"t209f3a217d72274fbedbe4d44e4a5095\" on \"t209f3a217d72274fbedbe4d44e4a5095\".\"pid\" = \"player\".\"pid\" and t209f3a217d72274fbedbe4d44e4a5095.seas_type = 'REG' and t209f3a217d72274fbedbe4d44e4a5095.year = 2023 where t400d8fd8d99658efbdbc325edea87166.career_year >= '1' group by player.fname, player.lname, t209f3a217d72274fbedbe4d44e4a5095.career_year, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 4 ASC NULLS LAST, \"player\".\"pid\" asc limit 10",
+  "tags": ["player", "career", "seasonlogs", "basic", "parameters"],
+  "timeout_ms": 30000
+}
