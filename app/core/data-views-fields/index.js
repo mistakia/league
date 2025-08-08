@@ -17,6 +17,7 @@ import keeptradecut_table_fields from './keeptradecut-table-fields'
 import player_games_played_table_fields from './player-games-played-table-fields'
 import player_contract_table_fields from './player-contract-table-fields'
 import player_pff_seasonlogs_table_fields from './player-pff-seasonlogs-table-fields'
+import player_seasonlogs_table_fields from './player-seasonlogs-table-fields'
 import player_rankings_table_fields from './player-rankings-table-fields'
 import player_adp_table_fields from './player-adp-table-fields'
 import player_dfs_salaries_table_fields from './player-dfs-salaries-table-fields'
@@ -85,6 +86,7 @@ export function PlayerTableFields({
   const fields = {
     ...fantasy_league_table_fields({ week, is_logged_in }),
     ...player_pff_seasonlogs_table_fields({ is_logged_in }),
+    ...player_seasonlogs_table_fields({ is_logged_in }),
 
     ...projected_table_fields({ week }),
     ...player_table_fields({ is_logged_in }),

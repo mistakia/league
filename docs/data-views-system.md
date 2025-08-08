@@ -127,6 +127,10 @@ Each stage makes key decisions that affect query performance:
     query.leftJoin(table_name, `${table_name}.pid`, data_view_options.pid_reference)
   },
 
+  // Join control parameters
+  skip_week_split_join: true,    // Skip week join for season-level data
+  join_week: false,              // Don't join on week column
+
   // Cache optimization
   get_cache_info: ({ params }) => ({
     cache_ttl: params.year?.includes(constants.season.year)
@@ -313,6 +317,24 @@ if (splits.includes('week') || splits.includes('year')) {
 #### `add_clauses_for_table()` - Table Processing Core
 
 **Performance-Critical Function**: Processes all columns and where clauses for a specific table, making key optimization decisions.
+
+#### Join Control Parameters for Season-Level Data
+
+Some columns contain season-level data (like `career_year`) that doesn't vary by week but should still support week splits for display purposes. These columns use specific join control parameters to prevent automatic week joins while maintaining week split compatibility:
+
+```javascript
+const player_seasonlogs_join = (join_arguments) => {
+  return data_view_join_function({
+    ...join_arguments,
+    join_table_clause: `player_seasonlogs as ${join_arguments.table_name}`,
+    additional_conditions,
+    join_week: false, // Don't join on week since player_seasonlogs doesn't have week column
+    skip_week_split_join: true // Skip automatic week join for week splits
+  })
+}
+```
+
+**Use Case**: Career year data is constant across all weeks in a season, but users want to see it when viewing data with week splits (e.g., "show me each player's career year for weeks 1-3 across multiple seasons").
 
 **Function Signature**:
 

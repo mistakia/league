@@ -79,6 +79,9 @@ export default {
   player_draft_rank_from_careerlogs:
     'The draft class rank of the player based on their draft position',
 
+  player_career_year:
+    'The NFL career year for the player (1st year, 2nd year, etc.)',
+
   player_contract_base_salary:
     "The player's base salary for the current contract year",
   player_contract_prorated_bonus:
