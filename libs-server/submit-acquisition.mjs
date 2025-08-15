@@ -90,17 +90,31 @@ export default async function ({
         lid: leagueId
       })
       .orderBy('pick', 'asc')
-    const lastPick = picks[picks.length - 1]
-    const draftDates = getDraftDates({
+    const last_pick = picks[picks.length - 1]
+
+    // Get the season data to check for explicit completion timestamp
+    const season = await db('seasons')
+      .where({
+        lid: leagueId,
+        year: constants.season.year
+      })
+      .first()
+
+    const draft_dates = getDraftDates({
       start: league.draft_start,
       type: league.draft_type,
       min: league.draft_hour_min,
       max: league.draft_hour_max,
       picks: picks.length,
-      last_selection_timestamp: lastPick ? lastPick.selection_timestamp : null
+      last_selection_timestamp: last_pick
+        ? last_pick.selection_timestamp
+        : null,
+      rookie_draft_completed_at: season
+        ? season.rookie_draft_completed_at
+        : null
     })
 
-    if (!league.draft_start || dayjs().isBefore(draftDates.waiverEnd)) {
+    if (!league.draft_start || dayjs().isBefore(draft_dates.waiverEnd)) {
       throw new Error('rookie free agency not open')
     }
 

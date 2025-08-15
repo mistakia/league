@@ -426,33 +426,42 @@ export function is_player_drafted(state, { pid, player_map = new Map() }) {
 export const get_rookie_draft_end = createSelector(
   (state) => state.getIn(['app', 'leagueId']),
   (state) => state.get('leagues'),
+  get_current_league,
   get_rookie_draft_last_pick,
   get_draft_state,
-  (leagueId, leagues, lastPick, draft) => {
-    if (!lastPick) {
+  (league_id, leagues, current_league, last_pick, draft) => {
+    if (!last_pick) {
       return null
     }
 
-    const league = leagues.get(leagueId, new League())
-    if (lastPick.selection_timestamp) {
+    const league = leagues.get(league_id, new League())
+
+    // Prioritize explicit completion timestamp when available
+    const rookie_draft_completed_at = current_league.rookie_draft_completed_at
+    if (rookie_draft_completed_at) {
+      return dayjs.unix(rookie_draft_completed_at).tz('America/New_York')
+    }
+
+    // Fallback to existing calculation logic
+    if (last_pick.selection_timestamp) {
       return dayjs
-        .unix(lastPick.selection_timestamp)
+        .unix(last_pick.selection_timestamp)
         .tz('America/New_York')
         .endOf('day')
     }
 
     const { picks } = draft
     const last_consecutive_pick = get_last_consecutive_pick(picks.toJS())
-    const draftEnd = getDraftWindow({
+    const rookie_draft_end = getDraftWindow({
       last_consecutive_pick,
       start: league.draft_start,
-      pickNum: lastPick.pick + 1,
+      pickNum: last_pick.pick + 1,
       type: league.draft_type,
       min: league.draft_hour_min,
       max: league.draft_hour_max
     })
 
-    return draftEnd
+    return rookie_draft_end
   }
 )
 
@@ -460,26 +469,28 @@ export const is_after_rookie_draft = createSelector(
   (state) => state.getIn(['app', 'leagueId']),
   (state) => state.get('leagues'),
   get_rookie_draft_end,
-  (leagueId, leagues, draftEnd) => {
+  (league_id, leagues, rookie_draft_end) => {
     if (constants.isRegularSeason) {
       return {
-        afterDraft: true,
-        afterWaivers: true
+        after_rookie_draft: true,
+        after_rookie_draft_waivers: true
       }
     }
 
-    const league = leagues.get(leagueId, new League())
-    const afterDraft =
-      league.draft_start && draftEnd && dayjs().isAfter(draftEnd)
-    const afterWaivers =
+    const league = leagues.get(league_id, new League())
+    const after_rookie_draft =
       league.draft_start &&
-      draftEnd &&
+      rookie_draft_end &&
+      dayjs().isAfter(rookie_draft_end)
+    const after_rookie_draft_waivers =
+      league.draft_start &&
+      rookie_draft_end &&
       dayjs().isAfter(
-        draftEnd.tz('America/New_York').endOf('day').add(1, 'day')
+        rookie_draft_end.add(24, 'hours').endOf('day')
       )
     return {
-      afterDraft,
-      afterWaivers
+      after_rookie_draft,
+      after_rookie_draft_waivers
     }
   }
 )
@@ -1232,21 +1243,23 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
       const onReleaseWaivers = isPlayerOnReleaseWaivers(state, {
         pid: playerId
       })
-      const draft = is_after_rookie_draft(state)
+      const rookie_draft_dates = is_after_rookie_draft(state)
       const isPracticeSquadEligible = isPlayerPracticeSquadEligible(state, {
         player_map
       })
       if (onReleaseWaivers) {
         if (isRegularSeason) status.waiver.active = true
-        if (draft.afterDraft && isPracticeSquadEligible)
+        if (rookie_draft_dates.after_rookie_draft && isPracticeSquadEligible)
           status.waiver.practice = true
       } else {
         if (isRegularSeason && !status.locked) {
           status.sign.active = true
         }
         if (isPracticeSquadEligible && !status.locked) {
-          if (draft.afterWaivers) status.sign.practice = true
-          else if (draft.afterDraft) status.waiver.practice = true
+          if (rookie_draft_dates.after_rookie_draft_waivers)
+            status.sign.practice = true
+          else if (rookie_draft_dates.after_rookie_draft)
+            status.waiver.practice = true
         }
       }
     }
