@@ -21226,7 +21226,8 @@ CREATE TABLE public.seasons (
     wildcard_round smallint,
     championship_round integer[],
     restricted_free_agency_announcement_hour smallint DEFAULT 24 NOT NULL,
-    restricted_free_agency_processing_hour smallint DEFAULT 0 NOT NULL
+    restricted_free_agency_processing_hour smallint DEFAULT 0 NOT NULL,
+    rookie_draft_completed_at bigint
 );
 
 
