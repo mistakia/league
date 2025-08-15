@@ -531,8 +531,8 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'invalid leagueId' })
     }
 
-    const draftStart = dayjs.unix(league.draft_start)
-    if (constants.season.now.isBefore(draftStart)) {
+    const draft_start = dayjs.unix(league.draft_start)
+    if (constants.season.now.isBefore(draft_start)) {
       return res.status(400).send({ error: 'draft has not started' })
     }
 
@@ -545,16 +545,29 @@ router.post('/?', async (req, res) => {
       .orderBy('pick', 'desc')
       .first()
 
-    const draftDates = getDraftDates({
+    // Get the season data to check for explicit completion timestamp
+    const season = await db('seasons')
+      .where({
+        lid: leagueId,
+        year: constants.season.year
+      })
+      .first()
+
+    const draft_dates = getDraftDates({
       start: league.draft_start,
       type: league.draft_type,
       min: league.draft_hour_min,
       max: league.draft_hour_max,
       picks: last_pick?.pick, // TODO — should be total number of picks in case some picks are missing due to decommissoned teams
-      last_selection_timestamp: last_pick ? last_pick.selection_timestamp : null
+      last_selection_timestamp: last_pick
+        ? last_pick.selection_timestamp
+        : null,
+      rookie_draft_completed_at: season
+        ? season.rookie_draft_completed_at
+        : null
     })
 
-    if (constants.season.now.isAfter(draftDates.draftEnd)) {
+    if (constants.season.now.isAfter(draft_dates.draftEnd)) {
       return res.status(400).send({ error: 'draft has ended' })
     }
 
@@ -661,12 +674,38 @@ router.post('/?', async (req, res) => {
       value
     })
 
-    await db('draft')
-      .where({ uid: pickId })
-      .update({
-        pid,
-        selection_timestamp: Math.round(Date.now() / 1000)
+    const selection_timestamp = Math.round(Date.now() / 1000)
+
+    await db('draft').where({ uid: pickId }).update({
+      pid,
+      selection_timestamp
+    })
+
+    // Check if this was the last pick in the draft
+    const remaining_picks = await db('draft')
+      .where({
+        lid,
+        year: constants.season.year
       })
+      .whereNull('pid')
+      .count('* as count')
+      .first()
+
+    if (remaining_picks.count === 0) {
+      // All picks have been made, update the seasons table with completion timestamp
+      await db('seasons')
+        .where({
+          lid,
+          year: constants.season.year
+        })
+        .update({
+          rookie_draft_completed_at: selection_timestamp
+        })
+
+      logger(
+        `Rookie draft completed for league ${lid} at ${selection_timestamp}`
+      )
+    }
 
     const trades = await db('trades')
       .innerJoin('trades_picks', 'trades.uid', 'trades_picks.tradeid')
