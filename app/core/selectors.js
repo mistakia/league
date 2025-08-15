@@ -485,9 +485,7 @@ export const is_after_rookie_draft = createSelector(
     const after_rookie_draft_waivers =
       league.draft_start &&
       rookie_draft_end &&
-      dayjs().isAfter(
-        rookie_draft_end.add(24, 'hours').endOf('day')
-      )
+      dayjs().isAfter(rookie_draft_end.add(24, 'hours').endOf('day'))
     return {
       after_rookie_draft,
       after_rookie_draft_waivers

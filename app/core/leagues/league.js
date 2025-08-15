@@ -71,6 +71,7 @@ export const League = new Record({
   draft_type: null,
   draft_hour_min: null,
   draft_hour_max: null,
+  rookie_draft_completed_at: null,
 
   min_bid: 0,
   hosted: 0,
@@ -187,6 +188,7 @@ export function createLeague({
   draft_type,
   draft_hour_min,
   draft_hour_max,
+  rookie_draft_completed_at,
 
   min_bid,
   hosted,
@@ -302,6 +304,7 @@ export function createLeague({
     draft_type,
     draft_hour_min,
     draft_hour_max,
+    rookie_draft_completed_at,
 
     min_bid,
     hosted,
