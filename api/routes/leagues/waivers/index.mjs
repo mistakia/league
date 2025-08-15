@@ -430,22 +430,34 @@ router.post('/?', async (req, res) => {
               lid: leagueId
             })
             .orderBy('pick', 'asc')
-          const lastPick = picks[picks.length - 1]
-          const draftDates = getDraftDates({
+          const last_pick = picks[picks.length - 1]
+
+          // Get the season data to check for explicit completion timestamp
+          const season = await db('seasons')
+            .where({
+              lid: leagueId,
+              year: constants.season.year
+            })
+            .first()
+
+          const draft_dates = getDraftDates({
             start: league.draft_start,
             type: league.draft_type,
             min: league.draft_hour_min,
             max: league.draft_hour_max,
-            picks: lastPick?.pick, // TODO — should be total number of picks in case some picks are missing due to decommissoned teams
-            last_selection_timestamp: lastPick
-              ? lastPick.selection_timestamp
+            picks: last_pick?.pick, // TODO — should be total number of picks in case some picks are missing due to decommissoned teams
+            last_selection_timestamp: last_pick
+              ? last_pick.selection_timestamp
+              : null,
+            rookie_draft_completed_at: season
+              ? season.rookie_draft_completed_at
               : null
           })
 
           // if player is a rookie
           if (player_row.nfl_draft_year === constants.season.year) {
             // reject practice waivers before day after draft
-            if (!league.draft_start || dayjs().isBefore(draftDates.draftEnd)) {
+            if (!league.draft_start || dayjs().isBefore(draft_dates.draftEnd)) {
               return res.status(400).send({
                 error: 'practice squad waivers are not open for rookies'
               })
@@ -456,7 +468,7 @@ router.post('/?', async (req, res) => {
             if (
               !super_priority &&
               league.draft_start &&
-              dayjs().isAfter(draftDates.waiverEnd) &&
+              dayjs().isAfter(draft_dates.waiverEnd) &&
               (!league.free_agency_live_auction_start ||
                 dayjs().isBefore(faPeriod.start))
             ) {
