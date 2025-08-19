@@ -240,6 +240,16 @@ export default function LeagueTeam({
           />
         </div>
         <div className='league-team-main-section'>
+          {Boolean(reserveIRItems.length) && (
+            <DashboardPlayersTable
+              items={reserveIRItems}
+              title='Reserve/IR'
+              space={roster.availableReserveSpace}
+              {...{ percentiles, is_team_manager }}
+            />
+          )}
+        </div>
+        <div className='league-team-main-section'>
           <DashboardPlayersTable
             items={practice_signed_items}
             title='Practice Squad — Signed'
@@ -253,16 +263,6 @@ export default function LeagueTeam({
             title='Practice Squad — Drafted'
             {...{ percentiles, is_team_manager }}
           />
-        </div>
-        <div className='league-team-main-section'>
-          {Boolean(reserveIRItems.length) && (
-            <DashboardPlayersTable
-              items={reserveIRItems}
-              title='Reserve/IR'
-              space={roster.availableReserveSpace}
-              {...{ percentiles, is_team_manager }}
-            />
-          )}
         </div>
         <div className='league-team-main-section'>
           {Boolean(reserveIRLongTermItems.length) && (
