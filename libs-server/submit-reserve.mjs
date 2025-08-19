@@ -62,6 +62,22 @@ export default async function ({
     throw new Error('protected players are not reserve eligible')
   }
 
+  // check if practice squad player has active poaching claims
+  if (
+    rosterPlayer.slot === constants.slots.PS ||
+    rosterPlayer.slot === constants.slots.PSD
+  ) {
+    const activePoaches = await db('poaches')
+      .where({ pid: reserve_pid })
+      .whereNull('processed')
+
+    if (activePoaches.length === 0) {
+      throw new Error(
+        'practice squad players can only be placed on reserve if they have an active poaching claim'
+      )
+    }
+  }
+
   // make sure player is reserve eligible
   if (slot === constants.slots.COV) {
     if (constants.season.week === 0) {
