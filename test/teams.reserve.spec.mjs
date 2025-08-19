@@ -485,5 +485,184 @@ describe('API /teams - reserve', function () {
 
       await error(request, 'not eligible, not rostered long enough')
     })
+
+    it('practice squad player without active poaching claim', async () => {
+      const player = await selectPlayer()
+      await addPlayer({
+        leagueId: 1,
+        player,
+        teamId: 1,
+        userId: 1,
+        slot: constants.slots.PS
+      })
+      await knex('player')
+        .update({
+          nfl_status: constants.player_nfl_status.INJURED_RESERVE
+        })
+        .where({
+          pid: player.pid
+        })
+
+      const request = chai_request
+        .execute(server)
+        .post('/api/teams/1/reserve')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          reserve_pid: player.pid,
+          slot: constants.slots.IR,
+          leagueId: 1
+        })
+
+      await error(
+        request,
+        'practice squad players can only be placed on reserve if they have an active poaching claim'
+      )
+    })
+
+    it('practice squad drafted player without active poaching claim', async () => {
+      const player = await selectPlayer()
+      await addPlayer({
+        leagueId: 1,
+        player,
+        teamId: 1,
+        userId: 1,
+        slot: constants.slots.PSD
+      })
+      await knex('player')
+        .update({
+          nfl_status: constants.player_nfl_status.INJURED_RESERVE
+        })
+        .where({
+          pid: player.pid
+        })
+
+      const request = chai_request
+        .execute(server)
+        .post('/api/teams/1/reserve')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          reserve_pid: player.pid,
+          slot: constants.slots.IR,
+          leagueId: 1
+        })
+
+      await error(
+        request,
+        'practice squad players can only be placed on reserve if they have an active poaching claim'
+      )
+    })
+  })
+
+  describe('practice squad with active poach', function () {
+    beforeEach(async function () {
+      this.timeout(60 * 1000)
+      await league(knex)
+    })
+
+    it('practice squad player with active poaching claim can be reserved', async () => {
+      MockDate.set(regular_season_start.subtract('1', 'week').toISOString())
+      const player = await selectPlayer()
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const value = 2
+
+      await addPlayer({
+        teamId,
+        leagueId,
+        userId,
+        player,
+        slot: constants.slots.PS,
+        transaction: constants.transactions.DRAFT,
+        value
+      })
+
+      // Create active poaching claim
+      await knex('poaches').insert({
+        userid: 2,
+        tid: 2,
+        lid: leagueId,
+        pid: player.pid,
+        player_tid: teamId,
+        submitted: Math.round(Date.now() / 1000)
+      })
+
+      await knex('player')
+        .update({
+          nfl_status: constants.player_nfl_status.INJURED_RESERVE
+        })
+        .where({
+          pid: player.pid
+        })
+
+      const res = await chai_request
+        .execute(server)
+        .post('/api/teams/1/reserve')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          reserve_pid: player.pid,
+          leagueId,
+          slot: constants.slots.IR
+        })
+
+      res.should.have.status(200)
+      res.should.be.json
+      res.body.tid.should.equal(teamId)
+      res.body.pid.should.equal(player.pid)
+      res.body.slot.should.equal(constants.slots.IR)
+    })
+
+    it('practice squad drafted player with active poaching claim can be reserved', async () => {
+      MockDate.set(regular_season_start.subtract('1', 'week').toISOString())
+      const player = await selectPlayer()
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const value = 2
+
+      await addPlayer({
+        teamId,
+        leagueId,
+        userId,
+        player,
+        slot: constants.slots.PSD,
+        transaction: constants.transactions.DRAFT,
+        value
+      })
+
+      // Create active poaching claim
+      await knex('poaches').insert({
+        userid: 2,
+        tid: 2,
+        lid: leagueId,
+        pid: player.pid,
+        player_tid: teamId,
+        submitted: Math.round(Date.now() / 1000)
+      })
+
+      await knex('player')
+        .update({
+          nfl_status: constants.player_nfl_status.INJURED_RESERVE
+        })
+        .where({
+          pid: player.pid
+        })
+
+      const res = await chai_request
+        .execute(server)
+        .post('/api/teams/1/reserve')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          reserve_pid: player.pid,
+          leagueId,
+          slot: constants.slots.IR
+        })
+
+      res.should.have.status(200)
+      res.should.be.json
+      res.body.tid.should.equal(teamId)
+      res.body.pid.should.equal(player.pid)
+      res.body.slot.should.equal(constants.slots.IR)
+    })
   })
 })
