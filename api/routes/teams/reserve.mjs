@@ -15,6 +15,13 @@ const router = express.Router({ mergeParams: true })
  *     description: |
  *       Move a player to injured reserve (IR) or long-term IR.
  *       Can optionally activate another player from reserve.
+ *
+ *       **Reserve Eligibility Rules:**
+ *       - Player must be on the team and meet standard reserve requirements
+ *       - Protected practice squad players (PSP, PSDP) cannot be placed on reserve
+ *       - Unprotected practice squad players (PS, PSD) can ONLY be placed on reserve if they have an active poaching claim
+ *       - Player must have been rostered for at least one week (unless acquired via trade)
+ *       - Player must meet NFL injury status requirements for the reserve type
  *     security:
  *       - bearerAuth: []
  *     parameters:
@@ -93,7 +100,32 @@ const router = express.Router({ mergeParams: true })
  *                   type: object
  *                   description: Transaction details
  *       400:
- *         $ref: '#/components/responses/BadRequestError'
+ *         description: Bad request - validation failed
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 error:
+ *                   type: string
+ *                   description: Error message
+ *             examples:
+ *               protectedPlayer:
+ *                 summary: Protected practice squad player
+ *                 value:
+ *                   error: "protected players are not reserve eligible"
+ *               practiceSquadNoPoach:
+ *                 summary: Practice squad player without active poach
+ *                 value:
+ *                   error: "practice squad players can only be placed on reserve if they have an active poaching claim"
+ *               notEligible:
+ *                 summary: Player not reserve eligible
+ *                 value:
+ *                   error: "player not eligible for Reserve"
+ *               notRosteredLongEnough:
+ *                 summary: Player not rostered long enough
+ *                 value:
+ *                   error: "not eligible, not rostered long enough"
  *       401:
  *         $ref: '#/components/responses/UnauthorizedError'
  *       500:

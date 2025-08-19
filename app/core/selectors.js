@@ -1336,22 +1336,39 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
 
       if (!status.protected && constants.week <= constants.season.finalWeek) {
         const reserve = isPlayerReserveEligible(state, { player_map })
+
+        // For practice squad players, only allow reserve if they have active poaching claim
+        const isPracticeSquad =
+          playerSlot === constants.slots.PS ||
+          playerSlot === constants.slots.PSD
+        let practiceSquadReserveEligible = true
+        if (isPracticeSquad) {
+          const leaguePoaches = get_poaches_for_current_league(state)
+          practiceSquadReserveEligible = leaguePoaches.has(playerId)
+        }
+
         if (
           reserve.ir &&
           playerSlot !== constants.slots.IR &&
-          playerSlot !== constants.slots.IR_LONG_TERM
+          playerSlot !== constants.slots.IR_LONG_TERM &&
+          practiceSquadReserveEligible
         ) {
           status.reserve.ir = true
         }
 
-        if (reserve.ir && playerSlot !== constants.slots.IR_LONG_TERM) {
+        if (
+          reserve.ir &&
+          playerSlot !== constants.slots.IR_LONG_TERM &&
+          practiceSquadReserveEligible
+        ) {
           status.reserve.ir_long_term = true
         }
 
         if (
           reserve.cov &&
           playerSlot !== constants.slots.COV &&
-          constants.isRegularSeason
+          constants.isRegularSeason &&
+          practiceSquadReserveEligible
         ) {
           status.reserve.cov = true
         }
