@@ -30,7 +30,7 @@ try {
   column_param_backwards_compatibility_mappings = (
     await import(
       '#private/column-param-backwards-compatibility-mappings.json',
-      { assert: { type: 'json' } }
+      { with: { type: 'json' } }
     )
   ).default
 } catch (error) {
