@@ -24,9 +24,10 @@ const generate_player_career_game_counts = async () => {
       'nfl_games.seas_type'
     )
     .innerJoin('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
+    .whereIn('nfl_games.seas_type', ['REG', 'POST'])  // Exclude preseason games
     .orderBy('date', 'asc')
 
-  log(`loaded ${player_gamelogs.length} player games`)
+  log(`loaded ${player_gamelogs.length} player games (excluding preseason)`)
 
   const player_career_games = {}
   const player_career_years = {}
@@ -35,7 +36,7 @@ const generate_player_career_game_counts = async () => {
 
   for (const game of player_gamelogs) {
     if (!player_career_games[game.pid]) {
-      player_career_games[game.pid] = 0
+      player_career_games[game.pid] = 0  // Start at 0 so first game becomes 1
       player_career_years[game.pid] = new Set()
     }
     player_career_games[game.pid]++
