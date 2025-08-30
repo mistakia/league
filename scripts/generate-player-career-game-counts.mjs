@@ -38,13 +38,18 @@ const generate_player_career_game_counts = async () => {
         'nfl_games.seas_type'
       )
       .innerJoin('nfl_games', function () {
-        this.on('nfl_games.esbid', '=', 'player_gamelogs.esbid')
-          .andOn('nfl_games.year', '=', 'player_gamelogs.year')
+        this.on('nfl_games.esbid', '=', 'player_gamelogs.esbid').andOn(
+          'nfl_games.year',
+          '=',
+          'player_gamelogs.year'
+        )
       })
       .where({ 'nfl_games.year': year })
       .whereIn('nfl_games.seas_type', ['REG', 'POST'])
 
-    log(`processing year ${year}: loaded ${rows.length} player games (excluding preseason)`) 
+    log(
+      `processing year ${year}: loaded ${rows.length} player games (excluding preseason)`
+    )
 
     const pid_to_rows = {}
     for (const row of rows) {
@@ -63,7 +68,9 @@ const generate_player_career_game_counts = async () => {
 
       const games = pid_to_rows[pid]
       games.sort((a, b) => {
-        const seas_cmp = (seas_type_order[a.seas_type] ?? 0) - (seas_type_order[b.seas_type] ?? 0)
+        const seas_cmp =
+          (seas_type_order[a.seas_type] ?? 0) -
+          (seas_type_order[b.seas_type] ?? 0)
         if (seas_cmp !== 0) return seas_cmp
         return a.week - b.week
       })
@@ -110,7 +117,9 @@ const generate_player_career_game_counts = async () => {
       })
 
       total_game_updates += game_updates.length
-      log(`updated career game counts for ${game_updates.length} games in ${year}`)
+      log(
+        `updated career game counts for ${game_updates.length} games in ${year}`
+      )
     }
 
     if (season_updates_array.length) {
@@ -126,11 +135,15 @@ const generate_player_career_game_counts = async () => {
       })
 
       total_season_updates += season_updates_array.length
-      log(`updated career year counts for ${season_updates_array.length} seasons in ${year}`)
+      log(
+        `updated career year counts for ${season_updates_array.length} seasons in ${year}`
+      )
     }
   }
 
-  log(`totals: updated ${total_game_updates} game rows and ${total_season_updates} season rows`)
+  log(
+    `totals: updated ${total_game_updates} game rows and ${total_season_updates} season rows`
+  )
 }
 
 const main = async () => {

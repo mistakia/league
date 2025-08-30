@@ -39,9 +39,10 @@ const extract_week = (week_string) => {
 
 const get_stats_for_props = async ({ props, week }) => {
   // For week 1, skip current_season period since there's no data
-  const periods = week === 1 
-    ? ['last_five', 'last_ten', 'last_season'] 
-    : ['last_five', 'last_ten', 'current_season', 'last_season']
+  const periods =
+    week === 1
+      ? ['last_five', 'last_ten', 'last_season']
+      : ['last_five', 'last_ten', 'current_season', 'last_season']
   const stats = {}
 
   for (const period of periods) {
@@ -150,11 +151,17 @@ const format_prop_pairing = ({ props, prop_stats, week, team, source }) => {
   const status = 'pending'
   const pairing_id = get_prop_pairing_id(props)
   const sorted_payouts = props.map((p) => p.odds_american).sort((a, b) => a - b)
-  
+
   // For week 1, use last season's hit rates since there's no current season data
-  const hit_rate_soft_field = props[0].week === 1 ? 'last_season_hit_rate_soft' : 'current_season_hit_rate_soft'
-  const hit_rate_hard_field = props[0].week === 1 ? 'last_season_hit_rate_hard' : 'current_season_hit_rate_hard'
-  
+  const hit_rate_soft_field =
+    props[0].week === 1
+      ? 'last_season_hit_rate_soft'
+      : 'current_season_hit_rate_soft'
+  const hit_rate_hard_field =
+    props[0].week === 1
+      ? 'last_season_hit_rate_hard'
+      : 'current_season_hit_rate_hard'
+
   const sum_hist_rate_soft = props.reduce(
     (accumulator, prop) => accumulator + (prop[hit_rate_soft_field] || 0),
     0
@@ -164,10 +171,11 @@ const format_prop_pairing = ({ props, prop_stats, week, team, source }) => {
     0
   )
   // For week 1, use last_season stats as current_season proxy
-  const current_stats = week === 1 && prop_stats.last_season 
-    ? prop_stats.last_season 
-    : (prop_stats.current_season || {})
-    
+  const current_stats =
+    week === 1 && prop_stats.last_season
+      ? prop_stats.last_season
+      : prop_stats.current_season || {}
+
   const pairing = {
     pairing_id,
     source_id: source,
@@ -239,10 +247,11 @@ const generate_prop_pairings = async ({
   console.time('generate_prop_pairings')
 
   // For week 1, use last season's data since there's no current season history yet
-  const hits_field = week === 1 ? 'last_season_hits_soft' : 'current_season_hits_soft'
+  const hits_field =
+    week === 1 ? 'last_season_hits_soft' : 'current_season_hits_soft'
   // For week 1, require more historical hits to reduce dataset size
   const min_hits = week === 1 ? 3 : 1
-  
+
   const prop_rows = await db('current_week_prop_market_selections_index')
     .select(
       'current_week_prop_market_selections_index.*',
@@ -483,11 +492,19 @@ const generate_prop_pairings = async ({
       }
 
       if (prop_pairing_props_inserts.length) {
-        for (let i = 0; i < prop_pairing_props_inserts.length; i += chunk_size) {
+        for (
+          let i = 0;
+          i < prop_pairing_props_inserts.length;
+          i += chunk_size
+        ) {
           const chunk = prop_pairing_props_inserts.slice(i, i + chunk_size)
           await trx('prop_pairing_props')
             .insert(chunk)
-            .onConflict(['pairing_id', 'source_market_id', 'source_selection_id'])
+            .onConflict([
+              'pairing_id',
+              'source_market_id',
+              'source_selection_id'
+            ])
             .ignore()
         }
       }
