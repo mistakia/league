@@ -30,10 +30,17 @@ The data view system supports complex queries with:
 
 2. **Validate Column Definitions**
 
-   - Verify all column IDs exist in the data view specifications (docs/data-view-specs/)
-   - Check that column parameters are valid for the selected columns using parameter schemas
-   - Ensure rate types are supported by the chosen columns per column family definitions
-   - Validate year ranges and format hashes against specification requirements
+   **Required Verification Steps:**
+   - **Check column existence**: Verify ALL column IDs exist in data-view-specs/index.json
+   - **Parameter validation**: Check data-view-specs/parameters/schemas/ for valid parameters  
+   - **Rate type compatibility**: Confirm rate_type values exist in data-view-specs/parameters/values/rate-types.json
+   - **Split compatibility**: Verify columns support requested splits (year/week) per column family definitions
+   - **Required parameters**: Ensure columns requiring scoring_format_hash, year, etc. have them specified
+
+   **Common Column ID Patterns:**
+   - Play stats: `player_[stat]_from_plays` (e.g., `player_rush_attempts_from_plays`)
+   - Basic info: `player_[attribute]` (e.g., `player_name`, `player_position`) 
+   - Betting: `betting_[metric]` per betting-markets.json family
 
 3. **Structure Query Parameters**
 
@@ -46,8 +53,31 @@ The data view system supports complex queries with:
    - `view_description`: Detailed description of analysis purpose
 
 4. **Generate Column Configurations**
-   Simple: `'player_position'`
-   Parameterized: `{"column_id": "name", "params": {"year": [2024]}}`
+   
+   **Simple (no parameters):**
+   ```javascript
+   'player_position'
+   'player_name'  
+   ```
+   
+   **Parameterized (with required parameters):**
+   ```javascript
+   {
+     "column_id": "player_rush_attempts_from_plays",
+     "params": {
+       "year": [2024, 2023, 2022, 2021, 2020, 2019], // Multi-year array
+       "seas_type": ["REG"], // Regular season only
+       "week": [1], // Week 1 only
+       "career_game": [1, 1] // First career game range
+     }
+   }
+   ```
+   
+   **Key Parameter Patterns:**
+   - **Multiple years**: Always use arrays even for single values: `"year": [2024]`
+   - **Career filtering**: Use `career_game: [1, 1]` for first career game
+   - **Week filtering**: Use `week: [1]` for specific weeks  
+   - **Season type**: Use `seas_type: ["REG"]` for regular season
 
 5. **Create Filter Conditions**
 
@@ -64,13 +94,31 @@ The data view system supports complex queries with:
 
    ```javascript
    {
-     "columns": [...],
-     "prefix_columns": [...],
-     "where": [...],
-     "sort": [...],
-     "splits": [...],
-     "view_name": "View Name",
-     "view_description": "Detailed description"
+     "columns": [
+       {
+         "column_id": "player_rush_attempts_from_plays", 
+         "params": {
+           "year": [2024, 2023, 2022, 2021, 2020, 2019],
+           "seas_type": ["REG"],
+           "week": [1],
+           "career_game": [1, 1]
+         }
+       }
+     ],
+     "prefix_columns": [
+       "player_name",
+       "player_position" 
+     ],
+     "where": [],
+     "sort": [
+       {
+         "column_id": "player_rush_attempts_from_plays",
+         "desc": true  // ALWAYS include desc: true/false
+       }
+     ],
+     "splits": ["year", "week"], // Enable time-series splits
+     "view_name": "Week 1 Rookie RB Rush Attempts 2019-2024",
+     "view_description": "First career game rushing attempts for rookie RBs"
    }
    ```
 
