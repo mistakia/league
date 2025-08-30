@@ -38,7 +38,10 @@ const extract_week = (week_string) => {
 }
 
 const get_stats_for_props = async ({ props, week }) => {
-  const periods = ['last_five', 'last_ten', 'current_season', 'last_season']
+  // For week 1, skip current_season period since there's no data
+  const periods = week === 1 
+    ? ['last_five', 'last_ten', 'last_season'] 
+    : ['last_five', 'last_ten', 'current_season', 'last_season']
   const stats = {}
 
   for (const period of periods) {
@@ -147,14 +150,24 @@ const format_prop_pairing = ({ props, prop_stats, week, team, source }) => {
   const status = 'pending'
   const pairing_id = get_prop_pairing_id(props)
   const sorted_payouts = props.map((p) => p.odds_american).sort((a, b) => a - b)
+  
+  // For week 1, use last season's hit rates since there's no current season data
+  const hit_rate_soft_field = props[0].week === 1 ? 'last_season_hit_rate_soft' : 'current_season_hit_rate_soft'
+  const hit_rate_hard_field = props[0].week === 1 ? 'last_season_hit_rate_hard' : 'current_season_hit_rate_hard'
+  
   const sum_hist_rate_soft = props.reduce(
-    (accumulator, prop) => accumulator + prop.current_season_hit_rate_soft,
+    (accumulator, prop) => accumulator + (prop[hit_rate_soft_field] || 0),
     0
   )
   const sum_hist_rate_hard = props.reduce(
-    (accumulator, prop) => accumulator + prop.current_season_hit_rate_hard,
+    (accumulator, prop) => accumulator + (prop[hit_rate_hard_field] || 0),
     0
   )
+  // For week 1, use last_season stats as current_season proxy
+  const current_stats = week === 1 && prop_stats.last_season 
+    ? prop_stats.last_season 
+    : (prop_stats.current_season || {})
+    
   const pairing = {
     pairing_id,
     source_id: source,
@@ -163,20 +176,20 @@ const format_prop_pairing = ({ props, prop_stats, week, team, source }) => {
     week,
     market_prob,
     ...props_totals,
-    current_season_hist_rate_soft: prop_stats.current_season.hist_rate_soft,
-    current_season_hist_rate_hard: prop_stats.current_season.hist_rate_hard,
-    current_season_opp_allow_rate: prop_stats.current_season.opp_allow_rate,
-    current_season_total_games: prop_stats.current_season.total_games,
-    current_season_week_last_hit: prop_stats.current_season.week_last_hit,
-    current_season_week_first_hit: prop_stats.current_season.week_first_hit,
+    current_season_hist_rate_soft: current_stats.hist_rate_soft || 0,
+    current_season_hist_rate_hard: current_stats.hist_rate_hard || 0,
+    current_season_opp_allow_rate: current_stats.opp_allow_rate || 0,
+    current_season_total_games: current_stats.total_games || 0,
+    current_season_week_last_hit: current_stats.week_last_hit,
+    current_season_week_first_hit: current_stats.week_first_hit,
     current_season_joint_hist_rate_soft:
-      prop_stats.current_season.joint_hist_rate_soft,
-    current_season_joint_games: prop_stats.current_season.joint_games,
+      current_stats.joint_hist_rate_soft || 0,
+    current_season_joint_games: current_stats.joint_games || 0,
     size: props.length,
     current_season_hist_edge_soft:
-      prop_stats.current_season.hist_rate_soft - market_prob,
+      (current_stats.hist_rate_soft || 0) - market_prob,
     current_season_hist_edge_hard:
-      prop_stats.current_season.hist_rate_hard - market_prob,
+      (current_stats.hist_rate_hard || 0) - market_prob,
     // TODO fix
     // is_pending,
     // is_success,
@@ -225,6 +238,11 @@ const generate_prop_pairings = async ({
   })
   console.time('generate_prop_pairings')
 
+  // For week 1, use last season's data since there's no current season history yet
+  const hits_field = week === 1 ? 'last_season_hits_soft' : 'current_season_hits_soft'
+  // For week 1, require more historical hits to reduce dataset size
+  const min_hits = week === 1 ? 3 : 1
+  
   const prop_rows = await db('current_week_prop_market_selections_index')
     .select(
       'current_week_prop_market_selections_index.*',
@@ -255,8 +273,8 @@ const generate_prop_pairings = async ({
       'nfl_games.esbid',
       'current_week_prop_market_selections_index.esbid'
     )
-    .whereNotNull('current_season_hits_soft')
-    .where('current_season_hits_soft', '>', 1)
+    .whereNotNull(hits_field)
+    .where(hits_field, '>', min_hits)
     .where('prop_market_selections_index.odds_american', '<', 1000)
     .where('prop_market_selections_index.odds_american', '>', -350)
     .whereIn('current_week_prop_market_selections_index.market_type', [
@@ -432,21 +450,48 @@ const generate_prop_pairings = async ({
   }
 
   if (prop_pairing_inserts.length) {
-    const chunk_size = 1000
-    for (let i = 0; i < prop_pairing_inserts.length; i += chunk_size) {
-      const chunk = prop_pairing_inserts.slice(i, i + chunk_size)
-      await db('prop_pairings').insert(chunk).onConflict('pairing_id').merge()
-    }
+    const chunk_size = 200
+    await db.transaction(async (trx) => {
+      await trx.raw("set local synchronous_commit = 'off'")
 
-    if (prop_pairing_props_inserts.length) {
-      for (let i = 0; i < prop_pairing_props_inserts.length; i += chunk_size) {
-        const chunk = prop_pairing_props_inserts.slice(i, i + chunk_size)
-        await db('prop_pairing_props')
+      for (let i = 0; i < prop_pairing_inserts.length; i += chunk_size) {
+        const chunk = prop_pairing_inserts.slice(i, i + chunk_size)
+        await trx('prop_pairings')
           .insert(chunk)
-          .onConflict(['pairing_id', 'source_market_id', 'source_selection_id'])
-          .merge()
+          .onConflict('pairing_id')
+          .merge([
+            'week',
+            'market_prob',
+            'risk_total',
+            'payout_total',
+            'current_season_hist_rate_soft',
+            'current_season_hist_rate_hard',
+            'current_season_opp_allow_rate',
+            'current_season_total_games',
+            'current_season_week_last_hit',
+            'current_season_week_first_hit',
+            'current_season_joint_hist_rate_soft',
+            'current_season_joint_games',
+            'current_season_hist_edge_soft',
+            'current_season_hist_edge_hard',
+            'highest_payout',
+            'lowest_payout',
+            'second_lowest_payout',
+            'current_season_sum_hist_rate_soft',
+            'current_season_sum_hist_rate_hard'
+          ])
       }
-    }
+
+      if (prop_pairing_props_inserts.length) {
+        for (let i = 0; i < prop_pairing_props_inserts.length; i += chunk_size) {
+          const chunk = prop_pairing_props_inserts.slice(i, i + chunk_size)
+          await trx('prop_pairing_props')
+            .insert(chunk)
+            .onConflict(['pairing_id', 'source_market_id', 'source_selection_id'])
+            .ignore()
+        }
+      }
+    })
 
     log(`inserted ${prop_pairing_inserts.length} prop pairings`)
   }
