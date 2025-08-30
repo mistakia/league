@@ -41,7 +41,10 @@ const create_base_column_params = () => ({
   year: {
     ...single_year,
     default_value: constants.year,
-    values: Array.from({ length: constants.year - 2023 + 1 }, (_, i) => 2023 + i)
+    values: Array.from(
+      { length: constants.year - 2023 + 1 },
+      (_, i) => 2023 + i
+    )
   },
   week: single_week
 })

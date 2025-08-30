@@ -31,15 +31,17 @@ The data view system supports complex queries with:
 2. **Validate Column Definitions**
 
    **Required Verification Steps:**
+
    - **Check column existence**: Verify ALL column IDs exist in data-view-specs/index.json
-   - **Parameter validation**: Check data-view-specs/parameters/schemas/ for valid parameters  
+   - **Parameter validation**: Check data-view-specs/parameters/schemas/ for valid parameters
    - **Rate type compatibility**: Confirm rate_type values exist in data-view-specs/parameters/values/rate-types.json
    - **Split compatibility**: Verify columns support requested splits (year/week) per column family definitions
    - **Required parameters**: Ensure columns requiring scoring_format_hash, year, etc. have them specified
 
    **Common Column ID Patterns:**
+
    - Play stats: `player_[stat]_from_plays` (e.g., `player_rush_attempts_from_plays`)
-   - Basic info: `player_[attribute]` (e.g., `player_name`, `player_position`) 
+   - Basic info: `player_[attribute]` (e.g., `player_name`, `player_position`)
    - Betting: `betting_[metric]` per betting-markets.json family
 
 3. **Structure Query Parameters**
@@ -53,14 +55,16 @@ The data view system supports complex queries with:
    - `view_description`: Detailed description of analysis purpose
 
 4. **Generate Column Configurations**
-   
+
    **Simple (no parameters):**
+
    ```javascript
    'player_position'
-   'player_name'  
+   'player_name'
    ```
-   
+
    **Parameterized (with required parameters):**
+
    ```javascript
    {
      "column_id": "player_rush_attempts_from_plays",
@@ -72,11 +76,12 @@ The data view system supports complex queries with:
      }
    }
    ```
-   
+
    **Key Parameter Patterns:**
+
    - **Multiple years**: Always use arrays even for single values: `"year": [2024]`
    - **Career filtering**: Use `career_game: [1, 1]` for first career game
-   - **Week filtering**: Use `week: [1]` for specific weeks  
+   - **Week filtering**: Use `week: [1]` for specific weeks
    - **Season type**: Use `seas_type: ["REG"]` for regular season
 
 5. **Create Filter Conditions**
@@ -96,7 +101,7 @@ The data view system supports complex queries with:
    {
      "columns": [
        {
-         "column_id": "player_rush_attempts_from_plays", 
+         "column_id": "player_rush_attempts_from_plays",
          "params": {
            "year": [2024, 2023, 2022, 2021, 2020, 2019],
            "seas_type": ["REG"],
@@ -107,7 +112,7 @@ The data view system supports complex queries with:
      ],
      "prefix_columns": [
        "player_name",
-       "player_position" 
+       "player_position"
      ],
      "where": [],
      "sort": [
