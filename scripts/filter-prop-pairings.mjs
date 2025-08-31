@@ -174,14 +174,13 @@ const fetch_prop_pairing_props = async (pairing_ids) => {
 const filter_prop_pairings = async ({
   week = constants.season.nfl_seas_week,
   year = constants.season.year,
-  seas_type = constants.season.nfl_seas_type,
   source = 'FANDUEL',
   filter_by_allowed_over_average = false
 } = {}) => {
   const opts = merge(default_options, config.filter_prop_pairings_options || {})
   log('options:')
   log(opts)
-  log({ week, year, seas_type, source, filter_by_allowed_over_average })
+  log({ week, year, source, filter_by_allowed_over_average })
 
   await db.raw('SET statement_timeout = 0')
 
