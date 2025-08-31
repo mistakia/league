@@ -233,7 +233,10 @@ export default async function ({
       year: constants.season.year,
       timestamp
     }
-    await db('transactions').insert(transaction)
+    const [inserted_transaction] = await db('transactions')
+      .insert(transaction)
+      .returning('uid')
+    transaction.uid = inserted_transaction.uid
 
     // clear any pending poaching claims for player
     await db('poaches')
@@ -271,7 +274,10 @@ export default async function ({
     year: constants.season.year,
     timestamp
   }
-  await db('transactions').insert(transaction)
+  const [inserted_transaction] = await db('transactions')
+    .insert(transaction)
+    .returning('uid')
+  transaction.uid = inserted_transaction.uid
 
   // remove release player from rosters
   const teamRosters = await db('rosters')
