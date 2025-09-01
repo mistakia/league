@@ -46,7 +46,7 @@ async function handle_super_priority_on_release({ pid, releasing_tid, lid }) {
   }
 
   // Determine if manual waiver is needed
-  let requires_waiver = false
+  let requires_waiver = 0
 
   // Check if player was originally a PS (signed) player, not PSD (drafted)
   const original_roster = await db('rosters_players')
@@ -70,7 +70,7 @@ async function handle_super_priority_on_release({ pid, releasing_tid, lid }) {
     const roster = new Roster({ roster: original_team_roster, league })
 
     if (roster.practice.length >= league.ps) {
-      requires_waiver = true // No open PS slot, requires manual waiver
+      requires_waiver = 1 // No open PS slot, requires manual waiver
     }
   }
 
