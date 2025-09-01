@@ -61,12 +61,19 @@ async function calculate_super_priority_from_source({
   lid,
   release_tid = null
 }) {
+  // Find the most recent RELEASE transaction for this player in this league
+  const release_transactions = await db('transactions')
+    .where({ pid, lid, type: constants.transactions.RELEASE })
+    .orderBy('timestamp', 'desc')
+    .limit(1)
+
   // Find the most recent POACHED transaction for this player in this league
+  // If there's a release transaction, only consider poaches after the release
   const poached_transactions = await db('transactions')
     .where({ pid, lid, type: constants.transactions.POACHED })
-    .where(function () {
-      if (release_tid) {
-        this.where({ tid: release_tid })
+    .modify(function (queryBuilder) {
+      if (release_transactions.length && release_transactions[0].timestamp) {
+        queryBuilder.where('timestamp', '>', release_transactions[0].timestamp)
       }
     })
     .orderBy('timestamp', 'desc')
@@ -76,7 +83,7 @@ async function calculate_super_priority_from_source({
     return {
       eligible: false,
       original_tid: null,
-      reason: 'Player was not poached'
+      reason: release_transactions.length ? 'No valid poaches since release' : 'Player was not poached'
     }
   }
 
