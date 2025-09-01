@@ -5,7 +5,7 @@ import './auction-slow-mode-status.styl'
 
 export default function AuctionSlowModeStatus({ is_slow_mode, nominated_pid }) {
   // Don't render if not in slow mode or no nomination
-  if (!is_slow_mode || !nominated_pid) {
+  if (!is_slow_mode) {
     return null
   }
 
