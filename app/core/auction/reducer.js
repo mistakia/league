@@ -27,7 +27,7 @@ const initialState = new Record({
   muted: true,
   pause_on_team_disconnect: true,
   is_slow_mode: false,
-  user_has_passed_current_auction_nomination: false
+  slow_mode_state: null
 })
 
 export function auction_reducer(state = initialState(), { payload, type }) {
@@ -76,13 +76,7 @@ export function auction_reducer(state = initialState(), { payload, type }) {
         bid: payload.value,
         nominated_pid: payload.pid,
         timer: Math.round((Date.now() + state.bidTimer) / 1000),
-        isLocked: true,
-        user_has_passed_current_auction_nomination: false // Reset pass state on new bid
-      })
-
-    case auction_actions.AUCTION_PASS_NOMINATION:
-      return state.merge({
-        user_has_passed_current_auction_nomination: true
+        isLocked: true
       })
 
     case auction_actions.AUCTION_SUBMIT_BID:
@@ -132,8 +126,7 @@ export function auction_reducer(state = initialState(), { payload, type }) {
         isComplete: payload.complete,
         pause_on_team_disconnect: payload.pause_on_team_disconnect,
         is_slow_mode: payload.slow_mode || false,
-        user_has_passed_current_auction_nomination:
-          payload.user_has_passed_current_auction_nomination || false
+        slow_mode_state: payload.slow_mode_state
       })
     }
 
@@ -164,6 +157,11 @@ export function auction_reducer(state = initialState(), { payload, type }) {
 
       return state.merge({
         lineupBudget: Math.round(payload.data.leagues[0].cap * 0.9)
+      })
+
+    case auction_actions.AUCTION_SLOW_MODE_STATE_UPDATE:
+      return state.merge({
+        slow_mode_state: payload.slow_mode_state
       })
 
     default:
