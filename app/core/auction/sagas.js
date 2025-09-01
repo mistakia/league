@@ -192,6 +192,21 @@ export function toggle_pause_on_team_disconnect() {
   send({ type: auction_actions.AUCTION_TOGGLE_PAUSE_ON_TEAM_DISCONNECT })
 }
 
+export function* submit_pass() {
+  const { userId, teamId } = yield select(get_app)
+  const { nominated_pid } = yield select(get_auction_state)
+
+  const message = {
+    type: auction_actions.AUCTION_PASS_NOMINATION,
+    payload: {
+      userid: userId,
+      tid: teamId,
+      pid: nominated_pid
+    }
+  }
+  send(message)
+}
+
 //= ====================================
 //  WATCHERS
 // -------------------------------------
@@ -253,6 +268,10 @@ export function* watch_auction_toggle_pause_on_team_disconnect() {
   )
 }
 
+export function* watch_auction_pass_nomination() {
+  yield takeLatest(auction_actions.AUCTION_PASS_NOMINATION, submit_pass)
+}
+
 //= ====================================
 //  ROOT
 // -------------------------------------
@@ -270,5 +289,6 @@ export const auction_sagas = [
   fork(watch_auction_resume),
   fork(watch_auction_start),
   fork(watch_auction_paused),
-  fork(watch_auction_toggle_pause_on_team_disconnect)
+  fork(watch_auction_toggle_pause_on_team_disconnect),
+  fork(watch_auction_pass_nomination)
 ]
