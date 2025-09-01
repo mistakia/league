@@ -173,6 +173,23 @@ export default class Auction {
       // Record transaction
       await this._record_auction_transaction(bid)
 
+      const nominating_team_id = this.nominating_team_id
+      if (!nominating_team_id) {
+        await db('seasons')
+          .where('lid', this._lid)
+          .update({
+            free_agency_live_auction_end: Math.round(Date.now() / 1000)
+          })
+
+        this._league = await getLeague({ lid: this._lid })
+        return this.broadcast({ type: 'AUCTION_COMPLETE' })
+      }
+
+      this.broadcast({
+        type: 'AUCTION_NOMINATION_INFO',
+        payload: { nominating_team_id }
+      })
+
       // Start next phase
       this._start_nomination_timer()
       return true
@@ -849,7 +866,8 @@ export default class Auction {
         team_id: nominating_team_id,
         player_id,
         bid_amount,
-        eligible_teams: eligible_team_ids
+        eligible_teams: eligible_team_ids,
+        is_nomination: true
       })
 
       if (nomination_message) {
@@ -880,7 +898,8 @@ export default class Auction {
         team_id: current_bidder_tid,
         player_id: pid,
         bid_amount: value,
-        eligible_teams: eligible_team_ids
+        eligible_teams: eligible_team_ids,
+        is_nomination: false
       })
 
       if (bid_update_message) {
@@ -902,7 +921,7 @@ export default class Auction {
     const current = this._transactions[0]
     if (current && current.pid === pid) {
       try {
-        const format_message = format_nomination_complete_message({
+        const format_message = await format_nomination_complete_message({
           player_id: current.pid,
           winning_bid_amount: current.value,
           winning_team_id: current.tid
@@ -1086,27 +1105,6 @@ export default class Auction {
 
     this._nomination_timer_expired = false
     this._clear_nomination_timer()
-
-    const nominating_team_id = this.nominating_team_id
-    if (!nominating_team_id) {
-      await db('seasons')
-        .where('lid', this._lid)
-        .update({
-          free_agency_live_auction_end: Math.round(Date.now() / 1000)
-        })
-
-      this._league = await getLeague({ lid: this._lid })
-      return this.broadcast({ type: 'AUCTION_COMPLETE' })
-    }
-
-    if (this._league.free_agency_live_auction_end) {
-      return this.broadcast({ type: 'AUCTION_COMPLETE' })
-    }
-
-    this.broadcast({
-      type: 'AUCTION_NOMINATION_INFO',
-      payload: { nominating_team_id }
-    })
 
     this._nomination_timer = setTimeout(() => {
       this._nomination_timer_expired = true
