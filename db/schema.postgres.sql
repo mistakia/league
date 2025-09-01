@@ -20700,7 +20700,6 @@ CREATE TABLE public.prop_markets_index (
     open boolean,
     live boolean,
     selection_count integer NOT NULL,
-    settled boolean,
     winning_selection_id character varying(255),
     metric_result_value numeric(6,1),
     time_type public.time_type NOT NULL,
@@ -21227,7 +21226,8 @@ CREATE TABLE public.seasons (
     championship_round integer[],
     restricted_free_agency_announcement_hour smallint DEFAULT 24 NOT NULL,
     restricted_free_agency_processing_hour smallint DEFAULT 0 NOT NULL,
-    rookie_draft_completed_at bigint
+    rookie_draft_completed_at bigint,
+    free_agency_auction_slow_mode boolean DEFAULT false NOT NULL
 );
 
 
