@@ -448,6 +448,20 @@ export default class Auction {
         nominating_team_id
       })
 
+      const completion_check =
+        await this._slow_mode_redis.check_nomination_complete({
+          lid: this._lid,
+          pid
+        })
+
+      if (completion_check.complete) {
+        this.logger(
+          `nomination complete for ${pid} - reason: ${completion_check.reason}`
+        )
+        await this._complete_slow_mode_nomination(pid)
+        return true
+      }
+
       // Send Discord notification
       await this._send_nomination_notification({
         player_id: pid,
@@ -458,8 +472,6 @@ export default class Auction {
 
       // Broadcast initial state
       await this._broadcast_slow_mode_state_update()
-
-      this.logger('timers suspended for slow mode nomination')
       return true
     } catch (error) {
       this.logger('error initializing slow mode nomination', error)
