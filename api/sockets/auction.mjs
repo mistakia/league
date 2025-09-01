@@ -872,11 +872,11 @@ export default class Auction {
 
       if (nomination_message) {
         this.logger(nomination_message)
-        // await sendNotifications({
-        //   league: this._league,
-        //   message: nomination_message,
-        //   notifyLeague: true
-        // })
+        await sendNotifications({
+          league: this._league,
+          message: nomination_message,
+          notifyLeague: true
+        })
       }
       return true
     } catch (error) {
@@ -904,11 +904,11 @@ export default class Auction {
 
       if (bid_update_message) {
         this.logger(bid_update_message)
-        // await sendNotifications({
-        //   league: this._league,
-        //   message: bid_update_message,
-        //   notifyLeague: true
-        // })
+        await sendNotifications({
+          league: this._league,
+          message: bid_update_message,
+          notifyLeague: true
+        })
       }
       return true
     } catch (error) {
@@ -929,11 +929,11 @@ export default class Auction {
 
         if (format_message) {
           this.logger(format_message)
-          // await sendNotifications({
-          //   league: this._league,
-          //   message: format_message,
-          //   notifyLeague: true
-          // })
+          await sendNotifications({
+            league: this._league,
+            message: format_message,
+            notifyLeague: true
+          })
         }
         return true
       } catch (error) {
