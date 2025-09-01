@@ -36,12 +36,12 @@ export default function (wss) {
         }
 
         if (auction) {
-          auction.join({ ws, tid, userId, onclose, clientId })
+          auction.join({ ws, tid, user_id: userId, onclose, client_id: clientId })
         } else {
           const auction = new Auction({ wss, lid })
           auctions.set(lid, auction)
           await auction.setup()
-          auction.join({ ws, tid, userId, onclose, clientId })
+          auction.join({ ws, tid, user_id: userId, onclose, client_id: clientId })
         }
       }
     })
