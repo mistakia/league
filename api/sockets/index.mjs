@@ -9,10 +9,10 @@ export default function (wss) {
   handle_data_view_socket(wss)
 
   wss.on('connection', function (ws, request) {
-    const userId = request.auth ? request.auth.userId : null
+    const user_id = request.auth ? request.auth.userId : null
 
     // If the user is not authenticated do not need to handle any of the following messages
-    if (!userId) {
+    if (!user_id) {
       return
     }
 
@@ -21,7 +21,7 @@ export default function (wss) {
 
       if (message.type === 'SCOREBOARD_REGISTER') {
         const { updated } = message.payload
-        return scoreboard.register({ ws, userId, updated })
+        return scoreboard.register({ ws, user_id, updated })
       }
 
       if (message.type === 'AUCTION_JOIN') {
@@ -36,12 +36,12 @@ export default function (wss) {
         }
 
         if (auction) {
-          auction.join({ ws, tid, user_id: userId, onclose, client_id: clientId })
+          auction.join({ ws, tid, user_id, onclose, client_id: clientId })
         } else {
           const auction = new Auction({ wss, lid })
           auctions.set(lid, auction)
           await auction.setup()
-          auction.join({ ws, tid, user_id: userId, onclose, client_id: clientId })
+          auction.join({ ws, tid, user_id, onclose, client_id: clientId })
         }
       }
     })
