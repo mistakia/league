@@ -368,7 +368,8 @@ export default class Auction {
       // Calculate eligible teams after bid placement
       const eligible_team_ids = await this._calculate_eligible_teams(
         value,
-        player_info.pos
+        player_info.pos,
+        tid
       )
 
       // Update Redis state - this resets all passes on new bid
@@ -393,7 +394,12 @@ export default class Auction {
         )
         await this._complete_slow_mode_nomination(pid)
       } else {
-        await this._send_bid_update_notification(pid, value, eligible_team_ids)
+        await this._send_bid_update_notification(
+          pid,
+          value,
+          eligible_team_ids,
+          tid
+        )
         await this._broadcast_slow_mode_state_update()
       }
       return true
@@ -412,7 +418,8 @@ export default class Auction {
       const player_info = players[0]
       const eligible_team_ids = await this._calculate_eligible_teams(
         value,
-        player_info.pos
+        player_info.pos,
+        nominating_team_id
       )
 
       // Initialize Redis state
@@ -425,7 +432,12 @@ export default class Auction {
       })
 
       // Send Discord notification
-      await this._send_nomination_notification(pid, value, eligible_team_ids)
+      await this._send_nomination_notification({
+        player_id: pid,
+        bid_amount: value,
+        eligible_team_ids,
+        nominating_team_id
+      })
 
       // Broadcast initial state
       await this._broadcast_slow_mode_state_update()
@@ -796,10 +808,19 @@ export default class Auction {
   // HELPER METHODS
   // ============================================================================
 
-  async _calculate_eligible_teams(bid_value, player_pos) {
+  async _calculate_eligible_teams(
+    bid_value,
+    player_pos,
+    exclude_team_id = null
+  ) {
     const eligible_team_ids = []
 
     for (const team of this._teams) {
+      // Skip the excluded team
+      if (exclude_team_id && team.uid === exclude_team_id) {
+        continue
+      }
+
       const team_roster = await getRoster({ tid: team.uid })
       const team_roster_obj = new Roster({
         roster: team_roster,
@@ -817,11 +838,17 @@ export default class Auction {
     return eligible_team_ids
   }
 
-  async _send_nomination_notification(pid, value, eligible_team_ids) {
+  async _send_nomination_notification({
+    player_id,
+    bid_amount,
+    eligible_team_ids,
+    nominating_team_id
+  }) {
     try {
       const nomination_message = await format_nomination_message({
-        player_id: pid,
-        bid_amount: value,
+        team_id: nominating_team_id,
+        player_id,
+        bid_amount,
         eligible_teams: eligible_team_ids
       })
 
@@ -842,9 +869,15 @@ export default class Auction {
     }
   }
 
-  async _send_bid_update_notification(pid, value, eligible_team_ids) {
+  async _send_bid_update_notification(
+    pid,
+    value,
+    eligible_team_ids,
+    current_bidder_tid
+  ) {
     try {
       const bid_update_message = await format_nomination_message({
+        team_id: current_bidder_tid,
         player_id: pid,
         bid_amount: value,
         eligible_teams: eligible_team_ids
