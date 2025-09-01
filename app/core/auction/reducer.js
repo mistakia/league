@@ -25,7 +25,9 @@ const initialState = new Record({
   search: null,
   timer: null,
   muted: true,
-  pause_on_team_disconnect: true
+  pause_on_team_disconnect: true,
+  is_slow_mode: false,
+  user_has_passed_current_auction_nomination: false
 })
 
 export function auction_reducer(state = initialState(), { payload, type }) {
@@ -74,7 +76,13 @@ export function auction_reducer(state = initialState(), { payload, type }) {
         bid: payload.value,
         nominated_pid: payload.pid,
         timer: Math.round((Date.now() + state.bidTimer) / 1000),
-        isLocked: true
+        isLocked: true,
+        user_has_passed_current_auction_nomination: false // Reset pass state on new bid
+      })
+
+    case auction_actions.AUCTION_PASS_NOMINATION:
+      return state.merge({
+        user_has_passed_current_auction_nomination: true
       })
 
     case auction_actions.AUCTION_SUBMIT_BID:
@@ -122,7 +130,10 @@ export function auction_reducer(state = initialState(), { payload, type }) {
         nominationTimer: payload.nominationTimer,
         nominatingTeamId: payload.nominatingTeamId,
         isComplete: payload.complete,
-        pause_on_team_disconnect: payload.pause_on_team_disconnect
+        pause_on_team_disconnect: payload.pause_on_team_disconnect,
+        is_slow_mode: payload.slow_mode || false,
+        user_has_passed_current_auction_nomination:
+          payload.user_has_passed_current_auction_nomination || false
       })
     }
 

@@ -86,6 +86,30 @@ class RedisCacheAdapter {
       console.warn(`Redis persist error for key ${key}:`, error.message)
     }
   }
+
+  async keys(pattern) {
+    if (!this.client) {
+      return []
+    }
+    try {
+      return await this.client.keys(pattern)
+    } catch (error) {
+      console.warn(`Redis keys error for pattern ${pattern}:`, error.message)
+      return []
+    }
+  }
+
+  async del(key) {
+    if (!this.client) {
+      return 0
+    }
+    try {
+      return await this.client.del(key)
+    } catch (error) {
+      console.warn(`Redis del error for key ${key}:`, error.message)
+      return 0
+    }
+  }
 }
 
 // Create the redis_cache with fallback to no-op implementation

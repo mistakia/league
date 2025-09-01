@@ -86,6 +86,7 @@ export {
   RedisCacheAdapter,
   redis_cache
 } from './redis_adapter.mjs'
+export * as auction_slow_mode_redis from './auction-slow-mode-redis.mjs'
 export * as pff from './pff.mjs'
 export * as sleeper from './sleeper.mjs'
 export * as fantasypros from './fantasypros.mjs'

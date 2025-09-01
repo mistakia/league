@@ -11,6 +11,8 @@ export const auction_actions = {
   AUCTION_NOMINATION_INFO: 'AUCTION_NOMINATION_INFO',
   AUCTION_COMPLETE: 'AUCTION_COMPLETE',
 
+  AUCTION_PASS_NOMINATION: 'AUCTION_PASS_NOMINATION',
+
   AUCTION_TOGGLE_PAUSE_ON_TEAM_DISCONNECT:
     'AUCTION_TOGGLE_PAUSE_ON_TEAM_DISCONNECT',
   AUCTION_TOGGLE_MUTED: 'AUCTION_TOGGLE_MUTED',
@@ -112,5 +114,9 @@ export const auction_actions = {
 
   toggle_pause_on_team_disconnect: () => ({
     type: auction_actions.AUCTION_TOGGLE_PAUSE_ON_TEAM_DISCONNECT
+  }),
+
+  pass_nomination: () => ({
+    type: auction_actions.AUCTION_PASS_NOMINATION
   })
 }
