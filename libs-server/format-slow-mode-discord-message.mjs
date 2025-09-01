@@ -106,7 +106,7 @@ export const format_nomination_message = async ({
   const team_name = team.name || `Team ${team.uid}`
   const teams_display = await format_team_list(eligible_teams)
 
-  return `${team_name} has ${is_nomination ? 'nominated' : 'bid on'} ${player_display} at $${bid_amount}. Eligible teams: ${teams_display}. Teams must pass or bid to continue.`
+  return `${team_name} has ${is_nomination ? 'nominated' : 'bid on'} ${player_display} at $${bid_amount}. Eligible teams: ${teams_display}. Eligible teams must pass or bid.`
 }
 
 /**
