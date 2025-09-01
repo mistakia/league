@@ -13,13 +13,13 @@ export default class Scoreboard {
     this._log = debug('scoreboard')
   }
 
-  register({ ws, userId, updated }) {
-    this._log(`registering userId(${userId}) for scoreboard updates`)
+  register({ ws, user_id, updated }) {
+    this._log(`registering user_id(${user_id}) for scoreboard updates`)
     ws.on('close', () => {
-      this._log(`removing userId(${userId}) from scoreboard`)
-      this._users.delete(userId)
+      this._log(`removing user_id(${user_id}) from scoreboard`)
+      this._users.delete(user_id)
     })
-    this._users.set(userId, updated)
+    this._users.set(user_id, updated)
 
     const event = {
       type: 'SCOREBOARD_REGISTER'
@@ -56,7 +56,7 @@ export default class Scoreboard {
     }
 
     // loop through users and broadcast diff
-    for (const [userId, updated] of this._users.entries()) {
+    for (const [user_id, updated] of this._users.entries()) {
       const userPlays = plays.filter((p) => p.updated > updated)
 
       if (!userPlays.length) continue
@@ -69,7 +69,7 @@ export default class Scoreboard {
       }
 
       this._wss.clients.forEach((c) => {
-        if (c.userId === userId) {
+        if (c.user_id === user_id) {
           if (c && c.readyState === WebSocket.OPEN) {
             c.send(JSON.stringify(event))
           }

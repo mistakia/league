@@ -88,7 +88,6 @@ export default class Auction {
       type: 'AUCTION_ERROR',
       payload: { error: message }
     }
-
     this._wss.clients.forEach((client) => {
       if (client.user_id === user_id && client.readyState === WebSocket.OPEN) {
         client.send(JSON.stringify(event))

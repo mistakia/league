@@ -189,17 +189,20 @@ server.on('upgrade', async (request, socket, head) => {
   }
 
   wss.handleUpgrade(request, socket, head, function (ws) {
-    ws.leagueId = Number(parsed.searchParams.get('leagueId'))
-    ws.userId = request.auth ? request.auth.userId : null
+    const league_id_param =
+      parsed.searchParams.get('league_id') ||
+      parsed.searchParams.get('leagueId')
+    ws.league_id = Number(league_id_param)
+    ws.user_id = request.auth ? request.auth.userId : null
     wss.emit('connection', ws, request)
   })
 })
 
 sockets(wss)
 
-api.locals.broadcast = (leagueId, message) => {
+api.locals.broadcast = (league_id, message) => {
   wss.clients.forEach((c) => {
-    if (c.leagueId === leagueId) {
+    if (c.league_id === league_id) {
       if (c && c.readyState === WebSocket.OPEN) {
         c.send(JSON.stringify(message))
       }
