@@ -27,6 +27,10 @@ export default class Roster {
     const is_before_extension_deadline =
       (!constants.season.isRegularSeason && !league.ext_date) ||
       constants.season.now.isBefore(dayjs.unix(league.ext_date))
+
+    const is_after_restricted_free_agency_end = constants.season.now.isAfter(
+      dayjs.unix(league.tran_end)
+    )
     for (const {
       slot,
       pid,
@@ -49,7 +53,9 @@ export default class Roster {
             value,
             bid
           })
-        : bid || value
+        : is_after_restricted_free_agency_end
+          ? value
+          : bid || value
 
       this._players.set(pid, {
         slot,
