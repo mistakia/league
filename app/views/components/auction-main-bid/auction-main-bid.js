@@ -9,6 +9,8 @@ import AddIcon from '@mui/icons-material/Add'
 import RemoveIcon from '@mui/icons-material/Remove'
 import Timer from '@components/timer'
 import AuctionNominatedPlayer from '@components/auction-nominated-player'
+import AuctionSlowModeStatus from '@components/auction-slow-mode-status'
+import AuctionPassButton from '@components/auction-pass-button'
 
 import './auction-main-bid.styl'
 
@@ -125,7 +127,8 @@ export default class AuctionMainBid extends React.Component {
       isWinningBid,
       league,
       isStarted,
-      free_agency_live_auction_start
+      free_agency_live_auction_start,
+      is_slow_mode
     } = this.props
 
     const classNames = []
@@ -213,15 +216,20 @@ export default class AuctionMainBid extends React.Component {
     return (
       <div className='auction__bar'>
         <div className='auction__bar-body'>
-          <div className='auction__bid-info'>{main}</div>
+          <div className='auction__bid-info'>
+            <AuctionSlowModeStatus />
+            {main}
+          </div>
           {isStarted && !isComplete && !isPaused && (
             <div className='auction__bid-actions'>
-              <div className='auction__main-timer'>
-                <Timer
-                  expiration={timer}
-                  alert={isNominating || Boolean(nominated_pid)}
-                />
-              </div>
+              {!is_slow_mode && (
+                <div className='auction__main-timer'>
+                  <Timer
+                    expiration={timer}
+                    alert={isNominating || Boolean(nominated_pid)}
+                  />
+                </div>
+              )}
               <div className='auction__main-action'>
                 <ButtonGroup
                   className={classNames.join(' ')}
@@ -241,6 +249,9 @@ export default class AuctionMainBid extends React.Component {
                     </Button>
                   )}
                 </ButtonGroup>
+                {is_slow_mode && nominated_pid && !disabled && (
+                  <AuctionPassButton />
+                )}
               </div>
               <div className='auction__main-input'>
                 <label>Enter Bid</label>
@@ -278,5 +289,6 @@ AuctionMainBid.propTypes = {
   isWinningBid: PropTypes.bool,
   league: PropTypes.object,
   isStarted: PropTypes.bool,
-  free_agency_live_auction_start: PropTypes.object
+  free_agency_live_auction_start: PropTypes.object,
+  is_slow_mode: PropTypes.bool
 }

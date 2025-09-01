@@ -24,7 +24,7 @@ export default class Auction {
     this._lid = lid
     this._league = null
     this._paused = true
-    this._pause_on_team_disconnect = true
+    this._pause_on_team_disconnect = false
     this._locked = false
     this._nomination_timer_expired = false
     this._tids = []
@@ -175,10 +175,12 @@ export default class Auction {
 
       // Start next phase
       this._start_nomination_timer()
+      return true
     } catch (error) {
       this.logger('error in sold()', error)
       this._start_bid_timer()
       this.reply(bid.userid, 'processing error')
+      return false
     } finally {
       this._locked = false
     }
@@ -207,10 +209,12 @@ export default class Auction {
       } else {
         this._start_bid_timer()
       }
+      return true
     } catch (error) {
       this.logger('error in bid()', error)
       this._start_bid_timer()
       this.reply(message.userid, 'bid error')
+      return false
     } finally {
       this._locked = false
     }
@@ -267,6 +271,8 @@ export default class Auction {
 
     this._locked = false
     this._start_bid_timer()
+
+    return true
   }
 
   async handle_pass_nomination(message, { user_id, tid }) {
@@ -290,9 +296,10 @@ export default class Auction {
       await this._slow_mode_redis.record_team_pass(this._lid, pid, tid)
 
       // Check completion and handle accordingly
-      await this._handle_pass_completion_check(pid)
+      return await this._handle_pass_completion_check(pid)
     } catch (error) {
       this.logger('error handling pass nomination', error)
+      return false
     }
   }
 
@@ -330,25 +337,21 @@ export default class Auction {
             client.league_id === this._lid &&
             client.readyState === WebSocket.OPEN
           ) {
-            const user_tid = client.tid
-            const user_has_passed = user_tid
-              ? state.passed_teams.includes(user_tid)
-              : false
-
             client.send(
               JSON.stringify({
                 type: 'AUCTION_SLOW_MODE_STATE_UPDATE',
                 payload: {
-                  slow_mode_state: state,
-                  user_has_passed_current_auction_nomination: user_has_passed
+                  slow_mode_state: state
                 }
               })
             )
           }
         })
       }
+      return true
     } catch (error) {
       this.logger('error broadcasting slow mode state update:', error)
+      return false
     }
   }
 
@@ -393,8 +396,10 @@ export default class Auction {
         await this._send_bid_update_notification(pid, value, eligible_team_ids)
         await this._broadcast_slow_mode_state_update()
       }
+      return true
     } catch (error) {
       this.logger('error updating slow mode state for bid', error)
+      return false
     }
   }
 
@@ -426,10 +431,12 @@ export default class Auction {
       await this._broadcast_slow_mode_state_update()
 
       this.logger('timers suspended for slow mode nomination')
+      return true
     } catch (error) {
       this.logger('error initializing slow mode nomination', error)
       // Fall back to normal mode on error
       this._start_bid_timer()
+      return false
     }
   }
 
@@ -444,8 +451,11 @@ export default class Auction {
 
       // Send Discord notification
       await this._send_completion_notification(pid)
+
+      return true
     } catch (error) {
       this.logger('error completing slow mode nomination', error)
+      return false
     }
   }
 
@@ -460,9 +470,10 @@ export default class Auction {
       this.logger(
         `nomination complete for ${pid} - reason: ${completion_check.reason}`
       )
-      await this._complete_slow_mode_nomination(pid)
+      return await this._complete_slow_mode_nomination(pid)
     } else {
       await this._broadcast_slow_mode_state_update()
+      return false
     }
   }
 
@@ -601,6 +612,14 @@ export default class Auction {
     const team = this._teams.find((t) => t.uid === tid)
     if (!team) {
       this.logger(`pass nomination rejected - team not found: ${tid}`)
+      return false
+    }
+
+    // Validate that the passing team is not the current bid team
+    if (current.tid === tid) {
+      this.logger(
+        `pass nomination rejected - team ${tid} cannot pass their own bid`
+      )
       return false
     }
 
@@ -788,7 +807,7 @@ export default class Auction {
       })
 
       if (
-        team_roster_obj.availableCap >= bid_value &&
+        team_roster_obj.availableCap > bid_value &&
         team_roster_obj.hasOpenBenchSlot(player_pos)
       ) {
         eligible_team_ids.push(team.uid)
@@ -807,16 +826,19 @@ export default class Auction {
       })
 
       if (nomination_message) {
-        await sendNotifications({
-          league: this._league,
-          message: nomination_message,
-          notifyLeague: true
-        })
+        this.logger(nomination_message)
+        // await sendNotifications({
+        //   league: this._league,
+        //   message: nomination_message,
+        //   notifyLeague: true
+        // })
       }
+      return true
     } catch (error) {
       this.logger(
         `Discord notification error for slow mode nomination: ${error.message}`
       )
+      return false
     }
   }
 
@@ -829,14 +851,17 @@ export default class Auction {
       })
 
       if (bid_update_message) {
-        await sendNotifications({
-          league: this._league,
-          message: bid_update_message,
-          notifyLeague: true
-        })
+        this.logger(bid_update_message)
+        // await sendNotifications({
+        //   league: this._league,
+        //   message: bid_update_message,
+        //   notifyLeague: true
+        // })
       }
+      return true
     } catch (error) {
       this.logger(`Discord notification error for bid update: ${error.message}`)
+      return false
     }
   }
 
@@ -851,15 +876,20 @@ export default class Auction {
         })
 
         if (format_message) {
-          await sendNotifications({
-            league: this._league,
-            message: format_message
-          })
+          this.logger(format_message)
+          // await sendNotifications({
+          //   league: this._league,
+          //   message: format_message,
+          //   notifyLeague: true
+          // })
         }
+        return true
       } catch (error) {
         this.logger('error sending Discord notification for completion', error)
+        return false
       }
     }
+    return false
   }
 
   // ============================================================================
@@ -961,8 +991,7 @@ export default class Auction {
           !nominating_team_id || this._league.free_agency_live_auction_end,
         pause_on_team_disconnect: this._pause_on_team_disconnect,
         slow_mode: this._slow_mode,
-        slow_mode_state,
-        user_has_passed_current_auction_nomination: false
+        slow_mode_state
       }
     })
   }
@@ -991,6 +1020,9 @@ export default class Auction {
   async _load_league() {
     this._league = await getLeague({ lid: this._lid })
     this._slow_mode = this._league?.free_agency_auction_slow_mode || false
+    if (this._slow_mode) {
+      this._paused = false
+    }
     this.logger(`slow mode enabled: ${this._slow_mode}`)
   }
 
@@ -1046,6 +1078,8 @@ export default class Auction {
     this._nomination_timer = setTimeout(() => {
       this._nomination_timer_expired = true
     }, config.nominationTimer)
+
+    return true
   }
 
   _clear_nomination_timer() {

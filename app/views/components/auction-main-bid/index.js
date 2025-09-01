@@ -46,7 +46,8 @@ const map_state_to_props = createSelector(
       isEligible,
       isStarted,
       free_agency_live_auction_start: faPeriod.free_agency_live_auction_start,
-      league
+      league,
+      is_slow_mode: auction.is_slow_mode
     }
   }
 )

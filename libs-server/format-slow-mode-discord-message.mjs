@@ -70,20 +70,22 @@ const format_player_display = (player) => {
     return 'Unknown Player'
   }
 
-  const name = player.formatted || `${player.fname} ${player.lname}`
-  const position = player.pos1 || player.pos || ''
+  const name = `${player.fname} ${player.lname}` || player.formatted
+  const position = player.pos || player.pos1 || ''
 
   return position ? `${name} (${position})` : name
 }
 
 /**
  * Format nomination message for Discord
- * @param {string} pid - Player ID
- * @param {number} bid - Current bid amount
+ * @param {string} team_id - Team ID that nominated the player
+ * @param {string} player_id - Player ID
+ * @param {number} bid_amount - Current bid amount
  * @param {number[]} eligible_teams - Array of eligible team IDs
  * @returns {Promise<string>} Formatted Discord message
  */
 export const format_nomination_message = async ({
+  team_id,
   player_id,
   bid_amount,
   eligible_teams
@@ -93,10 +95,16 @@ export const format_nomination_message = async ({
     throw new Error(`Player not found: ${player_id}`)
   }
 
+  const team = await get_team_info(team_id)
+  if (!team) {
+    throw new Error(`Team not found: ${team_id}`)
+  }
+
   const player_display = format_player_display(player)
+  const team_name = team.name || `Team ${team.uid}`
   const teams_display = await format_team_list(eligible_teams)
 
-  return `${player_display} nominated at $${bid_amount}. Eligible teams: ${teams_display}. Teams must pass or bid to continue.`
+  return `${team_name} has nominated ${player_display} at $${bid_amount}. Eligible teams: ${teams_display}. Teams must pass or bid to continue.`
 }
 
 /**
