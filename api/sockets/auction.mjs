@@ -1038,7 +1038,7 @@ export default class Auction {
         connected: Object.keys(this._connected).map((k) => parseInt(k, 10)),
         bidTimer: config.bidTimer,
         nominationTimer: config.nominationTimer,
-        nominatingTeamId: nominating_team_id,
+        nominating_team_id,
         complete:
           !nominating_team_id || this._league.free_agency_live_auction_end,
         pause_on_team_disconnect: this._pause_on_team_disconnect,

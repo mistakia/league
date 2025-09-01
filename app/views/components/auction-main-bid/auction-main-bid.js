@@ -122,7 +122,7 @@ export default class AuctionMainBid extends React.Component {
       isNominating,
       selected_pid,
       isCommish,
-      nominatingTeamId,
+      nominating_team_id,
       timer,
       isWinningBid,
       league,
@@ -208,7 +208,8 @@ export default class AuctionMainBid extends React.Component {
     } else {
       main = (
         <div className='auction__text'>
-          Waiting for a nomination by <TeamName tid={nominatingTeamId} abbrv />
+          Waiting for a nomination by{' '}
+          <TeamName tid={nominating_team_id} abbrv />
         </div>
       )
     }
@@ -284,7 +285,7 @@ AuctionMainBid.propTypes = {
   isAboveCap: PropTypes.bool,
   isNominating: PropTypes.bool,
   isCommish: PropTypes.bool,
-  nominatingTeamId: PropTypes.number,
+  nominating_team_id: PropTypes.number,
   timer: PropTypes.number,
   isWinningBid: PropTypes.bool,
   league: PropTypes.object,

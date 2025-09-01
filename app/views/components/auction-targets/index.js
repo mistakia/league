@@ -43,7 +43,7 @@ const map_state_to_props = createSelector(
       isNominating:
         !auction.isPaused &&
         !auction.nominated_pid &&
-        (auction.nominatingTeamId === app.teamId ||
+        (auction.nominating_team_id === app.teamId ||
           app.userId === league.commishid),
       team,
       rosteredPlayerIds,

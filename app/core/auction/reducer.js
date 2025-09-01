@@ -21,7 +21,7 @@ const initialState = new Record({
   positions: new List(constants.positions),
   bidTimer: null,
   nominationTimer: null,
-  nominatingTeamId: null,
+  nominating_team_id: null,
   search: null,
   timer: null,
   muted: true,
@@ -101,8 +101,8 @@ export function auction_reducer(state = initialState(), { payload, type }) {
       })
 
     case auction_actions.AUCTION_NOMINATION_INFO: {
-      const { nominatingTeamId } = payload
-      return state.merge({ nominatingTeamId })
+      const { nominating_team_id } = payload
+      return state.merge({ nominating_team_id })
     }
 
     case auction_actions.AUCTION_INIT: {
@@ -122,7 +122,7 @@ export function auction_reducer(state = initialState(), { payload, type }) {
         bidTimer: payload.bidTimer,
         connected: new List(payload.connected),
         nominationTimer: payload.nominationTimer,
-        nominatingTeamId: payload.nominatingTeamId,
+        nominating_team_id: payload.nominating_team_id,
         isComplete: payload.complete,
         pause_on_team_disconnect: payload.pause_on_team_disconnect,
         is_slow_mode: payload.slow_mode || false,
