@@ -1,9 +1,11 @@
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+import MockDate from 'mockdate'
 
 import db from '#db'
 import { constants } from '#libs-shared'
+import format_player_name from '#libs-shared/format-player-name.mjs'
 import { is_main, getLeague } from '#libs-server'
 import process_release from '#libs-server/process-release.mjs'
 
@@ -61,7 +63,6 @@ const argv = yargs(hideBin(process.argv))
     }
     return true
   })
-  .help()
   .example(
     '$0 --league-id 1 --team-id 5 --player-id "12345"',
     'Release player by ID'
@@ -74,44 +75,62 @@ const argv = yargs(hideBin(process.argv))
     '$0 -l 1 -t 5 -p "12345" -a "67890"',
     'Release player and activate another from practice squad'
   )
-  .help().argv
+  .alias('help', 'h')
+  .parse()
 
 const log = debug('release-player')
 debug.enable('release-player')
 
-const fuzzy_search_players = (search_term, players, threshold = 0.6) => {
-  const search_lower = search_term.toLowerCase()
+const search_players_by_name = (search_term, players) => {
+  const formatted_search = format_player_name(search_term)
+  if (!formatted_search) return []
+
   const matches = []
 
   for (const player of players) {
-    const full_name = `${player.fname} ${player.lname}`.toLowerCase()
+    const formatted_full = format_player_name(`${player.fname} ${player.lname}`)
+    if (!formatted_full) continue
 
-    // Exact match gets highest score
-    if (full_name === search_lower) {
-      matches.push({ player, score: 1.0 })
+    // Exact full name match
+    if (formatted_full === formatted_search) {
+      matches.push(player)
       continue
     }
 
-    // Check if search term is contained in full name
-    if (full_name.includes(search_lower)) {
-      const score = search_lower.length / full_name.length
-      if (score >= threshold) {
-        matches.push({ player, score })
-      }
+    // Search term contained in full name
+    if (formatted_full.includes(formatted_search)) {
+      matches.push(player)
       continue
     }
 
-    // Check if full name starts with search term
-    if (full_name.startsWith(search_lower)) {
-      const score = search_lower.length / full_name.length
-      if (score >= threshold) {
-        matches.push({ player, score })
+    // Check individual words (first name or last name)
+    const search_words = formatted_search.split(' ')
+    const name_words = formatted_full.split(' ')
+
+    for (const search_word of search_words) {
+      if (search_word.length < 2) continue
+
+      for (const name_word of name_words) {
+        if (name_word === search_word) {
+          matches.push(player)
+          break
+        }
       }
     }
   }
 
-  // Sort by score (highest first)
-  return matches.sort((a, b) => b.score - a.score)
+  // Remove duplicates
+  const unique_matches = []
+  const seen_pids = new Set()
+
+  for (const player of matches) {
+    if (!seen_pids.has(player.pid)) {
+      seen_pids.add(player.pid)
+      unique_matches.push(player)
+    }
+  }
+
+  return unique_matches
 }
 
 const resolve_player = async ({ player_id, player_name, lid, tid }) => {
@@ -140,7 +159,7 @@ const resolve_player = async ({ player_id, player_name, lid, tid }) => {
       throw new Error('No players found on team roster')
     }
 
-    const matches = fuzzy_search_players(player_name, roster_players)
+    const matches = search_players_by_name(player_name, roster_players)
 
     if (!matches.length) {
       const available_names = roster_players
@@ -151,26 +170,28 @@ const resolve_player = async ({ player_id, player_name, lid, tid }) => {
       )
     }
 
-    if (matches.length > 1 && matches[0].score === matches[1].score) {
+    if (matches.length > 1) {
       const ambiguous_names = matches
-        .filter((m) => m.score === matches[0].score)
-        .map((m) => `${m.player.fname} ${m.player.lname} (${m.player.pos})`)
+        .map((p) => `${p.fname} ${p.lname} (${p.pos})`)
         .join(', ')
       throw new Error(
         `Ambiguous player name "${player_name}". Multiple matches: ${ambiguous_names}. Please be more specific.`
       )
     }
 
-    log(
-      `Matched "${player_name}" to ${matches[0].player.fname} ${matches[0].player.lname} (score: ${matches[0].score.toFixed(2)})`
-    )
-    return matches[0].player
+    log(`Matched "${player_name}" to ${matches[0].fname} ${matches[0].lname}`)
+    return matches[0]
   }
 
   throw new Error('Must provide either player_id or player_name')
 }
 
 const main = async () => {
+  // Set mock date if provided (for testing)
+  if (process.env.MOCK_DATE) {
+    MockDate.set(process.env.MOCK_DATE)
+  }
+
   const {
     leagueId: lid,
     teamId: tid,
@@ -211,6 +232,22 @@ const main = async () => {
       `Release player resolved: ${release_player.fname} ${release_player.lname} (${release_player.pos}, ID: ${release_player.pid})`
     )
 
+    // Validate player is actually on the team roster
+    const roster_check = await db('rosters_players')
+      .join('rosters', 'rosters_players.rid', 'rosters.uid')
+      .where({
+        'rosters_players.pid': release_player.pid,
+        'rosters.tid': tid,
+        'rosters.lid': lid,
+        'rosters.year': constants.season.year,
+        'rosters.week': constants.season.week
+      })
+      .limit(1)
+
+    if (!roster_check.length) {
+      throw new Error('player not on roster')
+    }
+
     // Resolve activation player if specified
     let activate_player = null
     if (activate_player_id || activate_player_name) {
@@ -230,16 +267,15 @@ const main = async () => {
       console.log(`League: ${league.name} (ID: ${lid})`)
       console.log(`Team: ${team.name} (${team.abbrv})`)
       console.log(
-        `Release: ${release_player.fname} ${release_player.lname} (${release_player.pos})`
+        `Release: ${release_player.fname} ${release_player.lname} (${release_player.pos}, ID: ${release_player.pid})`
       )
       if (activate_player) {
         console.log(
-          `Activate: ${activate_player.fname} ${activate_player.lname} (${activate_player.pos})`
+          `Activate: ${activate_player.fname} ${activate_player.lname} (${activate_player.pos}, ID: ${activate_player.pid})`
         )
       }
       console.log('\nUse without --dry-run to execute the release.')
       process.exit(0)
-      return
     }
 
     // Execute the release using existing infrastructure

@@ -7,6 +7,7 @@ import { fileURLToPath } from 'url'
 
 import knex from '#db'
 import league from '#db/seeds/league.mjs'
+import draft from '#db/seeds/draft.mjs'
 import { constants } from '#libs-shared'
 import { getRoster } from '#libs-server'
 import { selectPlayer, addPlayer } from './utils/index.mjs'
@@ -18,6 +19,9 @@ const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const script_path = path.join(__dirname, '../scripts/release-player.mjs')
 const { regular_season_start } = constants.season
 
+// Track players used in tests to avoid duplicates
+const used_pids = new Set()
+
 describe('CLI release-player script', function () {
   this.timeout(60 * 1000)
 
@@ -28,13 +32,19 @@ describe('CLI release-player script', function () {
   beforeEach(async function () {
     MockDate.set(regular_season_start.subtract('2', 'month').toISOString())
     await league(knex)
+    await draft(knex)
+    used_pids.clear() // Clear tracked players for each test
   })
 
   const run_script = (args) => {
     return new Promise((resolve, reject) => {
       const child = spawn('node', [script_path, ...args], {
         stdio: 'pipe',
-        env: { ...process.env, NODE_ENV: 'test' }
+        env: {
+          ...process.env,
+          NODE_ENV: 'test',
+          MOCK_DATE: regular_season_start.subtract('2', 'month').toISOString()
+        }
       })
 
       let stdout = ''
@@ -124,7 +134,12 @@ describe('CLI release-player script', function () {
   describe('dry run functionality', function () {
     it('should show dry run information without making changes', async () => {
       // Add a player to roster for testing
-      const player = await selectPlayer()
+      const player = await selectPlayer({
+        random: false,
+        exclude_rostered_players: true,
+        exclude_pids: Array.from(used_pids)
+      })
+      used_pids.add(player.pid)
       await addPlayer({
         player,
         leagueId: 1,
@@ -154,7 +169,13 @@ describe('CLI release-player script', function () {
 
   describe('player resolution', function () {
     it('should resolve player by ID', async () => {
-      const player = await selectPlayer()
+      // Use a deterministic player for ID resolution test
+      const player = await selectPlayer({
+        random: false,
+        exclude_rostered_players: true,
+        exclude_pids: Array.from(used_pids)
+      })
+      used_pids.add(player.pid)
       await addPlayer({
         player,
         leagueId: 1,
@@ -178,20 +199,23 @@ describe('CLI release-player script', function () {
     })
 
     it('should resolve player by name with exact match', async () => {
-      // Get a player from the database
-      const roster = await getRoster({ tid: 1 })
-      const player_on_roster = roster.players.find((p) => p.pos !== 'DEF')
+      // Use a deterministic player for name matching
+      const player = await selectPlayer({
+        pos: 'RB',
+        random: false,
+        exclude_rostered_players: true,
+        exclude_pids: Array.from(used_pids)
+      })
+      used_pids.add(player.pid)
+      await addPlayer({
+        player,
+        leagueId: 1,
+        teamId: 1,
+        userId: 1,
+        slot: constants.slots.BENCH
+      })
 
-      if (!player_on_roster) {
-        throw new Error('No suitable player found for testing')
-      }
-
-      // Get full player details
-      const player_details = await knex('player')
-        .where({ pid: player_on_roster.pid })
-        .first()
-
-      const full_name = `${player_details.fname} ${player_details.lname}`
+      const full_name = `${player.fname} ${player.lname}`
 
       const result = await run_script([
         '--league-id',
@@ -204,24 +228,29 @@ describe('CLI release-player script', function () {
       ])
 
       result.code.should.equal(0)
-      result.stdout.should.include(player_details.fname)
-      result.stdout.should.include(player_details.lname)
+      result.stdout.should.include(player.fname)
+      result.stdout.should.include(player.lname)
     })
 
     it('should handle fuzzy name matching', async () => {
-      const roster = await getRoster({ tid: 1 })
-      const player_on_roster = roster.players.find((p) => p.pos !== 'DEF')
+      // Use a deterministic player for fuzzy matching
+      const test_player = await selectPlayer({
+        pos: 'WR',
+        random: false,
+        exclude_rostered_players: true,
+        exclude_pids: Array.from(used_pids)
+      })
+      used_pids.add(test_player.pid)
+      await addPlayer({
+        player: test_player,
+        leagueId: 1,
+        teamId: 1,
+        userId: 1,
+        slot: constants.slots.BENCH
+      })
 
-      if (!player_on_roster) {
-        throw new Error('No suitable player found for testing')
-      }
-
-      const player_details = await knex('player')
-        .where({ pid: player_on_roster.pid })
-        .first()
-
-      // Use just first name for fuzzy matching
-      const partial_name = player_details.fname
+      // Use just first name for matching
+      const partial_name = test_player.fname
 
       const result = await run_script([
         '--league-id',
@@ -234,7 +263,7 @@ describe('CLI release-player script', function () {
       ])
 
       result.code.should.equal(0)
-      result.stdout.should.include(player_details.fname)
+      result.stdout.should.include(test_player.fname)
     })
 
     it('should fail with invalid player ID', async () => {
@@ -254,7 +283,12 @@ describe('CLI release-player script', function () {
 
     it('should fail with player not on roster', async () => {
       // Get a player that's not on team 1's roster
-      const player_not_on_roster = await selectPlayer()
+      const player_not_on_roster = await selectPlayer({
+        random: false,
+        exclude_rostered_players: true,
+        exclude_pids: Array.from(used_pids)
+      })
+      used_pids.add(player_not_on_roster.pid)
 
       const result = await run_script([
         '--league-id',
@@ -374,24 +408,32 @@ describe('CLI release-player script', function () {
     })
 
     it('should successfully release and activate players', async () => {
+      // Add a practice squad player to activate
+      const practice_player = await selectPlayer({
+        random: false,
+        exclude_rostered_players: true,
+        exclude_pids: Array.from(used_pids)
+      })
+      used_pids.add(practice_player.pid)
+
+      await addPlayer({
+        player: practice_player,
+        leagueId: 1,
+        teamId: 1,
+        userId: 1,
+        slot: constants.slots.PS
+      })
+
       const roster_before = await getRoster({ tid: 1 })
 
-      // Find a bench player to release
-      const player_to_release = roster_before.players.find(
+      // Find an existing bench player to release
+      const bench_player = roster_before.players.find(
         (p) =>
           p.pos !== 'DEF' &&
+          p.slot === constants.slots.BENCH &&
           p.slot !== constants.slots.PSP &&
           p.slot !== constants.slots.PSDP
       )
-
-      // Find a practice squad player to activate
-      const player_to_activate = roster_before.players.find(
-        (p) => p.slot === constants.slots.PS && p.pos !== 'DEF'
-      )
-
-      if (!player_to_release || !player_to_activate) {
-        return this.skip() // Skip if no suitable players found
-      }
 
       const result = await run_script([
         '--league-id',
@@ -399,9 +441,9 @@ describe('CLI release-player script', function () {
         '--team-id',
         '1',
         '--player-id',
-        player_to_release.pid,
+        bench_player.pid,
         '--activate-player-id',
-        player_to_activate.pid
+        practice_player.pid
       ])
 
       result.code.should.equal(0)
@@ -414,13 +456,13 @@ describe('CLI release-player script', function () {
 
       // Released player should be gone
       const released_player_on_roster = roster_after.players.find(
-        (p) => p.pid === player_to_release.pid
+        (p) => p.pid === bench_player.pid
       )
       expect(released_player_on_roster).to.be.undefined
 
       // Activated player should be on bench now
       const activated_player_on_roster = roster_after.players.find(
-        (p) => p.pid === player_to_activate.pid
+        (p) => p.pid === practice_player.pid
       )
       expect(activated_player_on_roster).to.exist
       activated_player_on_roster.slot.should.equal(constants.slots.BENCH)
@@ -429,7 +471,7 @@ describe('CLI release-player script', function () {
 
   describe('help and usage', function () {
     it('should display help when requested', async () => {
-      const result = await run_script(['--help'])
+      const result = await run_script(['-h'])
 
       result.code.should.equal(0)
       result.stdout.should.include('help')

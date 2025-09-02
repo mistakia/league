@@ -2,7 +2,7 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import {
-  getWaiverById,
+  get_waiver_by_id,
   get_current_players_for_league,
   get_current_team_roster_record,
   get_current_league,
@@ -19,7 +19,7 @@ const map_state_to_props = createSelector(
   get_current_league,
   getPlayerStatus,
   get_current_team,
-  getWaiverById,
+  get_waiver_by_id,
   (rosterPlayers, roster, league, status, team, waiver) => ({
     rosterPlayers,
     roster,
