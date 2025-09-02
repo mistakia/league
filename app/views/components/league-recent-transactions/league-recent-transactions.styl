@@ -1,6 +1,8 @@
 .league__recent-transaction
   display flex
   border-bottom 1px solid $borderColor
+  min-height fit-content
+  padding 6px 0
   .transaction__timestamp
     display flex
     align-items center
@@ -8,12 +10,25 @@
     margin-left 4px
     padding-left 4px
     color rgba(0,0,0,0.4)
-    width 20px
+    flex 0 0 20px
     margin 8px 0
 
-.transactions__section.MuiGrid-root
+.league__recent-transactions
+  display grid
+  grid-template-columns 1fr
+  gap 16px
+  width 100%
+
+  @media (min-width: 768px)
+    grid-template-columns 1fr 1fr
+
+.transactions__section
   display flex
   flex-direction column
+  border 1px solid $borderColor
+  border-radius 8px
+  padding 16px
+  height fit-content
 
 .transactions__section-title
   font-family 'IBM Plex Mono', monospace
