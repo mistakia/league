@@ -360,8 +360,8 @@ describe('SCRIPTS - Super Priority Processing', function () {
           pid: player.pid,
           tid: 4,
           lid: 1,
-          week: constants.week,
-          year: constants.year
+          week: constants.season.week,
+          year: constants.season.year
         })
         .first()
 
