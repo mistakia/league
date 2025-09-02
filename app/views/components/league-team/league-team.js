@@ -1,10 +1,12 @@
-import React, { useEffect, useMemo } from 'react'
+import React, { useEffect, useMemo, useState } from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import { useParams } from 'react-router-dom'
 import { List } from 'immutable'
 import Toolbar from '@mui/material/Toolbar'
 import NotInterestedIcon from '@mui/icons-material/NotInterested'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 import Alert from '@mui/material/Alert'
 
 import DashboardDraftPicks from '@components/dashboard-draft-picks'
@@ -39,6 +41,10 @@ export default function LeagueTeam({
   restricted_free_agency_players
 }) {
   const { lid, tid } = useParams()
+  const [
+    is_practice_squad_drafted_expanded,
+    set_is_practice_squad_drafted_expanded
+  ] = useState(false)
 
   const is_hosted_league = Boolean(league.hosted)
   const teamId = Number(tid)
@@ -95,14 +101,82 @@ export default function LeagueTeam({
     )
   }
 
+  const recent_draft_cutoff = constants.year - 2
+  const all_practice_squad_drafted_players =
+    players.practice_drafted || new List()
+
+  // Sort practice squad drafted players by draft year (newest first) and draft position
+  const sorted_practice_squad_drafted_players =
+    all_practice_squad_drafted_players.sort((a, b) => {
+      const a_draft_year = a.get('nfl_draft_year') || 0
+      const b_draft_year = b.get('nfl_draft_year') || 0
+      const a_draft_pos = a.get('dpos') || 9999
+      const b_draft_pos = b.get('dpos') || 9999
+
+      if (a_draft_year !== b_draft_year) {
+        return b_draft_year - a_draft_year
+      }
+
+      return a_draft_pos - b_draft_pos
+    })
+
+  // Calculate how many recent players there are (for threshold count)
+  const recent_practice_squad_drafted_count =
+    sorted_practice_squad_drafted_players.filter((player_map) => {
+      const draft_year = player_map.get('nfl_draft_year')
+      return draft_year && draft_year > recent_draft_cutoff
+    }).size
+
+  const total_practice_squad_drafted_players =
+    sorted_practice_squad_drafted_players.size
+
+  // Display logic: show recent count in collapsed state, all in expanded state
+  const practice_squad_drafted_players_to_display =
+    is_practice_squad_drafted_expanded
+      ? sorted_practice_squad_drafted_players
+      : sorted_practice_squad_drafted_players.slice(
+          0,
+          recent_practice_squad_drafted_count
+        )
+
   const practice_drafted_items = []
-  for (const player_map of players.practice_drafted) {
+  for (const player_map of practice_squad_drafted_players_to_display) {
     if (!player_map.get('pid')) continue
     practice_drafted_items.push(
       <PlayerRoster
         key={player_map.get('pid')}
         {...{ player_map, percentiles }}
       />
+    )
+  }
+
+  // Add toggle control if there are additional players beyond the recent threshold
+  const additional_practice_squad_drafted_count =
+    total_practice_squad_drafted_players - recent_practice_squad_drafted_count
+
+  if (additional_practice_squad_drafted_count > 0) {
+    practice_drafted_items.push(
+      <div
+        key='practice-squad-toggle'
+        className='league-team-practice-squad-toggle'
+        onClick={() => {
+          set_is_practice_squad_drafted_expanded(
+            !is_practice_squad_drafted_expanded
+          )
+        }}
+      >
+        {is_practice_squad_drafted_expanded ? (
+          <>
+            <ExpandLessIcon fontSize='small' />
+            hide ({additional_practice_squad_drafted_count})
+          </>
+        ) : (
+          <>
+            <ExpandMoreIcon fontSize='small' />
+            show all ({additional_practice_squad_drafted_count})
+          </>
+        )}
+      </div>
     )
   }
 
