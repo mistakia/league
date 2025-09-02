@@ -6,6 +6,7 @@ import { Player, connect } from '@components/player'
 import PlayerHeadshotGroup from '@components/player-headshot-group'
 import TeamName from '@components/team-name'
 import PercentileMetric from '@components/percentile-metric'
+import NFLTeamBye from '@components/nfl-team-bye'
 
 class PlayerRoster extends Player {
   render() {
@@ -287,6 +288,11 @@ class PlayerRoster extends Player {
         {isRegularSeason && (
           <div className='metric table__cell'>
             {weekPoints ? weekPoints.toFixed(1) : '-'}
+          </div>
+        )}
+        {isRegularSeason && (
+          <div className='metric table__cell'>
+            <NFLTeamBye nfl_team={player_map.get('team')} />
           </div>
         )}
         <div className='metric table__cell'>

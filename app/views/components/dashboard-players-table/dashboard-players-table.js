@@ -350,6 +350,9 @@ export default function DashboardPlayersTable({
           {isRegularSeason && (
             <div className='table__cell metric'>Week {week}</div>
           )}
+          {isRegularSeason && (
+            <div className='table__cell metric'>Bye</div>
+          )}
           <div className='table__cell metric'>
             <PlayerRosterHeader
               tooltip='Projected starter points you would lose without player'
