@@ -233,13 +233,49 @@ describe('CLI release-player script', function () {
     })
 
     it('should handle fuzzy name matching', async () => {
-      // Use a deterministic player for fuzzy matching
-      const test_player = await selectPlayer({
-        pos: 'WR',
-        random: false,
-        exclude_rostered_players: true,
-        exclude_pids: Array.from(used_pids)
-      })
+      // First, clear any existing players with common first names from the roster
+      // to ensure a clean test environment
+      await knex('rosters_players')
+        .join('rosters', 'rosters_players.rid', 'rosters.uid')
+        .where({
+          'rosters.tid': 1,
+          'rosters.lid': 1,
+          'rosters.year': constants.season.year,
+          'rosters.week': constants.season.week
+        })
+        .del()
+
+      // Use a specific player to ensure deterministic behavior
+      // Find a player with a unique first name to avoid ambiguity
+      let test_player = await knex('player')
+        .whereNot('current_nfl_team', 'INA')
+        .where('pos1', 'WR')
+        .whereNotIn('pid', Array.from(used_pids))
+        .whereRaw(
+          `fname NOT IN (
+          SELECT fname FROM player 
+          WHERE pos1 = 'WR' AND current_nfl_team != 'INA'
+          GROUP BY fname 
+          HAVING COUNT(*) > 1
+        )`
+        )
+        .orderBy('pid')
+        .first()
+
+      if (!test_player) {
+        // Fallback: use any WR player but ensure no duplicates with same first name
+        test_player = await knex('player')
+          .whereNot('current_nfl_team', 'INA')
+          .where('pos1', 'WR')
+          .whereNotIn('pid', Array.from(used_pids))
+          .orderBy('pid')
+          .first()
+
+        if (!test_player) {
+          throw new Error('No suitable player found for fuzzy matching test')
+        }
+      }
+
       used_pids.add(test_player.pid)
       await addPlayer({
         player: test_player,
