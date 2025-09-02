@@ -3092,7 +3092,7 @@ export function getReserveTransactionsByPlayerId(state, { pid }) {
     .sort((a, b) => b.timestamp - a.timestamp)
 }
 
-export function getWaiverById(state, { waiverId }) {
+export function get_waiver_by_id(state, { waiverId }) {
   const waivers = get_waivers_for_current_team(state)
   return waivers.get(waiverId)
 }

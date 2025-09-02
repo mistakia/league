@@ -68,4 +68,5 @@ export default async function (knex, league_params = {}) {
   await knex('poach_releases').del()
   await knex('draft').del()
   await knex('league_cutlist').del()
+  await knex('super_priority').del()
 }

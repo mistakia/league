@@ -61,29 +61,88 @@ async function calculate_super_priority_from_source({
   lid,
   release_tid = null
 }) {
-  // Find the most recent RELEASE transaction for this player in this league
-  const release_transactions = await db('transactions')
-    .where({ pid, lid, type: constants.transactions.RELEASE })
+  // Find the most recent transaction to determine if player is free agent or rostered
+  const most_recent_transaction = await db('transactions')
+    .where({ pid, lid })
     .orderBy('timestamp', 'desc')
     .limit(1)
 
-  // Find the most recent POACHED transaction for this player in this league
-  // If there's a release transaction, only consider poaches after the release
-  const poached_transactions = await db('transactions')
-    .where({ pid, lid, type: constants.transactions.POACHED })
-    .modify(function (queryBuilder) {
-      if (release_transactions.length && release_transactions[0].timestamp) {
-        queryBuilder.where('timestamp', '>', release_transactions[0].timestamp)
+  if (!most_recent_transaction.length) {
+    return {
+      eligible: false,
+      original_tid: null,
+      reason: 'Player was not poached'
+    }
+  }
+
+  const is_free_agent =
+    most_recent_transaction[0].type === constants.transactions.ROSTER_RELEASE
+
+  let poached_transactions
+
+  if (is_free_agent) {
+    // For free agents: consider poaches that happened BEFORE the current release
+    // Player was: original team → poached → released (free agent)
+    const current_release = most_recent_transaction[0]
+
+    // Find poaches that happened before this release
+    let query = db('transactions')
+      .where({ pid, lid, type: constants.transactions.POACHED })
+      .where('timestamp', '<', current_release.timestamp)
+
+    // Filter by release_tid if provided
+    if (release_tid !== null) {
+      query = query.where('tid', release_tid)
+    }
+
+    poached_transactions = await query.orderBy('timestamp', 'desc').limit(1)
+  } else {
+    // For rostered players: consider poaches that happened AFTER the most recent release
+    // Player was: released → poached → still rostered
+    const most_recent_release = await db('transactions')
+      .where({ pid, lid, type: constants.transactions.ROSTER_RELEASE })
+      .orderBy('timestamp', 'desc')
+      .limit(1)
+
+    if (most_recent_release.length) {
+      // Find poaches after the most recent release
+      let query = db('transactions')
+        .where({ pid, lid, type: constants.transactions.POACHED })
+        .where('timestamp', '>', most_recent_release[0].timestamp)
+
+      // Filter by release_tid if provided
+      if (release_tid !== null) {
+        query = query.where('tid', release_tid)
       }
-    })
-    .orderBy('timestamp', 'desc')
-    .limit(1)
+
+      poached_transactions = await query.orderBy('timestamp', 'desc').limit(1)
+    } else {
+      // No release found, consider all poaches
+      let query = db('transactions').where({
+        pid,
+        lid,
+        type: constants.transactions.POACHED
+      })
+
+      // Filter by release_tid if provided
+      if (release_tid !== null) {
+        query = query.where('tid', release_tid)
+      }
+
+      poached_transactions = await query.orderBy('timestamp', 'desc').limit(1)
+    }
+  }
 
   if (!poached_transactions.length) {
     return {
       eligible: false,
       original_tid: null,
-      reason: release_transactions.length ? 'No valid poaches since release' : 'Player was not poached'
+      reason:
+        release_tid !== null
+          ? 'Player was not poached'
+          : is_free_agent
+            ? 'No valid poaches since most recent release'
+            : 'No valid poaches after most recent release'
     }
   }
 

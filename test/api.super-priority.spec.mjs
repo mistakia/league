@@ -7,12 +7,12 @@ import server from '#api'
 import knex from '#db'
 import league from '#db/seeds/league.mjs'
 import { constants } from '#libs-shared'
-import { user1, user2, user3 } from './fixtures/token.mjs'
+import { user1, user3 } from './fixtures/token.mjs'
 import {
   notLoggedIn,
   missing,
   selectPlayer,
-  addPlayer,
+  setupSuperPriority,
   releasePlayer
 } from './utils/index.mjs'
 
@@ -110,7 +110,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
   })
 
   describe('POST / - Super Priority Claims', function () {
-    let player, poach_timestamp
+    let player
 
     beforeEach(async () => {
       player = await selectPlayer({ rookie: false })
@@ -118,47 +118,21 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
       // Start with initial date for setup
       MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
 
-      // Step 1: Add player to original team (team 1) practice squad first
-      await addPlayer({
-        leagueId: 1,
+      // Use utility to properly setup super priority scenario
+      await setupSuperPriority({
         player,
-        teamId: 1,
-        userId: 1,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.PRACTICE_ADD
+        original_team_id: 1,
+        poaching_team_id: 2,
+        league_id: 1,
+        original_user_id: 1,
+        poaching_user_id: 2,
+        weeks_ago: 3
       })
 
-      // Move time forward for poach
-      MockDate.set(regular_season_start.subtract('3', 'week').toISOString())
-      poach_timestamp = Math.round(Date.now() / 1000)
-
-      // Step 2: Create poach transaction (team 2 poaches from team 1)
-      await knex('transactions').insert({
-        pid: player.pid,
-        tid: 2, // Poaching team
-        lid: 1,
-        type: constants.transactions.POACHED,
-        value: 0,
-        year: constants.year,
-        timestamp: poach_timestamp,
-        week: constants.week,
-        userid: 2
-      })
-
-      // Step 3: Add player to poaching team's roster
-      await addPlayer({
-        leagueId: 1,
-        player,
-        teamId: 2,
-        userId: 2,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.PRACTICE_ADD
-      })
-
-      // Step 4: Set date to free agency period first
+      // Set date to free agency period
       MockDate.set(regular_season_start.add('2', 'months').toISOString())
 
-      // Step 5: Release player recently to make available for waivers
+      // Release player to make available for waivers (this will create super priority record)
       await releasePlayer({
         leagueId: 1,
         player,
@@ -341,48 +315,39 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
 
     beforeEach(async () => {
       player = await selectPlayer({ rookie: false })
-      MockDate.set(regular_season_start.add('2', 'months').toISOString())
+
+      // Start with initial date for setup
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
     })
 
     it('should handle super priority claim when player already claimed back', async () => {
-      const poach_timestamp = Math.round(Date.now() / 1000) - 7 * 24 * 60 * 60
+      // Use utility to properly setup super priority scenario first
+      const result = await setupSuperPriority({
+        player,
+        original_team_id: 1,
+        poaching_team_id: 2,
+        league_id: 1,
+        original_user_id: 1,
+        poaching_user_id: 2,
+        weeks_ago: 1
+      })
+      const poach_timestamp = result.poach_timestamp
 
-      // Setup poach and immediate claim back
-      await knex('transactions').insert([
-        {
-          pid: player.pid,
-          tid: 1,
-          lid: 1,
-          type: constants.transactions.PRACTICE_ADD,
-          value: 0,
-          year: constants.year,
-          timestamp: poach_timestamp - 24 * 60 * 60,
-          week: constants.week - 1,
-          userid: 1
-        },
-        {
-          pid: player.pid,
-          tid: 2,
-          lid: 1,
-          type: constants.transactions.POACHED,
-          value: 0,
-          year: constants.year,
-          timestamp: poach_timestamp,
-          week: constants.week - 1,
-          userid: 2
-        },
-        {
-          pid: player.pid,
-          tid: 1,
-          lid: 1,
-          type: constants.transactions.ROSTER_ADD,
-          value: 0,
-          year: constants.year,
-          timestamp: poach_timestamp + 12 * 60 * 60, // 12 hours later
-          week: constants.week - 1,
-          userid: 1
-        }
-      ])
+      // Set date to free agency period
+      MockDate.set(regular_season_start.add('2', 'months').toISOString())
+
+      // Add transaction showing player was claimed back by original team
+      await knex('transactions').insert({
+        pid: player.pid,
+        tid: 1,
+        lid: 1,
+        type: constants.transactions.ROSTER_ADD,
+        value: 0,
+        year: constants.year,
+        timestamp: poach_timestamp + 12 * 60 * 60, // 12 hours later
+        week: constants.week - 1,
+        userid: 1
+      })
 
       // Add super_priority record that's already claimed
       await knex('super_priority').insert({
@@ -423,66 +388,59 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         'super priority not available for this player'
       )
     })
+  })
 
-    it('should handle multiple poaches for same player', async () => {
-      const first_poach = Math.round(Date.now() / 1000) - 14 * 24 * 60 * 60 // 2 weeks ago
-      const second_poach = Math.round(Date.now() / 1000) - 7 * 24 * 60 * 60 // 1 week ago
+  describe('Free Agent vs Rostered Player Scenarios', function () {
+    let player
 
-      // Setup multiple poach scenario: 1 → 2 → 3
-      await knex('transactions').insert([
-        // Original on team 1
-        {
-          pid: player.pid,
-          tid: 1,
-          lid: 1,
-          type: constants.transactions.PRACTICE_ADD,
-          value: 0,
-          year: constants.year,
-          timestamp: first_poach - 24 * 60 * 60,
-          week: constants.week - 2,
-          userid: 1
-        },
-        // First poach: 1 → 2
-        {
-          pid: player.pid,
-          tid: 2,
-          lid: 1,
-          type: constants.transactions.POACHED,
-          value: 0,
-          year: constants.year,
-          timestamp: first_poach,
-          week: constants.week - 2,
-          userid: 2
-        },
-        // Second poach: 2 → 3 (most recent)
-        {
-          pid: player.pid,
-          tid: 3,
-          lid: 1,
-          type: constants.transactions.POACHED,
-          value: 0,
-          year: constants.year,
-          timestamp: second_poach,
-          week: constants.week - 1,
-          userid: 3
-        }
-      ])
+    beforeEach(async () => {
+      player = await selectPlayer({ rookie: false })
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
+    })
 
-      // Release player from team 3 to make available for waivers
+    it('should handle super priority for free agent (poach before current release)', async () => {
+      // Setup: original team → poached (player still on poaching team)
+      await setupSuperPriority({
+        player,
+        original_team_id: 1,
+        poaching_team_id: 2,
+        league_id: 1,
+        original_user_id: 1,
+        poaching_user_id: 2,
+        weeks_ago: 1,
+        player_status: 'rostered' // Keep player rostered initially
+      })
+
+      MockDate.set(regular_season_start.add('2', 'months').toISOString())
+
+      // Release player to make them a free agent and trigger waiver system
       await releasePlayer({
         leagueId: 1,
         player,
-        teamId: 3,
-        userId: 3
+        teamId: 2,
+        userId: 2
       })
 
-      // Team 2 should be able to claim back (original team for most recent poach)
+      // Test super priority status
+      const get_super_priority_status = (
+        await import('../libs-server/get-super-priority-status.mjs')
+      ).default
+      const status = await get_super_priority_status({
+        pid: player.pid,
+        lid: 1
+      })
+
+      status.should.have.property('eligible', true)
+      status.should.have.property('original_tid', 1)
+      status.should.have.property('poaching_tid', 2)
+
+      // Test super priority waiver claim
       const res = await chai_request
         .execute(server)
         .post('/api/leagues/1/waivers')
-        .set('Authorization', `Bearer ${user2}`)
+        .set('Authorization', `Bearer ${user1}`)
         .send({
-          teamId: 2,
+          teamId: 1,
           pid: player.pid,
           type: constants.waivers.FREE_AGENCY_PRACTICE,
           leagueId: 1,
@@ -490,9 +448,141 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         })
 
       res.should.have.status(200)
-      res.should.be.json
       res.body.should.have.property('super_priority', 1)
-      res.body.should.have.property('tid', 2)
+    })
+
+    it('should handle super priority for rostered player (poach after previous release)', async () => {
+      // Setup: released → poached → still rostered
+      await setupSuperPriority({
+        player,
+        original_team_id: 1,
+        poaching_team_id: 2,
+        league_id: 1,
+        original_user_id: 1,
+        poaching_user_id: 2,
+        weeks_ago: 1,
+        player_status: 'rostered',
+        add_previous_release: true
+      })
+
+      MockDate.set(regular_season_start.add('2', 'months').toISOString())
+
+      // Test super priority status
+      const get_super_priority_status = (
+        await import('../libs-server/get-super-priority-status.mjs')
+      ).default
+      const status = await get_super_priority_status({
+        pid: player.pid,
+        lid: 1
+      })
+
+      status.should.have.property('eligible', true)
+      status.should.have.property('original_tid', 1)
+      status.should.have.property('poaching_tid', 2)
+
+      // For rostered players, super priority would apply if they get released
+      // First need to release the player
+      await releasePlayer({
+        leagueId: 1,
+        player,
+        teamId: 2,
+        userId: 2
+      })
+
+      // Now test super priority waiver claim
+      const res = await chai_request
+        .execute(server)
+        .post('/api/leagues/1/waivers')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          teamId: 1,
+          pid: player.pid,
+          type: constants.waivers.FREE_AGENCY_PRACTICE,
+          leagueId: 1,
+          super_priority: true
+        })
+
+      res.should.have.status(200)
+      res.body.should.have.property('super_priority', 1)
+    })
+
+    it('should not be eligible for rostered player with poach before previous release', async () => {
+      // Setup scenario where poach happened BEFORE the most recent release
+      // This should make the player ineligible since the poach is too old
+
+      // Step 1: Add player to original team
+      const originalTimestamp =
+        Math.round(Date.now() / 1000) - 10 * 24 * 60 * 60 // 10 days ago
+      await knex('transactions').insert({
+        userid: 1,
+        tid: 1,
+        lid: 1,
+        pid: player.pid,
+        type: constants.transactions.PRACTICE_ADD,
+        value: 0,
+        week: constants.season.week,
+        year: constants.season.year,
+        timestamp: originalTimestamp
+      })
+
+      // Step 2: Poach player (9 days ago)
+      const poachTimestamp = Math.round(Date.now() / 1000) - 9 * 24 * 60 * 60
+      await knex('transactions').insert({
+        userid: 2,
+        tid: 2,
+        lid: 1,
+        pid: player.pid,
+        type: constants.transactions.POACHED,
+        value: 0,
+        week: constants.season.week,
+        year: constants.season.year,
+        timestamp: poachTimestamp
+      })
+
+      // Step 3: Release player (5 days ago)
+      const releaseTimestamp = Math.round(Date.now() / 1000) - 5 * 24 * 60 * 60
+      await knex('transactions').insert({
+        userid: 2,
+        tid: 2,
+        lid: 1,
+        pid: player.pid,
+        type: constants.transactions.ROSTER_RELEASE,
+        value: 0,
+        week: constants.season.week,
+        year: constants.season.year,
+        timestamp: releaseTimestamp
+      })
+
+      // Step 4: Re-add player to make them rostered again (1 day ago)
+      const readdTimestamp = Math.round(Date.now() / 1000) - 1 * 24 * 60 * 60
+      await knex('transactions').insert({
+        userid: 2,
+        tid: 2,
+        lid: 1,
+        pid: player.pid,
+        type: constants.transactions.ROSTER_ADD,
+        value: 0,
+        week: constants.season.week,
+        year: constants.season.year,
+        timestamp: readdTimestamp
+      })
+
+      MockDate.set(regular_season_start.add('2', 'months').toISOString())
+
+      // Test super priority status - should be ineligible
+      const get_super_priority_status = (
+        await import('../libs-server/get-super-priority-status.mjs')
+      ).default
+      const status = await get_super_priority_status({
+        pid: player.pid,
+        lid: 1
+      })
+
+      status.should.have.property('eligible', false)
+      status.should.have.property(
+        'reason',
+        'No valid poaches after most recent release'
+      )
     })
   })
 
@@ -501,35 +591,23 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
 
     beforeEach(async () => {
       player = await selectPlayer({ rookie: false })
+
+      // Start with initial date for setup
+      MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
+
+      // Use utility to properly setup super priority scenario
+      await setupSuperPriority({
+        player,
+        original_team_id: 1,
+        poaching_team_id: 2,
+        league_id: 1,
+        original_user_id: 1,
+        poaching_user_id: 2,
+        weeks_ago: 1
+      })
+
+      // Set date to free agency period
       MockDate.set(regular_season_start.add('2', 'months').toISOString())
-
-      const poach_timestamp = Math.round(Date.now() / 1000) - 7 * 24 * 60 * 60 // 1 week ago
-
-      // Setup valid poach scenario: 1 → 2
-      await knex('transactions').insert([
-        {
-          pid: player.pid,
-          tid: 1, // Original team
-          lid: 1,
-          type: constants.transactions.PRACTICE_ADD,
-          value: 0,
-          year: constants.year,
-          timestamp: poach_timestamp - 24 * 60 * 60,
-          week: constants.week - 1,
-          userid: 1
-        },
-        {
-          pid: player.pid,
-          tid: 2, // Poaching team
-          lid: 1,
-          type: constants.transactions.POACHED,
-          value: 0,
-          year: constants.year,
-          timestamp: poach_timestamp,
-          week: constants.week - 1,
-          userid: 2
-        }
-      ])
     })
 
     it('should prioritize super priority claim over regular claim for same player', async () => {

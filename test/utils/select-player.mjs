@@ -9,13 +9,21 @@ export default async function ({
   nfl_status = undefined,
   injury_status = undefined,
   exclude_rostered_players = false,
-  lid = 1
+  lid = 1,
+  random = true // New option for backward compatibility - defaults to true
 } = {}) {
   const query = db('player')
     .whereNot('current_nfl_team', 'INA')
     .where('pos1', pos)
-    .orderByRaw('RANDOM()')
-    .limit(1)
+
+  // Use deterministic ordering for tests when random is false
+  if (random) {
+    query.orderByRaw('RANDOM()')
+  } else {
+    query.orderBy('pid') // Deterministic ordering by player ID
+  }
+
+  query.limit(1)
 
   // Exclude rostered players if requested
   if (exclude_rostered_players) {
