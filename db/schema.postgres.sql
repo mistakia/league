@@ -20200,7 +20200,9 @@ CREATE TABLE public.projections_index (
     dtd numeric(4,1),
     krtd numeric(4,1),
     prtd numeric(4,1),
-    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL
+    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
+    rec_first_down numeric(2,1) DEFAULT 0 NOT NULL,
+    rush_first_down numeric(2,1) DEFAULT 0 NOT NULL
 )
 PARTITION BY RANGE (year);
 
@@ -20252,7 +20254,9 @@ CREATE TABLE public.projections_index_default (
     dtd numeric(4,1),
     krtd numeric(4,1),
     prtd numeric(4,1),
-    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL
+    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
+    rec_first_down numeric(2,1) DEFAULT 0 NOT NULL,
+    rush_first_down numeric(2,1) DEFAULT 0 NOT NULL
 );
 
 
@@ -20303,7 +20307,9 @@ CREATE TABLE public.projections_index_y2020 (
     dtd numeric(4,1),
     krtd numeric(4,1),
     prtd numeric(4,1),
-    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL
+    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
+    rec_first_down numeric(2,1) DEFAULT 0 NOT NULL,
+    rush_first_down numeric(2,1) DEFAULT 0 NOT NULL
 );
 
 
@@ -20354,7 +20360,9 @@ CREATE TABLE public.projections_index_y2021 (
     dtd numeric(4,1),
     krtd numeric(4,1),
     prtd numeric(4,1),
-    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL
+    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
+    rec_first_down numeric(2,1) DEFAULT 0 NOT NULL,
+    rush_first_down numeric(2,1) DEFAULT 0 NOT NULL
 );
 
 
@@ -20405,7 +20413,9 @@ CREATE TABLE public.projections_index_y2022 (
     dtd numeric(4,1),
     krtd numeric(4,1),
     prtd numeric(4,1),
-    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL
+    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
+    rec_first_down numeric(2,1) DEFAULT 0 NOT NULL,
+    rush_first_down numeric(2,1) DEFAULT 0 NOT NULL
 );
 
 
@@ -20456,7 +20466,9 @@ CREATE TABLE public.projections_index_y2023 (
     dtd numeric(4,1),
     krtd numeric(4,1),
     prtd numeric(4,1),
-    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL
+    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
+    rec_first_down numeric(2,1) DEFAULT 0 NOT NULL,
+    rush_first_down numeric(2,1) DEFAULT 0 NOT NULL
 );
 
 
@@ -20507,7 +20519,9 @@ CREATE TABLE public.projections_index_y2024 (
     dtd numeric(4,1),
     krtd numeric(4,1),
     prtd numeric(4,1),
-    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL
+    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
+    rec_first_down numeric(2,1) DEFAULT 0 NOT NULL,
+    rush_first_down numeric(2,1) DEFAULT 0 NOT NULL
 );
 
 
@@ -20558,7 +20572,9 @@ CREATE TABLE public.projections_index_y2025 (
     dtd numeric(4,1),
     krtd numeric(4,1),
     prtd numeric(4,1),
-    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL
+    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
+    rec_first_down numeric(2,1) DEFAULT 0 NOT NULL,
+    rush_first_down numeric(2,1) DEFAULT 0 NOT NULL
 );
 
 
@@ -20609,7 +20625,9 @@ CREATE TABLE public.projections_index_y2026 (
     dtd numeric(4,1),
     krtd numeric(4,1),
     prtd numeric(4,1),
-    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL
+    seas_type public.seas_type DEFAULT 'REG'::public.seas_type NOT NULL,
+    rec_first_down numeric(2,1) DEFAULT 0 NOT NULL,
+    rush_first_down numeric(2,1) DEFAULT 0 NOT NULL
 );
 
 
