@@ -12,10 +12,13 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import:projections')
 debug.enable('import:projections,get-player')
 const timestamp = Math.round(Date.now() / 1000)
+const is_regular_season_projection = argv.season
 const year = constants.season.year
-const week = argv.season ? 0 : Math.max(constants.season.week, 1)
+const week = is_regular_season_projection
+  ? 0
+  : Math.max(constants.season.week, 1)
 const getURL = ({ position, page }) =>
-  argv.season
+  is_regular_season_projection
     ? `https://www.fftoday.com/rankings/playerproj.php?Season=${year}&PosID=${position}&LeagueID=&order_by=FFPts&sort_order=DESC&cur_page=${page}`
     : `https://www.fftoday.com/rankings/playerwkproj.php?Season=${year}&GameWeek=${week}&PosID=${position}&LeagueID=&order_by=FFPts&sort_order=DESC&cur_page=${page}`
 
@@ -24,6 +27,85 @@ const positions = {
   20: 'RB',
   30: 'WR',
   40: 'TE'
+}
+
+// Parsing functions for different projection types
+const parse_regular_season_data = (pos, $, el) => {
+  const data = {}
+
+  if (pos === 'QB') {
+    data.pa = Number($(el).find('td').eq(5).text().trim()) || null
+    data.pc = Number($(el).find('td').eq(4).text().trim()) || null
+    data.py =
+      Number($(el).find('td').eq(6).text().replace(',', '').trim()) || null
+    data.tdp = Number($(el).find('td').eq(7).text().trim()) || null
+    data.ints = Number($(el).find('td').eq(8).text().trim()) || null
+
+    data.ra = Number($(el).find('td').eq(9).text().trim()) || null
+    data.ry =
+      Number($(el).find('td').eq(10).text().replace(',', '').trim()) || null
+    data.tdr = Number($(el).find('td').eq(11).text().trim()) || null
+  } else if (pos === 'RB') {
+    data.ra = Number($(el).find('td').eq(4).text().trim()) || null
+    data.ry =
+      Number($(el).find('td').eq(5).text().replace(',', '').trim()) || null
+    data.tdr = Number($(el).find('td').eq(6).text().trim()) || null
+
+    data.rec = Number($(el).find('td').eq(7).text().trim()) || null
+    data.recy =
+      Number($(el).find('td').eq(8).text().replace(',', '').trim()) || null
+    data.tdrec = Number($(el).find('td').eq(9).text().trim()) || null
+  } else if (pos === 'WR') {
+    data.rec = Number($(el).find('td').eq(4).text().trim()) || null
+    data.recy =
+      Number($(el).find('td').eq(5).text().replace(',', '').trim()) || null
+    data.tdrec = Number($(el).find('td').eq(6).text().trim()) || null
+
+    data.ra = Number($(el).find('td').eq(7).text().trim()) || null
+    data.ry =
+      Number($(el).find('td').eq(8).text().replace(',', '').trim()) || null
+    data.tdr = Number($(el).find('td').eq(9).text().trim()) || null
+  } else if (pos === 'TE') {
+    data.rec = Number($(el).find('td').eq(4).text().trim()) || null
+    data.recy =
+      Number($(el).find('td').eq(5).text().replace(',', '').trim()) || null
+    data.tdrec = Number($(el).find('td').eq(6).text().trim()) || null
+  }
+
+  return data
+}
+
+const parse_week_data = (pos, $, el) => {
+  const data = {}
+
+  if (pos === 'QB') {
+    // QB parsing remains the same for week projections
+    data.pa = Number($(el).find('td').eq(5).text().trim()) || null
+    data.pc = Number($(el).find('td').eq(4).text().trim()) || null
+    data.py =
+      Number($(el).find('td').eq(6).text().replace(',', '').trim()) || null
+    data.tdp = Number($(el).find('td').eq(7).text().trim()) || null
+    data.ints = Number($(el).find('td').eq(8).text().trim()) || null
+
+    data.ra = Number($(el).find('td').eq(9).text().trim()) || null
+    data.ry =
+      Number($(el).find('td').eq(10).text().replace(',', '').trim()) || null
+    data.tdr = Number($(el).find('td').eq(11).text().trim()) || null
+  } else if (pos === 'RB' || pos === 'WR' || pos === 'TE') {
+    // For week projections, RB/WR/TE follow the order:
+    // rush attempts, rush yards, rush TDs, receptions, receiving yards, receiving TDs
+    data.ra = Number($(el).find('td').eq(4).text().trim()) || null
+    data.ry =
+      Number($(el).find('td').eq(5).text().replace(',', '').trim()) || null
+    data.tdr = Number($(el).find('td').eq(6).text().trim()) || null
+
+    data.rec = Number($(el).find('td').eq(7).text().trim()) || null
+    data.recy =
+      Number($(el).find('td').eq(8).text().replace(',', '').trim()) || null
+    data.tdrec = Number($(el).find('td').eq(9).text().trim()) || null
+  }
+
+  return data
 }
 
 const run = async ({ dry = false } = {}) => {
@@ -48,53 +130,11 @@ const run = async ({ dry = false } = {}) => {
           const team = $(el).find('td').eq(2).text().trim()
           const pos = positions[position]
           const params = { name, team, pos }
-          const data = {}
 
-          if (pos === 'QB') {
-            data.pa = Number($(el).find('td').eq(5).text().trim()) || null
-            data.pc = Number($(el).find('td').eq(4).text().trim()) || null
-            data.py =
-              Number($(el).find('td').eq(6).text().replace(',', '').trim()) ||
-              null
-            data.tdp = Number($(el).find('td').eq(7).text().trim()) || null
-            data.ints = Number($(el).find('td').eq(8).text().trim()) || null
-
-            data.ra = Number($(el).find('td').eq(9).text().trim()) || null
-            data.ry =
-              Number($(el).find('td').eq(10).text().replace(',', '').trim()) ||
-              null
-            data.tdr = Number($(el).find('td').eq(11).text().trim()) || null
-          } else if (pos === 'RB') {
-            data.ra = Number($(el).find('td').eq(4).text().trim()) || null
-            data.ry =
-              Number($(el).find('td').eq(5).text().replace(',', '').trim()) ||
-              null
-            data.tdr = Number($(el).find('td').eq(6).text().trim()) || null
-
-            data.rec = Number($(el).find('td').eq(7).text().trim()) || null
-            data.recy =
-              Number($(el).find('td').eq(8).text().replace(',', '').trim()) ||
-              null
-            data.tdrec = Number($(el).find('td').eq(9).text().trim()) || null
-          } else if (pos === 'WR') {
-            data.rec = Number($(el).find('td').eq(4).text().trim()) || null
-            data.recy =
-              Number($(el).find('td').eq(5).text().replace(',', '').trim()) ||
-              null
-            data.tdrec = Number($(el).find('td').eq(6).text().trim()) || null
-
-            data.ra = Number($(el).find('td').eq(7).text().trim()) || null
-            data.ry =
-              Number($(el).find('td').eq(8).text().replace(',', '').trim()) ||
-              null
-            data.tdr = Number($(el).find('td').eq(9).text().trim()) || null
-          } else if (pos === 'TE') {
-            data.rec = Number($(el).find('td').eq(4).text().trim()) || null
-            data.recy =
-              Number($(el).find('td').eq(5).text().replace(',', '').trim()) ||
-              null
-            data.tdrec = Number($(el).find('td').eq(6).text().trim()) || null
-          }
+          // Use appropriate parsing function based on projection type
+          const data = is_regular_season_projection
+            ? parse_regular_season_data(pos, $, el)
+            : parse_week_data(pos, $, el)
 
           items.push({ params, data })
         }
