@@ -100,7 +100,7 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
     // Only calculate ROS projections for regular season
     if (seas_type === 'REG') {
       // calculate ros projection
-      const ros = constants.createStats()
+      const ros = constants.createProjectedStats()
       let proj_wks = 0
       for (const [week, projection] of Object.entries(player_row.projection)) {
         if (week && week !== '0' && week >= constants.season.week) {
