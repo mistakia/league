@@ -72,8 +72,7 @@ const run = async ({
   const first_item = data[0]
 
   if (!first_item.Week) {
-    log('No Week column found in data')
-    return
+    throw new Error('No Week column found in data')
   }
 
   for (const item of data) {
