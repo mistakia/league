@@ -284,6 +284,9 @@ export const projected_fantasy_stats = [
 export const createStats = () =>
   fantasyStats.reduce((o, key) => ({ ...o, [key]: 0 }), {})
 
+export const createProjectedStats = () =>
+  projected_fantasy_stats.reduce((o, key) => ({ ...o, [key]: 0 }), {})
+
 export const statHeaders = {
   pa: 'Passing Attempts',
   pc: 'Passing Completions',
