@@ -13,7 +13,8 @@ export default function SelectedPlayerMatchupTable({
   nfl_team_against_seasonlogs,
   load_percentiles,
   load_players_gamelogs,
-  year
+  year,
+  selected_years = [year]
 }) {
   const individual_percentile_key = `INDIVIDUAL_GAMELOG_${position}`
 
@@ -40,8 +41,11 @@ export default function SelectedPlayerMatchupTable({
     if (!opponent) {
       return
     }
-    load_players_gamelogs({ year, opponent, position })
-  }, [year, opponent, position, load_players_gamelogs])
+    // Load gamelogs for all selected years
+    selected_years.forEach((selected_year) => {
+      load_players_gamelogs({ year: selected_year, opponent, position })
+    })
+  }, [selected_years, opponent, position, load_players_gamelogs])
 
   if (!opponent) {
     return <div>BYE</div>
@@ -142,5 +146,6 @@ SelectedPlayerMatchupTable.propTypes = {
   opponent: PropTypes.string,
   nfl_team_against_seasonlogs: PropTypes.array,
   load_players_gamelogs: PropTypes.func,
-  year: PropTypes.number
+  year: PropTypes.number,
+  selected_years: PropTypes.array
 }
