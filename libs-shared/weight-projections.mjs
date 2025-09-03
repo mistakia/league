@@ -1,4 +1,4 @@
-import { fantasyStats, sources } from './constants.mjs'
+import { projected_fantasy_stats, sources } from './constants.mjs'
 
 const removeFalsy = (obj) => {
   const newObj = {}
@@ -10,7 +10,7 @@ const removeFalsy = (obj) => {
 
 const weightProjections = ({ projections, weights = [], userId, week }) => {
   const data = {}
-  for (const r of fantasyStats) {
+  for (const r of projected_fantasy_stats) {
     data[r] = []
   }
 
