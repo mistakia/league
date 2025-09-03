@@ -7,6 +7,8 @@ import Tab from '@mui/material/Tab'
 import { constants } from '@libs-shared'
 import SelectedPlayerMatchupTable from '@components/selected-player-matchup-table'
 import PercentileMetric from '@components/percentile-metric'
+import SelectedPlayerScheduleYearFilter from '@components/selected-player-schedule-year-filter'
+import SelectedPlayerScheduleWeekFilter from '@components/selected-player-schedule-week-filter'
 
 import './selected-player-schedule.styl'
 
@@ -25,8 +27,20 @@ export default function SelectedPlayerSchedule({
   const team = player_map.get('team')
   const current_week = Math.max(constants.week, 1)
   const [selected_week, set_selected_week] = useState(current_week)
+  const [selected_years_for_schedule, set_selected_years_for_schedule] =
+    useState(
+      current_week < 4 ? [constants.year, constants.year - 1] : [constants.year]
+    )
+  const [selected_weeks_for_schedule, set_selected_weeks_for_schedule] =
+    useState(constants.nfl_weeks)
+  const [filters_expanded, set_filters_expanded] = useState(false)
 
-  const handleChange = (event, value) => set_selected_week(value)
+  const handle_tab_change = (event, value) => set_selected_week(value)
+  const handle_year_selection_change = (years) =>
+    set_selected_years_for_schedule(years)
+  const handle_week_selection_change = (weeks) =>
+    set_selected_weeks_for_schedule(weeks)
+  const handle_filters_toggle = () => set_filters_expanded(!filters_expanded)
 
   if (!games.length) {
     return null
@@ -73,18 +87,39 @@ export default function SelectedPlayerSchedule({
 
   return (
     <div className='selected__table'>
-      <Tabs
-        value={selected_week}
-        onChange={handleChange}
-        variant='scrollable'
-        className='selected__player-schedule-tabs sticky__column'
-        orientation='horizontal'
-        indicatorColor='primary'
-        textColor='inherit'
-      >
-        {labels}
-      </Tabs>
-      <SelectedPlayerMatchupTable week={selected_week} />
+      <div className='selected-player-schedule-tabs-row'>
+        <Tabs
+          value={selected_week}
+          onChange={handle_tab_change}
+          variant='scrollable'
+          className='selected__player-schedule-tabs sticky__column'
+          orientation='horizontal'
+          indicatorColor='primary'
+          textColor='inherit'
+        >
+          {labels}
+        </Tabs>
+        <div className='filters-toggle-button' onClick={handle_filters_toggle}>
+          {filters_expanded ? 'hide filters' : 'show filters'}
+        </div>
+      </div>
+      {filters_expanded && (
+        <div className='selected-player-schedule-filters'>
+          <SelectedPlayerScheduleYearFilter
+            selected_years_for_schedule={selected_years_for_schedule}
+            on_year_selection_change={handle_year_selection_change}
+          />
+          <SelectedPlayerScheduleWeekFilter
+            selected_weeks_for_schedule={selected_weeks_for_schedule}
+            on_week_selection_change={handle_week_selection_change}
+          />
+        </div>
+      )}
+      <SelectedPlayerMatchupTable
+        week={selected_week}
+        selected_years={selected_years_for_schedule}
+        selected_weeks={selected_weeks_for_schedule}
+      />
     </div>
   )
 }
