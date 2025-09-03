@@ -211,7 +211,8 @@ const process_scoring_format = async ({
         ...calculatePoints({
           stats: projection,
           position: player_row.pos,
-          league: league_scoring_format
+          league: league_scoring_format,
+          use_projected_stats: true
         })
       })
     }
@@ -224,7 +225,8 @@ const process_scoring_format = async ({
       ...calculatePoints({
         stats: player_row.projection.ros,
         position: player_row.pos,
-        league: league_scoring_format
+        league: league_scoring_format,
+        use_projected_stats: true
       })
     })
   }
