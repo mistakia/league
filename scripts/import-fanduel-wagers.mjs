@@ -27,6 +27,9 @@ debug.enable('import-fanduel-wagers,fanduel')
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const data_path = path.join(__dirname, '../tmp')
 
+// Default FanDuel states for wager import
+const DEFAULT_FANDUEL_STATES = ['va', 'md', 'dc', 'ny']
+
 const format_wager_type = (type) => {
   switch (type) {
     case 'DBL':
@@ -91,7 +94,7 @@ const format_bet_count = ({ wager_type, wager }) => {
 
 const load_fanduel_wagers = async ({
   filename,
-  fanduel_states = ['va', 'md', 'dc'],
+  fanduel_states = DEFAULT_FANDUEL_STATES,
   authorization,
   placed_after,
   placed_before
@@ -146,7 +149,7 @@ const import_fanduel_wagers = async ({
   user_id = 1,
   filename,
   authorization,
-  fanduel_states = ['va', 'md', 'dc'],
+  fanduel_states = DEFAULT_FANDUEL_STATES,
   placed_after
 } = {}) => {
   const wagers = await load_fanduel_wagers({
