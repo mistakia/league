@@ -15297,7 +15297,10 @@ CREATE TABLE public.nfl_team_seasonlogs (
     recv_deep_target_pct numeric(5,4) DEFAULT NULL::numeric,
     recv_tight_window_pct numeric(5,4) DEFAULT NULL::numeric,
     longest_reception numeric(5,2) DEFAULT NULL::numeric,
-    recv_yards_15_plus_rate numeric(5,4) DEFAULT NULL::numeric
+    recv_yards_15_plus_rate numeric(5,4) DEFAULT NULL::numeric,
+    rec_first_down numeric(5,2) DEFAULT 0.00,
+    rush_first_down numeric(5,2) DEFAULT 0.00,
+    ry_excluding_kneels numeric(6,2) DEFAULT 0.00
 );
 
 
