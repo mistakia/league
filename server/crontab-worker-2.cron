@@ -1,11 +1,11 @@
 ## import pff projections
-30 1 * 1,2,7-12 1,3-7 NODE_ENV=production /Users/trashman/.nvm/versions/node/v20.12.1/bin/node /Users/trashman/Projects/league/scripts/import-pff-projections.mjs >> /Users/trashman/Library/Logs/league/import-pff.log 2>&1
+30 1 * 1,2,7-12 1,3-7 NODE_ENV=production /Users/trashman/.nvm/versions/node/v18.20.8/bin/node /Users/trashman/user-base/repository/active/league/scripts/import-pff-projections.mjs >> /Users/trashman/Library/Logs/league/import-pff.log 2>&1
 
 ## import pff grades
-15 2 * 1,9-12 * NODE_ENV=production /Users/trashman/.nvm/versions/node/v20.12.1/bin/node /Users/trashman/Projects/league/scripts/import-pff-grades.mjs --ignore_cache >> /Users/trashman/Library/Logs/league/import-pff-grades.log 2>&1
+15 2 * 1,9-12 * NODE_ENV=production /Users/trashman/.nvm/versions/node/v18.20.8/bin/node /Users/trashman/user-base/repository/active/league/scripts/import-pff-grades.mjs --ignore_cache >> /Users/trashman/Library/Logs/league/import-pff-grades.log 2>&1
 
 ## import caesars odds
-0 */4 * * * NODE_ENV=production /Users/trashman/.nvm/versions/node/v20.12.1/bin/node /Users/trashman/Projects/league/scripts/import-caesars-odds.mjs --ignore_cache >> /Users/trashman/Library/Logs/league/import-caesars-odds.log 2>&1
+0 */4 * * * NODE_ENV=production /Users/trashman/.nvm/versions/node/v18.20.8/bin/node /Users/trashman/user-base/repository/active/league/scripts/import-caesars-odds.mjs --ignore_cache >> /Users/trashman/Library/Logs/league/import-caesars-odds.log 2>&1
 
 ## Every Thursday at 2:20PM
-20 14 * * 4 NODE_ENV=production /Users/trashman/.nvm/versions/node/v20.12.1/bin/node /Users/trashman/Projects/league/scripts/import-fanduel-salaries.mjs --ignore_cache 2>&1 /Users/trashman/Library/Logs/league/league-import-fanduel-salaries.log
+20 14 * * 4 NODE_ENV=production /Users/trashman/.nvm/versions/node/v18.20.8/bin/node /Users/trashman/user-base/repository/active/league/scripts/import-fanduel-salaries.mjs --ignore_cache 2>&1 /Users/trashman/Library/Logs/league/league-import-fanduel-salaries.log
