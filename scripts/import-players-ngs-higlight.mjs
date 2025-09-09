@@ -6,10 +6,10 @@ import { hideBin } from 'yargs/helpers'
 import {
   is_main,
   report_job,
-  ngs,
   find_player_row,
   updatePlayer
 } from '#libs-server'
+import { ngs } from '#private/libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { fixTeam, constants } from '#libs-shared'
 
