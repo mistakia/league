@@ -6,22 +6,23 @@ import {
   constants,
   Errors,
   formatHeight,
-  format_nfl_status
+  format_nfl_status,
+  fixTeam
 } from '#libs-shared'
 import {
   is_main,
-  ngs,
   find_player_row,
   updatePlayer,
   createPlayer
 } from '#libs-server'
+import { nfl_pro } from '#private/libs-server'
 // import db from '#db'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-current-players-ngs')
 debug.enable(
-  'import-current-players-ngs,nfl,update-player,create-player,get-player'
+  'import-current-players-ngs,nfl-pro,update-player,create-player,get-player'
 )
 
 const import_current_players_ngs = async ({
@@ -31,22 +32,21 @@ const import_current_players_ngs = async ({
   log('loading current players from ngs')
 
   const pids = []
-  const data = await ngs.getCurrentPlayers({ season, ignore_cache })
+  const data = await nfl_pro.get_team_players({ season, ignore_cache })
 
   if (!data || !data.teamPlayers) {
-    throw new Error('no data from ngs')
+    throw new Error('no data from NFL Pro API')
   }
 
-  log(`loaded ${data.teamPlayers.length} players from ngs`)
+  log(`loaded ${data.teamPlayers.length} players from NFL`)
 
   for (const player of data.teamPlayers) {
     const name = player.displayName
     const pos = player.position
-    // Not provided in the NGS data
-    // const dob = null
+    const dob = player.birthDate || null
     const gsisid = player.gsisId
     const esbid = player.esbId
-    const gsis_it_id = player.gsis_it_id
+    const gsis_it_id = player.gsisItId || player.nflId
 
     let player_row
     let error
@@ -85,17 +85,17 @@ const import_current_players_ngs = async ({
 
     const col = player.collegeName
     const dpos = player.draftNumber
-    // Not provided in the NGS data
-    // const round = null
-    let start = player.entryYear || player.rookieYear
+    const round = player.draftround || null
+    const draft_team = player.draftClub ? fixTeam(player.draftClub) : null
+    let nfl_draft_year = player.entryYear || player.rookieYear
     const weight = player.weight
-    const current_nfl_team = player.teamAbbr
+    const current_nfl_team = fixTeam(player.teamAbbr)
     const jnum = player.jerseyNumber
     const height = formatHeight(player.height)
     const nfl_status = format_nfl_status(player.status)
 
-    if (!start && player.yearsOfExperience === 0) {
-      start = season
+    if (!nfl_draft_year && player.yearsOfExperience === 0) {
+      nfl_draft_year = season
     }
 
     if (player_row) {
@@ -108,11 +108,17 @@ const import_current_players_ngs = async ({
           gsis_it_id,
           col,
           dpos,
-          start,
+          round,
+          draft_team,
+          nfl_draft_year,
           weight,
           height,
-          nfl_status
-        }
+          nfl_status,
+          dob,
+          current_nfl_team,
+          jnum
+        },
+        allow_protected_props: true
       })
     } else if (
       error instanceof Errors.MatchedMultiplePlayers === false &&
@@ -122,7 +128,7 @@ const import_current_players_ngs = async ({
       const player_row = await createPlayer({
         fname: player.firstName,
         lname: player.lastName,
-        start,
+        nfl_draft_year,
 
         pos,
         pos1: pos,
@@ -135,9 +141,11 @@ const import_current_players_ngs = async ({
         height,
 
         dpos,
+        round,
+        draft_team,
 
         col,
-        dob: '0000-00-00',
+        dob: dob || '0000-00-00',
         nfl_status,
 
         esbid,
@@ -173,7 +181,7 @@ const main = async () => {
       ignore_cache: argv.ignore_cache
     })
 
-    log(`processed ${pids.length} players from ngs`)
+    log(`processed ${pids.length} players from NFL Pro API`)
 
     // await setInactive(pids)
   } catch (err) {

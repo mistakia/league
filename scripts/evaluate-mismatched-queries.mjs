@@ -5,7 +5,6 @@ import path from 'path'
 import os from 'os'
 import { execSync } from 'child_process'
 import debug from 'debug'
-import * as prettier from 'prettier'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
@@ -15,7 +14,9 @@ import {
   get_data_view_results_query,
   load_data_view_test_queries,
   update_test_file,
-  process_expected_query
+  process_expected_query,
+  format_sql,
+  normalize_sql_for_comparison
 } from '#libs-server'
 
 const log = debug('evaluate-mismatched-queries')
@@ -33,31 +34,8 @@ const EVALUATION_CONFIG = {
  * Compare queries using the same logic as the test suite
  */
 const compare_queries_logic = (actual_query, expected_query) => {
-  const actual_table_hashes = [
-    ...new Set(
-      (actual_query.match(/t([A-Za-z0-9]{32})/g) || []).map((match) =>
-        match.slice(1)
-      )
-    )
-  ]
-  const expected_table_hashes = [
-    ...new Set(
-      (expected_query.match(/t([A-Za-z0-9]{32})/g) || []).map((match) =>
-        match.slice(1)
-      )
-    )
-  ]
-
-  const actual_query_normalized = actual_table_hashes.reduce(
-    (query, hash, index) =>
-      query.replaceAll(new RegExp(`${hash}`, 'g'), `table_${index}`),
-    actual_query
-  )
-  const expected_query_normalized = expected_table_hashes.reduce(
-    (query, hash, index) =>
-      query.replaceAll(new RegExp(`${hash}`, 'g'), `table_${index}`),
-    expected_query
-  )
+  const actual_query_normalized = normalize_sql_for_comparison(actual_query)
+  const expected_query_normalized = normalize_sql_for_comparison(expected_query)
 
   return {
     matches: actual_query_normalized === expected_query_normalized,
@@ -70,15 +48,12 @@ const compare_queries_logic = (actual_query, expected_query) => {
  * Format SQL query for better readability in diffs
  */
 const format_sql_query = async (query) => {
-  return await prettier.format(`sql\`${query}\``, {
+  return await format_sql(query, {
     parser: 'babel',
-    plugins: ['prettier-plugin-embed', 'prettier-plugin-sql'],
-    embeddedSqlTags: ['sql'],
-    language: 'postgresql',
+    wrapInTemplate: true,
     keywordCase: 'lower',
     printWidth: 80,
-    tabWidth: 2,
-    semi: false
+    tabWidth: 2
   })
 }
 

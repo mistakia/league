@@ -3,55 +3,20 @@
 import fs from 'fs'
 import path from 'path'
 import { fileURLToPath } from 'url'
-import prettier from 'prettier'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-import debug from 'debug'
 
 import {
   get_data_view_results_query,
   load_data_view_test_queries_sync,
   process_expected_query,
-  is_main
+  is_main,
+  format_sql,
+  normalize_sql_for_comparison
 } from '#libs-server'
 import { compare_queries } from '../test/utils/index.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
-const log = debug('data-views:cli')
-
-// CLI Functions
-async function beautify_sql(query) {
-  try {
-    // Use prettier with SQL plugin
-    const formatted = await prettier.format(query, {
-      parser: 'postgresql',
-      plugins: ['prettier-plugin-sql'],
-      printWidth: 80,
-      keywordCase: 'upper',
-      expressionWidth: 50,
-      linesBetweenQueries: 2
-    })
-    return formatted
-  } catch (err) {
-    log('Warning: Unable to format SQL, returning original', err.message)
-    return query
-  }
-}
-
-function normalize_query_for_comparison(query) {
-  // Replace table hashes with generic placeholders for comparison
-  const table_hashes = [
-    ...new Set(
-      (query.match(/t([A-Za-z0-9]{32})/g) || []).map((match) => match.slice(1))
-    )
-  ]
-
-  return table_hashes.reduce(
-    (q, hash, index) =>
-      q.replaceAll(new RegExp(`${hash}`, 'g'), `table_${index}`),
-    query
-  )
-}
 
 // Simple diff function without external dependencies
 function simple_diff(str1, str2) {
@@ -125,11 +90,23 @@ function simple_diff(str1, str2) {
 }
 
 async function show_diff(actual_query, expected_query) {
-  const actual_normalized = normalize_query_for_comparison(actual_query)
-  const expected_normalized = normalize_query_for_comparison(expected_query)
+  const actual_normalized = normalize_sql_for_comparison(actual_query)
+  const expected_normalized = normalize_sql_for_comparison(expected_query)
 
-  const actual_beautified = await beautify_sql(actual_normalized)
-  const expected_beautified = await beautify_sql(expected_normalized)
+  const actual_beautified = await format_sql(actual_normalized, {
+    parser: 'postgresql',
+    keywordCase: 'upper',
+    printWidth: 80,
+    expressionWidth: 50,
+    linesBetweenQueries: 2
+  })
+  const expected_beautified = await format_sql(expected_normalized, {
+    parser: 'postgresql',
+    keywordCase: 'upper',
+    printWidth: 80,
+    expressionWidth: 50,
+    linesBetweenQueries: 2
+  })
 
   console.log('\n\x1b[1m=== SQL Query Diff ===\x1b[0m\n')
 
@@ -189,7 +166,13 @@ async function run_test_case(test_path, options = {}) {
     if (options.showQuery || options.beautify) {
       console.log('\n\x1b[1m=== Generated Query ===\x1b[0m\n')
       const output = options.beautify
-        ? await beautify_sql(actual_query)
+        ? await format_sql(actual_query, {
+            parser: 'postgresql',
+            keywordCase: 'upper',
+            printWidth: 80,
+            expressionWidth: 50,
+            linesBetweenQueries: 2
+          })
         : actual_query
       console.log(output)
     }
@@ -200,7 +183,13 @@ async function run_test_case(test_path, options = {}) {
       if (options.showExpected || options.beautify) {
         console.log('\n\x1b[1m=== Expected Query ===\x1b[0m\n')
         const output = options.beautify
-          ? await beautify_sql(expected_query)
+          ? await format_sql(expected_query, {
+              parser: 'postgresql',
+              keywordCase: 'upper',
+              printWidth: 80,
+              expressionWidth: 50,
+              linesBetweenQueries: 2
+            })
           : expected_query
         console.log(output)
       }
