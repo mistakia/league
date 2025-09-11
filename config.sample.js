@@ -31,36 +31,7 @@ module.exports = {
 
   discord_sysadmin_alerts_channel_webhook_url: '',
 
-  discord_props_change_channel_webhook_url: '',
-  discord_props_open_channel_webhook_url: '',
 
-  discord_props_open_alts_channel_webhook_url: '',
-  discord_props_open_sunday_leaders_channel_webhook_url: '',
-  discord_props_open_game_leaders_channel_webhook_url: '',
-  discord_props_open_over_under_channel_webhook_url: '',
-
-  discord_props_open_passing_yards_channel_webhook_url: '',
-  discord_props_open_receiving_yards_channel_webhook_url: '',
-  discord_props_open_rushing_yards_channel_webhook_url: '',
-  discord_props_open_passing_completions_channel_webhook_url: '',
-  discord_props_open_passing_touchdowns_channel_webhook_url: '',
-  discord_props_open_receptions_channel_webhook_url: '',
-  discord_props_open_passing_interceptions_channel_webhook_url: '',
-  discord_props_open_rushing_attempts_channel_webhook_url: '',
-  discord_props_open_rushing_receiving_yards_channel_webhook_url: '',
-  discord_props_open_receiving_touchdowns_channel_webhook_url: '',
-  discord_props_open_rushing_touchdowns_channel_webhook_url: '',
-  discord_props_open_passing_attempts_channel_webhook_url: '',
-  discord_props_open_longest_completion_channel_webhook_url: '',
-  discord_props_open_longest_reception_channel_webhook_url: '',
-  discord_props_open_longest_rush_channel_webhook_url: '',
-  discord_props_open_tackles_assists_channel_webhook_url: '',
-  discord_props_open_rushing_receiving_touchdowns_channel_webhook_url: '',
-
-  discord_props_open_prizepicks_channel_webhook_url: '',
-
-  discord_props_market_new_channel_webhook_url: '',
-  discord_props_market_update_channel_webhook_url: '',
 
   filter_prop_pairings_options: {
     market_odds_max_threshold: 1,
