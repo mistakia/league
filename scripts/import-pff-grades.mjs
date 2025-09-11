@@ -2,7 +2,14 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { is_main, report_job, pff, wait, find_player_row } from '#libs-server'
+import {
+  is_main,
+  report_job,
+  pff,
+  wait,
+  find_player_row,
+  updatePlayer
+} from '#libs-server'
 import { constants, job_constants } from '#libs-shared'
 import db from '#db'
 import diff from 'deep-diff'
@@ -17,7 +24,8 @@ const import_pff_grades_for_position = async ({
   cookie,
   position,
   grades_url,
-  ignore_cache
+  ignore_cache,
+  update_pff_ids = true
 }) => {
   const data = await pff.get_pff_player_seasonlogs({
     year,
@@ -39,44 +47,59 @@ const import_pff_grades_for_position = async ({
   const existing_logs_map = new Map(existing_logs.map((log) => [log.pid, log]))
 
   for (const player of players) {
-    let pid
+    let player_row
 
-    // Try to get player id using pff_id
+    // Try to get player using pff_id
     try {
-      const player_row = await find_player_row({ pff_id: player.id })
-      if (player_row) {
-        pid = player_row.pid
-      }
+      player_row = await find_player_row({ pff_id: player.id })
     } catch (err) {
       log(`Error getting player by pff_id: ${err.message}`)
     }
 
     // If pff_id lookup fails, try matching using name, team, and position
-    if (!pid) {
+    if (!player_row) {
       try {
-        const player_row = await find_player_row({
+        player_row = await find_player_row({
           name: player.name,
           team: player.team_name,
           pos: player.position.toUpperCase()
         })
-        if (player_row) {
-          pid = player_row.pid
-        }
       } catch (err) {
         log(`Error getting player by name, team, and position: ${err.message}`)
       }
     }
 
     // Skip and log players that were not matched
-    if (!pid) {
+    if (!player_row) {
       log(
         `Player not matched: pff_id: ${player.id} - ${player.name}, ${player.team_name}, ${player.position}`
       )
       continue
     }
 
+    // Check if pff_id needs updating in player table
+    if (
+      update_pff_ids &&
+      (!player_row.pff_id || player_row.pff_id !== Number(player.id))
+    ) {
+      try {
+        const update_result = await updatePlayer({
+          player_row,
+          update: { pff_id: Number(player.id) },
+          allow_protected_props: true
+        })
+        if (update_result > 0) {
+          log(`Updated pff_id for player ${player_row.pid}: ${player.id}`)
+        }
+      } catch (err) {
+        log(
+          `Error updating pff_id for player ${player_row.pid}: ${err.message}`
+        )
+      }
+    }
+
     const update = {
-      pid,
+      pid: player_row.pid,
       year,
       position,
       fg_ep_kicker: Number(player.fg_ep_kicker) || null,
@@ -136,7 +159,7 @@ const import_pff_grades_for_position = async ({
       offense_rank: Number(player.offense_rank) || null
     }
 
-    const existing_log = existing_logs_map.get(pid)
+    const existing_log = existing_logs_map.get(player_row.pid)
 
     if (existing_log) {
       await update_pff_seasonlog(update, existing_log)
@@ -191,7 +214,8 @@ const import_pff_grades_for_year = async ({
   year,
   cookie,
   grades_url,
-  ignore_cache
+  ignore_cache,
+  update_pff_ids = true
 }) => {
   for (const position of pff.positions) {
     await import_pff_grades_for_position({
@@ -199,7 +223,8 @@ const import_pff_grades_for_year = async ({
       cookie,
       position,
       grades_url,
-      ignore_cache
+      ignore_cache,
+      update_pff_ids
     })
     await wait(10000)
   }
@@ -208,7 +233,8 @@ const import_pff_grades_for_year = async ({
 const import_pff_grades = async ({
   year = constants.season.year,
   all = false,
-  ignore_cache = false
+  ignore_cache = false,
+  update_pff_ids = true
 }) => {
   const config_row = await db('config').where({ key: 'pff_config' }).first()
   const pff_config = config_row.value
@@ -226,11 +252,18 @@ const import_pff_grades = async ({
         year,
         cookie,
         grades_url,
-        ignore_cache
+        ignore_cache,
+        update_pff_ids
       })
     }
   } else {
-    await import_pff_grades_for_year({ year, cookie, grades_url, ignore_cache })
+    await import_pff_grades_for_year({
+      year,
+      cookie,
+      grades_url,
+      ignore_cache,
+      update_pff_ids
+    })
   }
 }
 
@@ -240,7 +273,8 @@ const main = async () => {
     await import_pff_grades({
       year: argv.year,
       all: argv.all,
-      ignore_cache: argv.ignore_cache
+      ignore_cache: argv.ignore_cache,
+      update_pff_ids: argv.update_pff_ids !== false
     })
   } catch (err) {
     error = err
