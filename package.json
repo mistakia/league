@@ -26,7 +26,7 @@
     "generate:formats": "node scripts/generate-named-formats.mjs",
     "analyze:format-coverage": "node scripts/analyze-format-coverage.mjs",
     "generate:format-data": "node scripts/generate-format-data.mjs",
-    "debug:data-view": "NODE_ENV=production node cli/debug-data-view.mjs"
+    "debug:data-view": "NODE_ENV=production node scripts/debug-data-view.mjs"
   },
   "imports": {
     "#config": "./config.js",
