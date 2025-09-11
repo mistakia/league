@@ -505,10 +505,29 @@ const format_market = async ({
       )
     }
 
+    // Extract team information from player name if it exists in parentheses
+    let player_team_from_name = null
     if (draftkings_player_name) {
+      const team_match = draftkings_player_name.match(/\s*\(([A-Z]{2,4})\)\s*$/)
+      if (team_match) {
+        const raw_team = team_match[1]
+        player_team_from_name = safe_fix_team(raw_team)
+        // Remove the team abbreviation from the player name
+        draftkings_player_name = draftkings_player_name
+          .replace(/\s*\([A-Z]{2,4}\)\s*$/, '')
+          .trim()
+      }
+    }
+
+    if (draftkings_player_name) {
+      // Use team from player name if available, otherwise fall back to event teams
+      const search_teams = player_team_from_name
+        ? [player_team_from_name]
+        : nfl_team_abbreviations
+
       const player_search_params = {
         name: draftkings_player_name,
-        teams: nfl_team_abbreviations,
+        teams: search_teams,
         ignore_free_agent: true,
         ignore_retired: true
       }
