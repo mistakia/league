@@ -198,10 +198,52 @@ export const get_market_type_offer_1000 = (subcategoryId) => {
     case 9532:
       return player_prop_types.GAME_PASSING_RUSHING_YARDS
 
+    case 11969:
+      return player_prop_types.GAME_LEADER_PASSING_YARDS
+
     case 12093:
     case 14119:
     case 16569:
       return player_prop_types.GAME_ALT_PASSING_YARDS
+
+    case 15937:
+      return player_prop_types.GAME_PASSING_INTERCEPTIONS
+
+    case 16568:
+      return player_prop_types.GAME_PASSING_TOUCHDOWNS
+
+    case 16573:
+      return player_prop_types.GAME_FIRST_QUARTER_ALT_PASSING_YARDS
+
+    case 16819:
+      return player_prop_types.GAME_PASSING_INTERCEPTIONS
+
+    case 16888:
+      return player_prop_types.GAME_PASSING_ATTEMPTS
+
+    case 16889:
+      return player_prop_types.GAME_PASSING_COMPLETIONS
+
+    case 16896:
+      return player_prop_types.GAME_PASSING_RUSHING_YARDS
+
+    case 18487:
+    case 18490:
+    case 18493:
+      return player_prop_types.GAME_PASSING_YARDS
+
+    case 18496:
+    case 18500:
+      return player_prop_types.GAME_LEADER_PASSING_YARDS
+
+    case 18522:
+      return player_prop_types.GAME_PASSING_ATTEMPTS
+
+    case 18523:
+      return player_prop_types.GAME_PASSING_COMPLETIONS
+
+    case 18526:
+      return player_prop_types.GAME_PASSING_INTERCEPTIONS
 
     default:
       log(`unknown offercategoryId 1000 subcategoryId ${subcategoryId}`)
@@ -214,6 +256,9 @@ export const get_market_type_offer_1001 = (subcategoryId) => {
     case 9512:
       return player_prop_types.GAME_RECEIVING_YARDS
 
+    case 9513:
+      return player_prop_types.GAME_RECEIVING_TOUCHDOWNS
+
     case 9514:
       return player_prop_types.GAME_RUSHING_YARDS
 
@@ -222,6 +267,9 @@ export const get_market_type_offer_1001 = (subcategoryId) => {
 
     case 9519:
       return player_prop_types.GAME_RECEPTIONS
+
+    case 9520:
+      return player_prop_types.GAME_RUSHING_TOUCHDOWNS
 
     case 9523:
       return player_prop_types.GAME_RUSHING_RECEIVING_YARDS
@@ -246,6 +294,20 @@ export const get_market_type_offer_1001 = (subcategoryId) => {
 
     case 14126:
       return player_prop_types.GAME_LEADER_RUSHING_YARDS
+
+    case 14880:
+      return player_prop_types.GAME_LONGEST_RUSH
+
+    case 16074:
+    case 16575:
+    case 18488:
+    case 18491:
+    case 18494:
+      return player_prop_types.GAME_RUSHING_YARDS
+
+    case 16820:
+    case 18524:
+      return player_prop_types.GAME_RUSHING_ATTEMPTS
 
     default:
       log(`unknown offercategoryId 1001 subcategoryId ${subcategoryId}`)
@@ -315,8 +377,31 @@ export const get_market_type_offer_1342 = (subcategoryId) => {
     case 14124:
       return player_prop_types.GAME_LEADER_RECEIVING_YARDS
 
+    case 16233:
+      return player_prop_types.GAME_ALT_LONGEST_RECEPTION
+
     case 16821:
       return player_prop_types.GAME_ALT_RECEPTIONS
+
+    case 14225:
+    case 16574:
+    case 18489:
+    case 18492:
+    case 18495:
+      return player_prop_types.GAME_RECEIVING_YARDS
+
+    case 14881:
+      return player_prop_types.GAME_LONGEST_RECEPTION
+
+    case 18498:
+    case 18502:
+      return player_prop_types.GAME_LEADER_RECEIVING_YARDS
+
+    case 18520:
+      return player_prop_types.GAME_LEADER_RECEIVING_YARDS
+
+    case 18527:
+      return player_prop_types.GAME_RECEPTIONS
 
     default:
       log(`unknown offercategoryId 1342 subcategoryId ${subcategoryId}`)
@@ -497,23 +582,35 @@ export const get_market_type_offer_1076 = (subcategoryId) => {
 
 export const get_market_type_offer_528 = (subcategoryId) => {
   switch (subcategoryId) {
-    case 13459:
-      return game_props_types.GAME_OVERTIME
-
-    case 9590:
-      return game_props_types.GAME_TWO_POINT_CONVERSION
-
     case 4659:
       return game_props_types.GAME_TOTAL_POINTS_ODD_EVEN
 
-    case 9567:
-      return game_props_types.GAME_RACE_TO_POINTS
+    case 5873:
+      return game_props_types.GAME_WINNING_MARGIN
+
+    case 9313:
+      return game_props_types.GAME_FIRST_SCORING_PLAY_TYPE
+
+    case 9315:
+      return game_props_types.GAME_FIRST_TO_SCORE
+
+    case 9316:
+      return game_props_types.GAME_SAFETY_SCORED
+
+    case 9319:
+      return game_props_types.GAME_BOTH_TEAMS_TO_SCORE
 
     case 9325:
       return game_props_types.GAME_LAST_TO_SCORE
 
-    case 5873:
-      return game_props_types.GAME_WINNING_MARGIN
+    case 9567:
+      return game_props_types.GAME_RACE_TO_POINTS
+
+    case 9590:
+      return game_props_types.GAME_TWO_POINT_CONVERSION
+
+    case 13459:
+      return game_props_types.GAME_OVERTIME
 
     default:
       log(`unknown subcategory for offer category 528: ${subcategoryId}`)
@@ -563,6 +660,18 @@ const get_market_type_offer_492 = ({ subcategoryId, betOfferTypeId }) => {
         log(`unknown betOfferTypeId ${betOfferTypeId}`)
         return null
     }
+  }
+
+  if (subcategoryId === 8411) {
+    return team_game_market_types.GAME_MONEYLINE
+  }
+
+  if (subcategoryId === 9712) {
+    return game_props_types.GAME_HALF_TIME_FULL_TIME
+  }
+
+  if (subcategoryId === 10398) {
+    return game_props_types.GAME_HALF_TIME_FULL_TIME
   }
 
   if (subcategoryId === 13195 && betOfferTypeId === 1) {
