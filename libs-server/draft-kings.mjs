@@ -315,6 +315,9 @@ export const get_market_type_offer_1342 = (subcategoryId) => {
     case 14124:
       return player_prop_types.GAME_LEADER_RECEIVING_YARDS
 
+    case 16821:
+      return player_prop_types.GAME_ALT_RECEPTIONS
+
     default:
       log(`unknown offercategoryId 1342 subcategoryId ${subcategoryId}`)
       return null
