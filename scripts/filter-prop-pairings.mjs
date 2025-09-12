@@ -23,10 +23,10 @@ const data_path = path.join(__dirname, '../tmp')
 
 const default_options = {
   market_odds_max_threshold: 1,
-  current_season_soft_hit_rate_min_threshold: 1,
-  current_season_hard_hit_rate_min_threshold: 0.5,
-  current_season_opponent_allowed_rate_min_threshold: 1,
-  current_season_joint_historical_rate_min_threshold: 1,
+  current_season_soft_hit_rate_min_threshold: null,
+  current_season_hard_hit_rate_min_threshold: null,
+  current_season_opponent_allowed_rate_min_threshold: null,
+  current_season_joint_historical_rate_min_threshold: null,
   prop_hits_min_threshold: 1,
   pairing_size_max_threshold: 3,
   highest_payout_min_threshold: 100,

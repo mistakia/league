@@ -283,7 +283,7 @@ const generate_prop_pairings = async ({
       'current_week_prop_market_selections_index.esbid'
     )
     .whereNotNull(hits_field)
-    .where(hits_field, '>', min_hits)
+    .where(hits_field, '>=', min_hits)
     .where('prop_market_selections_index.odds_american', '<', 1000)
     .where('prop_market_selections_index.odds_american', '>', -350)
     .whereIn('current_week_prop_market_selections_index.market_type', [
