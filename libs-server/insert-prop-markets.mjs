@@ -56,14 +56,6 @@ const insert_market = async ({ timestamp, selections, ...market }) => {
         time_type: 'CLOSE'
       })
     }
-
-    const message = `New market detected on ${market.source_id} called \`${
-      market.source_market_name
-    }\` wtih ${market.selection_count} selections (open: ${
-      market.open ? 'yes' : 'no'
-    }, live: ${market.live ? 'yes' : 'no'})`
-
-    log(message)
   } else {
     // existing market might be newer than this current market snapshot
     const previous_market_row = await db('prop_markets_history')
@@ -137,31 +129,6 @@ const insert_market = async ({ timestamp, selections, ...market }) => {
             })
             .onConflict(['source_id', 'source_market_id', 'timestamp'])
             .merge()
-        }
-
-        const notify_on_change = ['open', 'selection_count']
-        // only notify on change if open or selection_count changes
-        const should_notify = differences.some((difference) =>
-          notify_on_change.includes(difference.path[0])
-        )
-
-        if (should_notify) {
-          // create message for discord notification based on differences
-          let message = `Market \`${market.source_market_name}\` on ${market.source_id} has changed.`
-          for (const difference of differences) {
-            const { kind, path, lhs, rhs } = difference
-            if (kind === 'E') {
-              message += `\n\`${path.join(
-                '.'
-              )}\` changed from \`${lhs}\` to \`${rhs}\``
-            } else if (kind === 'N') {
-              message += `\n\`${path.join('.')}\` added with value \`${rhs}\``
-            } else if (kind === 'D') {
-              message += `\n\`${path.join('.')}\` deleted with value \`${lhs}\``
-            }
-          }
-
-          log(message)
         }
       }
     }
