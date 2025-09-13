@@ -1,4 +1,4 @@
-import { blake2b } from 'blakejs'
+import { get_blake2b_hash } from '#libs-shared'
 
 export default function ({
   pa = 0,
@@ -49,9 +49,7 @@ export default function ({
 
   const key = core_key + extended_key
 
-  const scoring_format_hash = Array.from(blake2b(key, null, 32))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('')
+  const scoring_format_hash = get_blake2b_hash(key, 32)
 
   return {
     scoring_format_hash,

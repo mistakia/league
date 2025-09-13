@@ -1,5 +1,5 @@
 import express from 'express'
-import { blake2b } from 'blakejs'
+import { get_blake2b_hash } from '#libs-shared'
 
 import { validators } from '#libs-server'
 import db from '#db'
@@ -7,10 +7,7 @@ import db from '#db'
 const router = express.Router()
 
 const get_url_hash = (url) => {
-  const hash = Array.from(blake2b(url, null, 16))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('')
-  return hash
+  return get_blake2b_hash(url, 16)
 }
 
 /**
