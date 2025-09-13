@@ -92,7 +92,7 @@ const process_market_selection_hit_rates = async ({
 
   if (missing_only) {
     prop_selections_query.where(function () {
-      this.whereNull('prop_market_selections_index.result').orWhereNull(
+      this.whereNull('prop_market_selections_index.selection_result').orWhereNull(
         'prop_market_selections_index.overall_hit_rate_hard'
       )
     })
@@ -336,7 +336,7 @@ const process_market_selection_hit_rates = async ({
         unsupported_market_types
       })
 
-      update.result = wager_status
+      update.selection_result = wager_status
 
       const market_key = `${selection.source_id}:${selection.source_market_id}`
       if (!market_updates[market_key]) {
