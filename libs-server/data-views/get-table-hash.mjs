@@ -1,8 +1,6 @@
-import { blake2b } from 'blakejs'
+import { get_blake2b_hash } from '#libs-shared'
 
 export default function get_table_hash(key) {
-  const hash = Array.from(blake2b(key, null, 16))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('')
-  return `t${hash}`
+  const hash = get_blake2b_hash(key, 16, 't')
+  return hash
 }
