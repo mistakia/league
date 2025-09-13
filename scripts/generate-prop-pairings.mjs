@@ -2,10 +2,8 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import * as oddslib from 'oddslib'
-import { blake2b } from 'blakejs'
-
 import db from '#db'
-import { constants, groupBy } from '#libs-shared'
+import { constants, groupBy, get_blake2b_hash } from '#libs-shared'
 import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 import { is_main } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
@@ -26,10 +24,8 @@ const get_prop_pairing_id = (props) => {
     .map((p) => `${p.source_market_id}:${p.source_selection_id}`)
     .join('/')
 
-  const hash = Array.from(blake2b(sorted_props, null, 16))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('')
-  return `p${hash}`
+  const hash = get_blake2b_hash(sorted_props, 16, 'p')
+  return hash
 }
 
 const extract_week = (week_string) => {

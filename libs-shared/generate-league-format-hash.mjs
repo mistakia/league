@@ -1,4 +1,4 @@
-import { blake2b } from 'blakejs'
+import { get_blake2b_hash } from '#libs-shared'
 
 export default function ({
   num_teams = 0,
@@ -25,9 +25,7 @@ export default function ({
 
   const key = `${num_teams}${sqb}${srb}${swr}${ste}${srbwr}${srbwrte}${sqbrbwrte}${swrte}${sdst}${sk}${bench}${ps}${ir}${cap}${min_bid}${scoring_format_hash}`
 
-  const league_format_hash = Array.from(blake2b(key, null, 32))
-    .map((b) => b.toString(16).padStart(2, '0'))
-    .join('')
+  const league_format_hash = get_blake2b_hash(key, 32)
 
   return {
     league_format_hash,
