@@ -12,6 +12,7 @@ import {
   get_play_type_nfl,
   is_successful_play
 } from '#libs-server/play-stats-utils.mjs'
+import populate_nfl_year_week_timestamp from './populate-nfl-year-week-timestamp.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process-play-stats')
@@ -273,6 +274,22 @@ const main = async () => {
         dry_run,
         ignore_conflicts
       })
+    }
+
+    // Refresh nfl_year_week_timestamp materialized view after processing plays
+    if (!dry_run) {
+      log('Refreshing nfl_year_week_timestamp materialized view...')
+      try {
+        const refresh_year = year || constants.season.year
+        await populate_nfl_year_week_timestamp({ year: refresh_year })
+        log('Successfully refreshed nfl_year_week_timestamp')
+      } catch (refresh_error) {
+        log(
+          'Warning: Failed to refresh nfl_year_week_timestamp:',
+          refresh_error.message
+        )
+        // Don't fail the entire job if materialized view refresh fails
+      }
     }
   } catch (err) {
     error = err
