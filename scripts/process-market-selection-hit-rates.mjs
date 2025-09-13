@@ -92,9 +92,9 @@ const process_market_selection_hit_rates = async ({
 
   if (missing_only) {
     prop_selections_query.where(function () {
-      this.whereNull('prop_market_selections_index.selection_result').orWhereNull(
-        'prop_market_selections_index.overall_hit_rate_hard'
-      )
+      this.whereNull(
+        'prop_market_selections_index.selection_result'
+      ).orWhereNull('prop_market_selections_index.overall_hit_rate_hard')
     })
   }
 

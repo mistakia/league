@@ -1,9 +1,9 @@
-import { fetch as fetch_http2 } from 'fetch-h2'
 import debug from 'debug'
 
 import db from '#db'
 import * as cache from './cache.mjs'
 import { constants, bookmaker_constants } from '#libs-shared'
+import { fetch_with_retry } from './proxy-manager.mjs'
 
 const log = debug('pinnacle')
 
@@ -227,9 +227,17 @@ export const get_nfl_matchups = async ({ ignore_cache = false } = {}) => {
   const url = `${pinnacle_config.api_url}/leagues/889/matchups`
   log(`fetching ${url}`)
 
-  const response = await fetch_http2(url, {
-    headers: pinnacle_config.headers
-  })
+  const response = await fetch_with_retry(
+    url,
+    {
+      headers: pinnacle_config.headers
+    },
+    {
+      max_retries: 3,
+      use_proxy: true,
+      exponential_backoff: true
+    }
+  )
 
   const data = await response.json()
 
@@ -262,9 +270,17 @@ export const get_market_odds = async ({
   const url = `${pinnacle_config.api_url}/matchups/${matchup_id}/markets/related/straight`
   log(`fetching ${url}`)
 
-  const response = await fetch_http2(url, {
-    headers: pinnacle_config.headers
-  })
+  const response = await fetch_with_retry(
+    url,
+    {
+      headers: pinnacle_config.headers
+    },
+    {
+      max_retries: 3,
+      use_proxy: true,
+      exponential_backoff: true
+    }
+  )
 
   const data = await response.json()
 
