@@ -210,12 +210,27 @@ const format_market = async ({
       }
     }
 
+    // Determine selection_pid based on market type
+    let selection_pid = player_row?.pid || null
+
+    // For team-based game markets (moneyline, spread), use team abbreviation as selection_pid
+    if (pinnacle_matchup.type === 'matchup' && market_participant_name) {
+      try {
+        selection_pid = fixTeam(market_participant_name)
+      } catch (err) {
+        // If fixTeam fails, keep the original selection_pid
+        log(
+          `Failed to convert team name to abbreviation: ${market_participant_name}`
+        )
+      }
+    }
+
     selections.push({
       source_id: 'PINNACLE',
       source_market_id,
       source_selection_id: selection.participantId,
 
-      selection_pid: player_row?.pid || null,
+      selection_pid,
       selection_name: market_participant_name,
       selection_metric_line: selection.points,
       selection_type: pinnacle.format_selection_type(market_participant_name),
