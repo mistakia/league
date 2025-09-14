@@ -17,7 +17,10 @@ import {
 } from '#libs-server/prop-market-settlement/index.mjs'
 
 const argv = yargs(hideBin(process.argv))
-  .usage('$0 [options]', 'Process prop market results using the settlement system')
+  .usage(
+    '$0 [options]',
+    'Process prop market results using the settlement system'
+  )
   .option('year', {
     type: 'number',
     describe: 'Season year to process'
@@ -58,7 +61,10 @@ const argv = yargs(hideBin(process.argv))
   })
   .example('$0 --missing_only', 'Process only markets without results')
   .example('$0 --current_week_only --dry_run', 'Preview current week results')
-  .example('$0 --year 2024 --week 5', 'Process all markets for week 5 of 2024 season')
+  .example(
+    '$0 --year 2024 --week 5',
+    'Process all markets for week 5 of 2024 season'
+  )
   .help()
   .parse()
 const log = debug('process-market-results-modular')
@@ -169,7 +175,8 @@ const process_market_results = async ({
 
   // Filter by game status/week without expensive joins
   if (current_week_only || week !== undefined) {
-    const target_week = week !== undefined ? week : constants.season.nfl_seas_week
+    const target_week =
+      week !== undefined ? week : constants.season.nfl_seas_week
     const week_rows = await db('nfl_games')
       .select('esbid')
       .where('week', target_week)
@@ -273,7 +280,10 @@ const process_market_results = async ({
         if (!market_selection_counts.has(market_key)) {
           market_selection_counts.set(market_key, 0)
         }
-        market_selection_counts.set(market_key, market_selection_counts.get(market_key) + 1)
+        market_selection_counts.set(
+          market_key,
+          market_selection_counts.get(market_key) + 1
+        )
       }
 
       const selection_batches = chunk_array(markets, batch_size)
@@ -319,13 +329,16 @@ const process_market_results = async ({
               }
 
               const market_key = `${where_clause.source_id || 'unknown'}:${where_clause.source_market_id || 'unknown'}`
-              
+
               // Track successful processing for this market
               if (!market_processed_counts.has(market_key)) {
                 market_processed_counts.set(market_key, 0)
               }
-              market_processed_counts.set(market_key, market_processed_counts.get(market_key) + 1)
-              
+              market_processed_counts.set(
+                market_key,
+                market_processed_counts.get(market_key) + 1
+              )
+
               // Store or update market information
               if (!market_updates.has(market_key)) {
                 const market_info = fallback
@@ -374,14 +387,17 @@ const process_market_results = async ({
       // Determine if market should be settled based on selection processing
       const total_selections = market_selection_counts.get(market_key) || 0
       const processed_selections = market_processed_counts.get(market_key) || 0
-      const market_settled = total_selections > 0 && total_selections === processed_selections
-      
+      const market_settled =
+        total_selections > 0 && total_selections === processed_selections
+
       if (market_settled) {
-        log(`Market ${market_key}: ${processed_selections}/${total_selections} selections processed - marking as settled`)
+        log(
+          `Market ${market_key}: ${processed_selections}/${total_selections} selections processed - marking as settled`
+        )
       }
 
       const update_data = {
-        market_settled: market_settled,
+        market_settled,
         metric_result_value: market_update.metric_result_value
       }
 
@@ -406,7 +422,7 @@ const process_market_results = async ({
   log(`Total selections processed: ${processed_count}`)
   log(`Total errors: ${error_count}`)
   log(`Markets updated: ${market_updates_count}`)
-  
+
   // Calculate settlement statistics
   let fully_settled_count = 0
   let partially_settled_count = 0

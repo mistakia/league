@@ -38,7 +38,7 @@ const finalize_week = async () => {
 
   // Process market results after stats are updated
   log(`processing market results for week ${week}`)
-  await process_market_results({ 
+  await process_market_results({
     year: constants.season.year,
     current_week_only: false,
     missing_only: false

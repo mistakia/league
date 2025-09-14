@@ -147,8 +147,10 @@ export class TeamStatsHandler {
   async prefetch(esbids) {
     log(`Prefetching team stats for ${esbids.length} games`)
 
-    const aggregated_team_stats = await this._build_team_stats_query()
-      .whereIn('esbid', esbids)
+    const aggregated_team_stats = await this._build_team_stats_query().whereIn(
+      'esbid',
+      esbids
+    )
 
     // Cache by esbid for quick lookup
     for (const team_stat of aggregated_team_stats) {
@@ -206,7 +208,7 @@ export class TeamStatsHandler {
       selected_team_stats = aggregated_team_stats.find(
         (team_stat) => team_stat.tm === selection_type
       )
-      
+
       if (!selected_team_stats) {
         throw new Error(`No team stats found for team: ${selection_type}`)
       }
@@ -223,12 +225,17 @@ export class TeamStatsHandler {
     }
 
     // Sum all specified columns (handles both single and multiple columns)
-    return mapping.metric_columns.reduce((total_metric_value, gamelog_column) => {
-      const aggregated_column = TEAM_STATS_COLUMN_MAPPING[gamelog_column] || gamelog_column
-      return total_metric_value + (selected_team_stats[aggregated_column] || 0)
-    }, 0)
+    return mapping.metric_columns.reduce(
+      (total_metric_value, gamelog_column) => {
+        const aggregated_column =
+          TEAM_STATS_COLUMN_MAPPING[gamelog_column] || gamelog_column
+        return (
+          total_metric_value + (selected_team_stats[aggregated_column] || 0)
+        )
+      },
+      0
+    )
   }
-
 
   _determine_selection_result({
     metric_value,
@@ -254,20 +261,54 @@ export class TeamStatsHandler {
 
   _validate_selection_type(selection_type, mapping) {
     const valid_selection_types = ['OVER', 'UNDER']
-    
+
     if (mapping.team_filter) {
       // For team-filtered markets, validate that selection_type is a valid team code
-      const valid_team_codes = ['ARI', 'ATL', 'BAL', 'BUF', 'CAR', 'CHI', 'CIN', 'CLE', 
-                               'DAL', 'DEN', 'DET', 'GB', 'HOU', 'IND', 'JAX', 'KC', 
-                               'LV', 'LAC', 'LAR', 'MIA', 'MIN', 'NE', 'NO', 'NYG', 
-                               'NYJ', 'PHI', 'PIT', 'SF', 'SEA', 'TB', 'TEN', 'WAS']
-      
+      const valid_team_codes = [
+        'ARI',
+        'ATL',
+        'BAL',
+        'BUF',
+        'CAR',
+        'CHI',
+        'CIN',
+        'CLE',
+        'DAL',
+        'DEN',
+        'DET',
+        'GB',
+        'HOU',
+        'IND',
+        'JAX',
+        'KC',
+        'LV',
+        'LAC',
+        'LAR',
+        'MIA',
+        'MIN',
+        'NE',
+        'NO',
+        'NYG',
+        'NYJ',
+        'PHI',
+        'PIT',
+        'SF',
+        'SEA',
+        'TB',
+        'TEN',
+        'WAS'
+      ]
+
       if (!valid_team_codes.includes(selection_type)) {
-        throw new Error(`Invalid team code: ${selection_type}. Expected one of: ${valid_team_codes.join(', ')}`)
+        throw new Error(
+          `Invalid team code: ${selection_type}. Expected one of: ${valid_team_codes.join(', ')}`
+        )
       }
     } else {
       if (!valid_selection_types.includes(selection_type)) {
-        throw new Error(`Invalid selection type: ${selection_type}. Expected one of: ${valid_selection_types.join(', ')}`)
+        throw new Error(
+          `Invalid selection type: ${selection_type}. Expected one of: ${valid_selection_types.join(', ')}`
+        )
       }
     }
   }
@@ -282,8 +323,10 @@ export class TeamStatsHandler {
     }
 
     // Query database
-    const aggregated_team_stats = await this._build_team_stats_query()
-      .where('esbid', esbid)
+    const aggregated_team_stats = await this._build_team_stats_query().where(
+      'esbid',
+      esbid
+    )
 
     return aggregated_team_stats
   }
@@ -330,7 +373,9 @@ export class TeamStatsHandler {
     )
     return (
       Math.round(
-        ((total_cached_team_stats * estimated_bytes_per_team_stat) / (1024 * 1024)) * 100
+        ((total_cached_team_stats * estimated_bytes_per_team_stat) /
+          (1024 * 1024)) *
+          100
       ) / 100
     )
   }
@@ -339,15 +384,15 @@ export class TeamStatsHandler {
     if (!esbid) {
       throw new Error('esbid is required for team stats calculation')
     }
-    
+
     if (!market_type) {
       throw new Error('market_type is required for team stats calculation')
     }
-    
+
     if (!mapping) {
       throw new Error('mapping is required for team stats calculation')
     }
-    
+
     if (!selection_type) {
       throw new Error('selection_type is required for team stats calculation')
     }

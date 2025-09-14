@@ -10,7 +10,10 @@ import { groupBy, constants } from '#libs-shared'
 import { player_game_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 
 const argv = yargs(hideBin(process.argv))
-  .usage('$0 [options]', 'Calculate historical hit rates for prop market selections')
+  .usage(
+    '$0 [options]',
+    'Calculate historical hit rates for prop market selections'
+  )
   .option('year', {
     type: 'number',
     describe: 'Season year to process',
@@ -36,7 +39,10 @@ const argv = yargs(hideBin(process.argv))
     describe: 'Number of selections to process per batch'
   })
   .example('$0 --missing_only', 'Process only missing hit rates')
-  .example('$0 --market_types GAME_PASSING_YARDS', 'Process specific market type')
+  .example(
+    '$0 --market_types GAME_PASSING_YARDS',
+    'Process specific market type'
+  )
   .help()
   .parse()
 

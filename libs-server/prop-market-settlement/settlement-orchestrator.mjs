@@ -21,10 +21,12 @@ export class SettlementOrchestrator {
     this.calculators.set(calculator_type, calculator_instance)
   }
 
-
   _get_calculator_type_cached(market_type) {
     if (!this.market_type_cache.has(market_type)) {
-      this.market_type_cache.set(market_type, get_handler_for_market_type(market_type))
+      this.market_type_cache.set(
+        market_type,
+        get_handler_for_market_type(market_type)
+      )
     }
     return this.market_type_cache.get(market_type)
   }
@@ -104,10 +106,11 @@ export class SettlementOrchestrator {
   }
 
   async batch_calculate_markets(markets) {
-    const { groups: calculator_batches, unsupported } = this._group_markets_by_calculator(markets)
+    const { groups: calculator_batches, unsupported } =
+      this._group_markets_by_calculator(markets)
 
     // Process unsupported markets first
-    const unsupported_results = unsupported.map(market => ({
+    const unsupported_results = unsupported.map((market) => ({
       ...market,
       error: `Unsupported market type: ${market.market_type}`,
       selection_result: null
@@ -119,7 +122,7 @@ export class SettlementOrchestrator {
         const calculator = this.calculators.get(calculator_type)
         if (!calculator) {
           log(`Handler not found for type: ${calculator_type}`)
-          return calculator_markets.map(market => ({
+          return calculator_markets.map((market) => ({
             ...market,
             error: `Handler not registered for type: ${calculator_type}`,
             selection_result: null
@@ -151,7 +154,7 @@ export class SettlementOrchestrator {
     )
 
     const batch_results = await Promise.all(batch_promises)
-    
+
     // Include unsupported market results
     return [...unsupported_results, ...batch_results.flat()]
   }
@@ -161,7 +164,9 @@ export class SettlementOrchestrator {
     const unsupported = []
 
     for (const market of markets) {
-      const calculator_type = this._get_calculator_type_cached(market.market_type)
+      const calculator_type = this._get_calculator_type_cached(
+        market.market_type
+      )
 
       if (calculator_type === HANDLER_TYPES.UNSUPPORTED) {
         unsupported.push(market)
@@ -184,7 +189,9 @@ export class SettlementOrchestrator {
 
     // Determine what calculators we need
     for (const market of markets) {
-      const calculator_type = this._get_calculator_type_cached(market.market_type)
+      const calculator_type = this._get_calculator_type_cached(
+        market.market_type
+      )
       if (calculator_type !== HANDLER_TYPES.UNSUPPORTED) {
         calculator_types.add(calculator_type)
       }
@@ -261,10 +268,10 @@ export class SettlementOrchestrator {
     const health_promises = Array.from(this.calculators).map(
       async ([calculator_type, calculator]) => {
         try {
-          const healthy = calculator.health_check 
+          const healthy = calculator.health_check
             ? await calculator.health_check()
             : true
-          
+
           if (detailed) {
             return {
               calculator_type,
@@ -272,7 +279,7 @@ export class SettlementOrchestrator {
               error: null
             }
           }
-          
+
           return [calculator_type, healthy]
         } catch (error) {
           if (detailed) {
@@ -282,21 +289,20 @@ export class SettlementOrchestrator {
               error: error.message
             }
           }
-          
+
           return [calculator_type, false]
         }
       }
     )
 
     const results = await Promise.all(health_promises)
-    
+
     if (detailed) {
       return results
     }
-    
+
     return Object.fromEntries(results)
   }
-
 
   clear_cache() {
     this.market_type_cache.clear()
