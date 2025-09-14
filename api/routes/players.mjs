@@ -896,11 +896,10 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
  *                         type: string
  *                         description: Event name from sportsbook
  *                         example: "Kansas City Chiefs @ Buffalo Bills"
- *                       winning_selection_id:
- *                         type: string
- *                         nullable: true
- *                         description: ID of winning selection (if market is settled)
- *                         example: "sel_11111"
+ *                       market_settled:
+ *                         type: boolean
+ *                         description: Whether the market has been settled
+ *                         example: false
  *                       metric_result_value:
  *                         type: number
  *                         nullable: true
@@ -954,7 +953,7 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
  *                                   type: string
  *                                   description: Unique selection identifier from sportsbook
  *                                   example: "sel_11111"
- *                                 result:
+ *                                 selection_result:
  *                                   type: string
  *                                   nullable: true
  *                                   enum: ["WIN", "LOSE", "PUSH", null]
@@ -1027,8 +1026,7 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
  *                     source_event_name: "Kansas City Chiefs @ Buffalo Bills"
  *                     open: true
  *                     live: false
- *                     settled: false
- *                     winning_selection_id: null
+ *                     market_settled: false
  *                     metric_result_value: null
  *                     time_type: "CLOSE"
  *                     timestamp: "2024-01-14T15:30:00Z"
@@ -1073,8 +1071,7 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
  *                     source_event_name: "San Francisco 49ers @ Green Bay Packers"
  *                     open: false
  *                     live: false
- *                     settled: true
- *                     winning_selection_id: "sel_33333"
+ *                     market_settled: true
  *                     metric_result_value: 98.0
  *                     time_type: "CLOSE"
  *                     timestamp: "2024-01-07T16:30:00Z"
@@ -1131,7 +1128,7 @@ router.get('/:pid/markets/?', async (req, res) => {
         'prop_market_selections_index.selection_name',
         'prop_market_selections_index.selection_metric_line',
         'prop_market_selections_index.selection_type',
-        'prop_market_selections_index.result',
+        'prop_market_selections_index.selection_result',
         'prop_market_selections_index.odds_decimal',
         'prop_market_selections_index.odds_american',
         'prop_market_selections_index.timestamp as selection_timestamp',
@@ -1181,8 +1178,7 @@ router.get('/:pid/markets/?', async (req, res) => {
           source_event_name: row.source_event_name,
           open: row.open,
           live: row.live,
-          settled: row.settled,
-          winning_selection_id: row.winning_selection_id,
+          market_settled: row.market_settled,
           metric_result_value: row.metric_result_value,
           time_type: row.time_type,
           timestamp: row.timestamp,
@@ -1201,7 +1197,7 @@ router.get('/:pid/markets/?', async (req, res) => {
         selection_name: row.selection_name,
         selection_metric_line: row.selection_metric_line,
         selection_type: row.selection_type,
-        result: row.result,
+        selection_result: row.selection_result,
         odds_decimal: row.odds_decimal,
         odds_american: row.odds_american,
         timestamp: row.selection_timestamp,

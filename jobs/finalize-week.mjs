@@ -12,6 +12,7 @@ import process_matchups from '#scripts/process-matchups.mjs'
 import process_playoffs from '#scripts/process-playoffs.mjs'
 import update_stats_weekly from '#scripts/update-stats-weekly.mjs'
 import calculate_league_careerlogs from '#scripts/calculate-league-careerlogs.mjs'
+import process_market_results from '#scripts/process-market-results.mjs'
 
 const log = debug('finalize-week')
 
@@ -34,6 +35,14 @@ const finalize_week = async () => {
   // await import_plays_nfl_v3({ week, ignore_cache: true, force_update: true })
 
   await update_stats_weekly()
+
+  // Process market results after stats are updated
+  log(`processing market results for week ${week}`)
+  await process_market_results({ 
+    year: constants.season.year,
+    current_week_only: false,
+    missing_only: false
+  })
 
   const lid = 1
   await process_matchups({ lid })
