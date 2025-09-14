@@ -163,12 +163,18 @@ export class PlayerGamelogHandler {
   _buildGamelogQuery(baseQuery) {
     return baseQuery
       .leftJoin('player_receiving_gamelogs', function () {
-        this.on('player_gamelogs.esbid', '=', 'player_receiving_gamelogs.esbid')
-            .andOn('player_gamelogs.pid', '=', 'player_receiving_gamelogs.pid')
+        this.on(
+          'player_gamelogs.esbid',
+          '=',
+          'player_receiving_gamelogs.esbid'
+        ).andOn('player_gamelogs.pid', '=', 'player_receiving_gamelogs.pid')
       })
       .leftJoin('player_rushing_gamelogs', function () {
-        this.on('player_gamelogs.esbid', '=', 'player_rushing_gamelogs.esbid')
-            .andOn('player_gamelogs.pid', '=', 'player_rushing_gamelogs.pid')
+        this.on(
+          'player_gamelogs.esbid',
+          '=',
+          'player_rushing_gamelogs.esbid'
+        ).andOn('player_gamelogs.pid', '=', 'player_rushing_gamelogs.pid')
       })
       .select(
         'player_gamelogs.*',
@@ -179,12 +185,16 @@ export class PlayerGamelogHandler {
 
   _validate_metric_columns(gamelog, mapping) {
     if (!mapping.metric_columns || mapping.metric_columns.length === 0) {
-      throw new Error(`No metric columns defined for mapping: ${JSON.stringify(mapping)}`)
+      throw new Error(
+        `No metric columns defined for mapping: ${JSON.stringify(mapping)}`
+      )
     }
 
     for (const col of mapping.metric_columns) {
       if (!(col in gamelog)) {
-        throw new Error(`Metric column '${col}' not found in gamelog data. Available columns: ${Object.keys(gamelog).join(', ')}`)
+        throw new Error(
+          `Metric column '${col}' not found in gamelog data. Available columns: ${Object.keys(gamelog).join(', ')}`
+        )
       }
     }
   }
@@ -216,9 +226,11 @@ export class PlayerGamelogHandler {
     if (mapping.special_logic === 'anytime_touchdown') {
       // Validate that special logic has required selection types
       if (selection_type !== 'YES' && selection_type !== 'NO') {
-        throw new Error(`Invalid selection type '${selection_type}' for anytime touchdown. Expected 'YES' or 'NO'`)
+        throw new Error(
+          `Invalid selection type '${selection_type}' for anytime touchdown. Expected 'YES' or 'NO'`
+        )
       }
-      
+
       // For anytime touchdown, metric_value is already 1 or 0
       if (selection_type === 'YES') {
         return metric_value === 1 ? 'WON' : 'LOST'
