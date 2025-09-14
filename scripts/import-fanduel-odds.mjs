@@ -18,7 +18,7 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-fanduel')
-debug.enable('import-fanduel,get-player,fanduel,insert-prop-market')
+debug.enable('import-fanduel,get-player,fanduel,insert-prop-markets')
 
 const get_player_ignore_markets = [
   'COACH_OF_THE_YEAR',

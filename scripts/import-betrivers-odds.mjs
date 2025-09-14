@@ -18,7 +18,7 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-betrivers-odds')
-debug.enable('import-betrivers-odds,insert-prop-market')
+debug.enable('import-betrivers-odds,insert-prop-markets')
 
 const format_market = async ({
   betrivers_market,
