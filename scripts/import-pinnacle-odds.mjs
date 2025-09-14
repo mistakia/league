@@ -24,7 +24,7 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 const CONCURRENCY_LIMIT = 10
 const BATCH_WAIT_TIME = 5000
 const DEBUG_MODULES =
-  'import-pinnacle-odds,pinnacle,get-player,insert-prop-market,insert-prop-market-selections'
+  'import-pinnacle-odds,pinnacle,get-player,insert-prop-markets,insert-prop-market-selections'
 
 // Command line arguments
 const argv = yargs(hideBin(process.argv))

@@ -17,7 +17,7 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-betmgm-odds')
-debug.enable('import-betmgm-odds,get-player,betmgm,insert-prop-market')
+debug.enable('import-betmgm-odds,get-player,betmgm,insert-prop-markets')
 
 const team_name_re = /\(([^)]+)\)/
 

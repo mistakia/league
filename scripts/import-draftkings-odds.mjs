@@ -101,7 +101,7 @@ const argv = yargs(hideBin(process.argv))
   ).argv
 const log = debug('import-draft-kings')
 debug.enable(
-  'import-draft-kings,get-player,draftkings,insert-prop-market,insert-prop-market-selections'
+  'import-draft-kings,get-player,draftkings,insert-prop-markets,insert-prop-market-selections'
 )
 
 // Helper function to validate team names before passing to fixTeam

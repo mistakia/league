@@ -23,7 +23,7 @@ import {
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-fanatics-odds')
-debug.enable('import-fanatics-odds,get-player,insert-prop-market,fanatics')
+debug.enable('import-fanatics-odds,get-player,insert-prop-markets,fanatics')
 
 const format_market = async ({
   market,

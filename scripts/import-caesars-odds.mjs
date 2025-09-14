@@ -18,7 +18,7 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-caesars')
-debug.enable('import-caesars,get-player,caesars,insert-prop-market')
+debug.enable('import-caesars,get-player,caesars,insert-prop-markets')
 
 const format_market = async ({
   caesars_market,
