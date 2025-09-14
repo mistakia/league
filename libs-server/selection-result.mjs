@@ -1,4 +1,8 @@
-import { player_game_prop_types } from '#libs-shared/bookmaker-constants.mjs'
+import {
+  player_game_prop_types,
+  player_first_quarter_prop_types,
+  team_game_market_types
+} from '#libs-shared/bookmaker-constants.mjs'
 
 export const get_selection_result = ({
   line,
@@ -6,7 +10,9 @@ export const get_selection_result = ({
   player_gamelog,
   strict,
   selection_type,
-  unsupported_market_types = new Set()
+  selection_pid, // Player or team ID for the selection
+  unsupported_market_types = new Set(),
+  game_data = null // For team markets that need game outcome data
 }) => {
   const compare = (value, line, selection_type) => {
     if (selection_type === 'UNDER' || selection_type === 'NO') {
@@ -120,6 +126,31 @@ export const get_selection_result = ({
       }
     }
 
+    // Additional player stat markets
+    case player_game_prop_types.GAME_RECEIVING_TARGETS:
+      if (strict) {
+        return compare(player_gamelog.trg, line, selection_type)
+      } else {
+        const cushion = Math.round(line * 0.15)
+        return compare(player_gamelog.trg, line - cushion, selection_type)
+      }
+
+    // Longest play markets - these require play-by-play data
+    case player_game_prop_types.GAME_LONGEST_RECEPTION:
+      return compare(
+        player_gamelog.longest_reception || 0,
+        line,
+        selection_type
+      )
+
+    case player_game_prop_types.GAME_LONGEST_RUSH:
+      return compare(player_gamelog.longest_rush || 0, line, selection_type)
+
+    case player_game_prop_types.GAME_PASSING_LONGEST_COMPLETION:
+      return compare(player_gamelog.longest_pass || 0, line, selection_type)
+
+    // First quarter markets - use proper constants
+    case player_first_quarter_prop_types.GAME_FIRST_QUARTER_PASSING_YARDS:
     case player_game_prop_types.GAME_FIRST_QUARTER_ALT_PASSING_YARDS: {
       if (strict) {
         return compare(
@@ -137,6 +168,7 @@ export const get_selection_result = ({
       }
     }
 
+    case player_first_quarter_prop_types.GAME_FIRST_QUARTER_RUSHING_YARDS:
     case player_game_prop_types.GAME_FIRST_QUARTER_ALT_RUSHING_YARDS: {
       if (strict) {
         return compare(
@@ -154,6 +186,7 @@ export const get_selection_result = ({
       }
     }
 
+    case player_first_quarter_prop_types.GAME_FIRST_QUARTER_RECEIVING_YARDS:
     case player_game_prop_types.GAME_FIRST_QUARTER_ALT_RECEIVING_YARDS: {
       if (strict) {
         return compare(
@@ -170,6 +203,56 @@ export const get_selection_result = ({
         )
       }
     }
+
+    // Team game outcome markets - these require game outcome data
+    case team_game_market_types.GAME_MONEYLINE:
+      // For moneyline, selection_pid is the team_id, and we compare against game winner
+      if (
+        game_data &&
+        game_data.home_score !== undefined &&
+        game_data.away_score !== undefined
+      ) {
+        const winner =
+          game_data.home_score > game_data.away_score
+            ? game_data.h
+            : game_data.away_score > game_data.home_score
+              ? game_data.v
+              : 'TIE'
+        if (winner === 'TIE') {
+          return 'PUSH'
+        }
+        return winner === selection_pid ? 'WON' : 'LOST'
+      }
+      return null // No game result available
+
+    case team_game_market_types.GAME_SPREAD:
+      // For spread, selection_pid is the team_id, line is the spread
+      if (
+        game_data &&
+        game_data.home_score !== undefined &&
+        game_data.away_score !== undefined &&
+        selection_pid
+      ) {
+        const point_differential = game_data.home_score - game_data.away_score
+        const adjusted_differential =
+          selection_pid === game_data.h
+            ? point_differential
+            : -point_differential
+        return compare(adjusted_differential, -line, 'OVER') // Spread is typically negative for favorites
+      }
+      return null
+
+    case team_game_market_types.GAME_TOTAL:
+      // For totals, we compare total points against the line using selection_type (OVER/UNDER)
+      if (
+        game_data &&
+        game_data.home_score !== undefined &&
+        game_data.away_score !== undefined
+      ) {
+        const total_points = game_data.home_score + game_data.away_score
+        return compare(total_points, line, selection_type)
+      }
+      return null
 
     default:
       unsupported_market_types.add(market_type)

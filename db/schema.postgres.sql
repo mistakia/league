@@ -1526,6 +1526,7 @@ DROP INDEX IF EXISTS public.idx_prop_pairings_hist_edge_soft;
 DROP INDEX IF EXISTS public.idx_prop_pairings_highest_payout;
 DROP INDEX IF EXISTS public.idx_prop_pairing_props_composite;
 DROP INDEX IF EXISTS public.idx_prop_markets_index_market_time_year;
+DROP INDEX IF EXISTS public.idx_prop_markets_index_market_settled;
 DROP INDEX IF EXISTS public.idx_prop_market_selections_index_composite;
 DROP INDEX IF EXISTS public.idx_prop_market_selections_composite;
 DROP INDEX IF EXISTS public.idx_projections_pid;
@@ -20664,7 +20665,7 @@ CREATE TABLE public.prop_market_selections_index (
     selection_metric_line numeric(6,1),
     odds_decimal numeric(15,3),
     odds_american integer,
-    result public.wager_status,
+    selection_result public.wager_status,
     "timestamp" integer NOT NULL,
     time_type public.time_type NOT NULL,
     current_season_hit_rate_hard numeric(5,4),
@@ -20721,11 +20722,11 @@ CREATE TABLE public.prop_markets_index (
     open boolean,
     live boolean,
     selection_count integer NOT NULL,
-    winning_selection_id character varying(255),
     metric_result_value numeric(6,1),
     time_type public.time_type NOT NULL,
     "timestamp" integer NOT NULL,
-    year smallint
+    year smallint,
+    market_settled boolean DEFAULT false
 );
 
 
@@ -24581,6 +24582,13 @@ CREATE INDEX idx_prop_market_selections_composite ON public.prop_market_selectio
 --
 
 CREATE INDEX idx_prop_market_selections_index_composite ON public.prop_market_selections_index USING btree (selection_pid, source_market_id, source_id, time_type);
+
+
+--
+-- Name: idx_prop_markets_index_market_settled; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_prop_markets_index_market_settled ON public.prop_markets_index USING btree (market_settled) WHERE (market_settled = false);
 
 
 --

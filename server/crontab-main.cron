@@ -239,8 +239,11 @@
 
 # Betting Markets
 
-## Every 20 minutes
-*/20 * * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-market-selection-hit-rates.mjs --missing_only &>> /var/log/league/league-process-market-selection-hit-rates.log
+## Every 20 minutes - Hit rates calculation
+*/20 * * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/calculate-historical-hit-rates.mjs --missing_only &>> /var/log/league/league-calculate-hit-rates.log
+
+## Market processing after daily stats import (3:30 AM)
+30 3 * 1,2,9-12 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-market-results.mjs --current_week_only &>> /var/log/league/league-process-market-results-daily.log
 
 
 
