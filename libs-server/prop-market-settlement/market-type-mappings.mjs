@@ -214,6 +214,24 @@ export const market_type_mappings = {
     quarter_filter: 1,
     special_logic: 'count_attempts'
   },
+  [player_first_quarter_prop_types.GAME_FIRST_QUARTER_PASSING_ATTEMPTS]: {
+    handler: HANDLER_TYPES.NFL_PLAYS,
+    player_column: 'psr_pid', // passer
+    metric_columns: ['pass'], // Count passing attempts by counting pass plays
+    has_metric_value: true,
+    selection_types: ['OVER', 'UNDER'],
+    quarter_filter: 1,
+    special_logic: 'count_attempts'
+  },
+  [player_first_quarter_prop_types.GAME_FIRST_QUARTER_PASSING_INTERCEPTIONS]: {
+    handler: HANDLER_TYPES.NFL_PLAYS,
+    player_column: 'psr_pid', // passer
+    metric_columns: ['int'], // interception indicator
+    has_metric_value: true,
+    selection_types: ['OVER', 'UNDER'],
+    quarter_filter: 1,
+    special_logic: 'count_attempts'
+  },
 
   // First half markets - use NFL plays data for quarters 1 and 2
   [player_first_half_alt_prop_types.GAME_FIRST_HALF_ALT_RUSHING_YARDS]: {

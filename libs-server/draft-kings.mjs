@@ -239,13 +239,13 @@ export const get_market_type_offer_1000 = (subcategoryId) => {
       return player_prop_types.GAME_LEADER_PASSING_YARDS
 
     case 18522:
-      return player_prop_types.GAME_PASSING_ATTEMPTS
+      return player_prop_types.GAME_FIRST_QUARTER_PASSING_ATTEMPTS
 
     case 18523:
       return player_prop_types.GAME_PASSING_COMPLETIONS
 
     case 18526:
-      return player_prop_types.GAME_PASSING_INTERCEPTIONS
+      return player_prop_types.GAME_FIRST_QUARTER_PASSING_INTERCEPTIONS
 
     default:
       log(`unknown offercategoryId 1000 subcategoryId ${subcategoryId}`)
