@@ -7,6 +7,7 @@ import oddslib from 'oddslib'
 
 import db from '#db'
 import { constants, fixTeam } from '#libs-shared'
+import { chunk_array } from '#libs-shared/chunk.mjs'
 import {
   is_main,
   pinnacle,
@@ -578,16 +579,17 @@ const process_matchup_batches = async ({
   }
 
   // Process matchups in concurrent batches
-  for (let i = 0; i < pinnacle_matchups.length; i += CONCURRENCY_LIMIT) {
-    const batch = pinnacle_matchups.slice(i, i + CONCURRENCY_LIMIT)
+  const matchup_batches = chunk_array({
+    items: pinnacle_matchups,
+    chunk_size: CONCURRENCY_LIMIT
+  })
+  for (const [batch_index, batch] of matchup_batches.entries()) {
     await process_batch(batch)
 
     // Add delay between batches if not ignoring wait
-    if (!ignore_wait && i + CONCURRENCY_LIMIT < pinnacle_matchups.length) {
-      const current_batch = Math.floor(i / CONCURRENCY_LIMIT) + 1
-      const total_batches = Math.ceil(
-        pinnacle_matchups.length / CONCURRENCY_LIMIT
-      )
+    if (!ignore_wait && batch_index + 1 < matchup_batches.length) {
+      const current_batch = batch_index + 1
+      const total_batches = matchup_batches.length
       log(
         `Batch ${current_batch}/${total_batches} complete, waiting ${BATCH_WAIT_TIME / 1000} seconds...`
       )

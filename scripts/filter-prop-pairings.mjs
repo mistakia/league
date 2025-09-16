@@ -10,6 +10,7 @@ import { Table } from 'console-table-printer'
 
 import db from '#db'
 import { constants, groupBy } from '#libs-shared'
+import { chunk_array } from '#libs-shared/chunk.mjs'
 import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 import { is_main } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
@@ -120,10 +121,7 @@ const opponent_allowed_for_prop_is_negative = ({
 const batch_size = 10000 // Adjust this value based on your database's capabilities
 
 const fetch_prop_pairing_props = async (pairing_ids) => {
-  const batches = []
-  for (let i = 0; i < pairing_ids.length; i += batch_size) {
-    batches.push(pairing_ids.slice(i, i + batch_size))
-  }
+  const batches = chunk_array({ items: pairing_ids, chunk_size: batch_size })
 
   let all_prop_pairing_props = []
 
