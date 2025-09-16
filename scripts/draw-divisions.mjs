@@ -5,6 +5,7 @@ import { Table } from 'console-table-printer'
 
 import db from '#db'
 import { constants, sum } from '#libs-shared'
+import { chunk_mutating } from '#libs-shared/chunk.mjs'
 import { is_main, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -66,10 +67,7 @@ const run = async ({ lid, print = true, dry_run = false, num_divisions }) => {
 
   const sorted = powerIndexes.sort((a, b) => b.powerIndex - a.powerIndex)
   const poolLimit = num_divisions
-  const pools = []
-  while (sorted.length > 0) {
-    pools.push(sorted.splice(0, poolLimit))
-  }
+  const pools = chunk_mutating({ items: sorted, chunk_size: poolLimit })
 
   if (print) {
     pools.forEach((pool, index) => {

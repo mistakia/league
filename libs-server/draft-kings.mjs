@@ -229,8 +229,10 @@ export const get_market_type_offer_1000 = (subcategoryId) => {
 
     case 18487:
     case 18490:
-    case 18493:
       return player_prop_types.GAME_PASSING_YARDS
+
+    case 18493:
+      return player_prop_types.GAME_FIRST_HALF_ALT_PASSING_YARDS
 
     case 18496:
     case 18500:
@@ -298,16 +300,23 @@ export const get_market_type_offer_1001 = (subcategoryId) => {
     case 14880:
       return player_prop_types.GAME_LONGEST_RUSH
 
-    case 16074:
-    case 16575:
     case 18488:
+      return player_prop_types.GAME_FIRST_QUARTER_RUSHING_YARDS
+
     case 18491:
-    case 18494:
       return player_prop_types.GAME_RUSHING_YARDS
 
+    case 16575:
+      return player_prop_types.GAME_FIRST_QUARTER_ALT_RUSHING_YARDS
+
+    case 18494:
+      return player_prop_types.GAME_FIRST_HALF_ALT_RUSHING_YARDS
+
     case 16820:
-    case 18524:
       return player_prop_types.GAME_RUSHING_ATTEMPTS
+
+    case 18524:
+      return player_prop_types.GAME_FIRST_QUARTER_RUSHING_ATTEMPTS
 
     default:
       log(`unknown offercategoryId 1001 subcategoryId ${subcategoryId}`)
@@ -329,8 +338,10 @@ export const get_market_type_offer_1002 = (subcategoryId) => {
 export const get_market_type_offer_1003 = (subcategoryId) => {
   switch (subcategoryId) {
     case 11819:
-    case 12438:
       return player_prop_types.ANYTIME_TOUCHDOWN
+
+    case 12438:
+      return player_prop_types.GAME_TWO_PLUS_TOUCHDOWNS
 
     case 11820:
       return player_prop_types.GAME_FIRST_TEAM_TOUCHDOWN_SCORER
@@ -383,12 +394,17 @@ export const get_market_type_offer_1342 = (subcategoryId) => {
     case 16821:
       return player_prop_types.GAME_ALT_RECEPTIONS
 
-    case 14225:
-    case 16574:
     case 18489:
+      return player_prop_types.GAME_FIRST_QUARTER_ALT_RECEIVING_YARDS
+
     case 18492:
-    case 18495:
       return player_prop_types.GAME_RECEIVING_YARDS
+
+    case 18495:
+      return player_prop_types.GAME_FIRST_HALF_ALT_RECEIVING_YARDS
+
+    case 16574:
+      return player_prop_types.GAME_FIRST_QUARTER_ALT_RECEIVING_YARDS
 
     case 14881:
       return player_prop_types.GAME_LONGEST_RECEPTION
@@ -401,7 +417,7 @@ export const get_market_type_offer_1342 = (subcategoryId) => {
       return player_prop_types.GAME_LEADER_RECEIVING_YARDS
 
     case 18527:
-      return player_prop_types.GAME_RECEPTIONS
+      return player_prop_types.GAME_FIRST_QUARTER_RECEPTIONS
 
     default:
       log(`unknown offercategoryId 1342 subcategoryId ${subcategoryId}`)

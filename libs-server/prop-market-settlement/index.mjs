@@ -1,15 +1,17 @@
+// Only export what's actually used
 export { SettlementOrchestrator } from './settlement-orchestrator.mjs'
-export { PlayerGamelogHandler } from './player-gamelog-handler.mjs'
-export { NFLPlaysHandler } from './nfl-plays-handler.mjs'
-export { NFLGamesHandler } from './nfl-games-handler.mjs'
-export { TeamStatsHandler } from './team-stats-handler.mjs'
-
 export {
-  market_type_mappings,
-  get_handler_for_market_type,
   get_supported_market_types,
   get_unsupported_market_types,
   get_market_types_by_data_source,
-  HANDLER_TYPES,
-  DATA_SOURCE_REQUIREMENTS
+  HANDLER_TYPES
 } from './market-type-mappings.mjs'
+
+// Core utilities used by main script
+export { preload_game_data } from './data-preloader.mjs'
+export { write_selection_results_to_db } from './selection-result-writer.mjs'
+export {
+  format_duration,
+  validate_games_with_data,
+  fetch_markets_for_games
+} from './prop-market-utils.mjs'

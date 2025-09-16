@@ -7,6 +7,7 @@ import db from '#db'
 import { is_main, report_job, selection_result } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { groupBy, constants } from '#libs-shared'
+import { chunk_array } from '#libs-shared/chunk.mjs'
 import { player_game_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 
 const argv = yargs(hideBin(process.argv))
@@ -253,10 +254,10 @@ const calculate_historical_hit_rates = async ({
   const player_gamelogs_by_pid = groupBy(enhanced_player_gamelogs, 'pid')
 
   // Process selections in batches
-  const batches = []
-  for (let i = 0; i < prop_selections.length; i += batch_size) {
-    batches.push(prop_selections.slice(i, i + batch_size))
-  }
+  const batches = chunk_array({
+    items: prop_selections,
+    chunk_size: batch_size
+  })
 
   log(
     `Processing ${batches.length} batches of up to ${batch_size} selections each`

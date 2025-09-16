@@ -4,6 +4,7 @@ import { hideBin } from 'yargs/helpers'
 import * as oddslib from 'oddslib'
 import db from '#db'
 import { constants, groupBy, get_blake2b_hash } from '#libs-shared'
+import { chunk_array } from '#libs-shared/chunk.mjs'
 import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 import { is_main } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
@@ -459,8 +460,11 @@ const generate_prop_pairings = async ({
     await db.transaction(async (trx) => {
       await trx.raw("set local synchronous_commit = 'off'")
 
-      for (let i = 0; i < prop_pairing_inserts.length; i += chunk_size) {
-        const chunk = prop_pairing_inserts.slice(i, i + chunk_size)
+      const pairing_chunks = chunk_array({
+        items: prop_pairing_inserts,
+        chunk_size
+      })
+      for (const chunk of pairing_chunks) {
         await trx('prop_pairings')
           .insert(chunk)
           .onConflict('pairing_id')
@@ -488,12 +492,11 @@ const generate_prop_pairings = async ({
       }
 
       if (prop_pairing_props_inserts.length) {
-        for (
-          let i = 0;
-          i < prop_pairing_props_inserts.length;
-          i += chunk_size
-        ) {
-          const chunk = prop_pairing_props_inserts.slice(i, i + chunk_size)
+        const prop_chunks = chunk_array({
+          items: prop_pairing_props_inserts,
+          chunk_size
+        })
+        for (const chunk of prop_chunks) {
           await trx('prop_pairing_props')
             .insert(chunk)
             .onConflict([

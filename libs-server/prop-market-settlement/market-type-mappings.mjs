@@ -3,6 +3,7 @@ import {
   player_game_alt_prop_types,
   player_first_quarter_prop_types,
   player_quarter_alt_prop_types,
+  player_first_half_alt_prop_types,
   team_game_market_types,
   player_season_prop_types,
   awards_prop_types,
@@ -15,45 +16,7 @@ export const HANDLER_TYPES = {
   PLAYER_GAMELOG: 'PLAYER_GAMELOG',
   NFL_PLAYS: 'NFL_PLAYS',
   NFL_GAMES: 'NFL_GAMES',
-  TEAM_STATS: 'TEAM_STATS',
   UNSUPPORTED: 'UNSUPPORTED'
-}
-
-// Data source requirements for each calculator
-export const DATA_SOURCE_REQUIREMENTS = {
-  [HANDLER_TYPES.PLAYER_GAMELOG]: {
-    table: 'player_gamelogs',
-    joins: ['nfl_games ON player_gamelogs.esbid = nfl_games.esbid'],
-    required_columns: ['pid', 'esbid', 'year', 'week'],
-    filter_conditions: ['player_gamelogs.active = true']
-  },
-  [HANDLER_TYPES.NFL_PLAYS]: {
-    table: 'nfl_plays',
-    joins: ['nfl_games ON nfl_plays.esbid = nfl_games.esbid'],
-    required_columns: ['esbid', 'year', 'week', 'qtr', 'pos_team'],
-    filter_conditions: []
-  },
-  [HANDLER_TYPES.NFL_GAMES]: {
-    table: 'nfl_games',
-    joins: [],
-    required_columns: [
-      'esbid',
-      'year',
-      'week',
-      'home_score',
-      'away_score',
-      'h',
-      'v'
-    ],
-    filter_conditions: ["nfl_games.status = 'final'"]
-  },
-  [HANDLER_TYPES.TEAM_STATS]: {
-    table: 'player_gamelogs',
-    joins: ['nfl_games ON player_gamelogs.esbid = nfl_games.esbid'],
-    required_columns: ['tm', 'esbid', 'year', 'week'],
-    filter_conditions: ['player_gamelogs.active = true'],
-    aggregate_by: 'tm'
-  }
 }
 
 // Market type to calculator mappings
@@ -189,6 +152,25 @@ export const market_type_mappings = {
     special_logic: 'anytime_touchdown'
   },
 
+  // First touchdown scorer - find first TD in game using NFL plays
+  // TODO: Use td_pid field once it's available in nfl_plays table
+  [player_game_prop_types.GAME_FIRST_TOUCHDOWN_SCORER]: {
+    handler: HANDLER_TYPES.NFL_PLAYS,
+    metric_columns: ['td'], // touchdown indicator
+    has_metric_value: false, // Just YES/NO
+    selection_types: ['YES', 'NO'],
+    special_logic: 'first_touchdown_scorer'
+  },
+
+  // Two or more touchdowns - count total TDs from player gamelog
+  [player_game_prop_types.GAME_TWO_PLUS_TOUCHDOWNS]: {
+    handler: HANDLER_TYPES.PLAYER_GAMELOG,
+    metric_columns: ['tdr', 'tdrec'], // rushing and receiving TDs
+    has_metric_value: false, // Just YES/NO
+    selection_types: ['YES', 'NO'],
+    special_logic: 'two_plus_touchdowns'
+  },
+
   // First quarter markets - use NFL plays data (based on reference script logic)
   [player_first_quarter_prop_types.GAME_FIRST_QUARTER_PASSING_YARDS]: {
     handler: HANDLER_TYPES.NFL_PLAYS,
@@ -213,6 +195,50 @@ export const market_type_mappings = {
     has_metric_value: true,
     selection_types: ['OVER', 'UNDER'],
     quarter_filter: 1
+  },
+  [player_first_quarter_prop_types.GAME_FIRST_QUARTER_RECEPTIONS]: {
+    handler: HANDLER_TYPES.NFL_PLAYS,
+    player_column: 'trg_pid', // target
+    metric_columns: ['comp'], // Count receptions by counting completed passes
+    has_metric_value: true,
+    selection_types: ['OVER', 'UNDER'],
+    quarter_filter: 1,
+    special_logic: 'count_receptions'
+  },
+  [player_first_quarter_prop_types.GAME_FIRST_QUARTER_RUSHING_ATTEMPTS]: {
+    handler: HANDLER_TYPES.NFL_PLAYS,
+    player_column: 'bc_pid', // ball carrier
+    metric_columns: ['rush'], // Count rushing attempts by counting rush plays
+    has_metric_value: true,
+    selection_types: ['OVER', 'UNDER'],
+    quarter_filter: 1,
+    special_logic: 'count_attempts'
+  },
+
+  // First half markets - use NFL plays data for quarters 1 and 2
+  [player_first_half_alt_prop_types.GAME_FIRST_HALF_ALT_RUSHING_YARDS]: {
+    handler: HANDLER_TYPES.NFL_PLAYS,
+    player_column: 'bc_pid', // ball carrier
+    metric_columns: ['rush_yds'],
+    has_metric_value: true,
+    selection_types: ['OVER', 'UNDER'],
+    half_filter: 1 // First half (quarters 1 and 2)
+  },
+  [player_first_half_alt_prop_types.GAME_FIRST_HALF_ALT_PASSING_YARDS]: {
+    handler: HANDLER_TYPES.NFL_PLAYS,
+    player_column: 'psr_pid', // passer
+    metric_columns: ['pass_yds'],
+    has_metric_value: true,
+    selection_types: ['OVER', 'UNDER'],
+    half_filter: 1 // First half (quarters 1 and 2)
+  },
+  [player_first_half_alt_prop_types.GAME_FIRST_HALF_ALT_RECEIVING_YARDS]: {
+    handler: HANDLER_TYPES.NFL_PLAYS,
+    player_column: 'trg_pid', // target
+    metric_columns: ['recv_yds'],
+    has_metric_value: true,
+    selection_types: ['OVER', 'UNDER'],
+    half_filter: 1 // First half (quarters 1 and 2)
   },
 
   // Longest play markets - use player gamelogs data
@@ -316,6 +342,16 @@ Object.entries(player_quarter_alt_prop_types).forEach(([key, value]) => {
   const base_type = key.replace('_ALT_', '_')
   const base_mapping =
     market_type_mappings[player_first_quarter_prop_types[base_type]]
+  if (base_mapping && base_mapping.handler !== HANDLER_TYPES.UNSUPPORTED) {
+    alt_line_mappings[value] = { ...base_mapping, is_alt_line: true }
+  }
+})
+
+// Add alt half mappings
+Object.entries(player_first_half_alt_prop_types).forEach(([key, value]) => {
+  const base_type = key.replace('_ALT_', '_')
+  const base_mapping =
+    market_type_mappings[player_first_half_alt_prop_types[base_type]]
   if (base_mapping && base_mapping.handler !== HANDLER_TYPES.UNSUPPORTED) {
     alt_line_mappings[value] = { ...base_mapping, is_alt_line: true }
   }
