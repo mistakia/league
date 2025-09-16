@@ -174,7 +174,7 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
   _process_single_market(market) {
     const mapping = this._get_market_mapping(market)
     const game_plays = this.data_by_game[market.esbid] || []
-    
+
     let metric_value
     if (mapping.special_logic === 'first_touchdown_scorer') {
       // For first touchdown scorer, find the first TD in the entire game
@@ -182,7 +182,7 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
         const value = play[mapping.metric_columns[0]]
         return value === true
       })
-      
+
       if (!first_td_play) {
         metric_value = 0 // No touchdowns in the game
       } else {
@@ -191,7 +191,7 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
         // For passing TDs: trg_pid is the scorer (receiver)
         // TODO: Use td_pid field once it's available in nfl_plays table
         let is_scorer = false
-        
+
         if (first_td_play.rush === true) {
           // Rushing TD - bc_pid is the scorer
           is_scorer = first_td_play.bc_pid === market.selection_pid
@@ -200,10 +200,11 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
           is_scorer = first_td_play.trg_pid === market.selection_pid
         } else {
           // Other types of TDs - check both fields as fallback
-          is_scorer = (first_td_play.bc_pid === market.selection_pid || 
-                      first_td_play.trg_pid === market.selection_pid)
+          is_scorer =
+            first_td_play.bc_pid === market.selection_pid ||
+            first_td_play.trg_pid === market.selection_pid
         }
-        
+
         metric_value = is_scorer ? 1 : 0
       }
     } else {
@@ -212,7 +213,11 @@ export class NFLPlaysMarketHandler extends MarketDataHandler {
         market,
         mapping
       )
-      metric_value = this._calculate_plays_metric(relevant_plays, mapping, market)
+      metric_value = this._calculate_plays_metric(
+        relevant_plays,
+        mapping,
+        market
+      )
     }
     const selection_result = determine_selection_result({
       metric_value,

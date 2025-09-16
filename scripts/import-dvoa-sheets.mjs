@@ -1034,7 +1034,9 @@ const import_dvoa_sheets = async ({ dry_run = false, filepath } = {}) => {
       response = await fetch(versioned_dvoa_url)
 
       if (!response.ok) {
-        throw new Error(`both URLs failed - base: ${response.statusText}, versioned: ${response.statusText}`)
+        throw new Error(
+          `both URLs failed - base: ${response.statusText}, versioned: ${response.statusText}`
+        )
       }
     }
 
