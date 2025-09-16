@@ -1014,16 +1014,28 @@ const import_dvoa_sheets = async ({ dry_run = false, filepath } = {}) => {
     const month = current_date.format('MM')
     const week_of_month = Math.ceil(current_date.date() / 7)
 
-    const dvoa_url = `${dvoa_base_url}/${year}/${month}/${year}-Premium-Splits-v8.0-${week_of_month}.xlsx`
+    // Try base URL first, then fallback to versioned URL
+    const base_dvoa_url = `${dvoa_base_url}/${year}/${month}/${year}-Premium-Splits-v8.0.xlsx`
+    const versioned_dvoa_url = `${dvoa_base_url}/${year}/${month}/${year}-Premium-Splits-v8.0-${week_of_month}.xlsx`
 
     const filename = `dvoa_sheets_${constants.season.year}.xlsx`
     filepath = `${os.tmpdir()}/${filename}`
 
-    log(`downloading ${dvoa_url}`)
     const stream_pipeline = promisify(pipeline)
-    const response = await fetch(dvoa_url)
+    let response
+
+    // Try base URL first
+    log(`downloading ${base_dvoa_url}`)
+    response = await fetch(base_dvoa_url)
+
     if (!response.ok) {
-      throw new Error(`unexpected response ${response.statusText}`)
+      log(`base URL failed (${response.statusText}), trying versioned URL`)
+      log(`downloading ${versioned_dvoa_url}`)
+      response = await fetch(versioned_dvoa_url)
+
+      if (!response.ok) {
+        throw new Error(`both URLs failed - base: ${response.statusText}, versioned: ${response.statusText}`)
+      }
     }
 
     await stream_pipeline(response.body, fs.createWriteStream(filepath))
