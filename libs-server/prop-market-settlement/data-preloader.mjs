@@ -135,19 +135,6 @@ const load_nfl_games = async (esbids) => {
       'v',
       'home_score',
       'away_score',
-      'spread_line',
-      'total_line',
-      'home_moneyline',
-      'away_moneyline',
-      'temp',
-      'wind',
-      'stad',
-      'surf',
-      'roof',
-      'home_rest',
-      'away_rest',
-      'home_coach',
-      'away_coach',
       'status'
     )
     .whereIn('esbid', esbids)
