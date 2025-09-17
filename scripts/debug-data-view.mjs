@@ -7,9 +7,6 @@ import debug from 'debug'
 import db from '#db'
 import { is_main, get_data_view_results_query, format_sql } from '#libs-server'
 
-// Ensure production environment for database connection
-process.env.NODE_ENV = process.env.NODE_ENV || 'production'
-
 const log = debug('debug-data-view')
 
 /**
