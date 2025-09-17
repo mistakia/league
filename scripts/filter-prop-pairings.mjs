@@ -128,17 +128,17 @@ const fetch_prop_pairing_props = async (pairing_ids) => {
   for (const batch of batches) {
     const prop_pairing_props = await db('prop_pairing_props')
       .select(
-        'current_week_prop_market_selections_index.*',
+        'weekly_market_selections_analysis_cache.*',
         'prop_pairing_props.pairing_id',
         'prop_market_selections_index.*'
       )
-      .innerJoin('current_week_prop_market_selections_index', function () {
+      .innerJoin('weekly_market_selections_analysis_cache', function () {
         this.on(
-          'current_week_prop_market_selections_index.source_market_id',
+          'weekly_market_selections_analysis_cache.source_market_id',
           '=',
           'prop_pairing_props.source_market_id'
         ).andOn(
-          'current_week_prop_market_selections_index.source_selection_id',
+          'weekly_market_selections_analysis_cache.source_selection_id',
           '=',
           'prop_pairing_props.source_selection_id'
         )
@@ -157,7 +157,7 @@ const fetch_prop_pairing_props = async (pairing_ids) => {
           .andOn(
             'prop_market_selections_index.source_id',
             '=',
-            'current_week_prop_market_selections_index.source_id'
+            'weekly_market_selections_analysis_cache.source_id'
           )
       })
       .where('prop_market_selections_index.time_type', 'CLOSE')
