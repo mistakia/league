@@ -140,7 +140,12 @@ const find_player_row = async ({
           this.where({ pos: p }).orWhere({ pos1: p }).orWhere({ pos2: p })
         })
       } else if (Array.isArray(pos)) {
-        query.whereIn('pos', pos.map(format_position))
+        const formatted_positions = pos.map(format_position)
+        query.where(function () {
+          this.whereIn('pos', formatted_positions)
+            .orWhereIn('pos1', formatted_positions)
+            .orWhereIn('pos2', formatted_positions)
+        })
       }
     }
 
