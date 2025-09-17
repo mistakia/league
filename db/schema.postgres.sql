@@ -1481,6 +1481,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2000_assisted_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public."nfl_plays_current_week_playId";
 DROP INDEX IF EXISTS public."nfl_plays_current_week_esbid_playId";
 DROP INDEX IF EXISTS public.nfl_plays_current_week_esbid;
+DROP INDEX IF EXISTS public.idx_weekly_market_selections_analysis_cache_composite;
 DROP INDEX IF EXISTS public.idx_waivers_super_priority;
 DROP INDEX IF EXISTS public.idx_waivers_lid;
 DROP INDEX IF EXISTS public.idx_waiver_releases_waiverid;
@@ -1636,7 +1637,6 @@ DROP INDEX IF EXISTS public.idx_draftkings_activity_last_seen;
 DROP INDEX IF EXISTS public.idx_draftkings_activity_checks;
 DROP INDEX IF EXISTS public.idx_draft_tid;
 DROP INDEX IF EXISTS public.idx_draft_lid;
-DROP INDEX IF EXISTS public.idx_current_week_prop_market_selections_composite;
 DROP INDEX IF EXISTS public.idx_25147_waiverid_pid;
 DROP INDEX IF EXISTS public.idx_25141_userid_tid_year;
 DROP INDEX IF EXISTS public.idx_25138_sourceid;
@@ -1716,6 +1716,7 @@ DROP INDEX IF EXISTS public.idx_24626_baseline;
 DROP INDEX IF EXISTS public.idx_24623_player_value;
 DROP INDEX IF EXISTS public.idx_24613_team;
 DROP INDEX IF EXISTS public.idx_24608_pick;
+ALTER TABLE IF EXISTS ONLY public.weekly_market_selections_analysis_cache DROP CONSTRAINT IF EXISTS weekly_market_selections_analysis_cache_pkey;
 ALTER TABLE IF EXISTS ONLY public.users DROP CONSTRAINT IF EXISTS users_username_unique;
 ALTER TABLE IF EXISTS ONLY public.users_teams DROP CONSTRAINT IF EXISTS users_teams_pkey;
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_key;
@@ -1821,7 +1822,6 @@ ALTER TABLE IF EXISTS ONLY public.dvoa_team_seasonlogs_index DROP CONSTRAINT IF 
 ALTER TABLE IF EXISTS ONLY public.dvoa_team_seasonlogs_history DROP CONSTRAINT IF EXISTS dvoa_team_seasonlogs_history_year_team_week_key;
 ALTER TABLE IF EXISTS ONLY public.dvoa_team_gamelogs DROP CONSTRAINT IF EXISTS dvoa_team_gamelogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.draftkings_category_activity DROP CONSTRAINT IF EXISTS draftkings_category_activity_pkey;
-ALTER TABLE IF EXISTS ONLY public.current_week_prop_market_selections_index DROP CONSTRAINT IF EXISTS current_week_prop_market_selections_index_pkey;
 ALTER TABLE IF EXISTS ONLY public.config DROP CONSTRAINT IF EXISTS config_pkey;
 ALTER TABLE IF EXISTS ONLY public.config DROP CONSTRAINT IF EXISTS config_key_unique;
 ALTER TABLE IF EXISTS public.waivers ALTER COLUMN uid DROP DEFAULT;
@@ -1844,6 +1844,7 @@ ALTER TABLE IF EXISTS public.league_migrations_lock ALTER COLUMN index DROP DEFA
 ALTER TABLE IF EXISTS public.league_migrations ALTER COLUMN id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.jobs ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.draft ALTER COLUMN uid DROP DEFAULT;
+DROP TABLE IF EXISTS public.weekly_market_selections_analysis_cache;
 DROP SEQUENCE IF EXISTS public.waivers_uid_seq;
 DROP TABLE IF EXISTS public.waivers;
 DROP TABLE IF EXISTS public.waiver_releases;
@@ -2083,7 +2084,6 @@ DROP TABLE IF EXISTS public.dvoa_team_gamelogs;
 DROP TABLE IF EXISTS public.draftkings_category_activity;
 DROP SEQUENCE IF EXISTS public.draft_uid_seq;
 DROP TABLE IF EXISTS public.draft;
-DROP TABLE IF EXISTS public.current_week_prop_market_selections_index;
 DROP TABLE IF EXISTS public.config;
 DROP FUNCTION IF EXISTS public.update_modified_column();
 DROP FUNCTION IF EXISTS public.player_name_search_vector_update();
@@ -2590,52 +2590,6 @@ CREATE TABLE public.config (
     key character varying(255) NOT NULL,
     value jsonb,
     updated_at timestamp without time zone DEFAULT CURRENT_TIMESTAMP
-);
-
-
---
--- Name: current_week_prop_market_selections_index; Type: TABLE; Schema: public; Owner: -
---
-
-CREATE TABLE public.current_week_prop_market_selections_index (
-    source_id public.market_source_id NOT NULL,
-    source_market_id character varying(255) NOT NULL,
-    source_selection_id character varying(255) NOT NULL,
-    selection_pid character varying(25),
-    current_season_hits_soft integer,
-    current_season_hit_weeks_soft jsonb,
-    current_season_hits_hard integer,
-    current_season_hit_weeks_hard jsonb,
-    current_season_weeks_played jsonb,
-    last_five_hits_soft integer,
-    last_five_hit_weeks_soft jsonb,
-    last_five_hits_hard integer,
-    last_five_hit_weeks_hard jsonb,
-    last_five_weeks_played jsonb,
-    last_ten_hits_soft integer,
-    last_ten_hit_weeks_soft jsonb,
-    last_ten_hits_hard integer,
-    last_ten_hit_weeks_hard jsonb,
-    last_ten_weeks_played jsonb,
-    last_season_hits_soft integer,
-    last_season_hit_weeks_soft jsonb,
-    last_season_hits_hard integer,
-    last_season_hit_weeks_hard jsonb,
-    last_season_weeks_played jsonb,
-    overall_hits_soft integer,
-    overall_hit_weeks_soft jsonb,
-    overall_hits_hard integer,
-    overall_hit_weeks_hard jsonb,
-    overall_weeks_played jsonb,
-    current_season_hits_opp integer,
-    current_season_opp_hit_weeks jsonb,
-    current_season_opp_weeks_played jsonb,
-    name character varying(255),
-    team character varying(3),
-    pos character varying(4),
-    opp character varying(3),
-    market_type character varying(50),
-    esbid bigint
 );
 
 
@@ -21628,6 +21582,52 @@ ALTER SEQUENCE public.waivers_uid_seq OWNED BY public.waivers.uid;
 
 
 --
+-- Name: weekly_market_selections_analysis_cache; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.weekly_market_selections_analysis_cache (
+    source_id public.market_source_id NOT NULL,
+    source_market_id character varying(255) NOT NULL,
+    source_selection_id character varying(255) NOT NULL,
+    selection_pid character varying(25),
+    current_season_hits_soft integer,
+    current_season_hit_weeks_soft jsonb,
+    current_season_hits_hard integer,
+    current_season_hit_weeks_hard jsonb,
+    current_season_weeks_played jsonb,
+    last_five_hits_soft integer,
+    last_five_hit_weeks_soft jsonb,
+    last_five_hits_hard integer,
+    last_five_hit_weeks_hard jsonb,
+    last_five_weeks_played jsonb,
+    last_ten_hits_soft integer,
+    last_ten_hit_weeks_soft jsonb,
+    last_ten_hits_hard integer,
+    last_ten_hit_weeks_hard jsonb,
+    last_ten_weeks_played jsonb,
+    last_season_hits_soft integer,
+    last_season_hit_weeks_soft jsonb,
+    last_season_hits_hard integer,
+    last_season_hit_weeks_hard jsonb,
+    last_season_weeks_played jsonb,
+    overall_hits_soft integer,
+    overall_hit_weeks_soft jsonb,
+    overall_hits_hard integer,
+    overall_hit_weeks_hard jsonb,
+    overall_weeks_played jsonb,
+    current_season_hits_opp integer,
+    current_season_opp_hit_weeks jsonb,
+    current_season_opp_weeks_played jsonb,
+    name character varying(255),
+    team character varying(3),
+    pos character varying(4),
+    opp character varying(3),
+    market_type character varying(50),
+    esbid bigint
+);
+
+
+--
 -- Name: nfl_plays_year_2000; Type: TABLE ATTACH; Schema: public; Owner: -
 --
 
@@ -22411,14 +22411,6 @@ ALTER TABLE ONLY public.config
 
 ALTER TABLE ONLY public.config
     ADD CONSTRAINT config_pkey PRIMARY KEY (key);
-
-
---
--- Name: current_week_prop_market_selections_index current_week_prop_market_selections_index_pkey; Type: CONSTRAINT; Schema: public; Owner: -
---
-
-ALTER TABLE ONLY public.current_week_prop_market_selections_index
-    ADD CONSTRAINT current_week_prop_market_selections_index_pkey PRIMARY KEY (source_id, source_market_id, source_selection_id);
 
 
 --
@@ -23262,6 +23254,14 @@ ALTER TABLE ONLY public.users
 
 
 --
+-- Name: weekly_market_selections_analysis_cache weekly_market_selections_analysis_cache_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.weekly_market_selections_analysis_cache
+    ADD CONSTRAINT weekly_market_selections_analysis_cache_pkey PRIMARY KEY (source_id, source_market_id, source_selection_id);
+
+
+--
 -- Name: idx_24608_pick; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -23812,13 +23812,6 @@ CREATE UNIQUE INDEX idx_25141_userid_tid_year ON public.users_teams USING btree 
 --
 
 CREATE UNIQUE INDEX idx_25147_waiverid_pid ON public.waiver_releases USING btree (waiverid, pid);
-
-
---
--- Name: idx_current_week_prop_market_selections_composite; Type: INDEX; Schema: public; Owner: -
---
-
-CREATE INDEX idx_current_week_prop_market_selections_composite ON public.current_week_prop_market_selections_index USING btree (source_id, source_market_id, source_selection_id);
 
 
 --
@@ -24904,6 +24897,13 @@ CREATE INDEX idx_waivers_lid ON public.waivers USING btree (lid);
 --
 
 CREATE INDEX idx_waivers_super_priority ON public.waivers USING btree (super_priority);
+
+
+--
+-- Name: idx_weekly_market_selections_analysis_cache_composite; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_weekly_market_selections_analysis_cache_composite ON public.weekly_market_selections_analysis_cache USING btree (source_id, source_market_id, source_selection_id);
 
 
 --

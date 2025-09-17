@@ -249,9 +249,9 @@ const generate_prop_pairings = async ({
   // For week 1, require more historical hits to reduce dataset size
   const min_hits = week === 1 ? 3 : 1
 
-  const prop_rows = await db('current_week_prop_market_selections_index')
+  const prop_rows = await db('weekly_market_selections_analysis_cache')
     .select(
-      'current_week_prop_market_selections_index.*',
+      'weekly_market_selections_analysis_cache.*',
       'prop_market_selections_index.*',
       'nfl_games.year',
       'nfl_games.week',
@@ -261,29 +261,29 @@ const generate_prop_pairings = async ({
       this.on(
         'prop_market_selections_index.source_id',
         '=',
-        'current_week_prop_market_selections_index.source_id'
+        'weekly_market_selections_analysis_cache.source_id'
       )
         .andOn(
           'prop_market_selections_index.source_market_id',
           '=',
-          'current_week_prop_market_selections_index.source_market_id'
+          'weekly_market_selections_analysis_cache.source_market_id'
         )
         .andOn(
           'prop_market_selections_index.source_selection_id',
           '=',
-          'current_week_prop_market_selections_index.source_selection_id'
+          'weekly_market_selections_analysis_cache.source_selection_id'
         )
     })
     .join(
       'nfl_games',
       'nfl_games.esbid',
-      'current_week_prop_market_selections_index.esbid'
+      'weekly_market_selections_analysis_cache.esbid'
     )
     .whereNotNull(hits_field)
     .where(hits_field, '>=', min_hits)
     .where('prop_market_selections_index.odds_american', '<', 1000)
     .where('prop_market_selections_index.odds_american', '>', -350)
-    .whereIn('current_week_prop_market_selections_index.market_type', [
+    .whereIn('weekly_market_selections_analysis_cache.market_type', [
       player_prop_types.GAME_ALT_PASSING_YARDS,
       player_prop_types.GAME_ALT_RECEIVING_YARDS,
       player_prop_types.GAME_ALT_RUSHING_YARDS,

@@ -423,11 +423,13 @@ const process_props_index = async ({
   }
 
   if (props_index_inserts.length) {
+    await db('weekly_market_selections_analysis_cache').del()
+
     log(`saving ${props_index_inserts.length} prop rows`)
     await batch_insert({
       items: props_index_inserts,
       save: async (chunk) => {
-        await db('current_week_prop_market_selections_index')
+        await db('weekly_market_selections_analysis_cache')
           .insert(chunk)
           .onConflict(['source_id', 'source_market_id', 'source_selection_id'])
           .merge()
