@@ -1,6 +1,7 @@
 import {
   player_game_prop_types,
   player_first_quarter_prop_types,
+  player_first_half_alt_prop_types,
   team_game_market_types
 } from '#libs-shared/bookmaker-constants.mjs'
 
@@ -198,6 +199,58 @@ export const get_selection_result = ({
         const cushion = Math.min(Math.round(line * 0.12), 5)
         return compare(
           player_gamelog.first_quarter_stats?.receiving_yards,
+          line - cushion,
+          selection_type
+        )
+      }
+    }
+
+    // First half markets - use first half stats
+    case player_first_half_alt_prop_types.GAME_FIRST_HALF_ALT_PASSING_YARDS: {
+      if (strict) {
+        return compare(
+          player_gamelog.first_half_stats?.passing_yards,
+          line,
+          selection_type
+        )
+      } else {
+        const cushion = Math.min(Math.round(line * 0.06), 12)
+        return compare(
+          player_gamelog.first_half_stats?.passing_yards,
+          line - cushion,
+          selection_type
+        )
+      }
+    }
+
+    case player_first_half_alt_prop_types.GAME_FIRST_HALF_ALT_RUSHING_YARDS: {
+      if (strict) {
+        return compare(
+          player_gamelog.first_half_stats?.rushing_yards,
+          line,
+          selection_type
+        )
+      } else {
+        const cushion = Math.min(Math.round(line * 0.12), 7)
+        return compare(
+          player_gamelog.first_half_stats?.rushing_yards,
+          line - cushion,
+          selection_type
+        )
+      }
+    }
+
+    case player_first_half_alt_prop_types.GAME_FIRST_HALF_ALT_RECEIVING_YARDS: {
+      if (strict) {
+        return compare(
+          player_gamelog.first_half_stats?.receiving_yards,
+          line,
+          selection_type
+        )
+      } else {
+        const cushion = Math.min(Math.round(line * 0.12), 7)
+        return compare(
+          player_gamelog.first_half_stats?.receiving_yards,
           line - cushion,
           selection_type
         )
