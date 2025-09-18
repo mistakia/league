@@ -8,7 +8,9 @@ import { is_main, report_job, selection_result } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { groupBy, constants } from '#libs-shared'
 import { chunk_array } from '#libs-shared/chunk.mjs'
-import { player_game_prop_types } from '#libs-shared/bookmaker-constants.mjs'
+import {
+  player_game_prop_types
+} from '#libs-shared/bookmaker-constants.mjs'
 
 const argv = yargs(hideBin(process.argv))
   .usage(
@@ -239,10 +241,65 @@ const calculate_historical_hit_rates = async ({
     {}
   )
 
-  // Enhance player gamelogs with first quarter stats
+  // Fetch first half stats if needed (quarters 1 and 2)
+  const first_half_stats = await db('nfl_plays')
+    .select(
+      'esbid',
+      'pass_yds',
+      'recv_yds',
+      'rush_yds',
+      'psr_pid',
+      'trg_pid',
+      'bc_pid'
+    )
+    .whereIn(
+      'esbid',
+      player_gamelogs.map((g) => g.esbid)
+    )
+    .whereIn('qtr', [1, 2])
+    .whereNot('play_type', 'NOPL')
+
+  // Process first half stats into lookup
+  const first_half_stats_by_game = first_half_stats.reduce((acc, play) => {
+    if (!acc[play.esbid]) {
+      acc[play.esbid] = {}
+    }
+
+    ;[play.psr_pid, play.bc_pid, play.trg_pid].forEach((pid) => {
+      if (!pid) return
+      if (!acc[play.esbid][pid]) {
+        acc[play.esbid][pid] = {
+          passing_yards: 0,
+          rushing_yards: 0,
+          receiving_yards: 0
+        }
+      }
+    })
+
+    if (play.psr_pid) {
+      acc[play.esbid][play.psr_pid].passing_yards += play.pass_yds || 0
+    }
+    if (play.bc_pid) {
+      acc[play.esbid][play.bc_pid].rushing_yards += play.rush_yds || 0
+    }
+    if (play.trg_pid) {
+      acc[play.esbid][play.trg_pid].receiving_yards += play.recv_yds || 0
+    }
+
+    return acc
+  }, {})
+
+  // Enhance player gamelogs with first quarter and first half stats
   const enhanced_player_gamelogs = player_gamelogs.map((gamelog) => ({
     ...gamelog,
     first_quarter_stats: first_quarter_stats_by_game[`${gamelog.esbid}`]?.[
+      gamelog.pid
+    ] || {
+      passing_yards: 0,
+      rushing_yards: 0,
+      receiving_yards: 0
+    },
+    first_half_stats: first_half_stats_by_game[`${gamelog.esbid}`]?.[
       gamelog.pid
     ] || {
       passing_yards: 0,

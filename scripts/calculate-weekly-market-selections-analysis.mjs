@@ -519,7 +519,13 @@ const main = async () => {
 
     const prop_rows = await prop_rows_query
 
-    await calculate_weekly_market_selections_analysis({ prop_rows, week, year, seas_type, dry_run })
+    await calculate_weekly_market_selections_analysis({
+      prop_rows,
+      week,
+      year,
+      seas_type,
+      dry_run
+    })
   } catch (err) {
     error = err
     log(error)
