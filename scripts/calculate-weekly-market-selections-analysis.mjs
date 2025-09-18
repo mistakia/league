@@ -9,8 +9,8 @@ import { is_main, batch_insert, selection_result } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
-const log = debug('process-props-index')
-debug.enable('process-props-index')
+const log = debug('calculate-weekly-market-selections-analysis')
+debug.enable('calculate-weekly-market-selections-analysis')
 
 const prop_desc = {
   [player_prop_types.GAME_ALT_PASSING_YARDS]: 'pass',
@@ -300,14 +300,14 @@ const format_prop_row = ({
   }
 }
 
-const process_props_index = async ({
+const calculate_weekly_market_selections_analysis = async ({
   prop_rows,
   seas_type = constants.season.nfl_seas_type,
   week = constants.season.nfl_seas_week,
   year = constants.season.year,
   dry_run = false
 } = {}) => {
-  log(`processing ${prop_rows.length} prop rows`)
+  log(`calculating analysis for ${prop_rows.length} prop rows`)
 
   if (!prop_rows.length) {
     return
@@ -519,7 +519,7 @@ const main = async () => {
 
     const prop_rows = await prop_rows_query
 
-    await process_props_index({ prop_rows, week, year, seas_type, dry_run })
+    await calculate_weekly_market_selections_analysis({ prop_rows, week, year, seas_type, dry_run })
   } catch (err) {
     error = err
     log(error)
@@ -532,4 +532,4 @@ if (is_main(import.meta.url)) {
   main()
 }
 
-export default process_props_index
+export default calculate_weekly_market_selections_analysis
