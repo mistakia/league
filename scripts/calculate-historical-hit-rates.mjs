@@ -8,9 +8,7 @@ import { is_main, report_job, selection_result } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { groupBy, constants } from '#libs-shared'
 import { chunk_array } from '#libs-shared/chunk.mjs'
-import {
-  player_game_prop_types
-} from '#libs-shared/bookmaker-constants.mjs'
+import { player_game_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 
 const argv = yargs(hideBin(process.argv))
   .usage(
