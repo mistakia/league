@@ -335,13 +335,21 @@ export const get_market_type_offer_1002 = (subcategoryId) => {
   }
 }
 
-export const get_market_type_offer_1003 = (subcategoryId) => {
+export const get_market_type_offer_1003 = ({ subcategoryId, marketTypeId }) => {
   switch (subcategoryId) {
     case 11819:
       return player_prop_types.ANYTIME_TOUCHDOWN
 
     case 12438:
-      return player_prop_types.GAME_TWO_PLUS_TOUCHDOWNS
+      // subcategoryId 12438 is used for both Anytime TD and 2+ TDs
+      // Differentiate based on marketTypeId
+      if (marketTypeId === 11020) {
+        return player_prop_types.GAME_TWO_PLUS_TOUCHDOWNS
+      } else if (marketTypeId === 11019) {
+        return player_prop_types.ANYTIME_TOUCHDOWN
+      }
+      // Fallback to ANYTIME_TOUCHDOWN if marketTypeId is not provided
+      return player_prop_types.ANYTIME_TOUCHDOWN
 
     case 11820:
       return player_prop_types.GAME_FIRST_TEAM_TOUCHDOWN_SCORER
@@ -715,11 +723,13 @@ const get_market_type_offer_530 = (subcategoryId) => {
 export const get_market_type = ({
   offerCategoryId,
   subcategoryId,
-  betOfferTypeId
+  betOfferTypeId,
+  marketTypeId
 }) => {
   offerCategoryId = Number(offerCategoryId) || null
   subcategoryId = Number(subcategoryId) || null
   betOfferTypeId = Number(betOfferTypeId) || null
+  marketTypeId = Number(marketTypeId) || null
 
   switch (offerCategoryId) {
     case 492:
@@ -747,7 +757,7 @@ export const get_market_type = ({
       return get_market_type_offer_1002(subcategoryId)
 
     case 1003:
-      return get_market_type_offer_1003(subcategoryId)
+      return get_market_type_offer_1003({ subcategoryId, marketTypeId })
 
     case 1076:
       return get_market_type_offer_1076(subcategoryId)
