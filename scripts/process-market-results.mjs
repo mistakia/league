@@ -531,3 +531,5 @@ if (is_main(import.meta.url)) {
     process.exit(1)
   })
 }
+
+export default main
