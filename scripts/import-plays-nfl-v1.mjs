@@ -5,7 +5,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants, fixTeam } from '#libs-shared'
-import { is_main, wait, nfl, report_job } from '#libs-server'
+import { is_main, wait, nfl, report_job, clean_string } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('import-plays-nfl-v1')
@@ -15,53 +15,54 @@ const argv = yargs(hideBin(process.argv)).argv
 
 const getPlayData = ({ play, year, week, seas_type }) => {
   const data = {
-    desc: play.playDescription,
+    desc: clean_string(play.playDescription),
     dwn: play.down,
     drive_play_count: play.drivePlayCount,
     game_clock_start: play.clockTime,
     // TODO this might not match the drive sequence number in nflfastr
     drive_seq: play.driveSequenceNumber,
     drive_yds: play.driveNetYards,
-    ydl_end: play.endYardLine,
-    ydl_start: play.yardLine,
+    ydl_end: clean_string(play.endYardLine),
+    ydl_start: clean_string(play.yardLine),
     first_down: play.firstDown,
     goal_to_go: play.goalToGo,
     year,
     seas_type,
     week,
-    next_play_type: play.nextPlayType,
+    next_play_type: clean_string(play.nextPlayType),
     sequence: play.orderSequence,
     penalty: play.penaltyOnPlay,
     play_clock: play.playClock,
     deleted: play.playDeleted,
-    review: play.playReviewStatus,
+    review: clean_string(play.playReviewStatus),
     score: play.scoringPlay,
-    score_type: play.scoringPlayType,
-    special_play_type: play.stPlayType,
+    score_type: clean_string(play.scoringPlayType),
+    special_play_type: clean_string(play.stPlayType),
     timestamp: play.timeOfDay ? dayjs(play.timeOfDay).format('HH:mm:ss') : null,
     yards_to_go: play.yardsToGo,
     qtr: play.quarter,
-    play_type_nfl: play.playType
+    play_type_nfl: clean_string(play.playType)
   }
 
   if (play.possessionTeam) {
-    data.pos_team = play.possessionTeam.abbreviation
-      ? fixTeam(play.possessionTeam.abbreviation)
-      : null
+    const abbr = clean_string(play.possessionTeam.abbreviation)
+    data.pos_team = abbr ? fixTeam(abbr) : null
   }
 
   if (play.scoringTeam) {
-    data.score_team = fixTeam(play.scoringTeam.abbreviation)
+    const abbr = clean_string(play.scoringTeam.abbreviation)
+    data.score_team = fixTeam(abbr)
   }
 
   if (play.yardLine && data.pos_team) {
-    if (play.yardLine === '50') {
+    const cleaned_yard_line = clean_string(play.yardLine)
+    if (cleaned_yard_line === '50') {
       data.ydl_num = 50
       data.ydl_100 = 50
     } else {
-      const ydl_parts = play.yardLine.split(' ')
+      const ydl_parts = cleaned_yard_line.split(' ')
       data.ydl_num = parseInt(ydl_parts[1], 10)
-      data.ydl_side = fixTeam(ydl_parts[0])
+      data.ydl_side = fixTeam(clean_string(ydl_parts[0]))
       data.ydl_100 =
         data.ydl_side === data.pos_team ? 100 - data.ydl_num : data.ydl_num
     }
@@ -101,8 +102,10 @@ const extract_elias = (smart_id) => {
 const getPlayStatData = (playStat) => ({
   yards: playStat.yards,
   teamid: playStat.team.id,
-  playerName: playStat.playerName,
-  clubCode: playStat.team ? fixTeam(playStat.team.abbreviation) : null,
+  playerName: clean_string(playStat.playerName), // Clean the player name here to remove null bytes
+  clubCode: playStat.team
+    ? fixTeam(clean_string(playStat.team.abbreviation))
+    : null,
   esbid: playStat.gsisPlayer ? extract_elias(playStat.gsisPlayer.id) : null
 })
 
