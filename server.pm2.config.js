@@ -17,8 +17,9 @@ module.exports = {
       user: 'root',
       host: '38.242.199.45',
       ref: 'origin/master',
-      repo: 'https://github.com/mistakia/league.git',
+      repo: 'git@github.com:mistakia/league.git',
       path: '/root/league',
+      ssh_options: 'ForwardAgent=yes',
       'pre-deploy': 'git pull',
       'pre-deploy-local': '',
       'post-deploy': [
