@@ -59,6 +59,7 @@ export * as prizepicks from './prizepicks.mjs'
 export * as fantasylife from './fantasylife.mjs'
 export { default as getRestrictedFreeAgencyBids } from './get-restricted-free-agency-bids.mjs'
 export { wait } from './wait.mjs'
+export { default as clean_string } from './clean-string.mjs'
 export * as nfl from './nfl.mjs'
 
 export * as gambet from './gambet.mjs'
