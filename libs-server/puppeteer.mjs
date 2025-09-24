@@ -104,11 +104,32 @@ export const getPage = async (
 
   let browser
   if (connect) {
-    browser = await connectToChrome({
-      remote_debugging_port,
-      executable_path,
-      user_data_dir
-    })
+    try {
+      browser = await connectToChrome({
+        remote_debugging_port,
+        executable_path,
+        user_data_dir
+      })
+    } catch (error) {
+      console.log('Chrome connection failed, falling back to direct launch...')
+      browser = await puppeteer.launch({
+        headless: headless ? 'new' : false,
+        args: [
+          '--no-sandbox',
+          '--disable-setuid-sandbox',
+          '--disable-infobars',
+          '--window-position=0,0',
+          '--ignore-certifcate-errors',
+          '--ignore-certifcate-errors-spki-list',
+          '--max-http-header-size=16384',
+          ...(user_data_dir ? [`--user-data-dir=${user_data_dir}`] : [])
+        ],
+        timeout,
+        ignoreDefaultArgs: ['--enable-automation'],
+        executablePath: executable_path,
+        userDataDir: user_data_dir
+      })
+    }
   } else {
     browser = await puppeteer.launch({
       headless: headless ? 'new' : false,
@@ -286,38 +307,50 @@ export const getPage = async (
 async function connectToChrome({
   remote_debugging_port,
   executable_path,
-  user_data_dir
+  user_data_dir,
+  max_retries = 3,
+  initial_delay = 1000
 }) {
-  try {
-    // Try to connect to an existing Chrome instance
-    return await puppeteer.connect({
-      browserURL: `http://127.0.0.1:${remote_debugging_port}`,
-      defaultViewport: null
-    })
-  } catch (error) {
-    console.log('No existing Chrome instance found. Launching a new one...')
+  let chrome_process = null
 
-    // Launch a new Chrome instance with remote debugging enabled
-    const chrome_args = [
-      `--remote-debugging-port=${remote_debugging_port}`,
-      '--no-first-run',
-      '--no-default-browser-check',
-      ...(user_data_dir ? [`--user-data-dir=${user_data_dir}`] : [])
-    ]
+  for (let attempt = 0; attempt < max_retries; attempt++) {
+    try {
+      // Try to connect to an existing Chrome instance
+      return await puppeteer.connect({
+        browserURL: `http://127.0.0.1:${remote_debugging_port}`,
+        defaultViewport: null
+      })
+    } catch (error) {
+      if (attempt === 0) {
+        console.log('No existing Chrome instance found. Launching a new one...')
 
-    const chrome_process = child_process.spawn(
-      executable_path || findChromePath(),
-      chrome_args,
-      { detached: true, stdio: 'ignore' }
-    )
-    chrome_process.unref()
+        // Launch a new Chrome instance with remote debugging enabled
+        const chrome_args = [
+          `--remote-debugging-port=${remote_debugging_port}`,
+          '--no-first-run',
+          '--no-default-browser-check',
+          ...(user_data_dir ? [`--user-data-dir=${user_data_dir}`] : [])
+        ]
 
-    // Wait for Chrome to start and then connect
-    await new Promise((resolve) => setTimeout(resolve, 1000))
-    return await puppeteer.connect({
-      browserURL: `http://127.0.0.1:${remote_debugging_port}`,
-      defaultViewport: null
-    })
+        chrome_process = child_process.spawn(
+          executable_path || findChromePath(),
+          chrome_args,
+          { detached: true, stdio: 'ignore' }
+        )
+        chrome_process.unref()
+      }
+
+      // Calculate exponential backoff delay: 2s, 4s, 8s
+      const delay = initial_delay * Math.pow(2, attempt + 1)
+
+      if (attempt < max_retries - 1) {
+        console.log(`Connection attempt ${attempt + 1} failed, waiting ${delay}ms before retry...`)
+        await new Promise((resolve) => setTimeout(resolve, delay))
+      } else {
+        console.log(`Final connection attempt ${attempt + 1} failed`)
+        throw new Error(`Failed to connect to Chrome after ${max_retries} attempts: ${error.message}`)
+      }
+    }
   }
 }
 
