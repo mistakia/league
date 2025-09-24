@@ -344,11 +344,15 @@ async function connectToChrome({
       const delay = initial_delay * Math.pow(2, attempt + 1)
 
       if (attempt < max_retries - 1) {
-        console.log(`Connection attempt ${attempt + 1} failed, waiting ${delay}ms before retry...`)
+        console.log(
+          `Connection attempt ${attempt + 1} failed, waiting ${delay}ms before retry...`
+        )
         await new Promise((resolve) => setTimeout(resolve, delay))
       } else {
         console.log(`Final connection attempt ${attempt + 1} failed`)
-        throw new Error(`Failed to connect to Chrome after ${max_retries} attempts: ${error.message}`)
+        throw new Error(
+          `Failed to connect to Chrome after ${max_retries} attempts: ${error.message}`
+        )
       }
     }
   }
