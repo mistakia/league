@@ -188,10 +188,10 @@ const format_draftkings_selection_name = ({ selection }) => {
     if (market_display_name.includes('Rushing Yards')) {
       return `${player_name} ${selection_display_name} Rush Yds`
     }
-    if (market_display_name.includes('Receiving Yds')) {
+    if (market_display_name.includes('Receiving Yards')) {
       return `${player_name} ${selection_display_name} Recv Yds`
     }
-    if (market_display_name.includes('Passing Yds')) {
+    if (market_display_name.includes('Passing Yards')) {
       return `${player_name} ${selection_display_name} Pass Yds`
     }
     if (market_display_name.includes('Receptions')) {
