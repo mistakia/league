@@ -12,10 +12,13 @@ import {
   is_main,
   readCSV,
   update_nfl_game,
-  find_player_row,
   report_job,
   fetch_with_retry
 } from '#libs-server'
+import {
+  preload_active_players,
+  find_player
+} from '#libs-server/player-cache.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -79,6 +82,13 @@ const import_nfl_games_nflverse_nfldata = async ({
   force_import = false,
   force_download = false
 } = {}) => {
+  console.time('import-nfl-games-nflverse-total')
+
+  log('Preloading player cache for QB lookups...')
+  console.time('player-cache-preload-time')
+  await preload_active_players()
+  console.timeEnd('player-cache-preload-time')
+
   const current_date = new Date().toISOString().split('T')[0]
   const file_name = `nflverse_nfldata_games_${current_date}.csv`
   const path = `${os.tmpdir()}/${file_name}`
@@ -168,7 +178,7 @@ const import_nfl_games_nflverse_nfldata = async ({
       const game = format_game(item)
 
       if (item.away_qb_id) {
-        const away_qb_player = await find_player_row({
+        const away_qb_player = find_player({
           gsisid: item.away_qb_id
         })
 
@@ -180,7 +190,7 @@ const import_nfl_games_nflverse_nfldata = async ({
       }
 
       if (item.home_qb_id) {
-        const home_qb_player = await find_player_row({
+        const home_qb_player = find_player({
           gsisid: item.home_qb_id
         })
 
@@ -203,6 +213,7 @@ const import_nfl_games_nflverse_nfldata = async ({
   }
 
   log(`${game_not_matched.length} games not matched`)
+  console.timeEnd('import-nfl-games-nflverse-total')
 }
 
 const main = async () => {

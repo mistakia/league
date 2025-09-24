@@ -15,6 +15,7 @@ class PlayerCache {
   constructor() {
     this.players_by_formatted_name = new Map()
     this.players_by_pid = new Map()
+    this.players_by_gsisid = new Map()
     this.is_initialized = false
   }
 
@@ -38,6 +39,7 @@ class PlayerCache {
       this._clear_cache()
       this._build_player_indexes(active_players)
       this._build_alias_indexes(player_aliases)
+      this._build_gsisid_index(active_players)
 
       this.is_initialized = true
       console.timeEnd('player-cache-preload')
@@ -62,11 +64,26 @@ class PlayerCache {
    */
   find_player({
     name,
+    gsisid,
     teams = [],
     ignore_free_agent = true,
     ignore_retired = true
   }) {
     this._ensure_initialized()
+
+    // Fast lookup by GSISID if provided
+    if (gsisid) {
+      const player = this.players_by_gsisid.get(gsisid)
+      if (player) {
+        const filtered_players = this._apply_filters([player], {
+          teams,
+          ignore_free_agent,
+          ignore_retired
+        })
+        return filtered_players.length > 0 ? filtered_players[0] : null
+      }
+      return null
+    }
 
     if (!name) {
       return null
@@ -97,7 +114,8 @@ class PlayerCache {
     return {
       is_initialized: this.is_initialized,
       total_players: this.players_by_pid.size,
-      formatted_name_entries: this.players_by_formatted_name.size
+      formatted_name_entries: this.players_by_formatted_name.size,
+      gsisid_entries: this.players_by_gsisid.size
     }
   }
 
@@ -151,6 +169,7 @@ class PlayerCache {
   _clear_cache() {
     this.players_by_formatted_name.clear()
     this.players_by_pid.clear()
+    this.players_by_gsisid.clear()
   }
 
   /**
@@ -175,6 +194,19 @@ class PlayerCache {
       const player = this.players_by_pid.get(alias.pid)
       if (player && alias.formatted_alias) {
         this._add_player_to_name_index(player, alias.formatted_alias)
+      }
+    }
+  }
+
+  /**
+   * Builds GSISID index from player data
+   * @param {Array} players - Array of player objects
+   * @private
+   */
+  _build_gsisid_index(players) {
+    for (const player of players) {
+      if (player.gsisid) {
+        this.players_by_gsisid.set(player.gsisid, player)
       }
     }
   }
