@@ -36,6 +36,12 @@ const finalize_week = async () => {
 
   await update_stats_weekly()
 
+  const lid = 1
+  await process_matchups({ lid })
+  await process_playoffs({ lid, year: constants.season.year })
+  await calculate_league_careerlogs({ lid })
+  await clear_live_plays()
+
   // Process market results after stats are updated
   log(`processing market results for week ${week}`)
   await process_market_results({
@@ -43,12 +49,6 @@ const finalize_week = async () => {
     current_week_only: false,
     missing_only: false
   })
-
-  const lid = 1
-  await process_matchups({ lid })
-  await process_playoffs({ lid, year: constants.season.year })
-  await calculate_league_careerlogs({ lid })
-  await clear_live_plays()
 }
 
 const main = async () => {
