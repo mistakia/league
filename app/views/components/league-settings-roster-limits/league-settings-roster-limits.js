@@ -80,10 +80,10 @@ export default function LeagueSettingsRosterLimits({
         {...props}
       />
       <EditableLeagueField
-        label='IR'
-        field='ir'
+        label='Short Term Reserve Limit'
+        field='reserve_short_term_limit'
         type='int'
-        max={5}
+        max={99}
         min={0}
         {...props}
       />

@@ -182,20 +182,6 @@ export default class Lineup extends React.Component {
       bench.push(<PlayerSlot key={pid} {...{ pid, slot, ...slotProps }} />)
     }
 
-    /* const ir = []
-     * for (const { slot, pid } of r.ir) {
-     *   ir.push(
-     *     <PlayerSlot key={pid} {...{ pid, slot, roster }} />
-     *   )
-     * }
-
-     * const ps = []
-     * for (const { slot, pid } of r.practice) {
-     *   ps.push(
-     *     <PlayerSlot key={pid} {...{ pid, slot, roster }} />
-     *   )
-     * }
-     */
     return (
       <Grid container spacing={1} classes={{ root: 'lineup' }}>
         <Grid item xs={12} md={6}>

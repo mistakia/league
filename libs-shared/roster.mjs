@@ -5,8 +5,8 @@ import getActiveRosterLimit from './get-active-roster-limit.mjs'
 import isSlotActive from './is-slot-active.mjs'
 
 const nonStarterSlots = [
-  constants.slots.IR,
-  constants.slots.IR_LONG_TERM,
+  constants.slots.RESERVE_SHORT_TERM,
+  constants.slots.RESERVE_LONG_TERM,
   constants.slots.BENCH,
   constants.slots.COV,
   ...constants.ps_slots
@@ -91,7 +91,10 @@ export default class Roster {
   }
 
   get availableReserveSpace() {
-    return this._league.ir - this.ir.length
+    return (
+      this._league.reserve_short_term_limit -
+      this.reserve_short_term_players.length
+    )
   }
 
   get all() {
@@ -155,15 +158,15 @@ export default class Roster {
     return this.players.filter((p) => p.slot === constants.slots.BENCH)
   }
 
-  get ir() {
+  get reserve_short_term_players() {
     return Array.from(this._players.values()).filter(
-      (p) => p.slot === constants.slots.IR
+      (p) => p.slot === constants.slots.RESERVE_SHORT_TERM
     )
   }
 
-  get ir_long_term() {
+  get reserve_long_term_players() {
     return Array.from(this._players.values()).filter(
-      (p) => p.slot === constants.slots.IR_LONG_TERM
+      (p) => p.slot === constants.slots.RESERVE_LONG_TERM
     )
   }
 
@@ -175,9 +178,9 @@ export default class Roster {
 
   get reserve() {
     const slots = [
-      constants.slots.IR,
+      constants.slots.RESERVE_SHORT_TERM,
       constants.slots.COV,
-      constants.slots.IR_LONG_TERM
+      constants.slots.RESERVE_LONG_TERM
     ]
     return Array.from(this._players.values()).filter((p) =>
       slots.includes(p.slot)
@@ -256,9 +259,9 @@ export default class Roster {
   }
 
   isEligibleForSlot({ slot, pos }) {
-    if (slot === constants.slots.IR) {
-      return this.hasOpenInjuredReserveSlot()
-    } else if (slot === constants.slots.IR_LONG_TERM) {
+    if (slot === constants.slots.RESERVE_SHORT_TERM) {
+      return this.has_open_reserve_short_term_slot()
+    } else if (slot === constants.slots.RESERVE_LONG_TERM) {
       return true
     } else if (slot === constants.slots.BENCH) {
       return this.hasOpenBenchSlot(pos)
@@ -311,8 +314,15 @@ export default class Roster {
     return count < this._league[`tag${tag}`]
   }
 
-  hasOpenInjuredReserveSlot() {
-    return this.ir.length < this._league.ir
+  has_open_reserve_short_term_slot() {
+    // Values >= 99 are treated as unlimited
+    if (this._league.reserve_short_term_limit >= 99) {
+      return true
+    }
+    return (
+      this.reserve_short_term_players.length <
+      this._league.reserve_short_term_limit
+    )
   }
 
   hasOpenPracticeSquadSlot() {

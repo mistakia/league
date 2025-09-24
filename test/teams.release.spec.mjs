@@ -263,7 +263,7 @@ describe('API /teams - release', function () {
       })
     })
 
-    it('ir player - offseason', async () => {
+    it('short term reserve player - offseason', async () => {
       MockDate.set(regular_season_start.subtract('1', 'month').toISOString())
 
       const teamId = 1
@@ -275,7 +275,7 @@ describe('API /teams - release', function () {
         leagueId,
         teamId,
         userId,
-        slot: constants.slots.IR
+        slot: constants.slots.RESERVE_SHORT_TERM
       })
 
       const res = await chai_request
@@ -319,7 +319,7 @@ describe('API /teams - release', function () {
       })
     })
 
-    it('ir player - season', async () => {
+    it('short term reserve player - season', async () => {
       MockDate.set(regular_season_start.add('1', 'month').toISOString())
 
       const teamId = 1
@@ -331,7 +331,7 @@ describe('API /teams - release', function () {
         leagueId,
         teamId,
         userId,
-        slot: constants.slots.IR
+        slot: constants.slots.RESERVE_SHORT_TERM
       })
 
       const res = await chai_request

@@ -1,4 +1,4 @@
-const get_eligible_slots = ({ pos, ps, bench, ir, league }) => {
+const get_eligible_slots = ({ pos, ps, bench, reserve_short_term, league }) => {
   let eligible = []
 
   if (pos) {
@@ -53,8 +53,8 @@ const get_eligible_slots = ({ pos, ps, bench, ir, league }) => {
     }
   }
 
-  if (ir) {
-    for (let i = 0; i < league.ir; i++) {
+  if (reserve_short_term) {
+    for (let i = 0; i < league.reserve_short_term_limit; i++) {
       eligible.push('IR')
     }
   }

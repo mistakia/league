@@ -20,7 +20,7 @@ export default function ReserveConfirmation({
   reserve,
   onClose
 }) {
-  const has_reserve_space = team.roster.hasOpenInjuredReserveSlot()
+  const has_reserve_space = team.roster.has_open_reserve_short_term_slot()
   const activatable = []
 
   const [activate_pid, set_activate_pid] = useState('')
@@ -47,7 +47,11 @@ export default function ReserveConfirmation({
       set_missing_activate(false)
     }
 
-    reserve({ reserve_pid, slot: constants.slots.IR, activate_pid })
+    reserve({
+      reserve_pid,
+      slot: constants.slots.RESERVE_SHORT_TERM,
+      activate_pid
+    })
     onClose()
   }
 

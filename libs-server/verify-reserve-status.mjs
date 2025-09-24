@@ -25,8 +25,8 @@ export default async function ({ teamId, leagueId }) {
     const { nfl_status, injury_status } = player_row
 
     if (
-      (roster_player.slot === constants.slots.IR ||
-        roster_player.slot === constants.slots.IR_LONG_TERM) &&
+      (roster_player.slot === constants.slots.RESERVE_SHORT_TERM ||
+        roster_player.slot === constants.slots.RESERVE_LONG_TERM) &&
       !isReserveEligible({ nfl_status, injury_status })
     ) {
       throw new Error('Reserve player violation')

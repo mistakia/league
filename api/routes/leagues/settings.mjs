@@ -69,11 +69,12 @@ const router = express.Router()
  *           minimum: 0
  *           description: Practice squad roster slots
  *           example: 4
- *         ir:
+ *         reserve_short_term_limit:
  *           type: integer
  *           minimum: 0
- *           description: Injured reserve roster slots
- *           example: 2
+ *           maximum: 99
+ *           description: Short term reserve roster slots limit (99 = unlimited)
+ *           example: 3
  *         py:
  *           type: number
  *           format: float
@@ -217,7 +218,7 @@ const router = express.Router()
  *                   sk: 1
  *                   bench: 8
  *                   ps: 4
- *                   ir: 2
+ *                   reserve_short_term_limit: 3
  *                   py: 0.04
  *                   tdp: 4
  *                   ry: 0.1
@@ -298,7 +299,7 @@ const router = express.Router()
  *               value:
  *                 bench: 10
  *                 ps: 6
- *                 ir: 3
+ *                 reserve_short_term_limit: 3
  *             budget_update:
  *               summary: Update financial settings
  *               value:

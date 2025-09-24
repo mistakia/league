@@ -1,6 +1,6 @@
 # Named Scoring and League Formats
 
-_Generated at: 2025-07-05T08:37:32.390Z_
+_Generated at: 2025-09-24T18:51:09.226Z_
 
 This document shows the configuration for each named format in the system.
 
@@ -70,7 +70,7 @@ This document shows the configuration for each named format in the system.
 | `sk` | 0 | Starting K positions |
 | `bench` | 0 | Bench positions |
 | `ps` | 0 | Practice squad positions |
-| `ir` | 0 | IR positions |
+| `reserve_short_term_limit` | 0 | Short term reserve limit |
 | `cap` | 50000 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
@@ -98,7 +98,7 @@ This document shows the configuration for each named format in the system.
 | `sk` | 0 | Starting K positions |
 | `bench` | 7 | Bench positions |
 | `ps` | 4 | Practice squad positions |
-| `ir` | 3 | IR positions |
+| `reserve_short_term_limit` | 3 | Short term reserve limit |
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
@@ -108,7 +108,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** Half PPR 10 Team  
 **Description:** 10-team league with half PPR scoring - 1QB/2RB/2WR/1TE/1FLEX  
-**Hash:** `64cb7ce1421f243dd780af29304133d5054d439dfc39ffb64bd77e945cea99a8`
+**Hash:** `4589ff38eb918e2eebe4857a3cbacf5d6ce462519489712314fdba6751ac7fad`
 
 **Configuration:**
 | Property | Value | Description |
@@ -126,7 +126,7 @@ This document shows the configuration for each named format in the system.
 | `sk` | 1 | Starting K positions |
 | `bench` | 6 | Bench positions |
 | `ps` | 0 | Practice squad positions |
-| `ir` | 2 | IR positions |
+| `reserve_short_term_limit` | 3 | Short term reserve limit |
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
@@ -136,7 +136,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** Half PPR 10 Team Superflex  
 **Description:** 10-team superflex league with half PPR scoring - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX  
-**Hash:** `7827a68c0ba142deb72b7437fdac900216befeef0bed38989288a6ef4f5e88f5`
+**Hash:** `9bc7e990b650116fbb99a31868651072bde52fb1f124ca54e6dbc27af4df9a5c`
 
 **Configuration:**
 | Property | Value | Description |
@@ -154,7 +154,7 @@ This document shows the configuration for each named format in the system.
 | `sk` | 1 | Starting K positions |
 | `bench` | 6 | Bench positions |
 | `ps` | 0 | Practice squad positions |
-| `ir` | 2 | IR positions |
+| `reserve_short_term_limit` | 3 | Short term reserve limit |
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
@@ -164,7 +164,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** Half PPR 12 Team  
 **Description:** 12-team league with half PPR scoring - 1QB/2RB/2WR/1TE/1FLEX  
-**Hash:** `679b4ce98e575e6ed0d8c5153cd1c92a2701baf98dff68665780d5a640d4165c`
+**Hash:** `05e1ca2b3be59d771a2faf07429f6ed08ee746e93f86078bf8970dc34ce73cc0`
 
 **Configuration:**
 | Property | Value | Description |
@@ -182,7 +182,7 @@ This document shows the configuration for each named format in the system.
 | `sk` | 1 | Starting K positions |
 | `bench` | 6 | Bench positions |
 | `ps` | 0 | Practice squad positions |
-| `ir` | 2 | IR positions |
+| `reserve_short_term_limit` | 3 | Short term reserve limit |
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
@@ -192,7 +192,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** Half PPR 12 Team Superflex  
 **Description:** 12-team superflex league with half PPR scoring - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX  
-**Hash:** `99d663cbcf25ffe79f37031fc8771cf88c9adfe20f006c0cd4fb57d059dd6446`
+**Hash:** `d7b368c3da7d431b59f87ef1b34b6792ca71e586a2303e0a8d508b77327b85ff`
 
 **Configuration:**
 | Property | Value | Description |
@@ -210,7 +210,7 @@ This document shows the configuration for each named format in the system.
 | `sk` | 1 | Starting K positions |
 | `bench` | 6 | Bench positions |
 | `ps` | 0 | Practice squad positions |
-| `ir` | 2 | IR positions |
+| `reserve_short_term_limit` | 3 | Short term reserve limit |
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
@@ -220,7 +220,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** Half PPR Lower Turnover 10 Team  
 **Description:** 10-team league with half PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX  
-**Hash:** `ce41dc5669e598870cce14a016798dca3a6a252bccde39bcfaf8388e8d19a832`
+**Hash:** `aac3deee2f4350ad9dd1c641bd0e8abb16a511c1e8e5bf8dfbc050a7e78381fe`
 
 **Configuration:**
 | Property | Value | Description |
@@ -238,7 +238,7 @@ This document shows the configuration for each named format in the system.
 | `sk` | 1 | Starting K positions |
 | `bench` | 6 | Bench positions |
 | `ps` | 0 | Practice squad positions |
-| `ir` | 2 | IR positions |
+| `reserve_short_term_limit` | 3 | Short term reserve limit |
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
@@ -248,7 +248,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** Half PPR Lower Turnover 10 Team Superflex  
 **Description:** 10-team superflex league with half PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX  
-**Hash:** `8afaa971b4b5fc67f9f34f9d91a03619221f7fdff0be17c16ae9f830ad912731`
+**Hash:** `06c0a9c8f5ed702c119119bd29bd65e85e41bfdd9f2cdc2f2bc3e8662f484ff3`
 
 **Configuration:**
 | Property | Value | Description |
@@ -266,7 +266,7 @@ This document shows the configuration for each named format in the system.
 | `sk` | 1 | Starting K positions |
 | `bench` | 6 | Bench positions |
 | `ps` | 0 | Practice squad positions |
-| `ir` | 2 | IR positions |
+| `reserve_short_term_limit` | 3 | Short term reserve limit |
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
@@ -276,7 +276,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** Half PPR Lower Turnover 12 Team  
 **Description:** 12-team league with half PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX  
-**Hash:** `9abe8c6d4d77ecc4927175a149d1e2bccf415bbdbbaceb5afaa6876916e00e94`
+**Hash:** `00d919efb84e55e7a06a9e7adbe6fc3bcbe464ab57f3d5a03097f740d66812e9`
 
 **Configuration:**
 | Property | Value | Description |
@@ -294,7 +294,7 @@ This document shows the configuration for each named format in the system.
 | `sk` | 1 | Starting K positions |
 | `bench` | 6 | Bench positions |
 | `ps` | 0 | Practice squad positions |
-| `ir` | 2 | IR positions |
+| `reserve_short_term_limit` | 3 | Short term reserve limit |
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
@@ -304,7 +304,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** Half PPR Lower Turnover 12 Team Superflex  
 **Description:** 12-team superflex league with half PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX  
-**Hash:** `87d3d5fb64a9f318ee541af7eb180f35d2a516d7ae46aa9d9f4af80e964463f9`
+**Hash:** `9826b6010f7c678b002e16e856f87df2fb584918a63875482a86b7c765fa0fdf`
 
 **Configuration:**
 | Property | Value | Description |
@@ -322,7 +322,7 @@ This document shows the configuration for each named format in the system.
 | `sk` | 1 | Starting K positions |
 | `bench` | 6 | Bench positions |
 | `ps` | 0 | Practice squad positions |
-| `ir` | 2 | IR positions |
+| `reserve_short_term_limit` | 3 | Short term reserve limit |
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
@@ -332,7 +332,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** PPR 10 Team  
 **Description:** 10-team league with full PPR scoring - 1QB/2RB/2WR/1TE/1FLEX  
-**Hash:** `b3af242bbd78987446e23dbf4e5ab9d729cafcd24597318d94c8ef183ac76188`
+**Hash:** `8b57e86cda433bfb910f82628d84371f10d0ea604e5de0d9636d5418f86f78b9`
 
 **Configuration:**
 | Property | Value | Description |
@@ -350,7 +350,7 @@ This document shows the configuration for each named format in the system.
 | `sk` | 1 | Starting K positions |
 | `bench` | 6 | Bench positions |
 | `ps` | 0 | Practice squad positions |
-| `ir` | 2 | IR positions |
+| `reserve_short_term_limit` | 3 | Short term reserve limit |
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
@@ -360,7 +360,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** PPR 10 Team Superflex  
 **Description:** 10-team superflex league with full PPR scoring - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX  
-**Hash:** `fa66b63a9deb4e82eb752e18507cd6910814d67a2046cfc3705634cdaf058075`
+**Hash:** `125a362993074cb696f8f2254e11da33b6366b65f1f957dfd3a60f4bfe8b6140`
 
 **Configuration:**
 | Property | Value | Description |
@@ -378,7 +378,7 @@ This document shows the configuration for each named format in the system.
 | `sk` | 1 | Starting K positions |
 | `bench` | 6 | Bench positions |
 | `ps` | 0 | Practice squad positions |
-| `ir` | 2 | IR positions |
+| `reserve_short_term_limit` | 3 | Short term reserve limit |
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
@@ -388,7 +388,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** PPR 12 Team  
 **Description:** 12-team league with full PPR scoring - 1QB/2RB/2WR/1TE/1FLEX  
-**Hash:** `674c3710dc806f99c20b20bfc04f56f7c23490643a1a1c3b2d43241fe21ae9a2`
+**Hash:** `d8178f372cc25c7b38577d849bfde25b66833ac351fca0eb9ea2b07de03c2ccd`
 
 **Configuration:**
 | Property | Value | Description |
@@ -406,7 +406,7 @@ This document shows the configuration for each named format in the system.
 | `sk` | 1 | Starting K positions |
 | `bench` | 6 | Bench positions |
 | `ps` | 0 | Practice squad positions |
-| `ir` | 2 | IR positions |
+| `reserve_short_term_limit` | 3 | Short term reserve limit |
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
@@ -416,7 +416,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** PPR 12 Team Superflex  
 **Description:** 12-team superflex league with full PPR scoring - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX  
-**Hash:** `d85636e8c2233b3587eca24d615f6fe4767595f446a65dc033bf085b1c25f5e9`
+**Hash:** `7c94c1aa1d7addd37a9b4f0825e06af1a147276f74a2e76c995d2a5d3c84ca83`
 
 **Configuration:**
 | Property | Value | Description |
@@ -434,7 +434,7 @@ This document shows the configuration for each named format in the system.
 | `sk` | 1 | Starting K positions |
 | `bench` | 6 | Bench positions |
 | `ps` | 0 | Practice squad positions |
-| `ir` | 2 | IR positions |
+| `reserve_short_term_limit` | 3 | Short term reserve limit |
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
@@ -444,7 +444,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** PPR Lower Turnover 10 Team  
 **Description:** 10-team league with full PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX  
-**Hash:** `3a6b37972cab5b3d5b317701558e58cd363b8e63ce3008fc38a0bb136b86d067`
+**Hash:** `77ac5bb9b36b35ff77aaf308ace390a13ca5493706131f94ffc4374995d61a1d`
 
 **Configuration:**
 | Property | Value | Description |
@@ -462,7 +462,7 @@ This document shows the configuration for each named format in the system.
 | `sk` | 1 | Starting K positions |
 | `bench` | 6 | Bench positions |
 | `ps` | 0 | Practice squad positions |
-| `ir` | 2 | IR positions |
+| `reserve_short_term_limit` | 3 | Short term reserve limit |
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
@@ -472,7 +472,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** PPR Lower Turnover 10 Team Superflex  
 **Description:** 10-team superflex league with full PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX  
-**Hash:** `ca21453cabe4db2abbee23868669ce31a7062d0f7c3c42db07a14735a4b81322`
+**Hash:** `8f73f29d9bdd2174995a287de7b297a29c3f86f063f09fca63f598f5c2a2f78a`
 
 **Configuration:**
 | Property | Value | Description |
@@ -490,7 +490,7 @@ This document shows the configuration for each named format in the system.
 | `sk` | 1 | Starting K positions |
 | `bench` | 6 | Bench positions |
 | `ps` | 0 | Practice squad positions |
-| `ir` | 2 | IR positions |
+| `reserve_short_term_limit` | 3 | Short term reserve limit |
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
@@ -500,7 +500,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** PPR Lower Turnover 12 Team  
 **Description:** 12-team league with full PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX  
-**Hash:** `b69d6ae29bab63779e2e23d9194c82a137497d7051d7c1e1bd25a2962f7b7121`
+**Hash:** `51624cbf8f71b7a3f4c542c591e57f40e92a52809973498f0dea3eb8400f6806`
 
 **Configuration:**
 | Property | Value | Description |
@@ -518,7 +518,7 @@ This document shows the configuration for each named format in the system.
 | `sk` | 1 | Starting K positions |
 | `bench` | 6 | Bench positions |
 | `ps` | 0 | Practice squad positions |
-| `ir` | 2 | IR positions |
+| `reserve_short_term_limit` | 3 | Short term reserve limit |
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
@@ -528,7 +528,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** PPR Lower Turnover 12 Team Superflex  
 **Description:** 12-team superflex league with full PPR and lower turnovers (-1 INT, -1 fumble) - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX  
-**Hash:** `7b921f6971ea0c095ed0fc3c86d2d3856a78e903c252931b0357c394f23bc216`
+**Hash:** `560dba8a15d7af913b13fb390b3302414ba4efe63822e6258e88c9b1f6eb272a`
 
 **Configuration:**
 | Property | Value | Description |
@@ -546,7 +546,7 @@ This document shows the configuration for each named format in the system.
 | `sk` | 1 | Starting K positions |
 | `bench` | 6 | Bench positions |
 | `ps` | 0 | Practice squad positions |
-| `ir` | 2 | IR positions |
+| `reserve_short_term_limit` | 3 | Short term reserve limit |
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
@@ -556,7 +556,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** Scott Fish Bowl 15 (MFL)  
 **Description:** Scott Fish Bowl 15 MFL format with 2 superflex and 9 flex positions  
-**Hash:** `11b9eac5de1ef77124396e17fc02e941fda1f3f851da5b49848b6bb9fd89bb52`
+**Hash:** `5cbab5e165751c56e52f51b8360e95580e744842ce8080d268a4a8441340bcb9`
 
 **Configuration:**
 | Property | Value | Description |
@@ -574,7 +574,7 @@ This document shows the configuration for each named format in the system.
 | `sk` | 0 | Starting K positions |
 | `bench` | 6 | Bench positions |
 | `ps` | 0 | Practice squad positions |
-| `ir` | 2 | IR positions |
+| `reserve_short_term_limit` | 3 | Short term reserve limit |
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
@@ -584,7 +584,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** Scott Fish Bowl 15 (Sleeper)  
 **Description:** Scott Fish Bowl 15 Sleeper format with 2 superflex and 9 flex positions  
-**Hash:** `dd84e8d0283ee78448669ee426e48502a18b496f234d50798170cacd36a3b156`
+**Hash:** `ea8e0f39a320a6fdf5cf4dda3d1cd139bc4427defd9178c6a75341b255e5e2cd`
 
 **Configuration:**
 | Property | Value | Description |
@@ -602,7 +602,7 @@ This document shows the configuration for each named format in the system.
 | `sk` | 0 | Starting K positions |
 | `bench` | 6 | Bench positions |
 | `ps` | 0 | Practice squad positions |
-| `ir` | 2 | IR positions |
+| `reserve_short_term_limit` | 3 | Short term reserve limit |
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
@@ -612,7 +612,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** Standard 10 Team (No PPR)  
 **Description:** 10-team league with standard (no PPR) scoring - 1QB/2RB/2WR/1TE/1FLEX  
-**Hash:** `857cfdd9a277cdec6b617968581186c407cab6008e0754921952d41361c0ac1b`
+**Hash:** `ac4bd2c40b5b69c071935850c433997ca9cb144337f0aa73e84f10322a5d68fb`
 
 **Configuration:**
 | Property | Value | Description |
@@ -630,7 +630,7 @@ This document shows the configuration for each named format in the system.
 | `sk` | 1 | Starting K positions |
 | `bench` | 6 | Bench positions |
 | `ps` | 0 | Practice squad positions |
-| `ir` | 2 | IR positions |
+| `reserve_short_term_limit` | 3 | Short term reserve limit |
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
@@ -640,7 +640,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** Standard 12 Team (No PPR)  
 **Description:** 12-team league with standard (no PPR) scoring - 1QB/2RB/2WR/1TE/1FLEX  
-**Hash:** `5dfdbf5ad81c7650dba75860197aa9243df08fe1a441e7ecc480928d87d330af`
+**Hash:** `5e54d0dce15b5377d934ce3324f8a754854e77237120f17bfb89aba8b5dc5e09`
 
 **Configuration:**
 | Property | Value | Description |
@@ -658,7 +658,7 @@ This document shows the configuration for each named format in the system.
 | `sk` | 1 | Starting K positions |
 | `bench` | 6 | Bench positions |
 | `ps` | 0 | Practice squad positions |
-| `ir` | 2 | IR positions |
+| `reserve_short_term_limit` | 3 | Short term reserve limit |
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 

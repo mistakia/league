@@ -41,7 +41,7 @@ export default class Confirmation extends React.Component {
         switch (id) {
           case 'RESERVE':
             return ReserveConfirmation
-          case 'RESERVE_IR_LONG_TERM':
+          case 'RESERVE_LONG_TERM':
             return ReserveLongTermConfirmation
           case 'ACTIVATE':
             return ActivateConfirmation

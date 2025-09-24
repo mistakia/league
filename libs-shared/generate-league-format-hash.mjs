@@ -14,7 +14,7 @@ export default function ({
   sk = 0,
   bench = 0,
   ps = 0,
-  ir = 0,
+  reserve_short_term_limit = 0,
   cap = 0,
   min_bid = 0,
   scoring_format_hash
@@ -23,7 +23,7 @@ export default function ({
     throw new Error('scoring_format_hash is required')
   }
 
-  const key = `${num_teams}${sqb}${srb}${swr}${ste}${srbwr}${srbwrte}${sqbrbwrte}${swrte}${sdst}${sk}${bench}${ps}${ir}${cap}${min_bid}${scoring_format_hash}`
+  const key = `${num_teams}${sqb}${srb}${swr}${ste}${srbwr}${srbwrte}${sqbrbwrte}${swrte}${sdst}${sk}${bench}${ps}${reserve_short_term_limit}${cap}${min_bid}${scoring_format_hash}`
 
   const league_format_hash = get_blake2b_hash(key, 32)
 
@@ -46,7 +46,7 @@ export default function ({
 
     bench,
     ps,
-    ir,
+    reserve_short_term_limit,
 
     cap,
     min_bid

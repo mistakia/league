@@ -13,7 +13,7 @@ const router = express.Router({ mergeParams: true })
  *       - Fantasy Teams
  *     summary: Move player to injured reserve
  *     description: |
- *       Move a player to injured reserve (IR) or long-term IR.
+ *       Move a player to short-term injured reserve or long-term reserve.
  *       Can optionally activate another player from reserve.
  *
  *       **Reserve Eligibility Rules:**
@@ -43,7 +43,7 @@ const router = express.Router({ mergeParams: true })
  *                 example: 2
  *               slot:
  *                 type: integer
- *                 description: Reserve slot type (7=IR, 8=Long-term IR)
+ *                 description: Reserve slot type (7=Short Term Reserve, 8=Long-term Reserve)
  *                 enum: [7, 8]
  *                 example: 7
  *               activate_pid:
@@ -55,14 +55,14 @@ const router = express.Router({ mergeParams: true })
  *               - leagueId
  *               - slot
  *           examples:
- *             moveToIR:
- *               summary: Move player to IR
+ *             moveToShortTermReserve:
+ *               summary: Move player to Short Term Reserve
  *               value:
  *                 reserve_pid: "JALE-HURT-2020-1998-08-07"
  *                 leagueId: 2
  *                 slot: 7
- *             moveToIRAndActivate:
- *               summary: Move to IR and activate another
+ *             moveToShortTermReserveAndActivate:
+ *               summary: Move to Short Term Reserve and activate another
  *               value:
  *                 reserve_pid: "JALE-HURT-2020-1998-08-07"
  *                 leagueId: 2

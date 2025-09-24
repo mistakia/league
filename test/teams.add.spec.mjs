@@ -353,7 +353,7 @@ describe('API /teams - add', function () {
         leagueId,
         player: reservePlayer,
         teamId,
-        slot: constants.slots.IR,
+        slot: constants.slots.RESERVE_SHORT_TERM,
         userId: 1
       })
 

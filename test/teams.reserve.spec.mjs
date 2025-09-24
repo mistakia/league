@@ -38,7 +38,7 @@ describe('API /teams - reserve', function () {
       await league(knex)
     })
 
-    it('move player to reserve - ir', async () => {
+    it('move player to reserve - short term reserve', async () => {
       MockDate.set(regular_season_start.subtract('1', 'week').toISOString())
       const player = await selectPlayer()
       const teamId = 1
@@ -70,7 +70,7 @@ describe('API /teams - reserve', function () {
         .send({
           reserve_pid: player.pid,
           leagueId,
-          slot: constants.slots.IR
+          slot: constants.slots.RESERVE_SHORT_TERM
         })
 
       res.should.have.status(200)
@@ -79,7 +79,7 @@ describe('API /teams - reserve', function () {
 
       res.body.tid.should.equal(teamId)
       res.body.pid.should.equal(player.pid)
-      res.body.slot.should.equal(constants.slots.IR)
+      res.body.slot.should.equal(constants.slots.RESERVE_SHORT_TERM)
       res.body.transaction.userid.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
@@ -98,7 +98,7 @@ describe('API /teams - reserve', function () {
         .limit(1)
 
       const rosterRow = rosterRows[0]
-      expect(rosterRow.slot).to.equal(constants.slots.IR)
+      expect(rosterRow.slot).to.equal(constants.slots.RESERVE_SHORT_TERM)
 
       await checkLastTransaction({
         leagueId,
@@ -136,7 +136,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          slot: constants.slots.IR
+          slot: constants.slots.RESERVE_SHORT_TERM
         })
 
       await missing(request, 'reserve_pid')
@@ -149,7 +149,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           reserve_pid: 'x',
-          slot: constants.slots.IR
+          slot: constants.slots.RESERVE_SHORT_TERM
         })
 
       await missing(request, 'leagueId')
@@ -190,7 +190,7 @@ describe('API /teams - reserve', function () {
         .send({
           leagueId: 1,
           reserve_pid: 'x',
-          slot: constants.slots.IR
+          slot: constants.slots.RESERVE_SHORT_TERM
         })
 
       await invalid(request, 'player')
@@ -205,7 +205,7 @@ describe('API /teams - reserve', function () {
         .send({
           leagueId: 1,
           reserve_pid: player.pid,
-          slot: constants.slots.IR
+          slot: constants.slots.RESERVE_SHORT_TERM
         })
 
       await error(request, 'player not on roster')
@@ -220,7 +220,7 @@ describe('API /teams - reserve', function () {
         .send({
           leagueId: 1,
           reserve_pid: player.pid,
-          slot: constants.slots.IR
+          slot: constants.slots.RESERVE_SHORT_TERM
         })
 
       await invalid(request, 'teamId')
@@ -237,7 +237,7 @@ describe('API /teams - reserve', function () {
         leagueId,
         userId,
         player,
-        slot: constants.slots.IR,
+        slot: constants.slots.RESERVE_SHORT_TERM,
         transaction: constants.transactions.DRAFT,
         value
       })
@@ -248,7 +248,7 @@ describe('API /teams - reserve', function () {
         .send({
           leagueId: 1,
           reserve_pid: player.pid,
-          slot: constants.slots.IR
+          slot: constants.slots.RESERVE_SHORT_TERM
         })
 
       await error(request, 'player already on reserve')
@@ -282,7 +282,7 @@ describe('API /teams - reserve', function () {
       await error(request, 'player already on reserve')
     })
 
-    it('player not on reserve/ir', async () => {
+    it('player not on reserve/short term reserve', async () => {
       MockDate.set(regular_season_start.add('1', 'week').toISOString())
       const player = await selectPlayer({
         injury_status: null,
@@ -308,7 +308,7 @@ describe('API /teams - reserve', function () {
         .send({
           leagueId: 1,
           reserve_pid: player.pid,
-          slot: constants.slots.IR
+          slot: constants.slots.RESERVE_SHORT_TERM
         })
 
       await error(request, 'player not eligible for Reserve')
@@ -391,7 +391,7 @@ describe('API /teams - reserve', function () {
           week: constants.season.week,
           year: constants.season.year
         })
-        .whereNot('slot', constants.slots.IR)
+        .whereNot('slot', constants.slots.RESERVE_SHORT_TERM)
         .limit(1)
 
       const pid = players[0].pid
@@ -409,7 +409,7 @@ describe('API /teams - reserve', function () {
         .send({
           leagueId: 1,
           reserve_pid: pid,
-          slot: constants.slots.IR
+          slot: constants.slots.RESERVE_SHORT_TERM
         })
 
       await error(request, 'exceeds roster limits')
@@ -441,7 +441,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           reserve_pid: player.pid,
-          slot: constants.slots.IR,
+          slot: constants.slots.RESERVE_SHORT_TERM,
           leagueId: 1
         })
 
@@ -480,7 +480,7 @@ describe('API /teams - reserve', function () {
         .send({
           reserve_pid: player.pid,
           leagueId,
-          slot: constants.slots.IR
+          slot: constants.slots.RESERVE_SHORT_TERM
         })
 
       await error(request, 'not eligible, not rostered long enough')
@@ -509,7 +509,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           reserve_pid: player.pid,
-          slot: constants.slots.IR,
+          slot: constants.slots.RESERVE_SHORT_TERM,
           leagueId: 1
         })
 
@@ -542,7 +542,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           reserve_pid: player.pid,
-          slot: constants.slots.IR,
+          slot: constants.slots.RESERVE_SHORT_TERM,
           leagueId: 1
         })
 
@@ -602,14 +602,14 @@ describe('API /teams - reserve', function () {
         .send({
           reserve_pid: player.pid,
           leagueId,
-          slot: constants.slots.IR
+          slot: constants.slots.RESERVE_SHORT_TERM
         })
 
       res.should.have.status(200)
       res.should.be.json
       res.body.tid.should.equal(teamId)
       res.body.pid.should.equal(player.pid)
-      res.body.slot.should.equal(constants.slots.IR)
+      res.body.slot.should.equal(constants.slots.RESERVE_SHORT_TERM)
     })
 
     it('practice squad drafted player with active poaching claim can be reserved', async () => {
@@ -655,14 +655,14 @@ describe('API /teams - reserve', function () {
         .send({
           reserve_pid: player.pid,
           leagueId,
-          slot: constants.slots.IR
+          slot: constants.slots.RESERVE_SHORT_TERM
         })
 
       res.should.have.status(200)
       res.should.be.json
       res.body.tid.should.equal(teamId)
       res.body.pid.should.equal(player.pid)
-      res.body.slot.should.equal(constants.slots.IR)
+      res.body.slot.should.equal(constants.slots.RESERVE_SHORT_TERM)
     })
   })
 })

@@ -181,7 +181,7 @@ export default function LeagueTeam({
   }
 
   const reserveIRItems = []
-  for (const player_map of players.ir) {
+  for (const player_map of players.reserve_short_term_players) {
     if (!player_map.get('pid')) continue
     reserveIRItems.push(
       <PlayerRoster
@@ -192,7 +192,7 @@ export default function LeagueTeam({
   }
 
   const reserveIRLongTermItems = []
-  for (const player_map of players.ir_long_term) {
+  for (const player_map of players.reserve_long_term_players) {
     if (!player_map.get('pid')) continue
     reserveIRLongTermItems.push(
       <PlayerRoster
@@ -228,7 +228,10 @@ export default function LeagueTeam({
   const notice_items = [...rfa_notices]
 
   // Add reserve notices
-  for (const player_map of [...players.ir, ...players.ir_long_term]) {
+  for (const player_map of [
+    ...players.reserve_short_term_players,
+    ...players.reserve_long_term_players
+  ]) {
     if (!player_map.get('pid')) continue
 
     if (
@@ -317,7 +320,7 @@ export default function LeagueTeam({
           {Boolean(reserveIRItems.length) && (
             <DashboardPlayersTable
               items={reserveIRItems}
-              title='Reserve/IR'
+              title='Short Term Reserve'
               space={roster.availableReserveSpace}
               {...{ percentiles, is_team_manager }}
             />
@@ -342,7 +345,7 @@ export default function LeagueTeam({
           {Boolean(reserveIRLongTermItems.length) && (
             <DashboardPlayersTable
               items={reserveIRLongTermItems}
-              title='Reserve/IR (Long Term)'
+              title='Long Term Reserve'
               {...{ percentiles, is_team_manager }}
             />
           )}

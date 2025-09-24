@@ -7,7 +7,7 @@ import addPlayer from './add-player.mjs'
 export default async function ({
   leagueId,
   teamId,
-  excludeIR = false,
+  exclude_reserve_short_term = false,
   exclude_pids = [],
   userId = 0
 }) {
@@ -62,11 +62,11 @@ export default async function ({
     roster = new Roster({ roster: rosterRow, league })
   }
 
-  if (excludeIR) {
+  if (exclude_reserve_short_term) {
     return
   }
 
-  while (roster.hasOpenInjuredReserveSlot()) {
+  while (roster.has_open_reserve_short_term_slot()) {
     const players = await db('rosters_players').where({
       lid: leagueId,
       week: constants.season.week,
@@ -80,7 +80,7 @@ export default async function ({
       leagueId,
       teamId,
       player,
-      slot: constants.slots.IR,
+      slot: constants.slots.RESERVE_SHORT_TERM,
       userId
     })
 

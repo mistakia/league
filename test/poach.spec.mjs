@@ -43,7 +43,7 @@ describe('API /poaches', function () {
         leagueId,
         player: reservePlayer,
         teamId,
-        slot: constants.slots.IR,
+        slot: constants.slots.RESERVE_SHORT_TERM,
         userId: 1
       })
 

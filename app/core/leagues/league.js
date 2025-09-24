@@ -21,7 +21,7 @@ export const League = new Record({
 
   bench: null,
   ps: null,
-  ir: null,
+  reserve_short_term_limit: null,
 
   mqb: null,
   mrb: null,
@@ -138,7 +138,7 @@ export function createLeague({
 
   bench,
   ps,
-  ir,
+  reserve_short_term_limit,
 
   mqb,
   mrb,
@@ -254,7 +254,7 @@ export function createLeague({
 
     bench,
     ps,
-    ir,
+    reserve_short_term_limit,
 
     mqb,
     mrb,

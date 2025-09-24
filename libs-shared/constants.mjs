@@ -707,12 +707,12 @@ export const slots = {
   DST: 10,
   BENCH: 11,
   PS: 12, // practice squad - signed
-  IR: 13, // injured reserve
+  RESERVE_SHORT_TERM: 13, // short-term injured reserve
   COV: 14,
   PSP: 15, // practice squad - signed and protected
   PSD: 16, // practice squad - drafted
   PSDP: 17, // practice squad - drafted and protected
-  IR_LONG_TERM: 18
+  RESERVE_LONG_TERM: 18 // long-term injured reserve
 }
 
 export const starterSlots = [
@@ -747,12 +747,12 @@ export const slotName = {
   [slots.DST]: 'DST',
   [slots.BENCH]: 'BE',
   [slots.PS]: 'PS',
-  [slots.IR]: 'IR',
+  [slots.RESERVE_SHORT_TERM]: 'IR',
   [slots.COV]: 'COV',
   [slots.PSP]: 'PS (P)',
   [slots.PSD]: 'PSD',
   [slots.PSDP]: 'PSD (P)',
-  [slots.IR_LONG_TERM]: 'IR (LT)'
+  [slots.RESERVE_LONG_TERM]: 'IR (LT)'
 }
 
 export const matchups = {
@@ -849,7 +849,7 @@ export const transactions = {
   RESERVE_IR: 15,
   RESERVE_COV: 16,
   PRACTICE_PROTECTED: 17,
-  RESERVE_IR_LONG_TERM: 18,
+  RESERVE_LONG_TERM: 18,
 
   SUPER_PRIORITY: 19
 }

@@ -107,8 +107,8 @@ router.get('/reserve', async (req, res) => {
 
     const reserve_roster_rows = await db('rosters_players')
       .whereIn('rosters_players.slot', [
-        constants.slots.IR,
-        constants.slots.IR_LONG_TERM
+        constants.slots.RESERVE_SHORT_TERM,
+        constants.slots.RESERVE_LONG_TERM
       ])
       .where({ tid, year, week })
 
