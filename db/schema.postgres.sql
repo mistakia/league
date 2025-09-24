@@ -1565,6 +1565,11 @@ DROP INDEX IF EXISTS public.idx_player_adp_history_source_type;
 DROP INDEX IF EXISTS public.idx_player_adp_history_pid;
 DROP INDEX IF EXISTS public.idx_placed_wagers_userid;
 DROP INDEX IF EXISTS public.idx_placed_wagers_placed_at;
+DROP INDEX IF EXISTS public.idx_pff_team_seasonlogs_year;
+DROP INDEX IF EXISTS public.idx_pff_team_seasonlogs_team_year;
+DROP INDEX IF EXISTS public.idx_pff_team_gamelogs_year_week;
+DROP INDEX IF EXISTS public.idx_pff_team_gamelogs_team_year_week;
+DROP INDEX IF EXISTS public.idx_pff_team_gamelogs_team_year;
 DROP INDEX IF EXISTS public.idx_opening_days_year_opening_day;
 DROP INDEX IF EXISTS public.idx_nfl_snaps_partitioned;
 DROP INDEX IF EXISTS public.idx_nfl_plays_year_seas_type_week_play_type_trg_pid;
@@ -1782,6 +1787,10 @@ ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_cfbref
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_cbs_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_aliases DROP CONSTRAINT IF EXISTS player_aliases_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_adp_index DROP CONSTRAINT IF EXISTS player_adp_index_unique;
+ALTER TABLE IF EXISTS ONLY public.pff_team_seasonlogs DROP CONSTRAINT IF EXISTS pff_team_seasonlogs_pkey;
+ALTER TABLE IF EXISTS ONLY public.pff_team_seasonlogs DROP CONSTRAINT IF EXISTS pff_team_seasonlogs_nfl_team_year_key;
+ALTER TABLE IF EXISTS ONLY public.pff_team_gamelogs DROP CONSTRAINT IF EXISTS pff_team_gamelogs_pkey;
+ALTER TABLE IF EXISTS ONLY public.pff_team_gamelogs DROP CONSTRAINT IF EXISTS pff_team_gamelogs_nfl_team_year_week_key;
 ALTER TABLE IF EXISTS ONLY public.pff_player_seasonlogs DROP CONSTRAINT IF EXISTS pff_player_seasonlogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.pff_player_seasonlogs_changelog DROP CONSTRAINT IF EXISTS pff_player_seasonlogs_changelog_pkey;
 ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_index DROP CONSTRAINT IF EXISTS ngs_prospect_scores_index_pkey;
@@ -1959,6 +1968,10 @@ DROP TABLE IF EXISTS public.player;
 DROP TABLE IF EXISTS public.play_changelog;
 DROP SEQUENCE IF EXISTS public.placed_wagers_wager_id_seq;
 DROP TABLE IF EXISTS public.placed_wagers;
+DROP TABLE IF EXISTS public.pff_team_seasonlogs;
+DROP SEQUENCE IF EXISTS public.pff_team_seasonlogs_uid_seq;
+DROP TABLE IF EXISTS public.pff_team_gamelogs;
+DROP SEQUENCE IF EXISTS public.pff_team_gamelogs_uid_seq;
 DROP TABLE IF EXISTS public.pff_player_seasonlogs_changelog;
 DROP SEQUENCE IF EXISTS public.pff_player_seasonlogs_changelog_uid_seq;
 DROP TABLE IF EXISTS public.pff_player_seasonlogs;
@@ -15436,6 +15449,95 @@ CREATE TABLE public.pff_player_seasonlogs_changelog (
 
 
 --
+-- Name: pff_team_gamelogs_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.pff_team_gamelogs_uid_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: pff_team_gamelogs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.pff_team_gamelogs (
+    uid integer DEFAULT nextval('public.pff_team_gamelogs_uid_seq'::regclass) NOT NULL,
+    nfl_team character varying(3) NOT NULL,
+    year smallint NOT NULL,
+    week smallint NOT NULL,
+    franchise_id smallint,
+    team_name character varying(50),
+    wins smallint,
+    losses smallint,
+    ties smallint,
+    points_scored integer,
+    points_allowed integer,
+    grades_offense numeric(5,2),
+    grades_defense numeric(5,2),
+    grades_special_teams numeric(5,2),
+    grades_overall numeric(5,2),
+    grades_pass numeric(5,2),
+    grades_run numeric(5,2),
+    grades_pass_block numeric(5,2),
+    grades_pass_rush_defense numeric(5,2),
+    grades_run_defense numeric(5,2),
+    grades_run_block numeric(5,2),
+    grades_coverage_defense numeric(5,2),
+    grades_tackle numeric(5,2),
+    grades_pass_route numeric(5,2),
+    "timestamp" integer DEFAULT EXTRACT(epoch FROM now()) NOT NULL
+);
+
+
+--
+-- Name: pff_team_seasonlogs_uid_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.pff_team_seasonlogs_uid_seq
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: pff_team_seasonlogs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.pff_team_seasonlogs (
+    uid integer DEFAULT nextval('public.pff_team_seasonlogs_uid_seq'::regclass) NOT NULL,
+    nfl_team character varying(3) NOT NULL,
+    year smallint NOT NULL,
+    franchise_id smallint,
+    team_name character varying(50),
+    wins smallint,
+    losses smallint,
+    ties smallint,
+    points_scored integer,
+    points_allowed integer,
+    grades_offense numeric(5,2),
+    grades_defense numeric(5,2),
+    grades_special_teams numeric(5,2),
+    grades_overall numeric(5,2),
+    grades_pass numeric(5,2),
+    grades_run numeric(5,2),
+    grades_pass_block numeric(5,2),
+    grades_pass_rush_defense numeric(5,2),
+    grades_run_defense numeric(5,2),
+    grades_run_block numeric(5,2),
+    grades_coverage_defense numeric(5,2),
+    grades_tackle numeric(5,2),
+    grades_pass_route numeric(5,2),
+    "timestamp" integer DEFAULT EXTRACT(epoch FROM now()) NOT NULL
+);
+
+
+--
 -- Name: placed_wagers; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -22734,6 +22836,38 @@ ALTER TABLE ONLY public.pff_player_seasonlogs
 
 
 --
+-- Name: pff_team_gamelogs pff_team_gamelogs_nfl_team_year_week_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.pff_team_gamelogs
+    ADD CONSTRAINT pff_team_gamelogs_nfl_team_year_week_key UNIQUE (nfl_team, year, week);
+
+
+--
+-- Name: pff_team_gamelogs pff_team_gamelogs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.pff_team_gamelogs
+    ADD CONSTRAINT pff_team_gamelogs_pkey PRIMARY KEY (uid);
+
+
+--
+-- Name: pff_team_seasonlogs pff_team_seasonlogs_nfl_team_year_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.pff_team_seasonlogs
+    ADD CONSTRAINT pff_team_seasonlogs_nfl_team_year_key UNIQUE (nfl_team, year);
+
+
+--
+-- Name: pff_team_seasonlogs pff_team_seasonlogs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.pff_team_seasonlogs
+    ADD CONSTRAINT pff_team_seasonlogs_pkey PRIMARY KEY (uid);
+
+
+--
 -- Name: player_adp_index player_adp_index_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -24316,6 +24450,41 @@ CREATE UNIQUE INDEX idx_nfl_snaps_partitioned ON ONLY public.nfl_snaps USING btr
 --
 
 CREATE INDEX idx_opening_days_year_opening_day ON public.opening_days USING btree (year, opening_day);
+
+
+--
+-- Name: idx_pff_team_gamelogs_team_year; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_pff_team_gamelogs_team_year ON public.pff_team_gamelogs USING btree (nfl_team, year);
+
+
+--
+-- Name: idx_pff_team_gamelogs_team_year_week; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_pff_team_gamelogs_team_year_week ON public.pff_team_gamelogs USING btree (nfl_team, year, week);
+
+
+--
+-- Name: idx_pff_team_gamelogs_year_week; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_pff_team_gamelogs_year_week ON public.pff_team_gamelogs USING btree (year, week);
+
+
+--
+-- Name: idx_pff_team_seasonlogs_team_year; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_pff_team_seasonlogs_team_year ON public.pff_team_seasonlogs USING btree (nfl_team, year);
+
+
+--
+-- Name: idx_pff_team_seasonlogs_year; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_pff_team_seasonlogs_year ON public.pff_team_seasonlogs USING btree (year);
 
 
 --
@@ -45522,6 +45691,34 @@ ALTER TABLE ONLY public.ngs_prospect_scores_history
 
 ALTER TABLE ONLY public.ngs_prospect_scores_index
     ADD CONSTRAINT ngs_prospect_scores_index_pid_fkey FOREIGN KEY (pid) REFERENCES public.player(pid);
+
+
+--
+-- Name: SEQUENCE pff_team_gamelogs_uid_seq; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON SEQUENCE public.pff_team_gamelogs_uid_seq TO postgres;
+
+
+--
+-- Name: TABLE pff_team_gamelogs; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON TABLE public.pff_team_gamelogs TO postgres;
+
+
+--
+-- Name: SEQUENCE pff_team_seasonlogs_uid_seq; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON SEQUENCE public.pff_team_seasonlogs_uid_seq TO postgres;
+
+
+--
+-- Name: TABLE pff_team_seasonlogs; Type: ACL; Schema: public; Owner: -
+--
+
+GRANT ALL ON TABLE public.pff_team_seasonlogs TO postgres;
 
 
 --

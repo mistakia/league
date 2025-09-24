@@ -20,26 +20,32 @@ const clean_string = (str) => {
   // Remove null bytes and other control characters that PostgreSQL doesn't like
   // Keep tabs, newlines, and carriage returns if needed
   // Remove all other control characters below 0x20 (space)
-  let cleaned = str.split('').filter(char => {
-    const code = char.charCodeAt(0)
-    // Keep tabs (9), newlines (10), and carriage returns (13)
-    if (code === 9 || code === 10 || code === 13) return true
-    // Remove null bytes and other control characters below 32 (space)
-    if (code < 32) return false
-    // Keep printable ASCII and valid Unicode characters
-    return true
-  }).join('')
+  let cleaned = str
+    .split('')
+    .filter((char) => {
+      const code = char.charCodeAt(0)
+      // Keep tabs (9), newlines (10), and carriage returns (13)
+      if (code === 9 || code === 10 || code === 13) return true
+      // Remove null bytes and other control characters below 32 (space)
+      if (code < 32) return false
+      // Keep printable ASCII and valid Unicode characters
+      return true
+    })
+    .join('')
 
   // Also remove any invalid UTF-8 sequences by filtering out non-printable characters
-  cleaned = cleaned.split('').filter(char => {
-    const code = char.charCodeAt(0)
-    // Keep tabs, newlines, carriage returns, and printable ASCII
-    if (code >= 9 && code <= 13) return true
-    if (code >= 32 && code <= 126) return true
-    // Keep valid Unicode characters above 127
-    if (code >= 128) return true
-    return false
-  }).join('')
+  cleaned = cleaned
+    .split('')
+    .filter((char) => {
+      const code = char.charCodeAt(0)
+      // Keep tabs, newlines, carriage returns, and printable ASCII
+      if (code >= 9 && code <= 13) return true
+      if (code >= 32 && code <= 126) return true
+      // Keep valid Unicode characters above 127
+      if (code >= 128) return true
+      return false
+    })
+    .join('')
 
   // Trim whitespace
   cleaned = cleaned.trim()
