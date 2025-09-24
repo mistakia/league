@@ -20,7 +20,7 @@ export default class Roster extends React.Component {
       ps_drafted_threshold_count_max,
       ps_signed_count_max,
       bench_count_max,
-      ir_long_term_count_max,
+      reserve_long_term_count_max,
       is_psd_expanded,
       set_is_psd_expanded
     } = this.props
@@ -287,25 +287,25 @@ export default class Roster extends React.Component {
       }
     }
 
-    if (league.ir) {
-      const players = r.ir
-      for (let i = 0; i < league.ir; i++) {
+    if (league.reserve_short_term_limit) {
+      const players = r.reserve_short_term_players
+      for (let i = 0; i < league.reserve_short_term_limit; i++) {
         const { pid } = players[i] || {}
         rows.push(
           <PlayerRosterRow
-            key={`${roster.tid}-ir-${i}`}
+            key={`${roster.tid}-reserve-short-term-${i}`}
             reserve
             {...{ pid, roster, show_bid }}
           />
         )
       }
 
-      const long_term_players = r.ir_long_term
-      for (let i = 0; i < ir_long_term_count_max; i++) {
+      const long_term_players = r.reserve_long_term_players
+      for (let i = 0; i < reserve_long_term_count_max; i++) {
         const { pid } = long_term_players[i] || {}
         rows.push(
           <PlayerRosterRow
-            key={`${roster.tid}-ir-lt-${i}`}
+            key={`${roster.tid}-reserve-long-term-${i}`}
             reserve
             {...{ pid, roster, show_bid }}
           />
@@ -333,7 +333,7 @@ Roster.propTypes = {
   ps_drafted_count_max: PropTypes.number,
   ps_drafted_threshold_count_max: PropTypes.number,
   bench_count_max: PropTypes.number,
-  ir_long_term_count_max: PropTypes.number,
+  reserve_long_term_count_max: PropTypes.number,
   players: ImmutablePropTypes.map,
   is_psd_expanded: PropTypes.bool,
   set_is_psd_expanded: PropTypes.func

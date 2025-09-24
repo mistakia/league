@@ -1097,7 +1097,7 @@ export const isPlayerOnReleaseWaivers = createSelector(
 
 export function isPlayerReserveEligible(state, { player_map }) {
   const reserve = {
-    ir: false,
+    reserve_short_term_eligible: false,
     cov: false
   }
 
@@ -1110,7 +1110,7 @@ export function isPlayerReserveEligible(state, { player_map }) {
       injury_status
     })
   ) {
-    reserve.ir = true
+    reserve.reserve_short_term_eligible = true
   }
 
   if (
@@ -1197,8 +1197,8 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
       restrictedFreeAgencyBid: false
     },
     reserve: {
-      ir: false,
-      ir_long_term: false,
+      reserve_short_term_eligible: false,
+      reserve_long_term_eligible: false,
       covid: false
     }
   }
@@ -1312,10 +1312,10 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
         roster.active.find(({ pid }) => pid === playerId)
       )
       if (!isActive) {
-        // can not activate long term IR player during regular season
+        // can not activate long term reserve player during regular season
         status.eligible.activate = !(
           constants.isRegularSeason &&
-          playerSlot === constants.slots.IR_LONG_TERM
+          playerSlot === constants.slots.RESERVE_LONG_TERM
         )
 
         // is regular season and is on practice squad && has no poaching claims
@@ -1348,20 +1348,20 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
         }
 
         if (
-          reserve.ir &&
-          playerSlot !== constants.slots.IR &&
-          playerSlot !== constants.slots.IR_LONG_TERM &&
+          reserve.reserve_short_term_eligible &&
+          playerSlot !== constants.slots.RESERVE_SHORT_TERM &&
+          playerSlot !== constants.slots.RESERVE_LONG_TERM &&
           practiceSquadReserveEligible
         ) {
-          status.reserve.ir = true
+          status.reserve.reserve_short_term_eligible = true
         }
 
         if (
-          reserve.ir &&
-          playerSlot !== constants.slots.IR_LONG_TERM &&
+          reserve.reserve_short_term_eligible &&
+          playerSlot !== constants.slots.RESERVE_LONG_TERM &&
           practiceSquadReserveEligible
         ) {
-          status.reserve.ir_long_term = true
+          status.reserve.reserve_long_term_eligible = true
         }
 
         if (
@@ -1468,8 +1468,8 @@ export function isPlayerPracticeSquadEligible(
     return true
   }
 
-  // not eligible if player is on long term IR
-  if (rosterPlayer.slot === constants.slots.IR_LONG_TERM) {
+  // not eligible if player is on long term reserve
+  if (rosterPlayer.slot === constants.slots.RESERVE_LONG_TERM) {
     return false
   }
 
@@ -1503,7 +1503,7 @@ export function isPlayerPracticeSquadEligible(
     constants.transactions.PRACTICE_ADD,
     constants.transactions.DRAFT
   ]
-  if (rosterInfo.slot === constants.slots.IR) {
+  if (rosterInfo.slot === constants.slots.RESERVE_SHORT_TERM) {
     for (const tran of transactions.values()) {
       if (ps_types.includes(tran.type)) {
         break
@@ -1878,8 +1878,8 @@ export const get_injured_reserve_player_ids_for_current_league = createSelector(
     for (const roster of rosters.values()) {
       roster.players.forEach(({ slot, pid }) => {
         if (
-          slot === constants.slots.IR ||
-          slot === constants.slots.IR_LONG_TERM
+          slot === constants.slots.RESERVE_SHORT_TERM ||
+          slot === constants.slots.RESERVE_LONG_TERM
         ) {
           pids.push(pid)
         }
@@ -2088,8 +2088,8 @@ export const getGroupedPlayersByTeamId = createSelector(
         practice: new List(),
         practice_signed: new List(),
         practice_drafted: new List(),
-        ir: new List(),
-        ir_long_term: new List(),
+        reserve_short_term: new List(),
+        reserve_long_term: new List(),
         cov: new List(),
         players: new List(),
         roster: new Roster({ roster: new RosterRecord().toJS(), league })
@@ -2109,9 +2109,15 @@ export const getGroupedPlayersByTeamId = createSelector(
     const practice_drafted = new List(
       r.practice_drafted.map(({ pid }) => player_items.get(pid, new Map()))
     )
-    const ir = new List(r.ir.map(({ pid }) => player_items.get(pid, new Map())))
-    const ir_long_term = new List(
-      r.ir_long_term.map(({ pid }) => player_items.get(pid, new Map()))
+    const reserve_short_term = new List(
+      r.reserve_short_term_players.map(({ pid }) =>
+        player_items.get(pid, new Map())
+      )
+    )
+    const reserve_long_term = new List(
+      r.reserve_long_term_players.map(({ pid }) =>
+        player_items.get(pid, new Map())
+      )
     )
     const cov = new List(
       r.cov.map(({ pid }) => player_items.get(pid, new Map()))
@@ -2119,9 +2125,9 @@ export const getGroupedPlayersByTeamId = createSelector(
 
     const players = active
       .concat(practice)
-      .concat(ir)
+      .concat(reserve_short_term)
       .concat(cov)
-      .concat(ir_long_term)
+      .concat(reserve_long_term)
 
     return {
       active,
@@ -2129,8 +2135,8 @@ export const getGroupedPlayersByTeamId = createSelector(
       practice_signed,
       practice_drafted,
       players,
-      ir,
-      ir_long_term,
+      reserve_short_term,
+      reserve_long_term,
       cov,
       roster: r
     }

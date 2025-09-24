@@ -31,8 +31,8 @@ import nfl_team_seasonlogs_column_definitions from './nfl-team-seasonlogs-column
 import player_pfr_season_value_column_definitions from './player-pfr-season-value-column-definitions.mjs'
 import player_seasonlogs_column_definitions from './player-seasonlogs-column-definitions.mjs'
 
-// TODO include IR_LONG_TERM
-const player_league_roster_status_select = `CASE WHEN rosters_players.slot = ${constants.slots.IR} THEN 'injured_reserve' WHEN rosters_players.slot = ${constants.slots.PS} THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END`
+// TODO include RESERVE_LONG_TERM
+const player_league_roster_status_select = `CASE WHEN rosters_players.slot = ${constants.slots.RESERVE_SHORT_TERM} THEN 'injured_reserve' WHEN rosters_players.slot = ${constants.slots.PS} THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END`
 
 export default {
   ...player_projected_column_definitions,

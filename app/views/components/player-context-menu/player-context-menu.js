@@ -116,7 +116,7 @@ export default function PlayerContextMenu({
     hide()
   }
 
-  const handleReserveIR = () => {
+  const handle_reserve_short_term = () => {
     showConfirmation({
       id: 'RESERVE',
       data: {
@@ -126,9 +126,9 @@ export default function PlayerContextMenu({
     hide()
   }
 
-  const handleReserveIRLongTerm = () => {
+  const handle_reserve_long_term = () => {
     showConfirmation({
-      id: 'RESERVE_IR_LONG_TERM',
+      id: 'RESERVE_LONG_TERM',
       data: {
         player_map
       }
@@ -362,18 +362,20 @@ export default function PlayerContextMenu({
     }
 
     add({
-      key: 'ir',
-      onClick: handleReserveIR,
-      disabled: !status.reserve.ir || (status.locked && status.starter),
-      label: 'Move to Reserve/IR'
+      key: 'reserve_short_term',
+      onClick: handle_reserve_short_term,
+      disabled:
+        !status.reserve.reserve_short_term_eligible ||
+        (status.locked && status.starter),
+      label: 'Move to Short Term Reserve'
     })
 
-    if (status.reserve.ir_long_term) {
+    if (status.reserve.reserve_long_term_eligible) {
       add({
-        key: 'ir_long_term',
-        onClick: handleReserveIRLongTerm,
+        key: 'reserve_long_term',
+        onClick: handle_reserve_long_term,
         disabled: status.locked && status.starter,
-        label: 'Move to Reserve/IR (Long Term)'
+        label: 'Move to Long Term Reserve'
       })
     }
 

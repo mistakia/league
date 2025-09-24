@@ -325,7 +325,7 @@ export const league_formats = {
       sk: 1, // starting K
       bench: 6, // bench spots
       ps: 0, // practice squad spots
-      ir: 2, // IR spots
+      reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
     },
@@ -350,7 +350,7 @@ export const league_formats = {
       sk: 1, // starting K
       bench: 6, // bench spots
       ps: 0, // practice squad spots
-      ir: 2, // IR spots
+      reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
     },
@@ -374,7 +374,7 @@ export const league_formats = {
       sk: 1, // starting K
       bench: 6, // bench spots
       ps: 0, // practice squad spots
-      ir: 2, // IR spots
+      reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
     },
@@ -399,7 +399,7 @@ export const league_formats = {
       sk: 1, // starting K
       bench: 6, // bench spots
       ps: 0, // practice squad spots
-      ir: 2, // IR spots
+      reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
     },
@@ -424,7 +424,7 @@ export const league_formats = {
       sk: 1, // starting K
       bench: 6, // bench spots
       ps: 0, // practice squad spots
-      ir: 2, // IR spots
+      reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
     },
@@ -448,7 +448,7 @@ export const league_formats = {
       sk: 1, // starting K
       bench: 6, // bench spots
       ps: 0, // practice squad spots
-      ir: 2, // IR spots
+      reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
     },
@@ -473,7 +473,7 @@ export const league_formats = {
       sk: 1, // starting K
       bench: 6, // bench spots
       ps: 0, // practice squad spots
-      ir: 2, // IR spots
+      reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
     },
@@ -498,7 +498,7 @@ export const league_formats = {
       sk: 1, // starting K
       bench: 6, // bench spots
       ps: 0, // practice squad spots
-      ir: 2, // IR spots
+      reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
     },
@@ -524,7 +524,7 @@ export const league_formats = {
       sk: 1, // starting K
       bench: 6, // bench spots
       ps: 0, // practice squad spots
-      ir: 2, // IR spots
+      reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
     },
@@ -549,7 +549,7 @@ export const league_formats = {
       sk: 1, // starting K
       bench: 6, // bench spots
       ps: 0, // practice squad spots
-      ir: 2, // IR spots
+      reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
     },
@@ -575,7 +575,7 @@ export const league_formats = {
       sk: 0, // starting K (no K)
       bench: 6, // bench spots
       ps: 0, // practice squad spots
-      ir: 2, // IR spots
+      reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
     },
@@ -600,7 +600,7 @@ export const league_formats = {
       sk: 0, // starting K (no K)
       bench: 6, // bench spots
       ps: 0, // practice squad spots
-      ir: 2, // IR spots
+      reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
     },
@@ -626,7 +626,7 @@ export const league_formats = {
       sk: 0, // starting K (no K in DraftKings)
       bench: 0, // no bench (DFS)
       ps: 0, // no practice squad
-      ir: 0, // no IR
+      reserve_short_term_limit: 0, // no short term reserve
       cap: 50000, // salary cap ($50k)
       min_bid: 0 // minimum bid
     },
@@ -652,7 +652,7 @@ export const league_formats = {
       sk: 1, // starting K
       bench: 6, // bench spots
       ps: 0, // practice squad spots
-      ir: 2, // IR spots
+      reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
     },
@@ -677,7 +677,7 @@ export const league_formats = {
       sk: 1, // starting K
       bench: 6, // bench spots
       ps: 0, // practice squad spots
-      ir: 2, // IR spots
+      reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
     },
@@ -702,7 +702,7 @@ export const league_formats = {
       sk: 1, // starting K
       bench: 6, // bench spots
       ps: 0, // practice squad spots
-      ir: 2, // IR spots
+      reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
     },
@@ -727,7 +727,7 @@ export const league_formats = {
       sk: 1, // starting K
       bench: 6, // bench spots
       ps: 0, // practice squad spots
-      ir: 2, // IR spots
+      reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
     },
@@ -753,7 +753,7 @@ export const league_formats = {
       sk: 1, // starting K
       bench: 6, // bench spots
       ps: 0, // practice squad spots
-      ir: 2, // IR spots
+      reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
     },
@@ -778,7 +778,7 @@ export const league_formats = {
       sk: 1, // starting K
       bench: 6, // bench spots
       ps: 0, // practice squad spots
-      ir: 2, // IR spots
+      reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
     },
@@ -803,7 +803,7 @@ export const league_formats = {
       sk: 1, // starting K
       bench: 6, // bench spots
       ps: 0, // practice squad spots
-      ir: 2, // IR spots
+      reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
     },
@@ -828,7 +828,7 @@ export const league_formats = {
       sk: 1, // starting K
       bench: 6, // bench spots
       ps: 0, // practice squad spots
-      ir: 2, // IR spots
+      reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
     },
@@ -854,7 +854,7 @@ export const league_formats = {
       sk: 0, // starting K (no kicker)
       bench: 7, // bench spots
       ps: 4, // practice squad spots
-      ir: 3, // IR spots
+      reserve_short_term_limit: 3, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
     },

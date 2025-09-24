@@ -394,10 +394,10 @@ const options = {
               description: 'Practice squad spots',
               example: 4
             },
-            ir: {
+            reserve_short_term_limit: {
               type: 'integer',
-              description: 'Injured reserve spots',
-              example: 2
+              description: 'Short term reserve spots limit (99+ = unlimited)',
+              example: 3
             },
             cap: {
               type: 'integer',
@@ -3175,11 +3175,13 @@ const options = {
               description: 'Practice squad roster slots',
               example: 4
             },
-            ir: {
+            reserve_short_term_limit: {
               type: 'integer',
               minimum: 0,
-              description: 'Injured reserve roster slots',
-              example: 2
+              maximum: 99,
+              description:
+                'Short term reserve roster slots limit (99 = unlimited)',
+              example: 3
             },
             py: {
               type: 'number',

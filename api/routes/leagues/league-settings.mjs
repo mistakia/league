@@ -148,11 +148,11 @@
  *                 summary: Complete field definitions and validation rules
  *                 value:
  *                   league_fields: ["name", "espn_id", "sleeper_id", "mfl_id", "fleaflicker_id"]
- *                   league_format_fields: ["num_teams", "sqb", "srb", "swr", "ste", "bench", "ps", "ir", "cap", "min_bid"]
+ *                   league_format_fields: ["num_teams", "sqb", "srb", "swr", "ste", "bench", "ps", "reserve_short_term_limit", "cap", "min_bid"]
  *                   league_scoring_format_fields: ["pa", "pc", "py", "tdp", "ra", "ry", "tdr", "rec", "recy", "tdrec"]
  *                   season_fields: ["mqb", "mrb", "mwr", "mte", "mdst", "mk", "faab"]
- *                   integer_fields: ["num_teams", "sqb", "srb", "swr", "ste", "bench", "ps", "ir", "cap", "pa", "pc", "py", "tdp", "espn_id", "sleeper_id"]
- *                   positive_integer_fields: ["sqb", "srb", "swr", "ste", "bench", "ps", "ir", "cap", "min_bid", "espn_id", "sleeper_id", "mfl_id"]
+ *                   integer_fields: ["num_teams", "sqb", "srb", "swr", "ste", "bench", "ps", "reserve_short_term_limit", "cap", "pa", "pc", "py", "tdp", "espn_id", "sleeper_id"]
+ *                   positive_integer_fields: ["sqb", "srb", "swr", "ste", "bench", "ps", "reserve_short_term_limit", "cap", "min_bid", "espn_id", "sleeper_id", "mfl_id"]
  *                   float_fields: ["pa", "pc", "py", "ra", "ry", "rec", "recy"]
  *       400:
  *         description: Invalid league ID
@@ -195,7 +195,7 @@ export const league_format_fields = [
   'sk',
   'bench',
   'ps',
-  'ir',
+  'reserve_short_term_limit',
   'cap',
   'min_bid'
 ]
@@ -245,7 +245,7 @@ export const integer_fields = [
   'swrte',
   'bench',
   'ps',
-  'ir',
+  'reserve_short_term_limit',
   'mqb',
   'mrb',
   'mwr',
@@ -293,7 +293,7 @@ export const positive_integer_fields = [
   'swrte',
   'bench',
   'ps',
-  'ir',
+  'reserve_short_term_limit',
   'mqb',
   'mrb',
   'mwr',

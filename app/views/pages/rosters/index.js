@@ -23,7 +23,7 @@ const map_state_to_props = createSelector(
     let ps_drafted_threshold_count_max = 0
     let ps_signed_count_max = 0
     let bench_count_max = 0
-    let ir_long_term_count_max = 0
+    let reserve_long_term_count_max = 0
     const recent_draft_cutoff = constants.year - 2
 
     for (const roster of rosters.values()) {
@@ -57,12 +57,12 @@ const map_state_to_props = createSelector(
       )
       bench_count_max = Math.max(bench_count.size, bench_count_max)
 
-      const ir_long_term_count = roster.players.filter(
-        (r) => r.slot === constants.slots.IR_LONG_TERM
+      const reserve_long_term_count = roster.players.filter(
+        (r) => r.slot === constants.slots.RESERVE_LONG_TERM
       )
-      ir_long_term_count_max = Math.max(
-        ir_long_term_count.size,
-        ir_long_term_count_max
+      reserve_long_term_count_max = Math.max(
+        reserve_long_term_count.size,
+        reserve_long_term_count_max
       )
     }
 
@@ -74,7 +74,7 @@ const map_state_to_props = createSelector(
       ps_drafted_threshold_count_max,
       ps_signed_count_max,
       bench_count_max,
-      ir_long_term_count_max
+      reserve_long_term_count_max
     }
   }
 )

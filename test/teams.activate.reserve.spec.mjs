@@ -53,7 +53,9 @@ describe('API /teams - activate', function () {
         year: constants.season.year
       })
 
-      const player1 = players.find((p) => p.slot === constants.slots.IR)
+      const player1 = players.find(
+        (p) => p.slot === constants.slots.RESERVE_SHORT_TERM
+      )
       const player2 = players.find((p) => p.slot === constants.slots.BENCH)
 
       await knex('player')
@@ -69,7 +71,7 @@ describe('API /teams - activate', function () {
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          slot: constants.slots.IR,
+          slot: constants.slots.RESERVE_SHORT_TERM,
           activate_pid: player1.pid,
           reserve_pid: player2.pid,
           leagueId
@@ -148,7 +150,7 @@ describe('API /teams - activate', function () {
         leagueId,
         userId,
         player: player1,
-        slot: constants.slots.IR,
+        slot: constants.slots.RESERVE_SHORT_TERM,
         transaction: constants.transactions.DRAFT,
         value
       })
@@ -160,7 +162,7 @@ describe('API /teams - activate', function () {
         .send({
           leagueId: 1,
           reserve_pid: 'x',
-          slot: constants.slots.IR,
+          slot: constants.slots.RESERVE_SHORT_TERM,
           activate_pid: player1.pid
         })
 
@@ -180,7 +182,7 @@ describe('API /teams - activate', function () {
         leagueId,
         userId,
         player: player1,
-        slot: constants.slots.IR,
+        slot: constants.slots.RESERVE_SHORT_TERM,
         transaction: constants.transactions.DRAFT,
         value
       })
@@ -192,7 +194,7 @@ describe('API /teams - activate', function () {
         .send({
           leagueId: 1,
           reserve_pid: player2.pid,
-          slot: constants.slots.IR,
+          slot: constants.slots.RESERVE_SHORT_TERM,
           activate_pid: player1.pid
         })
 
@@ -213,9 +215,12 @@ describe('API /teams - activate', function () {
         year: constants.season.year
       })
 
-      const player1 = players.find((p) => p.slot === constants.slots.IR)
+      const player1 = players.find(
+        (p) => p.slot === constants.slots.RESERVE_SHORT_TERM
+      )
       const player2 = players.find(
-        (p) => p.slot === constants.slots.IR && p.pid !== player1.pid
+        (p) =>
+          p.slot === constants.slots.RESERVE_SHORT_TERM && p.pid !== player1.pid
       )
 
       const request = chai_request
@@ -225,7 +230,7 @@ describe('API /teams - activate', function () {
         .send({
           activate_pid: player1.pid,
           reserve_pid: player2.pid,
-          slot: constants.slots.IR,
+          slot: constants.slots.RESERVE_SHORT_TERM,
           leagueId
         })
 
@@ -248,7 +253,9 @@ describe('API /teams - activate', function () {
       })
 
       const exclude_pids = players.map((p) => p.pid)
-      const player1 = players.find((p) => p.slot === constants.slots.IR)
+      const player1 = players.find(
+        (p) => p.slot === constants.slots.RESERVE_SHORT_TERM
+      )
       const player2 = await selectPlayer({ exclude_pids })
 
       await addPlayer({
@@ -275,7 +282,7 @@ describe('API /teams - activate', function () {
         .send({
           activate_pid: player1.pid,
           reserve_pid: player2.pid,
-          slot: constants.slots.IR,
+          slot: constants.slots.RESERVE_SHORT_TERM,
           leagueId
         })
 
@@ -325,7 +332,7 @@ describe('API /teams - activate', function () {
         .send({
           leagueId: 1,
           reserve_pid: player2.pid,
-          slot: constants.slots.IR,
+          slot: constants.slots.RESERVE_SHORT_TERM,
           activate_pid: player1.pid
         })
 

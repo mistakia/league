@@ -196,7 +196,7 @@ describe('API /teams - deactivate', function () {
       // TODO
     })
 
-    it('ir player', async () => {
+    it('short term reserve player', async () => {
       // TODO
     })
 

@@ -52,7 +52,9 @@ describe('API /teams - activate', function () {
         year: constants.season.year
       })
 
-      const player1 = players.find((p) => p.slot === constants.slots.IR)
+      const player1 = players.find(
+        (p) => p.slot === constants.slots.RESERVE_SHORT_TERM
+      )
       const player2 = players.find((p) => p.slot === constants.slots.BENCH)
 
       const res = await chai_request
@@ -138,7 +140,7 @@ describe('API /teams - activate', function () {
         leagueId,
         userId,
         player: player1,
-        slot: constants.slots.IR,
+        slot: constants.slots.RESERVE_SHORT_TERM,
         transaction: constants.transactions.DRAFT,
         value
       })
@@ -168,7 +170,7 @@ describe('API /teams - activate', function () {
         leagueId,
         userId,
         player: player1,
-        slot: constants.slots.IR,
+        slot: constants.slots.RESERVE_SHORT_TERM,
         transaction: constants.transactions.DRAFT,
         value
       })
@@ -199,9 +201,12 @@ describe('API /teams - activate', function () {
         year: constants.season.year
       })
 
-      const player1 = players.find((p) => p.slot === constants.slots.IR)
+      const player1 = players.find(
+        (p) => p.slot === constants.slots.RESERVE_SHORT_TERM
+      )
       const player2 = players.find(
-        (p) => p.slot === constants.slots.IR && p.pid !== player1.pid
+        (p) =>
+          p.slot === constants.slots.RESERVE_SHORT_TERM && p.pid !== player1.pid
       )
 
       const request = chai_request

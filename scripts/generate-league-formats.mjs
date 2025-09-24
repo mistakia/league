@@ -71,7 +71,7 @@ const generate_league_formats = async () => {
     sk: [0, 1],
     bench: [7],
     ps: [4],
-    ir: [3],
+    reserve_short_term_limit: [3, 99],
     pa: [0],
     pc: [0],
     py: [0.04, 0.05],
@@ -174,7 +174,7 @@ const generate_league_formats = async () => {
       sk: combination.sk,
       bench: combination.bench,
       ps: combination.ps,
-      ir: combination.ir,
+      reserve_short_term_limit: combination.reserve_short_term_limit,
       cap: combination.cap,
       min_bid: combination.min_bid
     }

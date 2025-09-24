@@ -161,7 +161,10 @@ export default function LeagueHomePage({
     }
   })
 
-  for (const player_map of [...players.ir, ...players.ir_long_term]) {
+  for (const player_map of [
+    ...players.reserve_short_term_players,
+    ...players.reserve_long_term_players
+  ]) {
     if (!player_map.get('pid')) continue
 
     if (

@@ -190,7 +190,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
       await fillRoster({
         leagueId,
         teamId: team_id,
-        excludeIR: true,
+        exclude_reserve_short_term: true,
         exclude_pids
       })
 

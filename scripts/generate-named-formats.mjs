@@ -294,7 +294,7 @@ This document shows the configuration for each named format in the system.
           sk: 'Starting K positions',
           bench: 'Bench positions',
           ps: 'Practice squad positions',
-          ir: 'IR positions',
+          reserve_short_term_limit: 'Short term reserve limit',
           cap: 'Salary cap',
           min_bid: 'Minimum bid amount'
         }

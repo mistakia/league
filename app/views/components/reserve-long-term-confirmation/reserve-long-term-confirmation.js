@@ -17,7 +17,7 @@ export default function ReserveLongTermConfirmation({
 }) {
   const handle_submit = () => {
     const reserve_pid = player_map.get('pid')
-    reserve({ reserve_pid, slot: constants.slots.IR_LONG_TERM })
+    reserve({ reserve_pid, slot: constants.slots.RESERVE_LONG_TERM })
     onClose()
   }
 

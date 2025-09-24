@@ -321,7 +321,7 @@ describe('API /teams - lineups', function () {
         teamId: 1,
         player,
         userId: 1,
-        slot: constants.slots.IR,
+        slot: constants.slots.RESERVE_SHORT_TERM,
         transaction: constants.transactions.RESERVE_IR
       })
 

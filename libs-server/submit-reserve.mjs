@@ -23,9 +23,9 @@ export default async function ({
   const data = []
 
   const slots = [
-    constants.slots.IR,
+    constants.slots.RESERVE_SHORT_TERM,
     constants.slots.COV,
-    constants.slots.IR_LONG_TERM
+    constants.slots.RESERVE_LONG_TERM
   ]
   if (!slots.includes(slot)) {
     throw new Error('invalid slot')
@@ -123,9 +123,9 @@ export default async function ({
     throw new Error('not eligible, locked starter')
   }
 
-  // can not activate long term IR player
+  // can not activate long term Reserve player
   let activate_player_row
-  if (activate_pid && slot !== constants.slots.IR_LONG_TERM) {
+  if (activate_pid && slot !== constants.slots.RESERVE_LONG_TERM) {
     const player_rows = await db('player').where('pid', activate_pid)
     activate_player_row = player_rows[0]
 
@@ -142,7 +142,9 @@ export default async function ({
     // make sure player is on reserve
     if (
       roster.players.find(
-        (p) => p.pid === activate_pid && p.slot !== constants.slots.IR
+        (p) =>
+          p.pid === activate_pid &&
+          p.slot !== constants.slots.RESERVE_SHORT_TERM
       )
     ) {
       throw new Error('player is not on reserve')
@@ -191,15 +193,18 @@ export default async function ({
     roster.updateSlot(activate_pid, constants.slots.BENCH)
   }
 
-  if (slot === constants.slots.IR && !roster.hasOpenInjuredReserveSlot()) {
+  if (
+    slot === constants.slots.RESERVE_SHORT_TERM &&
+    !roster.has_open_reserve_short_term_slot()
+  ) {
     throw new Error('exceeds roster limits')
   }
 
   const type =
-    slot === constants.slots.IR
+    slot === constants.slots.RESERVE_SHORT_TERM
       ? constants.transactions.RESERVE_IR
-      : slot === constants.slots.IR_LONG_TERM
-        ? constants.transactions.RESERVE_IR_LONG_TERM
+      : slot === constants.slots.RESERVE_LONG_TERM
+        ? constants.transactions.RESERVE_LONG_TERM
         : constants.transactions.RESERVE_COV
   await db('rosters_players').update({ slot }).where({
     rid: rosterRow.uid,

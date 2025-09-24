@@ -58,7 +58,7 @@ describe('API /teams - reserve', function () {
         leagueId,
         userId,
         player: player2,
-        slot: constants.slots.IR,
+        slot: constants.slots.RESERVE_SHORT_TERM,
         transaction: constants.transactions.DRAFT,
         value
       })
@@ -79,7 +79,7 @@ describe('API /teams - reserve', function () {
           reserve_pid: player1.pid,
           activate_pid: player2.pid,
           leagueId,
-          slot: constants.slots.IR
+          slot: constants.slots.RESERVE_SHORT_TERM
         })
 
       res.should.have.status(200)
@@ -88,7 +88,7 @@ describe('API /teams - reserve', function () {
 
       res.body.tid.should.equal(teamId)
       res.body.pid.should.equal(player1.pid)
-      res.body.slot.should.equal(constants.slots.IR)
+      res.body.slot.should.equal(constants.slots.RESERVE_SHORT_TERM)
       res.body.transaction.userid.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
@@ -107,7 +107,7 @@ describe('API /teams - reserve', function () {
         .limit(1)
 
       const rosterRow1 = rosterRows1[0]
-      expect(rosterRow1.slot).to.equal(constants.slots.IR)
+      expect(rosterRow1.slot).to.equal(constants.slots.RESERVE_SHORT_TERM)
 
       const rosterRows2 = await knex('rosters_players')
         .where({
@@ -171,7 +171,7 @@ describe('API /teams - reserve', function () {
           leagueId: 1,
           activate_pid: 'x',
           reserve_pid: player1.pid,
-          slot: constants.slots.IR
+          slot: constants.slots.RESERVE_SHORT_TERM
         })
 
       await invalid(request, 'player')
@@ -211,7 +211,7 @@ describe('API /teams - reserve', function () {
           leagueId: 1,
           activate_pid: player2.pid,
           reserve_pid: player1.pid,
-          slot: constants.slots.IR
+          slot: constants.slots.RESERVE_SHORT_TERM
         })
 
       await invalid(request, 'player')
@@ -261,7 +261,7 @@ describe('API /teams - reserve', function () {
           leagueId: 1,
           activate_pid: player2.pid,
           reserve_pid: player1.pid,
-          slot: constants.slots.IR
+          slot: constants.slots.RESERVE_SHORT_TERM
         })
 
       await error(request, 'player is on active roster')
@@ -311,7 +311,7 @@ describe('API /teams - reserve', function () {
           leagueId: 1,
           activate_pid: player2.pid,
           reserve_pid: player1.pid,
-          slot: constants.slots.IR
+          slot: constants.slots.RESERVE_SHORT_TERM
         })
 
       await error(request, 'player is not on reserve')

@@ -258,7 +258,7 @@ router.put('/:leagueId', async (req, res) => {
  *               sk: 1
  *               bench: 6
  *               ps: 4
- *               ir: 2
+ *               reserve_short_term_limit: 3
  *               cap: 200
  *               faab: 200
  *               years: [2022, 2023, 2024]
@@ -330,7 +330,7 @@ router.get('/:leagueId/?', async (req, res) => {
  *               sk: 1
  *               bench: 6
  *               ps: 4
- *               ir: 2
+ *               reserve_short_term_limit: 3
  *               cap: 200
  *               faab: 200
  *               league_format_hash: "b5310a7f7c47c20ce372e47e8a0a188b22b78b1d34e2ea18829d94b94ffdc342"

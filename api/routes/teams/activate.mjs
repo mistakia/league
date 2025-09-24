@@ -68,7 +68,7 @@ const router = express.Router({ mergeParams: true })
  *                 leagueId: 2
  *                 release_pid: "JORD-LOVE-2020-1998-11-02"
  *             activateWithReserve:
- *               summary: Activate player and move another to IR
+ *               summary: Activate player and move another to Short Term Reserve
  *               value:
  *                 activate_pid: "JALE-HURT-2020-1998-08-07"
  *                 leagueId: 2

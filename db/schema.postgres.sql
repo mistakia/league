@@ -3585,7 +3585,7 @@ CREATE TABLE public.league_formats (
     sk smallint NOT NULL,
     bench smallint NOT NULL,
     ps smallint NOT NULL,
-    ir smallint NOT NULL,
+    reserve_short_term_limit smallint NOT NULL,
     cap integer NOT NULL,
     min_bid smallint DEFAULT '0'::smallint,
     pts_base_week_qb numeric(3,1),

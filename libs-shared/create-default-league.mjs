@@ -18,7 +18,7 @@ const create_default_league = ({ commishid = 0 } = {}) => {
     sk: 1,
     bench: 7,
     ps: 4,
-    ir: 3,
+    reserve_short_term_limit: 3,
     mqb: 0,
     mrb: 0,
     mwr: 0,

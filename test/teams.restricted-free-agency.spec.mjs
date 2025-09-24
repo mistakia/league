@@ -222,7 +222,12 @@ describe('API /teams - restricted free agency', function () {
       })
       exclude_pids.push(releasePlayer.pid)
 
-      await fillRoster({ leagueId, teamId, excludeIR: true, exclude_pids })
+      await fillRoster({
+        leagueId,
+        teamId,
+        exclude_reserve_short_term: true,
+        exclude_pids
+      })
 
       const res1 = await chai_request
         .execute(server)
@@ -932,7 +937,7 @@ describe('API /teams - restricted free agency', function () {
       await fillRoster({
         leagueId,
         teamId: competingTeamId,
-        excludeIR: true,
+        exclude_reserve_short_term: true,
         exclude_pids: [player.pid]
       })
 
@@ -1143,7 +1148,7 @@ describe('API /teams - restricted free agency', function () {
      *     player: reservePlayer,
      *     teamId,
      *     userId,
-     *     slot: constants.slots.IR
+     *     slot: constants.slots.RESERVE_SHORT_TERM
      *   })
 
      *   const request = chai

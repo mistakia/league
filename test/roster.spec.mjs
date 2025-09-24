@@ -21,7 +21,7 @@ describe('LIBS-SHARED Roster', function () {
       sk: 1,
       bench: 6,
       ps: 4,
-      ir: 2,
+      reserve_short_term_limit: 3,
 
       mqb: 0,
       mrb: 0,
@@ -64,7 +64,7 @@ describe('LIBS-SHARED Roster', function () {
       sk: 1,
       bench: 5,
       ps: 4,
-      ir: 2,
+      reserve_short_term_limit: 3,
 
       mqb: 0,
       mrb: 0,
@@ -111,7 +111,7 @@ describe('LIBS-SHARED Roster', function () {
       sk: 0,
       bench: 2,
       ps: 4,
-      ir: 2,
+      reserve_short_term_limit: 3,
 
       mqb: 0,
       mrb: 2,
@@ -166,7 +166,7 @@ describe('LIBS-SHARED Roster', function () {
       sk: 0,
       bench: 2,
       ps: 4,
-      ir: 2,
+      reserve_short_term_limit: 3,
 
       mqb: 0,
       mrb: 0,

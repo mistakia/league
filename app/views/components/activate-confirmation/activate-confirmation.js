@@ -70,7 +70,7 @@ export default class ActivateConfirmation extends React.Component {
       activate_pid,
       reserve_pid,
       release_pid,
-      slot: constants.slots.IR
+      slot: constants.slots.RESERVE_SHORT_TERM
     })
     this.props.onClose()
   }
@@ -98,7 +98,8 @@ export default class ActivateConfirmation extends React.Component {
       )
     }
 
-    const isReservePlayer = player_map.get('slot') === constants.slots.IR
+    const isReservePlayer =
+      player_map.get('slot') === constants.slots.RESERVE_SHORT_TERM
     let noBenchSpaceMessage =
       'No active roster space available, make room by releasing a player'
     if (isReservePlayer)
