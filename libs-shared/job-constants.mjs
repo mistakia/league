@@ -109,7 +109,8 @@ export const job_types = {
   IMPORT_FANATICS_ODDS: 85,
   CREATE_SEASON_PARTITIONS: 86,
   ANNOUNCE_RESTRICTED_FREE_AGENT: 87,
-  PROCESS_MARKET_RESULTS: 88
+  PROCESS_MARKET_RESULTS: 88,
+  IMPORT_PFF_TEAM_GRADES: 89
 }
 
 export const job_title_by_id = {
@@ -200,5 +201,6 @@ export const job_title_by_id = {
   85: 'Import Fanatics Odds',
   86: 'Create Season Partition Tables',
   87: 'Announce Restricted Free Agent',
-  88: 'Process Market Results'
+  88: 'Process Market Results',
+  89: 'Import PFF Team Grades'
 }
