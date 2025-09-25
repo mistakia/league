@@ -28,6 +28,7 @@ import player_routes_column_definitions from './player-routes-column-definitions
 import player_team_column_definition from './player-team-column-definition.mjs'
 import team_dvoa_column_definitions from './team-dvoa-column-definitions.mjs'
 import nfl_team_seasonlogs_column_definitions from './nfl-team-seasonlogs-column-definitions.mjs'
+import pff_team_grades_column_definitions from './pff-team-grades-column-definitions.mjs'
 import player_pfr_season_value_column_definitions from './player-pfr-season-value-column-definitions.mjs'
 import player_seasonlogs_column_definitions from './player-seasonlogs-column-definitions.mjs'
 
@@ -60,6 +61,7 @@ export default {
   ...player_team_column_definition,
   ...team_dvoa_column_definitions,
   ...nfl_team_seasonlogs_column_definitions,
+  ...pff_team_grades_column_definitions,
   ...player_pfr_season_value_column_definitions,
   ...player_seasonlogs_column_definitions,
 
