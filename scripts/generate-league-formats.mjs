@@ -71,7 +71,7 @@ const generate_league_formats = async () => {
     sk: [0, 1],
     bench: [7],
     ps: [4],
-    reserve_short_term_limit: [3, 99],
+    reserve_short_term_limit: [3],
     pa: [0],
     pc: [0],
     py: [0.04, 0.05],
