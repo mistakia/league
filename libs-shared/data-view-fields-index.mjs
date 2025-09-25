@@ -174,6 +174,30 @@ export default {
   player_pff_grade_position:
     'The position for which the player is graded by PFF',
 
+  // PFF Team Grades
+  pff_team_grades_offense: "The team's PFF offense grade for the season",
+  pff_team_grades_defense: "The team's PFF defense grade for the season",
+  pff_team_grades_special_teams:
+    "The team's PFF special teams grade for the season",
+  pff_team_grades_overall: "The team's PFF overall grade for the season",
+  pff_team_grades_pass: "The team's PFF pass grade for the season",
+  pff_team_grades_run: "The team's PFF run grade for the season",
+  pff_team_grades_pass_block: "The team's PFF pass block grade for the season",
+  pff_team_grades_pass_rush_defense:
+    "The team's PFF pass rush defense grade for the season",
+  pff_team_grades_run_defense:
+    "The team's PFF run defense grade for the season",
+  pff_team_grades_run_block: "The team's PFF run block grade for the season",
+  pff_team_grades_coverage_defense:
+    "The team's PFF coverage defense grade for the season",
+  pff_team_grades_tackle: "The team's PFF tackle grade for the season",
+  pff_team_grades_pass_route: "The team's PFF pass route grade for the season",
+  pff_team_wins: "The team's number of wins according to PFF",
+  pff_team_losses: "The team's number of losses according to PFF",
+  pff_team_ties: "The team's number of ties according to PFF",
+  pff_team_points_scored: "The team's points scored according to PFF",
+  pff_team_points_allowed: "The team's points allowed according to PFF",
+
   player_pass_completions_from_plays:
     'The number of pass completions by the player (calculated from play-by-play data)',
   player_pass_yards_from_plays:
