@@ -32,7 +32,7 @@ console.log(`  End: ${season.end.format('YYYY-MM-DD HH:mm:ss')}`)
 console.log(`  Offseason: ${season.offseason.format('YYYY-MM-DD HH:mm:ss')}`)
 
 console.log('\nWeek Configuration:')
-console.log(`  Final Week: ${season.finalWeek}`)
+console.log(`  Final Fantasy Week: ${season.finalWeek}`)
 console.log(`  NFL Final Week: ${season.nflFinalWeek}`)
 console.log(`  Regular Season Final Week: ${season.regularSeasonFinalWeek}`)
 console.log(`  Wildcard Week: ${season.wildcardWeek}`)
