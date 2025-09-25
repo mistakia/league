@@ -13,7 +13,6 @@ import { is_main, report_job } from '#libs-server'
 import db from '#db'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { fixTeam, constants } from '#libs-shared'
-import Season from '#libs-shared/season.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-dvoa-sheets')
