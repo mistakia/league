@@ -22,6 +22,7 @@ export default function RostersPage({
   ps_drafted_threshold_count_max,
   ps_signed_count_max,
   bench_count_max,
+  reserve_short_term_count_max,
   reserve_long_term_count_max
 }) {
   const { lid } = useParams()
@@ -172,8 +173,8 @@ export default function RostersPage({
     labels.push(<div key='PSD_toggle' className='roster__item' />)
   }
 
-  if (league.reserve_short_term_limit) {
-    for (let i = 0; i < league.reserve_short_term_limit; i++) {
+  if (reserve_short_term_count_max) {
+    for (let i = 0; i < reserve_short_term_count_max; i++) {
       labels.push(
         <div key={`${i}RESERVE_SHORT_TERM`} className='roster__item'>
           IR
@@ -202,6 +203,7 @@ export default function RostersPage({
           ps_drafted_threshold_count_max,
           ps_signed_count_max,
           bench_count_max,
+          reserve_short_term_count_max,
           reserve_long_term_count_max,
           is_psd_expanded,
           set_is_psd_expanded
@@ -242,6 +244,7 @@ RostersPage.propTypes = {
   ps_drafted_threshold_count_max: PropTypes.number,
   ps_signed_count_max: PropTypes.number,
   bench_count_max: PropTypes.number,
+  reserve_short_term_count_max: PropTypes.number,
   reserve_long_term_count_max: PropTypes.number,
   load_league_players: PropTypes.func,
   load_rosters: PropTypes.func
