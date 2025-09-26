@@ -2,6 +2,7 @@ import db from '#db'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { constants } from '#libs-shared'
 import get_join_func from '#libs-server/get-join-func.mjs'
+import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import { create_exact_year_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 
 const get_default_params = ({ params = {} } = {}) => {
@@ -39,6 +40,20 @@ const player_espn_line_join = (options) => {
       }
     }
   })
+}
+
+const espn_team_win_rates_table_alias = ({ params = {} } = {}) => {
+  const { year } = get_default_params({ params })
+  const matchup_opponent_type = Array.isArray(params.matchup_opponent_type)
+    ? params.matchup_opponent_type[0]
+    : params.matchup_opponent_type
+
+  // Include matchup_opponent_type in the hash to create unique table aliases
+  const hash_key = matchup_opponent_type
+    ? `espn_team_win_rates_${year}_${matchup_opponent_type}`
+    : `espn_team_win_rates_${year}`
+
+  return get_table_hash(hash_key)
 }
 
 const team_espn_line_join = ({
@@ -93,6 +108,7 @@ const create_team_espn_line_column = (column_name) => ({
   table_name: 'espn_team_win_rates_index',
   column_name,
   select_as: () => `espn_team_${column_name}`,
+  table_alias: espn_team_win_rates_table_alias,
   join: team_espn_line_join,
   supported_splits: ['year'],
   get_cache_info
