@@ -6,15 +6,15 @@ import { fileURLToPath } from 'url'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
+import { get_data_view_results_query } from '#libs-server/get-data-view-results.mjs'
+import { load_data_view_test_queries_sync } from '#libs-server/load-test-cases.mjs'
+import { process_expected_query } from '#libs-server/process-expected-query.mjs'
+import is_main from '#libs-server/is-main.mjs'
 import {
-  get_data_view_results_query,
-  load_data_view_test_queries_sync,
-  process_expected_query,
-  is_main,
   format_sql,
   normalize_sql_for_comparison
-} from '#libs-server'
-import { compare_queries } from '../test/utils/index.mjs'
+} from '#libs-server/format-sql.mjs'
+import { compare_queries } from '#test/utils/index.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
