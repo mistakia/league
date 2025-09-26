@@ -66,7 +66,7 @@ const team_espn_line_join = ({
   const { year } = get_default_params({ params })
   const join_func = get_join_func(join_type)
 
-  query[join_func](table_name, function () {
+  query[join_func](`espn_team_win_rates_index as ${table_name}`, function () {
     const matchup_opponent_type = Array.isArray(params.matchup_opponent_type)
       ? params.matchup_opponent_type[0]
       : params.matchup_opponent_type
