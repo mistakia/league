@@ -1,0 +1,32 @@
+{
+  "name": "pff team grades default behavior",
+  "description": "Auto-generated test case",
+  "request": {
+    "columns": [
+      {
+        "column_id": "pff_team_grades_overall",
+        "params": {
+          "year": [2024]
+        }
+      }
+    ],
+    "sort": [
+      {
+        "column_id": "pff_team_grades_overall",
+        "desc": true
+      }
+    ],
+    "where": [
+      {
+        "column_id": "player_position",
+        "params": {},
+        "value": ["TEAM"],
+        "operator": "IN"
+      }
+    ],
+    "splits": []
+  },
+  "expected_query": "select \"player\".\"pid\", t734afa63c517a54c5bbd61dd5c5ebbf4.grades_overall as pff_team_grades_overall_0, \"player\".\"pos\" from \"player\" left join \"pff_team_seasonlogs\" as \"t734afa63c517a54c5bbd61dd5c5ebbf4\" on \"t734afa63c517a54c5bbd61dd5c5ebbf4\".\"nfl_team\" = \"player\".\"current_nfl_team\" and \"t734afa63c517a54c5bbd61dd5c5ebbf4\".\"year\" = 2024 where player.pos IN ('TEAM') group by t734afa63c517a54c5bbd61dd5c5ebbf4.grades_overall, \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "tags": [],
+  "timeout_ms": 35000
+}

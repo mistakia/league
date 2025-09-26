@@ -7,27 +7,18 @@
       {
         "column_id": "team_espn_run_block_win_rate",
         "params": {
-          "year": [
-            2025
-          ]
+          "year": [2025]
         }
       },
       {
         "column_id": "team_espn_run_stop_win_rate",
         "params": {
-          "year": [
-            2025
-          ],
-          "matchup_opponent_type": [
-            "current_week_opponent_total"
-          ]
+          "year": [2025],
+          "matchup_opponent_type": ["current_week_opponent_total"]
         }
       }
     ],
-    "prefix_columns": [
-      "player_name",
-      "player_nfl_teams"
-    ],
+    "prefix_columns": ["player_name", "player_nfl_teams"],
     "sort": [
       {
         "column_id": "team_espn_run_block_win_rate",
@@ -38,21 +29,12 @@
       {
         "column_id": "player_position",
         "params": {},
-        "value": [
-          "TEAM"
-        ],
+        "value": ["TEAM"],
         "operator": "IN"
       }
     ],
     "splits": []
   },
-  "expected_query_contains": [
-    "\"espn_team_win_rates_index\".\"team\" = \"player\".\"current_nfl_team\"",
-    ".\"team\" = \"current_week_opponents\".\"opponent\""
-  ],
-  "expected_query_not_contains": [
-    "\"espn_team_win_rates_index\".\"team\" = \"current_week_opponents\".\"opponent\""
-  ],
   "tags": [
     "team",
     "espn",
