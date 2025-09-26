@@ -9,7 +9,11 @@ const get_default_params = ({ params = {} } = {}) => {
     year = [year]
   }
 
-  return { year }
+  const matchup_opponent_type = Array.isArray(params.matchup_opponent_type)
+    ? params.matchup_opponent_type[0]
+    : params.matchup_opponent_type
+
+  return { year, matchup_opponent_type }
 }
 
 const get_cache_info = create_season_aggregate_cache_info({
@@ -20,8 +24,9 @@ const get_cache_info = create_season_aggregate_cache_info({
 })
 
 const pff_team_seasonlogs_table_alias = ({ params = {} } = {}) => {
-  const { year } = get_default_params({ params })
-  return get_table_hash(`pff_team_seasonlogs_${year.join('_')}`)
+  const { year, matchup_opponent_type } = get_default_params({ params })
+  const suffix = matchup_opponent_type ? `_${matchup_opponent_type}` : ''
+  return get_table_hash(`pff_team_seasonlogs_${year.join('_')}${suffix}`)
 }
 
 const pff_team_seasonlogs_join = (join_arguments) => {
