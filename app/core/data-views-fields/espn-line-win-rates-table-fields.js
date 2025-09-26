@@ -2,11 +2,21 @@ import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
 import {
   common_column_params,
-  nfl_plays_team_column_params
+  nfl_plays_team_column_params,
+  year
 } from '@libs-shared'
 
 const { single_year, career_year } = common_column_params
 const { matchup_opponent_type } = nfl_plays_team_column_params
+
+// Generate year values from 2024 to current year
+const get_year_values = () => {
+  const years = []
+  for (let year_value = 2024; year_value <= year; year_value++) {
+    years.push(year_value)
+  }
+  return years
+}
 
 const create_espn_line_field = ({
   column_title,
@@ -22,7 +32,7 @@ const create_espn_line_field = ({
   column_params: {
     year: {
       ...single_year,
-      values: [2024]
+      values: get_year_values()
     },
     win_rate_type: {
       values: ['PASS_RUSH', 'PASS_BLOCK', 'RUN_BLOCK', 'RUN_STOP'],
@@ -50,7 +60,7 @@ const create_team_espn_line_field = ({
   column_params: {
     year: {
       ...single_year,
-      values: [2024]
+      values: get_year_values()
     },
     matchup_opponent_type,
     career_year
