@@ -119,9 +119,7 @@ const process_market = async ({ timestamp, selections, ...market }) => {
           'open',
           'selection_count',
           'live',
-          'source_market_name',
-          'esbid',
-          'year'
+          'source_market_name'
         ]
         const should_update = differences.some((difference) =>
           update_on_change.includes(difference.path[0])
@@ -145,6 +143,25 @@ const process_market = async ({ timestamp, selections, ...market }) => {
             open,
             live,
             selection_count
+          })
+        }
+
+        // Check for esbid or year changes and force index updates
+        const esbid_changed = differences.some((diff) => diff.path[0] === 'esbid')
+        const year_changed = differences.some((diff) => diff.path[0] === 'year')
+
+        if (esbid_changed || year_changed) {
+          // Update both OPEN and CLOSE entries in index
+          market_index_inserts.push({
+            ...market,
+            timestamp,
+            time_type: 'OPEN'
+          })
+
+          market_index_inserts.push({
+            ...market,
+            timestamp,
+            time_type: 'CLOSE'
           })
         }
       }
