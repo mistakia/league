@@ -119,7 +119,9 @@ const process_market = async ({ timestamp, selections, ...market }) => {
           'open',
           'selection_count',
           'live',
-          'source_market_name'
+          'source_market_name',
+          'esbid',
+          'year'
         ]
         const should_update = differences.some((difference) =>
           update_on_change.includes(difference.path[0])
