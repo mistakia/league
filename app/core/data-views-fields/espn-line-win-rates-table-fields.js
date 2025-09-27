@@ -3,7 +3,7 @@ import * as table_constants from 'react-table/src/constants.mjs'
 import {
   common_column_params,
   nfl_plays_team_column_params,
-  year
+  constants
 } from '@libs-shared'
 
 const { single_year, career_year } = common_column_params
@@ -12,7 +12,7 @@ const { matchup_opponent_type } = nfl_plays_team_column_params
 // Generate year values from 2024 to current year
 const get_year_values = () => {
   const years = []
-  for (let year_value = 2024; year_value <= year; year_value++) {
+  for (let year_value = 2024; year_value <= constants.year; year_value++) {
     years.push(year_value)
   }
   return years

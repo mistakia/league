@@ -147,7 +147,9 @@ const process_market = async ({ timestamp, selections, ...market }) => {
         }
 
         // Check for esbid or year changes and force index updates
-        const esbid_changed = differences.some((diff) => diff.path[0] === 'esbid')
+        const esbid_changed = differences.some(
+          (diff) => diff.path[0] === 'esbid'
+        )
         const year_changed = differences.some((diff) => diff.path[0] === 'year')
 
         if (esbid_changed || year_changed) {
