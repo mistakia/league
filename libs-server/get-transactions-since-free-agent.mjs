@@ -6,8 +6,6 @@ import db from '#db'
 
 import is_main from './is-main.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
-
 async function getTransactionsSinceFreeAgent({
   lid,
   pid,
@@ -33,9 +31,25 @@ async function getTransactionsSinceFreeAgent({
   return transactions.slice(0, index + 1)
 }
 
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv))
+    .option('lid', {
+      describe: 'League ID',
+      type: 'number',
+      demandOption: true
+    })
+    .option('pid', {
+      describe: 'Player ID',
+      type: 'string',
+      demandOption: true
+    })
+    .help().argv
+}
+
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const trans = await getTransactionsSinceFreeAgent({
       lid: argv.lid,
       pid: argv.pid

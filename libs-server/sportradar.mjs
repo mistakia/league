@@ -12,7 +12,6 @@ import * as cache from './cache.mjs'
 const queue = new PQueue({ concurrency: 1 })
 let last_request
 
-const argv = yargs(hideBin(process.argv)).argv
 const log = debug('sportradar')
 debug.enable('sportradar')
 
@@ -42,9 +41,21 @@ export const getPlayer = ({ sportradar_id }) =>
     return data
   })
 
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv))
+    .option('id', {
+      describe: 'Sportradar player ID',
+      type: 'string',
+      demandOption: true
+    })
+    .help().argv
+}
+
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
+
     if (!argv.id) {
       log('missing --id')
       process.exit()

@@ -26,75 +26,75 @@ import { update_market_settlement_status } from './update-market-settlement-stat
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-const argv = yargs(hideBin(process.argv))
-  .usage(
-    '$0 [options]',
-    'Process prop market results with simplified parallel processing'
-  )
-  .option('year', {
-    type: 'number',
-    describe: 'Season year to process',
-    default: 2025
-  })
-  .option('week', {
-    type: 'number',
-    describe: 'Specific week to process'
-  })
-  .option('seas_type', {
-    type: 'string',
-    describe: 'Season type (PRE, REG, POST)',
-    choices: ['PRE', 'REG', 'POST']
-  })
-  .option('dry_run', {
-    type: 'boolean',
-    default: false,
-    describe: 'Preview without database writes'
-  })
-  .option('batch_size', {
-    type: 'number',
-    default: 250,
-    describe: 'Markets per worker task'
-  })
-  .option('workers', {
-    type: 'number',
-    describe: 'Worker threads (default: auto-detect)'
-  })
-  .option('verbose', {
-    type: 'boolean',
-    default: false,
-    describe: 'Enable verbose logging'
-  })
-  .option('missing_only', {
-    type: 'boolean',
-    default: false,
-    describe: 'Only process markets with missing results'
-  })
-  .option('error_report', {
-    type: 'string',
-    describe: 'Export detailed error report to file'
-  })
-  .option('error_sample_size', {
-    type: 'number',
-    default: 10,
-    describe: 'Number of error examples to show per error type'
-  })
-  .example('$0 --week 5 --dry_run', 'Preview week 5 processing')
-  .example('$0 --workers 8 --verbose', 'Use 8 workers with verbose output')
-  .example('$0 --seas_type POST --week 1', 'Process playoff week 1')
-  .example('$0 --missing_only', 'Only process markets with missing results')
-  .example(
-    '$0 --error_report errors.json --error_sample_size 20',
-    'Export detailed error report'
-  )
-  .help()
-  .parse()
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv))
+    .usage(
+      '$0 [options]',
+      'Process prop market results with simplified parallel processing'
+    )
+    .option('year', {
+      type: 'number',
+      describe: 'Season year to process',
+      default: 2025
+    })
+    .option('week', {
+      type: 'number',
+      describe: 'Specific week to process'
+    })
+    .option('seas_type', {
+      type: 'string',
+      describe: 'Season type (PRE, REG, POST)',
+      choices: ['PRE', 'REG', 'POST']
+    })
+    .option('dry_run', {
+      type: 'boolean',
+      default: false,
+      describe: 'Preview without database writes'
+    })
+    .option('batch_size', {
+      type: 'number',
+      default: 250,
+      describe: 'Markets per worker task'
+    })
+    .option('workers', {
+      type: 'number',
+      describe: 'Worker threads (default: auto-detect)'
+    })
+    .option('verbose', {
+      type: 'boolean',
+      default: false,
+      describe: 'Enable verbose logging'
+    })
+    .option('missing_only', {
+      type: 'boolean',
+      default: false,
+      describe: 'Only process markets with missing results'
+    })
+    .option('error_report', {
+      type: 'string',
+      describe: 'Export detailed error report to file'
+    })
+    .option('error_sample_size', {
+      type: 'number',
+      default: 10,
+      describe: 'Number of error examples to show per error type'
+    })
+    .example('$0 --week 5 --dry_run', 'Preview week 5 processing')
+    .example('$0 --workers 8 --verbose', 'Use 8 workers with verbose output')
+    .example('$0 --seas_type POST --week 1', 'Process playoff week 1')
+    .example('$0 --missing_only', 'Only process markets with missing results')
+    .example(
+      '$0 --error_report errors.json --error_sample_size 20',
+      'Export detailed error report'
+    )
+    .help()
+    .parse()
+}
 
 const log = debug('process-market-results')
 
-// Enable debug logging when not showing help
-if (!process.argv.includes('--help')) {
-  debug.enable('process-market-results,selection-result-writer')
-}
+// Global argv variable to be initialized in main
+let argv
 
 /**
  * Simple is_main check
@@ -328,6 +328,14 @@ const process_markets_with_workers = async ({
 }
 
 const main = async () => {
+  // Initialize CLI arguments
+  argv = initialize_cli()
+
+  // Enable debug logging when not showing help
+  if (!process.argv.includes('--help')) {
+    debug.enable('process-market-results,selection-result-writer')
+  }
+
   const start_time = Date.now()
 
   try {
