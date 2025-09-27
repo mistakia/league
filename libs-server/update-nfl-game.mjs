@@ -6,7 +6,6 @@ import { hideBin } from 'yargs/helpers'
 import is_main from './is-main.mjs'
 import db from '#db'
 
-const argv = yargs(hideBin(process.argv)).argv
 const log = debug('update-nfl-game')
 debug.enable('update-nfl-game')
 
@@ -79,9 +78,21 @@ const update_nfl_game = async ({
 
 export default update_nfl_game
 
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv))
+    .option('esbid', {
+      describe: 'Game ID',
+      type: 'string',
+      demandOption: true
+    })
+    .help().argv
+}
+
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
+
     if (!argv.esbid) {
       log('missing --esbid')
       process.exit()

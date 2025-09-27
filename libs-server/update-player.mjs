@@ -7,7 +7,6 @@ import { format_nfl_status, format_nfl_injury_status } from '#libs-shared'
 import is_main from './is-main.mjs'
 import db from '#db'
 
-const argv = yargs(hideBin(process.argv)).argv
 const log = debug('update-player')
 debug.enable('update-player')
 
@@ -145,6 +144,16 @@ const updatePlayer = async ({
 
 export default updatePlayer
 
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv))
+    .option('pid', {
+      describe: 'Player ID',
+      type: 'string',
+      demandOption: true
+    })
+    .help().argv
+}
+
 /**
  * Example CLI usage:
  * node update-player.mjs --pid 1234 --fname "John" --lname "Doe" --pos "QB"
@@ -155,6 +164,8 @@ export default updatePlayer
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
+
     if (!argv.pid) {
       log('missing --pid')
       process.exit()

@@ -5,7 +5,6 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import is_main from './is-main.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
 const log = debug('update-player-id')
 debug.enable('update-player-id')
 
@@ -69,8 +68,25 @@ const update_player_id = async function ({ current_pid, new_pid }) {
 
 export default update_player_id
 
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv))
+    .option('current_pid', {
+      describe: 'Current player ID',
+      type: 'string',
+      demandOption: true
+    })
+    .option('new_pid', {
+      describe: 'New player ID',
+      type: 'string',
+      demandOption: true
+    })
+    .help().argv
+}
+
 if (is_main(import.meta.url)) {
   const main = async () => {
+    const argv = initialize_cli()
+
     await update_player_id({
       current_pid: argv.current_pid,
       new_pid: argv.new_pid

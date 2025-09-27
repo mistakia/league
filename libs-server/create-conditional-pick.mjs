@@ -8,8 +8,6 @@ import db from '#db'
 import is_main from './is-main.mjs'
 import set_draft_pick_number from '#scripts/set-draft-pick-number.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
-
 const create_conditional_pick = async function ({ tid, league }) {
   const is_before_draft = league.draft_start
     ? constants.season.now.isBefore(dayjs.unix(league.draft_start))
@@ -46,8 +44,25 @@ const create_conditional_pick = async function ({ tid, league }) {
 
 export default create_conditional_pick
 
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv))
+    .option('tid', {
+      describe: 'Team ID',
+      type: 'number',
+      demandOption: true
+    })
+    .option('lid', {
+      describe: 'League ID',
+      type: 'number',
+      demandOption: true
+    })
+    .help().argv
+}
+
 if (is_main(import.meta.url)) {
   const run = async () => {
+    const argv = initialize_cli()
+
     const tid = argv.tid
     if (!tid) {
       console.log('missing --tid')

@@ -202,10 +202,37 @@ const find_player_row = async ({
 
 export default find_player_row
 
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv))
+    .option('name', {
+      describe: 'Player name',
+      type: 'string'
+    })
+    .option('pos', {
+      describe: 'Player position',
+      type: 'string'
+    })
+    .option('team', {
+      describe: 'Team abbreviation',
+      type: 'string'
+    })
+    .option('ignore_retired', {
+      describe: 'Ignore retired players',
+      type: 'boolean',
+      default: false
+    })
+    .option('ignore_free_agent', {
+      describe: 'Ignore free agents',
+      type: 'boolean',
+      default: false
+    })
+    .help().argv
+}
+
 const main = async () => {
   let error
   try {
-    const argv = yargs(hideBin(process.argv)).argv
+    const argv = initialize_cli()
     const options = {
       name: argv.name,
       pos: argv.pos,

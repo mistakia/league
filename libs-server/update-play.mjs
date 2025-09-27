@@ -6,7 +6,6 @@ import { hideBin } from 'yargs/helpers'
 import is_main from './is-main.mjs'
 import db from '#db'
 
-const argv = yargs(hideBin(process.argv)).argv
 const log = debug('update-play')
 debug.enable('update-play')
 
@@ -105,9 +104,26 @@ const update_play = async ({
 
 export default update_play
 
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv))
+    .option('esbid', {
+      describe: 'Game ID',
+      type: 'string',
+      demandOption: true
+    })
+    .option('playId', {
+      describe: 'Play ID',
+      type: 'string',
+      demandOption: true
+    })
+    .help().argv
+}
+
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
+
     if (!argv.esbid || !argv.playId) {
       log('missing --esbid or --playId')
       process.exit()
