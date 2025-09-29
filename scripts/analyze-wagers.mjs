@@ -138,11 +138,20 @@ const format_fanduel_selection_name = ({ selection, week }) => {
     .replace('Any Time Touchdown Scorer', 'Anytime TD')
     .replace('To Score 2+ Touchdowns', '2+ TDs')
     .replace('1st Team Touchdown Scorer', '1st Team TD')
+    .replace('Anytime Touchdown Scorer', 'Anytime TD')
+
+  // Handle "Either Player" markets specially
+  if (player_name === 'Either Player') {
+    return `${selection.selectionName} ${stat_type}`
+  }
+
   const handicap = Math.round(Number(selection.parsedHandicap))
 
   let name
 
+  // Check if handicap is NaN or if it's a non-handicap market
   if (
+    isNaN(handicap) ||
     stat_type === 'Moneyline' ||
     stat_type === 'Anytime TD' ||
     stat_type === '2+ TDs' ||
@@ -179,6 +188,43 @@ const extract_draftkings_player_name = (market_display_name) => {
 }
 
 const format_draftkings_selection_name = ({ selection }) => {
+  // Handle nested SGP selections (2+ selections)
+  if (
+    selection.nestedSGPSelections &&
+    selection.nestedSGPSelections.length > 0
+  ) {
+    const formatted_selections = selection.nestedSGPSelections.map((nested) => {
+      const nested_market_display = nested.marketDisplayName || ''
+      const nested_selection_display = nested.selectionDisplayName || ''
+
+      const player_name = extract_draftkings_player_name(nested_market_display)
+      if (player_name) {
+        // Handle specific stats with abbreviated names
+        if (nested_market_display.includes('Rushing Yards')) {
+          return `${player_name} ${nested_selection_display} Rush Yds`
+        }
+        if (nested_market_display.includes('Receiving Yards')) {
+          return `${player_name} ${nested_selection_display} Recv Yds`
+        }
+        if (nested_market_display.includes('Passing Yards')) {
+          return `${player_name} ${nested_selection_display} Pass Yds`
+        }
+        if (nested_market_display.includes('Receptions')) {
+          return `${player_name} ${nested_selection_display} Recs`
+        }
+        if (nested_market_display.includes('Touchdowns')) {
+          return `${player_name} ${nested_selection_display} TDs`
+        }
+      }
+
+      // Default format for unrecognized markets
+      return `${nested_market_display} ${nested_selection_display}`
+    })
+
+    // Join all selections with + for SGP display
+    return `SGP: ${formatted_selections.join(' + ')}`
+  }
+
   const market_display_name = selection.marketDisplayName || ''
   const selection_display_name = selection.selectionDisplayName || ''
 
