@@ -1016,19 +1016,20 @@ const import_dvoa_sheets = async ({ dry_run = false, filepath } = {}) => {
     // Get NFL week to determine versioning logic
     const nfl_week = constants.season.nfl_seas_week
 
-    // DVOA sheets are not available after week 1
-    // Downloads begin after week 2, with version numbers starting at 1
+    // DVOA sheets are not available until after week 2
     let version_number = 0
-    if (nfl_week >= 2) {
-      // Version numbering: starts at 1 after week 2, increments slowly
-      // Currently after week 3, we're at version 1
-      // This appears to be more conservative than weekly increments
-      version_number = 1
-    } else {
+    if (nfl_week < 2) {
       log(
         `Skipping DVOA import - no sheets available until after NFL week 2 (currently week ${nfl_week})`
       )
       return
+    } else if (nfl_week === 2) {
+      // After week 2: no version suffix (base URL)
+      version_number = 0
+    } else {
+      // After week 3: version 1
+      // After week 4: version 2, etc.
+      version_number = nfl_week - 2
     }
 
     const filename = `dvoa_sheets_${constants.season.year}.xlsx`
@@ -1037,21 +1038,32 @@ const import_dvoa_sheets = async ({ dry_run = false, filepath } = {}) => {
     const stream_pipeline = promisify(pipeline)
     let response
 
-    // Try versioned URL first as it has the latest data
-    const versioned_dvoa_url = `${dvoa_base_url}/${year}/${month}/${year}-Premium-Splits-v8.0-${version_number}.xlsx`
-    log(`downloading ${versioned_dvoa_url}`)
-    response = await fetch(versioned_dvoa_url)
-
-    if (!response.ok) {
-      log(`versioned URL failed (${response.statusText}), trying base URL`)
+    if (version_number === 0) {
+      // Week 2: use base URL only (no version suffix)
       const base_dvoa_url = `${dvoa_base_url}/${year}/${month}/${year}-Premium-Splits-v8.0.xlsx`
       log(`downloading ${base_dvoa_url}`)
       response = await fetch(base_dvoa_url)
 
       if (!response.ok) {
-        throw new Error(
-          `both URLs failed - versioned: ${response.statusText}, base: ${response.statusText}`
-        )
+        throw new Error(`base URL failed: ${response.statusText}`)
+      }
+    } else {
+      // Week 3+: try versioned URL first as it has the latest data
+      const versioned_dvoa_url = `${dvoa_base_url}/${year}/${month}/${year}-Premium-Splits-v8.0-${version_number}.xlsx`
+      log(`downloading ${versioned_dvoa_url}`)
+      response = await fetch(versioned_dvoa_url)
+
+      if (!response.ok) {
+        log(`versioned URL failed (${response.statusText}), trying base URL`)
+        const base_dvoa_url = `${dvoa_base_url}/${year}/${month}/${year}-Premium-Splits-v8.0.xlsx`
+        log(`downloading ${base_dvoa_url}`)
+        response = await fetch(base_dvoa_url)
+
+        if (!response.ok) {
+          throw new Error(
+            `both URLs failed - versioned: ${response.statusText}, base: ${response.statusText}`
+          )
+        }
       }
     }
 
