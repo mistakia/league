@@ -55,7 +55,8 @@ const analyze_wagers = async ({
   show_wager_roi = false,
   show_only_open_round_robins = false,
   show_round_robins = false,
-  show_fanatics_sets = false
+  show_fanatics_sets = false,
+  show_player_exposure = false
 } = {}) => {
   if (!fanduel_filename && !draftkings_filename && !fanatics_filename) {
     throw new Error(
@@ -253,12 +254,14 @@ const analyze_wagers = async ({
   }, {})
 
   // Create and print player exposure table
-  const player_summary_table = create_player_exposure_table(
-    player_summary,
-    filtered.length,
-    wager_summary.total_risk
-  )
-  player_summary_table.printTable()
+  if (show_player_exposure) {
+    const player_summary_table = create_player_exposure_table(
+      player_summary,
+      filtered.length,
+      wager_summary.total_risk
+    )
+    player_summary_table.printTable()
+  }
 
   const props_summary = calculate_props_summary(unique_selections)
 
@@ -354,8 +357,9 @@ const analyze_wagers = async ({
   // Print exposures by game
   for (const esbid in grouped_props_by_esbid) {
     const event_title = esbid_to_title.get(Number(esbid)) || 'Unknown Game'
+    const event_title_with_esbid = `${event_title} [${esbid}]`
     const event_table = create_event_exposure_table(
-      event_title,
+      event_title_with_esbid,
       grouped_props_by_esbid[esbid],
       show_counts,
       show_potential_gain
@@ -452,7 +456,8 @@ const main = async () => {
       show_wager_roi: argv.show_wager_roi,
       show_only_open_round_robins: argv.show_only_open_round_robins,
       show_round_robins: argv.show_round_robins,
-      show_fanatics_sets: argv.show_fanatics_sets
+      show_fanatics_sets: argv.show_fanatics_sets,
+      show_player_exposure: argv.show_player_exposure
     })
   } catch (err) {
     error = err
