@@ -192,9 +192,10 @@ const analyze_wagers = async ({
         event_index[selection.event_id] = selection.event_description
       }
 
-      // Use event_id + selection_id as key (not market_id) because FanDuel can assign
-      // multiple market IDs to the same selection (same player, threshold, outcome)
-      const key = `${selection.event_id}/${selection.selection_id}`
+      // Use event_id + selection_id + market_type as key to differentiate between
+      // different market types (e.g., passing yards vs passing+rushing yards)
+      const key = `${selection.event_id}/${selection.selection_id}/${selection.market_type || 'unknown'}`
+
       if (!selections_index[key]) {
         selections_index[key] = {
           ...selection,
@@ -232,7 +233,8 @@ const analyze_wagers = async ({
       selection_keys_by_source[source].push({
         key,
         event_id: selection.event_id,
-        selection_id: selection.selection_id
+        selection_id: selection.selection_id,
+        market_type: selection.market_type
       })
     }
   }
@@ -260,19 +262,37 @@ const analyze_wagers = async ({
         'pms.source_selection_id',
         'pm.source_event_id',
         'pm.metric_result_value',
+        'pm.market_type',
         'pms.selection_metric_line',
         'pms.selection_type'
       )
 
-    // Map results using event_id/selection_id as key
+    // Map results using event_id/selection_id/market_type as key
     for (const row of db_results) {
-      const key = `${row.source_event_id}/${row.source_selection_id}`
+      // Create key with market_type to ensure unique matches
+      const key = `${row.source_event_id}/${row.source_selection_id}/${row.market_type || 'unknown'}`
+
+      // Also create a fallback key without market_type for cases where wager has null market_type
+      const fallback_key = `${row.source_event_id}/${row.source_selection_id}/unknown`
+
       // Only store if not already found (avoid duplicates from multiple markets)
       if (!results_map.has(key)) {
         results_map.set(key, {
           metric_result_value: row.metric_result_value,
           selection_metric_line: row.selection_metric_line,
-          selection_type: row.selection_type
+          selection_type: row.selection_type,
+          market_type: row.market_type
+        })
+      }
+
+      // Also store under fallback key if this is the first match for event+selection
+      // This allows matching when wager has null market_type but DB has the market_type
+      if (!results_map.has(fallback_key) && row.market_type !== null) {
+        results_map.set(fallback_key, {
+          metric_result_value: row.metric_result_value,
+          selection_metric_line: row.selection_metric_line,
+          selection_type: row.selection_type,
+          market_type: row.market_type
         })
       }
     }
@@ -321,6 +341,7 @@ const analyze_wagers = async ({
       selections_index[key].selection_metric_line =
         db_result.selection_metric_line
       selections_index[key].selection_type = db_result.selection_type
+      selections_index[key].market_type = db_result.market_type
 
       // Calculate distance from threshold
       if (
@@ -337,12 +358,13 @@ const analyze_wagers = async ({
   // Enrich wager selections with database results
   for (const wager of filtered) {
     for (const selection of wager.selections) {
-      const key = `${selection.event_id}/${selection.selection_id}`
+      const key = `${selection.event_id}/${selection.selection_id}/${selection.market_type || 'unknown'}`
       const enriched = selections_index[key]
       if (enriched) {
         selection.metric_result_value = enriched.metric_result_value
         selection.selection_metric_line = enriched.selection_metric_line
         selection.selection_type = enriched.selection_type
+        selection.market_type = enriched.market_type
         selection.distance_from_threshold = enriched.distance_from_threshold
       }
     }
