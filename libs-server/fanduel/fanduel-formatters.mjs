@@ -6,6 +6,13 @@ const format_selection_player_name = (str = '') => {
   return str.trim()
 }
 
+// Extract player name from FanDuel event market description
+export const extract_player_name_from_event_market_description = (
+  eventMarketDescription
+) => {
+  return eventMarketDescription.split(' - ')[0]
+}
+
 const format_market_name_player_name = (str = '') => {
   // Check if the string contains a date or "Regular Season"
   if (str.match(/\d{4}-\d{2}/) || str.includes('Regular Season')) {

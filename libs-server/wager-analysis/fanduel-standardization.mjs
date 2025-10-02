@@ -1,6 +1,8 @@
 import dayjs from 'dayjs'
 
 import { constants, format_player_name } from '#libs-shared'
+import { get_market_type } from '#libs-server/fanduel/fanduel-market-types.mjs'
+import { extract_player_name_from_event_market_description } from '#libs-server/fanduel/fanduel-formatters.mjs'
 
 // Helper function to generate combinations for round robin bets
 const generate_round_robin_combinations = (arr, r) => {
@@ -20,7 +22,9 @@ const generate_round_robin_combinations = (arr, r) => {
 
 // Format FanDuel selection name for display
 const format_fanduel_selection_name = ({ selection, week }) => {
-  const player_name = selection.eventMarketDescription.split(' - ')[0]
+  const player_name = extract_player_name_from_event_market_description(
+    selection.eventMarketDescription
+  )
   const stat_type = (
     selection.eventMarketDescription.includes(' - ')
       ? selection.eventMarketDescription.split(' - ')[1]
@@ -66,7 +70,9 @@ const format_fanduel_selection_name = ({ selection, week }) => {
 
 // Extract player name from FanDuel selection
 const format_fanduel_player_name = ({ selection }) => {
-  const player_name = selection.eventMarketDescription.split(' - ')[0]
+  const player_name = extract_player_name_from_event_market_description(
+    selection.eventMarketDescription
+  )
   return format_player_name(player_name)
 }
 
@@ -118,6 +124,10 @@ const calculate_fanduel_round_robin_wager = ({ wager }) => {
         player_name: format_fanduel_player_name({ selection: leg.parts[0] }),
         event_id: leg.parts[0].eventId,
         market_id: leg.parts[0].marketId,
+        market_type: get_market_type({
+          marketType: leg.parts[0].marketType,
+          marketName: ''
+        }),
         source_id: 'FANDUEL',
         selection_id: leg.parts[0].selectionId,
         parsed_odds: Number(leg.parts[0].americanPrice),
@@ -159,6 +169,10 @@ export const standardize_fanduel_wager = (wager) => {
       player_name: format_fanduel_player_name({ selection: leg.parts[0] }),
       event_id: leg.parts[0].eventId,
       market_id: leg.parts[0].marketId,
+      market_type: get_market_type({
+        marketType: leg.parts[0].marketType,
+        marketName: ''
+      }),
       source_id: 'FANDUEL',
       selection_id: leg.parts[0].selectionId,
       result: leg.result || 'OPEN',
