@@ -18,7 +18,21 @@ export const CONFIG = {
   // Team name validation
   TEAM_VALIDATION: {
     MAX_LENGTH: 50,
-    DIVISION_PATTERNS: [/^\d+(ST|ND|RD|TH)\s+/i, /1ST/, /2ND/, /3RD/, /4TH/]
+    DIVISION_PATTERNS: [/^\d+(ST|ND|RD|TH)\s+/i, /1ST/, /2ND/, /3RD/, /4TH/],
+    NON_TEAM_PATTERNS: [
+      /TO LOSE/i,
+      /TO WIN/i,
+      /WILD CARD/i,
+      /DIVISIONAL/i,
+      /CONFERENCE/i,
+      /SUPER BOWL/i,
+      /CHAMPION/i,
+      /PLAYOFF/i,
+      /ROUND/i,
+      /^(OVER|UNDER)\s*\(/i, // Over/Under lines like "Under (9.5)"
+      /\(\d+\.?\d*\)/, // Any parenthetical numbers
+      /^[A-Z][a-z]+\s+[A-Z][a-z]+$/ // First Last name pattern (player names)
+    ]
   },
 
   // Player name patterns

@@ -7,6 +7,7 @@
 
 // Export constants and configuration
 export { CONFIG, DEBUG_MODULES } from './draftkings-constants.mjs'
+export { get_draftkings_config } from './draftkings-config.mjs'
 
 // Export helper functions
 export {
@@ -17,7 +18,10 @@ export {
   determine_teams,
   extract_player_info,
   process_american_odds,
-  extract_metric_line
+  extract_metric_line,
+  extract_player_name_from_event,
+  format_selection_type,
+  get_team_from_participant
 } from './draftkings-helpers.mjs'
 
 // Export formatters
@@ -35,3 +39,18 @@ export {
 
 // Export processors
 export { run_all_mode, run_events_mode } from './draftkings-processors.mjs'
+
+// Export market type functions
+export * from './draftkings-market-types.mjs'
+
+// Export API functions
+export * from './draftkings-api.mjs'
+
+// Export wager functions
+export * from './draftkings-wagers.mjs'
+
+// Export DFS functions
+export * from './draftkings-dfs.mjs'
+
+// Export tracking functions
+export * from './draftkings-tracking.mjs'

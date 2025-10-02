@@ -3,7 +3,10 @@
  */
 
 import debug from 'debug'
-import { get_active_categories, get_priority_categories } from '#libs-server'
+import {
+  get_active_categories,
+  get_priority_categories
+} from './draftkings-tracking.mjs'
 
 const log = debug('import-draft-kings')
 
