@@ -1,0 +1,256 @@
+import { Table } from 'console-table-printer'
+
+// Create player exposure summary table
+export const create_player_exposure_table = (
+  player_summary,
+  filtered_wagers_count,
+  total_risk
+) => {
+  const player_summary_table = new Table({ title: 'Player Exposure Summary' })
+  Object.entries(player_summary)
+    .map(([player_name, stats]) => ({
+      player_name,
+      props_count: stats.props_count,
+      exposure_count: stats.exposure_count,
+      exposure_rate: `${((stats.exposure_count / filtered_wagers_count) * 100).toFixed(2)}%`,
+      open_wagers: stats.open_wagers,
+      open_potential_roi: `${((stats.open_potential_payout / total_risk) * 100).toFixed(0)}%`,
+      max_potential_roi: `${((stats.max_potential_payout / total_risk) * 100).toFixed(0)}%`
+    }))
+    .sort((a, b) => b.exposure_count - a.exposure_count)
+    .forEach((player) => player_summary_table.addRow(player))
+
+  return player_summary_table
+}
+
+// Create wager summary table
+export const create_wager_summary_table = (
+  wager_summary,
+  props_summary,
+  show_counts = false,
+  show_potential_gain = false
+) => {
+  const wager_summary_table = new Table({ title: 'Execution Summary' })
+
+  const add_row = (label, value) => {
+    if (typeof value === 'number') {
+      if (label.includes('Potential Win')) {
+        value = value.toLocaleString('en-US', { maximumFractionDigits: 2 })
+      } else if (label === 'Expected Hits') {
+        value = value.toFixed(2)
+      }
+    }
+    wager_summary_table.addRow({ Metric: label, Value: value })
+  }
+
+  add_row('Current ROI', wager_summary.current_roi)
+  add_row(
+    'Open Potential ROI',
+    `${((wager_summary.open_potential_win / wager_summary.total_risk - 1) * 100).toFixed(0)}%`
+  )
+  add_row(
+    'Max Potential ROI',
+    `${((wager_summary.max_potential_win / wager_summary.total_risk - 1) * 100).toFixed(0)}%`
+  )
+
+  // Add rows for props_summary
+  for (const [key, value] of Object.entries(props_summary)) {
+    add_row(
+      key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
+      value
+    )
+  }
+
+  if (show_counts) {
+    add_row('Wagers', wager_summary.wagers)
+    add_row('Total Won', wager_summary.total_won.toFixed(2))
+    add_row('Wagers Open', wager_summary.wagers_open)
+    add_row('Total Risk', wager_summary.total_risk)
+  }
+
+  if (show_potential_gain) {
+    add_row('Open Potential Win', wager_summary.open_potential_win)
+    add_row('Max Potential Win', wager_summary.max_potential_win)
+  }
+
+  return wager_summary_table
+}
+
+// Create lost by legs summary table
+export const create_lost_by_legs_table = (wager_summary) => {
+  const lost_by_legs_summary_table = new Table({
+    title: 'Wagers Lost By # Legs'
+  })
+  lost_by_legs_summary_table.addRow({
+    1: wager_summary.lost_by_one_leg,
+    2: wager_summary.lost_by_two_legs,
+    3: wager_summary.lost_by_three_legs,
+    '4+': wager_summary.lost_by_four_or_more_legs
+  })
+  return lost_by_legs_summary_table
+}
+
+// Create unique props table
+export const create_unique_props_table = (
+  unique_selections,
+  show_counts = false,
+  show_potential_gain = false
+) => {
+  const unique_props_table = new Table()
+  const props_with_exposure = unique_selections.map((prop) => {
+    const result = {
+      name: prop.name,
+      odds: prop.parsed_odds,
+      result: prop.result,
+      exposure_rate: prop.exposure_rate
+    }
+
+    if (show_counts) {
+      result.exposure_count = prop.exposure_count
+      result.open_wagers = prop.open_wagers
+    }
+
+    if (show_potential_gain) {
+      result.open_potential_payout = prop.open_potential_payout.toFixed(2)
+      result.open_potential_roi = prop.open_potential_roi
+    }
+    result.max_potential_roi = prop.max_potential_roi
+
+    if (show_potential_gain) {
+      result.max_potential_payout = prop.max_potential_payout.toFixed(2)
+    }
+
+    return result
+  })
+
+  props_with_exposure.forEach((prop) => unique_props_table.addRow(prop))
+  return unique_props_table
+}
+
+// Create event-specific exposure table
+export const create_event_exposure_table = (
+  event_title,
+  props,
+  show_counts = false,
+  show_potential_gain = false
+) => {
+  const event_table = new Table({
+    title: event_title || 'Unknown Game'
+  })
+  props
+    .sort((a, b) => b.exposure_count - a.exposure_count)
+    .forEach((prop) => {
+      const row = {
+        name: prop.name,
+        odds: prop.parsed_odds,
+        exposure_rate: prop.exposure_rate,
+        result: prop.result,
+        max_potential_roi: prop.max_potential_roi,
+        open_potential_roi: prop.open_potential_roi
+      }
+
+      if (show_counts) {
+        row.open_wagers = prop.open_wagers
+      }
+
+      if (show_potential_gain) {
+        row.open_potential_payout = prop.open_potential_payout.toFixed(2)
+        row.max_potential_payout = prop.max_potential_payout.toFixed(2)
+      }
+
+      event_table.addRow(row)
+    })
+  return event_table
+}
+
+// Create prop combination table (one/two/three legs away)
+export const create_prop_combination_table = (props, title) => {
+  if (props.length === 0) {
+    return null
+  }
+  const table = new Table({ title })
+  for (const prop of props.sort(
+    (a, b) => b.potential_gain - a.potential_gain
+  )) {
+    table.addRow({
+      name: prop.name,
+      potential_roi_added: `${prop.potential_roi_added.toFixed(2)}%`,
+      potential_gain: prop.potential_gain.toFixed(2),
+      potential_wins: prop.potential_wins
+    })
+  }
+  return table
+}
+
+// Create individual wager table
+export const create_wager_table = (wager, options = {}) => {
+  const {
+    show_wager_roi = false,
+    show_potential_gain = false,
+    show_bet_receipts = false,
+    total_risk = 0
+  } = options
+
+  const potential_roi_gain = (wager.potential_win / total_risk) * 100
+  const num_of_legs = wager.selections.length
+  let wager_table_title = `[${num_of_legs} leg parlay] American odds: ${
+    wager.parsed_odds > 0 ? '+' : ''
+  }${Number(wager.parsed_odds).toFixed(0)}`
+
+  if (show_wager_roi) {
+    wager_table_title += ` / ${potential_roi_gain.toFixed(2)}% roi`
+  }
+
+  if (show_potential_gain) {
+    wager_table_title += ` ($${wager.potential_win.toFixed(2)})`
+  }
+
+  if (show_bet_receipts && wager.bet_receipt_id) {
+    wager_table_title += ` / Bet Receipt: ${wager.bet_receipt_id}`
+  }
+
+  const wager_table = new Table({ title: wager_table_title })
+  for (const selection of wager.selections) {
+    wager_table.addRow({
+      selection: selection.name,
+      odds: selection.parsed_odds,
+      result: selection.is_won ? 'WON' : selection.is_lost ? 'LOST' : 'OPEN'
+    })
+  }
+  return wager_table
+}
+
+// Print all tables for analyze_wagers output
+export const print_wagers_analysis_tables = ({
+  player_summary_table,
+  wager_summary_table,
+  lost_by_legs_table,
+  unique_props_table,
+  event_tables,
+  prop_combination_tables,
+  wager_tables,
+  show_counts = false
+}) => {
+  player_summary_table.printTable()
+  wager_summary_table.printTable()
+
+  if (show_counts && lost_by_legs_table) {
+    lost_by_legs_table.printTable()
+  }
+
+  unique_props_table.printTable()
+
+  if (event_tables) {
+    event_tables.forEach((table) => table.printTable())
+  }
+
+  if (prop_combination_tables) {
+    prop_combination_tables.forEach((table) => {
+      if (table) table.printTable()
+    })
+  }
+
+  if (wager_tables) {
+    wager_tables.forEach((table) => table.printTable())
+  }
+}

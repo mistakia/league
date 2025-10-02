@@ -1,16 +1,34 @@
 import debug from 'debug'
 import dayjs from 'dayjs'
 import fs from 'fs-extra'
-import * as oddslib from 'oddslib'
 import path, { dirname } from 'path'
 import { fileURLToPath } from 'url'
-import { Table } from 'console-table-printer'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, format_player_name } from '#libs-shared'
-import { is_main, fanatics } from '#libs-server'
+import { constants } from '#libs-shared'
+import { is_main } from '#libs-server'
+import {
+  standardize_wager_by_source,
+  calculate_wager_summary,
+  calculate_props_summary,
+  analyze_prop_near_miss_combinations,
+  format_round_robin_display,
+  analyze_fanduel_round_robin_selections,
+  analyze_fanatics_wager_sets,
+  filter_wagers_by_lost_legs,
+  filter_wagers_excluding_selections,
+  filter_wagers_including_selections,
+  sort_wagers,
+  create_player_exposure_table,
+  create_wager_summary_table,
+  create_lost_by_legs_table,
+  create_unique_props_table,
+  create_event_exposure_table,
+  create_prop_combination_table,
+  create_wager_table
+} from '#libs-server/wager-analysis/index.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('analyze-wagers')
@@ -18,1148 +36,6 @@ debug.enable('analyze-wagers')
 
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const data_path = path.join(__dirname, '../tmp')
-
-const is_prop_equal = (prop_a, prop_b) =>
-  prop_a.event_id === prop_b.event_id &&
-  prop_a.market_id === prop_b.market_id &&
-  prop_a.selection_id === prop_b.selection_id
-
-const get_props_summary = (props) =>
-  props.reduce(
-    (accumulator, prop) => {
-      const odds = prop.parsed_odds
-        ? oddslib.from('moneyline', prop.parsed_odds).to('impliedProbability')
-        : 0
-      const is_win = prop.is_won
-      return {
-        total_props: accumulator.total_props + 1,
-        expected_hits: accumulator.expected_hits + odds,
-        actual_hits: is_win
-          ? accumulator.actual_hits + 1
-          : accumulator.actual_hits
-      }
-    },
-    {
-      expected_hits: 0,
-      actual_hits: 0,
-      total_props: 0
-    }
-  )
-
-const get_wagers_summary = ({ wagers, props = [] }) =>
-  wagers.reduce(
-    (accumulator, wager) => {
-      const lost_legs = wager.selections.filter((selection) => {
-        for (const prop of props) {
-          if (is_prop_equal(selection, prop)) {
-            return false
-          }
-        }
-        return selection.is_lost
-      }).length
-
-      const is_settled = wager.is_settled
-
-      const is_won = is_settled && lost_legs === 0
-      const is_lost = is_settled && lost_legs > 0
-
-      return {
-        won_wagers: is_won
-          ? [...accumulator.won_wagers, wager]
-          : accumulator.won_wagers,
-        wagers: accumulator.wagers + 1,
-        wagers_won: is_won
-          ? accumulator.wagers_won + 1
-          : accumulator.wagers_won,
-        wagers_loss: is_lost
-          ? accumulator.wagers_loss + 1
-          : accumulator.wagers_loss,
-        wagers_open: is_settled
-          ? accumulator.wagers_open
-          : accumulator.wagers_open + 1,
-
-        total_risk: accumulator.total_risk + wager.stake,
-        total_won: is_won
-          ? accumulator.total_won + wager.potential_win
-          : accumulator.total_won,
-        max_potential_win: accumulator.max_potential_win + wager.potential_win,
-        open_potential_win: is_settled
-          ? accumulator.open_potential_win
-          : accumulator.open_potential_win + wager.potential_win,
-
-        lost_by_one_leg:
-          lost_legs === 1
-            ? accumulator.lost_by_one_leg + 1
-            : accumulator.lost_by_one_leg,
-        lost_by_two_legs:
-          lost_legs === 2
-            ? accumulator.lost_by_two_legs + 1
-            : accumulator.lost_by_two_legs,
-        lost_by_three_legs:
-          lost_legs === 3
-            ? accumulator.lost_by_three_legs + 1
-            : accumulator.lost_by_three_legs,
-        lost_by_four_or_more_legs:
-          lost_legs >= 4
-            ? accumulator.lost_by_four_or_more_legs + 1
-            : accumulator.lost_by_four_or_more_legs
-      }
-    },
-    {
-      won_wagers: [],
-      wagers: 0,
-      wagers_won: 0,
-      wagers_loss: 0,
-      total_risk: 0,
-      wagers_open: 0,
-      total_won: 0,
-      max_potential_win: 0,
-      open_potential_win: 0,
-      lost_by_one_leg: 0,
-      lost_by_two_legs: 0,
-      lost_by_three_legs: 0,
-      lost_by_four_or_more_legs: 0
-    }
-  )
-
-const format_fanduel_selection_name = ({ selection, week }) => {
-  const player_name = selection.eventMarketDescription.split(' - ')[0]
-  const stat_type = (
-    selection.eventMarketDescription.includes(' - ')
-      ? selection.eventMarketDescription.split(' - ')[1]
-      : selection.eventMarketDescription
-  )
-    .replace('Alt ', '')
-    .trim()
-    .replace('Receptions', 'Recs')
-    .replace('Passing', 'Pass')
-    .replace('Rushing', 'Rush')
-    .replace('Receiving', 'Recv')
-    .replace('Any Time Touchdown Scorer', 'Anytime TD')
-    .replace('To Score 2+ Touchdowns', '2+ TDs')
-    .replace('1st Team Touchdown Scorer', '1st Team TD')
-    .replace('Anytime Touchdown Scorer', 'Anytime TD')
-
-  // Handle "Either Player" markets specially
-  if (player_name === 'Either Player') {
-    return `${selection.selectionName} ${stat_type}`
-  }
-
-  const handicap = Math.round(Number(selection.parsedHandicap))
-
-  let name
-
-  // Check if handicap is NaN or if it's a non-handicap market
-  if (
-    isNaN(handicap) ||
-    stat_type === 'Moneyline' ||
-    stat_type === 'Anytime TD' ||
-    stat_type === '2+ TDs' ||
-    stat_type === '1st Team TD'
-  ) {
-    name = `${selection.selectionName} ${stat_type}`
-  } else if (stat_type === 'Alternate Spread') {
-    name = `${selection.selectionName}`
-  } else {
-    name = `${player_name} ${handicap}+ ${stat_type}`
-  }
-
-  return name
-}
-
-const extract_draftkings_player_name = (market_display_name) => {
-  // List of stat names to check for
-  const stat_names = [
-    'Rushing Yards',
-    'Receiving Yards',
-    'Passing Yards',
-    'Receptions',
-    'Touchdowns'
-  ]
-
-  // Extract player name
-  const player_name = stat_names.reduce((name, stat) => {
-    if (name) return name
-    const index = market_display_name.indexOf(stat)
-    return index !== -1 ? market_display_name.slice(0, index).trim() : ''
-  }, '')
-
-  return player_name
-}
-
-const format_draftkings_selection_name = ({ selection }) => {
-  // Handle nested SGP selections (2+ selections)
-  if (
-    selection.nestedSGPSelections &&
-    selection.nestedSGPSelections.length > 0
-  ) {
-    const formatted_selections = selection.nestedSGPSelections.map((nested) => {
-      const nested_market_display = nested.marketDisplayName || ''
-      const nested_selection_display = nested.selectionDisplayName || ''
-
-      const player_name = extract_draftkings_player_name(nested_market_display)
-      if (player_name) {
-        // Handle specific stats with abbreviated names
-        if (nested_market_display.includes('Rushing Yards')) {
-          return `${player_name} ${nested_selection_display} Rush Yds`
-        }
-        if (nested_market_display.includes('Receiving Yards')) {
-          return `${player_name} ${nested_selection_display} Recv Yds`
-        }
-        if (nested_market_display.includes('Passing Yards')) {
-          return `${player_name} ${nested_selection_display} Pass Yds`
-        }
-        if (nested_market_display.includes('Receptions')) {
-          return `${player_name} ${nested_selection_display} Recs`
-        }
-        if (nested_market_display.includes('Touchdowns')) {
-          return `${player_name} ${nested_selection_display} TDs`
-        }
-      }
-
-      // Default format for unrecognized markets
-      return `${nested_market_display} ${nested_selection_display}`
-    })
-
-    // Join all selections with + for SGP display
-    return `SGP: ${formatted_selections.join(' + ')}`
-  }
-
-  const market_display_name = selection.marketDisplayName || ''
-  const selection_display_name = selection.selectionDisplayName || ''
-
-  const player_name = extract_draftkings_player_name(market_display_name)
-  if (player_name) {
-    // Handle specific stats
-    if (market_display_name.includes('Rushing Yards')) {
-      return `${player_name} ${selection_display_name} Rush Yds`
-    }
-    if (market_display_name.includes('Receiving Yards')) {
-      return `${player_name} ${selection_display_name} Recv Yds`
-    }
-    if (market_display_name.includes('Passing Yards')) {
-      return `${player_name} ${selection_display_name} Pass Yds`
-    }
-    if (market_display_name.includes('Receptions')) {
-      return `${player_name} ${selection_display_name} Recs`
-    }
-    if (market_display_name.includes('Touchdowns')) {
-      return `${player_name} ${selection_display_name} TDs`
-    }
-  }
-
-  // Default to original format if no specific case is matched
-  return `${market_display_name} (${selection_display_name})`
-}
-
-// Helper function to generate combinations
-const generate_round_robin_combinations = (arr, r) => {
-  const combinations = []
-  const combine = (start, combo) => {
-    if (combo.length === r) {
-      combinations.push(combo)
-      return
-    }
-    for (let i = start; i < arr.length; i++) {
-      combine(i + 1, [...combo, arr[i]])
-    }
-  }
-  combine(0, [])
-  return combinations
-}
-
-const calculate_fanduel_round_robin_wager = ({ wager }) => {
-  const num_selections = Number(wager.betType.slice(3))
-  const legs = wager.legs
-
-  // Generate all possible combinations
-  const all_combinations = generate_round_robin_combinations(
-    legs,
-    num_selections
-  )
-
-  // Filter combinations to include only one selection per market and event
-  const valid_combinations = all_combinations.filter((combination) => {
-    const markets = new Set()
-    const events = new Set()
-    for (const leg of combination) {
-      const market_id = leg.parts[0].marketId
-      const event_id = leg.parts[0].eventId
-      if (markets.has(market_id) || events.has(event_id)) {
-        return false
-      }
-      markets.add(market_id)
-      events.add(event_id)
-    }
-    return true
-  })
-
-  // Calculate potential win for each combination
-  const stake_per_combination = wager.currentSize / valid_combinations.length
-  const round_robin_wagers = valid_combinations.map((combination) => {
-    const odds_product = combination.reduce((product, leg) => {
-      return product * (1 + Number(leg.parts[0].price) - 1)
-    }, 1)
-    const potential_win = stake_per_combination * odds_product
-
-    return {
-      stake: stake_per_combination,
-      potential_win,
-      parsed_odds: (odds_product - 1) * 100, // Convert to American odds
-      selections: combination.map((leg) => ({
-        ...leg.parts[0],
-        name: format_fanduel_selection_name({
-          selection: leg.parts[0],
-          week: wager.week
-        }),
-        player_name: format_fanduel_player_name({ selection: leg.parts[0] }),
-        event_id: leg.parts[0].eventId,
-        market_id: leg.parts[0].marketId,
-        source_id: 'FANDUEL',
-        selection_id: leg.parts[0].selectionId,
-        parsed_odds: Number(leg.parts[0].americanPrice),
-        is_won: leg.result === 'WON',
-        is_lost: leg.result === 'LOST'
-      })),
-      bet_receipt_id: `${wager.betReceiptId}-${combination.map((leg) => leg.parts[0].selectionId).join('-')}`,
-      is_settled:
-        wager.isSettled || combination.some((leg) => leg.result === 'LOST'),
-      is_won: combination.every((leg) => leg.result === 'WON'),
-      is_lost: combination.some((leg) => leg.result === 'LOST'),
-      source_id: 'FANDUEL'
-    }
-  })
-
-  return round_robin_wagers
-}
-
-const format_fanduel_player_name = ({ selection }) => {
-  const player_name = selection.eventMarketDescription.split(' - ')[0]
-  return format_player_name(player_name)
-}
-
-const format_draftkings_player_name = ({ selection }) => {
-  const market_display_name = selection.marketDisplayName || ''
-
-  const player_name = extract_draftkings_player_name(market_display_name)
-
-  return format_player_name(player_name)
-}
-
-const standardize_wager = ({ wager, source }) => {
-  if (source === 'fanduel') {
-    const week = dayjs(wager.settledDate)
-      .subtract('2', 'day')
-      .diff(constants.season.regular_season_start, 'weeks')
-
-    // check if the wager is a round robin
-    if (wager.numLines > 1) {
-      const round_robin_wagers = calculate_fanduel_round_robin_wager({
-        wager: { ...wager, week }
-      })
-      return round_robin_wagers
-    }
-
-    return {
-      ...wager,
-      week,
-      selections: wager.legs.map((leg) => ({
-        ...leg.parts[0],
-        name: format_fanduel_selection_name({ selection: leg.parts[0], week }),
-        player_name: format_fanduel_player_name({ selection: leg.parts[0] }),
-        event_id: leg.parts[0].eventId,
-        market_id: leg.parts[0].marketId,
-        source_id: 'FANDUEL',
-        selection_id: leg.parts[0].selectionId,
-        result: leg.result || 'OPEN',
-        parsed_odds: Number(leg.parts[0].americanPrice),
-        is_won: leg.result === 'WON',
-        is_lost: leg.result === 'LOST'
-      })),
-      bet_receipt_id: wager.betReceiptId.replace(
-        /(\d{4})(\d{4})(\d{4})(\d{4})/,
-        '$1-$2-$3-$4'
-      ),
-      parsed_odds: Number(wager.americanBetPrice),
-      is_settled: wager.isSettled,
-      is_won: wager.result === 'WON',
-      potential_win: wager.betPrice * wager.currentSize,
-      stake: wager.currentSize,
-      source_id: 'FANDUEL'
-    }
-  } else if (source === 'draftkings') {
-    if (wager.type === 'RoundRobin') {
-      return wager.combinations.map((combination) => {
-        const selections = combination.selectionsMapped.flatMap(
-          (selectionId) => {
-            const selection =
-              wager.selections.find((s) => s.selectionId === selectionId) ||
-              wager.selections.find(
-                (s) =>
-                  s.nestedSGPSelections &&
-                  s.nestedSGPSelections.some(
-                    (ns) => ns.selectionId === selectionId
-                  )
-              )
-
-            if (!selection) {
-              throw new Error(`Selection not found for ID: ${selectionId}`)
-            }
-
-            const standardize_selection = (sel) => ({
-              name: format_draftkings_selection_name({
-                selection: sel
-              }),
-              player_name: format_draftkings_player_name({ selection: sel }),
-              event_id: sel.eventId,
-              market_id: sel.marketId,
-              selection_id: sel.selectionId,
-              bet_receipt_id: wager.receiptId,
-              source_id: 'DRAFTKINGS',
-              result: sel.settlementStatus.toUpperCase(),
-              parsed_odds: sel.displayOdds
-                ? Number(sel.displayOdds.replace(/—|-|−/g, '-'))
-                : null,
-              is_won: sel.settlementStatus === 'Won',
-              is_lost: sel.settlementStatus === 'Lost'
-            })
-
-            if (selection.nestedSGPSelections) {
-              return selection.nestedSGPSelections.map(standardize_selection)
-            } else {
-              return [standardize_selection(selection)]
-            }
-          }
-        )
-
-        const stake = wager.stake / wager.numberOfBets
-        const parsed_odds = combination.displayOdds
-          ? Number(combination.displayOdds.replace(/\+/g, ''))
-          : combination.trueOdds
-
-        const is_won = combination.status === 'Won'
-        const is_lost = combination.status === 'Lost'
-
-        return {
-          ...wager,
-          selections,
-          bet_receipt_id: `${wager.receiptId}-${combination.id}`,
-          parsed_odds,
-          is_settled: wager.status === 'Settled' || is_lost || is_won,
-          is_won,
-          is_lost,
-          potential_win: combination.potentialReturns,
-          stake,
-          source_id: 'DRAFTKINGS'
-        }
-      })
-    } else {
-      return {
-        ...wager,
-        selections: wager.selections.map((selection) => ({
-          ...selection,
-          name: format_draftkings_selection_name({ selection }),
-          player_name: format_draftkings_player_name({ selection }),
-          event_id: selection.eventId,
-          market_id: selection.marketId,
-          selection_id: selection.selectionId,
-          bet_receipt_id: wager.betReceiptId,
-          source_id: 'DRAFTKINGS',
-          result: selection.settlementStatus.toUpperCase(),
-          parsed_odds: selection.displayOdds
-            ? Number(selection.displayOdds.replace(/—|-|−/g, '-'))
-            : null,
-          is_won: selection.settlementStatus === 'Won',
-          is_lost: selection.settlementStatus === 'Lost'
-        })),
-        bet_receipt_id: wager.receiptId,
-        parsed_odds: wager.displayOdds
-          ? Number(wager.displayOdds.replace(/—|-|−/g, '-'))
-          : null,
-        is_settled: wager.status === 'Settled',
-        is_won: wager.settlementStatus === 'Won',
-        potential_win: wager.potentialReturns,
-        stake: wager.stake,
-        source_id: 'DRAFTKINGS'
-      }
-    }
-  } else if (source === 'fanatics') {
-    const parlay_legs = wager.parlayLegs || []
-
-    return {
-      ...wager,
-      selections: parlay_legs.map((leg) => ({
-        name: `${leg.title} ${leg.subtitle}`,
-        player_name: leg.title.split(' ')[0] + ' ' + leg.title.split(' ')[1],
-        event_id: leg.metaData.eventId,
-        market_id: leg.metaData.marketId,
-        source_id: 'FANATICS',
-        selection_id: leg.metaData.selectionId,
-        result: leg.betStatus,
-        parsed_odds: Number(leg.oddsData.americanDisplay.replace(/[+-]/g, '')),
-        is_won: leg.betStatus === 'WON',
-        is_lost: leg.betStatus === 'LOST'
-      })),
-      bet_receipt_id: wager.betMetaData.betId,
-      parsed_odds: Number(wager.header.oddsData.americanDisplay),
-      is_settled:
-        wager.header.betStatus !== 'OPEN' &&
-        wager.header.betStatus !== 'NOT_SET',
-      is_won: wager.header.betStatus === 'WON',
-      potential_win: fanatics.format_wager_payout(wager.header.payout),
-      stake: Number(wager.header.wager.replace('$', '')),
-      source_id: 'FANATICS'
-    }
-  }
-  throw new Error(`Unknown wager source: ${source}`)
-}
-
-const analyze_prop_combinations = (lost_props, filtered, wager_summary) => {
-  const one_prop = []
-  const two_props = []
-  const three_props = []
-
-  const prop_summaries = new Map()
-  const actual_prop_summaries = new Map()
-  const wager_indices = new Map()
-  const props_by_source = new Map()
-  const wagers_by_source = new Map()
-
-  // Index wagers and props by source_id
-  filtered.forEach((wager, index) => {
-    if (!wagers_by_source.has(wager.source_id)) {
-      wagers_by_source.set(wager.source_id, [])
-    }
-    wagers_by_source.get(wager.source_id).push(wager)
-
-    wager.selections.forEach((selection) => {
-      const key = `${wager.source_id}:${selection.selection_id}`
-      if (!wager_indices.has(key)) {
-        wager_indices.set(key, new Set())
-      }
-      wager_indices.get(key).add(index)
-    })
-  })
-
-  // Pre-calculate summaries for individual props
-  const calculate_summary = ({ source_id, prop_ids, actual = false }) => {
-    // Get the set of wager indices for the first prop
-    const first_prop_key = `${source_id}:${prop_ids[0]}`
-    let relevant_wager_indices = new Set(
-      wager_indices.get(first_prop_key) || []
-    )
-
-    // Intersect with the indices of the remaining props
-    for (let i = 1; i < prop_ids.length; i++) {
-      const prop_key = `${source_id}:${prop_ids[i]}`
-      const prop_indices = wager_indices.get(prop_key) || []
-      relevant_wager_indices = new Set(
-        [...relevant_wager_indices].filter((index) => prop_indices.has(index))
-      )
-    }
-
-    const relevant_wagers = Array.from(relevant_wager_indices).map(
-      (index) => filtered[index]
-    )
-
-    return get_wagers_summary({
-      wagers: relevant_wagers,
-      props: actual
-        ? []
-        : prop_ids.map((id) =>
-            lost_props.find(
-              (p) => p.selection_id === id && p.source_id === source_id
-            )
-          )
-    })
-  }
-
-  const get_prop_summary = ({ source_id, prop_ids = [], actual = false }) => {
-    const key = `${source_id}:${prop_ids.sort().join('|')}${actual ? ':actual' : ''}`
-    if (!prop_summaries.has(key)) {
-      prop_summaries.set(
-        key,
-        calculate_summary({ source_id, prop_ids, actual })
-      )
-    }
-    return prop_summaries.get(key)
-  }
-
-  const calculate_potential_gain = ({ actual_summary, prop_summary }) => ({
-    potential_gain: prop_summary.total_won - actual_summary.total_won,
-    potential_wins: prop_summary.wagers_won - actual_summary.wagers_won,
-    potential_roi_added:
-      ((prop_summary.total_won - actual_summary.total_won) /
-        wager_summary.total_risk) *
-      100
-  })
-
-  lost_props.forEach((prop) => {
-    if (!props_by_source.has(prop.source_id)) {
-      props_by_source.set(prop.source_id, [])
-    }
-    props_by_source.get(prop.source_id).push(prop)
-    const summary = calculate_summary({
-      source_id: prop.source_id,
-      prop_ids: [prop.selection_id]
-    })
-    const actual_summary = calculate_summary({
-      source_id: prop.source_id,
-      prop_ids: [prop.selection_id],
-      actual: true
-    })
-    prop_summaries.set(prop.selection_id, summary)
-    actual_prop_summaries.set(prop.selection_id, actual_summary)
-  })
-
-  // Use a Set for faster lookups
-  const processed_combinations = new Set()
-
-  // Analyze combinations for each source_id
-  for (const [source_id, source_props] of props_by_source.entries()) {
-    // Single prop analysis
-    source_props.forEach((prop) => {
-      const actual_summary = get_prop_summary({
-        source_id,
-        prop_ids: [prop.selection_id],
-        actual: true
-      })
-      const summary = get_prop_summary({
-        source_id,
-        prop_ids: [prop.selection_id]
-      })
-      const { potential_gain, potential_wins, potential_roi_added } =
-        calculate_potential_gain({ actual_summary, prop_summary: summary })
-
-      if (potential_gain > 0) {
-        one_prop.push({
-          name: prop.name,
-          selection_id: prop.selection_id,
-          source_id,
-          potential_gain,
-          potential_wins,
-          potential_roi_added
-        })
-      }
-    })
-
-    // Two-prop and three-prop combinations
-    for (let i = 0; i < source_props.length - 1; i++) {
-      for (let j = i + 1; j < source_props.length; j++) {
-        const two_prop_ids = [
-          source_props[i].selection_id,
-          source_props[j].selection_id
-        ]
-        const two_prop_key = `${source_id}:${two_prop_ids.sort().join('|')}`
-
-        if (!processed_combinations.has(two_prop_key)) {
-          processed_combinations.add(two_prop_key)
-          const actual_summary = get_prop_summary({
-            source_id,
-            prop_ids: two_prop_ids,
-            actual: true
-          })
-          const two_prop_summary = get_prop_summary({
-            source_id,
-            prop_ids: two_prop_ids
-          })
-          const { potential_gain, potential_wins, potential_roi_added } =
-            calculate_potential_gain({
-              actual_summary,
-              prop_summary: two_prop_summary
-            })
-
-          const individual_gains = [
-            get_prop_summary({
-              source_id,
-              prop_ids: [source_props[i].selection_id]
-            }).total_won,
-            get_prop_summary({
-              source_id,
-              prop_ids: [source_props[j].selection_id]
-            }).total_won
-          ]
-
-          if (
-            potential_gain > 0 &&
-            two_prop_summary.total_won > Math.max(...individual_gains)
-          ) {
-            two_props.push({
-              name: [source_props[i].name, source_props[j].name].join(' / '),
-              selection_ids: two_prop_ids,
-              source_id,
-              potential_gain,
-              potential_wins,
-              potential_roi_added
-            })
-          }
-
-          // Three-prop combinations
-          for (let k = j + 1; k < source_props.length; k++) {
-            const three_prop_ids = [
-              ...two_prop_ids,
-              source_props[k].selection_id
-            ]
-            const three_prop_key = `${source_id}:${three_prop_ids.sort().join('|')}`
-
-            if (!processed_combinations.has(three_prop_key)) {
-              processed_combinations.add(three_prop_key)
-              const actual_summary = get_prop_summary({
-                source_id,
-                prop_ids: three_prop_ids,
-                actual: true
-              })
-              const three_prop_summary = get_prop_summary({
-                source_id,
-                prop_ids: three_prop_ids
-              })
-              const three_prop_result = calculate_potential_gain({
-                actual_summary,
-                prop_summary: three_prop_summary
-              })
-
-              const two_prop_gains = [
-                get_prop_summary({
-                  source_id,
-                  prop_ids: [
-                    source_props[i].selection_id,
-                    source_props[j].selection_id
-                  ]
-                }).total_won,
-                get_prop_summary({
-                  source_id,
-                  prop_ids: [
-                    source_props[i].selection_id,
-                    source_props[k].selection_id
-                  ]
-                }).total_won,
-                get_prop_summary({
-                  source_id,
-                  prop_ids: [
-                    source_props[j].selection_id,
-                    source_props[k].selection_id
-                  ]
-                }).total_won
-              ]
-
-              if (
-                three_prop_result.potential_gain > 0 &&
-                three_prop_summary.total_won >
-                  Math.max(...two_prop_gains, ...individual_gains)
-              ) {
-                three_props.push({
-                  name: [
-                    source_props[i].name,
-                    source_props[j].name,
-                    source_props[k].name
-                  ].join(' / '),
-                  selection_ids: three_prop_ids,
-                  source_id,
-                  ...three_prop_result
-                })
-              }
-            }
-          }
-        }
-      }
-    }
-  }
-
-  return { one_prop, two_props, three_props }
-}
-
-const format_round_robin_display = (wager) => {
-  // Group selections by event_id
-  const selections_by_event = wager.legs.reduce((acc, leg) => {
-    const selection = leg.parts[0]
-    if (!acc[selection.eventId]) {
-      acc[selection.eventId] = []
-    }
-    acc[selection.eventId].push(selection)
-    return acc
-  }, {})
-
-  // Format each event's selections
-  const formatted_lines = Object.values(selections_by_event).map(
-    (event_selections) => {
-      // Group selections by player name
-      const selections_by_player = event_selections.reduce((acc, selection) => {
-        // Extract player name from eventMarketDescription
-        const player_name = selection.eventMarketDescription.split(' - ')[0]
-        if (!acc[player_name]) {
-          acc[player_name] = []
-        }
-        acc[player_name].push(selection)
-        return acc
-      }, {})
-
-      // Format each player's selections
-      const player_lines = Object.entries(selections_by_player).map(
-        ([player_name, player_selections]) => {
-          // Group by stat type and quarter
-          const grouped_by_stat = player_selections.reduce((acc, selection) => {
-            const is_q1 = selection.eventMarketDescription.includes('1st Qtr')
-            const parts = selection.eventMarketDescription.split(' - ')
-            const stat_type =
-              parts.length > 1
-                ? parts[1]
-                    .replace('Alt ', '')
-                    .replace('1st Qtr ', '')
-                    .replace('Receptions', 'recs')
-                    .replace('Receiving Yds', 'recv')
-                    .replace('Rushing Yds', 'rush')
-                    .replace('Passing Yds', 'pass')
-                : ''
-
-            const key = is_q1 ? `q1_${stat_type}` : stat_type
-            if (!acc[key]) {
-              acc[key] = []
-            }
-            acc[key].push(selection)
-            return acc
-          }, {})
-
-          // Format each stat type group
-          const stat_lines = Object.entries(grouped_by_stat).map(
-            ([stat_key, stat_selections]) => {
-              const thresholds = stat_selections
-                .map((selection) => {
-                  const match =
-                    selection.selectionName.match(/(\d+)\+ ?(Yards?)?/)
-                  return match ? match[1] : null
-                })
-                .filter(Boolean)
-                .sort((a, b) => Number(a) - Number(b))
-                .map((threshold) => `${threshold}+`)
-                .join(' / ')
-
-              const is_q1 = stat_key.startsWith('q1_')
-              const stat_type = is_q1 ? stat_key.replace('q1_', '') : stat_key
-
-              return `${thresholds} ${is_q1 ? 'q1 ' : ''}${stat_type}`
-            }
-          )
-
-          return `${player_name} ${stat_lines.join(' / ')}`
-        }
-      )
-
-      return player_lines.join(' / ')
-    }
-  )
-
-  return formatted_lines.join('\n')
-}
-
-const analyze_fanduel_round_robin_selections = (wagers) => {
-  // Track selection usage and combinations
-  const selection_stats = new Map()
-
-  wagers.forEach((wager) => {
-    // Group selections by event for this wager
-    const selections_by_event = wager.legs.reduce((acc, leg) => {
-      const selection = leg.parts[0]
-      if (!acc[selection.eventId]) {
-        acc[selection.eventId] = []
-      }
-      acc[selection.eventId].push(selection)
-      return acc
-    }, {})
-
-    // Process each selection
-    Object.entries(selections_by_event).forEach(
-      ([event_id, event_selections]) => {
-        event_selections.forEach((selection) => {
-          const is_q1 = selection.eventMarketDescription.includes('1st Qtr')
-          const market_parts = selection.eventMarketDescription.split(' - ')
-          const stat_type = market_parts[1]
-            ? market_parts[1]
-                .replace('Alt ', '')
-                .replace('1st Qtr ', '')
-                .replace('Receiving Yds', 'rec')
-                .replace('Rushing Yds', 'rush')
-                .replace('Passing Yds', 'pass')
-            : ''
-
-          const player_name = selection.eventMarketDescription.split(' - ')[0]
-          const match = selection.selectionName.match(/(\d+)\+ ?(Yards?)?/)
-          const threshold = match ? match[1] : null
-
-          const selection_key = `${player_name} ${threshold}+ ${is_q1 ? 'q1 ' : ''}${stat_type}`
-
-          if (!selection_stats.has(selection_key)) {
-            selection_stats.set(selection_key, {
-              count: 0,
-              combinations: []
-            })
-          }
-
-          const stat = selection_stats.get(selection_key)
-          stat.count++
-
-          // Add the other selections from this round robin, grouped by game
-          const other_selections = Object.entries(selections_by_event)
-            .filter(([other_event_id]) => other_event_id !== event_id)
-            .map(([_, game_selections]) => {
-              // Format the selections for this game
-              const formatted_selections = format_round_robin_display({
-                legs: game_selections.map((sel) => ({ parts: [sel] }))
-              })
-              return formatted_selections
-            })
-
-          if (other_selections.length > 0) {
-            stat.combinations.push(other_selections)
-          }
-        })
-      }
-    )
-  })
-
-  // Sort by usage count and format output
-  const sorted_selections = Array.from(selection_stats.entries()).sort(
-    (a, b) => b[1].count - a[1].count
-  )
-
-  console.log('\n\nSelection Analysis:\n')
-  sorted_selections.forEach(([selection_key, stats]) => {
-    console.log(`${selection_key} (${stats.count} round robins)`)
-    stats.combinations.forEach((combination, index) => {
-      console.log(`  Round Robin ${index + 1}:`)
-      combination.forEach((game_selections) => {
-        console.log(`    ${game_selections}`)
-      })
-    })
-    console.log()
-  })
-}
-
-const validate_combinations = (wagers, consolidated_selections) => {
-  // Create a map of all actual combinations that exist in wagers
-  const actual_combinations = new Set()
-
-  wagers.forEach((wager) => {
-    const wager_selections = wager.selections.map((s) => s.name)
-    actual_combinations.add(wager_selections.sort().join('|'))
-  })
-
-  // For each event's alternative selections, check if all combinations exist
-  const selection_groups = consolidated_selections.map((sel) =>
-    sel.split(' / ')
-  )
-
-  // Generate all possible combinations
-  const check_combinations = (index, current_combo = []) => {
-    if (index === selection_groups.length) {
-      // Check if this combination exists in any wager
-      const combo_exists = Array.from(actual_combinations).some(
-        (actual_combo) => {
-          return current_combo.every((sel) => actual_combo.includes(sel))
-        }
-      )
-      return combo_exists
-    }
-
-    // Try each alternative for this position
-    return selection_groups[index].every((selection) => {
-      return check_combinations(index + 1, [...current_combo, selection])
-    })
-  }
-
-  return check_combinations(0)
-}
-
-const split_invalid_combinations = (set) => {
-  const result_sets = []
-  let current_wagers = set.wagers
-
-  while (current_wagers.length > 0) {
-    // Get all selections grouped by event for these wagers
-    const selections_by_event = new Map()
-    current_wagers.forEach((wager) => {
-      wager.selections.forEach((selection) => {
-        if (!selections_by_event.has(selection.event_id)) {
-          selections_by_event.set(selection.event_id, new Set())
-        }
-        selections_by_event.get(selection.event_id).add(selection.name)
-      })
-    })
-
-    // Create consolidated selections
-    const consolidated = Array.from(selections_by_event.entries()).map(
-      ([_, selections]) => {
-        const selections_array = Array.from(selections)
-        return selections_array.length > 1
-          ? selections_array.sort().join(' / ')
-          : selections_array[0]
-      }
-    )
-
-    // Check if all combinations exist
-    if (validate_combinations(current_wagers, consolidated)) {
-      // This is a valid set
-      result_sets.push({
-        wagers: current_wagers,
-        consolidated_selections: consolidated
-      })
-      break
-    } else {
-      // Find the largest valid subset
-      const event_selections = Array.from(selections_by_event.entries())
-      let best_subset = []
-
-      for (const [event_id, selections] of event_selections) {
-        if (selections.size > 1) {
-          // Try removing each selection
-          for (const selection of selections) {
-            const subset = current_wagers.filter(
-              (wager) =>
-                !wager.selections.some(
-                  (s) => s.event_id === event_id && s.name === selection
-                )
-            )
-            if (subset.length > best_subset.length) {
-              best_subset = subset
-            }
-          }
-        }
-      }
-
-      if (best_subset.length > 0) {
-        // Add this subset as a valid set
-        const subset_consolidated = create_consolidated_selections(best_subset)
-        result_sets.push({
-          wagers: best_subset,
-          consolidated_selections: subset_consolidated
-        })
-        // Continue with remaining wagers
-        current_wagers = current_wagers.filter((w) => !best_subset.includes(w))
-      } else {
-        // Fallback: create individual sets
-        current_wagers.forEach((wager) => {
-          result_sets.push({
-            wagers: [wager],
-            consolidated_selections: wager.selections.map((s) => s.name)
-          })
-        })
-        break
-      }
-    }
-  }
-
-  return result_sets
-}
-
-const create_consolidated_selections = (wagers) => {
-  const selections_by_event = new Map()
-  wagers.forEach((wager) => {
-    wager.selections.forEach((selection) => {
-      if (!selections_by_event.has(selection.event_id)) {
-        selections_by_event.set(selection.event_id, new Set())
-      }
-      selections_by_event.get(selection.event_id).add(selection.name)
-    })
-  })
-
-  return Array.from(selections_by_event.values()).map((selections) => {
-    const selections_array = Array.from(selections)
-    return selections_array.length > 1
-      ? selections_array.sort().join(' / ')
-      : selections_array[0]
-  })
-}
-
-const analyze_fanatics_wager_sets = (wagers) => {
-  const selection_sets = new Map()
-
-  wagers.forEach((wager) => {
-    const selections_by_event = wager.selections.reduce((acc, selection) => {
-      if (!acc[selection.event_id]) {
-        acc[selection.event_id] = []
-      }
-      acc[selection.event_id].push({
-        name: selection.name,
-        eventId: selection.event_id
-      })
-      return acc
-    }, {})
-
-    Object.entries(selections_by_event).forEach(
-      ([event_id, event_selections]) => {
-        event_selections.forEach((selection) => {
-          const metric_match = selection.name.match(/(\d+)\+/)
-          const metric_amount = metric_match ? metric_match[1] : ''
-          const selection_key = `${selection.name.split(' ')[0]} ${selection.name.split(' ')[1]} ${metric_amount}+ ${selection.name.split(' ').slice(-2).join(' ')}`
-
-          if (!selection_sets.has(selection_key)) {
-            selection_sets.set(selection_key, {
-              count: 0,
-              total_stake: 0,
-              potential_win: 0,
-              wagers: [],
-              combinations: new Map()
-            })
-          }
-
-          const set = selection_sets.get(selection_key)
-          set.count++
-          set.total_stake += wager.stake
-          set.potential_win += wager.potential_win
-          set.wagers.push(wager)
-
-          const other_selections = Object.entries(selections_by_event)
-            .filter(([other_event_id]) => other_event_id !== event_id)
-            .map(([_, selections]) => ({
-              name: selections.map((s) => s.name).join(' & '),
-              eventId: selections[0].eventId
-            }))
-
-          if (other_selections.length > 0) {
-            const combo_key = other_selections
-              .map((s) => `${s.eventId}:${s.name}`)
-              .sort()
-              .join('|')
-            if (!set.combinations.has(combo_key)) {
-              set.combinations.set(combo_key, {
-                count: 0,
-                selections: other_selections
-              })
-            }
-            set.combinations.get(combo_key).count++
-          }
-        })
-      }
-    )
-  })
-
-  const sorted_sets = Array.from(selection_sets.entries()).sort(
-    (a, b) => b[1].potential_win - a[1].potential_win
-  )
-
-  console.log('\n\nFanatics Wager Sets Analysis:\n')
-  sorted_sets.forEach(([selection_key, stats]) => {
-    const split_sets = split_invalid_combinations(stats)
-
-    split_sets.forEach((set, index) => {
-      const set_label = split_sets.length > 1 ? ` (Set ${index + 1})` : ''
-      console.log(`${selection_key}${set_label}:`)
-      console.log(`  Total Parlays: ${set.wagers.length}`)
-      console.log(
-        `  Total Stake: $${set.wagers.reduce((sum, w) => sum + w.stake, 0).toFixed(2)}`
-      )
-      console.log(
-        `  Total Potential Win: $${set.wagers.reduce((sum, w) => sum + w.potential_win, 0).toFixed(2)}`
-      )
-
-      console.log('\n  Combinations:')
-      console.log(`    Used ${set.wagers.length} times:`)
-      set.consolidated_selections.forEach((sel) => {
-        console.log(`      ${sel}`)
-      })
-      console.log()
-    })
-  })
-}
 
 const analyze_wagers = async ({
   fanduel_filename,
@@ -1212,7 +88,7 @@ const analyze_wagers = async ({
       )
       wagers = wagers.concat(
         fanduel_wagers.flatMap((wager) =>
-          standardize_wager({ wager, source: 'fanduel' })
+          standardize_wager_by_source({ wager, source: 'fanduel' })
         )
       )
       fanduel_round_robin_wagers = fanduel_wagers.filter((wager) => {
@@ -1240,7 +116,7 @@ const analyze_wagers = async ({
       )
       wagers = wagers.concat(
         draftkings_wagers.flatMap((wager) => {
-          const standardized_wager = standardize_wager({
+          const standardized_wager = standardize_wager_by_source({
             wager,
             source: 'draftkings'
           })
@@ -1265,7 +141,7 @@ const analyze_wagers = async ({
       )
       wagers = wagers.concat(
         fanatics_wagers.flatMap((wager) =>
-          standardize_wager({ wager, source: 'fanatics' })
+          standardize_wager_by_source({ wager, source: 'fanatics' })
         )
       )
     } catch (error) {
@@ -1293,7 +169,7 @@ const analyze_wagers = async ({
     return true
   })
 
-  const wager_summary = get_wagers_summary({ wagers: filtered })
+  const wager_summary = calculate_wager_summary({ wagers: filtered })
   wager_summary.current_roi = `${(
     (wager_summary.total_won / wager_summary.total_risk - 1) *
     100
@@ -1351,7 +227,7 @@ const analyze_wagers = async ({
     })
     .sort((a, b) => b.exposure_count - a.exposure_count)
 
-  // Add player summary table
+  // Build player summary from selections
   const player_summary = unique_selections.reduce((acc, selection) => {
     if (!selection.player_name) return acc
 
@@ -1376,68 +252,23 @@ const analyze_wagers = async ({
     return acc
   }, {})
 
-  const player_summary_table = new Table({ title: 'Player Exposure Summary' })
-  Object.entries(player_summary)
-    .map(([player_name, stats]) => ({
-      player_name,
-      props_count: stats.props_count,
-      exposure_count: stats.exposure_count,
-      exposure_rate: `${((stats.exposure_count / filtered.length) * 100).toFixed(2)}%`,
-      open_wagers: stats.open_wagers,
-      open_potential_roi: `${((stats.open_potential_payout / wager_summary.total_risk) * 100).toFixed(0)}%`,
-      max_potential_roi: `${((stats.max_potential_payout / wager_summary.total_risk) * 100).toFixed(0)}%`
-    }))
-    .sort((a, b) => b.exposure_count - a.exposure_count)
-    .forEach((player) => player_summary_table.addRow(player))
-
+  // Create and print player exposure table
+  const player_summary_table = create_player_exposure_table(
+    player_summary,
+    filtered.length,
+    wager_summary.total_risk
+  )
   player_summary_table.printTable()
 
-  const props_summary = get_props_summary(unique_selections)
-  const wager_summary_table = new Table({ title: 'Execution Summary' })
+  const props_summary = calculate_props_summary(unique_selections)
 
-  const add_row = (label, value) => {
-    if (typeof value === 'number') {
-      if (label.includes('Potential Win')) {
-        value = value.toLocaleString('en-US', { maximumFractionDigits: 2 })
-      } else if (label === 'Expected Hits') {
-        value = value.toFixed(2)
-      }
-    }
-    wager_summary_table.addRow({ Metric: label, Value: value })
-  }
-
-  add_row('Current ROI', wager_summary.current_roi)
-  add_row(
-    'Open Potential ROI',
-    `${((wager_summary.open_potential_win / wager_summary.total_risk - 1) * 100).toFixed(0)}%`
+  // Create and print wager summary table
+  const wager_summary_table = create_wager_summary_table(
+    wager_summary,
+    props_summary,
+    show_counts,
+    show_potential_gain
   )
-  add_row(
-    'Max Potential ROI',
-    `${((wager_summary.max_potential_win / wager_summary.total_risk - 1) * 100).toFixed(0)}%`
-  )
-
-  // Add rows for props_summary
-  for (const [key, value] of Object.entries(props_summary)) {
-    add_row(
-      key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
-      value
-    )
-  }
-
-  if (show_counts) {
-    add_row('Wagers', wager_summary.wagers)
-    add_row('Total Won', wager_summary.total_won.toFixed(2))
-    // add_row('Wagers Won', wager_summary.wagers_won)
-    // add_row('Wagers Loss', wager_summary.wagers_loss)
-    add_row('Wagers Open', wager_summary.wagers_open)
-    add_row('Total Risk', wager_summary.total_risk)
-  }
-
-  if (show_potential_gain) {
-    add_row('Open Potential Win', wager_summary.open_potential_win)
-    add_row('Max Potential Win', wager_summary.max_potential_win)
-  }
-
   wager_summary_table.printTable()
 
   if (show_round_robins) {
@@ -1455,46 +286,16 @@ const analyze_wagers = async ({
   }
 
   if (show_counts) {
-    const lost_by_legs_summary_table = new Table({
-      title: 'Wagers Lost By # Legs'
-    })
-    lost_by_legs_summary_table.addRow({
-      1: wager_summary.lost_by_one_leg,
-      2: wager_summary.lost_by_two_legs,
-      3: wager_summary.lost_by_three_legs,
-      '4+': wager_summary.lost_by_four_or_more_legs
-    })
+    const lost_by_legs_summary_table = create_lost_by_legs_table(wager_summary)
     lost_by_legs_summary_table.printTable()
   }
 
-  const unique_props_table = new Table()
-  const props_with_exposure = unique_selections.map((prop) => {
-    const result = {
-      name: prop.name,
-      odds: prop.parsed_odds,
-      result: prop.result,
-      exposure_rate: prop.exposure_rate
-    }
-
-    if (show_counts) {
-      result.exposure_count = prop.exposure_count
-      result.open_wagers = prop.open_wagers
-    }
-
-    if (show_potential_gain) {
-      result.open_potential_payout = prop.open_potential_payout.toFixed(2)
-      result.open_potential_roi = prop.open_potential_roi
-    }
-    result.max_potential_roi = prop.max_potential_roi
-
-    if (show_potential_gain) {
-      result.max_potential_payout = prop.max_potential_payout.toFixed(2)
-    }
-
-    return result
-  })
-
-  props_with_exposure.forEach((prop) => unique_props_table.addRow(prop))
+  // Create and print unique props table
+  const unique_props_table = create_unique_props_table(
+    unique_selections,
+    show_counts,
+    show_potential_gain
+  )
   unique_props_table.printTable()
 
   // Get unique event_ids for each book
@@ -1552,143 +353,66 @@ const analyze_wagers = async ({
 
   // Print exposures by game
   for (const esbid in grouped_props_by_esbid) {
-    const event_table = new Table({
-      title: esbid_to_title.get(Number(esbid)) || 'Unknown Game'
-    })
-    grouped_props_by_esbid[esbid]
-      .sort((a, b) => b.exposure_count - a.exposure_count)
-      .forEach((prop) => {
-        const row = {
-          name: prop.name,
-          odds: prop.parsed_odds,
-          exposure_rate: prop.exposure_rate,
-          result: prop.result,
-          max_potential_roi: prop.max_potential_roi,
-          open_potential_roi: prop.open_potential_roi
-        }
-
-        if (show_counts) {
-          row.open_wagers = prop.open_wagers
-        }
-
-        if (show_potential_gain) {
-          row.open_potential_payout = prop.open_potential_payout.toFixed(2)
-          row.max_potential_payout = prop.max_potential_payout.toFixed(2)
-        }
-
-        event_table.addRow(row)
-      })
+    const event_title = esbid_to_title.get(Number(esbid)) || 'Unknown Game'
+    const event_table = create_event_exposure_table(
+      event_title,
+      grouped_props_by_esbid[esbid],
+      show_counts,
+      show_potential_gain
+    )
     event_table.printTable()
   }
 
   const lost_props = unique_selections.filter((prop) => prop.is_lost)
-  const { one_prop, two_props, three_props } = analyze_prop_combinations(
-    lost_props,
-    filtered,
-    wager_summary
+  const { one_prop, two_props, three_props } =
+    analyze_prop_near_miss_combinations(lost_props, filtered, wager_summary)
+
+  // Display prop combination tables
+  const one_leg_table = create_prop_combination_table(one_prop, 'One Leg Away')
+  const two_legs_table = create_prop_combination_table(
+    two_props,
+    'Two Legs Away'
+  )
+  const three_legs_table = create_prop_combination_table(
+    three_props,
+    'Three Legs Away'
   )
 
-  // Display results
-  const display_prop_table = (props, title) => {
-    if (props.length) {
-      const table = new Table({ title })
-      for (const prop of props.sort(
-        (a, b) => b.potential_gain - a.potential_gain
-      )) {
-        table.addRow({
-          name: prop.name,
-          potential_roi_added: `${prop.potential_roi_added.toFixed(2)}%`,
-          potential_gain: prop.potential_gain.toFixed(2),
-          potential_wins: prop.potential_wins
-        })
-      }
-      table.printTable()
-    }
-  }
-
-  display_prop_table(one_prop, 'One Leg Away')
-  display_prop_table(two_props, 'Two Legs Away')
-  display_prop_table(three_props, 'Three Legs Away')
+  if (one_leg_table) one_leg_table.printTable()
+  if (two_legs_table) two_legs_table.printTable()
+  if (three_legs_table) three_legs_table.printTable()
 
   if (!hide_wagers) {
     console.log(
       '\n\nTop 50 slips sorted by highest odds (<= specified lost legs)\n\n'
     )
 
-    const filtered_wagers = filtered.filter((wager) => {
-      const lost_legs = wager.selections.filter(
-        (selection) => selection.is_lost
-      ).length
-      return lost_legs <= wagers_lost_leg_limit
-    })
+    // Apply filters using filter functions
+    let display_wagers = filter_wagers_by_lost_legs(
+      filtered,
+      wagers_lost_leg_limit
+    )
+    log(`filtered_wagers: ${display_wagers.length}`)
 
-    log(`filtered_wagers: ${filtered_wagers.length}`)
-
-    const display_wagers = filtered_wagers.filter((wager) => {
-      // Filter out wagers that include any of the excluded selections
-      if (exclude_selections.length > 0) {
-        if (
-          wager.selections.some((selection) =>
-            exclude_selections.some((filter) =>
-              selection.name.toLowerCase().includes(filter.toLowerCase())
-            )
-          )
-        ) {
-          return false
-        }
-      }
-
-      // Filter to only include wagers that have all of the included selections
-      if (include_selections.length > 0) {
-        return include_selections.every((filter) =>
-          wager.selections.some((selection) =>
-            selection.name.toLowerCase().includes(filter.toLowerCase())
-          )
-        )
-      }
-
-      return true
-    })
-
+    display_wagers = filter_wagers_excluding_selections(
+      display_wagers,
+      exclude_selections
+    )
+    display_wagers = filter_wagers_including_selections(
+      display_wagers,
+      include_selections
+    )
     log(`display_wagers: ${display_wagers.length}`)
 
-    const sorted_wagers = display_wagers.sort((a, b) => {
-      if (sort_by === 'payout') {
-        return b.potential_win - a.potential_win
-      }
-      return b.parsed_odds - a.parsed_odds
-    })
+    const sorted_wagers = sort_wagers(display_wagers, sort_by)
 
     for (const wager of sorted_wagers.slice(0, wagers_limit)) {
-      const potential_roi_gain =
-        (wager.potential_win / wager_summary.total_risk) * 100
-      const num_of_legs = wager.selections.length
-      let wager_table_title = `[${num_of_legs} leg parlay] American odds: ${
-        wager.parsed_odds > 0 ? '+' : ''
-      }${Number(wager.parsed_odds).toFixed(0)}`
-
-      if (show_wager_roi) {
-        wager_table_title += ` / ${potential_roi_gain.toFixed(2)}% roi`
-      }
-
-      if (show_potential_gain) {
-        wager_table_title += ` ($${wager.potential_win.toFixed(2)})`
-      }
-
-      if (show_bet_receipts && wager.bet_receipt_id) {
-        wager_table_title += ` / Bet Receipt: ${wager.bet_receipt_id}`
-      }
-
-      // wager_table_title += ` [Week ${wager.week}]`
-
-      const wager_table = new Table({ title: wager_table_title })
-      for (const selection of wager.selections) {
-        wager_table.addRow({
-          selection: selection.name,
-          odds: selection.parsed_odds,
-          result: selection.is_won ? 'WON' : selection.is_lost ? 'LOST' : 'OPEN'
-        })
-      }
+      const wager_table = create_wager_table(wager, {
+        show_wager_roi,
+        show_potential_gain,
+        show_bet_receipts,
+        total_risk: wager_summary.total_risk
+      })
       wager_table.printTable()
     }
   }
