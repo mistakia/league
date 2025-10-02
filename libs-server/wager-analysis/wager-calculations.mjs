@@ -1,9 +1,11 @@
 import * as oddslib from 'oddslib'
 
 // Helper to check if two props are equal
+// Note: We don't compare market_id because FanDuel can assign different market IDs
+// to the same selection (same player, threshold, and outcome). The selection_id
+// combined with event_id is sufficient to uniquely identify a prop.
 const is_prop_equal = (prop_a, prop_b) =>
   prop_a.event_id === prop_b.event_id &&
-  prop_a.market_id === prop_b.market_id &&
   prop_a.selection_id === prop_b.selection_id
 
 // Calculate summary statistics for a collection of props
@@ -15,17 +17,17 @@ export const calculate_props_summary = (props) =>
         : 0
       const is_win = prop.is_won
       return {
-        total_props: accumulator.total_props + 1,
-        expected_hits: accumulator.expected_hits + odds,
+        total_selections: accumulator.total_selections + 1,
+        market_implied_hits: accumulator.market_implied_hits + odds,
         actual_hits: is_win
           ? accumulator.actual_hits + 1
           : accumulator.actual_hits
       }
     },
     {
-      expected_hits: 0,
+      market_implied_hits: 0,
       actual_hits: 0,
-      total_props: 0
+      total_selections: 0
     }
   )
 
