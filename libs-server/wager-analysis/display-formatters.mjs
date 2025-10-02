@@ -114,16 +114,6 @@ export const create_unique_props_table = (
       name: prop.name,
       odds: prop.parsed_odds,
       result: prop.result,
-      threshold:
-        prop.selection_metric_line !== null &&
-        prop.selection_metric_line !== undefined
-          ? Number(prop.selection_metric_line).toFixed(1)
-          : '-',
-      actual: format_metric_result(prop.metric_result_value),
-      diff: format_threshold_distance(
-        prop.distance_from_threshold,
-        prop.selection_type
-      ),
       exposure_rate: prop.exposure_rate
     }
 
@@ -141,6 +131,18 @@ export const create_unique_props_table = (
     if (show_potential_gain) {
       result.max_potential_payout = prop.max_potential_payout.toFixed(2)
     }
+
+    // Move threshold, actual, and diff columns to the end
+    result.threshold =
+      prop.selection_metric_line !== null &&
+      prop.selection_metric_line !== undefined
+        ? Number(prop.selection_metric_line).toFixed(1)
+        : '-'
+    result.actual = format_metric_result(prop.metric_result_value)
+    result.diff = format_threshold_distance(
+      prop.distance_from_threshold,
+      prop.selection_type
+    )
 
     return result
   })
@@ -166,16 +168,6 @@ export const create_event_exposure_table = (
         name: prop.name,
         odds: prop.parsed_odds,
         result: prop.result,
-        threshold:
-          prop.selection_metric_line !== null &&
-          prop.selection_metric_line !== undefined
-            ? Number(prop.selection_metric_line).toFixed(1)
-            : '-',
-        actual: format_metric_result(prop.metric_result_value),
-        diff: format_threshold_distance(
-          prop.distance_from_threshold,
-          prop.selection_type
-        ),
         exposure_rate: prop.exposure_rate,
         max_potential_roi: prop.max_potential_roi,
         open_potential_roi: prop.open_potential_roi
@@ -189,6 +181,18 @@ export const create_event_exposure_table = (
         row.open_potential_payout = prop.open_potential_payout.toFixed(2)
         row.max_potential_payout = prop.max_potential_payout.toFixed(2)
       }
+
+      // Move threshold, actual, and diff columns to the end
+      row.threshold =
+        prop.selection_metric_line !== null &&
+        prop.selection_metric_line !== undefined
+          ? Number(prop.selection_metric_line).toFixed(1)
+          : '-'
+      row.actual = format_metric_result(prop.metric_result_value)
+      row.diff = format_threshold_distance(
+        prop.distance_from_threshold,
+        prop.selection_type
+      )
 
       event_table.addRow(row)
     })
@@ -211,7 +215,7 @@ export const create_prop_combination_table = (props, title) => {
       potential_wins: prop.potential_wins
     }
 
-    // Add threshold/actual/diff columns for single prop combinations (one leg away)
+    // Add threshold/actual/diff columns for single prop combinations (one leg away) at the end
     if (prop.threshold !== undefined) {
       row.threshold =
         prop.threshold !== null && prop.threshold !== undefined
