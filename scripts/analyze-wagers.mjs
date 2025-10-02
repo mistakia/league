@@ -192,7 +192,9 @@ const analyze_wagers = async ({
         event_index[selection.event_id] = selection.event_description
       }
 
-      const key = `${selection.event_id}/${selection.market_id}/${selection.selection_id}`
+      // Use event_id + selection_id as key (not market_id) because FanDuel can assign
+      // multiple market IDs to the same selection (same player, threshold, outcome)
+      const key = `${selection.event_id}/${selection.selection_id}`
       if (!selections_index[key]) {
         selections_index[key] = {
           ...selection,

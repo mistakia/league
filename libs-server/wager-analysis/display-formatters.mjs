@@ -36,7 +36,7 @@ export const create_wager_summary_table = (
     if (typeof value === 'number') {
       if (label.includes('Potential Win')) {
         value = value.toLocaleString('en-US', { maximumFractionDigits: 2 })
-      } else if (label === 'Expected Hits') {
+      } else if (label === 'Market Implied Hits') {
         value = value.toFixed(2)
       }
     }
@@ -55,10 +55,16 @@ export const create_wager_summary_table = (
 
   // Add rows for props_summary
   for (const [key, value] of Object.entries(props_summary)) {
-    add_row(
-      key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase()),
-      value
-    )
+    let display_key = key.replace(/_/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase())
+    
+    // Handle specific field name changes
+    if (key === 'total_selections') {
+      display_key = 'Total Selections'
+    } else if (key === 'market_implied_hits') {
+      display_key = 'Market Implied Hits'
+    }
+    
+    add_row(display_key, value)
   }
 
   if (show_counts) {

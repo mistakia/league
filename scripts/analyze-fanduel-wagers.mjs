@@ -32,15 +32,15 @@ const get_props_summary = (props) =>
       const is_win = prop.result === 'WON'
       return {
         total_selections: accumulator.total_selections + 1,
-        expected_hits:
-          accumulator.expected_hits + odds.to('impliedProbability'),
+        market_implied_hits:
+          accumulator.market_implied_hits + odds.to('impliedProbability'),
         actual_hits: is_win
           ? accumulator.actual_hits + 1
           : accumulator.actual_hits
       }
     },
     {
-      expected_hits: 0,
+      market_implied_hits: 0,
       actual_hits: 0,
       total_selections: 0
     }
@@ -291,7 +291,7 @@ const analyze_fanduel_wagers = async ({
   const wager_summary_table = new Table({ title: 'Execution Summary' })
 
   const props_summary = get_props_summary(props)
-  props_summary.expected_hits = Number(props_summary.expected_hits.toFixed(2))
+  props_summary.market_implied_hits = Number(props_summary.market_implied_hits.toFixed(2))
 
   const wager_table_row = {
     current_roi: wager_summary.current_roi,
