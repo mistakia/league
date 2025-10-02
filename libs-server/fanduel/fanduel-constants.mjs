@@ -1,6 +1,6 @@
 import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 
-export const NFL_GAME_COMPETITION_ID = 12282733
+export const FANDUEL_NFL_GAME_COMPETITION_ID = 12282733
 
 export const tabs = [
   'quarter-props',
