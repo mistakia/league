@@ -1,4 +1,8 @@
 import { Table } from 'console-table-printer'
+import {
+  format_metric_result,
+  format_threshold_distance
+} from './wager-calculations.mjs'
 
 // Create player exposure summary table
 export const create_player_exposure_table = (
@@ -110,6 +114,16 @@ export const create_unique_props_table = (
       name: prop.name,
       odds: prop.parsed_odds,
       result: prop.result,
+      threshold:
+        prop.selection_metric_line !== null &&
+        prop.selection_metric_line !== undefined
+          ? Number(prop.selection_metric_line).toFixed(1)
+          : '-',
+      actual: format_metric_result(prop.metric_result_value),
+      diff: format_threshold_distance(
+        prop.distance_from_threshold,
+        prop.selection_type
+      ),
       exposure_rate: prop.exposure_rate
     }
 
@@ -151,8 +165,18 @@ export const create_event_exposure_table = (
       const row = {
         name: prop.name,
         odds: prop.parsed_odds,
-        exposure_rate: prop.exposure_rate,
         result: prop.result,
+        threshold:
+          prop.selection_metric_line !== null &&
+          prop.selection_metric_line !== undefined
+            ? Number(prop.selection_metric_line).toFixed(1)
+            : '-',
+        actual: format_metric_result(prop.metric_result_value),
+        diff: format_threshold_distance(
+          prop.distance_from_threshold,
+          prop.selection_type
+        ),
+        exposure_rate: prop.exposure_rate,
         max_potential_roi: prop.max_potential_roi,
         open_potential_roi: prop.open_potential_roi
       }
@@ -180,12 +204,24 @@ export const create_prop_combination_table = (props, title) => {
   for (const prop of props.sort(
     (a, b) => b.potential_gain - a.potential_gain
   )) {
-    table.addRow({
+    const row = {
       name: prop.name,
       potential_roi_added: `${prop.potential_roi_added.toFixed(2)}%`,
       potential_gain: prop.potential_gain.toFixed(2),
       potential_wins: prop.potential_wins
-    })
+    }
+
+    // Add threshold/actual/diff columns for single prop combinations (one leg away)
+    if (prop.threshold !== undefined) {
+      row.threshold =
+        prop.threshold !== null && prop.threshold !== undefined
+          ? Number(prop.threshold).toFixed(1)
+          : '-'
+      row.actual = format_metric_result(prop.actual)
+      row.diff = format_threshold_distance(prop.diff, prop.selection_type)
+    }
+
+    table.addRow(row)
   }
   return table
 }
@@ -222,7 +258,17 @@ export const create_wager_table = (wager, options = {}) => {
     wager_table.addRow({
       selection: selection.name,
       odds: selection.parsed_odds,
-      result: selection.is_won ? 'WON' : selection.is_lost ? 'LOST' : 'OPEN'
+      result: selection.is_won ? 'WON' : selection.is_lost ? 'LOST' : 'OPEN',
+      threshold:
+        selection.selection_metric_line !== null &&
+        selection.selection_metric_line !== undefined
+          ? Number(selection.selection_metric_line).toFixed(1)
+          : '-',
+      actual: format_metric_result(selection.metric_result_value),
+      diff: format_threshold_distance(
+        selection.distance_from_threshold,
+        selection.selection_type
+      )
     })
   }
   return wager_table

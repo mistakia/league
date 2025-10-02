@@ -31,6 +31,23 @@ export const calculate_props_summary = (props) =>
     }
   )
 
+// Format metric result value for display
+export const format_metric_result = (value) => {
+  if (value === null || value === undefined) {
+    return '-'
+  }
+  return Number(value).toFixed(1)
+}
+
+// Format threshold distance with appropriate sign
+export const format_threshold_distance = (distance, selection_type) => {
+  if (distance === null || distance === undefined) {
+    return '-'
+  }
+  const formatted_distance = Number(distance).toFixed(1)
+  return distance > 0 ? `+${formatted_distance}` : formatted_distance
+}
+
 // Calculate summary statistics for a collection of wagers
 export const calculate_wager_summary = ({ wagers, props = [] }) =>
   wagers.reduce(
