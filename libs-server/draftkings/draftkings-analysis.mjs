@@ -179,7 +179,7 @@ const log_missing_market_type_analysis = (
     missing_market_type.forEach((market) => {
       // Extract category info from source_market_name
       const match = market.source_market_name.match(
-        /\(categoryId: (\d+), subcategoryId: (\d+), betOfferTypeId: (\d+)\)/
+        /categoryId: (\d+), subcategoryId: (\d+), betOfferTypeId: (\d+)/
       )
       if (match) {
         const [, category_id, subcategory_id, bet_offer_type_id] = match
