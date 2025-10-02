@@ -52,7 +52,7 @@ export { format_sql, normalize_sql_for_comparison } from './format-sql.mjs'
 export { default as generate_player_id } from './generate-player-id.mjs'
 export * as espn from './espn.mjs'
 export * as sportradar from './sportradar.mjs'
-export * as draftkings from './draft-kings.mjs'
+export * as draftkings from './draftkings/index.mjs'
 export * as fanduel from './fanduel.mjs'
 export * as betmgm from './betmgm.mjs'
 export * as prizepicks from './prizepicks.mjs'
@@ -109,7 +109,6 @@ export {
 } from './load-test-cases.mjs'
 export { update_test_file } from './update-test-file.mjs'
 export { process_expected_query } from './process-expected-query.mjs'
-export * from './draftkings-tracking.mjs'
 
 export const getChartedPlayByPlayQuery = (db) =>
   db('nfl_plays')
