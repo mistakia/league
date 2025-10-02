@@ -129,7 +129,11 @@ export const analyze_prop_near_miss_combinations = (
           source_id,
           potential_gain,
           potential_wins,
-          potential_roi_added
+          potential_roi_added,
+          threshold: prop.selection_metric_line,
+          actual: prop.metric_result_value,
+          diff: prop.distance_from_threshold,
+          selection_type: prop.selection_type
         })
       }
     })

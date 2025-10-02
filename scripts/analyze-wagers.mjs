@@ -218,6 +218,136 @@ const analyze_wagers = async ({
     }
   }
 
+  // Enrich selections with actual metric results from database
+  const selection_keys_by_source = {
+    FANDUEL: [],
+    DRAFTKINGS: [],
+    FANATICS: []
+  }
+
+  // Group selection keys by source
+  for (const [key, selection] of Object.entries(selections_index)) {
+    const source = selection.source_id
+    if (selection_keys_by_source[source]) {
+      selection_keys_by_source[source].push({
+        key,
+        event_id: selection.event_id,
+        selection_id: selection.selection_id
+      })
+    }
+  }
+
+  // Query database for each source
+  const results_map = new Map()
+
+  for (const [source, selections] of Object.entries(selection_keys_by_source)) {
+    if (selections.length === 0) continue
+
+    // Build arrays for batch query
+    const selection_ids = selections.map((s) => s.selection_id)
+    const event_ids = [...new Set(selections.map((s) => s.event_id))]
+
+    // Query with both selection_id and event_id constraints to handle market ID mismatches
+    const db_results = await db('prop_market_selections_index as pms')
+      .join('prop_markets_index as pm', function () {
+        this.on('pms.source_id', '=', 'pm.source_id')
+        this.on('pms.source_market_id', '=', 'pm.source_market_id')
+      })
+      .where('pms.source_id', source)
+      .whereIn('pms.source_selection_id', selection_ids)
+      .whereIn('pm.source_event_id', event_ids)
+      .select(
+        'pms.source_selection_id',
+        'pm.source_event_id',
+        'pm.metric_result_value',
+        'pms.selection_metric_line',
+        'pms.selection_type'
+      )
+
+    // Map results using event_id/selection_id as key
+    for (const row of db_results) {
+      const key = `${row.source_event_id}/${row.source_selection_id}`
+      // Only store if not already found (avoid duplicates from multiple markets)
+      if (!results_map.has(key)) {
+        results_map.set(key, {
+          metric_result_value: row.metric_result_value,
+          selection_metric_line: row.selection_metric_line,
+          selection_type: row.selection_type
+        })
+      }
+    }
+  }
+
+  // Calculate matching statistics after all queries complete
+  const matching_stats = {
+    total_selections: Object.keys(selections_index).length,
+    found_in_db: 0,
+    with_results: 0,
+    pending: 0,
+    not_found: 0
+  }
+
+  for (const key of Object.keys(selections_index)) {
+    const db_result = results_map.get(key)
+    if (db_result) {
+      matching_stats.found_in_db++
+      if (db_result.metric_result_value !== null) {
+        matching_stats.with_results++
+      } else {
+        matching_stats.pending++
+      }
+    } else {
+      matching_stats.not_found++
+    }
+  }
+
+  // Log matching statistics
+  log('\nDatabase Matching Statistics:')
+  log(`Total selections: ${matching_stats.total_selections}`)
+  log(
+    `Found in database: ${matching_stats.found_in_db} (${((matching_stats.found_in_db / matching_stats.total_selections) * 100).toFixed(1)}%)`
+  )
+  log(
+    `With results: ${matching_stats.with_results} (${((matching_stats.with_results / matching_stats.total_selections) * 100).toFixed(1)}%)`
+  )
+  log(`Pending settlement: ${matching_stats.pending}`)
+  log(`Not found: ${matching_stats.not_found}`)
+
+  // Enhance selections_index with database results
+  for (const [key] of Object.entries(selections_index)) {
+    const db_result = results_map.get(key)
+    if (db_result) {
+      selections_index[key].metric_result_value = db_result.metric_result_value
+      selections_index[key].selection_metric_line =
+        db_result.selection_metric_line
+      selections_index[key].selection_type = db_result.selection_type
+
+      // Calculate distance from threshold
+      if (
+        db_result.metric_result_value !== null &&
+        db_result.selection_metric_line !== null
+      ) {
+        selections_index[key].distance_from_threshold =
+          Number(db_result.metric_result_value) -
+          Number(db_result.selection_metric_line)
+      }
+    }
+  }
+
+  // Enrich wager selections with database results
+  for (const wager of filtered) {
+    for (const selection of wager.selections) {
+      const key = `${selection.event_id}/${selection.selection_id}`
+      const enriched = selections_index[key]
+      if (enriched) {
+        selection.metric_result_value = enriched.metric_result_value
+        selection.selection_metric_line = enriched.selection_metric_line
+        selection.selection_type = enriched.selection_type
+        selection.distance_from_threshold = enriched.distance_from_threshold
+      }
+    }
+  }
+
   const unique_selections = Object.values(selections_index)
     .map((selection) => {
       return {
