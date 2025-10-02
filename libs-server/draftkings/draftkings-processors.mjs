@@ -3,7 +3,9 @@
  */
 
 import debug from 'debug'
-import { draftkings, wait, track_category_activity } from '#libs-server'
+import * as draftkings from './index.mjs'
+import { wait } from '#libs-server/wait.mjs'
+import { track_category_activity } from './draftkings-tracking.mjs'
 import { format_market } from './draftkings-formatters.mjs'
 import { CONFIG } from './draftkings-constants.mjs'
 

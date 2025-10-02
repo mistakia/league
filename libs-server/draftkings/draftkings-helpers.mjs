@@ -25,8 +25,14 @@ export const is_valid_team_name = (team_name) => {
     (pattern) => pattern.test(trimmed_name)
   )
 
+  // Check for futures market labels that aren't team names
+  const has_non_team_pattern = CONFIG.TEAM_VALIDATION.NON_TEAM_PATTERNS.some(
+    (pattern) => pattern.test(trimmed_name)
+  )
+
   return !(
     has_division_pattern ||
+    has_non_team_pattern ||
     trimmed_name.includes('/') ||
     trimmed_name.length > CONFIG.TEAM_VALIDATION.MAX_LENGTH
   )
@@ -39,15 +45,13 @@ export const is_valid_team_name = (team_name) => {
  */
 export const safe_fix_team = (team_name) => {
   if (!is_valid_team_name(team_name)) {
-    log(`Skipping invalid team name: ${team_name}`)
     return null
   }
 
   try {
     return fixTeam(team_name)
   } catch (err) {
-    log(`Error processing team name "${team_name}": ${err.message}`)
-    log(`Stack trace: ${err.stack}`)
+    // Silently handle errors - validation should have caught invalid inputs
     return null
   }
 }
@@ -227,4 +231,75 @@ export const extract_metric_line = (label) => {
 
   const parsed_line = label.match(CONFIG.PLAYER_PATTERNS.METRIC_LINE)
   return parsed_line ? Number(parsed_line[0]) : null
+}
+
+/**
+ * Extracts player name from NFL futures event name
+ * @param {string} event_name - The event name
+ * @returns {string|null} - Extracted player name or null
+ */
+export const extract_player_name_from_event = (event_name) => {
+  if (!event_name || typeof event_name !== 'string') {
+    return null
+  }
+
+  // Match pattern: "NFL 20XX/XX - Player Name"
+  // Examples: "NFL 2025/26 - Kyler Murray", "NFL 2024/25 - Josh Allen"
+  const nfl_futures_pattern = /^NFL\s+20\d{2}\/\d{2}\s+-\s+(.+)$/
+  const match = event_name.match(nfl_futures_pattern)
+
+  if (match && match[1]) {
+    const player_name = match[1].trim()
+    log(`Extracted player name from NFL futures event: ${player_name}`)
+    return player_name
+  }
+
+  return null
+}
+
+/**
+ * Formats selection type from selection name
+ * @param {string} selection_name - The selection name
+ * @returns {string|null} - Formatted selection type (OVER, UNDER, YES, NO) or null
+ */
+export const format_selection_type = (selection_name) => {
+  if (!selection_name) {
+    return null
+  }
+
+  const words = selection_name.toLowerCase().split(/\s+/)
+
+  if (words.includes('over')) {
+    return 'OVER'
+  } else if (words.includes('under')) {
+    return 'UNDER'
+  } else if (words.includes('yes')) {
+    return 'YES'
+  } else if (words.includes('no')) {
+    return 'NO'
+  } else if (/^\d+\+$/.test(selection_name)) {
+    return 'OVER'
+  }
+
+  return null
+}
+
+/**
+ * Extracts team from participant data
+ * @param {Object} params - The parameters
+ * @param {string} params.participant - The participant name
+ * @param {string} params.participantType - The participant type
+ * @returns {string|null} - Team abbreviation or null
+ */
+export const get_team_from_participant = ({ participant, participantType }) => {
+  if (participantType !== 'Team') {
+    return null
+  }
+
+  if (!participant) {
+    return null
+  }
+
+  // Use safe_fix_team which validates input and handles errors gracefully
+  return safe_fix_team(participant)
 }

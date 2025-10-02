@@ -13,23 +13,10 @@ import {
 } from '#libs-shared/bookmaker-constants.mjs'
 import { wait } from './wait.mjs'
 import * as cache from './cache.mjs'
+import { get_fanduel_dfs_config } from './fanduel/fanduel-config.mjs'
 
 const log = debug('fanduel')
 debug.enable('fanduel')
-
-const nfl_game_compeition_id = 12282733
-
-const get_fanduel_config = async () => {
-  const config_row = await db('config').where('key', 'fanduel_config').first()
-  return config_row.value
-}
-
-const get_fanduel_dfs_config = async () => {
-  const config_row = await db('config')
-    .where('key', 'fanduel_dfs_config')
-    .first()
-  return config_row.value
-}
 
 export const format_selection_type = ({ market_type, selection_name }) => {
   if (!selection_name) {
@@ -586,62 +573,6 @@ export const get_market_details_from_wager = (wager_leg) => {
     event_description: wager_leg.eventDescription,
     start_time: dayjs(wager_leg.startTime)
   }
-}
-
-export const getEvents = async () => {
-  const fanduel_config = await get_fanduel_config()
-  const query_params = fanduel_config.query_params || ''
-  const url = `${fanduel_config.api_url}/content-managed-page?betexRegion=GBR&capiJurisdiction=intl&currencyCode=USD&exchangeLocale=en_US&includePrices=true&includeRaceCards=false&includeSeo=true&language=en&regionCode=NAMERICA&timezone=America%2FNew_York&includeMarketBlurbs=true&page=CUSTOM&customPageId=nfl${query_params}`
-
-  log(`fetching ${url}`)
-  const res = await fetch(url, {
-    headers: fanduel_config.headers
-  })
-  const data = await res.json()
-
-  const filtered = Object.values(data.attachments.events).filter(
-    (e) => e.competitionId === nfl_game_compeition_id
-  )
-  const markets = Object.values(data.attachments.markets)
-
-  return { nfl_games_events: filtered, markets }
-}
-
-export const getEventTab = async ({ eventId, tab }) => {
-  const fanduel_config = await get_fanduel_config()
-  const query_params = fanduel_config.query_params || ''
-  const url = `${fanduel_config.api_url}/event-page?betexRegion=GBR&capiJurisdiction=intl&currencyCode=USD&exchangeLocale=en_US&includePrices=true&language=en&priceHistory=1&regionCode=NAMERICA&eventId=${eventId}&tab=${tab}${query_params}`
-
-  log(`fetching ${url}`)
-  const res = await fetch(url, {
-    headers: fanduel_config.headers
-  })
-  const data = await res.json()
-
-  return data
-}
-
-export const getWeeklySpecials = async () => {
-  const fanduel_config = await get_fanduel_config()
-  const query_params = fanduel_config.query_params || ''
-  const url = `${fanduel_config.api_url}/content-managed-page?betexRegion=GBR&capiJurisdiction=intl&currencyCode=USD&exchangeLocale=en_US&includePrices=true&includeRaceCards=false&includeSeo=true&language=en&regionCode=NAMERICA&timezone=America%2FNew_York&includeMarketBlurbs=true&page=CUSTOM&customPageId=nfl${query_params}`
-
-  log(`fetching ${url}`)
-  const res = await fetch(url, {
-    headers: fanduel_config.headers
-  })
-  const data = await res.json()
-
-  const market_names = [
-    'Most Passing Yards - Sunday Only',
-    'Most Receiving Yards - Sunday Only',
-    'Most Rushing Yards - Sunday Only'
-  ]
-  const filtered = Object.values(data.attachments.markets).filter((m) =>
-    market_names.includes(m.marketName)
-  )
-
-  return filtered
 }
 
 export const get_wagers = async ({
