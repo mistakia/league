@@ -289,7 +289,9 @@ const analyze_draftkings_wagers = async ({
   unique_props_table.printTable()
 
   const props_summary = get_props_summary(filtered_props)
-  props_summary.market_implied_hits = Number(props_summary.market_implied_hits.toFixed(2))
+  props_summary.market_implied_hits = Number(
+    props_summary.market_implied_hits.toFixed(2)
+  )
   const props_summary_table = new Table()
   props_summary_table.addRow(props_summary)
   props_summary_table.printTable()

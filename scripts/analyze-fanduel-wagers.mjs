@@ -291,7 +291,9 @@ const analyze_fanduel_wagers = async ({
   const wager_summary_table = new Table({ title: 'Execution Summary' })
 
   const props_summary = get_props_summary(props)
-  props_summary.market_implied_hits = Number(props_summary.market_implied_hits.toFixed(2))
+  props_summary.market_implied_hits = Number(
+    props_summary.market_implied_hits.toFixed(2)
+  )
 
   const wager_table_row = {
     current_roi: wager_summary.current_roi,
