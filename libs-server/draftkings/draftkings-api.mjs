@@ -25,7 +25,8 @@ const draftkings_fetch_with_retry = async (url, options) => {
 
 export const get_league_data_v1 = async ({ leagueId = 88808 } = {}) => {
   const draftkings_config = await get_draftkings_config()
-  const { headers = {}, draftkings_sportsbook_api_url: sportsbook_api_url } = draftkings_config
+  const { headers = {}, draftkings_sportsbook_api_url: sportsbook_api_url } =
+    draftkings_config
   const url = `${sportsbook_api_url}/sportscontent/dkusdc/v1/leagues/${leagueId}`
 
   return await draftkings_fetch_with_retry(url, { headers })
@@ -36,7 +37,8 @@ export const get_category_data_v1 = async ({
   categoryId
 }) => {
   const draftkings_config = await get_draftkings_config()
-  const { headers = {}, draftkings_sportsbook_api_url: sportsbook_api_url } = draftkings_config
+  const { headers = {}, draftkings_sportsbook_api_url: sportsbook_api_url } =
+    draftkings_config
   const url = `${sportsbook_api_url}/sportscontent/dkusdc/v1/leagues/${leagueId}/categories/${categoryId}`
 
   return await draftkings_fetch_with_retry(url, { headers })
@@ -47,7 +49,8 @@ export const get_subcategory_data_v1 = async ({
   subcategoryId
 }) => {
   const draftkings_config = await get_draftkings_config()
-  const { headers = {}, draftkings_sportsbook_api_url: sportsbook_api_url } = draftkings_config
+  const { headers = {}, draftkings_sportsbook_api_url: sportsbook_api_url } =
+    draftkings_config
   const url = `${sportsbook_api_url}/sportscontent/dkusdc/v1/leagues/88808/categories/${categoryId}/subcategories/${subcategoryId}`
 
   return await draftkings_fetch_with_retry(url, { headers })
@@ -56,7 +59,8 @@ export const get_subcategory_data_v1 = async ({
 // Event-specific API functions
 export const get_event_categories = async ({ eventId }) => {
   const draftkings_config = await get_draftkings_config()
-  const { headers = {}, draftkings_sportsbook_api_url: sportsbook_api_url } = draftkings_config
+  const { headers = {}, draftkings_sportsbook_api_url: sportsbook_api_url } =
+    draftkings_config
   const url = `${sportsbook_api_url}/sportscontent/dkusdc/v1/events/${eventId}/categories`
 
   const data = await draftkings_fetch_with_retry(url, { headers })
@@ -67,7 +71,8 @@ export const get_event_categories = async ({ eventId }) => {
 
 export const get_event_category_data = async ({ eventId, categoryId }) => {
   const draftkings_config = await get_draftkings_config()
-  const { headers = {}, draftkings_sportsbook_api_url: sportsbook_api_url } = draftkings_config
+  const { headers = {}, draftkings_sportsbook_api_url: sportsbook_api_url } =
+    draftkings_config
   const url = `${sportsbook_api_url}/sportscontent/dkusdc/v1/events/${eventId}/categories/${categoryId}`
 
   return await draftkings_fetch_with_retry(url, { headers })

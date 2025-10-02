@@ -53,14 +53,13 @@ const format_draftkings_selection_name = ({ selection }) => {
         .replace('Passing Yards', 'Pass Yds')
         .replace('Receptions', 'Recs')
 
-      const handicap = nested.parsedHandicap
-        ? ` ${Math.round(Number(nested.parsedHandicap))}+`
-        : ''
+      // Use selectionDisplayName for the threshold (e.g., "25+")
+      const handicap = nested_selection_display || ''
 
-      return `SGP: ${player_name}${handicap} ${stat}`
+      return `${player_name} ${handicap} ${stat}`
     })
 
-    return formatted_selections.join(' + ')
+    return `SGP(${formatted_selections.join(' + ')})`
   }
 
   // Single selection handling
@@ -69,8 +68,27 @@ const format_draftkings_selection_name = ({ selection }) => {
 
   const player_name = extract_draftkings_player_name(market_display)
 
-  // Handle team markets
+  // Handle team markets or selections without player names
   if (!player_name) {
+    // If we have a selection display name (like "30+"), try to extract stat from market
+    if (selection_display) {
+      const stat = market_display
+        .replace('Passing Attempts', 'Pass Atts')
+        .replace('Rushing Yards', 'Rush Yds')
+        .replace('Receiving Yards', 'Recv Yds')
+        .replace('Passing Yards', 'Pass Yds')
+        .replace('Receptions', 'Recs')
+
+      // Extract player name from the full market display for better formatting
+      const words = market_display.split(' ')
+      const full_player_name = words[0] + (words[1] ? ` ${words[1]}` : '')
+      if (full_player_name && full_player_name !== market_display) {
+        // Remove the player name from the stat to avoid duplication
+        const clean_stat = stat.replace(full_player_name, '').trim()
+        return `${full_player_name} ${selection_display} ${clean_stat}`
+      }
+      return `${selection_display} ${stat}`
+    }
     return selection_display
   }
 
@@ -86,13 +104,13 @@ const format_draftkings_selection_name = ({ selection }) => {
     .replace('Rushing Yards', 'Rush Yds')
     .replace('Receiving Yards', 'Recv Yds')
     .replace('Passing Yards', 'Pass Yds')
+    .replace('Passing Attempts', 'Pass Atts')
     .replace('Receptions', 'Recs')
 
-  const handicap = selection.parsedHandicap
-    ? ` ${Math.round(Number(selection.parsedHandicap))}+`
-    : ''
+  // Use selectionDisplayName for the threshold (e.g., "30+", "5+")
+  const handicap = selection_display || ''
 
-  return `${player_name}${handicap} ${stat}`
+  return `${player_name} ${handicap} ${stat}`
 }
 
 // Extract player name from DraftKings selection
