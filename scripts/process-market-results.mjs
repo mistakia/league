@@ -430,7 +430,8 @@ const main = async () => {
       source_market_id: r.source_market_id,
       source_selection_id: r.source_selection_id,
       time_type: r.time_type,
-      selection_result: r.selection_result
+      selection_result: r.selection_result,
+      metric_value: r.metric_value
     }))
 
     const error_count = results.length - successful_results.length
@@ -481,11 +482,14 @@ const main = async () => {
     // Write results to database
     if (updates.length > 0) {
       log(`Writing ${updates.length} results to database...`)
-      const written = await write_selection_results_to_db({
-        updates,
-        dry_run: argv.dry_run
-      })
-      log(`Written ${written} selection results`)
+      const { selection_count, market_count } =
+        await write_selection_results_to_db({
+          updates,
+          dry_run: argv.dry_run
+        })
+      log(
+        `Written ${selection_count} selection results and ${market_count} market metric values`
+      )
 
       // Update market settlement status for all affected games
       log(
