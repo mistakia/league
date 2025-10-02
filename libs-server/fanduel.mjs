@@ -5,7 +5,6 @@ import queryString from 'query-string'
 import dayjs from 'dayjs'
 import debug from 'debug'
 
-import db from '#db'
 import { fixTeam, constants } from '#libs-shared'
 import {
   player_prop_types,
