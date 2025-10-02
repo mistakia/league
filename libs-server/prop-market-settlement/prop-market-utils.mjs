@@ -172,8 +172,7 @@ export const validate_games_with_data = async (esbids) => {
     .whereIn('esbid', esbids)
     .whereNotNull('home_score')
     .whereNotNull('away_score')
-    .where('home_score', '>', 0)
-    .where('away_score', '>', 0)
+    .where('status', 'like', 'FINAL%')
 
   const valid_esbids = valid_games.map((row) => row.esbid)
 
