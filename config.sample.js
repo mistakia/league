@@ -2,7 +2,7 @@ const path = require('path')
 
 module.exports = {
   user_agent: '',
-  ssl: true,
+  ssl: false,
   key: path.resolve(__dirname, './key.pem'),
   cert: path.resolve(__dirname, './cert.pem'),
   port: 443,
