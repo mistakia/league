@@ -16,7 +16,12 @@ debug.enable('export-weekly-market-review')
 /**
  * Format query results to markdown table
  */
-const format_results_to_markdown_table = ({ results, columns, title, query_info }) => {
+const format_results_to_markdown_table = ({
+  results,
+  columns,
+  title,
+  query_info
+}) => {
   const lines = []
 
   lines.push(`# ${title}`)
@@ -36,17 +41,19 @@ const format_results_to_markdown_table = ({ results, columns, title, query_info 
   lines.push('')
 
   // Filter columns to only include those with data
-  const active_columns = columns.filter(col => {
+  const active_columns = columns.filter((col) => {
     // Always include non-week columns
     if (!col.key.startsWith('week_')) {
       return true
     }
     // For week columns, check if any row has data
-    return results.some(row => row[col.key] && row[col.key] !== '0' && row[col.key] !== 0)
+    return results.some(
+      (row) => row[col.key] && row[col.key] !== '0' && row[col.key] !== 0
+    )
   })
 
   // Build header
-  const header_cells = active_columns.map(c => c.label)
+  const header_cells = active_columns.map((c) => c.label)
   lines.push(`| ${header_cells.join(' | ')} |`)
 
   // Build separator
@@ -54,8 +61,8 @@ const format_results_to_markdown_table = ({ results, columns, title, query_info 
   lines.push(`| ${separator_cells.join(' | ')} |`)
 
   // Build rows
-  results.forEach(row => {
-    const cells = active_columns.map(col => {
+  results.forEach((row) => {
+    const cells = active_columns.map((col) => {
       const value = row[col.key]
 
       if (value === null || value === undefined) {
@@ -81,9 +88,12 @@ const detect_latest_week_with_longshots = async ({ year }) => {
   log('Detecting latest week with longshot results...')
 
   const result = await db('prop_market_selections_index as pmsi')
-    .join('prop_markets_index as pmi', function() {
-      this.on('pmsi.source_id', '=', 'pmi.source_id')
-        .on('pmsi.source_market_id', '=', 'pmi.source_market_id')
+    .join('prop_markets_index as pmi', function () {
+      this.on('pmsi.source_id', '=', 'pmi.source_id').on(
+        'pmsi.source_market_id',
+        '=',
+        'pmi.source_market_id'
+      )
     })
     .join('nfl_games as ng', 'pmi.esbid', 'ng.esbid')
     .where('pmsi.time_type', 'CLOSE')
@@ -487,7 +497,9 @@ const query_extreme_longshots_latest_week = async ({ year, week }) => {
   `
 
   const results = await db.raw(sql, [year, week])
-  log(`  Found ${results.rows.length} extreme longshot selections in week ${week}`)
+  log(
+    `  Found ${results.rows.length} extreme longshot selections in week ${week}`
+  )
   return results.rows
 }
 
@@ -524,7 +536,13 @@ const query_player_context = async ({ year, player_ids }) => {
     ORDER BY p.nfl_draft_year DESC, p.pname ASC
   `
 
-  const results = await db.raw(sql, [year, year - 1, year - 4, year, player_ids])
+  const results = await db.raw(sql, [
+    year,
+    year - 1,
+    year - 4,
+    year,
+    player_ids
+  ])
   log(`  Found context for ${results.rows.length} players`)
   return results.rows
 }
@@ -532,7 +550,13 @@ const query_player_context = async ({ year, player_ids }) => {
 /**
  * Save metadata file
  */
-const save_metadata = async ({ output_dir, year, week, query_results, execution_time_ms }) => {
+const save_metadata = async ({
+  output_dir,
+  year,
+  week,
+  query_results,
+  execution_time_ms
+}) => {
   const metadata = {
     year,
     week,
@@ -580,7 +604,9 @@ const main = async () => {
     log(`  Base directory: ${argv.outputDir}`)
 
     // Detect or use provided week
-    const week = argv.week || await detect_latest_week_with_longshots({ year: argv.year })
+    const week =
+      argv.week ||
+      (await detect_latest_week_with_longshots({ year: argv.year }))
     log(`  Week: ${week}`)
 
     // Create output directory with YYYY/week-N structure
@@ -594,7 +620,9 @@ const main = async () => {
     const query_results = []
 
     // Query 1: Player winning selections
-    const player_results = await query_player_winning_selections({ year: argv.year })
+    const player_results = await query_player_winning_selections({
+      year: argv.year
+    })
     const player_markdown = format_results_to_markdown_table({
       results: player_results,
       title: 'Players by Longshot Wins (200+ Odds)',
@@ -623,11 +651,19 @@ const main = async () => {
         { key: 'total_season', label: 'Total' }
       ]
     })
-    await fs.writeFile(path.join(output_dir, 'player-winning-selections.md'), player_markdown)
-    query_results.push({ query: 'player-winning-selections', row_count: player_results.length })
+    await fs.writeFile(
+      path.join(output_dir, 'player-winning-selections.md'),
+      player_markdown
+    )
+    query_results.push({
+      query: 'player-winning-selections',
+      row_count: player_results.length
+    })
 
     // Query 2: Team winning selections
-    const team_results = await query_team_winning_selections({ year: argv.year })
+    const team_results = await query_team_winning_selections({
+      year: argv.year
+    })
     const team_markdown = format_results_to_markdown_table({
       results: team_results,
       title: 'Team Longshot Production',
@@ -656,11 +692,19 @@ const main = async () => {
         { key: 'top_players', label: 'Top Contributors' }
       ]
     })
-    await fs.writeFile(path.join(output_dir, 'team-winning-selections.md'), team_markdown)
-    query_results.push({ query: 'team-winning-selections', row_count: team_results.length })
+    await fs.writeFile(
+      path.join(output_dir, 'team-winning-selections.md'),
+      team_markdown
+    )
+    query_results.push({
+      query: 'team-winning-selections',
+      row_count: team_results.length
+    })
 
     // Query 3: Opponent winning selections
-    const opponent_results = await query_opponent_winning_selections({ year: argv.year })
+    const opponent_results = await query_opponent_winning_selections({
+      year: argv.year
+    })
     const opponent_markdown = format_results_to_markdown_table({
       results: opponent_results,
       title: 'Opponent-Triggered Longshots',
@@ -689,11 +733,20 @@ const main = async () => {
         { key: 'top_players', label: 'Top Players' }
       ]
     })
-    await fs.writeFile(path.join(output_dir, 'opponent-winning-selections.md'), opponent_markdown)
-    query_results.push({ query: 'opponent-winning-selections', row_count: opponent_results.length })
+    await fs.writeFile(
+      path.join(output_dir, 'opponent-winning-selections.md'),
+      opponent_markdown
+    )
+    query_results.push({
+      query: 'opponent-winning-selections',
+      row_count: opponent_results.length
+    })
 
     // Query 4: All longshots from latest week
-    const all_longshots_results = await query_all_longshots_latest_week({ year: argv.year, week })
+    const all_longshots_results = await query_all_longshots_latest_week({
+      year: argv.year,
+      week
+    })
     const all_longshots_markdown = format_results_to_markdown_table({
       results: all_longshots_results,
       title: `All Longshot Selections (200+ Odds) - Week ${week}`,
@@ -707,11 +760,19 @@ const main = async () => {
         { key: 'odds_american', label: 'Odds', format: (v) => `+${v}` }
       ]
     })
-    await fs.writeFile(path.join(output_dir, 'all-longshots.md'), all_longshots_markdown)
-    query_results.push({ query: 'all-longshots', row_count: all_longshots_results.length })
+    await fs.writeFile(
+      path.join(output_dir, 'all-longshots.md'),
+      all_longshots_markdown
+    )
+    query_results.push({
+      query: 'all-longshots',
+      row_count: all_longshots_results.length
+    })
 
     // Query 5: Extreme longshots from latest week
-    const extreme_longshots_results = await query_extreme_longshots_latest_week({ year: argv.year, week })
+    const extreme_longshots_results = await query_extreme_longshots_latest_week(
+      { year: argv.year, week }
+    )
     const extreme_longshots_markdown = format_results_to_markdown_table({
       results: extreme_longshots_results,
       title: `Extreme Longshot Highlights (1000+ Odds) - Week ${week}`,
@@ -726,14 +787,20 @@ const main = async () => {
         { key: 'week', label: 'Week' }
       ]
     })
-    await fs.writeFile(path.join(output_dir, 'extreme-longshots.md'), extreme_longshots_markdown)
-    query_results.push({ query: 'extreme-longshots', row_count: extreme_longshots_results.length })
+    await fs.writeFile(
+      path.join(output_dir, 'extreme-longshots.md'),
+      extreme_longshots_markdown
+    )
+    query_results.push({
+      query: 'extreme-longshots',
+      row_count: extreme_longshots_results.length
+    })
 
     // Query 6: Player context
     const all_player_ids = new Set([
-      ...player_results.map(p => p.player_id),
-      ...all_longshots_results.map(p => p.player_id),
-      ...extreme_longshots_results.map(p => p.player_id)
+      ...player_results.map((p) => p.player_id),
+      ...all_longshots_results.map((p) => p.player_id),
+      ...extreme_longshots_results.map((p) => p.player_id)
     ])
     const player_context_results = await query_player_context({
       year: argv.year,
@@ -755,19 +822,32 @@ const main = async () => {
         { key: 'nfl_draft_year', label: 'Draft Year' }
       ]
     })
-    await fs.writeFile(path.join(output_dir, 'player-context.md'), player_context_markdown)
-    query_results.push({ query: 'player-context', row_count: player_context_results.length })
+    await fs.writeFile(
+      path.join(output_dir, 'player-context.md'),
+      player_context_markdown
+    )
+    query_results.push({
+      query: 'player-context',
+      row_count: player_context_results.length
+    })
 
     // Save metadata
     const execution_time_ms = Date.now() - start_time
-    await save_metadata({ output_dir, year: argv.year, week, query_results, execution_time_ms })
+    await save_metadata({
+      output_dir,
+      year: argv.year,
+      week,
+      query_results,
+      execution_time_ms
+    })
 
     log(`✓ Export complete in ${execution_time_ms}ms`)
     log(`  Data saved to: ${output_dir}`)
     log(`  Next step: Run summary script with --data-dir ${output_dir}`)
 
-    log(`Report: Successfully exported week ${week} data with ${query_results.length} queries`)
-
+    log(
+      `Report: Successfully exported week ${week} data with ${query_results.length} queries`
+    )
   } catch (error) {
     log(`Error: ${error.message}`)
 
