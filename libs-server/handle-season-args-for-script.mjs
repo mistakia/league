@@ -27,6 +27,14 @@ export default async function handle_season_args_for_script({
   }
 
   const process_year = async ({ year, current_seas_type }) => {
+    if (current_seas_type === 'ALL') {
+      // Process all season types
+      for (const type of ['PRE', 'REG', 'POST']) {
+        await process_year({ year, current_seas_type: type })
+      }
+      return
+    }
+
     if (season_only) {
       // For season-only scripts, call the script function once per year
       await script_function({

@@ -78,8 +78,7 @@ export const format_review_template = ({
     `| Market Implied Hits | ${props_summary.market_implied_hits.toFixed(2)} |`
   )
   lines.push(`| Actual Hits | ${props_summary.actual_hits} |`)
-  lines.push(`| Wagers | ${wager_summary.wagers} |`)
-  lines.push(`| Wagers Open | ${wager_summary.wagers_open} |\n`)
+  lines.push(`| Wagers Won | ${wager_summary.wagers_won} |\n`)
 
   // Wagers Lost By # Legs
   lines.push('## Wagers Lost By # Legs\n')
