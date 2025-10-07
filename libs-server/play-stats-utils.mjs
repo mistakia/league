@@ -97,3 +97,22 @@ export const get_play_type_nfl = (play_type_nfl) => {
       return null
   }
 }
+
+export const get_completed_games = async ({ year, week, seas_type }) => {
+  const completed_games = await db('nfl_games')
+    .select('esbid')
+    .where({ year, week, seas_type })
+    .where(function () {
+      // Method 1: Games with END_GAME play
+      this.whereExists(function () {
+        this.select('*')
+          .from('nfl_plays')
+          .whereRaw('nfl_plays.esbid = nfl_games.esbid')
+          .where('play_type_nfl', 'END_GAME')
+      })
+        // Method 2: Games with final status
+        .orWhere('status', 'like', 'FINAL%')
+    })
+
+  return completed_games.map((game) => game.esbid)
+}
