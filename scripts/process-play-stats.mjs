@@ -10,7 +10,8 @@ import {
   get_play_stats,
   get_play_type_ngs,
   get_play_type_nfl,
-  is_successful_play
+  is_successful_play,
+  get_completed_games
 } from '#libs-server/play-stats-utils.mjs'
 import populate_nfl_year_week_timestamp from './populate-nfl-year-week-timestamp.mjs'
 
@@ -27,6 +28,21 @@ const process_play_stats = async ({
 } = {}) => {
   let play_update_count = 0
   let play_field_update_count = 0
+
+  // Get completed games first
+  const completed_game_esbids = await get_completed_games({
+    year,
+    week,
+    seas_type
+  })
+  log(
+    `Found ${completed_game_esbids.length} completed games for ${year} week ${week}`
+  )
+
+  if (completed_game_esbids.length === 0) {
+    log('No completed games found, skipping processing')
+    return
+  }
 
   const playStats = await get_play_stats({ year, week, seas_type })
 
@@ -53,6 +69,7 @@ const process_play_stats = async ({
     .where('nfl_plays.year', year)
     .where('nfl_plays.week', week)
     .where('nfl_plays.seas_type', seas_type)
+    .whereIn('nfl_plays.esbid', completed_game_esbids)
 
   for (const play of plays) {
     const off = play.pos_team
@@ -90,12 +107,17 @@ const process_play_stats = async ({
     })
   }
 
-  const play_stats_by_gsisid = groupBy(playStats, 'gsisId')
+  // Filter play stats to only include completed games
+  const filtered_play_stats = playStats.filter((stat) =>
+    completed_game_esbids.includes(stat.esbid)
+  )
+
+  const play_stats_by_gsisid = groupBy(filtered_play_stats, 'gsisId')
   const gsisids = Object.keys(play_stats_by_gsisid)
   const player_gsisid_rows = await db('player').whereIn('gsisid', gsisids)
 
   log('Updating play row pid columns')
-  const playStatsByEsbid = groupBy(playStats, 'esbid')
+  const playStatsByEsbid = groupBy(filtered_play_stats, 'esbid')
   for (const [esbid, playStats] of Object.entries(playStatsByEsbid)) {
     const playStatsByPlay = groupBy(playStats, 'playId')
     for (const [playId, playStats] of Object.entries(playStatsByPlay)) {
@@ -201,7 +223,7 @@ const process_play_stats = async ({
     }
   }
   log(
-    `Updated ${play_field_update_count} play fields on ${play_update_count} plays`
+    `Updated ${play_field_update_count} play fields on ${play_update_count} plays from ${completed_game_esbids.length} completed games`
   )
 }
 
