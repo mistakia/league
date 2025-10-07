@@ -69,7 +69,7 @@ export const format_review_template = ({
   lines.push('## Performance Summary\n')
   lines.push('| Metric | Value |')
   lines.push('|--------|-------|')
-  lines.push(`| Current ROI | ${wager_summary.current_roi} |`)
+  lines.push(`| ROI | ${wager_summary.current_roi} |`)
   lines.push(
     `| Max Potential ROI | ${((wager_summary.max_potential_win / wager_summary.total_risk - 1) * 100).toFixed(0)}% |`
   )
