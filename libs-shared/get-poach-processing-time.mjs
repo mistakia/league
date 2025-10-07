@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 import isBetween from 'dayjs/plugin/isBetween.js'
 import * as constants from './constants.mjs'
+import get_next_tuesday_3pm from './get-next-tuesday-3pm.mjs'
 
 dayjs.extend(isBetween)
 
@@ -12,23 +13,22 @@ export default function (submitted) {
 
   // if submitted between thursday 6pm and sunday 3pm — set to tuesday at 3pm
   const { now } = constants.season
-  const cutoff = now.day(2).startOf('day').hour(15)
-  const is_before_cutoff = now.isBefore(cutoff)
+  const is_before_tuesday_cutoff = now.isBefore(
+    now.day(2).startOf('day').hour(15)
+  )
   const start_window = (
-    is_before_cutoff ? now.subtract('1', 'week').day(4) : now.day(4)
+    is_before_tuesday_cutoff ? now.subtract('1', 'week').day(4) : now.day(4)
   )
     .startOf('day')
     .hour(18)
   const end_window = (
-    is_before_cutoff ? now.day(0) : now.add('1', 'week').day(0)
+    is_before_tuesday_cutoff ? now.day(0) : now.add('1', 'week').day(0)
   )
     .startOf('day')
     .hour(15)
 
   if (submitted_timestamp.isBetween(start_window, end_window)) {
-    return (is_before_cutoff ? now.day(2) : now.add('1', 'week').day(2))
-      .startOf('day')
-      .hour(15)
+    return get_next_tuesday_3pm(now)
   } else {
     // otherwise add 48 hours
     return submitted_timestamp.add('48', 'hours')

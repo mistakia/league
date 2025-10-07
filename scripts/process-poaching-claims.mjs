@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 import debug from 'debug'
 
 import db from '#db'
-import { constants, Errors } from '#libs-shared'
+import { constants, Errors, should_block_poach_processing } from '#libs-shared'
 import {
   processPoach,
   sendNotifications,
@@ -32,16 +32,7 @@ const run = async () => {
 
   if (constants.season.isRegularSeason) {
     // check if currently between Saturday 6pm and Tuesday 3pm (EST)
-    const start_window = (now.day() < 2 ? now.subtract(1, 'week') : now)
-      .day(6)
-      .startOf('day')
-      .hour(18)
-    const end_window = (
-      now.day() < 2 ? now.day(2) : now.add('1', 'week').day(2)
-    )
-      .startOf('day')
-      .hour(15)
-    if (now.isBetween(start_window, end_window)) {
+    if (should_block_poach_processing(now)) {
       // do not process any claims during this window
       return
     }
