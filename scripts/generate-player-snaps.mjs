@@ -392,18 +392,27 @@ const main = async () => {
       argv,
       script_name: 'generate-player-snaps',
       script_function: generate_player_snaps_for_week,
-      year_query: ({ seas_type = 'REG' }) =>
-        db('nfl_games')
+      year_query: ({ seas_type = 'REG' }) => {
+        const query = db('nfl_games')
           .select('year')
-          .where({ seas_type })
           .groupBy('year')
-          .orderBy('year', 'asc'),
-      week_query: ({ year, seas_type = 'REG' }) =>
-        db('nfl_games')
+          .orderBy('year', 'asc')
+        if (seas_type !== 'ALL') {
+          query.where({ seas_type })
+        }
+        return query
+      },
+      week_query: ({ year, seas_type = 'REG' }) => {
+        const query = db('nfl_games')
           .select('week')
-          .where({ year, seas_type })
+          .where({ year })
           .groupBy('week')
-          .orderBy('week', 'asc'),
+          .orderBy('week', 'asc')
+        if (seas_type !== 'ALL') {
+          query.where({ seas_type })
+        }
+        return query
+      },
       script_args: { dry_run: argv.dry },
       seas_type: argv.seas_type || 'ALL'
     })
