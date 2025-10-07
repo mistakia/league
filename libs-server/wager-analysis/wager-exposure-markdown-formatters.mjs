@@ -12,10 +12,10 @@ export const format_exposures_markdown = (
   const lines = []
   lines.push('## Exposures\n')
   lines.push(
-    '| Name | Odds | Result | Exposure Rate | Exposure Count | Open Wagers | Open Potential ROI | Max Potential ROI | Open Potential Payout | Max Potential Payout | Threshold | Actual | Diff |'
+    '| Name | Odds | Result | Exposure | Potential ROI | Threshold | Actual | Diff |'
   )
   lines.push(
-    '|------|------|--------|---------------|----------------|-------------|--------------------|--------------------|----------------------|----------------------|-----------|--------|------|'
+    '|------|------|--------|----------|---------------|-----------|--------|------|'
   )
 
   const sorted_selections = unique_selections
@@ -38,7 +38,7 @@ export const format_exposures_markdown = (
     )
 
     lines.push(
-      `| ${prop.name} | ${prop.parsed_odds} | ${prop.result} | ${prop.exposure_rate} | ${prop.exposure_count} | ${prop.open_wagers} | ${prop.open_potential_roi} | ${prop.max_potential_roi} | ${prop.open_potential_payout.toFixed(2)} | ${prop.max_potential_payout.toFixed(2)} | ${threshold} | ${actual} | ${diff} |`
+      `| ${prop.name} | ${prop.parsed_odds} | ${prop.result} | ${prop.exposure_rate} | ${prop.max_potential_roi} | ${threshold} | ${actual} | ${diff} |`
     )
   }
 
@@ -82,15 +82,7 @@ export const format_review_template = ({
   )
   lines.push(`| Actual Hits | ${props_summary.actual_hits} |`)
   lines.push(`| Wagers | ${wager_summary.wagers} |`)
-  lines.push(`| Total Won | ${wager_summary.total_won.toFixed(2)} |`)
-  lines.push(`| Wagers Open | ${wager_summary.wagers_open} |`)
-  lines.push(`| Total Risk | ${wager_summary.total_risk} |`)
-  lines.push(
-    `| Open Potential Win | ${wager_summary.open_potential_win.toFixed(2)} |`
-  )
-  lines.push(
-    `| Max Potential Win | ${wager_summary.max_potential_win.toFixed(2)} |\n`
-  )
+  lines.push(`| Wagers Open | ${wager_summary.wagers_open} |\n`)
 
   // Wagers Lost By # Legs
   lines.push('## Wagers Lost By # Legs\n')
