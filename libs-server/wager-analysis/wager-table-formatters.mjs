@@ -91,7 +91,7 @@ export const create_wager_summary_table = (
 // Create lost by legs summary table
 export const create_lost_by_legs_table = (wager_summary) => {
   const lost_by_legs_summary_table = new Table({
-    title: 'Wagers Lost By # Legs'
+    title: 'Wagers Lost By # Selections'
   })
   lost_by_legs_summary_table.addRow({
     1: wager_summary.lost_by_one_leg,

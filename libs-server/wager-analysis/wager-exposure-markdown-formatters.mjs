@@ -80,8 +80,8 @@ export const format_review_template = ({
   lines.push(`| Actual Hits | ${props_summary.actual_hits} |`)
   lines.push(`| Wagers Won | ${wager_summary.wagers_won} |\n`)
 
-  // Wagers Lost By # Legs
-  lines.push('## Wagers Lost By # Legs\n')
+  // Wagers Lost By # Selections
+  lines.push('## Wagers Lost By # Selections\n')
   lines.push('| 1 | 2 | 3 | 4+ |')
   lines.push('|---|---|---|----|')
   lines.push(
