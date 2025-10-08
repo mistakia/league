@@ -2,6 +2,9 @@ import {
   format_metric_result,
   format_threshold_distance
 } from './wager-calculations.mjs'
+import { calculate_key_selections } from './key-selections-analysis.mjs'
+import { filter_wagers_by_lost_legs, sort_wagers } from './wager-filters.mjs'
+import { format_wager_search_markdown } from './wager-search-markdown-formatters.mjs'
 
 // Format exposures table as markdown
 export const format_exposures_markdown = (
@@ -45,10 +48,45 @@ export const format_exposures_markdown = (
   return lines.join('\n')
 }
 
-// Format review document template as markdown
+// Format key selections table as markdown
+export const format_key_selections_markdown = (key_selections) => {
+  const lines = []
+  lines.push('## Key Selections\n')
+  lines.push(
+    '| Selection | Odds | Result | Exposure | Threshold | Actual | Diff | 1L | 2L | 3L | Notes |'
+  )
+  lines.push(
+    '|-----------|------|--------|----------|-----------|--------|------|----|----|----|----|'
+  )
+
+  for (const selection of key_selections) {
+    const threshold =
+      selection.threshold !== null && selection.threshold !== undefined
+        ? Number(selection.threshold).toFixed(1)
+        : '-'
+    const actual = format_metric_result(selection.actual)
+    const diff = format_threshold_distance(
+      selection.diff,
+      selection.selection_type
+    )
+
+    lines.push(
+      `| ${selection.name} | ${selection.odds > 0 ? '+' : ''}${selection.odds} | ${selection.result} | ${selection.exposure_rate} | ${threshold} | ${actual} | ${diff} | ${selection.lost_by_1_count} | ${selection.lost_by_2_count} | ${selection.lost_by_3_count} | [TBD] |`
+    )
+  }
+
+  return lines.join('\n')
+}
+
+// Format review document template as markdown with all static content
 export const format_review_template = ({
   wager_summary,
   props_summary,
+  unique_selections,
+  filtered_wagers,
+  wagers_lost_leg_limit = 2,
+  wagers_limit = 10,
+  sort_by = 'payout',
   week,
   year
 }) => {
@@ -88,15 +126,49 @@ export const format_review_template = ({
     `| ${wager_summary.lost_by_one_leg} | ${wager_summary.lost_by_two_legs} | ${wager_summary.lost_by_three_legs} | ${wager_summary.lost_by_four_or_more_legs} |\n`
   )
 
-  // Placeholder sections
-  lines.push('## Missed Selection Analysis\n')
-  lines.push('<!-- Analysis of missed selections will be appended here -->\n')
+  // Key Selections - generate the actual table
+  const key_selections = calculate_key_selections({
+    unique_selections,
+    filtered_wagers,
+    total_wagers: filtered_wagers.length
+  })
 
-  lines.push('## Notable Wagers\n')
-  lines.push('<!-- Notable wagers will be appended here -->\n')
+  const key_selections_markdown = format_key_selections_markdown(key_selections)
+  lines.push(key_selections_markdown)
+  lines.push('\n')
 
+  // Key Learnings placeholder
   lines.push('## Key Learnings\n')
   lines.push('<!-- Key learnings from the week -->\n')
+
+  // Notable Wagers - generate the actual wagers
+  let notable_wagers = filter_wagers_by_lost_legs(
+    filtered_wagers,
+    wagers_lost_leg_limit
+  )
+  notable_wagers = sort_wagers(notable_wagers, sort_by)
+  notable_wagers = notable_wagers.slice(0, wagers_limit)
+
+  if (notable_wagers.length > 0) {
+    const notable_wagers_markdown = format_wager_search_markdown(
+      notable_wagers,
+      {
+        show_wager_roi: false,
+        show_potential_gain: true,
+        show_bet_receipts: false,
+        total_risk: wager_summary.total_risk
+      }
+    )
+    // Replace the heading from "Wager Search Results" to nothing (already have "Notable Wagers")
+    lines.push(notable_wagers_markdown.replace('## Wager Search Results\n', ''))
+  } else {
+    lines.push('No notable wagers found.\n')
+  }
+  lines.push('\n')
+
+  // Missed Selection Analysis placeholder
+  lines.push('## Missed Selection Analysis\n')
+  lines.push('<!-- Analysis of missed selections will be appended here -->\n')
 
   return lines.join('\n')
 }
