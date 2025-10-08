@@ -16,4 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
   console.log(`Year: ${constants.year}`)
   console.log(`Week: ${constants.week}`)
   console.log(`Fantasy Season Week: ${constants.fantasy_season_week}`)
+  console.log(`Timezone: ${constants.season.now.format('z')}`)
+  console.log(`EST Offset: ${constants.season.now.utcOffset() / 60} hours`)
+  console.log(
+    `Browser Native Timezone: ${Intl.DateTimeFormat().resolvedOptions().timeZone}`
+  )
 })
