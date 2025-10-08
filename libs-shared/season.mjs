@@ -6,22 +6,16 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 dayjs.extend(isBetween)
 
+// Convert any date to Eastern Time regardless of user's timezone
+const toEasternTime = (date) => {
+  return dayjs(date).tz('America/New_York')
+}
+
+// Get the correct Eastern Time offset for a given date
 const getEstOffset = (datetime = new Date()) => {
-  const stdTimezoneOffset = () => {
-    const jan = new Date(0, 1)
-    const jul = new Date(6, 1)
-    return Math.max(jan.getTimezoneOffset(), jul.getTimezoneOffset())
-  }
-
-  const isDstObserved = (Date) => {
-    return datetime.getTimezoneOffset() < stdTimezoneOffset()
-  }
-
-  if (isDstObserved(datetime)) {
-    return -4
-  } else {
-    return -5
-  }
+  // Convert the date to Eastern Time to get the correct offset
+  const easternTime = dayjs(datetime).tz('America/New_York')
+  return easternTime.utcOffset()
 }
 
 export default class Season {
@@ -65,8 +59,8 @@ export default class Season {
 
   get now() {
     if (this._now) return this._now
-    const offset = getEstOffset()
-    return dayjs().utc().utcOffset(offset)
+    // Convert current time to Eastern Time
+    return toEasternTime(dayjs())
   }
 
   get isOffseason() {
