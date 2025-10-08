@@ -45,11 +45,23 @@ const format_player_gamelog = ({ esbid, pid, stats, opp, pos, tm, year }) => {
   }
 }
 
-const format_receiving_gamelog = ({ esbid, pid, stats, year, team_stats }) => {
+const format_receiving_gamelog = ({
+  esbid,
+  pid,
+  stats,
+  year,
+  team_stats,
+  player_routes,
+  team_dropbacks
+}) => {
   const team_target_share = team_stats.trg ? stats.trg / team_stats.trg : 0
   const team_air_yard_share = team_stats.passing_air_yards
     ? stats.targeted_air_yards / team_stats.passing_air_yards
     : 0
+  const route_share =
+    player_routes && team_dropbacks
+      ? (player_routes / team_dropbacks) * 100
+      : null
 
   return {
     esbid,
@@ -59,6 +71,7 @@ const format_receiving_gamelog = ({ esbid, pid, stats, year, team_stats }) => {
     recv_yards_15_plus_count: stats.recv_yards_15_plus_count,
     team_target_share,
     team_air_yard_share,
+    route_share,
     redzone_targets: stats.redzone_targets,
     weighted_opportunity_rating:
       1.5 * team_target_share + 0.7 * team_air_yard_share
@@ -91,23 +104,36 @@ const generate_receiving_gamelog = ({
   player_gamelog,
   stats,
   team_gamelog_inserts,
-  player_receiving_gamelog_inserts
+  player_receiving_gamelog_inserts,
+  player_routes_by_game,
+  team_dropbacks_by_game
 }) => {
+  const player_routes =
+    player_routes_by_game[`${player_gamelog.pid}_${player_gamelog.esbid}`] ||
+    null
+
   if (
     player_gamelog.rec > 0 ||
     player_gamelog.recy > 0 ||
-    player_gamelog.trg > 0
+    player_gamelog.trg > 0 ||
+    player_routes > 0
   ) {
     const team_gamelog = team_gamelog_inserts.find(
       (t) =>
         t.tm === fixTeam(player_gamelog.tm) && t.esbid === player_gamelog.esbid
     )
+    const team_dropbacks =
+      team_dropbacks_by_game[
+        `${fixTeam(player_gamelog.tm)}_${player_gamelog.esbid}`
+      ] || null
     const receiving_gamelog = format_receiving_gamelog({
       pid: player_gamelog.pid,
       esbid: player_gamelog.esbid,
       year: player_gamelog.year,
       stats,
-      team_stats: team_gamelog
+      team_stats: team_gamelog,
+      player_routes,
+      team_dropbacks
     })
     player_receiving_gamelog_inserts.push(receiving_gamelog)
   }
@@ -148,6 +174,36 @@ const generate_player_gamelogs = async ({
   const unique_esbids = [...new Set(playStats.map((p) => p.esbid))]
   log(`loaded play stats for ${unique_esbids.length} games`)
   log(unique_esbids.join(', '))
+
+  // Load player routes data from existing gamelogs
+  const player_routes_query = await db('player_receiving_gamelogs')
+    .select('pid', 'esbid', 'routes')
+    .whereIn('esbid', unique_esbids)
+    .where({ year })
+    .whereNotNull('routes')
+  log(`loaded routes data for ${player_routes_query.length} players`)
+
+  // Create player routes lookup structure
+  const player_routes_by_game = player_routes_query.reduce((acc, row) => {
+    acc[`${row.pid}_${row.esbid}`] = row.routes
+    return acc
+  }, {})
+
+  // Load team dropbacks from nfl_plays
+  const team_dropbacks_query = await db('nfl_plays')
+    .select('pos_team as tm', 'esbid')
+    .count('* as dropbacks')
+    .whereIn('esbid', unique_esbids)
+    .where({ qb_dropback: true })
+    .whereNot({ play_type: 'NOPL' })
+    .groupBy('pos_team', 'esbid')
+  log(`loaded dropback counts for ${team_dropbacks_query.length} team-games`)
+
+  // Create team dropbacks lookup structure
+  const team_dropbacks_by_game = team_dropbacks_query.reduce((acc, row) => {
+    acc[`${fixTeam(row.tm)}_${row.esbid}`] = parseInt(row.dropbacks, 10)
+    return acc
+  }, {})
 
   const player_gamelog_inserts = []
   const player_receiving_gamelog_inserts = []
@@ -232,7 +288,9 @@ const generate_player_gamelogs = async ({
       player_gamelog,
       stats,
       team_gamelog_inserts,
-      player_receiving_gamelog_inserts
+      player_receiving_gamelog_inserts,
+      player_routes_by_game,
+      team_dropbacks_by_game
     })
 
     generate_rushing_gamelog({
@@ -280,7 +338,9 @@ const generate_player_gamelogs = async ({
       player_gamelog,
       stats,
       team_gamelog_inserts,
-      player_receiving_gamelog_inserts
+      player_receiving_gamelog_inserts,
+      player_routes_by_game,
+      team_dropbacks_by_game
     })
 
     generate_rushing_gamelog({
