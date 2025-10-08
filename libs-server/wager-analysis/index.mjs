@@ -38,6 +38,9 @@ export {
 // Prop Combinations Analysis
 export { analyze_prop_near_miss_combinations } from './prop-near-miss-analysis.mjs'
 
+// Key Selections Analysis
+export { calculate_key_selections } from './key-selections-analysis.mjs'
+
 // Round Robin Analysis
 export {
   format_round_robin_display,
@@ -74,7 +77,8 @@ export { print_wagers_analysis_tables } from './wager-data-formatters.mjs'
 // Markdown Formatters
 export {
   format_exposures_markdown,
-  format_review_template
+  format_review_template,
+  format_key_selections_markdown
 } from './wager-exposure-markdown-formatters.mjs'
 
 export {

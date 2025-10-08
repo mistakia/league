@@ -57,6 +57,7 @@ if (!argv.quiet) {
  * @param {boolean} [params.output_template] - Output review template as markdown
  * @param {boolean} [params.output_search_wagers] - Output search wagers as markdown
  * @param {boolean} [params.output_near_misses] - Output near misses as markdown
+ * @param {boolean} [params.output_key_selections] - Output key selections as markdown
  * @param {number} [params.year] - Year for template output
  */
 const analyze_wagers = async ({
@@ -83,6 +84,7 @@ const analyze_wagers = async ({
   output_template = false,
   output_search_wagers = false,
   output_near_misses = false,
+  output_key_selections = false,
   year = null
 } = {}) => {
   if (!fanduel_filename && !draftkings_filename && !fanatics_filename) {
@@ -181,6 +183,7 @@ const analyze_wagers = async ({
     output_template,
     output_near_misses,
     output_search_wagers,
+    output_key_selections,
     unique_selections,
     filtered_wagers: filtered,
     wager_summary,
@@ -300,6 +303,7 @@ const main = async () => {
       output_template: argv.template,
       output_search_wagers: argv.searchWagers || argv.search_wagers,
       output_near_misses: argv.nearMisses || argv.near_misses,
+      output_key_selections: argv.keySelections || argv.key_selections,
       year: argv.year
     })
   } catch (err) {

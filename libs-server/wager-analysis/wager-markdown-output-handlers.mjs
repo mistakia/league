@@ -1,6 +1,7 @@
 import {
   format_exposures_markdown,
-  format_review_template
+  format_review_template,
+  format_key_selections_markdown
 } from './wager-exposure-markdown-formatters.mjs'
 import {
   format_wager_search_markdown,
@@ -12,6 +13,7 @@ import {
   filter_wagers_including_selections,
   sort_wagers
 } from './wager-filters.mjs'
+import { calculate_key_selections } from './key-selections-analysis.mjs'
 
 /**
  * When markdown output modes are requested, render and exit.
@@ -23,6 +25,7 @@ export const handle_markdown_outputs = ({
   output_template,
   output_near_misses,
   output_search_wagers,
+  output_key_selections,
   unique_selections,
   filtered_wagers,
   wager_summary,
@@ -56,6 +59,11 @@ export const handle_markdown_outputs = ({
     const markdown = format_review_template({
       wager_summary,
       props_summary,
+      unique_selections,
+      filtered_wagers,
+      wagers_lost_leg_limit,
+      wagers_limit,
+      sort_by,
       week,
       year
     })
@@ -97,6 +105,18 @@ export const handle_markdown_outputs = ({
       show_bet_receipts,
       total_risk: wager_summary.total_risk
     })
+    console.log(markdown)
+    process.exit(0)
+    return true
+  }
+
+  if (output_key_selections) {
+    const key_selections = calculate_key_selections({
+      unique_selections,
+      filtered_wagers,
+      total_wagers: filtered_wagers.length
+    })
+    const markdown = format_key_selections_markdown(key_selections)
     console.log(markdown)
     process.exit(0)
     return true
