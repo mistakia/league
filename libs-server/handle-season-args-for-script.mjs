@@ -89,6 +89,12 @@ export default async function handle_season_args_for_script({
         await process_year({ year, current_seas_type: seas_type })
       }
     }
+  } else if (argv.year && argv.week) {
+    await process_year_week({
+      year: argv.year,
+      week: argv.week,
+      current_seas_type: seas_type
+    })
   } else if (argv.year) {
     await process_year({ year: argv.year, current_seas_type: seas_type })
   } else if (argv.week) {
