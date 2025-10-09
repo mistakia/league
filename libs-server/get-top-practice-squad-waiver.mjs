@@ -65,7 +65,8 @@ export default async function (lid) {
       'waivers.bid',
       'waivers.pid',
       'waivers.tid',
-      'waivers.userid'
+      'waivers.userid',
+      'waivers.type as waiver_type'
     )
     .join('teams', 'waivers.tid', 'teams.uid')
     .where('teams.year', constants.season.year)
@@ -115,6 +116,7 @@ export default async function (lid) {
       'waivers.pid',
       'waivers.tid',
       'waivers.userid',
+      'waivers.type as waiver_type',
       'waivers.super_priority'
     )
     .join('teams', 'waivers.tid', 'teams.uid')
