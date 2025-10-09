@@ -24,6 +24,7 @@ export default async function (leagueId) {
       'waivers.pid',
       'waivers.tid',
       'waivers.userid',
+      'waivers.type as waiver_type',
       'nfl_games.date',
       'nfl_games.time_est'
     )

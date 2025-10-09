@@ -154,7 +154,7 @@ const handle_tied_waivers = async (waiver) => {
       bid: waiver.bid,
       pid: waiver.pid,
       lid: waiver.lid,
-      type: waiver.type
+      type: waiver.waiver_type
     })
     .whereNot('uid', waiver.wid)
     .whereNot('tid', waiver.tid)
