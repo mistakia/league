@@ -1103,11 +1103,17 @@ export function isPlayerReserveEligible(state, { player_map }) {
 
   const nfl_status = player_map.get('nfl_status')
   const injury_status = player_map.get('injury_status')
+  const prior_week_inactive = player_map.get('prior_week_inactive')
+  const game_day = player_map.get('game_day')
 
   if (
     isReserveEligible({
       nfl_status,
-      injury_status
+      injury_status,
+      prior_week_inactive,
+      week: constants.season.week,
+      is_regular_season: constants.season.isRegularSeason,
+      game_day
     })
   ) {
     reserve.reserve_short_term_eligible = true

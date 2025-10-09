@@ -8,6 +8,11 @@ export default async function ({
 }) {
   const rows = await db('rosters').where({ tid, year, week })
   const roster_row = rows[0]
+
+  if (!roster_row) {
+    throw new Error('No roster found')
+  }
+
   const players = await db('rosters_players')
     .leftJoin('transactions', 'rosters_players.pid', 'transactions.pid')
     .where('rid', roster_row.uid)
