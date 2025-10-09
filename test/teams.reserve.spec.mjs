@@ -39,7 +39,9 @@ describe('API /teams - reserve', function () {
     })
 
     it('move player to reserve - short term reserve', async () => {
-      MockDate.set(regular_season_start.subtract('1', 'week').toISOString())
+      MockDate.set(
+        regular_season_start.clone().subtract('1', 'week').toISOString()
+      )
       const player = await selectPlayer()
       const teamId = 1
       const leagueId = 1
@@ -283,7 +285,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('player not on reserve/short term reserve', async () => {
-      MockDate.set(regular_season_start.add('1', 'week').toISOString())
+      MockDate.set(regular_season_start.clone().add('1', 'week').toISOString())
       const player = await selectPlayer({
         injury_status: null,
         nfl_status: constants.player_nfl_status.ACTIVE
@@ -343,7 +345,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('player not on reserve/cov - ir', async () => {
-      MockDate.set(regular_season_start.add('1', 'week').toISOString())
+      MockDate.set(regular_season_start.clone().add('1', 'week').toISOString())
       const player = await selectPlayer()
       const teamId = 1
       const leagueId = 1
@@ -379,7 +381,9 @@ describe('API /teams - reserve', function () {
     })
 
     it('exceeds ir roster limits', async () => {
-      MockDate.set(regular_season_start.subtract('1', 'week').toISOString())
+      MockDate.set(
+        regular_season_start.clone().subtract('1', 'week').toISOString()
+      )
       const teamId = 1
       const leagueId = 1
       await fillRoster({ leagueId, teamId })
@@ -449,7 +453,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('player not rostered on previous week roster', async () => {
-      MockDate.set(regular_season_start.add('2', 'week').toISOString())
+      MockDate.set(regular_season_start.clone().add('2', 'week').toISOString())
       const player = await selectPlayer()
       const teamId = 1
       const leagueId = 1
@@ -553,6 +557,403 @@ describe('API /teams - reserve', function () {
     })
   })
 
+  describe('historical grace period', function () {
+    beforeEach(async function () {
+      this.timeout(60 * 1000)
+      await league(knex)
+    })
+
+    it('player with prior week OUT status eligible before final practice day', async () => {
+      // Set to week 2, Tuesday (early in the week, before Friday final practice)
+      MockDate.set(regular_season_start.clone().add('2', 'week').toISOString())
+
+      const player = await selectPlayer()
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const value = 2
+
+      // Update player to ACTIVE with no injury status
+      await knex('player')
+        .update({
+          nfl_status: constants.player_nfl_status.ACTIVE,
+          injury_status: null
+        })
+        .where({ pid: player.pid })
+
+      // Create prior week roster so the "not rostered long enough" check has data
+      const prior_week = constants.season.week - 1
+      const prior_roster_result = await knex('rosters')
+        .insert({
+          tid: teamId,
+          lid: leagueId,
+          week: prior_week,
+          year: constants.season.year
+        })
+        .returning('uid')
+
+      const prior_roster_uid =
+        prior_roster_result[0].uid || prior_roster_result[0]
+
+      // Add player to prior week roster
+      await knex('rosters_players').insert({
+        rid: prior_roster_uid,
+        pid: player.pid,
+        slot: constants.slots.BENCH,
+        pos: player.pos,
+        tid: teamId,
+        lid: leagueId,
+        week: prior_week,
+        year: constants.season.year
+      })
+
+      // Add player to roster (will be added to current week 5 roster)
+      // Use TRADE to bypass "not rostered long enough" check
+      await addPlayer({
+        teamId,
+        leagueId,
+        userId,
+        player,
+        slot: constants.slots.BENCH,
+        transaction: constants.transactions.TRADE,
+        value
+      })
+
+      // Create prior week's game (week 4)
+      const prior_week_esbid = `${constants.season.year}${String(prior_week).padStart(2, '0')}99`
+
+      await knex('nfl_games').insert({
+        esbid: prior_week_esbid,
+        week: prior_week,
+        year: constants.season.year,
+        day: 'SUN',
+        seas_type: 'REG',
+        h: player.current_nfl_team,
+        v: 'OPP',
+        timestamp: Math.round(Date.now() / 1000) - 7 * 24 * 60 * 60 // 1 week ago from mocked date
+      })
+
+      // Create gamelog for prior week with active = false (player was inactive)
+      await knex('player_gamelogs').insert({
+        esbid: prior_week_esbid,
+        pid: player.pid,
+        tm: player.current_nfl_team,
+        opp: 'OPP',
+        pos: player.pos,
+        year: constants.season.year,
+        active: false
+      })
+
+      // Add current week game schedule
+      const current_week_esbid = `${constants.season.year}${String(constants.season.week).padStart(2, '0')}10`
+
+      // Calculate game date/time (Sunday 1PM EST, 3 days from mocked Tuesday)
+      const gameDate = constants.season.now.add(5, 'day') // Tuesday + 5 = Sunday
+
+      await knex('nfl_games').insert({
+        esbid: current_week_esbid,
+        week: constants.season.week,
+        year: constants.season.year,
+        day: 'SUN',
+        seas_type: 'REG',
+        h: player.current_nfl_team,
+        v: 'OPP',
+        date: gameDate.format('YYYY/MM/DD'),
+        time_est: '13:00:00',
+        timestamp: Math.round(Date.now() / 1000) + 3 * 24 * 60 * 60 // 3 days from now (Sunday)
+      })
+
+      const res = await chai_request
+        .execute(server)
+        .post('/api/teams/1/reserve')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          reserve_pid: player.pid,
+          leagueId,
+          slot: constants.slots.RESERVE_SHORT_TERM
+        })
+
+      res.should.have.status(200)
+      res.body.pid.should.equal(player.pid)
+      res.body.slot.should.equal(constants.slots.RESERVE_SHORT_TERM)
+
+      MockDate.reset()
+    })
+
+    it('player with prior week OUT not eligible after final practice day when cleared', async () => {
+      // Set to week 5, Friday (late in the week, on or after Friday final practice day)
+      // regular_season_start is Tuesday, so +3 days = Friday
+      MockDate.set(
+        regular_season_start.clone().add(5, 'week').add(3, 'day').toISOString()
+      )
+
+      const player = await selectPlayer()
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const value = 2
+
+      // Update player to ACTIVE with no injury status
+      await knex('player')
+        .update({
+          nfl_status: constants.player_nfl_status.ACTIVE,
+          injury_status: null
+        })
+        .where({ pid: player.pid })
+
+      // Add player to roster (will be added to current week 5 roster)
+      // Use TRADE to bypass "not rostered long enough" check
+      await addPlayer({
+        teamId,
+        leagueId,
+        userId,
+        player,
+        slot: constants.slots.BENCH,
+        transaction: constants.transactions.TRADE,
+        value
+      })
+
+      // Create prior week's game (week 4)
+      const prior_week = constants.season.week - 1
+      const prior_week_esbid = `${constants.season.year}${String(prior_week).padStart(2, '0')}98`
+
+      await knex('nfl_games').insert({
+        esbid: prior_week_esbid,
+        week: prior_week,
+        year: constants.season.year,
+        day: 'SUN',
+        seas_type: 'REG',
+        h: player.current_nfl_team,
+        v: 'OPP',
+        timestamp: 1640000000 // Static timestamp for prior week game
+      })
+
+      // Create gamelog for prior week with active = false (player was inactive)
+      await knex('player_gamelogs').insert({
+        esbid: prior_week_esbid,
+        pid: player.pid,
+        tm: player.current_nfl_team,
+        opp: 'OPP',
+        pos: player.pos,
+        year: constants.season.year,
+        active: false
+      })
+
+      // Add current week game schedule for Sunday game with unique esbid
+      const current_week_esbid = `${constants.season.year}${String(constants.season.week).padStart(2, '0')}21`
+      const gameDate = constants.season.now.add(2, 'day') // Friday + 2 = Sunday
+
+      await knex('nfl_games').insert({
+        esbid: current_week_esbid,
+        week: constants.season.week,
+        year: constants.season.year,
+        day: 'SUN',
+        seas_type: 'REG',
+        h: player.current_nfl_team,
+        v: 'OPP',
+        date: gameDate.format('YYYY/MM/DD'),
+        time_est: '13:00:00',
+        timestamp: 1640700000 // Static timestamp for current week game
+      })
+
+      const request = chai_request
+        .execute(server)
+        .post('/api/teams/1/reserve')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          reserve_pid: player.pid,
+          leagueId,
+          slot: constants.slots.RESERVE_SHORT_TERM
+        })
+
+      await error(request, 'player not eligible for Reserve')
+
+      MockDate.reset()
+    })
+
+    it('player with prior week OUT and current QUESTIONABLE not eligible after final practice day', async () => {
+      // Set to week 5, Friday (late in the week, on or after Friday final practice day)
+      // regular_season_start is Tuesday, so +3 days = Friday
+      MockDate.set(
+        regular_season_start.clone().add(5, 'week').add(3, 'day').toISOString()
+      )
+
+      const player = await selectPlayer()
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const value = 2
+
+      // Update player to ACTIVE with QUESTIONABLE injury status
+      await knex('player')
+        .update({
+          nfl_status: constants.player_nfl_status.ACTIVE,
+          injury_status: constants.player_nfl_injury_status.QUESTIONABLE
+        })
+        .where({ pid: player.pid })
+
+      // Add player to roster (will be added to current week 5 roster)
+      // Use TRADE to bypass "not rostered long enough" check
+      await addPlayer({
+        teamId,
+        leagueId,
+        userId,
+        player,
+        slot: constants.slots.BENCH,
+        transaction: constants.transactions.TRADE,
+        value
+      })
+
+      // Create prior week's game (week 4)
+      const prior_week = constants.season.week - 1
+      const prior_week_esbid = `${constants.season.year}${String(prior_week).padStart(2, '0')}97`
+
+      await knex('nfl_games').insert({
+        esbid: prior_week_esbid,
+        week: prior_week,
+        year: constants.season.year,
+        day: 'SUN',
+        seas_type: 'REG',
+        h: player.current_nfl_team,
+        v: 'OPP',
+        timestamp: 1640000000 // Static timestamp for prior week game
+      })
+
+      // Create gamelog for prior week with active = false (player was inactive)
+      await knex('player_gamelogs').insert({
+        esbid: prior_week_esbid,
+        pid: player.pid,
+        tm: player.current_nfl_team,
+        opp: 'OPP',
+        pos: player.pos,
+        year: constants.season.year,
+        active: false
+      })
+
+      // Add current week game schedule for Sunday game with unique esbid
+      const current_week_esbid = `${constants.season.year}${String(constants.season.week).padStart(2, '0')}31`
+      const gameDate = constants.season.now.add(2, 'day') // Friday + 2 = Sunday
+
+      await knex('nfl_games').insert({
+        esbid: current_week_esbid,
+        week: constants.season.week,
+        year: constants.season.year,
+        day: 'SUN',
+        seas_type: 'REG',
+        h: player.current_nfl_team,
+        v: 'OPP',
+        date: gameDate.format('YYYY/MM/DD'),
+        time_est: '13:00:00',
+        timestamp: 1640700000 // Static timestamp for current week game
+      })
+
+      const request = chai_request
+        .execute(server)
+        .post('/api/teams/1/reserve')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          reserve_pid: player.pid,
+          leagueId,
+          slot: constants.slots.RESERVE_SHORT_TERM
+        })
+
+      await error(request, 'player not eligible for Reserve')
+
+      MockDate.reset()
+    })
+
+    it('player with prior week OUT eligible before Wednesday for Thursday game', async () => {
+      // Set to week 5, Tuesday (early in the week, before Wednesday final practice for Thursday game)
+      // regular_season_start is already Tuesday, so week 5 = +5 weeks, +0 days
+      MockDate.set(regular_season_start.clone().add(5, 'week').toISOString())
+
+      const player = await selectPlayer()
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const value = 2
+
+      // Update player to ACTIVE with no injury status
+      await knex('player')
+        .update({
+          nfl_status: constants.player_nfl_status.ACTIVE,
+          injury_status: null
+        })
+        .where({ pid: player.pid })
+
+      // Add player to roster (will be added to current week 5 roster)
+      // Use TRADE to bypass "not rostered long enough" check
+      await addPlayer({
+        teamId,
+        leagueId,
+        userId,
+        player,
+        slot: constants.slots.BENCH,
+        transaction: constants.transactions.TRADE,
+        value
+      })
+
+      // Create prior week's game (week 4)
+      const prior_week = constants.season.week - 1
+      const prior_week_esbid = `${constants.season.year}${String(prior_week).padStart(2, '0')}96`
+
+      await knex('nfl_games').insert({
+        esbid: prior_week_esbid,
+        week: prior_week,
+        year: constants.season.year,
+        day: 'SUN',
+        seas_type: 'REG',
+        h: player.current_nfl_team,
+        v: 'OPP',
+        timestamp: 1640000000 // Static timestamp for prior week game
+      })
+
+      // Create gamelog for prior week with active = false (player was inactive)
+      await knex('player_gamelogs').insert({
+        esbid: prior_week_esbid,
+        pid: player.pid,
+        tm: player.current_nfl_team,
+        opp: 'OPP',
+        pos: player.pos,
+        year: constants.season.year,
+        active: false
+      })
+
+      // Add current week game schedule for Thursday game with unique esbid
+      const current_week_esbid = `${constants.season.year}${String(constants.season.week).padStart(2, '0')}41`
+      const gameDate = constants.season.now.add(2, 'day') // Tuesday + 2 = Thursday
+
+      await knex('nfl_games').insert({
+        esbid: current_week_esbid,
+        week: constants.season.week,
+        year: constants.season.year,
+        day: 'THU',
+        seas_type: 'REG',
+        h: player.current_nfl_team,
+        v: 'OPP',
+        date: gameDate.format('YYYY/MM/DD'),
+        time_est: '20:15:00',
+        timestamp: 1640700000 // Static timestamp for current week game
+      })
+
+      const res = await chai_request
+        .execute(server)
+        .post('/api/teams/1/reserve')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          reserve_pid: player.pid,
+          leagueId,
+          slot: constants.slots.RESERVE_SHORT_TERM
+        })
+
+      res.should.have.status(200)
+      res.body.pid.should.equal(player.pid)
+      res.body.slot.should.equal(constants.slots.RESERVE_SHORT_TERM)
+
+      MockDate.reset()
+    })
+  })
+
   describe('practice squad with active poach', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
@@ -560,7 +961,9 @@ describe('API /teams - reserve', function () {
     })
 
     it('practice squad player with active poaching claim can be reserved', async () => {
-      MockDate.set(regular_season_start.subtract('1', 'week').toISOString())
+      MockDate.set(
+        regular_season_start.clone().subtract('1', 'week').toISOString()
+      )
       const player = await selectPlayer()
       const teamId = 1
       const leagueId = 1
@@ -613,7 +1016,9 @@ describe('API /teams - reserve', function () {
     })
 
     it('practice squad drafted player with active poaching claim can be reserved', async () => {
-      MockDate.set(regular_season_start.subtract('1', 'week').toISOString())
+      MockDate.set(
+        regular_season_start.clone().subtract('1', 'week').toISOString()
+      )
       const player = await selectPlayer()
       const teamId = 1
       const leagueId = 1

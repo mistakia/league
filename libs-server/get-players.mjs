@@ -86,11 +86,50 @@ export default async function ({
     baselines.forEach((b) => baseline_player_ids.push(b.pid))
   }
 
-  const query = db('player').leftJoin('practice', function () {
-    this.on('player.pid', '=', 'practice.pid')
-      .andOn('practice.week', '=', constants.season.week)
-      .andOn('practice.year', '=', constants.season.year)
-  })
+  const query = db('player')
+    .leftJoin('practice', function () {
+      this.on('player.pid', '=', 'practice.pid')
+        .andOn('practice.week', '=', constants.season.week)
+        .andOn('practice.year', '=', constants.season.year)
+    })
+    .leftJoin('nfl_games', function () {
+      this.on(function () {
+        this.on('nfl_games.h', '=', 'player.current_nfl_team').orOn(
+          'nfl_games.v',
+          '=',
+          'player.current_nfl_team'
+        )
+      })
+        .andOn('nfl_games.week', '=', constants.season.week)
+        .andOn('nfl_games.year', '=', constants.season.year)
+        .andOn(db.raw("nfl_games.seas_type = 'REG'"))
+    })
+
+  // Only join prior week gamelog data if week > 1
+  if (constants.season.week > 1) {
+    const prior_week = constants.season.week - 1
+    // First join to prior week's game
+    query.leftJoin('nfl_games as prior_week_game', function () {
+      this.on(function () {
+        this.on('prior_week_game.h', '=', 'player.current_nfl_team').orOn(
+          'prior_week_game.v',
+          '=',
+          'player.current_nfl_team'
+        )
+      })
+        .andOn('prior_week_game.week', '=', prior_week)
+        .andOn('prior_week_game.year', '=', constants.season.year)
+        .andOn(db.raw("prior_week_game.seas_type = 'REG'"))
+    })
+    // Then join to player's gamelog for that game
+    query.leftJoin('player_gamelogs as prior_week_gamelog', function () {
+      this.on('prior_week_gamelog.pid', '=', 'player.pid').andOn(
+        'prior_week_gamelog.esbid',
+        '=',
+        'prior_week_game.esbid'
+      )
+    })
+  }
 
   const selects = ['player.pid']
 
@@ -127,6 +166,19 @@ export default async function ({
 
     query.select('practice.formatted_status as game_status')
     query.groupBy('game_status')
+
+    query.select('nfl_games.day as game_day')
+    query.groupBy('game_day')
+
+    // Calculate prior_week_inactive: true if no gamelog OR gamelog.active is false
+    if (constants.season.week > 1) {
+      query.select(
+        db.raw(
+          'CASE WHEN prior_week_gamelog.pid IS NULL OR prior_week_gamelog.active = false THEN true ELSE false END as prior_week_inactive'
+        )
+      )
+      query.groupBy('prior_week_gamelog.pid', 'prior_week_gamelog.active')
+    }
   }
 
   if (textSearch) {
