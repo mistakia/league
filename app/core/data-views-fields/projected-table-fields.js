@@ -4,7 +4,16 @@ import { constants, common_column_params } from '@libs-shared'
 
 const { single_year, single_week, single_seas_type } = common_column_params
 
-const projection_years = [2020, 2021, 2022, 2023, 2024]
+// Generate projection years dynamically from 2020 to current year
+const get_projection_years = () => {
+  const years = []
+  for (let year = 2020; year <= constants.year; year++) {
+    years.push(year)
+  }
+  return years
+}
+
+const projection_years = get_projection_years()
 
 export default function ({ week }) {
   const create_field = ({ base_name, title, groups, label, options = {} }) => ({
