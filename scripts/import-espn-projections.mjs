@@ -74,6 +74,12 @@ const run = async ({
       continue
     }
 
+    // Skip players without stats data from ESPN
+    if (!item.player.stats || !Array.isArray(item.player.stats)) {
+      log(`Skipping ${name} - no stats data available from ESPN`)
+      continue
+    }
+
     const projections = item.player.stats.find(
       (s) =>
         s.scoringPeriodId === week &&
