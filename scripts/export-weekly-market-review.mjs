@@ -126,7 +126,9 @@ const query_player_winning_selections = async ({ year }) => {
       SELECT
         pmsi.selection_pid as player_id,
         p.pname as player_name,
+        p.formatted as player_full_name,
         p.pos as position,
+        p.current_nfl_team as team,
         ng.week,
         pmi.market_type,
         pmi.source_market_name,
@@ -160,7 +162,9 @@ const query_player_winning_selections = async ({ year }) => {
     SELECT
       player_id,
       player_name,
+      player_full_name,
       position,
+      team,
       COUNT(*) FILTER (WHERE week = 1) as week_1,
       COUNT(*) FILTER (WHERE week = 2) as week_2,
       COUNT(*) FILTER (WHERE week = 3) as week_3,
@@ -181,7 +185,7 @@ const query_player_winning_selections = async ({ year }) => {
       COUNT(*) FILTER (WHERE week = 18) as week_18,
       COUNT(*) as total_season
     FROM filtered_selections
-    GROUP BY player_id, player_name, position
+    GROUP BY player_id, player_name, player_full_name, position, team
     HAVING COUNT(*) >= 3
     ORDER BY total_season DESC, player_name ASC
   `
@@ -204,6 +208,7 @@ const query_team_winning_selections = async ({ year }) => {
         ng.week,
         pmsi.selection_pid as player_id,
         p.pname as player_name,
+        p.formatted as player_full_name,
         p.pos as position,
         pmi.market_type,
         pmi.source_market_name,
@@ -266,7 +271,7 @@ const query_team_winning_selections = async ({ year }) => {
     team_players AS (
       SELECT
         team,
-        STRING_AGG(DISTINCT COALESCE(player_name, player_id) || ' (' || COALESCE(position, 'UNK') || ')', ', ') as top_players
+        STRING_AGG(DISTINCT COALESCE(player_full_name, player_name, player_id) || ' (' || COALESCE(position, 'UNK') || ')', ', ') as top_players
       FROM filtered_selections
       WHERE player_id IN (
         SELECT player_id
@@ -302,6 +307,7 @@ const query_opponent_winning_selections = async ({ year }) => {
         ng.week,
         pmsi.selection_pid as player_id,
         p.pname as player_name,
+        p.formatted as player_full_name,
         p.pos as position,
         pmi.market_type,
         pmi.source_market_name,
@@ -364,7 +370,7 @@ const query_opponent_winning_selections = async ({ year }) => {
     opponent_players AS (
       SELECT
         opponent,
-        STRING_AGG(DISTINCT COALESCE(player_name, player_id) || ' (' || COALESCE(position, 'UNK') || ')', ', ') as top_players
+        STRING_AGG(DISTINCT COALESCE(player_full_name, player_name, player_id) || ' (' || COALESCE(position, 'UNK') || ')', ', ') as top_players
       FROM filtered_selections
       WHERE player_id IN (
         SELECT player_id
@@ -398,7 +404,9 @@ const query_all_longshots_latest_week = async ({ year, week }) => {
       SELECT
         pmsi.selection_pid as player_id,
         COALESCE(p.pname, 'Unknown Player') as player_name,
+        COALESCE(p.formatted, p.pname, 'Unknown Player') as player_full_name,
         COALESCE(p.pos, 'UNK') as position,
+        COALESCE(p.current_nfl_team, 'UNK') as team,
         ng.week,
         pmi.market_type,
         pmsi.selection_name,
@@ -428,7 +436,9 @@ const query_all_longshots_latest_week = async ({ year, week }) => {
     SELECT
       player_id,
       player_name,
+      player_full_name,
       position,
+      team,
       week,
       market_type,
       selection_name,
@@ -455,7 +465,9 @@ const query_extreme_longshots_latest_week = async ({ year, week }) => {
       SELECT
         pmsi.selection_pid as player_id,
         COALESCE(p.pname, 'Unknown Player') as player_name,
+        COALESCE(p.formatted, p.pname, 'Unknown Player') as player_full_name,
         COALESCE(p.pos, 'UNK') as position,
+        COALESCE(p.current_nfl_team, 'UNK') as team,
         ng.week,
         pmi.market_type,
         pmsi.selection_name,
@@ -485,7 +497,9 @@ const query_extreme_longshots_latest_week = async ({ year, week }) => {
     SELECT
       player_id,
       player_name,
+      player_full_name,
       position,
+      team,
       week,
       market_type,
       selection_name,
@@ -504,7 +518,203 @@ const query_extreme_longshots_latest_week = async ({ year, week }) => {
 }
 
 /**
- * Query 6: Player context for identified players
+ * Query 6: Market type winning selections by week with top players and opponents
+ */
+const query_market_type_winning_selections = async ({ year, week }) => {
+  log('Executing market type winning selections query...')
+
+  const sql = `
+    WITH winning_selections AS (
+        SELECT
+            pmi.market_type,
+            ng.week,
+            pmsi.selection_pid as player_id,
+            p.pname as player_name,
+            p.formatted as player_full_name,
+            p.pos as position,
+            p.current_nfl_team as team,
+            pgl.opp as opponent,
+            pmi.source_market_name,
+            pmsi.selection_name,
+            pmsi.selection_metric_line,
+            pmsi.odds_decimal,
+            pmsi.odds_american,
+            ROW_NUMBER() OVER (
+                PARTITION BY pmsi.selection_pid, pmi.market_type, pmi.source_market_name
+                ORDER BY pmsi.odds_american DESC
+            ) as rn
+        FROM prop_market_selections_index pmsi
+        JOIN prop_markets_index pmi ON (
+            pmsi.source_id = pmi.source_id
+            AND pmsi.source_market_id = pmi.source_market_id
+        )
+        JOIN nfl_games ng ON pmi.esbid = ng.esbid
+        LEFT JOIN player p ON pmsi.selection_pid = p.pid
+        LEFT JOIN player_gamelogs pgl ON (
+            pmsi.selection_pid = pgl.pid
+            AND pmi.esbid = pgl.esbid
+        )
+        WHERE
+            pmsi.time_type = 'CLOSE'
+            AND ng.year = ?
+            AND pmsi.odds_american > 200
+            AND pmsi.selection_result = 'WON'
+            AND ng.seas_type = 'REG'
+            AND pmsi.selection_pid IS NOT NULL
+            AND pmsi.selection_pid != ''
+    ),
+    filtered_selections AS (
+        SELECT *
+        FROM winning_selections
+        WHERE rn = 1
+    ),
+    market_type_weekly AS (
+        SELECT
+            fs.market_type,
+            COUNT(*) FILTER (WHERE fs.week = 1) as week_1,
+            COUNT(*) FILTER (WHERE fs.week = 2) as week_2,
+            COUNT(*) FILTER (WHERE fs.week = 3) as week_3,
+            COUNT(*) FILTER (WHERE fs.week = 4) as week_4,
+            COUNT(*) FILTER (WHERE fs.week = 5) as week_5,
+            COUNT(*) FILTER (WHERE fs.week = 6) as week_6,
+            COUNT(*) FILTER (WHERE fs.week = 7) as week_7,
+            COUNT(*) FILTER (WHERE fs.week = 8) as week_8,
+            COUNT(*) FILTER (WHERE fs.week = 9) as week_9,
+            COUNT(*) FILTER (WHERE fs.week = 10) as week_10,
+            COUNT(*) FILTER (WHERE fs.week = 11) as week_11,
+            COUNT(*) FILTER (WHERE fs.week = 12) as week_12,
+            COUNT(*) FILTER (WHERE fs.week = 13) as week_13,
+            COUNT(*) FILTER (WHERE fs.week = 14) as week_14,
+            COUNT(*) FILTER (WHERE fs.week = 15) as week_15,
+            COUNT(*) FILTER (WHERE fs.week = 16) as week_16,
+            COUNT(*) FILTER (WHERE fs.week = 17) as week_17,
+            COUNT(*) FILTER (WHERE fs.week = 18) as week_18,
+            COUNT(*) as total_season
+        FROM filtered_selections fs
+        GROUP BY fs.market_type
+    ),
+    top_players_season AS (
+        SELECT
+            market_type,
+            STRING_AGG(
+                player_full_name || ' (' || position || ', ' || team || ')',
+                ', '
+                ORDER BY wins_count DESC, player_name ASC
+            ) as top_players_season
+        FROM (
+            SELECT
+                market_type,
+                player_full_name,
+                player_name,
+                position,
+                team,
+                COUNT(*) as wins_count,
+                ROW_NUMBER() OVER (
+                    PARTITION BY market_type
+                    ORDER BY COUNT(*) DESC, player_name ASC
+                ) as rn
+            FROM filtered_selections
+            GROUP BY market_type, player_full_name, player_name, position, team
+        ) ranked_players
+        WHERE rn <= 3
+        GROUP BY market_type
+    ),
+    top_players_week AS (
+        SELECT
+            market_type,
+            STRING_AGG(
+                player_full_name || ' (' || position || ', ' || team || ')',
+                ', '
+                ORDER BY wins_count DESC, player_name ASC
+            ) as top_players_week
+        FROM (
+            SELECT
+                market_type,
+                player_full_name,
+                player_name,
+                position,
+                team,
+                COUNT(*) as wins_count,
+                ROW_NUMBER() OVER (
+                    PARTITION BY market_type
+                    ORDER BY COUNT(*) DESC, player_name ASC
+                ) as rn
+            FROM filtered_selections
+            WHERE week = ?
+            GROUP BY market_type, player_full_name, player_name, position, team
+        ) ranked_players
+        WHERE rn <= 3
+        GROUP BY market_type
+    ),
+    top_opponents_season AS (
+        SELECT
+            market_type,
+            STRING_AGG(
+                opponent || ' (' || wins_count || ')',
+                ', '
+                ORDER BY wins_count DESC, opponent ASC
+            ) as top_opponents_season
+        FROM (
+            SELECT
+                market_type,
+                opponent,
+                COUNT(*) as wins_count,
+                ROW_NUMBER() OVER (
+                    PARTITION BY market_type
+                    ORDER BY COUNT(*) DESC, opponent ASC
+                ) as rn
+            FROM filtered_selections
+            WHERE opponent IS NOT NULL
+            GROUP BY market_type, opponent
+        ) ranked_opponents
+        WHERE rn <= 3
+        GROUP BY market_type
+    ),
+    top_opponents_week AS (
+        SELECT
+            market_type,
+            STRING_AGG(
+                opponent || ' (' || wins_count || ')',
+                ', '
+                ORDER BY wins_count DESC, opponent ASC
+            ) as top_opponents_week
+        FROM (
+            SELECT
+                market_type,
+                opponent,
+                COUNT(*) as wins_count,
+                ROW_NUMBER() OVER (
+                    PARTITION BY market_type
+                    ORDER BY COUNT(*) DESC, opponent ASC
+                ) as rn
+            FROM filtered_selections
+            WHERE week = ? AND opponent IS NOT NULL
+            GROUP BY market_type, opponent
+        ) ranked_opponents
+        WHERE rn <= 3
+        GROUP BY market_type
+    )
+    SELECT
+        mtw.*,
+        COALESCE(tps.top_players_season, 'None') as top_players_season,
+        COALESCE(tpw.top_players_week, 'None') as top_players_week,
+        COALESCE(tos.top_opponents_season, 'None') as top_opponents_season,
+        COALESCE(tow.top_opponents_week, 'None') as top_opponents_week
+    FROM market_type_weekly mtw
+    LEFT JOIN top_players_season tps ON mtw.market_type = tps.market_type
+    LEFT JOIN top_players_week tpw ON mtw.market_type = tpw.market_type
+    LEFT JOIN top_opponents_season tos ON mtw.market_type = tos.market_type
+    LEFT JOIN top_opponents_week tow ON mtw.market_type = tow.market_type
+    ORDER BY mtw.total_season DESC, mtw.market_type
+  `
+
+  const results = await db.raw(sql, [year, week, week])
+  log(`  Found ${results.rows.length} market types with longshot wins`)
+  return results.rows
+}
+
+/**
+ * Query 7: Player context for identified players
  */
 const query_player_context = async ({ year, player_ids }) => {
   if (!player_ids || player_ids.length === 0) {
@@ -518,6 +728,7 @@ const query_player_context = async ({ year, player_ids }) => {
     SELECT
       p.pid,
       p.pname,
+      p.formatted as player_full_name,
       p.pos,
       p.nfl_draft_year,
       p.height,
@@ -628,8 +839,9 @@ const main = async () => {
       title: 'Players by Longshot Wins (200+ Odds)',
       query_info: `Players with 3+ longshot wins across ${argv.year} regular season`,
       columns: [
-        { key: 'player_name', label: 'Player' },
+        { key: 'player_full_name', label: 'Player' },
         { key: 'position', label: 'Pos' },
+        { key: 'team', label: 'Team' },
         { key: 'week_1', label: 'W1', empty: '0' },
         { key: 'week_2', label: 'W2', empty: '0' },
         { key: 'week_3', label: 'W3', empty: '0' },
@@ -752,8 +964,9 @@ const main = async () => {
       title: `All Longshot Selections (200+ Odds) - Week ${week}`,
       query_info: `Complete list of all longshot wins from week ${week}`,
       columns: [
-        { key: 'player_name', label: 'Player' },
+        { key: 'player_full_name', label: 'Player' },
         { key: 'position', label: 'Pos' },
+        { key: 'team', label: 'Team' },
         { key: 'market_type', label: 'Market Type' },
         { key: 'selection_name', label: 'Selection' },
         { key: 'selection_metric_line', label: 'Line' },
@@ -778,8 +991,9 @@ const main = async () => {
       title: `Extreme Longshot Highlights (1000+ Odds) - Week ${week}`,
       query_info: `Only the most extreme longshot wins from week ${week}`,
       columns: [
-        { key: 'player_name', label: 'Player' },
+        { key: 'player_full_name', label: 'Player' },
         { key: 'position', label: 'Pos' },
+        { key: 'team', label: 'Team' },
         { key: 'market_type', label: 'Market Type' },
         { key: 'selection_name', label: 'Selection' },
         { key: 'selection_metric_line', label: 'Line' },
@@ -796,7 +1010,52 @@ const main = async () => {
       row_count: extreme_longshots_results.length
     })
 
-    // Query 6: Player context
+    // Query 6: Market type winning selections with top players and opponents
+    const market_type_results = await query_market_type_winning_selections({
+      year: argv.year,
+      week
+    })
+    const market_type_markdown = format_results_to_markdown_table({
+      results: market_type_results,
+      title: 'Market Type Longshot Distribution with Top Players & Opponents',
+      query_info: `Longshot wins by market type with top 3 players and opponents for season and week ${week}`,
+      columns: [
+        { key: 'market_type', label: 'Market Type' },
+        { key: 'week_1', label: 'W1', empty: '0' },
+        { key: 'week_2', label: 'W2', empty: '0' },
+        { key: 'week_3', label: 'W3', empty: '0' },
+        { key: 'week_4', label: 'W4', empty: '0' },
+        { key: 'week_5', label: 'W5', empty: '0' },
+        { key: 'week_6', label: 'W6', empty: '0' },
+        { key: 'week_7', label: 'W7', empty: '0' },
+        { key: 'week_8', label: 'W8', empty: '0' },
+        { key: 'week_9', label: 'W9', empty: '0' },
+        { key: 'week_10', label: 'W10', empty: '0' },
+        { key: 'week_11', label: 'W11', empty: '0' },
+        { key: 'week_12', label: 'W12', empty: '0' },
+        { key: 'week_13', label: 'W13', empty: '0' },
+        { key: 'week_14', label: 'W14', empty: '0' },
+        { key: 'week_15', label: 'W15', empty: '0' },
+        { key: 'week_16', label: 'W16', empty: '0' },
+        { key: 'week_17', label: 'W17', empty: '0' },
+        { key: 'week_18', label: 'W18', empty: '0' },
+        { key: 'total_season', label: 'Total' },
+        { key: 'top_players_season', label: 'Top Players (Season)' },
+        { key: 'top_players_week', label: `Top Players (Week ${week})` },
+        { key: 'top_opponents_season', label: 'Top Opponents (Season)' },
+        { key: 'top_opponents_week', label: `Top Opponents (Week ${week})` }
+      ]
+    })
+    await fs.writeFile(
+      path.join(output_dir, 'market-type-winning-selections.md'),
+      market_type_markdown
+    )
+    query_results.push({
+      query: 'market-type-winning-selections',
+      row_count: market_type_results.length
+    })
+
+    // Query 7: Player context
     const all_player_ids = new Set([
       ...player_results.map((p) => p.player_id),
       ...all_longshots_results.map((p) => p.player_id),
@@ -811,7 +1070,7 @@ const main = async () => {
       title: 'Player Context Analysis',
       query_info: `Background information for players with longshot wins`,
       columns: [
-        { key: 'pname', label: 'Player' },
+        { key: 'player_full_name', label: 'Player' },
         { key: 'pos', label: 'Pos' },
         { key: 'player_category', label: 'Category' },
         { key: 'nfl_seasons', label: 'Seasons' },
