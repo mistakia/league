@@ -66,6 +66,9 @@ export const calculate_wager_summary = ({ wagers, props = [] }) =>
       const is_won = is_settled && lost_legs === 0
       const is_lost = is_settled && lost_legs > 0
 
+      // Track bonus bet amounts
+      const bonus_bet_amount = wager.bonus_bet_amount || 0
+
       return {
         won_wagers: is_won
           ? [...accumulator.won_wagers, wager]
@@ -82,6 +85,7 @@ export const calculate_wager_summary = ({ wagers, props = [] }) =>
           : accumulator.wagers_open + 1,
 
         total_risk: accumulator.total_risk + wager.stake,
+        bonus_bet_risk: accumulator.bonus_bet_risk + bonus_bet_amount,
         total_won: is_won
           ? accumulator.total_won + wager.potential_win
           : accumulator.total_won,
@@ -114,6 +118,7 @@ export const calculate_wager_summary = ({ wagers, props = [] }) =>
       wagers_won: 0,
       wagers_loss: 0,
       total_risk: 0,
+      bonus_bet_risk: 0,
       wagers_open: 0,
       total_won: 0,
       max_potential_win: 0,

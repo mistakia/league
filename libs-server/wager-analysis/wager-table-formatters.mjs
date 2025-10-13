@@ -47,7 +47,11 @@ export const create_wager_summary_table = (
     wager_summary_table.addRow({ Metric: label, Value: value })
   }
 
+  add_row('Total Risk', wager_summary.total_risk)
+  add_row('Cash Risk', wager_summary.cash_risk)
+  add_row('Bonus Bet Risk', wager_summary.bonus_bet_risk)
   add_row('ROI', wager_summary.current_roi)
+  add_row('Cash ROI', wager_summary.cash_roi)
   add_row(
     'Open Potential ROI',
     `${((wager_summary.open_potential_win / wager_summary.total_risk - 1) * 100).toFixed(0)}%`

@@ -130,11 +130,30 @@ const analyze_wagers = async ({
   })
 
   const wager_summary = calculate_wager_summary({ wagers: filtered })
+
+  // Calculate cash risk (total risk minus bonus bets)
+  wager_summary.cash_risk =
+    wager_summary.total_risk - wager_summary.bonus_bet_risk
+
+  // Calculate ROIs
   wager_summary.current_roi = `${(
     (wager_summary.total_won / wager_summary.total_risk - 1) *
     100
   ).toFixed(2)}%`
+
+  // Calculate cash-only ROI (returns on actual cash invested)
+  wager_summary.cash_roi =
+    wager_summary.cash_risk > 0
+      ? `${(
+          (wager_summary.total_won / wager_summary.cash_risk - 1) *
+          100
+        ).toFixed(2)}%`
+      : 'N/A'
+
+  // Format numbers
   wager_summary.total_risk = Number(wager_summary.total_risk.toFixed(2))
+  wager_summary.bonus_bet_risk = Number(wager_summary.bonus_bet_risk.toFixed(2))
+  wager_summary.cash_risk = Number(wager_summary.cash_risk.toFixed(2))
   wager_summary.open_potential_win = Number(
     wager_summary.open_potential_win.toFixed(2)
   )
