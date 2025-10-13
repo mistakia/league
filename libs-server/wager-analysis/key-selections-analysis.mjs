@@ -1,3 +1,7 @@
+// Constants
+const HIGH_ODDS_THRESHOLD = 180
+const HIGH_EXPOSURE_THRESHOLD = 8
+
 /**
  * Calculate key selections based on multiple criteria:
  * - High-odds winners (odds >= 180)
@@ -79,12 +83,13 @@ export const calculate_key_selections = ({
     const exposure_rate_pct = parseFloat(selection.exposure_rate)
 
     // Determine selection criteria
-    const is_high_odds_winner = selection.is_won && selection.parsed_odds >= 180
+    const is_high_odds_winner =
+      selection.is_won && selection.parsed_odds >= HIGH_ODDS_THRESHOLD
     const is_near_miss =
       near_miss_counts.lost_by_1_count > 0 ||
       near_miss_counts.lost_by_2_count > 0 ||
       near_miss_counts.lost_by_3_count > 0
-    const is_high_exposure = exposure_rate_pct > 8
+    const is_high_exposure = exposure_rate_pct > HIGH_EXPOSURE_THRESHOLD
 
     // Include if it meets any criteria
     if (is_high_odds_winner || is_near_miss || is_high_exposure) {
@@ -119,11 +124,8 @@ export const calculate_key_selections = ({
     }
   }
 
-  // Sort by total_near_miss_count DESC, then by exposure_rate DESC
+  // Sort by exposure_rate DESC
   key_selections.sort((a, b) => {
-    if (b.total_near_miss_count !== a.total_near_miss_count) {
-      return b.total_near_miss_count - a.total_near_miss_count
-    }
     return parseFloat(b.exposure_rate) - parseFloat(a.exposure_rate)
   })
 
