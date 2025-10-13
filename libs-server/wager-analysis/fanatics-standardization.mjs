@@ -25,6 +25,8 @@ export const standardize_fanatics_wager = (wager) => {
     is_won: wager.header.betStatus === 'WON',
     potential_win: fanatics.format_wager_payout(wager.header.payout),
     stake: Number(wager.header.wager.replace('$', '')),
+    is_bonus_bet: false,
+    bonus_bet_amount: 0,
     source_id: 'FANATICS'
   }
 }

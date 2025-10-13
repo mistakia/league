@@ -103,8 +103,14 @@ const calculate_fanduel_round_robin_wager = ({ wager }) => {
     return true
   })
 
+  // Extract bonus bet information for round robin
+  const is_bonus_bet = Boolean(wager.rewardUsed?.type === 'BONUS_BET')
+  const bonus_bet_amount_total = is_bonus_bet ? wager.rewardUsed.balance : 0
+
   // Calculate potential win for each combination
   const stake_per_combination = wager.currentSize / valid_combinations.length
+  const bonus_bet_per_combination =
+    bonus_bet_amount_total / valid_combinations.length
   const round_robin_wagers = valid_combinations.map((combination) => {
     const odds_product = combination.reduce((product, leg) => {
       return product * (1 + Number(leg.parts[0].price) - 1)
@@ -115,6 +121,8 @@ const calculate_fanduel_round_robin_wager = ({ wager }) => {
       stake: stake_per_combination,
       potential_win,
       parsed_odds: (odds_product - 1) * 100, // Convert to American odds
+      is_bonus_bet,
+      bonus_bet_amount: bonus_bet_per_combination,
       selections: combination.map((leg) => ({
         ...leg.parts[0],
         name: format_fanduel_selection_name({
@@ -160,6 +168,10 @@ export const standardize_fanduel_wager = (wager) => {
     return round_robin_wagers
   }
 
+  // Extract bonus bet information
+  const is_bonus_bet = Boolean(wager.rewardUsed?.type === 'BONUS_BET')
+  const bonus_bet_amount = is_bonus_bet ? wager.rewardUsed.balance : 0
+
   return {
     ...wager,
     week,
@@ -189,6 +201,8 @@ export const standardize_fanduel_wager = (wager) => {
     is_won: wager.result === 'WON',
     potential_win: wager.betPrice * wager.currentSize,
     stake: wager.currentSize,
+    is_bonus_bet,
+    bonus_bet_amount,
     source_id: 'FANDUEL'
   }
 }

@@ -182,6 +182,8 @@ export const standardize_draftkings_wager = (wager) => {
         is_lost,
         potential_win: combination.potentialReturns,
         stake,
+        is_bonus_bet: false,
+        bonus_bet_amount: 0,
         source_id: 'DRAFTKINGS'
       }
     })
@@ -212,6 +214,8 @@ export const standardize_draftkings_wager = (wager) => {
       is_won: wager.settlementStatus === 'Won',
       potential_win: wager.potentialReturns,
       stake: wager.stake,
+      is_bonus_bet: false,
+      bonus_bet_amount: 0,
       source_id: 'DRAFTKINGS'
     }
   }
