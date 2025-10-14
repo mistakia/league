@@ -112,11 +112,26 @@ const format_wagers_by_odds_range = (wager_summary) => {
     ['+400 to +1000', wager_summary.wagers_by_odds_range.range_400_1000],
     ['+1000 to +10000', wager_summary.wagers_by_odds_range.range_1000_10000],
     ['+10000 to +50000', wager_summary.wagers_by_odds_range.range_10000_50000],
-    ['+50000 to +100000', wager_summary.wagers_by_odds_range.range_50000_100000],
-    ['+100000 to +150000', wager_summary.wagers_by_odds_range.range_100000_150000],
-    ['+150000 to +250000', wager_summary.wagers_by_odds_range.range_150000_250000],
-    ['+250000 to +500000', wager_summary.wagers_by_odds_range.range_250000_500000],
-    ['+500000 to +1000000', wager_summary.wagers_by_odds_range.range_500000_1000000],
+    [
+      '+50000 to +100000',
+      wager_summary.wagers_by_odds_range.range_50000_100000
+    ],
+    [
+      '+100000 to +150000',
+      wager_summary.wagers_by_odds_range.range_100000_150000
+    ],
+    [
+      '+150000 to +250000',
+      wager_summary.wagers_by_odds_range.range_150000_250000
+    ],
+    [
+      '+250000 to +500000',
+      wager_summary.wagers_by_odds_range.range_250000_500000
+    ],
+    [
+      '+500000 to +1000000',
+      wager_summary.wagers_by_odds_range.range_500000_1000000
+    ],
     ['> +1000000', wager_summary.wagers_by_odds_range.over_1000000]
   ]
 

@@ -56,9 +56,7 @@ export const format_american_odds_as_fractional = (american_odds) => {
 
   try {
     // Convert American odds to decimal odds first
-    const decimal_odds = oddslib
-      .from('moneyline', american_odds)
-      .to('decimal')
+    const decimal_odds = oddslib.from('moneyline', american_odds).to('decimal')
 
     // Convert decimal to X/1 fractional format
     // Decimal odds of 2.5 = 1.5/1 profit ratio
