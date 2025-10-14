@@ -211,6 +211,7 @@ DROP INDEX IF EXISTS public.ngs_prospect_scores_history_pid_idx;
 DROP INDEX IF EXISTS public.nfl_year_week_timestamp_year_week_idx;
 DROP INDEX IF EXISTS public."nfl_snaps_year_default_year_esbid_playId_gsis_it_id_idx";
 DROP INDEX IF EXISTS public."nfl_snaps_year_2026_year_esbid_playId_gsis_it_id_idx";
+DROP INDEX IF EXISTS public."nfl_snaps_year_2025_year_esbid_playId_gsis_it_id_idx";
 DROP INDEX IF EXISTS public."nfl_snaps_year_2024_year_esbid_playId_gsis_it_id_idx";
 DROP INDEX IF EXISTS public."nfl_snaps_year_2023_year_esbid_playId_gsis_it_id_idx";
 DROP INDEX IF EXISTS public."nfl_snaps_year_2022_year_esbid_playId_gsis_it_id_idx";
@@ -1984,6 +1985,7 @@ DROP TABLE IF EXISTS public.nfl_team_seasonlogs;
 DROP TABLE IF EXISTS public.nfl_team_gamelogs;
 DROP TABLE IF EXISTS public.nfl_snaps_year_default;
 DROP TABLE IF EXISTS public.nfl_snaps_year_2026;
+DROP TABLE IF EXISTS public.nfl_snaps_year_2025;
 DROP TABLE IF EXISTS public.nfl_snaps_year_2024;
 DROP TABLE IF EXISTS public.nfl_snaps_year_2023;
 DROP TABLE IF EXISTS public.nfl_snaps_year_2022;
@@ -15036,6 +15038,18 @@ CREATE TABLE public.nfl_snaps_year_2024 (
 
 
 --
+-- Name: nfl_snaps_year_2025; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.nfl_snaps_year_2025 (
+    esbid integer NOT NULL,
+    "playId" integer NOT NULL,
+    gsis_it_id integer NOT NULL,
+    year smallint NOT NULL
+);
+
+
+--
 -- Name: nfl_snaps_year_2026; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -22091,6 +22105,13 @@ ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2023 FO
 --
 
 ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2024 FOR VALUES FROM ('2024') TO ('2025');
+
+
+--
+-- Name: nfl_snaps_year_2025; Type: TABLE ATTACH; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.nfl_snaps ATTACH PARTITION public.nfl_snaps_year_2025 FOR VALUES FROM ('2025') TO ('2026');
 
 
 --
@@ -33966,6 +33987,13 @@ CREATE UNIQUE INDEX "nfl_snaps_year_2024_year_esbid_playId_gsis_it_id_idx" ON pu
 
 
 --
+-- Name: nfl_snaps_year_2025_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE UNIQUE INDEX "nfl_snaps_year_2025_year_esbid_playId_gsis_it_id_idx" ON public.nfl_snaps_year_2025 USING btree (year, esbid, "playId", gsis_it_id);
+
+
+--
 -- Name: nfl_snaps_year_2026_year_esbid_playId_gsis_it_id_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -44155,6 +44183,13 @@ ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_
 --
 
 ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_2024_year_esbid_playId_gsis_it_id_idx";
+
+
+--
+-- Name: nfl_snaps_year_2025_year_esbid_playId_gsis_it_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_snaps_partitioned ATTACH PARTITION public."nfl_snaps_year_2025_year_esbid_playId_gsis_it_id_idx";
 
 
 --

@@ -229,6 +229,9 @@
 
 # Maintenance
 
+## Create database partitions for upcoming season (At 00:00 on the 1st in May and July)
+0 0 1 5,7 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/create-season-partitions.mjs &>> /var/log/league/create-season-partitions.log
+
 ## Every day at 0:00
 0 0 * * * find /tmp/puppeteer* -mtime +2 -exec rm -rf {} \; &>> /var/log/league/league-cleanup-puppeteer.log
 
