@@ -150,6 +150,12 @@ const analyze_wagers = async ({
         ).toFixed(2)}%`
       : 'N/A'
 
+  // Calculate average wager odds
+  wager_summary.avg_wager_odds =
+    wager_summary.wagers > 0
+      ? Math.round(wager_summary.wagers_odds_sum / wager_summary.wagers)
+      : 0
+
   // Format numbers
   wager_summary.total_risk = Number(wager_summary.total_risk.toFixed(2))
   wager_summary.bonus_bet_risk = Number(wager_summary.bonus_bet_risk.toFixed(2))

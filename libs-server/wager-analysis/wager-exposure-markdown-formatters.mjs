@@ -63,6 +63,22 @@ const format_performance_summary = (wager_summary, props_summary) => {
   )
   lines.push(format_table_row(['Actual Hits', props_summary.actual_hits]))
   lines.push(format_table_row(['Wagers Won', wager_summary.wagers_won]))
+  lines.push(
+    format_table_row([
+      'Max Wager Odds',
+      wager_summary.max_wager_odds > 0
+        ? `+${wager_summary.max_wager_odds}`
+        : wager_summary.max_wager_odds
+    ])
+  )
+  lines.push(
+    format_table_row([
+      'Avg Wager Odds',
+      wager_summary.avg_wager_odds > 0
+        ? `+${wager_summary.avg_wager_odds}`
+        : wager_summary.avg_wager_odds
+    ])
+  )
   lines.push('')
   return lines.join('\n')
 }
@@ -80,6 +96,34 @@ const format_wagers_lost_by_selections = (wager_summary) => {
       wager_summary.lost_by_four_or_more_legs
     ])
   )
+  lines.push('')
+  return lines.join('\n')
+}
+
+const format_wagers_by_odds_range = (wager_summary) => {
+  const lines = []
+  lines.push('## Wagers By Odds Range\n')
+  lines.push(format_table_header(['Odds Range', 'Count']))
+  lines.push(format_table_separator(['Odds Range', 'Count']))
+
+  const ranges = [
+    ['< +100', wager_summary.wagers_by_odds_range.under_100],
+    ['+100 to +400', wager_summary.wagers_by_odds_range.range_100_400],
+    ['+400 to +1000', wager_summary.wagers_by_odds_range.range_400_1000],
+    ['+1000 to +10000', wager_summary.wagers_by_odds_range.range_1000_10000],
+    ['+10000 to +50000', wager_summary.wagers_by_odds_range.range_10000_50000],
+    ['+50000 to +100000', wager_summary.wagers_by_odds_range.range_50000_100000],
+    ['+100000 to +150000', wager_summary.wagers_by_odds_range.range_100000_150000],
+    ['+150000 to +250000', wager_summary.wagers_by_odds_range.range_150000_250000],
+    ['+250000 to +500000', wager_summary.wagers_by_odds_range.range_250000_500000],
+    ['+500000 to +1000000', wager_summary.wagers_by_odds_range.range_500000_1000000],
+    ['> +1000000', wager_summary.wagers_by_odds_range.over_1000000]
+  ]
+
+  for (const [range, count] of ranges) {
+    lines.push(format_table_row([range, count]))
+  }
+
   lines.push('')
   return lines.join('\n')
 }
@@ -419,7 +463,7 @@ export const format_exposures_markdown = (
 // Format key selections table as markdown
 export const format_key_selections_markdown = (key_selections) => {
   const lines = []
-  lines.push('## Notable Selections\n')
+  lines.push('## Key Selections\n')
   lines.push(
     format_table_header([
       'Selection',
@@ -504,6 +548,9 @@ export const format_review_template = ({
 
   // Wagers Lost By # Selections
   lines.push(format_wagers_lost_by_selections(wager_summary))
+
+  // Wagers By Odds Range
+  lines.push(format_wagers_by_odds_range(wager_summary))
 
   // Classification of Misses placeholder
   lines.push(format_classification_of_misses())

@@ -1,6 +1,7 @@
 import {
   format_metric_result,
-  format_threshold_distance
+  format_threshold_distance,
+  format_american_odds_as_fractional
 } from './wager-calculations.mjs'
 
 // Format wager search results as markdown
@@ -18,8 +19,11 @@ export const format_wager_search_markdown = (wagers, options = {}) => {
   for (const wager of wagers) {
     const potential_roi_gain = (wager.potential_win / total_risk) * 100
     const num_of_legs = wager.selections.length
+    const fractional_odds = format_american_odds_as_fractional(
+      wager.parsed_odds
+    )
 
-    let title = `### [${num_of_legs} leg parlay] American odds: ${wager.parsed_odds > 0 ? '+' : ''}${Number(wager.parsed_odds).toFixed(0)}`
+    let title = `### [${num_of_legs} leg parlay] ${fractional_odds}`
 
     if (show_wager_roi) {
       title += ` / ${potential_roi_gain.toFixed(2)}% roi`
