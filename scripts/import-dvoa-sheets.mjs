@@ -1016,20 +1016,35 @@ const import_dvoa_sheets = async ({ dry_run = false, filepath } = {}) => {
     // Get NFL week to determine versioning logic
     const nfl_week = constants.season.nfl_seas_week
 
-    // DVOA sheets are not available until after week 2
+    // DVOA sheets are not available until after NFL week 2
     let version_number = 0
-    if (nfl_week < 2) {
+    if (nfl_week <= 2) {
       log(
         `Skipping DVOA import - no sheets available until after NFL week 2 (currently week ${nfl_week})`
       )
       return
-    } else if (nfl_week === 2) {
-      // After week 2: no version suffix (base URL)
-      version_number = 0
     } else {
-      // After week 3: version 1
-      // After week 4: version 2, etc.
-      version_number = nfl_week - 2
+      // Calculate which month we're in (assuming 4 weeks per month)
+      const months_since_season_start = Math.floor((nfl_week - 1) / 4)
+      const week_in_month = ((nfl_week - 1) % 4) + 1
+
+      if (months_since_season_start === 0) {
+        // First month: version based on NFL week
+        // NFL week 3 = version 1, NFL week 4 = version 2, etc.
+        version_number = nfl_week - 2
+      } else {
+        // Subsequent months: version based on week within the month
+        // Week 1-2 of month = version 0, week 3 = version 1, week 4 = version 2
+        if (week_in_month <= 2) {
+          version_number = 0 // Use base URL for first 2 weeks of month
+        } else {
+          version_number = week_in_month - 2 // Week 3 = version 1, Week 4 = version 2
+        }
+      }
+
+      log(
+        `NFL week ${nfl_week}, month ${months_since_season_start + 1}, week in month ${week_in_month}, version ${version_number}`
+      )
     }
 
     const filename = `dvoa_sheets_${constants.season.year}.xlsx`
