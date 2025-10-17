@@ -5,3 +5,4 @@ export {
   default_data_views,
   default_data_view_view_id
 } from './default-data-views'
+export * from './browser-storage.mjs'

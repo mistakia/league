@@ -97,6 +97,8 @@ export default function DataViewsPage({
       const has_table_state =
         columns.length || where.length || (prefix_columns.length && sort.length)
 
+      // Only handle URL-based table state initialization
+      // Browser state restoration and default view selection is handled by sagas
       if (has_table_state) {
         data_view_changed(
           {
@@ -124,13 +126,9 @@ export default function DataViewsPage({
             view_state_changed: true
           }
         )
-      } else {
-        data_view_changed(selected_data_view, {
-          view_state_changed: true
-        })
       }
     }
-  }, [location, data_view_changed, view_id]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [location, data_view_changed, view_id])
 
   useEffect(() => {
     for (const column of selected_data_view.table_state.columns) {
@@ -231,6 +229,20 @@ export default function DataViewsPage({
     }
   }, [selected_data_view.table_state, leagueId])
 
+  const filtered_saved_table_state = useMemo(() => {
+    if (leagueId && leagueId > 0) {
+      return selected_data_view.saved_table_state
+    }
+
+    return {
+      ...selected_data_view.saved_table_state,
+      prefix_columns:
+        selected_data_view.saved_table_state.prefix_columns.filter(
+          (column) => column !== 'player_league_roster_status'
+        )
+    }
+  }, [selected_data_view.saved_table_state, leagueId])
+
   const fetch_more = useCallback(() => {
     // Don't fetch more if we're already loading or fetching more
     const is_fetching =
@@ -301,7 +313,7 @@ export default function DataViewsPage({
         on_view_change={on_view_change}
         on_save_view={save_data_view}
         table_state={filtered_table_state}
-        saved_table_state={selected_data_view.saved_table_state}
+        saved_table_state={filtered_saved_table_state}
         all_columns={data_views_fields}
         selected_view={selected_data_view}
         select_view={on_select_view}
