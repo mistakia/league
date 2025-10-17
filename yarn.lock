@@ -4764,14 +4764,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@trashman/ed25519-blake2b@npm:0.0.7":
-  version: 0.0.7
-  resolution: "@trashman/ed25519-blake2b@npm:0.0.7"
+"@trashman/ed25519-blake2b@npm:0.0.8":
+  version: 0.0.8
+  resolution: "@trashman/ed25519-blake2b@npm:0.0.8"
   dependencies:
     napi-macros: "npm:2.0.0"
     node-gyp: "npm:latest"
-    node-gyp-build: "npm:4.4.0"
-  checksum: 10/1f6de610ae5521e39bd27498e3b8bad48a39aaec309d5826572cdef12bf8bfb743bf830704bc2c0556d86c40713d618c465b62da1649b33a44fd5e1ed9912c8d
+    node-gyp-build: "npm:4.8.4"
+  checksum: 10/4670f893dd1d58cfe761a03dec745ebdc82b18f3920a77364eb5f6f097983c5ec4cf2027d0f5266cd0e9b0e15e8e6474e383cfbda4001700ea52f2e18a3d9427
   languageName: node
   linkType: hard
 
@@ -12548,18 +12548,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"node-gyp-build@npm:4.4.0":
-  version: 4.4.0
-  resolution: "node-gyp-build@npm:4.4.0"
-  bin:
-    node-gyp-build: bin.js
-    node-gyp-build-optional: optional.js
-    node-gyp-build-test: build-test.js
-  checksum: 10/a2f77e622ed738209f20ee808c812fe5697c3c641b76b6a369b989a810ed40d1a7f5e7687ca0ea5987363697c284f1c75cdc8164e8cfdd5e6ff3bae17e9898ff
-  languageName: node
-  linkType: hard
-
-"node-gyp-build@npm:^4.3.0":
+"node-gyp-build@npm:4.8.4, node-gyp-build@npm:^4.3.0":
   version: 4.8.4
   resolution: "node-gyp-build@npm:4.8.4"
   bin:
@@ -15015,7 +15004,7 @@ __metadata:
     "@mui/x-date-pickers": "npm:^7.23.6"
     "@sendgrid/mail": "npm:^7.7.0"
     "@simonwep/pickr": "npm:^1.9.1"
-    "@trashman/ed25519-blake2b": "npm:0.0.7"
+    "@trashman/ed25519-blake2b": "npm:0.0.8"
     babel-loader: "npm:^9.2.1"
     babel-plugin-dev-expression: "npm:^0.2.3"
     babel-plugin-module-resolver: "npm:^5.0.2"
