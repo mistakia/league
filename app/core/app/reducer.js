@@ -150,9 +150,17 @@ export function app_reducer(state = initialState(), { payload, type }) {
       return state
 
     case data_views_actions.DATA_VIEW_CHANGED:
-      return state.merge({
-        selected_data_view_id: payload.data_view.view_id
-      })
+      // Only update selected view if view_state_changed is true
+      // This prevents browser state restoration from changing the selected view
+      if (
+        payload.view_change_params &&
+        payload.view_change_params.view_state_changed
+      ) {
+        return state.merge({
+          selected_data_view_id: payload.data_view.view_id
+        })
+      }
+      return state
 
     default:
       return state
