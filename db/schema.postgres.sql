@@ -5281,7 +5281,7 @@ CREATE TABLE public.nfl_plays_current_week (
     fuml boolean,
     "int" boolean,
     sk boolean,
-    succ boolean,
+    successful_play boolean,
     comp boolean,
     td boolean,
     ret_td boolean,

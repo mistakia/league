@@ -373,14 +373,8 @@ const importPlaysForWeek = async ({
         }
 
         if (play_inserts.length) {
-          // nfl_plays_current_week uses 'succ' instead of 'successful_play'
-          const current_week_plays = play_inserts.map(({ successful_play, ...play }) => ({
-            ...play,
-            ...(successful_play !== undefined && { succ: successful_play })
-          }))
-
           await db('nfl_plays_current_week')
-            .insert(current_week_plays)
+            .insert(play_inserts)
             .onConflict(['esbid', 'playId'])
             .merge()
         }
