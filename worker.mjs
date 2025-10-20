@@ -7,7 +7,7 @@ import finalize_week from '#jobs/finalize-week.mjs'
 
 const log = debug('worker')
 debug.enable(
-  'worker,get-player,import-plays-nfl-v3,import-live-plays,import-live-odds,import-draft-kings,draftkings,import-caesars,caesars,import-fanduel,fanduel,import-betmgm,betmgm,import-prizepicks-odds,prizepicks,insert-prop-markets,finalize-week'
+  'worker,get-player,import-live-plays,import-live-odds,import-draft-kings,draftkings,import-caesars,caesars,import-fanduel,fanduel,import-betmgm,betmgm,import-prizepicks-odds,prizepicks,insert-prop-markets,finalize-week'
 )
 
 log(`env: ${process.env.NODE_ENV}`)
