@@ -6,6 +6,10 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { constants, fixTeam } from '#libs-shared'
 import { is_main, wait, nfl, report_job, clean_string } from '#libs-server'
+import player_cache, {
+  preload_active_players
+} from '#libs-server/player-cache.mjs'
+import { enrich_plays } from '#libs-server/play-enrichment/index.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const log = debug('import-plays-nfl-v1')
@@ -115,7 +119,8 @@ const importPlaysForWeek = async ({
   seas_type = constants.season.nfl_seas_type,
   ignore_cache = false,
   force_update = false,
-  token
+  token,
+  dry_run = false
 } = {}) => {
   week = week || constants.season.last_week_with_stats
   const is_current_week =
@@ -124,8 +129,11 @@ const importPlaysForWeek = async ({
     week === constants.season.last_week_with_stats
 
   log(
-    `importing plays for week ${week} ${year} ${seas_type} (force_update: ${force_update}, ignore_cache: ${ignore_cache}, is_current_week: ${is_current_week})`
+    `importing plays for week ${week} ${year} ${seas_type} (force_update: ${force_update}, ignore_cache: ${ignore_cache}, is_current_week: ${is_current_week}, dry_run: ${dry_run})`
   )
+
+  // Preload player cache once per week import
+  await preload_active_players()
 
   const players = await db('player')
     .select('esbid', 'gsisid')
@@ -252,56 +260,128 @@ const importPlaysForWeek = async ({
     // Remove duplicates from play_stat_inserts
     play_stat_inserts = Array.from(play_stat_inserts_map.values())
 
-    const end_play_exists = data.data.viewer.gameDetail.plays.find(
-      (p) => p.playType === 'END_GAME'
-    )
-    if (end_play_exists) {
-      if (play_stat_inserts.length) {
-        // reset final table playStats
-        await db('nfl_play_stats')
-          .update({ valid: 0 })
-          .where({ esbid: game.esbid })
-
-        // delete any excess plays
-        // TODO
-
-        // save in final tables
-        await db('nfl_play_stats')
-          .insert(play_stat_inserts)
-          .onConflict(['esbid', 'playId', 'statId', 'playerName'])
-          .merge()
-      }
-
-      if (play_inserts.length) {
-        await db('nfl_plays')
-          .insert(play_inserts)
-          .onConflict(['esbid', 'playId', 'year'])
-          .merge()
-      }
+    // Enrich plays before database insertion
+    try {
+      const games_map = { [game.esbid]: game }
+      const enriched_plays = await enrich_plays({
+        plays: play_inserts,
+        play_stats: play_stat_inserts,
+        games_map,
+        player_cache
+      })
+      // Replace play_inserts with enriched plays
+      play_inserts.length = 0
+      play_inserts.push(...enriched_plays)
+      log(`enriched ${enriched_plays.length} plays for esbid: ${game.esbid}`)
+    } catch (error) {
+      log(`error enriching plays for esbid: ${game.esbid} - ${error.message}`)
+      // Continue with unenriched plays on error
     }
 
-    // save in current tables
-    try {
-      if (play_stat_inserts.length) {
-        await db('nfl_play_stats_current_week')
-          .where({ esbid: game.esbid })
-          .del()
+    if (dry_run) {
+      // Helper to format play sample data
+      const format_play_sample = (play) => ({
+        playId: play.playId,
+        desc: play.desc ? play.desc.substring(0, 60) + '...' : null,
+        dwn: play.dwn,
+        ytg: play.yards_to_go,
+        pos_team: play.pos_team,
+        play_type_nfl: play.play_type_nfl,
+        off: play.off,
+        def: play.def,
+        play_type: play.play_type,
+        bc_pid: play.bc_pid,
+        psr_pid: play.psr_pid,
+        trg_pid: play.trg_pid
+      })
 
-        await db('nfl_play_stats_current_week')
-          .insert(play_stat_inserts)
-          .onConflict(['esbid', 'playId', 'statId', 'playerName'])
-          .merge()
+      // Helper to format play stat sample data
+      const format_play_stat_sample = (stat) => ({
+        playId: stat.playId,
+        statId: stat.statId,
+        playerName: stat.playerName,
+        clubCode: stat.clubCode,
+        gsisId: stat.gsisId,
+        yards: stat.yards
+      })
+
+      // In dry mode, sample some plays and play_stats for verification
+      const sample_plays = play_inserts.slice(0, 3).map(format_play_sample)
+      const sample_play_stats = play_stat_inserts
+        .slice(0, 5)
+        .map(format_play_stat_sample)
+
+      log(`\n=== DRY RUN - Sample data for esbid ${game.esbid} ===`)
+      log(`Total plays: ${play_inserts.length}`)
+      log(`Total play stats: ${play_stat_inserts.length}`)
+
+      log('\n--- Sample Plays ---')
+      sample_plays.forEach((play) => log(JSON.stringify(play, null, 2)))
+
+      log('\n--- Sample Play Stats ---')
+      sample_play_stats.forEach((stat) => log(JSON.stringify(stat, null, 2)))
+
+      log(`=== END DRY RUN SAMPLE ===\n`)
+
+      const end_play_exists = data.data.viewer.gameDetail.plays.find(
+        (p) => p.playType === 'END_GAME'
+      )
+      log(`Game ${game.esbid} complete: ${!!end_play_exists}`)
+      log(
+        `Would insert/update ${play_inserts.length} plays and ${play_stat_inserts.length} play stats`
+      )
+    } else {
+      const end_play_exists = data.data.viewer.gameDetail.plays.find(
+        (p) => p.playType === 'END_GAME'
+      )
+      if (end_play_exists) {
+        if (play_stat_inserts.length) {
+          // reset final table playStats
+          await db('nfl_play_stats')
+            .update({ valid: 0 })
+            .where({ esbid: game.esbid })
+
+          // delete any excess plays
+          // TODO
+
+          // save in final tables
+          await db('nfl_play_stats')
+            .insert(play_stat_inserts)
+            .onConflict(['esbid', 'playId', 'statId', 'playerName'])
+            .merge()
+        }
+
+        if (play_inserts.length) {
+          await db('nfl_plays')
+            .insert(play_inserts)
+            .onConflict(['esbid', 'playId', 'year'])
+            .merge()
+        }
       }
 
-      if (play_inserts.length) {
-        await db('nfl_plays_current_week')
-          .insert(play_inserts)
-          .onConflict(['esbid', 'playId'])
-          .merge()
+      // save in current tables
+      try {
+        if (play_stat_inserts.length) {
+          await db('nfl_play_stats_current_week')
+            .where({ esbid: game.esbid })
+            .del()
+
+          await db('nfl_play_stats_current_week')
+            .insert(play_stat_inserts)
+            .onConflict(['esbid', 'playId', 'statId', 'playerName'])
+            .merge()
+        }
+
+        if (play_inserts.length) {
+          await db('nfl_plays_current_week')
+            .insert(play_inserts)
+            .onConflict(['esbid', 'playId'])
+            .merge()
+        }
+      } catch (err) {
+        log('Error on inserting plays and play stats ignored')
+        log(err)
       }
-    } catch (err) {
-      log('Error on inserting plays and play stats ignored')
-      log(err)
     }
   }
 
@@ -323,7 +403,8 @@ const importPlaysForYear = async ({
   seas_type = 'REG',
   force_update = false,
   ignore_cache = false,
-  token
+  token,
+  dry_run = false
 } = {}) => {
   const weeks = await db('nfl_games')
     .select('week')
@@ -344,7 +425,8 @@ const importPlaysForYear = async ({
       seas_type,
       force_update,
       ignore_cache,
-      token
+      token,
+      dry_run
     })
     await wait(4000)
   }
@@ -355,7 +437,8 @@ const importAllPlays = async ({
   end,
   seas_type = 'ALL',
   force_update,
-  ignore_cache = false
+  ignore_cache = false,
+  dry_run = false
 } = {}) => {
   const nfl_games_result = await db('nfl_games')
     .select('year')
@@ -381,7 +464,8 @@ const importAllPlays = async ({
         seas_type: 'PRE',
         force_update,
         ignore_cache,
-        token
+        token,
+        dry_run
       })
       await wait(3000)
     }
@@ -392,7 +476,8 @@ const importAllPlays = async ({
         seas_type: 'REG',
         force_update,
         ignore_cache,
-        token
+        token,
+        dry_run
       })
       await wait(3000)
     }
@@ -403,7 +488,8 @@ const importAllPlays = async ({
         seas_type: 'POST',
         force_update,
         ignore_cache,
-        token
+        token,
+        dry_run
       })
       await wait(3000)
     }
@@ -413,13 +499,16 @@ const importAllPlays = async ({
 const main = async () => {
   let error
   try {
+    const dry_run = argv.dry
+
     if (argv.all) {
       await importAllPlays({
         start: argv.start,
         end: argv.end,
         seas_type: argv.seas_type,
         ignore_cache: argv.ignore_cache,
-        force_update: argv.final
+        force_update: argv.final,
+        dry_run
       })
     } else if (argv.year) {
       if (argv.week) {
@@ -428,14 +517,16 @@ const main = async () => {
           week: argv.week,
           seas_type: argv.seas_type,
           ignore_cache: argv.ignore_cache,
-          force_update: argv.final
+          force_update: argv.final,
+          dry_run
         })
       } else {
         await importPlaysForYear({
           year: argv.year,
           seas_type: argv.seas_type,
           ignore_cache: argv.ignore_cache,
-          force_update: argv.final
+          force_update: argv.final,
+          dry_run
         })
       }
     } else if (argv.live) {
@@ -448,7 +539,8 @@ const main = async () => {
           week: argv.week,
           seas_type: argv.seas_type,
           ignore_cache: true,
-          force_update: argv.final
+          force_update: argv.final,
+          dry_run
         })
       }
     } else {
@@ -457,7 +549,8 @@ const main = async () => {
         week: argv.week,
         seas_type: argv.seas_type,
         ignore_cache: true,
-        force_update: argv.final
+        force_update: argv.final,
+        dry_run
       })
       log('end')
     }

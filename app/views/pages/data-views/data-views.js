@@ -223,9 +223,10 @@ export default function DataViewsPage({
 
     return {
       ...selected_data_view.table_state,
-      prefix_columns: selected_data_view.table_state?.prefix_columns?.filter(
-        (column) => column !== 'player_league_roster_status'
-      ) || []
+      prefix_columns:
+        selected_data_view.table_state?.prefix_columns?.filter(
+          (column) => column !== 'player_league_roster_status'
+        ) || []
     }
   }, [selected_data_view.table_state, leagueId])
 

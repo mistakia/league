@@ -8,7 +8,7 @@ import { constants, create_default_league } from '#libs-shared'
 import { is_main, getLeague } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-import process_play_stats from './process-play-stats.mjs'
+import process_plays from './process-plays.mjs'
 import generate_player_gamelogs from './generate-player-gamelogs.mjs'
 
 import generate_scoring_format_player_gamelogs from './generate-scoring-format-player-gamelogs.mjs'
@@ -63,7 +63,7 @@ const update_stats_weekly = async ({ week } = {}) => {
 
   const processed_scoring_format_hashes_index = {}
 
-  await process_play_stats({ week })
+  await process_plays({ week })
   await generate_player_gamelogs({ week })
 
   // process default league
