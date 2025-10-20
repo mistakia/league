@@ -122,7 +122,7 @@ export const enrich_player_identifications = (
       map_tackle_array(
         enriched_play,
         play_data.tacklers_solo,
-        'solo_tackleer',
+        'solo_tackle',
         3
       )
     ) {
@@ -133,7 +133,7 @@ export const enrich_player_identifications = (
       map_tackle_array(
         enriched_play,
         play_data.tacklers_with_assisters,
-        'assist_tackle',
+        'assisted_tackle',
         2
       )
     ) {
@@ -144,7 +144,7 @@ export const enrich_player_identifications = (
       map_tackle_array(
         enriched_play,
         play_data.tackle_assisters,
-        'tackle_with_assist',
+        'tackle_assist',
         4
       )
     ) {

@@ -208,24 +208,24 @@ const process_plays = async ({
       update.player_fuml_pid = enriched_play.player_fuml_pid
 
     // Add tackle fields
-    if (enriched_play.solo_tackleer_1_pid)
-      update.solo_tackle_1_pid = enriched_play.solo_tackleer_1_pid
-    if (enriched_play.solo_tackleer_2_pid)
-      update.solo_tackle_2_pid = enriched_play.solo_tackleer_2_pid
-    if (enriched_play.solo_tackleer_3_pid)
-      update.solo_tackle_3_pid = enriched_play.solo_tackleer_3_pid
-    if (enriched_play.assist_tackle_1_pid)
-      update.assisted_tackle_1_pid = enriched_play.assist_tackle_1_pid
-    if (enriched_play.assist_tackle_2_pid)
-      update.assisted_tackle_2_pid = enriched_play.assist_tackle_2_pid
-    if (enriched_play.tackle_with_assist_1_pid)
-      update.tackle_assist_1_pid = enriched_play.tackle_with_assist_1_pid
-    if (enriched_play.tackle_with_assist_2_pid)
-      update.tackle_assist_2_pid = enriched_play.tackle_with_assist_2_pid
-    if (enriched_play.tackle_with_assist_3_pid)
-      update.tackle_assist_3_pid = enriched_play.tackle_with_assist_3_pid
-    if (enriched_play.tackle_with_assist_4_pid)
-      update.tackle_assist_4_pid = enriched_play.tackle_with_assist_4_pid
+    if (enriched_play.solo_tackle_1_pid)
+      update.solo_tackle_1_pid = enriched_play.solo_tackle_1_pid
+    if (enriched_play.solo_tackle_2_pid)
+      update.solo_tackle_2_pid = enriched_play.solo_tackle_2_pid
+    if (enriched_play.solo_tackle_3_pid)
+      update.solo_tackle_3_pid = enriched_play.solo_tackle_3_pid
+    if (enriched_play.assisted_tackle_1_pid)
+      update.assisted_tackle_1_pid = enriched_play.assisted_tackle_1_pid
+    if (enriched_play.assisted_tackle_2_pid)
+      update.assisted_tackle_2_pid = enriched_play.assisted_tackle_2_pid
+    if (enriched_play.tackle_assist_1_pid)
+      update.tackle_assist_1_pid = enriched_play.tackle_assist_1_pid
+    if (enriched_play.tackle_assist_2_pid)
+      update.tackle_assist_2_pid = enriched_play.tackle_assist_2_pid
+    if (enriched_play.tackle_assist_3_pid)
+      update.tackle_assist_3_pid = enriched_play.tackle_assist_3_pid
+    if (enriched_play.tackle_assist_4_pid)
+      update.tackle_assist_4_pid = enriched_play.tackle_assist_4_pid
 
     // Skip if no updates needed
     if (Object.keys(update).length === 0) continue
