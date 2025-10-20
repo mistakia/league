@@ -40,7 +40,7 @@ export const job_types = {
 
   PROJECTIONS_NUMBERFIRE: 29,
 
-  PROCESS_PLAY_STATS: 30,
+  PROCESS_PLAYS: 30,
   DATA_ARMCHAIR: 31,
   DATA_FOOTBALL_OUTSIDERS: 32,
 
@@ -143,7 +143,7 @@ export const job_title_by_id = {
   27: 'Projections (FFN)',
   28: 'Practice Report',
   29: 'Projections (Numberfire)',
-  30: 'Process Play Stats',
+  30: 'Process Plays',
   31: 'Armchair (Data)',
   32: 'Import Football Outsiders (Data)',
   33: 'DraftKings Odds',

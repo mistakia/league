@@ -268,7 +268,9 @@ export const format_market = async ({
 
     source_id: 'DRAFTKINGS',
     source_market_id: draftkings_market.id,
-    source_market_name: clean_string(`${draftkings_offer_category.name?.trim() || ''} - ${draftkings_offer_sub_category.name || ''} - ${draftkings_market.name || ''} (categoryId: ${draftkings_offer_category.offerCategoryId}, subcategoryId: ${draftkings_offer_sub_category.subcategoryId}, betOfferTypeId: ${draftkings_market.marketType?.betOfferTypeId}, marketTypeId: ${draftkings_market.marketType?.id})`),
+    source_market_name: clean_string(
+      `${draftkings_offer_category.name?.trim() || ''} - ${draftkings_offer_sub_category.name || ''} - ${draftkings_market.name || ''} (categoryId: ${draftkings_offer_category.offerCategoryId}, subcategoryId: ${draftkings_offer_sub_category.subcategoryId}, betOfferTypeId: ${draftkings_market.marketType?.betOfferTypeId}, marketTypeId: ${draftkings_market.marketType?.id})`
+    ),
 
     esbid: nfl_game ? nfl_game.esbid : null,
     year: nfl_game ? nfl_game.year : constants.season.year,
