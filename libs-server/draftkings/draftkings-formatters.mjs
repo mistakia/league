@@ -5,7 +5,7 @@
 import debug from 'debug'
 import dayjs from 'dayjs'
 import { constants, bookmaker_constants } from '#libs-shared'
-import { draftkings } from '#libs-server'
+import { draftkings, clean_string } from '#libs-server'
 import { find_player } from '#libs-server/player-cache.mjs'
 import {
   is_game_event,
@@ -182,7 +182,7 @@ const process_selection = (
     source_selection_id: selection.id,
 
     selection_pid: formatted_selection_pid,
-    selection_name: selection.label,
+    selection_name: clean_string(selection.label),
     selection_type: draftkings.format_selection_type(selection.label),
     selection_metric_line: formatted_selection_metric_line || null,
     odds_decimal: selection.trueOdds,
@@ -268,12 +268,12 @@ export const format_market = async ({
 
     source_id: 'DRAFTKINGS',
     source_market_id: draftkings_market.id,
-    source_market_name: `${draftkings_offer_category.name.trim()} - ${draftkings_offer_sub_category.name} - ${draftkings_market.name} (categoryId: ${draftkings_offer_category.offerCategoryId}, subcategoryId: ${draftkings_offer_sub_category.subcategoryId}, betOfferTypeId: ${draftkings_market.marketType?.betOfferTypeId}, marketTypeId: ${draftkings_market.marketType?.id})`,
+    source_market_name: clean_string(`${draftkings_offer_category.name?.trim() || ''} - ${draftkings_offer_sub_category.name || ''} - ${draftkings_market.name || ''} (categoryId: ${draftkings_offer_category.offerCategoryId}, subcategoryId: ${draftkings_offer_sub_category.subcategoryId}, betOfferTypeId: ${draftkings_market.marketType?.betOfferTypeId}, marketTypeId: ${draftkings_market.marketType?.id})`),
 
     esbid: nfl_game ? nfl_game.esbid : null,
     year: nfl_game ? nfl_game.year : constants.season.year,
     source_event_id: draftkings_market.eventId,
-    source_event_name: draftkings_event?.name || null,
+    source_event_name: clean_string(draftkings_event?.name) || null,
 
     open: true, // Assume open if present in API
     live: null,
