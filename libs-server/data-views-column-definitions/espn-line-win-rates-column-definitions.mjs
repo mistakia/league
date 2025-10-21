@@ -1,7 +1,6 @@
 import db from '#db'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { constants } from '#libs-shared'
-import get_join_func from '#libs-server/get-join-func.mjs'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import { create_exact_year_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 
@@ -56,42 +55,14 @@ const espn_team_win_rates_table_alias = ({ params = {} } = {}) => {
   return get_table_hash(hash_key)
 }
 
-const team_espn_line_join = ({
-  query,
-  table_name,
-  join_type = 'LEFT',
-  params = {},
-  splits = []
-}) => {
-  const { year } = get_default_params({ params })
-  const join_func = get_join_func(join_type)
-
-  query[join_func](`espn_team_win_rates_index as ${table_name}`, function () {
-    const matchup_opponent_type = Array.isArray(params.matchup_opponent_type)
-      ? params.matchup_opponent_type[0]
-      : params.matchup_opponent_type
-
-    if (matchup_opponent_type) {
-      switch (matchup_opponent_type) {
-        case 'current_week_opponent_total':
-          this.on(`${table_name}.team`, '=', 'current_week_opponents.opponent')
-          break
-
-        case 'next_week_opponent_total':
-          this.on(`${table_name}.team`, '=', 'next_week_opponents.opponent')
-          break
-
-        default:
-          this.on(`${table_name}.team`, '=', 'player.current_nfl_team')
-          break
-      }
-    } else {
-      this.on(`${table_name}.team`, '=', 'player.current_nfl_team')
-    }
-
-    if (!splits.includes('year')) {
-      this.andOn(`${table_name}.year`, '=', db.raw('?', [year]))
-    }
+const team_espn_line_join = (join_arguments) => {
+  data_view_join_function({
+    ...join_arguments,
+    join_year: true,
+    join_on_team: true,
+    join_table_team_field: 'team',
+    join_table_clause: `espn_team_win_rates_index as ${join_arguments.table_name}`,
+    default_year: constants.season.stats_season_year
   })
 }
 
