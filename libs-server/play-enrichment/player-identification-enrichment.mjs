@@ -119,12 +119,7 @@ export const enrich_player_identifications = (
 
     // Map tackle arrays
     if (
-      map_tackle_array(
-        enriched_play,
-        play_data.tacklers_solo,
-        'solo_tackle',
-        3
-      )
+      map_tackle_array(enriched_play, play_data.tacklers_solo, 'solo_tackle', 3)
     ) {
       has_player_data = true
     }
