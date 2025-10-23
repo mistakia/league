@@ -7,6 +7,10 @@ export default async function (knex) {
   await knex('rosters').del()
   await knex('rosters_players').del()
 
+  // Reset sequences for test isolation
+  await knex.raw('ALTER SEQUENCE teams_uid_seq RESTART WITH 1')
+  await knex.raw('ALTER SEQUENCE rosters_uid_seq RESTART WITH 1')
+
   await knex('trades').del()
   await knex('trades_picks').del()
   await knex('trades_players').del()

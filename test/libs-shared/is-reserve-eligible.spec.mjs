@@ -305,4 +305,163 @@ describe('LIBS-SHARED isReserveEligible', function () {
       })
     })
   })
+
+  describe('practice status eligibility', function () {
+    it('should return true for DNP practice status', function () {
+      const result = isReserveEligible({
+        nfl_status: constants.player_nfl_status.ACTIVE,
+        injury_status: null,
+        practice: {
+          m: null,
+          tu: null,
+          w: 'DNP',
+          th: null,
+          f: null,
+          s: null,
+          su: null
+        },
+        current_date: new Date('2024-01-10') // Wednesday
+      })
+      expect(result).to.equal(true)
+    })
+
+    it('should return true for LIMITED practice status', function () {
+      const result = isReserveEligible({
+        nfl_status: constants.player_nfl_status.ACTIVE,
+        injury_status: null,
+        practice: {
+          m: null,
+          tu: null,
+          w: null,
+          th: 'LIMITED',
+          f: null,
+          s: null,
+          su: null
+        },
+        current_date: new Date('2024-01-11') // Thursday
+      })
+      expect(result).to.equal(true)
+    })
+
+    it('should return false for FULL practice status', function () {
+      const result = isReserveEligible({
+        nfl_status: constants.player_nfl_status.ACTIVE,
+        injury_status: null,
+        practice: {
+          m: null,
+          tu: null,
+          w: 'FULL',
+          th: null,
+          f: null,
+          s: null,
+          su: null
+        },
+        current_date: new Date('2024-01-10') // Wednesday
+      })
+      expect(result).to.equal(false)
+    })
+
+    it('should return false for null practice status', function () {
+      const result = isReserveEligible({
+        nfl_status: constants.player_nfl_status.ACTIVE,
+        injury_status: null,
+        practice: {
+          m: null,
+          tu: null,
+          w: null,
+          th: null,
+          f: null,
+          s: null,
+          su: null
+        },
+        current_date: new Date('2024-01-10') // Wednesday
+      })
+      expect(result).to.equal(false)
+    })
+
+    it('should return true for DNP regardless of QUESTIONABLE injury_status', function () {
+      const result = isReserveEligible({
+        nfl_status: constants.player_nfl_status.ACTIVE,
+        injury_status: constants.player_nfl_injury_status.QUESTIONABLE,
+        practice: {
+          m: null,
+          tu: null,
+          w: 'DNP',
+          th: null,
+          f: null,
+          s: null,
+          su: null
+        },
+        current_date: new Date('2024-01-10') // Wednesday
+      })
+      expect(result).to.equal(true)
+    })
+
+    it('should return true for LIMITED with ACTIVE nfl_status', function () {
+      const result = isReserveEligible({
+        nfl_status: constants.player_nfl_status.ACTIVE,
+        injury_status: null,
+        practice: {
+          m: null,
+          tu: 'LIMITED',
+          w: null,
+          th: null,
+          f: null,
+          s: null,
+          su: null
+        },
+        current_date: new Date('2024-01-09') // Tuesday
+      })
+      expect(result).to.equal(true)
+    })
+
+    it('should use other eligibility logic when practice status is FULL', function () {
+      const result = isReserveEligible({
+        nfl_status: constants.player_nfl_status.ACTIVE,
+        injury_status: constants.player_nfl_injury_status.OUT,
+        practice: {
+          m: null,
+          tu: null,
+          w: 'FULL',
+          th: null,
+          f: null,
+          s: null,
+          su: null
+        },
+        current_date: new Date('2024-01-10') // Wednesday
+      })
+      // FULL doesn't make eligible via practice, but OUT injury_status does
+      expect(result).to.equal(true)
+    })
+
+    it('should use other eligibility logic when practice is null', function () {
+      const result = isReserveEligible({
+        nfl_status: constants.player_nfl_status.INJURED_RESERVE,
+        injury_status: null,
+        practice: null,
+        current_date: new Date('2024-01-10')
+      })
+      // No practice data, but nfl_status is not ACTIVE
+      expect(result).to.equal(true)
+    })
+
+    it('should check most recent practice status walking backward', function () {
+      const result = isReserveEligible({
+        nfl_status: constants.player_nfl_status.ACTIVE,
+        injury_status: null,
+        practice: {
+          m: 'FULL',
+          tu: 'LIMITED',
+          w: null,
+          th: null,
+          f: null,
+          s: null,
+          su: null
+        },
+        current_date: new Date('2024-01-10') // Wednesday
+      })
+      // Most recent status is Tuesday's LIMITED
+      expect(result).to.equal(true)
+    })
+  })
 })
