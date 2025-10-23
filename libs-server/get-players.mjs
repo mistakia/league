@@ -167,6 +167,26 @@ export default async function ({
     query.select('practice.formatted_status as game_status')
     query.groupBy('game_status')
 
+    // Include practice day columns for reserve eligibility checking
+    query.select(
+      'practice.m',
+      'practice.tu',
+      'practice.w',
+      'practice.th',
+      'practice.f',
+      'practice.s',
+      'practice.su'
+    )
+    query.groupBy(
+      'practice.m',
+      'practice.tu',
+      'practice.w',
+      'practice.th',
+      'practice.f',
+      'practice.s',
+      'practice.su'
+    )
+
     query.select('nfl_games.day as game_day')
     query.groupBy('game_day')
 

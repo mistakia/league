@@ -27,6 +27,7 @@ describe('API /teams - tag', function () {
   before(async function () {
     this.timeout(60 * 1000)
     await knex.seed.run()
+    await league(knex)
   })
 
   describe('post', function () {
