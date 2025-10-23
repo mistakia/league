@@ -1088,7 +1088,6 @@ describe('API /teams - reserve', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
       await league(knex)
-
     })
 
     it('player with DNP practice status should be eligible', async () => {
