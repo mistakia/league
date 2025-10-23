@@ -207,7 +207,9 @@ const save_contract_data = async ({ player_updates, contract_rows }) => {
           .merge(CONTRACT_SUMMARY_FIELDS)
 
         processed += batch.length
-        log(`updated ${processed}/${player_updates.length} player contract summaries`)
+        log(
+          `updated ${processed}/${player_updates.length} player contract summaries`
+        )
       }
     })
   }
