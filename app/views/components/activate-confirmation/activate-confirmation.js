@@ -35,6 +35,10 @@ export default class ActivateConfirmation extends React.Component {
         (player_map) => player_map.get('pid') === pid
       )
       this._activePlayers.push(activePlayerMap)
+
+      const practice_week = activePlayerMap.get('practice_week')
+      const practice_data = practice_week ? practice_week.toJS() : null
+
       if (
         isReserveEligible({
           nfl_status: activePlayerMap.get('nfl_status'),
@@ -42,7 +46,8 @@ export default class ActivateConfirmation extends React.Component {
           prior_week_inactive: activePlayerMap.get('prior_week_inactive'),
           week: constants.season.week,
           is_regular_season: constants.season.isRegularSeason,
-          game_day: activePlayerMap.get('game_day')
+          game_day: activePlayerMap.get('game_day'),
+          practice: practice_data
         })
       ) {
         this._reserveEligible.push(activePlayerMap)
