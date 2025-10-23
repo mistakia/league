@@ -56,7 +56,7 @@ describe('API /waivers - cancel', function () {
     const player_row = player_rows[0]
     pid = player_row.pid
 
-    await chai_request
+    const draftRes = await chai_request
       .execute(server)
       .post('/api/leagues/1/draft')
       .set('Authorization', `Bearer ${user1}`)
@@ -65,6 +65,8 @@ describe('API /waivers - cancel', function () {
         pid,
         pickId: 1
       })
+
+    draftRes.should.have.status(200)
 
     MockDate.set(
       regular_season_start
@@ -87,6 +89,7 @@ describe('API /waivers - cancel', function () {
         leagueId
       })
 
+    submitRes.should.have.status(200)
     waiverId = submitRes.body.uid
 
     const res = await chai_request
@@ -123,6 +126,7 @@ describe('API /waivers - cancel', function () {
         leagueId
       })
 
+    submitRes.should.have.status(200)
     const waiverId = submitRes.body.uid
 
     const res = await chai_request

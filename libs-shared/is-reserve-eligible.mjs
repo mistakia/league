@@ -1,5 +1,6 @@
 import * as constants from './constants.mjs'
 import get_final_practice_day from './get-final-practice-day.mjs'
+import get_most_recent_practice_status from './get-most-recent-practice-status.mjs'
 
 export default function isReserveEligible({
   nfl_status,
@@ -7,8 +8,25 @@ export default function isReserveEligible({
   prior_week_inactive = false,
   week = null,
   is_regular_season = false,
-  game_day = null
+  game_day = null,
+  practice = null,
+  current_date = new Date()
 } = {}) {
+  // Check practice status first - DNP or LIMITED makes player immediately eligible
+  if (practice) {
+    const most_recent_practice_status = get_most_recent_practice_status({
+      practice,
+      current_date
+    })
+
+    if (
+      most_recent_practice_status === 'DNP' ||
+      most_recent_practice_status === 'LIMITED'
+    ) {
+      return true
+    }
+  }
+
   // Apply historical grace period logic for regular season after week 1
   // Player was inactive if they have no gamelog OR gamelog.active is false
   if (week && week > 1 && is_regular_season && prior_week_inactive === true) {

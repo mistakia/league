@@ -1106,6 +1106,10 @@ export function isPlayerReserveEligible(state, { player_map }) {
   const prior_week_inactive = player_map.get('prior_week_inactive')
   const game_day = player_map.get('game_day')
 
+  // Extract practice data from player state
+  const practice_week = player_map.get('practice_week')
+  const practice_data = practice_week ? practice_week.toJS() : null
+
   if (
     isReserveEligible({
       nfl_status,
@@ -1113,7 +1117,8 @@ export function isPlayerReserveEligible(state, { player_map }) {
       prior_week_inactive,
       week: constants.season.week,
       is_regular_season: constants.season.isRegularSeason,
-      game_day
+      game_day,
+      practice: practice_data
     })
   ) {
     reserve.reserve_short_term_eligible = true
