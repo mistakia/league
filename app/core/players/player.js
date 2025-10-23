@@ -16,10 +16,30 @@ export function createPlayer({
   transactions,
   stats,
   betting_markets,
+  m,
+  tu,
+  w,
+  th,
+  f,
+  s,
+  su,
   ...data
 }) {
   const params = {
     ...data
+  }
+
+  // Handle practice day columns from get-players query
+  if (
+    m !== undefined ||
+    tu !== undefined ||
+    w !== undefined ||
+    th !== undefined ||
+    f !== undefined ||
+    s !== undefined ||
+    su !== undefined
+  ) {
+    params.practice_week = new Map({ m, tu, w, th, f, s, su })
   }
 
   if (current_nfl_team) {

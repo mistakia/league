@@ -60,6 +60,13 @@ export default async function ({ teamId, leagueId }) {
     player_query.select(
       'player.*',
       'practice.formatted_status as game_status',
+      'practice.m',
+      'practice.tu',
+      'practice.w',
+      'practice.th',
+      'practice.f',
+      'practice.s',
+      'practice.su',
       'nfl_games.day as game_day',
       db.raw(
         'CASE WHEN prior_week_gamelog.pid IS NULL OR prior_week_gamelog.active = false THEN true ELSE false END as prior_week_inactive'
@@ -69,6 +76,13 @@ export default async function ({ teamId, leagueId }) {
     player_query.select(
       'player.*',
       'practice.formatted_status as game_status',
+      'practice.m',
+      'practice.tu',
+      'practice.w',
+      'practice.th',
+      'practice.f',
+      'practice.s',
+      'practice.su',
       'nfl_games.day as game_day'
     )
   }
@@ -81,8 +95,30 @@ export default async function ({ teamId, leagueId }) {
       throw new Error('Reserve player violation')
     }
 
-    const { nfl_status, injury_status, prior_week_inactive, game_day } =
-      player_row
+    const {
+      nfl_status,
+      injury_status,
+      prior_week_inactive,
+      game_day,
+      m,
+      tu,
+      w,
+      th,
+      f,
+      s,
+      su
+    } = player_row
+
+    const practice_data =
+      m !== undefined ||
+      tu !== undefined ||
+      w !== undefined ||
+      th !== undefined ||
+      f !== undefined ||
+      s !== undefined ||
+      su !== undefined
+        ? { m, tu, w, th, f, s, su }
+        : null
 
     if (
       (roster_player.slot === constants.slots.RESERVE_SHORT_TERM ||
@@ -93,7 +129,8 @@ export default async function ({ teamId, leagueId }) {
         prior_week_inactive,
         week: constants.season.week,
         is_regular_season: constants.season.isRegularSeason,
-        game_day
+        game_day,
+        practice: practice_data
       })
     ) {
       throw new Error('Reserve player violation')

@@ -26,6 +26,19 @@ chai.use(chai_http)
 const expect = chai.expect
 const { regular_season_start } = constants.season
 
+// Track used player IDs across tests to avoid duplicate game collisions
+const used_pids = []
+
+// Helper to select a player and track it to avoid collisions
+async function select_player_with_tracking(options = {}) {
+  const player = await selectPlayer({
+    ...options,
+    exclude_pids: [...used_pids, ...(options.exclude_pids || [])]
+  })
+  used_pids.push(player.pid)
+  return player
+}
+
 describe('API /teams - reserve', function () {
   before(async function () {
     this.timeout(60 * 1000)
@@ -42,7 +55,7 @@ describe('API /teams - reserve', function () {
       MockDate.set(
         regular_season_start.clone().subtract('1', 'week').toISOString()
       )
-      const player = await selectPlayer()
+      const player = await select_player_with_tracking()
       const teamId = 1
       const leagueId = 1
       const userId = 1
@@ -199,7 +212,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('invalid player - not on active roster', async () => {
-      const player = await selectPlayer()
+      const player = await select_player_with_tracking()
       const request = chai_request
         .execute(server)
         .post('/api/teams/1/reserve')
@@ -214,7 +227,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('teamId does not belong to userId', async () => {
-      const player = await selectPlayer()
+      const player = await select_player_with_tracking()
       const request = chai_request
         .execute(server)
         .post('/api/teams/1/reserve')
@@ -229,7 +242,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('player already on reserve/ir', async () => {
-      const player = await selectPlayer()
+      const player = await select_player_with_tracking()
       const teamId = 1
       const leagueId = 1
       const userId = 1
@@ -257,7 +270,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('player already on reserve/cov', async () => {
-      const player = await selectPlayer()
+      const player = await select_player_with_tracking()
       const teamId = 1
       const leagueId = 1
       const userId = 1
@@ -286,7 +299,7 @@ describe('API /teams - reserve', function () {
 
     it('player not on reserve/short term reserve', async () => {
       MockDate.set(regular_season_start.clone().add('1', 'week').toISOString())
-      const player = await selectPlayer({
+      const player = await select_player_with_tracking({
         injury_status: null,
         nfl_status: constants.player_nfl_status.ACTIVE
       })
@@ -317,7 +330,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('player not on reserve/cov - no status', async () => {
-      const player = await selectPlayer()
+      const player = await select_player_with_tracking()
       const teamId = 1
       const leagueId = 1
       const userId = 1
@@ -346,7 +359,7 @@ describe('API /teams - reserve', function () {
 
     it('player not on reserve/cov - ir', async () => {
       MockDate.set(regular_season_start.clone().add('1', 'week').toISOString())
-      const player = await selectPlayer()
+      const player = await select_player_with_tracking()
       const teamId = 1
       const leagueId = 1
       const userId = 1
@@ -424,7 +437,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('player is protected', async () => {
-      const player = await selectPlayer()
+      const player = await select_player_with_tracking()
       await addPlayer({
         leagueId: 1,
         player,
@@ -454,7 +467,7 @@ describe('API /teams - reserve', function () {
 
     it('player not rostered on previous week roster', async () => {
       MockDate.set(regular_season_start.clone().add('2', 'week').toISOString())
-      const player = await selectPlayer()
+      const player = await select_player_with_tracking()
       const teamId = 1
       const leagueId = 1
       const userId = 1
@@ -491,7 +504,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('practice squad player without active poaching claim', async () => {
-      const player = await selectPlayer()
+      const player = await select_player_with_tracking()
       await addPlayer({
         leagueId: 1,
         player,
@@ -524,7 +537,7 @@ describe('API /teams - reserve', function () {
     })
 
     it('practice squad drafted player without active poaching claim', async () => {
-      const player = await selectPlayer()
+      const player = await select_player_with_tracking()
       await addPlayer({
         leagueId: 1,
         player,
@@ -567,7 +580,7 @@ describe('API /teams - reserve', function () {
       // Set to week 2, Tuesday (early in the week, before Friday final practice)
       MockDate.set(regular_season_start.clone().add('2', 'week').toISOString())
 
-      const player = await selectPlayer()
+      const player = await select_player_with_tracking({ pos: 'RB' })
       const teamId = 1
       const leagueId = 1
       const userId = 1
@@ -687,7 +700,7 @@ describe('API /teams - reserve', function () {
         regular_season_start.clone().add(5, 'week').add(3, 'day').toISOString()
       )
 
-      const player = await selectPlayer()
+      const player = await select_player_with_tracking({ pos: 'WR' })
       const teamId = 1
       const leagueId = 1
       const userId = 1
@@ -778,7 +791,7 @@ describe('API /teams - reserve', function () {
         regular_season_start.clone().add(5, 'week').add(3, 'day').toISOString()
       )
 
-      const player = await selectPlayer()
+      const player = await select_player_with_tracking()
       const teamId = 1
       const leagueId = 1
       const userId = 1
@@ -867,7 +880,7 @@ describe('API /teams - reserve', function () {
       // regular_season_start is already Tuesday, so week 5 = +5 weeks, +0 days
       MockDate.set(regular_season_start.clone().add(5, 'week').toISOString())
 
-      const player = await selectPlayer()
+      const player = await select_player_with_tracking({ pos: 'QB' })
       const teamId = 1
       const leagueId = 1
       const userId = 1
@@ -964,7 +977,7 @@ describe('API /teams - reserve', function () {
       MockDate.set(
         regular_season_start.clone().subtract('1', 'week').toISOString()
       )
-      const player = await selectPlayer()
+      const player = await select_player_with_tracking()
       const teamId = 1
       const leagueId = 1
       const userId = 1
@@ -1019,7 +1032,7 @@ describe('API /teams - reserve', function () {
       MockDate.set(
         regular_season_start.clone().subtract('1', 'week').toISOString()
       )
-      const player = await selectPlayer()
+      const player = await select_player_with_tracking()
       const teamId = 1
       const leagueId = 1
       const userId = 1
@@ -1068,6 +1081,214 @@ describe('API /teams - reserve', function () {
       res.body.tid.should.equal(teamId)
       res.body.pid.should.equal(player.pid)
       res.body.slot.should.equal(constants.slots.RESERVE_SHORT_TERM)
+    })
+  })
+
+  describe('practice status eligibility', function () {
+    beforeEach(async function () {
+      this.timeout(60 * 1000)
+      await league(knex)
+
+    })
+
+    it('player with DNP practice status should be eligible', async () => {
+      MockDate.set(regular_season_start.clone().add('1', 'week').toISOString())
+      const player = await select_player_with_tracking()
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const value = 2
+      await addPlayer({
+        teamId,
+        leagueId,
+        userId,
+        player,
+        slot: constants.slots.BENCH,
+        transaction: constants.transactions.TRADE,
+        value
+      })
+
+      // Set player as ACTIVE with no injury status
+      await knex('player')
+        .update({
+          nfl_status: constants.player_nfl_status.ACTIVE,
+          injury_status: null
+        })
+        .where({
+          pid: player.pid
+        })
+
+      // Add DNP practice status
+      await knex('practice').insert({
+        pid: player.pid,
+        week: constants.season.week,
+        year: constants.season.year,
+        w: 'DNP'
+      })
+
+      const res = await chai_request
+        .execute(server)
+        .post('/api/teams/1/reserve')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          reserve_pid: player.pid,
+          leagueId,
+          slot: constants.slots.RESERVE_SHORT_TERM
+        })
+
+      res.should.have.status(200)
+      res.body.pid.should.equal(player.pid)
+      res.body.slot.should.equal(constants.slots.RESERVE_SHORT_TERM)
+
+      MockDate.reset()
+    })
+
+    it('player with LIMITED practice status should be eligible', async () => {
+      MockDate.set(regular_season_start.clone().add('1', 'week').toISOString())
+      const player = await select_player_with_tracking()
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const value = 2
+      await addPlayer({
+        teamId,
+        leagueId,
+        userId,
+        player,
+        slot: constants.slots.BENCH,
+        transaction: constants.transactions.TRADE,
+        value
+      })
+
+      // Set player as ACTIVE with no injury status
+      await knex('player')
+        .update({
+          nfl_status: constants.player_nfl_status.ACTIVE,
+          injury_status: null
+        })
+        .where({
+          pid: player.pid
+        })
+
+      // Add LIMITED practice status
+      await knex('practice').insert({
+        pid: player.pid,
+        week: constants.season.week,
+        year: constants.season.year,
+        th: 'LIMITED'
+      })
+
+      const res = await chai_request
+        .execute(server)
+        .post('/api/teams/1/reserve')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          reserve_pid: player.pid,
+          leagueId,
+          slot: constants.slots.RESERVE_SHORT_TERM
+        })
+
+      res.should.have.status(200)
+      res.body.pid.should.equal(player.pid)
+      res.body.slot.should.equal(constants.slots.RESERVE_SHORT_TERM)
+
+      MockDate.reset()
+    })
+
+    it('player with FULL practice status and no injury should not be eligible', async () => {
+      MockDate.set(regular_season_start.clone().add('1', 'week').toISOString())
+      const player = await select_player_with_tracking()
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const value = 2
+      await addPlayer({
+        teamId,
+        leagueId,
+        userId,
+        player,
+        slot: constants.slots.BENCH,
+        transaction: constants.transactions.TRADE,
+        value
+      })
+
+      // Set player as ACTIVE with no injury status
+      await knex('player')
+        .update({
+          nfl_status: constants.player_nfl_status.ACTIVE,
+          injury_status: null
+        })
+        .where({
+          pid: player.pid
+        })
+
+      // Add FULL practice status
+      await knex('practice').insert({
+        pid: player.pid,
+        week: constants.season.week,
+        year: constants.season.year,
+        w: 'FULL'
+      })
+
+      const request = chai_request
+        .execute(server)
+        .post('/api/teams/1/reserve')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          reserve_pid: player.pid,
+          leagueId,
+          slot: constants.slots.RESERVE_SHORT_TERM
+        })
+
+      await error(request, 'player not eligible for Reserve')
+
+      MockDate.reset()
+    })
+
+    it('player with no practice data and OUT injury should be eligible', async () => {
+      MockDate.set(regular_season_start.clone().add('1', 'week').toISOString())
+      const player = await select_player_with_tracking()
+      const teamId = 1
+      const leagueId = 1
+      const userId = 1
+      const value = 2
+      await addPlayer({
+        teamId,
+        leagueId,
+        userId,
+        player,
+        slot: constants.slots.BENCH,
+        transaction: constants.transactions.TRADE,
+        value
+      })
+
+      // Set player as ACTIVE with OUT injury status
+      await knex('player')
+        .update({
+          nfl_status: constants.player_nfl_status.ACTIVE,
+          injury_status: constants.player_nfl_injury_status.OUT
+        })
+        .where({
+          pid: player.pid
+        })
+
+      // No practice data inserted
+
+      const res = await chai_request
+        .execute(server)
+        .post('/api/teams/1/reserve')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          reserve_pid: player.pid,
+          leagueId,
+          slot: constants.slots.RESERVE_SHORT_TERM
+        })
+
+      res.should.have.status(200)
+      res.body.pid.should.equal(player.pid)
+      res.body.slot.should.equal(constants.slots.RESERVE_SHORT_TERM)
+
+      MockDate.reset()
     })
   })
 })

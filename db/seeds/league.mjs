@@ -2,6 +2,15 @@ import { constants } from '#libs-shared'
 import { getLeague, createLeague } from '#libs-server'
 
 export default async function (knex, league_params = {}) {
+  // Reset sequences for test isolation (teams_uid_seq reset after team creation)
+  await knex.raw('ALTER SEQUENCE waivers_uid_seq RESTART WITH 1')
+  await knex.raw('ALTER SEQUENCE transactions_uid_seq RESTART WITH 1')
+  await knex.raw('ALTER SEQUENCE rosters_uid_seq RESTART WITH 1')
+  await knex.raw('ALTER SEQUENCE trades_uid_seq RESTART WITH 1')
+  await knex.raw('ALTER SEQUENCE poaches_uid_seq RESTART WITH 1')
+  await knex.raw('ALTER SEQUENCE leagues_uid_seq RESTART WITH 1')
+  await knex.raw('ALTER SEQUENCE super_priority_uid_seq RESTART WITH 1')
+
   await knex('leagues').del()
   await knex('seasons').del()
 
@@ -23,6 +32,8 @@ export default async function (knex, league_params = {}) {
   await knex('teams').del()
   await knex('rosters').del()
   await knex('rosters_players').del()
+  await knex('practice').del()
+  await knex('player_gamelogs').del()
   for (let i = 1; i <= 12; i++) {
     await knex('teams').insert({
       uid: i,
@@ -53,6 +64,9 @@ export default async function (knex, league_params = {}) {
       year: constants.season.year
     })
   }
+
+  // Sync teams sequence with the max uid after manual inserts
+  await knex.raw("SELECT setval('teams_uid_seq', (SELECT MAX(uid) FROM teams))")
 
   await knex('trades').del()
   await knex('trades_picks').del()
