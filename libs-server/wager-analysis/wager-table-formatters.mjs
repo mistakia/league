@@ -92,17 +92,35 @@ export const create_wager_summary_table = (
   return wager_summary_table
 }
 
-// Create lost by legs summary table
+/**
+ * Create a table showing wagers grouped by number of losing selections.
+ * Dynamically generates columns for all observed counts (e.g., 1, 2, 3, 4, 5...).
+ * This provides full visibility into near-miss patterns across all wagers.
+ *
+ * @param {Object} wager_summary - Summary object containing lost_by_legs counts
+ * @returns {Table} Console table with dynamic columns for each lost leg count
+ */
 export const create_lost_by_legs_table = (wager_summary) => {
   const lost_by_legs_summary_table = new Table({
     title: 'Wagers Lost By # Selections'
   })
-  lost_by_legs_summary_table.addRow({
-    1: wager_summary.lost_by_one_leg,
-    2: wager_summary.lost_by_two_legs,
-    3: wager_summary.lost_by_three_legs,
-    '4+': wager_summary.lost_by_four_or_more_legs
-  })
+
+  // Get all unique leg counts and sort them numerically
+  const leg_counts = Object.keys(wager_summary.lost_by_legs)
+    .map(Number)
+    .sort((a, b) => a - b)
+
+  // Build row object dynamically with each count as a column
+  const row = {}
+  for (const count of leg_counts) {
+    row[count] = wager_summary.lost_by_legs[count]
+  }
+
+  // Only add row if we have data to display
+  if (Object.keys(row).length > 0) {
+    lost_by_legs_summary_table.addRow(row)
+  }
+
   return lost_by_legs_summary_table
 }
 

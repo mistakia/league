@@ -8,6 +8,23 @@ const is_prop_equal = (prop_a, prop_b) =>
   prop_a.event_id === prop_b.event_id &&
   prop_a.selection_id === prop_b.selection_id
 
+/**
+ * Update the count of wagers lost by a specific number of legs.
+ * Creates a new object to maintain immutability in the reducer.
+ *
+ * @param {Object} lost_by_legs - Current counts object {1: count, 2: count, ...}
+ * @param {boolean} is_lost - Whether the wager was lost
+ * @param {number} lost_legs - Number of losing selections in the wager
+ * @returns {Object} Updated counts object
+ */
+const update_lost_by_legs_count = (lost_by_legs, is_lost, lost_legs) => {
+  const updated = { ...lost_by_legs }
+  if (is_lost && lost_legs > 0) {
+    updated[lost_legs] = (updated[lost_legs] || 0) + 1
+  }
+  return updated
+}
+
 // Calculate summary statistics for a collection of props
 export const calculate_props_summary = (props) =>
   props.reduce(
@@ -188,22 +205,12 @@ export const calculate_wager_summary = ({ wagers, props = [] }) =>
             (odds_categories.over_1000000 || 0)
         },
 
-        lost_by_one_leg:
-          lost_legs === 1
-            ? accumulator.lost_by_one_leg + 1
-            : accumulator.lost_by_one_leg,
-        lost_by_two_legs:
-          lost_legs === 2
-            ? accumulator.lost_by_two_legs + 1
-            : accumulator.lost_by_two_legs,
-        lost_by_three_legs:
-          lost_legs === 3
-            ? accumulator.lost_by_three_legs + 1
-            : accumulator.lost_by_three_legs,
-        lost_by_four_or_more_legs:
-          lost_legs >= 4
-            ? accumulator.lost_by_four_or_more_legs + 1
-            : accumulator.lost_by_four_or_more_legs
+        // Track lost legs dynamically - count wagers by number of losing selections
+        lost_by_legs: update_lost_by_legs_count(
+          accumulator.lost_by_legs,
+          is_lost,
+          lost_legs
+        )
       }
     },
     {
@@ -232,9 +239,6 @@ export const calculate_wager_summary = ({ wagers, props = [] }) =>
         range_500000_1000000: 0,
         over_1000000: 0
       },
-      lost_by_one_leg: 0,
-      lost_by_two_legs: 0,
-      lost_by_three_legs: 0,
-      lost_by_four_or_more_legs: 0
+      lost_by_legs: {}
     }
   )

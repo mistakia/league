@@ -17,6 +17,23 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('analyze-fanduel-wagers')
 debug.enable('analyze-fanduel-wagers')
 
+/**
+ * Update the count of wagers lost by a specific number of legs.
+ * Creates a new object to maintain immutability in the reducer.
+ *
+ * @param {Object} lost_by_legs - Current counts object {1: count, 2: count, ...}
+ * @param {boolean} is_lost - Whether the wager was lost
+ * @param {number} lost_legs - Number of losing selections in the wager
+ * @returns {Object} Updated counts object
+ */
+const update_lost_by_legs_count = (lost_by_legs, is_lost, lost_legs) => {
+  const updated = { ...lost_by_legs }
+  if (is_lost && lost_legs > 0) {
+    updated[lost_legs] = (updated[lost_legs] || 0) + 1
+  }
+  return updated
+}
+
 const __dirname = dirname(fileURLToPath(import.meta.url))
 const data_path = path.join(__dirname, '../tmp')
 
@@ -84,22 +101,12 @@ const get_wagers_summary = ({ wagers, props = [] }) =>
         open_potential_win:
           accumulator.open_potential_win + Number(wager.potentialWin),
 
-        lost_by_one_leg:
-          lost_legs === 1
-            ? accumulator.lost_by_one_leg + 1
-            : accumulator.lost_by_one_leg,
-        lost_by_two_legs:
-          lost_legs === 2
-            ? accumulator.lost_by_two_legs + 1
-            : accumulator.lost_by_two_legs,
-        lost_by_three_legs:
-          lost_legs === 3
-            ? accumulator.lost_by_three_legs + 1
-            : accumulator.lost_by_three_legs,
-        lost_by_four_or_more_legs:
-          lost_legs >= 4
-            ? accumulator.lost_by_four_or_more_legs + 1
-            : accumulator.lost_by_four_or_more_legs
+        // Track lost legs dynamically - count wagers by number of losing selections
+        lost_by_legs: update_lost_by_legs_count(
+          accumulator.lost_by_legs,
+          is_lost,
+          lost_legs
+        )
       }
     },
     {
@@ -111,10 +118,7 @@ const get_wagers_summary = ({ wagers, props = [] }) =>
       total_won: 0,
       max_potential_win: 0,
       open_potential_win: 0,
-      lost_by_one_leg: 0,
-      lost_by_two_legs: 0,
-      lost_by_three_legs: 0,
-      lost_by_four_or_more_legs: 0
+      lost_by_legs: {}
     }
   )
 
@@ -328,15 +332,28 @@ const analyze_fanduel_wagers = async ({
   wager_summary_table.printTable()
 
   if (show_counts) {
+    // Create table showing full accounting of wagers by number of losing selections
+    // Dynamically generates columns for all observed counts (e.g., 1, 2, 3, 4, 5...)
     const lost_by_legs_summary_table = new Table({
       title: 'Wagers Lost By # Selections'
     })
-    lost_by_legs_summary_table.addRow({
-      1: wager_summary.lost_by_one_leg,
-      2: wager_summary.lost_by_two_legs,
-      3: wager_summary.lost_by_three_legs,
-      '4+': wager_summary.lost_by_four_or_more_legs
-    })
+
+    // Get all unique leg counts and sort them numerically
+    const leg_counts = Object.keys(wager_summary.lost_by_legs)
+      .map(Number)
+      .sort((a, b) => a - b)
+
+    // Build row object dynamically with each count as a column
+    const row = {}
+    for (const count of leg_counts) {
+      row[count] = wager_summary.lost_by_legs[count]
+    }
+
+    // Only display table if we have data
+    if (Object.keys(row).length > 0) {
+      lost_by_legs_summary_table.addRow(row)
+    }
+
     lost_by_legs_summary_table.printTable()
   }
 
