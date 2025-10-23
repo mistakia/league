@@ -83,19 +83,36 @@ const format_performance_summary = (wager_summary, props_summary) => {
   return lines.join('\n')
 }
 
+/**
+ * Format wagers lost by number of selections as a markdown table.
+ * Dynamically generates columns for all observed counts (e.g., 1, 2, 3, 4, 5...).
+ * This provides full visibility into near-miss patterns across all wagers.
+ *
+ * @param {Object} wager_summary - Summary object containing lost_by_legs counts
+ * @returns {string} Markdown formatted table
+ */
 const format_wagers_lost_by_selections = (wager_summary) => {
   const lines = []
   lines.push('## Wagers Lost By # Selections\n')
-  lines.push(format_table_header(['1', '2', '3', '4+']))
-  lines.push(format_table_separator(['1', '2', '3', '4+']))
-  lines.push(
-    format_table_row([
-      wager_summary.lost_by_one_leg,
-      wager_summary.lost_by_two_legs,
-      wager_summary.lost_by_three_legs,
-      wager_summary.lost_by_four_or_more_legs
-    ])
-  )
+
+  // Get all unique leg counts and sort them numerically
+  const leg_counts = Object.keys(wager_summary.lost_by_legs)
+    .map(Number)
+    .sort((a, b) => a - b)
+
+  // Handle case with no lost wagers
+  if (leg_counts.length === 0) {
+    lines.push('No lost wagers to display.\n')
+    return lines.join('\n')
+  }
+
+  // Build headers (column names) and values (counts) dynamically
+  const headers = leg_counts.map(String)
+  const values = leg_counts.map((count) => wager_summary.lost_by_legs[count])
+
+  lines.push(format_table_header(headers))
+  lines.push(format_table_separator(headers))
+  lines.push(format_table_row(values))
   lines.push('')
   return lines.join('\n')
 }
