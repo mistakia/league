@@ -167,6 +167,9 @@ export default function LeagueHomePage({
   ]) {
     if (!player_map.get('pid')) continue
 
+    const practice_week = player_map.get('practice_week')
+    const practice_data = practice_week ? practice_week.toJS() : null
+
     if (
       !isReserveEligible({
         nfl_status: player_map.get('nfl_status'),
@@ -174,7 +177,8 @@ export default function LeagueHomePage({
         prior_week_inactive: player_map.get('prior_week_inactive'),
         week: constants.season.week,
         is_regular_season: constants.season.isRegularSeason,
-        game_day: player_map.get('game_day')
+        game_day: player_map.get('game_day'),
+        practice: practice_data
       })
     ) {
       notice_items.push(
