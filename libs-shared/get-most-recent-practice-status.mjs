@@ -1,8 +1,9 @@
 /**
  * Determines the most recent practice status for a player based on the current date.
  *
- * Walks backward from the current day of the week to find the most recent practice status.
- * If no status is found in previous days, walks forward from the current day.
+ * First checks if the current day has a practice status. If it does, returns it.
+ * If the current day has no status, walks backward from the previous day to find
+ * the most recent practice status.
  *
  * @param {Object} params - The parameters object
  * @param {Object} params.practice - Practice object with day-of-week properties
@@ -38,8 +39,19 @@ export default function get_most_recent_practice_status({
   // Get current day of week (0=Sunday, 6=Saturday)
   const current_day_of_week = current_date.getDay()
 
-  // Walk backward from current day to find first non-null value
-  for (let days_back = 0; days_back <= 6; days_back++) {
+  // First check if current day has a value
+  const current_practice_key = practice_day_map[current_day_of_week]
+  const current_practice_status = practice[current_practice_key]
+
+  if (
+    current_practice_status !== null &&
+    current_practice_status !== undefined
+  ) {
+    return current_practice_status
+  }
+
+  // If current day has no value, walk backward from previous day to find first non-null value
+  for (let days_back = 1; days_back <= 6; days_back++) {
     const day_to_check = (current_day_of_week - days_back + 7) % 7
     const practice_day_key = practice_day_map[day_to_check]
     const practice_status = practice[practice_day_key]
