@@ -23,6 +23,7 @@ export function createPlayer({
   f,
   s,
   su,
+  practice_week,
   ...data
 }) {
   const params = {
@@ -40,6 +41,12 @@ export function createPlayer({
     su !== undefined
   ) {
     params.practice_week = new Map({ m, tu, w, th, f, s, su })
+  } else if (practice_week) {
+    // If practice_week is passed directly (e.g., from data.toJS() spreading),
+    // ensure it's converted back to an Immutable Map
+    params.practice_week = Map.isMap(practice_week)
+      ? practice_week
+      : new Map(practice_week)
   }
 
   if (current_nfl_team) {
