@@ -17,6 +17,10 @@ import {
   preload_plays,
   find_play
 } from '#libs-server'
+import {
+  standardize_kick_result,
+  standardize_two_point_result
+} from '#libs-server/play-enum-utils.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -340,12 +344,12 @@ const format_special_teams = (play) => ({
   fg_att: format_boolean(play.field_goal_attempt),
   kickoff_att: format_boolean(play.kickoff_attempt),
   punt_att: format_boolean(play.punt_attempt),
-  fg_result: play.field_goal_result || null,
+
+  fg_result: standardize_kick_result(play.field_goal_result),
   kick_distance: format_number(play.kick_distance),
-  ep_result: play.extra_point_result || null,
-  tp_result: play.two_point_conv_result || null,
-  punt_blocked: format_boolean(play.punt_blocked)
-})
+  ep_result: standardize_kick_result(play.extra_point_result),
+  tp_result: standardize_two_point_result(play.two_point_conv_result),
+  punt_blocked: format_boolean(play.punt_blocked),
 
 const format_timeout_data = (play) => ({
   home_to_rem: format_number(play.home_timeouts_remaining),
