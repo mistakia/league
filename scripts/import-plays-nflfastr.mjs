@@ -306,7 +306,7 @@ const format_play = (play) => ({
 
 const run = async ({
   year = constants.season.year,
-  force_import = false,
+  ignore_conflicts = false,
   force_download = false
 } = {}) => {
   if (
@@ -371,7 +371,7 @@ const run = async ({
       await update_play({
         play_row: dbPlay,
         update: play,
-        ignore_conflicts: force_import
+        ignore_conflicts
       })
     } else {
       log(`${item.game_id} - ${item.play_id} - ${item.desc}`)
@@ -387,7 +387,7 @@ const main = async () => {
   let error
   try {
     const year = argv.year || constants.season.year
-    const force_import = argv.force
+    const ignore_conflicts = argv.ignore_conflicts
     const force_download = argv.d
     const all = argv.all
     if (all) {
@@ -396,10 +396,10 @@ const main = async () => {
         year <= constants.season.stats_season_year;
         year++
       ) {
-        await run({ year, force_import, force_download })
+        await run({ year, ignore_conflicts, force_download })
       }
     } else {
-      await run({ year, force_import, force_download })
+      await run({ year, ignore_conflicts, force_download })
     }
   } catch (err) {
     error = err

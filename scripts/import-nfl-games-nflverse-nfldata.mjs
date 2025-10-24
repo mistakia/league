@@ -79,7 +79,7 @@ const format_game = (game) => ({
 })
 
 const import_nfl_games_nflverse_nfldata = async ({
-  force_import = false,
+  ignore_conflicts = false,
   force_download = false
 } = {}) => {
   console.time('import-nfl-games-nflverse-total')
@@ -204,7 +204,7 @@ const import_nfl_games_nflverse_nfldata = async ({
       await update_nfl_game({
         game_row: db_game,
         update: game,
-        ignore_conflicts: force_import
+        ignore_conflicts
       })
     } else {
       log(`game not matched: ${item.old_game_id} - ${item.game_id}`)
@@ -219,9 +219,12 @@ const import_nfl_games_nflverse_nfldata = async ({
 const main = async () => {
   let error
   try {
-    const force_import = argv.force
+    const ignore_conflicts = argv.ignore_conflicts
     const force_download = argv.d
-    await import_nfl_games_nflverse_nfldata({ force_import, force_download })
+    await import_nfl_games_nflverse_nfldata({
+      ignore_conflicts,
+      force_download
+    })
   } catch (err) {
     error = err
     console.log(error)
