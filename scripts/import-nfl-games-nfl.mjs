@@ -73,7 +73,7 @@ const run = async ({
   week = constants.season.nfl_seas_week,
   seas_type = constants.season.nfl_seas_type,
   token,
-  force_import = false
+  ignore_cache = false
 } = {}) => {
   log(`processing ${seas_type} season games for week ${week} in ${year}`)
   const games = await db('nfl_games').where({
@@ -86,7 +86,7 @@ const run = async ({
   const game_missing_detailid_v1 = games.find((game) => !game.detailid_v1)
 
   if (
-    !force_import &&
+    !ignore_cache &&
     games.length &&
     !game_missing_detailid_v1 &&
     !game_missing_detailid_v3
@@ -108,7 +108,7 @@ const run = async ({
     week,
     seas_type,
     token,
-    ignore_cache: force_import
+    ignore_cache
   })
 
   const inserts = []
@@ -126,10 +126,10 @@ const run = async ({
 const main = async () => {
   let error
   try {
-    const force_import = argv.force
+    const ignore_cache = argv.ignore_cache
 
     if (argv.current) {
-      await run({ force_import })
+      await run({ ignore_cache })
     } else if (argv.year && argv.all) {
       const year = argv.year
 
@@ -138,7 +138,7 @@ const main = async () => {
         .where({ year, seas_type: 'PRE' })
         .groupBy('week')
       for (const { week } of pre_weeks) {
-        await run({ year, week, seas_type: 'PRE', force_import })
+        await run({ year, week, seas_type: 'PRE', ignore_cache })
         await wait(3000)
       }
 
@@ -147,7 +147,7 @@ const main = async () => {
         .where({ year, seas_type: 'REG' })
         .groupBy('week')
       for (const { week } of reg_weeks) {
-        await run({ year, week, seas_type: 'REG', force_import })
+        await run({ year, week, seas_type: 'REG', ignore_cache })
         await wait(3000)
       }
 
@@ -156,7 +156,7 @@ const main = async () => {
         .where({ year, seas_type: 'POST' })
         .groupBy('week')
       for (const { week } of post_weeks) {
-        await run({ year, week, seas_type: 'POST', force_import })
+        await run({ year, week, seas_type: 'POST', ignore_cache })
         await wait(3000)
       }
     } else if (argv.all) {
@@ -166,17 +166,17 @@ const main = async () => {
         const token = await nfl.getToken()
 
         for (let week = 0; week < 5; week++) {
-          await run({ year, week, seas_type: 'PRE', token, force_import })
+          await run({ year, week, seas_type: 'PRE', token, ignore_cache })
           await wait(3000)
         }
 
         for (let week = 0; week < 18; week++) {
-          await run({ year, week, seas_type: 'REG', token, force_import })
+          await run({ year, week, seas_type: 'REG', token, ignore_cache })
           await wait(3000)
         }
 
         for (let week = 0; week < 5; week++) {
-          await run({ year, week, seas_type: 'POST', token, force_import })
+          await run({ year, week, seas_type: 'POST', token, ignore_cache })
           await wait(3000)
         }
       }
@@ -184,7 +184,7 @@ const main = async () => {
       const year = argv.year
       const week = argv.week
       const seas_type = argv.seas_type
-      await run({ year, week, seas_type, force_import })
+      await run({ year, week, seas_type, ignore_cache })
     }
   } catch (err) {
     error = err
