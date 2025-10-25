@@ -84,6 +84,7 @@ class PlayCache {
    * @param {string} params.ydl_side - Yardline side
    * @param {number} params.ydl_100 - Yardline from 0-100
    * @param {number} params.sec_rem_qtr - Seconds remaining in quarter
+   * @param {number} params.sec_rem_qtr_tolerance - Tolerance for sec_rem_qtr matching (default: 0 for exact match)
    * @returns {Object|null} Play object if found, null otherwise
    * @throws {Error} If cache not initialized
    */
@@ -102,7 +103,8 @@ class PlayCache {
     ydl_num,
     ydl_side,
     ydl_100,
-    sec_rem_qtr
+    sec_rem_qtr,
+    sec_rem_qtr_tolerance
   }) {
     this._ensure_initialized()
 
@@ -121,6 +123,7 @@ class PlayCache {
         off,
         def,
         sec_rem_qtr,
+        sec_rem_qtr_tolerance,
         game_clock_start,
         play_type,
         ydl_num,
@@ -216,24 +219,61 @@ class PlayCache {
    */
   _build_game_context_index(plays) {
     for (const play of plays) {
-      const has_context_fields =
+      const has_required_fields =
         play.esbid &&
         play.qtr !== null &&
         play.dwn !== null &&
         play.yards_to_go !== null &&
         play.ydl_100 !== null
 
-      if (has_context_fields) {
-        const key = `${play.esbid}_${play.qtr}_${play.dwn}_${play.yards_to_go}_${play.ydl_100}`
+      if (has_required_fields) {
+        const context_key = this._create_context_key(
+          play.esbid,
+          play.qtr,
+          play.dwn,
+          play.yards_to_go,
+          play.ydl_100
+        )
 
-        if (!this.plays_by_game_context.has(key)) {
-          this.plays_by_game_context.set(key, [])
+        if (!this.plays_by_game_context.has(context_key)) {
+          this.plays_by_game_context.set(context_key, [])
         }
-        this.plays_by_game_context.get(key).push(play)
+        this.plays_by_game_context.get(context_key).push(play)
       }
     }
   }
 
+  /**
+   * Creates a context key for indexing plays
+   * @param {number} esbid - Game esbid
+   * @param {number} qtr - Quarter
+   * @param {number} dwn - Down
+   * @param {number} yards_to_go - Yards to go
+   * @param {number} ydl_100 - Yardline from 0-100
+   * @returns {string} Context key
+   * @private
+   */
+  _create_context_key(esbid, qtr, dwn, yards_to_go, ydl_100) {
+    return `${esbid}_${qtr}_${dwn}_${yards_to_go}_${ydl_100}`
+  }
+
+  /**
+   * Checks if all required context fields are defined
+   * @private
+   */
+  _has_context_fields(qtr, dwn, yards_to_go, ydl_100) {
+    return (
+      qtr !== undefined &&
+      dwn !== undefined &&
+      yards_to_go !== undefined &&
+      ydl_100 !== undefined
+    )
+  }
+
+  /**
+   * Searches plays using context index first, falls back to full scan
+   * @private
+   */
   _find_play_by_context({
     esbid,
     qtr,
@@ -243,44 +283,44 @@ class PlayCache {
     off,
     def,
     sec_rem_qtr,
+    sec_rem_qtr_tolerance,
     game_clock_start,
     play_type,
     ydl_num,
     ydl_side
   }) {
-    const has_context_key =
-      qtr !== undefined &&
-      dwn !== undefined &&
-      yards_to_go !== undefined &&
-      ydl_100 !== undefined
+    // Try indexed lookup first (fastest)
+    if (this._has_context_fields(qtr, dwn, yards_to_go, ydl_100)) {
+      const context_key = this._create_context_key(
+        esbid,
+        qtr,
+        dwn,
+        yards_to_go,
+        ydl_100
+      )
+      const indexed_plays = this.plays_by_game_context.get(context_key) || []
 
-    if (has_context_key) {
-      const key = `${esbid}_${qtr}_${dwn}_${yards_to_go}_${ydl_100}`
-      const plays = this.plays_by_game_context.get(key) || []
-
-      if (plays.length > 0) {
-        const filtered = this._filter_plays(plays, {
+      if (indexed_plays.length > 0) {
+        const additional_filters = {
           off,
           def,
           sec_rem_qtr,
+          sec_rem_qtr_tolerance,
           game_clock_start,
           play_type,
           ydl_num,
           ydl_side
-        })
-
-        if (filtered.length > 0) {
-          return filtered[0]
         }
+        const matching_play = this._find_first_matching_play(
+          indexed_plays,
+          additional_filters
+        )
+        if (matching_play) return matching_play
       }
     }
 
-    const game_plays = this.plays_by_esbid.get(esbid) || []
-    if (game_plays.length === 0) {
-      return null
-    }
-
-    const filtered = this._filter_plays(game_plays, {
+    // Fall back to full game scan
+    return this._scan_game_plays(esbid, {
       qtr,
       dwn,
       yards_to_go,
@@ -288,61 +328,129 @@ class PlayCache {
       off,
       def,
       sec_rem_qtr,
+      sec_rem_qtr_tolerance,
       game_clock_start,
       play_type,
       ydl_num,
       ydl_side
     })
-
-    return filtered.length > 0 ? filtered[0] : null
   }
 
+  /**
+   * Scans all plays for a game with given filters
+   * @private
+   */
+  _scan_game_plays(esbid, filters) {
+    const game_plays = this.plays_by_esbid.get(esbid) || []
+    if (game_plays.length === 0) return null
+
+    return this._find_first_matching_play(game_plays, filters)
+  }
+
+  /**
+   * Finds first play matching all filters
+   * @private
+   */
+  _find_first_matching_play(plays, filters) {
+    const matching_plays = this._filter_plays(plays, filters)
+    return matching_plays.length > 0 ? matching_plays[0] : null
+  }
+
+  /**
+   * Filters plays based on provided criteria
+   * @private
+   */
   _filter_plays(plays, filters) {
-    return plays.filter((play) => {
-      if (filters.qtr !== undefined && play.qtr !== Number(filters.qtr)) {
-        return false
-      }
-      if (filters.dwn !== undefined && play.dwn !== Number(filters.dwn)) {
-        return false
-      }
-      if (
-        filters.yards_to_go !== undefined &&
-        play.yards_to_go !== filters.yards_to_go
-      ) {
-        return false
-      }
-      if (filters.ydl_100 !== undefined && play.ydl_100 !== filters.ydl_100) {
-        return false
-      }
-      if (filters.off && play.off !== fixTeam(filters.off)) {
-        return false
-      }
-      if (filters.def && play.def !== fixTeam(filters.def)) {
-        return false
-      }
-      if (
-        filters.sec_rem_qtr !== undefined &&
-        play.sec_rem_qtr !== filters.sec_rem_qtr
-      ) {
-        return false
-      }
-      if (
-        filters.game_clock_start &&
-        play.game_clock_start !== filters.game_clock_start
-      ) {
-        return false
-      }
-      if (filters.play_type && play.play_type !== filters.play_type) {
-        return false
-      }
-      if (filters.ydl_num !== undefined && play.ydl_num !== filters.ydl_num) {
-        return false
-      }
-      if (filters.ydl_side && play.ydl_side !== fixTeam(filters.ydl_side)) {
-        return false
-      }
-      return true
-    })
+    return plays.filter((play) => this._play_matches_filters(play, filters))
+  }
+
+  /**
+   * Checks if a play matches all provided filters
+   * @private
+   */
+  _play_matches_filters(play, filters) {
+    return (
+      this._matches_numeric_field(play.qtr, filters.qtr) &&
+      this._matches_nullable_field(play.dwn, filters.dwn) &&
+      this._matches_nullable_field(play.yards_to_go, filters.yards_to_go) &&
+      this._matches_numeric_field(play.ydl_100, filters.ydl_100) &&
+      this._matches_team_field(play.off, filters.off) &&
+      this._matches_team_field(play.def, filters.def) &&
+      this._matches_time_field(
+        play.sec_rem_qtr,
+        filters.sec_rem_qtr,
+        filters.sec_rem_qtr_tolerance
+      ) &&
+      this._matches_string_field(
+        play.game_clock_start,
+        filters.game_clock_start
+      ) &&
+      this._matches_string_field(play.play_type, filters.play_type) &&
+      this._matches_numeric_field(play.ydl_num, filters.ydl_num) &&
+      this._matches_team_field(play.ydl_side, filters.ydl_side)
+    )
+  }
+
+  /**
+   * Checks if numeric field matches filter (handles undefined)
+   * @private
+   */
+  _matches_numeric_field(play_value, filter_value) {
+    if (filter_value === undefined) return true
+    return play_value === Number(filter_value)
+  }
+
+  /**
+   * Checks if nullable field matches filter (handles null and numeric values)
+   * @private
+   */
+  _matches_nullable_field(play_value, filter_value) {
+    if (filter_value === undefined) return true
+    if (filter_value === null) return play_value === null
+    return play_value === Number(filter_value)
+  }
+
+  /**
+   * Checks if string field matches filter
+   * @private
+   */
+  _matches_string_field(play_value, filter_value) {
+    if (!filter_value) return true
+    return play_value === filter_value
+  }
+
+  /**
+   * Checks if team field matches filter (normalizes team names)
+   * @private
+   */
+  _matches_team_field(play_value, filter_value) {
+    if (!filter_value) return true
+    return play_value === fixTeam(filter_value)
+  }
+
+  /**
+   * Checks if time field matches filter with optional tolerance
+   * @param {number} play_value - Play's sec_rem_qtr value
+   * @param {number} filter_value - Filter sec_rem_qtr value
+   * @param {number} tolerance - Tolerance in seconds (default: 0 for exact match)
+   * @returns {boolean} True if matches within tolerance
+   * @private
+   */
+  _matches_time_field(play_value, filter_value, tolerance = 0) {
+    if (filter_value === undefined) return true
+    if (filter_value === null) return play_value === null
+
+    const play_time = Number(play_value)
+    const filter_time = Number(filter_value)
+
+    // If no tolerance, require exact match
+    if (tolerance === 0 || tolerance === undefined) {
+      return play_time === filter_time
+    }
+
+    // Match if within tolerance range
+    const diff = Math.abs(play_time - filter_time)
+    return diff <= tolerance
   }
 
   /**

@@ -11,6 +11,7 @@ import player_cache, {
 } from '#libs-server/player-cache.mjs'
 import { enrich_plays } from '#libs-server/play-enrichment/index.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { standardize_score_type } from '#libs-server/play-enum-utils.mjs'
 
 const log = debug('import-plays-nfl-v1')
 debug.enable('import-plays-nfl-v1,nfl')
@@ -89,7 +90,8 @@ const getPlayData = ({ play, year, week, seas_type }) => {
 
   const data = {
     desc: clean_string(play.playDescription),
-    dwn: play.down,
+    // Normalize down to null for special teams plays (0 should be null)
+    dwn: play.down === 0 ? null : play.down,
     drive_play_count: play.drivePlayCount,
     game_clock_start: play.clockTime,
     // Clock-based time fields calculated from game_clock_start
@@ -114,10 +116,11 @@ const getPlayData = ({ play, year, week, seas_type }) => {
     deleted: play.playDeleted,
     review: clean_string(play.playReviewStatus),
     score: play.scoringPlay,
-    score_type: clean_string(play.scoringPlayType),
+    score_type: standardize_score_type(play.scoringPlayType),
     special_play_type: clean_string(play.stPlayType),
     timestamp: play.timeOfDay ? dayjs(play.timeOfDay).format('HH:mm:ss') : null,
-    yards_to_go: play.yardsToGo,
+    // Normalize yards_to_go to null for special teams plays (0 should be null)
+    yards_to_go: play.yardsToGo === 0 ? null : play.yardsToGo,
     qtr: play.quarter,
     play_type_nfl: clean_string(play.playType)
   }
