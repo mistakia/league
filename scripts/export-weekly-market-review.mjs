@@ -116,13 +116,13 @@ const detect_latest_week_with_longshots = async ({ year }) => {
 }
 
 /**
- * Query 1: Player winning selections aggregated by week
+ * Query 1: Player occurring selections aggregated by week
  */
-const query_player_winning_selections = async ({ year }) => {
-  log('Executing player winning selections query...')
+const query_player_occurring_selections = async ({ year }) => {
+  log('Executing player occurring selections query...')
 
   const sql = `
-    WITH winning_selections AS (
+    WITH occurring_selections AS (
       SELECT
         pmsi.selection_pid as player_id,
         p.pname as player_name,
@@ -157,7 +157,7 @@ const query_player_winning_selections = async ({ year }) => {
         AND pmsi.selection_pid != ''
     ),
     filtered_selections AS (
-      SELECT * FROM winning_selections WHERE rn = 1
+      SELECT * FROM occurring_selections WHERE rn = 1
     )
     SELECT
       player_id,
@@ -191,18 +191,18 @@ const query_player_winning_selections = async ({ year }) => {
   `
 
   const results = await db.raw(sql, [year])
-  log(`  Found ${results.rows.length} players with 3+ longshot wins`)
+  log(`  Found ${results.rows.length} players with 3+ longshot occurrences`)
   return results.rows
 }
 
 /**
- * Query 2: Team winning selections aggregated by week
+ * Query 2: Team occurring selections aggregated by week
  */
-const query_team_winning_selections = async ({ year }) => {
-  log('Executing team winning selections query...')
+const query_team_occurring_selections = async ({ year }) => {
+  log('Executing team occurring selections query...')
 
   const sql = `
-    WITH winning_selections AS (
+    WITH occurring_selections AS (
       SELECT
         pgl.tm as team,
         ng.week,
@@ -241,7 +241,7 @@ const query_team_winning_selections = async ({ year }) => {
         AND pmsi.selection_pid != ''
     ),
     filtered_selections AS (
-      SELECT * FROM winning_selections WHERE rn = 1
+      SELECT * FROM occurring_selections WHERE rn = 1
     ),
     team_summary AS (
       SELECT
@@ -295,13 +295,13 @@ const query_team_winning_selections = async ({ year }) => {
 }
 
 /**
- * Query 3: Opponent winning selections aggregated by week
+ * Query 3: Opponent occurring selections aggregated by week
  */
-const query_opponent_winning_selections = async ({ year }) => {
-  log('Executing opponent winning selections query...')
+const query_opponent_occurring_selections = async ({ year }) => {
+  log('Executing opponent occurring selections query...')
 
   const sql = `
-    WITH winning_selections AS (
+    WITH occurring_selections AS (
       SELECT
         pgl.opp as opponent,
         ng.week,
@@ -340,7 +340,7 @@ const query_opponent_winning_selections = async ({ year }) => {
         AND pmsi.selection_pid != ''
     ),
     filtered_selections AS (
-      SELECT * FROM winning_selections WHERE rn = 1
+      SELECT * FROM occurring_selections WHERE rn = 1
     ),
     opponent_summary AS (
       SELECT
@@ -400,7 +400,7 @@ const query_all_longshots_latest_week = async ({ year, week }) => {
   log(`Executing all longshots query for week ${week}...`)
 
   const sql = `
-    WITH winning_selections AS (
+    WITH occurring_selections AS (
       SELECT
         pmsi.selection_pid as player_id,
         COALESCE(p.pname, 'Unknown Player') as player_name,
@@ -444,7 +444,7 @@ const query_all_longshots_latest_week = async ({ year, week }) => {
       selection_name,
       selection_metric_line,
       odds_american
-    FROM winning_selections
+    FROM occurring_selections
     WHERE rn = 1
     ORDER BY odds_american ASC, player_name ASC, market_type ASC
   `
@@ -461,7 +461,7 @@ const query_extreme_longshots_latest_week = async ({ year, week }) => {
   log(`Executing extreme longshots query for week ${week}...`)
 
   const sql = `
-    WITH winning_selections AS (
+    WITH occurring_selections AS (
       SELECT
         pmsi.selection_pid as player_id,
         COALESCE(p.pname, 'Unknown Player') as player_name,
@@ -505,7 +505,7 @@ const query_extreme_longshots_latest_week = async ({ year, week }) => {
       selection_name,
       selection_metric_line,
       odds_american
-    FROM winning_selections
+    FROM occurring_selections
     WHERE rn = 1
     ORDER BY odds_american DESC, player_name ASC
   `
@@ -518,13 +518,13 @@ const query_extreme_longshots_latest_week = async ({ year, week }) => {
 }
 
 /**
- * Query 6: Market type winning selections by week with top players and opponents
+ * Query 6: Market type occurring selections by week with top players and opponents
  */
-const query_market_type_winning_selections = async ({ year, week }) => {
-  log('Executing market type winning selections query...')
+const query_market_type_occurring_selections = async ({ year, week }) => {
+  log('Executing market type occurring selections query...')
 
   const sql = `
-    WITH winning_selections AS (
+    WITH occurring_selections AS (
         SELECT
             pmi.market_type,
             ng.week,
@@ -565,7 +565,7 @@ const query_market_type_winning_selections = async ({ year, week }) => {
     ),
     filtered_selections AS (
         SELECT *
-        FROM winning_selections
+        FROM occurring_selections
         WHERE rn = 1
     ),
     market_type_weekly AS (
@@ -599,7 +599,7 @@ const query_market_type_winning_selections = async ({ year, week }) => {
             STRING_AGG(
                 player_full_name || ' (' || position || ', ' || team || ')',
                 ', '
-                ORDER BY wins_count DESC, player_name ASC
+                ORDER BY occurrences_count DESC, player_name ASC
             ) as top_players_season
         FROM (
             SELECT
@@ -608,7 +608,7 @@ const query_market_type_winning_selections = async ({ year, week }) => {
                 player_name,
                 position,
                 team,
-                COUNT(*) as wins_count,
+                COUNT(*) as occurrences_count,
                 ROW_NUMBER() OVER (
                     PARTITION BY market_type
                     ORDER BY COUNT(*) DESC, player_name ASC
@@ -625,7 +625,7 @@ const query_market_type_winning_selections = async ({ year, week }) => {
             STRING_AGG(
                 player_full_name || ' (' || position || ', ' || team || ')',
                 ', '
-                ORDER BY wins_count DESC, player_name ASC
+                ORDER BY occurrences_count DESC, player_name ASC
             ) as top_players_week
         FROM (
             SELECT
@@ -634,7 +634,7 @@ const query_market_type_winning_selections = async ({ year, week }) => {
                 player_name,
                 position,
                 team,
-                COUNT(*) as wins_count,
+                COUNT(*) as occurrences_count,
                 ROW_NUMBER() OVER (
                     PARTITION BY market_type
                     ORDER BY COUNT(*) DESC, player_name ASC
@@ -650,15 +650,15 @@ const query_market_type_winning_selections = async ({ year, week }) => {
         SELECT
             market_type,
             STRING_AGG(
-                opponent || ' (' || wins_count || ')',
+                opponent || ' (' || occurrences_count || ')',
                 ', '
-                ORDER BY wins_count DESC, opponent ASC
+                ORDER BY occurrences_count DESC, opponent ASC
             ) as top_opponents_season
         FROM (
             SELECT
                 market_type,
                 opponent,
-                COUNT(*) as wins_count,
+                COUNT(*) as occurrences_count,
                 ROW_NUMBER() OVER (
                     PARTITION BY market_type
                     ORDER BY COUNT(*) DESC, opponent ASC
@@ -674,15 +674,15 @@ const query_market_type_winning_selections = async ({ year, week }) => {
         SELECT
             market_type,
             STRING_AGG(
-                opponent || ' (' || wins_count || ')',
+                opponent || ' (' || occurrences_count || ')',
                 ', '
-                ORDER BY wins_count DESC, opponent ASC
+                ORDER BY occurrences_count DESC, opponent ASC
             ) as top_opponents_week
         FROM (
             SELECT
                 market_type,
                 opponent,
-                COUNT(*) as wins_count,
+                COUNT(*) as occurrences_count,
                 ROW_NUMBER() OVER (
                     PARTITION BY market_type
                     ORDER BY COUNT(*) DESC, opponent ASC
@@ -709,7 +709,7 @@ const query_market_type_winning_selections = async ({ year, week }) => {
   `
 
   const results = await db.raw(sql, [year, week, week])
-  log(`  Found ${results.rows.length} market types with longshot wins`)
+  log(`  Found ${results.rows.length} market types with longshot occurrences`)
   return results.rows
 }
 
@@ -830,14 +830,14 @@ const main = async () => {
 
     const query_results = []
 
-    // Query 1: Player winning selections
-    const player_results = await query_player_winning_selections({
+    // Query 1: Player occurring selections
+    const player_results = await query_player_occurring_selections({
       year: argv.year
     })
     const player_markdown = format_results_to_markdown_table({
       results: player_results,
-      title: 'Players by Longshot Wins (200+ Odds)',
-      query_info: `Players with 3+ longshot wins across ${argv.year} regular season`,
+      title: 'Players by Longshot Occurrences (200+ Odds)',
+      query_info: `Players with 3+ longshot occurrences across ${argv.year} regular season`,
       columns: [
         { key: 'player_full_name', label: 'Player' },
         { key: 'position', label: 'Pos' },
@@ -864,22 +864,22 @@ const main = async () => {
       ]
     })
     await fs.writeFile(
-      path.join(output_dir, 'player-winning-selections.md'),
+      path.join(output_dir, 'player-occurring-selections.md'),
       player_markdown
     )
     query_results.push({
-      query: 'player-winning-selections',
+      query: 'player-occurring-selections',
       row_count: player_results.length
     })
 
-    // Query 2: Team winning selections
-    const team_results = await query_team_winning_selections({
+    // Query 2: Team occurring selections
+    const team_results = await query_team_occurring_selections({
       year: argv.year
     })
     const team_markdown = format_results_to_markdown_table({
       results: team_results,
       title: 'Team Longshot Production',
-      query_info: `Teams generating the most longshot wins in ${argv.year} regular season`,
+      query_info: `Teams generating the most longshot occurrences in ${argv.year} regular season`,
       columns: [
         { key: 'team', label: 'Team' },
         { key: 'week_1', label: 'W1', empty: '0' },
@@ -905,22 +905,22 @@ const main = async () => {
       ]
     })
     await fs.writeFile(
-      path.join(output_dir, 'team-winning-selections.md'),
+      path.join(output_dir, 'team-occurring-selections.md'),
       team_markdown
     )
     query_results.push({
-      query: 'team-winning-selections',
+      query: 'team-occurring-selections',
       row_count: team_results.length
     })
 
-    // Query 3: Opponent winning selections
-    const opponent_results = await query_opponent_winning_selections({
+    // Query 3: Opponent occurring selections
+    const opponent_results = await query_opponent_occurring_selections({
       year: argv.year
     })
     const opponent_markdown = format_results_to_markdown_table({
       results: opponent_results,
       title: 'Opponent-Triggered Longshots',
-      query_info: `Opponents that allow the most longshot wins in ${argv.year} regular season`,
+      query_info: `Opponents that allow the most longshot occurrences in ${argv.year} regular season`,
       columns: [
         { key: 'opponent', label: 'Opponent' },
         { key: 'week_1', label: 'W1', empty: '0' },
@@ -946,11 +946,11 @@ const main = async () => {
       ]
     })
     await fs.writeFile(
-      path.join(output_dir, 'opponent-winning-selections.md'),
+      path.join(output_dir, 'opponent-occurring-selections.md'),
       opponent_markdown
     )
     query_results.push({
-      query: 'opponent-winning-selections',
+      query: 'opponent-occurring-selections',
       row_count: opponent_results.length
     })
 
@@ -962,7 +962,7 @@ const main = async () => {
     const all_longshots_markdown = format_results_to_markdown_table({
       results: all_longshots_results,
       title: `All Longshot Selections (200+ Odds) - Week ${week}`,
-      query_info: `Complete list of all longshot wins from week ${week}`,
+      query_info: `Complete list of all longshot occurrences from week ${week}`,
       columns: [
         { key: 'player_full_name', label: 'Player' },
         { key: 'position', label: 'Pos' },
@@ -989,7 +989,7 @@ const main = async () => {
     const extreme_longshots_markdown = format_results_to_markdown_table({
       results: extreme_longshots_results,
       title: `Extreme Longshot Highlights (1000+ Odds) - Week ${week}`,
-      query_info: `Only the most extreme longshot wins from week ${week}`,
+      query_info: `Only the most extreme longshot occurrences from week ${week}`,
       columns: [
         { key: 'player_full_name', label: 'Player' },
         { key: 'position', label: 'Pos' },
@@ -1010,15 +1010,15 @@ const main = async () => {
       row_count: extreme_longshots_results.length
     })
 
-    // Query 6: Market type winning selections with top players and opponents
-    const market_type_results = await query_market_type_winning_selections({
+    // Query 6: Market type occurring selections with top players and opponents
+    const market_type_results = await query_market_type_occurring_selections({
       year: argv.year,
       week
     })
     const market_type_markdown = format_results_to_markdown_table({
       results: market_type_results,
       title: 'Market Type Longshot Distribution with Top Players & Opponents',
-      query_info: `Longshot wins by market type with top 3 players and opponents for season and week ${week}`,
+      query_info: `Longshot occurrences by market type with top 3 players and opponents for season and week ${week}`,
       columns: [
         { key: 'market_type', label: 'Market Type' },
         { key: 'week_1', label: 'W1', empty: '0' },
@@ -1047,11 +1047,11 @@ const main = async () => {
       ]
     })
     await fs.writeFile(
-      path.join(output_dir, 'market-type-winning-selections.md'),
+      path.join(output_dir, 'market-type-occurring-selections.md'),
       market_type_markdown
     )
     query_results.push({
-      query: 'market-type-winning-selections',
+      query: 'market-type-occurring-selections',
       row_count: market_type_results.length
     })
 
@@ -1068,7 +1068,7 @@ const main = async () => {
     const player_context_markdown = format_results_to_markdown_table({
       results: player_context_results,
       title: 'Player Context Analysis',
-      query_info: `Background information for players with longshot wins`,
+      query_info: `Background information for players with longshot occurrences`,
       columns: [
         { key: 'player_full_name', label: 'Player' },
         { key: 'pos', label: 'Pos' },
