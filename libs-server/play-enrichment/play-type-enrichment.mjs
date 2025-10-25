@@ -23,14 +23,22 @@ export const enrich_play_types = (plays) => {
   const enriched_plays = plays.map((play) => {
     let play_type = null
 
-    // Prioritize NGS play type
-    if (play.play_type_ngs) {
-      play_type = get_play_type_ngs(play.play_type_ngs)
-    }
+    // Check if play was negated by penalty
+    // Plays with "no play" in description should always be NOPL regardless of original type
+    // This handles cases like extra points, field goals, passes, runs that were negated
+    const desc = play.desc || ''
+    if (desc.toLowerCase().includes('no play')) {
+      play_type = 'NOPL'
+    } else {
+      // Prioritize NGS play type
+      if (play.play_type_ngs) {
+        play_type = get_play_type_ngs(play.play_type_ngs)
+      }
 
-    // Fall back to NFL play type
-    if (!play_type && play.play_type_nfl) {
-      play_type = get_play_type_nfl(play.play_type_nfl)
+      // Fall back to NFL play type
+      if (!play_type && play.play_type_nfl) {
+        play_type = get_play_type_nfl(play.play_type_nfl)
+      }
     }
 
     // Skip plays without either type

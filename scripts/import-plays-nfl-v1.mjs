@@ -85,8 +85,27 @@ const parse_clock_time = (clockTime, quarter) => {
 }
 
 const getPlayData = ({ play, year, week, seas_type }) => {
+  const play_type_nfl = clean_string(play.playType)
+
   // Parse clock time and calculate time-related fields
-  const time_fields = parse_clock_time(play.clockTime, play.quarter)
+  let time_fields = parse_clock_time(play.clockTime, play.quarter)
+
+  // Special handling for game state events that may have null/invalid clock times
+  // GAME_START should have full quarter time (900 seconds)
+  // END_QUARTER and END_GAME should have 0 seconds remaining
+  if (play_type_nfl === 'GAME_START' && play.quarter === 1) {
+    time_fields = {
+      sec_rem_qtr: 900,
+      sec_rem_half: 1800,  // 900 + 900 (Q1 + Q2)
+      sec_rem_gm: 3600     // Full game time
+    }
+  } else if (play_type_nfl === 'END_QUARTER' || play_type_nfl === 'END_GAME') {
+    time_fields = {
+      sec_rem_qtr: 0,
+      sec_rem_half: play.quarter === 2 || play.quarter === 4 ? 0 : time_fields.sec_rem_half,
+      sec_rem_gm: play_type_nfl === 'END_GAME' ? 0 : time_fields.sec_rem_gm
+    }
+  }
 
   const data = {
     desc: clean_string(play.playDescription),
@@ -122,7 +141,7 @@ const getPlayData = ({ play, year, week, seas_type }) => {
     // Normalize yards_to_go to null for special teams plays (0 should be null)
     yards_to_go: play.yardsToGo === 0 ? null : play.yardsToGo,
     qtr: play.quarter,
-    play_type_nfl: clean_string(play.playType)
+    play_type_nfl
   }
 
   if (play.possessionTeam) {

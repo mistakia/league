@@ -11,7 +11,8 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 import {
   preload_plays,
   find_play,
-  get_cache_stats
+  get_cache_stats,
+  MultiplePlayMatchError
 } from '#libs-server/play-cache.mjs'
 import {
   preload_active_players,
@@ -655,7 +656,9 @@ const import_plays_sportradar = async ({
   let total_plays_processed = 0
   let total_plays_matched = 0
   let total_plays_updated = 0
+  let total_plays_multiple_matches = 0
   const unmatched_plays = []
+  const multiple_match_plays = []
   const unmatched_reasons = {} // Track unmatched plays by play type
   const sample_plays_by_type = {} // For --dry mode: collect sample plays by type
   const all_collisions = [] // Track all field collisions for summary
@@ -751,32 +754,49 @@ const import_plays_sportradar = async ({
               match_criteria.sec_rem_qtr_tolerance = 10 // 10-second tolerance for time matching
             }
 
-            let db_play = find_play(match_criteria)
+            let db_play
+            let multiple_match_error = false
 
-            // Fuzzy matching: If exact match fails and yards_to_go is set, try +/-1 yard tolerance
-            // This handles minor discrepancies in yard measurements between data sources
-            if (
-              !db_play &&
-              match_criteria.yards_to_go !== null &&
-              match_criteria.yards_to_go !== undefined
-            ) {
-              for (const offset of [-1, 1]) {
-                const fuzzy_criteria = {
-                  ...match_criteria,
-                  yards_to_go: match_criteria.yards_to_go + offset
+            try {
+              db_play = find_play(match_criteria)
+
+              // Fuzzy matching: If exact match fails and yards_to_go is set, try +/-1 yard tolerance
+              // This handles minor discrepancies in yard measurements between data sources
+              if (
+                !db_play &&
+                match_criteria.yards_to_go !== null &&
+                match_criteria.yards_to_go !== undefined
+              ) {
+                for (const offset of [-1, 1]) {
+                  const fuzzy_criteria = {
+                    ...match_criteria,
+                    yards_to_go: match_criteria.yards_to_go + offset
+                  }
+                  db_play = find_play(fuzzy_criteria)
+                  if (db_play) {
+                    log(
+                      `Fuzzy match: yards_to_go ${match_criteria.yards_to_go} -> ${fuzzy_criteria.yards_to_go}`
+                    )
+                    break
+                  }
                 }
-                db_play = find_play(fuzzy_criteria)
-                if (db_play) {
-                  log(
-                    `Fuzzy match: yards_to_go ${match_criteria.yards_to_go} -> ${fuzzy_criteria.yards_to_go}`
-                  )
-                  break
-                }
+              }
+            } catch (error) {
+              if (error instanceof MultiplePlayMatchError) {
+                log(
+                  `MULTIPLE MATCH ERROR: ${game.esbid} - ${sportradar_play.id}`
+                )
+                log(`Description: ${sportradar_play.description}`)
+                log(`Matched ${error.match_count} plays`)
+                log('Match criteria:', match_criteria)
+                multiple_match_error = true
+              } else {
+                throw error
               }
             }
 
             // Track reasons for non-matches
-            if (!db_play) {
+            if (!db_play && !multiple_match_error) {
               if (!unmatched_reasons[mapped_play.play_type]) {
                 unmatched_reasons[mapped_play.play_type] = 0
               }
@@ -845,6 +865,16 @@ const import_plays_sportradar = async ({
                   total_plays_updated++
                 }
               }
+            } else if (multiple_match_error) {
+              total_plays_multiple_matches++
+              multiple_match_plays.push({
+                esbid: game.esbid,
+                sportradar_play_id: sportradar_play.id,
+                description: sportradar_play.description,
+                qtr: mapped_play.qtr,
+                clock: mapped_play.game_clock_start,
+                match_criteria
+              })
             } else {
               unmatched_plays.push({
                 esbid: game.esbid,
@@ -870,7 +900,9 @@ const import_plays_sportradar = async ({
     total_plays_processed,
     total_plays_matched,
     total_plays_updated,
+    total_plays_multiple_matches,
     unmatched_plays,
+    multiple_match_plays,
     unmatched_reasons
   })
 

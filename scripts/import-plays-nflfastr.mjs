@@ -13,10 +13,13 @@ import {
   readCSV,
   update_play,
   report_job,
-  fetch_with_retry,
-  preload_plays,
-  find_play
+  fetch_with_retry
 } from '#libs-server'
+import {
+  preload_plays,
+  find_play,
+  MultiplePlayMatchError
+} from '#libs-server/play-cache.mjs'
 import {
   standardize_kick_result,
   standardize_two_point_result
@@ -25,10 +28,10 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-nflfastr-plays')
-debug.enable('import-nflfastr-plays,update-play,fetch')
+debug.enable('import-nflfastr-plays,update-play,fetch,play-cache')
 
 // Constants
-const TIME_MATCH_TOLERANCE_SECONDS = 5
+const TIME_MATCH_TOLERANCE_SECONDS = 5  // Allow 5-second tolerance for timing discrepancies
 
 // ============================================================================
 // Basic Formatters
@@ -136,9 +139,23 @@ const format_play_type = (
   extra_point_attempt,
   field_goal_attempt,
   kickoff_attempt,
-  punt_attempt
+  punt_attempt,
+  two_point_attempt,
+  desc
 ) => {
-  if (!play_type) return null
+  if (!play_type) {
+    // Special handling for administrative plays that have null play_type in nflfastR
+    // but are stored as NOPL in the database
+    if (desc === 'GAME' || desc?.includes('END QUARTER') || desc === 'END GAME') {
+      return 'NOPL'
+    }
+    return null
+  }
+
+  // Two-point conversion attempts are stored as CONV in database
+  if (two_point_attempt) {
+    return 'CONV'
+  }
 
   // Map nflfastR play_type to NFL play_type constants
   switch (play_type.toLowerCase()) {
@@ -147,9 +164,9 @@ const format_play_type = (
     case 'run':
       return 'RUSH'
     case 'qb_kneel':
-      return 'NOPL' // QB kneel is classified as NOPL
+      return 'RUSH'
     case 'qb_spike':
-      return 'NOPL' // QB spike is classified as NOPL
+      return 'PASS'
     case 'no_play':
       return 'NOPL'
     case 'kickoff':
@@ -174,22 +191,34 @@ const format_play_type = (
 // Play Formatting - Broken into logical sections
 // ============================================================================
 
-const format_play_context = (play) => ({
-  qtr: format_number(play.qtr),
-  dwn: format_number(play.down),
-  yards_to_go: format_number(play.ydstogo),
-  off: play.posteam ? fixTeam(play.posteam) : null,
-  def: play.defteam ? fixTeam(play.defteam) : null,
-  play_type: format_play_type(
-    play.play_type,
-    format_boolean(play.special_teams_play),
-    format_boolean(play.extra_point_attempt),
-    format_boolean(play.field_goal_attempt),
-    format_boolean(play.kickoff_attempt),
-    format_boolean(play.punt_attempt)
-  ),
-  ydl_100: format_number(play.yardline_100)
-})
+const format_play_context = (play) => {
+  const dwn = format_number(play.down)
+  const yards_to_go_raw = format_number(play.ydstogo)
+
+  // For plays without downs (timeouts, kickoffs, extra points, etc.),
+  // nflfastR may have yards_to_go=0, but database has null.
+  // Convert 0 to null when there's no down.
+  const yards_to_go = dwn === null && yards_to_go_raw === 0 ? null : yards_to_go_raw
+
+  return {
+    qtr: format_number(play.qtr),
+    dwn,
+    yards_to_go,
+    off: play.posteam ? fixTeam(play.posteam) : null,
+    def: play.defteam ? fixTeam(play.defteam) : null,
+    play_type: format_play_type(
+      play.play_type,
+      format_boolean(play.special_teams_play),
+      format_boolean(play.extra_point_attempt),
+      format_boolean(play.field_goal_attempt),
+      format_boolean(play.kickoff_attempt),
+      format_boolean(play.punt_attempt),
+      format_boolean(play.two_point_attempt),
+      play.desc
+    ),
+    ydl_100: format_number(play.yardline_100)
+  }
+}
 
 const format_drive_data = (play) => ({
   // TODO this might not match the drive sequence number in nfl/ngs system
@@ -421,29 +450,30 @@ const build_match_criteria = (esbid, formatted_play) => {
     qtr: formatted_play.qtr,
     dwn: formatted_play.dwn,
     yards_to_go: formatted_play.yards_to_go,
+    play_type: formatted_play.play_type,
+    ydl_100: formatted_play.ydl_100,
+    // Always include off/def in match criteria - the play cache will handle null matching
+    // For timeouts and game state plays, nflfastR has null off/def but database has team assignments
+    // The _matches_team_field function returns true when filter_value is null/undefined
     off: formatted_play.off,
-    def: formatted_play.def,
-    play_type: formatted_play.play_type
+    def: formatted_play.def
   }
 
-  // For non-special teams plays, include ydl_100 in matching
-  if (
-    formatted_play.play_type !== 'KOFF' &&
-    formatted_play.play_type !== 'FGXP'
-  ) {
-    match_criteria.ydl_100 = formatted_play.ydl_100
-  }
-
-  // Use time-based matching for ALL plays to prevent context collisions
+  // Use time-based matching for most plays to prevent context collisions
   // Time (sec_rem_qtr) is a stable identifier across data sources and prevents mismatches
   // when multiple plays share the same game situation (down, distance, field position)
   // This is critical because:
   // 1. Special teams plays (KOFF, PUNT, FGXP) often share context (null down, null distance)
   // 2. Regular plays (PASS, RUSH) can also share context (e.g., multiple 1st & 10 from same yard line)
-  if (
+  // 3. Timeout plays (NOPL with null teams) need time to distinguish between multiple timeouts
+  //
+  // EXCEPTION: Don't use sec_rem_qtr for plays where time is truly unavailable or unreliable
+  // (e.g., GAME_START which may have different time representations)
+  const use_time_matching =
     formatted_play.sec_rem_qtr !== null &&
     formatted_play.sec_rem_qtr !== undefined
-  ) {
+
+  if (use_time_matching) {
     match_criteria.sec_rem_qtr = formatted_play.sec_rem_qtr
     match_criteria.sec_rem_qtr_tolerance = TIME_MATCH_TOLERANCE_SECONDS
   }
@@ -503,12 +533,35 @@ const download_file = async ({ year, force_download }) => {
 /**
  * Process a single play from the CSV data
  */
-const process_play = async ({ item, year, ignore_conflicts }) => {
+const process_play = async ({ item, year, ignore_conflicts, dry_mode }) => {
   const esbid = parseInt(item.old_game_id, 10)
   const formatted_play = format_play(item)
   const match_criteria = build_match_criteria(esbid, formatted_play)
 
-  const db_play = find_play(match_criteria)
+  let db_play
+  try {
+    db_play = find_play(match_criteria)
+  } catch (error) {
+    if (error instanceof MultiplePlayMatchError) {
+      log(`MULTIPLE MATCH ERROR: ${item.game_id} - ${item.play_id}`)
+      log(`Description: ${item.desc}`)
+      log(`Matched ${error.match_count} plays:`)
+      error.matching_plays.forEach((play, index) => {
+        log(
+          `  [${index + 1}] playId=${play.playId} desc="${play.desc?.substring(0, 60)}"`
+        )
+      })
+      log('Match criteria:', match_criteria)
+      return {
+        matched: false,
+        multiple_match_error: true,
+        match_count: error.match_count,
+        item,
+        match_criteria
+      }
+    }
+    throw error
+  }
 
   if (db_play) {
     // Temporary workaround: ignore discrepancies in current year data
@@ -516,19 +569,27 @@ const process_play = async ({ item, year, ignore_conflicts }) => {
       delete formatted_play.game_clock_end
     }
 
-    await update_play({
-      play_row: db_play,
-      update: formatted_play,
-      ignore_conflicts
-    })
+    if (!dry_mode) {
+      await update_play({
+        play_row: db_play,
+        update: formatted_play,
+        ignore_conflicts
+      })
+    }
 
-    return { matched: true }
+    return {
+      matched: true,
+      item,
+      db_play,
+      match_criteria,
+      formatted_play
+    }
   }
 
   // Play not matched
-  log(`${item.game_id} - ${item.play_id} - ${item.desc}`)
+  log(`UNMATCHED: ${item.game_id} - ${item.play_id} - ${item.desc}`)
   log(match_criteria)
-  return { matched: false, item }
+  return { matched: false, item, match_criteria }
 }
 
 // ============================================================================
@@ -538,20 +599,36 @@ const process_play = async ({ item, year, ignore_conflicts }) => {
 const run = async ({
   year = constants.season.year,
   ignore_conflicts = false,
-  force_download = false
+  force_download = false,
+  dry_mode = false,
+  esbid = null
 } = {}) => {
   // Check if data is available for this year
   if (!is_data_available(year)) {
     return
   }
 
+  log(`${dry_mode ? '[DRY MODE] ' : ''}Importing plays for year ${year}${esbid ? ` (filtered to esbid: ${esbid})` : ''}`)
+
   // Download the CSV file
   const file_path = await download_file({ year, force_download })
 
   // Load CSV data
-  const data = await readCSV(file_path, {
+  let data = await readCSV(file_path, {
     mapValues: ({ header, index, value }) => (value === 'NA' ? null : value)
   })
+
+  // Filter by esbid if specified
+  if (esbid) {
+    const original_count = data.length
+    data = data.filter((item) => parseInt(item.old_game_id, 10) === esbid)
+    log(`Filtered from ${original_count} to ${data.length} plays for esbid ${esbid}`)
+    
+    if (data.length === 0) {
+      log(`No plays found for esbid ${esbid}`)
+      return
+    }
+  }
 
   // Preload plays into cache for efficient contextual matching
   log(`Preloading plays for year ${year}...`)
@@ -559,15 +636,107 @@ const run = async ({
   log(`Plays preloaded`)
 
   // Process each play
+  const plays_matched = []
   const plays_not_matched = []
+  const plays_multiple_matches = []
+  let processed_count = 0
+
   for (const item of data) {
-    const result = await process_play({ item, year, ignore_conflicts })
-    if (!result.matched) {
-      plays_not_matched.push(result.item)
+    const result = await process_play({ item, year, ignore_conflicts, dry_mode })
+    
+    processed_count++
+    if (processed_count % 500 === 0) {
+      log(`Processed ${processed_count}/${data.length} plays...`)
+    }
+
+    if (result.matched) {
+      plays_matched.push(result)
+    } else if (result.multiple_match_error) {
+      plays_multiple_matches.push(result)
+    } else {
+      plays_not_matched.push(result)
     }
   }
 
-  log(`${plays_not_matched.length} plays not matched`)
+  log(
+    `\nTotal: ${data.length} | Matched: ${plays_matched.length} | Unmatched: ${plays_not_matched.length} | Multiple Matches: ${plays_multiple_matches.length}`
+  )
+
+  // In dry mode, show matched plays grouped by play_type
+  if (dry_mode && plays_matched.length > 0) {
+    log('\n--- Matched Plays by Play Type ---')
+    
+    const matched_by_type = {}
+    for (const play of plays_matched) {
+      const play_type = play.match_criteria.play_type || 'NULL'
+      if (!matched_by_type[play_type]) {
+        matched_by_type[play_type] = []
+      }
+      matched_by_type[play_type].push(play)
+    }
+
+    for (const [play_type, type_plays] of Object.entries(matched_by_type)) {
+      log(`\n${play_type}: ${type_plays.length} matched`)
+      
+      // Show first 3 examples for each type
+      const examples = type_plays.slice(0, 3)
+      for (const play of examples) {
+        log(`  Game: ${play.item.game_id} | Play: ${play.item.play_id}`)
+        log(`    ${play.item.desc}`)
+        log(`    Q${play.match_criteria.qtr} | ${play.match_criteria.dwn || 'N/A'} & ${play.match_criteria.yards_to_go || 'N/A'} | YDL: ${play.match_criteria.ydl_100 || 'N/A'} | Time: ${play.match_criteria.sec_rem_qtr}s`)
+        log(`    DB Play ID: ${play.db_play.playId}`)
+      }
+      
+      if (type_plays.length > 3) {
+        log(`    ... and ${type_plays.length - 3} more`)
+      }
+    }
+  }
+
+  // Output multiple match errors
+  if (plays_multiple_matches.length > 0) {
+    log('\n--- Multiple Match Errors ---')
+    log(`Total plays with multiple matches: ${plays_multiple_matches.length}\n`)
+    
+    for (const play of plays_multiple_matches) {
+      log(`Game: ${play.item.game_id} | Play: ${play.item.play_id}`)
+      log(`  ${play.item.desc}`)
+      log(`  Matched ${play.match_count} plays - requires more specific criteria`)
+      log(`  Match Criteria:`)
+      log(`    esbid: ${play.match_criteria.esbid}`)
+      log(`    qtr: ${play.match_criteria.qtr}`)
+      log(`    dwn: ${play.match_criteria.dwn}`)
+      log(`    yards_to_go: ${play.match_criteria.yards_to_go}`)
+      log(`    off: ${play.match_criteria.off}`)
+      log(`    def: ${play.match_criteria.def}`)
+      log(`    play_type: ${play.match_criteria.play_type}`)
+      log(`    ydl_100: ${play.match_criteria.ydl_100}`)
+      log(`    sec_rem_qtr: ${play.match_criteria.sec_rem_qtr}`)
+      log('---')
+    }
+  }
+
+  // Output unmatched plays details
+  if (plays_not_matched.length > 0) {
+    log('\n--- Unmatched Plays Details ---')
+    log(`Total unmatched: ${plays_not_matched.length}\n`)
+    
+    for (const play of plays_not_matched) {
+      log(`Game: ${play.item.game_id} | Play: ${play.item.play_id}`)
+      log(`  ${play.item.desc}`)
+      log(`  Match Criteria:`)
+      log(`    esbid: ${play.match_criteria.esbid}`)
+      log(`    qtr: ${play.match_criteria.qtr}`)
+      log(`    dwn: ${play.match_criteria.dwn}`)
+      log(`    yards_to_go: ${play.match_criteria.yards_to_go}`)
+      log(`    off: ${play.match_criteria.off}`)
+      log(`    def: ${play.match_criteria.def}`)
+      log(`    play_type: ${play.match_criteria.play_type}`)
+      log(`    ydl_100: ${play.match_criteria.ydl_100}`)
+      log(`    sec_rem_qtr: ${play.match_criteria.sec_rem_qtr}`)
+      log('---')
+    }
+  }
 }
 
 // ============================================================================
@@ -580,6 +749,8 @@ const main = async () => {
     const year = argv.year || constants.season.year
     const ignore_conflicts = argv.ignore_conflicts
     const force_download = argv.d
+    const dry_mode = argv.dry || argv.dry_mode
+    const esbid = argv.esbid ? parseInt(argv.esbid, 10) : null
     const all = argv.all
 
     if (all) {
@@ -592,7 +763,9 @@ const main = async () => {
         await run({
           year: import_year,
           ignore_conflicts,
-          force_download
+          force_download,
+          dry_mode,
+          esbid
         })
       }
     } else {
@@ -600,7 +773,9 @@ const main = async () => {
       await run({
         year,
         ignore_conflicts,
-        force_download
+        force_download,
+        dry_mode,
+        esbid
       })
     }
   } catch (err) {
