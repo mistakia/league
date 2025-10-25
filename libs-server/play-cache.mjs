@@ -100,6 +100,8 @@ class PlayCache {
    * @param {number} params.ydl_100 - Yardline from 0-100
    * @param {number} params.sec_rem_qtr - Seconds remaining in quarter
    * @param {number} params.sec_rem_qtr_tolerance - Tolerance for sec_rem_qtr matching (default: 0 for exact match)
+   * @param {string} params.desc_contains - String that must be contained in play description (optional)
+   * @param {string} params.to_team - Timeout team abbreviation (optional)
    * @returns {Object|null} Play object if found, null otherwise
    * @throws {Error} If cache not initialized
    * @throws {MultiplePlayMatchError} If multiple plays match the search criteria
@@ -120,7 +122,9 @@ class PlayCache {
     ydl_side,
     ydl_100,
     sec_rem_qtr,
-    sec_rem_qtr_tolerance
+    sec_rem_qtr_tolerance,
+    desc_contains,
+    to_team
   }) {
     this._ensure_initialized()
 
@@ -143,7 +147,9 @@ class PlayCache {
         game_clock_start,
         play_type,
         ydl_num,
-        ydl_side
+        ydl_side,
+        desc_contains,
+        to_team
       })
     }
 
@@ -303,7 +309,9 @@ class PlayCache {
     game_clock_start,
     play_type,
     ydl_num,
-    ydl_side
+    ydl_side,
+    desc_contains,
+    to_team
   }) {
     const has_context = this._has_context_fields(qtr, dwn, yards_to_go, ydl_100)
 
@@ -327,7 +335,9 @@ class PlayCache {
           game_clock_start,
           play_type,
           ydl_num,
-          ydl_side
+          ydl_side,
+          desc_contains,
+          to_team
         }
         const matching_play = this._find_unique_matching_play(
           indexed_plays,
@@ -352,7 +362,9 @@ class PlayCache {
       game_clock_start,
       play_type,
       ydl_num,
-      ydl_side
+      ydl_side,
+      desc_contains,
+      to_team
     })
   }
 
@@ -430,8 +442,10 @@ class PlayCache {
     const type_match = this._matches_string_field(play.play_type, filters.play_type)
     const ydl_num_match = this._matches_numeric_field(play.ydl_num, filters.ydl_num)
     const ydl_side_match = this._matches_team_field(play.ydl_side, filters.ydl_side)
+    const desc_match = this._matches_desc_contains(play.desc, filters.desc_contains)
+    const to_team_match = this._matches_team_field(play.to_team, filters.to_team)
 
-    return qtr_match && dwn_match && ytg_match && ydl_match && off_match && def_match && time_match && clock_match && type_match && ydl_num_match && ydl_side_match
+    return qtr_match && dwn_match && ytg_match && ydl_match && off_match && def_match && time_match && clock_match && type_match && ydl_num_match && ydl_side_match && desc_match && to_team_match
   }
 
   /**
@@ -461,6 +475,16 @@ class PlayCache {
   _matches_string_field(play_value, filter_value) {
     if (!filter_value) return true
     return play_value === filter_value
+  }
+
+  /**
+   * Checks if play description contains the filter string
+   * @private
+   */
+  _matches_desc_contains(play_value, filter_value) {
+    if (!filter_value) return true
+    if (!play_value) return false
+    return play_value.includes(filter_value)
   }
 
   /**
