@@ -10,7 +10,7 @@ import {
 import db from '#db'
 import generate_player_id from './generate-player-id.mjs'
 import * as espn from './espn.mjs'
-import * as sportradar from './sportradar.mjs'
+import * as sportradar from './sportradar/index.mjs'
 
 const IS_PROD = process.env.NODE_ENV === 'production'
 const log = debug('create-player')

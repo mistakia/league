@@ -258,6 +258,8 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2026_tackle_assist_4_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2026_tackle_assist_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2026_tackle_assist_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2026_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2026_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2026_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2026_solo_tackle_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2026_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2026_solo_tackle_1_pid_idx;
@@ -304,6 +306,8 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2025_tackle_assist_4_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2025_tackle_assist_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2025_tackle_assist_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2025_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2025_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2025_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2025_solo_tackle_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2025_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2025_solo_tackle_1_pid_idx;
@@ -350,6 +354,8 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2024_tackle_assist_4_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2024_tackle_assist_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2024_tackle_assist_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2024_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2024_solo_tackle_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2024_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2024_solo_tackle_1_pid_idx;
@@ -396,6 +402,8 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2023_tackle_assist_4_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2023_tackle_assist_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2023_tackle_assist_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2023_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2023_solo_tackle_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2023_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2023_solo_tackle_1_pid_idx;
@@ -442,6 +450,8 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2022_tackle_assist_4_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2022_tackle_assist_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2022_tackle_assist_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2022_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2022_solo_tackle_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2022_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2022_solo_tackle_1_pid_idx;
@@ -488,6 +498,8 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2021_tackle_assist_4_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2021_tackle_assist_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2021_tackle_assist_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2021_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2021_solo_tackle_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2021_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2021_solo_tackle_1_pid_idx;
@@ -534,6 +546,8 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2020_tackle_assist_4_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2020_tackle_assist_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2020_tackle_assist_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2020_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2020_solo_tackle_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2020_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2020_solo_tackle_1_pid_idx;
@@ -580,6 +594,8 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2019_tackle_assist_4_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2019_tackle_assist_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2019_tackle_assist_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2019_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2019_solo_tackle_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2019_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2019_solo_tackle_1_pid_idx;
@@ -626,6 +642,8 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2018_tackle_assist_4_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2018_tackle_assist_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2018_tackle_assist_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2018_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2018_solo_tackle_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2018_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2018_solo_tackle_1_pid_idx;
@@ -672,6 +690,8 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2017_tackle_assist_4_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2017_tackle_assist_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2017_tackle_assist_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2017_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2017_solo_tackle_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2017_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2017_solo_tackle_1_pid_idx;
@@ -718,6 +738,8 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2016_tackle_assist_4_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2016_tackle_assist_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2016_tackle_assist_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2016_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2016_solo_tackle_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2016_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2016_solo_tackle_1_pid_idx;
@@ -764,6 +786,8 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2015_tackle_assist_4_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2015_tackle_assist_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2015_tackle_assist_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2015_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2015_solo_tackle_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2015_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2015_solo_tackle_1_pid_idx;
@@ -810,6 +834,8 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2014_tackle_assist_4_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2014_tackle_assist_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2014_tackle_assist_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2014_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2014_solo_tackle_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2014_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2014_solo_tackle_1_pid_idx;
@@ -856,6 +882,8 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2013_tackle_assist_4_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2013_tackle_assist_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2013_tackle_assist_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2013_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2013_solo_tackle_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2013_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2013_solo_tackle_1_pid_idx;
@@ -902,6 +930,8 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2012_tackle_assist_4_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2012_tackle_assist_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2012_tackle_assist_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2012_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2012_solo_tackle_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2012_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2012_solo_tackle_1_pid_idx;
@@ -948,6 +978,8 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2011_tackle_assist_4_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2011_tackle_assist_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2011_tackle_assist_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2011_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2011_solo_tackle_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2011_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2011_solo_tackle_1_pid_idx;
@@ -994,6 +1026,8 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2010_tackle_assist_4_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2010_tackle_assist_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2010_tackle_assist_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2010_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2010_solo_tackle_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2010_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2010_solo_tackle_1_pid_idx;
@@ -1040,6 +1074,8 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2009_tackle_assist_4_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2009_tackle_assist_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2009_tackle_assist_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2009_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2009_solo_tackle_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2009_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2009_solo_tackle_1_pid_idx;
@@ -1086,6 +1122,8 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2008_tackle_assist_4_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2008_tackle_assist_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2008_tackle_assist_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2008_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2008_solo_tackle_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2008_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2008_solo_tackle_1_pid_idx;
@@ -1132,6 +1170,8 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2007_tackle_assist_4_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2007_tackle_assist_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2007_tackle_assist_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2007_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2007_solo_tackle_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2007_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2007_solo_tackle_1_pid_idx;
@@ -1178,6 +1218,8 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2006_tackle_assist_4_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2006_tackle_assist_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2006_tackle_assist_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2006_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2006_solo_tackle_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2006_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2006_solo_tackle_1_pid_idx;
@@ -1224,6 +1266,8 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2005_tackle_assist_4_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2005_tackle_assist_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2005_tackle_assist_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2005_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2005_solo_tackle_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2005_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2005_solo_tackle_1_pid_idx;
@@ -1270,6 +1314,8 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2004_tackle_assist_4_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2004_tackle_assist_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2004_tackle_assist_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2004_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2004_solo_tackle_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2004_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2004_solo_tackle_1_pid_idx;
@@ -1316,6 +1362,8 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2003_tackle_assist_4_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2003_tackle_assist_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2003_tackle_assist_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2003_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2003_solo_tackle_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2003_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2003_solo_tackle_1_pid_idx;
@@ -1362,6 +1410,8 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2002_tackle_assist_4_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2002_tackle_assist_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2002_tackle_assist_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2002_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2002_solo_tackle_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2002_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2002_solo_tackle_1_pid_idx;
@@ -1408,6 +1458,8 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2001_tackle_assist_4_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2001_tackle_assist_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2001_tackle_assist_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2001_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2001_solo_tackle_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2001_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2001_solo_tackle_1_pid_idx;
@@ -1454,6 +1506,8 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2000_tackle_assist_4_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2000_tackle_assist_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2000_tackle_assist_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2000_tackle_assist_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2000_solo_tackle_3_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2000_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2000_solo_tackle_1_pid_idx;
@@ -1479,9 +1533,12 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2000_bc_pid_psr_pid_trg_pid_player_fu
 DROP INDEX IF EXISTS public.nfl_plays_year_2000_bc_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2000_assisted_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2000_assisted_tackle_1_pid_idx;
+DROP INDEX IF EXISTS public.nfl_plays_sportradar_play_id_idx;
+DROP INDEX IF EXISTS public.nfl_plays_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public."nfl_plays_current_week_playId";
 DROP INDEX IF EXISTS public."nfl_plays_current_week_esbid_playId";
 DROP INDEX IF EXISTS public.nfl_plays_current_week_esbid;
+DROP INDEX IF EXISTS public.nfl_games_sportradar_game_id_idx;
 DROP INDEX IF EXISTS public.idx_weekly_market_selections_analysis_cache_composite;
 DROP INDEX IF EXISTS public.idx_waivers_super_priority;
 DROP INDEX IF EXISTS public.idx_waivers_lid;
@@ -2117,9 +2174,15 @@ DROP TYPE IF EXISTS public.qb_position;
 DROP TYPE IF EXISTS public.play_direction;
 DROP TYPE IF EXISTS public.placed_wagers_wager_type;
 DROP TYPE IF EXISTS public.placed_wagers_book_id;
+DROP TYPE IF EXISTS public.nfl_two_point_result;
+DROP TYPE IF EXISTS public.nfl_score_type;
+DROP TYPE IF EXISTS public.nfl_pocket_location;
 DROP TYPE IF EXISTS public.nfl_play_type;
+DROP TYPE IF EXISTS public.nfl_kick_result;
+DROP TYPE IF EXISTS public.nfl_incomplete_pass_type;
 DROP TYPE IF EXISTS public.nfl_games_surf;
 DROP TYPE IF EXISTS public.nfl_games_roof;
+DROP TYPE IF EXISTS public.nfl_fg_result_detail;
 DROP TYPE IF EXISTS public.motion_type;
 DROP TYPE IF EXISTS public.mock_draft_source_id;
 DROP TYPE IF EXISTS public.market_source_id;
@@ -2309,6 +2372,21 @@ CREATE TYPE public.motion_type AS ENUM (
 
 
 --
+-- Name: nfl_fg_result_detail; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.nfl_fg_result_detail AS ENUM (
+    'blocked',
+    'hit_crossbar',
+    'hit_left_upright',
+    'hit_right_upright',
+    'short',
+    'wide_left',
+    'wide_right'
+);
+
+
+--
 -- Name: nfl_games_roof; Type: TYPE; Schema: public; Owner: -
 --
 
@@ -2337,6 +2415,31 @@ CREATE TYPE public.nfl_games_surf AS ENUM (
 
 
 --
+-- Name: nfl_incomplete_pass_type; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.nfl_incomplete_pass_type AS ENUM (
+    'thrown_away',
+    'defended',
+    'dropped',
+    'spike',
+    'poorly_thrown'
+);
+
+
+--
+-- Name: nfl_kick_result; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.nfl_kick_result AS ENUM (
+    'made',
+    'missed',
+    'blocked',
+    'aborted'
+);
+
+
+--
 -- Name: nfl_play_type; Type: TYPE; Schema: public; Owner: -
 --
 
@@ -2349,6 +2452,44 @@ CREATE TYPE public.nfl_play_type AS ENUM (
     'PUNT',
     'RUSH',
     'FREE'
+);
+
+
+--
+-- Name: nfl_pocket_location; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.nfl_pocket_location AS ENUM (
+    'middle',
+    'scramble_left',
+    'scramble_right',
+    'rollout_left',
+    'rollout_right',
+    'boot_left',
+    'boot_right'
+);
+
+
+--
+-- Name: nfl_score_type; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.nfl_score_type AS ENUM (
+    'TD',
+    'FG',
+    'PAT',
+    'PAT2',
+    'SFTY'
+);
+
+
+--
+-- Name: nfl_two_point_result; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.nfl_two_point_result AS ENUM (
+    'success',
+    'failure'
 );
 
 
@@ -4247,7 +4388,9 @@ CREATE TABLE public.nfl_games (
     away_qb_pid character varying(25),
     home_qb_pid character varying(25),
     away_play_caller character varying(36),
-    home_play_caller character varying(36)
+    home_play_caller character varying(36),
+    sportradar_game_id character varying,
+    sportradar_season_id character varying
 );
 
 
@@ -4343,7 +4486,7 @@ CREATE TABLE public.nfl_plays (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -4537,7 +4680,7 @@ CREATE TABLE public.nfl_plays (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -4631,7 +4774,69 @@ CREATE TABLE public.nfl_plays (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 )
 PARTITION BY RANGE (year);
 
@@ -5722,7 +5927,7 @@ CREATE TABLE public.nfl_plays_year_2000 (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -5916,7 +6121,7 @@ CREATE TABLE public.nfl_plays_year_2000 (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -6010,7 +6215,69 @@ CREATE TABLE public.nfl_plays_year_2000 (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 );
 
 
@@ -6057,7 +6324,7 @@ CREATE TABLE public.nfl_plays_year_2001 (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -6251,7 +6518,7 @@ CREATE TABLE public.nfl_plays_year_2001 (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -6345,7 +6612,69 @@ CREATE TABLE public.nfl_plays_year_2001 (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 );
 
 
@@ -6392,7 +6721,7 @@ CREATE TABLE public.nfl_plays_year_2002 (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -6586,7 +6915,7 @@ CREATE TABLE public.nfl_plays_year_2002 (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -6680,7 +7009,69 @@ CREATE TABLE public.nfl_plays_year_2002 (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 );
 
 
@@ -6727,7 +7118,7 @@ CREATE TABLE public.nfl_plays_year_2003 (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -6921,7 +7312,7 @@ CREATE TABLE public.nfl_plays_year_2003 (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -7015,7 +7406,69 @@ CREATE TABLE public.nfl_plays_year_2003 (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 );
 
 
@@ -7062,7 +7515,7 @@ CREATE TABLE public.nfl_plays_year_2004 (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -7256,7 +7709,7 @@ CREATE TABLE public.nfl_plays_year_2004 (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -7350,7 +7803,69 @@ CREATE TABLE public.nfl_plays_year_2004 (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 );
 
 
@@ -7397,7 +7912,7 @@ CREATE TABLE public.nfl_plays_year_2005 (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -7591,7 +8106,7 @@ CREATE TABLE public.nfl_plays_year_2005 (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -7685,7 +8200,69 @@ CREATE TABLE public.nfl_plays_year_2005 (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 );
 
 
@@ -7732,7 +8309,7 @@ CREATE TABLE public.nfl_plays_year_2006 (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -7926,7 +8503,7 @@ CREATE TABLE public.nfl_plays_year_2006 (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -8020,7 +8597,69 @@ CREATE TABLE public.nfl_plays_year_2006 (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 );
 
 
@@ -8067,7 +8706,7 @@ CREATE TABLE public.nfl_plays_year_2007 (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -8261,7 +8900,7 @@ CREATE TABLE public.nfl_plays_year_2007 (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -8355,7 +8994,69 @@ CREATE TABLE public.nfl_plays_year_2007 (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 );
 
 
@@ -8402,7 +9103,7 @@ CREATE TABLE public.nfl_plays_year_2008 (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -8596,7 +9297,7 @@ CREATE TABLE public.nfl_plays_year_2008 (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -8690,7 +9391,69 @@ CREATE TABLE public.nfl_plays_year_2008 (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 );
 
 
@@ -8737,7 +9500,7 @@ CREATE TABLE public.nfl_plays_year_2009 (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -8931,7 +9694,7 @@ CREATE TABLE public.nfl_plays_year_2009 (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -9025,7 +9788,69 @@ CREATE TABLE public.nfl_plays_year_2009 (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 );
 
 
@@ -9072,7 +9897,7 @@ CREATE TABLE public.nfl_plays_year_2010 (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -9266,7 +10091,7 @@ CREATE TABLE public.nfl_plays_year_2010 (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -9360,7 +10185,69 @@ CREATE TABLE public.nfl_plays_year_2010 (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 );
 
 
@@ -9407,7 +10294,7 @@ CREATE TABLE public.nfl_plays_year_2011 (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -9601,7 +10488,7 @@ CREATE TABLE public.nfl_plays_year_2011 (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -9695,7 +10582,69 @@ CREATE TABLE public.nfl_plays_year_2011 (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 );
 
 
@@ -9742,7 +10691,7 @@ CREATE TABLE public.nfl_plays_year_2012 (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -9936,7 +10885,7 @@ CREATE TABLE public.nfl_plays_year_2012 (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -10030,7 +10979,69 @@ CREATE TABLE public.nfl_plays_year_2012 (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 );
 
 
@@ -10077,7 +11088,7 @@ CREATE TABLE public.nfl_plays_year_2013 (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -10271,7 +11282,7 @@ CREATE TABLE public.nfl_plays_year_2013 (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -10365,7 +11376,69 @@ CREATE TABLE public.nfl_plays_year_2013 (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 );
 
 
@@ -10412,7 +11485,7 @@ CREATE TABLE public.nfl_plays_year_2014 (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -10606,7 +11679,7 @@ CREATE TABLE public.nfl_plays_year_2014 (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -10700,7 +11773,69 @@ CREATE TABLE public.nfl_plays_year_2014 (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 );
 
 
@@ -10747,7 +11882,7 @@ CREATE TABLE public.nfl_plays_year_2015 (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -10941,7 +12076,7 @@ CREATE TABLE public.nfl_plays_year_2015 (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -11035,7 +12170,69 @@ CREATE TABLE public.nfl_plays_year_2015 (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 );
 
 
@@ -11082,7 +12279,7 @@ CREATE TABLE public.nfl_plays_year_2016 (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -11276,7 +12473,7 @@ CREATE TABLE public.nfl_plays_year_2016 (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -11370,7 +12567,69 @@ CREATE TABLE public.nfl_plays_year_2016 (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 );
 
 
@@ -11417,7 +12676,7 @@ CREATE TABLE public.nfl_plays_year_2017 (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -11611,7 +12870,7 @@ CREATE TABLE public.nfl_plays_year_2017 (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -11705,7 +12964,69 @@ CREATE TABLE public.nfl_plays_year_2017 (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 );
 
 
@@ -11752,7 +13073,7 @@ CREATE TABLE public.nfl_plays_year_2018 (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -11946,7 +13267,7 @@ CREATE TABLE public.nfl_plays_year_2018 (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -12040,7 +13361,69 @@ CREATE TABLE public.nfl_plays_year_2018 (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 );
 
 
@@ -12087,7 +13470,7 @@ CREATE TABLE public.nfl_plays_year_2019 (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -12281,7 +13664,7 @@ CREATE TABLE public.nfl_plays_year_2019 (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -12375,7 +13758,69 @@ CREATE TABLE public.nfl_plays_year_2019 (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 );
 
 
@@ -12422,7 +13867,7 @@ CREATE TABLE public.nfl_plays_year_2020 (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -12616,7 +14061,7 @@ CREATE TABLE public.nfl_plays_year_2020 (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -12710,7 +14155,69 @@ CREATE TABLE public.nfl_plays_year_2020 (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 );
 
 
@@ -12757,7 +14264,7 @@ CREATE TABLE public.nfl_plays_year_2021 (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -12951,7 +14458,7 @@ CREATE TABLE public.nfl_plays_year_2021 (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -13045,7 +14552,69 @@ CREATE TABLE public.nfl_plays_year_2021 (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 );
 
 
@@ -13092,7 +14661,7 @@ CREATE TABLE public.nfl_plays_year_2022 (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -13286,7 +14855,7 @@ CREATE TABLE public.nfl_plays_year_2022 (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -13380,7 +14949,69 @@ CREATE TABLE public.nfl_plays_year_2022 (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 );
 
 
@@ -13427,7 +15058,7 @@ CREATE TABLE public.nfl_plays_year_2023 (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -13621,7 +15252,7 @@ CREATE TABLE public.nfl_plays_year_2023 (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -13715,7 +15346,69 @@ CREATE TABLE public.nfl_plays_year_2023 (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 );
 
 
@@ -13762,7 +15455,7 @@ CREATE TABLE public.nfl_plays_year_2024 (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -13956,7 +15649,7 @@ CREATE TABLE public.nfl_plays_year_2024 (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -14050,7 +15743,69 @@ CREATE TABLE public.nfl_plays_year_2024 (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 );
 
 
@@ -14097,7 +15852,7 @@ CREATE TABLE public.nfl_plays_year_2025 (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -14291,7 +16046,7 @@ CREATE TABLE public.nfl_plays_year_2025 (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -14385,7 +16140,69 @@ CREATE TABLE public.nfl_plays_year_2025 (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 );
 
 
@@ -14432,7 +16249,7 @@ CREATE TABLE public.nfl_plays_year_2026 (
     deleted boolean,
     review text,
     score boolean,
-    score_type character varying(10),
+    score_type public.nfl_score_type,
     score_team character varying(4),
     special_play_type character varying(10),
     "timestamp" character varying(10),
@@ -14626,7 +16443,7 @@ CREATE TABLE public.nfl_plays_year_2026 (
     punt_att boolean,
     fg_result character varying(10),
     kick_distance integer,
-    ep_result character varying(10),
+    ep_result public.nfl_kick_result,
     tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
@@ -14720,7 +16537,69 @@ CREATE TABLE public.nfl_plays_year_2026 (
     targeted_defender_gsis_id character varying(36),
     pass_breakup boolean,
     motion_before_snap boolean,
-    motion_during_snap boolean
+    motion_during_snap boolean,
+    sportradar_game_id character varying,
+    sportradar_play_id character varying,
+    sportradar_drive_id character varying,
+    sportradar_event_id character varying,
+    sportradar_play_type character varying,
+    wall_clock timestamp with time zone,
+    kicker_pid character varying(25),
+    kicker_gsis character varying(36),
+    kicker_sportradar_id character varying,
+    punter_pid character varying(25),
+    punter_gsis character varying(36),
+    punter_sportradar_id character varying,
+    returner_pid character varying(25),
+    returner_gsis character varying(36),
+    returner_sportradar_id character varying,
+    penalty_player_pid character varying(25),
+    penalty_player_gsis character varying(36),
+    penalty_player_sportradar_id character varying,
+    penalty_type character varying(50),
+    penalty_declined boolean,
+    penalty_offset boolean,
+    kickoff_yds integer,
+    punt_yds integer,
+    punt_hang_time numeric,
+    punt_inside_20 boolean,
+    punt_touchback boolean,
+    punt_fair_catch boolean,
+    punt_out_of_bounds boolean,
+    kickoff_onside boolean,
+    kickoff_touchback boolean,
+    kickoff_out_of_bounds boolean,
+    fg_blocked boolean,
+    fg_result_detail public.nfl_fg_result_detail,
+    pocket_time numeric,
+    tackle_for_loss_1_gsis character varying(36),
+    tackle_for_loss_1_pid character varying(25),
+    tackle_for_loss_1_sportradar_id character varying,
+    tackle_for_loss_2_gsis character varying(36),
+    tackle_for_loss_2_pid character varying(25),
+    tackle_for_loss_2_sportradar_id character varying,
+    sack_player_1_gsis character varying(36),
+    sack_player_1_pid character varying(25),
+    sack_player_1_sportradar_id character varying,
+    sack_player_2_gsis character varying(36),
+    sack_player_2_pid character varying(25),
+    sack_player_2_sportradar_id character varying,
+    fumble_forced_1_gsis character varying(36),
+    fumble_forced_1_pid character varying(25),
+    fumble_forced_1_sportradar_id character varying,
+    fumble_recovered_1_gsis character varying(36),
+    fumble_recovered_1_pid character varying(25),
+    fumble_recovered_1_sportradar_id character varying,
+    fumble_recovered_team character varying(3),
+    incomplete_pass_type public.nfl_incomplete_pass_type,
+    broken_tackles_rush integer,
+    broken_tackles_rec integer,
+    pocket_location public.nfl_pocket_location,
+    left_tightends smallint,
+    right_tightends smallint,
+    fake_punt boolean,
+    fake_field_goal boolean,
+    blitz boolean
 );
 
 
@@ -25097,6 +26976,13 @@ CREATE INDEX idx_weekly_market_selections_analysis_cache_composite ON public.wee
 
 
 --
+-- Name: nfl_games_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_games_sportradar_game_id_idx ON public.nfl_games USING btree (sportradar_game_id);
+
+
+--
 -- Name: nfl_plays_current_week_esbid; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -25115,6 +27001,20 @@ CREATE UNIQUE INDEX "nfl_plays_current_week_esbid_playId" ON public.nfl_plays_cu
 --
 
 CREATE INDEX "nfl_plays_current_week_playId" ON public.nfl_plays_current_week USING btree ("playId");
+
+
+--
+-- Name: nfl_plays_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_sportradar_game_id_idx ON ONLY public.nfl_plays USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_sportradar_play_id_idx ON ONLY public.nfl_plays USING btree (sportradar_play_id);
 
 
 --
@@ -25290,6 +27190,20 @@ CREATE INDEX nfl_plays_year_2000_solo_tackle_2_pid_idx ON public.nfl_plays_year_
 --
 
 CREATE INDEX nfl_plays_year_2000_solo_tackle_3_pid_idx ON public.nfl_plays_year_2000 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2000_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_sportradar_game_id_idx ON public.nfl_plays_year_2000 USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_year_2000_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_sportradar_play_id_idx ON public.nfl_plays_year_2000 USING btree (sportradar_play_id);
 
 
 --
@@ -25615,6 +27529,20 @@ CREATE INDEX nfl_plays_year_2001_solo_tackle_3_pid_idx ON public.nfl_plays_year_
 
 
 --
+-- Name: nfl_plays_year_2001_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_sportradar_game_id_idx ON public.nfl_plays_year_2001 USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_year_2001_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_sportradar_play_id_idx ON public.nfl_plays_year_2001 USING btree (sportradar_play_id);
+
+
+--
 -- Name: nfl_plays_year_2001_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -25934,6 +27862,20 @@ CREATE INDEX nfl_plays_year_2002_solo_tackle_2_pid_idx ON public.nfl_plays_year_
 --
 
 CREATE INDEX nfl_plays_year_2002_solo_tackle_3_pid_idx ON public.nfl_plays_year_2002 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2002_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_sportradar_game_id_idx ON public.nfl_plays_year_2002 USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_year_2002_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_sportradar_play_id_idx ON public.nfl_plays_year_2002 USING btree (sportradar_play_id);
 
 
 --
@@ -26259,6 +28201,20 @@ CREATE INDEX nfl_plays_year_2003_solo_tackle_3_pid_idx ON public.nfl_plays_year_
 
 
 --
+-- Name: nfl_plays_year_2003_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_sportradar_game_id_idx ON public.nfl_plays_year_2003 USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_year_2003_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_sportradar_play_id_idx ON public.nfl_plays_year_2003 USING btree (sportradar_play_id);
+
+
+--
 -- Name: nfl_plays_year_2003_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -26578,6 +28534,20 @@ CREATE INDEX nfl_plays_year_2004_solo_tackle_2_pid_idx ON public.nfl_plays_year_
 --
 
 CREATE INDEX nfl_plays_year_2004_solo_tackle_3_pid_idx ON public.nfl_plays_year_2004 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2004_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_sportradar_game_id_idx ON public.nfl_plays_year_2004 USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_year_2004_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_sportradar_play_id_idx ON public.nfl_plays_year_2004 USING btree (sportradar_play_id);
 
 
 --
@@ -26903,6 +28873,20 @@ CREATE INDEX nfl_plays_year_2005_solo_tackle_3_pid_idx ON public.nfl_plays_year_
 
 
 --
+-- Name: nfl_plays_year_2005_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_sportradar_game_id_idx ON public.nfl_plays_year_2005 USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_year_2005_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_sportradar_play_id_idx ON public.nfl_plays_year_2005 USING btree (sportradar_play_id);
+
+
+--
 -- Name: nfl_plays_year_2005_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -27222,6 +29206,20 @@ CREATE INDEX nfl_plays_year_2006_solo_tackle_2_pid_idx ON public.nfl_plays_year_
 --
 
 CREATE INDEX nfl_plays_year_2006_solo_tackle_3_pid_idx ON public.nfl_plays_year_2006 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2006_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_sportradar_game_id_idx ON public.nfl_plays_year_2006 USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_year_2006_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_sportradar_play_id_idx ON public.nfl_plays_year_2006 USING btree (sportradar_play_id);
 
 
 --
@@ -27547,6 +29545,20 @@ CREATE INDEX nfl_plays_year_2007_solo_tackle_3_pid_idx ON public.nfl_plays_year_
 
 
 --
+-- Name: nfl_plays_year_2007_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_sportradar_game_id_idx ON public.nfl_plays_year_2007 USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_year_2007_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_sportradar_play_id_idx ON public.nfl_plays_year_2007 USING btree (sportradar_play_id);
+
+
+--
 -- Name: nfl_plays_year_2007_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -27866,6 +29878,20 @@ CREATE INDEX nfl_plays_year_2008_solo_tackle_2_pid_idx ON public.nfl_plays_year_
 --
 
 CREATE INDEX nfl_plays_year_2008_solo_tackle_3_pid_idx ON public.nfl_plays_year_2008 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2008_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_sportradar_game_id_idx ON public.nfl_plays_year_2008 USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_year_2008_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_sportradar_play_id_idx ON public.nfl_plays_year_2008 USING btree (sportradar_play_id);
 
 
 --
@@ -28191,6 +30217,20 @@ CREATE INDEX nfl_plays_year_2009_solo_tackle_3_pid_idx ON public.nfl_plays_year_
 
 
 --
+-- Name: nfl_plays_year_2009_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_sportradar_game_id_idx ON public.nfl_plays_year_2009 USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_year_2009_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_sportradar_play_id_idx ON public.nfl_plays_year_2009 USING btree (sportradar_play_id);
+
+
+--
 -- Name: nfl_plays_year_2009_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -28510,6 +30550,20 @@ CREATE INDEX nfl_plays_year_2010_solo_tackle_2_pid_idx ON public.nfl_plays_year_
 --
 
 CREATE INDEX nfl_plays_year_2010_solo_tackle_3_pid_idx ON public.nfl_plays_year_2010 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2010_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_sportradar_game_id_idx ON public.nfl_plays_year_2010 USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_year_2010_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_sportradar_play_id_idx ON public.nfl_plays_year_2010 USING btree (sportradar_play_id);
 
 
 --
@@ -28835,6 +30889,20 @@ CREATE INDEX nfl_plays_year_2011_solo_tackle_3_pid_idx ON public.nfl_plays_year_
 
 
 --
+-- Name: nfl_plays_year_2011_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_sportradar_game_id_idx ON public.nfl_plays_year_2011 USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_year_2011_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_sportradar_play_id_idx ON public.nfl_plays_year_2011 USING btree (sportradar_play_id);
+
+
+--
 -- Name: nfl_plays_year_2011_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -29154,6 +31222,20 @@ CREATE INDEX nfl_plays_year_2012_solo_tackle_2_pid_idx ON public.nfl_plays_year_
 --
 
 CREATE INDEX nfl_plays_year_2012_solo_tackle_3_pid_idx ON public.nfl_plays_year_2012 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2012_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_sportradar_game_id_idx ON public.nfl_plays_year_2012 USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_year_2012_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_sportradar_play_id_idx ON public.nfl_plays_year_2012 USING btree (sportradar_play_id);
 
 
 --
@@ -29479,6 +31561,20 @@ CREATE INDEX nfl_plays_year_2013_solo_tackle_3_pid_idx ON public.nfl_plays_year_
 
 
 --
+-- Name: nfl_plays_year_2013_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_sportradar_game_id_idx ON public.nfl_plays_year_2013 USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_year_2013_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_sportradar_play_id_idx ON public.nfl_plays_year_2013 USING btree (sportradar_play_id);
+
+
+--
 -- Name: nfl_plays_year_2013_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -29798,6 +31894,20 @@ CREATE INDEX nfl_plays_year_2014_solo_tackle_2_pid_idx ON public.nfl_plays_year_
 --
 
 CREATE INDEX nfl_plays_year_2014_solo_tackle_3_pid_idx ON public.nfl_plays_year_2014 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2014_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_sportradar_game_id_idx ON public.nfl_plays_year_2014 USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_year_2014_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_sportradar_play_id_idx ON public.nfl_plays_year_2014 USING btree (sportradar_play_id);
 
 
 --
@@ -30123,6 +32233,20 @@ CREATE INDEX nfl_plays_year_2015_solo_tackle_3_pid_idx ON public.nfl_plays_year_
 
 
 --
+-- Name: nfl_plays_year_2015_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_sportradar_game_id_idx ON public.nfl_plays_year_2015 USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_year_2015_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_sportradar_play_id_idx ON public.nfl_plays_year_2015 USING btree (sportradar_play_id);
+
+
+--
 -- Name: nfl_plays_year_2015_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -30442,6 +32566,20 @@ CREATE INDEX nfl_plays_year_2016_solo_tackle_2_pid_idx ON public.nfl_plays_year_
 --
 
 CREATE INDEX nfl_plays_year_2016_solo_tackle_3_pid_idx ON public.nfl_plays_year_2016 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2016_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_sportradar_game_id_idx ON public.nfl_plays_year_2016 USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_year_2016_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_sportradar_play_id_idx ON public.nfl_plays_year_2016 USING btree (sportradar_play_id);
 
 
 --
@@ -30767,6 +32905,20 @@ CREATE INDEX nfl_plays_year_2017_solo_tackle_3_pid_idx ON public.nfl_plays_year_
 
 
 --
+-- Name: nfl_plays_year_2017_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_sportradar_game_id_idx ON public.nfl_plays_year_2017 USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_year_2017_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_sportradar_play_id_idx ON public.nfl_plays_year_2017 USING btree (sportradar_play_id);
+
+
+--
 -- Name: nfl_plays_year_2017_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -31086,6 +33238,20 @@ CREATE INDEX nfl_plays_year_2018_solo_tackle_2_pid_idx ON public.nfl_plays_year_
 --
 
 CREATE INDEX nfl_plays_year_2018_solo_tackle_3_pid_idx ON public.nfl_plays_year_2018 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2018_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_sportradar_game_id_idx ON public.nfl_plays_year_2018 USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_year_2018_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_sportradar_play_id_idx ON public.nfl_plays_year_2018 USING btree (sportradar_play_id);
 
 
 --
@@ -31411,6 +33577,20 @@ CREATE INDEX nfl_plays_year_2019_solo_tackle_3_pid_idx ON public.nfl_plays_year_
 
 
 --
+-- Name: nfl_plays_year_2019_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_sportradar_game_id_idx ON public.nfl_plays_year_2019 USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_year_2019_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_sportradar_play_id_idx ON public.nfl_plays_year_2019 USING btree (sportradar_play_id);
+
+
+--
 -- Name: nfl_plays_year_2019_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -31730,6 +33910,20 @@ CREATE INDEX nfl_plays_year_2020_solo_tackle_2_pid_idx ON public.nfl_plays_year_
 --
 
 CREATE INDEX nfl_plays_year_2020_solo_tackle_3_pid_idx ON public.nfl_plays_year_2020 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2020_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_sportradar_game_id_idx ON public.nfl_plays_year_2020 USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_year_2020_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_sportradar_play_id_idx ON public.nfl_plays_year_2020 USING btree (sportradar_play_id);
 
 
 --
@@ -32055,6 +34249,20 @@ CREATE INDEX nfl_plays_year_2021_solo_tackle_3_pid_idx ON public.nfl_plays_year_
 
 
 --
+-- Name: nfl_plays_year_2021_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_sportradar_game_id_idx ON public.nfl_plays_year_2021 USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_year_2021_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_sportradar_play_id_idx ON public.nfl_plays_year_2021 USING btree (sportradar_play_id);
+
+
+--
 -- Name: nfl_plays_year_2021_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -32374,6 +34582,20 @@ CREATE INDEX nfl_plays_year_2022_solo_tackle_2_pid_idx ON public.nfl_plays_year_
 --
 
 CREATE INDEX nfl_plays_year_2022_solo_tackle_3_pid_idx ON public.nfl_plays_year_2022 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2022_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_sportradar_game_id_idx ON public.nfl_plays_year_2022 USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_year_2022_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_sportradar_play_id_idx ON public.nfl_plays_year_2022 USING btree (sportradar_play_id);
 
 
 --
@@ -32699,6 +34921,20 @@ CREATE INDEX nfl_plays_year_2023_solo_tackle_3_pid_idx ON public.nfl_plays_year_
 
 
 --
+-- Name: nfl_plays_year_2023_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_sportradar_game_id_idx ON public.nfl_plays_year_2023 USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_year_2023_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_sportradar_play_id_idx ON public.nfl_plays_year_2023 USING btree (sportradar_play_id);
+
+
+--
 -- Name: nfl_plays_year_2023_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -33018,6 +35254,20 @@ CREATE INDEX nfl_plays_year_2024_solo_tackle_2_pid_idx ON public.nfl_plays_year_
 --
 
 CREATE INDEX nfl_plays_year_2024_solo_tackle_3_pid_idx ON public.nfl_plays_year_2024 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2024_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_sportradar_game_id_idx ON public.nfl_plays_year_2024 USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_year_2024_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_sportradar_play_id_idx ON public.nfl_plays_year_2024 USING btree (sportradar_play_id);
 
 
 --
@@ -33343,6 +35593,20 @@ CREATE INDEX nfl_plays_year_2025_solo_tackle_3_pid_idx ON public.nfl_plays_year_
 
 
 --
+-- Name: nfl_plays_year_2025_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2025_sportradar_game_id_idx ON public.nfl_plays_year_2025 USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_year_2025_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2025_sportradar_play_id_idx ON public.nfl_plays_year_2025 USING btree (sportradar_play_id);
+
+
+--
 -- Name: nfl_plays_year_2025_tackle_assist_1_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -33662,6 +35926,20 @@ CREATE INDEX nfl_plays_year_2026_solo_tackle_2_pid_idx ON public.nfl_plays_year_
 --
 
 CREATE INDEX nfl_plays_year_2026_solo_tackle_3_pid_idx ON public.nfl_plays_year_2026 USING btree (solo_tackle_3_pid);
+
+
+--
+-- Name: nfl_plays_year_2026_sportradar_game_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2026_sportradar_game_id_idx ON public.nfl_plays_year_2026 USING btree (sportradar_game_id);
+
+
+--
+-- Name: nfl_plays_year_2026_sportradar_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2026_sportradar_play_id_idx ON public.nfl_plays_year_2026 USING btree (sportradar_play_id);
 
 
 --
@@ -35492,6 +37770,20 @@ ALTER INDEX public.idx_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_p
 
 
 --
+-- Name: nfl_plays_year_2000_sportradar_game_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_game_id_idx ATTACH PARTITION public.nfl_plays_year_2000_sportradar_game_id_idx;
+
+
+--
+-- Name: nfl_plays_year_2000_sportradar_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_play_id_idx ATTACH PARTITION public.nfl_plays_year_2000_sportradar_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2000_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -35811,6 +38103,20 @@ ALTER INDEX public.idx_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_p
 --
 
 ALTER INDEX public.idx_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2001_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_sportradar_game_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_game_id_idx ATTACH PARTITION public.nfl_plays_year_2001_sportradar_game_id_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_sportradar_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_play_id_idx ATTACH PARTITION public.nfl_plays_year_2001_sportradar_play_id_idx;
 
 
 --
@@ -36136,6 +38442,20 @@ ALTER INDEX public.idx_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_p
 
 
 --
+-- Name: nfl_plays_year_2002_sportradar_game_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_game_id_idx ATTACH PARTITION public.nfl_plays_year_2002_sportradar_game_id_idx;
+
+
+--
+-- Name: nfl_plays_year_2002_sportradar_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_play_id_idx ATTACH PARTITION public.nfl_plays_year_2002_sportradar_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2002_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -36455,6 +38775,20 @@ ALTER INDEX public.idx_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_p
 --
 
 ALTER INDEX public.idx_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2003_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_sportradar_game_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_game_id_idx ATTACH PARTITION public.nfl_plays_year_2003_sportradar_game_id_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_sportradar_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_play_id_idx ATTACH PARTITION public.nfl_plays_year_2003_sportradar_play_id_idx;
 
 
 --
@@ -36780,6 +39114,20 @@ ALTER INDEX public.idx_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_p
 
 
 --
+-- Name: nfl_plays_year_2004_sportradar_game_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_game_id_idx ATTACH PARTITION public.nfl_plays_year_2004_sportradar_game_id_idx;
+
+
+--
+-- Name: nfl_plays_year_2004_sportradar_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_play_id_idx ATTACH PARTITION public.nfl_plays_year_2004_sportradar_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2004_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -37099,6 +39447,20 @@ ALTER INDEX public.idx_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_p
 --
 
 ALTER INDEX public.idx_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2005_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_sportradar_game_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_game_id_idx ATTACH PARTITION public.nfl_plays_year_2005_sportradar_game_id_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_sportradar_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_play_id_idx ATTACH PARTITION public.nfl_plays_year_2005_sportradar_play_id_idx;
 
 
 --
@@ -37424,6 +39786,20 @@ ALTER INDEX public.idx_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_p
 
 
 --
+-- Name: nfl_plays_year_2006_sportradar_game_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_game_id_idx ATTACH PARTITION public.nfl_plays_year_2006_sportradar_game_id_idx;
+
+
+--
+-- Name: nfl_plays_year_2006_sportradar_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_play_id_idx ATTACH PARTITION public.nfl_plays_year_2006_sportradar_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2006_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -37743,6 +40119,20 @@ ALTER INDEX public.idx_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_p
 --
 
 ALTER INDEX public.idx_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2007_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_sportradar_game_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_game_id_idx ATTACH PARTITION public.nfl_plays_year_2007_sportradar_game_id_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_sportradar_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_play_id_idx ATTACH PARTITION public.nfl_plays_year_2007_sportradar_play_id_idx;
 
 
 --
@@ -38068,6 +40458,20 @@ ALTER INDEX public.idx_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_p
 
 
 --
+-- Name: nfl_plays_year_2008_sportradar_game_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_game_id_idx ATTACH PARTITION public.nfl_plays_year_2008_sportradar_game_id_idx;
+
+
+--
+-- Name: nfl_plays_year_2008_sportradar_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_play_id_idx ATTACH PARTITION public.nfl_plays_year_2008_sportradar_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2008_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -38387,6 +40791,20 @@ ALTER INDEX public.idx_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_p
 --
 
 ALTER INDEX public.idx_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2009_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_sportradar_game_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_game_id_idx ATTACH PARTITION public.nfl_plays_year_2009_sportradar_game_id_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_sportradar_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_play_id_idx ATTACH PARTITION public.nfl_plays_year_2009_sportradar_play_id_idx;
 
 
 --
@@ -38712,6 +41130,20 @@ ALTER INDEX public.idx_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_p
 
 
 --
+-- Name: nfl_plays_year_2010_sportradar_game_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_game_id_idx ATTACH PARTITION public.nfl_plays_year_2010_sportradar_game_id_idx;
+
+
+--
+-- Name: nfl_plays_year_2010_sportradar_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_play_id_idx ATTACH PARTITION public.nfl_plays_year_2010_sportradar_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2010_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -39031,6 +41463,20 @@ ALTER INDEX public.idx_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_p
 --
 
 ALTER INDEX public.idx_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2011_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_sportradar_game_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_game_id_idx ATTACH PARTITION public.nfl_plays_year_2011_sportradar_game_id_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_sportradar_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_play_id_idx ATTACH PARTITION public.nfl_plays_year_2011_sportradar_play_id_idx;
 
 
 --
@@ -39356,6 +41802,20 @@ ALTER INDEX public.idx_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_p
 
 
 --
+-- Name: nfl_plays_year_2012_sportradar_game_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_game_id_idx ATTACH PARTITION public.nfl_plays_year_2012_sportradar_game_id_idx;
+
+
+--
+-- Name: nfl_plays_year_2012_sportradar_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_play_id_idx ATTACH PARTITION public.nfl_plays_year_2012_sportradar_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2012_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -39675,6 +42135,20 @@ ALTER INDEX public.idx_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_p
 --
 
 ALTER INDEX public.idx_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2013_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_sportradar_game_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_game_id_idx ATTACH PARTITION public.nfl_plays_year_2013_sportradar_game_id_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_sportradar_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_play_id_idx ATTACH PARTITION public.nfl_plays_year_2013_sportradar_play_id_idx;
 
 
 --
@@ -40000,6 +42474,20 @@ ALTER INDEX public.idx_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_p
 
 
 --
+-- Name: nfl_plays_year_2014_sportradar_game_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_game_id_idx ATTACH PARTITION public.nfl_plays_year_2014_sportradar_game_id_idx;
+
+
+--
+-- Name: nfl_plays_year_2014_sportradar_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_play_id_idx ATTACH PARTITION public.nfl_plays_year_2014_sportradar_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2014_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -40319,6 +42807,20 @@ ALTER INDEX public.idx_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_p
 --
 
 ALTER INDEX public.idx_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2015_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_sportradar_game_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_game_id_idx ATTACH PARTITION public.nfl_plays_year_2015_sportradar_game_id_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_sportradar_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_play_id_idx ATTACH PARTITION public.nfl_plays_year_2015_sportradar_play_id_idx;
 
 
 --
@@ -40644,6 +43146,20 @@ ALTER INDEX public.idx_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_p
 
 
 --
+-- Name: nfl_plays_year_2016_sportradar_game_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_game_id_idx ATTACH PARTITION public.nfl_plays_year_2016_sportradar_game_id_idx;
+
+
+--
+-- Name: nfl_plays_year_2016_sportradar_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_play_id_idx ATTACH PARTITION public.nfl_plays_year_2016_sportradar_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2016_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -40963,6 +43479,20 @@ ALTER INDEX public.idx_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_p
 --
 
 ALTER INDEX public.idx_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2017_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_sportradar_game_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_game_id_idx ATTACH PARTITION public.nfl_plays_year_2017_sportradar_game_id_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_sportradar_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_play_id_idx ATTACH PARTITION public.nfl_plays_year_2017_sportradar_play_id_idx;
 
 
 --
@@ -41288,6 +43818,20 @@ ALTER INDEX public.idx_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_p
 
 
 --
+-- Name: nfl_plays_year_2018_sportradar_game_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_game_id_idx ATTACH PARTITION public.nfl_plays_year_2018_sportradar_game_id_idx;
+
+
+--
+-- Name: nfl_plays_year_2018_sportradar_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_play_id_idx ATTACH PARTITION public.nfl_plays_year_2018_sportradar_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2018_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -41607,6 +44151,20 @@ ALTER INDEX public.idx_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_p
 --
 
 ALTER INDEX public.idx_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2019_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_sportradar_game_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_game_id_idx ATTACH PARTITION public.nfl_plays_year_2019_sportradar_game_id_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_sportradar_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_play_id_idx ATTACH PARTITION public.nfl_plays_year_2019_sportradar_play_id_idx;
 
 
 --
@@ -41932,6 +44490,20 @@ ALTER INDEX public.idx_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_p
 
 
 --
+-- Name: nfl_plays_year_2020_sportradar_game_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_game_id_idx ATTACH PARTITION public.nfl_plays_year_2020_sportradar_game_id_idx;
+
+
+--
+-- Name: nfl_plays_year_2020_sportradar_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_play_id_idx ATTACH PARTITION public.nfl_plays_year_2020_sportradar_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2020_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -42251,6 +44823,20 @@ ALTER INDEX public.idx_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_p
 --
 
 ALTER INDEX public.idx_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2021_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_sportradar_game_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_game_id_idx ATTACH PARTITION public.nfl_plays_year_2021_sportradar_game_id_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_sportradar_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_play_id_idx ATTACH PARTITION public.nfl_plays_year_2021_sportradar_play_id_idx;
 
 
 --
@@ -42576,6 +45162,20 @@ ALTER INDEX public.idx_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_p
 
 
 --
+-- Name: nfl_plays_year_2022_sportradar_game_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_game_id_idx ATTACH PARTITION public.nfl_plays_year_2022_sportradar_game_id_idx;
+
+
+--
+-- Name: nfl_plays_year_2022_sportradar_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_play_id_idx ATTACH PARTITION public.nfl_plays_year_2022_sportradar_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2022_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -42895,6 +45495,20 @@ ALTER INDEX public.idx_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_p
 --
 
 ALTER INDEX public.idx_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2023_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_sportradar_game_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_game_id_idx ATTACH PARTITION public.nfl_plays_year_2023_sportradar_game_id_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_sportradar_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_play_id_idx ATTACH PARTITION public.nfl_plays_year_2023_sportradar_play_id_idx;
 
 
 --
@@ -43220,6 +45834,20 @@ ALTER INDEX public.idx_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_p
 
 
 --
+-- Name: nfl_plays_year_2024_sportradar_game_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_game_id_idx ATTACH PARTITION public.nfl_plays_year_2024_sportradar_game_id_idx;
+
+
+--
+-- Name: nfl_plays_year_2024_sportradar_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_play_id_idx ATTACH PARTITION public.nfl_plays_year_2024_sportradar_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2024_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -43542,6 +46170,20 @@ ALTER INDEX public.idx_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_p
 
 
 --
+-- Name: nfl_plays_year_2025_sportradar_game_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_game_id_idx ATTACH PARTITION public.nfl_plays_year_2025_sportradar_game_id_idx;
+
+
+--
+-- Name: nfl_plays_year_2025_sportradar_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_play_id_idx ATTACH PARTITION public.nfl_plays_year_2025_sportradar_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2025_tackle_assist_1_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -43861,6 +46503,20 @@ ALTER INDEX public.idx_nfl_plays_solo_tackle_2_pid ATTACH PARTITION public.nfl_p
 --
 
 ALTER INDEX public.idx_nfl_plays_solo_tackle_3_pid ATTACH PARTITION public.nfl_plays_year_2026_solo_tackle_3_pid_idx;
+
+
+--
+-- Name: nfl_plays_year_2026_sportradar_game_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_game_id_idx ATTACH PARTITION public.nfl_plays_year_2026_sportradar_game_id_idx;
+
+
+--
+-- Name: nfl_plays_year_2026_sportradar_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.nfl_plays_sportradar_play_id_idx ATTACH PARTITION public.nfl_plays_year_2026_sportradar_play_id_idx;
 
 
 --
