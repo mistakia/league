@@ -17,12 +17,86 @@ debug.enable('import-plays-nfl-v1,nfl')
 
 const argv = yargs(hideBin(process.argv)).argv
 
+/**
+ * Parse clock time string and calculate time-related fields
+ * @param {string} clockTime - Clock time in format "MM:SS" or "M:SS"
+ * @param {number} quarter - Quarter number (1-4 for regulation, 5+ for OT)
+ * @returns {Object} Time-related fields: sec_rem_qtr, sec_rem_half, sec_rem_gm
+ */
+const parse_clock_time = (clockTime, quarter) => {
+  const time_fields = {
+    sec_rem_qtr: null,
+    sec_rem_half: null,
+    sec_rem_gm: null
+  }
+
+  if (!clockTime || !quarter) {
+    return time_fields
+  }
+
+  // Parse MM:SS format
+  const parts = clockTime.split(':')
+  if (parts.length !== 2) {
+    return time_fields
+  }
+
+  const minutes = parseInt(parts[0], 10)
+  const seconds = parseInt(parts[1], 10)
+
+  if (isNaN(minutes) || isNaN(seconds)) {
+    return time_fields
+  }
+
+  // Calculate seconds remaining in quarter
+  time_fields.sec_rem_qtr = minutes * 60 + seconds
+
+  // Calculate seconds remaining in half and game
+  // Quarter 1-2: First half (each quarter is 900 seconds)
+  // Quarter 3-4: Second half
+  // Quarter 5+: Overtime (10 minutes = 600 seconds per OT period)
+
+  if (quarter === 1) {
+    // First quarter: add Q2 time (900) to current quarter time
+    time_fields.sec_rem_half = time_fields.sec_rem_qtr + 900
+    // First half: add entire second half (1800) + current half time
+    time_fields.sec_rem_gm = time_fields.sec_rem_half + 1800
+  } else if (quarter === 2) {
+    // Second quarter: just current quarter time left in half
+    time_fields.sec_rem_half = time_fields.sec_rem_qtr
+    // Add entire second half (1800) to current half time
+    time_fields.sec_rem_gm = time_fields.sec_rem_half + 1800
+  } else if (quarter === 3) {
+    // Third quarter: add Q4 time (900) to current quarter time
+    time_fields.sec_rem_half = time_fields.sec_rem_qtr + 900
+    // Second half: just current half time left
+    time_fields.sec_rem_gm = time_fields.sec_rem_half
+  } else if (quarter === 4) {
+    // Fourth quarter: just current quarter time left
+    time_fields.sec_rem_half = time_fields.sec_rem_qtr
+    time_fields.sec_rem_gm = time_fields.sec_rem_qtr
+  } else {
+    // Overtime: just quarter time, half and game same as quarter
+    time_fields.sec_rem_half = time_fields.sec_rem_qtr
+    time_fields.sec_rem_gm = time_fields.sec_rem_qtr
+  }
+
+  return time_fields
+}
+
 const getPlayData = ({ play, year, week, seas_type }) => {
+  // Parse clock time and calculate time-related fields
+  const time_fields = parse_clock_time(play.clockTime, play.quarter)
+
   const data = {
     desc: clean_string(play.playDescription),
     dwn: play.down,
     drive_play_count: play.drivePlayCount,
     game_clock_start: play.clockTime,
+    // Clock-based time fields calculated from game_clock_start
+    // These are the source of truth for time matching across data sources
+    sec_rem_qtr: time_fields.sec_rem_qtr,
+    sec_rem_half: time_fields.sec_rem_half,
+    sec_rem_gm: time_fields.sec_rem_gm,
     // TODO this might not match the drive sequence number in nflfastr
     drive_seq: play.driveSequenceNumber,
     drive_yds: play.driveNetYards,
