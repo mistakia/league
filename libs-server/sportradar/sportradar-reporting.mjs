@@ -13,14 +13,33 @@ export const print_import_summary = ({
   total_plays_processed,
   total_plays_matched,
   total_plays_updated,
+  total_plays_multiple_matches = 0,
   unmatched_plays,
+  multiple_match_plays = [],
   unmatched_reasons
 }) => {
   log('\n=== Import Summary ===')
   log(`Total plays processed: ${total_plays_processed}`)
   log(`Plays matched: ${total_plays_matched}`)
   log(`Plays updated: ${total_plays_updated}`)
+  log(`Plays with multiple matches: ${total_plays_multiple_matches}`)
   log(`Plays not matched: ${unmatched_plays.length}`)
+
+  if (multiple_match_plays.length > 0) {
+    log('\n⚠️  Multiple Match Errors:')
+    log(
+      'The following plays matched multiple records in the database. This indicates'
+    )
+    log('ambiguous match criteria and needs to be resolved.')
+    multiple_match_plays.slice(0, 10).forEach((play) => {
+      log(
+        `  ${play.esbid} Q${play.qtr} ${play.clock} - ${play.description?.substring(0, 60)}`
+      )
+    })
+    if (multiple_match_plays.length > 10) {
+      log(`  ... and ${multiple_match_plays.length - 10} more`)
+    }
+  }
 
   if (Object.keys(unmatched_reasons).length > 0) {
     log('\nUnmatched plays by type:')
