@@ -475,7 +475,18 @@ const build_match_criteria = (esbid, formatted_play) => {
 
   if (use_time_matching) {
     match_criteria.sec_rem_qtr = formatted_play.sec_rem_qtr
-    match_criteria.sec_rem_qtr_tolerance = TIME_MATCH_TOLERANCE_SECONDS
+
+    // Use exact time matching (0s tolerance) for timeouts to avoid ambiguity
+    // Multiple timeouts can occur within seconds of each other, and the 5-second
+    // tolerance causes them to match each other incorrectly. With exact time + team
+    // matching, we can precisely identify which timeout is which.
+    // nflfastR provides timeout_team which maps to to_team in the database.
+    if (formatted_play.play_type === 'NOPL' && formatted_play.to && formatted_play.to_team) {
+      match_criteria.sec_rem_qtr_tolerance = 0  // Exact time match for team timeouts
+      match_criteria.to_team = formatted_play.to_team  // Include team in criteria
+    } else {
+      match_criteria.sec_rem_qtr_tolerance = TIME_MATCH_TOLERANCE_SECONDS  // 5s for others
+    }
   }
 
   return match_criteria

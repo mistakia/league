@@ -316,6 +316,17 @@ const importPlaysForWeek = async ({
     for (const play of data.data.viewer.gameDetail.plays) {
       const { playId } = play
       const playData = getPlayData({ play, year, week, seas_type })
+
+      // Extract timeout team from playStats for TIMEOUT plays
+      // Team timeouts have a playStat entry with statId 68 and team attribution
+      // Official/TV timeouts have empty playStats array
+      if (play.playType === 'TIMEOUT' && play.playStats && play.playStats.length > 0) {
+        const timeoutStat = play.playStats.find(stat => stat.statId === 68)
+        if (timeoutStat && timeoutStat.team) {
+          playData.to_team = fixTeam(clean_string(timeoutStat.team.abbreviation))
+        }
+      }
+
       play_inserts.push({
         playId,
         esbid: game.esbid,
