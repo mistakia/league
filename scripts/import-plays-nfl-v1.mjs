@@ -92,18 +92,29 @@ const getPlayData = ({ play, year, week, seas_type }) => {
 
   // Special handling for game state events that may have null/invalid clock times
   // GAME_START should have full quarter time (900 seconds)
-  // END_QUARTER and END_GAME should have 0 seconds remaining
+  // END_QUARTER should have 0 seconds remaining
+  // END_GAME should have 0 seconds remaining in regulation (Q4) but preserve actual time in overtime
   if (play_type_nfl === 'GAME_START' && play.quarter === 1) {
     time_fields = {
       sec_rem_qtr: 900,
       sec_rem_half: 1800,  // 900 + 900 (Q1 + Q2)
       sec_rem_gm: 3600     // Full game time
     }
-  } else if (play_type_nfl === 'END_QUARTER' || play_type_nfl === 'END_GAME') {
+  } else if (play_type_nfl === 'END_QUARTER') {
     time_fields = {
       sec_rem_qtr: 0,
+      sec_rem_half: play.quarter === 2 ? 0 : time_fields.sec_rem_half,
+      sec_rem_gm: time_fields.sec_rem_gm
+    }
+  } else if (play_type_nfl === 'END_GAME') {
+    // In regulation (Q1-4), END_GAME is at 00:00
+    // In overtime (Q5+), END_GAME occurs at the actual time the game ended
+    // Preserve the parsed time for overtime, use 0 for regulation
+    const is_overtime = play.quarter >= 5
+    time_fields = {
+      sec_rem_qtr: is_overtime ? time_fields.sec_rem_qtr : 0,
       sec_rem_half: play.quarter === 2 || play.quarter === 4 ? 0 : time_fields.sec_rem_half,
-      sec_rem_gm: play_type_nfl === 'END_GAME' ? 0 : time_fields.sec_rem_gm
+      sec_rem_gm: 0  // Always 0 for END_GAME
     }
   }
 

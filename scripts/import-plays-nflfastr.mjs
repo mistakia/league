@@ -444,7 +444,7 @@ const format_play = (play) => ({
  * Uses contextual matching instead of playId matching since playId is NOT stable
  * across data sources (nflfastR vs NFL v1 vs Sportradar)
  */
-const build_match_criteria = (esbid, formatted_play) => {
+const build_match_criteria = (esbid, formatted_play, item) => {
   const match_criteria = {
     esbid,
     qtr: formatted_play.qtr,
@@ -487,6 +487,53 @@ const build_match_criteria = (esbid, formatted_play) => {
     } else {
       match_criteria.sec_rem_qtr_tolerance = TIME_MATCH_TOLERANCE_SECONDS  // 5s for others
     }
+  }
+
+  // Special handling for END QUARTER and END GAME markers
+  // These occur at exactly 00:00 at end of quarters (END QUARTER at end of Q1-3,
+  // END GAME at end of Q4 or at actual game end time in overtime).
+  // They should not match with timeouts or other plays that occur within the 5-second
+  // tolerance window. Use exact time matching (0s tolerance) and description matching
+  // for precise identification.
+  const is_end_marker = formatted_play.play_type === 'NOPL' &&
+                        (item.desc?.includes('END QUARTER') || item.desc === 'END GAME')
+
+  if (is_end_marker) {
+    match_criteria.sec_rem_qtr_tolerance = 0  // Exact time match
+    match_criteria.desc_contains = item.desc  // Match on description
+  }
+
+  // Special handling for game suspension and resumption events
+  // These occur during weather delays and have null sec_rem_qtr values in the database
+  // because there is no meaningful game clock time during a suspension.
+  // Without special handling, they match ALL timeouts and administrative plays in the quarter.
+  // Use description-based matching to uniquely identify these events.
+  // Example: "The game has been suspended. Lightning in the area." should only match
+  // the specific suspension event, not every timeout in Q2.
+  //
+  // Administrative markers that indicate game suspension/resumption:
+  // - Modern format: "The game has been suspended" / "The game has resumed"
+  // - Older format: Starts with "Game suspended" / "Play resumed at"
+  //
+  // Exclude false positives:
+  // - "(11:56) 21:28, play resumed after a rain delay..." (actual PASS play)
+  // - "Timeout at 15:00. Game suspended due to lightning." (TIMEOUT play)
+  // - "(15:00) Game temporarily suspended..." (actual play that mentions delay)
+  //
+  // Key distinction: Administrative markers start with the suspension/resumption phrase,
+  // while false positives have the phrase embedded later in the description.
+  const desc_lower = item.desc?.toLowerCase() || ''
+  const is_suspension = desc_lower.startsWith('the game has been suspended') ||
+                        (desc_lower.startsWith('game suspended') && !desc_lower.startsWith('game temporarily'))
+  const is_resumption = desc_lower.startsWith('the game has resumed') ||
+                        desc_lower.startsWith('play resumed at')
+
+  if (is_suspension || is_resumption) {
+    // Remove time-based matching since these events have null sec_rem_qtr
+    delete match_criteria.sec_rem_qtr
+    delete match_criteria.sec_rem_qtr_tolerance
+    // Use description pattern matching to uniquely identify the event
+    match_criteria.desc_contains = is_suspension ? 'game has been suspended' : 'game has resumed'
   }
 
   return match_criteria
@@ -547,7 +594,7 @@ const download_file = async ({ year, force_download }) => {
 const process_play = async ({ item, year, ignore_conflicts, dry_mode }) => {
   const esbid = parseInt(item.old_game_id, 10)
   const formatted_play = format_play(item)
-  const match_criteria = build_match_criteria(esbid, formatted_play)
+  const match_criteria = build_match_criteria(esbid, formatted_play, item)
 
   let db_play
   try {
