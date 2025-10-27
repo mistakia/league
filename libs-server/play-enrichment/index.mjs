@@ -4,6 +4,7 @@ import { enrich_team_assignments } from './team-assignment-enrichment.mjs'
 import { enrich_play_types } from './play-type-enrichment.mjs'
 import { enrich_play_success } from './success-metric-enrichment.mjs'
 import { enrich_player_identifications } from './player-identification-enrichment.mjs'
+import { enrich_yardage_stats } from './yardage-stat-enrichment.mjs'
 
 const log = debug('play-enrichment')
 
@@ -80,7 +81,16 @@ export const enrich_plays = async ({
       }
     }
 
-    // Phase 4: Player identifications
+    // Phase 4: Yardage statistics from play_stats (always enabled)
+    if (play_stats.length > 0) {
+      try {
+        enriched_plays = enrich_yardage_stats(enriched_plays, play_stats)
+      } catch (error) {
+        log(`Yardage stat enrichment failed: ${error.message}`)
+      }
+    }
+
+    // Phase 5: Player identifications
     if (players && play_stats.length > 0 && player_cache) {
       try {
         enriched_plays = enrich_player_identifications(
