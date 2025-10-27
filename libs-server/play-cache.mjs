@@ -285,10 +285,14 @@ class PlayCache {
    */
   _has_context_fields(qtr, dwn, yards_to_go, ydl_100) {
     return (
-      qtr !== undefined && qtr !== null &&
-      dwn !== undefined && dwn !== null &&
-      yards_to_go !== undefined && yards_to_go !== null &&
-      ydl_100 !== undefined && ydl_100 !== null
+      qtr !== undefined &&
+      qtr !== null &&
+      dwn !== undefined &&
+      dwn !== null &&
+      yards_to_go !== undefined &&
+      yards_to_go !== null &&
+      ydl_100 !== undefined &&
+      ydl_100 !== null
     )
   }
 
@@ -389,11 +393,11 @@ class PlayCache {
    */
   _find_unique_matching_play(plays, filters) {
     const matching_plays = this._filter_plays(plays, filters)
-    
+
     if (matching_plays.length === 0) {
       return null
     }
-    
+
     if (matching_plays.length > 1) {
       log(`Multiple plays matched (${matching_plays.length}):`)
       matching_plays.forEach((play, index) => {
@@ -407,7 +411,7 @@ class PlayCache {
         matching_plays
       )
     }
-    
+
     return matching_plays[0]
   }
 
@@ -426,7 +430,10 @@ class PlayCache {
   _play_matches_filters(play, filters) {
     const qtr_match = this._matches_numeric_field(play.qtr, filters.qtr)
     const dwn_match = this._matches_nullable_field(play.dwn, filters.dwn)
-    const ytg_match = this._matches_nullable_field(play.yards_to_go, filters.yards_to_go)
+    const ytg_match = this._matches_nullable_field(
+      play.yards_to_go,
+      filters.yards_to_go
+    )
     const ydl_match = this._matches_numeric_field(play.ydl_100, filters.ydl_100)
     const off_match = this._matches_team_field(play.off, filters.off)
     const def_match = this._matches_team_field(play.def, filters.def)
@@ -439,13 +446,42 @@ class PlayCache {
       play.game_clock_start,
       filters.game_clock_start
     )
-    const type_match = this._matches_string_field(play.play_type, filters.play_type)
-    const ydl_num_match = this._matches_numeric_field(play.ydl_num, filters.ydl_num)
-    const ydl_side_match = this._matches_team_field(play.ydl_side, filters.ydl_side)
-    const desc_match = this._matches_desc_contains(play.desc, filters.desc_contains)
-    const to_team_match = this._matches_team_field(play.to_team, filters.to_team)
+    const type_match = this._matches_string_field(
+      play.play_type,
+      filters.play_type
+    )
+    const ydl_num_match = this._matches_numeric_field(
+      play.ydl_num,
+      filters.ydl_num
+    )
+    const ydl_side_match = this._matches_team_field(
+      play.ydl_side,
+      filters.ydl_side
+    )
+    const desc_match = this._matches_desc_contains(
+      play.desc,
+      filters.desc_contains
+    )
+    const to_team_match = this._matches_team_field(
+      play.to_team,
+      filters.to_team
+    )
 
-    return qtr_match && dwn_match && ytg_match && ydl_match && off_match && def_match && time_match && clock_match && type_match && ydl_num_match && ydl_side_match && desc_match && to_team_match
+    return (
+      qtr_match &&
+      dwn_match &&
+      ytg_match &&
+      ydl_match &&
+      off_match &&
+      def_match &&
+      time_match &&
+      clock_match &&
+      type_match &&
+      ydl_num_match &&
+      ydl_side_match &&
+      desc_match &&
+      to_team_match
+    )
   }
 
   /**

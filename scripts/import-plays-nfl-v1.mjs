@@ -97,8 +97,8 @@ const getPlayData = ({ play, year, week, seas_type }) => {
   if (play_type_nfl === 'GAME_START' && play.quarter === 1) {
     time_fields = {
       sec_rem_qtr: 900,
-      sec_rem_half: 1800,  // 900 + 900 (Q1 + Q2)
-      sec_rem_gm: 3600     // Full game time
+      sec_rem_half: 1800, // 900 + 900 (Q1 + Q2)
+      sec_rem_gm: 3600 // Full game time
     }
   } else if (play_type_nfl === 'END_QUARTER') {
     time_fields = {
@@ -113,8 +113,9 @@ const getPlayData = ({ play, year, week, seas_type }) => {
     const is_overtime = play.quarter >= 5
     time_fields = {
       sec_rem_qtr: is_overtime ? time_fields.sec_rem_qtr : 0,
-      sec_rem_half: play.quarter === 2 || play.quarter === 4 ? 0 : time_fields.sec_rem_half,
-      sec_rem_gm: 0  // Always 0 for END_GAME
+      sec_rem_half:
+        play.quarter === 2 || play.quarter === 4 ? 0 : time_fields.sec_rem_half,
+      sec_rem_gm: 0 // Always 0 for END_GAME
     }
   }
 
@@ -331,10 +332,16 @@ const importPlaysForWeek = async ({
       // Extract timeout team from playStats for TIMEOUT plays
       // Team timeouts have a playStat entry with statId 68 and team attribution
       // Official/TV timeouts have empty playStats array
-      if (play.playType === 'TIMEOUT' && play.playStats && play.playStats.length > 0) {
-        const timeoutStat = play.playStats.find(stat => stat.statId === 68)
+      if (
+        play.playType === 'TIMEOUT' &&
+        play.playStats &&
+        play.playStats.length > 0
+      ) {
+        const timeoutStat = play.playStats.find((stat) => stat.statId === 68)
         if (timeoutStat && timeoutStat.team) {
-          playData.to_team = fixTeam(clean_string(timeoutStat.team.abbreviation))
+          playData.to_team = fixTeam(
+            clean_string(timeoutStat.team.abbreviation)
+          )
         }
       }
 
