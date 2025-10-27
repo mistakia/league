@@ -31,7 +31,7 @@ const log = debug('import-nflfastr-plays')
 debug.enable('import-nflfastr-plays,update-play,fetch,play-cache')
 
 // Constants
-const TIME_MATCH_TOLERANCE_SECONDS = 5  // Allow 5-second tolerance for timing discrepancies
+const TIME_MATCH_TOLERANCE_SECONDS = 5 // Allow 5-second tolerance for timing discrepancies
 
 // ============================================================================
 // Basic Formatters
@@ -146,7 +146,11 @@ const format_play_type = (
   if (!play_type) {
     // Special handling for administrative plays that have null play_type in nflfastR
     // but are stored as NOPL in the database
-    if (desc === 'GAME' || desc?.includes('END QUARTER') || desc === 'END GAME') {
+    if (
+      desc === 'GAME' ||
+      desc?.includes('END QUARTER') ||
+      desc === 'END GAME'
+    ) {
       return 'NOPL'
     }
     return null
@@ -198,7 +202,8 @@ const format_play_context = (play) => {
   // For plays without downs (timeouts, kickoffs, extra points, etc.),
   // nflfastR may have yards_to_go=0, but database has null.
   // Convert 0 to null when there's no down.
-  const yards_to_go = dwn === null && yards_to_go_raw === 0 ? null : yards_to_go_raw
+  const yards_to_go =
+    dwn === null && yards_to_go_raw === 0 ? null : yards_to_go_raw
 
   return {
     qtr: format_number(play.qtr),
@@ -666,7 +671,9 @@ const run = async ({
     return
   }
 
-  log(`${dry_mode ? '[DRY MODE] ' : ''}Importing plays for year ${year}${esbid ? ` (filtered to esbid: ${esbid})` : ''}`)
+  log(
+    `${dry_mode ? '[DRY MODE] ' : ''}Importing plays for year ${year}${esbid ? ` (filtered to esbid: ${esbid})` : ''}`
+  )
 
   // Download the CSV file
   const file_path = await download_file({ year, force_download })
@@ -680,8 +687,10 @@ const run = async ({
   if (esbid) {
     const original_count = data.length
     data = data.filter((item) => parseInt(item.old_game_id, 10) === esbid)
-    log(`Filtered from ${original_count} to ${data.length} plays for esbid ${esbid}`)
-    
+    log(
+      `Filtered from ${original_count} to ${data.length} plays for esbid ${esbid}`
+    )
+
     if (data.length === 0) {
       log(`No plays found for esbid ${esbid}`)
       return
@@ -700,8 +709,13 @@ const run = async ({
   let processed_count = 0
 
   for (const item of data) {
-    const result = await process_play({ item, year, ignore_conflicts, dry_mode })
-    
+    const result = await process_play({
+      item,
+      year,
+      ignore_conflicts,
+      dry_mode
+    })
+
     processed_count++
     if (processed_count % 500 === 0) {
       log(`Processed ${processed_count}/${data.length} plays...`)
@@ -723,7 +737,7 @@ const run = async ({
   // In dry mode, show matched plays grouped by play_type
   if (dry_mode && plays_matched.length > 0) {
     log('\n--- Matched Plays by Play Type ---')
-    
+
     const matched_by_type = {}
     for (const play of plays_matched) {
       const play_type = play.match_criteria.play_type || 'NULL'
@@ -735,16 +749,18 @@ const run = async ({
 
     for (const [play_type, type_plays] of Object.entries(matched_by_type)) {
       log(`\n${play_type}: ${type_plays.length} matched`)
-      
+
       // Show first 3 examples for each type
       const examples = type_plays.slice(0, 3)
       for (const play of examples) {
         log(`  Game: ${play.item.game_id} | Play: ${play.item.play_id}`)
         log(`    ${play.item.desc}`)
-        log(`    Q${play.match_criteria.qtr} | ${play.match_criteria.dwn || 'N/A'} & ${play.match_criteria.yards_to_go || 'N/A'} | YDL: ${play.match_criteria.ydl_100 || 'N/A'} | Time: ${play.match_criteria.sec_rem_qtr}s`)
+        log(
+          `    Q${play.match_criteria.qtr} | ${play.match_criteria.dwn || 'N/A'} & ${play.match_criteria.yards_to_go || 'N/A'} | YDL: ${play.match_criteria.ydl_100 || 'N/A'} | Time: ${play.match_criteria.sec_rem_qtr}s`
+        )
         log(`    DB Play ID: ${play.db_play.playId}`)
       }
-      
+
       if (type_plays.length > 3) {
         log(`    ... and ${type_plays.length - 3} more`)
       }
@@ -755,11 +771,13 @@ const run = async ({
   if (plays_multiple_matches.length > 0) {
     log('\n--- Multiple Match Errors ---')
     log(`Total plays with multiple matches: ${plays_multiple_matches.length}\n`)
-    
+
     for (const play of plays_multiple_matches) {
       log(`Game: ${play.item.game_id} | Play: ${play.item.play_id}`)
       log(`  ${play.item.desc}`)
-      log(`  Matched ${play.match_count} plays - requires more specific criteria`)
+      log(
+        `  Matched ${play.match_count} plays - requires more specific criteria`
+      )
       log(`  Match Criteria:`)
       log(`    esbid: ${play.match_criteria.esbid}`)
       log(`    qtr: ${play.match_criteria.qtr}`)
@@ -778,7 +796,7 @@ const run = async ({
   if (plays_not_matched.length > 0) {
     log('\n--- Unmatched Plays Details ---')
     log(`Total unmatched: ${plays_not_matched.length}\n`)
-    
+
     for (const play of plays_not_matched) {
       log(`Game: ${play.item.game_id} | Play: ${play.item.play_id}`)
       log(`  ${play.item.desc}`)
