@@ -1,13 +1,49 @@
 /* global localStorage */
 
 /**
+ * Sanitizes parameter values to prevent nested arrays
+ * @param {Object} params - Parameter object to sanitize
+ * @returns {Object} Sanitized parameter object
+ */
+const sanitize_params = (params) => {
+  if (!params || typeof params !== 'object') {
+    return params
+  }
+
+  const sanitized = {}
+  for (const [key, value] of Object.entries(params)) {
+    if (Array.isArray(value)) {
+      // Flatten nested arrays recursively and filter invalid values
+      const flattened = value.flat(Infinity)
+      sanitized[key] = flattened.filter(
+        (v) => v !== undefined && v !== null && v !== ''
+      )
+    } else {
+      sanitized[key] = value
+    }
+  }
+  return sanitized
+}
+
+/**
  * Local storage helper - provides promise-based interface to localStorage
  * Mirrors the localStorageAdapter from utils but avoids import issues in test environment
  */
 const local_storage_helper = {
   async getItem(key) {
-    const data = JSON.parse(localStorage.getItem(key))
-    return data
+    try {
+      const raw_data = localStorage.getItem(key)
+      if (raw_data === null) {
+        return null
+      }
+      const data = JSON.parse(raw_data)
+      return data
+    } catch (error) {
+      // If JSON parsing fails (corrupted data), clear the corrupted entry
+      console.error(`Failed to parse localStorage item "${key}":`, error)
+      localStorage.removeItem(key)
+      return null
+    }
   },
 
   setItem(key, value) {
@@ -61,9 +97,36 @@ export const data_view_browser_storage_save_snapshot = async ({
       history = []
     }
 
+    // Sanitize table_state to prevent nested arrays in parameters
+    const sanitized_table_state = {
+      ...table_state,
+      columns: table_state.columns?.map((col) => {
+        if (typeof col === 'string') {
+          return col
+        }
+        return {
+          ...col,
+          params: sanitize_params(col.params)
+        }
+      }),
+      prefix_columns: table_state.prefix_columns?.map((col) => {
+        if (typeof col === 'string') {
+          return col
+        }
+        return {
+          ...col,
+          params: sanitize_params(col.params)
+        }
+      }),
+      where: table_state.where?.map((clause) => ({
+        ...clause,
+        params: sanitize_params(clause.params)
+      }))
+    }
+
     // Create new snapshot
     const snapshot = {
-      table_state,
+      table_state: sanitized_table_state,
       change_type,
       timestamp: Date.now()
     }
@@ -90,10 +153,25 @@ export const data_view_browser_storage_save_snapshot = async ({
       // Attempt aggressive cleanup
       try {
         await data_view_browser_storage_cleanup_old_views()
-        // Retry save after cleanup
+        // Retry save after cleanup (with sanitization)
         const storage_key = `${DATA_VIEW_BROWSER_STORAGE_CONFIG.STORAGE_KEY_PREFIX}${view_id}`
+        const sanitized_table_state = {
+          ...table_state,
+          columns: table_state.columns?.map((col) => {
+            if (typeof col === 'string') return col
+            return { ...col, params: sanitize_params(col.params) }
+          }),
+          prefix_columns: table_state.prefix_columns?.map((col) => {
+            if (typeof col === 'string') return col
+            return { ...col, params: sanitize_params(col.params) }
+          }),
+          where: table_state.where?.map((clause) => ({
+            ...clause,
+            params: sanitize_params(clause.params)
+          }))
+        }
         const snapshot = {
-          table_state,
+          table_state: sanitized_table_state,
           change_type,
           timestamp: Date.now()
         }
@@ -113,6 +191,46 @@ export const data_view_browser_storage_save_snapshot = async ({
 }
 
 /**
+ * Sanitizes a loaded snapshot to fix any corrupted data
+ * @param {Object} snapshot - Snapshot to sanitize
+ * @returns {Object} Sanitized snapshot
+ */
+const sanitize_snapshot = (snapshot) => {
+  if (!snapshot || !snapshot.table_state) {
+    return snapshot
+  }
+
+  return {
+    ...snapshot,
+    table_state: {
+      ...snapshot.table_state,
+      columns: snapshot.table_state.columns?.map((col) => {
+        if (typeof col === 'string') {
+          return col
+        }
+        return {
+          ...col,
+          params: sanitize_params(col.params)
+        }
+      }),
+      prefix_columns: snapshot.table_state.prefix_columns?.map((col) => {
+        if (typeof col === 'string') {
+          return col
+        }
+        return {
+          ...col,
+          params: sanitize_params(col.params)
+        }
+      }),
+      where: snapshot.table_state.where?.map((clause) => ({
+        ...clause,
+        params: sanitize_params(clause.params)
+      }))
+    }
+  }
+}
+
+/**
  * Load the full history of snapshots for a view
  *
  * @param {string} view_id - The data view UUID
@@ -121,12 +239,17 @@ export const data_view_browser_storage_save_snapshot = async ({
  * @description
  * Retrieves all stored snapshots for a view from localStorage.
  * Returns empty array if no history exists or if data is corrupted.
+ * Automatically sanitizes loaded snapshots to fix any corrupted parameter arrays.
  */
 export const data_view_browser_storage_load_view_history = async (view_id) => {
   try {
     const storage_key = `${DATA_VIEW_BROWSER_STORAGE_CONFIG.STORAGE_KEY_PREFIX}${view_id}`
     const history = await local_storage_helper.getItem(storage_key)
-    return history || []
+    if (!history || !Array.isArray(history)) {
+      return []
+    }
+    // Sanitize all loaded snapshots to fix any corrupted data
+    return history.map((snapshot) => sanitize_snapshot(snapshot))
   } catch (error) {
     // Return empty array on any error (including JSON parse failures)
     console.error('Error loading browser storage history:', error)
@@ -142,6 +265,7 @@ export const data_view_browser_storage_load_view_history = async (view_id) => {
  *
  * @description
  * Convenience function to retrieve just the latest snapshot without loading full history.
+ * Automatically sanitizes the snapshot to fix any corrupted parameter arrays.
  */
 export const data_view_browser_storage_get_latest_snapshot = async (
   view_id
@@ -151,6 +275,7 @@ export const data_view_browser_storage_get_latest_snapshot = async (
     if (history.length === 0) {
       return null
     }
+    // history is already sanitized by load_view_history
     return history[history.length - 1]
   } catch (error) {
     console.error('Error getting latest browser storage snapshot:', error)
