@@ -300,7 +300,8 @@ export const scoring_formats = {
       krtd: 6, // kick return touchdowns
       trg: 0, // targets (no points in Genesis)
       rush_first_down: 0, // rushing first downs
-      rec_first_down: 0 // receiving first downs
+      rec_first_down: 0, // receiving first downs
+      exclude_qb_kneels: true // exclude QB kneels from rushing yards
     },
     description:
       'Genesis League scoring with half PPR, 4-point passing TDs, 0.05 passing yards, and -1 turnovers'
@@ -854,7 +855,7 @@ export const league_formats = {
       sk: 0, // starting K (no kicker)
       bench: 7, // bench spots
       ps: 4, // practice squad spots
-      reserve_short_term_limit: 3, // Short term reserve spots
+      reserve_short_term_limit: 99, // Short term reserve spots
       cap: 200, // salary cap
       min_bid: 0 // minimum bid
     },

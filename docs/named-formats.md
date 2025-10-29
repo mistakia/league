@@ -1,6 +1,6 @@
 # Named Scoring and League Formats
 
-_Generated at: 2025-09-24T18:51:09.226Z_
+_Generated at: 2025-10-29T01:27:49.982Z_
 
 This document shows the configuration for each named format in the system.
 
@@ -80,7 +80,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** Genesis League 10 Team  
 **Description:** Genesis League 10-team superflex format with no kicker - 1QB/2RB/2WR/1TE/1FLEX/1SFLEX  
-**Hash:** `1985e1968b75707ebcab9da620176a0b218c5c1bd28d00cbbc4d1744a1631d0b`
+**Hash:** `a54416be9596b2a3dbdac2c5fd40d0bea908cd74b84e16416713bbaf45c6bfc5`
 
 **Configuration:**
 | Property | Value | Description |
@@ -98,7 +98,7 @@ This document shows the configuration for each named format in the system.
 | `sk` | 0 | Starting K positions |
 | `bench` | 7 | Bench positions |
 | `ps` | 4 | Practice squad positions |
-| `reserve_short_term_limit` | 3 | Short term reserve limit |
+| `reserve_short_term_limit` | 99 | Short term reserve limit |
 | `cap` | 200 | Salary cap |
 | `min_bid` | 0 | Minimum bid amount |
 
@@ -732,7 +732,7 @@ This document shows the configuration for each named format in the system.
 
 **Label:** Genesis League  
 **Description:** Genesis League scoring with half PPR, 4-point passing TDs, 0.05 passing yards, and -1 turnovers  
-**Hash:** `0df3e49bb29d3dbbeb7e9479b9e77f2688c0521df4e147cd9035f042680ba13d`
+**Hash:** `e984217bc49da7f112d0fdbbb371a32666b0fb336383fe42da8ab19357eacd51`
 
 **Configuration:**
 | Property | Value | Description |
@@ -758,6 +758,7 @@ This document shows the configuration for each named format in the system.
 | `trg` | 0 | trg |
 | `rush_first_down` | 0 | rush_first_down |
 | `rec_first_down` | 0 | rec_first_down |
+| `exclude_qb_kneels` | true | exclude_qb_kneels |
 
 ### half_ppr
 
