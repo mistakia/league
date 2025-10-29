@@ -1,3 +1,6 @@
+import dayjs from 'dayjs'
+import timezone from 'dayjs/plugin/timezone.js'
+import utc from 'dayjs/plugin/utc.js'
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
@@ -7,6 +10,9 @@ import { fixTeam } from '#libs-shared'
 import { is_main, report_job } from '#libs-server'
 import { get_games_schedule } from '#libs-server/sportradar/sportradar-api.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-games-sportradar')
@@ -65,11 +71,63 @@ const store_team_mappings = async ({ team_mappings }) => {
 }
 
 /**
+ * Preload games from database for a given year
+ * @param {number} year - The year to load games for
+ * @param {number|null} week - Optional week filter
+ * @returns {Map} Map of games keyed by "home-away" (without date for fuzzy matching)
+ */
+const preload_games = async ({ year, week = null }) => {
+  const query = db('nfl_games')
+    .select(
+      'esbid',
+      'year',
+      'week',
+      'date',
+      'h',
+      'v',
+      'sportradar_game_id',
+      'sportradar_season_id'
+    )
+    .where({ year })
+
+  if (week) {
+    query.where({ week })
+  }
+
+  const games = await query
+
+  // Create a lookup map keyed by home-away teams
+  // We'll match by teams and then verify the date is close
+  const games_map = new Map()
+  for (const game of games) {
+    const lookup_key = `${game.h}-${game.v}`
+
+    // If there are duplicate matchups in the same year, store as array
+    if (games_map.has(lookup_key)) {
+      const existing = games_map.get(lookup_key)
+      if (Array.isArray(existing)) {
+        existing.push(game)
+      } else {
+        games_map.set(lookup_key, [existing, game])
+      }
+    } else {
+      games_map.set(lookup_key, game)
+    }
+  }
+
+  log(
+    `Preloaded ${games.length} games for year ${year}${week ? ` week ${week}` : ''}`
+  )
+  return games_map
+}
+
+/**
  * Match a Sportradar game to an existing nfl_games record
  * @param {Object} sportradar_game - Game object from Sportradar API
+ * @param {Map} games_map - Preloaded games map
  * @returns {Object|null} Matched game record or null
  */
-const match_game_to_esbid = async ({ sportradar_game }) => {
+const match_game_to_esbid = ({ sportradar_game, games_map }) => {
   if (!sportradar_game.home || !sportradar_game.away) {
     log(`Game ${sportradar_game.id} missing home or away team`)
     return null
@@ -84,26 +142,74 @@ const match_game_to_esbid = async ({ sportradar_game }) => {
   const home_team = fixTeam(sportradar_game.home.alias)
   const away_team = fixTeam(sportradar_game.away.alias)
 
-  // Parse date from ISO string (e.g., "2024-09-08T17:00:00+00:00")
-  const game_date = new Date(sportradar_game.scheduled)
+  // Parse scheduled date - convert UTC to US Eastern time
+  // Sportradar returns UTC timestamps, database stores Eastern dates
+  const game_datetime_eastern = dayjs(sportradar_game.scheduled).tz(
+    'America/New_York'
+  )
+  const date_local = game_datetime_eastern.format('YYYY-MM-DD')
 
-  // Query for matching game
-  // Match by date (within same day) + home team + away team
-  const db_game = await db('nfl_games')
-    .whereRaw('DATE(date) = DATE(?)', [game_date.toISOString()])
-    .where({
-      h: home_team,
-      v: away_team
-    })
-    .first()
+  // Look up game by team matchup
+  const lookup_key = `${home_team}-${away_team}`
+  const db_result = games_map.get(lookup_key)
 
-  if (!db_game) {
+  if (!db_result) {
     log(
-      `No match for ${away_team} @ ${home_team} on ${game_date.toISOString().split('T')[0]} (${sportradar_game.id})`
+      `No match for ${away_team} @ ${home_team} on ${date_local} (${sportradar_game.id})`
     )
+    return null
   }
 
-  return db_game
+  // Handle both single game and array of games (for duplicate matchups)
+  const db_games = Array.isArray(db_result) ? db_result : [db_result]
+
+  // If there's only one game for this matchup, return it (most common case)
+  if (db_games.length === 1) {
+    const db_game = db_games[0]
+
+    // If date is null in DB, still match it (common for future games)
+    if (!db_game.date) {
+      return db_game
+    }
+
+    // Verify date is within +/- 2 days to handle timezone edge cases
+    const db_date = dayjs.tz(db_game.date, 'YYYY/MM/DD', 'America/New_York')
+    const date_diff_days = Math.abs(db_date.diff(game_datetime_eastern, 'day'))
+
+    if (date_diff_days <= 2) {
+      return db_game
+    }
+
+    log(
+      `Date mismatch for ${away_team} @ ${home_team}: DB has ${db_game.date}, Sportradar has ${date_local} (${sportradar_game.id})`
+    )
+    return null
+  }
+
+  // Multiple games with same matchup - find the one with closest date
+  for (const db_game of db_games) {
+    // If date is null, skip it in favor of games with dates (unless it's the only option)
+    if (!db_game.date) continue
+
+    const db_date = dayjs.tz(db_game.date, 'YYYY/MM/DD', 'America/New_York')
+    const date_diff_days = Math.abs(db_date.diff(game_datetime_eastern, 'day'))
+
+    if (date_diff_days <= 2) {
+      return db_game
+    }
+  }
+
+  // If no date-matched game found, check if any have null dates
+  for (const db_game of db_games) {
+    if (!db_game.date) {
+      return db_game
+    }
+  }
+
+  log(
+    `No date match for ${away_team} @ ${home_team} near ${date_local} (${sportradar_game.id})`
+  )
+  return null
 }
 
 /**
@@ -113,7 +219,8 @@ const import_games_sportradar = async ({
   year,
   week,
   all = false,
-  dry = false
+  dry = false,
+  ignore_cache = false
 } = {}) => {
   console.time('import-games-sportradar-total')
 
@@ -137,16 +244,21 @@ const import_games_sportradar = async ({
   let total_games_processed = 0
   let total_games_matched = 0
   let total_games_updated = 0
+  let total_games_skipped = 0
   const all_team_mappings = new Map()
 
   // Process each year
   for (const process_year of years) {
     log(`Fetching games for ${process_year}...`)
 
+    // Preload games from database for this year
+    const games_map = await preload_games({ year: process_year, week })
+
     // Fetch schedule from Sportradar
     const schedule_data = await get_games_schedule({
       year: process_year,
-      season_type: 'REG'
+      season_type: 'REG',
+      ignore_cache
     })
 
     if (!schedule_data || !schedule_data.weeks) {
@@ -179,21 +291,34 @@ const import_games_sportradar = async ({
 
     // Process each game
     for (const game of all_games) {
-      const db_game = await match_game_to_esbid({ sportradar_game: game })
+      const db_game = match_game_to_esbid({ sportradar_game: game, games_map })
 
       if (db_game) {
         total_games_matched++
 
+        // Check if update is necessary
+        const new_sportradar_game_id = game.id
+        const new_sportradar_season_id = schedule_data.id || null
+
+        const needs_update =
+          db_game.sportradar_game_id !== new_sportradar_game_id ||
+          db_game.sportradar_season_id !== new_sportradar_season_id
+
+        if (!needs_update) {
+          total_games_skipped++
+          log(
+            `Skipped ${db_game.esbid} - already has correct Sportradar IDs (${game.away?.alias} @ ${game.home?.alias})`
+          )
+          continue
+        }
+
         // Update the game with Sportradar ID
         if (!dry) {
-          await db('nfl_games')
-            .where({ esbid: db_game.esbid })
-            .update({
-              sportradar_game_id: game.id,
-              sportradar_season_id: schedule_data.id || null
-            })
+          await db('nfl_games').where({ esbid: db_game.esbid }).update({
+            sportradar_game_id: new_sportradar_game_id,
+            sportradar_season_id: new_sportradar_season_id
+          })
 
-          total_games_updated++
           log(
             `Updated ${db_game.esbid} with Sportradar ID ${game.id} (${game.away?.alias} @ ${game.home?.alias})`
           )
@@ -202,6 +327,8 @@ const import_games_sportradar = async ({
             `[DRY RUN] Would update ${db_game.esbid} with Sportradar ID ${game.id}`
           )
         }
+
+        total_games_updated++
       }
     }
   }
@@ -220,6 +347,7 @@ const import_games_sportradar = async ({
   log(`Total games processed: ${total_games_processed}`)
   log(`Games matched: ${total_games_matched}`)
   log(`Games updated: ${total_games_updated}`)
+  log(`Games skipped (already correct): ${total_games_skipped}`)
   log(`Games not matched: ${total_games_processed - total_games_matched}`)
   log(`Team mappings extracted: ${all_team_mappings.size}`)
 
@@ -233,12 +361,13 @@ const main = async () => {
     const week = argv.week ? parseInt(argv.week) : null
     const all = argv.all || false
     const dry = argv.dry || false
+    const ignore_cache = argv.ignore_cache || false
 
     if (!year && !all) {
       log('Warning: No --year specified, defaulting to current year')
     }
 
-    await import_games_sportradar({ year, week, all, dry })
+    await import_games_sportradar({ year, week, all, dry, ignore_cache })
   } catch (err) {
     error = err
     console.log(error)
