@@ -4990,7 +4990,7 @@ COMMENT ON COLUMN public.nfl_plays.sk IS 'sack';
 -- Name: COLUMN nfl_plays.successful_play; Type: COMMENT; Schema: public; Owner: -
 --
 
-COMMENT ON COLUMN public.nfl_plays.successful_play IS 'successful play';
+COMMENT ON COLUMN public.nfl_plays.successful_play IS 'Play success based on down/distance thresholds (40%/60%/100% criteria). Calculated by process-plays enrichment pipeline using is_successful_play() logic.';
 
 
 --
@@ -5397,6 +5397,13 @@ COMMENT ON COLUMN public.nfl_plays.fourth_down_converted IS 'Binary indicator fo
 --
 
 COMMENT ON COLUMN public.nfl_plays.fourth_down_failed IS 'Binary indicator for if the posteam failed to convert first down on fourth down.';
+
+
+--
+-- Name: COLUMN nfl_plays.ep_succ; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.ep_succ IS 'Play success based on Expected Points Added (EPA) model from nflfastr dataset. More sophisticated than down/distance thresholds. 100% coverage for nflfastr plays.';
 
 
 --
