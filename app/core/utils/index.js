@@ -5,6 +5,7 @@ export { timeago } from './timeago'
 export { default as useTraceUpdate } from './use-trace-update'
 export { create_debug_selector } from './create-debug-selector'
 export { default as shorten_url } from './shorten-url'
+export { get_player_image_url } from './player-image'
 
 export const ordinalSuffixOf = (i) => {
   const j = i % 10

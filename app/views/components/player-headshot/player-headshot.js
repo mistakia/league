@@ -4,6 +4,8 @@ import PropTypes from 'prop-types'
 
 import Avatar from '@mui/material/Avatar'
 
+import { get_player_image_url } from '@core/utils'
+
 import './player-headshot.styl'
 
 export default function PlayerHeadshot({
@@ -12,23 +14,8 @@ export default function PlayerHeadshot({
   square = false,
   position
 }) {
-  const isTeam = player_map.get('pos') === 'DST'
   const height = Math.round((width * 70) / 96)
-
-  let src
-  if (isTeam) {
-    const pid = player_map.get('pid')
-    src = `https://a.espncdn.com/combiner/i?img=/i/teamlogos/nfl/500/${pid}.png&h=${
-      height * 2
-    }&w=${height * 2}`
-  } else {
-    const espn_id = player_map.get('espn_id')
-    src = espn_id
-      ? `https://a.espncdn.com/combiner/i?img=/i/headshots/nfl/players/full/${espn_id}.png&w=${
-          width * 2
-        }&h=${height * 2}&cb=1`
-      : null
-  }
+  const src = get_player_image_url({ player_map, width, height })
 
   const classNames = ['player__headshot']
   const style = {
