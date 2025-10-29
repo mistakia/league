@@ -25,7 +25,6 @@ const formatPlay = (play) => ({
   qb_pressure: Boolean(parseInt(play.qb_pressure, 10)),
   qb_hit: Boolean(parseInt(play.qb_hit, 10)),
   int_worthy: Boolean(parseInt(play.int_worthy, 10)),
-  successful_play: Boolean(parseInt(play.succ, 10)),
   mbt: parseInt(play.mbt, 10) || null,
   yards_after_any_contact: parseInt(play.yaco, 10) || null,
   no_huddle: Boolean(parseInt(play.nh, 10)),
