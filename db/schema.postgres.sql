@@ -265,7 +265,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2026_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2026_solo_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2026_series_seq_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2026_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2026_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2026_route_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2026_qtr_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2026_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2026_player_fuml_pid_week_year_idx;
@@ -313,7 +313,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2025_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2025_solo_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2025_series_seq_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2025_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2025_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2025_route_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2025_qtr_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2025_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2025_player_fuml_pid_week_year_idx;
@@ -361,7 +361,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2024_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2024_solo_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2024_series_seq_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2024_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2024_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_route_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2024_qtr_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2024_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2024_player_fuml_pid_week_year_idx;
@@ -409,7 +409,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2023_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2023_solo_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2023_series_seq_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2023_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2023_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_route_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2023_qtr_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2023_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2023_player_fuml_pid_week_year_idx;
@@ -457,7 +457,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2022_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2022_solo_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2022_series_seq_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2022_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2022_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_route_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2022_qtr_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2022_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2022_player_fuml_pid_week_year_idx;
@@ -505,7 +505,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2021_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2021_solo_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2021_series_seq_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2021_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2021_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_route_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2021_qtr_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2021_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2021_player_fuml_pid_week_year_idx;
@@ -553,7 +553,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2020_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2020_solo_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2020_series_seq_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2020_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2020_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_route_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2020_qtr_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2020_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2020_player_fuml_pid_week_year_idx;
@@ -601,7 +601,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2019_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2019_solo_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2019_series_seq_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2019_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2019_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_route_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2019_qtr_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2019_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2019_player_fuml_pid_week_year_idx;
@@ -649,7 +649,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2018_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2018_solo_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2018_series_seq_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2018_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2018_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_route_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2018_qtr_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2018_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2018_player_fuml_pid_week_year_idx;
@@ -697,7 +697,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2017_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2017_solo_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2017_series_seq_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2017_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2017_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_route_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2017_qtr_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2017_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2017_player_fuml_pid_week_year_idx;
@@ -745,7 +745,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2016_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2016_solo_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2016_series_seq_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2016_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2016_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_route_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2016_qtr_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2016_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2016_player_fuml_pid_week_year_idx;
@@ -793,7 +793,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2015_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2015_solo_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2015_series_seq_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2015_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2015_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_route_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2015_qtr_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2015_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2015_player_fuml_pid_week_year_idx;
@@ -841,7 +841,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2014_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2014_solo_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2014_series_seq_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2014_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2014_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_route_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2014_qtr_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2014_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2014_player_fuml_pid_week_year_idx;
@@ -889,7 +889,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2013_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2013_solo_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2013_series_seq_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2013_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2013_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_route_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2013_qtr_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2013_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2013_player_fuml_pid_week_year_idx;
@@ -937,7 +937,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2012_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2012_solo_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2012_series_seq_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2012_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2012_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_route_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2012_qtr_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2012_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2012_player_fuml_pid_week_year_idx;
@@ -985,7 +985,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2011_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2011_solo_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2011_series_seq_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2011_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2011_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_route_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2011_qtr_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2011_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2011_player_fuml_pid_week_year_idx;
@@ -1033,7 +1033,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2010_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2010_solo_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2010_series_seq_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2010_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2010_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_route_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2010_qtr_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2010_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2010_player_fuml_pid_week_year_idx;
@@ -1081,7 +1081,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2009_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2009_solo_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2009_series_seq_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2009_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2009_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_route_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2009_qtr_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2009_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2009_player_fuml_pid_week_year_idx;
@@ -1129,7 +1129,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2008_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2008_solo_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2008_series_seq_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2008_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2008_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_route_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2008_qtr_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2008_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2008_player_fuml_pid_week_year_idx;
@@ -1177,7 +1177,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2007_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2007_solo_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2007_series_seq_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2007_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2007_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_route_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2007_qtr_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2007_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2007_player_fuml_pid_week_year_idx;
@@ -1225,7 +1225,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2006_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2006_solo_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2006_series_seq_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2006_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2006_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_route_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2006_qtr_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2006_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2006_player_fuml_pid_week_year_idx;
@@ -1273,7 +1273,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2005_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2005_solo_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2005_series_seq_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2005_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2005_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_route_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2005_qtr_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2005_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2005_player_fuml_pid_week_year_idx;
@@ -1321,7 +1321,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2004_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2004_solo_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2004_series_seq_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2004_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2004_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_route_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2004_qtr_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2004_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2004_player_fuml_pid_week_year_idx;
@@ -1369,7 +1369,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2003_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2003_solo_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2003_series_seq_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2003_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2003_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_route_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2003_qtr_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2003_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2003_player_fuml_pid_week_year_idx;
@@ -1417,7 +1417,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2002_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2002_solo_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2002_series_seq_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2002_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2002_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_route_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2002_qtr_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2002_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2002_player_fuml_pid_week_year_idx;
@@ -1465,7 +1465,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2001_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2001_solo_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2001_series_seq_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2001_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2001_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_route_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2001_qtr_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2001_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2001_player_fuml_pid_week_year_idx;
@@ -1513,7 +1513,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2000_solo_tackle_2_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2000_solo_tackle_1_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2000_series_seq_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2000_seas_type_idx;
-DROP INDEX IF EXISTS public.nfl_plays_year_2000_route_ngs_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_route_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2000_qtr_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2000_psr_pid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2000_player_fuml_pid_week_year_idx;
@@ -2178,6 +2178,7 @@ DROP TYPE IF EXISTS public.nfl_two_point_result;
 DROP TYPE IF EXISTS public.nfl_score_type;
 DROP TYPE IF EXISTS public.nfl_pocket_location;
 DROP TYPE IF EXISTS public.nfl_play_type;
+DROP TYPE IF EXISTS public.nfl_pass_route;
 DROP TYPE IF EXISTS public.nfl_kick_result;
 DROP TYPE IF EXISTS public.nfl_incomplete_pass_type;
 DROP TYPE IF EXISTS public.nfl_games_surf;
@@ -2437,6 +2438,38 @@ CREATE TYPE public.nfl_kick_result AS ENUM (
     'blocked',
     'aborted'
 );
+
+
+--
+-- Name: nfl_pass_route; Type: TYPE; Schema: public; Owner: -
+--
+
+CREATE TYPE public.nfl_pass_route AS ENUM (
+    'GO',
+    'SLANT',
+    'CURL',
+    'OUT',
+    'IN',
+    'CROSS',
+    'POST',
+    'FLAT',
+    'COMEBACK',
+    'SCREEN',
+    'CORNER',
+    'DIG',
+    'HITCH',
+    'SEAM',
+    'WHEEL',
+    'ANGLE',
+    'OTHER'
+);
+
+
+--
+-- Name: TYPE nfl_pass_route; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TYPE public.nfl_pass_route IS 'Standardized pass route types in UPPERCASE. SCREEN represents all screen variations from different data sources.';
 
 
 --
@@ -4678,10 +4711,8 @@ CREATE TABLE public.nfl_plays (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -4710,7 +4741,7 @@ CREATE TABLE public.nfl_plays (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -4836,7 +4867,9 @@ CREATE TABLE public.nfl_plays (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 )
 PARTITION BY RANGE (year);
 
@@ -5392,6 +5425,13 @@ COMMENT ON COLUMN public.nfl_plays.pos_to_rem IS 'Number of timeouts remaining f
 --
 
 COMMENT ON COLUMN public.nfl_plays.def_to_rem IS 'Number of timeouts remaining for the team on defense';
+
+
+--
+-- Name: COLUMN nfl_plays.route; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.route IS 'Pass route type from NGS and Sportradar data. SCREEN includes WR screens and underneath screens from Sportradar.';
 
 
 --
@@ -6119,10 +6159,8 @@ CREATE TABLE public.nfl_plays_year_2000 (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -6151,7 +6189,7 @@ CREATE TABLE public.nfl_plays_year_2000 (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -6277,7 +6315,9 @@ CREATE TABLE public.nfl_plays_year_2000 (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 );
 
 
@@ -6516,10 +6556,8 @@ CREATE TABLE public.nfl_plays_year_2001 (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -6548,7 +6586,7 @@ CREATE TABLE public.nfl_plays_year_2001 (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -6674,7 +6712,9 @@ CREATE TABLE public.nfl_plays_year_2001 (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 );
 
 
@@ -6913,10 +6953,8 @@ CREATE TABLE public.nfl_plays_year_2002 (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -6945,7 +6983,7 @@ CREATE TABLE public.nfl_plays_year_2002 (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -7071,7 +7109,9 @@ CREATE TABLE public.nfl_plays_year_2002 (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 );
 
 
@@ -7310,10 +7350,8 @@ CREATE TABLE public.nfl_plays_year_2003 (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -7342,7 +7380,7 @@ CREATE TABLE public.nfl_plays_year_2003 (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -7468,7 +7506,9 @@ CREATE TABLE public.nfl_plays_year_2003 (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 );
 
 
@@ -7707,10 +7747,8 @@ CREATE TABLE public.nfl_plays_year_2004 (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -7739,7 +7777,7 @@ CREATE TABLE public.nfl_plays_year_2004 (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -7865,7 +7903,9 @@ CREATE TABLE public.nfl_plays_year_2004 (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 );
 
 
@@ -8104,10 +8144,8 @@ CREATE TABLE public.nfl_plays_year_2005 (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -8136,7 +8174,7 @@ CREATE TABLE public.nfl_plays_year_2005 (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -8262,7 +8300,9 @@ CREATE TABLE public.nfl_plays_year_2005 (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 );
 
 
@@ -8501,10 +8541,8 @@ CREATE TABLE public.nfl_plays_year_2006 (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -8533,7 +8571,7 @@ CREATE TABLE public.nfl_plays_year_2006 (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -8659,7 +8697,9 @@ CREATE TABLE public.nfl_plays_year_2006 (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 );
 
 
@@ -8898,10 +8938,8 @@ CREATE TABLE public.nfl_plays_year_2007 (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -8930,7 +8968,7 @@ CREATE TABLE public.nfl_plays_year_2007 (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -9056,7 +9094,9 @@ CREATE TABLE public.nfl_plays_year_2007 (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 );
 
 
@@ -9295,10 +9335,8 @@ CREATE TABLE public.nfl_plays_year_2008 (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -9327,7 +9365,7 @@ CREATE TABLE public.nfl_plays_year_2008 (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -9453,7 +9491,9 @@ CREATE TABLE public.nfl_plays_year_2008 (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 );
 
 
@@ -9692,10 +9732,8 @@ CREATE TABLE public.nfl_plays_year_2009 (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -9724,7 +9762,7 @@ CREATE TABLE public.nfl_plays_year_2009 (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -9850,7 +9888,9 @@ CREATE TABLE public.nfl_plays_year_2009 (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 );
 
 
@@ -10089,10 +10129,8 @@ CREATE TABLE public.nfl_plays_year_2010 (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -10121,7 +10159,7 @@ CREATE TABLE public.nfl_plays_year_2010 (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -10247,7 +10285,9 @@ CREATE TABLE public.nfl_plays_year_2010 (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 );
 
 
@@ -10486,10 +10526,8 @@ CREATE TABLE public.nfl_plays_year_2011 (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -10518,7 +10556,7 @@ CREATE TABLE public.nfl_plays_year_2011 (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -10644,7 +10682,9 @@ CREATE TABLE public.nfl_plays_year_2011 (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 );
 
 
@@ -10883,10 +10923,8 @@ CREATE TABLE public.nfl_plays_year_2012 (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -10915,7 +10953,7 @@ CREATE TABLE public.nfl_plays_year_2012 (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -11041,7 +11079,9 @@ CREATE TABLE public.nfl_plays_year_2012 (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 );
 
 
@@ -11280,10 +11320,8 @@ CREATE TABLE public.nfl_plays_year_2013 (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -11312,7 +11350,7 @@ CREATE TABLE public.nfl_plays_year_2013 (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -11438,7 +11476,9 @@ CREATE TABLE public.nfl_plays_year_2013 (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 );
 
 
@@ -11677,10 +11717,8 @@ CREATE TABLE public.nfl_plays_year_2014 (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -11709,7 +11747,7 @@ CREATE TABLE public.nfl_plays_year_2014 (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -11835,7 +11873,9 @@ CREATE TABLE public.nfl_plays_year_2014 (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 );
 
 
@@ -12074,10 +12114,8 @@ CREATE TABLE public.nfl_plays_year_2015 (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -12106,7 +12144,7 @@ CREATE TABLE public.nfl_plays_year_2015 (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -12232,7 +12270,9 @@ CREATE TABLE public.nfl_plays_year_2015 (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 );
 
 
@@ -12471,10 +12511,8 @@ CREATE TABLE public.nfl_plays_year_2016 (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -12503,7 +12541,7 @@ CREATE TABLE public.nfl_plays_year_2016 (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -12629,7 +12667,9 @@ CREATE TABLE public.nfl_plays_year_2016 (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 );
 
 
@@ -12868,10 +12908,8 @@ CREATE TABLE public.nfl_plays_year_2017 (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -12900,7 +12938,7 @@ CREATE TABLE public.nfl_plays_year_2017 (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -13026,7 +13064,9 @@ CREATE TABLE public.nfl_plays_year_2017 (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 );
 
 
@@ -13265,10 +13305,8 @@ CREATE TABLE public.nfl_plays_year_2018 (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -13297,7 +13335,7 @@ CREATE TABLE public.nfl_plays_year_2018 (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -13423,7 +13461,9 @@ CREATE TABLE public.nfl_plays_year_2018 (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 );
 
 
@@ -13662,10 +13702,8 @@ CREATE TABLE public.nfl_plays_year_2019 (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -13694,7 +13732,7 @@ CREATE TABLE public.nfl_plays_year_2019 (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -13820,7 +13858,9 @@ CREATE TABLE public.nfl_plays_year_2019 (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 );
 
 
@@ -14059,10 +14099,8 @@ CREATE TABLE public.nfl_plays_year_2020 (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -14091,7 +14129,7 @@ CREATE TABLE public.nfl_plays_year_2020 (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -14217,7 +14255,9 @@ CREATE TABLE public.nfl_plays_year_2020 (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 );
 
 
@@ -14456,10 +14496,8 @@ CREATE TABLE public.nfl_plays_year_2021 (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -14488,7 +14526,7 @@ CREATE TABLE public.nfl_plays_year_2021 (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -14614,7 +14652,9 @@ CREATE TABLE public.nfl_plays_year_2021 (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 );
 
 
@@ -14853,10 +14893,8 @@ CREATE TABLE public.nfl_plays_year_2022 (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -14885,7 +14923,7 @@ CREATE TABLE public.nfl_plays_year_2022 (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -15011,7 +15049,9 @@ CREATE TABLE public.nfl_plays_year_2022 (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 );
 
 
@@ -15250,10 +15290,8 @@ CREATE TABLE public.nfl_plays_year_2023 (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -15282,7 +15320,7 @@ CREATE TABLE public.nfl_plays_year_2023 (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -15408,7 +15446,9 @@ CREATE TABLE public.nfl_plays_year_2023 (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 );
 
 
@@ -15647,10 +15687,8 @@ CREATE TABLE public.nfl_plays_year_2024 (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -15679,7 +15717,7 @@ CREATE TABLE public.nfl_plays_year_2024 (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -15805,7 +15843,9 @@ CREATE TABLE public.nfl_plays_year_2024 (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 );
 
 
@@ -16044,10 +16084,8 @@ CREATE TABLE public.nfl_plays_year_2025 (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -16076,7 +16114,7 @@ CREATE TABLE public.nfl_plays_year_2025 (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -16202,7 +16240,9 @@ CREATE TABLE public.nfl_plays_year_2025 (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 );
 
 
@@ -16441,10 +16481,8 @@ CREATE TABLE public.nfl_plays_year_2026 (
     fg_att boolean,
     kickoff_att boolean,
     punt_att boolean,
-    fg_result character varying(10),
     kick_distance integer,
     ep_result public.nfl_kick_result,
-    tp_result character varying(10),
     punt_blocked boolean,
     home_to_rem smallint,
     away_to_rem smallint,
@@ -16473,7 +16511,7 @@ CREATE TABLE public.nfl_plays_year_2026 (
     cpoe numeric(16,12),
     air_yards numeric(8,4),
     time_to_throw numeric(8,4),
-    route character varying(100),
+    route public.nfl_pass_route,
     man_zone character varying(100),
     cov_type character varying(100),
     qb_pressure_tracking boolean,
@@ -16599,7 +16637,9 @@ CREATE TABLE public.nfl_plays_year_2026 (
     right_tightends smallint,
     fake_punt boolean,
     fake_field_goal boolean,
-    blitz boolean
+    blitz boolean,
+    fg_result public.nfl_kick_result,
+    tp_result public.nfl_two_point_result
 );
 
 
@@ -17266,7 +17306,6 @@ CREATE TABLE public.pff_player_seasonlogs (
     slug character varying(100),
     coverage_snaps smallint,
     punter_rank smallint,
-    age numeric(3,1),
     pass_rush numeric(4,1),
     punter numeric(4,1),
     unit character varying(20),
@@ -17279,7 +17318,6 @@ CREATE TABLE public.pff_player_seasonlogs (
     draft_selection smallint,
     draft_type character varying(20),
     offense_ranked smallint,
-    jersey_number character varying(3),
     "position" character varying(5),
     defense_snaps smallint,
     pass_snaps smallint,
@@ -17298,15 +17336,11 @@ CREATE TABLE public.pff_player_seasonlogs (
     pff_id integer,
     run_defense numeric(4,1),
     special_teams_rank smallint,
-    franchise_id smallint,
     run_snaps smallint,
-    team_slug character varying(50),
     meets_snap_minimum boolean,
     kickoff_kicker numeric(4,1),
-    status character(10),
     pass numeric(4,1),
     receiving_snaps smallint,
-    team_name character varying(3),
     weight smallint,
     overall_snaps smallint,
     offense_rank smallint
@@ -27151,10 +27185,10 @@ CREATE INDEX nfl_plays_year_2000_qtr_idx ON public.nfl_plays_year_2000 USING btr
 
 
 --
--- Name: nfl_plays_year_2000_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_year_2000_route_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2000_route_ngs_idx ON public.nfl_plays_year_2000 USING btree (route);
+CREATE INDEX nfl_plays_year_2000_route_idx ON public.nfl_plays_year_2000 USING btree (route);
 
 
 --
@@ -27487,10 +27521,10 @@ CREATE INDEX nfl_plays_year_2001_qtr_idx ON public.nfl_plays_year_2001 USING btr
 
 
 --
--- Name: nfl_plays_year_2001_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_year_2001_route_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2001_route_ngs_idx ON public.nfl_plays_year_2001 USING btree (route);
+CREATE INDEX nfl_plays_year_2001_route_idx ON public.nfl_plays_year_2001 USING btree (route);
 
 
 --
@@ -27823,10 +27857,10 @@ CREATE INDEX nfl_plays_year_2002_qtr_idx ON public.nfl_plays_year_2002 USING btr
 
 
 --
--- Name: nfl_plays_year_2002_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_year_2002_route_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2002_route_ngs_idx ON public.nfl_plays_year_2002 USING btree (route);
+CREATE INDEX nfl_plays_year_2002_route_idx ON public.nfl_plays_year_2002 USING btree (route);
 
 
 --
@@ -28159,10 +28193,10 @@ CREATE INDEX nfl_plays_year_2003_qtr_idx ON public.nfl_plays_year_2003 USING btr
 
 
 --
--- Name: nfl_plays_year_2003_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_year_2003_route_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2003_route_ngs_idx ON public.nfl_plays_year_2003 USING btree (route);
+CREATE INDEX nfl_plays_year_2003_route_idx ON public.nfl_plays_year_2003 USING btree (route);
 
 
 --
@@ -28495,10 +28529,10 @@ CREATE INDEX nfl_plays_year_2004_qtr_idx ON public.nfl_plays_year_2004 USING btr
 
 
 --
--- Name: nfl_plays_year_2004_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_year_2004_route_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2004_route_ngs_idx ON public.nfl_plays_year_2004 USING btree (route);
+CREATE INDEX nfl_plays_year_2004_route_idx ON public.nfl_plays_year_2004 USING btree (route);
 
 
 --
@@ -28831,10 +28865,10 @@ CREATE INDEX nfl_plays_year_2005_qtr_idx ON public.nfl_plays_year_2005 USING btr
 
 
 --
--- Name: nfl_plays_year_2005_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_year_2005_route_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2005_route_ngs_idx ON public.nfl_plays_year_2005 USING btree (route);
+CREATE INDEX nfl_plays_year_2005_route_idx ON public.nfl_plays_year_2005 USING btree (route);
 
 
 --
@@ -29167,10 +29201,10 @@ CREATE INDEX nfl_plays_year_2006_qtr_idx ON public.nfl_plays_year_2006 USING btr
 
 
 --
--- Name: nfl_plays_year_2006_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_year_2006_route_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2006_route_ngs_idx ON public.nfl_plays_year_2006 USING btree (route);
+CREATE INDEX nfl_plays_year_2006_route_idx ON public.nfl_plays_year_2006 USING btree (route);
 
 
 --
@@ -29503,10 +29537,10 @@ CREATE INDEX nfl_plays_year_2007_qtr_idx ON public.nfl_plays_year_2007 USING btr
 
 
 --
--- Name: nfl_plays_year_2007_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_year_2007_route_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2007_route_ngs_idx ON public.nfl_plays_year_2007 USING btree (route);
+CREATE INDEX nfl_plays_year_2007_route_idx ON public.nfl_plays_year_2007 USING btree (route);
 
 
 --
@@ -29839,10 +29873,10 @@ CREATE INDEX nfl_plays_year_2008_qtr_idx ON public.nfl_plays_year_2008 USING btr
 
 
 --
--- Name: nfl_plays_year_2008_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_year_2008_route_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2008_route_ngs_idx ON public.nfl_plays_year_2008 USING btree (route);
+CREATE INDEX nfl_plays_year_2008_route_idx ON public.nfl_plays_year_2008 USING btree (route);
 
 
 --
@@ -30175,10 +30209,10 @@ CREATE INDEX nfl_plays_year_2009_qtr_idx ON public.nfl_plays_year_2009 USING btr
 
 
 --
--- Name: nfl_plays_year_2009_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_year_2009_route_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2009_route_ngs_idx ON public.nfl_plays_year_2009 USING btree (route);
+CREATE INDEX nfl_plays_year_2009_route_idx ON public.nfl_plays_year_2009 USING btree (route);
 
 
 --
@@ -30511,10 +30545,10 @@ CREATE INDEX nfl_plays_year_2010_qtr_idx ON public.nfl_plays_year_2010 USING btr
 
 
 --
--- Name: nfl_plays_year_2010_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_year_2010_route_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2010_route_ngs_idx ON public.nfl_plays_year_2010 USING btree (route);
+CREATE INDEX nfl_plays_year_2010_route_idx ON public.nfl_plays_year_2010 USING btree (route);
 
 
 --
@@ -30847,10 +30881,10 @@ CREATE INDEX nfl_plays_year_2011_qtr_idx ON public.nfl_plays_year_2011 USING btr
 
 
 --
--- Name: nfl_plays_year_2011_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_year_2011_route_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2011_route_ngs_idx ON public.nfl_plays_year_2011 USING btree (route);
+CREATE INDEX nfl_plays_year_2011_route_idx ON public.nfl_plays_year_2011 USING btree (route);
 
 
 --
@@ -31183,10 +31217,10 @@ CREATE INDEX nfl_plays_year_2012_qtr_idx ON public.nfl_plays_year_2012 USING btr
 
 
 --
--- Name: nfl_plays_year_2012_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_year_2012_route_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2012_route_ngs_idx ON public.nfl_plays_year_2012 USING btree (route);
+CREATE INDEX nfl_plays_year_2012_route_idx ON public.nfl_plays_year_2012 USING btree (route);
 
 
 --
@@ -31519,10 +31553,10 @@ CREATE INDEX nfl_plays_year_2013_qtr_idx ON public.nfl_plays_year_2013 USING btr
 
 
 --
--- Name: nfl_plays_year_2013_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_year_2013_route_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2013_route_ngs_idx ON public.nfl_plays_year_2013 USING btree (route);
+CREATE INDEX nfl_plays_year_2013_route_idx ON public.nfl_plays_year_2013 USING btree (route);
 
 
 --
@@ -31855,10 +31889,10 @@ CREATE INDEX nfl_plays_year_2014_qtr_idx ON public.nfl_plays_year_2014 USING btr
 
 
 --
--- Name: nfl_plays_year_2014_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_year_2014_route_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2014_route_ngs_idx ON public.nfl_plays_year_2014 USING btree (route);
+CREATE INDEX nfl_plays_year_2014_route_idx ON public.nfl_plays_year_2014 USING btree (route);
 
 
 --
@@ -32191,10 +32225,10 @@ CREATE INDEX nfl_plays_year_2015_qtr_idx ON public.nfl_plays_year_2015 USING btr
 
 
 --
--- Name: nfl_plays_year_2015_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_year_2015_route_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2015_route_ngs_idx ON public.nfl_plays_year_2015 USING btree (route);
+CREATE INDEX nfl_plays_year_2015_route_idx ON public.nfl_plays_year_2015 USING btree (route);
 
 
 --
@@ -32527,10 +32561,10 @@ CREATE INDEX nfl_plays_year_2016_qtr_idx ON public.nfl_plays_year_2016 USING btr
 
 
 --
--- Name: nfl_plays_year_2016_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_year_2016_route_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2016_route_ngs_idx ON public.nfl_plays_year_2016 USING btree (route);
+CREATE INDEX nfl_plays_year_2016_route_idx ON public.nfl_plays_year_2016 USING btree (route);
 
 
 --
@@ -32863,10 +32897,10 @@ CREATE INDEX nfl_plays_year_2017_qtr_idx ON public.nfl_plays_year_2017 USING btr
 
 
 --
--- Name: nfl_plays_year_2017_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_year_2017_route_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2017_route_ngs_idx ON public.nfl_plays_year_2017 USING btree (route);
+CREATE INDEX nfl_plays_year_2017_route_idx ON public.nfl_plays_year_2017 USING btree (route);
 
 
 --
@@ -33199,10 +33233,10 @@ CREATE INDEX nfl_plays_year_2018_qtr_idx ON public.nfl_plays_year_2018 USING btr
 
 
 --
--- Name: nfl_plays_year_2018_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_year_2018_route_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2018_route_ngs_idx ON public.nfl_plays_year_2018 USING btree (route);
+CREATE INDEX nfl_plays_year_2018_route_idx ON public.nfl_plays_year_2018 USING btree (route);
 
 
 --
@@ -33535,10 +33569,10 @@ CREATE INDEX nfl_plays_year_2019_qtr_idx ON public.nfl_plays_year_2019 USING btr
 
 
 --
--- Name: nfl_plays_year_2019_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_year_2019_route_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2019_route_ngs_idx ON public.nfl_plays_year_2019 USING btree (route);
+CREATE INDEX nfl_plays_year_2019_route_idx ON public.nfl_plays_year_2019 USING btree (route);
 
 
 --
@@ -33871,10 +33905,10 @@ CREATE INDEX nfl_plays_year_2020_qtr_idx ON public.nfl_plays_year_2020 USING btr
 
 
 --
--- Name: nfl_plays_year_2020_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_year_2020_route_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2020_route_ngs_idx ON public.nfl_plays_year_2020 USING btree (route);
+CREATE INDEX nfl_plays_year_2020_route_idx ON public.nfl_plays_year_2020 USING btree (route);
 
 
 --
@@ -34207,10 +34241,10 @@ CREATE INDEX nfl_plays_year_2021_qtr_idx ON public.nfl_plays_year_2021 USING btr
 
 
 --
--- Name: nfl_plays_year_2021_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_year_2021_route_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2021_route_ngs_idx ON public.nfl_plays_year_2021 USING btree (route);
+CREATE INDEX nfl_plays_year_2021_route_idx ON public.nfl_plays_year_2021 USING btree (route);
 
 
 --
@@ -34543,10 +34577,10 @@ CREATE INDEX nfl_plays_year_2022_qtr_idx ON public.nfl_plays_year_2022 USING btr
 
 
 --
--- Name: nfl_plays_year_2022_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_year_2022_route_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2022_route_ngs_idx ON public.nfl_plays_year_2022 USING btree (route);
+CREATE INDEX nfl_plays_year_2022_route_idx ON public.nfl_plays_year_2022 USING btree (route);
 
 
 --
@@ -34879,10 +34913,10 @@ CREATE INDEX nfl_plays_year_2023_qtr_idx ON public.nfl_plays_year_2023 USING btr
 
 
 --
--- Name: nfl_plays_year_2023_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_year_2023_route_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2023_route_ngs_idx ON public.nfl_plays_year_2023 USING btree (route);
+CREATE INDEX nfl_plays_year_2023_route_idx ON public.nfl_plays_year_2023 USING btree (route);
 
 
 --
@@ -35215,10 +35249,10 @@ CREATE INDEX nfl_plays_year_2024_qtr_idx ON public.nfl_plays_year_2024 USING btr
 
 
 --
--- Name: nfl_plays_year_2024_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_year_2024_route_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2024_route_ngs_idx ON public.nfl_plays_year_2024 USING btree (route);
+CREATE INDEX nfl_plays_year_2024_route_idx ON public.nfl_plays_year_2024 USING btree (route);
 
 
 --
@@ -35551,10 +35585,10 @@ CREATE INDEX nfl_plays_year_2025_qtr_idx ON public.nfl_plays_year_2025 USING btr
 
 
 --
--- Name: nfl_plays_year_2025_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_year_2025_route_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2025_route_ngs_idx ON public.nfl_plays_year_2025 USING btree (route);
+CREATE INDEX nfl_plays_year_2025_route_idx ON public.nfl_plays_year_2025 USING btree (route);
 
 
 --
@@ -35887,10 +35921,10 @@ CREATE INDEX nfl_plays_year_2026_qtr_idx ON public.nfl_plays_year_2026 USING btr
 
 
 --
--- Name: nfl_plays_year_2026_route_ngs_idx; Type: INDEX; Schema: public; Owner: -
+-- Name: nfl_plays_year_2026_route_idx; Type: INDEX; Schema: public; Owner: -
 --
 
-CREATE INDEX nfl_plays_year_2026_route_ngs_idx ON public.nfl_plays_year_2026 USING btree (route);
+CREATE INDEX nfl_plays_year_2026_route_idx ON public.nfl_plays_year_2026 USING btree (route);
 
 
 --
@@ -37728,10 +37762,10 @@ ALTER INDEX public.idx_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2000
 
 
 --
--- Name: nfl_plays_year_2000_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: nfl_plays_year_2000_route_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2000_route_ngs_idx;
+ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2000_route_idx;
 
 
 --
@@ -38064,10 +38098,10 @@ ALTER INDEX public.idx_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2001
 
 
 --
--- Name: nfl_plays_year_2001_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: nfl_plays_year_2001_route_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2001_route_ngs_idx;
+ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2001_route_idx;
 
 
 --
@@ -38400,10 +38434,10 @@ ALTER INDEX public.idx_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2002
 
 
 --
--- Name: nfl_plays_year_2002_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: nfl_plays_year_2002_route_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2002_route_ngs_idx;
+ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2002_route_idx;
 
 
 --
@@ -38736,10 +38770,10 @@ ALTER INDEX public.idx_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2003
 
 
 --
--- Name: nfl_plays_year_2003_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: nfl_plays_year_2003_route_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2003_route_ngs_idx;
+ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2003_route_idx;
 
 
 --
@@ -39072,10 +39106,10 @@ ALTER INDEX public.idx_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2004
 
 
 --
--- Name: nfl_plays_year_2004_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: nfl_plays_year_2004_route_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2004_route_ngs_idx;
+ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2004_route_idx;
 
 
 --
@@ -39408,10 +39442,10 @@ ALTER INDEX public.idx_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2005
 
 
 --
--- Name: nfl_plays_year_2005_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: nfl_plays_year_2005_route_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2005_route_ngs_idx;
+ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2005_route_idx;
 
 
 --
@@ -39744,10 +39778,10 @@ ALTER INDEX public.idx_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2006
 
 
 --
--- Name: nfl_plays_year_2006_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: nfl_plays_year_2006_route_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2006_route_ngs_idx;
+ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2006_route_idx;
 
 
 --
@@ -40080,10 +40114,10 @@ ALTER INDEX public.idx_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2007
 
 
 --
--- Name: nfl_plays_year_2007_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: nfl_plays_year_2007_route_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2007_route_ngs_idx;
+ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2007_route_idx;
 
 
 --
@@ -40416,10 +40450,10 @@ ALTER INDEX public.idx_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2008
 
 
 --
--- Name: nfl_plays_year_2008_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: nfl_plays_year_2008_route_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2008_route_ngs_idx;
+ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2008_route_idx;
 
 
 --
@@ -40752,10 +40786,10 @@ ALTER INDEX public.idx_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2009
 
 
 --
--- Name: nfl_plays_year_2009_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: nfl_plays_year_2009_route_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2009_route_ngs_idx;
+ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2009_route_idx;
 
 
 --
@@ -41088,10 +41122,10 @@ ALTER INDEX public.idx_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2010
 
 
 --
--- Name: nfl_plays_year_2010_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: nfl_plays_year_2010_route_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2010_route_ngs_idx;
+ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2010_route_idx;
 
 
 --
@@ -41424,10 +41458,10 @@ ALTER INDEX public.idx_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2011
 
 
 --
--- Name: nfl_plays_year_2011_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: nfl_plays_year_2011_route_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2011_route_ngs_idx;
+ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2011_route_idx;
 
 
 --
@@ -41760,10 +41794,10 @@ ALTER INDEX public.idx_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2012
 
 
 --
--- Name: nfl_plays_year_2012_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: nfl_plays_year_2012_route_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2012_route_ngs_idx;
+ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2012_route_idx;
 
 
 --
@@ -42096,10 +42130,10 @@ ALTER INDEX public.idx_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2013
 
 
 --
--- Name: nfl_plays_year_2013_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: nfl_plays_year_2013_route_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2013_route_ngs_idx;
+ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2013_route_idx;
 
 
 --
@@ -42432,10 +42466,10 @@ ALTER INDEX public.idx_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2014
 
 
 --
--- Name: nfl_plays_year_2014_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: nfl_plays_year_2014_route_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2014_route_ngs_idx;
+ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2014_route_idx;
 
 
 --
@@ -42768,10 +42802,10 @@ ALTER INDEX public.idx_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2015
 
 
 --
--- Name: nfl_plays_year_2015_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: nfl_plays_year_2015_route_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2015_route_ngs_idx;
+ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2015_route_idx;
 
 
 --
@@ -43104,10 +43138,10 @@ ALTER INDEX public.idx_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2016
 
 
 --
--- Name: nfl_plays_year_2016_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: nfl_plays_year_2016_route_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2016_route_ngs_idx;
+ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2016_route_idx;
 
 
 --
@@ -43440,10 +43474,10 @@ ALTER INDEX public.idx_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2017
 
 
 --
--- Name: nfl_plays_year_2017_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: nfl_plays_year_2017_route_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2017_route_ngs_idx;
+ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2017_route_idx;
 
 
 --
@@ -43776,10 +43810,10 @@ ALTER INDEX public.idx_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2018
 
 
 --
--- Name: nfl_plays_year_2018_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: nfl_plays_year_2018_route_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2018_route_ngs_idx;
+ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2018_route_idx;
 
 
 --
@@ -44112,10 +44146,10 @@ ALTER INDEX public.idx_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2019
 
 
 --
--- Name: nfl_plays_year_2019_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: nfl_plays_year_2019_route_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2019_route_ngs_idx;
+ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2019_route_idx;
 
 
 --
@@ -44448,10 +44482,10 @@ ALTER INDEX public.idx_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2020
 
 
 --
--- Name: nfl_plays_year_2020_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: nfl_plays_year_2020_route_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2020_route_ngs_idx;
+ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2020_route_idx;
 
 
 --
@@ -44784,10 +44818,10 @@ ALTER INDEX public.idx_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2021
 
 
 --
--- Name: nfl_plays_year_2021_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: nfl_plays_year_2021_route_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2021_route_ngs_idx;
+ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2021_route_idx;
 
 
 --
@@ -45120,10 +45154,10 @@ ALTER INDEX public.idx_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2022
 
 
 --
--- Name: nfl_plays_year_2022_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: nfl_plays_year_2022_route_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2022_route_ngs_idx;
+ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2022_route_idx;
 
 
 --
@@ -45456,10 +45490,10 @@ ALTER INDEX public.idx_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2023
 
 
 --
--- Name: nfl_plays_year_2023_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: nfl_plays_year_2023_route_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2023_route_ngs_idx;
+ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2023_route_idx;
 
 
 --
@@ -45792,10 +45826,10 @@ ALTER INDEX public.idx_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2024
 
 
 --
--- Name: nfl_plays_year_2024_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: nfl_plays_year_2024_route_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2024_route_ngs_idx;
+ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2024_route_idx;
 
 
 --
@@ -46128,10 +46162,10 @@ ALTER INDEX public.idx_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2025
 
 
 --
--- Name: nfl_plays_year_2025_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: nfl_plays_year_2025_route_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2025_route_ngs_idx;
+ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2025_route_idx;
 
 
 --
@@ -46464,10 +46498,10 @@ ALTER INDEX public.idx_nfl_plays_qtr ATTACH PARTITION public.nfl_plays_year_2026
 
 
 --
--- Name: nfl_plays_year_2026_route_ngs_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+-- Name: nfl_plays_year_2026_route_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
-ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2026_route_ngs_idx;
+ALTER INDEX public.idx_nfl_plays_route_ngs ATTACH PARTITION public.nfl_plays_year_2026_route_idx;
 
 
 --

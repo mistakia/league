@@ -67,7 +67,6 @@ export default {
     create_field_from_pff_player_seasonlogs('coverage_snaps'),
   player_pff_punter_rank:
     create_field_from_pff_player_seasonlogs('punter_rank'),
-  player_pff_age: create_field_from_pff_player_seasonlogs('age'),
   player_pff_pass_rush: create_field_from_pff_player_seasonlogs('pass_rush'),
   player_pff_punter: create_field_from_pff_player_seasonlogs('punter'),
   player_pff_unit: create_field_from_pff_player_seasonlogs('unit'),
@@ -76,8 +75,6 @@ export default {
     create_field_from_pff_player_seasonlogs('run_block_snaps'),
   player_pff_offense_ranked:
     create_field_from_pff_player_seasonlogs('offense_ranked'),
-  player_pff_jersey_number:
-    create_field_from_pff_player_seasonlogs('jersey_number'),
   player_pff_position: create_field_from_pff_player_seasonlogs('position'),
   player_pff_defense_snaps:
     create_field_from_pff_player_seasonlogs('defense_snaps'),
@@ -104,7 +101,6 @@ export default {
     create_field_from_pff_player_seasonlogs('meets_snap_minimum'),
   player_pff_kickoff_kicker:
     create_field_from_pff_player_seasonlogs('kickoff_kicker'),
-  player_pff_status: create_field_from_pff_player_seasonlogs('status'),
   player_pff_pass: create_field_from_pff_player_seasonlogs('pass'),
   player_pff_receiving_snaps:
     create_field_from_pff_player_seasonlogs('receiving_snaps'),
