@@ -455,13 +455,19 @@ const build_match_criteria = (esbid, formatted_play, item) => {
     qtr: formatted_play.qtr,
     dwn: formatted_play.dwn,
     yards_to_go: formatted_play.yards_to_go,
-    play_type: formatted_play.play_type,
     ydl_100: formatted_play.ydl_100,
     // Always include off/def in match criteria - the play cache will handle null matching
     // For timeouts and game state plays, nflfastR has null off/def but database has team assignments
     // The _matches_team_field function returns true when filter_value is null/undefined
     off: formatted_play.off,
     def: formatted_play.def
+  }
+
+  // For reversed plays, don't use play_type in match criteria
+  // The database has play_type=null for these plays until they're enriched with nflfastR data
+  // We'll match on other criteria (context + description) and then update the play_type
+  if (!item._is_reversed_play) {
+    match_criteria.play_type = formatted_play.play_type
   }
 
   // Use time-based matching for most plays to prevent context collisions
@@ -486,11 +492,15 @@ const build_match_criteria = (esbid, formatted_play, item) => {
     // tolerance causes them to match each other incorrectly. With exact time + team
     // matching, we can precisely identify which timeout is which.
     // nflfastR provides timeout_team which maps to to_team in the database.
-    if (formatted_play.play_type === 'NOPL' && formatted_play.to && formatted_play.to_team) {
-      match_criteria.sec_rem_qtr_tolerance = 0  // Exact time match for team timeouts
-      match_criteria.to_team = formatted_play.to_team  // Include team in criteria
+    if (
+      formatted_play.play_type === 'NOPL' &&
+      formatted_play.to &&
+      formatted_play.to_team
+    ) {
+      match_criteria.sec_rem_qtr_tolerance = 0 // Exact time match for team timeouts
+      match_criteria.to_team = formatted_play.to_team // Include team in criteria
     } else {
-      match_criteria.sec_rem_qtr_tolerance = TIME_MATCH_TOLERANCE_SECONDS  // 5s for others
+      match_criteria.sec_rem_qtr_tolerance = TIME_MATCH_TOLERANCE_SECONDS // 5s for others
     }
   }
 
@@ -500,12 +510,13 @@ const build_match_criteria = (esbid, formatted_play, item) => {
   // They should not match with timeouts or other plays that occur within the 5-second
   // tolerance window. Use exact time matching (0s tolerance) and description matching
   // for precise identification.
-  const is_end_marker = formatted_play.play_type === 'NOPL' &&
-                        (item.desc?.includes('END QUARTER') || item.desc === 'END GAME')
+  const is_end_marker =
+    formatted_play.play_type === 'NOPL' &&
+    (item.desc?.includes('END QUARTER') || item.desc === 'END GAME')
 
   if (is_end_marker) {
-    match_criteria.sec_rem_qtr_tolerance = 0  // Exact time match
-    match_criteria.desc_contains = item.desc  // Match on description
+    match_criteria.sec_rem_qtr_tolerance = 0 // Exact time match
+    match_criteria.desc_contains = item.desc // Match on description
   }
 
   // Special handling for game suspension and resumption events
@@ -528,17 +539,22 @@ const build_match_criteria = (esbid, formatted_play, item) => {
   // Key distinction: Administrative markers start with the suspension/resumption phrase,
   // while false positives have the phrase embedded later in the description.
   const desc_lower = item.desc?.toLowerCase() || ''
-  const is_suspension = desc_lower.startsWith('the game has been suspended') ||
-                        (desc_lower.startsWith('game suspended') && !desc_lower.startsWith('game temporarily'))
-  const is_resumption = desc_lower.startsWith('the game has resumed') ||
-                        desc_lower.startsWith('play resumed at')
+  const is_suspension =
+    desc_lower.startsWith('the game has been suspended') ||
+    (desc_lower.startsWith('game suspended') &&
+      !desc_lower.startsWith('game temporarily'))
+  const is_resumption =
+    desc_lower.startsWith('the game has resumed') ||
+    desc_lower.startsWith('play resumed at')
 
   if (is_suspension || is_resumption) {
     // Remove time-based matching since these events have null sec_rem_qtr
     delete match_criteria.sec_rem_qtr
     delete match_criteria.sec_rem_qtr_tolerance
     // Use description pattern matching to uniquely identify the event
-    match_criteria.desc_contains = is_suspension ? 'game has been suspended' : 'game has resumed'
+    match_criteria.desc_contains = is_suspension
+      ? 'game has been suspended'
+      : 'game has resumed'
   }
 
   return match_criteria
@@ -567,6 +583,36 @@ const is_data_available = (year) => {
   }
 
   return true
+}
+
+/**
+ * Pre-process play descriptions to handle reversed plays
+ * When a play is reversed by replay review, both nflfastR and the database include
+ * the full description with the "REVERSED" marker. However, the database has play_type=null
+ * for these plays since they haven't been enriched yet. We mark these plays so that
+ * matching logic can skip play_type comparison.
+ */
+const preprocess_reversed_plays = (data) => {
+  const REVERSED_MARKER = ' was REVERSED. '
+  let reversed_count = 0
+
+  for (const play of data) {
+    if (play.desc && play.desc.includes(REVERSED_MARKER)) {
+      // Mark this play as reversed so matching logic can handle it specially
+      play._is_reversed_play = true
+      reversed_count++
+
+      log(`Reversed play detected:`)
+      log(`  Game: ${play.game_id} | Play: ${play.play_id}`)
+      log(`  Will match without play_type requirement (DB has play_type=null)`)
+    }
+  }
+
+  if (reversed_count > 0) {
+    log(`Pre-processed ${reversed_count} reversed play(s)`)
+  }
+
+  return data
 }
 
 /**
@@ -696,6 +742,9 @@ const run = async ({
       return
     }
   }
+
+  // Pre-process reversed plays before matching
+  data = preprocess_reversed_plays(data)
 
   // Preload plays into cache for efficient contextual matching
   log(`Preloading plays for year ${year}...`)
