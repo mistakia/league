@@ -1024,22 +1024,36 @@ const import_dvoa_sheets = async ({ dry_run = false, filepath } = {}) => {
       )
       return
     } else {
-      // Calculate which month we're in (assuming 4 weeks per month)
-      const months_since_season_start = Math.floor((nfl_week - 1) / 4)
-      const week_in_month = ((nfl_week - 1) % 4) + 1
+      // Calculate which Tuesday of the month we're on
+      // NFL weeks start on Tuesday, so we count Tuesdays in the current month
+      const tuesday_of_week = constants.season.regular_season_start
+        .add(nfl_week, 'weeks')
+      const first_of_month = tuesday_of_week.startOf('month')
+
+      // Count how many Tuesdays have occurred up to and including this week
+      let week_in_month = 0
+      let current = first_of_month
+      while (current.isSameOrBefore(tuesday_of_week, 'day')) {
+        if (current.day() === 2) { // Tuesday
+          week_in_month++
+        }
+        current = current.add(1, 'day')
+      }
+
+      // Calculate months since season start for display
+      const months_since_season_start = tuesday_of_week.diff(
+        constants.season.regular_season_start.startOf('month'),
+        'months'
+      )
 
       if (months_since_season_start === 0) {
         // First month: version based on NFL week
         // NFL week 3 = version 1, NFL week 4 = version 2, etc.
         version_number = nfl_week - 2
       } else {
-        // Subsequent months: version based on week within the month
-        // Week 1-2 of month = version 0, week 3 = version 1, week 4 = version 2
-        if (week_in_month <= 2) {
-          version_number = 0 // Use base URL for first 2 weeks of month
-        } else {
-          version_number = week_in_month - 2 // Week 3 = version 1, Week 4 = version 2
-        }
+        // Subsequent months: version count starts at 0 for the month, increments with each week
+        // Week 1 = version 1, Week 2 = version 2, Week 3 = version 3, Week 4 = version 4
+        version_number = week_in_month
       }
 
       log(
