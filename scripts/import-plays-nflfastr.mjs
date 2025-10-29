@@ -196,14 +196,14 @@ const format_play_type = (
 // ============================================================================
 
 const format_play_context = (play) => {
-  const dwn = format_number(play.down)
+  const dwn_raw = format_number(play.down)
   const yards_to_go_raw = format_number(play.ydstogo)
 
   // For plays without downs (timeouts, kickoffs, extra points, etc.),
-  // nflfastR may have yards_to_go=0, but database has null.
-  // Convert 0 to null when there's no down.
-  const yards_to_go =
-    dwn === null && yards_to_go_raw === 0 ? null : yards_to_go_raw
+  // nflfastR may have down=0 and yards_to_go=0, but database expects null.
+  // Convert 0 to null for both fields to maintain consistency with NFL v1 and database schema.
+  const dwn = dwn_raw === 0 ? null : dwn_raw
+  const yards_to_go = yards_to_go_raw === 0 ? null : yards_to_go_raw
 
   return {
     qtr: format_number(play.qtr),
