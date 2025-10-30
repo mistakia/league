@@ -2,6 +2,7 @@ import debug from 'debug'
 
 import { enrich_team_assignments } from './team-assignment-enrichment.mjs'
 import { enrich_play_types } from './play-type-enrichment.mjs'
+import { enrich_qb_plays } from './qb-play-enrichment.mjs'
 import { enrich_play_success } from './success-metric-enrichment.mjs'
 import { enrich_player_identifications } from './player-identification-enrichment.mjs'
 import { enrich_yardage_stats } from './yardage-stat-enrichment.mjs'
@@ -34,6 +35,7 @@ export const enrich_plays = async ({
   const {
     teams = true,
     play_types = true,
+    qb_plays = true,
     success = true,
     players = true
   } = options
@@ -72,7 +74,16 @@ export const enrich_plays = async ({
       }
     }
 
-    // Phase 3: Success metrics
+    // Phase 3: QB play detection (kneels, spikes)
+    if (qb_plays) {
+      try {
+        enriched_plays = enrich_qb_plays(enriched_plays)
+      } catch (error) {
+        log(`QB play enrichment failed: ${error.message}`)
+      }
+    }
+
+    // Phase 4: Success metrics
     if (success) {
       try {
         enriched_plays = enrich_play_success(enriched_plays)
@@ -81,7 +92,7 @@ export const enrich_plays = async ({
       }
     }
 
-    // Phase 4: Yardage statistics from play_stats (always enabled)
+    // Phase 5: Yardage statistics from play_stats (always enabled)
     if (play_stats.length > 0) {
       try {
         enriched_plays = enrich_yardage_stats(enriched_plays, play_stats)
@@ -90,7 +101,7 @@ export const enrich_plays = async ({
       }
     }
 
-    // Phase 5: Player identifications
+    // Phase 6: Player identifications
     if (players && play_stats.length > 0 && player_cache) {
       try {
         enriched_plays = enrich_player_identifications(

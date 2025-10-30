@@ -415,6 +415,8 @@ const importPlaysForWeek = async ({
         off: play.off,
         def: play.def,
         play_type: play.play_type,
+        qb_kneel: play.qb_kneel,
+        qb_spike: play.qb_spike,
         bc_pid: play.bc_pid,
         psr_pid: play.psr_pid,
         trg_pid: play.trg_pid
