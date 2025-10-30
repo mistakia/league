@@ -1,6 +1,8 @@
 import { constants, isReserveEligible, isReserveCovEligible } from './index.mjs'
 
-export default function get_reserve_eligibility_from_player_map({ player_map }) {
+export default function get_reserve_eligibility_from_player_map({
+  player_map
+}) {
   const result = {
     reserve_short_term_eligible: false,
     cov: false
@@ -35,5 +37,3 @@ export default function get_reserve_eligibility_from_player_map({ player_map }) 
 
   return result
 }
-
-
