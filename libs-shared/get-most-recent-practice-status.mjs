@@ -7,7 +7,7 @@
  *
  * @param {Object} params - The parameters object
  * @param {Object} params.practice - Practice object with day-of-week properties
- * @param {string|null} params.practice.m - Monday practice status (FULL, LIMITED, DNP, or null)
+ * @param {string|null} params.practice.m - Monday practice status (FP, LP, DNP or legacy FULL, LIMITED; or null)
  * @param {string|null} params.practice.tu - Tuesday practice status
  * @param {string|null} params.practice.w - Wednesday practice status
  * @param {string|null} params.practice.th - Thursday practice status
@@ -15,7 +15,7 @@
  * @param {string|null} params.practice.s - Saturday practice status
  * @param {string|null} params.practice.su - Sunday practice status
  * @param {Date} params.current_date - The current date to determine which practice day is most recent
- * @returns {string|null} The most recent practice status ('FULL', 'LIMITED', 'DNP') or null if no status exists
+ * @returns {string|null} The most recent practice status ('FP', 'LP', 'DNP' or an unrecognized value) or null if no status exists
  */
 export default function get_most_recent_practice_status({
   practice,
@@ -23,6 +23,18 @@ export default function get_most_recent_practice_status({
 }) {
   if (!practice) {
     return null
+  }
+
+  const normalize_daily_status = (status) => {
+    if (status === null || status === undefined) {
+      return status
+    }
+    // Only normalize exact legacy values; keep variants (e.g. LP-NON INJURY) unchanged
+    if (status === 'FULL') return 'FP'
+    if (status === 'LIMITED') return 'LP'
+    if (status === 'DNP') return 'DNP'
+    if (status === 'FP' || status === 'LP') return status
+    return status
   }
 
   // Map day numbers (0=Sunday, 6=Saturday) to practice object properties
@@ -47,7 +59,7 @@ export default function get_most_recent_practice_status({
     current_practice_status !== null &&
     current_practice_status !== undefined
   ) {
-    return current_practice_status
+    return normalize_daily_status(current_practice_status)
   }
 
   // If current day has no value, walk backward from previous day to find first non-null value
@@ -57,7 +69,7 @@ export default function get_most_recent_practice_status({
     const practice_status = practice[practice_day_key]
 
     if (practice_status !== null && practice_status !== undefined) {
-      return practice_status
+      return normalize_daily_status(practice_status)
     }
   }
 

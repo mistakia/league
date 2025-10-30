@@ -1142,7 +1142,7 @@ describe('API /teams - reserve', function () {
       MockDate.reset()
     })
 
-    it('player with LIMITED practice status should be eligible', async () => {
+    it('player with LP practice status should be eligible', async () => {
       MockDate.set(regular_season_start.clone().add('1', 'week').toISOString())
       const player = await select_player_with_tracking()
       const teamId = 1
@@ -1169,12 +1169,12 @@ describe('API /teams - reserve', function () {
           pid: player.pid
         })
 
-      // Add LIMITED practice status
+      // Add LP practice status
       await knex('practice').insert({
         pid: player.pid,
         week: constants.season.week,
         year: constants.season.year,
-        th: 'LIMITED'
+        th: 'LP'
       })
 
       const res = await chai_request
