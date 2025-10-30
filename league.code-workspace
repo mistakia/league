@@ -10,7 +10,10 @@
       "path": "/Users/trashman/user-base/repository/active/base/system/guideline"
     },
     {
-      "path": "../../../workflow"
+      "path": "/Users/trashman/user-base/workflow"
+    },
+    {
+      "path": "/Users/trashman/user-base/task/league"
     }
   ],
   "settings": {}
