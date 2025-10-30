@@ -129,6 +129,7 @@ class PlayerRoster extends Player {
             hideActions={isPoach}
             headshot_width={48}
             show_position_bar
+            show_reserve_tag
           />
           {Boolean(
             player_map.get('pid') && is_hosted && is_manager_in_league
@@ -154,6 +155,7 @@ class PlayerRoster extends Player {
                   hideActions={isClaim}
                   headshot_width={48}
                   show_position_bar
+                  show_reserve_tag
                 />
               ))}
           </div>

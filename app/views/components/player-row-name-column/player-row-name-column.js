@@ -7,6 +7,7 @@ import { constants, get_string_from_object } from '@libs-shared'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
 import PlayerLabel from '@components/player-label'
 import PlayerTag from '@components/player-tag'
+ 
 import NFLTeam from '@components/nfl-team'
 import IconButton from '@components/icon-button'
 
@@ -26,6 +27,7 @@ export default function PlayerRowNameColumn({
   const nfl_team = player_map.get('team')
   const pid = player_map.get('pid')
   const tag = player_map.get('tag')
+  
 
   const handle_click = () => select_player(pid)
   const handle_context_click = (event) => {

@@ -51,9 +51,11 @@ class PlayerRosterRow extends Player {
 
     return (
       <div className={class_names.join(' ')}>
-        <div className='roster__item-name'>
-          <PlayerName pid={pid} />
-        </div>
+        {Boolean(pid) && (
+          <div className='roster__item-name'>
+            <PlayerName pid={pid} show_reserve_tag />
+          </div>
+        )}
         {Boolean(pid) && (
           <div className='roster__item-salary metric'>{`$${salary}`}</div>
         )}

@@ -27,6 +27,7 @@ import {
   get_last_consecutive_pick,
   league_has_starting_position
 } from '@libs-shared'
+import { get_reserve_eligibility_from_player_map } from '@libs-shared'
 import { League } from '@core/leagues'
 import { fuzzy_search } from '@core/utils'
 import { create_matchup } from '@core/matchups'
@@ -1095,45 +1096,6 @@ export const isPlayerOnReleaseWaivers = createSelector(
   }
 )
 
-export function isPlayerReserveEligible(state, { player_map }) {
-  const reserve = {
-    reserve_short_term_eligible: false,
-    cov: false
-  }
-
-  const nfl_status = player_map.get('nfl_status')
-  const injury_status = player_map.get('injury_status')
-  const prior_week_inactive = player_map.get('prior_week_inactive')
-  const game_day = player_map.get('game_day')
-
-  // Extract practice data from player state
-  const practice_week = player_map.get('practice_week')
-  const practice_data = practice_week ? practice_week.toJS() : null
-
-  if (
-    isReserveEligible({
-      nfl_status,
-      injury_status,
-      prior_week_inactive,
-      week: constants.season.week,
-      is_regular_season: constants.season.isRegularSeason,
-      game_day,
-      practice: practice_data
-    })
-  ) {
-    reserve.reserve_short_term_eligible = true
-  }
-
-  if (
-    isReserveCovEligible({
-      nfl_status
-    })
-  ) {
-    reserve.cov = true
-  }
-
-  return reserve
-}
 
 export function isPlayerLocked(state, { player_map = new Map(), pid }) {
   if (constants.week > constants.season.finalWeek) {
@@ -1346,7 +1308,7 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
       }
 
       if (!status.protected && constants.week <= constants.season.finalWeek) {
-        const reserve = isPlayerReserveEligible(state, { player_map })
+        const reserve = get_reserve_eligibility_from_player_map({ player_map })
 
         // For practice squad players, only allow reserve if they have active poaching claim
         const isPracticeSquad =
