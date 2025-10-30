@@ -481,35 +481,6 @@ const is_data_available = (year) => {
   return true
 }
 
-/**
- * Pre-process play descriptions to handle reversed plays
- * When a play is reversed by replay review, both nflfastR and the database include
- * the full description with the "REVERSED" marker. However, the database has play_type=null
- * for these plays since they haven't been enriched yet. We mark these plays so that
- * matching logic can skip play_type comparison.
- */
-const preprocess_reversed_plays = (data) => {
-  const REVERSED_MARKER = ' was REVERSED. '
-  let reversed_count = 0
-
-  for (const play of data) {
-    if (play.desc && play.desc.includes(REVERSED_MARKER)) {
-      // Mark this play as reversed so matching logic can handle it specially
-      play._is_reversed_play = true
-      reversed_count++
-
-      log(`Reversed play detected:`)
-      log(`  Game: ${play.game_id} | Play: ${play.play_id}`)
-      log(`  Will match without play_type requirement (DB has play_type=null)`)
-    }
-  }
-
-  if (reversed_count > 0) {
-    log(`Pre-processed ${reversed_count} reversed play(s)`)
-  }
-
-  return data
-}
 
 /**
  * Download the play-by-play CSV file from nflverse
@@ -639,9 +610,6 @@ const run = async ({
     }
   }
 
-  // Pre-process reversed plays before matching
-  data = preprocess_reversed_plays(data)
-
   // Preload plays into cache for efficient contextual matching
   log(`Preloading plays for year ${year}...`)
   await preload_plays({ years: [year] })
@@ -652,6 +620,10 @@ const run = async ({
   const plays_not_matched = []
   const plays_multiple_matches = []
   let processed_count = 0
+  let total_updates_applied = 0
+  let total_conflicts_detected = 0
+  const updates_by_field = {}
+  const conflicts_by_field = {}
 
   for (const item of data) {
     const result = await process_play({
@@ -668,6 +640,27 @@ const run = async ({
 
     if (result.matched) {
       plays_matched.push(result)
+      // Evaluate field-level differences for summary stats
+      const excluded_fields = new Set(['esbid', 'playId', 'updated'])
+      const db_play = result.db_play
+      const formatted_play = result.formatted_play
+
+      for (const [field, new_value] of Object.entries(formatted_play)) {
+        if (excluded_fields.has(field)) continue
+        if (new_value === null || new_value === undefined || new_value === '') continue
+
+        const existing_value = db_play[field]
+        if (existing_value === new_value) continue
+
+        const is_conflict = !ignore_conflicts && Boolean(existing_value)
+        if (is_conflict) {
+          total_conflicts_detected += 1
+          conflicts_by_field[field] = (conflicts_by_field[field] || 0) + 1
+        } else {
+          total_updates_applied += 1
+          updates_by_field[field] = (updates_by_field[field] || 0) + 1
+        }
+      }
     } else if (result.multiple_match_error) {
       plays_multiple_matches.push(result)
     } else {
@@ -757,6 +750,40 @@ const run = async ({
       log(`    sec_rem_qtr: ${play.match_criteria.sec_rem_qtr}`)
       log('---')
     }
+  }
+
+  // Final field-level summary and conflicts summary
+  const sort_desc = (entries) => entries.sort((a, b) => b[1] - a[1])
+
+  const sorted_updates = sort_desc(Object.entries(updates_by_field))
+  const sorted_conflicts = sort_desc(Object.entries(conflicts_by_field))
+
+  log('\n=== Field Update Summary ===')
+  log(`Total field updates applied (or that would be applied in dry mode): ${total_updates_applied}`)
+  if (sorted_updates.length) {
+    const top = sorted_updates.slice(0, 20)
+    for (const [field, count] of top) {
+      log(`  ${field}: ${count}`)
+    }
+    if (sorted_updates.length > 20) {
+      log(`  ... and ${sorted_updates.length - 20} more fields`)
+    }
+  } else {
+    log('  No field updates detected')
+  }
+
+  log('\n=== Conflict Summary ===')
+  log(`Total conflicts detected: ${total_conflicts_detected}`)
+  if (sorted_conflicts.length) {
+    const top = sorted_conflicts.slice(0, 20)
+    for (const [field, count] of top) {
+      log(`  ${field}: ${count}`)
+    }
+    if (sorted_conflicts.length > 20) {
+      log(`  ... and ${sorted_conflicts.length - 20} more fields with conflicts`)
+    }
+  } else {
+    log('  No conflicts detected')
   }
 }
 
