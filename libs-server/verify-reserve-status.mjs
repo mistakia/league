@@ -36,7 +36,7 @@ export default async function ({ teamId, leagueId }) {
   // Only join prior week gamelog data if week > 1
   if (constants.season.week > 1) {
     const prior_week = constants.season.week - 1
-    // First join to prior week's game
+    // First join to prior week's game (to detect if it was a bye week)
     player_query.leftJoin('nfl_games as prior_week_game', function () {
       this.on(function () {
         this.on('prior_week_game.h', '=', 'player.current_nfl_team').orOn(
@@ -49,12 +49,31 @@ export default async function ({ teamId, leagueId }) {
         .andOn('prior_week_game.year', '=', constants.season.year)
         .andOn(db.raw("prior_week_game.seas_type = 'REG'"))
     })
-    // Then join to player's gamelog for that game
+    // Join to reference week game (week - 2 if prior week was bye, else week - 1)
+    player_query.leftJoin('nfl_games as reference_week_game', function () {
+      this.on(function () {
+        this.on('reference_week_game.h', '=', 'player.current_nfl_team').orOn(
+          'reference_week_game.v',
+          '=',
+          'player.current_nfl_team'
+        )
+      })
+        .andOn(
+          'reference_week_game.week',
+          '=',
+          db.raw(
+            `CASE WHEN prior_week_game.esbid IS NULL THEN ${prior_week - 1} ELSE ${prior_week} END`
+          )
+        )
+        .andOn('reference_week_game.year', '=', constants.season.year)
+        .andOn(db.raw("reference_week_game.seas_type = 'REG'"))
+    })
+    // Then join to player's gamelog for the reference week game
     player_query.leftJoin('player_gamelogs as prior_week_gamelog', function () {
       this.on('prior_week_gamelog.pid', '=', 'player.pid').andOn(
         'prior_week_gamelog.esbid',
         '=',
-        'prior_week_game.esbid'
+        'reference_week_game.esbid'
       )
     })
     player_query.select(
