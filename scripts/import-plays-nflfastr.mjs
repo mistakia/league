@@ -421,11 +421,6 @@ const format_probability_data = (play) => ({
   cpoe: format_number(play.cpoe)
 })
 
-// External identifiers (nflfastr)
-const format_external_ids = (play) => ({
-  nflfastr_play_id: format_number(play.play_id)
-})
-
 const format_play = (play) => ({
   ...format_play_context(play),
   ...format_drive_data(play),
@@ -442,8 +437,7 @@ const format_play = (play) => ({
   ...format_special_teams(play),
   ...format_timeout_data(play),
   ...format_score_data(play),
-  ...format_probability_data(play),
-  ...format_external_ids(play)
+  ...format_probability_data(play)
 })
 
 // ============================================================================
@@ -452,118 +446,14 @@ const format_play = (play) => ({
 
 /**
  * Build match criteria for finding plays in the database
- * Uses contextual matching instead of playId matching since playId is NOT stable
- * across data sources (nflfastR vs NFL v1 vs Sportradar)
+ * Use stable playId equality now that nflfastR play_id matches DB "playId".
  */
 const build_match_criteria = (esbid, formatted_play, item) => {
-  const match_criteria = {
+  const play_id_num = format_number(item.play_id)
+  return {
     esbid,
-    qtr: formatted_play.qtr,
-    dwn: formatted_play.dwn,
-    yards_to_go: formatted_play.yards_to_go,
-    ydl_100: formatted_play.ydl_100,
-    // Always include off/def in match criteria - the play cache will handle null matching
-    // For timeouts and game state plays, nflfastR has null off/def but database has team assignments
-    // The _matches_team_field function returns true when filter_value is null/undefined
-    off: formatted_play.off,
-    def: formatted_play.def
+    playId: play_id_num
   }
-
-  // For reversed plays, don't use play_type in match criteria
-  // The database has play_type=null for these plays until they're enriched with nflfastR data
-  // We'll match on other criteria (context + description) and then update the play_type
-  if (!item._is_reversed_play) {
-    match_criteria.play_type = formatted_play.play_type
-  }
-
-  // Use time-based matching for most plays to prevent context collisions
-  // Time (sec_rem_qtr) is a stable identifier across data sources and prevents mismatches
-  // when multiple plays share the same game situation (down, distance, field position)
-  // This is critical because:
-  // 1. Special teams plays (KOFF, PUNT, FGXP) often share context (null down, null distance)
-  // 2. Regular plays (PASS, RUSH) can also share context (e.g., multiple 1st & 10 from same yard line)
-  // 3. Timeout plays (NOPL with null teams) need time to distinguish between multiple timeouts
-  //
-  // EXCEPTION: Don't use sec_rem_qtr for plays where time is truly unavailable or unreliable
-  // (e.g., GAME_START which may have different time representations)
-  const use_time_matching =
-    formatted_play.sec_rem_qtr !== null &&
-    formatted_play.sec_rem_qtr !== undefined
-
-  if (use_time_matching) {
-    match_criteria.sec_rem_qtr = formatted_play.sec_rem_qtr
-
-    // Use exact time matching (0s tolerance) for timeouts to avoid ambiguity
-    // Multiple timeouts can occur within seconds of each other, and the 5-second
-    // tolerance causes them to match each other incorrectly. With exact time + team
-    // matching, we can precisely identify which timeout is which.
-    // nflfastR provides timeout_team which maps to to_team in the database.
-    if (
-      formatted_play.play_type === 'NOPL' &&
-      formatted_play.to &&
-      formatted_play.to_team
-    ) {
-      match_criteria.sec_rem_qtr_tolerance = 0 // Exact time match for team timeouts
-      match_criteria.to_team = formatted_play.to_team // Include team in criteria
-    } else {
-      match_criteria.sec_rem_qtr_tolerance = TIME_MATCH_TOLERANCE_SECONDS // 5s for others
-    }
-  }
-
-  // Special handling for END QUARTER and END GAME markers
-  // These occur at exactly 00:00 at end of quarters (END QUARTER at end of Q1-3,
-  // END GAME at end of Q4 or at actual game end time in overtime).
-  // They should not match with timeouts or other plays that occur within the 5-second
-  // tolerance window. Use exact time matching (0s tolerance) and description matching
-  // for precise identification.
-  const is_end_marker =
-    formatted_play.play_type === 'NOPL' &&
-    (item.desc?.includes('END QUARTER') || item.desc === 'END GAME')
-
-  if (is_end_marker) {
-    match_criteria.sec_rem_qtr_tolerance = 0 // Exact time match
-    match_criteria.desc_contains = item.desc // Match on description
-  }
-
-  // Special handling for game suspension and resumption events
-  // These occur during weather delays and have null sec_rem_qtr values in the database
-  // because there is no meaningful game clock time during a suspension.
-  // Without special handling, they match ALL timeouts and administrative plays in the quarter.
-  // Use description-based matching to uniquely identify these events.
-  // Example: "The game has been suspended. Lightning in the area." should only match
-  // the specific suspension event, not every timeout in Q2.
-  //
-  // Administrative markers that indicate game suspension/resumption:
-  // - Modern format: "The game has been suspended" / "The game has resumed"
-  // - Older format: Starts with "Game suspended" / "Play resumed at"
-  //
-  // Exclude false positives:
-  // - "(11:56) 21:28, play resumed after a rain delay..." (actual PASS play)
-  // - "Timeout at 15:00. Game suspended due to lightning." (TIMEOUT play)
-  // - "(15:00) Game temporarily suspended..." (actual play that mentions delay)
-  //
-  // Key distinction: Administrative markers start with the suspension/resumption phrase,
-  // while false positives have the phrase embedded later in the description.
-  const desc_lower = item.desc?.toLowerCase() || ''
-  const is_suspension =
-    desc_lower.startsWith('the game has been suspended') ||
-    (desc_lower.startsWith('game suspended') &&
-      !desc_lower.startsWith('game temporarily'))
-  const is_resumption =
-    desc_lower.startsWith('the game has resumed') ||
-    desc_lower.startsWith('play resumed at')
-
-  if (is_suspension || is_resumption) {
-    // Remove time-based matching since these events have null sec_rem_qtr
-    delete match_criteria.sec_rem_qtr
-    delete match_criteria.sec_rem_qtr_tolerance
-    // Use description pattern matching to uniquely identify the event
-    match_criteria.desc_contains = is_suspension
-      ? 'game has been suspended'
-      : 'game has resumed'
-  }
-
-  return match_criteria
 }
 
 /**
