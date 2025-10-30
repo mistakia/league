@@ -27,9 +27,6 @@ const format = (item) => {
   const esbid = (item.externalIds.find((e) => e.source === 'elias') || {}).id
   const shieldid = (item.externalIds.find((e) => e.source === 'shield') || {})
     .id
-  const detailid_v3 = (
-    item.externalIds.find((e) => e.source === 'gamedetail') || {}
-  ).id
 
   const day = date
     ? getGameDayAbbreviation({ seas_type, date, time_est, week_type })
@@ -38,7 +35,6 @@ const format = (item) => {
   return {
     ...(esbid && { esbid }),
     ...(shieldid && { shieldid }),
-    ...(detailid_v3 && { detailid_v3 }),
     ...(item.id && { detailid_v1: item.id }),
 
     ...(year && { year }),
@@ -82,15 +78,9 @@ const run = async ({
     seas_type
   })
 
-  const game_missing_detailid_v3 = games.find((game) => !game.detailid_v3)
   const game_missing_detailid_v1 = games.find((game) => !game.detailid_v1)
 
-  if (
-    !ignore_cache &&
-    games.length &&
-    !game_missing_detailid_v1 &&
-    !game_missing_detailid_v3
-  ) {
+  if (!ignore_cache && games.length && !game_missing_detailid_v1) {
     log('found no games with missing ids')
     return
   }
