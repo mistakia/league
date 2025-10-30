@@ -417,16 +417,16 @@ router.get('/:pid', async (req, res) => {
  *                     example: "2024-01-15"
  *                   status:
  *                     type: string
- *                     enum: ["FULL", "LIMITED", "DNP", "OUT", "QUESTIONABLE", "DOUBTFUL"]
+ *                     enum: ["FP", "LP", "DNP", "OUT", "QUESTIONABLE", "DOUBTFUL"]
  *                     description: |
  *                       Practice participation status:
- *                       - FULL: Full participation
- *                       - LIMITED: Limited participation
+ *                       - FP: Full participation
+ *                       - LP: Limited participation
  *                       - DNP: Did not participate
  *                       - OUT: Out (will not play)
  *                       - QUESTIONABLE: Questionable (game-time decision)
  *                       - DOUBTFUL: Doubtful (unlikely to play)
- *                     example: "FULL"
+ *                     example: "FP"
  *                   week:
  *                     type: integer
  *                     description: NFL week number
@@ -485,7 +485,7 @@ router.get('/:pid', async (req, res) => {
  *                 value:
  *                   - pid: "CHRI-MCCA-2017-1996-06-07"
  *                     date: "2024-01-15"
- *                     status: "LIMITED"
+ *                     status: "LP"
  *                     week: 18
  *                     year: 2024
  *                     seas_type: "REG"

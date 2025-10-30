@@ -12,7 +12,17 @@ export default function isReserveEligible({
   practice = null,
   current_date = new Date()
 } = {}) {
-  // Check practice status first - DNP or LIMITED makes player immediately eligible
+  console.log({
+    nfl_status,
+    injury_status,
+    prior_week_inactive,
+    week,
+    is_regular_season,
+    game_day,
+    practice,
+    current_date
+  })
+  // Check practice status first - DNP or LP makes player immediately eligible
   if (practice) {
     const most_recent_practice_status = get_most_recent_practice_status({
       practice,
@@ -21,7 +31,7 @@ export default function isReserveEligible({
 
     if (
       most_recent_practice_status === 'DNP' ||
-      most_recent_practice_status === 'LIMITED'
+      most_recent_practice_status === 'LP'
     ) {
       return true
     }

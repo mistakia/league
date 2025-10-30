@@ -378,7 +378,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
       expect(result).to.equal(true)
     })
 
-    it('should return true for LIMITED practice status', function () {
+    it('should return true for LP practice status', function () {
       const result = isReserveEligible({
         nfl_status: constants.player_nfl_status.ACTIVE,
         injury_status: null,
@@ -386,7 +386,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
           m: null,
           tu: null,
           w: null,
-          th: 'LIMITED',
+          th: 'LP',
           f: null,
           s: null,
           su: null
@@ -396,14 +396,14 @@ describe('LIBS-SHARED isReserveEligible', function () {
       expect(result).to.equal(true)
     })
 
-    it('should return false for FULL practice status', function () {
+    it('should return false for FP practice status', function () {
       const result = isReserveEligible({
         nfl_status: constants.player_nfl_status.ACTIVE,
         injury_status: null,
         practice: {
           m: null,
           tu: null,
-          w: 'FULL',
+          w: 'FP',
           th: null,
           f: null,
           s: null,
@@ -450,13 +450,13 @@ describe('LIBS-SHARED isReserveEligible', function () {
       expect(result).to.equal(true)
     })
 
-    it('should return true for LIMITED with ACTIVE nfl_status', function () {
+    it('should return true for LP with ACTIVE nfl_status', function () {
       const result = isReserveEligible({
         nfl_status: constants.player_nfl_status.ACTIVE,
         injury_status: null,
         practice: {
           m: null,
-          tu: 'LIMITED',
+          tu: 'LP',
           w: null,
           th: null,
           f: null,
@@ -503,8 +503,8 @@ describe('LIBS-SHARED isReserveEligible', function () {
         nfl_status: constants.player_nfl_status.ACTIVE,
         injury_status: null,
         practice: {
-          m: 'FULL',
-          tu: 'LIMITED',
+          m: 'FP',
+          tu: 'LP',
           w: null,
           th: null,
           f: null,
