@@ -421,6 +421,11 @@ const format_probability_data = (play) => ({
   cpoe: format_number(play.cpoe)
 })
 
+// External identifiers (nflfastr)
+const format_external_ids = (play) => ({
+  nflfastr_play_id: format_number(play.play_id)
+})
+
 const format_play = (play) => ({
   ...format_play_context(play),
   ...format_drive_data(play),
@@ -437,7 +442,8 @@ const format_play = (play) => ({
   ...format_special_teams(play),
   ...format_timeout_data(play),
   ...format_score_data(play),
-  ...format_probability_data(play)
+  ...format_probability_data(play),
+  ...format_external_ids(play)
 })
 
 // ============================================================================
