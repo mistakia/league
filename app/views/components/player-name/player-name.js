@@ -5,10 +5,12 @@ import NotInterestedIcon from '@mui/icons-material/NotInterested'
 
 import Position from '@components/position'
 import NFLTeam from '@components/nfl-team'
-import { constants } from '@libs-shared'
+import {
+  constants,
+  get_reserve_eligibility_from_player_map
+} from '@libs-shared'
 import PlayerLabel from '@components/player-label'
 import PlayerTag from '@components/player-tag'
-import { get_reserve_eligibility_from_player_map } from '@libs-shared'
 import PlayerStatus from '@components/player-status'
 import PlayerHeadshot from '@components/player-headshot'
 
@@ -141,5 +143,6 @@ PlayerName.propTypes = {
   headshot_square: PropTypes.bool,
   hidePosition: PropTypes.bool,
   large: PropTypes.bool,
-  show_position_bar: PropTypes.bool
+  show_position_bar: PropTypes.bool,
+  show_reserve_tag: PropTypes.bool
 }
