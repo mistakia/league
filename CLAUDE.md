@@ -134,13 +134,15 @@ Teams can poach players from other teams' practice squads with automatic roster 
 **Super Priority System:**
 
 When a poached player is released, `handle_super_priority_on_release()` (in `process-release.mjs`) automatically:
+
 - Creates `super_priority` record tracking eligibility
 - **Auto-creates waiver** (type: `FREE_AGENCY_PRACTICE`) if original team has practice squad space
 - **Requires manual waiver** if no space available
 
 This preserves transaction history and gives original teams first rights to reclaim poached players.
 
-**Key Files**: 
+**Key Files**:
+
 - `/libs-server/process-poach.mjs` - Poach orchestration
 - `/libs-server/process-release.mjs` - Super priority handling
 

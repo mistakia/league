@@ -277,6 +277,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2026_pass_location_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2026_off_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2026_off_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2026_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2026_esbid_nflfastr_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2026_esbid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2026_dwn_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2026_catchable_ball_idx;
@@ -325,6 +326,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2025_pass_location_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2025_off_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2025_off_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2025_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2025_esbid_nflfastr_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2025_esbid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2025_dwn_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2025_catchable_ball_idx;
@@ -373,6 +375,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2024_pass_location_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2024_off_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2024_off_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2024_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2024_esbid_nflfastr_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2024_esbid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2024_dwn_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2024_catchable_ball_idx;
@@ -421,6 +424,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2023_pass_location_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2023_off_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2023_off_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2023_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2023_esbid_nflfastr_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2023_esbid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2023_dwn_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2023_catchable_ball_idx;
@@ -469,6 +473,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2022_pass_location_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2022_off_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2022_off_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2022_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2022_esbid_nflfastr_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2022_esbid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2022_dwn_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2022_catchable_ball_idx;
@@ -517,6 +522,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2021_pass_location_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2021_off_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2021_off_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2021_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2021_esbid_nflfastr_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2021_esbid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2021_dwn_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2021_catchable_ball_idx;
@@ -565,6 +571,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2020_pass_location_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2020_off_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2020_off_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2020_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2020_esbid_nflfastr_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2020_esbid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2020_dwn_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2020_catchable_ball_idx;
@@ -613,6 +620,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2019_pass_location_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2019_off_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2019_off_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2019_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2019_esbid_nflfastr_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2019_esbid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2019_dwn_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2019_catchable_ball_idx;
@@ -661,6 +669,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2018_pass_location_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2018_off_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2018_off_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2018_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2018_esbid_nflfastr_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2018_esbid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2018_dwn_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2018_catchable_ball_idx;
@@ -709,6 +718,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2017_pass_location_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2017_off_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2017_off_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2017_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2017_esbid_nflfastr_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2017_esbid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2017_dwn_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2017_catchable_ball_idx;
@@ -757,6 +767,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2016_pass_location_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2016_off_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2016_off_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2016_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2016_esbid_nflfastr_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2016_esbid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2016_dwn_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2016_catchable_ball_idx;
@@ -805,6 +816,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2015_pass_location_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2015_off_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2015_off_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2015_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2015_esbid_nflfastr_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2015_esbid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2015_dwn_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2015_catchable_ball_idx;
@@ -853,6 +865,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2014_pass_location_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2014_off_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2014_off_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2014_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2014_esbid_nflfastr_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2014_esbid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2014_dwn_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2014_catchable_ball_idx;
@@ -901,6 +914,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2013_pass_location_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2013_off_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2013_off_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2013_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2013_esbid_nflfastr_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2013_esbid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2013_dwn_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2013_catchable_ball_idx;
@@ -949,6 +963,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2012_pass_location_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2012_off_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2012_off_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2012_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2012_esbid_nflfastr_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2012_esbid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2012_dwn_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2012_catchable_ball_idx;
@@ -997,6 +1012,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2011_pass_location_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2011_off_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2011_off_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2011_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2011_esbid_nflfastr_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2011_esbid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2011_dwn_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2011_catchable_ball_idx;
@@ -1045,6 +1061,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2010_pass_location_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2010_off_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2010_off_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2010_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2010_esbid_nflfastr_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2010_esbid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2010_dwn_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2010_catchable_ball_idx;
@@ -1093,6 +1110,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2009_pass_location_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2009_off_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2009_off_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2009_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2009_esbid_nflfastr_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2009_esbid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2009_dwn_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2009_catchable_ball_idx;
@@ -1141,6 +1159,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2008_pass_location_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2008_off_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2008_off_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2008_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2008_esbid_nflfastr_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2008_esbid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2008_dwn_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2008_catchable_ball_idx;
@@ -1189,6 +1208,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2007_pass_location_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2007_off_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2007_off_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2007_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2007_esbid_nflfastr_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2007_esbid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2007_dwn_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2007_catchable_ball_idx;
@@ -1237,6 +1257,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2006_pass_location_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2006_off_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2006_off_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2006_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2006_esbid_nflfastr_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2006_esbid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2006_dwn_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2006_catchable_ball_idx;
@@ -1285,6 +1306,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2005_pass_location_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2005_off_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2005_off_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2005_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2005_esbid_nflfastr_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2005_esbid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2005_dwn_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2005_catchable_ball_idx;
@@ -1333,6 +1355,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2004_pass_location_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2004_off_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2004_off_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2004_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2004_esbid_nflfastr_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2004_esbid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2004_dwn_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2004_catchable_ball_idx;
@@ -1381,6 +1404,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2003_pass_location_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2003_off_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2003_off_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2003_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2003_esbid_nflfastr_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2003_esbid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2003_dwn_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2003_catchable_ball_idx;
@@ -1429,6 +1453,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2002_pass_location_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2002_off_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2002_off_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2002_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2002_esbid_nflfastr_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2002_esbid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2002_dwn_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2002_catchable_ball_idx;
@@ -1477,6 +1502,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2001_pass_location_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2001_off_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2001_off_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2001_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2001_esbid_nflfastr_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2001_esbid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2001_dwn_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2001_catchable_ball_idx;
@@ -1525,6 +1551,7 @@ DROP INDEX IF EXISTS public.nfl_plays_year_2000_pass_location_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2000_off_week_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2000_off_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2000_motion_idx;
+DROP INDEX IF EXISTS public.nfl_plays_year_2000_esbid_nflfastr_play_id_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2000_esbid_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2000_dwn_idx;
 DROP INDEX IF EXISTS public.nfl_plays_year_2000_catchable_ball_idx;
@@ -1669,6 +1696,7 @@ DROP INDEX IF EXISTS public.idx_nfl_plays_motion;
 DROP INDEX IF EXISTS public.idx_nfl_plays_fuml_pid_week_year;
 DROP INDEX IF EXISTS public.idx_nfl_plays_fantasy_points;
 DROP INDEX IF EXISTS public.idx_nfl_plays_fantasy;
+DROP INDEX IF EXISTS public.idx_nfl_plays_esbid_nflfastr_play_id;
 DROP INDEX IF EXISTS public.idx_nfl_plays_esbid;
 DROP INDEX IF EXISTS public.idx_nfl_plays_dwn;
 DROP INDEX IF EXISTS public.idx_nfl_plays_catchable_ball;
@@ -4869,7 +4897,8 @@ CREATE TABLE public.nfl_plays (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 )
 PARTITION BY RANGE (year);
 
@@ -5453,6 +5482,13 @@ COMMENT ON COLUMN public.nfl_plays.qb_pressure_tracking IS 'QB pressure (trackin
 --
 
 COMMENT ON COLUMN public.nfl_plays.read_thrown IS 'The type of read thrown by the quarterback';
+
+
+--
+-- Name: COLUMN nfl_plays.nflfastr_play_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.nfl_plays.nflfastr_play_id IS 'Play identifier from nflfastR (play_id). Nullable. Not globally unique.';
 
 
 --
@@ -6324,7 +6360,8 @@ CREATE TABLE public.nfl_plays_year_2000 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 );
 
 
@@ -6721,7 +6758,8 @@ CREATE TABLE public.nfl_plays_year_2001 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 );
 
 
@@ -7118,7 +7156,8 @@ CREATE TABLE public.nfl_plays_year_2002 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 );
 
 
@@ -7515,7 +7554,8 @@ CREATE TABLE public.nfl_plays_year_2003 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 );
 
 
@@ -7912,7 +7952,8 @@ CREATE TABLE public.nfl_plays_year_2004 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 );
 
 
@@ -8309,7 +8350,8 @@ CREATE TABLE public.nfl_plays_year_2005 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 );
 
 
@@ -8706,7 +8748,8 @@ CREATE TABLE public.nfl_plays_year_2006 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 );
 
 
@@ -9103,7 +9146,8 @@ CREATE TABLE public.nfl_plays_year_2007 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 );
 
 
@@ -9500,7 +9544,8 @@ CREATE TABLE public.nfl_plays_year_2008 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 );
 
 
@@ -9897,7 +9942,8 @@ CREATE TABLE public.nfl_plays_year_2009 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 );
 
 
@@ -10294,7 +10340,8 @@ CREATE TABLE public.nfl_plays_year_2010 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 );
 
 
@@ -10691,7 +10738,8 @@ CREATE TABLE public.nfl_plays_year_2011 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 );
 
 
@@ -11088,7 +11136,8 @@ CREATE TABLE public.nfl_plays_year_2012 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 );
 
 
@@ -11485,7 +11534,8 @@ CREATE TABLE public.nfl_plays_year_2013 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 );
 
 
@@ -11882,7 +11932,8 @@ CREATE TABLE public.nfl_plays_year_2014 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 );
 
 
@@ -12279,7 +12330,8 @@ CREATE TABLE public.nfl_plays_year_2015 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 );
 
 
@@ -12676,7 +12728,8 @@ CREATE TABLE public.nfl_plays_year_2016 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 );
 
 
@@ -13073,7 +13126,8 @@ CREATE TABLE public.nfl_plays_year_2017 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 );
 
 
@@ -13470,7 +13524,8 @@ CREATE TABLE public.nfl_plays_year_2018 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 );
 
 
@@ -13867,7 +13922,8 @@ CREATE TABLE public.nfl_plays_year_2019 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 );
 
 
@@ -14264,7 +14320,8 @@ CREATE TABLE public.nfl_plays_year_2020 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 );
 
 
@@ -14661,7 +14718,8 @@ CREATE TABLE public.nfl_plays_year_2021 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 );
 
 
@@ -15058,7 +15116,8 @@ CREATE TABLE public.nfl_plays_year_2022 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 );
 
 
@@ -15455,7 +15514,8 @@ CREATE TABLE public.nfl_plays_year_2023 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 );
 
 
@@ -15852,7 +15912,8 @@ CREATE TABLE public.nfl_plays_year_2024 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 );
 
 
@@ -16249,7 +16310,8 @@ CREATE TABLE public.nfl_plays_year_2025 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 );
 
 
@@ -16646,7 +16708,8 @@ CREATE TABLE public.nfl_plays_year_2026 (
     fake_field_goal boolean,
     blitz boolean,
     fg_result public.nfl_kick_result,
-    tp_result public.nfl_two_point_result
+    tp_result public.nfl_two_point_result,
+    nflfastr_play_id integer
 );
 
 
@@ -26107,6 +26170,13 @@ CREATE INDEX idx_nfl_plays_esbid ON ONLY public.nfl_plays USING btree (esbid);
 
 
 --
+-- Name: idx_nfl_plays_esbid_nflfastr_play_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_nfl_plays_esbid_nflfastr_play_id ON ONLY public.nfl_plays USING btree (esbid, nflfastr_play_id);
+
+
+--
 -- Name: idx_nfl_plays_fantasy; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -27115,6 +27185,13 @@ CREATE INDEX nfl_plays_year_2000_esbid_idx ON public.nfl_plays_year_2000 USING b
 
 
 --
+-- Name: nfl_plays_year_2000_esbid_nflfastr_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2000_esbid_nflfastr_play_id_idx ON public.nfl_plays_year_2000 USING btree (esbid, nflfastr_play_id);
+
+
+--
 -- Name: nfl_plays_year_2000_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -27448,6 +27525,13 @@ CREATE INDEX nfl_plays_year_2001_dwn_idx ON public.nfl_plays_year_2001 USING btr
 --
 
 CREATE INDEX nfl_plays_year_2001_esbid_idx ON public.nfl_plays_year_2001 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2001_esbid_nflfastr_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2001_esbid_nflfastr_play_id_idx ON public.nfl_plays_year_2001 USING btree (esbid, nflfastr_play_id);
 
 
 --
@@ -27787,6 +27871,13 @@ CREATE INDEX nfl_plays_year_2002_esbid_idx ON public.nfl_plays_year_2002 USING b
 
 
 --
+-- Name: nfl_plays_year_2002_esbid_nflfastr_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2002_esbid_nflfastr_play_id_idx ON public.nfl_plays_year_2002 USING btree (esbid, nflfastr_play_id);
+
+
+--
 -- Name: nfl_plays_year_2002_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -28120,6 +28211,13 @@ CREATE INDEX nfl_plays_year_2003_dwn_idx ON public.nfl_plays_year_2003 USING btr
 --
 
 CREATE INDEX nfl_plays_year_2003_esbid_idx ON public.nfl_plays_year_2003 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2003_esbid_nflfastr_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2003_esbid_nflfastr_play_id_idx ON public.nfl_plays_year_2003 USING btree (esbid, nflfastr_play_id);
 
 
 --
@@ -28459,6 +28557,13 @@ CREATE INDEX nfl_plays_year_2004_esbid_idx ON public.nfl_plays_year_2004 USING b
 
 
 --
+-- Name: nfl_plays_year_2004_esbid_nflfastr_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2004_esbid_nflfastr_play_id_idx ON public.nfl_plays_year_2004 USING btree (esbid, nflfastr_play_id);
+
+
+--
 -- Name: nfl_plays_year_2004_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -28792,6 +28897,13 @@ CREATE INDEX nfl_plays_year_2005_dwn_idx ON public.nfl_plays_year_2005 USING btr
 --
 
 CREATE INDEX nfl_plays_year_2005_esbid_idx ON public.nfl_plays_year_2005 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2005_esbid_nflfastr_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2005_esbid_nflfastr_play_id_idx ON public.nfl_plays_year_2005 USING btree (esbid, nflfastr_play_id);
 
 
 --
@@ -29131,6 +29243,13 @@ CREATE INDEX nfl_plays_year_2006_esbid_idx ON public.nfl_plays_year_2006 USING b
 
 
 --
+-- Name: nfl_plays_year_2006_esbid_nflfastr_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2006_esbid_nflfastr_play_id_idx ON public.nfl_plays_year_2006 USING btree (esbid, nflfastr_play_id);
+
+
+--
 -- Name: nfl_plays_year_2006_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -29464,6 +29583,13 @@ CREATE INDEX nfl_plays_year_2007_dwn_idx ON public.nfl_plays_year_2007 USING btr
 --
 
 CREATE INDEX nfl_plays_year_2007_esbid_idx ON public.nfl_plays_year_2007 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2007_esbid_nflfastr_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2007_esbid_nflfastr_play_id_idx ON public.nfl_plays_year_2007 USING btree (esbid, nflfastr_play_id);
 
 
 --
@@ -29803,6 +29929,13 @@ CREATE INDEX nfl_plays_year_2008_esbid_idx ON public.nfl_plays_year_2008 USING b
 
 
 --
+-- Name: nfl_plays_year_2008_esbid_nflfastr_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2008_esbid_nflfastr_play_id_idx ON public.nfl_plays_year_2008 USING btree (esbid, nflfastr_play_id);
+
+
+--
 -- Name: nfl_plays_year_2008_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -30136,6 +30269,13 @@ CREATE INDEX nfl_plays_year_2009_dwn_idx ON public.nfl_plays_year_2009 USING btr
 --
 
 CREATE INDEX nfl_plays_year_2009_esbid_idx ON public.nfl_plays_year_2009 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2009_esbid_nflfastr_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2009_esbid_nflfastr_play_id_idx ON public.nfl_plays_year_2009 USING btree (esbid, nflfastr_play_id);
 
 
 --
@@ -30475,6 +30615,13 @@ CREATE INDEX nfl_plays_year_2010_esbid_idx ON public.nfl_plays_year_2010 USING b
 
 
 --
+-- Name: nfl_plays_year_2010_esbid_nflfastr_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2010_esbid_nflfastr_play_id_idx ON public.nfl_plays_year_2010 USING btree (esbid, nflfastr_play_id);
+
+
+--
 -- Name: nfl_plays_year_2010_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -30808,6 +30955,13 @@ CREATE INDEX nfl_plays_year_2011_dwn_idx ON public.nfl_plays_year_2011 USING btr
 --
 
 CREATE INDEX nfl_plays_year_2011_esbid_idx ON public.nfl_plays_year_2011 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2011_esbid_nflfastr_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2011_esbid_nflfastr_play_id_idx ON public.nfl_plays_year_2011 USING btree (esbid, nflfastr_play_id);
 
 
 --
@@ -31147,6 +31301,13 @@ CREATE INDEX nfl_plays_year_2012_esbid_idx ON public.nfl_plays_year_2012 USING b
 
 
 --
+-- Name: nfl_plays_year_2012_esbid_nflfastr_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2012_esbid_nflfastr_play_id_idx ON public.nfl_plays_year_2012 USING btree (esbid, nflfastr_play_id);
+
+
+--
 -- Name: nfl_plays_year_2012_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -31480,6 +31641,13 @@ CREATE INDEX nfl_plays_year_2013_dwn_idx ON public.nfl_plays_year_2013 USING btr
 --
 
 CREATE INDEX nfl_plays_year_2013_esbid_idx ON public.nfl_plays_year_2013 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2013_esbid_nflfastr_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2013_esbid_nflfastr_play_id_idx ON public.nfl_plays_year_2013 USING btree (esbid, nflfastr_play_id);
 
 
 --
@@ -31819,6 +31987,13 @@ CREATE INDEX nfl_plays_year_2014_esbid_idx ON public.nfl_plays_year_2014 USING b
 
 
 --
+-- Name: nfl_plays_year_2014_esbid_nflfastr_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2014_esbid_nflfastr_play_id_idx ON public.nfl_plays_year_2014 USING btree (esbid, nflfastr_play_id);
+
+
+--
 -- Name: nfl_plays_year_2014_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -32152,6 +32327,13 @@ CREATE INDEX nfl_plays_year_2015_dwn_idx ON public.nfl_plays_year_2015 USING btr
 --
 
 CREATE INDEX nfl_plays_year_2015_esbid_idx ON public.nfl_plays_year_2015 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2015_esbid_nflfastr_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2015_esbid_nflfastr_play_id_idx ON public.nfl_plays_year_2015 USING btree (esbid, nflfastr_play_id);
 
 
 --
@@ -32491,6 +32673,13 @@ CREATE INDEX nfl_plays_year_2016_esbid_idx ON public.nfl_plays_year_2016 USING b
 
 
 --
+-- Name: nfl_plays_year_2016_esbid_nflfastr_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2016_esbid_nflfastr_play_id_idx ON public.nfl_plays_year_2016 USING btree (esbid, nflfastr_play_id);
+
+
+--
 -- Name: nfl_plays_year_2016_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -32824,6 +33013,13 @@ CREATE INDEX nfl_plays_year_2017_dwn_idx ON public.nfl_plays_year_2017 USING btr
 --
 
 CREATE INDEX nfl_plays_year_2017_esbid_idx ON public.nfl_plays_year_2017 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2017_esbid_nflfastr_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2017_esbid_nflfastr_play_id_idx ON public.nfl_plays_year_2017 USING btree (esbid, nflfastr_play_id);
 
 
 --
@@ -33163,6 +33359,13 @@ CREATE INDEX nfl_plays_year_2018_esbid_idx ON public.nfl_plays_year_2018 USING b
 
 
 --
+-- Name: nfl_plays_year_2018_esbid_nflfastr_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2018_esbid_nflfastr_play_id_idx ON public.nfl_plays_year_2018 USING btree (esbid, nflfastr_play_id);
+
+
+--
 -- Name: nfl_plays_year_2018_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -33496,6 +33699,13 @@ CREATE INDEX nfl_plays_year_2019_dwn_idx ON public.nfl_plays_year_2019 USING btr
 --
 
 CREATE INDEX nfl_plays_year_2019_esbid_idx ON public.nfl_plays_year_2019 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2019_esbid_nflfastr_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2019_esbid_nflfastr_play_id_idx ON public.nfl_plays_year_2019 USING btree (esbid, nflfastr_play_id);
 
 
 --
@@ -33835,6 +34045,13 @@ CREATE INDEX nfl_plays_year_2020_esbid_idx ON public.nfl_plays_year_2020 USING b
 
 
 --
+-- Name: nfl_plays_year_2020_esbid_nflfastr_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2020_esbid_nflfastr_play_id_idx ON public.nfl_plays_year_2020 USING btree (esbid, nflfastr_play_id);
+
+
+--
 -- Name: nfl_plays_year_2020_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -34168,6 +34385,13 @@ CREATE INDEX nfl_plays_year_2021_dwn_idx ON public.nfl_plays_year_2021 USING btr
 --
 
 CREATE INDEX nfl_plays_year_2021_esbid_idx ON public.nfl_plays_year_2021 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2021_esbid_nflfastr_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2021_esbid_nflfastr_play_id_idx ON public.nfl_plays_year_2021 USING btree (esbid, nflfastr_play_id);
 
 
 --
@@ -34507,6 +34731,13 @@ CREATE INDEX nfl_plays_year_2022_esbid_idx ON public.nfl_plays_year_2022 USING b
 
 
 --
+-- Name: nfl_plays_year_2022_esbid_nflfastr_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2022_esbid_nflfastr_play_id_idx ON public.nfl_plays_year_2022 USING btree (esbid, nflfastr_play_id);
+
+
+--
 -- Name: nfl_plays_year_2022_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -34840,6 +35071,13 @@ CREATE INDEX nfl_plays_year_2023_dwn_idx ON public.nfl_plays_year_2023 USING btr
 --
 
 CREATE INDEX nfl_plays_year_2023_esbid_idx ON public.nfl_plays_year_2023 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2023_esbid_nflfastr_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2023_esbid_nflfastr_play_id_idx ON public.nfl_plays_year_2023 USING btree (esbid, nflfastr_play_id);
 
 
 --
@@ -35179,6 +35417,13 @@ CREATE INDEX nfl_plays_year_2024_esbid_idx ON public.nfl_plays_year_2024 USING b
 
 
 --
+-- Name: nfl_plays_year_2024_esbid_nflfastr_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2024_esbid_nflfastr_play_id_idx ON public.nfl_plays_year_2024 USING btree (esbid, nflfastr_play_id);
+
+
+--
 -- Name: nfl_plays_year_2024_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -35515,6 +35760,13 @@ CREATE INDEX nfl_plays_year_2025_esbid_idx ON public.nfl_plays_year_2025 USING b
 
 
 --
+-- Name: nfl_plays_year_2025_esbid_nflfastr_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2025_esbid_nflfastr_play_id_idx ON public.nfl_plays_year_2025 USING btree (esbid, nflfastr_play_id);
+
+
+--
 -- Name: nfl_plays_year_2025_motion_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -35848,6 +36100,13 @@ CREATE INDEX nfl_plays_year_2026_dwn_idx ON public.nfl_plays_year_2026 USING btr
 --
 
 CREATE INDEX nfl_plays_year_2026_esbid_idx ON public.nfl_plays_year_2026 USING btree (esbid);
+
+
+--
+-- Name: nfl_plays_year_2026_esbid_nflfastr_play_id_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX nfl_plays_year_2026_esbid_nflfastr_play_id_idx ON public.nfl_plays_year_2026 USING btree (esbid, nflfastr_play_id);
 
 
 --
@@ -37692,6 +37951,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 
 
 --
+-- Name: nfl_plays_year_2000_esbid_nflfastr_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_esbid_nflfastr_play_id ATTACH PARTITION public.nfl_plays_year_2000_esbid_nflfastr_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2000_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -38025,6 +38291,13 @@ ALTER INDEX public.idx_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2001
 --
 
 ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2001_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2001_esbid_nflfastr_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_esbid_nflfastr_play_id ATTACH PARTITION public.nfl_plays_year_2001_esbid_nflfastr_play_id_idx;
 
 
 --
@@ -38364,6 +38637,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 
 
 --
+-- Name: nfl_plays_year_2002_esbid_nflfastr_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_esbid_nflfastr_play_id ATTACH PARTITION public.nfl_plays_year_2002_esbid_nflfastr_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2002_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -38697,6 +38977,13 @@ ALTER INDEX public.idx_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2003
 --
 
 ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2003_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2003_esbid_nflfastr_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_esbid_nflfastr_play_id ATTACH PARTITION public.nfl_plays_year_2003_esbid_nflfastr_play_id_idx;
 
 
 --
@@ -39036,6 +39323,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 
 
 --
+-- Name: nfl_plays_year_2004_esbid_nflfastr_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_esbid_nflfastr_play_id ATTACH PARTITION public.nfl_plays_year_2004_esbid_nflfastr_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2004_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -39369,6 +39663,13 @@ ALTER INDEX public.idx_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2005
 --
 
 ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2005_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2005_esbid_nflfastr_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_esbid_nflfastr_play_id ATTACH PARTITION public.nfl_plays_year_2005_esbid_nflfastr_play_id_idx;
 
 
 --
@@ -39708,6 +40009,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 
 
 --
+-- Name: nfl_plays_year_2006_esbid_nflfastr_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_esbid_nflfastr_play_id ATTACH PARTITION public.nfl_plays_year_2006_esbid_nflfastr_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2006_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -40041,6 +40349,13 @@ ALTER INDEX public.idx_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2007
 --
 
 ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2007_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2007_esbid_nflfastr_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_esbid_nflfastr_play_id ATTACH PARTITION public.nfl_plays_year_2007_esbid_nflfastr_play_id_idx;
 
 
 --
@@ -40380,6 +40695,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 
 
 --
+-- Name: nfl_plays_year_2008_esbid_nflfastr_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_esbid_nflfastr_play_id ATTACH PARTITION public.nfl_plays_year_2008_esbid_nflfastr_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2008_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -40713,6 +41035,13 @@ ALTER INDEX public.idx_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2009
 --
 
 ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2009_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2009_esbid_nflfastr_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_esbid_nflfastr_play_id ATTACH PARTITION public.nfl_plays_year_2009_esbid_nflfastr_play_id_idx;
 
 
 --
@@ -41052,6 +41381,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 
 
 --
+-- Name: nfl_plays_year_2010_esbid_nflfastr_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_esbid_nflfastr_play_id ATTACH PARTITION public.nfl_plays_year_2010_esbid_nflfastr_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2010_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -41385,6 +41721,13 @@ ALTER INDEX public.idx_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2011
 --
 
 ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2011_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2011_esbid_nflfastr_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_esbid_nflfastr_play_id ATTACH PARTITION public.nfl_plays_year_2011_esbid_nflfastr_play_id_idx;
 
 
 --
@@ -41724,6 +42067,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 
 
 --
+-- Name: nfl_plays_year_2012_esbid_nflfastr_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_esbid_nflfastr_play_id ATTACH PARTITION public.nfl_plays_year_2012_esbid_nflfastr_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2012_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -42057,6 +42407,13 @@ ALTER INDEX public.idx_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2013
 --
 
 ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2013_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2013_esbid_nflfastr_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_esbid_nflfastr_play_id ATTACH PARTITION public.nfl_plays_year_2013_esbid_nflfastr_play_id_idx;
 
 
 --
@@ -42396,6 +42753,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 
 
 --
+-- Name: nfl_plays_year_2014_esbid_nflfastr_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_esbid_nflfastr_play_id ATTACH PARTITION public.nfl_plays_year_2014_esbid_nflfastr_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2014_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -42729,6 +43093,13 @@ ALTER INDEX public.idx_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2015
 --
 
 ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2015_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2015_esbid_nflfastr_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_esbid_nflfastr_play_id ATTACH PARTITION public.nfl_plays_year_2015_esbid_nflfastr_play_id_idx;
 
 
 --
@@ -43068,6 +43439,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 
 
 --
+-- Name: nfl_plays_year_2016_esbid_nflfastr_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_esbid_nflfastr_play_id ATTACH PARTITION public.nfl_plays_year_2016_esbid_nflfastr_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2016_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -43401,6 +43779,13 @@ ALTER INDEX public.idx_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2017
 --
 
 ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2017_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2017_esbid_nflfastr_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_esbid_nflfastr_play_id ATTACH PARTITION public.nfl_plays_year_2017_esbid_nflfastr_play_id_idx;
 
 
 --
@@ -43740,6 +44125,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 
 
 --
+-- Name: nfl_plays_year_2018_esbid_nflfastr_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_esbid_nflfastr_play_id ATTACH PARTITION public.nfl_plays_year_2018_esbid_nflfastr_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2018_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -44073,6 +44465,13 @@ ALTER INDEX public.idx_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2019
 --
 
 ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2019_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2019_esbid_nflfastr_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_esbid_nflfastr_play_id ATTACH PARTITION public.nfl_plays_year_2019_esbid_nflfastr_play_id_idx;
 
 
 --
@@ -44412,6 +44811,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 
 
 --
+-- Name: nfl_plays_year_2020_esbid_nflfastr_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_esbid_nflfastr_play_id ATTACH PARTITION public.nfl_plays_year_2020_esbid_nflfastr_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2020_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -44745,6 +45151,13 @@ ALTER INDEX public.idx_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2021
 --
 
 ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2021_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2021_esbid_nflfastr_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_esbid_nflfastr_play_id ATTACH PARTITION public.nfl_plays_year_2021_esbid_nflfastr_play_id_idx;
 
 
 --
@@ -45084,6 +45497,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 
 
 --
+-- Name: nfl_plays_year_2022_esbid_nflfastr_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_esbid_nflfastr_play_id ATTACH PARTITION public.nfl_plays_year_2022_esbid_nflfastr_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2022_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -45417,6 +45837,13 @@ ALTER INDEX public.idx_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2023
 --
 
 ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2023_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2023_esbid_nflfastr_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_esbid_nflfastr_play_id ATTACH PARTITION public.nfl_plays_year_2023_esbid_nflfastr_play_id_idx;
 
 
 --
@@ -45756,6 +46183,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 
 
 --
+-- Name: nfl_plays_year_2024_esbid_nflfastr_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_esbid_nflfastr_play_id ATTACH PARTITION public.nfl_plays_year_2024_esbid_nflfastr_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2024_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -46092,6 +46526,13 @@ ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_20
 
 
 --
+-- Name: nfl_plays_year_2025_esbid_nflfastr_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_esbid_nflfastr_play_id ATTACH PARTITION public.nfl_plays_year_2025_esbid_nflfastr_play_id_idx;
+
+
+--
 -- Name: nfl_plays_year_2025_motion_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -46425,6 +46866,13 @@ ALTER INDEX public.idx_nfl_plays_dwn ATTACH PARTITION public.nfl_plays_year_2026
 --
 
 ALTER INDEX public.idx_nfl_plays_esbid ATTACH PARTITION public.nfl_plays_year_2026_esbid_idx;
+
+
+--
+-- Name: nfl_plays_year_2026_esbid_nflfastr_play_id_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_nfl_plays_esbid_nflfastr_play_id ATTACH PARTITION public.nfl_plays_year_2026_esbid_nflfastr_play_id_idx;
 
 
 --
