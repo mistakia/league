@@ -1026,15 +1026,18 @@ const import_dvoa_sheets = async ({ dry_run = false, filepath } = {}) => {
     } else {
       // Calculate which Tuesday of the month we're on
       // NFL weeks start on Tuesday, so we count Tuesdays in the current month
-      const tuesday_of_week = constants.season.regular_season_start
-        .add(nfl_week, 'weeks')
+      const tuesday_of_week = constants.season.regular_season_start.add(
+        nfl_week,
+        'weeks'
+      )
       const first_of_month = tuesday_of_week.startOf('month')
 
       // Count how many Tuesdays have occurred up to and including this week
       let week_in_month = 0
       let current = first_of_month
       while (current.isSameOrBefore(tuesday_of_week, 'day')) {
-        if (current.day() === 2) { // Tuesday
+        if (current.day() === 2) {
+          // Tuesday
           week_in_month++
         }
         current = current.add(1, 'day')
