@@ -62,9 +62,19 @@ async function calculate_super_priority_from_source({
   release_tid = null
 }) {
   // Find the most recent transaction to determine if player is free agent or rostered
-  const most_recent_transaction = await db('transactions')
-    .where({ pid, lid })
+  // When release_tid is provided, look at transactions from that team specifically
+  let most_recent_transaction_query = db('transactions').where({ pid, lid })
+
+  if (release_tid !== null) {
+    most_recent_transaction_query = most_recent_transaction_query.where(
+      'tid',
+      release_tid
+    )
+  }
+
+  const most_recent_transaction = await most_recent_transaction_query
     .orderBy('timestamp', 'desc')
+    .orderBy('uid', 'desc') // Secondary sort by uid for same-timestamp transactions
     .limit(1)
 
   if (!most_recent_transaction.length) {
@@ -81,14 +91,15 @@ async function calculate_super_priority_from_source({
   let poached_transactions
 
   if (is_free_agent) {
-    // For free agents: consider poaches that happened BEFORE the current release
+    // For free agents: consider poaches that happened BEFORE or AT the current release
     // Player was: original team → poached → released (free agent)
+    // Use <= to handle immediate release scenarios where poach and release happen at same timestamp
     const current_release = most_recent_transaction[0]
 
-    // Find poaches that happened before this release
+    // Find poaches that happened before or at this release
     let query = db('transactions')
       .where({ pid, lid, type: constants.transactions.POACHED })
-      .where('timestamp', '<', current_release.timestamp)
+      .where('timestamp', '<=', current_release.timestamp)
 
     // Filter by release_tid if provided
     if (release_tid !== null) {
@@ -150,10 +161,13 @@ async function calculate_super_priority_from_source({
   const poaching_tid = poach_transaction.tid
   const poach_timestamp = poach_transaction.timestamp
 
-  // Find the original team by looking at transactions before the poach
+  // Find the original team by looking at transactions before or at the poach time
+  // Use <= to handle immediate release scenarios where all transactions have same timestamp
+  // Exclude the poach transaction itself by filtering out transactions from the poaching team
   const pre_poach_transactions = await db('transactions')
     .where({ pid, lid })
-    .where('timestamp', '<', poach_timestamp)
+    .where('timestamp', '<=', poach_timestamp)
+    .whereNot('tid', poaching_tid) // Exclude poaching team's transactions
     .whereIn('type', [
       constants.transactions.PRACTICE_ADD,
       constants.transactions.DRAFT,
@@ -162,6 +176,7 @@ async function calculate_super_priority_from_source({
       constants.transactions.POACHED
     ])
     .orderBy('timestamp', 'desc')
+    .orderBy('uid', 'desc')
     .limit(1)
 
   if (!pre_poach_transactions.length) {
