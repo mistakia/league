@@ -112,7 +112,8 @@ export const job_types = {
   PROCESS_MARKET_RESULTS: 88,
   IMPORT_PFF_TEAM_GRADES: 89,
   IMPORT_GAMES_SPORTRADAR: 90,
-  IMPORT_PLAYS_SPORTRADAR: 91
+  IMPORT_PLAYS_SPORTRADAR: 91,
+  IMPORT_GAMEDAY_ROSTERS: 92
 }
 
 export const job_title_by_id = {
@@ -206,5 +207,6 @@ export const job_title_by_id = {
   88: 'Process Market Results',
   89: 'Import PFF Team Grades',
   90: 'Import NFL Games (Sportradar)',
-  91: 'Import NFL Plays (Sportradar)'
+  91: 'Import NFL Plays (Sportradar)',
+  92: 'Import Gameday Rosters'
 }
