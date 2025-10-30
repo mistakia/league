@@ -30,9 +30,6 @@ const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-nflfastr-plays')
 debug.enable('import-nflfastr-plays,update-play,fetch,play-cache')
 
-// Constants
-const TIME_MATCH_TOLERANCE_SECONDS = 5 // Allow 5-second tolerance for timing discrepancies
-
 // ============================================================================
 // Basic Formatters
 // ============================================================================
@@ -763,12 +760,8 @@ const run = async ({
     `Total field updates applied (or that would be applied in dry mode): ${total_updates_applied}`
   )
   if (sorted_updates.length) {
-    const top = sorted_updates.slice(0, 20)
-    for (const [field, count] of top) {
+    for (const [field, count] of sorted_updates) {
       log(`  ${field}: ${count}`)
-    }
-    if (sorted_updates.length > 20) {
-      log(`  ... and ${sorted_updates.length - 20} more fields`)
     }
   } else {
     log('  No field updates detected')
@@ -777,14 +770,8 @@ const run = async ({
   log('\n=== Conflict Summary ===')
   log(`Total conflicts detected: ${total_conflicts_detected}`)
   if (sorted_conflicts.length) {
-    const top = sorted_conflicts.slice(0, 20)
-    for (const [field, count] of top) {
+    for (const [field, count] of sorted_conflicts) {
       log(`  ${field}: ${count}`)
-    }
-    if (sorted_conflicts.length > 20) {
-      log(
-        `  ... and ${sorted_conflicts.length - 20} more fields with conflicts`
-      )
     }
   } else {
     log('  No conflicts detected')
