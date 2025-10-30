@@ -119,6 +119,31 @@ Preferred approach for database schema changes:
 
 Most operations occur within league context (`/leagues/:lid/`). Check user permissions for team operations using helper functions from `libs-server/verify-user-team.mjs` and related utilities.
 
+### Poaching System
+
+**Practice Squad Poaching:**
+
+Teams can poach players from other teams' practice squads with automatic roster space handling:
+
+- **Normal Flow**: Poached player added to bench, removed from original team
+- **Immediate Release Flow**: When poaching team lacks space (after designated releases):
+  1. Creates `POACHED` transaction (preserves history)
+  2. Immediately releases player to waivers via `processRelease()`
+  3. Marks poach as successful (not failed)
+
+**Super Priority System:**
+
+When a poached player is released, `handle_super_priority_on_release()` (in `process-release.mjs`) automatically:
+- Creates `super_priority` record tracking eligibility
+- **Auto-creates waiver** (type: `FREE_AGENCY_PRACTICE`) if original team has practice squad space
+- **Requires manual waiver** if no space available
+
+This preserves transaction history and gives original teams first rights to reclaim poached players.
+
+**Key Files**: 
+- `/libs-server/process-poach.mjs` - Poach orchestration
+- `/libs-server/process-release.mjs` - Super priority handling
+
 ### Real-time Features
 
 WebSocket endpoints for:
