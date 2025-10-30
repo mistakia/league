@@ -8,6 +8,7 @@ import NFLTeam from '@components/nfl-team'
 import { constants } from '@libs-shared'
 import PlayerLabel from '@components/player-label'
 import PlayerTag from '@components/player-tag'
+import { get_reserve_eligibility_from_player_map } from '@libs-shared'
 import PlayerStatus from '@components/player-status'
 import PlayerHeadshot from '@components/player-headshot'
 
@@ -48,7 +49,8 @@ export default function PlayerName({
   headshot_square,
   hidePosition,
   large,
-  show_position_bar
+  show_position_bar,
+  show_reserve_tag = false
 }) {
   const [is_mobile, set_is_mobile] = useState(window.innerWidth < 600)
 
@@ -79,6 +81,12 @@ export default function PlayerName({
   }
 
   const slot = player_map.get('slot')
+  const reserve_info = get_reserve_eligibility_from_player_map({ player_map })
+  const reserve_eligible = show_reserve_tag
+    ? Boolean(
+        reserve_info.reserve_short_term_eligible || reserve_info.cov
+      )
+    : false
 
   return (
     <>
@@ -118,7 +126,7 @@ export default function PlayerName({
           <PlayerLabel label={<NotInterestedIcon />} description='Cutlist' />
         )}
         <PlayerStatus player_map={player_map} />
-        <PlayerTag tag={player_map.get('tag')} />
+        <PlayerTag tag={player_map.get('tag')} reserve_eligible={reserve_eligible} />
       </div>
     </>
   )

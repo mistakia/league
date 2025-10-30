@@ -6,7 +6,14 @@ import { constants } from '@libs-shared'
 
 export default class PlayerTag extends React.Component {
   render() {
-    const { tag } = this.props
+    const { tag, reserve_eligible } = this.props
+
+    // show reserve eligibility tag alongside any other tag
+    if (reserve_eligible) {
+      return (
+        <PlayerLabel label='IR' type='tag' description='Reserve Eligible' />
+      )
+    }
 
     switch (tag) {
       case constants.tags.FRANCHISE:
@@ -31,5 +38,6 @@ export default class PlayerTag extends React.Component {
 }
 
 PlayerTag.propTypes = {
-  tag: PropTypes.number
+  tag: PropTypes.number,
+  reserve_eligible: PropTypes.bool
 }
