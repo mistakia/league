@@ -8,6 +8,8 @@ import create_conditional_pick from './create-conditional-pick.mjs'
 import getLastTransaction from './get-last-transaction.mjs'
 
 export default async function ({ pid, release = [], lid, tid, userid }) {
+  let should_immediate_release_poached_player = false
+
   const rosterSlots = await db('rosters_players')
     .where('rosters_players.pid', pid)
     .where({ week: constants.season.week, year: constants.season.year, lid })
@@ -46,9 +48,21 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
       }
     }
   }
-  const hasSlot = roster.hasOpenBenchSlot(poach_player_row.pos)
-  if (!hasSlot) {
-    throw new Error('poaching claim unsuccessful, no available roster space')
+
+  // Check roster space availability, catch error if no space
+  try {
+    const hasSlot = roster.hasOpenBenchSlot(poach_player_row.pos)
+    if (!hasSlot) {
+      throw new Error('poaching claim unsuccessful, no available roster space')
+    }
+  } catch (error) {
+    if (
+      error.message === 'poaching claim unsuccessful, no available roster space'
+    ) {
+      should_immediate_release_poached_player = true
+    } else {
+      throw error
+    }
   }
 
   // verify team has enough cap if during the offseason
@@ -115,15 +129,35 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
     league
   })
 
+  // Handle immediate release if roster space was not available
+  if (should_immediate_release_poached_player) {
+    console.log(
+      `Processing immediate release for poached player ${pid} from team ${tid}`
+    )
+    await processRelease({
+      release_pid: pid,
+      tid,
+      lid,
+      userid
+    })
+    // Note: Super priority waiver is automatically created by handle_super_priority_on_release()
+    // within processRelease when the original team has available roster space
+  }
+
   // send notification
-  let message = `Poaching claim for ${poach_player_row.fname} ${poach_player_row.lname} (${poach_player_row.pos}) successfully processed.`
-  if (release.length) {
-    for (const release_pid of release) {
-      if (roster.has(release_pid)) {
-        const release_player_row = player_rows.find(
-          (p) => p.pid === release_pid
-        )
-        message += ` ${release_player_row.fname} ${release_player_row.lname} (${release_player_row.pos}) has been released.`
+  let message
+  if (should_immediate_release_poached_player) {
+    message = `${poach_player_row.fname} ${poach_player_row.lname} (${poach_player_row.pos}) was poached and released to waivers.`
+  } else {
+    message = `Poaching claim for ${poach_player_row.fname} ${poach_player_row.lname} (${poach_player_row.pos}) successfully processed.`
+    if (release.length) {
+      for (const release_pid of release) {
+        if (roster.has(release_pid)) {
+          const release_player_row = player_rows.find(
+            (p) => p.pid === release_pid
+          )
+          message += ` ${release_player_row.fname} ${release_player_row.lname} (${release_player_row.pos}) has been released.`
+        }
       }
     }
   }

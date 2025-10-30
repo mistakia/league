@@ -30,7 +30,8 @@ export const get_play_stats = async ({ year, week, seas_type }) => {
 }
 
 export const is_successful_play = ({ yds_gained, yards_to_go, dwn }) => {
-  if (!dwn || !yards_to_go || yds_gained === null || yds_gained === undefined) return null
+  if (!dwn || !yards_to_go || yds_gained === null || yds_gained === undefined)
+    return null
 
   if (dwn === 1) {
     return yds_gained >= 0.4 * yards_to_go
