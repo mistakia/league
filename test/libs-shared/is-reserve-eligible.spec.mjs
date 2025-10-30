@@ -185,6 +185,59 @@ describe('LIBS-SHARED isReserveEligible', function () {
       })
     })
 
+    describe('bye week scenarios', function () {
+      before(function () {
+        // Set current day to Tuesday (day 2)
+        MockDate.set('2024-10-08T10:00:00.000Z') // Tuesday
+      })
+
+      after(function () {
+        MockDate.reset()
+      })
+
+      it('should NOT grant grace period when prior week was bye and player was active in week - 2', function () {
+        const result = isReserveEligible({
+          nfl_status: constants.player_nfl_status.ACTIVE,
+          injury_status: null,
+          prior_week_inactive: false, // SQL now correctly returns false when week-2 was active
+          week: 6,
+          is_regular_season: true,
+          game_day: 'SUN'
+        })
+        // prior_week_inactive should be false (player was active in their actual last game)
+        // No grace period should apply
+        expect(result).to.equal(false)
+      })
+
+      it('should grant grace period when prior week was bye and player was inactive in week - 2', function () {
+        const result = isReserveEligible({
+          nfl_status: constants.player_nfl_status.ACTIVE,
+          injury_status: null,
+          prior_week_inactive: true, // SQL now correctly returns true when week-2 was inactive
+          week: 6,
+          is_regular_season: true,
+          game_day: 'SUN'
+        })
+        // Tuesday (2) < Friday (5), so grace period applies
+        // prior_week_inactive should be true (player was inactive in their actual last game)
+        expect(result).to.equal(true)
+      })
+
+      it('should handle Week 2 after Week 1 bye (no week 0 reference)', function () {
+        const result = isReserveEligible({
+          nfl_status: constants.player_nfl_status.ACTIVE,
+          injury_status: null,
+          prior_week_inactive: false, // SQL returns false when no reference week exists
+          week: 2,
+          is_regular_season: true,
+          game_day: 'SUN'
+        })
+        // Week 2 with week 1 bye, reference week would be week 0 (doesn't exist)
+        // prior_week_inactive should be false (no prior game to reference)
+        expect(result).to.equal(false)
+      })
+    })
+
     describe('edge cases - should not apply historical logic', function () {
       it('should use original logic for week 1', function () {
         const result = isReserveEligible({
