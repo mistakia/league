@@ -83,9 +83,7 @@ export default function PlayerName({
   const slot = player_map.get('slot')
   const reserve_info = get_reserve_eligibility_from_player_map({ player_map })
   const reserve_eligible = show_reserve_tag
-    ? Boolean(
-        reserve_info.reserve_short_term_eligible || reserve_info.cov
-      )
+    ? Boolean(reserve_info.reserve_short_term_eligible || reserve_info.cov)
     : false
 
   return (
@@ -126,7 +124,10 @@ export default function PlayerName({
           <PlayerLabel label={<NotInterestedIcon />} description='Cutlist' />
         )}
         <PlayerStatus player_map={player_map} />
-        <PlayerTag tag={player_map.get('tag')} reserve_eligible={reserve_eligible} />
+        <PlayerTag
+          tag={player_map.get('tag')}
+          reserve_eligible={reserve_eligible}
+        />
       </div>
     </>
   )

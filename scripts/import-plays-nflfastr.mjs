@@ -481,7 +481,6 @@ const is_data_available = (year) => {
   return true
 }
 
-
 /**
  * Download the play-by-play CSV file from nflverse
  */
@@ -647,7 +646,8 @@ const run = async ({
 
       for (const [field, new_value] of Object.entries(formatted_play)) {
         if (excluded_fields.has(field)) continue
-        if (new_value === null || new_value === undefined || new_value === '') continue
+        if (new_value === null || new_value === undefined || new_value === '')
+          continue
 
         const existing_value = db_play[field]
         if (existing_value === new_value) continue
@@ -759,7 +759,9 @@ const run = async ({
   const sorted_conflicts = sort_desc(Object.entries(conflicts_by_field))
 
   log('\n=== Field Update Summary ===')
-  log(`Total field updates applied (or that would be applied in dry mode): ${total_updates_applied}`)
+  log(
+    `Total field updates applied (or that would be applied in dry mode): ${total_updates_applied}`
+  )
   if (sorted_updates.length) {
     const top = sorted_updates.slice(0, 20)
     for (const [field, count] of top) {
@@ -780,7 +782,9 @@ const run = async ({
       log(`  ${field}: ${count}`)
     }
     if (sorted_conflicts.length > 20) {
-      log(`  ... and ${sorted_conflicts.length - 20} more fields with conflicts`)
+      log(
+        `  ... and ${sorted_conflicts.length - 20} more fields with conflicts`
+      )
     }
   } else {
     log('  No conflicts detected')

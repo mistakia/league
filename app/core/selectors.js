@@ -1096,7 +1096,6 @@ export const isPlayerOnReleaseWaivers = createSelector(
   }
 )
 
-
 export function isPlayerLocked(state, { player_map = new Map(), pid }) {
   if (constants.week > constants.season.finalWeek) {
     return true
