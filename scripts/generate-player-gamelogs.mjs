@@ -1,3 +1,26 @@
+/**
+ * Generate Player Gamelogs
+ *
+ * This script creates comprehensive player gamelogs from play-by-play data.
+ *
+ * Process Overview:
+ * 1. Load play stats from nfl_plays table
+ * 2. Calculate stats from play-by-play data (targets, receptions, yards, etc.)
+ * 3. Generate receiving and rushing advanced metrics
+ * 4. Create defense/special teams gamelogs
+ * 5. Add snap-based gamelogs for players without counting stats
+ *    (ensures all active players have gamelogs even with 0 targets/carries)
+ *
+ * Data Sources:
+ * - nfl_plays: Play-by-play data with player stats
+ * - nfl_snaps: Snap participation data
+ * - player_receiving_gamelogs: Route data
+ *
+ * Usage:
+ *   node scripts/generate-player-gamelogs.mjs --year 2025 --week 8
+ *   node scripts/generate-player-gamelogs.mjs --year 2025 --week 8 --dry
+ */
+
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
@@ -161,6 +184,109 @@ const generate_rushing_gamelog = ({
   }
 }
 
+/**
+ * Generate gamelogs for players who played snaps but didn't record any counting stats
+ * This ensures all active players have gamelogs, even if they had 0 targets, 0 carries, etc.
+ *
+ * @param {Array<number>} unique_esbids - Array of game IDs to process
+ * @param {number} year - Season year
+ * @param {Array<Object>} player_gamelog_inserts - Existing gamelogs (will be modified)
+ * @returns {Promise<number>} Number of snap-based gamelogs added
+ */
+const generate_snap_based_gamelogs = async ({
+  unique_esbids,
+  year,
+  player_gamelog_inserts
+}) => {
+  log('Checking for players with snaps but no stats...')
+
+  // Query players who played snaps in these games
+  const players_with_snaps = await db('nfl_snaps')
+    .select(
+      'player.pid',
+      'player.pos',
+      'player.current_nfl_team',
+      'nfl_snaps.esbid'
+    )
+    .join('player', 'player.gsis_it_id', 'nfl_snaps.gsis_it_id')
+    .whereIn('nfl_snaps.esbid', unique_esbids)
+    .where('nfl_snaps.year', year)
+    .groupBy(
+      'player.pid',
+      'player.pos',
+      'player.current_nfl_team',
+      'nfl_snaps.esbid'
+    )
+    .havingRaw('COUNT(*) > 0')
+
+  log(`Found ${players_with_snaps.length} players with snap data`)
+
+  // Build game lookup for opponent determination
+  const games_by_esbid = await db('nfl_games')
+    .whereIn('esbid', unique_esbids)
+    .then((games) =>
+      games.reduce((acc, game) => {
+        acc[game.esbid] = game
+        return acc
+      }, {})
+    )
+
+  // Add gamelogs for players with snaps but no existing gamelog
+  let added_count = 0
+  for (const snap_player of players_with_snaps) {
+    const already_has_gamelog = player_gamelog_inserts.some(
+      (gamelog) =>
+        gamelog.pid === snap_player.pid && gamelog.esbid === snap_player.esbid
+    )
+
+    if (!already_has_gamelog) {
+      const game = games_by_esbid[snap_player.esbid]
+      if (!game) {
+        log(`Warning: Could not find game for esbid ${snap_player.esbid}`)
+        continue
+      }
+
+      const team = fixTeam(snap_player.current_nfl_team)
+      const opponent =
+        fixTeam(game.h) === team ? fixTeam(game.v) : fixTeam(game.h)
+
+      player_gamelog_inserts.push({
+        esbid: snap_player.esbid,
+        pid: snap_player.pid,
+        pos: snap_player.pos,
+        tm: team,
+        opp: opponent,
+        year,
+        active: true
+        // All counting stats default to NULL/0
+      })
+      added_count++
+    }
+  }
+
+  log(
+    `Added ${added_count} snap-based gamelogs for players without counting stats`
+  )
+
+  return added_count
+}
+
+/**
+ * Generate player gamelogs from play-by-play data
+ *
+ * This script processes NFL play data to create comprehensive player gamelogs including:
+ * - Basic player stats (passing, rushing, receiving)
+ * - Advanced receiving metrics (routes, target share, etc.)
+ * - Advanced rushing metrics (rush share, opportunity, etc.)
+ * - Team aggregates
+ * - Defense/special teams stats
+ * - Snap-based gamelogs for players without counting stats
+ *
+ * @param {number} week - Week number to process
+ * @param {number} year - Season year
+ * @param {string} seas_type - Season type (REG, PRE, POST)
+ * @param {boolean} dry_run - If true, shows what would be generated without saving
+ */
 const generate_player_gamelogs = async ({
   week = constants.season.last_week_with_stats,
   year = constants.season.year,
@@ -397,6 +523,14 @@ const generate_player_gamelogs = async ({
   missing.forEach((m) =>
     log(`could not find player: ${m.pname} / ${m.current_nfl_team}`)
   )
+
+  // Generate gamelogs for players who played snaps but didn't record any counting stats
+  // This ensures complete coverage (e.g., WR with 0 targets still gets a gamelog)
+  await generate_snap_based_gamelogs({
+    unique_esbids,
+    year,
+    player_gamelog_inserts
+  })
 
   if (dry_run) {
     log(player_gamelog_inserts[0])
