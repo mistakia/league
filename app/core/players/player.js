@@ -23,6 +23,8 @@ export function createPlayer({
   f,
   s,
   su,
+  status,
+  formatted_status,
   practice_week,
   ...data
 }) {
@@ -40,7 +42,17 @@ export function createPlayer({
     s !== undefined ||
     su !== undefined
   ) {
-    params.practice_week = new Map({ m, tu, w, th, f, s, su })
+    params.practice_week = new Map({
+      m,
+      tu,
+      w,
+      th,
+      f,
+      s,
+      su,
+      status,
+      formatted_status
+    })
   } else if (practice_week) {
     // If practice_week is passed directly (e.g., from data.toJS() spreading),
     // ensure it's converted back to an Immutable Map

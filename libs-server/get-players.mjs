@@ -194,7 +194,9 @@ export default async function ({
       'practice.th',
       'practice.f',
       'practice.s',
-      'practice.su'
+      'practice.su',
+      'practice.status',
+      'practice.formatted_status'
     )
     query.groupBy(
       'practice.m',
@@ -203,7 +205,9 @@ export default async function ({
       'practice.th',
       'practice.f',
       'practice.s',
-      'practice.su'
+      'practice.su',
+      'practice.status',
+      'practice.formatted_status'
     )
 
     query.select('nfl_games.day as game_day')
