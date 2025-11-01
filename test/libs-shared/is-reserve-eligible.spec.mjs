@@ -517,4 +517,282 @@ describe('LIBS-SHARED isReserveEligible', function () {
       expect(result).to.equal(true)
     })
   })
+
+  describe('final practice report detection', function () {
+    it('should return true when status field exists', function () {
+      const result = isReserveEligible({
+        nfl_status: constants.player_nfl_status.ACTIVE,
+        injury_status: null,
+        practice: {
+          m: null,
+          tu: 'LP',
+          w: null,
+          th: null,
+          f: null,
+          s: null,
+          su: null,
+          status: 'OUT'
+        },
+        game_day: 'SUN',
+        current_date: new Date('2024-01-10') // Wednesday
+      })
+      // Final report exists (status field), so practice status check is skipped
+      // Falls through to original eligibility logic
+      expect(result).to.equal(false)
+    })
+
+    it('should return true when formatted_status field exists', function () {
+      const result = isReserveEligible({
+        nfl_status: constants.player_nfl_status.ACTIVE,
+        injury_status: null,
+        practice: {
+          m: null,
+          tu: 'DNP',
+          w: null,
+          th: null,
+          f: null,
+          s: null,
+          su: null,
+          formatted_status: 'Questionable'
+        },
+        game_day: 'SUN',
+        current_date: new Date('2024-01-10') // Wednesday
+      })
+      // Final report exists (formatted_status field), so practice status check is skipped
+      // Falls through to original eligibility logic
+      expect(result).to.equal(false)
+    })
+
+    it('should return true when current day > final practice day', function () {
+      const result = isReserveEligible({
+        nfl_status: constants.player_nfl_status.ACTIVE,
+        injury_status: null,
+        practice: {
+          m: null,
+          tu: 'LP',
+          w: null,
+          th: null,
+          f: null,
+          s: null,
+          su: null
+        },
+        game_day: 'SUN',
+        current_date: new Date('2024-01-13T12:00:00') // Saturday (day 6)
+      })
+      // Saturday (6) > Friday (5) for Sunday game, final report exists
+      // Falls through to original eligibility logic
+      expect(result).to.equal(false)
+    })
+
+    it('should return true when final practice day has status', function () {
+      const result = isReserveEligible({
+        nfl_status: constants.player_nfl_status.ACTIVE,
+        injury_status: null,
+        practice: {
+          m: null,
+          tu: null,
+          w: 'LP',
+          th: null,
+          f: 'FP',
+          s: null,
+          su: null
+        },
+        game_day: 'SUN',
+        current_date: new Date('2024-01-10') // Wednesday
+      })
+      // Friday has status ('FP'), final report exists for Sunday game
+      // Falls through to original eligibility logic
+      expect(result).to.equal(false)
+    })
+
+    it('should return false when no conditions met', function () {
+      const result = isReserveEligible({
+        nfl_status: constants.player_nfl_status.ACTIVE,
+        injury_status: null,
+        practice: {
+          m: null,
+          tu: 'LP',
+          w: null,
+          th: null,
+          f: null,
+          s: null,
+          su: null
+        },
+        game_day: 'SUN',
+        current_date: new Date('2024-01-09') // Tuesday (day 2)
+      })
+      // Tuesday (2) < Friday (5), no status/formatted_status fields, final day has no status
+      // Practice status check applies, LP makes eligible
+      expect(result).to.equal(true)
+    })
+
+    it('should return false when practice is null', function () {
+      const result = isReserveEligible({
+        nfl_status: constants.player_nfl_status.ACTIVE,
+        injury_status: null,
+        practice: null,
+        game_day: 'SUN',
+        current_date: new Date('2024-01-10') // Wednesday
+      })
+      // No practice data, falls through to original eligibility logic
+      expect(result).to.equal(false)
+    })
+  })
+
+  describe('practice status with final report', function () {
+    it('should make DNP eligible when no final report', function () {
+      const result = isReserveEligible({
+        nfl_status: constants.player_nfl_status.ACTIVE,
+        injury_status: null,
+        practice: {
+          m: null,
+          tu: null,
+          w: 'DNP',
+          th: null,
+          f: null,
+          s: null,
+          su: null
+        },
+        game_day: 'SUN',
+        current_date: new Date('2024-01-10') // Wednesday
+      })
+      // Wednesday (3) < Friday (5), no final report exists
+      // DNP makes eligible
+      expect(result).to.equal(true)
+    })
+
+    it('should make LP eligible when no final report', function () {
+      const result = isReserveEligible({
+        nfl_status: constants.player_nfl_status.ACTIVE,
+        injury_status: null,
+        practice: {
+          m: null,
+          tu: null,
+          w: 'LP',
+          th: null,
+          f: null,
+          s: null,
+          su: null
+        },
+        game_day: 'SUN',
+        current_date: new Date('2024-01-10') // Wednesday
+      })
+      // Wednesday (3) < Friday (5), no final report exists
+      // LP makes eligible
+      expect(result).to.equal(true)
+    })
+
+    it('should NOT make DNP eligible when final report exists', function () {
+      const result = isReserveEligible({
+        nfl_status: constants.player_nfl_status.ACTIVE,
+        injury_status: null,
+        practice: {
+          m: null,
+          tu: null,
+          w: 'DNP',
+          th: null,
+          f: null,
+          s: null,
+          su: null,
+          status: 'OUT'
+        },
+        game_day: 'SUN',
+        current_date: new Date('2024-01-10') // Wednesday
+      })
+      // Final report exists (status field), practice status check is skipped
+      // Falls through to original eligibility logic (injury_status is null)
+      expect(result).to.equal(false)
+    })
+
+    it('should NOT make LP eligible when final report exists', function () {
+      const result = isReserveEligible({
+        nfl_status: constants.player_nfl_status.ACTIVE,
+        injury_status: null,
+        practice: {
+          m: null,
+          tu: null,
+          w: 'LP',
+          th: null,
+          f: null,
+          s: null,
+          su: null,
+          formatted_status: 'Questionable'
+        },
+        game_day: 'SUN',
+        current_date: new Date('2024-01-10') // Wednesday
+      })
+      // Final report exists (formatted_status field), practice status check is skipped
+      // Falls through to original eligibility logic (injury_status is null)
+      expect(result).to.equal(false)
+    })
+
+    it('should fall through to original logic after final report', function () {
+      const result = isReserveEligible({
+        nfl_status: constants.player_nfl_status.ACTIVE,
+        injury_status: constants.player_nfl_injury_status.QUESTIONABLE,
+        practice: {
+          m: null,
+          tu: 'LP',
+          w: null,
+          th: null,
+          f: null,
+          s: null,
+          su: null,
+          status: 'QUESTIONABLE'
+        },
+        game_day: 'SUN',
+        current_date: new Date('2024-01-10') // Wednesday
+      })
+      // Final report exists (status field), practice status check is skipped
+      // Falls through to original eligibility logic
+      // QUESTIONABLE injury_status is not eligible unless constants.season.week === 0
+      const expected = Boolean(constants.season.week === 0)
+      expect(result).to.equal(expected)
+    })
+
+    it('should make OUT injury_status eligible even with final report', function () {
+      const result = isReserveEligible({
+        nfl_status: constants.player_nfl_status.ACTIVE,
+        injury_status: constants.player_nfl_injury_status.OUT,
+        practice: {
+          m: null,
+          tu: 'LP',
+          w: null,
+          th: null,
+          f: null,
+          s: null,
+          su: null,
+          status: 'OUT'
+        },
+        game_day: 'SUN',
+        current_date: new Date('2024-01-10') // Wednesday
+      })
+      // Final report exists (status field), practice status check is skipped
+      // Falls through to original eligibility logic
+      // OUT injury_status makes eligible
+      expect(result).to.equal(true)
+    })
+
+    it('should skip practice check when past final practice day', function () {
+      const result = isReserveEligible({
+        nfl_status: constants.player_nfl_status.ACTIVE,
+        injury_status: null,
+        practice: {
+          m: null,
+          tu: 'DNP',
+          w: 'DNP',
+          th: 'DNP',
+          f: 'DNP',
+          s: null,
+          su: null
+        },
+        game_day: 'SUN',
+        current_date: new Date('2024-01-13T12:00:00') // Saturday (day 6)
+      })
+      // Saturday (6) > Friday (5) for Sunday game, final report exists
+      // Practice status check is skipped even though all days show DNP
+      // Falls through to original eligibility logic
+      expect(result).to.equal(false)
+    })
+  })
 })
