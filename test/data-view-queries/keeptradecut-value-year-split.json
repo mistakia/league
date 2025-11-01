@@ -1,0 +1,27 @@
+{
+  "name": "keeptradecut value year split",
+  "description": "Auto-generated test case",
+  "request": {
+    "columns": [
+      {
+        "column_id": "player_keeptradecut_value",
+        "params": {
+          "year": [2023, 2024],
+          "date": "latest"
+        }
+      }
+    ],
+    "prefix_columns": ["player_name", "player_position"],
+    "splits": ["year"],
+    "sort": [
+      {
+        "column_id": "player_keeptradecut_value",
+        "desc": true
+      }
+    ],
+    "limit": 10
+  },
+  "expected_query": "with \"base_years\" as (SELECT unnest(ARRAY[2023,2024]) as year), \"player_years\" as (SELECT DISTINCT player.pid, base_years.year FROM player CROSS JOIN base_years) select \"player\".\"pid\", player.fname, player.lname, \"player\".\"pos\" AS \"pos_0\", \"t84d95af855d699f03c85a849d680271c\".\"v\" AS \"player_keeptradecut_value_0\", \"player_years\".\"year\", \"player\".\"pos\" from \"player\" inner join \"player_years\" on \"player_years\".\"pid\" = \"player\".\"pid\" left join \"opening_days\" on \"opening_days\".\"year\" = \"player_years\".\"year\" left join \"keeptradecut_rankings\" as \"t84d95af855d699f03c85a849d680271c\" on \"t84d95af855d699f03c85a849d680271c\".\"pid\" = \"player\".\"pid\" and \"t84d95af855d699f03c85a849d680271c\".\"qb\" = 2 and \"t84d95af855d699f03c85a849d680271c\".\"type\" = 1 and \"t84d95af855d699f03c85a849d680271c\".\"d\" = EXTRACT(EPOCH FROM (date_trunc('day', opening_days.opening_day) + interval '0 year'))::integer and opening_days.year = (player_years.year) group by player.fname, player.lname, \"player\".\"pos\", \"t84d95af855d699f03c85a849d680271c\".\"v\", \"player_years\".\"year\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 5 DESC NULLS LAST, \"player\".\"pid\" asc limit 10",
+  "tags": [],
+  "timeout_ms": 35000
+}
