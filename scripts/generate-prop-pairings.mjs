@@ -456,9 +456,10 @@ const generate_prop_pairings = async ({
   }
 
   if (prop_pairing_inserts.length) {
-    const chunk_size = 200
+    const chunk_size = 100
     await db.transaction(async (trx) => {
       await trx.raw("set local synchronous_commit = 'off'")
+      await trx.raw('set local statement_timeout = 0')
 
       const pairing_chunks = chunk_array({
         items: prop_pairing_inserts,
