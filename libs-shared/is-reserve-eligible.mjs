@@ -39,6 +39,12 @@ function has_final_practice_report({ practice, game_day, current_date }) {
 
   const current_day_of_week = current_date.getDay()
 
+  // Sundays (0) and Mondays (1) are considered after the final practice day
+  // since the new NFL week starts on Tuesday
+  if (current_day_of_week === 0 || current_day_of_week === 1) {
+    return true
+  }
+
   // Check if current day is past final practice day
   if (current_day_of_week > final_practice_day) {
     return true
@@ -91,10 +97,14 @@ export default function isReserveEligible({
     const final_practice_day = get_final_practice_day({ game_day })
 
     if (final_practice_day !== null) {
-      const current_day_of_week = new Date().getDay()
+      const current_day_of_week = current_date.getDay()
 
-      // Before final practice day: player remains eligible (grace period)
-      if (current_day_of_week < final_practice_day) {
+      // Sundays (0) and Mondays (1) are considered after the final practice day
+      // since the new NFL week starts on Tuesday, so grace period doesn't apply
+      if (current_day_of_week === 0 || current_day_of_week === 1) {
+        // On or after final practice day: fall through to original eligibility logic
+      } else if (current_day_of_week < final_practice_day) {
+        // Before final practice day: player remains eligible (grace period)
         return true
       }
 
