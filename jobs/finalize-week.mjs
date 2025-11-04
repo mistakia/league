@@ -50,6 +50,7 @@ const finalize_week = async () => {
 }
 
 const main = async () => {
+  debug.enable('finalize-week')
   let error
   try {
     await finalize_week()
