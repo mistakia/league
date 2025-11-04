@@ -270,6 +270,11 @@ const generate_player_snaps_for_week = async ({
     const team = player_gamelog.tm
     const team_total = team_totals[team]
 
+    if (!team_total) {
+      log(`team_total not found for team: ${team}, pid: ${player_row.pid}`)
+      continue
+    }
+
     player_snap_inserts.push({
       esbid,
       pid: player_row.pid,
