@@ -220,6 +220,115 @@ describe('LIBS-SHARED Roster', function () {
     hasSlot2.should.equal(true)
   })
 
+  it('addPlayer preserves extensions', () => {
+    const league = {
+      sqb: 1,
+      srb: 2,
+      swr: 2,
+      ste: 1,
+      srbwr: 1,
+      srbwrte: 1,
+      srqbrbwrte: 1,
+      swrte: 1,
+      sdst: 1,
+      sk: 1,
+      bench: 6,
+      ps: 4,
+      reserve_short_term_limit: 3,
+      mqb: 0,
+      mrb: 0,
+      mwr: 0,
+      mte: 0,
+      mk: 3,
+      mdst: 3
+    }
+
+    const roster = {
+      uid: 0,
+      tid: 1,
+      week: 1,
+      year: 2024,
+      lid: 1,
+      players: []
+    }
+
+    const r = new Roster({ roster, league })
+
+    // Add player with extensions
+    r.addPlayer({
+      slot: constants.slots.BENCH,
+      pid: 'player-with-extensions',
+      pos: 'RB',
+      value: 10,
+      extensions: 3
+    })
+
+    // Verify extensions are stored
+    const player = r.get('player-with-extensions')
+    player.extensions.should.equal(3)
+
+    // Verify extensions are included in rosters_players getter
+    const rosterPlayers = r.rosters_players
+    const addedPlayer = rosterPlayers.find(
+      (p) => p.pid === 'player-with-extensions'
+    )
+    addedPlayer.extensions.should.equal(3)
+  })
+
+  it('addPlayer defaults extensions to 0', () => {
+    const league = {
+      sqb: 1,
+      srb: 2,
+      swr: 2,
+      ste: 1,
+      srbwr: 1,
+      srbwrte: 1,
+      srqbrbwrte: 1,
+      swrte: 1,
+      sdst: 1,
+      sk: 1,
+      bench: 6,
+      ps: 4,
+      reserve_short_term_limit: 3,
+      mqb: 0,
+      mrb: 0,
+      mwr: 0,
+      mte: 0,
+      mk: 3,
+      mdst: 3
+    }
+
+    const roster = {
+      uid: 0,
+      tid: 1,
+      week: 1,
+      year: 2024,
+      lid: 1,
+      players: []
+    }
+
+    const r = new Roster({ roster, league })
+
+    // Add player without extensions parameter
+    r.addPlayer({
+      slot: constants.slots.BENCH,
+      pid: 'player-no-extensions',
+      pos: 'WR',
+      value: 5
+    })
+
+    // Verify extensions default to 0
+    const player = r.get('player-no-extensions')
+    player.extensions.should.equal(0)
+
+    // Verify in rosters_players getter
+    const rosterPlayers = r.rosters_players
+    const addedPlayer = rosterPlayers.find(
+      (p) => p.pid === 'player-no-extensions'
+    )
+    addedPlayer.extensions.should.equal(0)
+  })
+
   it('getCountBySlot', () => {
     // TODO
   })

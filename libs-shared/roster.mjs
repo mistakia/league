@@ -240,6 +240,7 @@ export default class Roster {
     pos,
     value = 0,
     tag = 1,
+    extensions = 0,
     restricted_free_agency_original_team = null
   }) {
     if (this.isFull) {
@@ -255,6 +256,7 @@ export default class Roster {
       rid: this.uid,
       value,
       tag,
+      extensions,
       restricted_free_agency_original_team
     })
   }

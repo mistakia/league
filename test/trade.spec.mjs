@@ -130,6 +130,92 @@ describe('API /trades', function () {
       // TODO - check player values pre/post trade
     })
 
+    it('trade preserves extension counts', async () => {
+      await draft(knex)
+
+      // Get players from both teams
+      const proposingTeamPlayerRows = await knex('rosters_players')
+        .where({
+          lid: 1,
+          tid: 1,
+          year: constants.season.year,
+          week: constants.season.week
+        })
+        .whereNot('pos', 'K')
+        .limit(1)
+
+      const acceptingTeamPlayerRows = await knex('rosters_players')
+        .where({
+          lid: 1,
+          tid: 2,
+          year: constants.season.year,
+          week: constants.season.week
+        })
+        .whereNot('pos', 'K')
+        .limit(1)
+
+      const proposingTeamPlayers = [proposingTeamPlayerRows[0].pid]
+      const acceptingTeamPlayers = [acceptingTeamPlayerRows[0].pid]
+
+      // Set extension counts for both players
+      await knex('rosters_players')
+        .where({ pid: proposingTeamPlayers[0], tid: 1 })
+        .update({ extensions: 3 })
+
+      await knex('rosters_players')
+        .where({ pid: acceptingTeamPlayers[0], tid: 2 })
+        .update({ extensions: 2 })
+
+      // Create trade proposal
+      const proposalRes = await chai_request
+        .execute(server)
+        .post('/api/leagues/1/trades')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          proposingTeamPlayers,
+          acceptingTeamPlayers,
+          propose_tid: 1,
+          accept_tid: 2,
+          leagueId: 1
+        })
+
+      proposalRes.should.have.status(200)
+      should.exist(proposalRes.body.uid)
+
+      const tradeid = proposalRes.body.uid
+
+      // Accept trade
+      const acceptRes = await chai_request
+        .execute(server)
+        .post(`/api/leagues/1/trades/${tradeid}/accept`)
+        .set('Authorization', `Bearer ${user2}`)
+
+      acceptRes.should.have.status(200)
+
+      // Verify extension counts are preserved
+      const proposingPlayerAfterTrade = await knex('rosters_players')
+        .where({
+          pid: proposingTeamPlayers[0],
+          tid: 2,
+          year: constants.season.year,
+          week: constants.season.week
+        })
+        .first()
+
+      const acceptingPlayerAfterTrade = await knex('rosters_players')
+        .where({
+          pid: acceptingTeamPlayers[0],
+          tid: 1,
+          year: constants.season.year,
+          week: constants.season.week
+        })
+        .first()
+
+      // Verify extensions preserved
+      proposingPlayerAfterTrade.extensions.should.equal(3)
+      acceptingPlayerAfterTrade.extensions.should.equal(2)
+    })
+
     it('one for one trade of rookies: one active, one on practice squad, with subsequent deactivations', async () => {
       const player1 = await selectPlayer({ rookie: true })
       const teamId = 1
