@@ -552,12 +552,20 @@ router.post(
         .join('player', 'transactions.pid', 'player.pid')
         .whereIn('player.pid', all_pids)
 
-      // validate accepting team roster
+      // Load both team rosters first
       const acceptingTeamRosterRow = await getRoster({ tid: trade.accept_tid })
       const acceptingTeamRoster = new Roster({
         roster: acceptingTeamRosterRow,
         league
       })
+
+      const proposingTeamRosterRow = await getRoster({ tid: trade.propose_tid })
+      const proposingTeamRoster = new Roster({
+        roster: proposingTeamRosterRow,
+        league
+      })
+
+      // validate accepting team roster
       for (const pid of acceptingTeamReleasePlayers) {
         if (!acceptingTeamRoster.has(pid)) {
           return res
@@ -588,6 +596,19 @@ router.post(
         }
       }
 
+      // Get extension counts before removing players
+      const proposingPlayerExtensions = {}
+      for (const pid of proposingTeamPlayers) {
+        const player = proposingTeamRoster.get(pid)
+        proposingPlayerExtensions[pid] = player?.extensions || 0
+      }
+
+      const acceptingPlayerExtensions = {}
+      for (const pid of acceptingTeamPlayers) {
+        const player = acceptingTeamRoster.get(pid)
+        acceptingPlayerExtensions[pid] = player?.extensions || 0
+      }
+
       acceptingTeamReleasePlayers.forEach((p) =>
         acceptingTeamRoster.removePlayer(p)
       )
@@ -605,15 +626,10 @@ router.post(
           slot: constants.slots.BENCH,
           pid,
           pos: player_row.pos,
-          value: player_row.value
+          value: player_row.value,
+          extensions: proposingPlayerExtensions[pid]
         })
       }
-
-      const proposingTeamRosterRow = await getRoster({ tid: trade.propose_tid })
-      const proposingTeamRoster = new Roster({
-        roster: proposingTeamRosterRow,
-        league
-      })
 
       // check if proposing team trade players are a locked starter
       for (const pid of proposingTeamPlayers) {
@@ -656,7 +672,8 @@ router.post(
           slot: constants.slots.BENCH,
           pid,
           pos: player_row.pos,
-          value: player_row.value
+          value: player_row.value,
+          extensions: acceptingPlayerExtensions[pid]
         })
       }
 
