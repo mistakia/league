@@ -19,6 +19,7 @@ import {
   find_player,
   preload_active_players
 } from '#libs-server/player-cache.mjs'
+import { normalize_selection_metric_line } from '#libs-server/normalize-selection-metric-line.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 // Constants
@@ -241,13 +242,19 @@ const process_market_selections = ({
       player_row
     })
 
+    // Normalize the line for N+ discrete stat markets
+    const normalized_line = normalize_selection_metric_line({
+      raw_value: selection.points,
+      selection_name: participant_name
+    })
+
     return {
       source_id: 'PINNACLE',
       source_market_id: `${pinnacle_matchup.id}/${pinnacle_matchup.pinnacle_odds_key}`,
       source_selection_id: selection.participantId,
       selection_pid,
       selection_name: participant_name,
-      selection_metric_line: selection.points,
+      selection_metric_line: normalized_line,
       selection_type: pinnacle.format_selection_type(participant_name),
       odds_decimal: oddslib.from('moneyline', selection.price).to('decimal'),
       odds_american: selection.price
