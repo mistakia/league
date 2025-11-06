@@ -14,6 +14,7 @@ import {
   find_player_row,
   report_job
 } from '#libs-server'
+import { normalize_selection_metric_line } from '#libs-server/normalize-selection-metric-line.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -55,7 +56,13 @@ const format_market = async ({
       selection_name = outcome.label
     }
 
-    const selection_metric_line = Number(outcome.line) || null
+    let selection_metric_line = Number(outcome.line) || null
+
+    // Normalize the line for N+ discrete stat markets
+    selection_metric_line = normalize_selection_metric_line({
+      raw_value: selection_metric_line,
+      selection_name: outcome.label
+    })
 
     selections.push({
       source_id: 'BETRIVERS',

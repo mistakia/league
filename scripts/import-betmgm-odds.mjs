@@ -13,6 +13,7 @@ import {
   find_player_row,
   report_job
 } from '#libs-server'
+import { normalize_selection_metric_line } from '#libs-server/normalize-selection-metric-line.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -106,6 +107,12 @@ const format_option_market = async ({
     if (selection_name) {
       selection_line = Number(option.name.value.replace(/[a-zA-Z]/g, ''))
     }
+
+    // Normalize the line for N+ discrete stat markets
+    selection_line = normalize_selection_metric_line({
+      raw_value: selection_line,
+      selection_name: option.name.value
+    })
 
     selections.push({
       source_id: 'BETMGM',
