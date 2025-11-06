@@ -3,20 +3,21 @@ import dayjs from 'dayjs'
 import db from '#db'
 import { constants } from '#libs-shared'
 
-export default async function (leagueId) {
-  // get relevant transactions from last 48 hours
-  const cutoff = dayjs().subtract('48', 'hours').unix()
+export default async function (league_id) {
+  // sanctuary period and waiver period both last 24 hours and overlap
+  // exclude players still in these periods from waiver processing (but allow waiver submission)
+  const sanctuary_period = dayjs().subtract('24', 'hours').unix()
   const transactions = await db('transactions')
     .whereIn('type', [
       constants.transactions.DRAFT,
       constants.transactions.PRACTICE_ADD,
       constants.transactions.ROSTER_DEACTIVATE
     ])
-    .where('timestamp', '>=', cutoff)
-    .where('lid', leagueId)
+    .where('timestamp', '>=', sanctuary_period)
+    .where('lid', league_id)
 
   const exclude_pids = transactions.map((t) => t.pid)
-  const waiversQuery = db('waivers')
+  const waivers_query = db('waivers')
     .select(
       'teams.*',
       'waivers.uid as wid',
@@ -33,10 +34,10 @@ export default async function (leagueId) {
     .orderBy(['teams.waiver_order', 'waivers.po', 'waivers.uid'])
 
   if (exclude_pids.length) {
-    waiversQuery.whereNotIn('waivers.pid', exclude_pids)
+    waivers_query.whereNotIn('waivers.pid', exclude_pids)
   }
 
-  const waivers = await waiversQuery
+  const waivers = await waivers_query
 
   return waivers.length ? waivers[0] : undefined
 }

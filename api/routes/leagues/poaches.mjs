@@ -91,14 +91,16 @@ router.post('/?', async (req, res) => {
       }
     }
 
-    // verify player is not on waivers
+    // verify player is not in 24-hour sanctuary/waiver period
     if (
       (tran.type === constants.transactions.ROSTER_DEACTIVATE ||
         tran.type === constants.transactions.DRAFT ||
         tran.type === constants.transactions.PRACTICE_ADD) &&
-      dayjs().isBefore(dayjs.unix(tran.timestamp).add('48', 'hours'))
+      dayjs().isBefore(dayjs.unix(tran.timestamp).add('24', 'hours'))
     ) {
-      return res.status(400).send({ error: 'Player is on waivers' })
+      return res
+        .status(400)
+        .send({ error: 'Player in 24-hour sanctuary/waiver period' })
     }
 
     // check team reserve status
