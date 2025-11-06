@@ -15,6 +15,7 @@ import {
   wait,
   report_job
 } from '#libs-server'
+import { normalize_selection_metric_line } from '#libs-server/normalize-selection-metric-line.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -33,6 +34,12 @@ const format_market = async ({
 }) => {
   const selections = []
 
+  // Normalize the line for N+ discrete stat markets
+  const normalized_line = normalize_selection_metric_line({
+    raw_value: Number(betonline_market.value),
+    selection_name: betonline_market.value
+  })
+
   selections.push({
     source_id: 'BETONLINE',
     source_market_id: betonline_market.id,
@@ -40,7 +47,7 @@ const format_market = async ({
 
     selection_pid: player_row?.pid || null,
     selection_name: 'over',
-    selection_metric_line: Number(betonline_market.value) - 0.5,
+    selection_metric_line: normalized_line,
     odds_decimal: Number(betonline_market.odds),
     odds_american: oddslib
       .from('decimal', betonline_market.odds)
