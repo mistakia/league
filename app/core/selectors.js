@@ -1350,27 +1350,32 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
         playerSlot === constants.slots.PS ||
         playerSlot === constants.slots.PSD
       ) {
-        const rosterInfo = getRosterInfoForPlayerId(state, {
+        const roster_info = getRosterInfoForPlayerId(state, {
           pid: playerId
         })
-        const sanctuaryEnd = dayjs.unix(rosterInfo.timestamp).add('24', 'hours')
-        const cutoff = dayjs.unix(rosterInfo.timestamp).add('48', 'hours')
+        const sanctuary_end = dayjs
+          .unix(roster_info.timestamp)
+          .add('24', 'hours')
+        const waiver_period_end = dayjs
+          .unix(roster_info.timestamp)
+          .add('24', 'hours')
 
         // check if player has existing poaching claim and is after sanctuary period
-        const leaguePoaches = get_poaches_for_current_league(state)
+        const league_poaches = get_poaches_for_current_league(state)
         if (
-          !leaguePoaches.has(playerId) &&
-          dayjs().isAfter(sanctuaryEnd) &&
+          !league_poaches.has(playerId) &&
+          dayjs().isAfter(sanctuary_end) &&
           !is_sanctuary_period
         ) {
           status.eligible.poach = true
         }
 
+        // waiver period overlaps with sanctuary period (both 24 hours)
         if (
-          ((rosterInfo.type === constants.transactions.ROSTER_DEACTIVATE ||
-            rosterInfo.type === constants.transactions.DRAFT ||
-            rosterInfo.type === constants.transactions.PRACTICE_ADD) &&
-            dayjs().isBefore(cutoff)) ||
+          ((roster_info.type === constants.transactions.ROSTER_DEACTIVATE ||
+            roster_info.type === constants.transactions.DRAFT ||
+            roster_info.type === constants.transactions.PRACTICE_ADD) &&
+            dayjs().isBefore(waiver_period_end)) ||
           is_sanctuary_period
         ) {
           status.waiver.poach = true
