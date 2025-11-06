@@ -119,7 +119,7 @@ async function calculate_super_priority_from_source({
       // Find poaches after the most recent release
       let query = db('transactions')
         .where({ pid, lid, type: constants.transactions.POACHED })
-        .where('timestamp', '>', most_recent_release[0].timestamp)
+        .where('timestamp', '>=', most_recent_release[0].timestamp)
 
       // Filter by release_tid if provided
       if (release_tid !== null) {

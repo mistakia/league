@@ -103,22 +103,20 @@ async function handle_super_priority_on_release({ pid, releasing_tid, lid }) {
       .update({ eligible: 1, requires_waiver })
   }
 
-  // Automatically create waiver when roster space is available
-  // When space is NOT available (requires_waiver=1), user must manually submit waiver
-  if (!requires_waiver) {
-    // Super priority waivers are always FREE_AGENCY_PRACTICE type
-    await db('waivers').insert({
-      userid: 0,
-      pid,
-      tid: super_priority_status.original_tid,
-      lid,
-      submitted: Math.round(Date.now() / 1000),
-      bid: 0,
-      po: 0,
-      type: constants.waivers.FREE_AGENCY_PRACTICE,
-      super_priority: 1
-    })
-  }
+  // Automatically create waiver for all eligible super priority cases
+  // Team can update the waiver to include a release if roster space is needed
+  // Super priority waivers are always FREE_AGENCY_PRACTICE type
+  await db('waivers').insert({
+    userid: 0,
+    pid,
+    tid: super_priority_status.original_tid,
+    lid,
+    submitted: Math.round(Date.now() / 1000),
+    bid: 0,
+    po: 0,
+    type: constants.waivers.FREE_AGENCY_PRACTICE,
+    super_priority: 1
+  })
 }
 
 export default async function ({
