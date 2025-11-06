@@ -1,4 +1,5 @@
 import { player_game_alt_prop_types } from '#libs-shared/bookmaker-constants.mjs'
+import { normalize_selection_metric_line } from '../normalize-selection-metric-line.mjs'
 
 const format_selection_player_name = (str = '') => {
   str = str.split(' - ')[0].replace('Over', '').replace('Under', '')
@@ -92,7 +93,12 @@ export const get_player_string = ({ marketName, marketType, runnerName }) => {
 export const get_selection_metric_from_selection_name = (selection_name) => {
   const metric_line = selection_name.match(/(\d+(?:\.5+)?)\+?/)
   if (metric_line) {
-    return Number(metric_line[1])
+    const raw_line = Number(metric_line[1])
+    // Normalize the line for N+ discrete stat markets
+    return normalize_selection_metric_line({
+      raw_value: raw_line,
+      selection_name
+    })
   }
 
   return null

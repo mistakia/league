@@ -12,6 +12,7 @@ import {
   insert_prop_markets,
   report_job
 } from '#libs-server'
+import { normalize_selection_metric_line } from '#libs-server/normalize-selection-metric-line.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -49,6 +50,13 @@ const format_market = async ({
     )
   }
 
+  // Extract and normalize the line
+  const raw_line = Number(prizepicks_market.attributes?.line_score) || null
+  const normalized_line = normalize_selection_metric_line({
+    raw_value: raw_line,
+    selection_name: prizepicks_market.attributes?.stat_type || ''
+  })
+
   selections.push({
     source_id: 'PRIZEPICKS',
     source_market_id: prizepicks_market.id,
@@ -57,8 +65,7 @@ const format_market = async ({
 
     selection_pid: player_row?.pid || null,
     selection_name: 'over',
-    selection_metric_line:
-      Number(prizepicks_market.attributes?.line_score) || null,
+    selection_metric_line: normalized_line,
     odds_decimal: null,
     odds_american: null
   })
@@ -71,8 +78,7 @@ const format_market = async ({
 
     selection_pid: player_row?.pid || null,
     selection_name: 'under',
-    selection_metric_line:
-      Number(prizepicks_market.attributes?.line_score) || null,
+    selection_metric_line: normalized_line,
     odds_decimal: null,
     odds_american: null
   })

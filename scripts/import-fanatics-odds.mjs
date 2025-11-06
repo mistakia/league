@@ -14,6 +14,7 @@ import {
   report_job,
   fanatics
 } from '#libs-server'
+import { normalize_selection_metric_line } from '#libs-server/normalize-selection-metric-line.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import {
   player_game_alt_prop_types,
@@ -124,7 +125,13 @@ const format_metric_line = (selection_type) => {
   const match = selection_type.match(/([+-])?(\d+\.?\d*)\+?$/)
   if (!match) return null
   const value = Number(match[2])
-  return match[1] === '-' ? -value : value
+  const raw_line = match[1] === '-' ? -value : value
+
+  // Normalize the line for N+ discrete stat markets
+  return normalize_selection_metric_line({
+    raw_value: raw_line,
+    selection_name: selection_type
+  })
 }
 
 const format_selection_type = (selection_type) => {

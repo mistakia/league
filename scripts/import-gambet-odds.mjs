@@ -15,6 +15,7 @@ import {
   insert_prop_markets,
   report_job
 } from '#libs-server'
+import { normalize_selection_metric_line } from '#libs-server/normalize-selection-metric-line.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -65,7 +66,7 @@ const format_market = async ({ gambet_market, timestamp, event, nfl_game }) => {
   }
 
   for (const odd of gambet_market.odds) {
-    const selection_metric_line = Number(odd.handicap) || null
+    let selection_metric_line = Number(odd.handicap) || null
     let selection_name = null
 
     if (odd.type === 'Over') {
@@ -75,6 +76,12 @@ const format_market = async ({ gambet_market, timestamp, event, nfl_game }) => {
     } else {
       selection_name = odd.name
     }
+
+    // Normalize the line for N+ discrete stat markets
+    selection_metric_line = normalize_selection_metric_line({
+      raw_value: selection_metric_line,
+      selection_name: odd.name
+    })
 
     selections.push({
       source_id: 'GAMBET',

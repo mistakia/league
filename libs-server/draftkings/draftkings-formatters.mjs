@@ -7,6 +7,7 @@ import dayjs from 'dayjs'
 import { constants, bookmaker_constants } from '#libs-shared'
 import { draftkings, clean_string } from '#libs-server'
 import { find_player } from '#libs-server/player-cache.mjs'
+import { normalize_selection_metric_line } from '../normalize-selection-metric-line.mjs'
 import {
   is_game_event,
   extract_team_abbreviations,
@@ -171,6 +172,12 @@ const process_selection = (
     formatted_selection_metric_line = extract_metric_line(selection.label)
   }
 
+  // Normalize the line for N+ discrete stat markets
+  formatted_selection_metric_line = normalize_selection_metric_line({
+    raw_value: formatted_selection_metric_line,
+    selection_name: clean_string(selection.label)
+  })
+
   // Process American odds
   const odds_american_value = process_american_odds(
     selection.displayOdds?.american
@@ -184,7 +191,7 @@ const process_selection = (
     selection_pid: formatted_selection_pid,
     selection_name: clean_string(selection.label),
     selection_type: draftkings.format_selection_type(selection.label),
-    selection_metric_line: formatted_selection_metric_line || null,
+    selection_metric_line: formatted_selection_metric_line,
     odds_decimal: selection.trueOdds,
     odds_american: odds_american_value
   }
