@@ -825,19 +825,15 @@ const import_plays_sportradar = async ({
   }
 
   log('Preloading play cache...')
-  console.time('play-cache-preload')
   await preload_plays({
     years: [...new Set(games.map((g) => g.year))],
     weeks: [...new Set(games.map((g) => g.week))],
     esbids: games.map((g) => g.esbid)
   })
-  console.timeEnd('play-cache-preload')
   log('Play cache stats:', get_cache_stats())
 
   log('Preloading player cache...')
-  console.time('player-cache-preload')
   await preload_active_players({ all_players: true })
-  console.timeEnd('player-cache-preload')
 
   // Process each game
   let total_plays_processed = 0
