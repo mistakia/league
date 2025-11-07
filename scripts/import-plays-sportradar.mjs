@@ -1,7 +1,11 @@
+import dayjs from 'dayjs'
+import timezone from 'dayjs/plugin/timezone.js'
 import diff from 'deep-diff'
 import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
+
+dayjs.extend(timezone)
 
 import db from '#db'
 import { fixTeam } from '#libs-shared'
@@ -802,7 +806,7 @@ const import_plays_sportradar = async ({
 
   let games_query = db('nfl_games')
     .whereNotNull('sportradar_game_id')
-    .select('esbid', 'year', 'week', 'sportradar_game_id', 'v', 'h')
+    .select('esbid', 'year', 'week', 'sportradar_game_id', 'v', 'h', 'date', 'time_est')
 
   if (game_id) {
     games_query = games_query.where({ esbid: game_id })
@@ -849,6 +853,20 @@ const import_plays_sportradar = async ({
 
   for (const game of games) {
     log(`\nProcessing game ${game.esbid} (${game.v} @ ${game.h})...`)
+
+    // Skip games that haven't started yet
+    if (game.date && game.time_est) {
+      const time_str = `${game.date} ${game.time_est}`
+      const game_start = dayjs.tz(
+        time_str,
+        'YYYY/MM/DD HH:mm:SS',
+        'America/New_York'
+      )
+      if (dayjs().isBefore(game_start)) {
+        log(`skipping esbid: ${game.esbid}, game hasn't started`)
+        continue
+      }
+    }
 
     try {
       // Fetch play-by-play data
