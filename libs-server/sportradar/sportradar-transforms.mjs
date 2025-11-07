@@ -3,6 +3,8 @@
  * to database enum values and standardized formats
  */
 
+import { fixTeam } from '#libs-shared'
+
 /**
  * Map Sportradar play type to nfl_play_type enum
  */
@@ -155,15 +157,18 @@ export const parse_yardline = (location, pos_team) => {
   const ydl_num = location.yardline
   const ydl_side = location.alias
 
+  // Normalize team abbreviation (JAC → JAX, etc.) for comparison
+  const normalized_ydl_side = fixTeam(ydl_side)
+
   // Calculate 100-yard scale per nflfastR convention:
   // 0 = at opponent's goal line, 100 = at own goal line
-  const ydl_100 = ydl_side === pos_team ? 100 - ydl_num : ydl_num
+  const ydl_100 = normalized_ydl_side === pos_team ? 100 - ydl_num : ydl_num
 
   return {
-    ydl_side,
+    ydl_side: normalized_ydl_side,
     ydl_num,
     ydl_100,
-    ydl_str: `${ydl_side} ${ydl_num}`
+    ydl_str: `${normalized_ydl_side} ${ydl_num}`
   }
 }
 
