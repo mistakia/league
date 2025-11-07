@@ -102,9 +102,12 @@ class PlayCache {
    * @param {number} params.sec_rem_qtr_tolerance - Tolerance for sec_rem_qtr matching (default: 0 for exact match)
    * @param {string} params.desc_contains - String that must be contained in play description (optional)
    * @param {string} params.to_team - Timeout team abbreviation (optional)
-   * @returns {Object|null} Play object if found, null otherwise
+   * @param {number} params.home_score - Home team score (optional, for kickoff disambiguation)
+   * @param {number} params.away_score - Away team score (optional, for kickoff disambiguation)
+   * @param {boolean} params.return_all_matches - If true, return array of all matches instead of throwing on multiple matches (default: false)
+   * @returns {Object|Array|null} Play object if found (or array if return_all_matches=true), null otherwise
    * @throws {Error} If cache not initialized
-   * @throws {MultiplePlayMatchError} If multiple plays match the search criteria
+   * @throws {MultiplePlayMatchError} If multiple plays match the search criteria and return_all_matches=false
    */
   find_play({
     esbid,
@@ -124,7 +127,10 @@ class PlayCache {
     sec_rem_qtr,
     sec_rem_qtr_tolerance,
     desc_contains,
-    to_team
+    to_team,
+    home_score,
+    away_score,
+    return_all_matches = false
   }) {
     this._ensure_initialized()
 
@@ -149,7 +155,10 @@ class PlayCache {
         ydl_num,
         ydl_side,
         desc_contains,
-        to_team
+        to_team,
+        home_score,
+        away_score,
+        return_all_matches
       })
     }
 
@@ -315,7 +324,10 @@ class PlayCache {
     ydl_num,
     ydl_side,
     desc_contains,
-    to_team
+    to_team,
+    home_score,
+    away_score,
+    return_all_matches
   }) {
     const has_context = this._has_context_fields(qtr, dwn, yards_to_go, ydl_100)
 
@@ -341,11 +353,14 @@ class PlayCache {
           ydl_num,
           ydl_side,
           desc_contains,
-          to_team
+          to_team,
+          home_score,
+          away_score
         }
         const matching_play = this._find_unique_matching_play(
           indexed_plays,
-          additional_filters
+          additional_filters,
+          return_all_matches
         )
         if (matching_play) {
           return matching_play
@@ -354,51 +369,81 @@ class PlayCache {
     }
 
     // Fall back to full game scan
-    return this._scan_game_plays(esbid, {
-      qtr,
-      dwn,
-      yards_to_go,
-      ydl_100,
-      off,
-      def,
-      sec_rem_qtr,
-      sec_rem_qtr_tolerance,
-      game_clock_start,
-      play_type,
-      ydl_num,
-      ydl_side,
-      desc_contains,
-      to_team
-    })
+    return this._scan_game_plays(
+      esbid,
+      {
+        qtr,
+        dwn,
+        yards_to_go,
+        ydl_100,
+        off,
+        def,
+        sec_rem_qtr,
+        sec_rem_qtr_tolerance,
+        game_clock_start,
+        play_type,
+        ydl_num,
+        ydl_side,
+        desc_contains,
+        to_team,
+        home_score,
+        away_score
+      },
+      return_all_matches
+    )
   }
 
   /**
    * Scans all plays for a game with given filters
    * @private
    */
-  _scan_game_plays(esbid, filters) {
+  _scan_game_plays(esbid, filters, return_all_matches = false) {
     const game_plays = this.plays_by_esbid.get(esbid) || []
     if (game_plays.length === 0) {
       return null
     }
 
-    return this._find_unique_matching_play(game_plays, filters)
+    return this._find_unique_matching_play(
+      game_plays,
+      filters,
+      return_all_matches
+    )
   }
 
   /**
    * Finds unique play matching all filters
-   * Throws error if multiple plays match
+   * Throws error if multiple plays match (unless return_all_matches is true)
    * @private
-   * @throws {MultiplePlayMatchError} If multiple plays match the criteria
+   * @throws {MultiplePlayMatchError} If multiple plays match the criteria and return_all_matches=false
    */
-  _find_unique_matching_play(plays, filters) {
-    const matching_plays = this._filter_plays(plays, filters)
+  _find_unique_matching_play(plays, filters, return_all_matches = false) {
+    let matching_plays = this._filter_plays(plays, filters)
 
     if (matching_plays.length === 0) {
       return null
     }
 
+    // Apply score filtering if home_score and away_score are provided
+    if (
+      filters.home_score != null &&
+      filters.away_score != null &&
+      matching_plays.length > 1
+    ) {
+      const score_matches = matching_plays.filter(
+        (play) =>
+          play.home_score === filters.home_score &&
+          play.away_score === filters.away_score
+      )
+      if (score_matches.length > 0) {
+        matching_plays = score_matches
+      }
+    }
+
     if (matching_plays.length > 1) {
+      if (return_all_matches) {
+        return matching_plays
+      }
+
       log(`Multiple plays matched (${matching_plays.length}):`)
       matching_plays.forEach((play, index) => {
         log(
