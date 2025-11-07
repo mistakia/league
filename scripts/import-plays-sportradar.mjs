@@ -301,11 +301,21 @@ const build_match_criteria = (game_esbid, mapped_play) => {
   const criteria = {
     esbid: game_esbid,
     qtr: mapped_play.qtr,
-    dwn: mapped_play.dwn,
-    yards_to_go: mapped_play.yards_to_go,
-    off: mapped_play.off,
-    def: mapped_play.def,
     play_type: mapped_play.play_type
+  }
+
+  // KOFF plays have inconsistent team semantics between systems
+  // Database uses receiving team as "off", Sportradar uses kicking team
+  // So we exclude off/def from KOFF matching and rely on score + time
+  if (mapped_play.play_type !== 'KOFF') {
+    // FGXP plays have inconsistent dwn/ytg between systems
+    // Database has dwn=null for extra points, Sportradar has situational values
+    if (mapped_play.play_type !== 'FGXP') {
+      criteria.dwn = mapped_play.dwn
+      criteria.yards_to_go = mapped_play.yards_to_go
+    }
+    criteria.off = mapped_play.off
+    criteria.def = mapped_play.def
   }
 
   if (mapped_play.play_type !== 'KOFF' && mapped_play.play_type !== 'CONV') {
@@ -318,10 +328,90 @@ const build_match_criteria = (game_esbid, mapped_play) => {
     mapped_play.sec_rem_qtr != null
   ) {
     criteria.sec_rem_qtr = mapped_play.sec_rem_qtr
-    criteria.sec_rem_qtr_tolerance = 10
+
+    if (mapped_play.play_type === 'KOFF' || mapped_play.play_type === 'PUNT') {
+      criteria.sec_rem_qtr_tolerance = 20
+      if (mapped_play.play_type === 'KOFF') {
+        // Use score context to distinguish kickoffs after different scoring plays
+        if (mapped_play.home_score != null) {
+          criteria.home_score = mapped_play.home_score
+        }
+        if (mapped_play.away_score != null) {
+          criteria.away_score = mapped_play.away_score
+        }
+      } else {
+        // PUNT needs team context
+        criteria.off = mapped_play.off
+        criteria.def = mapped_play.def
+      }
+    } else {
+      // FGXP needs team context
+      criteria.off = mapped_play.off
+      criteria.def = mapped_play.def
+      criteria.sec_rem_qtr_tolerance = 10
+    }
   }
 
   return criteria
+}
+
+const resolve_multiple_matches = ({
+  db_plays,
+  sportradar_play,
+  mapped_play
+}) => {
+  if (!db_plays || db_plays.length <= 1) {
+    return db_plays?.[0] || null
+  }
+
+  // Strategy 1: wall_clock comparison
+  if (mapped_play.wall_clock && sportradar_play.wall_clock) {
+    const sportradar_time = new Date(sportradar_play.wall_clock).getTime()
+    let best_match = null
+    let smallest_diff = Infinity
+
+    for (const db_play of db_plays) {
+      if (db_play.wall_clock) {
+        const db_time = new Date(db_play.wall_clock).getTime()
+        const diff = Math.abs(sportradar_time - db_time)
+        if (diff < smallest_diff) {
+          smallest_diff = diff
+          best_match = db_play
+        }
+      }
+    }
+
+    if (best_match && smallest_diff < 500) {
+      // 500ms tolerance
+      log(
+        `Resolved multiple matches using wall_clock: ${smallest_diff}ms difference`
+      )
+      return best_match
+    }
+  }
+
+  // Strategy 2: sequence comparison
+  if (mapped_play.sequence && db_plays.some((p) => p.sequence)) {
+    const closest_sequence = db_plays.reduce((closest, play) => {
+      if (!play.sequence) return closest
+      const diff = Math.abs(play.sequence - mapped_play.sequence)
+      const closest_diff = closest
+        ? Math.abs(closest.sequence - mapped_play.sequence)
+        : Infinity
+      return diff < closest_diff ? play : closest
+    }, null)
+
+    if (closest_sequence) {
+      log(
+        `Resolved multiple matches using sequence: ${closest_sequence.sequence}`
+      )
+      return closest_sequence
+    }
+  }
+
+  // Unable to resolve - log and return null
+  log(`Unable to resolve ${db_plays.length} matches - skipping update`)
+  return null
 }
 
 const match_play_to_db = ({
@@ -331,36 +421,176 @@ const match_play_to_db = ({
   unmatched_reasons
 }) => {
   const match_criteria = build_match_criteria(game.esbid, mapped_play)
+
+  // Request all matches instead of throwing on multiple
+  const matches = find_play({ ...match_criteria, return_all_matches: true })
+
   let db_play = null
   let multiple_match_error = false
 
-  try {
-    db_play = find_play(match_criteria)
+  if (Array.isArray(matches) && matches.length > 1) {
+    // Try to resolve multiple matches
+    db_play = resolve_multiple_matches({
+      db_plays: matches,
+      sportradar_play,
+      mapped_play
+    })
 
-    if (!db_play && match_criteria.yards_to_go != null) {
-      for (const offset of [-1, 1]) {
-        const fuzzy_criteria = {
+    if (!db_play) {
+      // Unable to resolve
+      log(`MULTIPLE MATCH ERROR: ${game.esbid} - ${sportradar_play.id}`)
+      log(`Description: ${sportradar_play.description}`)
+      log(`Matched ${matches.length} plays - unable to resolve`)
+      log('Match criteria:', match_criteria)
+      multiple_match_error = true
+    } else {
+      log(`Resolved ${matches.length} matches to single play: ${db_play.playId}`)
+    }
+  } else if (Array.isArray(matches) && matches.length === 1) {
+    db_play = matches[0]
+  } else if (matches && !Array.isArray(matches)) {
+    // Single match returned directly
+    db_play = matches
+  }
+
+  // Fuzzy matching fallback for yards_to_go
+  if (!db_play && !multiple_match_error && match_criteria.yards_to_go != null) {
+    for (const offset of [-1, 1]) {
+      const fuzzy_criteria = {
+        ...match_criteria,
+        yards_to_go: match_criteria.yards_to_go + offset
+      }
+      const fuzzy_matches = find_play({
+        ...fuzzy_criteria,
+        return_all_matches: true
+      })
+
+      if (Array.isArray(fuzzy_matches) && fuzzy_matches.length > 1) {
+        db_play = resolve_multiple_matches({
+          db_plays: fuzzy_matches,
+          sportradar_play,
+          mapped_play
+        })
+      } else if (Array.isArray(fuzzy_matches) && fuzzy_matches.length === 1) {
+        db_play = fuzzy_matches[0]
+      } else if (fuzzy_matches && !Array.isArray(fuzzy_matches)) {
+        db_play = fuzzy_matches
+      }
+
+      if (db_play) {
+        log(
+          `Fuzzy match: yards_to_go ${match_criteria.yards_to_go} -> ${fuzzy_criteria.yards_to_go}`
+        )
+        break
+      }
+    }
+  }
+
+  // Fuzzy matching fallback for PASS/RUSH → NOPL (penalty negated play)
+  if (
+    !db_play &&
+    !multiple_match_error &&
+    (mapped_play.play_type === 'PASS' || mapped_play.play_type === 'RUSH')
+  ) {
+    // Try matching as NOPL (penalty negated the play)
+    const nopl_criteria = {
+      ...match_criteria,
+      play_type: 'NOPL'
+    }
+    const nopl_matches = find_play({
+      ...nopl_criteria,
+      return_all_matches: true
+    })
+
+    if (Array.isArray(nopl_matches) && nopl_matches.length > 1) {
+      db_play = resolve_multiple_matches({
+        db_plays: nopl_matches,
+        sportradar_play,
+        mapped_play
+      })
+    } else if (Array.isArray(nopl_matches) && nopl_matches.length === 1) {
+      db_play = nopl_matches[0]
+    } else if (nopl_matches && !Array.isArray(nopl_matches)) {
+      db_play = nopl_matches
+    }
+
+    if (db_play) {
+      log(`Matched ${mapped_play.play_type} to NOPL (negated by penalty)`)
+    }
+  }
+
+  // Fuzzy matching for ydl_100 field position
+  if (!db_play && !multiple_match_error && match_criteria.ydl_100 != null) {
+    for (const offset of [-2, -1, 1, 2]) {
+      const fuzzy_criteria = {
+        ...match_criteria,
+        ydl_100: match_criteria.ydl_100 + offset
+      }
+      const fuzzy_matches = find_play({
+        ...fuzzy_criteria,
+        return_all_matches: true
+      })
+
+      if (Array.isArray(fuzzy_matches) && fuzzy_matches.length > 1) {
+        db_play = resolve_multiple_matches({
+          db_plays: fuzzy_matches,
+          sportradar_play,
+          mapped_play
+        })
+      } else if (Array.isArray(fuzzy_matches) && fuzzy_matches.length === 1) {
+        db_play = fuzzy_matches[0]
+      } else if (fuzzy_matches && !Array.isArray(fuzzy_matches)) {
+        db_play = fuzzy_matches
+      }
+
+      if (db_play) {
+        log(
+          `Fuzzy match: ydl_100 ${match_criteria.ydl_100} -> ${fuzzy_criteria.ydl_100}`
+        )
+        break
+      }
+    }
+  }
+
+  // Combined fuzzy matching: ytg and ydl_100 both off by ±1
+  if (
+    !db_play &&
+    !multiple_match_error &&
+    match_criteria.yards_to_go != null &&
+    match_criteria.ydl_100 != null
+  ) {
+    for (const ytg_offset of [-1, 1]) {
+      for (const ydl_offset of [-1, 1]) {
+        const combined_criteria = {
           ...match_criteria,
-          yards_to_go: match_criteria.yards_to_go + offset
+          yards_to_go: match_criteria.yards_to_go + ytg_offset,
+          ydl_100: match_criteria.ydl_100 + ydl_offset
         }
-        db_play = find_play(fuzzy_criteria)
+        const fuzzy_matches = find_play({
+          ...combined_criteria,
+          return_all_matches: true
+        })
+
+        if (Array.isArray(fuzzy_matches) && fuzzy_matches.length > 1) {
+          db_play = resolve_multiple_matches({
+            db_plays: fuzzy_matches,
+            sportradar_play,
+            mapped_play
+          })
+        } else if (Array.isArray(fuzzy_matches) && fuzzy_matches.length === 1) {
+          db_play = fuzzy_matches[0]
+        } else if (fuzzy_matches && !Array.isArray(fuzzy_matches)) {
+          db_play = fuzzy_matches
+        }
+
         if (db_play) {
           log(
-            `Fuzzy match: yards_to_go ${match_criteria.yards_to_go} -> ${fuzzy_criteria.yards_to_go}`
+            `Combined fuzzy match: ytg ${match_criteria.yards_to_go} -> ${combined_criteria.yards_to_go}, ydl_100 ${match_criteria.ydl_100} -> ${combined_criteria.ydl_100}`
           )
           break
         }
       }
-    }
-  } catch (error) {
-    if (error instanceof MultiplePlayMatchError) {
-      log(`MULTIPLE MATCH ERROR: ${game.esbid} - ${sportradar_play.id}`)
-      log(`Description: ${sportradar_play.description}`)
-      log(`Matched ${error.match_count} plays`)
-      log('Match criteria:', match_criteria)
-      multiple_match_error = true
-    } else {
-      throw error
+      if (db_play) break
     }
   }
 
@@ -509,12 +739,49 @@ const map_sportradar_play_to_nfl_play = async ({
     mapped.fuml = fumble_stats.some((f) => f.fumble === 1)
   }
 
+  // Override play_type to NOPL for nullified plays
+  // Check both explicit nullified flag and no_play detail category
+  const has_no_play_detail = (play.details || []).some(
+    (d) => d.category === 'no_play'
+  )
+  if (play.nullified || has_no_play_detail || mapped.deleted) {
+    mapped.play_type = 'NOPL'
+  }
+
   if (play.nullified) {
     mapped.deleted = true
   }
 
   mapped.updated = Math.floor(Date.now() / 1000)
   return mapped
+}
+
+const format_unmatched_play_details = (unmatched_plays_details) => {
+  if (unmatched_plays_details.length === 0) return
+
+  log('\n=== DETAILED UNMATCHED PLAYS ANALYSIS ===')
+
+  const by_type = {}
+  for (const detail of unmatched_plays_details) {
+    if (!by_type[detail.play_type]) {
+      by_type[detail.play_type] = []
+    }
+    by_type[detail.play_type].push(detail)
+  }
+
+  for (const [play_type, details] of Object.entries(by_type)) {
+    log(`\n${play_type} Plays (${details.length} unmatched):`)
+    for (const detail of details.slice(0, 5)) {
+      // First 5 examples
+      log(`  Game: ${detail.esbid} Q${detail.qtr} ${detail.clock}`)
+      log(`  Desc: ${detail.description.substring(0, 80)}`)
+      log(
+        `  Criteria: dwn=${detail.dwn} ytg=${detail.yards_to_go} ydl=${detail.ydl_100}`
+      )
+      log(`  Teams: ${detail.off} vs ${detail.def}`)
+      log('')
+    }
+  }
 }
 
 /**
@@ -578,6 +845,7 @@ const import_plays_sportradar = async ({
   const unmatched_reasons = {} // Track unmatched plays by play type
   const sample_plays_by_type = {} // For --dry mode: collect sample plays by type
   const all_collisions = [] // Track all field collisions for summary
+  const unmatched_plays_details = [] // Track detailed unmatched play information
 
   for (const game of games) {
     log(`\nProcessing game ${game.esbid} (${game.v} @ ${game.h})...`)
@@ -680,6 +948,24 @@ const import_plays_sportradar = async ({
                 qtr: mapped_play.qtr,
                 clock: mapped_play.game_clock_start
               })
+
+              // Collect detailed information for analysis
+              const match_criteria = build_match_criteria(game.esbid, mapped_play)
+
+              unmatched_plays_details.push({
+                esbid: game.esbid,
+                sportradar_play_id: event.id,
+                description: event.description,
+                play_type: mapped_play.play_type,
+                qtr: mapped_play.qtr,
+                clock: mapped_play.game_clock_start,
+                dwn: mapped_play.dwn,
+                yards_to_go: mapped_play.yards_to_go,
+                ydl_100: mapped_play.ydl_100,
+                off: mapped_play.off,
+                def: mapped_play.def,
+                match_criteria
+              })
             }
           }
         }
@@ -691,6 +977,9 @@ const import_plays_sportradar = async ({
       continue
     }
   }
+
+  // Print detailed unmatched play analysis
+  format_unmatched_play_details(unmatched_plays_details)
 
   // Print summary reports
   print_import_summary({
