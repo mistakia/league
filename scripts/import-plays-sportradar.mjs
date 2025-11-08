@@ -5,8 +5,6 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-dayjs.extend(timezone)
-
 import db from '#db'
 import { fixTeam } from '#libs-shared'
 import { is_main, report_job, update_play } from '#libs-server'
@@ -15,16 +13,13 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 import {
   preload_plays,
   find_play,
-  get_cache_stats,
-  MultiplePlayMatchError
+  get_cache_stats
 } from '#libs-server/play-cache.mjs'
 import {
   preload_active_players,
   find_player
 } from '#libs-server/player-cache.mjs'
 import transform_play_route from '#libs-server/transform-play-route.mjs'
-
-// Import refactored modules
 import {
   map_play_type,
   transform_qb_position,
@@ -36,7 +31,6 @@ import {
   parse_yardline,
   normalize_drive_duration
 } from '#libs-server/sportradar/sportradar-transforms.mjs'
-
 import {
   map_passing_stats,
   map_receiving_stats,
@@ -48,13 +42,14 @@ import {
   map_penalty_stats,
   map_play_details
 } from '#libs-server/sportradar/sportradar-stats-mappers.mjs'
-
 import {
   print_import_summary,
   print_dry_mode_comparison,
   print_collision_summary,
   should_track_collision
 } from '#libs-server/sportradar/sportradar-reporting.mjs'
+
+dayjs.extend(timezone)
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-plays-sportradar')
@@ -93,30 +88,36 @@ const resolve_player_id = async ({
 }) => {
   if (!sportradar_player_id) return null
 
-  const db_player = await db('player')
-    .where({ sportradar_id: sportradar_player_id })
-    .first()
+  // Check cache (all players are preloaded with all_players: true)
+  const cached_player = find_player({
+    sportradar_id: sportradar_player_id,
+    teams: team_abbrev ? [team_abbrev] : [],
+    ignore_free_agent: false,
+    ignore_retired: false
+  })
 
-  if (db_player) {
+  if (cached_player) {
     return {
-      pid: db_player.pid,
-      gsisid: db_player.gsisid,
+      pid: cached_player.pid,
+      gsisid: cached_player.gsisid,
       sportradar_id: sportradar_player_id
     }
   }
 
+  // Fallback: try name-based lookup if name and team provided
+  // (useful for players without sportradar_id or mismatched IDs)
   if (player_name && team_abbrev) {
-    const cached_player = find_player({
+    const name_cached_player = find_player({
       name: player_name,
       teams: [team_abbrev],
       ignore_free_agent: false,
       ignore_retired: false
     })
 
-    if (cached_player) {
+    if (name_cached_player) {
       return {
-        pid: cached_player.pid,
-        gsisid: cached_player.gsisid,
+        pid: name_cached_player.pid,
+        gsisid: name_cached_player.gsisid,
         sportradar_id: sportradar_player_id
       }
     }
@@ -448,7 +449,9 @@ const match_play_to_db = ({
       log('Match criteria:', match_criteria)
       multiple_match_error = true
     } else {
-      log(`Resolved ${matches.length} matches to single play: ${db_play.playId}`)
+      log(
+        `Resolved ${matches.length} matches to single play: ${db_play.playId}`
+      )
     }
   } else if (Array.isArray(matches) && matches.length === 1) {
     db_play = matches[0]
@@ -806,7 +809,16 @@ const import_plays_sportradar = async ({
 
   let games_query = db('nfl_games')
     .whereNotNull('sportradar_game_id')
-    .select('esbid', 'year', 'week', 'sportradar_game_id', 'v', 'h', 'date', 'time_est')
+    .select(
+      'esbid',
+      'year',
+      'week',
+      'sportradar_game_id',
+      'v',
+      'h',
+      'date',
+      'time_est'
+    )
 
   if (game_id) {
     games_query = games_query.where({ esbid: game_id })
@@ -848,6 +860,8 @@ const import_plays_sportradar = async ({
   const unmatched_plays_details = [] // Track detailed unmatched play information
 
   for (const game of games) {
+    const game_start_time = Date.now()
+    let game_plays_processed = 0
     log(`\nProcessing game ${game.esbid} (${game.v} @ ${game.h})...`)
 
     // Skip games that haven't started yet
@@ -895,6 +909,8 @@ const import_plays_sportradar = async ({
             if (event.type !== 'play') continue
 
             total_plays_processed++
+            game_plays_processed++
+            const play_start_time = Date.now()
 
             const game_context = {
               esbid: game.esbid,
@@ -904,19 +920,31 @@ const import_plays_sportradar = async ({
               away_team: game.v
             }
 
+            const map_start_time = Date.now()
             const mapped_play = await map_sportradar_play_to_nfl_play({
               sportradar_play: event,
               game_context,
               drive_context,
               team_mappings_cache
             })
+            const map_time = Date.now() - map_start_time
+            if (map_time > 500) {
+              log(
+                `Slow map_sportradar_play_to_nfl_play: ${map_time}ms for play ${event.id}`
+              )
+            }
 
+            const match_start_time = Date.now()
             const { db_play, multiple_match_error } = match_play_to_db({
               game,
               mapped_play,
               sportradar_play: event,
               unmatched_reasons
             })
+            const match_time = Date.now() - match_start_time
+            if (match_time > 500) {
+              log(`Slow match_play_to_db: ${match_time}ms for play ${event.id}`)
+            }
 
             if (db_play) {
               total_plays_matched++
@@ -938,11 +966,18 @@ const import_plays_sportradar = async ({
                   }
                 }
               } else {
+                const update_start_time = Date.now()
                 const updates_made = await update_play({
                   play_row: db_play,
                   update: mapped_play,
                   ignore_conflicts
                 })
+                const update_time = Date.now() - update_start_time
+                if (update_time > 500) {
+                  log(
+                    `Slow update_play: ${update_time}ms for play ${game.esbid}-${db_play.playId} (${updates_made} updates)`
+                  )
+                }
                 if (updates_made > 0) total_plays_updated++
               }
             } else if (multiple_match_error) {
@@ -964,7 +999,10 @@ const import_plays_sportradar = async ({
               })
 
               // Collect detailed information for analysis
-              const match_criteria = build_match_criteria(game.esbid, mapped_play)
+              const match_criteria = build_match_criteria(
+                game.esbid,
+                mapped_play
+              )
 
               unmatched_plays_details.push({
                 esbid: game.esbid,
@@ -981,11 +1019,21 @@ const import_plays_sportradar = async ({
                 match_criteria
               })
             }
+
+            const play_total_time = Date.now() - play_start_time
+            if (play_total_time > 1000) {
+              log(
+                `Slow play processing: ${play_total_time}ms for play ${event.id} (map: ${map_time}ms, match: ${match_time}ms)`
+              )
+            }
           }
         }
       }
 
-      log(`Game ${game.esbid} processed`)
+      const game_processing_time = Date.now() - game_start_time
+      log(
+        `Game ${game.esbid} processed in ${(game_processing_time / 1000).toFixed(2)}s (${game_plays_processed} plays, ${(game_processing_time / game_plays_processed).toFixed(0)}ms/play)`
+      )
     } catch (error) {
       log(`Error processing game ${game.esbid}: ${error.message}`)
       continue
