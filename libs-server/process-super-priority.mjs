@@ -3,6 +3,7 @@ import { constants, Roster } from '#libs-shared'
 import getRoster from './get-roster.mjs'
 import getLeague from './get-league.mjs'
 import sendNotifications from './send-notifications.mjs'
+import processRelease from './process-release.mjs'
 import { is_main } from '#libs-server'
 
 export default async function process_super_priority({
@@ -10,7 +11,8 @@ export default async function process_super_priority({
   original_tid,
   lid,
   super_priority_uid,
-  userid = null
+  userid = null,
+  release = []
 }) {
   const timestamp = Math.floor(Date.now() / 1000)
 
@@ -38,14 +40,54 @@ export default async function process_super_priority({
 
   let target_slot
   if (super_priority_record && super_priority_record.requires_waiver) {
-    // Player requires waiver (was PS signed and no open slot)
-    if (roster.practice.length >= league.ps) {
-      throw new Error('No practice squad space available')
-    }
     target_slot = constants.slots.PS
   } else {
     // Player can automatically return (was PSD or PS with open slot)
     target_slot = constants.slots.PSD
+  }
+
+  // Handle waiver releases - validate and simulate before checking space
+  const releasePlayers = []
+  if (release.length) {
+    for (const release_pid of release) {
+      const releasePlayer = roster.get(release_pid)
+      if (!releasePlayer) {
+        throw new Error(`Release player ${release_pid} not found on roster`)
+      }
+
+      // Validate release isn't a protected player
+      if (
+        releasePlayer.slot === constants.slots.PSP ||
+        releasePlayer.slot === constants.slots.PSDP
+      ) {
+        throw new Error('Cannot release protected practice squad players')
+      }
+
+      releasePlayers.push(release_pid)
+      // Simulate removal to check if space will be available
+      roster.removePlayer(release_pid)
+    }
+  }
+
+  // Check practice squad space after simulated releases
+  if (
+    super_priority_record &&
+    super_priority_record.requires_waiver &&
+    roster.practice_signed.length >= league.ps
+  ) {
+    throw new Error('No practice squad space available')
+  }
+
+  // Process releases now that we've validated space will be available
+  if (releasePlayers.length) {
+    for (const release_pid of releasePlayers) {
+      await processRelease({
+        release_pid,
+        tid: original_tid,
+        lid,
+        userid: userid || 0
+      })
+    }
   }
 
   // Add player to original team roster for current and future weeks
@@ -123,10 +165,23 @@ export default async function process_super_priority({
 
   if (team_rows.length) {
     const team = team_rows[0]
-    const automatically_reverted = !(
-      super_priority_record && super_priority_record.requires_waiver
-    )
-    const message = `${player_row.fname} ${player_row.lname} (${player_row.pos}) has been ${automatically_reverted ? 'automatically ' : ''}claimed via Super Priority by ${team.name} (${team.abbrv}).`
+
+    let message = `${player_row.fname} ${player_row.lname} (${player_row.pos}) has been claimed via Super Priority by ${team.name} (${team.abbrv}).`
+
+    // Add release information if players were released
+    if (releasePlayers.length) {
+      const released_player_rows = await db('player').whereIn(
+        'pid',
+        releasePlayers
+      )
+
+      const released_names = released_player_rows
+        .map((p) => `${p.fname} ${p.lname} (${p.pos})`)
+        .join(', ')
+
+      const verb = releasePlayers.length === 1 ? 'has' : 'have'
+      message += ` ${released_names} ${verb} been released.`
+    }
 
     await sendNotifications({
       league,
