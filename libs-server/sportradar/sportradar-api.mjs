@@ -37,7 +37,6 @@ const monitor_queue_wait = ({
   return () => clearInterval(monitor_interval)
 }
 
-
 // Helper to get Sportradar config from database
 const get_sportradar_config = async () => {
   const config_row = await db('config')
