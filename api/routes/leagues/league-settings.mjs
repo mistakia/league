@@ -218,7 +218,11 @@ export const league_scoring_format_fields = [
   'tdrec',
   'fuml',
   'prtd',
-  'krtd'
+  'krtd',
+  'trg',
+  'rush_first_down',
+  'rec_first_down',
+  'exclude_qb_kneels'
 ]
 
 export const season_fields = ['mqb', 'mrb', 'mwr', 'mte', 'mdst', 'mk', 'faab']
@@ -321,5 +325,8 @@ export const float_fields = [
   'wrrec',
   'terec',
   'rec',
-  'recy'
+  'recy',
+  'trg',
+  'rush_first_down',
+  'rec_first_down'
 ]
