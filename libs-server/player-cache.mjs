@@ -2,6 +2,7 @@ import debug from 'debug'
 
 import db from '#db'
 import { fixTeam, format_player_name, constants } from '#libs-shared'
+import clean_string from './clean-string.mjs'
 
 const log = debug('player-cache')
 
@@ -197,36 +198,53 @@ class PlayerCache {
 
   /**
    * Fetches all players from database
-   * @returns {Promise<Array>} Array of all player objects
+   * @returns {Promise<Array>} Array of all player objects with cleaned formatted names
    * @private
    */
   async _fetch_all_players() {
-    return await db('player').select('*')
+    const players = await db('player').select('*')
+    // Clean formatted names to remove null bytes
+    return players.map((player) => ({
+      ...player,
+      formatted: clean_string(player.formatted)
+    }))
   }
 
   /**
    * Fetches all active players from database
-   * @returns {Promise<Array>} Array of active player objects
+   * @returns {Promise<Array>} Array of active player objects with cleaned formatted names
    * @private
    */
   async _fetch_active_players() {
     const all_players = await db('player').select('*')
 
-    return all_players.filter((player) => this._is_active_player(player))
+    // Clean formatted names and filter for active players
+    return all_players
+      .map((player) => ({
+        ...player,
+        formatted: clean_string(player.formatted)
+      }))
+      .filter((player) => this._is_active_player(player))
   }
 
   /**
    * Fetches aliases for given players
    * @param {Array} players - Array of player objects
-   * @returns {Promise<Array>} Array of alias objects
+   * @returns {Promise<Array>} Array of alias objects with cleaned formatted_alias
    * @private
    */
   async _fetch_player_aliases(players) {
     const player_pids = players.map((player) => player.pid)
 
-    return await db('player_aliases')
+    const aliases = await db('player_aliases')
       .select('pid', 'formatted_alias')
       .whereIn('pid', player_pids)
+
+    // Clean formatted_alias to remove null bytes that cause UTF8 encoding errors
+    return aliases.map((alias) => ({
+      ...alias,
+      formatted_alias: clean_string(alias.formatted_alias)
+    }))
   }
 
   /**
@@ -278,6 +296,7 @@ class PlayerCache {
   _build_alias_indexes(aliases) {
     for (const alias of aliases) {
       const player = this.players_by_pid.get(alias.pid)
+      // formatted_alias is already cleaned by _fetch_player_aliases
       if (player && alias.formatted_alias) {
         this._add_player_to_name_index(player, alias.formatted_alias)
       }
