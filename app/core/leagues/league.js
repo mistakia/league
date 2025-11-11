@@ -52,6 +52,11 @@ export const League = new Record({
   prtd: null,
   krtd: null,
 
+  trg: null,
+  rush_first_down: null,
+  rec_first_down: null,
+  exclude_qb_kneels: null,
+
   tag2: null,
   tag3: null,
   tag4: null,
@@ -169,6 +174,11 @@ export function createLeague({
   prtd,
   krtd,
 
+  trg,
+  rush_first_down,
+  rec_first_down,
+  exclude_qb_kneels,
+
   tag2,
   tag3,
   tag4,
@@ -284,6 +294,11 @@ export function createLeague({
     fuml,
     prtd,
     krtd,
+
+    trg,
+    rush_first_down,
+    rec_first_down,
+    exclude_qb_kneels,
 
     tag2,
     tag3,
