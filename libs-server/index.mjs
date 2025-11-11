@@ -172,6 +172,7 @@ const fields = [
   'nfl_plays_current_week.timestamp',
   'nfl_plays_current_week.play_type_nfl',
   'nfl_plays_current_week.updated',
+  'nfl_plays_current_week.qb_kneel',
 
   'nfl_games.h',
   'nfl_games.v'
