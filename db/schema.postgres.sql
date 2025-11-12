@@ -41,168 +41,196 @@ DROP INDEX IF EXISTS public.projections_index_default_pid_idx;
 DROP INDEX IF EXISTS public.player_name_search_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2026_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2026_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2026_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2026_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2026_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2026_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2026_active_pid_year_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2025_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2025_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2025_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2025_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2025_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2025_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2025_active_pid_year_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2024_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2024_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2024_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2024_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2024_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2024_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2024_active_pid_year_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2023_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2023_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2023_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2023_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2023_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2023_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2023_active_pid_year_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2022_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2022_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2022_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2022_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2022_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2022_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2022_active_pid_year_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2021_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2021_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2021_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2021_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2021_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2021_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2021_active_pid_year_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2020_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2020_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2020_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2020_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2020_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2020_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2020_active_pid_year_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2019_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2019_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2019_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2019_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2019_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2019_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2019_active_pid_year_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2018_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2018_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2018_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2018_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2018_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2018_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2018_active_pid_year_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2017_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2017_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2017_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2017_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2017_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2017_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2017_active_pid_year_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2016_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2016_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2016_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2016_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2016_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2016_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2016_active_pid_year_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2015_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2015_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2015_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2015_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2015_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2015_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2015_active_pid_year_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2014_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2014_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2014_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2014_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2014_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2014_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2014_active_pid_year_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2013_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2013_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2013_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2013_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2013_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2013_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2013_active_pid_year_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2012_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2012_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2012_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2012_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2012_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2012_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2012_active_pid_year_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2011_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2011_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2011_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2011_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2011_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2011_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2011_active_pid_year_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2010_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2010_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2010_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2010_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2010_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2010_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2010_active_pid_year_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2009_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2009_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2009_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2009_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2009_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2009_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2009_active_pid_year_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2008_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2008_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2008_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2008_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2008_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2008_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2008_active_pid_year_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2007_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2007_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2007_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2007_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2007_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2007_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2007_active_pid_year_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2006_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2006_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2006_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2006_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2006_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2006_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2006_active_pid_year_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2005_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2005_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2005_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2005_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2005_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2005_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2005_active_pid_year_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2004_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2004_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2004_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2004_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2004_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2004_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2004_active_pid_year_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2003_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2003_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2003_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2003_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2003_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2003_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2003_active_pid_year_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2002_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2002_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2002_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2002_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2002_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2002_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2002_active_pid_year_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2001_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2001_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2001_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2001_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2001_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2001_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2001_active_pid_year_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2000_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2000_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_year_2000_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2000_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2000_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2000_esbid_pid_active_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_year_2000_active_pid_year_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_default_year_esbid_pid_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_default_tm_esbid_pid_idx;
+DROP INDEX IF EXISTS public.player_gamelogs_default_ruled_out_in_game_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_default_pid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_default_esbid_tm_idx;
 DROP INDEX IF EXISTS public.player_gamelogs_default_esbid_pid_active_idx;
@@ -1605,6 +1633,7 @@ DROP INDEX IF EXISTS public.idx_player_pid_incl_pos_fname_lname;
 DROP INDEX IF EXISTS public.idx_player_pff_id;
 DROP INDEX IF EXISTS public.idx_player_lname;
 DROP INDEX IF EXISTS public.idx_player_gamelogs_year_esbid_pid;
+DROP INDEX IF EXISTS public.idx_player_gamelogs_ruled_out;
 DROP INDEX IF EXISTS public.idx_player_gamelogs_pid_week_teams;
 DROP INDEX IF EXISTS public.idx_player_gamelogs_esbid_tm_pid;
 DROP INDEX IF EXISTS public.idx_player_gamelogs_esbid_tm;
@@ -2159,6 +2188,7 @@ DROP TABLE IF EXISTS public.draft;
 DROP TABLE IF EXISTS public.config;
 DROP FUNCTION IF EXISTS public.update_modified_column();
 DROP FUNCTION IF EXISTS public.player_name_search_vector_update();
+DROP FUNCTION IF EXISTS public.needs_line_normalization(line numeric, name text);
 DROP TYPE IF EXISTS public.wager_status;
 DROP TYPE IF EXISTS public.time_type;
 DROP TYPE IF EXISTS public.team_unit;
@@ -2737,6 +2767,24 @@ CREATE TYPE public.wager_status AS ENUM (
     'PUSH',
     'CANCELLED'
 );
+
+
+--
+-- Name: needs_line_normalization(numeric, text); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.needs_line_normalization(line numeric, name text) RETURNS boolean
+    LANGUAGE plpgsql IMMUTABLE
+    AS $_$
+BEGIN
+    RETURN (
+        line IS NOT NULL
+        AND line > 0
+        AND line = FLOOR(line)  -- Integer check
+        AND name ~ '^\d+\+$'    -- Pure "N+" pattern (CRITICAL: uses regex ~)
+    );
+END;
+$_$;
 
 
 --
@@ -18773,9 +18821,17 @@ CREATE TABLE public.player_gamelogs (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 )
 PARTITION BY RANGE (year);
+
+
+--
+-- Name: COLUMN player_gamelogs.ruled_out_in_game; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.player_gamelogs.ruled_out_in_game IS 'Indicates player was active (suited up) but left game early due to injury and was ruled OUT during/after the game. Used for reserve eligibility grace period.';
 
 
 --
@@ -18870,7 +18926,8 @@ CREATE TABLE public.player_gamelogs_default (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -18966,7 +19023,8 @@ CREATE TABLE public.player_gamelogs_year_2000 (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -19062,7 +19120,8 @@ CREATE TABLE public.player_gamelogs_year_2001 (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -19158,7 +19217,8 @@ CREATE TABLE public.player_gamelogs_year_2002 (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -19254,7 +19314,8 @@ CREATE TABLE public.player_gamelogs_year_2003 (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -19350,7 +19411,8 @@ CREATE TABLE public.player_gamelogs_year_2004 (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -19446,7 +19508,8 @@ CREATE TABLE public.player_gamelogs_year_2005 (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -19542,7 +19605,8 @@ CREATE TABLE public.player_gamelogs_year_2006 (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -19638,7 +19702,8 @@ CREATE TABLE public.player_gamelogs_year_2007 (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -19734,7 +19799,8 @@ CREATE TABLE public.player_gamelogs_year_2008 (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -19830,7 +19896,8 @@ CREATE TABLE public.player_gamelogs_year_2009 (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -19926,7 +19993,8 @@ CREATE TABLE public.player_gamelogs_year_2010 (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -20022,7 +20090,8 @@ CREATE TABLE public.player_gamelogs_year_2011 (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -20118,7 +20187,8 @@ CREATE TABLE public.player_gamelogs_year_2012 (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -20214,7 +20284,8 @@ CREATE TABLE public.player_gamelogs_year_2013 (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -20310,7 +20381,8 @@ CREATE TABLE public.player_gamelogs_year_2014 (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -20406,7 +20478,8 @@ CREATE TABLE public.player_gamelogs_year_2015 (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -20502,7 +20575,8 @@ CREATE TABLE public.player_gamelogs_year_2016 (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -20598,7 +20672,8 @@ CREATE TABLE public.player_gamelogs_year_2017 (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -20694,7 +20769,8 @@ CREATE TABLE public.player_gamelogs_year_2018 (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -20790,7 +20866,8 @@ CREATE TABLE public.player_gamelogs_year_2019 (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -20886,7 +20963,8 @@ CREATE TABLE public.player_gamelogs_year_2020 (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -20982,7 +21060,8 @@ CREATE TABLE public.player_gamelogs_year_2021 (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -21078,7 +21157,8 @@ CREATE TABLE public.player_gamelogs_year_2022 (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -21174,7 +21254,8 @@ CREATE TABLE public.player_gamelogs_year_2023 (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -21270,7 +21351,8 @@ CREATE TABLE public.player_gamelogs_year_2024 (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -21366,7 +21448,8 @@ CREATE TABLE public.player_gamelogs_year_2025 (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -21462,7 +21545,8 @@ CREATE TABLE public.player_gamelogs_year_2026 (
     snaps_under_five_minutes_pct numeric(5,2) DEFAULT NULL::numeric,
     rush_first_down smallint DEFAULT 0 NOT NULL,
     rec_first_down smallint DEFAULT 0 NOT NULL,
-    ry_excluding_kneels integer DEFAULT 0 NOT NULL
+    ry_excluding_kneels integer DEFAULT 0 NOT NULL,
+    ruled_out_in_game boolean DEFAULT false
 );
 
 
@@ -26552,6 +26636,13 @@ CREATE INDEX idx_player_gamelogs_esbid_tm_pid ON ONLY public.player_gamelogs USI
 --
 
 CREATE INDEX idx_player_gamelogs_pid_week_teams ON ONLY public.player_gamelogs USING btree (pid, tm);
+
+
+--
+-- Name: idx_player_gamelogs_ruled_out; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_gamelogs_ruled_out ON ONLY public.player_gamelogs USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
 
 
 --
@@ -36369,6 +36460,13 @@ CREATE INDEX player_gamelogs_default_pid_tm_idx ON public.player_gamelogs_defaul
 
 
 --
+-- Name: player_gamelogs_default_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_default_ruled_out_in_game_idx ON public.player_gamelogs_default USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+
+
+--
 -- Name: player_gamelogs_default_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -36408,6 +36506,13 @@ CREATE INDEX player_gamelogs_year_2000_esbid_tm_idx ON public.player_gamelogs_ye
 --
 
 CREATE INDEX player_gamelogs_year_2000_pid_tm_idx ON public.player_gamelogs_year_2000 USING btree (pid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2000_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2000_ruled_out_in_game_idx ON public.player_gamelogs_year_2000 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
 
 
 --
@@ -36453,6 +36558,13 @@ CREATE INDEX player_gamelogs_year_2001_pid_tm_idx ON public.player_gamelogs_year
 
 
 --
+-- Name: player_gamelogs_year_2001_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2001_ruled_out_in_game_idx ON public.player_gamelogs_year_2001 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+
+
+--
 -- Name: player_gamelogs_year_2001_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -36492,6 +36604,13 @@ CREATE INDEX player_gamelogs_year_2002_esbid_tm_idx ON public.player_gamelogs_ye
 --
 
 CREATE INDEX player_gamelogs_year_2002_pid_tm_idx ON public.player_gamelogs_year_2002 USING btree (pid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2002_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2002_ruled_out_in_game_idx ON public.player_gamelogs_year_2002 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
 
 
 --
@@ -36537,6 +36656,13 @@ CREATE INDEX player_gamelogs_year_2003_pid_tm_idx ON public.player_gamelogs_year
 
 
 --
+-- Name: player_gamelogs_year_2003_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2003_ruled_out_in_game_idx ON public.player_gamelogs_year_2003 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+
+
+--
 -- Name: player_gamelogs_year_2003_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -36576,6 +36702,13 @@ CREATE INDEX player_gamelogs_year_2004_esbid_tm_idx ON public.player_gamelogs_ye
 --
 
 CREATE INDEX player_gamelogs_year_2004_pid_tm_idx ON public.player_gamelogs_year_2004 USING btree (pid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2004_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2004_ruled_out_in_game_idx ON public.player_gamelogs_year_2004 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
 
 
 --
@@ -36621,6 +36754,13 @@ CREATE INDEX player_gamelogs_year_2005_pid_tm_idx ON public.player_gamelogs_year
 
 
 --
+-- Name: player_gamelogs_year_2005_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2005_ruled_out_in_game_idx ON public.player_gamelogs_year_2005 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+
+
+--
 -- Name: player_gamelogs_year_2005_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -36660,6 +36800,13 @@ CREATE INDEX player_gamelogs_year_2006_esbid_tm_idx ON public.player_gamelogs_ye
 --
 
 CREATE INDEX player_gamelogs_year_2006_pid_tm_idx ON public.player_gamelogs_year_2006 USING btree (pid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2006_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2006_ruled_out_in_game_idx ON public.player_gamelogs_year_2006 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
 
 
 --
@@ -36705,6 +36852,13 @@ CREATE INDEX player_gamelogs_year_2007_pid_tm_idx ON public.player_gamelogs_year
 
 
 --
+-- Name: player_gamelogs_year_2007_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2007_ruled_out_in_game_idx ON public.player_gamelogs_year_2007 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+
+
+--
 -- Name: player_gamelogs_year_2007_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -36744,6 +36898,13 @@ CREATE INDEX player_gamelogs_year_2008_esbid_tm_idx ON public.player_gamelogs_ye
 --
 
 CREATE INDEX player_gamelogs_year_2008_pid_tm_idx ON public.player_gamelogs_year_2008 USING btree (pid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2008_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2008_ruled_out_in_game_idx ON public.player_gamelogs_year_2008 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
 
 
 --
@@ -36789,6 +36950,13 @@ CREATE INDEX player_gamelogs_year_2009_pid_tm_idx ON public.player_gamelogs_year
 
 
 --
+-- Name: player_gamelogs_year_2009_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2009_ruled_out_in_game_idx ON public.player_gamelogs_year_2009 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+
+
+--
 -- Name: player_gamelogs_year_2009_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -36828,6 +36996,13 @@ CREATE INDEX player_gamelogs_year_2010_esbid_tm_idx ON public.player_gamelogs_ye
 --
 
 CREATE INDEX player_gamelogs_year_2010_pid_tm_idx ON public.player_gamelogs_year_2010 USING btree (pid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2010_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2010_ruled_out_in_game_idx ON public.player_gamelogs_year_2010 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
 
 
 --
@@ -36873,6 +37048,13 @@ CREATE INDEX player_gamelogs_year_2011_pid_tm_idx ON public.player_gamelogs_year
 
 
 --
+-- Name: player_gamelogs_year_2011_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2011_ruled_out_in_game_idx ON public.player_gamelogs_year_2011 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+
+
+--
 -- Name: player_gamelogs_year_2011_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -36912,6 +37094,13 @@ CREATE INDEX player_gamelogs_year_2012_esbid_tm_idx ON public.player_gamelogs_ye
 --
 
 CREATE INDEX player_gamelogs_year_2012_pid_tm_idx ON public.player_gamelogs_year_2012 USING btree (pid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2012_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2012_ruled_out_in_game_idx ON public.player_gamelogs_year_2012 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
 
 
 --
@@ -36957,6 +37146,13 @@ CREATE INDEX player_gamelogs_year_2013_pid_tm_idx ON public.player_gamelogs_year
 
 
 --
+-- Name: player_gamelogs_year_2013_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2013_ruled_out_in_game_idx ON public.player_gamelogs_year_2013 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+
+
+--
 -- Name: player_gamelogs_year_2013_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -36996,6 +37192,13 @@ CREATE INDEX player_gamelogs_year_2014_esbid_tm_idx ON public.player_gamelogs_ye
 --
 
 CREATE INDEX player_gamelogs_year_2014_pid_tm_idx ON public.player_gamelogs_year_2014 USING btree (pid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2014_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2014_ruled_out_in_game_idx ON public.player_gamelogs_year_2014 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
 
 
 --
@@ -37041,6 +37244,13 @@ CREATE INDEX player_gamelogs_year_2015_pid_tm_idx ON public.player_gamelogs_year
 
 
 --
+-- Name: player_gamelogs_year_2015_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2015_ruled_out_in_game_idx ON public.player_gamelogs_year_2015 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+
+
+--
 -- Name: player_gamelogs_year_2015_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -37080,6 +37290,13 @@ CREATE INDEX player_gamelogs_year_2016_esbid_tm_idx ON public.player_gamelogs_ye
 --
 
 CREATE INDEX player_gamelogs_year_2016_pid_tm_idx ON public.player_gamelogs_year_2016 USING btree (pid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2016_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2016_ruled_out_in_game_idx ON public.player_gamelogs_year_2016 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
 
 
 --
@@ -37125,6 +37342,13 @@ CREATE INDEX player_gamelogs_year_2017_pid_tm_idx ON public.player_gamelogs_year
 
 
 --
+-- Name: player_gamelogs_year_2017_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2017_ruled_out_in_game_idx ON public.player_gamelogs_year_2017 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+
+
+--
 -- Name: player_gamelogs_year_2017_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -37164,6 +37388,13 @@ CREATE INDEX player_gamelogs_year_2018_esbid_tm_idx ON public.player_gamelogs_ye
 --
 
 CREATE INDEX player_gamelogs_year_2018_pid_tm_idx ON public.player_gamelogs_year_2018 USING btree (pid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2018_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2018_ruled_out_in_game_idx ON public.player_gamelogs_year_2018 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
 
 
 --
@@ -37209,6 +37440,13 @@ CREATE INDEX player_gamelogs_year_2019_pid_tm_idx ON public.player_gamelogs_year
 
 
 --
+-- Name: player_gamelogs_year_2019_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2019_ruled_out_in_game_idx ON public.player_gamelogs_year_2019 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+
+
+--
 -- Name: player_gamelogs_year_2019_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -37248,6 +37486,13 @@ CREATE INDEX player_gamelogs_year_2020_esbid_tm_idx ON public.player_gamelogs_ye
 --
 
 CREATE INDEX player_gamelogs_year_2020_pid_tm_idx ON public.player_gamelogs_year_2020 USING btree (pid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2020_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2020_ruled_out_in_game_idx ON public.player_gamelogs_year_2020 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
 
 
 --
@@ -37293,6 +37538,13 @@ CREATE INDEX player_gamelogs_year_2021_pid_tm_idx ON public.player_gamelogs_year
 
 
 --
+-- Name: player_gamelogs_year_2021_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2021_ruled_out_in_game_idx ON public.player_gamelogs_year_2021 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+
+
+--
 -- Name: player_gamelogs_year_2021_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -37332,6 +37584,13 @@ CREATE INDEX player_gamelogs_year_2022_esbid_tm_idx ON public.player_gamelogs_ye
 --
 
 CREATE INDEX player_gamelogs_year_2022_pid_tm_idx ON public.player_gamelogs_year_2022 USING btree (pid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2022_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2022_ruled_out_in_game_idx ON public.player_gamelogs_year_2022 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
 
 
 --
@@ -37377,6 +37636,13 @@ CREATE INDEX player_gamelogs_year_2023_pid_tm_idx ON public.player_gamelogs_year
 
 
 --
+-- Name: player_gamelogs_year_2023_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2023_ruled_out_in_game_idx ON public.player_gamelogs_year_2023 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+
+
+--
 -- Name: player_gamelogs_year_2023_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -37416,6 +37682,13 @@ CREATE INDEX player_gamelogs_year_2024_esbid_tm_idx ON public.player_gamelogs_ye
 --
 
 CREATE INDEX player_gamelogs_year_2024_pid_tm_idx ON public.player_gamelogs_year_2024 USING btree (pid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2024_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2024_ruled_out_in_game_idx ON public.player_gamelogs_year_2024 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
 
 
 --
@@ -37461,6 +37734,13 @@ CREATE INDEX player_gamelogs_year_2025_pid_tm_idx ON public.player_gamelogs_year
 
 
 --
+-- Name: player_gamelogs_year_2025_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2025_ruled_out_in_game_idx ON public.player_gamelogs_year_2025 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
+
+
+--
 -- Name: player_gamelogs_year_2025_tm_esbid_pid_idx; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -37500,6 +37780,13 @@ CREATE INDEX player_gamelogs_year_2026_esbid_tm_idx ON public.player_gamelogs_ye
 --
 
 CREATE INDEX player_gamelogs_year_2026_pid_tm_idx ON public.player_gamelogs_year_2026 USING btree (pid, tm);
+
+
+--
+-- Name: player_gamelogs_year_2026_ruled_out_in_game_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX player_gamelogs_year_2026_ruled_out_in_game_idx ON public.player_gamelogs_year_2026 USING btree (ruled_out_in_game) WHERE (ruled_out_in_game = true);
 
 
 --
@@ -46939,6 +47226,13 @@ ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_
 
 
 --
+-- Name: player_gamelogs_default_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_default_ruled_out_in_game_idx;
+
+
+--
 -- Name: player_gamelogs_default_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -46985,6 +47279,13 @@ ALTER INDEX public.idx_player_gamelogs_pid_week_teams ATTACH PARTITION public.pl
 --
 
 ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2000_pkey;
+
+
+--
+-- Name: player_gamelogs_year_2000_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_year_2000_ruled_out_in_game_idx;
 
 
 --
@@ -47037,6 +47338,13 @@ ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_
 
 
 --
+-- Name: player_gamelogs_year_2001_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_year_2001_ruled_out_in_game_idx;
+
+
+--
 -- Name: player_gamelogs_year_2001_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -47083,6 +47391,13 @@ ALTER INDEX public.idx_player_gamelogs_pid_week_teams ATTACH PARTITION public.pl
 --
 
 ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2002_pkey;
+
+
+--
+-- Name: player_gamelogs_year_2002_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_year_2002_ruled_out_in_game_idx;
 
 
 --
@@ -47135,6 +47450,13 @@ ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_
 
 
 --
+-- Name: player_gamelogs_year_2003_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_year_2003_ruled_out_in_game_idx;
+
+
+--
 -- Name: player_gamelogs_year_2003_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -47181,6 +47503,13 @@ ALTER INDEX public.idx_player_gamelogs_pid_week_teams ATTACH PARTITION public.pl
 --
 
 ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2004_pkey;
+
+
+--
+-- Name: player_gamelogs_year_2004_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_year_2004_ruled_out_in_game_idx;
 
 
 --
@@ -47233,6 +47562,13 @@ ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_
 
 
 --
+-- Name: player_gamelogs_year_2005_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_year_2005_ruled_out_in_game_idx;
+
+
+--
 -- Name: player_gamelogs_year_2005_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -47279,6 +47615,13 @@ ALTER INDEX public.idx_player_gamelogs_pid_week_teams ATTACH PARTITION public.pl
 --
 
 ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2006_pkey;
+
+
+--
+-- Name: player_gamelogs_year_2006_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_year_2006_ruled_out_in_game_idx;
 
 
 --
@@ -47331,6 +47674,13 @@ ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_
 
 
 --
+-- Name: player_gamelogs_year_2007_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_year_2007_ruled_out_in_game_idx;
+
+
+--
 -- Name: player_gamelogs_year_2007_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -47377,6 +47727,13 @@ ALTER INDEX public.idx_player_gamelogs_pid_week_teams ATTACH PARTITION public.pl
 --
 
 ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2008_pkey;
+
+
+--
+-- Name: player_gamelogs_year_2008_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_year_2008_ruled_out_in_game_idx;
 
 
 --
@@ -47429,6 +47786,13 @@ ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_
 
 
 --
+-- Name: player_gamelogs_year_2009_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_year_2009_ruled_out_in_game_idx;
+
+
+--
 -- Name: player_gamelogs_year_2009_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -47475,6 +47839,13 @@ ALTER INDEX public.idx_player_gamelogs_pid_week_teams ATTACH PARTITION public.pl
 --
 
 ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2010_pkey;
+
+
+--
+-- Name: player_gamelogs_year_2010_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_year_2010_ruled_out_in_game_idx;
 
 
 --
@@ -47527,6 +47898,13 @@ ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_
 
 
 --
+-- Name: player_gamelogs_year_2011_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_year_2011_ruled_out_in_game_idx;
+
+
+--
 -- Name: player_gamelogs_year_2011_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -47573,6 +47951,13 @@ ALTER INDEX public.idx_player_gamelogs_pid_week_teams ATTACH PARTITION public.pl
 --
 
 ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2012_pkey;
+
+
+--
+-- Name: player_gamelogs_year_2012_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_year_2012_ruled_out_in_game_idx;
 
 
 --
@@ -47625,6 +48010,13 @@ ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_
 
 
 --
+-- Name: player_gamelogs_year_2013_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_year_2013_ruled_out_in_game_idx;
+
+
+--
 -- Name: player_gamelogs_year_2013_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -47671,6 +48063,13 @@ ALTER INDEX public.idx_player_gamelogs_pid_week_teams ATTACH PARTITION public.pl
 --
 
 ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2014_pkey;
+
+
+--
+-- Name: player_gamelogs_year_2014_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_year_2014_ruled_out_in_game_idx;
 
 
 --
@@ -47723,6 +48122,13 @@ ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_
 
 
 --
+-- Name: player_gamelogs_year_2015_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_year_2015_ruled_out_in_game_idx;
+
+
+--
 -- Name: player_gamelogs_year_2015_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -47769,6 +48175,13 @@ ALTER INDEX public.idx_player_gamelogs_pid_week_teams ATTACH PARTITION public.pl
 --
 
 ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2016_pkey;
+
+
+--
+-- Name: player_gamelogs_year_2016_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_year_2016_ruled_out_in_game_idx;
 
 
 --
@@ -47821,6 +48234,13 @@ ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_
 
 
 --
+-- Name: player_gamelogs_year_2017_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_year_2017_ruled_out_in_game_idx;
+
+
+--
 -- Name: player_gamelogs_year_2017_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -47867,6 +48287,13 @@ ALTER INDEX public.idx_player_gamelogs_pid_week_teams ATTACH PARTITION public.pl
 --
 
 ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2018_pkey;
+
+
+--
+-- Name: player_gamelogs_year_2018_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_year_2018_ruled_out_in_game_idx;
 
 
 --
@@ -47919,6 +48346,13 @@ ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_
 
 
 --
+-- Name: player_gamelogs_year_2019_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_year_2019_ruled_out_in_game_idx;
+
+
+--
 -- Name: player_gamelogs_year_2019_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -47965,6 +48399,13 @@ ALTER INDEX public.idx_player_gamelogs_pid_week_teams ATTACH PARTITION public.pl
 --
 
 ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2020_pkey;
+
+
+--
+-- Name: player_gamelogs_year_2020_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_year_2020_ruled_out_in_game_idx;
 
 
 --
@@ -48017,6 +48458,13 @@ ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_
 
 
 --
+-- Name: player_gamelogs_year_2021_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_year_2021_ruled_out_in_game_idx;
+
+
+--
 -- Name: player_gamelogs_year_2021_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -48063,6 +48511,13 @@ ALTER INDEX public.idx_player_gamelogs_pid_week_teams ATTACH PARTITION public.pl
 --
 
 ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2022_pkey;
+
+
+--
+-- Name: player_gamelogs_year_2022_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_year_2022_ruled_out_in_game_idx;
 
 
 --
@@ -48115,6 +48570,13 @@ ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_
 
 
 --
+-- Name: player_gamelogs_year_2023_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_year_2023_ruled_out_in_game_idx;
+
+
+--
 -- Name: player_gamelogs_year_2023_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -48161,6 +48623,13 @@ ALTER INDEX public.idx_player_gamelogs_pid_week_teams ATTACH PARTITION public.pl
 --
 
 ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2024_pkey;
+
+
+--
+-- Name: player_gamelogs_year_2024_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_year_2024_ruled_out_in_game_idx;
 
 
 --
@@ -48213,6 +48682,13 @@ ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_
 
 
 --
+-- Name: player_gamelogs_year_2025_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_year_2025_ruled_out_in_game_idx;
+
+
+--
 -- Name: player_gamelogs_year_2025_tm_esbid_pid_idx; Type: INDEX ATTACH; Schema: public; Owner: -
 --
 
@@ -48259,6 +48735,13 @@ ALTER INDEX public.idx_player_gamelogs_pid_week_teams ATTACH PARTITION public.pl
 --
 
 ALTER INDEX public.player_gamelogs_pkey ATTACH PARTITION public.player_gamelogs_year_2026_pkey;
+
+
+--
+-- Name: player_gamelogs_year_2026_ruled_out_in_game_idx; Type: INDEX ATTACH; Schema: public; Owner: -
+--
+
+ALTER INDEX public.idx_player_gamelogs_ruled_out ATTACH PARTITION public.player_gamelogs_year_2026_ruled_out_in_game_idx;
 
 
 --

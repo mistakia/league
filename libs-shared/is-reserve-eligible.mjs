@@ -66,6 +66,7 @@ export default function isReserveEligible({
   nfl_status,
   injury_status,
   prior_week_inactive = false,
+  prior_week_ruled_out = false,
   week = null,
   is_regular_season = false,
   game_day = null,
@@ -93,7 +94,13 @@ export default function isReserveEligible({
 
   // Apply historical grace period logic for regular season after week 1
   // Player was inactive if they have no gamelog OR gamelog.active is false
-  if (week && week > 1 && is_regular_season && prior_week_inactive === true) {
+  // OR if they were ruled out during the game (left early due to injury)
+  if (
+    week &&
+    week > 1 &&
+    is_regular_season &&
+    (prior_week_inactive === true || prior_week_ruled_out === true)
+  ) {
     const final_practice_day = get_final_practice_day({ game_day })
 
     if (final_practice_day !== null) {

@@ -113,7 +113,8 @@ export const job_types = {
   IMPORT_PFF_TEAM_GRADES: 89,
   IMPORT_GAMES_SPORTRADAR: 90,
   IMPORT_PLAYS_SPORTRADAR: 91,
-  IMPORT_GAMEDAY_ROSTERS: 92
+  IMPORT_GAMEDAY_ROSTERS: 92,
+  UPDATE_PLAYER_GAMELOG_RULED_OUT_STATUS: 93
 }
 
 export const job_title_by_id = {
@@ -208,5 +209,6 @@ export const job_title_by_id = {
   89: 'Import PFF Team Grades',
   90: 'Import NFL Games (Sportradar)',
   91: 'Import NFL Plays (Sportradar)',
-  92: 'Import Gameday Rosters'
+  92: 'Import Gameday Rosters',
+  93: 'Update Player Gamelog Ruled Out Status'
 }
