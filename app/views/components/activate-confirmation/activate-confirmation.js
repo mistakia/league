@@ -44,6 +44,7 @@ export default class ActivateConfirmation extends React.Component {
           nfl_status: activePlayerMap.get('nfl_status'),
           injury_status: activePlayerMap.get('injury_status'),
           prior_week_inactive: activePlayerMap.get('prior_week_inactive'),
+          prior_week_ruled_out: activePlayerMap.get('prior_week_ruled_out'),
           week: constants.season.week,
           is_regular_season: constants.season.isRegularSeason,
           game_day: activePlayerMap.get('game_day'),

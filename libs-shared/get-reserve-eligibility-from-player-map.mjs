@@ -13,6 +13,7 @@ export default function get_reserve_eligibility_from_player_map({
   const nfl_status = player_map.get('nfl_status')
   const injury_status = player_map.get('injury_status')
   const prior_week_inactive = player_map.get('prior_week_inactive')
+  const prior_week_ruled_out = player_map.get('prior_week_ruled_out')
   const game_day = player_map.get('game_day')
   const practice_week = player_map.get('practice_week')
   const practice = practice_week ? practice_week.toJS() : null
@@ -22,6 +23,7 @@ export default function get_reserve_eligibility_from_player_map({
       nfl_status,
       injury_status,
       prior_week_inactive,
+      prior_week_ruled_out,
       week: constants.season.week,
       is_regular_season: constants.season.isRegularSeason,
       game_day,
