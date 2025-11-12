@@ -1,4 +1,20 @@
-# Create Data View Link Workflow
+---
+title: Create Data View Link
+type: workflow
+description: Generate valid data view links for the league system with proper validation and parameter encoding
+created_at: '2025-11-12T00:00:00.000Z'
+entity_id: f8a3c2e1-9d4b-4a7c-b5e6-1f2a3c4d5e6f
+observations:
+  - '[pattern] URL shortening through xo.football/u endpoint reduces link complexity'
+  - '[validation] Column existence verification prevents runtime errors'
+  - '[performance] Single-year parameters optimize partitioned table queries'
+relations:
+  - follows [[repository/active/league/docs/guideline-data-view-links.md]]
+updated_at: '2025-11-12T00:00:00.000Z'
+user_public_key: 0000000000000000000000000000000000000000000000000000000000000000
+---
+
+# Create Data View Link
 
 <task>
 Generate a valid data view link for the league system that can be shared for analysis and collaboration.
@@ -18,7 +34,9 @@ The data view system supports complex queries with:
 - Time-based splits (year/week groupings)
 - Rate type normalizations (per-game, per-play, etc.)
 - League/scoring format configurations
-  </context>
+
+**Reference**: See [[repository/active/league/docs/guideline-data-view-links.md]] for complete standards and best practices.
+</context>
 
 <instructions>
 1. **Define Query Requirements**
@@ -151,7 +169,7 @@ echo '{"url": "'$VIEW_URL'"}' | curl -X POST https://xo.football/u \
   -d @-
 ```
 
-**Error Handling:** Refer to guideline for validation requirements and troubleshooting.
+**Error Handling:** Refer to [[repository/active/league/docs/guideline-data-view-links.md]] for validation requirements and troubleshooting.
 </instructions>
 
 <output_format>
