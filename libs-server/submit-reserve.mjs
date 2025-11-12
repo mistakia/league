@@ -106,6 +106,9 @@ export default async function ({
       'nfl_games.day as game_day',
       db.raw(
         'CASE WHEN prior_week_gamelog.pid IS NULL OR prior_week_gamelog.active = false THEN true ELSE false END as prior_week_inactive'
+      ),
+      db.raw(
+        'CASE WHEN prior_week_gamelog.ruled_out_in_game = true THEN true ELSE false END as prior_week_ruled_out'
       )
     )
   } else {
@@ -188,6 +191,7 @@ export default async function ({
       nfl_status,
       injury_status,
       prior_week_inactive,
+      prior_week_ruled_out,
       game_day,
       m,
       tu,
@@ -214,6 +218,7 @@ export default async function ({
         nfl_status,
         injury_status,
         prior_week_inactive,
+        prior_week_ruled_out,
         week: constants.season.week,
         is_regular_season: constants.season.isRegularSeason,
         game_day,
