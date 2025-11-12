@@ -82,6 +82,9 @@
 ## At 3AM every day
 0 3 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-player-contracts-nflverse.mjs --force_download &>> /var/log/league/import-player-contracts-nflverse.log
 
+## At 5:00 AM on Tuesday during the NFL Season - Update ruled out in game status for prior week
+0 5 * 1,2,9-12 2 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/update-player-gamelog-ruled-out-status.mjs &>> /var/log/league/update-player-gamelog-ruled-out-status.log
+
 
 
 # KEEP TRADE CUT

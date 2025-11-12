@@ -41,7 +41,11 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { constants } from '#libs-shared'
-import { is_main, report_job, handle_season_args_for_script } from '#libs-server'
+import {
+  is_main,
+  report_job,
+  handle_season_args_for_script
+} from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const argv = yargs(hideBin(process.argv)).argv
@@ -114,7 +118,9 @@ const load_games = async ({ year, week, seas_type }) => {
 
   const games = await query.orderBy('week', 'asc')
 
-  log(`Loaded ${games.length} games for ${year} ${seas_type} ${week ? `week ${week}` : 'all weeks'}`)
+  log(
+    `Loaded ${games.length} games for ${year} ${seas_type} ${week ? `week ${week}` : 'all weeks'}`
+  )
 
   return games
 }
@@ -217,7 +223,9 @@ const process_game = async (game, gamelogs) => {
     }
   }
 
-  log(`  Found ${Object.keys(out_status_by_pid).length} players with OUT status`)
+  log(
+    `  Found ${Object.keys(out_status_by_pid).length} players with OUT status`
+  )
 
   // Identify players to update
   const updates = []
@@ -244,9 +252,7 @@ const process_game = async (game, gamelogs) => {
           `  Flagging ${gamelog.pid} as ruled out (status updated ${status_date}, injury: ${out_status.injury_body_part || 'unknown'}, snaps: ${gamelog.snaps_off || 0})`
         )
       } else {
-        log(
-          `  Skipping ${gamelog.pid} - already flagged as ruled out`
-        )
+        log(`  Skipping ${gamelog.pid} - already flagged as ruled out`)
       }
     }
   }
