@@ -1,3 +1,20 @@
+---
+title: Data View Link Guidelines
+type: guideline
+description: Standards and best practices for creating, sharing, and maintaining data view links in the league system
+created_at: '2025-11-12T00:00:00.000Z'
+entity_id: a7b9c1d2-3e4f-5a6b-7c8d-9e0f1a2b3c4d
+observations:
+  - '[performance] Single-year parameters enable partition pruning for faster queries'
+  - '[validation] Column existence checks prevent runtime failures'
+  - '[usability] Shortened URLs improve link sharing and readability'
+  - '[pattern] Rate type and split compatibility prevents invalid query combinations'
+relations:
+  - used_by [[repository/active/league/docs/workflow-create-data-view-link.md]]
+updated_at: '2025-11-12T00:00:00.000Z'
+user_public_key: 0000000000000000000000000000000000000000000000000000000000000000
+---
+
 # Data View Link Guidelines
 
 ## Purpose
@@ -171,4 +188,4 @@ Validate before generating links:
 ## References
 
 - **Data View Specs**: `docs/data-view-specs/` - Column definitions and parameter schemas
-- **Workflow**: `workflow-create-data-view-link.md` - Step-by-step process implementation
+- **Workflow**: [[repository/active/league/docs/workflow-create-data-view-link.md]] - Step-by-step process implementation
