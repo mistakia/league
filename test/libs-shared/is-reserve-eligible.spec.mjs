@@ -66,6 +66,72 @@ describe('LIBS-SHARED isReserveEligible', function () {
   })
 
   describe('enhanced logic - historical grace period', function () {
+    describe('grace period - ruled out in game', function () {
+      before(function () {
+        // Set current day to Tuesday (day 2)
+        MockDate.set('2024-10-08T10:00:00.000Z') // Tuesday
+      })
+
+      after(function () {
+        MockDate.reset()
+      })
+
+      it('should return true for prior week ruled out with Sunday game (final practice Friday)', function () {
+        const result = isReserveEligible({
+          nfl_status: constants.player_nfl_status.ACTIVE,
+          injury_status: null,
+          prior_week_ruled_out: true,
+          week: 5,
+          is_regular_season: true,
+          game_day: 'SUN'
+        })
+        // Tuesday (2) < Friday (5), so should be eligible
+        expect(result).to.equal(true)
+      })
+
+      it('should return true when both prior_week_inactive and prior_week_ruled_out are false but one is true', function () {
+        const result = isReserveEligible({
+          nfl_status: constants.player_nfl_status.ACTIVE,
+          injury_status: null,
+          prior_week_inactive: false,
+          prior_week_ruled_out: true,
+          week: 5,
+          is_regular_season: true,
+          game_day: 'SUN'
+        })
+        // Tuesday (2) < Friday (5), prior_week_ruled_out is true, so should be eligible
+        expect(result).to.equal(true)
+      })
+
+      it('should return true when prior_week_inactive is true regardless of prior_week_ruled_out', function () {
+        const result = isReserveEligible({
+          nfl_status: constants.player_nfl_status.ACTIVE,
+          injury_status: null,
+          prior_week_inactive: true,
+          prior_week_ruled_out: false,
+          week: 5,
+          is_regular_season: true,
+          game_day: 'SUN'
+        })
+        // Tuesday (2) < Friday (5), prior_week_inactive is true, so should be eligible
+        expect(result).to.equal(true)
+      })
+
+      it('should return false when both prior_week_inactive and prior_week_ruled_out are false', function () {
+        const result = isReserveEligible({
+          nfl_status: constants.player_nfl_status.ACTIVE,
+          injury_status: null,
+          prior_week_inactive: false,
+          prior_week_ruled_out: false,
+          week: 5,
+          is_regular_season: true,
+          game_day: 'SUN'
+        })
+        // Grace period logic doesn't apply, falls through to original logic
+        expect(result).to.equal(false)
+      })
+    })
+
     describe('grace period - before final practice day', function () {
       before(function () {
         // Set current day to Tuesday (day 2)
