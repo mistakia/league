@@ -28,10 +28,11 @@ export default function isOnReleaseWaivers({ transactions = [] } = {}) {
   }
 
   // not on waivers if not on roster for 24 hours before being dropped
+  // EXCEPTION: if previous transaction is POACHED, allow immediate release to waivers
   const diff = dayjs
     .unix(last.timestamp)
     .diff(dayjs.unix(previous.timestamp), 'hour')
-  if (diff < 24) {
+  if (diff < 24 && previous.type !== constantsTransactions.POACHED) {
     return false
   }
 
