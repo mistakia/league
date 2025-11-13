@@ -329,6 +329,244 @@ describe('LIBS-SHARED Roster', function () {
     addedPlayer.extensions.should.equal(0)
   })
 
+  it('should include signed practice squad in position limits', () => {
+    const league = {
+      sqb: 0,
+      srb: 1,
+      swr: 1,
+      ste: 0,
+      srbwr: 0,
+      srbwrte: 1,
+      sqbrbwrte: 0,
+      swrte: 0,
+      sdst: 0,
+      sk: 0,
+      bench: 5,
+      ps: 4,
+      reserve_short_term_limit: 3,
+
+      mqb: 0,
+      mrb: 0,
+      mwr: 0,
+      mte: 0,
+      mk: 0,
+      mdst: 3 // Position limit of 3 DST
+    }
+
+    const roster = {
+      uid: 0,
+      players: []
+    }
+
+    // Add 1 DST on bench
+    roster.players.push({
+      slot: constants.slots.BENCH,
+      pid: 'dst-bench',
+      pos: 'DST'
+    })
+
+    // Add 2 DST on signed practice squad (slots 12 and 15)
+    roster.players.push({
+      slot: constants.slots.PS,
+      pid: 'dst-ps-1',
+      pos: 'DST'
+    })
+
+    roster.players.push({
+      slot: constants.slots.PSP,
+      pid: 'dst-ps-2',
+      pos: 'DST'
+    })
+
+    const r = new Roster({ roster, league })
+
+    r.uid.should.equal(0)
+    r.players.length.should.equal(3)
+    r.isFull.should.equal(false)
+
+    // Should not have open bench slot for DST (1 bench + 2 signed PS = 3, which equals the limit)
+    const hasSlot = r.hasOpenBenchSlot('DST')
+    hasSlot.should.equal(false)
+  })
+
+  it('should exclude drafted practice squad from position limits', () => {
+    const league = {
+      sqb: 0,
+      srb: 1,
+      swr: 1,
+      ste: 0,
+      srbwr: 0,
+      srbwrte: 1,
+      sqbrbwrte: 0,
+      swrte: 0,
+      sdst: 0,
+      sk: 0,
+      bench: 5,
+      ps: 4,
+      reserve_short_term_limit: 3,
+
+      mqb: 0,
+      mrb: 0,
+      mwr: 0,
+      mte: 0,
+      mk: 0,
+      mdst: 3 // Position limit of 3 DST
+    }
+
+    const roster = {
+      uid: 0,
+      players: []
+    }
+
+    // Add 1 DST on bench
+    roster.players.push({
+      slot: constants.slots.BENCH,
+      pid: 'dst-bench',
+      pos: 'DST'
+    })
+
+    // Add 1 DST on signed PS
+    roster.players.push({
+      slot: constants.slots.PS,
+      pid: 'dst-ps-signed',
+      pos: 'DST'
+    })
+
+    // Add 2 DST on drafted practice squad (slots 16 and 17) - should NOT count
+    roster.players.push({
+      slot: constants.slots.PSD,
+      pid: 'dst-psd',
+      pos: 'DST'
+    })
+
+    roster.players.push({
+      slot: constants.slots.PSDP,
+      pid: 'dst-psdp',
+      pos: 'DST'
+    })
+
+    const r = new Roster({ roster, league })
+
+    r.uid.should.equal(0)
+    r.players.length.should.equal(4)
+    r.isFull.should.equal(false)
+
+    // Should have open bench slot for DST (only 1 bench + 1 signed PS = 2, limit is 3)
+    // Drafted PS players don't count toward position limit
+    const hasSlot = r.hasOpenBenchSlot('DST')
+    hasSlot.should.equal(true)
+  })
+
+  it('should respect position limits even when practice squad has space', () => {
+    const league = {
+      sqb: 0,
+      srb: 1,
+      swr: 1,
+      ste: 0,
+      srbwr: 0,
+      srbwrte: 1,
+      sqbrbwrte: 0,
+      swrte: 0,
+      sdst: 0,
+      sk: 0,
+      bench: 5,
+      ps: 4, // 4 practice squad slots available
+      reserve_short_term_limit: 3,
+
+      mqb: 2, // Position limit of 2 QB
+      mrb: 0,
+      mwr: 0,
+      mte: 0,
+      mk: 0,
+      mdst: 0
+    }
+
+    const roster = {
+      uid: 0,
+      players: []
+    }
+
+    // Add 1 QB on bench
+    roster.players.push({
+      slot: constants.slots.BENCH,
+      pid: 'qb-bench',
+      pos: 'QB'
+    })
+
+    // Add 1 QB on signed PS
+    roster.players.push({
+      slot: constants.slots.PS,
+      pid: 'qb-ps',
+      pos: 'QB'
+    })
+
+    const r = new Roster({ roster, league })
+
+    r.uid.should.equal(0)
+    r.players.length.should.equal(2)
+    r.isFull.should.equal(false)
+    r.hasOpenPracticeSquadSlot().should.equal(true) // PS has space
+
+    // Should not have open bench slot for QB (1 bench + 1 signed PS = 2, which equals limit)
+    // Even though PS has available space, position limit is enforced
+    const hasSlot = r.hasOpenBenchSlot('QB')
+    hasSlot.should.equal(false)
+  })
+
+  it('should keep practice squad size limit independent from position limits', () => {
+    const league = {
+      sqb: 0,
+      srb: 1,
+      swr: 1,
+      ste: 0,
+      srbwr: 0,
+      srbwrte: 1,
+      sqbrbwrte: 0,
+      swrte: 0,
+      sdst: 0,
+      sk: 0,
+      bench: 5,
+      ps: 2, // Only 2 practice squad slots
+      reserve_short_term_limit: 3,
+
+      mqb: 5, // High position limit
+      mrb: 0,
+      mwr: 0,
+      mte: 0,
+      mk: 0,
+      mdst: 0
+    }
+
+    const roster = {
+      uid: 0,
+      players: []
+    }
+
+    // Fill practice squad with 2 QBs
+    roster.players.push({
+      slot: constants.slots.PS,
+      pid: 'qb-ps-1',
+      pos: 'QB'
+    })
+
+    roster.players.push({
+      slot: constants.slots.PSP,
+      pid: 'qb-ps-2',
+      pos: 'QB'
+    })
+
+    const r = new Roster({ roster, league })
+
+    r.uid.should.equal(0)
+    r.players.length.should.equal(2)
+
+    // Practice squad is full
+    r.hasOpenPracticeSquadSlot().should.equal(false)
+
+    // But position limit still has space (2 < 5)
+    r.hasOpenBenchSlot('QB').should.equal(true)
+  })
+
   it('getCountBySlot', () => {
     // TODO
   })
