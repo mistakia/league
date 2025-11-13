@@ -155,6 +155,15 @@ export default class Roster {
     )
   }
 
+  // Returns players that count toward position limits (active roster + signed practice squad)
+  // Position limits (mdst, mqb, mrb, mwr, mte, mk) apply to:
+  // - Active roster slots (bench, starter slots)
+  // - Signed practice squad slots (PS, PSP)
+  // Excludes drafted practice squad (PSD, PSDP) and reserve slots
+  get roster_players_for_position_limits() {
+    return [...this.active, ...this.practice_signed]
+  }
+
   get bench() {
     return this.players.filter((p) => p.slot === constants.slots.BENCH)
   }
@@ -351,7 +360,10 @@ export default class Roster {
       return false
     }
 
-    const count = this.active.filter((p) => p.pos === pos).length
+    // Position limits (mdst, mqb, etc.) apply to active roster + signed practice squad combined
+    const count = this.roster_players_for_position_limits.filter(
+      (p) => p.pos === pos
+    ).length
     const limit = this._league[`m${pos.toLowerCase()}`]
     return !limit || count < limit
   }
