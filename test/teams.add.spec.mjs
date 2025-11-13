@@ -340,7 +340,153 @@ describe('API /teams - add', function () {
     })
 
     it('exceeded roster limit', async () => {
-      // TODO
+      MockDate.set(regular_season_start.add('2', 'week').day(4).toISOString())
+      const leagueId = 1
+      const teamId = 1
+
+      // Set position limit for RB to 3
+      await knex('seasons').update({ mrb: 3 }).where({ lid: leagueId })
+
+      // Add 1 RB to bench
+      const player1 = await selectPlayer({ pos: 'RB' })
+      await addPlayer({
+        teamId,
+        leagueId,
+        player: player1,
+        userId: 1,
+        slot: constants.slots.BENCH
+      })
+
+      // Add 2 RB to signed practice squad
+      const player2 = await selectPlayer({
+        pos: 'RB',
+        exclude_pids: [player1.pid]
+      })
+      await addPlayer({
+        teamId,
+        leagueId,
+        player: player2,
+        userId: 1,
+        slot: constants.slots.PS
+      })
+
+      const player3 = await selectPlayer({
+        pos: 'RB',
+        exclude_pids: [player1.pid, player2.pid]
+      })
+      await addPlayer({
+        teamId,
+        leagueId,
+        player: player3,
+        userId: 1,
+        slot: constants.slots.PSP
+      })
+
+      // Verify we have 3 RB (1 bench + 2 signed PS)
+      const rosters = await knex('rosters_players')
+        .where({
+          tid: teamId,
+          week: constants.season.week,
+          year: constants.season.year,
+          pos: 'RB'
+        })
+        .whereIn('slot', [
+          constants.slots.BENCH,
+          constants.slots.PS,
+          constants.slots.PSP
+        ])
+      rosters.length.should.equal(3)
+
+      // Try to add a 4th RB (should fail due to position limit)
+      const player4 = await selectPlayer({
+        pos: 'RB',
+        exclude_pids: [player1.pid, player2.pid, player3.pid]
+      })
+      const request = chai_request
+        .execute(server)
+        .post('/api/teams/1/add')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          teamId,
+          pid: player4.pid,
+          leagueId,
+          slot: constants.slots.BENCH
+        })
+
+      await error(request, 'exceeds roster limits')
+    })
+
+    it('should allow add after releasing signed practice squad player', async () => {
+      MockDate.set(regular_season_start.add('2', 'week').day(4).toISOString())
+      const leagueId = 1
+      const teamId = 1
+
+      // Set position limit for RB to 3
+      await knex('seasons').update({ mrb: 3 }).where({ lid: leagueId })
+
+      // Add 1 RB to bench
+      const player1 = await selectPlayer({ pos: 'RB' })
+      await addPlayer({
+        teamId,
+        leagueId,
+        player: player1,
+        userId: 1,
+        slot: constants.slots.BENCH
+      })
+
+      // Add 2 RB to signed practice squad
+      const player2 = await selectPlayer({
+        pos: 'RB',
+        exclude_pids: [player1.pid]
+      })
+      await addPlayer({
+        teamId,
+        leagueId,
+        player: player2,
+        userId: 1,
+        slot: constants.slots.PS
+      })
+
+      const player3 = await selectPlayer({
+        pos: 'RB',
+        exclude_pids: [player1.pid, player2.pid]
+      })
+      await addPlayer({
+        teamId,
+        leagueId,
+        player: player3,
+        userId: 1,
+        slot: constants.slots.PSP
+      })
+
+      // Release one of the signed PS players
+      await knex('rosters_players')
+        .where({
+          tid: teamId,
+          week: constants.season.week,
+          year: constants.season.year,
+          pid: player2.pid
+        })
+        .del()
+
+      // Now should be able to add a new RB (2 remaining < 3 limit)
+      const player4 = await selectPlayer({
+        pos: 'RB',
+        exclude_pids: [player1.pid, player2.pid, player3.pid]
+      })
+      const res = await chai_request
+        .execute(server)
+        .post('/api/teams/1/add')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          teamId,
+          pid: player4.pid,
+          leagueId,
+          slot: constants.slots.BENCH
+        })
+
+      res.should.have.status(200)
+      res.body[0].pid.should.equal(player4.pid)
     })
 
     it('reserve player violation', async () => {
