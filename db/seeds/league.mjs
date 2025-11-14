@@ -71,6 +71,7 @@ export default async function (knex, league_params = {}) {
   await knex('trades').del()
   await knex('trades_picks').del()
   await knex('trades_players').del()
+  await knex('trades_slots').del()
   await knex('trades_transactions').del()
   await knex('trade_releases').del()
   await knex('transactions').del()

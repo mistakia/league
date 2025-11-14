@@ -1,19 +1,46 @@
 .trade__player
   display flex
-  border-bottom 1px solid $borderColor
+  border-bottom 1px solid rgba(0, 0, 0, 0.08)
   align-items center
   padding 16px 0
+  transition background-color 0.2s ease
+
+  &:hover
+    background-color rgba(0, 0, 0, 0.01)
+
+  @media (max-width: 768px)
+    padding 12px 0
+    flex-wrap wrap
 
 .trade__player-name
   flex 1
   min-width 0
+  padding-right 12px
+
+  @media (max-width: 768px)
+    flex-basis 100%
+    padding-right 0
+    margin-bottom 8px
 
 .trade__player-metric
   flex 0 0 50px
   display flex
   flex-direction column
   align-items center
+  padding 0 4px
+
+  @media (max-width: 768px)
+    flex 0 0 45px
+    padding 0 2px
+
   label
     font-size 11px
     padding-bottom 4px
-    color rgba(0,0,0,0.5)
+    color rgba(0, 0, 0, 0.5)
+    font-weight 500
+    text-transform uppercase
+    letter-spacing 0.3px
+
+  @media (max-width: 768px)
+    label
+      font-size 10px

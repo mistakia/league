@@ -22,6 +22,7 @@ ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_history DROP CONSTRAINT IF
 ALTER TABLE IF EXISTS ONLY public.invite_codes DROP CONSTRAINT IF EXISTS invite_codes_created_by_fkey;
 DROP TRIGGER IF EXISTS update_config_modtime ON public.config;
 DROP TRIGGER IF EXISTS player_name_search_vector_update ON public.player;
+DROP INDEX IF EXISTS public.trades_slots_trade_uid_idx;
 DROP INDEX IF EXISTS public.projections_index_y2026_sourceid_pid_userid_week_year_seas__idx;
 DROP INDEX IF EXISTS public.projections_index_y2026_pid_idx;
 DROP INDEX IF EXISTS public.projections_index_y2025_sourceid_pid_userid_week_year_seas__idx;
@@ -1815,6 +1816,7 @@ ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_key;
 ALTER TABLE IF EXISTS ONLY public.urls DROP CONSTRAINT IF EXISTS urls_url_hash_key;
 ALTER TABLE IF EXISTS ONLY public.super_priority DROP CONSTRAINT IF EXISTS unique_super_priority;
 ALTER TABLE IF EXISTS ONLY public.transactions DROP CONSTRAINT IF EXISTS transactions_pkey;
+ALTER TABLE IF EXISTS ONLY public.trades_slots DROP CONSTRAINT IF EXISTS trades_slots_pkey;
 ALTER TABLE IF EXISTS ONLY public.teams DROP CONSTRAINT IF EXISTS teams_pkey;
 ALTER TABLE IF EXISTS ONLY public.super_priority DROP CONSTRAINT IF EXISTS super_priority_pkey;
 ALTER TABLE IF EXISTS ONLY public.seasons DROP CONSTRAINT IF EXISTS seasons_pkey;
@@ -1954,6 +1956,7 @@ DROP SEQUENCE IF EXISTS public.transactions_uid_seq;
 DROP TABLE IF EXISTS public.transactions;
 DROP SEQUENCE IF EXISTS public.trades_uid_seq;
 DROP TABLE IF EXISTS public.trades_transactions;
+DROP TABLE IF EXISTS public.trades_slots;
 DROP TABLE IF EXISTS public.trades_players;
 DROP TABLE IF EXISTS public.trades_picks;
 DROP TABLE IF EXISTS public.trades;
@@ -23490,6 +23493,18 @@ CREATE TABLE public.trades_players (
 
 
 --
+-- Name: trades_slots; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.trades_slots (
+    trade_uid integer NOT NULL,
+    pid character varying(25) NOT NULL,
+    tid integer NOT NULL,
+    slot integer NOT NULL
+);
+
+
+--
 -- Name: trades_transactions; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -25362,6 +25377,14 @@ ALTER TABLE ONLY public.super_priority
 
 ALTER TABLE ONLY public.teams
     ADD CONSTRAINT teams_pkey PRIMARY KEY (uid, year);
+
+
+--
+-- Name: trades_slots trades_slots_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.trades_slots
+    ADD CONSTRAINT trades_slots_pkey PRIMARY KEY (trade_uid, pid, tid);
 
 
 --
@@ -37920,6 +37943,13 @@ CREATE INDEX projections_index_y2026_pid_idx ON public.projections_index_y2026 U
 --
 
 CREATE UNIQUE INDEX projections_index_y2026_sourceid_pid_userid_week_year_seas__idx ON public.projections_index_y2026 USING btree (sourceid, pid, userid, week, year, seas_type);
+
+
+--
+-- Name: trades_slots_trade_uid_idx; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX trades_slots_trade_uid_idx ON public.trades_slots USING btree (trade_uid);
 
 
 --
