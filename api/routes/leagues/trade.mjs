@@ -2,6 +2,7 @@ import dayjs from 'dayjs'
 import express from 'express'
 
 import { constants, Roster, toStringArray, nth } from '#libs-shared'
+import validate_trade_roster_slots from '#libs-server/validate-trade-roster-slots.mjs'
 import {
   getRoster,
   getLeague,
@@ -209,6 +210,22 @@ export const get_trade = async (req, res) => {
         trade.proposingTeamPlayers.push(trades_players_row.pid)
       } else {
         trade.acceptingTeamPlayers.push(trades_players_row.pid)
+      }
+    }
+
+    // Load slot assignments for both teams
+    const trades_slots_rows = await db('trades_slots').where({
+      trade_uid: tradeId
+    })
+
+    trade.proposingTeamSlots = {}
+    trade.acceptingTeamSlots = {}
+
+    for (const row of trades_slots_rows) {
+      if (row.tid === trade.propose_tid) {
+        trade.proposingTeamSlots[row.pid] = row.slot
+      } else {
+        trade.acceptingTeamSlots[row.pid] = row.slot
       }
     }
 
@@ -496,6 +513,39 @@ router.post(
           : [req.body.releasePlayers]
         : []
 
+      // Parse accepting team slot overrides (if provided)
+      const accepting_team_slot_overrides = req.body.accepting_team_slots || {}
+
+      // Validate slot assignment inputs
+      const valid_slots = [
+        constants.slots.BENCH,
+        constants.slots.PS,
+        constants.slots.PSP,
+        constants.slots.PSD,
+        constants.slots.PSDP,
+        constants.slots.RESERVE_SHORT_TERM,
+        constants.slots.RESERVE_LONG_TERM,
+        constants.slots.COV
+      ]
+
+      for (const [pid, slot] of Object.entries(accepting_team_slot_overrides)) {
+        if (typeof pid !== 'string' || pid.length === 0) {
+          return res.status(400).send({
+            error: 'Invalid player ID in slot assignments'
+          })
+        }
+        if (!Number.isInteger(slot)) {
+          return res.status(400).send({
+            error: `Invalid slot value for player ${pid}`
+          })
+        }
+        if (!valid_slots.includes(slot)) {
+          return res.status(400).send({
+            error: `Invalid slot ${slot} for player ${pid}. Only BENCH, PS, PSD, and RESERVE slots are allowed for trades.`
+          })
+        }
+      }
+
       const proposing_release_rows = await db('trade_releases').where({
         tradeid: tradeId
       })
@@ -515,6 +565,41 @@ router.post(
         } else {
           acceptingTeamPlayers.push(row.pid)
         }
+      }
+
+      // Load stored slot assignments from trades_slots table
+      const trades_slots_rows = await db('trades_slots').where({
+        trade_uid: tradeId
+      })
+
+      // Build slot assignment maps for each team
+      const stored_proposing_team_slots = {}
+      const stored_accepting_team_slots = {}
+      for (const row of trades_slots_rows) {
+        if (row.tid === trade.propose_tid) {
+          // Proposing team receives these players
+          stored_proposing_team_slots[row.pid] = row.slot
+        } else {
+          // Accepting team receives these players
+          stored_accepting_team_slots[row.pid] = row.slot
+        }
+      }
+
+      // Validate accepting team overrides only apply to players they're receiving
+      for (const pid of Object.keys(accepting_team_slot_overrides)) {
+        if (!proposingTeamPlayers.includes(pid)) {
+          return res.status(400).send({
+            error: `Cannot override slot for player ${pid} - not receiving this player`
+          })
+        }
+      }
+
+      // Merge accepting team overrides with stored assignments
+      // Proposing team assignments are immutable (cannot be changed during acceptance)
+      const proposing_team_slots = stored_proposing_team_slots
+      const accepting_team_slots = {
+        ...stored_accepting_team_slots,
+        ...accepting_team_slot_overrides
       }
 
       const tradedPlayers = proposingTeamPlayers.concat(acceptingTeamPlayers)
@@ -546,10 +631,23 @@ router.post(
         .as('sub_query')
 
       const player_rows = await db
-        .select('player.*', 'transactions.value')
+        .select('player.*', 'transactions.value', 'rosters_players.slot')
         .from(sub)
         .join('transactions', 'sub_query.uid', 'transactions.uid')
         .join('player', 'transactions.pid', 'player.pid')
+        .leftJoin('rosters_players', function () {
+          this.on('player.pid', '=', 'rosters_players.pid')
+            .andOn(
+              'rosters_players.year',
+              '=',
+              db.raw('?', [constants.season.year])
+            )
+            .andOn(
+              'rosters_players.week',
+              '=',
+              db.raw('?', [constants.season.week])
+            )
+        })
         .whereIn('player.pid', all_pids)
 
       // Load both team rosters first
@@ -614,20 +712,21 @@ router.post(
       )
       acceptingTeamPlayers.forEach((p) => acceptingTeamRoster.removePlayer(p))
 
-      for (const pid of proposingTeamPlayers) {
-        const player_row = player_rows.find((p) => p.pid === pid)
-        const hasSlot = acceptingTeamRoster.hasOpenBenchSlot(player_row.pos)
-        if (!hasSlot) {
-          return res
-            .status(400)
-            .send({ error: 'no slots available on accepting team roster' })
-        }
-        acceptingTeamRoster.addPlayer({
-          slot: constants.slots.BENCH,
-          pid,
-          pos: player_row.pos,
-          value: player_row.value,
-          extensions: proposingPlayerExtensions[pid]
+      // Validate accepting team roster with slot-aware validation
+      const accepting_team_validation_errors = validate_trade_roster_slots({
+        incoming_player_ids: proposingTeamPlayers,
+        player_rows,
+        slot_assignments: accepting_team_slots,
+        roster: acceptingTeamRoster,
+        week: constants.season.week,
+        is_regular_season: constants.season.isRegularSeason,
+        player_extensions: proposingPlayerExtensions
+      })
+
+      if (accepting_team_validation_errors.length > 0) {
+        return res.status(400).send({
+          error: 'accepting team: slot validation failed',
+          details: accepting_team_validation_errors
         })
       }
 
@@ -660,235 +759,261 @@ router.post(
         proposingTeamRoster.removePlayer(p)
       )
       proposingTeamPlayers.forEach((p) => proposingTeamRoster.removePlayer(p))
-      for (const pid of acceptingTeamPlayers) {
-        const player_row = player_rows.find((p) => p.pid === pid)
-        const hasSlot = proposingTeamRoster.hasOpenBenchSlot(player_row.pos)
-        if (!hasSlot) {
-          return res
-            .status(400)
-            .send({ error: 'no slots available on proposing team roster' })
-        }
-        proposingTeamRoster.addPlayer({
-          slot: constants.slots.BENCH,
-          pid,
-          pos: player_row.pos,
-          value: player_row.value,
-          extensions: acceptingPlayerExtensions[pid]
+
+      // Validate proposing team roster with slot-aware validation
+      const proposing_team_validation_errors = validate_trade_roster_slots({
+        incoming_player_ids: acceptingTeamPlayers,
+        player_rows,
+        slot_assignments: proposing_team_slots,
+        roster: proposingTeamRoster,
+        week: constants.season.week,
+        is_regular_season: constants.season.isRegularSeason,
+        player_extensions: acceptingPlayerExtensions
+      })
+
+      if (proposing_team_validation_errors.length > 0) {
+        return res.status(400).send({
+          error: 'proposing team: slot validation failed',
+          details: proposing_team_validation_errors
         })
       }
 
-      // clear any existing poaching claims
+      // Fetch data needed for notifications before transaction
       const activePoaches = await db('poaches')
         .where('lid', leagueId)
         .whereNull('processed')
         .whereIn('pid', all_pids)
 
-      if (activePoaches.length) {
-        await db('poaches')
-          .update('processed', Math.round(Date.now() / 1000))
-          .update('reason', 'Player traded')
-          .update('succ', 0)
-          .where('lid', leagueId)
-          .whereIn(
-            'pid',
-            activePoaches.map((p) => p.pid)
+      const pickRows = await db('trades_picks').where({ tradeid: tradeId })
+
+      // Use transaction to ensure all trade acceptance operations are atomic
+      await db.transaction(async (trx) => {
+        // clear any existing poaching claims
+        if (activePoaches.length) {
+          await trx('poaches')
+            .update('processed', Math.round(Date.now() / 1000))
+            .update('reason', 'Player traded')
+            .update('succ', 0)
+            .where('lid', leagueId)
+            .whereIn(
+              'pid',
+              activePoaches.map((p) => p.pid)
+            )
+        }
+
+        // insert receiving team releases
+        const release_inserts = []
+        for (const pid of acceptingTeamReleasePlayers) {
+          release_inserts.push({
+            tradeid: tradeId,
+            pid,
+            tid: trade.accept_tid
+          })
+        }
+        if (release_inserts.length) {
+          await trx('trade_releases').insert(release_inserts)
+        }
+
+        await trx('trades')
+          .where({ uid: tradeId })
+          .update({ accepted: Math.round(Date.now() / 1000) })
+
+        // Update slot assignments if accepting team made any overrides
+        if (Object.keys(accepting_team_slot_overrides).length > 0) {
+          for (const [pid, slot] of Object.entries(
+            accepting_team_slot_overrides
+          )) {
+            await trx('trades_slots')
+              .where({
+                trade_uid: tradeId,
+                pid,
+                tid: trade.accept_tid
+              })
+              .update({ slot })
+          }
+        }
+
+        const sub_query = trx('transactions')
+          .select(
+            trx.raw('max(uid) AS maxuid'),
+            trx.raw("pid || '_' || lid AS group1")
           )
-      }
+          .groupBy('group1')
+          .whereIn('pid', tradedPlayers)
+          .where({ lid: leagueId })
+          .as('sub_query')
 
-      // insert receiving team releases
-      const release_inserts = []
-      for (const pid of acceptingTeamReleasePlayers) {
-        release_inserts.push({
-          tradeid: tradeId,
-          pid,
-          tid: trade.accept_tid
-        })
-      }
-      if (release_inserts.length) {
-        await db('trade_releases').insert(release_inserts)
-      }
+        const transaction_history = await trx
+          .select('transactions.*')
+          .from('transactions')
+          .join(sub_query, function () {
+            this.on('transactions.uid', '=', 'sub_query.maxuid')
+            this.andOn(
+              trx.raw("transactions.pid || '_' || transactions.lid"),
+              '=',
+              'sub_query.group1'
+            )
+          })
 
-      await db('trades')
-        .where({ uid: tradeId })
-        .update({ accepted: Math.round(Date.now() / 1000) })
-
-      const sub_query = db('transactions')
-        .select(
-          db.raw('max(uid) AS maxuid'),
-          db.raw("pid || '_' || lid AS group1")
-        )
-        .groupBy('group1')
-        .whereIn('pid', tradedPlayers)
-        .where({ lid: leagueId })
-        .as('sub_query')
-
-      const transaction_history = await db
-        .select('transactions.*')
-        .from('transactions')
-        .join(sub_query, function () {
-          this.on('transactions.uid', '=', 'sub_query.maxuid')
-          this.andOn(
-            db.raw("transactions.pid || '_' || transactions.lid"),
-            '=',
-            'sub_query.group1'
-          )
-        })
-
-      // insert transactions
-      const insertTransactions = []
-      for (const pid of acceptingTeamPlayers) {
-        insertTransactions.push({
-          userid: trade.userid,
-          tid: trade.propose_tid,
-          lid: leagueId,
-          pid,
-          type: constants.transactions.TRADE,
-          value: transaction_history.find((t) => t.pid === pid).value,
-          week: constants.season.week,
-          year: constants.season.year,
-          timestamp: Math.round(Date.now() / 1000)
-        })
-      }
-      for (const pid of proposingTeamPlayers) {
-        insertTransactions.push({
-          userid: req.auth.userId,
-          tid: trade.accept_tid,
-          lid: leagueId,
-          pid,
-          type: constants.transactions.TRADE,
-          value: transaction_history.find((t) => t.pid === pid).value,
-          week: constants.season.week,
-          year: constants.season.year,
-          timestamp: Math.round(Date.now() / 1000)
-        })
-      }
-
-      // insert trade transactions
-      if (insertTransactions.length) {
-        const tranIds = await db('transactions')
-          .insert(insertTransactions)
-          .returning('uid')
-        await db('trades_transactions').insert(
-          tranIds.map((t) => ({ transactionid: t.uid, tradeid: trade.uid }))
-        )
-      }
-
-      if (releasePlayers.length) {
-        const releaseTransactions = []
-        for (const pid of proposingTeamReleasePlayerIds) {
-          releaseTransactions.push({
+        // insert transactions
+        const insertTransactions = []
+        for (const pid of acceptingTeamPlayers) {
+          insertTransactions.push({
             userid: trade.userid,
             tid: trade.propose_tid,
             lid: leagueId,
             pid,
-            type: constants.transactions.ROSTER_RELEASE,
-            value: 0,
+            type: constants.transactions.TRADE,
+            value: transaction_history.find((t) => t.pid === pid).value,
             week: constants.season.week,
             year: constants.season.year,
             timestamp: Math.round(Date.now() / 1000)
           })
         }
-
-        for (const pid of acceptingTeamReleasePlayers) {
-          releaseTransactions.push({
+        for (const pid of proposingTeamPlayers) {
+          insertTransactions.push({
             userid: req.auth.userId,
             tid: trade.accept_tid,
             lid: leagueId,
             pid,
-            type: constants.transactions.ROSTER_RELEASE,
-            value: 0,
+            type: constants.transactions.TRADE,
+            value: transaction_history.find((t) => t.pid === pid).value,
             week: constants.season.week,
             year: constants.season.year,
             timestamp: Math.round(Date.now() / 1000)
           })
         }
 
-        await db('transactions').insert(releaseTransactions)
-      }
+        // insert trade transactions
+        if (insertTransactions.length) {
+          const tranIds = await trx('transactions')
+            .insert(insertTransactions)
+            .returning('uid')
+          await trx('trades_transactions').insert(
+            tranIds.map((t) => ({ transactionid: t.uid, tradeid: trade.uid }))
+          )
+        }
 
-      // update receiving roster
-      if (acceptingTeamPlayers.length || proposingTeamPlayers.length) {
-        await db('rosters_players')
+        if (releasePlayers.length) {
+          const releaseTransactions = []
+          for (const pid of proposingTeamReleasePlayerIds) {
+            releaseTransactions.push({
+              userid: trade.userid,
+              tid: trade.propose_tid,
+              lid: leagueId,
+              pid,
+              type: constants.transactions.ROSTER_RELEASE,
+              value: 0,
+              week: constants.season.week,
+              year: constants.season.year,
+              timestamp: Math.round(Date.now() / 1000)
+            })
+          }
+
+          for (const pid of acceptingTeamReleasePlayers) {
+            releaseTransactions.push({
+              userid: req.auth.userId,
+              tid: trade.accept_tid,
+              lid: leagueId,
+              pid,
+              type: constants.transactions.ROSTER_RELEASE,
+              value: 0,
+              week: constants.season.week,
+              year: constants.season.year,
+              timestamp: Math.round(Date.now() / 1000)
+            })
+          }
+
+          await trx('transactions').insert(releaseTransactions)
+        }
+
+        // update receiving roster
+        if (acceptingTeamPlayers.length || proposingTeamPlayers.length) {
+          await trx('rosters_players')
+            .del()
+            .where({ rid: acceptingTeamRoster.uid })
+          await trx('rosters_players').insert(
+            acceptingTeamRoster.rosters_players
+          )
+        }
+
+        // update proposing team roster
+        if (acceptingTeamPlayers.length || proposingTeamPlayers.length) {
+          await trx('rosters_players')
+            .del()
+            .where({ rid: proposingTeamRoster.uid })
+          await trx('rosters_players').insert(
+            proposingTeamRoster.rosters_players
+          )
+        }
+
+        // update traded picks
+        for (const pick of pickRows) {
+          await trx('draft')
+            .update({
+              tid:
+                pick.tid === trade.propose_tid
+                  ? trade.accept_tid
+                  : trade.propose_tid
+            }) // swap team ids
+            .where({ uid: pick.pickid })
+        }
+
+        // cancel other trades that include any picks in this trade
+        const pickTradeRows = await trx('trades')
+          .innerJoin('trades_picks', 'trades.uid', 'trades_picks.tradeid')
+          .whereIn(
+            'trades_picks.pickid',
+            pickRows.map((p) => p.pickid)
+          )
+          .whereNull('trades.accepted')
+          .whereNull('trades.cancelled')
+          .whereNull('trades.rejected')
+          .whereNull('trades.vetoed')
+
+        if (pickTradeRows.length) {
+          // TODO - broadcast on WS
+          // TODO - broadcast notifications
+          const tradeids = pickTradeRows.map((t) => t.uid)
+          await trx('trades')
+            .whereIn('uid', tradeids)
+            .update({ cancelled: Math.round(Date.now() / 1000) })
+        }
+
+        // cancel other trades that include any players in this trade
+        const playerTradeRows = await trx('trades')
+          .innerJoin('trades_players', 'trades.uid', 'trades_players.tradeid')
+          .whereIn('trades_players.pid', all_pids)
+          .where('trades.lid', leagueId)
+          .whereNull('trades.accepted')
+          .whereNull('trades.cancelled')
+          .whereNull('trades.rejected')
+          .whereNull('trades.vetoed')
+
+        // remove players from cutlist
+        await trx('league_cutlist')
+          .whereIn('pid', all_pids)
+          .whereIn('tid', [trade.propose_tid, trade.accept_tid])
           .del()
-          .where({ rid: acceptingTeamRoster.uid })
-        await db('rosters_players').insert(acceptingTeamRoster.rosters_players)
-      }
 
-      // update proposing team roster
-      if (acceptingTeamPlayers.length || proposingTeamPlayers.length) {
-        await db('rosters_players')
-          .del()
-          .where({ rid: proposingTeamRoster.uid })
-        await db('rosters_players').insert(proposingTeamRoster.rosters_players)
-      }
+        // cancel any restricted free agency bids
+        await trx('restricted_free_agency_bids')
+          .update('cancelled', Math.round(Date.now() / 1000))
+          .whereIn('pid', all_pids)
+          .whereNull('cancelled')
+          .whereNull('processed')
+          .where('lid', leagueId)
+          .where('year', constants.season.year)
 
-      // update traded picks
-      const pickRows = await db('trades_picks').where({ tradeid: tradeId })
-      for (const pick of pickRows) {
-        await db('draft')
-          .update({
-            tid:
-              pick.tid === trade.propose_tid
-                ? trade.accept_tid
-                : trade.propose_tid
-          }) // swap team ids
-          .where({ uid: pick.pickid })
-      }
-
-      // cancel other trades that include any picks in this trade
-      const pickTradeRows = await db('trades')
-        .innerJoin('trades_picks', 'trades.uid', 'trades_picks.tradeid')
-        .whereIn(
-          'trades_picks.pickid',
-          pickRows.map((p) => p.pickid)
-        )
-        .whereNull('trades.accepted')
-        .whereNull('trades.cancelled')
-        .whereNull('trades.rejected')
-        .whereNull('trades.vetoed')
-
-      if (pickTradeRows.length) {
-        // TODO - broadcast on WS
-        // TODO - broadcast notifications
-        const tradeids = pickTradeRows.map((t) => t.uid)
-        await db('trades')
-          .whereIn('uid', tradeids)
-          .update({ cancelled: Math.round(Date.now() / 1000) })
-      }
-
-      // cancel other trades that include any players in this trade
-      const playerTradeRows = await db('trades')
-        .innerJoin('trades_players', 'trades.uid', 'trades_players.tradeid')
-        .whereIn('trades_players.pid', all_pids)
-        .where('trades.lid', leagueId)
-        .whereNull('trades.accepted')
-        .whereNull('trades.cancelled')
-        .whereNull('trades.rejected')
-        .whereNull('trades.vetoed')
-
-      // remove players from cutlist
-      await db('league_cutlist')
-        .whereIn('pid', all_pids)
-        .whereIn('tid', [trade.propose_tid, trade.accept_tid])
-        .del()
-
-      // cancel any restricted free agency bids
-      await db('restricted_free_agency_bids')
-        .update('cancelled', Math.round(Date.now() / 1000))
-        .whereIn('pid', all_pids)
-        .whereNull('cancelled')
-        .whereNull('processed')
-        .where('lid', leagueId)
-        .where('year', constants.season.year)
-
-      if (playerTradeRows.length) {
-        // TODO - broadcast on WS
-        // TODO - broadcast notifications
-        const tradeids = playerTradeRows.map((t) => t.uid)
-        await db('trades')
-          .whereIn('uid', tradeids)
-          .update({ cancelled: Math.round(Date.now() / 1000) })
-      }
+        if (playerTradeRows.length) {
+          // TODO - broadcast on WS
+          // TODO - broadcast notifications
+          const tradeids = playerTradeRows.map((t) => t.uid)
+          await trx('trades')
+            .whereIn('uid', tradeids)
+            .update({ cancelled: Math.round(Date.now() / 1000) })
+        }
+      }) // Close transaction
 
       const teams = await db('teams').where({
         lid: leagueId,

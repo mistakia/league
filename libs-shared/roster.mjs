@@ -252,7 +252,10 @@ export default class Roster {
     extensions = 0,
     restricted_free_agency_original_team = null
   }) {
-    if (this.isFull) {
+    // Only check active roster limit for active slots (not reserve, practice squad, etc.)
+    // Reserve and practice squad slots don't count against active roster limit
+    const is_active_slot = isSlotActive(slot)
+    if (is_active_slot && this.isFull) {
       throw new Error('Roster is full')
     }
 
@@ -275,10 +278,15 @@ export default class Roster {
       return this.has_open_reserve_short_term_slot()
     } else if (slot === constants.slots.RESERVE_LONG_TERM) {
       return true
+    } else if (slot === constants.slots.COV) {
+      return true
     } else if (slot === constants.slots.BENCH) {
       return this.hasOpenBenchSlot(pos)
     } else if (slot === constants.slots.PS || slot === constants.slots.PSP) {
       return this.hasOpenPracticeSquadSlot()
+    } else if (slot === constants.slots.PSD || slot === constants.slots.PSDP) {
+      // Drafted practice squad has unlimited space
+      return true
     } else {
       const slotName = Object.keys(constants.slots).find(
         (key) => constants.slots[key] === slot
@@ -366,5 +374,99 @@ export default class Roster {
     ).length
     const limit = this._league[`m${pos.toLowerCase()}`]
     return !limit || count < limit
+  }
+
+  /**
+   * Validate if a player can be assigned to a specific slot
+   * @param {Object} player - Player object with pos property
+   * @param {number} target_slot - Slot constant to validate
+   * @returns {boolean} True if player can be assigned to the slot
+   */
+  validate_slot_for_player(player, target_slot) {
+    // Check if slot is a practice squad slot (unlimited for PSD/PSDP)
+    if (
+      target_slot === constants.slots.PSD ||
+      target_slot === constants.slots.PSDP
+    ) {
+      return true
+    }
+
+    // Check practice squad space for PS/PSP
+    if (
+      target_slot === constants.slots.PS ||
+      target_slot === constants.slots.PSP
+    ) {
+      return this.hasOpenPracticeSquadSlot()
+    }
+
+    // Check reserve slots
+    if (target_slot === constants.slots.RESERVE_SHORT_TERM) {
+      return this.has_open_reserve_short_term_slot()
+    }
+
+    if (
+      target_slot === constants.slots.RESERVE_LONG_TERM ||
+      target_slot === constants.slots.COV
+    ) {
+      return true
+    }
+
+    // Check bench slot
+    if (target_slot === constants.slots.BENCH) {
+      return this.hasOpenBenchSlot(player.pos)
+    }
+
+    // Check starter slots
+    if (constants.starterSlots.includes(target_slot)) {
+      const slot_name = Object.keys(constants.slots).find(
+        (key) => constants.slots[key] === target_slot
+      )
+      // Check position eligibility
+      if (!slot_name.includes(player.pos)) {
+        return false
+      }
+      return this.hasOpenSlot(target_slot)
+    }
+
+    return false
+  }
+
+  /**
+   * Get all available slots for a player based on position and roster space
+   * @param {Object} player - Player object with pos property
+   * @returns {Array<number>} Array of valid slot constants
+   */
+  get_available_slots_for_player(player) {
+    const available_slots = []
+
+    // Always include bench if there's space
+    if (this.hasOpenBenchSlot(player.pos)) {
+      available_slots.push(constants.slots.BENCH)
+    }
+
+    // Include signed practice squad if space available
+    if (this.hasOpenPracticeSquadSlot()) {
+      available_slots.push(constants.slots.PS)
+    }
+
+    // Always include drafted practice squad (unlimited)
+    available_slots.push(constants.slots.PSD)
+
+    // Include short-term reserve if space available
+    if (this.has_open_reserve_short_term_slot()) {
+      available_slots.push(constants.slots.RESERVE_SHORT_TERM)
+    }
+
+    // Check each starter slot for position eligibility
+    for (const starter_slot of constants.starterSlots) {
+      const slot_name = Object.keys(constants.slots).find(
+        (key) => constants.slots[key] === starter_slot
+      )
+      if (slot_name.includes(player.pos) && this.hasOpenSlot(starter_slot)) {
+        available_slots.push(starter_slot)
+      }
+    }
+
+    return available_slots
   }
 }

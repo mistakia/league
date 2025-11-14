@@ -24,7 +24,8 @@ import {
   is_league_post_season_week,
   get_last_consecutive_pick,
   league_has_starting_position,
-  get_reserve_eligibility_from_player_map
+  get_reserve_eligibility_from_player_map,
+  get_default_trade_slot
 } from '@libs-shared'
 import { League } from '@core/leagues'
 import { fuzzy_search } from '@core/utils'
@@ -1734,7 +1735,12 @@ export const getRosterByTeamId = createSelector(
 export const getPlayersByTeamId = createSelector(
   getRosterByTeamId,
   (state) => state.get('players').get('items'),
-  (roster, players) => roster.all.map(({ pid }) => players.get(pid, new Map()))
+  (roster, players) =>
+    roster.all.map(({ pid, slot }) => {
+      const player_map = players.get(pid, new Map())
+      // Enrich with slot information from roster for accurate slot display
+      return slot !== undefined ? player_map.set('slot', slot) : player_map
+    })
 )
 
 export function getStartersByTeamId(state, { tid, week }) {
@@ -1750,7 +1756,22 @@ export function getActivePlayersByTeamId(
   { tid, week = constants.fantasy_season_week }
 ) {
   const roster = getRosterByTeamId(state, { tid, week })
-  return roster.active.map(({ pid }) => getPlayerById(state, { pid }))
+  // Include both active roster players and practice squad players for trades
+  // Set the slot from the roster (important for practice squad players)
+  const active_players = roster.active.map(({ pid, slot }) => {
+    const player_map = getPlayerById(state, { pid })
+    return player_map.set('slot', slot)
+  })
+  const practice_players = roster.practice.map(({ pid, slot }) => {
+    const player_map = getPlayerById(state, { pid })
+    return player_map.set('slot', slot)
+  })
+
+  const all_players = active_players.concat(practice_players)
+  // Filter out any undefined/null players (in case player data isn't loaded yet)
+  const filtered_players = all_players.filter((p) => p && p.size > 0)
+
+  return filtered_players
 }
 
 export function getAvailableSalarySpaceForCurrentLeague(state) {
@@ -2744,36 +2765,235 @@ export function get_trade_is_valid(state) {
   const league = get_current_league(state)
   const playerMaps = get_player_maps(state)
   const roster = new Roster({ roster: rosterRecord.toJS(), league })
+  const tradeState = get_trade(state)
+  const slot_assignments = isProposer
+    ? tradeState.proposingTeamSlots
+    : tradeState.acceptingTeamSlots
+
   release_pids.forEach((pid) => roster.removePlayer(pid))
   remove_pids.forEach((pid) => roster.removePlayer(pid))
+
   for (const pid of add_pids) {
     const player_map = playerMaps.get(pid)
-    const hasOpenBenchSlot = roster.hasOpenBenchSlot(player_map.get('pos'))
-    if (!hasOpenBenchSlot) {
+    if (!player_map) {
+      // Player data not loaded yet, skip validation
+      continue
+    }
+
+    const current_slot = player_map.get('slot')
+
+    // Determine target slot - use assigned slot or calculate default using shared logic
+    let target_slot = slot_assignments.get(pid)
+
+    if (!target_slot) {
+      // Convert Immutable player_map to plain object for get_default_trade_slot
+      const player = {
+        pid: player_map.get('pid'),
+        pos: player_map.get('pos'),
+        nfl_status: player_map.get('nfl_status'),
+        injury_status: player_map.get('injury_status'),
+        practice: player_map.get('practice'),
+        game_day: player_map.get('game_day'),
+        prior_week_inactive: player_map.get('prior_week_inactive'),
+        prior_week_ruled_out: player_map.get('prior_week_ruled_out'),
+        value: player_map.get('value')
+      }
+
+      target_slot = get_default_trade_slot({
+        player,
+        current_slot,
+        roster,
+        week: constants.season.week,
+        is_regular_season: constants.season.isRegularSeason
+      })
+    }
+
+    // Validate slot availability
+    let has_space = true
+    if (target_slot === constants.slots.BENCH) {
+      has_space = roster.hasOpenBenchSlot(player_map.get('pos'))
+    } else if (
+      target_slot === constants.slots.PS ||
+      target_slot === constants.slots.PSP
+    ) {
+      has_space = roster.hasOpenPracticeSquadSlot()
+    } else if (
+      target_slot === constants.slots.PSD ||
+      target_slot === constants.slots.PSDP
+    ) {
+      // Drafted practice squad has unlimited space
+      has_space = true
+    } else if (target_slot === constants.slots.RESERVE_SHORT_TERM) {
+      has_space = roster.has_open_reserve_short_term_slot()
+    }
+
+    if (!has_space) {
       return false
     }
-    roster.addPlayer({
-      slot: constants.slots.BENCH,
-      pid,
-      pos: player_map.get('pos'),
-      value: player_map.get('value')
-    })
+
+    // Add player with error handling - gracefully handle roster full errors
+    try {
+      roster.addPlayer({
+        slot: target_slot,
+        pid,
+        pos: player_map.get('pos'),
+        value: player_map.get('value')
+      })
+    } catch (error) {
+      // If roster is full or any other error, return false to show release section
+      if (
+        error.message === 'Roster is full' ||
+        error.message === 'Player is not eligible'
+      ) {
+        return false
+      }
+      // Re-throw unexpected errors
+      throw error
+    }
   }
 
   return true
 }
 
-export function get_trade_selected_team_id(state) {
-  let { teamId } = get_trade(state)
-  if (!teamId) {
-    const myTeamId = get_app(state).teamId
-    teamId = get_current_league_team_ids(state).find(
-      (teamId) => teamId !== myTeamId
-    )
+export function get_trade_validation_details(state) {
+  const { teamId } = get_app(state)
+  const trade = get_current_trade(state)
+  const isProposer = trade.propose_tid === teamId
+
+  const rosterRecord = isProposer
+    ? get_proposing_team_roster(state)
+    : get_accepting_team_roster(state)
+  const add_pids = isProposer
+    ? trade.acceptingTeamPlayers
+    : trade.proposingTeamPlayers
+  const release_pids = isProposer
+    ? trade.proposingTeamReleasePlayers
+    : trade.acceptingTeamReleasePlayers
+  const remove_pids = isProposer
+    ? trade.proposingTeamPlayers
+    : trade.acceptingTeamPlayers
+
+  const league = get_current_league(state)
+  const playerMaps = get_player_maps(state)
+  const roster = new Roster({ roster: rosterRecord.toJS(), league })
+  const tradeState = get_trade(state)
+  const slot_assignments = isProposer
+    ? tradeState.proposingTeamSlots
+    : tradeState.acceptingTeamSlots
+
+  release_pids.forEach((pid) => roster.removePlayer(pid))
+  remove_pids.forEach((pid) => roster.removePlayer(pid))
+
+  const needs_active_releases = []
+  const needs_ps_releases = []
+  let all_valid = true
+
+  for (const pid of add_pids) {
+    const player_map = playerMaps.get(pid)
+    if (!player_map) {
+      continue
+    }
+
+    const current_slot = player_map.get('slot')
+    let target_slot = slot_assignments.get(pid)
+
+    if (!target_slot) {
+      const player = {
+        pid: player_map.get('pid'),
+        pos: player_map.get('pos'),
+        nfl_status: player_map.get('nfl_status'),
+        injury_status: player_map.get('injury_status'),
+        practice: player_map.get('practice'),
+        game_day: player_map.get('game_day'),
+        prior_week_inactive: player_map.get('prior_week_inactive'),
+        prior_week_ruled_out: player_map.get('prior_week_ruled_out'),
+        value: player_map.get('value')
+      }
+
+      target_slot = get_default_trade_slot({
+        player,
+        current_slot,
+        roster,
+        week: constants.season.week,
+        is_regular_season: constants.season.isRegularSeason
+      })
+    }
+
+    // Check if this slot needs releases
+    if (target_slot === constants.slots.BENCH) {
+      if (!roster.hasOpenBenchSlot(player_map.get('pos'))) {
+        needs_active_releases.push(pid)
+        all_valid = false
+        continue
+      }
+    } else if (
+      target_slot === constants.slots.PS ||
+      target_slot === constants.slots.PSP
+    ) {
+      if (!roster.hasOpenPracticeSquadSlot()) {
+        needs_ps_releases.push(pid)
+        all_valid = false
+        continue
+      }
+    } else if (target_slot === constants.slots.RESERVE_SHORT_TERM) {
+      if (!roster.has_open_reserve_short_term_slot()) {
+        all_valid = false
+        continue
+      }
+    }
+    // PSD/PSDP have unlimited space, always valid
+
+    // Try adding player to roster simulation
+    try {
+      roster.addPlayer({
+        slot: target_slot,
+        pid,
+        pos: player_map.get('pos'),
+        value: player_map.get('value')
+      })
+    } catch (error) {
+      if (
+        error.message === 'Roster is full' ||
+        error.message === 'Player is not eligible'
+      ) {
+        // Categorize by slot type
+        if (isSlotActive(target_slot)) {
+          needs_active_releases.push(pid)
+        } else if (
+          target_slot === constants.slots.PS ||
+          target_slot === constants.slots.PSP
+        ) {
+          needs_ps_releases.push(pid)
+        }
+        all_valid = false
+      } else {
+        throw error
+      }
+    }
   }
 
-  return teamId
+  return {
+    is_valid: all_valid,
+    needs_active_releases: needs_active_releases.length > 0,
+    needs_ps_releases: needs_ps_releases.length > 0,
+    active_release_count: needs_active_releases.length,
+    ps_release_count: needs_ps_releases.length
+  }
 }
+
+export const get_trade_selected_team_id = createSelector(
+  get_trade,
+  get_app,
+  get_current_league_team_ids,
+  (trade_state, app, team_ids) => {
+    let { teamId } = trade_state
+    if (!teamId) {
+      const myTeamId = app.teamId
+      teamId = team_ids.find((teamId) => teamId !== myTeamId)
+    }
+    return teamId
+  }
+)
 
 export function get_current_trade(state) {
   const { teamId } = get_app(state)
@@ -2793,12 +3013,14 @@ export function get_current_trade(state) {
       !trade.cancelled && !trade.rejected && !trade.accepted && !trade.vetoed
     const isAcceptingTeam = trade.accept_tid === teamId
     if (isOpen && isAcceptingTeam) {
-      return trade.merge({ acceptingTeamReleasePlayers: releasePlayers })
+      return trade.merge({
+        acceptingTeamReleasePlayers: releasePlayers,
+        acceptingTeamSlots: get_trade(state).acceptingTeamSlots
+      })
     } else {
       return trade
     }
   } else {
-    const { teamId } = get_app(state)
     const accept_tid = get_trade_selected_team_id(state)
     return create_trade({
       accept_tid,
@@ -2811,41 +3033,114 @@ export function get_current_trade(state) {
       ),
       proposingTeamPicks: proposingTeamPicks.map((pickId) =>
         get_draft_pick_by_id(state, { pickId })
-      )
+      ),
+      proposingTeamSlots: get_trade(state).proposingTeamSlots,
+      acceptingTeamSlots: get_trade(state).acceptingTeamSlots
     })
   }
 }
 
-export function get_current_trade_players(state) {
-  const trade = get_current_trade(state)
+export const get_current_trade_players = createSelector(
+  get_current_trade,
+  get_app,
+  get_trade_selected_team_id,
+  get_trade,
+  get_rosters_state,
+  get_player_maps,
+  get_current_league,
+  (
+    trade,
+    app,
+    accept_tid_from_state,
+    trade_state,
+    rosters_state,
+    player_maps,
+    league
+  ) => {
+    const { teamId } = app
+    const accept_tid = trade.accept_tid || accept_tid_from_state
 
-  const acceptingTeamPlayers = new List(
-    trade.acceptingTeamPlayers.map((pid) => getPlayerById(state, { pid }))
-  )
-
-  const proposingTeamPlayers = new List(
-    trade.proposingTeamPlayers.map((pid) => getPlayerById(state, { pid }))
-  )
-
-  const acceptingTeamReleasePlayers = new List(
-    trade.acceptingTeamReleasePlayers.map((pid) =>
-      getPlayerById(state, { pid })
+    const week = Math.min(
+      constants.fantasy_season_week,
+      constants.season.finalWeek
     )
-  )
+    const year = constants.year
 
-  const proposingTeamReleasePlayers = new List(
-    trade.proposingTeamReleasePlayers.map((pid) =>
-      getPlayerById(state, { pid })
+    const get_accepting_roster = () => {
+      if (!accept_tid) return null
+      const rec =
+        rosters_state.getIn([accept_tid, year, week]) || new RosterRecord()
+      return new Roster({ roster: rec.toJS(), league })
+    }
+
+    const accepting_roster = get_accepting_roster()
+
+    const acceptingTeamPlayersArray = trade.acceptingTeamPlayers
+      .map((pid) => {
+        const player_map = player_maps.get(pid, Map())
+        let slot = player_map.get('slot')
+        if (accepting_roster) {
+          const roster_player = accepting_roster._players.get(pid)
+          if (roster_player) {
+            slot = roster_player.slot
+          }
+        }
+        return slot ? player_map.set('slot', slot) : player_map
+      })
+      .filter((player_map) => player_map && player_map.size > 0)
+      .toArray()
+
+    const acceptingTeamPlayers = List(acceptingTeamPlayersArray)
+
+    const propose_tid = trade.propose_tid || teamId
+
+    const get_proposing_roster = () => {
+      if (!propose_tid) return null
+      const rec =
+        rosters_state.getIn([propose_tid, year, week]) || new RosterRecord()
+      return new Roster({ roster: rec.toJS(), league })
+    }
+
+    const proposing_roster = get_proposing_roster()
+
+    const proposingTeamPlayersArray = trade.proposingTeamPlayers
+      .map((pid) => {
+        const player_map = player_maps.get(pid, Map())
+        let slot = player_map.get('slot')
+        if (proposing_roster) {
+          const roster_player = proposing_roster._players.get(pid)
+          if (roster_player) {
+            slot = roster_player.slot
+          }
+        }
+        return slot ? player_map.set('slot', slot) : player_map
+      })
+      .filter((player_map) => player_map && player_map.size > 0)
+      .toArray()
+    const proposingTeamPlayers = List(proposingTeamPlayersArray)
+
+    const acceptingTeamReleasePlayers = new List(
+      trade.acceptingTeamReleasePlayers.map((pid) =>
+        player_maps.get(pid, Map())
+      )
     )
-  )
 
-  return {
-    acceptingTeamPlayers,
-    proposingTeamPlayers,
-    acceptingTeamReleasePlayers,
-    proposingTeamReleasePlayers
+    const proposingTeamReleasePlayers = new List(
+      trade.proposingTeamReleasePlayers.map((pid) =>
+        player_maps.get(pid, Map())
+      )
+    )
+
+    return {
+      acceptingTeamPlayers,
+      proposingTeamPlayers,
+      acceptingTeamReleasePlayers,
+      proposingTeamReleasePlayers,
+      acceptingTeamSlots: trade_state.acceptingTeamSlots,
+      proposingTeamSlots: trade_state.proposingTeamSlots
+    }
   }
-}
+)
 
 function calculateTradedPicks({ picks, add, remove }) {
   const pickids = remove.map((p) => p.uid)
@@ -2921,10 +3216,26 @@ export function get_accepting_team_traded_roster_players(state) {
   })
 }
 
-function getTeamTradeSummary(state, { lineups, playerMaps, picks }) {
+function getTeamTradeSummary(
+  draft_pick_values,
+  { lineups, playerMaps, picks }
+) {
   const pts_added_type = constants.isOffseason ? '0' : 'ros'
+  const get_draft_pick_value = (pick) => {
+    if (!pick || !draft_pick_values) return 0
+    const rank = get_rookie_draft_pick_rank(pick)
+    const item = draft_pick_values.find((value) => value.rank === rank)
+    if (!item) return 0
+    const avg =
+      (3 * item.median_best_season_points_added_per_game +
+        item.median_career_points_added_per_game) /
+      4
+    const weeks_remaining =
+      constants.season.finalWeek - constants.fantasy_season_week
+    return avg * weeks_remaining
+  }
   const draft_value = picks.reduce(
-    (sum, pick) => sum + get_draft_pick_value_by_pick(state, { pick }),
+    (sum, pick) => sum + get_draft_pick_value(pick),
     0
   )
   const player_value = playerMaps.reduce(
@@ -2952,85 +3263,164 @@ function getTeamTradeSummary(state, { lineups, playerMaps, picks }) {
   return values
 }
 
-export function get_current_trade_analysis(state) {
-  const trade = get_current_trade(state)
+export const get_current_trade_analysis = createSelector(
+  get_current_trade,
+  get_rosters_state,
+  get_trade,
+  get_teams_for_current_year,
+  get_player_maps,
+  get_draft_pick_values,
+  get_current_league,
+  (
+    trade,
+    rosters_state,
+    trade_state,
+    teams,
+    player_maps,
+    draft_pick_values,
+    league
+  ) => {
+    // Helper to get roster record
+    const getRosterRecord = (tid) => {
+      const week = Math.min(
+        constants.fantasy_season_week,
+        constants.season.finalWeek
+      )
+      const year = constants.year
+      return rosters_state.getIn([tid, year, week]) || new RosterRecord()
+    }
 
-  const proposingTeamRoster = getRosterRecordByTeamId(state, {
-    tid: trade.propose_tid
-  })
-  const acceptingTeamRoster = getRosterRecordByTeamId(state, {
-    tid: trade.accept_tid
-  })
+    const proposingTeamRoster = getRosterRecord(trade.propose_tid)
+    const acceptingTeamRoster = getRosterRecord(trade.accept_tid)
 
-  const proposingTeamLineups = proposingTeamRoster
-    .get('lineups', new Map())
-    .valueSeq()
-    .toArray()
-  const acceptingTeamLineups = acceptingTeamRoster
-    .get('lineups', new Map())
-    .valueSeq()
-    .toArray()
+    const proposingTeamLineups = proposingTeamRoster
+      .get('lineups', new Map())
+      .valueSeq()
+      .toArray()
+    const acceptingTeamLineups = acceptingTeamRoster
+      .get('lineups', new Map())
+      .valueSeq()
+      .toArray()
 
-  const proposingTeamProjectedLineups = state
-    .getIn(['trade', 'proposingTeamLineups'], new Map())
-    .valueSeq()
-    .toArray()
-  const acceptingTeamProjectedLineups = state
-    .getIn(['trade', 'acceptingTeamLineups'], new Map())
-    .valueSeq()
-    .toArray()
+    const proposingTeamProjectedLineups = trade_state.proposingTeamLineups
+      ? trade_state.proposingTeamLineups.valueSeq().toArray()
+      : []
+    const acceptingTeamProjectedLineups = trade_state.acceptingTeamLineups
+      ? trade_state.acceptingTeamLineups.valueSeq().toArray()
+      : []
 
-  const proposingTeamTradedPicks = get_proposing_team_traded_picks(state)
-  const acceptingTeamTradedPicks = get_accepting_team_traded_picks(state)
+    // Inline the traded picks calculation
+    const getTradedPicks = (teamPicks, add, remove) => {
+      // Convert Immutable Lists to arrays if needed
+      const add_array = List.isList(add) ? add.toArray() : add
+      const remove_array = List.isList(remove) ? remove.toArray() : remove
 
-  const proposingTeamTradedPlayers =
-    get_proposing_team_traded_roster_players(state)
-  const acceptingTeamTradedPlayers =
-    get_accepting_team_traded_roster_players(state)
+      // Extract pick IDs from remove, handling both pick objects and pick ID strings
+      const pickids = remove_array
+        .filter((p) => p != null) // Filter out undefined/null values
+        .map((p) =>
+          typeof p === 'string' || typeof p === 'number' ? p : p.uid
+        )
+      let filtered = teamPicks.filter((pick) => !pickids.includes(pick.uid))
+      // Add new picks, filtering out undefined values
+      for (const pick of add_array) {
+        if (pick != null) {
+          filtered = filtered.push(pick)
+        }
+      }
+      return filtered
+    }
 
-  const proposingTeamPlayers = getActivePlayersByTeamId(state, {
-    tid: trade.propose_tid
-  })
-  const acceptingTeamPlayers = getActivePlayersByTeamId(state, {
-    tid: trade.accept_tid
-  })
+    const proposingTeamRecord = teams.get(trade.propose_tid, new Team())
+    const acceptingTeamRecord = teams.get(trade.accept_tid, new Team())
 
-  const proposingTeamRecord = get_team_by_id_for_current_year(state, {
-    tid: trade.propose_tid
-  })
-  const proposingTeam = {
-    team: proposingTeamRecord,
-    before: getTeamTradeSummary(state, {
-      lineups: proposingTeamLineups,
-      playerMaps: proposingTeamPlayers,
-      picks: proposingTeamRecord.picks
-    }),
-    after: getTeamTradeSummary(state, {
-      lineups: proposingTeamProjectedLineups,
-      playerMaps: proposingTeamTradedPlayers,
-      picks: proposingTeamTradedPicks
-    })
+    const proposingTeamTradedPicks = getTradedPicks(
+      proposingTeamRecord.picks,
+      trade.acceptingTeamPicks,
+      trade.proposingTeamPicks
+    )
+    const acceptingTeamTradedPicks = getTradedPicks(
+      acceptingTeamRecord.picks,
+      trade.proposingTeamPicks,
+      trade.acceptingTeamPicks
+    )
+
+    // Inline traded roster players calculation
+    const getTradedRosterPlayers = (roster, add, remove, release) => {
+      const remove_pids = remove.map((pid) => pid)
+      const release_pids = release.map((pid) => pid)
+      const filtered = roster.all.filter(
+        ({ pid }) => !remove_pids.includes(pid) && !release_pids.includes(pid)
+      )
+      const added = add.map((pid) => {
+        const player_map = player_maps.get(pid, Map())
+        return { pid, slot: player_map.get('slot') }
+      })
+      return filtered.concat(added).map(({ pid, slot }) => {
+        const player_map = player_maps.get(pid, Map())
+        return slot !== undefined ? player_map.set('slot', slot) : player_map
+      })
+    }
+
+    const proposingTeamTradedPlayers = getTradedRosterPlayers(
+      new Roster({ roster: proposingTeamRoster.toJS(), league }),
+      trade.acceptingTeamPlayers,
+      trade.proposingTeamPlayers,
+      trade.proposingTeamReleasePlayers
+    )
+    const acceptingTeamTradedPlayers = getTradedRosterPlayers(
+      new Roster({ roster: acceptingTeamRoster.toJS(), league }),
+      trade.proposingTeamPlayers,
+      trade.acceptingTeamPlayers,
+      trade.acceptingTeamReleasePlayers
+    )
+
+    // Get active players
+    const getActivePlayers = (tid) => {
+      const roster = new Roster({
+        roster: getRosterRecord(tid).toJS(),
+        league
+      })
+      return roster.all.map(({ pid, slot }) => {
+        const player_map = player_maps.get(pid, Map())
+        return slot !== undefined ? player_map.set('slot', slot) : player_map
+      })
+    }
+
+    const proposingTeamPlayers = getActivePlayers(trade.propose_tid)
+    const acceptingTeamPlayers = getActivePlayers(trade.accept_tid)
+
+    const proposingTeam = {
+      team: proposingTeamRecord,
+      before: getTeamTradeSummary(draft_pick_values, {
+        lineups: proposingTeamLineups,
+        playerMaps: proposingTeamPlayers,
+        picks: proposingTeamRecord.picks
+      }),
+      after: getTeamTradeSummary(draft_pick_values, {
+        lineups: proposingTeamProjectedLineups,
+        playerMaps: proposingTeamTradedPlayers,
+        picks: proposingTeamTradedPicks
+      })
+    }
+
+    const acceptingTeam = {
+      team: acceptingTeamRecord,
+      before: getTeamTradeSummary(draft_pick_values, {
+        lineups: acceptingTeamLineups,
+        playerMaps: acceptingTeamPlayers,
+        picks: acceptingTeamRecord.picks
+      }),
+      after: getTeamTradeSummary(draft_pick_values, {
+        lineups: acceptingTeamProjectedLineups,
+        playerMaps: acceptingTeamTradedPlayers,
+        picks: acceptingTeamTradedPicks
+      })
+    }
+
+    return { proposingTeam, acceptingTeam }
   }
-
-  const acceptingTeamRecord = get_team_by_id_for_current_year(state, {
-    tid: trade.accept_tid
-  })
-  const acceptingTeam = {
-    team: acceptingTeamRecord,
-    before: getTeamTradeSummary(state, {
-      lineups: acceptingTeamLineups,
-      playerMaps: acceptingTeamPlayers,
-      picks: acceptingTeamRecord.picks
-    }),
-    after: getTeamTradeSummary(state, {
-      lineups: acceptingTeamProjectedLineups,
-      playerMaps: acceptingTeamTradedPlayers,
-      picks: acceptingTeamTradedPicks
-    })
-  }
-
-  return { proposingTeam, acceptingTeam }
-}
+)
 
 export function get_proposing_team_players(state) {
   const trade = get_current_trade(state)

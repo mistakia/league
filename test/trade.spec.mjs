@@ -67,6 +67,14 @@ describe('API /trades', function () {
 
       // TODO - get trading player values
 
+      // Proposing team sets slots for players they receive (from accepting team)
+      const proposing_team_slots = {}
+      proposing_team_slots[acceptingTeamPlayers[0]] = constants.slots.BENCH
+
+      // Accepting team sets slots for players they receive (from proposing team)
+      const accepting_team_slots = {}
+      accepting_team_slots[proposingTeamPlayers[0]] = constants.slots.BENCH
+
       const proposeRes = await chai_request
         .execute(server)
         .post('/api/leagues/1/trades')
@@ -74,6 +82,8 @@ describe('API /trades', function () {
         .send({
           proposingTeamPlayers,
           acceptingTeamPlayers,
+          proposing_team_slots,
+          accepting_team_slots,
           propose_tid: 1,
           accept_tid: 2,
           leagueId: 1
@@ -93,8 +103,18 @@ describe('API /trades', function () {
       should.not.exist(proposeRes.body.vetoed)
       proposeRes.body.proposingTeamPlayers.should.be.eql(proposingTeamPlayers)
       proposeRes.body.acceptingTeamPlayers.should.be.eql(acceptingTeamPlayers)
+      proposeRes.body.proposingTeamSlots.should.be.eql(proposing_team_slots)
+      proposeRes.body.acceptingTeamSlots.should.be.eql(accepting_team_slots)
 
       const tradeid = proposeRes.body.uid
+
+      // Verify slot assignments stored in database
+      const stored_slots = await knex('trades_slots').where({
+        trade_uid: tradeid
+      })
+      stored_slots.length.should.equal(
+        proposingTeamPlayers.length + acceptingTeamPlayers.length
+      )
 
       const acceptRes = await chai_request
         .execute(server)
@@ -166,6 +186,18 @@ describe('API /trades', function () {
         .where({ pid: acceptingTeamPlayers[0], tid: 2 })
         .update({ extensions: 2 })
 
+      // Proposing team sets slots for players they receive (from accepting team)
+      const proposing_team_slots = {}
+      for (const pid of acceptingTeamPlayers) {
+        proposing_team_slots[pid] = constants.slots.BENCH
+      }
+
+      // Accepting team sets slots for players they receive (from proposing team)
+      const accepting_team_slots = {}
+      for (const pid of proposingTeamPlayers) {
+        accepting_team_slots[pid] = constants.slots.BENCH
+      }
+
       // Create trade proposal
       const proposalRes = await chai_request
         .execute(server)
@@ -174,6 +206,8 @@ describe('API /trades', function () {
         .send({
           proposingTeamPlayers,
           acceptingTeamPlayers,
+          proposing_team_slots,
+          accepting_team_slots,
           propose_tid: 1,
           accept_tid: 2,
           leagueId: 1
@@ -181,8 +215,18 @@ describe('API /trades', function () {
 
       proposalRes.should.have.status(200)
       should.exist(proposalRes.body.uid)
+      proposalRes.body.proposingTeamSlots.should.be.eql(proposing_team_slots)
+      proposalRes.body.acceptingTeamSlots.should.be.eql(accepting_team_slots)
 
       const tradeid = proposalRes.body.uid
+
+      // Verify slot assignments stored in database
+      const stored_slots = await knex('trades_slots').where({
+        trade_uid: tradeid
+      })
+      stored_slots.length.should.equal(
+        proposingTeamPlayers.length + acceptingTeamPlayers.length
+      )
 
       // Accept trade
       const acceptRes = await chai_request
@@ -272,6 +316,19 @@ describe('API /trades', function () {
 
       const proposingTeamPlayers = [player1.pid]
       const acceptingTeamPlayers = [player2.pid]
+
+      // Proposing team sets slots for players they receive (from accepting team)
+      const proposing_team_slots = {}
+      for (const pid of acceptingTeamPlayers) {
+        proposing_team_slots[pid] = constants.slots.BENCH
+      }
+
+      // Accepting team sets slots for players they receive (from proposing team)
+      const accepting_team_slots = {}
+      for (const pid of proposingTeamPlayers) {
+        accepting_team_slots[pid] = constants.slots.BENCH
+      }
+
       const proposeRes = await chai_request
         .execute(server)
         .post('/api/leagues/1/trades')
@@ -279,6 +336,8 @@ describe('API /trades', function () {
         .send({
           proposingTeamPlayers,
           acceptingTeamPlayers,
+          proposing_team_slots,
+          accepting_team_slots,
           propose_tid: 1,
           accept_tid: 2,
           leagueId: 1
@@ -298,8 +357,18 @@ describe('API /trades', function () {
       should.not.exist(proposeRes.body.vetoed)
       proposeRes.body.proposingTeamPlayers.should.be.eql(proposingTeamPlayers)
       proposeRes.body.acceptingTeamPlayers.should.be.eql(acceptingTeamPlayers)
+      proposeRes.body.proposingTeamSlots.should.be.eql(proposing_team_slots)
+      proposeRes.body.acceptingTeamSlots.should.be.eql(accepting_team_slots)
 
       const tradeid = proposeRes.body.uid
+
+      // Verify slot assignments stored in database
+      const stored_slots = await knex('trades_slots').where({
+        trade_uid: tradeid
+      })
+      stored_slots.length.should.equal(
+        proposingTeamPlayers.length + acceptingTeamPlayers.length
+      )
 
       const acceptRes = await chai_request
         .execute(server)
@@ -389,6 +458,195 @@ describe('API /trades', function () {
       })
     })
 
+    it('trade with practice squad slot assignments', async () => {
+      // Add two practice squad players
+      const player1 = await selectPlayer({ rookie: true })
+      const player2 = await selectPlayer({
+        rookie: true,
+        exclude_pids: [player1.pid]
+      })
+
+      await addPlayer({
+        teamId: 1,
+        leagueId: 1,
+        userId: 1,
+        player: player1,
+        slot: constants.slots.PS,
+        transaction: constants.transactions.DRAFT
+      })
+
+      await addPlayer({
+        teamId: 2,
+        leagueId: 1,
+        userId: 2,
+        player: player2,
+        slot: constants.slots.PS,
+        transaction: constants.transactions.DRAFT
+      })
+
+      const proposingTeamPlayers = [player1.pid]
+      const acceptingTeamPlayers = [player2.pid]
+
+      // Proposing team assigns player2 (receiving from accepting team) to practice squad
+      const proposing_team_slots = {}
+      proposing_team_slots[player2.pid] = constants.slots.PS
+
+      // Accepting team assigns player1 (receiving from proposing team) to bench
+      const accepting_team_slots = {}
+      accepting_team_slots[player1.pid] = constants.slots.BENCH
+
+      const proposeRes = await chai_request
+        .execute(server)
+        .post('/api/leagues/1/trades')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          proposingTeamPlayers,
+          acceptingTeamPlayers,
+          proposing_team_slots,
+          accepting_team_slots,
+          propose_tid: 1,
+          accept_tid: 2,
+          leagueId: 1
+        })
+
+      proposeRes.should.have.status(200)
+      proposeRes.body.proposingTeamSlots.should.be.eql(proposing_team_slots)
+      proposeRes.body.acceptingTeamSlots.should.be.eql(accepting_team_slots)
+
+      const tradeid = proposeRes.body.uid
+
+      // Verify slot assignments in database
+      const stored_slots = await knex('trades_slots').where({
+        trade_uid: tradeid
+      })
+      stored_slots.length.should.equal(2)
+
+      const proposing_slot = stored_slots.find((s) => s.tid === 1)
+      proposing_slot.pid.should.equal(player2.pid)
+      proposing_slot.slot.should.equal(constants.slots.PS)
+
+      const accepting_slot = stored_slots.find((s) => s.tid === 2)
+      accepting_slot.pid.should.equal(player1.pid)
+      accepting_slot.slot.should.equal(constants.slots.BENCH)
+
+      // Accept trade (accepting team can override their slot if desired)
+      const acceptRes = await chai_request
+        .execute(server)
+        .post(`/api/leagues/1/trades/${tradeid}/accept`)
+        .set('Authorization', `Bearer ${user2}`)
+
+      acceptRes.should.have.status(200)
+
+      // Verify players moved to correct teams with correct slots
+      const rosterRows = await knex('rosters_players')
+        .whereIn('pid', [player1.pid, player2.pid])
+        .where({ year: constants.season.year, week: constants.season.week })
+
+      rosterRows.length.should.equal(2)
+
+      const player1_row = rosterRows.find((r) => r.pid === player1.pid)
+      const player2_row = rosterRows.find((r) => r.pid === player2.pid)
+
+      // Player1 went to team 2 (accepting team) with BENCH slot
+      player1_row.tid.should.equal(2)
+      player1_row.slot.should.equal(constants.slots.BENCH)
+
+      // Player2 went to team 1 (proposing team) with PS slot
+      player2_row.tid.should.equal(1)
+      player2_row.slot.should.equal(constants.slots.PS)
+    })
+
+    it('accepting team can override slot assignments', async () => {
+      const player1 = await selectPlayer({ rookie: true })
+      const player2 = await selectPlayer({
+        rookie: true,
+        exclude_pids: [player1.pid]
+      })
+
+      await addPlayer({
+        teamId: 1,
+        leagueId: 1,
+        userId: 1,
+        player: player1,
+        slot: constants.slots.PS,
+        transaction: constants.transactions.DRAFT
+      })
+
+      await addPlayer({
+        teamId: 2,
+        leagueId: 1,
+        userId: 2,
+        player: player2,
+        slot: constants.slots.PS,
+        transaction: constants.transactions.DRAFT
+      })
+
+      const proposingTeamPlayers = [player1.pid]
+      const acceptingTeamPlayers = [player2.pid]
+
+      // Initial slot assignments
+      const proposing_team_slots = {}
+      proposing_team_slots[player2.pid] = constants.slots.PS
+
+      const accepting_team_slots = {}
+      accepting_team_slots[player1.pid] = constants.slots.PS
+
+      const proposeRes = await chai_request
+        .execute(server)
+        .post('/api/leagues/1/trades')
+        .set('Authorization', `Bearer ${user1}`)
+        .send({
+          proposingTeamPlayers,
+          acceptingTeamPlayers,
+          proposing_team_slots,
+          accepting_team_slots,
+          propose_tid: 1,
+          accept_tid: 2,
+          leagueId: 1
+        })
+
+      proposeRes.should.have.status(200)
+      const tradeid = proposeRes.body.uid
+
+      // Accepting team overrides their slot assignment to BENCH
+      const accepting_team_slot_override = {}
+      accepting_team_slot_override[player1.pid] = constants.slots.BENCH
+
+      const acceptRes = await chai_request
+        .execute(server)
+        .post(`/api/leagues/1/trades/${tradeid}/accept`)
+        .set('Authorization', `Bearer ${user2}`)
+        .send({
+          accepting_team_slots: accepting_team_slot_override
+        })
+
+      acceptRes.should.have.status(200)
+
+      // Verify player1 was assigned to BENCH (overridden from PS)
+      const player1_row = await knex('rosters_players')
+        .where({
+          pid: player1.pid,
+          tid: 2,
+          year: constants.season.year,
+          week: constants.season.week
+        })
+        .first()
+
+      player1_row.slot.should.equal(constants.slots.BENCH)
+
+      // Verify player2 kept original PS assignment (proposing team slots are immutable)
+      const player2_row = await knex('rosters_players')
+        .where({
+          pid: player2.pid,
+          tid: 1,
+          year: constants.season.year,
+          week: constants.season.week
+        })
+        .first()
+
+      player2_row.slot.should.equal(constants.slots.PS)
+    })
+
     // check to make sure cutlist players are removed
   })
 
@@ -456,6 +714,19 @@ describe('API /trades', function () {
 
       const proposingTeamPlayers = [player1.pid]
       const acceptingTeamPlayers = [player2.pid]
+
+      // Proposing team sets slots for players they receive (from accepting team)
+      const proposing_team_slots = {}
+      for (const pid of acceptingTeamPlayers) {
+        proposing_team_slots[pid] = constants.slots.BENCH
+      }
+
+      // Accepting team sets slots for players they receive (from proposing team)
+      const accepting_team_slots = {}
+      for (const pid of proposingTeamPlayers) {
+        accepting_team_slots[pid] = constants.slots.BENCH
+      }
+
       const request = chai_request
         .execute(server)
         .post('/api/leagues/1/trades')
@@ -463,6 +734,8 @@ describe('API /trades', function () {
         .send({
           proposingTeamPlayers,
           acceptingTeamPlayers,
+          proposing_team_slots,
+          accepting_team_slots,
           propose_tid: 1,
           accept_tid: 2,
           leagueId: 1
