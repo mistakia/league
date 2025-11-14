@@ -96,6 +96,37 @@ export const trade_actions = {
     payload: {
       picks
     }
+  }),
+
+  TRADE_SET_PROPOSING_TEAM_SLOT: 'TRADE_SET_PROPOSING_TEAM_SLOT',
+  set_proposing_team_slot: (pid, slot) => ({
+    type: trade_actions.TRADE_SET_PROPOSING_TEAM_SLOT,
+    payload: {
+      pid,
+      slot
+    }
+  }),
+
+  TRADE_SET_ACCEPTING_TEAM_SLOT: 'TRADE_SET_ACCEPTING_TEAM_SLOT',
+  set_accepting_team_slot: (pid, slot) => ({
+    type: trade_actions.TRADE_SET_ACCEPTING_TEAM_SLOT,
+    payload: {
+      pid,
+      slot
+    }
+  }),
+
+  TRADE_SET_VALIDATION_ERRORS: 'TRADE_SET_VALIDATION_ERRORS',
+  set_validation_errors: (errors) => ({
+    type: trade_actions.TRADE_SET_VALIDATION_ERRORS,
+    payload: {
+      errors
+    }
+  }),
+
+  TRADE_CLEAR_VALIDATION_ERRORS: 'TRADE_CLEAR_VALIDATION_ERRORS',
+  clear_validation_errors: () => ({
+    type: trade_actions.TRADE_CLEAR_VALIDATION_ERRORS
   })
 }
 
