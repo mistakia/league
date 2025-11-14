@@ -1,0 +1,103 @@
+.trade-slot-selector
+  padding 0
+  display flex
+  flex-direction column
+  gap 2px
+
+.trade-slot-selector-form
+  width 100%
+
+.trade-slot-selector-arrow
+  font-size 12px
+  color rgba(0, 0, 0, 0.3)
+  margin-right 2px
+  flex-shrink 0
+
+.trade-slot-selector-label
+  font-size 12px
+  color rgba(0, 0, 0, 0.6)
+  display flex
+  align-items center
+  gap 4px
+  flex-wrap wrap
+  line-height 1.4
+
+  strong
+    color rgba(0, 0, 0, 0.8)
+
+  @media (max-width: 768px)
+    font-size 11px
+
+.trade-slot-selector-select
+  display inline-flex
+  font-weight 600
+  color #1976d2
+  cursor pointer
+  padding 0 2px
+  border-radius 3px
+  transition all 0.2s ease
+  font-size 12px
+
+  &:hover
+    background-color rgba(33, 150, 243, 0.08)
+
+  .MuiSelect-select
+    padding 1px 20px 1px 3px
+    font-weight 600
+    color #1976d2
+    border-bottom 1px dashed rgba(33, 150, 243, 0.5)
+    font-size 12px
+
+    &:focus
+      background-color transparent
+
+  .MuiSelect-icon
+    color #1976d2
+    font-size 18px
+
+  @media (max-width: 768px)
+    font-size 11px
+
+    .MuiSelect-select
+      font-size 11px
+
+.trade-slot-selector-error
+  margin-top 2px
+  font-size 10px
+  color #d32f2f
+  padding 2px 6px
+  background-color rgba(211, 47, 47, 0.08)
+  border-radius 3px
+  border-left 2px solid #d32f2f
+
+.trade-slot-selector-readonly
+  display flex
+  align-items center
+  gap 4px
+  padding 0
+  font-size 12px
+  color rgba(0, 0, 0, 0.6)
+  flex-wrap wrap
+
+  @media (max-width: 768px)
+    font-size 11px
+
+.trade-slot-selector-lock-icon
+  color rgba(0, 0, 0, 0.3)
+  font-size 14px
+  flex-shrink 0
+
+.trade-slot-selector-readonly-text
+  color rgba(0, 0, 0, 0.6)
+  line-height 1.4
+
+  strong
+    color rgba(0, 0, 0, 0.8)
+
+.trade-slot-selector-readonly-note
+  font-size 10px
+  color rgba(0, 0, 0, 0.5)
+  font-style italic
+
+  @media (max-width: 768px)
+    font-size 9px

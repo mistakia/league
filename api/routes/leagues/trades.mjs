@@ -2,6 +2,8 @@ import express from 'express'
 import dayjs from 'dayjs'
 
 import { constants, Roster } from '#libs-shared'
+import get_default_trade_slot from '#libs-shared/get-default-trade-slot.mjs'
+import validate_trade_roster_slots from '#libs-server/validate-trade-roster-slots.mjs'
 import {
   getRoster,
   getLeague,
@@ -446,6 +448,58 @@ router.post(
           : [req.body.releasePlayers]
         : []
 
+      // Parse slot assignments (objects mapping pid to slot)
+      const proposing_team_slots_input = req.body.proposing_team_slots || {}
+      const accepting_team_slots_input = req.body.accepting_team_slots || {}
+
+      // Validate slot assignment inputs
+      const valid_slots = [
+        constants.slots.BENCH,
+        constants.slots.PS,
+        constants.slots.PSP,
+        constants.slots.PSD,
+        constants.slots.PSDP,
+        constants.slots.RESERVE_SHORT_TERM,
+        constants.slots.RESERVE_LONG_TERM,
+        constants.slots.COV
+      ]
+
+      for (const [pid, slot] of Object.entries(proposing_team_slots_input)) {
+        if (typeof pid !== 'string' || pid.length === 0) {
+          return res.status(400).send({
+            error: 'Invalid player ID in proposing team slot assignments'
+          })
+        }
+        if (!Number.isInteger(slot)) {
+          return res.status(400).send({
+            error: `Invalid slot value for player ${pid} in proposing team`
+          })
+        }
+        if (!valid_slots.includes(slot)) {
+          return res.status(400).send({
+            error: `Invalid slot ${slot} for player ${pid} in proposing team. Only BENCH, PS, PSD, and RESERVE slots are allowed for trades.`
+          })
+        }
+      }
+
+      for (const [pid, slot] of Object.entries(accepting_team_slots_input)) {
+        if (typeof pid !== 'string' || pid.length === 0) {
+          return res.status(400).send({
+            error: 'Invalid player ID in accepting team slot assignments'
+          })
+        }
+        if (!Number.isInteger(slot)) {
+          return res.status(400).send({
+            error: `Invalid slot value for player ${pid} in accepting team`
+          })
+        }
+        if (!valid_slots.includes(slot)) {
+          return res.status(400).send({
+            error: `Invalid slot ${slot} for player ${pid} in accepting team. Only BENCH, PS, PSD, and RESERVE slots are allowed for trades.`
+          })
+        }
+      }
+
       const { leagueId } = req.params
       const { propose_tid, accept_tid } = req.body
 
@@ -579,102 +633,212 @@ router.post(
         }
       }
 
-      // validate proposing team roster
+      // Fetch player data for both teams' incoming players
+      const all_incoming_pids =
+        acceptingTeamPlayers.concat(proposingTeamPlayers)
       const sub = db('transactions')
         .select(db.raw('max(uid) as uid'))
-        .whereIn('pid', acceptingTeamPlayers)
+        .whereIn('pid', all_incoming_pids)
         .where('lid', leagueId)
         .groupBy('pid')
         .as('sub_query')
 
       const players = await db
-        .select('player.*', 'transactions.value')
+        .select('player.*', 'transactions.value', 'rosters_players.slot')
         .from(sub)
         .join('transactions', 'sub_query.uid', 'transactions.uid')
         .join('player', 'transactions.pid', 'player.pid')
-        .whereIn('player.pid', acceptingTeamPlayers)
+        .leftJoin('rosters_players', function () {
+          this.on('player.pid', '=', 'rosters_players.pid')
+            .andOn(
+              'rosters_players.year',
+              '=',
+              db.raw('?', [constants.season.year])
+            )
+            .andOn(
+              'rosters_players.week',
+              '=',
+              db.raw('?', [constants.season.week])
+            )
+        })
+        .whereIn('player.pid', all_incoming_pids)
 
-      releasePlayers.forEach((p) => proposingTeamRoster.removePlayer(p))
-      proposingTeamPlayers.forEach((p) => proposingTeamRoster.removePlayer(p))
+      // Calculate slot assignments for proposing team (receiving accepting team players)
+      const proposing_team_slots = {}
       for (const pid of acceptingTeamPlayers) {
         const player = players.find((p) => p.pid === pid)
-        const hasSlot = proposingTeamRoster.hasOpenBenchSlot(player.pos)
-        if (!hasSlot) {
-          return res.status(400).send({ error: 'no slots available' })
+        if (!player) {
+          return res.status(400).send({ error: `player ${pid} not found` })
         }
-        proposingTeamRoster.addPlayer({
-          slot: constants.slots.BENCH,
-          pid,
-          pos: player.pos,
-          value: player.value
-        })
+
+        // Use provided slot or calculate default
+        const assigned_slot =
+          proposing_team_slots_input[pid] ||
+          get_default_trade_slot({
+            player,
+            current_slot: player.slot,
+            roster: proposingTeamRoster,
+            week: constants.season.week,
+            is_regular_season: constants.season.isRegularSeason
+          })
+
+        proposing_team_slots[pid] = assigned_slot
       }
 
-      // insert trade
-      const result = await db('trades')
-        .insert({
-          propose_tid,
-          accept_tid,
-          userid: req.auth.userId,
-          year: constants.season.year,
-          lid: leagueId,
-          offered: Math.round(Date.now() / 1000)
-        })
-        .returning('uid')
-      const tradeid = result[0].uid
-
-      // insert join entries
-      const insertPlayers = []
-      const insertPicks = []
+      // Calculate slot assignments for accepting team (receiving proposing team players)
+      const accepting_team_slots = {}
       for (const pid of proposingTeamPlayers) {
-        insertPlayers.push({
-          tradeid,
-          tid: propose_tid,
-          pid
-        })
+        const player = players.find((p) => p.pid === pid)
+        if (!player) {
+          return res.status(400).send({ error: `player ${pid} not found` })
+        }
+
+        // Use provided slot or calculate default
+        const assigned_slot =
+          accepting_team_slots_input[pid] ||
+          get_default_trade_slot({
+            player,
+            current_slot: player.slot,
+            roster: acceptingTeamRoster,
+            week: constants.season.week,
+            is_regular_season: constants.season.isRegularSeason
+          })
+
+        accepting_team_slots[pid] = assigned_slot
       }
-      for (const pid of acceptingTeamPlayers) {
-        insertPlayers.push({
-          tradeid,
-          tid: accept_tid,
-          pid
-        })
-      }
-      for (const pickid of proposingTeamPicks) {
-        insertPicks.push({
-          tradeid,
-          pickid,
-          tid: propose_tid
-        })
-      }
-      for (const pickid of acceptingTeamPicks) {
-        insertPicks.push({
-          tradeid,
-          pickid,
-          tid: accept_tid
+
+      // Validate proposing team roster with slot-aware validation
+      releasePlayers.forEach((p) => proposingTeamRoster.removePlayer(p))
+      proposingTeamPlayers.forEach((p) => proposingTeamRoster.removePlayer(p))
+
+      const proposing_team_validation_errors = validate_trade_roster_slots({
+        incoming_player_ids: acceptingTeamPlayers,
+        player_rows: players,
+        slot_assignments: proposing_team_slots,
+        roster: proposingTeamRoster,
+        week: constants.season.week,
+        is_regular_season: constants.season.isRegularSeason
+      })
+
+      if (proposing_team_validation_errors.length > 0) {
+        return res.status(400).send({
+          error: 'proposing team: slot validation failed',
+          details: proposing_team_validation_errors
         })
       }
 
-      const insertReleases = []
-      for (const pid of releasePlayers) {
-        insertReleases.push({
-          tradeid,
-          pid,
-          tid: propose_tid
+      // Validate accepting team roster with slot-aware validation
+      acceptingTeamPlayers.forEach((p) => acceptingTeamRoster.removePlayer(p))
+
+      const accepting_team_validation_errors = validate_trade_roster_slots({
+        incoming_player_ids: proposingTeamPlayers,
+        player_rows: players,
+        slot_assignments: accepting_team_slots,
+        roster: acceptingTeamRoster,
+        week: constants.season.week,
+        is_regular_season: constants.season.isRegularSeason
+      })
+
+      if (accepting_team_validation_errors.length > 0) {
+        return res.status(400).send({
+          error: 'accepting team: slot validation failed',
+          details: accepting_team_validation_errors
         })
       }
 
-      if (insertPicks.length) {
-        await db('trades_picks').insert(insertPicks)
-      }
+      // Use transaction to ensure all trade data is inserted atomically
+      const tradeid = await db.transaction(async (trx) => {
+        // insert trade
+        const result = await trx('trades')
+          .insert({
+            propose_tid,
+            accept_tid,
+            userid: req.auth.userId,
+            year: constants.season.year,
+            lid: leagueId,
+            offered: Math.round(Date.now() / 1000)
+          })
+          .returning('uid')
+        const trade_uid = result[0].uid
 
-      if (insertPlayers.length) {
-        await db('trades_players').insert(insertPlayers)
-      }
+        // insert join entries
+        const insertPlayers = []
+        const insertPicks = []
+        for (const pid of proposingTeamPlayers) {
+          insertPlayers.push({
+            tradeid: trade_uid,
+            tid: propose_tid,
+            pid
+          })
+        }
+        for (const pid of acceptingTeamPlayers) {
+          insertPlayers.push({
+            tradeid: trade_uid,
+            tid: accept_tid,
+            pid
+          })
+        }
+        for (const pickid of proposingTeamPicks) {
+          insertPicks.push({
+            tradeid: trade_uid,
+            pickid,
+            tid: propose_tid
+          })
+        }
+        for (const pickid of acceptingTeamPicks) {
+          insertPicks.push({
+            tradeid: trade_uid,
+            pickid,
+            tid: accept_tid
+          })
+        }
 
-      if (insertReleases.length) {
-        await db('trade_releases').insert(insertReleases)
-      }
+        const insertReleases = []
+        for (const pid of releasePlayers) {
+          insertReleases.push({
+            tradeid: trade_uid,
+            pid,
+            tid: propose_tid
+          })
+        }
+
+        if (insertPicks.length) {
+          await trx('trades_picks').insert(insertPicks)
+        }
+
+        if (insertPlayers.length) {
+          await trx('trades_players').insert(insertPlayers)
+        }
+
+        if (insertReleases.length) {
+          await trx('trade_releases').insert(insertReleases)
+        }
+
+        // Insert slot assignments for both teams
+        const insert_slot_assignments = []
+        for (const pid of acceptingTeamPlayers) {
+          insert_slot_assignments.push({
+            trade_uid,
+            pid,
+            tid: propose_tid, // proposing team receives these players
+            slot: proposing_team_slots[pid]
+          })
+        }
+        for (const pid of proposingTeamPlayers) {
+          insert_slot_assignments.push({
+            trade_uid,
+            pid,
+            tid: accept_tid, // accepting team receives these players
+            slot: accepting_team_slots[pid]
+          })
+        }
+
+        if (insert_slot_assignments.length) {
+          await trx('trades_slots').insert(insert_slot_assignments)
+        }
+
+        return trade_uid
+      })
 
       req.params.tradeId = tradeid
       next()

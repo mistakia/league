@@ -13,7 +13,10 @@ const initialState = new Record({
   acceptingTeamPicks: new List(),
   proposingTeamPicks: new List(),
   proposingTeamLineups: new Map(),
-  acceptingTeamLineups: new Map()
+  acceptingTeamLineups: new Map(),
+  proposingTeamSlots: new Map(), // Map of pid -> slot for players proposing team receives
+  acceptingTeamSlots: new Map(), // Map of pid -> slot for players accepting team receives
+  validationErrors: new Map() // Map of team -> slot type -> error message
 })
 
 export function trade_reducer(state = initialState(), { payload, type }) {
@@ -78,8 +81,23 @@ export function trade_reducer(state = initialState(), { payload, type }) {
         acceptingTeamPlayers: new List(),
         proposingTeamPlayers: new List(),
         acceptingTeamPicks: new List(),
-        proposingTeamPicks: new List()
+        proposingTeamPicks: new List(),
+        proposingTeamSlots: new Map(),
+        acceptingTeamSlots: new Map(),
+        validationErrors: new Map()
       })
+
+    case trade_actions.TRADE_SET_PROPOSING_TEAM_SLOT:
+      return state.setIn(['proposingTeamSlots', payload.pid], payload.slot)
+
+    case trade_actions.TRADE_SET_ACCEPTING_TEAM_SLOT:
+      return state.setIn(['acceptingTeamSlots', payload.pid], payload.slot)
+
+    case trade_actions.TRADE_SET_VALIDATION_ERRORS:
+      return state.set('validationErrors', new Map(payload.errors))
+
+    case trade_actions.TRADE_CLEAR_VALIDATION_ERRORS:
+      return state.set('validationErrors', new Map())
 
     default:
       return state

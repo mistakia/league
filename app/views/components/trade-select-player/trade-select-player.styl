@@ -2,3 +2,107 @@
   flex 1
   display flex
   align-items center
+  padding 10px 12px
+  gap 10px
+  border-radius 6px
+  transition all 0.2s ease
+  cursor pointer
+  min-height 48px
+
+  &:hover
+    background-color rgba(0, 0, 0, 0.02)
+
+  &.selected
+    background-color rgba(33, 150, 243, 0.08)
+    border-left 3px solid #2196f3
+
+  @media (max-width: 768px)
+    padding 8px 10px
+    gap 8px
+    min-height 44px
+
+.player__name-position
+  flex-shrink 0
+  display flex
+  align-items center
+  justify-content center
+
+.player__name-main
+  flex 1
+  display flex
+  align-items center
+  gap 8px
+  flex-wrap wrap
+  min-width 0
+  overflow hidden
+
+  span
+    font-size 14px
+    font-weight 500
+    color #212121
+    line-height 1.4
+    white-space nowrap
+    overflow hidden
+    text-overflow ellipsis
+    flex-shrink 1
+
+    @media (max-width: 768px)
+      font-size 13px
+
+  // Style nested components
+  .nfl__team
+    font-size 12px
+    color rgba(0, 0, 0, 0.6)
+    font-weight 400
+    margin-left 2px
+    flex-shrink 0
+
+    @media (max-width: 768px)
+      font-size 11px
+
+.trade-select-player-slot-badge
+  display inline-flex
+  align-items center
+  justify-content center
+  font-size 10px
+  padding 3px 8px
+  border-radius 12px
+  margin-left auto
+  font-weight 600
+  text-transform uppercase
+  letter-spacing 0.3px
+  white-space nowrap
+  flex-shrink 0
+  min-width fit-content
+  transition all 0.2s ease
+  order 999
+
+  @media (max-width: 768px)
+    font-size 9px
+    padding 2px 6px
+    margin-left 4px
+
+.slot-badge-active
+  background-color rgba(33, 150, 243, 0.15)
+  color #1976d2
+  border 1px solid rgba(33, 150, 243, 0.3)
+
+.slot-badge-ps
+  background-color rgba(76, 175, 80, 0.15)
+  color #388e3c
+  border 1px solid rgba(76, 175, 80, 0.3)
+
+.slot-badge-psd
+  background-color rgba(156, 39, 176, 0.15)
+  color #7b1fa2
+  border 1px solid rgba(156, 39, 176, 0.3)
+
+.slot-badge-reserve
+  background-color rgba(255, 152, 0, 0.15)
+  color #f57c00
+  border 1px solid rgba(255, 152, 0, 0.3)
+
+.slot-badge-starter
+  background-color rgba(63, 81, 181, 0.15)
+  color #303f9f
+  border 1px solid rgba(63, 81, 181, 0.3)
