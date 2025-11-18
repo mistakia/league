@@ -25,7 +25,7 @@ export default class PoachConfirmation extends React.Component {
     for (const activePlayerMap of props.team.active) {
       const r = new Roster({ roster: props.roster.toJS(), league })
       r.removePlayer(activePlayerMap.get('pid'))
-      if (r.hasOpenBenchSlot(pos)) {
+      if (r.has_bench_space_for_position(pos)) {
         releases.push(activePlayerMap)
       }
     }
@@ -49,7 +49,7 @@ export default class PoachConfirmation extends React.Component {
 
     // TODO - valid salary during offseason
 
-    return r.hasOpenBenchSlot(player_map.get('pos'))
+    return r.has_bench_space_for_position(player_map.get('pos'))
   }
 
   handleRelease = (event, value) => {

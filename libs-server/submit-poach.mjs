@@ -94,7 +94,7 @@ export default async function ({
       roster.removePlayer(release_pid)
     }
   }
-  const hasSlot = roster.hasOpenBenchSlot(poachPlayer.pos)
+  const hasSlot = roster.has_bench_space_for_position(poachPlayer.pos)
   if (!hasSlot) {
     throw new Error('poaching claim unsuccessful, no available roster space')
   }

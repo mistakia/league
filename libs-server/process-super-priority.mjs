@@ -69,13 +69,17 @@ export default async function process_super_priority({
     }
   }
 
-  // Check practice squad space after simulated releases
+  // Check practice squad space and position limits after simulated releases
   if (
     super_priority_record &&
     super_priority_record.requires_waiver &&
-    roster.practice_signed.length >= league.ps
+    target_slot === constants.slots.PS
   ) {
-    throw new Error('No practice squad space available')
+    if (!roster.has_practice_squad_space_for_position(player_row.pos)) {
+      throw new Error(
+        'No practice squad space available or position limit exceeded'
+      )
+    }
   }
 
   // Process releases now that we've validated space will be available

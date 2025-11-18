@@ -56,7 +56,7 @@ export default function get_default_trade_slot({
   if (
     (current_slot === constants.slots.PS ||
       current_slot === constants.slots.PSP) &&
-    roster.hasOpenPracticeSquadSlot()
+    roster.has_practice_squad_space_for_position(player.pos)
   ) {
     return constants.slots.PS
   }

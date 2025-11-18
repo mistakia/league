@@ -48,7 +48,7 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
   const player_row = player_rows[0]
 
   // make sure team has space on active roster
-  if (!roster.hasOpenBenchSlot(player_row.pos)) {
+  if (!roster.has_bench_space()) {
     throw new Error('no available space on active roster')
   }
 

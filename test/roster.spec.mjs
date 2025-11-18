@@ -93,7 +93,7 @@ describe('LIBS-SHARED Roster', function () {
     r.players.length.should.equal(18)
     r.isFull.should.equal(true)
 
-    const hasSlot = r.hasOpenBenchSlot('RB')
+    const hasSlot = r.has_bench_space_for_position('RB')
     hasSlot.should.equal(false)
   })
 
@@ -148,7 +148,7 @@ describe('LIBS-SHARED Roster', function () {
     r.players.length.should.equal(4)
     r.isFull.should.equal(false)
 
-    const hasSlot = r.hasOpenBenchSlot('RB')
+    const hasSlot = r.has_bench_space_for_position('RB')
     hasSlot.should.equal(false)
   })
 
@@ -203,7 +203,7 @@ describe('LIBS-SHARED Roster', function () {
     r.players.length.should.equal(4)
     r.isFull.should.equal(false)
 
-    const hasSlot = r.hasOpenBenchSlot('RB')
+    const hasSlot = r.has_bench_space_for_position('RB')
     hasSlot.should.equal(true)
 
     r.addPlayer({
@@ -216,7 +216,7 @@ describe('LIBS-SHARED Roster', function () {
     r.players.length.should.equal(4)
     r.isFull.should.equal(false)
 
-    const hasSlot2 = r.hasOpenBenchSlot('RB')
+    const hasSlot2 = r.has_bench_space_for_position('RB')
     hasSlot2.should.equal(true)
   })
 
@@ -385,7 +385,7 @@ describe('LIBS-SHARED Roster', function () {
     r.isFull.should.equal(false)
 
     // Should not have open bench slot for DST (1 bench + 2 signed PS = 3, which equals the limit)
-    const hasSlot = r.hasOpenBenchSlot('DST')
+    const hasSlot = r.has_bench_space_for_position('DST')
     hasSlot.should.equal(false)
   })
 
@@ -453,7 +453,7 @@ describe('LIBS-SHARED Roster', function () {
 
     // Should have open bench slot for DST (only 1 bench + 1 signed PS = 2, limit is 3)
     // Drafted PS players don't count toward position limit
-    const hasSlot = r.hasOpenBenchSlot('DST')
+    const hasSlot = r.has_bench_space_for_position('DST')
     hasSlot.should.equal(true)
   })
 
@@ -509,7 +509,7 @@ describe('LIBS-SHARED Roster', function () {
 
     // Should not have open bench slot for QB (1 bench + 1 signed PS = 2, which equals limit)
     // Even though PS has available space, position limit is enforced
-    const hasSlot = r.hasOpenBenchSlot('QB')
+    const hasSlot = r.has_bench_space_for_position('QB')
     hasSlot.should.equal(false)
   })
 
@@ -564,7 +564,7 @@ describe('LIBS-SHARED Roster', function () {
     r.hasOpenPracticeSquadSlot().should.equal(false)
 
     // But position limit still has space (2 < 5)
-    r.hasOpenBenchSlot('QB').should.equal(true)
+    r.has_bench_space_for_position('QB').should.equal(true)
   })
 
   it('getCountBySlot', () => {

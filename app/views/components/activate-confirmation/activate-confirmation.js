@@ -24,8 +24,8 @@ export default class ActivateConfirmation extends React.Component {
       missing: false
     }
 
-    const { team, player_map } = props
-    this._hasBenchSpace = team.roster.hasOpenBenchSlot(player_map.get('pos'))
+    const { team } = props
+    this._hasBenchSpace = team.roster.has_bench_space()
     this._reserveEligible = []
     this._activePlayers = []
 

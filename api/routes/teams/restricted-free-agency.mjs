@@ -422,7 +422,7 @@ router.post('/?', async (req, res) => {
 
     // if competing bid, make sure there is roster space
     if (playerTid !== tid) {
-      if (!roster.hasOpenBenchSlot(player_row.pos)) {
+      if (!roster.has_bench_space_for_position(player_row.pos)) {
         return res.status(400).send({ error: 'exceeds roster limits' })
       }
 
@@ -871,7 +871,7 @@ router.put('/?', async (req, res) => {
 
     // if competing bid, make sure there is roster space
     if (restrictedFreeAgencyBid.player_tid !== teamId) {
-      if (!roster.hasOpenBenchSlot(player_row.pos)) {
+      if (!roster.has_bench_space_for_position(player_row.pos)) {
         return res.status(400).send({ error: 'exceeds roster limits' })
       }
 

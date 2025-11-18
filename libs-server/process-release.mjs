@@ -222,7 +222,7 @@ export default async function ({
 
     // make sure roster has bench space
     roster.removePlayer(release_pid)
-    if (!roster.hasOpenBenchSlot(activate_player_row.pos)) {
+    if (!roster.has_bench_space()) {
       throw new Error('exceeds roster limits')
     }
 

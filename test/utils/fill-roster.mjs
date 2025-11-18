@@ -25,7 +25,7 @@ export default async function ({
     const player = await selectPlayer({
       exclude_pids: [...existing_pids, ...exclude_pids]
     })
-    const hasSlot = roster.hasOpenBenchSlot(player.pos1)
+    const hasSlot = roster.has_bench_space_for_position(player.pos1)
     if (hasSlot) {
       await addPlayer({
         leagueId,

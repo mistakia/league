@@ -47,7 +47,7 @@ export default function WaiverConfirmation({
         continue
       r.removePlayer(releasePlayerMap.get('pid'))
       if (isActiveRoster) {
-        if (r.hasOpenBenchSlot(releasePlayerMap.get('pos')))
+        if (r.has_bench_space_for_position(releasePlayerMap.get('pos')))
           releases.push(releasePlayerMap)
       } else {
         if (r.hasOpenPracticeSquadSlot()) releases.push(releasePlayerMap)
@@ -57,11 +57,11 @@ export default function WaiverConfirmation({
     return releases
   }
 
+  const ros = new Roster({ roster: roster.toJS(), league })
   const has_bench_space = (isActiveRoster) =>
     isActiveRoster
-      ? ros.hasOpenBenchSlot(player_map.get('pos'))
-      : ros.hasOpenPracticeSquadSlot()
-  const ros = new Roster({ roster: roster.toJS(), league })
+      ? ros.has_bench_space_for_position(player_map.get('pos'))
+      : ros.has_practice_squad_space_for_position(player_map.get('pos'))
 
   const [waiver_max_bid, set_waiver_max_bid] = useState(
     constants.season.isRegularSeason ? team.faab : ros.availableCap

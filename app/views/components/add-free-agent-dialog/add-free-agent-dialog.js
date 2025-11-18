@@ -38,15 +38,15 @@ export default class AddFreeAgentDialog extends React.Component {
       props.rosterPlayers.active.forEach((activePlayerMap) => {
         const r = new Roster({ roster: props.roster.toJS(), league })
         r.removePlayer(activePlayerMap.get('pid'))
-        if (r.hasOpenBenchSlot(pos)) {
+        if (r.has_bench_space_for_position(pos)) {
           releases.push(activePlayerMap)
         }
       })
     }
 
     this._isPlayerEligible = practice
-      ? r.hasOpenPracticeSquadSlot()
-      : r.hasOpenBenchSlot(pos)
+      ? r.has_practice_squad_space_for_position(pos)
+      : r.has_bench_space_for_position(pos)
     this._releases = releases
     this.state = { release: [], error: false }
   }
