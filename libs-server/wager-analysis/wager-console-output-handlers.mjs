@@ -192,11 +192,13 @@ export const print_exposures_by_game = async ({
   const fanduel_esbid_mapping = await db('prop_markets_index')
     .whereIn('source_event_id', Array.from(fanduel_event_ids))
     .where('source_id', 'FANDUEL')
+    .whereNotNull('esbid')
     .select('source_event_id', 'esbid')
 
   const draftkings_esbid_mapping = await db('prop_markets_index')
     .whereIn('source_event_id', Array.from(draftkings_event_ids))
     .where('source_id', 'DRAFTKINGS')
+    .whereNotNull('esbid')
     .select('source_event_id', 'esbid')
 
   // Create a combined mapping
