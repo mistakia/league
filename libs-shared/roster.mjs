@@ -281,9 +281,9 @@ export default class Roster {
     } else if (slot === constants.slots.COV) {
       return true
     } else if (slot === constants.slots.BENCH) {
-      return this.hasOpenBenchSlot(pos)
+      return this.has_bench_space_for_position(pos)
     } else if (slot === constants.slots.PS || slot === constants.slots.PSP) {
-      return this.hasOpenPracticeSquadSlot()
+      return this.has_practice_squad_space_for_position(pos)
     } else if (slot === constants.slots.PSD || slot === constants.slots.PSDP) {
       // Drafted practice squad has unlimited space
       return true
@@ -349,6 +349,15 @@ export default class Roster {
     return this.practice_signed.length < this._league.ps
   }
 
+  // Check if there's practice squad space for adding new players (includes position limit check)
+  has_practice_squad_space_for_position(pos) {
+    if (!this.hasOpenPracticeSquadSlot()) {
+      return false
+    }
+
+    return this.has_position_capacity(pos)
+  }
+
   hasUnprocessedRestrictedTag() {
     const processed_restricted_free_agency_tags = this.all.filter(
       (player) =>
@@ -363,17 +372,27 @@ export default class Roster {
     return processed_restricted_free_agency_tags !== originalTeamTagLimit
   }
 
-  hasOpenBenchSlot(pos) {
-    if (this.isFull) {
-      return false
-    }
-
+  has_position_capacity(pos) {
     // Position limits (mdst, mqb, etc.) apply to active roster + signed practice squad combined
     const count = this.roster_players_for_position_limits.filter(
       (p) => p.pos === pos
     ).length
     const limit = this._league[`m${pos.toLowerCase()}`]
     return !limit || count < limit
+  }
+
+  // Check if there's open bench space for activating existing players (no position limit check)
+  has_bench_space() {
+    return !this.isFull
+  }
+
+  // Check if there's an open bench slot for adding new players (includes position limit check)
+  has_bench_space_for_position(pos) {
+    if (this.isFull) {
+      return false
+    }
+
+    return this.has_position_capacity(pos)
   }
 
   /**
@@ -396,7 +415,7 @@ export default class Roster {
       target_slot === constants.slots.PS ||
       target_slot === constants.slots.PSP
     ) {
-      return this.hasOpenPracticeSquadSlot()
+      return this.has_practice_squad_space_for_position(player.pos)
     }
 
     // Check reserve slots
@@ -413,7 +432,7 @@ export default class Roster {
 
     // Check bench slot
     if (target_slot === constants.slots.BENCH) {
-      return this.hasOpenBenchSlot(player.pos)
+      return this.has_bench_space_for_position(player.pos)
     }
 
     // Check starter slots
@@ -440,12 +459,12 @@ export default class Roster {
     const available_slots = []
 
     // Always include bench if there's space
-    if (this.hasOpenBenchSlot(player.pos)) {
+    if (this.has_bench_space_for_position(player.pos)) {
       available_slots.push(constants.slots.BENCH)
     }
 
     // Include signed practice squad if space available
-    if (this.hasOpenPracticeSquadSlot()) {
+    if (this.has_practice_squad_space_for_position(player.pos)) {
       available_slots.push(constants.slots.PS)
     }
 

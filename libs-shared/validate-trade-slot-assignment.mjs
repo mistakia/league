@@ -21,7 +21,7 @@ export default function validate_trade_slot_assignment({
 }) {
   // Validate BENCH (active roster) slot
   if (slot === constants.slots.BENCH) {
-    const has_space = roster.hasOpenBenchSlot(player.pos)
+    const has_space = roster.has_bench_space_for_position(player.pos)
     return {
       valid: has_space,
       error: has_space
@@ -33,10 +33,12 @@ export default function validate_trade_slot_assignment({
 
   // Validate signed practice squad slots (PS, PSP converted to PS)
   if (slot === constants.slots.PS || slot === constants.slots.PSP) {
-    const has_space = roster.hasOpenPracticeSquadSlot()
+    const has_space = roster.has_practice_squad_space_for_position(player.pos)
     return {
       valid: has_space,
-      error: has_space ? null : 'No practice squad space available',
+      error: has_space
+        ? null
+        : 'No practice squad space available or position limit exceeded',
       requires_release: !has_space
     }
   }

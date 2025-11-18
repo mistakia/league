@@ -324,7 +324,7 @@ export const is_nominated_player_eligible = createSelector(
     }
 
     const ros = new Roster({ roster: roster.toJS(), league })
-    return ros.hasOpenBenchSlot(pos)
+    return ros.has_bench_space_for_position(pos)
   }
 )
 
@@ -2811,12 +2811,14 @@ export function get_trade_is_valid(state) {
     // Validate slot availability
     let has_space = true
     if (target_slot === constants.slots.BENCH) {
-      has_space = roster.hasOpenBenchSlot(player_map.get('pos'))
+      has_space = roster.has_bench_space_for_position(player_map.get('pos'))
     } else if (
       target_slot === constants.slots.PS ||
       target_slot === constants.slots.PSP
     ) {
-      has_space = roster.hasOpenPracticeSquadSlot()
+      has_space = roster.has_practice_squad_space_for_position(
+        player_map.get('pos')
+      )
     } else if (
       target_slot === constants.slots.PSD ||
       target_slot === constants.slots.PSDP
@@ -2921,7 +2923,7 @@ export function get_trade_validation_details(state) {
 
     // Check if this slot needs releases
     if (target_slot === constants.slots.BENCH) {
-      if (!roster.hasOpenBenchSlot(player_map.get('pos'))) {
+      if (!roster.has_bench_space_for_position(player_map.get('pos'))) {
         needs_active_releases.push(pid)
         all_valid = false
         continue
@@ -2930,7 +2932,9 @@ export function get_trade_validation_details(state) {
       target_slot === constants.slots.PS ||
       target_slot === constants.slots.PSP
     ) {
-      if (!roster.hasOpenPracticeSquadSlot()) {
+      if (
+        !roster.has_practice_squad_space_for_position(player_map.get('pos'))
+      ) {
         needs_ps_releases.push(pid)
         all_valid = false
         continue

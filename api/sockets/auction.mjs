@@ -616,7 +616,7 @@ export default class Auction {
     const roster = await getRoster({ tid: nominating_team_id })
     const roster_obj = new Roster({ roster, league: this._league })
 
-    if (!roster_obj.hasOpenBenchSlot(player_info.pos)) {
+    if (!roster_obj.has_bench_space_for_position(player_info.pos)) {
       this.logger(
         `no open slots available for ${pid} on team_id ${nominating_team_id}`
       )
@@ -690,7 +690,7 @@ export default class Auction {
 
   _validate_team_can_acquire_player(roster_obj, player_info, value) {
     // Check roster space
-    if (!roster_obj.hasOpenBenchSlot(player_info.pos)) {
+    if (!roster_obj.has_bench_space_for_position(player_info.pos)) {
       this.logger(
         `no open slots available for ${player_info.pid} on team_id ${this._transactions[0].tid}`
       )
@@ -858,7 +858,7 @@ export default class Auction {
 
       if (
         team_roster_obj.availableCap > bid_value &&
-        team_roster_obj.hasOpenBenchSlot(player_pos)
+        team_roster_obj.has_bench_space_for_position(player_pos)
       ) {
         eligible_team_ids.push(team.uid)
       }

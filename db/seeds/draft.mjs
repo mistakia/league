@@ -21,7 +21,7 @@ export default async function (knex) {
     let player
     for (let p = 0; p < players.length; p++) {
       player = players[p]
-      const hasOpenSlot = r.hasOpenBenchSlot(player.pos1)
+      const hasOpenSlot = r.has_bench_space_for_position(player.pos1)
 
       if (hasOpenSlot) {
         players.splice(p, 1)

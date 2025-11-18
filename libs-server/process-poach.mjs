@@ -51,7 +51,7 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
 
   // Check roster space availability, catch error if no space
   try {
-    const hasSlot = roster.hasOpenBenchSlot(poach_player_row.pos)
+    const hasSlot = roster.has_bench_space_for_position(poach_player_row.pos)
     if (!hasSlot) {
       throw new Error('poaching claim unsuccessful, no available roster space')
     }
