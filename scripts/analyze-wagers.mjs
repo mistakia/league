@@ -135,20 +135,17 @@ const analyze_wagers = async ({
   wager_summary.cash_risk =
     wager_summary.total_risk - wager_summary.bonus_bet_risk
 
-  // Calculate ROIs
-  wager_summary.current_roi = `${(
-    (wager_summary.total_won / wager_summary.total_risk - 1) *
-    100
-  ).toFixed(2)}%`
-
-  // Calculate cash-only ROI (returns on actual cash invested)
-  wager_summary.cash_roi =
+  // Calculate ROIs based on cash risk (excluding bonus bets)
+  wager_summary.current_roi =
     wager_summary.cash_risk > 0
       ? `${(
           (wager_summary.total_won / wager_summary.cash_risk - 1) *
           100
         ).toFixed(2)}%`
       : 'N/A'
+
+  // Keep cash_roi as alias for backwards compatibility
+  wager_summary.cash_roi = wager_summary.current_roi
 
   // Calculate average wager odds
   wager_summary.avg_wager_odds =
