@@ -6,6 +6,13 @@
  * without risking data quality from other sources.
  */
 export const NFLFASTR_EXCLUSIVE_FIELDS = new Set([
+  // Play Characteristics
+  'incomp',
+  'fg_att',
+  'oob',
+  'drive_yds_penalized',
+  'punt_att',
+
   // Core EPA Metrics
   'ep', // Expected Points pre-play
   'epa', // Expected Points Added
