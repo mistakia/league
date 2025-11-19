@@ -31,6 +31,7 @@ import {
   parse_yardline,
   normalize_drive_duration
 } from '#libs-server/sportradar/sportradar-transforms.mjs'
+import { normalize_game_clock } from '#libs-server/play-enum-utils.mjs'
 import {
   map_passing_stats,
   map_receiving_stats,
@@ -187,7 +188,7 @@ const map_contextual_data = ({
 
   // Time data
   if (play.clock) {
-    mapped.game_clock_start = play.clock
+    mapped.game_clock_start = normalize_game_clock(play.clock)
     const sec_rem_qtr = parse_clock_to_seconds(play.clock)
     Object.assign(
       mapped,
@@ -369,29 +370,17 @@ const resolve_multiple_matches = ({
     return db_plays?.[0] || null
   }
 
-  // Strategy 1: wall_clock comparison
-  if (mapped_play.wall_clock && sportradar_play.wall_clock) {
-    const sportradar_time = new Date(sportradar_play.wall_clock).getTime()
-    let best_match = null
-    let smallest_diff = Infinity
-
-    for (const db_play of db_plays) {
-      if (db_play.wall_clock) {
-        const db_time = new Date(db_play.wall_clock).getTime()
-        const diff = Math.abs(sportradar_time - db_time)
-        if (diff < smallest_diff) {
-          smallest_diff = diff
-          best_match = db_play
-        }
-      }
-    }
-
-    if (best_match && smallest_diff < 500) {
-      // 500ms tolerance
+  // Strategy 1: game_clock_start exact match
+  if (sportradar_play.clock && mapped_play.game_clock_start) {
+    const sportradar_clock = normalize_game_clock(sportradar_play.clock)
+    const exact_match = db_plays.find(
+      (p) => normalize_game_clock(p.game_clock_start) === sportradar_clock
+    )
+    if (exact_match) {
       log(
-        `Resolved multiple matches using wall_clock: ${smallest_diff}ms difference`
+        `Resolved multiple matches using game_clock_start: ${exact_match.game_clock_start}`
       )
-      return best_match
+      return exact_match
     }
   }
 
@@ -755,10 +744,6 @@ const map_sportradar_play_to_nfl_play = async ({
   )
   if (play.nullified || has_no_play_detail || mapped.deleted) {
     mapped.play_type = 'NOPL'
-  }
-
-  if (play.nullified) {
-    mapped.deleted = true
   }
 
   mapped.updated = Math.floor(Date.now() / 1000)

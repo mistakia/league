@@ -5,11 +5,35 @@ import { hideBin } from 'yargs/helpers'
 
 import is_main from './is-main.mjs'
 import db from '#db'
+import { normalize_game_clock } from './play-enum-utils.mjs'
 
 const log = debug('update-play')
 debug.enable('update-play')
 
 const excluded_props = ['esbid', 'playId', 'updated']
+
+// Fields that contain game clock values and should be normalized
+const game_clock_fields = [
+  'game_clock_start',
+  'game_clock_end',
+  'drive_game_clock_start',
+  'drive_game_clock_end'
+]
+
+/**
+ * Normalize game clock fields in both play_row and update objects
+ * to ensure consistent comparison (prevent "2:00" vs "02:00" false positives)
+ */
+const normalize_clock_fields = (obj) => {
+  if (!obj) return obj
+  const normalized = { ...obj }
+  for (const field of game_clock_fields) {
+    if (normalized[field]) {
+      normalized[field] = normalize_game_clock(normalized[field])
+    }
+  }
+  return normalized
+}
 
 const update_play = async ({
   play_row,
@@ -27,7 +51,11 @@ const update_play = async ({
     return 0
   }
 
-  const differences = diff(play_row, update)
+  // Normalize game clock fields in both objects before comparison
+  const normalized_play_row = normalize_clock_fields(play_row)
+  const normalized_update = normalize_clock_fields(update)
+
+  const differences = diff(normalized_play_row, normalized_update)
 
   if (!differences) {
     return 0
