@@ -7,17 +7,19 @@ const log = debug('format-sql')
  * Format SQL query using prettier with SQL plugin
  * @param {string} sql - The SQL query to format
  * @param {Object} options - Formatting options
- * @param {string} options.parser - Parser to use (default: 'sql', alternatives: 'postgresql', 'babel')
+ * @param {string} options.parser - Parser to use (default: 'sql', alternatives: 'babel')
+ * @param {string} options.language - SQL dialect/language (e.g., 'postgresql', 'mysql', 'sqlite')
  * @param {string} options.keywordCase - Case for SQL keywords (default: 'upper')
  * @param {number} options.printWidth - Line width before wrapping (default: 80)
  * @param {number} options.expressionWidth - Width for expressions (default: 50)
  * @param {number} options.linesBetweenQueries - Lines between multiple queries (default: 2)
  * @param {boolean} options.wrapInTemplate - Wrap in template literal for babel parser (default: false)
- * @returns {Promise<string>} - Formatted SQL query
+ * @returns {Promise<string>} - Formatted SQL query, or original SQL if formatting fails
  */
 export const format_sql = async (sql, options = {}) => {
   const {
     parser = 'sql',
+    language,
     keywordCase = 'upper',
     printWidth = 80,
     expressionWidth = 50,
@@ -26,10 +28,9 @@ export const format_sql = async (sql, options = {}) => {
   } = options
 
   try {
-    // For babel parser, wrap in template literal
     const input = wrapInTemplate ? `sql\`${sql}\`` : sql
 
-    const formatted = await prettier.format(input, {
+    const prettier_options = {
       parser,
       plugins:
         parser === 'babel'
@@ -38,20 +39,23 @@ export const format_sql = async (sql, options = {}) => {
       printWidth,
       keywordCase,
       expressionWidth,
-      linesBetweenQueries,
-      // Additional options for babel parser
-      ...(parser === 'babel' && {
-        embeddedSqlTags: ['sql'],
-        language: 'postgresql',
-        tabWidth: 2,
-        semi: false
-      })
-    })
+      linesBetweenQueries
+    }
 
-    return formatted
+    if (parser === 'sql' && language) {
+      prettier_options.language = language
+    }
+
+    if (parser === 'babel') {
+      prettier_options.embeddedSqlTags = ['sql']
+      prettier_options.language = language || 'postgresql'
+      prettier_options.tabWidth = 2
+      prettier_options.semi = false
+    }
+
+    return await prettier.format(input, prettier_options)
   } catch (error) {
     log('Failed to format SQL:', error.message)
-    // Return original SQL if formatting fails
     return sql
   }
 }

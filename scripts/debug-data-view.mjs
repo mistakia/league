@@ -122,7 +122,10 @@ const debug_data_view = async ({
     // Step 5: Optionally beautify SQL
     if (beautify) {
       log('Beautifying SQL...')
-      sql = await format_sql(sql, { parser: 'sql' })
+      sql = await format_sql(sql, {
+        parser: 'sql',
+        language: 'postgresql'
+      })
     }
 
     // Step 6: Output SQL

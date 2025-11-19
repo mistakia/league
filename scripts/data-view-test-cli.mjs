@@ -18,6 +18,16 @@ import { compare_queries } from '#test/utils/index.mjs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
+// Standard SQL formatting options for beautification
+const SQL_FORMAT_OPTIONS = {
+  parser: 'sql',
+  language: 'postgresql',
+  keywordCase: 'upper',
+  printWidth: 80,
+  expressionWidth: 50,
+  linesBetweenQueries: 2
+}
+
 // Simple diff function without external dependencies
 function simple_diff(str1, str2) {
   const lines1 = str1.split('\n')
@@ -93,20 +103,14 @@ async function show_diff(actual_query, expected_query) {
   const actual_normalized = normalize_sql_for_comparison(actual_query)
   const expected_normalized = normalize_sql_for_comparison(expected_query)
 
-  const actual_beautified = await format_sql(actual_normalized, {
-    parser: 'postgresql',
-    keywordCase: 'upper',
-    printWidth: 80,
-    expressionWidth: 50,
-    linesBetweenQueries: 2
-  })
-  const expected_beautified = await format_sql(expected_normalized, {
-    parser: 'postgresql',
-    keywordCase: 'upper',
-    printWidth: 80,
-    expressionWidth: 50,
-    linesBetweenQueries: 2
-  })
+  const actual_beautified = await format_sql(
+    actual_normalized,
+    SQL_FORMAT_OPTIONS
+  )
+  const expected_beautified = await format_sql(
+    expected_normalized,
+    SQL_FORMAT_OPTIONS
+  )
 
   console.log('\n\x1b[1m=== SQL Query Diff ===\x1b[0m\n')
 
@@ -166,13 +170,7 @@ async function run_test_case(test_path, options = {}) {
     if (options.showQuery || options.beautify) {
       console.log('\n\x1b[1m=== Generated Query ===\x1b[0m\n')
       const output = options.beautify
-        ? await format_sql(actual_query, {
-            parser: 'postgresql',
-            keywordCase: 'upper',
-            printWidth: 80,
-            expressionWidth: 50,
-            linesBetweenQueries: 2
-          })
+        ? await format_sql(actual_query, SQL_FORMAT_OPTIONS)
         : actual_query
       console.log(output)
     }
@@ -183,13 +181,7 @@ async function run_test_case(test_path, options = {}) {
       if (options.showExpected || options.beautify) {
         console.log('\n\x1b[1m=== Expected Query ===\x1b[0m\n')
         const output = options.beautify
-          ? await format_sql(expected_query, {
-              parser: 'postgresql',
-              keywordCase: 'upper',
-              printWidth: 80,
-              expressionWidth: 50,
-              linesBetweenQueries: 2
-            })
+          ? await format_sql(expected_query, SQL_FORMAT_OPTIONS)
           : expected_query
         console.log(output)
       }
@@ -199,9 +191,11 @@ async function run_test_case(test_path, options = {}) {
       }
 
       // Check if queries match
+      let queries_match = false
       try {
         compare_queries(actual_query, expected_query)
         console.log('\n\x1b[32m✓ Queries match!\x1b[0m')
+        queries_match = true
       } catch (err) {
         console.log('\n\x1b[31m✗ Queries do not match\x1b[0m')
         if (!options.diff) {
@@ -213,6 +207,8 @@ async function run_test_case(test_path, options = {}) {
           await update_test_case(test_path, actual_query)
         }
       }
+
+      return { query: actual_query, success: queries_match }
     } else {
       console.log('\n\x1b[33mNo expected query defined in test case\x1b[0m')
 
@@ -220,9 +216,9 @@ async function run_test_case(test_path, options = {}) {
         console.log('\x1b[33mAdding expected query to test case...\x1b[0m')
         await update_test_case(test_path, actual_query)
       }
-    }
 
-    return actual_query
+      return { query: actual_query, success: true }
+    }
   } catch (error) {
     console.log('\n\x1b[31m✗ Error: ' + error.message + '\x1b[0m')
     if (options.verbose) {
@@ -339,6 +335,8 @@ async function main() {
     .alias('h', 'help').argv
 
   try {
+    let exit_code = 0
+
     if (argv.all) {
       // Run all test cases
       const test_cases = load_data_view_test_queries_sync()
@@ -356,8 +354,12 @@ async function main() {
           test_case.filename
         )
         try {
-          await run_test_case(test_path, argv)
-          passed++
+          const result = await run_test_case(test_path, argv)
+          if (result.success) {
+            passed++
+          } else {
+            failed++
+          }
         } catch (err) {
           failed++
           if (!argv.verbose) {
@@ -372,6 +374,7 @@ async function main() {
       console.log('\x1b[32mPassed: ' + passed + '\x1b[0m')
       if (failed > 0) {
         console.log('\x1b[31mFailed: ' + failed + '\x1b[0m')
+        exit_code = 1
       }
     } else if (argv.create) {
       // Create a new test case
@@ -393,7 +396,15 @@ async function main() {
       await create_test_case(argv.testFile, request)
     } else if (argv.testFile) {
       // Run a specific test case
-      await run_test_case(argv.testFile, argv)
+      try {
+        const result = await run_test_case(argv.testFile, argv)
+        if (!result.success) {
+          exit_code = 1
+        }
+      } catch (error) {
+        // Error already logged in run_test_case
+        exit_code = 1
+      }
     } else {
       // Show help if no arguments
       console.log('Usage: data-view-test-cli [test-file] [options]')
@@ -424,6 +435,8 @@ async function main() {
         '  node scripts/data-view-test-cli.mjs test/data-view-queries/player-career-year.json --update'
       )
     }
+
+    process.exit(exit_code)
   } catch (error) {
     console.error('\n\x1b[31mError: ' + error.message + '\x1b[0m')
     if (argv.verbose) {
@@ -435,5 +448,8 @@ async function main() {
 
 // Run as CLI if this is the main module
 if (is_main(import.meta.url)) {
-  main().catch(console.error)
+  main().catch((error) => {
+    console.error(error)
+    process.exit(1)
+  })
 }
