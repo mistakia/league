@@ -23,7 +23,9 @@ import {
 import {
   standardize_kick_result,
   standardize_two_point_result,
-  normalize_game_clock
+  normalize_game_clock,
+  normalize_drive_start_transition,
+  normalize_drive_end_transition
 } from '#libs-server/play-enum-utils.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { NFLFASTR_EXCLUSIVE_FIELDS } from '#libs-server/nflfastr/nflfastr-exclusive-fields.mjs'
@@ -44,7 +46,9 @@ import { NFLFASTR_EXCLUSIVE_FIELDS } from '#libs-server/nflfastr/nflfastr-exclus
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-nflfastr-plays')
-debug.enable('import-nflfastr-plays,update-play,fetch,play-cache')
+debug.enable(
+  'import-nflfastr-plays,update-play,fetch,play-cache,play-enum-utils'
+)
 
 // ============================================================================
 // Basic Formatters
@@ -264,8 +268,12 @@ const format_drive_data = (play) => ({
   drive_start_qtr: format_number(play.drive_quarter_start),
   drive_end_qtr: format_number(play.drive_quarter_end),
   drive_yds_penalized: format_number(play.drive_yards_penalized),
-  drive_start_transition: play.drive_start_transition || null,
-  drive_end_transition: play.drive_end_transition || null,
+  drive_start_transition: normalize_drive_start_transition(
+    play.drive_start_transition
+  ),
+  drive_end_transition: normalize_drive_end_transition(
+    play.drive_end_transition
+  ),
   drive_game_clock_start: normalize_game_clock(play.drive_game_clock_start),
   drive_game_clock_end: normalize_game_clock(play.drive_game_clock_end),
   drive_start_ydl: play.drive_start_yard_line || null,

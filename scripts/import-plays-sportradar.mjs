@@ -32,7 +32,11 @@ import {
   parse_yardline,
   normalize_drive_duration
 } from '#libs-server/sportradar/sportradar-transforms.mjs'
-import { normalize_game_clock } from '#libs-server/play-enum-utils.mjs'
+import {
+  normalize_game_clock,
+  normalize_drive_start_transition,
+  normalize_drive_end_transition
+} from '#libs-server/play-enum-utils.mjs'
 import {
   map_passing_stats,
   map_receiving_stats,
@@ -66,7 +70,7 @@ dayjs.extend(timezone)
 
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-plays-sportradar')
-debug.enable('import-plays-sportradar,sportradar')
+debug.enable('import-plays-sportradar,sportradar,play-enum-utils')
 
 const load_team_mappings = async () => {
   const config_row = await db('config')
@@ -302,14 +306,14 @@ const map_drive_data = ({ drive_context }) => {
   }
 
   if (drive_context.start_reason) {
-    mapped.drive_start_transition = drive_context.start_reason
-      .toUpperCase()
-      .replace(/ /g, '_')
+    mapped.drive_start_transition = normalize_drive_start_transition(
+      drive_context.start_reason
+    )
   }
   if (drive_context.end_reason) {
-    mapped.drive_end_transition = drive_context.end_reason
-      .toUpperCase()
-      .replace(/ /g, '_')
+    mapped.drive_end_transition = normalize_drive_end_transition(
+      drive_context.end_reason
+    )
   }
 
   return mapped

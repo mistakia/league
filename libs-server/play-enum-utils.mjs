@@ -5,6 +5,60 @@
  * (NFLverse/nflfastr, Sportradar, NFL API, NGS, etc.)
  */
 
+import debug from 'debug'
+
+const log = debug('play-enum-utils')
+
+// Valid enum values from database (nfl_kick_result)
+const VALID_KICK_RESULTS = new Set(['made', 'missed', 'blocked', 'aborted'])
+
+// Valid enum values from database (nfl_two_point_result)
+const VALID_TWO_POINT_RESULTS = new Set(['success', 'failure'])
+
+// Valid enum values from database (nfl_score_type)
+const VALID_SCORE_TYPES = new Set(['TD', 'FG', 'PAT', 'PAT2', 'SFTY'])
+
+// Valid enum values for drive_start_transition (from database analysis)
+const VALID_DRIVE_START_TRANSITIONS = new Set([
+  'KICKOFF',
+  'PUNT',
+  'INTERCEPTION',
+  'FUMBLE',
+  'DOWNS',
+  'MISSED_FG',
+  'MUFFED_PUNT',
+  'ONSIDE_KICK',
+  'BLOCKED_FG',
+  'BLOCKED_PUNT',
+  'MUFFED_KICKOFF',
+  'BLOCKED_FG_DOWNS',
+  'BLOCKED_PUNT_DOWNS',
+  'OWN_KICKOFF',
+  'MUFFED_FG',
+  'TOUCHDOWN', // Rare but valid
+  'FIELD_GOAL', // Rare but valid
+  'END_OF_HALF' // Rare but valid
+])
+
+// Valid enum values for drive_end_transition (from database analysis)
+const VALID_DRIVE_END_TRANSITIONS = new Set([
+  'PUNT',
+  'TOUCHDOWN',
+  'FIELD_GOAL',
+  'INTERCEPTION',
+  'DOWNS',
+  'MISSED_FG',
+  'FUMBLE',
+  'END_OF_GAME',
+  'END_OF_HALF',
+  'BLOCKED_FG',
+  'BLOCKED_PUNT',
+  'SAFETY',
+  'BLOCKED_FG_DOWNS',
+  'BLOCKED_PUNT_DOWNS',
+  'FUMBLE_SAFETY'
+])
+
 /**
  * Transform kick result values to standardized nfl_kick_result enum
  *
@@ -13,10 +67,10 @@
  * Transformations:
  * - 'good' (NFLverse) -> 'made' (standard)
  * - 'failed' (NFLverse) -> 'missed' (standard)
- * - All other values pass through unchanged
+ * - Invalid values return null (not passed through)
  *
  * @param {string|null} value - Raw kick result value from data source
- * @returns {string|null} - Standardized kick result value or null
+ * @returns {string|null} - Standardized kick result value or null if invalid
  */
 export const standardize_kick_result = (value) => {
   if (!value || value === '') {
@@ -29,7 +83,17 @@ export const standardize_kick_result = (value) => {
     failed: 'missed' // NFLverse extra point failure
   }
 
-  return transformations[value] || value
+  const transformed = transformations[value] || value
+
+  // Validate against database enum values
+  if (!VALID_KICK_RESULTS.has(transformed)) {
+    log(
+      `Invalid kick_result value: "${value}" (transformed: "${transformed}") - valid values: ${Array.from(VALID_KICK_RESULTS).join(', ')}`
+    )
+    return null
+  }
+
+  return transformed
 }
 
 /**
@@ -38,14 +102,21 @@ export const standardize_kick_result = (value) => {
  * Standard enum values: 'success', 'failure'
  *
  * @param {string|null} value - Raw two-point result value
- * @returns {string|null} - Standardized two-point result or null
+ * @returns {string|null} - Standardized two-point result or null if invalid
  */
 export const standardize_two_point_result = (value) => {
   if (!value || value === '') {
     return null
   }
 
-  // Currently no transformations needed - NFLverse already uses 'success'/'failure'
+  // Validate against database enum values
+  if (!VALID_TWO_POINT_RESULTS.has(value)) {
+    log(
+      `Invalid two_point_result value: "${value}" - valid values: ${Array.from(VALID_TWO_POINT_RESULTS).join(', ')}`
+    )
+    return null
+  }
+
   return value
 }
 
@@ -57,9 +128,10 @@ export const standardize_two_point_result = (value) => {
  * Transformations:
  * - Uppercase normalization for consistency
  * - Alternative names mapped to standard values
+ * - Invalid values return null (not passed through)
  *
  * @param {string|null} value - Raw score type value
- * @returns {string|null} - Standardized score type or null
+ * @returns {string|null} - Standardized score type or null if invalid
  */
 export const standardize_score_type = (value) => {
   if (!value || value === '') {
@@ -79,7 +151,17 @@ export const standardize_score_type = (value) => {
     SAFETY: 'SFTY'
   }
 
-  return transformations[normalized] || normalized
+  const transformed = transformations[normalized] || normalized
+
+  // Validate against database enum values
+  if (!VALID_SCORE_TYPES.has(transformed)) {
+    log(
+      `Invalid score_type value: "${value}" (normalized: "${normalized}", transformed: "${transformed}") - valid values: ${Array.from(VALID_SCORE_TYPES).join(', ')}`
+    )
+    return null
+  }
+
+  return transformed
 }
 
 /**
@@ -222,4 +304,133 @@ export const normalize_yardline = (ydl_str) => {
   // Return normalized format: "TEAM NUM"
   // Team abbreviation should already be normalized by caller using fixTeam()
   return `${team} ${yard_num}`
+}
+
+/**
+ * Normalize drive start transition values to standard database enum format
+ *
+ * Ensures consistent drive start transition values across all data sources
+ * (NFLverse/nflfastr, Sportradar, NFL API, etc.) to prevent false collisions
+ * and maintain data consistency.
+ *
+ * Format rules:
+ * - Uppercase with underscores (e.g., "KICKOFF", "MISSED_FG")
+ * - Sportradar "End of Half" → "END_OF_HALF"
+ * - Normalize comma variations: "BLOCKED_FG,_DOWNS" → "BLOCKED_FG_DOWNS"
+ * - Invalid values return null (not passed through)
+ *
+ * Valid start transition values:
+ * - KICKOFF, PUNT, INTERCEPTION, FUMBLE, DOWNS, MISSED_FG
+ * - MUFFED_PUNT, ONSIDE_KICK, BLOCKED_FG, BLOCKED_PUNT
+ * - MUFFED_KICKOFF, BLOCKED_FG_DOWNS, BLOCKED_PUNT_DOWNS
+ * - OWN_KICKOFF, MUFFED_FG, TOUCHDOWN, FIELD_GOAL, END_OF_HALF
+ *
+ * Used by:
+ * - import-plays-sportradar.mjs (map_drive_data)
+ * - import-plays-nflfastr.mjs (format_drive_data)
+ * - Any other import sources that provide drive start transition data
+ *
+ * @param {string|null} transition - Raw transition value from data source
+ * @returns {string|null} - Normalized transition value or null if invalid
+ *
+ * @example
+ * normalize_drive_start_transition('Kickoff')        // 'KICKOFF'
+ * normalize_drive_start_transition('Missed FG')      // 'MISSED_FG'
+ * normalize_drive_start_transition('KICKOFF')        // 'KICKOFF' (already normalized)
+ * normalize_drive_start_transition(null)             // null
+ */
+export const normalize_drive_start_transition = (transition) => {
+  if (!transition || transition === '') return null
+
+  // Convert to uppercase with underscores
+  let normalized = transition.toUpperCase().trim().replace(/\s+/g, '_')
+
+  // Normalize comma variations (e.g., "BLOCKED_FG,_DOWNS" → "BLOCKED_FG_DOWNS")
+  normalized = normalized.replace(/,_/g, '_')
+
+  // Map Sportradar-specific values to standard database enum values
+  const transition_mapping = {
+    END_HALF: 'END_OF_HALF'
+  }
+
+  const transformed = transition_mapping[normalized] || normalized
+
+  // Validate against drive start enum set
+  const valid_values = Array.from(VALID_DRIVE_START_TRANSITIONS)
+    .sort()
+    .join(', ')
+
+  if (!VALID_DRIVE_START_TRANSITIONS.has(transformed)) {
+    log(
+      `Invalid drive_start_transition value: "${transition}" (normalized: "${normalized}", transformed: "${transformed}") - valid values: ${valid_values}`
+    )
+    return null
+  }
+
+  return transformed
+}
+
+/**
+ * Normalize drive end transition values to standard database enum format
+ *
+ * Ensures consistent drive end transition values across all data sources
+ * (NFLverse/nflfastr, Sportradar, NFL API, etc.) to prevent false collisions
+ * and maintain data consistency.
+ *
+ * Format rules:
+ * - Uppercase with underscores (e.g., "END_OF_GAME", "MISSED_FG")
+ * - Sportradar "End of Game" → "END_OF_GAME"
+ * - Sportradar "End of Half" → "END_OF_HALF"
+ * - Normalize comma variations: "BLOCKED_FG,_DOWNS" → "BLOCKED_FG_DOWNS"
+ * - Invalid values return null (not passed through)
+ *
+ * Valid end transition values:
+ * - PUNT, TOUCHDOWN, FIELD_GOAL, INTERCEPTION, DOWNS, MISSED_FG
+ * - FUMBLE, END_OF_GAME, END_OF_HALF, BLOCKED_FG, BLOCKED_PUNT
+ * - SAFETY, BLOCKED_FG_DOWNS, BLOCKED_PUNT_DOWNS, FUMBLE_SAFETY
+ *
+ * Used by:
+ * - import-plays-sportradar.mjs (map_drive_data)
+ * - import-plays-nflfastr.mjs (format_drive_data)
+ * - Any other import sources that provide drive end transition data
+ *
+ * @param {string|null} transition - Raw transition value from data source
+ * @returns {string|null} - Normalized transition value or null if invalid
+ *
+ * @example
+ * normalize_drive_end_transition('End of Game')     // 'END_OF_GAME'
+ * normalize_drive_end_transition('End of Half')     // 'END_OF_HALF'
+ * normalize_drive_end_transition('Missed FG')       // 'MISSED_FG'
+ * normalize_drive_end_transition('END_OF_GAME')     // 'END_OF_GAME' (already normalized)
+ * normalize_drive_end_transition('TOUCHDOWN')       // 'TOUCHDOWN'
+ * normalize_drive_end_transition(null)              // null
+ */
+export const normalize_drive_end_transition = (transition) => {
+  if (!transition || transition === '') return null
+
+  // Convert to uppercase with underscores
+  let normalized = transition.toUpperCase().trim().replace(/\s+/g, '_')
+
+  // Normalize comma variations (e.g., "BLOCKED_FG,_DOWNS" → "BLOCKED_FG_DOWNS")
+  normalized = normalized.replace(/,_/g, '_')
+
+  // Map Sportradar-specific values to standard database enum values
+  const transition_mapping = {
+    END_GAME: 'END_OF_GAME',
+    END_HALF: 'END_OF_HALF'
+  }
+
+  const transformed = transition_mapping[normalized] || normalized
+
+  // Validate against drive end enum set
+  const valid_values = Array.from(VALID_DRIVE_END_TRANSITIONS).sort().join(', ')
+
+  if (!VALID_DRIVE_END_TRANSITIONS.has(transformed)) {
+    log(
+      `Invalid drive_end_transition value: "${transition}" (normalized: "${normalized}", transformed: "${transformed}") - valid values: ${valid_values}`
+    )
+    return null
+  }
+
+  return transformed
 }
