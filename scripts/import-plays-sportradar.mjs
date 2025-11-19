@@ -53,6 +53,17 @@ import {
 
 dayjs.extend(timezone)
 
+/**
+ * CLI Arguments:
+ * --esbid: Specific game ID to import
+ * --week: Import all games for a specific week
+ * --year: Year for week-based import (default: current season)
+ * --dry: Preview changes without updating database
+ * --ignore_conflicts: Overwrite all existing field values
+ * --ignore_sportradar_field_conflicts: Overwrite only Sportradar-exclusive fields
+ *   (automatically converted to overwrite_fields parameter internally)
+ */
+
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-plays-sportradar')
 debug.enable('import-plays-sportradar,sportradar')
@@ -960,8 +971,10 @@ const import_plays_sportradar = async ({
                   play_row: db_play,
                   update: mapped_play,
                   ignore_conflicts,
-                  ignore_sportradar_field_conflicts,
-                  sportradar_exclusive_fields: SPORTRADAR_EXCLUSIVE_FIELDS
+                  // Use modern overwrite_fields approach for Sportradar-exclusive fields
+                  overwrite_fields: ignore_sportradar_field_conflicts
+                    ? Array.from(SPORTRADAR_EXCLUSIVE_FIELDS)
+                    : []
                 })
                 const update_time = Date.now() - update_start_time
                 if (update_time > 500) {

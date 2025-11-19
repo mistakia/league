@@ -27,6 +27,18 @@ import {
 } from '#libs-server/play-enum-utils.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
+/**
+ * CLI Arguments:
+ * --year: Year to import (default: current season)
+ * --all: Import all years from 1999 to current season
+ * --esbid: Filter to a specific game ID
+ * --dry or --dry_mode: Run without making database changes
+ * --ignore_conflicts: Overwrite all existing field values
+ * --overwrite_fields: Comma-separated list of specific fields to overwrite
+ *                     (e.g., --overwrite_fields="game_clock_end,sec_rem_qtr")
+ * -d: Force download of CSV file even if cached
+ */
+
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-nflfastr-plays')
 debug.enable('import-nflfastr-plays,update-play,fetch,play-cache')
@@ -521,7 +533,13 @@ const download_file = async ({ year, force_download }) => {
 /**
  * Process a single play from the CSV data
  */
-const process_play = async ({ item, year, ignore_conflicts, dry_mode }) => {
+const process_play = async ({
+  item,
+  year,
+  ignore_conflicts,
+  dry_mode,
+  overwrite_fields
+}) => {
   const esbid = parseInt(item.old_game_id, 10)
   const formatted_play = format_play(item)
   const match_criteria = build_match_criteria(esbid, formatted_play, item)
@@ -561,7 +579,8 @@ const process_play = async ({ item, year, ignore_conflicts, dry_mode }) => {
       await update_play({
         play_row: db_play,
         update: formatted_play,
-        ignore_conflicts
+        ignore_conflicts,
+        overwrite_fields
       })
     }
 
@@ -589,7 +608,8 @@ const run = async ({
   ignore_conflicts = false,
   force_download = false,
   dry_mode = false,
-  esbid = null
+  esbid = null,
+  overwrite_fields = []
 } = {}) => {
   // Check if data is available for this year
   if (!is_data_available(year)) {
@@ -642,7 +662,8 @@ const run = async ({
       item,
       year,
       ignore_conflicts,
-      dry_mode
+      dry_mode,
+      overwrite_fields
     })
 
     processed_count++
@@ -808,6 +829,16 @@ const main = async () => {
     const esbid = argv.esbid ? parseInt(argv.esbid, 10) : null
     const all = argv.all
 
+    // Parse overwrite_fields argument (comma-separated field names)
+    // Example: --overwrite_fields="game_clock_end,sec_rem_qtr"
+    const overwrite_fields = argv.overwrite_fields
+      ? argv.overwrite_fields.split(',').map((f) => f.trim())
+      : []
+
+    if (overwrite_fields.length > 0) {
+      log(`Will overwrite conflicts for fields: ${overwrite_fields.join(', ')}`)
+    }
+
     if (all) {
       // Import all years from 1999 to current season
       for (
@@ -820,7 +851,8 @@ const main = async () => {
           ignore_conflicts,
           force_download,
           dry_mode,
-          esbid
+          esbid,
+          overwrite_fields
         })
       }
     } else {
@@ -830,7 +862,8 @@ const main = async () => {
         ignore_conflicts,
         force_download,
         dry_mode,
-        esbid
+        esbid,
+        overwrite_fields
       })
     }
   } catch (err) {
