@@ -183,8 +183,6 @@ const map_basic_play_data = ({
     mapped.yards_to_go = yfd && yfd !== 0 ? yfd : null
   }
 
-  set_if_defined(mapped, play, 'sequence')
-
   if (play.play_type) {
     mapped.play_type = map_play_type(play.play_type)
   }
@@ -377,6 +375,48 @@ const build_match_criteria = (game_esbid, mapped_play) => {
   return criteria
 }
 
+const log_unresolved_matches = ({
+  mapped_play,
+  sportradar_play,
+  db_plays,
+  time_matches = null
+}) => {
+  log('Mapped play:', {
+    sportradar_play_id: mapped_play.sportradar_play_id,
+    play_type: mapped_play.play_type,
+    qtr: mapped_play.qtr,
+    game_clock_start: mapped_play.game_clock_start,
+    sec_rem_qtr: mapped_play.sec_rem_qtr,
+    dwn: mapped_play.dwn,
+    yards_to_go: mapped_play.yards_to_go,
+    ydl_100: mapped_play.ydl_100,
+    off: mapped_play.off,
+    def: mapped_play.def,
+    description: sportradar_play.description
+  })
+  log('Possible matches:')
+  const plays_to_log = time_matches || db_plays
+  plays_to_log.forEach((item, idx) => {
+    const play = item.play || item
+    const log_data = {
+      playId: play.playId,
+      play_type: play.play_type,
+      qtr: play.qtr,
+      game_clock_start: play.game_clock_start,
+      sec_rem_qtr: play.sec_rem_qtr,
+      dwn: play.dwn,
+      yards_to_go: play.yards_to_go,
+      ydl_100: play.ydl_100,
+      off: play.off,
+      def: play.def
+    }
+    if (item.time_diff != null) {
+      log_data.time_diff = item.time_diff
+    }
+    log(`  Match ${idx + 1}:`, log_data)
+  })
+}
+
 const resolve_multiple_matches = ({
   db_plays,
   sportradar_play,
@@ -400,27 +440,48 @@ const resolve_multiple_matches = ({
     }
   }
 
-  // Strategy 2: sequence comparison
-  if (mapped_play.sequence && db_plays.some((p) => p.sequence)) {
-    const closest_sequence = db_plays.reduce((closest, play) => {
-      if (!play.sequence) return closest
-      const diff = Math.abs(play.sequence - mapped_play.sequence)
-      const closest_diff = closest
-        ? Math.abs(closest.sequence - mapped_play.sequence)
-        : Infinity
-      return diff < closest_diff ? play : closest
-    }, null)
+  // Strategy 2: fuzzy time match (within 5 seconds) - MOST RELIABLE
+  // Use sec_rem_qtr for precise time matching
+  if (mapped_play.sec_rem_qtr != null) {
+    const sportradar_sec_rem = mapped_play.sec_rem_qtr
+    const time_matches = db_plays
+      .filter((p) => p.sec_rem_qtr != null)
+      .map((p) => ({
+        play: p,
+        time_diff: Math.abs(p.sec_rem_qtr - sportradar_sec_rem)
+      }))
+      .filter((m) => m.time_diff <= 5) // Within 5 seconds
+      .sort((a, b) => a.time_diff - b.time_diff)
 
-    if (closest_sequence) {
+    if (time_matches.length === 1) {
+      // Only one play within 5 seconds - very confident match
+      const match = time_matches[0]
       log(
-        `Resolved multiple matches using sequence: ${closest_sequence.sequence}`
+        `Resolved multiple matches using fuzzy time (${match.time_diff}s diff): ${match.play.game_clock_start || 'N/A'}`
       )
-      return closest_sequence
+      return match.play
+    } else if (time_matches.length > 1) {
+      // Multiple plays within 5 seconds - unable to disambiguate
+      log(
+        `Unable to disambiguate: ${time_matches.length} plays within 5 seconds (closest: ${time_matches[0].time_diff}s diff)`
+      )
+      log_unresolved_matches({
+        mapped_play,
+        sportradar_play,
+        db_plays,
+        time_matches
+      })
+      return null
     }
   }
 
   // Unable to resolve - log and return null
   log(`Unable to resolve ${db_plays.length} matches - skipping update`)
+  log_unresolved_matches({
+    mapped_play,
+    sportradar_play,
+    db_plays
+  })
   return null
 }
 
