@@ -639,7 +639,9 @@ const track_collisions = ({
           qtr: db_play.qtr,
           game_clock: db_play.game_clock_start,
           play_type: mapped_play.play_type,
-          description: sportradar_play.description?.substring(0, 80)
+          description: sportradar_play.description?.substring(0, 80),
+          sportradar_game_id: mapped_play.sportradar_game_id,
+          sportradar_play_id: mapped_play.sportradar_play_id
         }
       })
     }
