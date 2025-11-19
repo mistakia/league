@@ -440,7 +440,7 @@ const resolve_multiple_matches = ({
     }
   }
 
-  // Strategy 2: fuzzy time match (within 5 seconds) - MOST RELIABLE
+  // Strategy 2: fuzzy time match
   // Use sec_rem_qtr for precise time matching
   if (mapped_play.sec_rem_qtr != null) {
     const sportradar_sec_rem = mapped_play.sec_rem_qtr
@@ -450,20 +450,53 @@ const resolve_multiple_matches = ({
         play: p,
         time_diff: Math.abs(p.sec_rem_qtr - sportradar_sec_rem)
       }))
-      .filter((m) => m.time_diff <= 5) // Within 5 seconds
+      .filter((m) => m.time_diff <= 14)
       .sort((a, b) => a.time_diff - b.time_diff)
 
     if (time_matches.length === 1) {
-      // Only one play within 5 seconds - very confident match
       const match = time_matches[0]
       log(
         `Resolved multiple matches using fuzzy time (${match.time_diff}s diff): ${match.play.game_clock_start || 'N/A'}`
       )
       return match.play
     } else if (time_matches.length > 1) {
-      // Multiple plays within 5 seconds - unable to disambiguate
       log(
-        `Unable to disambiguate: ${time_matches.length} plays within 5 seconds (closest: ${time_matches[0].time_diff}s diff)`
+        `Found ${time_matches.length} plays within 14 seconds, attempting yards gained filter`
+      )
+
+      // Strategy 2.5: Filter by yards gained (within 1 yard tolerance)
+      if (mapped_play.yds_gained != null) {
+        const yards_matches = time_matches.filter((m) => {
+          if (m.play.yds_gained == null) return false
+          const yards_diff = Math.abs(
+            m.play.yds_gained - mapped_play.yds_gained
+          )
+          return yards_diff <= 1
+        })
+
+        if (yards_matches.length === 1) {
+          const match = yards_matches[0]
+          log(
+            `Resolved multiple matches using yards gained (${match.time_diff}s time diff, ${Math.abs(match.play.yds_gained - mapped_play.yds_gained)} yards diff): ${match.play.game_clock_start || 'N/A'}`
+          )
+          return match.play
+        } else if (yards_matches.length > 1) {
+          log(
+            `Unable to disambiguate: ${yards_matches.length} plays match time and yards (closest: ${yards_matches[0].time_diff}s diff)`
+          )
+          log_unresolved_matches({
+            mapped_play,
+            sportradar_play,
+            db_plays,
+            time_matches: yards_matches
+          })
+          return null
+        }
+      }
+
+      // No yards gained filter or no matches with yards - unable to disambiguate
+      log(
+        `Unable to disambiguate: ${time_matches.length} plays (closest: ${time_matches[0].time_diff}s diff)`
       )
       log_unresolved_matches({
         mapped_play,
@@ -972,6 +1005,12 @@ const import_plays_sportradar = async ({
 
           for (const event of pbp_item.events || []) {
             if (event.type !== 'play') continue
+
+            // Skip deleted plays - they have minimal data and cannot be matched
+            if (event.deleted === true) {
+              log(`Skipping deleted play: ${event.id}`)
+              continue
+            }
 
             total_plays_processed++
             game_plays_processed++
