@@ -248,8 +248,12 @@ export const print_collision_summary = ({ all_collisions }) => {
       ].includes(field)
         ? ` [${ex.existing} → ${ex.new}]`
         : ''
+      const sportradar_info =
+        ex.play_info.sportradar_game_id && ex.play_info.sportradar_play_id
+          ? ` [SR Game: ${ex.play_info.sportradar_game_id}, SR Play: ${ex.play_info.sportradar_play_id}]`
+          : ''
       log(
-        `    ${ex.play_info.esbid} Play ${ex.play_info.playId} Q${ex.play_info.qtr} - ${ex.play_info.description || 'N/A'}${timing_note}`
+        `    ${ex.play_info.esbid} Play ${ex.play_info.playId} Q${ex.play_info.qtr} - ${ex.play_info.description || 'N/A'}${timing_note}${sportradar_info}`
       )
     }
   }
