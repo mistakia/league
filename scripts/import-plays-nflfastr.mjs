@@ -26,6 +26,7 @@ import {
   normalize_game_clock
 } from '#libs-server/play-enum-utils.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { NFLFASTR_EXCLUSIVE_FIELDS } from '#libs-server/nflfastr/nflfastr-exclusive-fields.mjs'
 
 /**
  * CLI Arguments:
@@ -34,6 +35,8 @@ import { job_types } from '#libs-shared/job-constants.mjs'
  * --esbid: Filter to a specific game ID
  * --dry or --dry_mode: Run without making database changes
  * --ignore_conflicts: Overwrite all existing field values
+ * --ignore_nflfastr_field_conflicts: Overwrite only nflfastR-exclusive fields
+ *   (automatically merged with --overwrite_fields if both are specified)
  * --overwrite_fields: Comma-separated list of specific fields to overwrite
  *                     (e.g., --overwrite_fields="game_clock_end,sec_rem_qtr")
  * -d: Force download of CSV file even if cached
@@ -828,15 +831,28 @@ const main = async () => {
     const dry_mode = argv.dry || argv.dry_mode
     const esbid = argv.esbid ? parseInt(argv.esbid, 10) : null
     const all = argv.all
+    const ignore_nflfastr_field_conflicts = argv.ignore_nflfastr_field_conflicts
 
     // Parse overwrite_fields argument (comma-separated field names)
     // Example: --overwrite_fields="game_clock_end,sec_rem_qtr"
-    const overwrite_fields = argv.overwrite_fields
+    let overwrite_fields = argv.overwrite_fields
       ? argv.overwrite_fields.split(',').map((f) => f.trim())
       : []
 
+    // Merge nflfastr-exclusive fields if flag is set
+    if (ignore_nflfastr_field_conflicts) {
+      const nflfastr_fields = Array.from(NFLFASTR_EXCLUSIVE_FIELDS)
+      overwrite_fields = [...new Set([...overwrite_fields, ...nflfastr_fields])]
+      log(
+        `Will overwrite nflfastR-exclusive fields (${nflfastr_fields.length} fields)`
+      )
+    }
+
     if (overwrite_fields.length > 0) {
-      log(`Will overwrite conflicts for fields: ${overwrite_fields.join(', ')}`)
+      log(`Total fields to overwrite: ${overwrite_fields.length}`)
+      if (!ignore_nflfastr_field_conflicts && overwrite_fields.length <= 10) {
+        log(`Fields: ${overwrite_fields.join(', ')}`)
+      }
     }
 
     if (all) {
