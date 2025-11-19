@@ -35,7 +35,7 @@
   "tags": ["sorting", "cte"],
   "timeout_ms": 40000,
   "expected_metadata": {
-    "cache_ttl": "one_week",
+    "cache_ttl": "one_hour",
     "cache_expire_at": null
   }
 }

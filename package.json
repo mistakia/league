@@ -7,6 +7,7 @@
     "lint": "eslint .",
     "prettier": "prettier --write .",
     "test": "TZ=America/New_York NODE_ENV=test TEST=all mocha --exit --exclude test/importer-espn.spec.mjs --exclude test/libs-server.get-players-table-view-results-debug.mjs --require test/global.mjs",
+    "test:data-view-queries": "TZ=America/New_York NODE_ENV=test TEST=all mocha --exit test/libs-server.data-view-queries.mjs --require test/global.mjs",
     "start:api": "NODE_ENV=development nodemon server.mjs",
     "start:api:prod": "NODE_ENV=production node server.mjs",
     "build": "cross-env NODE_ENV=production webpack --config ./webpack/webpack.config.prod.babel.mjs",

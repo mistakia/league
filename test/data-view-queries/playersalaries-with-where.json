@@ -22,11 +22,11 @@
       }
     ]
   },
-  "expected_query": "with \"t6558bff27f5619303d370c6360ae0c26\" as (select \"player_salaries\".\"pid\", \"player_salaries\".\"salary\", \"nfl_games\".\"year\", \"nfl_games\".\"week\" from \"player_salaries\" inner join \"nfl_games\" on \"player_salaries\".\"esbid\" = \"nfl_games\".\"esbid\" where \"player_salaries\".\"source_id\" in ('DRAFTKINGS') and \"nfl_games\".\"year\" in (2024) and \"nfl_games\".\"week\" in (1) and player_salaries.salary >= '5000') select \"player\".\"pid\", \"t6558bff27f5619303d370c6360ae0c26\".\"salary\" AS \"dfs_salary_0\", \"player\".\"pos\" from \"player\" inner join \"t6558bff27f5619303d370c6360ae0c26\" on \"t6558bff27f5619303d370c6360ae0c26\".\"pid\" = \"player\".\"pid\" group by \"t6558bff27f5619303d370c6360ae0c26\".\"salary\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
+  "expected_query": "with \"t6558bff27f5619303d370c6360ae0c26\" as (select \"player_salaries\".\"pid\", \"player_salaries\".\"salary\", \"nfl_games\".\"year\", \"nfl_games\".\"week\" from \"player_salaries\" inner join \"nfl_games\" on \"player_salaries\".\"esbid\" = \"nfl_games\".\"esbid\" where \"player_salaries\".\"source_id\" in ('DRAFTKINGS') and \"nfl_games\".\"year\" in (${constants.season.year}) and \"nfl_games\".\"week\" in (${constants.season.week}) and player_salaries.salary >= '5000') select \"player\".\"pid\", \"t6558bff27f5619303d370c6360ae0c26\".\"salary\" AS \"dfs_salary_0\", \"player\".\"pos\" from \"player\" inner join \"t6558bff27f5619303d370c6360ae0c26\" on \"t6558bff27f5619303d370c6360ae0c26\".\"pid\" = \"player\".\"pid\" group by \"t6558bff27f5619303d370c6360ae0c26\".\"salary\", \"player\".\"pid\", \"player\".\"lname\", \"player\".\"fname\", \"player\".\"pos\" order by 2 DESC NULLS LAST, \"player\".\"pid\" asc limit 500",
   "tags": ["player", "plays", "filters", "sorting", "cte"],
   "timeout_ms": 40000,
   "expected_metadata": {
-    "cache_ttl": "one_week",
+    "cache_ttl": "six_hours",
     "cache_expire_at": null
   }
 }
