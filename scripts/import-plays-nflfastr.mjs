@@ -203,12 +203,26 @@ const format_play_context = (play) => {
   const dwn = dwn_raw === 0 ? null : dwn_raw
   const yards_to_go = yards_to_go_raw === 0 ? null : yards_to_go_raw
 
+  // nflfastr uses receiving team as posteam for kickoffs,
+  // but database convention uses kicking team, so swap them
+  const is_kickoff = play.play_type === 'kickoff'
+
+  // For kickoffs: use defteam (kicking team) for off/pos_team, use posteam (receiving team) for def
+  // For all other plays: use posteam for off/pos_team, use defteam for def
+  const off_team = play.posteam
+    ? fixTeam(is_kickoff ? play.defteam : play.posteam)
+    : null
+  const def_team = play.defteam
+    ? fixTeam(is_kickoff ? play.posteam : play.defteam)
+    : null
+
   return {
     qtr: format_number(play.qtr),
     dwn,
     yards_to_go,
-    off: play.posteam ? fixTeam(play.posteam) : null,
-    def: play.defteam ? fixTeam(play.defteam) : null,
+    pos_team: off_team, // pos_team should match off (possession team)
+    off: off_team,
+    def: def_team,
     play_type: format_play_type(
       play.play_type,
       format_boolean(play.special_teams_play),
