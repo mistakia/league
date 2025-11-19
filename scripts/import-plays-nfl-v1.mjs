@@ -88,7 +88,7 @@ const parse_clock_time = (clockTime, quarter) => {
   return time_fields
 }
 
-const getPlayData = ({ play, year, week, seas_type }) => {
+const getPlayData = ({ play, year, week, seas_type, game }) => {
   const play_type_nfl = clean_string(play.playType)
 
   // Parse clock time and calculate time-related fields
@@ -162,7 +162,15 @@ const getPlayData = ({ play, year, week, seas_type }) => {
 
   if (play.possessionTeam) {
     const abbr = clean_string(play.possessionTeam.abbreviation)
-    data.pos_team = abbr ? fixTeam(abbr) : null
+    let pos_team = abbr ? fixTeam(abbr) : null
+
+    // NFL v1 API uses receiving team for kickoffs, but database convention
+    // uses kicking team. Swap to kicking team by using opposite team.
+    if (play_type_nfl === 'KICK_OFF' && pos_team && game) {
+      pos_team = pos_team === game.h ? game.v : game.h
+    }
+
+    data.pos_team = pos_team
   }
 
   if (play.scoringTeam) {
@@ -335,7 +343,7 @@ const importPlaysForWeek = async ({
 
     for (const play of data.data.viewer.gameDetail.plays) {
       const { playId } = play
-      const playData = getPlayData({ play, year, week, seas_type })
+      const playData = getPlayData({ play, year, week, seas_type, game })
 
       // Extract timeout team from playStats for TIMEOUT plays
       // Team timeouts have a playStat entry with statId 68 and team attribution
