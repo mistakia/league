@@ -40,7 +40,9 @@ const update_play = async ({
   esbid,
   playId,
   update,
-  ignore_conflicts = false
+  ignore_conflicts = false,
+  ignore_sportradar_field_conflicts = false,
+  sportradar_exclusive_fields = null
 }) => {
   if (!play_row && esbid && playId) {
     const play_rows = await db('nfl_plays').where({ esbid, playId })
@@ -90,11 +92,29 @@ const update_play = async ({
       continue
     }
 
-    if (!ignore_conflicts && edit.lhs) {
-      log(
-        `conflict with existing value for ${prop}, esbid: ${play_row.esbid}, playId: ${play_row.playId}, existing: ${edit.lhs}, new: ${edit.rhs}`
-      )
-      continue
+    // Enhanced conflict handling with selective overwrite support
+    if (edit.lhs) {
+      // If ignore_conflicts flag is set, overwrite everything
+      if (ignore_conflicts) {
+        // Allow update
+      }
+      // If ignore_sportradar_field_conflicts flag is set AND this is an exclusive field
+      else if (
+        ignore_sportradar_field_conflicts &&
+        sportradar_exclusive_fields?.has(prop)
+      ) {
+        log(
+          `overwriting sportradar-exclusive field ${prop}, esbid: ${play_row.esbid}, playId: ${play_row.playId}, existing: ${edit.lhs}, new: ${edit.rhs}`
+        )
+        // Allow update
+      }
+      // Otherwise, skip the update due to conflict
+      else {
+        log(
+          `conflict with existing value for ${prop}, esbid: ${play_row.esbid}, playId: ${play_row.playId}, existing: ${edit.lhs}, new: ${edit.rhs}`
+        )
+        continue
+      }
     }
 
     changes += 1
