@@ -23,12 +23,24 @@ export const enrich_play_types = (plays) => {
   const enriched_plays = plays.map((play) => {
     let play_type = null
 
+    const desc = play.desc || ''
+    const desc_upper = desc.toUpperCase()
+    const desc_lower = desc.toLowerCase()
+
     // Check if play was negated by penalty
     // Plays with "no play" in description should always be NOPL regardless of original type
     // This handles cases like extra points, field goals, passes, runs that were negated
-    const desc = play.desc || ''
-    if (desc.toLowerCase().includes('no play')) {
+    if (desc_lower.includes('no play')) {
       play_type = 'NOPL'
+    }
+    // Special case: TWO-POINT CONVERSION with "enforced between downs" penalty
+    // NFL API returns play_type_nfl="PENALTY" for conversions with post-play penalties
+    // These are valid conversions where the penalty didn't negate the play
+    else if (
+      desc_upper.includes('TWO-POINT CONVERSION ATTEMPT') &&
+      desc_lower.includes('enforced between downs')
+    ) {
+      play_type = 'CONV'
     } else {
       // Prioritize NGS play type
       if (play.play_type_ngs) {
