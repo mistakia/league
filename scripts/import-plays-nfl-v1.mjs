@@ -127,7 +127,8 @@ const getPlayData = ({ play, year, week, seas_type, game }) => {
     desc: clean_string(play.playDescription),
     // Normalize down to null for special teams plays (0 should be null)
     dwn: play.down === 0 ? null : play.down,
-    drive_play_count: play.drivePlayCount,
+    // NOTE: drive_play_count is calculated by the play enrichment pipeline, not imported from NFL API
+    // The NFL API's drivePlayCount is unreliable (live-updating, often inaccurate)
     game_clock_start: normalize_game_clock(play.clockTime),
     // Clock-based time fields calculated from game_clock_start
     // These are the source of truth for time matching across data sources
