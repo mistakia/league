@@ -37,7 +37,7 @@ const VALID_DRIVE_START_TRANSITIONS = new Set([
   'MUFFED_FG',
   'TOUCHDOWN', // Rare but valid
   'FIELD_GOAL', // Rare but valid
-  'END_OF_HALF' // Rare but valid
+  'END_HALF' // Rare but valid (not END_OF_HALF)
 ])
 
 // Valid enum values for drive_end_transition (from database analysis)
@@ -49,8 +49,8 @@ const VALID_DRIVE_END_TRANSITIONS = new Set([
   'DOWNS',
   'MISSED_FG',
   'FUMBLE',
-  'END_OF_GAME',
-  'END_OF_HALF',
+  'END_GAME',
+  'END_HALF',
   'BLOCKED_FG',
   'BLOCKED_PUNT',
   'SAFETY',
@@ -315,7 +315,7 @@ export const normalize_yardline = (ydl_str) => {
  *
  * Format rules:
  * - Uppercase with underscores (e.g., "KICKOFF", "MISSED_FG")
- * - Sportradar "End of Half" → "END_OF_HALF"
+ * - Sportradar "End of Half" → "END_HALF"
  * - Normalize comma variations: "BLOCKED_FG,_DOWNS" → "BLOCKED_FG_DOWNS"
  * - Invalid values return null (not passed through)
  *
@@ -323,7 +323,7 @@ export const normalize_yardline = (ydl_str) => {
  * - KICKOFF, PUNT, INTERCEPTION, FUMBLE, DOWNS, MISSED_FG
  * - MUFFED_PUNT, ONSIDE_KICK, BLOCKED_FG, BLOCKED_PUNT
  * - MUFFED_KICKOFF, BLOCKED_FG_DOWNS, BLOCKED_PUNT_DOWNS
- * - OWN_KICKOFF, MUFFED_FG, TOUCHDOWN, FIELD_GOAL, END_OF_HALF
+ * - OWN_KICKOFF, MUFFED_FG, TOUCHDOWN, FIELD_GOAL, END_HALF
  *
  * Used by:
  * - import-plays-sportradar.mjs (map_drive_data)
@@ -336,6 +336,7 @@ export const normalize_yardline = (ydl_str) => {
  * @example
  * normalize_drive_start_transition('Kickoff')        // 'KICKOFF'
  * normalize_drive_start_transition('Missed FG')      // 'MISSED_FG'
+ * normalize_drive_start_transition('End of Half')    // 'END_HALF'
  * normalize_drive_start_transition('KICKOFF')        // 'KICKOFF' (already normalized)
  * normalize_drive_start_transition(null)             // null
  */
@@ -349,8 +350,9 @@ export const normalize_drive_start_transition = (transition) => {
   normalized = normalized.replace(/,_/g, '_')
 
   // Map Sportradar-specific values to standard database enum values
+  // Note: Database uses END_HALF (not END_OF_HALF)
   const transition_mapping = {
-    END_HALF: 'END_OF_HALF'
+    END_OF_HALF: 'END_HALF'
   }
 
   const transformed = transition_mapping[normalized] || normalized
@@ -378,15 +380,15 @@ export const normalize_drive_start_transition = (transition) => {
  * and maintain data consistency.
  *
  * Format rules:
- * - Uppercase with underscores (e.g., "END_OF_GAME", "MISSED_FG")
- * - Sportradar "End of Game" → "END_OF_GAME"
- * - Sportradar "End of Half" → "END_OF_HALF"
+ * - Uppercase with underscores (e.g., "END_GAME", "MISSED_FG")
+ * - Sportradar "End of Game" → "END_GAME"
+ * - Sportradar "End of Half" → "END_HALF"
  * - Normalize comma variations: "BLOCKED_FG,_DOWNS" → "BLOCKED_FG_DOWNS"
  * - Invalid values return null (not passed through)
  *
  * Valid end transition values:
  * - PUNT, TOUCHDOWN, FIELD_GOAL, INTERCEPTION, DOWNS, MISSED_FG
- * - FUMBLE, END_OF_GAME, END_OF_HALF, BLOCKED_FG, BLOCKED_PUNT
+ * - FUMBLE, END_GAME, END_HALF, BLOCKED_FG, BLOCKED_PUNT
  * - SAFETY, BLOCKED_FG_DOWNS, BLOCKED_PUNT_DOWNS, FUMBLE_SAFETY
  *
  * Used by:
@@ -398,10 +400,10 @@ export const normalize_drive_start_transition = (transition) => {
  * @returns {string|null} - Normalized transition value or null if invalid
  *
  * @example
- * normalize_drive_end_transition('End of Game')     // 'END_OF_GAME'
- * normalize_drive_end_transition('End of Half')     // 'END_OF_HALF'
+ * normalize_drive_end_transition('End of Game')     // 'END_GAME'
+ * normalize_drive_end_transition('End of Half')     // 'END_HALF'
  * normalize_drive_end_transition('Missed FG')       // 'MISSED_FG'
- * normalize_drive_end_transition('END_OF_GAME')     // 'END_OF_GAME' (already normalized)
+ * normalize_drive_end_transition('END_GAME')        // 'END_GAME' (already normalized)
  * normalize_drive_end_transition('TOUCHDOWN')       // 'TOUCHDOWN'
  * normalize_drive_end_transition(null)              // null
  */
@@ -415,9 +417,10 @@ export const normalize_drive_end_transition = (transition) => {
   normalized = normalized.replace(/,_/g, '_')
 
   // Map Sportradar-specific values to standard database enum values
+  // Note: Database uses END_GAME and END_HALF (not END_OF_GAME/END_OF_HALF)
   const transition_mapping = {
-    END_GAME: 'END_OF_GAME',
-    END_HALF: 'END_OF_HALF'
+    END_OF_GAME: 'END_GAME',
+    END_OF_HALF: 'END_HALF'
   }
 
   const transformed = transition_mapping[normalized] || normalized
