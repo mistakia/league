@@ -1,4 +1,4 @@
-/* global describe before it */
+/* global describe it */
 import * as chai from 'chai'
 
 import { normalize_game_clock } from '../libs-server/play-enum-utils.mjs'

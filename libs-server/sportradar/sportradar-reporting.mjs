@@ -3,6 +3,7 @@
  */
 
 import debug from 'debug'
+import { is_sportradar_exclusive_field } from './sportradar-exclusive-fields.mjs'
 
 const log = debug('import-plays-sportradar')
 
@@ -188,12 +189,24 @@ export const print_collision_summary = ({ all_collisions }) => {
     return
   }
 
+  // Separate exclusive vs non-exclusive collisions
+  const exclusive_collisions = all_collisions.filter((c) =>
+    is_sportradar_exclusive_field(c.field)
+  )
+  const non_exclusive_collisions = all_collisions.filter(
+    (c) => !is_sportradar_exclusive_field(c.field)
+  )
+
   log('\n\n' + '='.repeat(80))
   log(
     'COLLISION SUMMARY: Field Differences Between Existing Data and Sportradar'
   )
   log('='.repeat(80))
   log(`Total collisions detected: ${all_collisions.length}`)
+  log(`  Sportradar-exclusive fields: ${exclusive_collisions.length}`)
+  log(
+    `  Shared fields (also in FTN/nflfastR): ${non_exclusive_collisions.length}`
+  )
   log('')
 
   // Group collisions by field
@@ -263,16 +276,51 @@ export const print_collision_summary = ({ all_collisions }) => {
   log('='.repeat(80))
 
   // Categorize collisions
-  print_collision_categorization({ all_collisions })
+  print_collision_categorization({
+    all_collisions,
+    exclusive_collisions,
+    non_exclusive_collisions
+  })
 }
 
 /**
- * Print collision categorization (expected vs unexpected)
+ * Print collision categorization (exclusive vs shared fields)
  */
-const print_collision_categorization = ({ all_collisions }) => {
-  log('\n\nCOLLISION CATEGORIZATION:')
+const print_collision_categorization = ({
+  all_collisions,
+  exclusive_collisions,
+  non_exclusive_collisions
+}) => {
+  log('\n\nCOLLISION CATEGORIZATION BY FIELD TYPE:')
   log('-'.repeat(80))
 
+  log(
+    `Sportradar-exclusive fields (safe to overwrite): ${exclusive_collisions.length}`
+  )
+  if (exclusive_collisions.length > 0) {
+    const exclusive_fields = [
+      ...new Set(exclusive_collisions.map((c) => c.field))
+    ]
+    log(`  Fields: ${exclusive_fields.slice(0, 10).join(', ')}`)
+    if (exclusive_fields.length > 10) {
+      log(`  ... and ${exclusive_fields.length - 10} more`)
+    }
+  }
+
+  log(
+    `\nShared fields (also in FTN/NGS/nflfastR): ${non_exclusive_collisions.length}`
+  )
+  if (non_exclusive_collisions.length > 0) {
+    const shared_fields = [
+      ...new Set(non_exclusive_collisions.map((c) => c.field))
+    ]
+    log(`  Fields: ${shared_fields.join(', ')}`)
+    log(
+      '  Note: These fields may have better data from other sources (FTN/NGS/nflfastR)'
+    )
+  }
+
+  // Additional categorization for shared fields
   const expected_minor_diffs = [
     'box_defenders',
     'route',
@@ -280,26 +328,17 @@ const print_collision_categorization = ({ all_collisions }) => {
     'pass_rushers'
   ]
 
-  const expected_collisions = all_collisions.filter((c) =>
+  const expected_shared_collisions = non_exclusive_collisions.filter((c) =>
     expected_minor_diffs.includes(c.field)
   )
-  const unexpected_collisions = all_collisions.filter(
-    (c) => !expected_minor_diffs.includes(c.field)
-  )
 
-  log(
-    `Expected minor differences (different charting methodologies): ${expected_collisions.length}`
-  )
-  log(`  Fields: ${expected_minor_diffs.join(', ')}`)
-  log(
-    `\nUnexpected collisions (may indicate data quality issues): ${unexpected_collisions.length}`
-  )
-
-  if (unexpected_collisions.length > 0) {
-    const unexpected_fields = [
-      ...new Set(unexpected_collisions.map((c) => c.field))
-    ]
-    log(`  Fields with unexpected collisions: ${unexpected_fields.join(', ')}`)
+  if (expected_shared_collisions.length > 0) {
+    log(
+      `\n  Expected differences (different methodologies): ${expected_shared_collisions.length}`
+    )
+    log(
+      `    Fields: ${expected_minor_diffs.filter((f) => expected_shared_collisions.some((c) => c.field === f)).join(', ')}`
+    )
   }
 
   log('\n' + '='.repeat(80) + '\n')

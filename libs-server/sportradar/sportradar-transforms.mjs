@@ -4,6 +4,7 @@
  */
 
 import { fixTeam } from '#libs-shared'
+import { normalize_yardline } from '#libs-server/play-enum-utils.mjs'
 
 /**
  * Map Sportradar play type to nfl_play_type enum
@@ -164,11 +165,15 @@ export const parse_yardline = (location, pos_team) => {
   // 0 = at opponent's goal line, 100 = at own goal line
   const ydl_100 = normalized_ydl_side === pos_team ? 100 - ydl_num : ydl_num
 
+  // Build raw yardline string
+  const raw_ydl_str =
+    ydl_num === 50 ? '50' : `${normalized_ydl_side} ${ydl_num}`
+
   return {
-    ydl_side: normalized_ydl_side,
+    ydl_side: ydl_num === 50 ? null : normalized_ydl_side,
     ydl_num,
     ydl_100,
-    ydl_str: `${normalized_ydl_side} ${ydl_num}`
+    ydl_str: normalize_yardline(raw_ydl_str)
   }
 }
 

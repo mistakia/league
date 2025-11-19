@@ -495,12 +495,6 @@ export const map_play_details = async ({
     }
   }
 
-  // Special flags
-  const no_play_detail = details.find((d) => d.category === 'no_play')
-  if (no_play_detail) {
-    mapped.deleted = true
-  }
-
   if (details.some((d) => d.category === 'safety')) {
     mapped.safety = true
   }

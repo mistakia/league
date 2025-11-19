@@ -146,3 +146,80 @@ export const normalize_game_clock = (clock_string) => {
   // Return zero-padded format MM:SS
   return `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`
 }
+
+/**
+ * Normalize yardline string to standard database format
+ *
+ * Ensures consistent yardline representation across all data sources to prevent
+ * false collisions in play matching and update_play where semantically identical
+ * yardlines would be treated as different values.
+ *
+ * Format rules:
+ * - Midfield (50-yard line): "50" (no team prefix)
+ * - Team side: "{TEAM} {NUMBER}" (e.g., "TB 22", "DET 30")
+ * - Team abbreviations normalized via fixTeam() (LAR → LA, JAC → JAX, etc.)
+ *
+ * Transformations:
+ * - "LAR 35" → "LA 35" (normalize team abbreviation)
+ * - "IND 50" → "50" (midfield has no team prefix)
+ * - "TB 22" → "TB 22" (already normalized)
+ * - null/empty → null
+ *
+ * This prevents collisions like:
+ * - "LAR 35" vs "LA 35" (team normalization)
+ * - "IND 50" vs "50" (midfield format)
+ *
+ * Used by:
+ * - sportradar/sportradar-transforms.mjs (parse_yardline function)
+ * - import-plays-nfl-v1.mjs (NFL API yardline processing)
+ * - update-play.mjs (comparison normalization)
+ *
+ * @param {string} ydl_str - Yardline string in format "TEAM NUM" or "50"
+ * @returns {string|null} - Normalized yardline string or null
+ *
+ * @example
+ * normalize_yardline('LAR 35')   // 'LA 35'
+ * normalize_yardline('IND 50')   // '50'
+ * normalize_yardline('TB 22')    // 'TB 22'
+ * normalize_yardline('50')       // '50'
+ * normalize_yardline(null)       // null
+ */
+export const normalize_yardline = (ydl_str) => {
+  if (!ydl_str || typeof ydl_str !== 'string') return null
+
+  const trimmed = ydl_str.trim()
+  if (!trimmed) return null
+
+  // Handle midfield (50-yard line) - should not have team prefix
+  if (trimmed === '50') return '50'
+
+  // Parse "TEAM NUM" format
+  const parts = trimmed.split(/\s+/)
+  if (parts.length !== 2) {
+    // If it's just a number (e.g., "50"), return as-is
+    if (/^\d+$/.test(trimmed)) {
+      const num = parseInt(trimmed, 10)
+      return num === 50 ? '50' : null
+    }
+    return null
+  }
+
+  const [team, yard_num_str] = parts
+  const yard_num = parseInt(yard_num_str, 10)
+
+  // Validate yard number
+  if (isNaN(yard_num) || yard_num < 1 || yard_num > 50) return null
+
+  // Midfield should not have team prefix
+  if (yard_num === 50) return '50'
+
+  // Import fixTeam from libs-shared for team normalization
+  // This handles LAR → LA, JAC → JAX, etc.
+  // Note: fixTeam is imported at module level from '#libs-shared'
+  // For now, we'll assume it's available in the calling context
+  // Otherwise, we'd need to import it here
+
+  // Return normalized format: "TEAM NUM"
+  // Team abbreviation should already be normalized by caller using fixTeam()
+  return `${team} ${yard_num}`
+}

@@ -10,6 +10,7 @@ import { fixTeam } from '#libs-shared'
 import { is_main, report_job, update_play } from '#libs-server'
 import { get_game_play_by_play } from '#libs-server/sportradar/sportradar-api.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { SPORTRADAR_EXCLUSIVE_FIELDS } from '#libs-server/sportradar/sportradar-exclusive-fields.mjs'
 import {
   preload_plays,
   find_play,
@@ -787,7 +788,8 @@ const import_plays_sportradar = async ({
   game_id,
   all = false,
   dry = false,
-  ignore_conflicts = false
+  ignore_conflicts = false,
+  ignore_sportradar_field_conflicts = false
 } = {}) => {
   console.time('import-plays-sportradar-total')
 
@@ -957,7 +959,9 @@ const import_plays_sportradar = async ({
                 const updates_made = await update_play({
                   play_row: db_play,
                   update: mapped_play,
-                  ignore_conflicts
+                  ignore_conflicts,
+                  ignore_sportradar_field_conflicts,
+                  sportradar_exclusive_fields: SPORTRADAR_EXCLUSIVE_FIELDS
                 })
                 const update_time = Date.now() - update_start_time
                 if (update_time > 500) {
@@ -1059,6 +1063,8 @@ const main = async () => {
     const all = argv.all || false
     const dry = argv.dry || false
     const ignore_conflicts = argv['ignore-conflicts'] || false
+    const ignore_sportradar_field_conflicts =
+      argv['ignore-sportradar-field-conflicts'] || false
 
     await import_plays_sportradar({
       year,
@@ -1066,7 +1072,8 @@ const main = async () => {
       game_id,
       all,
       dry,
-      ignore_conflicts
+      ignore_conflicts,
+      ignore_sportradar_field_conflicts
     })
   } catch (err) {
     error = err

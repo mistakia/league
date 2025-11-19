@@ -13,7 +13,8 @@ import { enrich_plays } from '#libs-server/play-enrichment/index.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import {
   standardize_score_type,
-  normalize_game_clock
+  normalize_game_clock,
+  normalize_yardline
 } from '#libs-server/play-enum-utils.mjs'
 
 const log = debug('import-plays-nfl-v1')
@@ -136,7 +137,7 @@ const getPlayData = ({ play, year, week, seas_type }) => {
     // TODO this might not match the drive sequence number in nflfastr
     drive_seq: play.driveSequenceNumber,
     drive_yds: play.driveNetYards,
-    ydl_end: clean_string(play.endYardLine),
+    ydl_end: normalize_yardline(clean_string(play.endYardLine)),
     ydl_start: clean_string(play.yardLine),
     first_down: play.firstDown,
     goal_to_go: play.goalToGo,
@@ -174,12 +175,16 @@ const getPlayData = ({ play, year, week, seas_type }) => {
     if (cleaned_yard_line === '50') {
       data.ydl_num = 50
       data.ydl_100 = 50
+      data.ydl_side = null
+      data.ydl_start = '50'
     } else {
       const ydl_parts = cleaned_yard_line.split(' ')
       data.ydl_num = parseInt(ydl_parts[1], 10)
       data.ydl_side = fixTeam(clean_string(ydl_parts[0]))
       data.ydl_100 =
         data.ydl_side === data.pos_team ? 100 - data.ydl_num : data.ydl_num
+      // Normalize yardline format (handles team abbreviation normalization)
+      data.ydl_start = normalize_yardline(`${data.ydl_side} ${data.ydl_num}`)
     }
   }
 
