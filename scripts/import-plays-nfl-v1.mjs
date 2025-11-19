@@ -18,7 +18,7 @@ import {
 } from '#libs-server/play-enum-utils.mjs'
 
 const log = debug('import-plays-nfl-v1')
-debug.enable('import-plays-nfl-v1,nfl')
+debug.enable('import-plays-nfl-v1,nfl,play-enum-utils')
 
 const argv = yargs(hideBin(process.argv)).argv
 
