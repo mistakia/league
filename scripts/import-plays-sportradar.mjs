@@ -915,7 +915,7 @@ const import_plays_sportradar = async ({
             const game_context = {
               esbid: game.esbid,
               sportradar_game_id: game.sportradar_game_id,
-              period_number: period.number,
+              period_number: period.sequence,
               home_team: game.h,
               away_team: game.v
             }
