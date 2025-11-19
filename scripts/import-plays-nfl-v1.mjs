@@ -11,7 +11,10 @@ import player_cache, {
 } from '#libs-server/player-cache.mjs'
 import { enrich_plays } from '#libs-server/play-enrichment/index.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
-import { standardize_score_type } from '#libs-server/play-enum-utils.mjs'
+import {
+  standardize_score_type,
+  normalize_game_clock
+} from '#libs-server/play-enum-utils.mjs'
 
 const log = debug('import-plays-nfl-v1')
 debug.enable('import-plays-nfl-v1,nfl')
@@ -124,7 +127,7 @@ const getPlayData = ({ play, year, week, seas_type }) => {
     // Normalize down to null for special teams plays (0 should be null)
     dwn: play.down === 0 ? null : play.down,
     drive_play_count: play.drivePlayCount,
-    game_clock_start: play.clockTime,
+    game_clock_start: normalize_game_clock(play.clockTime),
     // Clock-based time fields calculated from game_clock_start
     // These are the source of truth for time matching across data sources
     sec_rem_qtr: time_fields.sec_rem_qtr,

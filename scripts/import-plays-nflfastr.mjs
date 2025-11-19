@@ -22,7 +22,8 @@ import {
 } from '#libs-server/play-cache.mjs'
 import {
   standardize_kick_result,
-  standardize_two_point_result
+  standardize_two_point_result,
+  normalize_game_clock
 } from '#libs-server/play-enum-utils.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -235,8 +236,8 @@ const format_drive_data = (play) => ({
   drive_yds_penalized: format_number(play.drive_yards_penalized),
   drive_start_transition: play.drive_start_transition || null,
   drive_end_transition: play.drive_end_transition || null,
-  drive_game_clock_start: play.drive_game_clock_start || null,
-  drive_game_clock_end: play.drive_game_clock_end || null,
+  drive_game_clock_start: normalize_game_clock(play.drive_game_clock_start),
+  drive_game_clock_end: normalize_game_clock(play.drive_game_clock_end),
   drive_start_ydl: play.drive_start_yard_line || null,
   drive_end_ydl: play.drive_end_yard_line || null,
   drive_start_play_id: format_number(play.drive_play_id_started),
@@ -250,7 +251,7 @@ const format_series_data = (play) => ({
 })
 
 const format_game_clock = (play) => ({
-  game_clock_end: play.end_clock_time || null,
+  game_clock_end: normalize_game_clock(play.end_clock_time),
   sec_rem_qtr: format_number(play.quarter_seconds_remaining),
   sec_rem_half: format_number(play.half_seconds_remaining),
   sec_rem_gm: format_number(play.game_seconds_remaining)
