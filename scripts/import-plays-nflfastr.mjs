@@ -240,6 +240,7 @@ const format_play_context = (play) => {
 const format_drive_data = (play) => ({
   // TODO this might not match the drive sequence number in nfl/ngs system
   drive_seq: format_number(play.fixed_drive),
+  drive_play_count: format_number(play.drive_play_count),
   drive_result: play.fixed_drive_result || null,
   drive_top: play.drive_time_of_possession || null,
   drive_fds: format_number(play.drive_first_downs) || null,

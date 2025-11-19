@@ -6,6 +6,7 @@ import { enrich_qb_plays } from './qb-play-enrichment.mjs'
 import { enrich_play_success } from './success-metric-enrichment.mjs'
 import { enrich_player_identifications } from './player-identification-enrichment.mjs'
 import { enrich_yardage_stats } from './yardage-stat-enrichment.mjs'
+import { enrich_drive_play_counts } from './drive-play-count-enrichment.mjs'
 
 const log = debug('play-enrichment')
 
@@ -22,6 +23,7 @@ const log = debug('play-enrichment')
  * @param {boolean} params.options.play_types - Enable play type enrichment (default: true)
  * @param {boolean} params.options.success - Enable success metric enrichment (default: true)
  * @param {boolean} params.options.players - Enable player identification enrichment (default: true)
+ * @param {boolean} params.options.drive_counts - Enable drive play count enrichment (default: true)
  * @returns {Promise<Array>} Enriched play objects (does NOT persist to database)
  */
 export const enrich_plays = async ({
@@ -37,7 +39,8 @@ export const enrich_plays = async ({
     play_types = true,
     qb_plays = true,
     success = true,
-    players = true
+    players = true,
+    drive_counts = true
   } = options
 
   // Validate inputs
@@ -111,6 +114,16 @@ export const enrich_plays = async ({
         )
       } catch (error) {
         log(`Player identification enrichment failed: ${error.message}`)
+      }
+    }
+
+    // Phase 7: Drive play counts
+    // This must run AFTER play type enrichment since it depends on play_type field
+    if (drive_counts) {
+      try {
+        enriched_plays = enrich_drive_play_counts(enriched_plays)
+      } catch (error) {
+        log(`Drive play count enrichment failed: ${error.message}`)
       }
     }
 
