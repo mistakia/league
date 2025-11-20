@@ -7,7 +7,7 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { fixTeam } from '#libs-shared'
-import { is_main, report_job, update_play } from '#libs-server'
+import { is_main, report_job, update_play, updatePlayer } from '#libs-server'
 import { get_game_play_by_play } from '#libs-server/sportradar/sportradar-api.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { SPORTRADAR_EXCLUSIVE_FIELDS } from '#libs-server/sportradar/sportradar-exclusive-fields.mjs'
@@ -57,6 +57,23 @@ import {
 
 dayjs.extend(timezone)
 
+// ============================================================================
+// CONSTANTS
+// ============================================================================
+
+const SPECIAL_TEAMS_TYPES = ['KOFF', 'PUNT', 'FGXP']
+const TIME_TOLERANCE_SECONDS = 18
+const FUZZY_TIME_TOLERANCE_KICKOFF_PUNT = 20
+const FUZZY_TIME_TOLERANCE_FGXP = 10
+const FUZZY_YARDS_TOLERANCE = 1
+const FUZZY_YDL_TOLERANCE = 2
+const PERFORMANCE_THRESHOLD_MS = 500
+const SLOW_PLAY_THRESHOLD_MS = 1000
+
+// ============================================================================
+// CONFIGURATION
+// ============================================================================
+
 /**
  * CLI Arguments:
  * --esbid: Specific game ID to import
@@ -71,6 +88,14 @@ dayjs.extend(timezone)
 const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-plays-sportradar')
 debug.enable('import-plays-sportradar,sportradar,play-enum-utils')
+
+// Module-level tracking for player resolution outcomes (using Maps to avoid duplicates)
+let sportradar_id_updates = new Map() // Key: pid, Value: { pid, name, team, sportradar_id }
+let sportradar_players_not_found = new Map() // Key: sportradar_id, Value: { name, team, sportradar_id }
+
+// ============================================================================
+// TEAM AND PLAYER RESOLUTION
+// ============================================================================
 
 const load_team_mappings = async () => {
   const config_row = await db('config')
@@ -101,14 +126,17 @@ const get_team_abbreviation = ({
 const resolve_player_id = async ({
   sportradar_player_id,
   player_name,
-  team_abbrev
+  player_team_alias
 }) => {
   if (!sportradar_player_id) return null
+
+  // Normalize the player's team alias using fixTeam
+  const normalized_team = player_team_alias ? fixTeam(player_team_alias) : null
 
   // Check cache (all players are preloaded with all_players: true)
   const cached_player = find_player({
     sportradar_id: sportradar_player_id,
-    teams: team_abbrev ? [team_abbrev] : [],
+    teams: normalized_team ? [normalized_team] : [],
     ignore_free_agent: false,
     ignore_retired: false
   })
@@ -123,15 +151,43 @@ const resolve_player_id = async ({
 
   // Fallback: try name-based lookup if name and team provided
   // (useful for players without sportradar_id or mismatched IDs)
-  if (player_name && team_abbrev) {
+  if (player_name && normalized_team) {
     const name_cached_player = find_player({
       name: player_name,
-      teams: [team_abbrev],
+      teams: [normalized_team],
       ignore_free_agent: false,
       ignore_retired: false
     })
 
     if (name_cached_player) {
+      // Update player sportradar_id if matched by name but not by sportradar_id
+      if (!cached_player && sportradar_player_id) {
+        // Clear duplicate sportradar_id before updating
+        await db('player')
+          .update({ sportradar_id: null })
+          .where({ sportradar_id: sportradar_player_id })
+
+        // Update the player with the sportradar_id
+        await updatePlayer({
+          player_row: name_cached_player,
+          update: { sportradar_id: sportradar_player_id },
+          allow_protected_props: true
+        })
+
+        // Track the update (using pid as key to avoid duplicates)
+        // Use player's actual team from cache
+        sportradar_id_updates.set(name_cached_player.pid, {
+          pid: name_cached_player.pid,
+          name: player_name,
+          team: name_cached_player.current_nfl_team,
+          sportradar_id: sportradar_player_id
+        })
+
+        log(
+          `Updated sportradar_id for ${player_name} (${name_cached_player.pid}) to ${sportradar_player_id}`
+        )
+      }
+
       return {
         pid: name_cached_player.pid,
         gsisid: name_cached_player.gsisid,
@@ -140,11 +196,22 @@ const resolve_player_id = async ({
     }
   }
 
+  // Track players that couldn't be found by either method (using sportradar_id as key to avoid duplicates)
+  sportradar_players_not_found.set(sportradar_player_id, {
+    name: player_name,
+    team: normalized_team,
+    sportradar_id: sportradar_player_id
+  })
+
   log(
-    `Player not found: ${player_name || 'unknown'} (${sportradar_player_id}) - ${team_abbrev || 'unknown team'}`
+    `Player not found: ${player_name || 'unknown'} (${sportradar_player_id}) - ${normalized_team || 'unknown team'}`
   )
   return null
 }
+
+// ============================================================================
+// HELPER FUNCTIONS
+// ============================================================================
 
 const set_boolean_if_defined = (mapped, source, source_key, target_key) => {
   if (source[source_key] === true) {
@@ -159,6 +226,10 @@ const set_if_defined = (mapped, source, source_key, target_key) => {
     mapped[target_key || source_key] = source[source_key]
   }
 }
+
+// ============================================================================
+// PLAY DATA MAPPING
+// ============================================================================
 
 const map_basic_play_data = ({
   sportradar_play: play,
@@ -317,6 +388,139 @@ const map_drive_data = ({ drive_context }) => {
   return mapped
 }
 
+const map_statistics = async ({
+  sportradar_play: play,
+  mapped_play,
+  resolve_player,
+  get_team_abbrev
+}) => {
+  const stats = play.statistics || []
+  const get_stat = (type) => stats.find((s) => s.stat_type === type)
+  const get_stats = (type) => stats.filter((s) => s.stat_type === type)
+
+  const stat_mappers = [
+    map_passing_stats({
+      pass_stats: get_stat('pass'),
+      resolve_player,
+      pos_team: mapped_play.pos_team
+    }),
+    map_receiving_stats({
+      receive_stats: get_stat('receive'),
+      resolve_player,
+      pos_team: mapped_play.pos_team
+    }),
+    map_rushing_stats({
+      rush_stats: get_stat('rush'),
+      resolve_player,
+      pos_team: mapped_play.pos_team,
+      is_sack: mapped_play.sk
+    }),
+    map_field_goal_stats({
+      field_goal_stats: get_stat('field_goal'),
+      resolve_player,
+      pos_team: mapped_play.pos_team
+    }),
+    map_punt_stats({
+      punt_stats: get_stat('punt'),
+      resolve_player,
+      pos_team: mapped_play.pos_team
+    }),
+    map_kickoff_stats({
+      kick_stats: get_stat('kick'),
+      resolve_player,
+      pos_team: mapped_play.pos_team
+    }),
+    map_return_stats({
+      return_stats: get_stat('return'),
+      resolve_player,
+      def_team: mapped_play.def
+    }),
+    map_penalty_stats({
+      penalty_stats: get_stats('penalty'),
+      resolve_player,
+      get_team_abbrev
+    }),
+    map_play_details({
+      details: play.details || [],
+      resolve_player,
+      get_team_abbrev,
+      def_team: mapped_play.def
+    })
+  ]
+
+  const results = await Promise.all(stat_mappers)
+  return results.reduce((acc, result) => Object.assign(acc, result), {})
+}
+
+const map_sportradar_play_to_nfl_play = async ({
+  sportradar_play: play,
+  game_context,
+  drive_context,
+  team_mappings_cache
+}) => {
+  const mapped = map_basic_play_data({
+    sportradar_play: play,
+    game_context,
+    drive_context
+  })
+
+  Object.assign(
+    mapped,
+    map_contextual_data({
+      sportradar_play: play,
+      game_context,
+      team_mappings_cache
+    }),
+    map_formation_data({ sportradar_play: play }),
+    map_drive_data({ drive_context })
+  )
+
+  const resolve_player = resolve_player_id
+  const get_team_abbrev = (params) =>
+    get_team_abbreviation({ ...params, team_mappings_cache })
+
+  const stats_mapped = await map_statistics({
+    sportradar_play: play,
+    mapped_play: mapped,
+    resolve_player,
+    get_team_abbrev
+  })
+  Object.assign(mapped, stats_mapped)
+
+  // Calculate goal_to_go after all field position data is available
+  if (mapped.ydl_100 !== null && mapped.yards_to_go !== null) {
+    mapped.goal_to_go = mapped.ydl_100 + mapped.yards_to_go >= 100
+  }
+
+  const broken_tackles_rush = mapped.broken_tackles_rush || 0
+  const broken_tackles_rec = mapped.broken_tackles_rec || 0
+  if (broken_tackles_rush > 0 || broken_tackles_rec > 0) {
+    mapped.mbt = broken_tackles_rush + broken_tackles_rec
+  }
+
+  const fumble_stats =
+    play.statistics?.filter((s) => s.stat_type === 'fumble') || []
+  if (fumble_stats.length > 0) {
+    mapped.fuml = fumble_stats.some((f) => f.fumble === 1)
+  }
+
+  // Override play_type to NOPL for nullified plays
+  // Check both explicit nullified flag and no_play detail category
+  const has_no_play_detail = (play.details || []).some(
+    (d) => d.category === 'no_play'
+  )
+  if (play.nullified || has_no_play_detail || mapped.deleted) {
+    mapped.play_type = 'NOPL'
+  }
+
+  mapped.updated = Math.floor(Date.now() / 1000)
+  return mapped
+}
+
+// ============================================================================
+// PLAY MATCHING
+// ============================================================================
+
 const build_match_criteria = (game_esbid, mapped_play) => {
   const criteria = {
     esbid: game_esbid,
@@ -342,15 +546,15 @@ const build_match_criteria = (game_esbid, mapped_play) => {
     criteria.ydl_100 = mapped_play.ydl_100
   }
 
-  const special_teams_types = ['KOFF', 'PUNT', 'FGXP']
+  // Special teams plays need time-based matching
   if (
-    special_teams_types.includes(mapped_play.play_type) &&
+    SPECIAL_TEAMS_TYPES.includes(mapped_play.play_type) &&
     mapped_play.sec_rem_qtr != null
   ) {
     criteria.sec_rem_qtr = mapped_play.sec_rem_qtr
 
     if (mapped_play.play_type === 'KOFF' || mapped_play.play_type === 'PUNT') {
-      criteria.sec_rem_qtr_tolerance = 20
+      criteria.sec_rem_qtr_tolerance = FUZZY_TIME_TOLERANCE_KICKOFF_PUNT
       if (mapped_play.play_type === 'KOFF') {
         // Use score context to distinguish kickoffs after different scoring plays
         if (mapped_play.home_score != null) {
@@ -368,11 +572,117 @@ const build_match_criteria = (game_esbid, mapped_play) => {
       // FGXP needs team context
       criteria.off = mapped_play.off
       criteria.def = mapped_play.def
-      criteria.sec_rem_qtr_tolerance = 10
+      criteria.sec_rem_qtr_tolerance = FUZZY_TIME_TOLERANCE_FGXP
     }
   }
 
   return criteria
+}
+
+const find_time_matches = (db_plays, sportradar_sec_rem) => {
+  return db_plays
+    .filter((p) => p.sec_rem_qtr != null)
+    .map((p) => ({
+      play: p,
+      time_diff: Math.abs(p.sec_rem_qtr - sportradar_sec_rem)
+    }))
+    .filter((m) => m.time_diff <= TIME_TOLERANCE_SECONDS)
+    .sort((a, b) => a.time_diff - b.time_diff)
+}
+
+const find_yards_matches = (time_matches, mapped_play) => {
+  if (mapped_play.yds_gained == null) return []
+
+  return time_matches.filter((m) => {
+    if (m.play.yds_gained == null) return false
+    const yards_diff = Math.abs(m.play.yds_gained - mapped_play.yds_gained)
+    return yards_diff <= FUZZY_YARDS_TOLERANCE
+  })
+}
+
+const resolve_multiple_matches = ({
+  db_plays,
+  sportradar_play,
+  mapped_play
+}) => {
+  if (!db_plays || db_plays.length <= 1) {
+    return db_plays?.[0] || null
+  }
+
+  // Strategy 1: game_clock_start exact match
+  if (sportradar_play.clock && mapped_play.game_clock_start) {
+    const sportradar_clock = normalize_game_clock(sportradar_play.clock)
+    const exact_match = db_plays.find(
+      (p) => normalize_game_clock(p.game_clock_start) === sportradar_clock
+    )
+    if (exact_match) {
+      log(
+        `Resolved multiple matches using game_clock_start: ${exact_match.game_clock_start}`
+      )
+      return exact_match
+    }
+  }
+
+  // Strategy 2: fuzzy time match
+  if (mapped_play.sec_rem_qtr != null) {
+    const sportradar_sec_rem = mapped_play.sec_rem_qtr
+    const time_matches = find_time_matches(db_plays, sportradar_sec_rem)
+
+    if (time_matches.length === 1) {
+      const match = time_matches[0]
+      log(
+        `Resolved multiple matches using fuzzy time (${match.time_diff}s diff): ${match.play.game_clock_start || 'N/A'}`
+      )
+      return match.play
+    } else if (time_matches.length > 1) {
+      log(
+        `Found ${time_matches.length} plays within ${TIME_TOLERANCE_SECONDS} seconds, attempting yards gained filter`
+      )
+
+      // Strategy 2.5: Filter by yards gained (within 1 yard tolerance)
+      const yards_matches = find_yards_matches(time_matches, mapped_play)
+
+      if (yards_matches.length === 1) {
+        const match = yards_matches[0]
+        log(
+          `Resolved multiple matches using yards gained (${match.time_diff}s time diff, ${Math.abs(match.play.yds_gained - mapped_play.yds_gained)} yards diff): ${match.play.game_clock_start || 'N/A'}`
+        )
+        return match.play
+      } else if (yards_matches.length > 1) {
+        log(
+          `Unable to disambiguate: ${yards_matches.length} plays match time and yards (closest: ${yards_matches[0].time_diff}s diff)`
+        )
+        log_unresolved_matches({
+          mapped_play,
+          sportradar_play,
+          db_plays,
+          time_matches: yards_matches
+        })
+        return null
+      }
+
+      // No yards gained filter or no matches with yards - unable to disambiguate
+      log(
+        `Unable to disambiguate: ${time_matches.length} plays (closest: ${time_matches[0].time_diff}s diff)`
+      )
+      log_unresolved_matches({
+        mapped_play,
+        sportradar_play,
+        db_plays,
+        time_matches
+      })
+      return null
+    }
+  }
+
+  // Unable to resolve - log and return null
+  log(`Unable to resolve ${db_plays.length} matches - skipping update`)
+  log_unresolved_matches({
+    mapped_play,
+    sportradar_play,
+    db_plays
+  })
+  return null
 }
 
 const log_unresolved_matches = ({
@@ -417,105 +727,153 @@ const log_unresolved_matches = ({
   })
 }
 
-const resolve_multiple_matches = ({
-  db_plays,
+const try_fuzzy_match = (
+  match_criteria,
+  mapped_play,
   sportradar_play,
-  mapped_play
-}) => {
-  if (!db_plays || db_plays.length <= 1) {
-    return db_plays?.[0] || null
-  }
+  offsets
+) => {
+  for (const offset of offsets) {
+    const fuzzy_criteria = {
+      ...match_criteria,
+      [offset.field]: match_criteria[offset.field] + offset.value
+    }
+    const fuzzy_matches = find_play({
+      ...fuzzy_criteria,
+      return_all_matches: true
+    })
 
-  // Strategy 1: game_clock_start exact match
-  if (sportradar_play.clock && mapped_play.game_clock_start) {
-    const sportradar_clock = normalize_game_clock(sportradar_play.clock)
-    const exact_match = db_plays.find(
-      (p) => normalize_game_clock(p.game_clock_start) === sportradar_clock
-    )
-    if (exact_match) {
+    let db_play = null
+    if (Array.isArray(fuzzy_matches) && fuzzy_matches.length > 1) {
+      db_play = resolve_multiple_matches({
+        db_plays: fuzzy_matches,
+        sportradar_play,
+        mapped_play
+      })
+    } else if (Array.isArray(fuzzy_matches) && fuzzy_matches.length === 1) {
+      db_play = fuzzy_matches[0]
+    } else if (fuzzy_matches && !Array.isArray(fuzzy_matches)) {
+      db_play = fuzzy_matches
+    }
+
+    if (db_play) {
       log(
-        `Resolved multiple matches using game_clock_start: ${exact_match.game_clock_start}`
+        `Fuzzy match: ${offset.field} ${match_criteria[offset.field]} -> ${fuzzy_criteria[offset.field]}`
       )
-      return exact_match
+      return db_play
+    }
+  }
+  return null
+}
+
+const try_fuzzy_match_yards_to_go = (
+  match_criteria,
+  mapped_play,
+  sportradar_play
+) => {
+  if (match_criteria.yards_to_go == null) return null
+
+  return try_fuzzy_match(match_criteria, mapped_play, sportradar_play, [
+    { field: 'yards_to_go', value: -1 },
+    { field: 'yards_to_go', value: 1 }
+  ])
+}
+
+const try_fuzzy_match_ydl_100 = (
+  match_criteria,
+  mapped_play,
+  sportradar_play
+) => {
+  if (match_criteria.ydl_100 == null) return null
+
+  // Generate offsets from -tolerance to +tolerance, excluding 0
+  const offsets = []
+  for (let i = -FUZZY_YDL_TOLERANCE; i <= FUZZY_YDL_TOLERANCE; i++) {
+    if (i !== 0) {
+      offsets.push({ field: 'ydl_100', value: i })
     }
   }
 
-  // Strategy 2: fuzzy time match
-  // Use sec_rem_qtr for precise time matching
-  if (mapped_play.sec_rem_qtr != null) {
-    const sportradar_sec_rem = mapped_play.sec_rem_qtr
-    const time_matches = db_plays
-      .filter((p) => p.sec_rem_qtr != null)
-      .map((p) => ({
-        play: p,
-        time_diff: Math.abs(p.sec_rem_qtr - sportradar_sec_rem)
-      }))
-      .filter((m) => m.time_diff <= 14)
-      .sort((a, b) => a.time_diff - b.time_diff)
+  return try_fuzzy_match(match_criteria, mapped_play, sportradar_play, offsets)
+}
 
-    if (time_matches.length === 1) {
-      const match = time_matches[0]
-      log(
-        `Resolved multiple matches using fuzzy time (${match.time_diff}s diff): ${match.play.game_clock_start || 'N/A'}`
-      )
-      return match.play
-    } else if (time_matches.length > 1) {
-      log(
-        `Found ${time_matches.length} plays within 14 seconds, attempting yards gained filter`
-      )
+const try_fuzzy_match_combined = (
+  match_criteria,
+  mapped_play,
+  sportradar_play
+) => {
+  if (match_criteria.yards_to_go == null || match_criteria.ydl_100 == null) {
+    return null
+  }
 
-      // Strategy 2.5: Filter by yards gained (within 1 yard tolerance)
-      if (mapped_play.yds_gained != null) {
-        const yards_matches = time_matches.filter((m) => {
-          if (m.play.yds_gained == null) return false
-          const yards_diff = Math.abs(
-            m.play.yds_gained - mapped_play.yds_gained
-          )
-          return yards_diff <= 1
+  for (const ytg_offset of [-1, 1]) {
+    for (const ydl_offset of [-1, 1]) {
+      const combined_criteria = {
+        ...match_criteria,
+        yards_to_go: match_criteria.yards_to_go + ytg_offset,
+        ydl_100: match_criteria.ydl_100 + ydl_offset
+      }
+      const fuzzy_matches = find_play({
+        ...combined_criteria,
+        return_all_matches: true
+      })
+
+      let db_play = null
+      if (Array.isArray(fuzzy_matches) && fuzzy_matches.length > 1) {
+        db_play = resolve_multiple_matches({
+          db_plays: fuzzy_matches,
+          sportradar_play,
+          mapped_play
         })
-
-        if (yards_matches.length === 1) {
-          const match = yards_matches[0]
-          log(
-            `Resolved multiple matches using yards gained (${match.time_diff}s time diff, ${Math.abs(match.play.yds_gained - mapped_play.yds_gained)} yards diff): ${match.play.game_clock_start || 'N/A'}`
-          )
-          return match.play
-        } else if (yards_matches.length > 1) {
-          log(
-            `Unable to disambiguate: ${yards_matches.length} plays match time and yards (closest: ${yards_matches[0].time_diff}s diff)`
-          )
-          log_unresolved_matches({
-            mapped_play,
-            sportradar_play,
-            db_plays,
-            time_matches: yards_matches
-          })
-          return null
-        }
+      } else if (Array.isArray(fuzzy_matches) && fuzzy_matches.length === 1) {
+        db_play = fuzzy_matches[0]
+      } else if (fuzzy_matches && !Array.isArray(fuzzy_matches)) {
+        db_play = fuzzy_matches
       }
 
-      // No yards gained filter or no matches with yards - unable to disambiguate
-      log(
-        `Unable to disambiguate: ${time_matches.length} plays (closest: ${time_matches[0].time_diff}s diff)`
-      )
-      log_unresolved_matches({
-        mapped_play,
-        sportradar_play,
-        db_plays,
-        time_matches
-      })
-      return null
+      if (db_play) {
+        log(
+          `Combined fuzzy match: ytg ${match_criteria.yards_to_go} -> ${combined_criteria.yards_to_go}, ydl_100 ${match_criteria.ydl_100} -> ${combined_criteria.ydl_100}`
+        )
+        return db_play
+      }
     }
   }
-
-  // Unable to resolve - log and return null
-  log(`Unable to resolve ${db_plays.length} matches - skipping update`)
-  log_unresolved_matches({
-    mapped_play,
-    sportradar_play,
-    db_plays
-  })
   return null
+}
+
+const try_fuzzy_match_nopl = (match_criteria, mapped_play, sportradar_play) => {
+  if (mapped_play.play_type !== 'PASS' && mapped_play.play_type !== 'RUSH') {
+    return null
+  }
+
+  // Try matching as NOPL (penalty negated the play)
+  const nopl_criteria = {
+    ...match_criteria,
+    play_type: 'NOPL'
+  }
+  const nopl_matches = find_play({
+    ...nopl_criteria,
+    return_all_matches: true
+  })
+
+  let db_play = null
+  if (Array.isArray(nopl_matches) && nopl_matches.length > 1) {
+    db_play = resolve_multiple_matches({
+      db_plays: nopl_matches,
+      sportradar_play,
+      mapped_play
+    })
+  } else if (Array.isArray(nopl_matches) && nopl_matches.length === 1) {
+    db_play = nopl_matches[0]
+  } else if (nopl_matches && !Array.isArray(nopl_matches)) {
+    db_play = nopl_matches
+  }
+
+  if (db_play) {
+    log(`Matched ${mapped_play.play_type} to NOPL (negated by penalty)`)
+  }
+  return db_play
 }
 
 const match_play_to_db = ({
@@ -532,6 +890,7 @@ const match_play_to_db = ({
   let db_play = null
   let multiple_match_error = false
 
+  // Handle initial match results
   if (Array.isArray(matches) && matches.length > 1) {
     // Try to resolve multiple matches
     db_play = resolve_multiple_matches({
@@ -559,145 +918,33 @@ const match_play_to_db = ({
     db_play = matches
   }
 
-  // Fuzzy matching fallback for yards_to_go
-  if (!db_play && !multiple_match_error && match_criteria.yards_to_go != null) {
-    for (const offset of [-1, 1]) {
-      const fuzzy_criteria = {
-        ...match_criteria,
-        yards_to_go: match_criteria.yards_to_go + offset
-      }
-      const fuzzy_matches = find_play({
-        ...fuzzy_criteria,
-        return_all_matches: true
-      })
-
-      if (Array.isArray(fuzzy_matches) && fuzzy_matches.length > 1) {
-        db_play = resolve_multiple_matches({
-          db_plays: fuzzy_matches,
-          sportradar_play,
-          mapped_play
-        })
-      } else if (Array.isArray(fuzzy_matches) && fuzzy_matches.length === 1) {
-        db_play = fuzzy_matches[0]
-      } else if (fuzzy_matches && !Array.isArray(fuzzy_matches)) {
-        db_play = fuzzy_matches
-      }
-
-      if (db_play) {
-        log(
-          `Fuzzy match: yards_to_go ${match_criteria.yards_to_go} -> ${fuzzy_criteria.yards_to_go}`
-        )
-        break
-      }
-    }
+  // Fuzzy matching fallbacks
+  if (!db_play && !multiple_match_error) {
+    db_play = try_fuzzy_match_yards_to_go(
+      match_criteria,
+      mapped_play,
+      sportradar_play
+    )
   }
 
-  // Fuzzy matching fallback for PASS/RUSH → NOPL (penalty negated play)
-  if (
-    !db_play &&
-    !multiple_match_error &&
-    (mapped_play.play_type === 'PASS' || mapped_play.play_type === 'RUSH')
-  ) {
-    // Try matching as NOPL (penalty negated the play)
-    const nopl_criteria = {
-      ...match_criteria,
-      play_type: 'NOPL'
-    }
-    const nopl_matches = find_play({
-      ...nopl_criteria,
-      return_all_matches: true
-    })
-
-    if (Array.isArray(nopl_matches) && nopl_matches.length > 1) {
-      db_play = resolve_multiple_matches({
-        db_plays: nopl_matches,
-        sportradar_play,
-        mapped_play
-      })
-    } else if (Array.isArray(nopl_matches) && nopl_matches.length === 1) {
-      db_play = nopl_matches[0]
-    } else if (nopl_matches && !Array.isArray(nopl_matches)) {
-      db_play = nopl_matches
-    }
-
-    if (db_play) {
-      log(`Matched ${mapped_play.play_type} to NOPL (negated by penalty)`)
-    }
+  if (!db_play && !multiple_match_error) {
+    db_play = try_fuzzy_match_nopl(match_criteria, mapped_play, sportradar_play)
   }
 
-  // Fuzzy matching for ydl_100 field position
-  if (!db_play && !multiple_match_error && match_criteria.ydl_100 != null) {
-    for (const offset of [-2, -1, 1, 2]) {
-      const fuzzy_criteria = {
-        ...match_criteria,
-        ydl_100: match_criteria.ydl_100 + offset
-      }
-      const fuzzy_matches = find_play({
-        ...fuzzy_criteria,
-        return_all_matches: true
-      })
-
-      if (Array.isArray(fuzzy_matches) && fuzzy_matches.length > 1) {
-        db_play = resolve_multiple_matches({
-          db_plays: fuzzy_matches,
-          sportradar_play,
-          mapped_play
-        })
-      } else if (Array.isArray(fuzzy_matches) && fuzzy_matches.length === 1) {
-        db_play = fuzzy_matches[0]
-      } else if (fuzzy_matches && !Array.isArray(fuzzy_matches)) {
-        db_play = fuzzy_matches
-      }
-
-      if (db_play) {
-        log(
-          `Fuzzy match: ydl_100 ${match_criteria.ydl_100} -> ${fuzzy_criteria.ydl_100}`
-        )
-        break
-      }
-    }
+  if (!db_play && !multiple_match_error) {
+    db_play = try_fuzzy_match_ydl_100(
+      match_criteria,
+      mapped_play,
+      sportradar_play
+    )
   }
 
-  // Combined fuzzy matching: ytg and ydl_100 both off by ±1
-  if (
-    !db_play &&
-    !multiple_match_error &&
-    match_criteria.yards_to_go != null &&
-    match_criteria.ydl_100 != null
-  ) {
-    for (const ytg_offset of [-1, 1]) {
-      for (const ydl_offset of [-1, 1]) {
-        const combined_criteria = {
-          ...match_criteria,
-          yards_to_go: match_criteria.yards_to_go + ytg_offset,
-          ydl_100: match_criteria.ydl_100 + ydl_offset
-        }
-        const fuzzy_matches = find_play({
-          ...combined_criteria,
-          return_all_matches: true
-        })
-
-        if (Array.isArray(fuzzy_matches) && fuzzy_matches.length > 1) {
-          db_play = resolve_multiple_matches({
-            db_plays: fuzzy_matches,
-            sportradar_play,
-            mapped_play
-          })
-        } else if (Array.isArray(fuzzy_matches) && fuzzy_matches.length === 1) {
-          db_play = fuzzy_matches[0]
-        } else if (fuzzy_matches && !Array.isArray(fuzzy_matches)) {
-          db_play = fuzzy_matches
-        }
-
-        if (db_play) {
-          log(
-            `Combined fuzzy match: ytg ${match_criteria.yards_to_go} -> ${combined_criteria.yards_to_go}, ydl_100 ${match_criteria.ydl_100} -> ${combined_criteria.ydl_100}`
-          )
-          break
-        }
-      }
-      if (db_play) break
-    }
+  if (!db_play && !multiple_match_error) {
+    db_play = try_fuzzy_match_combined(
+      match_criteria,
+      mapped_play,
+      sportradar_play
+    )
   }
 
   if (!db_play && !multiple_match_error) {
@@ -707,6 +954,10 @@ const match_play_to_db = ({
 
   return { db_play, multiple_match_error }
 }
+
+// ============================================================================
+// COLLISION TRACKING
+// ============================================================================
 
 const track_collisions = ({
   db_play,
@@ -747,118 +998,9 @@ const track_collisions = ({
   }
 }
 
-const map_sportradar_play_to_nfl_play = async ({
-  sportradar_play: play,
-  game_context,
-  drive_context,
-  team_mappings_cache
-}) => {
-  const mapped = map_basic_play_data({
-    sportradar_play: play,
-    game_context,
-    drive_context
-  })
-
-  Object.assign(
-    mapped,
-    map_contextual_data({
-      sportradar_play: play,
-      game_context,
-      team_mappings_cache
-    }),
-    map_formation_data({ sportradar_play: play }),
-    map_drive_data({ drive_context })
-  )
-
-  const stats = play.statistics || []
-  const get_stat = (type) => stats.find((s) => s.stat_type === type)
-  const get_stats = (type) => stats.filter((s) => s.stat_type === type)
-
-  const resolve_player = resolve_player_id
-  const get_team_abbrev = (params) =>
-    get_team_abbreviation({ ...params, team_mappings_cache })
-
-  const stat_mappers = [
-    map_passing_stats({
-      pass_stats: get_stat('pass'),
-      resolve_player,
-      pos_team: mapped.pos_team
-    }),
-    map_receiving_stats({
-      receive_stats: get_stat('receive'),
-      resolve_player,
-      pos_team: mapped.pos_team
-    }),
-    map_rushing_stats({
-      rush_stats: get_stat('rush'),
-      resolve_player,
-      pos_team: mapped.pos_team,
-      is_sack: mapped.sk
-    }),
-    map_field_goal_stats({
-      field_goal_stats: get_stat('field_goal'),
-      resolve_player,
-      pos_team: mapped.pos_team
-    }),
-    map_punt_stats({
-      punt_stats: get_stat('punt'),
-      resolve_player,
-      pos_team: mapped.pos_team
-    }),
-    map_kickoff_stats({
-      kick_stats: get_stat('kick'),
-      resolve_player,
-      pos_team: mapped.pos_team
-    }),
-    map_return_stats({
-      return_stats: get_stat('return'),
-      resolve_player,
-      def_team: mapped.def
-    }),
-    map_penalty_stats({
-      penalty_stats: get_stats('penalty'),
-      resolve_player,
-      get_team_abbrev
-    }),
-    map_play_details({
-      details: play.details || [],
-      resolve_player,
-      get_team_abbrev,
-      def_team: mapped.def
-    })
-  ]
-
-  const results = await Promise.all(stat_mappers)
-  results.forEach((result) => Object.assign(mapped, result))
-
-  // Calculate goal_to_go after all field position data is available
-  if (mapped.ydl_100 !== null && mapped.yards_to_go !== null) {
-    mapped.goal_to_go = mapped.ydl_100 + mapped.yards_to_go >= 100
-  }
-
-  const broken_tackles_rush = mapped.broken_tackles_rush || 0
-  const broken_tackles_rec = mapped.broken_tackles_rec || 0
-  if (broken_tackles_rush > 0 || broken_tackles_rec > 0) {
-    mapped.mbt = broken_tackles_rush + broken_tackles_rec
-  }
-
-  const fumble_stats = get_stats('fumble')
-  if (fumble_stats.length > 0) {
-    mapped.fuml = fumble_stats.some((f) => f.fumble === 1)
-  }
-
-  // Override play_type to NOPL for nullified plays
-  // Check both explicit nullified flag and no_play detail category
-  const has_no_play_detail = (play.details || []).some(
-    (d) => d.category === 'no_play'
-  )
-  if (play.nullified || has_no_play_detail || mapped.deleted) {
-    mapped.play_type = 'NOPL'
-  }
-
-  mapped.updated = Math.floor(Date.now() / 1000)
-  return mapped
-}
+// ============================================================================
+// REPORTING
+// ============================================================================
 
 const format_unmatched_play_details = (unmatched_plays_details) => {
   if (unmatched_plays_details.length === 0) return
@@ -888,23 +1030,283 @@ const format_unmatched_play_details = (unmatched_plays_details) => {
   }
 }
 
-/**
- * Import play-by-play data for games with Sportradar game IDs
- */
-const import_plays_sportradar = async ({
-  year,
-  week,
-  game_id,
-  all = false,
-  dry = false,
-  ignore_conflicts = false,
-  ignore_sportradar_field_conflicts = false
-} = {}) => {
-  console.time('import-plays-sportradar-total')
+const print_sportradar_player_resolution_summary = ({
+  sportradar_id_updates,
+  sportradar_players_not_found
+}) => {
+  if (
+    sportradar_id_updates.size === 0 &&
+    sportradar_players_not_found.size === 0
+  ) {
+    return
+  }
 
-  // Load team mappings
-  const team_mappings_cache = await load_team_mappings()
+  log('\n=== SPORTRADAR PLAYER RESOLUTION SUMMARY ===')
 
+  if (sportradar_id_updates.size > 0) {
+    log(`\nUpdated Sportradar IDs (${sportradar_id_updates.size}):`)
+    console.table(
+      Array.from(sportradar_id_updates.values()).map((update) => ({
+        PID: update.pid,
+        Name: update.name,
+        Team: update.team,
+        'Sportradar ID': update.sportradar_id
+      }))
+    )
+  }
+
+  if (sportradar_players_not_found.size > 0) {
+    log(`\nPlayers Not Found (${sportradar_players_not_found.size}):`)
+    console.table(
+      Array.from(sportradar_players_not_found.values()).map((player) => ({
+        Name: player.name || 'unknown',
+        Team: player.team || 'unknown',
+        'Sportradar ID': player.sportradar_id
+      }))
+    )
+  }
+
+  log(
+    `\nTotal: ${sportradar_id_updates.size} updated, ${sportradar_players_not_found.size} not found`
+  )
+}
+
+// ============================================================================
+// GAME PROCESSING
+// ============================================================================
+
+const should_skip_game = (game) => {
+  if (!game.date || !game.time_est) return false
+
+  const time_str = `${game.date} ${game.time_est}`
+  const game_start = dayjs.tz(
+    time_str,
+    'YYYY/MM/DD HH:mm:SS',
+    'America/New_York'
+  )
+  return dayjs().isBefore(game_start)
+}
+
+const build_game_context = (game, period_number) => ({
+  esbid: game.esbid,
+  sportradar_game_id: game.sportradar_game_id,
+  period_number,
+  home_team: game.h,
+  away_team: game.v
+})
+
+const build_drive_context = (pbp_item) => ({
+  id: pbp_item.id,
+  sequence: pbp_item.sequence,
+  play_count: pbp_item.play_count,
+  duration: pbp_item.duration,
+  gain: pbp_item.gain,
+  first_downs: pbp_item.first_downs,
+  penalty_yards: pbp_item.penalty_yards,
+  start_reason: pbp_item.start_reason,
+  end_reason: pbp_item.end_reason
+})
+
+const process_play = async ({
+  event,
+  game,
+  period,
+  drive_context,
+  team_mappings_cache,
+  stats,
+  dry
+}) => {
+  const play_start_time = Date.now()
+
+  const game_context = build_game_context(game, period.sequence)
+
+  const map_start_time = Date.now()
+  const mapped_play = await map_sportradar_play_to_nfl_play({
+    sportradar_play: event,
+    game_context,
+    drive_context,
+    team_mappings_cache
+  })
+  const map_time = Date.now() - map_start_time
+  if (map_time > PERFORMANCE_THRESHOLD_MS) {
+    log(
+      `Slow map_sportradar_play_to_nfl_play: ${map_time}ms for play ${event.id}`
+    )
+  }
+
+  const match_start_time = Date.now()
+  const { db_play, multiple_match_error } = match_play_to_db({
+    game,
+    mapped_play,
+    sportradar_play: event,
+    unmatched_reasons: stats.unmatched_reasons
+  })
+  const match_time = Date.now() - match_start_time
+  if (match_time > PERFORMANCE_THRESHOLD_MS) {
+    log(`Slow match_play_to_db: ${match_time}ms for play ${event.id}`)
+  }
+
+  if (db_play) {
+    stats.total_plays_matched++
+    track_collisions({
+      db_play,
+      mapped_play,
+      sportradar_play: event,
+      game,
+      all_collisions: stats.all_collisions
+    })
+
+    if (dry) {
+      const play_type = mapped_play.play_type || 'UNKNOWN'
+      if (!stats.sample_plays_by_type[play_type]) {
+        stats.sample_plays_by_type[play_type] = {
+          sportradar_play: event,
+          mapped_play,
+          db_play
+        }
+      }
+    } else {
+      const update_start_time = Date.now()
+      const updates_made = await update_play({
+        play_row: db_play,
+        update: mapped_play,
+        ignore_conflicts: stats.ignore_conflicts,
+        // Use modern overwrite_fields approach for Sportradar-exclusive fields
+        overwrite_fields: stats.ignore_sportradar_field_conflicts
+          ? Array.from(SPORTRADAR_EXCLUSIVE_FIELDS)
+          : []
+      })
+      const update_time = Date.now() - update_start_time
+      if (update_time > PERFORMANCE_THRESHOLD_MS) {
+        log(
+          `Slow update_play: ${update_time}ms for play ${game.esbid}-${db_play.playId} (${updates_made} updates)`
+        )
+      }
+      if (updates_made > 0) stats.total_plays_updated++
+    }
+  } else if (multiple_match_error) {
+    stats.total_plays_multiple_matches++
+    stats.multiple_match_plays.push({
+      esbid: game.esbid,
+      sportradar_play_id: event.id,
+      description: event.description,
+      qtr: mapped_play.qtr,
+      clock: mapped_play.game_clock_start
+    })
+  } else {
+    stats.unmatched_plays.push({
+      esbid: game.esbid,
+      sportradar_play_id: event.id,
+      description: event.description,
+      qtr: mapped_play.qtr,
+      clock: mapped_play.game_clock_start
+    })
+
+    // Collect detailed information for analysis
+    const match_criteria = build_match_criteria(game.esbid, mapped_play)
+
+    stats.unmatched_plays_details.push({
+      esbid: game.esbid,
+      sportradar_play_id: event.id,
+      description: event.description,
+      play_type: mapped_play.play_type,
+      qtr: mapped_play.qtr,
+      clock: mapped_play.game_clock_start,
+      dwn: mapped_play.dwn,
+      yards_to_go: mapped_play.yards_to_go,
+      ydl_100: mapped_play.ydl_100,
+      off: mapped_play.off,
+      def: mapped_play.def,
+      match_criteria
+    })
+  }
+
+  const play_total_time = Date.now() - play_start_time
+  if (play_total_time > SLOW_PLAY_THRESHOLD_MS) {
+    log(
+      `Slow play processing: ${play_total_time}ms for play ${event.id} (map: ${map_time}ms, match: ${match_time}ms)`
+    )
+  }
+
+  return { processed: true }
+}
+
+const process_game = async ({
+  game,
+  team_mappings_cache,
+  stats,
+  dry,
+  ignore_conflicts,
+  ignore_sportradar_field_conflicts
+}) => {
+  const game_start_time = Date.now()
+  let game_plays_processed = 0
+  log(`\nProcessing game ${game.esbid} (${game.v} @ ${game.h})...`)
+
+  if (should_skip_game(game)) {
+    log(`skipping esbid: ${game.esbid}, game hasn't started`)
+    return { processed: false }
+  }
+
+  try {
+    // Fetch play-by-play data
+    const pbp_data = await get_game_play_by_play({
+      sportradar_game_id: game.sportradar_game_id
+    })
+
+    if (!pbp_data || !pbp_data.periods) {
+      log(`No play-by-play data for game ${game.esbid}`)
+      return { processed: false }
+    }
+
+    for (const period of pbp_data.periods) {
+      for (const pbp_item of period.pbp || []) {
+        if (pbp_item.type !== 'drive') continue
+
+        const drive_context = build_drive_context(pbp_item)
+
+        for (const event of pbp_item.events || []) {
+          if (event.type !== 'play') continue
+
+          // Skip deleted plays - they have minimal data and cannot be matched
+          if (event.deleted === true) {
+            log(`Skipping deleted play: ${event.id}`)
+            continue
+          }
+
+          stats.total_plays_processed++
+          game_plays_processed++
+
+          await process_play({
+            event,
+            game,
+            period,
+            drive_context,
+            team_mappings_cache,
+            stats: {
+              ...stats,
+              ignore_conflicts,
+              ignore_sportradar_field_conflicts
+            },
+            dry
+          })
+        }
+      }
+    }
+
+    const game_processing_time = Date.now() - game_start_time
+    log(
+      `Game ${game.esbid} processed in ${(game_processing_time / 1000).toFixed(2)}s (${game_plays_processed} plays, ${(game_processing_time / game_plays_processed).toFixed(0)}ms/play)`
+    )
+
+    return { processed: true }
+  } catch (error) {
+    log(`Error processing game ${game.esbid}: ${error.message}`)
+    return { processed: false, error }
+  }
+}
+
+const build_games_query = ({ game_id, year, week, all }) => {
   let games_query = db('nfl_games')
     .whereNotNull('sportradar_game_id')
     .select(
@@ -925,6 +1327,41 @@ const import_plays_sportradar = async ({
     if (week) games_query = games_query.where({ week })
   }
 
+  return games_query
+}
+
+const initialize_stats = () => ({
+  total_plays_processed: 0,
+  total_plays_matched: 0,
+  total_plays_updated: 0,
+  total_plays_multiple_matches: 0,
+  unmatched_plays: [],
+  multiple_match_plays: [],
+  unmatched_reasons: {},
+  sample_plays_by_type: {},
+  all_collisions: [],
+  unmatched_plays_details: []
+})
+
+/**
+ * Import play-by-play data for games with Sportradar game IDs
+ */
+const import_plays_sportradar = async ({
+  year,
+  week,
+  game_id,
+  all = false,
+  dry = false,
+  ignore_conflicts = false,
+  ignore_sportradar_field_conflicts = false
+} = {}) => {
+  console.time('import-plays-sportradar-total')
+
+  // Load team mappings
+  const team_mappings_cache = await load_team_mappings()
+
+  // Build and execute games query
+  const games_query = build_games_query({ game_id, year, week, all })
   const games = await games_query
   log(`Found ${games.length} games with Sportradar game IDs`)
 
@@ -934,6 +1371,7 @@ const import_plays_sportradar = async ({
     return
   }
 
+  // Preload caches
   log('Preloading play cache...')
   await preload_plays({
     years: [...new Set(games.map((g) => g.year))],
@@ -945,231 +1383,58 @@ const import_plays_sportradar = async ({
   log('Preloading player cache...')
   await preload_active_players({ all_players: true })
 
+  // Reset module-level tracking for this import run
+  sportradar_id_updates = new Map()
+  sportradar_players_not_found = new Map()
+
+  // Initialize statistics tracking
+  const stats = initialize_stats()
+
   // Process each game
-  let total_plays_processed = 0
-  let total_plays_matched = 0
-  let total_plays_updated = 0
-  let total_plays_multiple_matches = 0
-  const unmatched_plays = []
-  const multiple_match_plays = []
-  const unmatched_reasons = {} // Track unmatched plays by play type
-  const sample_plays_by_type = {} // For --dry mode: collect sample plays by type
-  const all_collisions = [] // Track all field collisions for summary
-  const unmatched_plays_details = [] // Track detailed unmatched play information
-
   for (const game of games) {
-    const game_start_time = Date.now()
-    let game_plays_processed = 0
-    log(`\nProcessing game ${game.esbid} (${game.v} @ ${game.h})...`)
-
-    // Skip games that haven't started yet
-    if (game.date && game.time_est) {
-      const time_str = `${game.date} ${game.time_est}`
-      const game_start = dayjs.tz(
-        time_str,
-        'YYYY/MM/DD HH:mm:SS',
-        'America/New_York'
-      )
-      if (dayjs().isBefore(game_start)) {
-        log(`skipping esbid: ${game.esbid}, game hasn't started`)
-        continue
-      }
-    }
-
-    try {
-      // Fetch play-by-play data
-      const pbp_data = await get_game_play_by_play({
-        sportradar_game_id: game.sportradar_game_id
-      })
-
-      if (!pbp_data || !pbp_data.periods) {
-        log(`No play-by-play data for game ${game.esbid}`)
-        continue
-      }
-
-      for (const period of pbp_data.periods) {
-        for (const pbp_item of period.pbp || []) {
-          if (pbp_item.type !== 'drive') continue
-
-          const drive_context = {
-            id: pbp_item.id,
-            sequence: pbp_item.sequence,
-            play_count: pbp_item.play_count,
-            duration: pbp_item.duration,
-            gain: pbp_item.gain,
-            first_downs: pbp_item.first_downs,
-            penalty_yards: pbp_item.penalty_yards,
-            start_reason: pbp_item.start_reason,
-            end_reason: pbp_item.end_reason
-          }
-
-          for (const event of pbp_item.events || []) {
-            if (event.type !== 'play') continue
-
-            // Skip deleted plays - they have minimal data and cannot be matched
-            if (event.deleted === true) {
-              log(`Skipping deleted play: ${event.id}`)
-              continue
-            }
-
-            total_plays_processed++
-            game_plays_processed++
-            const play_start_time = Date.now()
-
-            const game_context = {
-              esbid: game.esbid,
-              sportradar_game_id: game.sportradar_game_id,
-              period_number: period.sequence,
-              home_team: game.h,
-              away_team: game.v
-            }
-
-            const map_start_time = Date.now()
-            const mapped_play = await map_sportradar_play_to_nfl_play({
-              sportradar_play: event,
-              game_context,
-              drive_context,
-              team_mappings_cache
-            })
-            const map_time = Date.now() - map_start_time
-            if (map_time > 500) {
-              log(
-                `Slow map_sportradar_play_to_nfl_play: ${map_time}ms for play ${event.id}`
-              )
-            }
-
-            const match_start_time = Date.now()
-            const { db_play, multiple_match_error } = match_play_to_db({
-              game,
-              mapped_play,
-              sportradar_play: event,
-              unmatched_reasons
-            })
-            const match_time = Date.now() - match_start_time
-            if (match_time > 500) {
-              log(`Slow match_play_to_db: ${match_time}ms for play ${event.id}`)
-            }
-
-            if (db_play) {
-              total_plays_matched++
-              track_collisions({
-                db_play,
-                mapped_play,
-                sportradar_play: event,
-                game,
-                all_collisions
-              })
-
-              if (dry) {
-                const play_type = mapped_play.play_type || 'UNKNOWN'
-                if (!sample_plays_by_type[play_type]) {
-                  sample_plays_by_type[play_type] = {
-                    sportradar_play: event,
-                    mapped_play,
-                    db_play
-                  }
-                }
-              } else {
-                const update_start_time = Date.now()
-                const updates_made = await update_play({
-                  play_row: db_play,
-                  update: mapped_play,
-                  ignore_conflicts,
-                  // Use modern overwrite_fields approach for Sportradar-exclusive fields
-                  overwrite_fields: ignore_sportradar_field_conflicts
-                    ? Array.from(SPORTRADAR_EXCLUSIVE_FIELDS)
-                    : []
-                })
-                const update_time = Date.now() - update_start_time
-                if (update_time > 500) {
-                  log(
-                    `Slow update_play: ${update_time}ms for play ${game.esbid}-${db_play.playId} (${updates_made} updates)`
-                  )
-                }
-                if (updates_made > 0) total_plays_updated++
-              }
-            } else if (multiple_match_error) {
-              total_plays_multiple_matches++
-              multiple_match_plays.push({
-                esbid: game.esbid,
-                sportradar_play_id: event.id,
-                description: event.description,
-                qtr: mapped_play.qtr,
-                clock: mapped_play.game_clock_start
-              })
-            } else {
-              unmatched_plays.push({
-                esbid: game.esbid,
-                sportradar_play_id: event.id,
-                description: event.description,
-                qtr: mapped_play.qtr,
-                clock: mapped_play.game_clock_start
-              })
-
-              // Collect detailed information for analysis
-              const match_criteria = build_match_criteria(
-                game.esbid,
-                mapped_play
-              )
-
-              unmatched_plays_details.push({
-                esbid: game.esbid,
-                sportradar_play_id: event.id,
-                description: event.description,
-                play_type: mapped_play.play_type,
-                qtr: mapped_play.qtr,
-                clock: mapped_play.game_clock_start,
-                dwn: mapped_play.dwn,
-                yards_to_go: mapped_play.yards_to_go,
-                ydl_100: mapped_play.ydl_100,
-                off: mapped_play.off,
-                def: mapped_play.def,
-                match_criteria
-              })
-            }
-
-            const play_total_time = Date.now() - play_start_time
-            if (play_total_time > 1000) {
-              log(
-                `Slow play processing: ${play_total_time}ms for play ${event.id} (map: ${map_time}ms, match: ${match_time}ms)`
-              )
-            }
-          }
-        }
-      }
-
-      const game_processing_time = Date.now() - game_start_time
-      log(
-        `Game ${game.esbid} processed in ${(game_processing_time / 1000).toFixed(2)}s (${game_plays_processed} plays, ${(game_processing_time / game_plays_processed).toFixed(0)}ms/play)`
-      )
-    } catch (error) {
-      log(`Error processing game ${game.esbid}: ${error.message}`)
-      continue
-    }
+    await process_game({
+      game,
+      team_mappings_cache,
+      stats,
+      dry,
+      ignore_conflicts,
+      ignore_sportradar_field_conflicts
+    })
   }
 
   // Print detailed unmatched play analysis
-  format_unmatched_play_details(unmatched_plays_details)
+  format_unmatched_play_details(stats.unmatched_plays_details)
 
   // Print summary reports
   print_import_summary({
-    total_plays_processed,
-    total_plays_matched,
-    total_plays_updated,
-    total_plays_multiple_matches,
-    unmatched_plays,
-    multiple_match_plays,
-    unmatched_reasons
+    total_plays_processed: stats.total_plays_processed,
+    total_plays_matched: stats.total_plays_matched,
+    total_plays_updated: stats.total_plays_updated,
+    total_plays_multiple_matches: stats.total_plays_multiple_matches,
+    unmatched_plays: stats.unmatched_plays,
+    multiple_match_plays: stats.multiple_match_plays,
+    unmatched_reasons: stats.unmatched_reasons
   })
 
   if (dry) {
-    print_dry_mode_comparison({ sample_plays_by_type })
+    print_dry_mode_comparison({
+      sample_plays_by_type: stats.sample_plays_by_type
+    })
   }
 
-  print_collision_summary({ all_collisions })
+  print_collision_summary({ all_collisions: stats.all_collisions })
+
+  print_sportradar_player_resolution_summary({
+    sportradar_id_updates,
+    sportradar_players_not_found
+  })
 
   console.timeEnd('import-plays-sportradar-total')
 }
+
+// ============================================================================
+// MAIN ENTRY POINT
+// ============================================================================
 
 const main = async () => {
   let error
