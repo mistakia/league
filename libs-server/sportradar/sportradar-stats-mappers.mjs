@@ -25,7 +25,7 @@ export const map_passing_stats = async ({
     const passer = await resolve_player({
       sportradar_player_id: pass_stats.player.id,
       player_name: pass_stats.player.name,
-      team_abbrev: pos_team
+      player_team_alias: pass_stats.team?.alias
     })
     if (passer) {
       mapped.psr_pid = passer.pid
@@ -79,7 +79,7 @@ export const map_receiving_stats = async ({
     const receiver = await resolve_player({
       sportradar_player_id: receive_stats.player.id,
       player_name: receive_stats.player.name,
-      team_abbrev: pos_team
+      player_team_alias: receive_stats.team?.alias
     })
     if (receiver) {
       mapped.trg_pid = receiver.pid
@@ -123,7 +123,7 @@ export const map_rushing_stats = async ({
     const ball_carrier = await resolve_player({
       sportradar_player_id: rush_stats.player.id,
       player_name: rush_stats.player.name,
-      team_abbrev: pos_team
+      player_team_alias: rush_stats.team?.alias
     })
     if (ball_carrier) {
       mapped.bc_pid = ball_carrier.pid
@@ -176,7 +176,7 @@ export const map_field_goal_stats = async ({
     const kicker = await resolve_player({
       sportradar_player_id: field_goal_stats.kicker.id,
       player_name: field_goal_stats.kicker.name,
-      team_abbrev: pos_team
+      player_team_alias: field_goal_stats.team?.alias
     })
     if (kicker) {
       mapped.kicker_pid = kicker.pid
@@ -220,7 +220,7 @@ export const map_punt_stats = async ({
     const punter = await resolve_player({
       sportradar_player_id: punt_stats.punter.id,
       player_name: punt_stats.punter.name,
-      team_abbrev: pos_team
+      player_team_alias: punt_stats.team?.alias
     })
     if (punter) {
       mapped.punter_pid = punter.pid
@@ -258,7 +258,7 @@ export const map_kickoff_stats = async ({
     const kicker = await resolve_player({
       sportradar_player_id: kick_stats.player.id,
       player_name: kick_stats.player.name,
-      team_abbrev: pos_team
+      player_team_alias: kick_stats.team?.alias
     })
     if (kicker) {
       mapped.kicker_pid = kicker.pid
@@ -292,7 +292,7 @@ export const map_return_stats = async ({
     const returner = await resolve_player({
       sportradar_player_id: return_stats.returner.id,
       player_name: return_stats.returner.name,
-      team_abbrev: def_team
+      player_team_alias: return_stats.team?.alias
     })
     if (returner) {
       mapped.returner_pid = returner.pid
@@ -313,7 +313,7 @@ export const map_return_stats = async ({
     const intercepter = await resolve_player({
       sportradar_player_id: return_stats.returner.id,
       player_name: return_stats.returner.name,
-      team_abbrev: def_team
+      player_team_alias: return_stats.team?.alias
     })
     if (intercepter) {
       mapped.intp_pid = intercepter.pid
@@ -344,15 +344,10 @@ export const map_penalty_stats = async ({
 
   // Penalty player
   if (primary_penalty.player) {
-    const penalty_team = get_team_abbrev({
-      sportradar_team_id: primary_penalty.team?.id,
-      sportradar_alias: primary_penalty.team?.alias
-    })
-
     const penalty_player = await resolve_player({
       sportradar_player_id: primary_penalty.player.id,
       player_name: primary_penalty.player.name,
-      team_abbrev: penalty_team
+      player_team_alias: primary_penalty.team?.alias
     })
     if (penalty_player) {
       mapped.penalty_player_pid = penalty_player.pid
@@ -423,7 +418,7 @@ export const map_play_details = async ({
     const forcer = await resolve_player({
       sportradar_player_id: forced_fumble_detail.players[0].id,
       player_name: forced_fumble_detail.players[0].name,
-      team_abbrev: def_team
+      player_team_alias: forced_fumble_detail.team?.alias
     })
     if (forcer) {
       mapped.fumble_forced_1_pid = forcer.pid
@@ -438,17 +433,16 @@ export const map_play_details = async ({
       d.category === 'opponent_fumble_recovery'
   )
   if (recovery_detail?.players?.[0]) {
-    const recovery_team = get_team_abbrev({
-      sportradar_team_id: recovery_detail.team?.id,
-      sportradar_alias: recovery_detail.team?.alias
-    })
-
     const recoverer = await resolve_player({
       sportradar_player_id: recovery_detail.players[0].id,
       player_name: recovery_detail.players[0].name,
-      team_abbrev: recovery_team
+      player_team_alias: recovery_detail.team?.alias
     })
     if (recoverer) {
+      const recovery_team = get_team_abbrev({
+        sportradar_team_id: recovery_detail.team?.id,
+        sportradar_alias: recovery_detail.team?.alias
+      })
       mapped.fumble_recovered_1_pid = recoverer.pid
       mapped.fumble_recovered_1_gsis = recoverer.gsisid
       mapped.fumble_recovered_1_sportradar_id = recovery_detail.players[0].id
@@ -464,7 +458,7 @@ export const map_play_details = async ({
       const sacker = await resolve_player({
         sportradar_player_id: sack_players[i].id,
         player_name: sack_players[i].name,
-        team_abbrev: def_team
+        player_team_alias: sack_detail.team?.alias
       })
       if (sacker) {
         const idx = i + 1
@@ -484,7 +478,7 @@ export const map_play_details = async ({
       const tackler = await resolve_player({
         sportradar_player_id: tfl_players[i].id,
         player_name: tfl_players[i].name,
-        team_abbrev: def_team
+        player_team_alias: tackle_detail.team?.alias
       })
       if (tackler) {
         const idx = i + 1
