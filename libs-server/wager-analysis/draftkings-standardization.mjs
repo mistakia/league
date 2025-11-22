@@ -1,4 +1,6 @@
-import { format_player_name } from '#libs-shared'
+import dayjs from 'dayjs'
+
+import { constants, format_player_name } from '#libs-shared'
 
 // Extract player name from DraftKings market display name
 const extract_draftkings_player_name = (market_display_name) => {
@@ -124,6 +126,11 @@ const format_draftkings_player_name = ({ selection }) => {
 
 // Standardize DraftKings wager format
 export const standardize_draftkings_wager = (wager) => {
+  // Calculate week from settlement date
+  const week = dayjs(wager.settlementDate)
+    .subtract('2', 'day')
+    .diff(constants.season.regular_season_start, 'weeks')
+
   if (wager.type === 'RoundRobin') {
     return wager.combinations.map((combination) => {
       const selections = combination.selectionsMapped.flatMap((selectionId) => {
@@ -174,6 +181,7 @@ export const standardize_draftkings_wager = (wager) => {
 
       return {
         ...wager,
+        week,
         selections,
         bet_receipt_id: `${wager.receiptId}-${combination.id}`,
         parsed_odds,
@@ -190,6 +198,7 @@ export const standardize_draftkings_wager = (wager) => {
   } else {
     return {
       ...wager,
+      week,
       selections: wager.selections.map((selection) => ({
         ...selection,
         name: format_draftkings_selection_name({ selection }),

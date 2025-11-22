@@ -122,8 +122,9 @@ const analyze_wagers = async ({
     )
   }
 
+  // Filter wagers by week (week is set during standardization)
   const filtered = wagers.filter((wager) => {
-    if (week) {
+    if (week !== undefined) {
       return wager.week === week
     }
     return true
@@ -135,7 +136,16 @@ const analyze_wagers = async ({
   wager_summary.cash_risk =
     wager_summary.total_risk - wager_summary.bonus_bet_risk
 
-  // Calculate ROIs based on cash risk (excluding bonus bets)
+  // Calculate ROI based on total risk
+  wager_summary.total_roi =
+    wager_summary.total_risk > 0
+      ? `${(
+          (wager_summary.total_won / wager_summary.total_risk - 1) *
+          100
+        ).toFixed(2)}%`
+      : 'N/A'
+
+  // Calculate ROI based on cash risk (excluding bonus bets) - this is the primary ROI
   wager_summary.current_roi =
     wager_summary.cash_risk > 0
       ? `${(

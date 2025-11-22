@@ -133,10 +133,11 @@ const resolve_player_id = async ({
   // Normalize the player's team alias using fixTeam
   const normalized_team = player_team_alias ? fixTeam(player_team_alias) : null
 
-  // Check cache (all players are preloaded with all_players: true)
+  // First: try matching on sportradar_id alone (no team filter)
+  // This ensures we match the unique identifier first, regardless of team
   const cached_player = find_player({
     sportradar_id: sportradar_player_id,
-    teams: normalized_team ? [normalized_team] : [],
+    teams: [],
     ignore_free_agent: false,
     ignore_retired: false
   })
@@ -149,7 +150,7 @@ const resolve_player_id = async ({
     }
   }
 
-  // Fallback: try name-based lookup if name and team provided
+  // Fallback: try name-based lookup with name and team only
   // (useful for players without sportradar_id or mismatched IDs)
   if (player_name && normalized_team) {
     const name_cached_player = find_player({
