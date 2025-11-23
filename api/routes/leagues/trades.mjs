@@ -720,12 +720,17 @@ router.post(
         is_regular_season: constants.season.isRegularSeason
       })
 
-      if (proposing_team_validation_errors.length > 0) {
-        return res.status(400).send({
-          error: 'proposing team: slot validation failed',
-          details: proposing_team_validation_errors
-        })
-      }
+      console.log(
+        'proposing_team_validation_errors',
+        proposing_team_validation_errors
+      )
+
+      // if (proposing_team_validation_errors.length > 0) {
+      //   return res.status(400).send({
+      //     error: 'proposing team: slot validation failed',
+      //     details: proposing_team_validation_errors
+      //   })
+      // }
 
       // Validate accepting team roster with slot-aware validation
       acceptingTeamPlayers.forEach((p) => acceptingTeamRoster.removePlayer(p))
@@ -739,12 +744,17 @@ router.post(
         is_regular_season: constants.season.isRegularSeason
       })
 
-      if (accepting_team_validation_errors.length > 0) {
-        return res.status(400).send({
-          error: 'accepting team: slot validation failed',
-          details: accepting_team_validation_errors
-        })
-      }
+      console.log(
+        'accepting_team_validation_errors',
+        accepting_team_validation_errors
+      )
+
+      // if (accepting_team_validation_errors.length > 0) {
+      //   return res.status(400).send({
+      //     error: 'accepting team: slot validation failed',
+      //     details: accepting_team_validation_errors
+      //   })
+      // }
 
       // Use transaction to ensure all trade data is inserted atomically
       const tradeid = await db.transaction(async (trx) => {
