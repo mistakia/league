@@ -722,17 +722,13 @@ router.post(
         is_regular_season: constants.season.isRegularSeason,
         player_extensions: proposingPlayerExtensions
       })
-      console.log(
-        'accepting_team_validation_errors',
-        accepting_team_validation_errors
-      )
 
-      // if (accepting_team_validation_errors.length > 0) {
-      //   return res.status(400).send({
-      //     error: 'accepting team: slot validation failed',
-      //     details: accepting_team_validation_errors
-      //   })
-      // }
+      if (accepting_team_validation_errors.length > 0) {
+        return res.status(400).send({
+          error: 'accepting team: slot validation failed',
+          details: accepting_team_validation_errors
+        })
+      }
 
       // check if proposing team trade players are a locked starter
       for (const pid of proposingTeamPlayers) {
@@ -775,17 +771,12 @@ router.post(
         player_extensions: acceptingPlayerExtensions
       })
 
-      console.log(
-        'proposing_team_validation_errors',
-        proposing_team_validation_errors
-      )
-
-      // if (proposing_team_validation_errors.length > 0) {
-      //   return res.status(400).send({
-      //     error: 'proposing team: slot validation failed',
-      //     details: proposing_team_validation_errors
-      //   })
-      // }
+      if (proposing_team_validation_errors.length > 0) {
+        return res.status(400).send({
+          error: 'proposing team: slot validation failed',
+          details: proposing_team_validation_errors
+        })
+      }
 
       // Fetch data needed for notifications before transaction
       const activePoaches = await db('poaches')
