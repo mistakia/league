@@ -23,15 +23,16 @@ jobs:
 
     steps:
       - name: Check out Git repository
-        uses: actions/checkout@v1
+        uses: actions/checkout@v4
 
       - name: Install Node.js, NPM and Yarn
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
-          node-version: current
+          node-version: '18'
 
-      - name: yarn install
+      - name: Clean install
         run: |
+          rm -rf node_modules yarn.lock
           YARN_CHECKSUM_BEHAVIOR=update yarn install
 
       - name: yarn test
