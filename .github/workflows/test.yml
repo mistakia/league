@@ -35,9 +35,33 @@ jobs:
           rm -rf node_modules
           yarn install
 
+      - name: Install PostgreSQL client
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+
+      - name: Setup PostgreSQL roles
+        env:
+          PGHOST: localhost
+          PGPORT: 5432
+          PGDATABASE: league_test
+          PGUSER: league_test
+          PGPASSWORD: league_test
+        run: |
+          # Create postgres role if it doesn't exist (needed for schema GRANT statements)
+          psql -c "CREATE ROLE postgres WITH SUPERUSER LOGIN PASSWORD 'postgres';" || true
+          # Ensure league_test role has necessary permissions
+          psql -c "GRANT ALL PRIVILEGES ON DATABASE league_test TO league_test;" || true
+
       - name: yarn test
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          NODE_ENV: test
+          PGHOST: localhost
+          PGPORT: 5432
+          PGDATABASE: league_test
+          PGUSER: league_test
+          PGPASSWORD: league_test
         run: |
           yarn lint
           yarn test
