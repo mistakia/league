@@ -281,3 +281,10 @@
 
 ## At 6:40 on Monday, Tuesday, and Wednesday in January, February, and every month from September through December.
 40 6 * 1,2,9-12 1,2,3 NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/import-dvoa-sheets.mjs &>> /var/log/league/league-import-dvoa-sheets.log
+
+
+
+# Crontab Export
+
+## Export crontab for backup sync (hourly)
+0 * * * * crontab -l > /tmp/league-crontab.txt
