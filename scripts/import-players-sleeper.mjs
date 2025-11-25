@@ -19,7 +19,10 @@ import {
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-players-sleeper')
 debug.enable(
   'import-players-sleeper,update-player,create-player,get-player,fetch'
@@ -205,15 +208,17 @@ const run = async () => {
     await db('players_status').insert(statuses)
   }
 
-  if (argv.fields) {
-    log(`Complete field list: ${Object.keys(fields)}`)
-  }
+  return { fields }
 }
 
 const main = async () => {
   let error
   try {
-    await run()
+    const argv = initialize_cli()
+    const { fields } = await run()
+    if (argv.fields) {
+      log(`Complete field list: ${Object.keys(fields)}`)
+    }
   } catch (err) {
     error = err
     console.log(error)

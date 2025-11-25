@@ -48,7 +48,10 @@ import {
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('update-player-gamelog-ruled-out-status')
 debug.enable('update-player-gamelog-ruled-out-status')
 
@@ -387,6 +390,7 @@ const run = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     await handle_season_args_for_script({
       argv,
       script_name: 'update-player-gamelog-ruled-out-status',

@@ -10,7 +10,11 @@ import { is_main } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 dayjs.extend(utc)
-const argv = yargs(hideBin(process.argv)).argv
+
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('generate-season-dates')
 debug.enable('generate-season-dates')
 
@@ -109,6 +113,7 @@ const generateSeasonDates = async ({ year = constants.season.year } = {}) => {
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     await generateSeasonDates({ year: argv.year })
   } catch (err) {
     error = err

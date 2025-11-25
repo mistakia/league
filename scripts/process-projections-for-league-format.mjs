@@ -14,7 +14,10 @@ import {
 import { is_main, batch_insert, get_league_format } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('process-projections-for-league-format')
 debug.enable('process-projections-for-league-format')
 
@@ -187,6 +190,7 @@ const process_projections_for_league_format = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const league_format_hash = argv.league_format_hash
     const year = argv.year ? Number(argv.year) : null
     const all = argv.all

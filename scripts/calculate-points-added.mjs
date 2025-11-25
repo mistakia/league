@@ -16,7 +16,10 @@ import {
   calculateBaselines
 } from '#libs-shared'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('calculate-points-added')
 debug.enable('calculate-points-added')
 
@@ -196,6 +199,7 @@ const calculate_points_added = async ({
 
 const main = async () => {
   try {
+    const argv = initialize_cli()
     const year = argv.year
     const rookie = argv.rookie
     const lid = argv.lid

@@ -8,21 +8,22 @@ import { googleDrive, is_main, wait } from '#libs-server'
 const log = debug('cleanup-backups')
 debug.enable('cleanup-backups')
 
-// Parse command line arguments
-const argv = yargs(hideBin(process.argv))
-  .option('dry-run', {
-    alias: 'd',
-    type: 'boolean',
-    description: 'Run without making any changes',
-    default: false
-  })
-  .option('rate-limit', {
-    alias: 'r',
-    type: 'number',
-    description: 'Maximum API requests per minute (default: 6000)',
-    default: 6000
-  })
-  .help().argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv))
+    .option('dry-run', {
+      alias: 'd',
+      type: 'boolean',
+      description: 'Run without making any changes',
+      default: false
+    })
+    .option('rate-limit', {
+      alias: 'r',
+      type: 'number',
+      description: 'Maximum API requests per minute (default: 6000)',
+      default: 6000
+    })
+    .help().argv
+}
 
 // Constants
 const PARENT_FOLDER_ID = '1OnikVibAJ5-1uUhEyMHBRpkFGbzUM23v'
@@ -417,6 +418,7 @@ export default run
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     await run({
       dry_run: argv['dry-run'],
       rate_limit: argv['rate-limit']

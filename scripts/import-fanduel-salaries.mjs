@@ -15,7 +15,10 @@ import {
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { constants, fixTeam } from '#libs-shared'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-fanduel-salaries')
 debug.enable('import-fanduel-salaries,get-player,fanduel,update-player')
 
@@ -226,6 +229,7 @@ const process_matched_player = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     await import_fanduel_salaries({
       dry_run: argv.dry,
       ignore_cache: argv.ignore_cache

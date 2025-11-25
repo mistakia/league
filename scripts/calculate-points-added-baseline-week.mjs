@@ -8,7 +8,10 @@ import { is_main, getLeague, get_league_format } from '#libs-server'
 import calculate_points_added from './calculate-points-added.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('calculate-points-added-baseline-week')
 debug.enable('calculate-points-added-baseline-week')
 
@@ -54,6 +57,7 @@ const calculate_points_added_baseline_week = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const lid = argv.lid
     if (typeof lid === 'number') {
       const league = await getLeague({ lid: argv.lid })

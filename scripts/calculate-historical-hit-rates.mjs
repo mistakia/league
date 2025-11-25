@@ -10,42 +10,44 @@ import { groupBy, constants } from '#libs-shared'
 import { chunk_array } from '#libs-shared/chunk.mjs'
 import { player_game_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 
-const argv = yargs(hideBin(process.argv))
-  .usage(
-    '$0 [options]',
-    'Calculate historical hit rates for prop market selections'
-  )
-  .option('year', {
-    type: 'number',
-    describe: 'Season year to process',
-    default: constants.season.year
-  })
-  .option('missing_only', {
-    type: 'boolean',
-    default: false,
-    describe: 'Only process selections missing hit rate data'
-  })
-  .option('current_week_only', {
-    type: 'boolean',
-    default: false,
-    describe: 'Only process current NFL week'
-  })
-  .option('market_types', {
-    type: 'array',
-    describe: 'Specific market types to process (optional)'
-  })
-  .option('batch_size', {
-    type: 'number',
-    default: 1000,
-    describe: 'Number of selections to process per batch'
-  })
-  .example('$0 --missing_only', 'Process only missing hit rates')
-  .example(
-    '$0 --market_types GAME_PASSING_YARDS',
-    'Process specific market type'
-  )
-  .help()
-  .parse()
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv))
+    .usage(
+      '$0 [options]',
+      'Calculate historical hit rates for prop market selections'
+    )
+    .option('year', {
+      type: 'number',
+      describe: 'Season year to process',
+      default: constants.season.year
+    })
+    .option('missing_only', {
+      type: 'boolean',
+      default: false,
+      describe: 'Only process selections missing hit rate data'
+    })
+    .option('current_week_only', {
+      type: 'boolean',
+      default: false,
+      describe: 'Only process current NFL week'
+    })
+    .option('market_types', {
+      type: 'array',
+      describe: 'Specific market types to process (optional)'
+    })
+    .option('batch_size', {
+      type: 'number',
+      default: 1000,
+      describe: 'Number of selections to process per batch'
+    })
+    .example('$0 --missing_only', 'Process only missing hit rates')
+    .example(
+      '$0 --market_types GAME_PASSING_YARDS',
+      'Process specific market type'
+    )
+    .help()
+    .parse()
+}
 
 const log = debug('calculate-historical-hit-rates')
 debug.enable('calculate-historical-hit-rates')
@@ -489,6 +491,7 @@ const calculate_historical_hit_rates = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     await calculate_historical_hit_rates({
       year: argv.year,
       missing_only: argv.missing_only,

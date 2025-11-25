@@ -11,7 +11,10 @@ import db from '#db'
 import { is_main, draftkings, format_market_selection_id } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-draftkings-wagers')
 debug.enable('import-draftkings-wagers,draft-kings')
 
@@ -95,7 +98,8 @@ const import_draftkings_wagers = async ({
   filename,
   authorization,
   placed_after,
-  user_id = 1
+  user_id = 1,
+  dry = false
 } = {}) => {
   const wagers = await load_draftkings_wagers({
     filename,
@@ -166,7 +170,7 @@ const import_draftkings_wagers = async ({
     }
   }
 
-  if (argv.dry) {
+  if (dry) {
     log(wager_inserts[0])
     return
   }
@@ -183,6 +187,7 @@ const import_draftkings_wagers = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const auth = argv.auth
 
     const placed_after = argv.placed_after
@@ -196,7 +201,8 @@ const main = async () => {
       filename,
       authorization: auth,
       placed_after,
-      placed_before
+      placed_before,
+      dry: argv.dry
     })
   } catch (err) {
     error = err

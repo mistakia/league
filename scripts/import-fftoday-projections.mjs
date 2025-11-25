@@ -8,16 +8,21 @@ import { constants } from '#libs-shared'
 import { is_main, find_player_row, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import:projections')
 debug.enable('import:projections,get-player')
 const timestamp = Math.round(Date.now() / 1000)
-const is_regular_season_projection = argv.season
-const year = constants.season.year
-const week = is_regular_season_projection
-  ? 0
-  : Math.max(constants.season.week, 1)
-const getURL = ({ position, page }) =>
+
+const getURL = ({
+  position,
+  page,
+  is_regular_season_projection,
+  year,
+  week
+}) =>
   is_regular_season_projection
     ? `https://www.fftoday.com/rankings/playerproj.php?Season=${year}&PosID=${position}&LeagueID=&order_by=FFPts&sort_order=DESC&cur_page=${page}`
     : `https://www.fftoday.com/rankings/playerwkproj.php?Season=${year}&GameWeek=${week}&PosID=${position}&LeagueID=&order_by=FFPts&sort_order=DESC&cur_page=${page}`
@@ -108,11 +113,19 @@ const parse_week_data = (pos, $, el) => {
   return data
 }
 
-const run = async ({ dry = false } = {}) => {
+const run = async ({
+  dry = false,
+  is_regular_season_projection = false
+} = {}) => {
   // do not pull in any projections after the season has ended
   if (constants.season.week > constants.season.nflFinalWeek) {
     return
   }
+
+  const year = constants.season.year
+  const week = is_regular_season_projection
+    ? 0
+    : Math.max(constants.season.week, 1)
 
   const missing = []
   const items = []
@@ -120,7 +133,13 @@ const run = async ({ dry = false } = {}) => {
     let count = 50
     let page = 0
     while (count === 50) {
-      const url = getURL({ position, page })
+      const url = getURL({
+        position,
+        page,
+        is_regular_season_projection,
+        year,
+        week
+      })
       log(url)
       const $ = await fetchCheerioObject(url)
       count = $('table tr table tr tr:not(.tablehdr):not(.tableclmhdr)').length
@@ -215,7 +234,8 @@ const run = async ({ dry = false } = {}) => {
 const main = async () => {
   let error
   try {
-    await run({ dry: argv.dry })
+    const argv = initialize_cli()
+    await run({ dry: argv.dry, is_regular_season_projection: argv.season })
   } catch (err) {
     error = err
     console.log(error)

@@ -12,7 +12,10 @@ import {
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import:projections')
 debug.enable('import:projections,get-player,fetch')
 const week = Math.max(constants.season.week, 1)
@@ -179,6 +182,7 @@ const run = async ({ dry_run = false } = {}) => {
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     await run({ dry_run: argv.dry })
   } catch (err) {
     error = err

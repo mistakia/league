@@ -8,7 +8,10 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import debug from 'debug'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('calculate-points')
 debug.enable('calculate-points')
 
@@ -125,6 +128,7 @@ const calculate_points = async ({
 
 const main = async () => {
   try {
+    const argv = initialize_cli()
     const result = await calculate_points({
       year: argv.year,
       lid: argv.lid,

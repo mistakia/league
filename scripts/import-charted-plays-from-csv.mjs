@@ -9,7 +9,10 @@ import { getYardlineInfoFromString } from '#libs-shared'
 import { is_main, readCSV, getPlay, format_starting_hash } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 dayjs.extend(duration)
 
 const log = debug('import-charted-plays-from-csv')
@@ -133,6 +136,7 @@ const run = async ({ dry = false, filepath } = {}) => {
 }
 
 const main = async () => {
+  const argv = initialize_cli()
   debug.enable('import-charted-plays-from-csv')
   let error
   try {

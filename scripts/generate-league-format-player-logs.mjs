@@ -9,7 +9,10 @@ import generate_league_format_player_gamelogs from './generate-league-format-pla
 import generate_league_format_player_seasonlogs from './generate-league-format-player-seasonlogs.mjs'
 import generate_league_format_player_careerlogs from './generate-league-format-player-careerlogs.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('generate-league-format-player-logs')
 debug.enable(
   'generate-league-format-player-logs,generate-league-format-player-gamelogs,generate-league-format-player-seasonlogs,generate-league-format-player-careerlogs'
@@ -18,6 +21,7 @@ debug.enable(
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     let league_format_hash = argv.league_format_hash
 
     if (!league_format_hash) {

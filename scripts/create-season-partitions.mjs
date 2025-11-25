@@ -7,7 +7,10 @@ import { constants } from '#libs-shared'
 import { is_main, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('create-season-partitions')
 debug.enable('create-season-partitions')
 
@@ -215,6 +218,7 @@ const create_season_partitions = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const year = argv.year ? Number(argv.year) : constants.season.year
     const dry_run = argv.dry || false
 

@@ -9,7 +9,10 @@ import { chunk_mutating } from '#libs-shared/chunk.mjs'
 import { is_main, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('draw-divisions')
 debug.enable('draw-divisions')
 
@@ -120,6 +123,7 @@ export default run
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const lid = argv.lid
     if (!lid) {
       console.log('missing --lid')

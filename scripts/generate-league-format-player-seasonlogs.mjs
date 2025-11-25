@@ -7,7 +7,10 @@ import { sum, groupBy, constants } from '#libs-shared'
 import { is_main, getLeague } from '#libs-server'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('generate-league-format-player-seasonlogs')
 debug.enable('generate-league-format-player-seasonlogs')
 
@@ -129,6 +132,7 @@ const generate_league_format_player_seasonlogs = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     // Use CLI argument if provided, otherwise fall back to league lookup
     let league_format_hash = argv.league_format_hash
 

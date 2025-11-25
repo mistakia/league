@@ -9,13 +9,17 @@ import { is_main, fanduel, find_player_row } from '#libs-server'
 // import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('process-fanduel-markets-and-selections')
 debug.enable('process-fanduel-markets-and-selections,get-player')
 
 const process_fanduel_markets_and_selections = async ({
   missing_only = false,
-  since_date = null
+  since_date = null,
+  force = false
 } = {}) => {
   const query = db('prop_market_selections_index')
     .select(
@@ -220,7 +224,7 @@ const process_fanduel_markets_and_selections = async ({
       if (selection.selection_pid) {
         // Check for conflict if selection pid already exists
         if (selection.selection_pid !== player_row.pid) {
-          if (argv.force) {
+          if (force) {
             // Update if force param is set
             await db('prop_market_selections_index')
               .where({
@@ -263,9 +267,11 @@ const process_fanduel_markets_and_selections = async ({
 async function main() {
   let error
   try {
+    const argv = initialize_cli()
     await process_fanduel_markets_and_selections({
       missing_only: argv.missing_only,
-      since_date: argv.since_date
+      since_date: argv.since_date,
+      force: argv.force
     })
   } catch (err) {
     error = err

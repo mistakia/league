@@ -13,7 +13,10 @@ import { ngs } from '#private/libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { fixTeam, constants } from '#libs-shared'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-players-ngs-highlight')
 debug.enable('import-players-ngs-highlight,ngs,get-player,update-player')
 
@@ -112,6 +115,7 @@ const import_players_ngs_highlight = async ({ ignore_cache = false }) => {
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     await import_players_ngs_highlight({ ignore_cache: argv.ignore_cache })
   } catch (err) {
     error = err

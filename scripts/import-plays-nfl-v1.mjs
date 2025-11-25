@@ -18,9 +18,10 @@ import {
 } from '#libs-server/play-enum-utils.mjs'
 
 const log = debug('import-plays-nfl-v1')
-debug.enable('import-plays-nfl-v1,nfl,play-enum-utils')
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
 
 /**
  * Parse clock time string and calculate time-related fields
@@ -643,6 +644,8 @@ const importAllPlays = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
+    debug.enable('import-plays-nfl-v1,nfl,play-enum-utils')
     const dry_run = argv.dry
 
     if (argv.all) {

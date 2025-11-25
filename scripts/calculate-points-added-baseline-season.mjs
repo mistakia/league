@@ -15,7 +15,10 @@ import { getLeague, is_main } from '#libs-server'
 import db from '#db'
 import calculate_points_added from './calculate-points-added.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('calculate-points-added-baseline-season')
 debug.enable('calculate-points-added-baseline-season,calculate-points-added')
 
@@ -120,6 +123,7 @@ const calculate_points_added_baseline_season = async ({ league }) => {
 
 if (is_main(import.meta.url)) {
   const main = async () => {
+    const argv = initialize_cli()
     const lid = argv.lid
     if (!lid) {
       console.log('missing --lid')

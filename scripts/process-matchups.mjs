@@ -7,7 +7,10 @@ import { constants, Roster, calculateStandings } from '#libs-shared'
 import { is_main, getRoster, getLeague, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('process-matchups')
 debug.enable('process-matchups,calculate-standings')
 
@@ -106,6 +109,7 @@ const run = async ({ lid = 1, year = constants.season.year }) => {
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const lid = argv.lid
     const year = argv.year
     await run({ year, lid })

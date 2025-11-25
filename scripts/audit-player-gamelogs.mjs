@@ -8,7 +8,10 @@ import { constants } from '#libs-shared'
 import { is_main, pfr } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('audit-player-gamelogs')
 debug.enable('audit-player-gamelogs,pro-football-reference')
 
@@ -110,6 +113,7 @@ const audit_player_gamelogs = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     await audit_player_gamelogs({
       year: argv.year,
       ignore_cache: argv.ignore_cache

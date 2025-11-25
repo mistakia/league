@@ -13,7 +13,10 @@ import {
 } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-players-combine-profiles')
 debug.enable(
   'import-players-combine-profiles,get-player,create-player,update-player,nfl'
@@ -186,6 +189,7 @@ const import_all_players_from_combine_profiles = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     if (argv.all) {
       await import_all_players_from_combine_profiles({
         start: argv.start,

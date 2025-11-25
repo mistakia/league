@@ -23,11 +23,7 @@ import {
   handle_markdown_outputs
 } from '#libs-server/wager-analysis/index.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
 const log = debug('analyze-wagers')
-if (!argv.quiet) {
-  debug.enable('analyze-wagers')
-}
 
 /**
  * Analyze wagers from FanDuel, DraftKings, and Fanatics sources.
@@ -183,19 +179,17 @@ const analyze_wagers = async ({
     filtered_wagers: filtered
   })
 
-  // Log matching statistics (unless quiet mode)
-  if (!argv.quiet) {
-    log('\nDatabase Matching Statistics:')
-    log(`Total selections: ${matching_stats.total_selections}`)
-    log(
-      `Found in database: ${matching_stats.found_in_db} (${((matching_stats.found_in_db / matching_stats.total_selections) * 100).toFixed(1)}%)`
-    )
-    log(
-      `With results: ${matching_stats.with_results} (${((matching_stats.with_results / matching_stats.total_selections) * 100).toFixed(1)}%)`
-    )
-    log(`Pending settlement: ${matching_stats.pending}`)
-    log(`Not found: ${matching_stats.not_found}`)
-  }
+  // Log matching statistics
+  log('\nDatabase Matching Statistics:')
+  log(`Total selections: ${matching_stats.total_selections}`)
+  log(
+    `Found in database: ${matching_stats.found_in_db} (${((matching_stats.found_in_db / matching_stats.total_selections) * 100).toFixed(1)}%)`
+  )
+  log(
+    `With results: ${matching_stats.with_results} (${((matching_stats.with_results / matching_stats.total_selections) * 100).toFixed(1)}%)`
+  )
+  log(`Pending settlement: ${matching_stats.pending}`)
+  log(`Not found: ${matching_stats.not_found}`)
 
   const unique_selections = build_unique_selections({
     selections_index,
@@ -300,9 +294,17 @@ const analyze_wagers = async ({
   })
 }
 
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
+    if (!argv.quiet) {
+      debug.enable('analyze-wagers')
+    }
     await analyze_wagers({
       fanduel_filename: argv.fanduel,
       draftkings_filename: argv.draftkings,

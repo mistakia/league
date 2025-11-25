@@ -10,7 +10,10 @@ import db from '#db'
 import { is_main, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-espn-receiving-tracking-metrics')
 debug.enable('import-espn-receiving-tracking-metrics')
 
@@ -97,6 +100,7 @@ const import_espn_receiving_tracking_metrics = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     await import_espn_receiving_tracking_metrics({
       force_download: argv.force_download,
       dry: argv.dry,

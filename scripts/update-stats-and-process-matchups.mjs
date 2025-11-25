@@ -26,7 +26,10 @@ import { is_main } from '#libs-server'
 import update_stats_weekly from './update-stats-weekly.mjs'
 import process_matchups from './process-matchups.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('update-stats-and-process-matchups')
 debug.enable('update-stats-and-process-matchups')
 
@@ -178,6 +181,7 @@ const update_stats_and_process_matchups = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     await update_stats_and_process_matchups({
       week: argv.week,
       year: argv.year

@@ -26,6 +26,52 @@ import { is_main } from '#libs-server'
 
 const log = debug('update-market-settlement')
 
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv))
+    .usage(
+      '$0 [options]',
+      'Update settlement status for markets where all selections are settled'
+    )
+    .option('year', {
+      type: 'number',
+      describe: 'Year to process'
+    })
+    .option('week', {
+      type: 'number',
+      describe: 'Week to process'
+    })
+    .option('seas_type', {
+      type: 'string',
+      describe: 'Season type (PRE, REG, POST)',
+      choices: ['PRE', 'REG', 'POST']
+    })
+    .option('esbids', {
+      type: 'string',
+      describe: 'Comma-separated game IDs to process'
+    })
+    .option('dry_run', {
+      type: 'boolean',
+      default: false,
+      describe: 'Preview changes without updating database'
+    })
+    .option('verbose', {
+      type: 'boolean',
+      default: false,
+      describe: 'Enable verbose logging'
+    })
+    .example('$0 --year 2025 --week 2', 'Update settlements for week 2 of 2025')
+    .example(
+      '$0 --esbids 401547417,401547418 --dry_run',
+      'Preview updates for specific games'
+    )
+    .example(
+      '$0 --year 2025 --verbose',
+      'Update all 2025 markets with detailed logging'
+    )
+    .help()
+    .parse()
+}
+
 /**
  * Update market settlement status for markets where all selections are settled
  *
@@ -213,49 +259,7 @@ export const update_market_settlement_status = async ({
 
 // CLI interface
 const main = async () => {
-  const argv = yargs(hideBin(process.argv))
-    .usage(
-      '$0 [options]',
-      'Update settlement status for markets where all selections are settled'
-    )
-    .option('year', {
-      type: 'number',
-      describe: 'Year to process'
-    })
-    .option('week', {
-      type: 'number',
-      describe: 'Week to process'
-    })
-    .option('seas_type', {
-      type: 'string',
-      describe: 'Season type (PRE, REG, POST)',
-      choices: ['PRE', 'REG', 'POST']
-    })
-    .option('esbids', {
-      type: 'string',
-      describe: 'Comma-separated game IDs to process'
-    })
-    .option('dry_run', {
-      type: 'boolean',
-      default: false,
-      describe: 'Preview changes without updating database'
-    })
-    .option('verbose', {
-      type: 'boolean',
-      default: false,
-      describe: 'Enable verbose logging'
-    })
-    .example('$0 --year 2025 --week 2', 'Update settlements for week 2 of 2025')
-    .example(
-      '$0 --esbids 401547417,401547418 --dry_run',
-      'Preview updates for specific games'
-    )
-    .example(
-      '$0 --year 2025 --verbose',
-      'Update all 2025 markets with detailed logging'
-    )
-    .help()
-    .parse()
+  const argv = initialize_cli()
 
   // Enable debug logging
   if (argv.verbose || (!argv.help && !process.argv.includes('--help'))) {

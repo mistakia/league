@@ -16,7 +16,10 @@ import {
 import { normalize_selection_metric_line } from '#libs-server/normalize-selection-metric-line.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-betmgm-odds')
 debug.enable('import-betmgm-odds,get-player,betmgm,insert-prop-markets')
 
@@ -260,6 +263,7 @@ export const job = async () => {
 }
 
 const main = async () => {
+  const argv = initialize_cli()
   await import_betmgm_odds({
     write_file: argv.write,
     dry_run: argv.dry

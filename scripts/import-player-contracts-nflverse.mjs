@@ -41,7 +41,10 @@ import {
   find_player
 } from '#libs-server/player-cache.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-player-contracts-nflverse')
 debug.enable('import-player-contracts-nflverse,get-player,fetch')
 
@@ -357,6 +360,7 @@ const import_player_contracts_nflverse = async ({ force_download = false }) => {
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const { force_download } = argv
     await import_player_contracts_nflverse({ force_download })
   } catch (err) {

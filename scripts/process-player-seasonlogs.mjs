@@ -8,7 +8,10 @@ import { is_main, batch_insert } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('process-player-seasonlogs')
 debug.enable('process-player-seasonlogs')
 
@@ -70,6 +73,7 @@ const processPlayerSeasonlogs = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     await handle_season_args_for_script({
       argv,
       script_name: 'process-player-seasonlogs',

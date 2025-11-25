@@ -29,29 +29,31 @@ const DEBUG_MODULES =
   'import-pinnacle-odds,pinnacle,get-player,insert-prop-markets,insert-prop-market-selections'
 
 // Command line arguments
-const argv = yargs(hideBin(process.argv))
-  .option('dry', {
-    describe: 'Dry run - do not insert to database',
-    type: 'boolean',
-    default: false
-  })
-  .option('ignore-cache', {
-    describe: 'Ignore cache and fetch fresh data',
-    type: 'boolean',
-    default: false
-  })
-  .option('ignore-wait', {
-    describe: 'Ignore wait time between requests',
-    type: 'boolean',
-    default: false
-  })
-  .option('save', {
-    describe: 'Save JSON files to tmp directory',
-    type: 'boolean',
-    default: false
-  })
-  .help('h')
-  .alias('h', 'help').argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv))
+    .option('dry', {
+      describe: 'Dry run - do not insert to database',
+      type: 'boolean',
+      default: false
+    })
+    .option('ignore-cache', {
+      describe: 'Ignore cache and fetch fresh data',
+      type: 'boolean',
+      default: false
+    })
+    .option('ignore-wait', {
+      describe: 'Ignore wait time between requests',
+      type: 'boolean',
+      default: false
+    })
+    .option('save', {
+      describe: 'Save JSON files to tmp directory',
+      type: 'boolean',
+      default: false
+    })
+    .help('h')
+    .alias('h', 'help').argv
+}
 
 const log = debug('import-pinnacle-odds')
 debug.enable(DEBUG_MODULES)
@@ -758,16 +760,26 @@ const import_pinnacle_odds = async ({
 
 /**
  * Job wrapper function for pinnacle odds import
+ * @param {Object} options - Job options
+ * @param {boolean} options.dry_run - Dry run mode
+ * @param {boolean} options.ignore_cache - Ignore cache
+ * @param {boolean} options.ignore_wait - Ignore wait
+ * @param {boolean} options.save - Save JSON files
  * @returns {Promise<void>}
  */
-export const job = async () => {
+export const job = async ({
+  dry_run = false,
+  ignore_cache = false,
+  ignore_wait = false,
+  save = false
+} = {}) => {
   let error
   try {
     await import_pinnacle_odds({
-      dry_run: argv.dry,
-      ignore_cache: argv.ignore_cache,
-      ignore_wait: argv.ignore_wait,
-      save: argv.save
+      dry_run,
+      ignore_cache,
+      ignore_wait,
+      save
     })
   } catch (err) {
     error = err
@@ -785,7 +797,13 @@ export const job = async () => {
  * @returns {Promise<void>}
  */
 const main = async () => {
-  await job()
+  const argv = initialize_cli()
+  await job({
+    dry_run: argv.dry,
+    ignore_cache: argv['ignore-cache'],
+    ignore_wait: argv['ignore-wait'],
+    save: argv.save
+  })
   process.exit()
 }
 

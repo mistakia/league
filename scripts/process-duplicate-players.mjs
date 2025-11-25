@@ -10,7 +10,10 @@ import { is_main, mergePlayer, readCSV } from '#libs-server'
 import { format_player_name } from '#libs-shared'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('process-duplicate-players')
 debug.enable('process-duplicate-players,update-player,merge-player')
 
@@ -294,6 +297,7 @@ const processDuplicatePlayers = async ({ formatted = null } = {}) => {
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const __dirname = path.dirname(fileURLToPath(import.meta.url))
     const nicknames_csv_path = path.join(
       __dirname,

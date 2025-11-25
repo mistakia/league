@@ -18,7 +18,9 @@ import {
 import { normalize_selection_metric_line } from '#libs-server/normalize-selection-metric-line.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
 
 const log = debug('import-betonline')
 debug.enable('import-betonline,get-player,betonline')
@@ -75,6 +77,7 @@ const format_market = async ({
 }
 
 const run = async () => {
+  const argv = initialize_cli()
   // do not pull in reports outside of the NFL season
   if (
     !constants.season.now.isBetween(

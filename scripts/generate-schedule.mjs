@@ -5,9 +5,11 @@ import { hideBin } from 'yargs/helpers'
 import { is_main, generateSchedule, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
 const log = debug('generate-schedule')
-debug.enable('generate-schedule')
+
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
 
 const run = async ({ lid, random_seed }) => {
   log(`generating schedule for league: ${lid}`)
@@ -17,6 +19,8 @@ const run = async ({ lid, random_seed }) => {
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
+    debug.enable('generate-schedule')
     const lid = argv.lid
     if (!lid) {
       console.log('missing --lid')

@@ -21,7 +21,10 @@ import {
 } from '#libs-server/player-cache.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-nfl-games-nflverse')
 debug.enable('import-nfl-games-nflverse,update-nfl-game,get-player,fetch')
 
@@ -219,6 +222,7 @@ const import_nfl_games_nflverse_nfldata = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const ignore_conflicts = argv.ignore_conflicts
     const force_download = argv.d
     await import_nfl_games_nflverse_nfldata({

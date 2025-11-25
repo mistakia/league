@@ -7,7 +7,10 @@ import { constants, Roster } from '#libs-shared'
 import { is_main, getLeague, getRoster, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('check-restricted-free-agency-salary-cap-violations')
 debug.enable('check-restricted-free-agency-salary-cap-violations')
 
@@ -254,6 +257,7 @@ const script = async ({ dry_run = false } = {}) => {
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const dry_run = argv.dry_run || false
     await script({ dry_run })
   } catch (err) {

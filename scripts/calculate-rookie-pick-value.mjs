@@ -7,7 +7,10 @@ import { Table } from 'console-table-printer'
 import { is_main } from '#libs-server'
 import calculate_points_added from './calculate-points-added.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 // const log = debug('script:calculate-rookie-pick-value')
 const LATEST_YEAR = 2020
 
@@ -59,6 +62,7 @@ if (is_main(import.meta.url)) {
   debug.enable('script:calculate-points-added')
   const main = async () => {
     try {
+      const argv = initialize_cli()
       const year = argv.year
       const results = await calculateRookiePickValue({ year })
       const sortedResults = Object.values(results).sort(

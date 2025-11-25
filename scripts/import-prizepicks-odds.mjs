@@ -15,7 +15,10 @@ import {
 import { normalize_selection_metric_line } from '#libs-server/normalize-selection-metric-line.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-prizepicks-odds')
 debug.enable('import-prizepicks-odds,get-player,prizepicks')
 
@@ -196,6 +199,7 @@ const import_prizepicks_odds = async ({
 }
 
 export const job = async () => {
+  const argv = initialize_cli()
   let error
   try {
     await import_prizepicks_odds({

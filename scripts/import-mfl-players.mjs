@@ -8,11 +8,14 @@ import { is_main, find_player_row, report_job } from '#libs-server'
 import config from '#config'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import:players:mfl')
 debug.enable('league:player:get,import:players:mfl,get-player')
 
-const run = async () => {
+const run = async ({ dry = false } = {}) => {
   const missing = []
 
   const URL = `https://api.myfantasyleague.com/${constants.season.year}/export?TYPE=players&DETAILS=1&JSON=1`
@@ -106,7 +109,7 @@ const run = async () => {
     log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`)
   )
 
-  if (argv.dry) {
+  if (dry) {
     return
   }
 
@@ -131,7 +134,8 @@ const run = async () => {
 const main = async () => {
   let error
   try {
-    await run()
+    const argv = initialize_cli()
+    await run({ dry: argv.dry })
   } catch (err) {
     error = err
     console.log(error)

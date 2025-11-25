@@ -7,7 +7,10 @@ import db from '#db'
 import { is_main, updatePlayer } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('update-player-gsispid')
 debug.enable('update-player-gsispid,update-player')
 
@@ -187,6 +190,7 @@ const updatePlayerGsispid = async ({ dry = false } = {}) => {
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     await updatePlayerGsispid({ dry: argv.dry })
   } catch (err) {
     error = err

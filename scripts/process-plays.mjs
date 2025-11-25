@@ -16,7 +16,6 @@ import {
 } from '#libs-server/play-stats-utils.mjs'
 import populate_nfl_year_week_timestamp from './populate-nfl-year-week-timestamp.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
 const log = debug('process-plays')
 debug.enable('process-plays,update-play')
 
@@ -243,9 +242,14 @@ const process_plays = async ({
   )
 }
 
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const year = argv.year
     const week = argv.week
     const seas_type = argv.seas_type || constants.season.nfl_seas_type

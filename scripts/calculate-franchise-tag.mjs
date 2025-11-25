@@ -7,7 +7,10 @@ import { constants, groupBy } from '#libs-shared'
 import { is_main, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('calculate:franchise-tags')
 debug.enable('calculate:franchise-tags')
 
@@ -86,6 +89,7 @@ export default run
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     await run({ year: argv.year, dry_run: argv.dry })
   } catch (err) {
     error = err

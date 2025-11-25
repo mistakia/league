@@ -38,7 +38,10 @@ import db from '#db'
 import { get_play_stats } from '#libs-server/play-stats-utils.mjs'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('generate-player-gamelogs')
 debug.enable('generate-player-gamelogs')
 
@@ -603,6 +606,7 @@ const generate_player_gamelogs = async ({
 }
 
 const main = async () => {
+  const argv = initialize_cli()
   let error
   try {
     await handle_season_args_for_script({

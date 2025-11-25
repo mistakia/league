@@ -15,7 +15,10 @@ import {
 import db from '#db'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('process:waivers:poach')
 if (process.env.NODE_ENV !== 'test') {
   debug.enable('process:waivers:poach')
@@ -127,6 +130,7 @@ export default run
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const daily = argv.daily
     await run({ daily })
   } catch (err) {

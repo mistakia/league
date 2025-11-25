@@ -7,7 +7,10 @@ import { format_player_name } from '#libs-shared'
 import { is_main, pfr } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-pfr-player-ids')
 debug.enable('import-pfr-player-ids,pro-football-reference')
 
@@ -99,6 +102,7 @@ const import_pro_football_reference_player_ids = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     await import_pro_football_reference_player_ids({
       ignore_cache: argv.ignore_cache
     })

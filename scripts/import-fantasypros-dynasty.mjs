@@ -13,7 +13,10 @@ import {
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-fantasypros-dynasty')
 debug.enable('import-fantasypros-dynasty,get-player,fantasypros,fetch')
 
@@ -143,6 +146,7 @@ const import_fantasypros_dynasty_rankings = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const year = argv.year ? argv.year : constants.season.year
     await import_fantasypros_dynasty_rankings({
       year,

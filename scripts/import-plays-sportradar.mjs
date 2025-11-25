@@ -85,9 +85,11 @@ const SLOW_PLAY_THRESHOLD_MS = 1000
  *   (automatically converted to overwrite_fields parameter internally)
  */
 
-const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-plays-sportradar')
-debug.enable('import-plays-sportradar,sportradar,play-enum-utils')
+
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
 
 // Module-level tracking for player resolution outcomes (using Maps to avoid duplicates)
 let sportradar_id_updates = new Map() // Key: pid, Value: { pid, name, team, sportradar_id }
@@ -1440,6 +1442,8 @@ const import_plays_sportradar = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
+    debug.enable('import-plays-sportradar,sportradar,play-enum-utils')
     const year = argv.year ? parseInt(argv.year) : null
     const week = argv.week ? parseInt(argv.week) : null
     const game_id = argv['game-id'] || null

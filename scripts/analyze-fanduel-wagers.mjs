@@ -13,7 +13,10 @@ import { hideBin } from 'yargs/helpers'
 import { constants } from '#libs-shared'
 import { is_main } from '#libs-server'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('analyze-fanduel-wagers')
 debug.enable('analyze-fanduel-wagers')
 
@@ -604,6 +607,7 @@ const analyze_fanduel_wagers = async ({
 
 const main = async () => {
   let error
+  const argv = initialize_cli()
   console.log(argv.include)
   try {
     await analyze_fanduel_wagers({

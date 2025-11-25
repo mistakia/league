@@ -8,20 +8,23 @@ import { constants } from '#libs-shared'
 import { is_main, find_player_row, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import:projections')
 debug.enable('import:projections,get-player')
 
-const week = argv.season ? 0 : Math.max(constants.season.week, 1)
-const type = argv.season ? 'season' : week
 const year = new Date().getFullYear()
 const timestamp = Math.round(Date.now() / 1000)
-const getUrl = (pos) =>
+const getUrl = (pos, type) =>
   `https://www.cbssports.com/fantasy/football/stats/${pos}/${year}/${type}/projections/ppr/`
 
 const positions = ['QB', 'RB', 'WR', 'TE']
 
-const run = async () => {
+const run = async ({ season = false, dry = false } = {}) => {
+  const week = season ? 0 : Math.max(constants.season.week, 1)
+  const type = season ? 'season' : week
   // do not pull in any projections after the season has ended
   if (
     type !== 'season' &&
@@ -37,7 +40,7 @@ const run = async () => {
   const missing = []
   const items = []
   for (const position of positions) {
-    const url = getUrl(position)
+    const url = getUrl(position, type)
     log(url)
     const $ = await fetchCheerioObject(url)
     $('main table tbody tr').each((i, el) => {
@@ -140,7 +143,7 @@ const run = async () => {
     log(`could not find player: ${m.name} / ${m.pos} / ${m.teams.join(', ')}`)
   )
 
-  if (argv.dry) {
+  if (dry) {
     log(`${inserts.length} projections`)
     log(inserts[0])
     return
@@ -168,7 +171,11 @@ const run = async () => {
 const main = async () => {
   let error
   try {
-    await run()
+    const argv = initialize_cli()
+    await run({
+      season: argv.season,
+      dry: argv.dry
+    })
   } catch (err) {
     error = err
     console.log(error)

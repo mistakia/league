@@ -11,7 +11,10 @@ import db from '#db'
 import { is_main, googleDrive, downloadFile } from '#libs-server'
 import config from '#config'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-database-from-drive')
 debug.enable('import-database-from-drive')
 
@@ -205,6 +208,7 @@ const run = async ({ file_path, type = 'user' } = {}) => {
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const file_path = argv.file
     const type = argv.type || 'user'
 

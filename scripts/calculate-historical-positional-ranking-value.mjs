@@ -7,7 +7,9 @@ import { groupBy, constants } from '#libs-shared'
 import { getLeague, is_main } from '#libs-server'
 import calculate_points_added from './calculate-points-added.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
 
 const calculateHistoricalPositionalRankingValue = async ({ league }) => {
   const years = 2
@@ -80,6 +82,7 @@ const calculateHistoricalPositionalRankingValue = async ({ league }) => {
 
 if (is_main(import.meta.url)) {
   const main = async () => {
+    const argv = initialize_cli()
     const lid = argv.lid
     if (!lid) {
       console.log('missing --lid')

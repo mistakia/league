@@ -7,7 +7,10 @@ import { constants, sum, groupBy } from '#libs-shared'
 import { is_main, getLeague } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('generate-scoring-format-player-seasonlogs')
 debug.enable('generate-scoring-format-player-seasonlogs')
 
@@ -111,6 +114,7 @@ const generate_scoring_format_player_seasonlogs = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     let scoring_format_hash = argv.scoring_format_hash
 
     if (!scoring_format_hash) {

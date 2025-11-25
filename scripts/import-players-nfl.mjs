@@ -18,7 +18,10 @@ import {
 // import db from '#db'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-players-nfl')
 debug.enable('import-players-nfl,nfl,update-player,create-player,get-player')
 
@@ -148,6 +151,7 @@ const importPlayersNFL = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     // const setInactive = async (pids) => {
     //   // set current_nfl_team to INA for pid not in pids
     //   const player_rows = await db('player')

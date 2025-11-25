@@ -13,7 +13,10 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 
 dayjs.extend(timezone)
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-games-ngs')
 debug.enable('import-games-ngs')
 
@@ -118,6 +121,7 @@ const run = async ({ year = constants.season.year }) => {
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const year = argv.year
     await run({ year })
   } catch (err) {
