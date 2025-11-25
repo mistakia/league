@@ -13,7 +13,10 @@ import db from '#db'
 import { is_main, readCSV, updatePlayer } from '#libs-server'
 import { format_player_name, fixTeam } from '#libs-shared'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('audit-player-ids-dynastyprocess-repo')
 debug.enable('audit-player-ids-dynastyprocess-repo,update-player')
 
@@ -284,6 +287,7 @@ const audit_player_ids_dynastyprocess_repo = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const force_download = argv.d
     const update_player_conflicts = argv.update
     await audit_player_ids_dynastyprocess_repo({

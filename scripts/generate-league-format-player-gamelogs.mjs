@@ -9,7 +9,10 @@ import handle_season_args_for_script from '#libs-server/handle-season-args-for-s
 import calculate_points_added from './calculate-points-added.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('generate-league-format-player-gamelogs')
 debug.enable('generate-league-format-player-gamelogs')
 
@@ -90,6 +93,7 @@ const generate_league_format_player_gamelogs = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     // Use CLI argument if provided, otherwise fall back to league lookup
     let league_format_hash = argv.league_format_hash
 

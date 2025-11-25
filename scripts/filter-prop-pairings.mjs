@@ -21,7 +21,10 @@ const PAIRING_BATCH_SIZE = 5000
 const DEFAULT_TIMEOUT = 0
 
 // Initialize debug and paths
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug(DEBUG_NAMESPACE)
 debug.enable(DEBUG_NAMESPACE)
 
@@ -808,6 +811,7 @@ const filter_prop_pairings = async ({
  */
 const main = async () => {
   try {
+    const argv = initialize_cli()
     const { week, source, filter_by_allowed_over_average } = argv
 
     log('Starting prop pairing filter with parameters:', {

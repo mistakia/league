@@ -7,7 +7,10 @@ import { constants, Roster, calculatePoints } from '#libs-shared'
 import { is_main, getLeague, getRoster, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('process-playoffs')
 debug.enable('process-playoffs')
 
@@ -252,6 +255,7 @@ const process_playoffs = async ({ lid, year }) => {
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const lid = argv.lid
     const year = argv.year
     if (!lid) {

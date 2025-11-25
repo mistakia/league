@@ -20,66 +20,68 @@ const exec = (cmd, options = {}) =>
 const log = debug('download-backup-from-drive')
 debug.enable('download-backup-from-drive')
 
-const argv = yargs(hideBin(process.argv))
-  .option('q', {
-    describe: 'Query string to find backup file',
-    type: 'string',
-    demandOption: true
-  })
-  .option('db', {
-    describe: 'Database name to import to',
-    type: 'string',
-    default: 'league_development'
-  })
-  .option('user', {
-    describe: 'PostgreSQL username',
-    type: 'string',
-    default: 'trashman'
-  })
-  .option('password', {
-    describe: 'PostgreSQL password (if needed)',
-    type: 'string'
-  })
-  .option('drop', {
-    describe: 'Drop and recreate the database before importing',
-    type: 'boolean',
-    default: false
-  })
-  .option('data_only', {
-    describe: 'Import only data, skip schema creation',
-    type: 'boolean',
-    default: false
-  })
-  .option('clean', {
-    describe: 'Truncate tables before importing data',
-    type: 'boolean',
-    default: false
-  })
-  .option('table', {
-    describe: 'Import only specific tables (comma separated)',
-    type: 'string'
-  })
-  .option('config_only', {
-    describe: 'Only import the config table',
-    type: 'boolean',
-    default: false
-  })
-  .option('ignore_duplicates', {
-    describe: 'Skip duplicate records during import',
-    type: 'boolean',
-    default: false
-  })
-  .option('chunk_size', {
-    describe: 'Maximum rows per chunk when processing large tables',
-    type: 'number',
-    default: 5000
-  })
-  .option('update_config', {
-    describe:
-      'Update config table with values from backup (instead of replacing)',
-    type: 'boolean',
-    default: false
-  }).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv))
+    .option('q', {
+      describe: 'Query string to find backup file',
+      type: 'string',
+      demandOption: true
+    })
+    .option('db', {
+      describe: 'Database name to import to',
+      type: 'string',
+      default: 'league_development'
+    })
+    .option('user', {
+      describe: 'PostgreSQL username',
+      type: 'string',
+      default: 'trashman'
+    })
+    .option('password', {
+      describe: 'PostgreSQL password (if needed)',
+      type: 'string'
+    })
+    .option('drop', {
+      describe: 'Drop and recreate the database before importing',
+      type: 'boolean',
+      default: false
+    })
+    .option('data_only', {
+      describe: 'Import only data, skip schema creation',
+      type: 'boolean',
+      default: false
+    })
+    .option('clean', {
+      describe: 'Truncate tables before importing data',
+      type: 'boolean',
+      default: false
+    })
+    .option('table', {
+      describe: 'Import only specific tables (comma separated)',
+      type: 'string'
+    })
+    .option('config_only', {
+      describe: 'Only import the config table',
+      type: 'boolean',
+      default: false
+    })
+    .option('ignore_duplicates', {
+      describe: 'Skip duplicate records during import',
+      type: 'boolean',
+      default: false
+    })
+    .option('chunk_size', {
+      describe: 'Maximum rows per chunk when processing large tables',
+      type: 'number',
+      default: 5000
+    })
+    .option('update_config', {
+      describe:
+        'Update config table with values from backup (instead of replacing)',
+      type: 'boolean',
+      default: false
+    }).argv
+}
 
 /**
  * Process SQL file using streaming for better memory efficiency
@@ -548,6 +550,7 @@ const download_backup_from_drive = async (
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const query = argv.q
     const db_name = argv.db
     const db_user = argv.user

@@ -5,43 +5,43 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { is_main } from '#libs-server'
 
-const argv = yargs(hideBin(process.argv))
-  .option('created_by', {
-    alias: 'u',
-    describe: 'User ID creating the invite code',
-    type: 'number',
-    default: 1
-  })
-  .option('max_uses', {
-    alias: 'm',
-    describe: 'Maximum number of uses (null for unlimited)',
-    type: 'number',
-    default: 1
-  })
-  .option('expires_in_days', {
-    alias: 'e',
-    describe: 'Number of days until expiration (null for no expiration)',
-    type: 'number',
-    default: null
-  })
-  .option('code', {
-    alias: 'c',
-    describe: 'Custom invite code (will be generated if not provided)',
-    type: 'string'
-  })
-  .help()
-  .example(
-    '$0 --created_by 1',
-    'Generate unlimited use code with no expiration'
-  )
-  .example(
-    '$0 -u 1 -m 10 -e 30',
-    'Generate code with 10 uses that expires in 30 days'
-  )
-  .example(
-    '$0 -u 1 -c WELCOME2024',
-    'Generate code with custom code string'
-  ).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv))
+    .option('created_by', {
+      alias: 'u',
+      describe: 'User ID creating the invite code',
+      type: 'number',
+      default: 1
+    })
+    .option('max_uses', {
+      alias: 'm',
+      describe: 'Maximum number of uses (null for unlimited)',
+      type: 'number',
+      default: 1
+    })
+    .option('expires_in_days', {
+      alias: 'e',
+      describe: 'Number of days until expiration (null for no expiration)',
+      type: 'number',
+      default: null
+    })
+    .option('code', {
+      alias: 'c',
+      describe: 'Custom invite code (will be generated if not provided)',
+      type: 'string'
+    })
+    .help()
+    .example(
+      '$0 --created_by 1',
+      'Generate unlimited use code with no expiration'
+    )
+    .example(
+      '$0 -u 1 -m 10 -e 30',
+      'Generate code with 10 uses that expires in 30 days'
+    )
+    .example('$0 -u 1 -c WELCOME2024', 'Generate code with custom code string')
+    .argv
+}
 
 const log = debug('generate-invite-code')
 debug.enable('generate-invite-code')
@@ -114,6 +114,7 @@ const script = async ({
 }
 
 const main = async () => {
+  const argv = initialize_cli()
   let error
   try {
     await script({

@@ -22,7 +22,10 @@ import {
   team_game_market_types
 } from '#libs-shared/bookmaker-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-fanatics-odds')
 debug.enable('import-fanatics-odds,get-player,insert-prop-markets,fanatics')
 
@@ -245,6 +248,7 @@ const run = async ({
 }
 
 export const job = async () => {
+  const argv = initialize_cli()
   let error
   try {
     await run({

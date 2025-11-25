@@ -95,119 +95,122 @@ const generate_all_formats = async (options = {}) => {
   console.log(`\nFORMAT DATA GENERATION COMPLETE!`)
 }
 
-// Configure yargs
-const argv = yargs(hideBin(process.argv))
-  .option('dry-run', {
-    type: 'boolean',
-    default: false,
-    describe: 'Preview what would be executed without running'
-  })
-  .option('continue-on-error', {
-    type: 'boolean',
-    default: false,
-    describe: 'Continue processing even if some steps fail'
-  })
-  .option('skip-core-formats', {
-    type: 'boolean',
-    default: false,
-    describe: 'Skip generating core format definitions'
-  })
-  .option('scoring-only', {
-    type: 'boolean',
-    default: false,
-    describe: 'Only process scoring formats'
-  })
-  .option('league-only', {
-    type: 'boolean',
-    default: false,
-    describe: 'Only process league formats'
-  })
-  .option('all-formats', {
-    type: 'boolean',
-    default: true,
-    describe: 'Generate data for all scoring and league formats'
-  })
-  .option('formats', {
-    type: 'string',
-    describe: 'Only process specific formats (comma-separated)',
-    coerce: (arg) => (arg ? arg.split(',') : [])
-  })
-  .option('skip-steps', {
-    type: 'string',
-    describe: 'Skip specific generation steps (comma-separated)',
-    coerce: (arg) => (arg ? arg.split(',') : [])
-  })
-  .option('only-steps', {
-    type: 'string',
-    describe: 'Only run specific generation steps (comma-separated)',
-    coerce: (arg) => (arg ? arg.split(',') : [])
-  })
-  .option('only-missing', {
-    type: 'boolean',
-    default: true,
-    describe: 'Only generate missing data (skip if data already exists)'
-  })
-  .option('hash', {
-    type: 'string',
-    describe: 'Process specific league format hash'
-  })
-  .option('lid', {
-    type: 'number',
-    describe: 'Process format for specific league ID'
-  })
-  .option('format', {
-    type: 'string',
-    describe: 'Process specific named format (e.g., ppr_12_team)'
-  })
-  .option('remove', {
-    type: 'boolean',
-    default: false,
-    describe: 'Remove data instead of generating it'
-  })
-  .option('cleanup-orphaned', {
-    type: 'boolean',
-    default: false,
-    describe: 'Remove data for unused format hashes'
-  })
-  .help()
-  .alias('help', 'h')
-  .example('$0', 'Generate all format data (full run)')
-  .example('$0 --dry-run', 'Preview what would be generated')
-  .example('$0 --scoring-only', 'Only generate scoring format data')
-  .example(
-    '$0 --formats standard,half_ppr,ppr',
-    'Only generate data for specific formats'
-  )
-  .example(
-    '$0 --skip-steps scoring_format_gamelogs,league_format_gamelogs',
-    'Skip expensive steps like gamelogs'
-  )
-  .example(
-    '$0 --only-steps scoring_format_projections,league_format_projections',
-    'Only run projection processing'
-  )
-  .example(
-    '$0 --no-only-missing',
-    'Regenerate all data even if it already exists'
-  )
-  .example(
-    '$0 --only-missing --formats standard,ppr',
-    'Generate only missing data for specific formats'
-  )
-  .example('$0 --lid 1', 'Generate data for league ID 1')
-  .example('$0 --hash abc123def', 'Generate data for specific format hash')
-  .example('$0 --format ppr_12_team', 'Generate data for named format')
-  .example(
-    '$0 --remove --hash abc123def --dry-run',
-    'Preview removal of format data'
-  )
-  .example('$0 --cleanup-orphaned', 'Remove data for unused format hashes').argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv))
+    .option('dry-run', {
+      type: 'boolean',
+      default: false,
+      describe: 'Preview what would be executed without running'
+    })
+    .option('continue-on-error', {
+      type: 'boolean',
+      default: false,
+      describe: 'Continue processing even if some steps fail'
+    })
+    .option('skip-core-formats', {
+      type: 'boolean',
+      default: false,
+      describe: 'Skip generating core format definitions'
+    })
+    .option('scoring-only', {
+      type: 'boolean',
+      default: false,
+      describe: 'Only process scoring formats'
+    })
+    .option('league-only', {
+      type: 'boolean',
+      default: false,
+      describe: 'Only process league formats'
+    })
+    .option('all-formats', {
+      type: 'boolean',
+      default: true,
+      describe: 'Generate data for all scoring and league formats'
+    })
+    .option('formats', {
+      type: 'string',
+      describe: 'Only process specific formats (comma-separated)',
+      coerce: (arg) => (arg ? arg.split(',') : [])
+    })
+    .option('skip-steps', {
+      type: 'string',
+      describe: 'Skip specific generation steps (comma-separated)',
+      coerce: (arg) => (arg ? arg.split(',') : [])
+    })
+    .option('only-steps', {
+      type: 'string',
+      describe: 'Only run specific generation steps (comma-separated)',
+      coerce: (arg) => (arg ? arg.split(',') : [])
+    })
+    .option('only-missing', {
+      type: 'boolean',
+      default: true,
+      describe: 'Only generate missing data (skip if data already exists)'
+    })
+    .option('hash', {
+      type: 'string',
+      describe: 'Process specific league format hash'
+    })
+    .option('lid', {
+      type: 'number',
+      describe: 'Process format for specific league ID'
+    })
+    .option('format', {
+      type: 'string',
+      describe: 'Process specific named format (e.g., ppr_12_team)'
+    })
+    .option('remove', {
+      type: 'boolean',
+      default: false,
+      describe: 'Remove data instead of generating it'
+    })
+    .option('cleanup-orphaned', {
+      type: 'boolean',
+      default: false,
+      describe: 'Remove data for unused format hashes'
+    })
+    .help()
+    .alias('help', 'h')
+    .example('$0', 'Generate all format data (full run)')
+    .example('$0 --dry-run', 'Preview what would be generated')
+    .example('$0 --scoring-only', 'Only generate scoring format data')
+    .example(
+      '$0 --formats standard,half_ppr,ppr',
+      'Only generate data for specific formats'
+    )
+    .example(
+      '$0 --skip-steps scoring_format_gamelogs,league_format_gamelogs',
+      'Skip expensive steps like gamelogs'
+    )
+    .example(
+      '$0 --only-steps scoring_format_projections,league_format_projections',
+      'Only run projection processing'
+    )
+    .example(
+      '$0 --no-only-missing',
+      'Regenerate all data even if it already exists'
+    )
+    .example(
+      '$0 --only-missing --formats standard,ppr',
+      'Generate only missing data for specific formats'
+    )
+    .example('$0 --lid 1', 'Generate data for league ID 1')
+    .example('$0 --hash abc123def', 'Generate data for specific format hash')
+    .example('$0 --format ppr_12_team', 'Generate data for named format')
+    .example(
+      '$0 --remove --hash abc123def --dry-run',
+      'Preview removal of format data'
+    )
+    .example('$0 --cleanup-orphaned', 'Remove data for unused format hashes')
+    .argv
+}
 
 /**
  * Parse command line arguments and return options
  * @returns {Object} Parsed arguments with action and options
  */
 const parse_args = () => {
+  const argv = initialize_cli()
   // Check for single format parameters
   const has_single_format = argv.hash || argv.lid !== undefined || argv.format
 

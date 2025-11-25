@@ -8,7 +8,10 @@ import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 import { is_main, batch_insert, selection_result } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('calculate-weekly-market-selections-analysis')
 debug.enable('calculate-weekly-market-selections-analysis')
 
@@ -442,6 +445,7 @@ const calculate_weekly_market_selections_analysis = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const week = argv.week || constants.season.nfl_seas_week
     const year = argv.year || constants.season.year
     const seas_type = argv.seas_type || constants.season.nfl_seas_type

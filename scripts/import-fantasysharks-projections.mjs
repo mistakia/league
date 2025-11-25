@@ -12,18 +12,20 @@ import {
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import:projections')
 debug.enable('import:projections,get-player,fetch')
 
-const URL = argv.season
-  ? 'https://www.fantasysharks.com/apps/Projections/SeasonProjections.php?pos=ALL&format=json&l=2'
-  : 'https://www.fantasysharks.com/apps/Projections/WeeklyProjections.php?pos=ALL&format=json'
-const week = argv.season ? 0 : Math.max(constants.season.week, 1)
-const year = new Date().getFullYear()
-const timestamp = Math.round(Date.now() / 1000)
-
-const run = async () => {
+const run = async ({ season = false, dry = false } = {}) => {
+  const URL = season
+    ? 'https://www.fantasysharks.com/apps/Projections/SeasonProjections.php?pos=ALL&format=json&l=2'
+    : 'https://www.fantasysharks.com/apps/Projections/WeeklyProjections.php?pos=ALL&format=json'
+  const week = season ? 0 : Math.max(constants.season.week, 1)
+  const year = new Date().getFullYear()
+  const timestamp = Math.round(Date.now() / 1000)
   // do not pull in any projections after the season has ended
   if (constants.season.week > constants.season.nflFinalWeek) {
     return
@@ -90,7 +92,7 @@ const run = async () => {
     log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`)
   )
 
-  if (argv.dry) {
+  if (dry) {
     log(inserts[0])
     return
   }
@@ -122,7 +124,8 @@ const run = async () => {
 const main = async () => {
   let error
   try {
-    await run()
+    const argv = initialize_cli()
+    await run({ season: argv.season, dry: argv.dry })
   } catch (err) {
     error = err
     console.log(error)

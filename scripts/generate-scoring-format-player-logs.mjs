@@ -10,7 +10,10 @@ import generate_scoring_format_player_gamelogs from './generate-scoring-format-p
 import generate_scoring_format_player_seasonlogs from './generate-scoring-format-player-seasonlogs.mjs'
 import generate_scoring_format_player_careerlogs from './generate-scoring-format-player-careerlogs.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('generate-scoring-format-player-logs')
 debug.enable(
   'generate-scoring-format-player-logs,generate-scoring-format-player-gamelogs,generate-scoring-format-player-seasonlogs,generate-scoring-format-player-careerlogs'
@@ -19,6 +22,7 @@ debug.enable(
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const scoring_format_hash = argv.scoring_format_hash
 
     if (!scoring_format_hash) {

@@ -7,7 +7,10 @@ import { constants, calculatePoints, groupBy } from '#libs-shared'
 import { is_main, batch_insert } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('process-projections-for-scoring-format')
 debug.enable('process-projections-for-scoring-format')
 
@@ -135,6 +138,7 @@ const process_projections_for_scoring_format = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const scoring_format_hash = argv.scoring_format_hash
     const year = argv.year ? Number(argv.year) : null
     const all = argv.all

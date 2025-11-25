@@ -7,16 +7,18 @@ import { hideBin } from 'yargs/helpers'
 import processActiveWaivers from './process-waivers-free-agency-active.mjs'
 import processPracticeWaivers from './process-waivers-free-agency-practice.mjs'
 
-const argv = yargs(hideBin(process.argv))
-  .option('wid', {
-    alias: 'waiver-id',
-    describe: 'Process a specific waiver by ID',
-    type: 'string'
-  })
-  .option('daily', {
-    describe: 'Run daily waivers',
-    type: 'boolean'
-  }).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv))
+    .option('wid', {
+      alias: 'waiver-id',
+      describe: 'Process a specific waiver by ID',
+      type: 'string'
+    })
+    .option('daily', {
+      describe: 'Run daily waivers',
+      type: 'boolean'
+    }).argv
+}
 
 const run_active = async ({ daily = false }) => {
   let error
@@ -103,6 +105,7 @@ const process_specific_waiver = async (waiver_id) => {
 }
 
 const main = async () => {
+  const argv = initialize_cli()
   if (argv.wid) {
     await process_specific_waiver(argv.wid)
   } else {

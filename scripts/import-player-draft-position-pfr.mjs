@@ -7,7 +7,10 @@ import { constants } from '#libs-shared'
 import { is_main, pfr, updatePlayer, find_player_row } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-player-draft-position-pfr')
 debug.enable(
   'import-player-draft-position-pfr,update-player,get-player,pro-football-reference'
@@ -93,6 +96,7 @@ const import_player_draft_position_pfr = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     await import_player_draft_position_pfr({
       year: argv.year,
       ignore_cache: argv.ignore_cache,

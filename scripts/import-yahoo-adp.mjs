@@ -14,7 +14,10 @@ import {
 import { constants } from '#libs-shared'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-yahoo-adp')
 debug.enable('import-yahoo-adp,update-player,get-player')
 
@@ -168,6 +171,7 @@ const import_yahoo_adp = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     await import_yahoo_adp({ dry_run: argv.dry, year: argv.year })
   } catch (err) {
     error = err

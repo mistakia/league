@@ -4,9 +4,11 @@ import { hideBin } from 'yargs/helpers'
 
 import { getLeague, sendNotifications, is_main } from '#libs-server'
 
-const argv = yargs(hideBin(process.argv)).argv
 const log = debug('send-notification')
-debug.enable('send-notification')
+
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
 
 const run = async ({ message, dry = false }) => {
   if (!message) {
@@ -31,6 +33,8 @@ const run = async ({ message, dry = false }) => {
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
+    debug.enable('send-notification')
     await run({
       message: argv.message,
       dry: argv.dry

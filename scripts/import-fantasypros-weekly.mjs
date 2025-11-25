@@ -13,7 +13,10 @@ import {
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import:rankings:weekly')
 debug.enable('import:rankings:weekly,get-player,fetch')
 
@@ -159,6 +162,7 @@ const import_fantasypros_weekly_rankings = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const year = argv.year ? argv.year : constants.season.year
     const week = argv.week ? argv.week : constants.season.week
     await import_fantasypros_weekly_rankings({

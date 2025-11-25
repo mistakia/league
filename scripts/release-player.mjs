@@ -9,74 +9,76 @@ import format_player_name from '#libs-shared/format-player-name.mjs'
 import { is_main, getLeague } from '#libs-server'
 import process_release from '#libs-server/process-release.mjs'
 
-const argv = yargs(hideBin(process.argv))
-  .usage('Usage: $0 [options]')
-  .option('league-id', {
-    alias: 'l',
-    type: 'number',
-    demandOption: true,
-    describe: 'League ID'
-  })
-  .option('team-id', {
-    alias: 't',
-    type: 'number',
-    demandOption: true,
-    describe: 'Team ID'
-  })
-  .option('player-id', {
-    alias: 'p',
-    type: 'string',
-    describe: 'Player ID (exact match)'
-  })
-  .option('player-name', {
-    alias: 'n',
-    type: 'string',
-    describe: 'Player name (supports fuzzy matching)'
-  })
-  .option('activate-player-id', {
-    alias: 'a',
-    type: 'string',
-    describe: 'Player ID to activate from practice squad'
-  })
-  .option('activate-player-name', {
-    alias: 'A',
-    type: 'string',
-    describe: 'Player name to activate from practice squad'
-  })
-  .option('dry-run', {
-    alias: 'd',
-    type: 'boolean',
-    default: false,
-    describe: 'Show what would be done without making changes'
-  })
-  .check((argv) => {
-    if (!argv.playerId && !argv.playerName) {
-      throw new Error('Must specify either --player-id or --player-name')
-    }
-    if (argv.playerId && argv.playerName) {
-      throw new Error('Cannot specify both --player-id and --player-name')
-    }
-    if (argv.activatePlayerId && argv.activatePlayerName) {
-      throw new Error(
-        'Cannot specify both --activate-player-id and --activate-player-name'
-      )
-    }
-    return true
-  })
-  .example(
-    '$0 --league-id 1 --team-id 5 --player-id "12345"',
-    'Release player by ID'
-  )
-  .example(
-    '$0 --league-id 1 --team-id 5 --player-name "Josh Allen"',
-    'Release player by name'
-  )
-  .example(
-    '$0 -l 1 -t 5 -p "12345" -a "67890"',
-    'Release player and activate another from practice squad'
-  )
-  .alias('help', 'h')
-  .parse()
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv))
+    .usage('Usage: $0 [options]')
+    .option('league-id', {
+      alias: 'l',
+      type: 'number',
+      demandOption: true,
+      describe: 'League ID'
+    })
+    .option('team-id', {
+      alias: 't',
+      type: 'number',
+      demandOption: true,
+      describe: 'Team ID'
+    })
+    .option('player-id', {
+      alias: 'p',
+      type: 'string',
+      describe: 'Player ID (exact match)'
+    })
+    .option('player-name', {
+      alias: 'n',
+      type: 'string',
+      describe: 'Player name (supports fuzzy matching)'
+    })
+    .option('activate-player-id', {
+      alias: 'a',
+      type: 'string',
+      describe: 'Player ID to activate from practice squad'
+    })
+    .option('activate-player-name', {
+      alias: 'A',
+      type: 'string',
+      describe: 'Player name to activate from practice squad'
+    })
+    .option('dry-run', {
+      alias: 'd',
+      type: 'boolean',
+      default: false,
+      describe: 'Show what would be done without making changes'
+    })
+    .check((argv) => {
+      if (!argv.playerId && !argv.playerName) {
+        throw new Error('Must specify either --player-id or --player-name')
+      }
+      if (argv.playerId && argv.playerName) {
+        throw new Error('Cannot specify both --player-id and --player-name')
+      }
+      if (argv.activatePlayerId && argv.activatePlayerName) {
+        throw new Error(
+          'Cannot specify both --activate-player-id and --activate-player-name'
+        )
+      }
+      return true
+    })
+    .example(
+      '$0 --league-id 1 --team-id 5 --player-id "12345"',
+      'Release player by ID'
+    )
+    .example(
+      '$0 --league-id 1 --team-id 5 --player-name "Josh Allen"',
+      'Release player by name'
+    )
+    .example(
+      '$0 -l 1 -t 5 -p "12345" -a "67890"',
+      'Release player and activate another from practice squad'
+    )
+    .alias('help', 'h')
+    .parse()
+}
 
 const log = debug('release-player')
 debug.enable('release-player')
@@ -133,7 +135,12 @@ const search_players_by_name = (search_term, players) => {
   return unique_matches
 }
 
-const resolve_player = async ({ player_id, player_name, lid, tid }) => {
+const resolve_player = async ({
+  player_id = null,
+  player_name = null,
+  lid,
+  tid
+}) => {
   if (player_id) {
     const players = await db('player').where({ pid: player_id }).limit(1)
     if (!players.length) {
@@ -187,6 +194,7 @@ const resolve_player = async ({ player_id, player_name, lid, tid }) => {
 }
 
 const main = async () => {
+  const argv = initialize_cli()
   // Set mock date if provided (for testing)
   if (process.env.MOCK_DATE) {
     MockDate.set(process.env.MOCK_DATE)

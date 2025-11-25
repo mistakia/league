@@ -7,7 +7,10 @@ import { constants } from '#libs-shared'
 import { is_main, getLeague } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('generate-league-season-teams')
 debug.enable('generate-league-season-teams')
 
@@ -105,6 +108,7 @@ const generate_league_season_teams = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const lid = argv.lid
     const year = argv.year
     if (!lid) {

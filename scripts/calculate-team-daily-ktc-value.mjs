@@ -13,7 +13,10 @@ import {
 } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('calculate-team-daily-ktc-value')
 debug.enable('calculate-team-daily-ktc-value')
 
@@ -360,6 +363,7 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     if (argv.lid) {
       await calculate_team_daily_ktc_value({ lid: argv.lid })
     } else {

@@ -14,7 +14,10 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('announce-restricted-free-agent')
 debug.enable('announce-restricted-free-agent')
 
@@ -88,7 +91,10 @@ const calculate_announcement_timestamp = ({ league, day_offset = 0 }) => {
  * @param {boolean} params.use_previous - Whether to check eligibility for previous day announcements
  * @returns {Promise<Array>} Array of eligible league objects
  */
-const get_eligible_leagues = async ({ use_previous = false } = {}) => {
+const get_eligible_leagues = async ({
+  use_previous = false,
+  dry_run = false
+} = {}) => {
   const current_timestamp = Math.round(Date.now() / 1000)
 
   // Get leagues currently in RFA period
@@ -123,7 +129,7 @@ const get_eligible_leagues = async ({ use_previous = false } = {}) => {
         `next announcement time: ${dayjs.unix(timing_info.next_announcement_time).format('YYYY-MM-DD HH:mm:ss')}`
     )
 
-    if (timing_info.can_announce || argv.dry_run) {
+    if (timing_info.can_announce || dry_run) {
       eligible_leagues.push(league)
     }
   }
@@ -334,7 +340,7 @@ const process_all_leagues = async ({
   dry_run = false,
   use_previous = false
 } = {}) => {
-  const eligible_leagues = await get_eligible_leagues({ use_previous })
+  const eligible_leagues = await get_eligible_leagues({ use_previous, dry_run })
 
   if (!eligible_leagues.length) {
     log('No eligible leagues found for RFA announcements at the current hour')
@@ -359,6 +365,7 @@ const process_all_leagues = async ({
 
 const main = async () => {
   let error
+  const argv = initialize_cli()
   const { lid, tid, use_previous = false, dry_run = false } = argv
 
   try {

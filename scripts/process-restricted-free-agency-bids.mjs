@@ -22,7 +22,9 @@ dayjs.extend(timezone)
 const log = debug('process-restricted-free-agency-bids')
 debug.enable('process-restricted-free-agency-bids')
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
 
 /**
  * Sort bids by waiver order for the given league
@@ -453,6 +455,7 @@ export default run
 
 const main = async () => {
   debug.enable('process-restricted-free-agency-bids')
+  const argv = initialize_cli()
   let error
   try {
     const dry_run = argv.dry_run || false

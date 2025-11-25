@@ -20,7 +20,10 @@ import {
 
 dayjs.extend(isBetween)
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-fanduel-wagers')
 debug.enable('import-fanduel-wagers,fanduel')
 
@@ -150,7 +153,8 @@ const import_fanduel_wagers = async ({
   filename,
   authorization,
   fanduel_states = DEFAULT_FANDUEL_STATES,
-  placed_after
+  placed_after,
+  dry_run = false
 } = {}) => {
   const wagers = await load_fanduel_wagers({
     filename,
@@ -367,7 +371,7 @@ const import_fanduel_wagers = async ({
     }
   }
 
-  if (argv.dry) {
+  if (dry_run) {
     log(wager_inserts[0])
     log(wager_inserts.find((w) => w.selection_count > 8))
     return
@@ -391,6 +395,7 @@ const import_fanduel_wagers = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const auth = argv.auth
     let fanduel_states = argv.states
     if (fanduel_states && !Array.isArray(fanduel_states)) {
@@ -408,7 +413,8 @@ const main = async () => {
       authorization: auth,
       fanduel_states,
       placed_after,
-      placed_before
+      placed_before,
+      dry_run: argv.dry
     })
   } catch (err) {
     error = err

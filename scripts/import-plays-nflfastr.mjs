@@ -44,11 +44,11 @@ import { NFLFASTR_EXCLUSIVE_FIELDS } from '#libs-server/nflfastr/nflfastr-exclus
  * -d: Force download of CSV file even if cached
  */
 
-const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-nflfastr-plays')
-debug.enable(
-  'import-nflfastr-plays,update-play,fetch,play-cache,play-enum-utils'
-)
+
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
 
 // ============================================================================
 // Basic Formatters
@@ -833,6 +833,10 @@ const run = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
+    debug.enable(
+      'import-nflfastr-plays,update-play,fetch,play-cache,play-enum-utils'
+    )
     const year = argv.year || constants.season.year
     const ignore_conflicts = argv.ignore_conflicts
     const force_download = argv.d

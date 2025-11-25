@@ -14,7 +14,10 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-games-sportradar')
 debug.enable('import-games-sportradar,sportradar')
 
@@ -355,6 +358,7 @@ const import_games_sportradar = async ({
 }
 
 const main = async () => {
+  const argv = initialize_cli()
   let error
   try {
     const year = argv.year ? parseInt(argv.year) : null

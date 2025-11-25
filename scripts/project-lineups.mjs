@@ -7,7 +7,10 @@ import { constants, Roster, optimizeLineup } from '#libs-shared'
 import { getLeague, getRoster, getPlayers, is_main } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('project-lineups')
 
 const project_lineups = async (lid) => {
@@ -218,6 +221,7 @@ const main = async () => {
   debug.enable('project-lineups')
   let error
   try {
+    const argv = initialize_cli()
     const lid = argv.lid || 1
     await project_lineups(lid)
   } catch (err) {

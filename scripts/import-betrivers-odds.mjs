@@ -17,7 +17,10 @@ import {
 import { normalize_selection_metric_line } from '#libs-server/normalize-selection-metric-line.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-betrivers-odds')
 debug.enable('import-betrivers-odds,insert-prop-markets')
 
@@ -98,6 +101,7 @@ const format_market = async ({
 }
 
 const import_betrivers_odds = async () => {
+  const argv = initialize_cli()
   const formatted_markets = []
   const all_markets = []
   const timestamp = Math.round(Date.now() / 1000)

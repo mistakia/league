@@ -7,14 +7,18 @@ import { constants } from '#libs-shared'
 import { is_main } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('calculate-matchup-projection')
 debug.enable('calculate-matchup-projection')
 
 const calculate_matchup_projection = async ({
   year = constants.season.year,
-  lid = 1
-}) => {
+  lid = 1,
+  dry = false
+} = {}) => {
   log(`Calculating matchup projections for lid ${lid} in ${year}`)
   const lineups = await db('league_team_lineups').where({ year, lid })
   const matchups = await db('matchups').where({ year, lid })
@@ -46,7 +50,7 @@ const calculate_matchup_projection = async ({
     })
   }
 
-  if (argv.dry) {
+  if (dry) {
     log(matchup_updates[0])
     return
   }
@@ -60,9 +64,11 @@ const calculate_matchup_projection = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     await calculate_matchup_projection({
       year: argv.year,
-      lid: argv.lid
+      lid: argv.lid,
+      dry: argv.dry
     })
   } catch (err) {
     error = err

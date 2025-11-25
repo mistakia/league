@@ -24,86 +24,90 @@ import {
   log_processing_summary
 } from '#libs-server/draftkings/index.mjs'
 
-const argv = yargs(hideBin(process.argv))
-  .usage('Usage: $0 [options]')
-  .option('mode', {
-    describe: 'Import mode',
-    type: 'string',
-    default: 'all',
-    choices: ['all', 'events']
-  })
-  .option('categories', {
-    describe: 'Comma-separated list of category IDs to filter',
-    type: 'string'
-  })
-  .option('subcategories', {
-    describe: 'Comma-separated list of subcategory IDs to filter',
-    type: 'string'
-  })
-  .option('events', {
-    describe: 'Comma-separated list of event IDs to process (events mode only)',
-    type: 'string'
-  })
-  .option('use-tracking', {
-    describe: 'Use tracking data to filter categories/subcategories',
-    type: 'string',
-    choices: ['active', 'priority'],
-    conflicts: ['categories', 'subcategories']
-  })
-  .option('tracking-days', {
-    describe: 'Days to look back for active tracking filter',
-    type: 'number',
-    default: 7
-  })
-  .option('dry', {
-    describe: 'Dry run - do not insert to database',
-    type: 'boolean',
-    default: false
-  })
-  .option('write', {
-    describe: 'Write JSON files to tmp directory',
-    type: 'boolean',
-    default: false
-  })
-  .help('h')
-  .alias('h', 'help')
-  .example('$0', 'Import all categories and subcategories')
-  .example(
-    '$0 --mode events',
-    'Import using events mode (faster for specific events)'
-  )
-  .example('$0 --categories 492,528', 'Import specific categories by ID')
-  .example(
-    '$0 --subcategories 17147,17223',
-    'Import specific subcategories by ID'
-  )
-  .example(
-    '$0 --mode events --events 32225662 --categories 492',
-    'Import game lines for specific event'
-  )
-  .example(
-    '$0 --use-tracking active --tracking-days 3',
-    'Import categories active in last 3 days'
-  )
-  .example(
-    '$0 --use-tracking priority',
-    'Import priority categories (recent activity + good success rates)'
-  )
-  .example('$0 --dry --write', 'Dry run with JSON output files')
-  .epilogue(
-    'Modes:\n' +
-      '  all:    Process all league categories and subcategories\n' +
-      '  events: Process specific events with their categories\n\n' +
-      'Tracking Filters:\n' +
-      '  active:   Categories that had offers in the last N days\n' +
-      '  priority: Categories with recent activity OR good success rates\n\n' +
-      'Common Category IDs:\n' +
-      '  492:  Game Lines (spreads, totals, moneylines)\n' +
-      '  1000: Passing Props\n' +
-      '  1001: Rushing/Receiving Props\n' +
-      '  1342: Receiving Props\n' +
-      '  634:  Season Leaders'
-  ).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv))
+    .usage('Usage: $0 [options]')
+    .option('mode', {
+      describe: 'Import mode',
+      type: 'string',
+      default: 'all',
+      choices: ['all', 'events']
+    })
+    .option('categories', {
+      describe: 'Comma-separated list of category IDs to filter',
+      type: 'string'
+    })
+    .option('subcategories', {
+      describe: 'Comma-separated list of subcategory IDs to filter',
+      type: 'string'
+    })
+    .option('events', {
+      describe:
+        'Comma-separated list of event IDs to process (events mode only)',
+      type: 'string'
+    })
+    .option('use-tracking', {
+      describe: 'Use tracking data to filter categories/subcategories',
+      type: 'string',
+      choices: ['active', 'priority'],
+      conflicts: ['categories', 'subcategories']
+    })
+    .option('tracking-days', {
+      describe: 'Days to look back for active tracking filter',
+      type: 'number',
+      default: 7
+    })
+    .option('dry', {
+      describe: 'Dry run - do not insert to database',
+      type: 'boolean',
+      default: false
+    })
+    .option('write', {
+      describe: 'Write JSON files to tmp directory',
+      type: 'boolean',
+      default: false
+    })
+    .help('h')
+    .alias('h', 'help')
+    .example('$0', 'Import all categories and subcategories')
+    .example(
+      '$0 --mode events',
+      'Import using events mode (faster for specific events)'
+    )
+    .example('$0 --categories 492,528', 'Import specific categories by ID')
+    .example(
+      '$0 --subcategories 17147,17223',
+      'Import specific subcategories by ID'
+    )
+    .example(
+      '$0 --mode events --events 32225662 --categories 492',
+      'Import game lines for specific event'
+    )
+    .example(
+      '$0 --use-tracking active --tracking-days 3',
+      'Import categories active in last 3 days'
+    )
+    .example(
+      '$0 --use-tracking priority',
+      'Import priority categories (recent activity + good success rates)'
+    )
+    .example('$0 --dry --write', 'Dry run with JSON output files')
+    .epilogue(
+      'Modes:\n' +
+        '  all:    Process all league categories and subcategories\n' +
+        '  events: Process specific events with their categories\n\n' +
+        'Tracking Filters:\n' +
+        '  active:   Categories that had offers in the last N days\n' +
+        '  priority: Categories with recent activity OR good success rates\n\n' +
+        'Common Category IDs:\n' +
+        '  492:  Game Lines (spreads, totals, moneylines)\n' +
+        '  1000: Passing Props\n' +
+        '  1001: Rushing/Receiving Props\n' +
+        '  1342: Receiving Props\n' +
+        '  634:  Season Leaders'
+    ).argv
+}
+
 const log = debug('import-draft-kings')
 debug.enable(DEBUG_MODULES.join(','))
 
@@ -123,6 +127,7 @@ debug.enable(DEBUG_MODULES.join(','))
  * Main execution function for DraftKings odds import
  */
 const run = async () => {
+  const argv = initialize_cli()
   console.time('import-draft-kings')
 
   // Preload player cache for performance optimization

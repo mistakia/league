@@ -11,7 +11,10 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 
 dayjs.extend(timezone)
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-nfl-games-nfl')
 debug.enable('import-nfl-games-nfl,nfl')
 
@@ -114,6 +117,7 @@ const run = async ({
 }
 
 const main = async () => {
+  const argv = initialize_cli()
   let error
   try {
     const ignore_cache = argv.ignore_cache

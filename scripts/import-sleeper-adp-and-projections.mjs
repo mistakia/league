@@ -14,7 +14,10 @@ import { job_types } from '#libs-shared/job-constants.mjs'
 
 import db from '#db'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-sleeper-adp-and-projections')
 const timestamp = Math.floor(Date.now() / 1000)
 const BATCH_SIZE = 500
@@ -298,6 +301,7 @@ const import_sleeper_adp_and_projections = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     await import_sleeper_adp_and_projections({
       ignore_cache: argv.ignore_cache,
       dry_run: argv.dry

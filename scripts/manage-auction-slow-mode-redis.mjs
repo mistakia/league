@@ -16,164 +16,166 @@ import {
 import db from '#db'
 import is_main from '#libs-server/is-main.mjs'
 
-const argv = yargs(hideBin(process.argv))
-  .command('list', 'List all active slow mode nominations', {
-    year: {
-      describe: 'Season year',
-      type: 'number',
-      default: constants.season.year
-    },
-    lid: {
-      describe: 'League ID',
-      type: 'number'
-    }
-  })
-  .command('get', 'Get nomination state', {
-    lid: {
-      describe: 'League ID',
-      type: 'number',
-      demand: true
-    },
-    pid: {
-      describe: 'Player ID',
-      type: 'string',
-      demand: true
-    },
-    year: {
-      describe: 'Season year',
-      type: 'number',
-      default: constants.season.year
-    }
-  })
-  .command('clear', 'Clear nomination state', {
-    lid: {
-      describe: 'League ID',
-      type: 'number',
-      demand: true
-    },
-    pid: {
-      describe: 'Player ID',
-      type: 'string',
-      demand: true
-    },
-    year: {
-      describe: 'Season year',
-      type: 'number',
-      default: constants.season.year
-    }
-  })
-  .command('clear-all', 'Clear all slow mode nominations for a league', {
-    lid: {
-      describe: 'League ID',
-      type: 'number',
-      demand: true
-    },
-    year: {
-      describe: 'Season year',
-      type: 'number',
-      default: constants.season.year
-    },
-    confirm: {
-      describe: 'Confirm clearing all nominations',
-      type: 'boolean',
-      default: false
-    }
-  })
-  .command('init', 'Initialize a nomination (testing)', {
-    lid: {
-      describe: 'League ID',
-      type: 'number',
-      demand: true
-    },
-    pid: {
-      describe: 'Player ID',
-      type: 'string',
-      demand: true
-    },
-    bid: {
-      describe: 'Initial bid amount',
-      type: 'number',
-      demand: true
-    },
-    teams: {
-      describe: 'Eligible team IDs (comma-separated)',
-      type: 'string',
-      demand: true
-    }
-  })
-  .command('pass', 'Record a team pass (testing)', {
-    lid: {
-      describe: 'League ID',
-      type: 'number',
-      demand: true
-    },
-    pid: {
-      describe: 'Player ID',
-      type: 'string',
-      demand: true
-    },
-    tid: {
-      describe: 'Team ID',
-      type: 'number',
-      demand: true
-    }
-  })
-  .command('bid', 'Update bid (testing)', {
-    lid: {
-      describe: 'League ID',
-      type: 'number',
-      demand: true
-    },
-    pid: {
-      describe: 'Player ID',
-      type: 'string',
-      demand: true
-    },
-    value: {
-      describe: 'New bid amount',
-      type: 'number',
-      demand: true
-    },
-    tid: {
-      describe: 'Bidding team ID',
-      type: 'number',
-      demand: true
-    },
-    teams: {
-      describe: 'New eligible team IDs (comma-separated)',
-      type: 'string'
-    }
-  })
-  .command('complete', 'Complete a nomination (testing)', {
-    lid: {
-      describe: 'League ID',
-      type: 'number',
-      demand: true
-    },
-    pid: {
-      describe: 'Player ID',
-      type: 'string',
-      demand: true
-    }
-  })
-  .command('reset', 'Reset all slow mode data for a league', {
-    lid: {
-      describe: 'League ID',
-      type: 'number',
-      demand: true
-    },
-    year: {
-      describe: 'Season year',
-      type: 'number',
-      default: constants.season.year
-    },
-    confirm: {
-      describe: 'Confirm reset',
-      type: 'boolean',
-      default: false
-    }
-  })
-  .help().argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv))
+    .command('list', 'List all active slow mode nominations', {
+      year: {
+        describe: 'Season year',
+        type: 'number',
+        default: constants.season.year
+      },
+      lid: {
+        describe: 'League ID',
+        type: 'number'
+      }
+    })
+    .command('get', 'Get nomination state', {
+      lid: {
+        describe: 'League ID',
+        type: 'number',
+        demand: true
+      },
+      pid: {
+        describe: 'Player ID',
+        type: 'string',
+        demand: true
+      },
+      year: {
+        describe: 'Season year',
+        type: 'number',
+        default: constants.season.year
+      }
+    })
+    .command('clear', 'Clear nomination state', {
+      lid: {
+        describe: 'League ID',
+        type: 'number',
+        demand: true
+      },
+      pid: {
+        describe: 'Player ID',
+        type: 'string',
+        demand: true
+      },
+      year: {
+        describe: 'Season year',
+        type: 'number',
+        default: constants.season.year
+      }
+    })
+    .command('clear-all', 'Clear all slow mode nominations for a league', {
+      lid: {
+        describe: 'League ID',
+        type: 'number',
+        demand: true
+      },
+      year: {
+        describe: 'Season year',
+        type: 'number',
+        default: constants.season.year
+      },
+      confirm: {
+        describe: 'Confirm clearing all nominations',
+        type: 'boolean',
+        default: false
+      }
+    })
+    .command('init', 'Initialize a nomination (testing)', {
+      lid: {
+        describe: 'League ID',
+        type: 'number',
+        demand: true
+      },
+      pid: {
+        describe: 'Player ID',
+        type: 'string',
+        demand: true
+      },
+      bid: {
+        describe: 'Initial bid amount',
+        type: 'number',
+        demand: true
+      },
+      teams: {
+        describe: 'Eligible team IDs (comma-separated)',
+        type: 'string',
+        demand: true
+      }
+    })
+    .command('pass', 'Record a team pass (testing)', {
+      lid: {
+        describe: 'League ID',
+        type: 'number',
+        demand: true
+      },
+      pid: {
+        describe: 'Player ID',
+        type: 'string',
+        demand: true
+      },
+      tid: {
+        describe: 'Team ID',
+        type: 'number',
+        demand: true
+      }
+    })
+    .command('bid', 'Update bid (testing)', {
+      lid: {
+        describe: 'League ID',
+        type: 'number',
+        demand: true
+      },
+      pid: {
+        describe: 'Player ID',
+        type: 'string',
+        demand: true
+      },
+      value: {
+        describe: 'New bid amount',
+        type: 'number',
+        demand: true
+      },
+      tid: {
+        describe: 'Bidding team ID',
+        type: 'number',
+        demand: true
+      },
+      teams: {
+        describe: 'New eligible team IDs (comma-separated)',
+        type: 'string'
+      }
+    })
+    .command('complete', 'Complete a nomination (testing)', {
+      lid: {
+        describe: 'League ID',
+        type: 'number',
+        demand: true
+      },
+      pid: {
+        describe: 'Player ID',
+        type: 'string',
+        demand: true
+      }
+    })
+    .command('reset', 'Reset all slow mode data for a league', {
+      lid: {
+        describe: 'League ID',
+        type: 'number',
+        demand: true
+      },
+      year: {
+        describe: 'Season year',
+        type: 'number',
+        default: constants.season.year
+      },
+      confirm: {
+        describe: 'Confirm reset',
+        type: 'boolean',
+        default: false
+      }
+    })
+    .help().argv
+}
 
 const format_state = (state) => {
   if (!state) return 'No state found'
@@ -212,6 +214,7 @@ const check_status = (state) => {
 }
 
 const main = async () => {
+  const argv = initialize_cli()
   const command = argv._[0]
 
   // Check if Redis is available

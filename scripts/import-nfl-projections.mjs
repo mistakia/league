@@ -8,7 +8,10 @@ import { constants } from '#libs-shared'
 import { is_main, find_player_row, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import:projections')
 debug.enable('import:projections,get-player')
 
@@ -23,7 +26,7 @@ const getURL = (week, offset) =>
         offset + 1
       }`
 
-const runOne = async (week = 0) => {
+const runOne = async ({ week = 0, dry = false } = {}) => {
   const missing = []
   const items = []
 
@@ -121,7 +124,7 @@ const runOne = async (week = 0) => {
     log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`)
   )
 
-  if (argv.dry) {
+  if (dry) {
     log(`${inserts.length} projections`)
     log(inserts[0])
     return
@@ -146,26 +149,27 @@ const runOne = async (week = 0) => {
   }
 }
 
-const run = async () => {
+const run = async ({ season = false, dry = false } = {}) => {
   // do not pull in any projections after the season has ended
   if (constants.season.week > constants.season.nflFinalWeek) {
     return
   }
 
-  if (argv.season) {
-    await runOne()
+  if (season) {
+    await runOne({ week: 0, dry })
   }
 
   let week = Math.max(1, constants.season.week)
   for (; week <= constants.season.finalWeek; week++) {
-    await runOne(week)
+    await runOne({ week, dry })
   }
 }
 
 const main = async () => {
   let error
   try {
-    await run()
+    const argv = initialize_cli()
+    await run({ season: argv.season, dry: argv.dry })
   } catch (err) {
     error = err
     console.log(error)

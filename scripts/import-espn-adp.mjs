@@ -14,7 +14,10 @@ import {
 import { constants } from '#libs-shared'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-espn-adp')
 debug.enable('import-espn-adp,update-player,get-player,espn')
 
@@ -163,6 +166,7 @@ const import_espn_adp = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     await import_espn_adp({ year: argv.year, dry_run: argv.dry })
   } catch (err) {
     error = err

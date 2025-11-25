@@ -17,7 +17,10 @@ import {
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-keeptradecut')
 debug.enable('import-keeptradecut,get-player,update-player,fetch')
 
@@ -221,6 +224,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     await importKeepTradeCut({ full: argv.full, dry: argv.dry })
   } catch (err) {
     error = err

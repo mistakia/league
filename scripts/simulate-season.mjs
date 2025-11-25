@@ -13,7 +13,10 @@ dayjs.extend(dayOfYear)
 const log = debug('simulate-season')
 debug.enable('simulate-season')
 const timestamp = Math.round(Date.now() / 1000)
-const argv = yargs(hideBin(process.argv)).argv
+
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
 
 const simulate_season = async (lid) => {
   if (isNaN(lid)) {
@@ -118,6 +121,7 @@ const simulate_season = async (lid) => {
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const lid = argv.lid || 1
     await simulate_season(lid)
   } catch (err) {

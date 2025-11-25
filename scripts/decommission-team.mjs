@@ -7,7 +7,10 @@ import { constants } from '#libs-shared'
 import { is_main, getRoster, processRelease } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('decommission-team')
 debug.enable('decommission-team')
 
@@ -54,6 +57,7 @@ const decommission_team = async ({ year = constants.season.year, team_id }) => {
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     await decommission_team({ team_id: argv.tid, year: argv.year })
   } catch (err) {
     error = err

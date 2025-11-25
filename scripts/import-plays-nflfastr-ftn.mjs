@@ -20,7 +20,10 @@ import {
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-ftn-charting-plays')
 debug.enable('import-ftn-charting-plays,update-play')
 
@@ -188,6 +191,7 @@ const run = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const year = argv.year || constants.season.year
     const ignore_conflicts = argv.ignore_conflicts
     const force_download = argv.d

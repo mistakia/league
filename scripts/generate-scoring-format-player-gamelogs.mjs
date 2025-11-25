@@ -9,7 +9,10 @@ import handle_season_args_for_script from '#libs-server/handle-season-args-for-s
 import calculate_points from './calculate-points.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('generate-scoring-format-player-gamelogs')
 debug.enable('generate-scoring-format-player-gamelogs')
 
@@ -91,6 +94,7 @@ const generate_scoring_format_player_gamelogs = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     let scoring_format_hash = argv.scoring_format_hash
 
     if (!scoring_format_hash) {

@@ -7,7 +7,10 @@ import { constants } from '#libs-shared'
 import { is_main, fantasylife, find_player_row } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-fantasylife-projections')
 debug.enable('import-fantasylife-projections,fantasylife,get-player')
 
@@ -129,6 +132,7 @@ const import_fantasylife_projections = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     await import_fantasylife_projections({
       table_id: argv.table_id,
       dry_run: argv.dry

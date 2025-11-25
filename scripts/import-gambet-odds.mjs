@@ -18,7 +18,10 @@ import {
 import { normalize_selection_metric_line } from '#libs-server/normalize-selection-metric-line.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-gambet-odds')
 debug.enable('import-gambet-odds,get-player,gambet')
 
@@ -117,6 +120,7 @@ const format_market = async ({ gambet_market, timestamp, event, nfl_game }) => {
 }
 
 const import_gambet_odds = async () => {
+  const argv = initialize_cli()
   log('importing gambet odds')
 
   const formatted_markets = []

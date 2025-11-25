@@ -9,7 +9,10 @@ import { hideBin } from 'yargs/helpers'
 import db from '#db'
 import { is_main, fanatics, format_market_selection_id } from '#libs-server'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-fanatics-wagers')
 debug.enable('import-fanatics-wagers,fanatics')
 
@@ -104,6 +107,7 @@ const load_fanatics_wagers = async ({
 }
 
 const import_fanatics_wagers = async ({
+  dry = false,
   user_id = 1,
   filename,
   session_token,
@@ -188,7 +192,7 @@ const import_fanatics_wagers = async ({
     }
   }
 
-  if (argv.dry) {
+  if (dry) {
     log(wager_inserts[0])
     return
   }
@@ -205,6 +209,7 @@ const import_fanatics_wagers = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const session_token = argv.session
     const channel = argv.channel
     const segment = argv.segment
@@ -221,7 +226,8 @@ const main = async () => {
       segment,
       state_code,
       dma,
-      placed_after
+      placed_after,
+      dry: argv.dry
     })
   } catch (err) {
     error = err

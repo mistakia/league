@@ -8,11 +8,14 @@ import { constants } from '#libs-shared'
 import { is_main, find_player_row, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import:projections')
 debug.enable('import:projections,get-player')
 
-const run = async () => {
+const run = async ({ dry = false } = {}) => {
   // do not pull in any projections after the season has ended
   if (constants.season.week > constants.season.nflFinalWeek) {
     return
@@ -88,7 +91,7 @@ const run = async () => {
     log(`could not find player: ${m.name} / ${m.pos} / ${m.team}`)
   )
 
-  if (argv.dry) {
+  if (dry) {
     log(`${inserts.length} projections`)
     log(inserts[0])
     return
@@ -121,7 +124,8 @@ const run = async () => {
 const main = async () => {
   let error
   try {
-    await run()
+    const argv = initialize_cli()
+    await run({ dry: argv.dry })
   } catch (err) {
     error = err
     console.log(error)

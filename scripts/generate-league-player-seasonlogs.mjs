@@ -9,7 +9,10 @@ import generateSeasonDates from './generate-season-dates.mjs'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('generate-league-player-seasonlogs')
 debug.enable('generate-league-player-seasonlogs')
 
@@ -133,6 +136,7 @@ const generate_league_player_seasonlogs = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const lid = argv.lid || 1
     const league = await getLeague({ lid })
     const { league_format_hash } = league

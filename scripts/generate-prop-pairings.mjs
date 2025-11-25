@@ -9,7 +9,10 @@ import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 import { is_main } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('generate-prop-pairings')
 debug.enable('generate-prop-pairings')
 
@@ -517,6 +520,7 @@ const generate_prop_pairings = async ({
 }
 
 const main = async () => {
+  const argv = initialize_cli()
   let error
   try {
     const week = argv.week

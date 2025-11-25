@@ -24,7 +24,10 @@ import process_player_seasonlogs from './process-player-seasonlogs.mjs'
 import generate_player_career_game_counts from './generate-player-career-game-counts.mjs'
 import generate_player_snaps_for_week from './generate-player-snaps.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('update-stats-weekly')
 debug.enable('update-stats-weekly')
 
@@ -110,6 +113,7 @@ const update_stats_weekly = async ({ week } = {}) => {
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     await update_stats_weekly({ week: argv.week })
   } catch (err) {
     error = err

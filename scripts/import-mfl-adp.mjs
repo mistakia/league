@@ -14,7 +14,10 @@ import {
 import { constants } from '#libs-shared'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-mfl-adp')
 debug.enable('import-mfl-adp,update-player,get-player')
 
@@ -186,6 +189,7 @@ const import_mfl_adp = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     await import_mfl_adp({ year: argv.year, dry_run: argv.dry })
   } catch (err) {
     error = err

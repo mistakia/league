@@ -7,7 +7,10 @@ import { constants } from '#libs-shared'
 import { is_main, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('generate-draft-picks')
 
 const run = async ({ future_year = constants.season.year + 1 }) => {
@@ -62,6 +65,7 @@ const main = async () => {
   debug.enable('generate-draft-picks')
   let error
   try {
+    const argv = initialize_cli()
     await run({ future_year: argv.year })
   } catch (err) {
     error = err

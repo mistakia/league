@@ -6,7 +6,10 @@ import db from '#db'
 import { constants } from '#libs-shared'
 import { is_main } from '#libs-server'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('populate-nfl-year-week-timestamp')
 debug.enable('populate-nfl-year-week-timestamp')
 
@@ -72,6 +75,7 @@ const populate_nfl_year_week_timestamp = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     const result = await populate_nfl_year_week_timestamp({ year: argv.year })
     log('Operation completed:', result)
   } catch (err) {

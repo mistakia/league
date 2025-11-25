@@ -16,7 +16,10 @@ const log = debug('import:projections')
 debug.enable('import:projections,get-player,4for4')
 
 const timestamp = Math.floor(Date.now() / 1000)
-const argv = yargs(hideBin(process.argv)).argv
+
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
 
 const get_projection = (stats) => ({
   py: Number(stats['Pass Yds']) || null,
@@ -146,6 +149,7 @@ const run = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     await run({ is_regular_season_projection: argv.season, dry_run: argv.dry })
   } catch (err) {
     error = err

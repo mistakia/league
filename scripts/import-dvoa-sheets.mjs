@@ -14,7 +14,10 @@ import db from '#db'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { fixTeam, constants } from '#libs-shared'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('import-dvoa-sheets')
 debug.enable('import-dvoa-sheets')
 
@@ -1191,6 +1194,7 @@ const import_dvoa_sheets = async ({ dry_run = false, filepath } = {}) => {
 }
 
 const main = async () => {
+  const argv = initialize_cli()
   let error
   try {
     await import_dvoa_sheets({ filepath: argv.filepath, dry_run: argv.dry })

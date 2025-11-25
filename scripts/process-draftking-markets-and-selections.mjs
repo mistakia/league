@@ -7,7 +7,10 @@ import { is_main, draftkings, find_player_row } from '#libs-server'
 import { bookmaker_constants, fixTeam } from '#libs-shared'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-const argv = yargs(hideBin(process.argv)).argv
+const initialize_cli = () => {
+  return yargs(hideBin(process.argv)).argv
+}
+
 const log = debug('process-draftkings-markets-and-selections')
 debug.enable('process-draftkings-markets-and-selections,get-player')
 
@@ -496,6 +499,7 @@ const process_draftkings_markets_and_selections = async ({
 const main = async () => {
   let error
   try {
+    const argv = initialize_cli()
     await process_draftkings_markets_and_selections({
       missing_only: argv.missing_only,
       since_date: argv.since_date
