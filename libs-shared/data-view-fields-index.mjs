@@ -105,7 +105,8 @@ export default {
   player_contract_option_bonus:
     'The option bonus for the player in the current contract year',
 
-  player_games_played: 'The number of games active',
+  player_games_played:
+    'The number of games the player was active for (on the 46-man gameday roster)',
 
   player_all_pro_first_team_selections:
     'Number of All-Pro First Team selections',
@@ -500,5 +501,445 @@ export default {
   team_play_count_from_plays:
     'Team Total Play Count, includes all plays (passes, rushes, punts, field goals, extra point attempts, two point conversions, kickoffs, and free kicks)',
   team_offensive_play_count_from_plays:
-    'Team Offensive Play Count, includes only passes and rushes'
+    'Team Offensive Play Count, includes only passes and rushes',
+
+  // Missing Team Stats from Plays
+  team_completion_percentage_over_expected_from_plays:
+    'Team Completion Percentage Over Expected (calculated from play-by-play data)',
+  team_yards_after_catch_from_plays:
+    'Team Yards After Catch (calculated from play-by-play data)',
+  team_series_count_from_plays:
+    'Team Series Count (calculated from play-by-play data)',
+  team_drive_count_from_plays:
+    'Team Drive Count (calculated from play-by-play data)',
+  team_yards_created_from_plays:
+    'Team Yards Created (calculated from play-by-play data)',
+  team_yards_blocked_from_plays:
+    'Team Yards Blocked (calculated from play-by-play data)',
+  team_expected_points_success_rate_from_plays:
+    'Team Expected Points Success Rate (calculated from play-by-play data)',
+  team_series_conversion_rate_from_plays:
+    'Team Series Conversion Rate (calculated from play-by-play data)',
+
+  // Player Rankings/ADP Fields
+  player_adp: 'Average Draft Position (ADP)',
+  player_adp_min: 'Minimum Draft Position',
+  player_adp_max: 'Maximum Draft Position',
+  player_adp_stddev: 'ADP Standard Deviation',
+  player_adp_sample_size: 'ADP Sample Size',
+  player_percent_drafted: 'Percent Drafted',
+  player_average_ranking: 'Average Ranking / Draft Position (ADP)',
+  player_overall_ranking: 'Overall Ranking',
+  player_position_ranking: 'Position Ranking',
+  player_min_ranking: 'Minimum Ranking',
+  player_max_ranking: 'Maximum Ranking',
+  player_ranking_standard_deviation: 'Ranking Standard Deviation',
+
+  // Practice/Injury Fields
+  player_practice_status:
+    "The player's practice participation status (Full, Limited, Did Not Practice)",
+  player_practice_injury:
+    "The injury affecting the player's practice participation",
+  player_practice_designation_monday:
+    'Monday practice designation (Full, Limited, DNP)',
+  player_practice_designation_tuesday:
+    'Tuesday practice designation (Full, Limited, DNP)',
+  player_practice_designation_wednesday:
+    'Wednesday practice designation (Full, Limited, DNP)',
+  player_practice_designation_thursday:
+    'Thursday practice designation (Full, Limited, DNP)',
+  player_practice_designation_friday:
+    'Friday practice designation (Full, Limited, DNP)',
+  player_practice_designation_saturday:
+    'Saturday practice designation (Full, Limited, DNP)',
+  player_practice_designation_sunday:
+    'Sunday practice designation (Full, Limited, DNP)',
+
+  // Team DVOA Fields (Football Outsiders)
+  team_unit_adjusted_line_yards:
+    'Adjusted Line Yards - measures offensive line performance on running plays, adjusting for situation and opponent (Football Outsiders)',
+  team_unit_power_success:
+    'Power Success Rate - percentage of runs on 3rd/4th-and-short or goal-to-go that achieve a first down or touchdown (Football Outsiders)',
+  team_unit_stuffed_rate:
+    'Stuffed Rate - percentage of runs where the runner is stopped at or behind the line of scrimmage (Football Outsiders)',
+  team_unit_rushing_second_level_yards:
+    'Second Level Yards - rushing yards gained 5-10 yards past the line of scrimmage, measuring back skill (Football Outsiders)',
+  team_unit_rushing_open_field_yards:
+    'Open Field Yards - rushing yards gained 10+ yards past the line of scrimmage (Football Outsiders)',
+  team_unit_dvoa:
+    'Defense-adjusted Value Over Average - measures team efficiency compared to league average, adjusted for opponent (Football Outsiders)',
+
+  // ESPN Win Rate Fields
+  player_espn_line_win_rate:
+    "Player's ESPN Win Rate on line plays (pass blocking, run blocking, pass rush, or run defense depending on position)",
+  player_espn_line_wins:
+    'Total number of plays where the player won their individual matchup according to ESPN tracking',
+  team_espn_pass_rush_win_rate:
+    'Team Pass Rush Win Rate - percentage of pass rush plays where a defender beats their blocker within 2.5 seconds (ESPN)',
+  team_espn_pass_block_win_rate:
+    'Team Pass Block Win Rate - percentage of pass blocking plays where the blocker holds their block for 2.5+ seconds (ESPN)',
+  team_espn_run_block_win_rate:
+    'Team Run Block Win Rate - percentage of run blocking plays where the blocker wins their matchup (ESPN)',
+  team_espn_run_stop_win_rate:
+    'Team Run Stop Win Rate - percentage of run defense plays where a defender wins their matchup (ESPN)',
+
+  // Additional betting market fields
+  player_game_prop_historical_hit_rate:
+    'Historical hit rate for player game prop markets',
+  player_game_prop_historical_edge:
+    'Historical edge for player game prop markets',
+  team_game_prop_line_from_betting_markets:
+    'The betting line for team game prop markets',
+  team_game_prop_american_odds_from_betting_markets:
+    'The betting odds for team game prop market selections',
+  team_game_prop_decimal_odds_from_betting_markets:
+    'The betting odds for team game prop market selections',
+  team_game_implied_team_total_from_betting_markets:
+    'The implied team total from betting markets',
+
+  // Game fields
+  game_opponent: 'The opponent team for the game (NFL team abbreviation)',
+
+  // Player DFS fields
+  player_dfs_salary:
+    "The player's salary for Daily Fantasy Sports contests (DraftKings, FanDuel, etc.)",
+
+  // Player routes
+  player_routes:
+    'The number of pass routes run by the player (receiver participation metric)',
+
+  // Player snaps
+  player_snaps:
+    'Total offensive snaps played by the player (snap count from game participation data)',
+
+  // Missing player stats from plays fields
+  player_pass_first_downs_from_plays:
+    'Pass first downs by the player (calculated from play-by-play data)',
+  player_completion_percentage_over_expected_from_plays:
+    'Completion percentage over expected by the player (calculated from play-by-play data)',
+  player_receiving_yards_after_catch_from_plays:
+    'Receiving yards after catch by the player (calculated from play-by-play data)',
+  player_yards_created_from_plays:
+    'Yards created by the player (calculated from play-by-play data)',
+  player_yards_blocked_from_plays:
+    'Yards blocked by the player (calculated from play-by-play data)',
+  player_successful_passing_play_percentage_from_plays:
+    'Successful passing play percentage by the player (calculated from play-by-play data)',
+  player_successful_rushing_and_receiving_play_percentage_from_plays:
+    'Successful rushing and receiving play percentage by the player (calculated from play-by-play data)',
+
+  // League NFL Team Season Logs
+  league_nfl_team_seasonlogs_rank:
+    'Fantasy Points Rank Generated/Allowed By Position',
+  league_nfl_team_seasonlogs_points:
+    'Fantasy Points Generated/Allowed By Position',
+
+  // NFL Team Season Log Fields (85 fields)
+  nfl_team_seasonlogs_pa: 'Pass Attempts Generated/Allowed By Position',
+  nfl_team_seasonlogs_pc: 'Pass Completions Generated/Allowed By Position',
+  nfl_team_seasonlogs_py: 'Pass Yards Generated/Allowed By Position',
+  nfl_team_seasonlogs_ints: 'Interceptions Generated/Allowed By Position',
+  nfl_team_seasonlogs_tdp: 'Passing TDs Generated/Allowed By Position',
+  nfl_team_seasonlogs_ra: 'Rush Attempts Generated/Allowed By Position',
+  nfl_team_seasonlogs_ry: 'Rush Yards Generated/Allowed By Position',
+  nfl_team_seasonlogs_tdr: 'Rushing TDs Generated/Allowed By Position',
+  nfl_team_seasonlogs_fuml: 'Fumbles Lost Generated/Allowed By Position',
+  nfl_team_seasonlogs_trg: 'Targets Generated/Allowed By Position',
+  nfl_team_seasonlogs_rec: 'Receptions Generated/Allowed By Position',
+  nfl_team_seasonlogs_recy: 'Receiving Yards Generated/Allowed By Position',
+  nfl_team_seasonlogs_tdrec: 'Receiving TDs Generated/Allowed By Position',
+  nfl_team_seasonlogs_twoptc:
+    'Two Point Conversions Generated/Allowed By Position',
+  nfl_team_seasonlogs_prtd: 'Punt Return TDs Generated/Allowed By Position',
+  nfl_team_seasonlogs_krtd: 'Kick Return TDs Generated/Allowed By Position',
+  nfl_team_seasonlogs_fgm: 'Field Goals Made/Allowed By Position',
+  nfl_team_seasonlogs_fgy: 'Field Goal Yards Generated/Allowed By Position',
+  nfl_team_seasonlogs_fg19:
+    'Field Goals Made 0-19 Yards Generated/Allowed By Position',
+  nfl_team_seasonlogs_fg29:
+    'Field Goals Made 20-29 Yards Generated/Allowed By Position',
+  nfl_team_seasonlogs_fg39:
+    'Field Goals Made 30-39 Yards Generated/Allowed By Position',
+  nfl_team_seasonlogs_fg49:
+    'Field Goals Made 40-49 Yards Generated/Allowed By Position',
+  nfl_team_seasonlogs_fg50:
+    'Field Goals Made 50+ Yards Generated/Allowed By Position',
+  nfl_team_seasonlogs_xpm: 'Extra Points Made Generated/Allowed By Position',
+  nfl_team_seasonlogs_dsk: 'Defensive Sacks Generated/Allowed By Position',
+  nfl_team_seasonlogs_dint:
+    'Defensive Interceptions Generated/Allowed By Position',
+  nfl_team_seasonlogs_dff:
+    'Defensive Forced Fumbles Generated/Allowed By Position',
+  nfl_team_seasonlogs_drf:
+    'Defensive Recovered Fumbles Generated/Allowed By Position',
+  nfl_team_seasonlogs_dtno:
+    'Defensive Three and Outs Generated/Allowed By Position',
+  nfl_team_seasonlogs_dfds:
+    'Defensive Fourth Down Stops Generated/Allowed By Position',
+  nfl_team_seasonlogs_dpa:
+    'Defensive Points Against Generated/Allowed By Position',
+  nfl_team_seasonlogs_dya:
+    'Defensive Yards Against Generated/Allowed By Position',
+  nfl_team_seasonlogs_dblk:
+    'Defensive Blocked Kicks Generated/Allowed By Position',
+  nfl_team_seasonlogs_dsf: 'Defensive Safeties Generated/Allowed By Position',
+  nfl_team_seasonlogs_dtpr:
+    'Defensive Two Point Returns Generated/Allowed By Position',
+  nfl_team_seasonlogs_dtd: 'Defensive Touchdowns Generated/Allowed By Position',
+  nfl_team_seasonlogs_pass_rating:
+    'Passer Rating Generated/Allowed By Position',
+  nfl_team_seasonlogs_pass_yards_per_attempt:
+    'Pass Yards per Attempt Generated/Allowed By Position',
+  nfl_team_seasonlogs_pass_comp_pct:
+    'Pass Completion % Generated/Allowed By Position',
+  nfl_team_seasonlogs_sacks: 'Sacks Generated/Allowed By Position',
+  nfl_team_seasonlogs_expected_pass_comp:
+    'Expected Pass Completions Generated/Allowed By Position',
+  nfl_team_seasonlogs_cpoe: 'CPOE Generated/Allowed By Position',
+  nfl_team_seasonlogs_dropbacks: 'Dropbacks Generated/Allowed By Position',
+  nfl_team_seasonlogs_pass_epa: 'Pass EPA Generated/Allowed By Position',
+  nfl_team_seasonlogs_pass_epa_per_db:
+    'Pass EPA per Dropback Generated/Allowed By Position',
+  nfl_team_seasonlogs_avg_time_to_throw:
+    'Average Time to Throw Generated/Allowed By Position',
+  nfl_team_seasonlogs_avg_time_to_pressure:
+    'Average Time to Pressure Generated/Allowed By Position',
+  nfl_team_seasonlogs_avg_time_to_sack:
+    'Average Time to Sack Generated/Allowed By Position',
+  nfl_team_seasonlogs_pressures_against:
+    'Pressures Against Generated/Allowed By Position',
+  nfl_team_seasonlogs_pressure_rate_against:
+    'Pressure Rate Against Generated/Allowed By Position',
+  nfl_team_seasonlogs_blitz_rate: 'Blitz Rate Generated/Allowed By Position',
+  nfl_team_seasonlogs_pass_drops: 'Pass Drops Generated/Allowed By Position',
+  nfl_team_seasonlogs_drop_rate: 'Drop Rate Generated/Allowed By Position',
+  nfl_team_seasonlogs_pass_completed_air_yards:
+    'Pass Completed Air Yards Generated/Allowed By Position',
+  nfl_team_seasonlogs_pass_yards_after_catch:
+    'Pass Yards After Catch Generated/Allowed By Position',
+  nfl_team_seasonlogs_expected_pass_yards_after_catch:
+    'Expected Pass YAC Generated/Allowed By Position',
+  nfl_team_seasonlogs_pass_yards_after_catch_pct:
+    'Pass YAC % Generated/Allowed By Position',
+  nfl_team_seasonlogs_air_yards_per_pass_att:
+    'Air Yards per Pass Attempt Generated/Allowed By Position',
+  nfl_team_seasonlogs_avg_target_separation:
+    'Average Target Separation Generated/Allowed By Position',
+  nfl_team_seasonlogs_deep_pass_att_pct:
+    'Deep Pass Attempt % Generated/Allowed By Position',
+  nfl_team_seasonlogs_tight_window_pct:
+    'Tight Window % Generated/Allowed By Position',
+  nfl_team_seasonlogs_play_action_pct:
+    'Play Action % Generated/Allowed By Position',
+  nfl_team_seasonlogs_rush_epa: 'Rush EPA Generated/Allowed By Position',
+  nfl_team_seasonlogs_rush_epa_per_attempt:
+    'Rush EPA per Attempt Generated/Allowed By Position',
+  nfl_team_seasonlogs_expected_rush_yards:
+    'Expected Rush Yards Generated/Allowed By Position',
+  nfl_team_seasonlogs_expected_rush_yards_per_attempt:
+    'Expected Rush Yards per Attempt Generated/Allowed By Position',
+  nfl_team_seasonlogs_rush_yards_over_expected:
+    'Rush Yards Over Expected Generated/Allowed By Position',
+  nfl_team_seasonlogs_rush_yards_over_expected_per_attempt:
+    'Rush Yards Over Expected per Attempt Generated/Allowed By Position',
+  nfl_team_seasonlogs_rush_yards_after_contact:
+    'Rush Yards After Contact Generated/Allowed By Position',
+  nfl_team_seasonlogs_rush_yards_after_contact_per_attempt:
+    'Rush Yards After Contact per Attempt Generated/Allowed By Position',
+  nfl_team_seasonlogs_rush_yards_before_contact:
+    'Rush Yards Before Contact Generated/Allowed By Position',
+  nfl_team_seasonlogs_rush_yards_before_contact_per_attempt:
+    'Rush Yards Before Contact per Attempt Generated/Allowed By Position',
+  nfl_team_seasonlogs_rush_success_rate:
+    'Rush Success Rate Generated/Allowed By Position',
+  nfl_team_seasonlogs_rush_attempts_yards_10_plus:
+    'Rush Attempts 10+ Yards Generated/Allowed By Position',
+  nfl_team_seasonlogs_rush_attempts_speed_15_plus_mph:
+    'Rush Attempts 15+ MPH Generated/Allowed By Position',
+  nfl_team_seasonlogs_rush_attempts_speed_20_plus_mph:
+    'Rush Attempts 20+ MPH Generated/Allowed By Position',
+  nfl_team_seasonlogs_rush_avg_time_to_line_of_scrimmage:
+    'Average Time to Line of Scrimmage Generated/Allowed By Position',
+  nfl_team_seasonlogs_rush_attempts_inside_tackles_pct:
+    'Rush Attempts Inside Tackles % Generated/Allowed By Position',
+  nfl_team_seasonlogs_rush_attempts_stacked_box_pct:
+    'Rush Attempts vs Stacked Box % Generated/Allowed By Position',
+  nfl_team_seasonlogs_rush_attempts_under_center_pct:
+    'Rush Attempts Under Center % Generated/Allowed By Position',
+  nfl_team_seasonlogs_longest_rush:
+    'Longest Rush Generated/Allowed By Position',
+  nfl_team_seasonlogs_rush_yards_per_attempt:
+    'Rush Yards per Attempt Generated/Allowed By Position',
+  nfl_team_seasonlogs_rush_yards_10_plus_rate:
+    'Rush Yards 10+ Rate Generated/Allowed By Position',
+  nfl_team_seasonlogs_routes: 'Routes Run Generated/Allowed By Position',
+  nfl_team_seasonlogs_receiving_passer_rating:
+    'Receiving Passer Rating Generated/Allowed By Position',
+  nfl_team_seasonlogs_catch_rate: 'Catch Rate Generated/Allowed By Position',
+  nfl_team_seasonlogs_expected_catch_rate:
+    'Expected Catch Rate Generated/Allowed By Position',
+  nfl_team_seasonlogs_catch_rate_over_expected:
+    'Catch Rate Over Expected Generated/Allowed By Position',
+  nfl_team_seasonlogs_recv_yards_per_reception:
+    'Receiving Yards per Reception Generated/Allowed By Position',
+  nfl_team_seasonlogs_recv_yards_per_route:
+    'Receiving Yards per Route Generated/Allowed By Position',
+  nfl_team_seasonlogs_recv_epa: 'Receiving EPA Generated/Allowed By Position',
+  nfl_team_seasonlogs_recv_epa_per_target:
+    'Receiving EPA per Target Generated/Allowed By Position',
+  nfl_team_seasonlogs_recv_epa_per_route:
+    'Receiving EPA per Route Generated/Allowed By Position',
+  nfl_team_seasonlogs_recv_drops:
+    'Receiving Drops Generated/Allowed By Position',
+  nfl_team_seasonlogs_recv_drop_rate:
+    'Receiving Drop Rate Generated/Allowed By Position',
+  nfl_team_seasonlogs_recv_yards_after_catch:
+    'Receiving Yards After Catch Generated/Allowed By Position',
+  nfl_team_seasonlogs_expected_recv_yards_after_catch:
+    'Expected Receiving YAC Generated/Allowed By Position',
+  nfl_team_seasonlogs_recv_yards_after_catch_over_expected:
+    'Receiving YAC Over Expected Generated/Allowed By Position',
+  nfl_team_seasonlogs_recv_yards_after_catch_per_reception:
+    'Receiving YAC per Reception Generated/Allowed By Position',
+  nfl_team_seasonlogs_recv_avg_target_separation:
+    'Average Target Separation Generated/Allowed By Position',
+  nfl_team_seasonlogs_recv_air_yards:
+    'Receiving Air Yards Generated/Allowed By Position',
+  nfl_team_seasonlogs_recv_air_yards_per_target:
+    'Receiving Air Yards per Target Generated/Allowed By Position',
+  nfl_team_seasonlogs_target_rate: 'Target Rate Generated/Allowed By Position',
+  nfl_team_seasonlogs_avg_route_depth:
+    'Average Route Depth Generated/Allowed By Position',
+  nfl_team_seasonlogs_endzone_targets:
+    'Endzone Targets Generated/Allowed By Position',
+  nfl_team_seasonlogs_endzone_recs:
+    'Endzone Receptions Generated/Allowed By Position',
+  nfl_team_seasonlogs_team_target_share:
+    'Team Target Share Generated/Allowed By Position',
+  nfl_team_seasonlogs_team_air_yard_share:
+    'Team Air Yard Share Generated/Allowed By Position',
+  nfl_team_seasonlogs_recv_deep_target_pct:
+    'Deep Target Percentage Generated/Allowed By Position',
+  nfl_team_seasonlogs_recv_tight_window_pct:
+    'Tight Window Percentage Generated/Allowed By Position',
+  nfl_team_seasonlogs_longest_reception:
+    'Longest Reception Generated/Allowed By Position',
+  nfl_team_seasonlogs_recv_yards_15_plus_rate:
+    'Reception Rate 15+ Yards Generated/Allowed By Position',
+  nfl_team_seasonlogs_snp: 'Snaps Generated/Allowed By Position',
+
+  // Player Basic Info
+  player_name: "The player's full name",
+  player_position: "The player's position (QB, RB, WR, TE, K, DEF)",
+  player_age: "The player's age (calculated from date of birth)",
+  player_date_of_birth: "The player's date of birth",
+  player_height: "The player's height in inches",
+  player_weight: "The player's weight in pounds",
+  player_jersey_number: "The player's current jersey number",
+  player_current_nfl_team: "The player's current NFL team abbreviation",
+  player_position_depth: "The player's depth chart position",
+  player_nfl_teams: 'NFL teams the player has been on',
+  player_starting_nfl_year: 'The year the player entered the NFL (draft year)',
+
+  // Player Physical Measurements & Combine
+  player_forty_yard_dash: "The player's 40-yard dash time in seconds",
+  player_bench_press: 'Number of bench press reps (225 lbs) at the NFL Combine',
+  player_vertical_jump: "The player's vertical jump height in inches",
+  player_broad_jump: "The player's broad jump distance in inches",
+  player_shuttle_run: "The player's 20-yard shuttle run time in seconds",
+  player_three_cone_drill: "The player's 3-cone drill time in seconds",
+  player_arm_length: "The player's arm length in inches",
+  player_hand_size: "The player's hand size in inches",
+  player_speed_score:
+    'A metric combining weight and 40-yard dash time to measure speed relative to size. Formula: (weight * 200) / (40-time^4)',
+  player_height_adjusted_speed_score:
+    'Speed Score adjusted for height, useful for comparing WRs and TEs. Formula: Speed Score * (height / position average height)',
+  player_agility_score:
+    'Combined shuttle run and 3-cone drill times, measuring agility',
+  player_body_mass_index:
+    "The player's Body Mass Index (BMI). Formula: (weight / height^2) * 703",
+
+  // Player College & Draft Info
+  player_college: 'The college the player attended',
+  player_college_division: 'The college division (FBS, FCS, D2, D3, etc.)',
+  player_draft_position: 'The overall pick number in the NFL Draft',
+  player_draft_round: 'The round in which the player was drafted',
+
+  // Player Contract Info (from player table)
+  player_contract_year_signed: 'The year the current contract was signed',
+  player_contract_years: 'Total years of the current contract',
+  player_contract_value: 'Total value of the current contract in dollars',
+  player_contract_apy:
+    'Average Per Year (APY) value of the contract in dollars',
+  player_contract_guaranteed: 'Total guaranteed money in the contract',
+  player_contract_apy_cap_pct:
+    'APY as a percentage of the salary cap when signed',
+  player_contract_inflated_value:
+    'Contract value adjusted for salary cap inflation',
+  player_contract_inflated_apy: 'APY adjusted for salary cap inflation',
+  player_contract_inflated_guaranteed:
+    'Guaranteed money adjusted for salary cap inflation',
+
+  // Player NGS Scores
+  player_ngs_athleticism_score:
+    'Next Gen Stats Athleticism Score based on combine and pro day measurements',
+  player_ngs_draft_grade: 'Next Gen Stats Draft Grade',
+  player_nfl_grade: "NFL.com's scouting grade for the player",
+  player_ngs_production_score:
+    'Next Gen Stats Production Score based on college production',
+  player_ngs_size_score:
+    'Next Gen Stats Size Score based on physical measurements',
+
+  // Player Fantasy Points from Logs
+  player_fantasy_points_from_seasonlogs:
+    'Total fantasy points for the season (from season logs)',
+  player_fantasy_points_per_game_from_seasonlogs:
+    'Fantasy points per game for the season (from season logs)',
+  player_fantasy_points_from_careerlogs:
+    'Total career fantasy points (from career logs)',
+  player_fantasy_points_per_game_from_careerlogs:
+    'Career fantasy points per game (from career logs)',
+
+  // Player PFF Additional Fields
+  player_pff_height: 'Player height according to PFF',
+  player_pff_weight: 'Player weight according to PFF',
+  player_pff_speed: 'Player speed rating according to PFF',
+  player_pff_position: 'The position PFF grades the player at',
+  player_pff_unit: 'The unit (offense/defense/special teams) for PFF grading',
+  player_pff_id: "Player's ID in the PFF database",
+  player_pff_meets_snap_minimum:
+    'Whether the player meets the minimum snap threshold for PFF rankings',
+
+  // Player External IDs
+  player_nfl_id: "Player's ID in the NFL database",
+  player_esbid: "Player's ESB (Elias Sports Bureau) ID",
+  player_gsisid: "Player's GSIS ID (Game Statistics and Information System)",
+  player_gsispid: "Player's GSIS PID",
+  player_gsis_it_id: "Player's GSIS IT ID",
+  player_sleeper_id: "Player's ID in the Sleeper platform",
+  player_rotoworld_id: "Player's ID in the Rotoworld database",
+  player_rotowire_id: "Player's ID in the Rotowire database",
+  player_sportradar_id: "Player's ID in the Sportradar database",
+  player_espn_id: "Player's ID in the ESPN database",
+  player_fantasy_data_id: "Player's ID in the FantasyData database",
+  player_yahoo_id: "Player's ID in the Yahoo Fantasy database",
+  player_keeptradecut_id: "Player's ID in the KeepTradeCut database",
+  player_pfr_id: "Player's ID in the Pro Football Reference database",
+  player_otc_id: "Player's ID in the Over The Cap database",
+  player_draftkings_id: "Player's ID in the DraftKings database",
+  player_mfl_id: "Player's ID in the MyFantasyLeague database",
+  player_fleaflicker_id: "Player's ID in the Fleaflicker database",
+  player_cbs_id: "Player's ID in the CBS Sports database",
+  player_cfbref_id: "Player's ID in the College Football Reference database",
+  player_swish_id: "Player's ID in the Swish Analytics database",
+  player_twitter_username: "Player's Twitter/X username",
+
+  // Additional Player Stats from Plays
+  player_quarterback_pressures_from_plays:
+    'Number of quarterback pressures by the player (calculated from play-by-play data)',
+  player_receiving_or_rushing_touchdowns_from_plays:
+    'Combined receiving and rushing touchdowns (calculated from play-by-play data)',
+
+  // Team Unit
+  team_unit: 'The team unit (offense, defense, or special teams)'
 }
