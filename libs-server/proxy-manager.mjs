@@ -247,6 +247,7 @@ export async function fetch_with_retry(url, options = {}, config = {}) {
           const proxy_response = await fetch_with_proxy({
             url,
             options: {
+              ...options,
               method: options.method || 'GET',
               headers: options.headers
             }
