@@ -7,6 +7,11 @@ const round = (value, precision) => {
 
 const toPct = (value) => value * 100
 
+const safe_div = ({ numerator, denominator }) => {
+  if (!denominator) return 0
+  return numerator / denominator
+}
+
 const calculateStatsFromPlays = (plays) => {
   const players = {}
   const teams = {}
@@ -141,66 +146,136 @@ const calculateStatsFromPlays = (plays) => {
   for (const pid in players) {
     const stats = players[pid]
     const team = playerToTeam[pid]
-    const teamStats = teams[team]
+    const team_stats = teams[team]
 
     const skpa = stats.sk + stats.pa
 
     stats._tch = stats.ra + stats.rec
 
-    stats.pc_pct = round(toPct(stats.pc / stats.pa), 1) || 0
+    stats.pc_pct =
+      round(
+        toPct(safe_div({ numerator: stats.pc, denominator: stats.pa })),
+        1
+      ) || 0
     // stats.py_pg
 
-    stats.tdp_pct = round(toPct(stats.tdp / stats.pa), 1) || 0
-    stats.ints_pct = round(toPct(stats.ints / stats.pa), 1) || 0
+    stats.tdp_pct =
+      round(
+        toPct(safe_div({ numerator: stats.tdp, denominator: stats.pa })),
+        1
+      ) || 0
+    stats.ints_pct =
+      round(
+        toPct(safe_div({ numerator: stats.ints, denominator: stats.pa })),
+        1
+      ) || 0
 
-    stats.int_worthy_pct = round(toPct(stats.int_worthy / stats.pa), 1) || 0
-    stats.pcay_pc = round(stats.pcay / stats.pc, 1) || 0
-    stats._ypa = round(stats.py / stats.pa, 1) || 0
-    stats.pyac_pc = round(stats.pyac / stats.pc, 1) || 0
+    stats.int_worthy_pct =
+      round(
+        toPct(safe_div({ numerator: stats.int_worthy, denominator: stats.pa })),
+        1
+      ) || 0
+    stats.pcay_pc =
+      round(safe_div({ numerator: stats.pcay, denominator: stats.pc }), 1) || 0
+    stats._ypa =
+      round(safe_div({ numerator: stats.py, denominator: stats.pa }), 1) || 0
+    stats.pyac_pc =
+      round(safe_div({ numerator: stats.pyac, denominator: stats.pc }), 1) || 0
     // stats._adjypa
-    stats._ypc = round(stats.py / stats.pc, 1) || 0
+    stats._ypc =
+      round(safe_div({ numerator: stats.py, denominator: stats.pc }), 1) || 0
     // stats._ypg
-    stats._pacr = round(stats.py / stats.pdot, 2) || 0
-    stats.pdot_pa = round(stats.pdot / stats.pa, 1) || 0
+    stats._pacr =
+      round(safe_div({ numerator: stats.py, denominator: stats.pdot }), 2) || 0
+    stats.pdot_pa =
+      round(safe_div({ numerator: stats.pdot, denominator: stats.pa }), 1) || 0
     // stats._apacr
 
-    stats.sk_pct = round(toPct(stats.sk / skpa), 1) || 0
-    stats.qb_pressure_pct = round(toPct(stats.qb_pressure / skpa), 1) || 0
-    stats.qb_hit_pct = round(toPct(stats.qb_hit / skpa), 1) || 0
-    stats.qb_hurry_pct = round(toPct(stats.qb_hurry / skpa), 1) || 0
-    stats._nygpa = round((stats.py - stats.sky) / skpa, 1) || 0
+    stats.sk_pct =
+      round(toPct(safe_div({ numerator: stats.sk, denominator: skpa })), 1) || 0
+    stats.qb_pressure_pct =
+      round(
+        toPct(safe_div({ numerator: stats.qb_pressure, denominator: skpa })),
+        1
+      ) || 0
+    stats.qb_hit_pct =
+      round(
+        toPct(safe_div({ numerator: stats.qb_hit, denominator: skpa })),
+        1
+      ) || 0
+    stats.qb_hurry_pct =
+      round(
+        toPct(safe_div({ numerator: stats.qb_hurry, denominator: skpa })),
+        1
+      ) || 0
+    stats._nygpa =
+      round(
+        safe_div({ numerator: stats.py - stats.sky, denominator: skpa }),
+        1
+      ) || 0
 
-    stats.recy_prec = round(stats.recy / stats.rec, 1) || 0
+    stats.recy_prec =
+      round(safe_div({ numerator: stats.recy, denominator: stats.rec }), 1) || 0
     // stats.recy_pg
 
-    const stray = stats.rdot / teamStats.rdot // share of teams air yards
-    const sttrg = stats.trg / teamStats.trg // share of teams targets
+    const team_rdot = team_stats ? team_stats.rdot : 0
+    const team_trg = team_stats ? team_stats.trg : 0
+    const stray = team_rdot ? stats.rdot / team_rdot : 0 // share of teams air yards
+    const sttrg = team_trg ? stats.trg / team_trg : 0 // share of teams targets
     stats._stray = round(toPct(stray), 1) || 0
     stats._sttrg = round(toPct(sttrg), 1) || 0
 
-    stats.dptrg_pct = round(toPct(stats.dptrg / stats.trg), 1) || 0
+    stats.dptrg_pct =
+      round(
+        toPct(safe_div({ numerator: stats.dptrg, denominator: stats.trg })),
+        1
+      ) || 0
 
     // stats._ayps
-    stats._ayprec = round(stats.rdot / stats.rec, 1) || 0
-    stats._ayptrg = round(stats.rdot / stats.trg, 1) || 0
-    stats._recypay = round(stats.recy / stats.rdot, 1) || 0
+    stats._ayprec =
+      round(safe_div({ numerator: stats.rdot, denominator: stats.rec }), 1) || 0
+    stats._ayptrg =
+      round(safe_div({ numerator: stats.rdot, denominator: stats.trg }), 1) || 0
+    stats._recypay =
+      round(safe_div({ numerator: stats.recy, denominator: stats.rdot }), 1) ||
+      0
     // stats._recypsnp
-    stats._recyprec = round(stats.recy / stats.rec, 1) || 0
-    stats._recyptrg = round(stats.recy / stats.trg, 1) || 0
+    stats._recyprec =
+      round(safe_div({ numerator: stats.recy, denominator: stats.rec }), 1) || 0
+    stats._recyptrg =
+      round(safe_div({ numerator: stats.recy, denominator: stats.trg }), 1) || 0
     stats._wopr = round(1.5 * sttrg + 0.7 * stray, 1) || 0
-    stats._ryacprec = round(stats.ryac / stats.rec, 1) || 0
+    stats._ryacprec =
+      round(safe_div({ numerator: stats.ryac, denominator: stats.rec }), 1) || 0
 
     // stats.ry_pg
-    stats.ry_pra = round(stats.ry / stats.ra, 1) || 0
-    stats.ryaco_pra = round(stats.ryaco / stats.ra, 1) || 0
+    stats.ry_pra =
+      round(safe_div({ numerator: stats.ry, denominator: stats.ra }), 1) || 0
+    stats.ryaco_pra =
+      round(safe_div({ numerator: stats.ryaco, denominator: stats.ra }), 1) || 0
 
-    stats.mbt_pt = round(stats.mbt / stats._tch, 1) || 0
-    stats._fumlpra = round(toPct(stats.fuml / stats.ra), 1) || 0
-    stats.rasucc_pra = round(toPct(stats.rasucc / stats.ra), 1) || 0
-    stats.posra_pra = round(toPct(stats.posra / stats.ra), 1) || 0
+    stats.mbt_pt =
+      round(safe_div({ numerator: stats.mbt, denominator: stats._tch }), 1) || 0
+    stats._fumlpra =
+      round(
+        toPct(safe_div({ numerator: stats.fuml, denominator: stats.ra })),
+        1
+      ) || 0
+    stats.rasucc_pra =
+      round(
+        toPct(safe_div({ numerator: stats.rasucc, denominator: stats.ra })),
+        1
+      ) || 0
+    stats.posra_pra =
+      round(
+        toPct(safe_div({ numerator: stats.posra, denominator: stats.ra })),
+        1
+      ) || 0
 
-    stats._stra = round(toPct(stats.ra / teamStats.ra), 1) || 0
-    stats._stry = round(toPct(stats.ry / teamStats.ry), 1) || 0
+    const team_ra = team_stats ? team_stats.ra : 0
+    const team_ry = team_stats ? team_stats.ry : 0
+    stats._stra = team_ra ? round(toPct(stats.ra / team_ra), 1) || 0 : 0
+    stats._stry = team_ry ? round(toPct(stats.ry / team_ry), 1) || 0 : 0
 
     // stats.fd_pct
     // stats.succ_psnp
