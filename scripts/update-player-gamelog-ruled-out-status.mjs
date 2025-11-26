@@ -23,13 +23,14 @@
  * - nfl_games: Game timing information
  *
  * Usage Examples:
+ * - node scripts/update-player-gamelog-ruled-out-status.mjs (processes prior week by default)
  * - node scripts/update-player-gamelog-ruled-out-status.mjs --year 2025 --week 11
  * - node scripts/update-player-gamelog-ruled-out-status.mjs --year 2025 --week 10 --dry
  * - node scripts/update-player-gamelog-ruled-out-status.mjs --all (process all weeks)
  *
  * Options:
  * --year <number>        Season year (default: current)
- * --week <number>        Week number (required unless --all)
+ * --week <number>        Week number (default: prior week - most recent completed week)
  * --seas_type <string>   Season type: PRE | REG | POST (default: REG)
  * --all                  Process all weeks for the season
  * --dry                  Dry run (no database writes)
@@ -318,8 +319,14 @@ const run = async ({
   seas_type = 'REG',
   dry_run = false
 } = {}) => {
+  // Default to most recent completed week when no week specified
+  // This script runs on Tuesday to process the prior week that just completed
+  if (week === null) {
+    week = constants.season.last_week_with_stats
+  }
+
   log(
-    `Starting ruled out status detection for ${year} ${seas_type} ${week ? `week ${week}` : 'all weeks'} (dry_run: ${dry_run})`
+    `Starting ruled out status detection for ${year} ${seas_type} week ${week} (dry_run: ${dry_run})`
   )
 
   // Load games
@@ -398,6 +405,7 @@ const main = async () => {
       script_args: {
         dry_run: argv.dry
       },
+      default_week: constants.season.last_week_with_stats, // Default to most recent completed week
       year_query: ({ seas_type = 'REG' }) =>
         db('nfl_games')
           .select('year')
