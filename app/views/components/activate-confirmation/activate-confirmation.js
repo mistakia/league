@@ -21,13 +21,24 @@ export default class ActivateConfirmation extends React.Component {
     this.state = {
       reserve_pid: '',
       release_pid: '',
+      deactivate_pid: '',
       missing: false
     }
 
-    const { team } = props
+    const { team, player_map, psquad_eligible_active_players } = props
     this._hasBenchSpace = team.roster.has_bench_space()
     this._reserveEligible = []
     this._activePlayers = []
+
+    // Check if player being activated is from practice squad (signed slots)
+    const player_slot = player_map.get('slot')
+    this._isFromPracticeSquad =
+      player_slot === constants.slots.PS || player_slot === constants.slots.PSP
+
+    // Use psquad-eligible active players for deactivation candidates (filtered in index.js)
+    this._deactivationCandidates = this._isFromPracticeSquad
+      ? psquad_eligible_active_players.toArray()
+      : []
 
     const active_pids = team.roster.active.map((p) => p.pid)
     for (const pid of active_pids) {
@@ -66,8 +77,13 @@ export default class ActivateConfirmation extends React.Component {
     this.setState({ release_pid: value, missing: false })
   }
 
+  handleSelectDeactivate = (event) => {
+    const { value } = event.target
+    this.setState({ deactivate_pid: value, missing: false })
+  }
+
   handleSubmit = () => {
-    const { reserve_pid, release_pid } = this.state
+    const { reserve_pid, release_pid, deactivate_pid } = this.state
     const activate_pid = this.props.player_map.get('pid')
 
     if (!this._hasBenchSpace && !reserve_pid && !release_pid) {
@@ -80,6 +96,7 @@ export default class ActivateConfirmation extends React.Component {
       activate_pid,
       reserve_pid,
       release_pid,
+      deactivate_pid,
       slot: constants.slots.RESERVE_SHORT_TERM
     })
     this.props.onClose()
@@ -108,6 +125,16 @@ export default class ActivateConfirmation extends React.Component {
       )
     }
 
+    const deactivateItems = []
+    for (const activePlayerMap of this._deactivationCandidates) {
+      const pid = activePlayerMap.get('pid')
+      deactivateItems.push(
+        <MenuItem key={pid} value={pid}>
+          {activePlayerMap.get('name')} ({activePlayerMap.get('pos')})
+        </MenuItem>
+      )
+    }
+
     const isReservePlayer =
       player_map.get('slot') === constants.slots.RESERVE_SHORT_TERM
     let noBenchSpaceMessage =
@@ -129,6 +156,22 @@ export default class ActivateConfirmation extends React.Component {
           </DialogContentText>
           {!this._hasBenchSpace && (
             <DialogContentText>{noBenchSpaceMessage}</DialogContentText>
+          )}
+          {this._isFromPracticeSquad && Boolean(deactivateItems.length) && (
+            <div className='confirmation__inputs'>
+              <FormControl size='small' variant='outlined'>
+                <InputLabel id='deactivate-label'>Deactivate</InputLabel>
+                <Select
+                  labelId='deactivate-label'
+                  value={this.state.deactivate_pid}
+                  onChange={this.handleSelectDeactivate}
+                  label='Deactivate'
+                >
+                  <MenuItem value=''>None</MenuItem>
+                  {deactivateItems}
+                </Select>
+              </FormControl>
+            </div>
           )}
           <div className='confirmation__inputs'>
             {isReservePlayer &&
@@ -182,5 +225,6 @@ ActivateConfirmation.propTypes = {
   onClose: PropTypes.func,
   activate: PropTypes.func,
   player_map: ImmutablePropTypes.map,
-  team: PropTypes.object
+  team: PropTypes.object,
+  psquad_eligible_active_players: ImmutablePropTypes.list
 }

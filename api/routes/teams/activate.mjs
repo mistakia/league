@@ -4,6 +4,7 @@ import { constants } from '#libs-shared'
 import {
   submitReserve,
   submitActivate,
+  submitDeactivate,
   processRelease,
   verifyUserTeam
 } from '#libs-server'
@@ -47,6 +48,10 @@ const router = express.Router({ mergeParams: true })
  *                 type: string
  *                 description: Player ID to move to reserve (optional)
  *                 example: "JACO-BURR-2020-1996-12-10"
+ *               deactivate_pid:
+ *                 type: string
+ *                 description: Player ID to deactivate to practice squad (optional, use when activating from practice squad)
+ *                 example: "AMON-ST-B-2023-2001-04-24"
  *               slot:
  *                 type: integer
  *                 description: Reserve slot type (required if reserve_pid provided)
@@ -74,6 +79,12 @@ const router = express.Router({ mergeParams: true })
  *                 leagueId: 2
  *                 reserve_pid: "JACO-BURR-2020-1996-12-10"
  *                 slot: 7
+ *             activateWithDeactivate:
+ *               summary: Activate player from practice squad and deactivate another signed practice squad player
+ *               value:
+ *                 activate_pid: "JALE-HURT-2020-1998-08-07"
+ *                 leagueId: 2
+ *                 deactivate_pid: "AMON-ST-B-2023-2001-04-24"
  *     responses:
  *       200:
  *         description: Player activated successfully
@@ -115,7 +126,14 @@ router.post('/?', async (req, res) => {
   const { logger, broadcast } = req.app.locals
   try {
     const { teamId } = req.params
-    const { activate_pid, leagueId, release_pid, reserve_pid, slot } = req.body
+    const {
+      activate_pid,
+      leagueId,
+      release_pid,
+      reserve_pid,
+      deactivate_pid,
+      slot
+    } = req.body
 
     if (!req.auth) {
       return res.status(401).send({ error: 'invalid token' })
@@ -196,6 +214,45 @@ router.post('/?', async (req, res) => {
 
       // return activate transaction data
       res.send(reserveData[1])
+    } else if (deactivate_pid) {
+      // deactivate signed practice squad player first, then activate
+      let deactivateData
+      try {
+        deactivateData = await submitDeactivate({
+          tid,
+          deactivate_pid,
+          leagueId,
+          userId: req.auth.userId,
+          skip_practice_squad_space_check: true
+        })
+      } catch (error) {
+        return res.status(400).send({ error: error.message })
+      }
+
+      broadcast(leagueId, {
+        type: 'ROSTER_TRANSACTION',
+        payload: { data: deactivateData }
+      })
+
+      let activateData
+      try {
+        activateData = await submitActivate({
+          tid,
+          activate_pid,
+          leagueId,
+          userId: req.auth.userId
+        })
+      } catch (error) {
+        return res.status(400).send({ error: error.message })
+      }
+
+      broadcast(leagueId, {
+        type: 'ROSTER_TRANSACTION',
+        payload: { data: activateData }
+      })
+
+      // return activate transaction data
+      res.send(activateData)
     } else {
       let data
       try {
