@@ -91,9 +91,15 @@ export const roster_actions = {
   }),
 
   ACTIVATE_PLAYER: 'ACTIVATE_PLAYER',
-  activate: ({ activate_pid, release_pid, reserve_pid, slot }) => ({
+  activate: ({
+    activate_pid,
+    release_pid,
+    reserve_pid,
+    deactivate_pid,
+    slot
+  }) => ({
     type: roster_actions.ACTIVATE_PLAYER,
-    payload: { activate_pid, release_pid, reserve_pid, slot }
+    payload: { activate_pid, release_pid, reserve_pid, deactivate_pid, slot }
   }),
 
   DEACTIVATE_PLAYER: 'DEACTIVATE_PLAYER',
