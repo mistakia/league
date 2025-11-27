@@ -86,7 +86,7 @@ export default function SelectedPlayerSchedule({
   labels.splice(bye_week - 1, 0, bye_item)
 
   return (
-    <div className='selected__table'>
+    <div className='selected-player-schedule-wrapper'>
       <div className='selected-player-schedule-tabs-row'>
         <Tabs
           value={selected_week}
@@ -115,11 +115,13 @@ export default function SelectedPlayerSchedule({
           />
         </div>
       )}
-      <SelectedPlayerMatchupTable
-        week={selected_week}
-        selected_years={selected_years_for_schedule}
-        selected_weeks={selected_weeks_for_schedule}
-      />
+      <div className='selected__table'>
+        <SelectedPlayerMatchupTable
+          week={selected_week}
+          selected_years={selected_years_for_schedule}
+          selected_weeks={selected_weeks_for_schedule}
+        />
+      </div>
     </div>
   )
 }
