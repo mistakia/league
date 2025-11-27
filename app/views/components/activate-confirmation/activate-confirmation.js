@@ -86,7 +86,12 @@ export default class ActivateConfirmation extends React.Component {
     const { reserve_pid, release_pid, deactivate_pid } = this.state
     const activate_pid = this.props.player_map.get('pid')
 
-    if (!this._hasBenchSpace && !reserve_pid && !release_pid) {
+    if (
+      !this._hasBenchSpace &&
+      !reserve_pid &&
+      !release_pid &&
+      !deactivate_pid
+    ) {
       return this.setState({ missing: true })
     } else {
       this.setState({ missing: false })
@@ -176,6 +181,7 @@ export default class ActivateConfirmation extends React.Component {
           <div className='confirmation__inputs'>
             {isReservePlayer &&
               !this._hasBenchSpace &&
+              !this.state.deactivate_pid &&
               Boolean(reserveItems.length) && (
                 <FormControl size='small' variant='outlined'>
                   <InputLabel id='reserve-label'>Reserve</InputLabel>
@@ -192,7 +198,7 @@ export default class ActivateConfirmation extends React.Component {
               )}
           </div>
           <div className='confirmation__inputs'>
-            {!this._hasBenchSpace && (
+            {!this._hasBenchSpace && !this.state.deactivate_pid && (
               <FormControl size='small' variant='outlined'>
                 <InputLabel id='release-label'>Release</InputLabel>
                 <Select
