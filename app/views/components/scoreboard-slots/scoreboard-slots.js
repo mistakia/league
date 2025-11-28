@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 
 import './scoreboard-slots.styl'
-import { roster_slot_types } from '@constants'
+import { roster_slot_types, roster_slot_display_names } from '@constants'
 
 export default class ScoreboardSlots extends React.Component {
   render = () => {
@@ -26,7 +26,7 @@ export default class ScoreboardSlots extends React.Component {
         const s = roster_slot_types[`${slot.toUpperCase()}`]
         rows.push(
           <div key={index} className='scoreboard__slots-slot'>
-            {roster_slot_types.slotName[s]}
+            {roster_slot_display_names[s]}
           </div>
         )
         index += 1

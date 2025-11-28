@@ -3,7 +3,11 @@ import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import { toStringArray } from '@libs-shared'
-import { current_season, roster_slot_types } from '@constants'
+import {
+  current_season,
+  roster_slot_types,
+  roster_slot_display_names
+} from '@constants'
 import Button from '@components/button'
 import PlayerNameExpanded from '@components/player-name-expanded'
 
@@ -23,7 +27,7 @@ export default class PlayerSlot extends React.Component {
     const slotPositions = Object.keys(roster_slot_types).find(
       (key) => roster_slot_types[key] === slot
     )
-    const slotName = roster_slot_types.slotName[slot]
+    const slotName = roster_slot_display_names[slot]
     const pid = player_map.get('pid')
 
     let action

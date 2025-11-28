@@ -1,6 +1,6 @@
 import debug from 'debug'
 
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { wait } from '#libs-server'
 import import_plays_nfl_v1 from '#scripts/import-plays-nfl-v1.mjs'
 
@@ -11,7 +11,7 @@ const log = debug('import-live-plays')
 let live_plays_job_is_running = false
 
 export default async function () {
-  if (constants.current_season.nfl_seas_type !== 'REG') {
+  if (current_season.nfl_seas_type !== 'REG') {
     return
   }
 

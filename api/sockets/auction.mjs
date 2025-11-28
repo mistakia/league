@@ -1,7 +1,12 @@
 import WebSocket from 'ws'
 import config from '#config'
 import db from '#db'
-import { constants, Roster } from '#libs-shared'
+import { Roster } from '#libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  transaction_types
+} from '#constants'
 import { getRoster, getLeague, sendNotifications } from '#libs-server'
 import {
   format_nomination_message,
@@ -122,7 +127,7 @@ export default class Auction {
     this.broadcast({ type: 'AUCTION_START' })
 
     const latest = this._transactions[0]
-    if (latest && latest.type === constants.transaction_types.AUCTION_BID) {
+    if (latest && latest.type === transaction_types.AUCTION_BID) {
       this._start_bid_timer()
     } else {
       this._start_nomination_timer()
@@ -328,7 +333,7 @@ export default class Auction {
     if (!this._slow_mode) return null
 
     const current = this._transactions[0]
-    if (!current || current.type !== constants.transaction_types.AUCTION_BID) {
+    if (!current || current.type !== transaction_types.AUCTION_BID) {
       return null
     }
 
@@ -604,7 +609,7 @@ export default class Auction {
     // Check if player is already rostered
     const roster_rows = await db('rosters_players')
       .where('lid', this._lid)
-      .where('year', constants.current_season.year)
+      .where('year', current_season.year)
       .where('pid', pid)
     if (roster_rows.length) {
       this.reply(userid, 'invalid nomination')
@@ -636,7 +641,7 @@ export default class Auction {
     const { pid } = message
 
     // Validate that there's an active nomination
-    if (!current || current.type !== constants.transaction_types.AUCTION_BID) {
+    if (!current || current.type !== transaction_types.AUCTION_BID) {
       this.logger(`pass nomination rejected - no active nomination`)
       return false
     }
@@ -720,10 +725,10 @@ export default class Auction {
       tid,
       pid,
       lid: this._lid,
-      type: constants.transaction_types.AUCTION_BID,
+      type: transaction_types.AUCTION_BID,
       value,
       week: 0,
-      year: constants.current_season.year,
+      year: current_season.year,
       timestamp: Math.round(Date.now() / 1000)
     }
 
@@ -745,11 +750,11 @@ export default class Auction {
       userid,
       tid: nominating_team_id,
       pid,
-      type: constants.transaction_types.AUCTION_BID,
+      type: transaction_types.AUCTION_BID,
       value,
       lid: this._lid,
       week: 0,
-      year: constants.current_season.year,
+      year: current_season.year,
       timestamp: Math.round(Date.now() / 1000)
     }
 
@@ -768,13 +773,13 @@ export default class Auction {
     try {
       await db('rosters_players').insert({
         rid: roster_obj.uid,
-        slot: constants.roster_slot_types.BENCH,
+        slot: roster_slot_types.BENCH,
         pos: player_info.pos,
         pid: player_info.pid,
         extensions: 0,
         tid,
         lid: this._lid,
-        year: constants.current_season.year,
+        year: current_season.year,
         week: 0
       })
     } catch (err) {
@@ -794,7 +799,7 @@ export default class Auction {
 
     try {
       await db('teams')
-        .where({ uid: tid, year: constants.current_season.year })
+        .where({ uid: tid, year: current_season.year })
         .update('cap', new_cap)
     } catch (err) {
       this.logger(err)
@@ -809,7 +814,7 @@ export default class Auction {
       tid: bid.tid,
       pid: bid.pid,
       lid: this._lid,
-      type: constants.transaction_types.AUCTION_PROCESSED,
+      type: transaction_types.AUCTION_PROCESSED,
       value: bid.value,
       week: 0,
       year: bid.year,
@@ -1063,7 +1068,7 @@ export default class Auction {
   async _load_teams() {
     const teams = await db('teams').where({
       lid: this._lid,
-      year: constants.current_season.year
+      year: current_season.year
     })
     this._teams = teams.sort((a, b) => a.draft_order - b.draft_order)
     this._tids = this._teams.map((t) => t.uid)
@@ -1072,10 +1077,10 @@ export default class Auction {
   async _load_transactions() {
     this._transactions = await db('transactions')
       .whereIn('tid', this._tids)
-      .where('year', constants.current_season.year)
+      .where('year', current_season.year)
       .whereIn('type', [
-        constants.transaction_types.AUCTION_BID,
-        constants.transaction_types.AUCTION_PROCESSED
+        transaction_types.AUCTION_BID,
+        transaction_types.AUCTION_PROCESSED
       ])
       .orderBy('timestamp', 'desc')
       .orderBy('uid', 'desc')
@@ -1158,14 +1163,14 @@ export default class Auction {
     const last_nomination = this._transactions.find((tran, index) => {
       const prev = this._transactions[index + 1]
       return (
-        tran.type === constants.transaction_types.AUCTION_BID &&
-        (!prev || prev.type === constants.transaction_types.AUCTION_PROCESSED)
+        tran.type === transaction_types.AUCTION_BID &&
+        (!prev || prev.type === transaction_types.AUCTION_PROCESSED)
       )
     })
 
     this.logger(`last nominating team_id: ${last_nomination.tid}`)
 
-    if (last_tran.type === constants.transaction_types.AUCTION_BID) {
+    if (last_tran.type === transaction_types.AUCTION_BID) {
       return last_nomination.tid
     } else {
       // starting with the tid of the last nomination

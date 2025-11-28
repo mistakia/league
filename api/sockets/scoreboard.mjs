@@ -2,7 +2,8 @@ import WebSocket from 'ws'
 import debug from 'debug'
 
 import db from '#db'
-import { constants, uniqBy } from '#libs-shared'
+import { uniqBy } from '#libs-shared'
+import { current_season } from '#constants'
 import { getPlayByPlayQuery, wait } from '#libs-server'
 
 export default class Scoreboard {
@@ -39,8 +40,8 @@ export default class Scoreboard {
 
     const query = getPlayByPlayQuery(db)
     const plays = await query
-      .where('nfl_plays_current_week.year', constants.current_season.year)
-      .where('nfl_plays_current_week.week', constants.current_season.week)
+      .where('nfl_plays_current_week.year', current_season.year)
+      .where('nfl_plays_current_week.week', current_season.week)
       .where('nfl_plays_current_week.seas_type', 'REG')
       .where('updated', '>', updated)
 

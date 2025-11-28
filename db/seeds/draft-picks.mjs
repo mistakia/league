@@ -1,4 +1,4 @@
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { getLeague } from '#libs-server'
 
 export default async function (knex) {
@@ -6,7 +6,7 @@ export default async function (knex) {
   const lid = 1
   const teams = await knex('teams').where({
     lid,
-    year: constants.current_season.year
+    year: current_season.year
   })
   const league = await getLeague({ lid })
   await knex('draft').del()
@@ -19,7 +19,7 @@ export default async function (knex) {
       lid: league.uid,
       pick: i + 1,
       round: Math.ceil((i + 1) / league.num_teams),
-      year: constants.current_season.year
+      year: current_season.year
     })
   }
 
@@ -30,7 +30,7 @@ export default async function (knex) {
         otid: team.uid,
         lid: league.uid,
         round: i,
-        year: constants.current_season.year + 1
+        year: current_season.year + 1
       })
     }
   }

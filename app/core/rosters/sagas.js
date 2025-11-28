@@ -51,8 +51,8 @@ import {
 } from '@core/selectors'
 import {
   current_season,
-  roster_slot_types,
-  transaction_types
+  roster_slot_display_names,
+  transaction_type_display_names
 } from '@constants'
 import { player_actions } from '@core/players'
 import { poach_actions } from '@core/poaches'
@@ -490,8 +490,8 @@ export function* export_rosters() {
         pos: player_map.get('pos'),
         last_transaction_timestamp: rosterPlayer.timestamp,
         last_transaction_type:
-          transaction_types.transactionsDetail[rosterPlayer.type],
-        slot: roster_slot_types.slotName[rosterPlayer.slot],
+          transaction_type_display_names[rosterPlayer.type],
+        slot: roster_slot_display_names[rosterPlayer.slot],
         draft_year: player_map.get('nfl_draft_year'),
         player_team: player_map.get('team')
       })
