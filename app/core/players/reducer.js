@@ -25,7 +25,8 @@ import {
   ncaa_college_names,
   ncaa_conference_names,
   nfl_draft_rounds,
-  player_availability_statuses
+  player_availability_statuses,
+  create_empty_extended_stats
 } from '@constants'
 
 export const default_player_filter_options = {
@@ -163,7 +164,7 @@ export function players_reducer(state = initialState, { payload, type }) {
     case stat_actions.FILTER_STATS:
       return state.withMutations((state) => {
         state.set('isPending', true)
-        const stats = current_season.createFullStats()
+        const stats = create_empty_extended_stats()
         for (const pid of state.get('items').keys()) {
           state.setIn(['items', pid, 'stats'], new Map(stats))
         }

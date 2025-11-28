@@ -3,7 +3,10 @@ import { createSelector } from 'reselect'
 import { Map } from 'immutable'
 
 import { team_actions } from '@core/teams'
-import { current_season } from '@constants'
+import {
+  create_empty_fantasy_team_stats,
+  fantasy_team_stats
+} from '@constants'
 import {
   get_app,
   get_current_league,
@@ -32,7 +35,7 @@ const map_state_to_props = createSelector(
     })
 
     const default_team_stats = new Map({
-      ...current_season.createFantasyTeamStats(),
+      ...create_empty_fantasy_team_stats(),
       all_play_win_pct: 0
     })
     const year = app.year
@@ -42,7 +45,7 @@ const map_state_to_props = createSelector(
         .map((t) => t.get('stats', default_team_stats))
         .toList()
         .toJS(),
-      stats: [...current_season.fantasyTeamStats, 'all_play_win_pct']
+      stats: [...fantasy_team_stats, 'all_play_win_pct']
     })
 
     const careerlog_fields = [

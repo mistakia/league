@@ -15,7 +15,8 @@ import './stats.styl'
 import {
   current_season,
   roster_slot_types,
-  fantasy_positions
+  fantasy_positions,
+  create_empty_fantasy_team_stats
 } from '@constants'
 
 const careerlog_single_fields = {
@@ -197,7 +198,7 @@ const season_fields = {
 function SummaryRow({ team, percentiles, year, key }) {
   const stats = team.get(
     'stats',
-    new Map(current_season.createFantasyTeamStats())
+    new Map(create_empty_fantasy_team_stats())
   )
 
   const items = Object.entries(season_fields).map(([key, value]) => {
