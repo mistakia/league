@@ -1,7 +1,8 @@
 import debug from 'debug'
 
 import db from '#db'
-import { constants, Errors, get_free_agent_period } from '#libs-shared'
+import { Errors, get_free_agent_period } from '#libs-shared'
+import { current_season, waiver_types } from '#constants'
 import {
   submitAcquisition,
   resetWaiverOrder,
@@ -34,14 +35,14 @@ const process_single_active_waiver = async (waiver_id, timestamp) => {
   const waiver = await get_waiver_by_id(waiver_id)
 
   // Validate it's a free agency waiver
-  if (waiver.waiver_type !== constants.waivers.FREE_AGENCY) {
+  if (waiver.waiver_type !== waiver_types.FREE_AGENCY) {
     throw new Error(`Waiver ${waiver_id} is not a free agency waiver`)
   }
 
   const lid = waiver.lid
 
   // Check game timing constraints if during regular season
-  if (constants.season.isRegularSeason) {
+  if (current_season.isRegularSeason) {
     await validate_game_timing(waiver_id)
   }
 
@@ -64,13 +65,13 @@ const process_single_active_waiver = async (waiver_id, timestamp) => {
 const process_bulk_active_waivers = async (daily, timestamp) => {
   // Original bulk processing logic
   // only run outside of regular season waiver period
-  if (constants.season.isRegularSeason && constants.season.isWaiverPeriod) {
+  if (current_season.isRegularSeason && current_season.isWaiverPeriod) {
     log('during regular season waiver period, active waivers not run')
     return
   }
 
   // only run daily waivers during offseason
-  if (!constants.season.isRegularSeason && !daily) {
+  if (!current_season.isRegularSeason && !daily) {
     log('outside of daily waivers during offseason, active waivers not run')
     return
   }
@@ -81,7 +82,7 @@ const process_bulk_active_waivers = async (daily, timestamp) => {
   }
 
   for (const lid of league_ids) {
-    if (!constants.season.isRegularSeason) {
+    if (!current_season.isRegularSeason) {
       const should_skip = await should_skip_league_in_offseason(lid)
       if (should_skip) continue
     }
@@ -96,7 +97,7 @@ const validate_game_timing = async (waiver_id) => {
     .select('waivers.*', 'nfl_games.date', 'nfl_games.time_est')
     .join('player', 'waivers.pid', 'player.pid')
     .joinRaw(
-      `left join nfl_games on (player.current_nfl_team = nfl_games.v or player.current_nfl_team = nfl_games.h) and (nfl_games.week = ${constants.season.week} or nfl_games.week is null) and (nfl_games.year = ${constants.season.year} or nfl_games.year is null) and (nfl_games.seas_type = 'REG' or nfl_games.seas_type is null)`
+      `left join nfl_games on (player.current_nfl_team = nfl_games.v or player.current_nfl_team = nfl_games.h) and (nfl_games.week = ${current_season.week} or nfl_games.week is null) and (nfl_games.year = ${current_season.year} or nfl_games.year is null) and (nfl_games.seas_type = 'REG' or nfl_games.seas_type is null)`
     )
     .where('waivers.uid', waiver_id)
     .first()
@@ -140,7 +141,7 @@ const process_waiver_claim = async (waiver, lid, timestamp) => {
   await handle_tied_waivers(waiver)
 
   // update team budget
-  if (constants.season.isRegularSeason) {
+  if (current_season.isRegularSeason) {
     await update_team_budget(waiver.tid, waiver.bid)
   }
 
@@ -169,7 +170,7 @@ const handle_tied_waivers = async (waiver) => {
 const update_team_budget = async (team_id, bid) => {
   await db('teams').decrement('faab', bid).where({
     uid: team_id,
-    year: constants.season.year
+    year: current_season.year
   })
 }
 
@@ -192,7 +193,7 @@ const get_leagues_with_pending_active_waivers = async () => {
     .select('lid')
     .whereNull('processed')
     .whereNull('cancelled')
-    .where('type', constants.waivers.FREE_AGENCY)
+    .where('type', waiver_types.FREE_AGENCY)
     .groupBy('lid')
 
   return results.map((w) => w.lid)
@@ -203,9 +204,7 @@ const should_skip_league_in_offseason = async (lid) => {
 
   if (league.free_agency_live_auction_start) {
     const fa_period = get_free_agent_period(league)
-    if (
-      constants.season.now.isBefore(fa_period.free_agency_live_auction_start)
-    ) {
+    if (current_season.now.isBefore(fa_period.free_agency_live_auction_start)) {
       // skip leagues during offseason before start of free agency auction
       return true
     }

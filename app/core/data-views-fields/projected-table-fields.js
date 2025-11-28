@@ -1,13 +1,14 @@
 import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
-import { constants, common_column_params } from '@libs-shared'
+import { common_column_params } from '@libs-shared'
+import { current_season } from '@constants'
 
 const { single_year, single_week, single_seas_type } = common_column_params
 
 // Generate projection years dynamically from 2020 to current year
 const get_projection_years = () => {
   const years = []
-  for (let year = 2020; year <= constants.year; year++) {
+  for (let year = 2020; year <= current_season.year; year++) {
     years.push(year)
   }
   return years
@@ -74,7 +75,7 @@ export default function ({ week }) {
         ? {
             year: {
               ...single_year,
-              default_value: constants.year,
+              default_value: current_season.year,
               values: projection_years
             }
           }
@@ -82,7 +83,7 @@ export default function ({ week }) {
           ? {
               year: {
                 ...single_year,
-                default_value: constants.year,
+                default_value: current_season.year,
                 values: projection_years
               },
               week: single_week,

@@ -1,4 +1,4 @@
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { create_season_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
@@ -8,7 +8,7 @@ import db from '#db'
 const default_league_id = 1
 
 const get_default_params = ({ params = {} } = {}) => {
-  let year = params.year || [constants.season.stats_season_year]
+  let year = params.year || [current_season.stats_season_year]
   if (!Array.isArray(year)) {
     year = [year]
   }
@@ -72,7 +72,7 @@ const nfl_team_seasonlogs_join = (join_arguments) => {
   data_view_join_function({
     ...join_arguments,
     join_year: true,
-    default_year: constants.season.stats_season_year,
+    default_year: current_season.stats_season_year,
     join_table_clause: `nfl_team_seasonlogs as ${join_arguments.table_name}`,
     join_on_team: true,
     join_table_team_field: 'tm',
@@ -95,7 +95,7 @@ const league_nfl_team_seasonlogs_join = (join_arguments) => {
   data_view_join_function({
     ...join_arguments,
     join_year: true,
-    default_year: constants.season.stats_season_year,
+    default_year: current_season.stats_season_year,
     join_table_clause: `league_nfl_team_seasonlogs as ${join_arguments.table_name}`,
     join_on_team: true,
     join_table_team_field: 'tm',
@@ -117,7 +117,7 @@ const get_cache_info = create_season_cache_info({
   get_params: ({ params = {} } = {}) => {
     const year = Array.isArray(params.year)
       ? params.year[0]
-      : params.year || constants.season.stats_season_year
+      : params.year || current_season.stats_season_year
     return { year: [year] }
   }
 })

@@ -3,10 +3,10 @@ import dayjs from 'dayjs'
 
 import { play_actions } from '@core/plays'
 import { scoreboard_actions } from './actions'
-import { constants } from '@libs-shared'
+import { current_season } from '@constants'
 import { matchups_actions } from '@core/matchups'
 
-const current_week = Math.min(constants.week, constants.season.finalWeek)
+const current_week = Math.min(current_season.week, current_season.finalWeek)
 const initial_week = Math.max(
   dayjs().day() === 2 ? current_week - 1 : current_week,
   1

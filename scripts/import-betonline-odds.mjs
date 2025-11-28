@@ -6,7 +6,8 @@ import { hideBin } from 'yargs/helpers'
 import oddslib from 'oddslib'
 
 import db from '#db'
-import { constants, fixTeam } from '#libs-shared'
+import { fixTeam } from '#libs-shared'
+import { current_season } from '#constants'
 import {
   is_main,
   find_player_row,
@@ -80,9 +81,9 @@ const run = async () => {
   const argv = initialize_cli()
   // do not pull in reports outside of the NFL season
   if (
-    !constants.season.now.isBetween(
-      constants.season.regular_season_start,
-      constants.season.end
+    !current_season.now.isBetween(
+      current_season.regular_season_start,
+      current_season.end
     )
   ) {
     log('Not during regular season')
@@ -93,7 +94,7 @@ const run = async () => {
   const formatted_markets = []
 
   const nfl_games = await db('nfl_games').where({
-    year: constants.season.year
+    year: current_season.year
   })
 
   const market_groups = await betonline.get_market_groups()
@@ -113,7 +114,7 @@ const run = async () => {
       event.team2 &&
       event.team2.length
     ) {
-      const { week, seas_type } = constants.season.calculate_week(
+      const { week, seas_type } = current_season.calculate_week(
         dayjs(event.date)
       )
       const home = fixTeam(event.team1[0]?.title)
@@ -122,7 +123,7 @@ const run = async () => {
         (game) =>
           game.week === week &&
           game.seas_type === seas_type &&
-          game.year === constants.season.year &&
+          game.year === current_season.year &&
           game.v === visitor &&
           game.h === home
       )

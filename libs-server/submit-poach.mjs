@@ -3,12 +3,8 @@ import advancedFormat from 'dayjs/plugin/advancedFormat.js'
 
 import db from '#db'
 
-import {
-  constants,
-  Roster,
-  isSantuaryPeriod,
-  getPoachProcessingTime
-} from '#libs-shared'
+import { Roster, isSantuaryPeriod, getPoachProcessingTime } from '#libs-shared'
+import { current_season, roster_slot_types, waiver_types } from '#constants'
 import sendNotifications from './send-notifications.mjs'
 import getRoster from './get-roster.mjs'
 import getLeague from './get-league.mjs'
@@ -45,15 +41,15 @@ export default async function ({
   const slots = await db('rosters_players')
     .where({
       lid: leagueId,
-      week: constants.season.week,
-      year: constants.season.year,
+      week: current_season.week,
+      year: current_season.year,
       pid
     })
     .where(function () {
       this.where({
-        slot: constants.slots.PS
+        slot: roster_slot_types.PS
       }).orWhere({
-        slot: constants.slots.PSD
+        slot: roster_slot_types.PSD
       })
     })
   if (!slots.length) {
@@ -67,7 +63,7 @@ export default async function ({
       .where({
         pid,
         lid: leagueId,
-        type: constants.waivers.POACH
+        type: waiver_types.POACH
       })
       .whereNull('processed')
       .whereNull('cancelled')
@@ -113,7 +109,7 @@ export default async function ({
   const tran = transactions[0]
   const playerPoachValue = tran.value + 2
   if (
-    !constants.season.isRegularSeason &&
+    !current_season.isRegularSeason &&
     roster.availableCap - playerPoachValue < 0
   ) {
     throw new Error('not enough available cap')
@@ -155,7 +151,7 @@ export default async function ({
   const player_team = await db('teams')
     .where({
       uid: playerTid,
-      year: constants.season.year,
+      year: current_season.year,
       lid: leagueId
     })
     .first()

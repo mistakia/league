@@ -6,7 +6,7 @@ import { team_actions } from './actions'
 import { auction_actions } from '@core/auction'
 import { draft_actions } from '@core/draft'
 import { trade_actions } from '@core/trade'
-import { constants } from '@libs-shared'
+import { current_season } from '@constants'
 
 const initialState = new Map()
 
@@ -15,7 +15,7 @@ export function teams_reducer(state = initialState, { payload, type }) {
     case app_actions.AUTH_FULFILLED:
     case team_actions.GET_TEAMS_FULFILLED:
       return state.withMutations((state) => {
-        const year = payload.opts.year || constants.year
+        const year = payload.opts.year || current_season.year
         payload.data.teams.forEach((t) => {
           if (state.hasIn([year, t.uid])) {
             if (t.stats) {
@@ -48,23 +48,23 @@ export function teams_reducer(state = initialState, { payload, type }) {
 
     case auction_actions.AUCTION_PROCESSED: {
       const newCap =
-        state.getIn([constants.year, payload.tid, 'cap']) - payload.value
-      return state.setIn([constants.year, payload.tid, 'cap'], newCap)
+        state.getIn([current_season.year, payload.tid, 'cap']) - payload.value
+      return state.setIn([current_season.year, payload.tid, 'cap'], newCap)
     }
 
     case team_actions.PUT_TEAM_FULFILLED:
       return state.setIn(
-        [constants.year, payload.opts.teamId, payload.opts.field],
+        [current_season.year, payload.opts.teamId, payload.opts.field],
         payload.data.value
       )
 
     case draft_actions.DRAFTED_PLAYER:
     case draft_actions.POST_DRAFT_FULFILLED: {
       const { data } = payload
-      const teamPicks = state.getIn([constants.year, data.tid, 'picks'])
+      const teamPicks = state.getIn([current_season.year, data.tid, 'picks'])
       const key = teamPicks.findKey((p) => p.uid === data.uid)
       return state.setIn(
-        [constants.year, data.tid, 'picks', key, 'pid'],
+        [current_season.year, data.tid, 'picks', key, 'pid'],
         data.pid
       )
     }
@@ -79,9 +79,9 @@ export function teams_reducer(state = initialState, { payload, type }) {
 
       return state.withMutations((state) => {
         // make changes to proposing team picks
-        if (state.getIn([constants.year, payload.data.propose_tid])) {
+        if (state.getIn([current_season.year, payload.data.propose_tid])) {
           const proposingTeam = state.getIn([
-            constants.year,
+            current_season.year,
             payload.data.propose_tid
           ])
           let proposingTeamPicks = proposingTeam.get('picks')
@@ -101,14 +101,14 @@ export function teams_reducer(state = initialState, { payload, type }) {
           }
 
           state.setIn(
-            [constants.year, payload.data.propose_tid, 'picks'],
+            [current_season.year, payload.data.propose_tid, 'picks'],
             proposingTeamPicks
           )
         }
 
-        if (state.getIn([constants.year, payload.data.accept_tid])) {
+        if (state.getIn([current_season.year, payload.data.accept_tid])) {
           const acceptingTeam = state.getIn([
-            constants.year,
+            current_season.year,
             payload.data.accept_tid
           ])
           let acceptingTeamPicks = acceptingTeam.get('picks')
@@ -128,7 +128,7 @@ export function teams_reducer(state = initialState, { payload, type }) {
           }
 
           state.setIn(
-            [constants.year, payload.data.accept_tid, 'picks'],
+            [current_season.year, payload.data.accept_tid, 'picks'],
             acceptingTeamPicks
           )
         }
@@ -136,12 +136,12 @@ export function teams_reducer(state = initialState, { payload, type }) {
 
     case team_actions.POST_TEAMS_FULFILLED:
       return state.setIn(
-        [constants.year, payload.data.team.uid],
+        [current_season.year, payload.data.team.uid],
         createTeam(payload.data.team)
       )
 
     case team_actions.DELETE_TEAMS_FULFILLED:
-      return state.deleteIn([constants.year, payload.opts.teamId])
+      return state.deleteIn([current_season.year, payload.opts.teamId])
 
     case team_actions.GET_LEAGUE_TEAM_STATS_FULFILLED:
       return state.withMutations((state) => {

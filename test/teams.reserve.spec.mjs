@@ -6,7 +6,13 @@ import MockDate from 'mockdate'
 import server from '#api'
 import knex from '#db'
 import league from '#db/seeds/league.mjs'
-import { constants } from '#libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  transaction_types,
+  player_nfl_status,
+  player_nfl_injury_status
+} from '#constants'
 import { user1, user2 } from './fixtures/token.mjs'
 import {
   addPlayer,
@@ -24,7 +30,7 @@ process.env.NODE_ENV = 'test'
 chai.should()
 chai.use(chai_http)
 const expect = chai.expect
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 
 // Track used player IDs across tests to avoid duplicate game collisions
 const used_pids = []
@@ -65,14 +71,14 @@ describe('API /teams - reserve', function () {
         leagueId,
         userId,
         player,
-        slot: constants.slots.BENCH,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.BENCH,
+        transaction: transaction_types.DRAFT,
         value
       })
 
       await knex('player')
         .update({
-          nfl_status: constants.player_nfl_status.INJURED_RESERVE
+          nfl_status: player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid: player.pid
@@ -85,7 +91,7 @@ describe('API /teams - reserve', function () {
         .send({
           reserve_pid: player.pid,
           leagueId,
-          slot: constants.slots.RESERVE_SHORT_TERM
+          slot: roster_slot_types.RESERVE_SHORT_TERM
         })
 
       res.should.have.status(200)
@@ -94,32 +100,32 @@ describe('API /teams - reserve', function () {
 
       res.body.tid.should.equal(teamId)
       res.body.pid.should.equal(player.pid)
-      res.body.slot.should.equal(constants.slots.RESERVE_SHORT_TERM)
+      res.body.slot.should.equal(roster_slot_types.RESERVE_SHORT_TERM)
       res.body.transaction.userid.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.pid.should.equal(player.pid)
-      res.body.transaction.type.should.equal(constants.transactions.RESERVE_IR)
+      res.body.transaction.type.should.equal(transaction_types.RESERVE_IR)
       res.body.transaction.value.should.equal(value)
-      res.body.transaction.year.should.equal(constants.season.year)
+      res.body.transaction.year.should.equal(current_season.year)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
 
       const rosterRows = await knex('rosters_players')
         .where({
-          year: constants.season.year,
-          week: constants.season.week,
+          year: current_season.year,
+          week: current_season.week,
           pid: player.pid
         })
         .limit(1)
 
       const rosterRow = rosterRows[0]
-      expect(rosterRow.slot).to.equal(constants.slots.RESERVE_SHORT_TERM)
+      expect(rosterRow.slot).to.equal(roster_slot_types.RESERVE_SHORT_TERM)
 
       await checkLastTransaction({
         leagueId,
-        type: constants.transactions.RESERVE_IR,
+        type: transaction_types.RESERVE_IR,
         value,
-        year: constants.season.year,
+        year: current_season.year,
         pid: player.pid,
         teamId,
         userId
@@ -151,7 +157,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           leagueId: 1,
-          slot: constants.slots.RESERVE_SHORT_TERM
+          slot: roster_slot_types.RESERVE_SHORT_TERM
         })
 
       await missing(request, 'reserve_pid')
@@ -164,7 +170,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           reserve_pid: 'x',
-          slot: constants.slots.RESERVE_SHORT_TERM
+          slot: roster_slot_types.RESERVE_SHORT_TERM
         })
 
       await missing(request, 'leagueId')
@@ -205,7 +211,7 @@ describe('API /teams - reserve', function () {
         .send({
           leagueId: 1,
           reserve_pid: 'x',
-          slot: constants.slots.RESERVE_SHORT_TERM
+          slot: roster_slot_types.RESERVE_SHORT_TERM
         })
 
       await invalid(request, 'player')
@@ -220,7 +226,7 @@ describe('API /teams - reserve', function () {
         .send({
           leagueId: 1,
           reserve_pid: player.pid,
-          slot: constants.slots.RESERVE_SHORT_TERM
+          slot: roster_slot_types.RESERVE_SHORT_TERM
         })
 
       await error(request, 'player not on roster')
@@ -235,7 +241,7 @@ describe('API /teams - reserve', function () {
         .send({
           leagueId: 1,
           reserve_pid: player.pid,
-          slot: constants.slots.RESERVE_SHORT_TERM
+          slot: roster_slot_types.RESERVE_SHORT_TERM
         })
 
       await invalid(request, 'teamId')
@@ -252,8 +258,8 @@ describe('API /teams - reserve', function () {
         leagueId,
         userId,
         player,
-        slot: constants.slots.RESERVE_SHORT_TERM,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.RESERVE_SHORT_TERM,
+        transaction: transaction_types.DRAFT,
         value
       })
       const request = chai_request
@@ -263,7 +269,7 @@ describe('API /teams - reserve', function () {
         .send({
           leagueId: 1,
           reserve_pid: player.pid,
-          slot: constants.slots.RESERVE_SHORT_TERM
+          slot: roster_slot_types.RESERVE_SHORT_TERM
         })
 
       await error(request, 'player already on reserve')
@@ -280,8 +286,8 @@ describe('API /teams - reserve', function () {
         leagueId,
         userId,
         player,
-        slot: constants.slots.COV,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.COV,
+        transaction: transaction_types.DRAFT,
         value
       })
       const request = chai_request
@@ -291,7 +297,7 @@ describe('API /teams - reserve', function () {
         .send({
           leagueId: 1,
           reserve_pid: player.pid,
-          slot: constants.slots.COV
+          slot: roster_slot_types.COV
         })
 
       await error(request, 'player already on reserve')
@@ -301,7 +307,7 @@ describe('API /teams - reserve', function () {
       MockDate.set(regular_season_start.clone().add('1', 'week').toISOString())
       const player = await select_player_with_tracking({
         injury_status: null,
-        nfl_status: constants.player_nfl_status.ACTIVE
+        nfl_status: player_nfl_status.ACTIVE
       })
       const teamId = 1
       const leagueId = 1
@@ -312,8 +318,8 @@ describe('API /teams - reserve', function () {
         leagueId,
         userId,
         player,
-        slot: constants.slots.BENCH,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.BENCH,
+        transaction: transaction_types.DRAFT,
         value
       })
       const request = chai_request
@@ -323,7 +329,7 @@ describe('API /teams - reserve', function () {
         .send({
           leagueId: 1,
           reserve_pid: player.pid,
-          slot: constants.slots.RESERVE_SHORT_TERM
+          slot: roster_slot_types.RESERVE_SHORT_TERM
         })
 
       await error(request, 'player not eligible for Reserve')
@@ -340,8 +346,8 @@ describe('API /teams - reserve', function () {
         leagueId,
         userId,
         player,
-        slot: constants.slots.BENCH,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.BENCH,
+        transaction: transaction_types.DRAFT,
         value
       })
       const request = chai_request
@@ -351,7 +357,7 @@ describe('API /teams - reserve', function () {
         .send({
           leagueId: 1,
           reserve_pid: player.pid,
-          slot: constants.slots.COV
+          slot: roster_slot_types.COV
         })
 
       await error(request, 'player not eligible for Reserve/COV')
@@ -369,13 +375,13 @@ describe('API /teams - reserve', function () {
         leagueId,
         userId,
         player,
-        slot: constants.slots.BENCH,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.BENCH,
+        transaction: transaction_types.DRAFT,
         value
       })
       await knex('player')
         .update({
-          nfl_status: constants.player_nfl_status.INJURED_RESERVE
+          nfl_status: player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid: player.pid
@@ -387,7 +393,7 @@ describe('API /teams - reserve', function () {
         .send({
           leagueId: 1,
           reserve_pid: player.pid,
-          slot: constants.slots.COV
+          slot: roster_slot_types.COV
         })
 
       await error(request, 'player not eligible for Reserve/COV')
@@ -405,16 +411,16 @@ describe('API /teams - reserve', function () {
         .where({
           lid: leagueId,
           tid: teamId,
-          week: constants.season.week,
-          year: constants.season.year
+          week: current_season.week,
+          year: current_season.year
         })
-        .whereNot('slot', constants.slots.RESERVE_SHORT_TERM)
+        .whereNot('slot', roster_slot_types.RESERVE_SHORT_TERM)
         .limit(1)
 
       const pid = players[0].pid
       await knex('player')
         .update({
-          nfl_status: constants.player_nfl_status.INJURED_RESERVE
+          nfl_status: player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid
@@ -426,7 +432,7 @@ describe('API /teams - reserve', function () {
         .send({
           leagueId: 1,
           reserve_pid: pid,
-          slot: constants.slots.RESERVE_SHORT_TERM
+          slot: roster_slot_types.RESERVE_SHORT_TERM
         })
 
       await error(request, 'exceeds roster limits')
@@ -443,11 +449,11 @@ describe('API /teams - reserve', function () {
         player,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PSP
+        slot: roster_slot_types.PSP
       })
       await knex('player')
         .update({
-          nfl_status: constants.player_nfl_status.INJURED_RESERVE
+          nfl_status: player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid: player.pid
@@ -458,7 +464,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           reserve_pid: player.pid,
-          slot: constants.slots.RESERVE_SHORT_TERM,
+          slot: roster_slot_types.RESERVE_SHORT_TERM,
           leagueId: 1
         })
 
@@ -477,14 +483,14 @@ describe('API /teams - reserve', function () {
         leagueId,
         userId,
         player,
-        slot: constants.slots.BENCH,
-        transaction: constants.transactions.ROSTER_ADD,
+        slot: roster_slot_types.BENCH,
+        transaction: transaction_types.ROSTER_ADD,
         value
       })
 
       await knex('player')
         .update({
-          nfl_status: constants.player_nfl_status.INJURED_RESERVE
+          nfl_status: player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid: player.pid
@@ -497,7 +503,7 @@ describe('API /teams - reserve', function () {
         .send({
           reserve_pid: player.pid,
           leagueId,
-          slot: constants.slots.RESERVE_SHORT_TERM
+          slot: roster_slot_types.RESERVE_SHORT_TERM
         })
 
       await error(request, 'not eligible, not rostered long enough')
@@ -510,11 +516,11 @@ describe('API /teams - reserve', function () {
         player,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PS
+        slot: roster_slot_types.PS
       })
       await knex('player')
         .update({
-          nfl_status: constants.player_nfl_status.INJURED_RESERVE
+          nfl_status: player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid: player.pid
@@ -526,7 +532,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           reserve_pid: player.pid,
-          slot: constants.slots.RESERVE_SHORT_TERM,
+          slot: roster_slot_types.RESERVE_SHORT_TERM,
           leagueId: 1
         })
 
@@ -543,11 +549,11 @@ describe('API /teams - reserve', function () {
         player,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PSD
+        slot: roster_slot_types.PSD
       })
       await knex('player')
         .update({
-          nfl_status: constants.player_nfl_status.INJURED_RESERVE
+          nfl_status: player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid: player.pid
@@ -559,7 +565,7 @@ describe('API /teams - reserve', function () {
         .set('Authorization', `Bearer ${user1}`)
         .send({
           reserve_pid: player.pid,
-          slot: constants.slots.RESERVE_SHORT_TERM,
+          slot: roster_slot_types.RESERVE_SHORT_TERM,
           leagueId: 1
         })
 
@@ -574,6 +580,22 @@ describe('API /teams - reserve', function () {
     beforeEach(async function () {
       this.timeout(60 * 1000)
       await league(knex)
+      // Clean up test games and related gamelogs to avoid duplicate key constraints
+      // Delete games with v='OPP' (test opponent) for current season year
+      const test_game_esbids = await knex('nfl_games')
+        .select('esbid')
+        .where('year', current_season.year)
+        .where('v', 'OPP')
+
+      if (test_game_esbids.length > 0) {
+        const esbids = test_game_esbids.map((row) => row.esbid)
+
+        // Delete player_gamelogs first (foreign key constraint)
+        await knex('player_gamelogs').whereIn('esbid', esbids).del()
+
+        // Then delete games
+        await knex('nfl_games').whereIn('esbid', esbids).del()
+      }
     })
 
     it('player with prior week OUT status eligible before final practice day', async () => {
@@ -589,19 +611,19 @@ describe('API /teams - reserve', function () {
       // Update player to ACTIVE with no injury status
       await knex('player')
         .update({
-          nfl_status: constants.player_nfl_status.ACTIVE,
+          nfl_status: player_nfl_status.ACTIVE,
           injury_status: null
         })
         .where({ pid: player.pid })
 
       // Create prior week roster so the "not rostered long enough" check has data
-      const prior_week = constants.season.week - 1
+      const prior_week = current_season.week - 1
       const prior_roster_result = await knex('rosters')
         .insert({
           tid: teamId,
           lid: leagueId,
           week: prior_week,
-          year: constants.season.year
+          year: current_season.year
         })
         .returning('uid')
 
@@ -612,12 +634,12 @@ describe('API /teams - reserve', function () {
       await knex('rosters_players').insert({
         rid: prior_roster_uid,
         pid: player.pid,
-        slot: constants.slots.BENCH,
+        slot: roster_slot_types.BENCH,
         pos: player.pos,
         tid: teamId,
         lid: leagueId,
         week: prior_week,
-        year: constants.season.year
+        year: current_season.year
       })
 
       // Add player to roster (will be added to current week 5 roster)
@@ -627,18 +649,18 @@ describe('API /teams - reserve', function () {
         leagueId,
         userId,
         player,
-        slot: constants.slots.BENCH,
-        transaction: constants.transactions.TRADE,
+        slot: roster_slot_types.BENCH,
+        transaction: transaction_types.TRADE,
         value
       })
 
       // Create prior week's game (week 4)
-      const prior_week_esbid = `${constants.season.year}${String(prior_week).padStart(2, '0')}99`
+      const prior_week_esbid = `${current_season.year}${String(prior_week).padStart(2, '0')}99`
 
       await knex('nfl_games').insert({
         esbid: prior_week_esbid,
         week: prior_week,
-        year: constants.season.year,
+        year: current_season.year,
         day: 'SUN',
         seas_type: 'REG',
         h: player.current_nfl_team,
@@ -653,20 +675,20 @@ describe('API /teams - reserve', function () {
         tm: player.current_nfl_team,
         opp: 'OPP',
         pos: player.pos,
-        year: constants.season.year,
+        year: current_season.year,
         active: false
       })
 
       // Add current week game schedule
-      const current_week_esbid = `${constants.season.year}${String(constants.season.week).padStart(2, '0')}10`
+      const current_week_esbid = `${current_season.year}${String(current_season.week).padStart(2, '0')}10`
 
       // Calculate game date/time (Sunday 1PM EST, 3 days from mocked Tuesday)
-      const gameDate = constants.season.now.add(5, 'day') // Tuesday + 5 = Sunday
+      const gameDate = current_season.now.add(5, 'day') // Tuesday + 5 = Sunday
 
       await knex('nfl_games').insert({
         esbid: current_week_esbid,
-        week: constants.season.week,
-        year: constants.season.year,
+        week: current_season.week,
+        year: current_season.year,
         day: 'SUN',
         seas_type: 'REG',
         h: player.current_nfl_team,
@@ -683,12 +705,12 @@ describe('API /teams - reserve', function () {
         .send({
           reserve_pid: player.pid,
           leagueId,
-          slot: constants.slots.RESERVE_SHORT_TERM
+          slot: roster_slot_types.RESERVE_SHORT_TERM
         })
 
       res.should.have.status(200)
       res.body.pid.should.equal(player.pid)
-      res.body.slot.should.equal(constants.slots.RESERVE_SHORT_TERM)
+      res.body.slot.should.equal(roster_slot_types.RESERVE_SHORT_TERM)
 
       MockDate.reset()
     })
@@ -709,7 +731,7 @@ describe('API /teams - reserve', function () {
       // Update player to ACTIVE with no injury status
       await knex('player')
         .update({
-          nfl_status: constants.player_nfl_status.ACTIVE,
+          nfl_status: player_nfl_status.ACTIVE,
           injury_status: null
         })
         .where({ pid: player.pid })
@@ -721,19 +743,19 @@ describe('API /teams - reserve', function () {
         leagueId,
         userId,
         player,
-        slot: constants.slots.BENCH,
-        transaction: constants.transactions.TRADE,
+        slot: roster_slot_types.BENCH,
+        transaction: transaction_types.TRADE,
         value
       })
 
       // Create prior week's game (week 4)
-      const prior_week = constants.season.week - 1
-      const prior_week_esbid = `${constants.season.year}${String(prior_week).padStart(2, '0')}98`
+      const prior_week = current_season.week - 1
+      const prior_week_esbid = `${current_season.year}${String(prior_week).padStart(2, '0')}98`
 
       await knex('nfl_games').insert({
         esbid: prior_week_esbid,
         week: prior_week,
-        year: constants.season.year,
+        year: current_season.year,
         day: 'SUN',
         seas_type: 'REG',
         h: player.current_nfl_team,
@@ -748,18 +770,18 @@ describe('API /teams - reserve', function () {
         tm: player.current_nfl_team,
         opp: 'OPP',
         pos: player.pos,
-        year: constants.season.year,
+        year: current_season.year,
         active: false
       })
 
       // Add current week game schedule for Sunday game with unique esbid
-      const current_week_esbid = `${constants.season.year}${String(constants.season.week).padStart(2, '0')}21`
-      const gameDate = constants.season.now.add(2, 'day') // Friday + 2 = Sunday
+      const current_week_esbid = `${current_season.year}${String(current_season.week).padStart(2, '0')}21`
+      const gameDate = current_season.now.add(2, 'day') // Friday + 2 = Sunday
 
       await knex('nfl_games').insert({
         esbid: current_week_esbid,
-        week: constants.season.week,
-        year: constants.season.year,
+        week: current_season.week,
+        year: current_season.year,
         day: 'SUN',
         seas_type: 'REG',
         h: player.current_nfl_team,
@@ -776,7 +798,7 @@ describe('API /teams - reserve', function () {
         .send({
           reserve_pid: player.pid,
           leagueId,
-          slot: constants.slots.RESERVE_SHORT_TERM
+          slot: roster_slot_types.RESERVE_SHORT_TERM
         })
 
       await error(request, 'player not eligible for Reserve')
@@ -800,8 +822,8 @@ describe('API /teams - reserve', function () {
       // Update player to ACTIVE with QUESTIONABLE injury status
       await knex('player')
         .update({
-          nfl_status: constants.player_nfl_status.ACTIVE,
-          injury_status: constants.player_nfl_injury_status.QUESTIONABLE
+          nfl_status: player_nfl_status.ACTIVE,
+          injury_status: player_nfl_injury_status.QUESTIONABLE
         })
         .where({ pid: player.pid })
 
@@ -812,19 +834,19 @@ describe('API /teams - reserve', function () {
         leagueId,
         userId,
         player,
-        slot: constants.slots.BENCH,
-        transaction: constants.transactions.TRADE,
+        slot: roster_slot_types.BENCH,
+        transaction: transaction_types.TRADE,
         value
       })
 
       // Create prior week's game (week 4)
-      const prior_week = constants.season.week - 1
-      const prior_week_esbid = `${constants.season.year}${String(prior_week).padStart(2, '0')}97`
+      const prior_week = current_season.week - 1
+      const prior_week_esbid = `${current_season.year}${String(prior_week).padStart(2, '0')}97`
 
       await knex('nfl_games').insert({
         esbid: prior_week_esbid,
         week: prior_week,
-        year: constants.season.year,
+        year: current_season.year,
         day: 'SUN',
         seas_type: 'REG',
         h: player.current_nfl_team,
@@ -839,18 +861,18 @@ describe('API /teams - reserve', function () {
         tm: player.current_nfl_team,
         opp: 'OPP',
         pos: player.pos,
-        year: constants.season.year,
+        year: current_season.year,
         active: false
       })
 
       // Add current week game schedule for Sunday game with unique esbid
-      const current_week_esbid = `${constants.season.year}${String(constants.season.week).padStart(2, '0')}31`
-      const gameDate = constants.season.now.add(2, 'day') // Friday + 2 = Sunday
+      const current_week_esbid = `${current_season.year}${String(current_season.week).padStart(2, '0')}31`
+      const gameDate = current_season.now.add(2, 'day') // Friday + 2 = Sunday
 
       await knex('nfl_games').insert({
         esbid: current_week_esbid,
-        week: constants.season.week,
-        year: constants.season.year,
+        week: current_season.week,
+        year: current_season.year,
         day: 'SUN',
         seas_type: 'REG',
         h: player.current_nfl_team,
@@ -867,7 +889,7 @@ describe('API /teams - reserve', function () {
         .send({
           reserve_pid: player.pid,
           leagueId,
-          slot: constants.slots.RESERVE_SHORT_TERM
+          slot: roster_slot_types.RESERVE_SHORT_TERM
         })
 
       await error(request, 'player not eligible for Reserve')
@@ -889,7 +911,7 @@ describe('API /teams - reserve', function () {
       // Update player to ACTIVE with no injury status
       await knex('player')
         .update({
-          nfl_status: constants.player_nfl_status.ACTIVE,
+          nfl_status: player_nfl_status.ACTIVE,
           injury_status: null
         })
         .where({ pid: player.pid })
@@ -901,19 +923,19 @@ describe('API /teams - reserve', function () {
         leagueId,
         userId,
         player,
-        slot: constants.slots.BENCH,
-        transaction: constants.transactions.TRADE,
+        slot: roster_slot_types.BENCH,
+        transaction: transaction_types.TRADE,
         value
       })
 
       // Create prior week's game (week 4)
-      const prior_week = constants.season.week - 1
-      const prior_week_esbid = `${constants.season.year}${String(prior_week).padStart(2, '0')}96`
+      const prior_week = current_season.week - 1
+      const prior_week_esbid = `${current_season.year}${String(prior_week).padStart(2, '0')}96`
 
       await knex('nfl_games').insert({
         esbid: prior_week_esbid,
         week: prior_week,
-        year: constants.season.year,
+        year: current_season.year,
         day: 'SUN',
         seas_type: 'REG',
         h: player.current_nfl_team,
@@ -928,18 +950,18 @@ describe('API /teams - reserve', function () {
         tm: player.current_nfl_team,
         opp: 'OPP',
         pos: player.pos,
-        year: constants.season.year,
+        year: current_season.year,
         active: false
       })
 
       // Add current week game schedule for Thursday game with unique esbid
-      const current_week_esbid = `${constants.season.year}${String(constants.season.week).padStart(2, '0')}41`
-      const gameDate = constants.season.now.add(2, 'day') // Tuesday + 2 = Thursday
+      const current_week_esbid = `${current_season.year}${String(current_season.week).padStart(2, '0')}41`
+      const gameDate = current_season.now.add(2, 'day') // Tuesday + 2 = Thursday
 
       await knex('nfl_games').insert({
         esbid: current_week_esbid,
-        week: constants.season.week,
-        year: constants.season.year,
+        week: current_season.week,
+        year: current_season.year,
         day: 'THU',
         seas_type: 'REG',
         h: player.current_nfl_team,
@@ -956,12 +978,12 @@ describe('API /teams - reserve', function () {
         .send({
           reserve_pid: player.pid,
           leagueId,
-          slot: constants.slots.RESERVE_SHORT_TERM
+          slot: roster_slot_types.RESERVE_SHORT_TERM
         })
 
       res.should.have.status(200)
       res.body.pid.should.equal(player.pid)
-      res.body.slot.should.equal(constants.slots.RESERVE_SHORT_TERM)
+      res.body.slot.should.equal(roster_slot_types.RESERVE_SHORT_TERM)
 
       MockDate.reset()
     })
@@ -988,8 +1010,8 @@ describe('API /teams - reserve', function () {
         leagueId,
         userId,
         player,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.DRAFT,
         value
       })
 
@@ -1005,7 +1027,7 @@ describe('API /teams - reserve', function () {
 
       await knex('player')
         .update({
-          nfl_status: constants.player_nfl_status.INJURED_RESERVE
+          nfl_status: player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid: player.pid
@@ -1018,14 +1040,14 @@ describe('API /teams - reserve', function () {
         .send({
           reserve_pid: player.pid,
           leagueId,
-          slot: constants.slots.RESERVE_SHORT_TERM
+          slot: roster_slot_types.RESERVE_SHORT_TERM
         })
 
       res.should.have.status(200)
       res.should.be.json
       res.body.tid.should.equal(teamId)
       res.body.pid.should.equal(player.pid)
-      res.body.slot.should.equal(constants.slots.RESERVE_SHORT_TERM)
+      res.body.slot.should.equal(roster_slot_types.RESERVE_SHORT_TERM)
     })
 
     it('practice squad drafted player with active poaching claim can be reserved', async () => {
@@ -1043,8 +1065,8 @@ describe('API /teams - reserve', function () {
         leagueId,
         userId,
         player,
-        slot: constants.slots.PSD,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.PSD,
+        transaction: transaction_types.DRAFT,
         value
       })
 
@@ -1060,7 +1082,7 @@ describe('API /teams - reserve', function () {
 
       await knex('player')
         .update({
-          nfl_status: constants.player_nfl_status.INJURED_RESERVE
+          nfl_status: player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid: player.pid
@@ -1073,14 +1095,14 @@ describe('API /teams - reserve', function () {
         .send({
           reserve_pid: player.pid,
           leagueId,
-          slot: constants.slots.RESERVE_SHORT_TERM
+          slot: roster_slot_types.RESERVE_SHORT_TERM
         })
 
       res.should.have.status(200)
       res.should.be.json
       res.body.tid.should.equal(teamId)
       res.body.pid.should.equal(player.pid)
-      res.body.slot.should.equal(constants.slots.RESERVE_SHORT_TERM)
+      res.body.slot.should.equal(roster_slot_types.RESERVE_SHORT_TERM)
     })
   })
 
@@ -1102,15 +1124,15 @@ describe('API /teams - reserve', function () {
         leagueId,
         userId,
         player,
-        slot: constants.slots.BENCH,
-        transaction: constants.transactions.TRADE,
+        slot: roster_slot_types.BENCH,
+        transaction: transaction_types.TRADE,
         value
       })
 
       // Set player as ACTIVE with no injury status
       await knex('player')
         .update({
-          nfl_status: constants.player_nfl_status.ACTIVE,
+          nfl_status: player_nfl_status.ACTIVE,
           injury_status: null
         })
         .where({
@@ -1120,8 +1142,8 @@ describe('API /teams - reserve', function () {
       // Add DNP practice status
       await knex('practice').insert({
         pid: player.pid,
-        week: constants.season.week,
-        year: constants.season.year,
+        week: current_season.week,
+        year: current_season.year,
         w: 'DNP'
       })
 
@@ -1132,12 +1154,12 @@ describe('API /teams - reserve', function () {
         .send({
           reserve_pid: player.pid,
           leagueId,
-          slot: constants.slots.RESERVE_SHORT_TERM
+          slot: roster_slot_types.RESERVE_SHORT_TERM
         })
 
       res.should.have.status(200)
       res.body.pid.should.equal(player.pid)
-      res.body.slot.should.equal(constants.slots.RESERVE_SHORT_TERM)
+      res.body.slot.should.equal(roster_slot_types.RESERVE_SHORT_TERM)
 
       MockDate.reset()
     })
@@ -1154,15 +1176,15 @@ describe('API /teams - reserve', function () {
         leagueId,
         userId,
         player,
-        slot: constants.slots.BENCH,
-        transaction: constants.transactions.TRADE,
+        slot: roster_slot_types.BENCH,
+        transaction: transaction_types.TRADE,
         value
       })
 
       // Set player as ACTIVE with no injury status
       await knex('player')
         .update({
-          nfl_status: constants.player_nfl_status.ACTIVE,
+          nfl_status: player_nfl_status.ACTIVE,
           injury_status: null
         })
         .where({
@@ -1172,8 +1194,8 @@ describe('API /teams - reserve', function () {
       // Add LP practice status
       await knex('practice').insert({
         pid: player.pid,
-        week: constants.season.week,
-        year: constants.season.year,
+        week: current_season.week,
+        year: current_season.year,
         th: 'LP'
       })
 
@@ -1184,12 +1206,12 @@ describe('API /teams - reserve', function () {
         .send({
           reserve_pid: player.pid,
           leagueId,
-          slot: constants.slots.RESERVE_SHORT_TERM
+          slot: roster_slot_types.RESERVE_SHORT_TERM
         })
 
       res.should.have.status(200)
       res.body.pid.should.equal(player.pid)
-      res.body.slot.should.equal(constants.slots.RESERVE_SHORT_TERM)
+      res.body.slot.should.equal(roster_slot_types.RESERVE_SHORT_TERM)
 
       MockDate.reset()
     })
@@ -1206,15 +1228,15 @@ describe('API /teams - reserve', function () {
         leagueId,
         userId,
         player,
-        slot: constants.slots.BENCH,
-        transaction: constants.transactions.TRADE,
+        slot: roster_slot_types.BENCH,
+        transaction: transaction_types.TRADE,
         value
       })
 
       // Set player as ACTIVE with no injury status
       await knex('player')
         .update({
-          nfl_status: constants.player_nfl_status.ACTIVE,
+          nfl_status: player_nfl_status.ACTIVE,
           injury_status: null
         })
         .where({
@@ -1224,8 +1246,8 @@ describe('API /teams - reserve', function () {
       // Add FULL practice status
       await knex('practice').insert({
         pid: player.pid,
-        week: constants.season.week,
-        year: constants.season.year,
+        week: current_season.week,
+        year: current_season.year,
         w: 'FULL'
       })
 
@@ -1236,7 +1258,7 @@ describe('API /teams - reserve', function () {
         .send({
           reserve_pid: player.pid,
           leagueId,
-          slot: constants.slots.RESERVE_SHORT_TERM
+          slot: roster_slot_types.RESERVE_SHORT_TERM
         })
 
       await error(request, 'player not eligible for Reserve')
@@ -1256,16 +1278,16 @@ describe('API /teams - reserve', function () {
         leagueId,
         userId,
         player,
-        slot: constants.slots.BENCH,
-        transaction: constants.transactions.TRADE,
+        slot: roster_slot_types.BENCH,
+        transaction: transaction_types.TRADE,
         value
       })
 
       // Set player as ACTIVE with OUT injury status
       await knex('player')
         .update({
-          nfl_status: constants.player_nfl_status.ACTIVE,
-          injury_status: constants.player_nfl_injury_status.OUT
+          nfl_status: player_nfl_status.ACTIVE,
+          injury_status: player_nfl_injury_status.OUT
         })
         .where({
           pid: player.pid
@@ -1280,12 +1302,12 @@ describe('API /teams - reserve', function () {
         .send({
           reserve_pid: player.pid,
           leagueId,
-          slot: constants.slots.RESERVE_SHORT_TERM
+          slot: roster_slot_types.RESERVE_SHORT_TERM
         })
 
       res.should.have.status(200)
       res.body.pid.should.equal(player.pid)
-      res.body.slot.should.equal(constants.slots.RESERVE_SHORT_TERM)
+      res.body.slot.should.equal(roster_slot_types.RESERVE_SHORT_TERM)
 
       MockDate.reset()
     })

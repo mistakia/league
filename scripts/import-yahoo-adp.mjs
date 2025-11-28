@@ -11,7 +11,7 @@ import {
   updatePlayer,
   yahoo
 } from '#libs-server'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -39,7 +39,7 @@ const parse_yahoo_data = (players) => {
 }
 
 const import_yahoo_adp = async ({
-  year = constants.season.year,
+  year = current_season.year,
   dry_run = false
 } = {}) => {
   const raw_data = await yahoo.get_yahoo_adp()

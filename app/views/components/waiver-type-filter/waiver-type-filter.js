@@ -1,8 +1,8 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { constants } from '@libs-shared'
 import WaiversFilter from '@components/waivers-filter'
+import { waiver_types } from '@constants'
 
 export default class WaiverTypeFilter extends React.Component {
   render = () => {
@@ -13,9 +13,9 @@ export default class WaiverTypeFilter extends React.Component {
       values: []
     }
 
-    for (const type in constants.waivers) {
-      const value = constants.waivers[type]
-      const label = constants.waiversDetail[value]
+    for (const type in waiver_types) {
+      const value = waiver_types[type]
+      const label = waiver_types.waiversDetail[value]
 
       state.values.push({
         value,

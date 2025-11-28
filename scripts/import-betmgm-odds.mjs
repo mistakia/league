@@ -5,7 +5,8 @@ import { hideBin } from 'yargs/helpers'
 import fs from 'fs-extra'
 
 import db from '#db'
-import { constants, fixTeam } from '#libs-shared'
+import { fixTeam } from '#libs-shared'
+import { current_season } from '#constants'
 import {
   is_main,
   betmgm,
@@ -168,7 +169,7 @@ const import_betmgm_odds = async ({
   const formatted_markets = []
 
   const nfl_games = await db('nfl_games').where({
-    year: constants.season.year
+    year: current_season.year
   })
 
   const { fixtures } = await betmgm.get_markets()
@@ -184,14 +185,14 @@ const import_betmgm_odds = async ({
         event_name_split[0].replace(/\(.*?\)/g, '').trim()
       )
       const home = fixTeam(event_name_split[1].replace(/\(.*?\)/g, '').trim())
-      const { week, seas_type } = constants.season.calculate_week(
+      const { week, seas_type } = current_season.calculate_week(
         dayjs(fixture.startDate)
       )
       nfl_game = nfl_games.find(
         (game) =>
           game.week === week &&
           game.seas_type === seas_type &&
-          game.year === constants.season.year &&
+          game.year === current_season.year &&
           game.v === visitor &&
           game.h === home
       )

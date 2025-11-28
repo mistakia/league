@@ -3,7 +3,7 @@ import dayjs from 'dayjs'
 // import debug from 'debug'
 
 import config from '#config'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 
 // const log = debug('gambet')
@@ -63,7 +63,7 @@ export const get_events = async () => {
   })
   const data = await res.json()
 
-  const week_end = constants.season.week_end
+  const week_end = current_season.week_end
   if (
     data &&
     data.models &&

@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -13,10 +13,10 @@ const initialize_cli = () => {
 
 const log = debug('generate-draft-picks')
 
-const run = async ({ future_year = constants.season.year + 1 }) => {
+const run = async ({ future_year = current_season.year + 1 }) => {
   const leagues = await db('leagues').where('hosted', 1)
 
-  if (constants.season.isRegularSeason) {
+  if (current_season.isRegularSeason) {
     log('not generating future draft picks during the regular season')
     return
   }
@@ -29,7 +29,7 @@ const run = async ({ future_year = constants.season.year + 1 }) => {
 
     const teams = await db('teams').where({
       lid: league.uid,
-      year: constants.season.year
+      year: current_season.year
     })
     for (const team of teams) {
       for (let i = 1; i < 4; i++) {

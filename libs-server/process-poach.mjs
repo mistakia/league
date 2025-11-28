@@ -1,5 +1,10 @@
 import db from '#db'
-import { constants, Roster } from '#libs-shared'
+import { Roster } from '#libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  transaction_types
+} from '#constants'
 import sendNotifications from './send-notifications.mjs'
 import getRoster from './get-roster.mjs'
 import processRelease from './process-release.mjs'
@@ -12,7 +17,11 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
 
   const rosterSlots = await db('rosters_players')
     .where('rosters_players.pid', pid)
-    .where({ week: constants.season.week, year: constants.season.year, lid })
+    .where({
+      week: current_season.week,
+      year: current_season.year,
+      lid
+    })
 
   // verify player is on a team
   if (!rosterSlots.length) {
@@ -23,8 +32,8 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
 
   // verify player is on the practice squad
   if (
-    rosterSlot.slot !== constants.slots.PS &&
-    rosterSlot.slot !== constants.slots.PSD
+    rosterSlot.slot !== roster_slot_types.PS &&
+    rosterSlot.slot !== roster_slot_types.PSD
   ) {
     throw new Error('player is not on a practice squad')
   }
@@ -73,7 +82,7 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
   })
   const playerPoachValue = value + 2
   if (
-    !constants.season.isRegularSeason &&
+    !current_season.isRegularSeason &&
     roster.availableCap - playerPoachValue < 0
   ) {
     throw new Error('not enough available cap')
@@ -88,9 +97,9 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
 
   // remove player from poached team rosters
   const poachedTeamRosters = await db('rosters')
-    .where('week', '>=', constants.season.week)
+    .where('week', '>=', current_season.week)
     .where('tid', rosterSlot.tid)
-    .where('year', constants.season.year)
+    .where('year', current_season.year)
   const poachedTeamRosterIds = poachedTeamRosters.map((r) => r.uid)
   await db('rosters_players')
     .whereIn('rid', poachedTeamRosterIds)
@@ -102,10 +111,10 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
     tid,
     lid,
     pid,
-    type: constants.transactions.POACHED,
+    type: transaction_types.POACHED,
     value: playerPoachValue,
-    week: constants.season.week,
-    year: constants.season.year,
+    week: current_season.week,
+    year: current_season.year,
     timestamp: Math.round(Date.now() / 1000)
   }
   await db('transactions').insert(transaction)
@@ -113,14 +122,14 @@ export default async function ({ pid, release = [], lid, tid, userid }) {
   // add player to poaching team roster
   await db('rosters_players').insert({
     rid: rosterRow.uid,
-    slot: constants.slots.BENCH,
+    slot: roster_slot_types.BENCH,
     pid,
     pos: poach_player_row.pos,
     extensions: 0,
     tid,
     lid,
-    week: constants.season.week,
-    year: constants.season.year
+    week: current_season.week,
+    year: current_season.year
   })
 
   // award conditional pick to poached team

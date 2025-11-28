@@ -12,7 +12,7 @@ import {
   batch_insert,
   updatePlayer
 } from '#libs-server'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -101,7 +101,7 @@ const parse_nfl_data = (html) => {
 }
 
 const import_nfl_adp = async ({
-  year = constants.season.year,
+  year = current_season.year,
   dry_run = false
 } = {}) => {
   const url = `https://fantasy.nfl.com/draftcenter/breakdown?leagueId=&offset=1&count=400&position=all&season=${year}&sort=draftAveragePosition`

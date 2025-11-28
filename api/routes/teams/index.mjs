@@ -12,7 +12,7 @@ import protect from './protect.mjs'
 import tag from './tag.mjs'
 import transactions from './transactions.mjs'
 import players from './players.mjs'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 const router = express.Router()
 
@@ -133,14 +133,14 @@ router.put('/:teamId', async (req, res) => {
     if (userTeamFields.indexOf(field) < 0) {
       await db('teams')
         .update({ [field]: value })
-        .where({ uid: teamId, year: constants.season.year })
+        .where({ uid: teamId, year: current_season.year })
     } else {
       await db('users_teams')
         .update({ [field]: value })
         .where({
           tid: teamId,
           userid: req.auth.userId,
-          year: constants.season.year
+          year: current_season.year
         })
     }
     res.send({ value })

@@ -1,7 +1,13 @@
 import debug from 'debug'
 
 import db from '#db'
-import { constants, Errors } from '#libs-shared'
+import { Errors } from '#libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  transaction_types,
+  waiver_types
+} from '#constants'
 import {
   submitAcquisition,
   resetWaiverOrder,
@@ -35,14 +41,14 @@ const process_single_practice_waiver = async (waiver_id, timestamp) => {
   const waiver = await get_waiver_by_id(waiver_id)
 
   // Validate it's a practice squad waiver
-  if (waiver.waiver_type !== constants.waivers.FREE_AGENCY_PRACTICE) {
+  if (waiver.waiver_type !== waiver_types.FREE_AGENCY_PRACTICE) {
     throw new Error(`Waiver ${waiver_id} is not a practice squad waiver`)
   }
 
   const lid = waiver.lid
 
   // Check game timing constraints if during regular season
-  if (constants.season.isRegularSeason) {
+  if (current_season.isRegularSeason) {
     await validate_game_timing(waiver_id, waiver.lid)
   }
 
@@ -70,18 +76,18 @@ const process_single_practice_waiver = async (waiver_id, timestamp) => {
 
 const process_bulk_practice_waivers = async (daily, timestamp) => {
   // Original bulk processing logic
-  if (constants.season.week > constants.season.finalWeek) {
+  if (current_season.week > current_season.finalWeek) {
     log('after final week, practice waivers not run')
     return
   }
 
   // only run daily waivers during offseason
-  if (!constants.season.isRegularSeason && !daily) {
+  if (!current_season.isRegularSeason && !daily) {
     log('outside of daily waivers during offseason, practice waivers not run')
     return
   }
 
-  if (constants.season.isRegularSeason && constants.season.isWaiverPeriod) {
+  if (current_season.isRegularSeason && current_season.isWaiverPeriod) {
     return
   }
 
@@ -101,7 +107,7 @@ const validate_game_timing = async (waiver_id, lid) => {
     .select('waivers.*', 'nfl_games.date', 'nfl_games.time_est')
     .join('player', 'waivers.pid', 'player.pid')
     .joinRaw(
-      `left join nfl_games on nfl_games.week = ${constants.season.week} and nfl_games.year = ${constants.season.year} and nfl_games.seas_type = 'REG' and (player.current_nfl_team = nfl_games.v or player.current_nfl_team = nfl_games.h)`
+      `left join nfl_games on nfl_games.week = ${current_season.week} and nfl_games.year = ${current_season.year} and nfl_games.seas_type = 'REG' and (player.current_nfl_team = nfl_games.v or player.current_nfl_team = nfl_games.h)`
     )
     .where('waivers.uid', waiver_id)
     .first()
@@ -190,11 +196,11 @@ const handle_super_priority_claim = async (waiver, lid, timestamp) => {
 
 const handle_regular_practice_claim = async (waiver, lid, timestamp) => {
   let value = 0
-  if (!constants.season.isRegularSeason) {
+  if (!current_season.isRegularSeason) {
     const transactions = await db('transactions').where({
       lid,
-      type: constants.transactions.DRAFT,
-      year: constants.season.year,
+      type: transaction_types.DRAFT,
+      year: current_season.year,
       pid: waiver.pid
     })
 
@@ -214,7 +220,7 @@ const handle_regular_practice_claim = async (waiver, lid, timestamp) => {
     teamId: waiver.tid,
     bid: value,
     userId: waiver.userid,
-    slot: constants.slots.PS,
+    slot: roster_slot_types.PS,
     waiverId: waiver.wid
   })
 
@@ -255,7 +261,7 @@ const cancel_other_pending_waivers = async (
     })
     .where('lid', lid)
     .where('pid', pid)
-    .where('type', constants.waivers.FREE_AGENCY_PRACTICE)
+    .where('type', waiver_types.FREE_AGENCY_PRACTICE)
     .where('uid', '!=', waiver_id)
     .whereNull('processed')
     .whereNull('cancelled')
@@ -266,7 +272,7 @@ const get_leagues_with_pending_practice_waivers = async () => {
     .select('lid')
     .whereNull('processed')
     .whereNull('cancelled')
-    .where('type', constants.waivers.FREE_AGENCY_PRACTICE)
+    .where('type', waiver_types.FREE_AGENCY_PRACTICE)
     .groupBy('lid')
 
   return results.map((w) => w.lid)

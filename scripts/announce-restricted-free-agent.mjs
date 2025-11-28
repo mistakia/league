@@ -6,7 +6,10 @@ import db from '#db'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { constants } from '#libs-shared'
+import {
+  current_season,
+  league_default_rfa_announcement_hour
+} from '#constants'
 import { is_main, sendNotifications, getLeague, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -38,7 +41,7 @@ const calculate_announcement_timestamp = ({ league, day_offset = 0 }) => {
   const announcement_hour =
     league.restricted_free_agency_announcement_hour !== undefined
       ? league.restricted_free_agency_announcement_hour
-      : constants.league_default_restricted_free_agency_announcement_hour
+      : league_default_rfa_announcement_hour
 
   // Handle special case for hour 24 (midnight)
   const target_hour = announcement_hour === 24 ? 0 : announcement_hour
@@ -102,7 +105,7 @@ const get_eligible_leagues = async ({
     .select('seasons.*', 'leagues.name as name')
     .join('leagues', 'leagues.uid', '=', 'seasons.lid')
     .where({
-      'seasons.year': constants.season.year
+      'seasons.year': current_season.year
     })
     .whereNotNull('tran_start')
     .where('tran_start', '<=', current_timestamp)
@@ -226,7 +229,7 @@ const announce_restricted_free_agent = async ({
 
   // Get teams sorted by draft_order desc (highest to lowest)
   const teams = await db('teams')
-    .where({ lid, year: constants.season.year })
+    .where({ lid, year: current_season.year })
     .orderBy('draft_order', 'desc')
 
   // Determine the nominating team based on provided parameters
@@ -272,7 +275,7 @@ const announce_restricted_free_agent = async ({
     .where({
       tid: nominating_team.uid,
       lid,
-      year: constants.season.year
+      year: current_season.year
     })
     .whereNull('cancelled')
     .whereNull('processed')

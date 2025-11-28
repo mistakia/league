@@ -1,7 +1,8 @@
 import express from 'express'
 import bcrypt from 'bcrypt'
 
-import { constants, groupBy } from '#libs-shared'
+import { groupBy } from '#libs-shared'
+import { current_season } from '#constants'
 import { validators } from '#libs-server'
 
 const router = express.Router()
@@ -207,7 +208,7 @@ router.get('/?', async (req, res) => {
       )
       .where({
         'users_teams.userid': req.auth.userId,
-        'users_teams.year': constants.season.year
+        'users_teams.year': current_season.year
       })
       .join('users_teams', function () {
         this.on('users_teams.tid', '=', 'teams.uid')
@@ -221,7 +222,7 @@ router.get('/?', async (req, res) => {
         this.on('leagues.uid', '=', 'seasons.lid')
         this.on(
           db.raw(
-            `seasons.year = ${constants.season.year} or seasons.year is null`
+            `seasons.year = ${current_season.year} or seasons.year is null`
           )
         )
       })
@@ -242,7 +243,7 @@ router.get('/?', async (req, res) => {
     // Fetch divisions for all leagues
     const divisions = await db('league_divisions')
       .whereIn('lid', leagueIds)
-      .andWhere('year', constants.season.year)
+      .andWhere('year', current_season.year)
 
     const seasonsByLeagueId = groupBy(seasons, 'lid')
     const divisionsByLeagueId = groupBy(divisions, 'lid')

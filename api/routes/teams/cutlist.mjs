@@ -1,6 +1,7 @@
 import express from 'express'
 
-import { Roster, constants } from '#libs-shared'
+import { Roster } from '#libs-shared'
+import { player_tag_types } from '#constants'
 import { getRoster, verifyUserTeam, getLeague } from '#libs-server'
 
 const router = express.Router({ mergeParams: true })
@@ -174,7 +175,7 @@ router.post('/?', async (req, res) => {
       }
 
       const rosterPlayer = roster.get(pid)
-      if (rosterPlayer.tag === constants.tags.RESTRICTED_FREE_AGENCY) {
+      if (rosterPlayer.tag === player_tag_types.RESTRICTED_FREE_AGENCY) {
         return res
           .status(400)
           .send({ error: 'restricted free agents are ineligible' })

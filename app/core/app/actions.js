@@ -1,4 +1,4 @@
-import { constants } from '@libs-shared'
+import { league_defaults } from '@constants'
 import { actions_utils } from '@core/utils'
 const { create_api_actions, create_api_action_types } = actions_utils
 
@@ -16,7 +16,7 @@ export const app_actions = {
   }),
 
   INIT_APP: 'INIT_APP',
-  init: ({ token, leagueId = constants.DEFAULTS.LEAGUE_ID }) => ({
+  init: ({ token, leagueId = league_defaults.LEAGUE_ID }) => ({
     type: app_actions.INIT_APP,
     payload: {
       token,

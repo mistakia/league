@@ -3,7 +3,7 @@
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import { redis_cache } from '#libs-server/redis_adapter.mjs'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import {
   initialize_slow_mode_nomination,
   record_team_pass,
@@ -22,7 +22,7 @@ const initialize_cli = () => {
       year: {
         describe: 'Season year',
         type: 'number',
-        default: constants.season.year
+        default: current_season.year
       },
       lid: {
         describe: 'League ID',
@@ -43,7 +43,7 @@ const initialize_cli = () => {
       year: {
         describe: 'Season year',
         type: 'number',
-        default: constants.season.year
+        default: current_season.year
       }
     })
     .command('clear', 'Clear nomination state', {
@@ -60,7 +60,7 @@ const initialize_cli = () => {
       year: {
         describe: 'Season year',
         type: 'number',
-        default: constants.season.year
+        default: current_season.year
       }
     })
     .command('clear-all', 'Clear all slow mode nominations for a league', {
@@ -72,7 +72,7 @@ const initialize_cli = () => {
       year: {
         describe: 'Season year',
         type: 'number',
-        default: constants.season.year
+        default: current_season.year
       },
       confirm: {
         describe: 'Confirm clearing all nominations',
@@ -166,7 +166,7 @@ const initialize_cli = () => {
       year: {
         describe: 'Season year',
         type: 'number',
-        default: constants.season.year
+        default: current_season.year
       },
       confirm: {
         describe: 'Confirm reset',

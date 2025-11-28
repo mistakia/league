@@ -6,7 +6,7 @@ import MockDate from 'mockdate'
 import server from '#api'
 import knex from '#db'
 import league from '#db/seeds/league.mjs'
-import { constants } from '#libs-shared'
+import { current_season, transaction_types, waiver_types } from '#constants'
 import { user1, user3 } from './fixtures/token.mjs'
 import {
   notLoggedIn,
@@ -19,7 +19,7 @@ import {
 process.env.NODE_ENV = 'test'
 chai.should()
 chai.use(chai_http)
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 
 describe('API /leagues/:lid/waivers - Super Priority', function () {
   before(async function () {
@@ -46,22 +46,22 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
           pid: player.pid,
           tid: 1,
           lid: 1,
-          type: constants.transactions.PRACTICE_ADD,
+          type: transaction_types.PRACTICE_ADD,
           value: 0,
-          year: constants.year,
+          year: current_season.year,
           timestamp: poach_timestamp - 24 * 60 * 60,
-          week: constants.week - 1,
+          week: current_season.week - 1,
           userid: 1
         },
         {
           pid: player.pid,
           tid: 2,
           lid: 1,
-          type: constants.transactions.POACHED,
+          type: transaction_types.POACHED,
           value: 0,
-          year: constants.year,
+          year: current_season.year,
           timestamp: poach_timestamp,
-          week: constants.week - 1,
+          week: current_season.week - 1,
           userid: 2
         }
       ])
@@ -149,7 +149,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         .send({
           teamId: 1, // Original team claiming back
           pid: player.pid,
-          type: constants.waivers.FREE_AGENCY_PRACTICE,
+          type: waiver_types.FREE_AGENCY_PRACTICE,
           leagueId: 1,
           super_priority: true
         })
@@ -158,10 +158,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
       res.should.be.json
       res.body.should.have.property('tid', 1)
       res.body.should.have.property('pid', player.pid)
-      res.body.should.have.property(
-        'type',
-        constants.waivers.FREE_AGENCY_PRACTICE
-      )
+      res.body.should.have.property('type', waiver_types.FREE_AGENCY_PRACTICE)
       res.body.should.have.property('super_priority', 1)
     })
 
@@ -173,7 +170,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         .send({
           teamId: 3, // Different team trying to claim
           pid: player.pid,
-          type: constants.waivers.FREE_AGENCY_PRACTICE,
+          type: waiver_types.FREE_AGENCY_PRACTICE,
           leagueId: 1,
           super_priority: true
         })
@@ -199,7 +196,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         .send({
           teamId: 1,
           pid: otherPlayer.pid,
-          type: constants.waivers.FREE_AGENCY_PRACTICE,
+          type: waiver_types.FREE_AGENCY_PRACTICE,
           leagueId: 1,
           super_priority: true
         })
@@ -220,7 +217,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         .send({
           teamId: 1,
           pid: player.pid,
-          type: constants.waivers.FREE_AGENCY, // Not practice squad
+          type: waiver_types.FREE_AGENCY, // Not practice squad
           leagueId: 1,
           super_priority: true
         })
@@ -241,7 +238,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
           .send({
             teamId: 1,
             pid: player.pid,
-            type: constants.waivers.FREE_AGENCY_PRACTICE,
+            type: waiver_types.FREE_AGENCY_PRACTICE,
             leagueId: 1,
             super_priority: true
           })
@@ -255,7 +252,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
           .set('Authorization', `Bearer ${user1}`)
           .send({
             teamId: 1,
-            type: constants.waivers.FREE_AGENCY_PRACTICE,
+            type: waiver_types.FREE_AGENCY_PRACTICE,
             leagueId: 1,
             super_priority: true
           })
@@ -269,7 +266,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
           .set('Authorization', `Bearer ${user1}`)
           .send({
             pid: player.pid,
-            type: constants.waivers.FREE_AGENCY_PRACTICE,
+            type: waiver_types.FREE_AGENCY_PRACTICE,
             leagueId: 1,
             super_priority: true
           })
@@ -284,7 +281,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
           .send({
             teamId: 1,
             pid: player.pid,
-            type: constants.waivers.FREE_AGENCY_PRACTICE,
+            type: waiver_types.FREE_AGENCY_PRACTICE,
             super_priority: true
           })
         await missing(request, 'leagueId')
@@ -341,11 +338,11 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         pid: player.pid,
         tid: 1,
         lid: 1,
-        type: constants.transactions.ROSTER_ADD,
+        type: transaction_types.ROSTER_ADD,
         value: 0,
-        year: constants.year,
+        year: current_season.year,
         timestamp: poach_timestamp + 12 * 60 * 60, // 12 hours later
-        week: constants.week - 1,
+        week: current_season.week - 1,
         userid: 1
       })
 
@@ -376,7 +373,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         .send({
           teamId: 1,
           pid: player.pid,
-          type: constants.waivers.FREE_AGENCY_PRACTICE,
+          type: waiver_types.FREE_AGENCY_PRACTICE,
           leagueId: 1,
           super_priority: true
         })
@@ -442,7 +439,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         .send({
           teamId: 1,
           pid: player.pid,
-          type: constants.waivers.FREE_AGENCY_PRACTICE,
+          type: waiver_types.FREE_AGENCY_PRACTICE,
           leagueId: 1,
           super_priority: true
         })
@@ -497,7 +494,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         .send({
           teamId: 1,
           pid: player.pid,
-          type: constants.waivers.FREE_AGENCY_PRACTICE,
+          type: waiver_types.FREE_AGENCY_PRACTICE,
           leagueId: 1,
           super_priority: true
         })
@@ -518,10 +515,10 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         tid: 1,
         lid: 1,
         pid: player.pid,
-        type: constants.transactions.PRACTICE_ADD,
+        type: transaction_types.PRACTICE_ADD,
         value: 0,
-        week: constants.season.week,
-        year: constants.season.year,
+        week: current_season.week,
+        year: current_season.year,
         timestamp: originalTimestamp
       })
 
@@ -532,10 +529,10 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         tid: 2,
         lid: 1,
         pid: player.pid,
-        type: constants.transactions.POACHED,
+        type: transaction_types.POACHED,
         value: 0,
-        week: constants.season.week,
-        year: constants.season.year,
+        week: current_season.week,
+        year: current_season.year,
         timestamp: poachTimestamp
       })
 
@@ -546,10 +543,10 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         tid: 2,
         lid: 1,
         pid: player.pid,
-        type: constants.transactions.ROSTER_RELEASE,
+        type: transaction_types.ROSTER_RELEASE,
         value: 0,
-        week: constants.season.week,
-        year: constants.season.year,
+        week: current_season.week,
+        year: current_season.year,
         timestamp: releaseTimestamp
       })
 
@@ -560,10 +557,10 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         tid: 2,
         lid: 1,
         pid: player.pid,
-        type: constants.transactions.ROSTER_ADD,
+        type: transaction_types.ROSTER_ADD,
         value: 0,
-        week: constants.season.week,
-        year: constants.season.year,
+        week: current_season.week,
+        year: current_season.year,
         timestamp: readdTimestamp
       })
 
@@ -626,7 +623,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         .send({
           teamId: 3, // Regular waiver claim by team 3
           pid: player.pid,
-          type: constants.waivers.FREE_AGENCY_PRACTICE,
+          type: waiver_types.FREE_AGENCY_PRACTICE,
           leagueId: 1,
           super_priority: false
         })
@@ -640,7 +637,7 @@ describe('API /leagues/:lid/waivers - Super Priority', function () {
         .send({
           teamId: 1, // Super priority claim by original team
           pid: player.pid,
-          type: constants.waivers.FREE_AGENCY_PRACTICE,
+          type: waiver_types.FREE_AGENCY_PRACTICE,
           leagueId: 1,
           super_priority: true
         })

@@ -12,21 +12,35 @@ import DefaultPlayersViews, {
   default_players_view_order_by
 } from './default-players-views'
 
-import { constants, league_has_starting_position } from '@libs-shared'
+import { league_has_starting_position } from '@libs-shared'
+import {
+  current_season,
+  fantasy_positions,
+  player_nfl_status,
+  roster_slot_types,
+  transaction_types,
+  player_tag_types,
+  external_data_sources,
+  nfl_team_abbreviations,
+  ncaa_college_names,
+  ncaa_conference_names,
+  nfl_draft_rounds,
+  player_availability_statuses
+} from '@constants'
 
 export const default_player_filter_options = {
   search: null,
-  positions: new List(constants.positions),
-  nflTeams: new List(constants.nflTeams),
+  positions: new List(fantasy_positions),
+  nflTeams: new List(nfl_team_abbreviations),
   highlight_teamIds: new List(),
   teamIds: new List(),
-  colleges: new List(constants.colleges),
-  collegeDivisions: new List(constants.collegeDivisions),
-  nfl_draft_rounds: new List(constants.nfl_draft_rounds),
+  colleges: new List(ncaa_college_names),
+  collegeDivisions: new List(ncaa_conference_names),
+  nfl_draft_rounds: new List(nfl_draft_rounds),
   experience: new List([0, 1, -1]),
-  selected_nfl_statuses: new List(Object.keys(constants.player_nfl_status)),
+  selected_nfl_statuses: new List(Object.keys(player_nfl_status)),
   teams: new List(),
-  availability: new List(constants.availability)
+  availability: new List(player_availability_statuses)
 }
 
 const initialState = new Map({
@@ -35,7 +49,7 @@ const initialState = new Map({
   allPlayersPending: false,
   leaguePlayersLoaded: false,
   leaguePlayersPending: false,
-  week: new List([constants.fantasy_season_week]),
+  week: new List([current_season.fantasy_season_week]),
   items: new Map(),
   order: 'desc',
   selected_players_page_view: default_players_view_key,
@@ -56,7 +70,7 @@ export function players_reducer(state = initialState, { payload, type }) {
       if (league) {
         return state.merge({
           positions: new List(
-            constants.positions.filter((pos) =>
+            fantasy_positions.filter((pos) =>
               league_has_starting_position({ pos, league })
             )
           )
@@ -71,7 +85,7 @@ export function players_reducer(state = initialState, { payload, type }) {
         selected_players_page_view: payload.view_key,
         orderBy: view.order_by,
         order: 'desc',
-        week: new List([Math.max(constants.fantasy_season_week, 1)])
+        week: new List([Math.max(current_season.fantasy_season_week, 1)])
       })
     }
 
@@ -149,7 +163,7 @@ export function players_reducer(state = initialState, { payload, type }) {
     case stat_actions.FILTER_STATS:
       return state.withMutations((state) => {
         state.set('isPending', true)
-        const stats = constants.createFullStats()
+        const stats = current_season.createFullStats()
         for (const pid of state.get('items').keys()) {
           state.setIn(['items', pid, 'stats'], new Map(stats))
         }
@@ -302,8 +316,8 @@ export function players_reducer(state = initialState, { payload, type }) {
 
     case roster_actions.GET_ROSTERS_FULFILLED: {
       const week = Math.min(
-        constants.fantasy_season_week,
-        constants.season.finalWeek
+        current_season.fantasy_season_week,
+        current_season.finalWeek
       )
       const rosters = payload.data.filter((r) => r.week === week)
       return state.withMutations((state) => {
@@ -372,7 +386,7 @@ export function players_reducer(state = initialState, { payload, type }) {
         value,
         type,
         tid,
-        slot: constants.slots.BENCH
+        slot: roster_slot_types.BENCH
       })
     }
 
@@ -398,7 +412,7 @@ export function players_reducer(state = initialState, { payload, type }) {
       return state.withMutations((state) => {
         payload.data.forEach((p) => {
           const t = p.transaction
-          if (t.type === constants.transactions.ROSTER_RELEASE) {
+          if (t.type === transaction_types.ROSTER_RELEASE) {
             state.mergeIn(['items', t.pid], {
               value: null,
               tag: null,
@@ -422,7 +436,7 @@ export function players_reducer(state = initialState, { payload, type }) {
         state.mergeIn(['items', payload.opts.pid], { tag: payload.opts.tag })
         if (payload.opts.remove)
           state.mergeIn(['items', payload.opts.remove], {
-            tag: constants.tags.REGULAR
+            tag: player_tag_types.REGULAR
           })
       })
 
@@ -438,7 +452,7 @@ export function players_reducer(state = initialState, { payload, type }) {
         }
 
         state.mergeIn(['items', payload.data.pid], {
-          tag: constants.tags.RESTRICTED_FREE_AGENCY,
+          tag: player_tag_types.RESTRICTED_FREE_AGENCY,
           bid: payload.data.bid,
           restricted_free_agency_conditional_releases:
             payload.data.release || []
@@ -446,7 +460,7 @@ export function players_reducer(state = initialState, { payload, type }) {
 
         if (payload.data.remove)
           state.mergeIn(['items', payload.data.remove], {
-            tag: constants.tags.REGULAR
+            tag: player_tag_types.REGULAR
           })
       })
 
@@ -460,7 +474,7 @@ export function players_reducer(state = initialState, { payload, type }) {
         !payload.data.player_tid ||
         payload.data.player_tid === payload.data.tid
       ) {
-        data.tag = constants.tags.REGULAR
+        data.tag = player_tag_types.REGULAR
       }
       return state.mergeIn(['items', payload.data.pid], data)
     }
@@ -538,7 +552,7 @@ export function players_reducer(state = initialState, { payload, type }) {
         // Extract average projections (sourceid: 18) and store in projection field
         const average_projections = {}
         projections.forEach((projection) => {
-          if (projection.sourceid === constants.sources.AVERAGE) {
+          if (projection.sourceid === external_data_sources.AVERAGE) {
             const week = projection.week
             // Create a copy of the projection without metadata fields
             const {

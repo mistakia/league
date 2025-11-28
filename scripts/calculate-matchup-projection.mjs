@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -15,7 +15,7 @@ const log = debug('calculate-matchup-projection')
 debug.enable('calculate-matchup-projection')
 
 const calculate_matchup_projection = async ({
-  year = constants.season.year,
+  year = current_season.year,
   lid = 1,
   dry = false
 } = {}) => {

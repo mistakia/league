@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main, getLeague } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -16,7 +16,7 @@ debug.enable('generate-league-season-teams')
 
 const generate_league_season_teams = async ({
   lid,
-  year = constants.season.year,
+  year = current_season.year,
   overwrite = false
 }) => {
   const teams_exist = await db('teams').where({ lid, year }).first()

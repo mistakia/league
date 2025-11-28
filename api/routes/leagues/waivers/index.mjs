@@ -4,12 +4,17 @@ import express from 'express'
 import report from './report.mjs'
 
 import {
-  constants,
   Roster,
   getDraftDates,
   isSantuaryPeriod,
   get_free_agent_period
 } from '#libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  transaction_types,
+  waiver_types
+} from '#constants'
 import {
   getRoster,
   getLeague,
@@ -148,7 +153,7 @@ router.get('/?', async (req, res) => {
       return res.status(400).send({ error: 'missing type' })
     }
 
-    const types = Object.values(constants.waivers)
+    const types = Object.values(waiver_types)
     if (!types.includes(type)) {
       return res.status(400).send({ error: 'invalid type' })
     }
@@ -278,7 +283,7 @@ router.post('/?', async (req, res) => {
       release = release ? [release] : []
     }
 
-    if (constants.season.week > constants.season.finalWeek) {
+    if (current_season.week > current_season.finalWeek) {
       return res.status(400).send({ error: 'player is locked' })
     }
 
@@ -298,12 +303,12 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'missing type' })
     }
 
-    if (!Object.values(constants.waivers).includes(type)) {
+    if (!Object.values(waiver_types).includes(type)) {
       return res.status(400).send({ error: 'invalid type' })
     }
 
     // Super priority can only be used for practice squad waivers
-    if (super_priority && type !== constants.waivers.FREE_AGENCY_PRACTICE) {
+    if (super_priority && type !== waiver_types.FREE_AGENCY_PRACTICE) {
       return res
         .status(400)
         .send({ error: 'super priority only valid for practice squad waivers' })
@@ -360,7 +365,7 @@ router.post('/?', async (req, res) => {
       }
     }
 
-    if (type === constants.waivers.FREE_AGENCY_PRACTICE) {
+    if (type === waiver_types.FREE_AGENCY_PRACTICE) {
       // set bid to zero for practice squad waivers
       bid = 0
 
@@ -374,8 +379,8 @@ router.post('/?', async (req, res) => {
       .orderBy('uid', 'desc')
 
     if (
-      constants.season.isRegularSeason &&
-      !constants.season.isWaiverPeriod &&
+      current_season.isRegularSeason &&
+      !current_season.isWaiverPeriod &&
       !transactions.length
     ) {
       return res.status(400).send({ error: 'player is not on waivers' })
@@ -390,8 +395,8 @@ router.post('/?', async (req, res) => {
 
     // check free agency waivers
     if (
-      type === constants.waivers.FREE_AGENCY ||
-      type === constants.waivers.FREE_AGENCY_PRACTICE
+      type === waiver_types.FREE_AGENCY ||
+      type === waiver_types.FREE_AGENCY_PRACTICE
     ) {
       // make sure player is not rostered
       const isRostered = await isPlayerRostered({ pid, leagueId })
@@ -399,9 +404,9 @@ router.post('/?', async (req, res) => {
         return res.status(400).send({ error: 'player rostered' })
       }
 
-      if (constants.season.isRegularSeason) {
+      if (current_season.isRegularSeason) {
         // if regular season and not during waiver period, check if player is on release waivers
-        if (!constants.season.isWaiverPeriod) {
+        if (!current_season.isWaiverPeriod) {
           const isOnWaivers = await isPlayerOnWaivers({ pid, leagueId })
           if (!isOnWaivers) {
             return res.status(400).send({ error: 'player is not on waivers' })
@@ -414,7 +419,7 @@ router.post('/?', async (req, res) => {
 
         // reject active roster waivers before start of free agenct period
         if (
-          type === constants.waivers.FREE_AGENCY &&
+          type === waiver_types.FREE_AGENCY &&
           (!league.free_agency_live_auction_start ||
             dayjs().isBefore(faPeriod.start))
         ) {
@@ -423,10 +428,10 @@ router.post('/?', async (req, res) => {
             .send({ error: 'active roster waivers not open' })
         }
 
-        if (type === constants.waivers.FREE_AGENCY_PRACTICE) {
+        if (type === waiver_types.FREE_AGENCY_PRACTICE) {
           const picks = await db('draft')
             .where({
-              year: constants.season.year,
+              year: current_season.year,
               lid: leagueId
             })
             .orderBy('pick', 'asc')
@@ -436,7 +441,7 @@ router.post('/?', async (req, res) => {
           const season = await db('seasons')
             .where({
               lid: leagueId,
-              year: constants.season.year
+              year: current_season.year
             })
             .first()
 
@@ -455,7 +460,7 @@ router.post('/?', async (req, res) => {
           })
 
           // if player is a rookie
-          if (player_row.nfl_draft_year === constants.season.year) {
+          if (player_row.nfl_draft_year === current_season.year) {
             // reject practice waivers before day after draft
             if (!league.draft_start || dayjs().isBefore(draft_dates.draftEnd)) {
               return res.status(400).send({
@@ -522,7 +527,7 @@ router.post('/?', async (req, res) => {
           }
         }
       }
-    } else if (type === constants.waivers.POACH) {
+    } else if (type === waiver_types.POACH) {
       const is_sanctuary_period = isSantuaryPeriod(league)
 
       // player can not be on waivers if he has no transactions
@@ -533,9 +538,9 @@ router.post('/?', async (req, res) => {
       // player has been deactivated
       if (
         !is_sanctuary_period &&
-        transactions[0].type !== constants.transactions.ROSTER_DEACTIVATE &&
-        transactions[0].type !== constants.transactions.PRACTICE_ADD &&
-        transactions[0].type !== constants.transactions.DRAFT
+        transactions[0].type !== transaction_types.ROSTER_DEACTIVATE &&
+        transactions[0].type !== transaction_types.PRACTICE_ADD &&
+        transactions[0].type !== transaction_types.DRAFT
       ) {
         return res.status(400).send({ error: 'player is not on waivers' })
       }
@@ -557,15 +562,15 @@ router.post('/?', async (req, res) => {
       const slots = await db('rosters_players')
         .where({
           lid: leagueId,
-          week: constants.season.week,
-          year: constants.season.year,
+          week: current_season.week,
+          year: current_season.year,
           pid
         })
         .where(function () {
           this.where({
-            slot: constants.slots.PS
+            slot: roster_slot_types.PS
           }).orWhere({
-            slot: constants.slots.PSD
+            slot: roster_slot_types.PSD
           })
         })
       if (!slots.length) {
@@ -596,8 +601,8 @@ router.post('/?', async (req, res) => {
 
         const releasePlayer = roster.get(release_pid)
         if (
-          releasePlayer.slot === constants.slots.PSP ||
-          releasePlayer.slot === constants.slots.PSDP
+          releasePlayer.slot === roster_slot_types.PSP ||
+          releasePlayer.slot === roster_slot_types.PSDP
         ) {
           return res.status(400).send({ error: 'invalid release' })
         }
@@ -605,7 +610,7 @@ router.post('/?', async (req, res) => {
       }
     }
     const hasSlot =
-      type === constants.waivers.FREE_AGENCY_PRACTICE
+      type === waiver_types.FREE_AGENCY_PRACTICE
         ? roster.has_practice_squad_space_for_position(player_row.pos)
         : roster.has_bench_space_for_position(player_row.pos)
     if (!hasSlot) {
@@ -894,7 +899,7 @@ router.put('/:waiverId', async (req, res) => {
       }
     }
     const hasSlot =
-      waiver.type === constants.waivers.FREE_AGENCY_PRACTICE
+      waiver.type === waiver_types.FREE_AGENCY_PRACTICE
         ? roster.has_practice_squad_space_for_position(player_row.pos)
         : roster.has_bench_space_for_position(player_row.pos)
     if (!hasSlot) {

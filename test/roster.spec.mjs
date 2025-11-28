@@ -1,7 +1,8 @@
 /* global describe it */
 import * as chai from 'chai'
 
-import { constants, Roster } from '#libs-shared'
+import { roster_slot_types } from '#constants'
+import { Roster } from '#libs-shared'
 
 process.env.NODE_ENV = 'test'
 chai.should()
@@ -81,7 +82,7 @@ describe('LIBS-SHARED Roster', function () {
 
     for (let i = 0; i < 18; i++) {
       roster.players.push({
-        slot: constants.slots.BENCH,
+        slot: roster_slot_types.BENCH,
         pid: `player${i}`,
         pos: 'RB'
       })
@@ -128,7 +129,7 @@ describe('LIBS-SHARED Roster', function () {
 
     for (let i = 0; i < 2; i++) {
       roster.players.push({
-        slot: constants.slots.BENCH,
+        slot: roster_slot_types.BENCH,
         pid: `player-wr-${i}`,
         pos: 'WR'
       })
@@ -136,7 +137,7 @@ describe('LIBS-SHARED Roster', function () {
 
     for (let i = 0; i < 2; i++) {
       roster.players.push({
-        slot: constants.slots.BENCH,
+        slot: roster_slot_types.BENCH,
         pid: `player-rb-${i}`,
         pos: 'RB'
       })
@@ -183,7 +184,7 @@ describe('LIBS-SHARED Roster', function () {
 
     for (let i = 0; i < 2; i++) {
       roster.players.push({
-        slot: constants.slots.BENCH,
+        slot: roster_slot_types.BENCH,
         pid: `player-wr-${i}`,
         pos: 'WR'
       })
@@ -191,7 +192,7 @@ describe('LIBS-SHARED Roster', function () {
 
     for (let i = 0; i < 2; i++) {
       roster.players.push({
-        slot: constants.slots.BENCH,
+        slot: roster_slot_types.BENCH,
         pid: `player-rb-${i}`,
         pos: 'RB'
       })
@@ -207,7 +208,7 @@ describe('LIBS-SHARED Roster', function () {
     hasSlot.should.equal(true)
 
     r.addPlayer({
-      slot: constants.slots.BENCH,
+      slot: roster_slot_types.BENCH,
       pid: 'player-rb-add',
       pos: 'RB'
     })
@@ -256,7 +257,7 @@ describe('LIBS-SHARED Roster', function () {
 
     // Add player with extensions
     r.addPlayer({
-      slot: constants.slots.BENCH,
+      slot: roster_slot_types.BENCH,
       pid: 'player-with-extensions',
       pos: 'RB',
       value: 10,
@@ -311,7 +312,7 @@ describe('LIBS-SHARED Roster', function () {
 
     // Add player without extensions parameter
     r.addPlayer({
-      slot: constants.slots.BENCH,
+      slot: roster_slot_types.BENCH,
       pid: 'player-no-extensions',
       pos: 'WR',
       value: 5
@@ -360,20 +361,20 @@ describe('LIBS-SHARED Roster', function () {
 
     // Add 1 DST on bench
     roster.players.push({
-      slot: constants.slots.BENCH,
+      slot: roster_slot_types.BENCH,
       pid: 'dst-bench',
       pos: 'DST'
     })
 
     // Add 2 DST on signed practice squad (slots 12 and 15)
     roster.players.push({
-      slot: constants.slots.PS,
+      slot: roster_slot_types.PS,
       pid: 'dst-ps-1',
       pos: 'DST'
     })
 
     roster.players.push({
-      slot: constants.slots.PSP,
+      slot: roster_slot_types.PSP,
       pid: 'dst-ps-2',
       pos: 'DST'
     })
@@ -420,27 +421,27 @@ describe('LIBS-SHARED Roster', function () {
 
     // Add 1 DST on bench
     roster.players.push({
-      slot: constants.slots.BENCH,
+      slot: roster_slot_types.BENCH,
       pid: 'dst-bench',
       pos: 'DST'
     })
 
     // Add 1 DST on signed PS
     roster.players.push({
-      slot: constants.slots.PS,
+      slot: roster_slot_types.PS,
       pid: 'dst-ps-signed',
       pos: 'DST'
     })
 
     // Add 2 DST on drafted practice squad (slots 16 and 17) - should NOT count
     roster.players.push({
-      slot: constants.slots.PSD,
+      slot: roster_slot_types.PSD,
       pid: 'dst-psd',
       pos: 'DST'
     })
 
     roster.players.push({
-      slot: constants.slots.PSDP,
+      slot: roster_slot_types.PSDP,
       pid: 'dst-psdp',
       pos: 'DST'
     })
@@ -488,14 +489,14 @@ describe('LIBS-SHARED Roster', function () {
 
     // Add 1 QB on bench
     roster.players.push({
-      slot: constants.slots.BENCH,
+      slot: roster_slot_types.BENCH,
       pid: 'qb-bench',
       pos: 'QB'
     })
 
     // Add 1 QB on signed PS
     roster.players.push({
-      slot: constants.slots.PS,
+      slot: roster_slot_types.PS,
       pid: 'qb-ps',
       pos: 'QB'
     })
@@ -544,13 +545,13 @@ describe('LIBS-SHARED Roster', function () {
 
     // Fill practice squad with 2 QBs
     roster.players.push({
-      slot: constants.slots.PS,
+      slot: roster_slot_types.PS,
       pid: 'qb-ps-1',
       pos: 'QB'
     })
 
     roster.players.push({
-      slot: constants.slots.PSP,
+      slot: roster_slot_types.PSP,
       pid: 'qb-ps-2',
       pos: 'QB'
     })

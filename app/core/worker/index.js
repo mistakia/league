@@ -1,6 +1,5 @@
 import {
   calculateStatsFromPlays,
-  constants,
   calculatePercentiles,
   calculatePoints,
   calculateBaselines,
@@ -12,6 +11,11 @@ import {
   calculatePlayerValuesRestOfSeason
 } from '@libs-shared'
 import solver from 'javascript-lp-solver'
+import {
+  current_season,
+  fantasy_positions,
+  extended_player_stats
+} from '@constants'
 
 export function workerOptimizeLineup(params) {
   return optimizeLineup(params)
@@ -29,7 +33,7 @@ export function workerCalculateStatsFromPlays({ plays, qualifiers, league }) {
 
   const percentiles = calculatePercentiles({
     items: Object.values(players),
-    stats: constants.fullStats,
+    stats: extended_player_stats,
     qualifiers
   })
 
@@ -43,7 +47,7 @@ export function calculatePlayerValues(payload) {
   const rosterSize = getRosterSize(league)
   const leagueTotalCap = num_teams * cap - num_teams * rosterSize * min_bid
 
-  const finalWeek = constants.season.finalWeek
+  const finalWeek = current_season.finalWeek
   for (const player of players) {
     player.points = player.points || {}
     player.projection = player.projection || {}
@@ -135,7 +139,7 @@ export function optimizeAuctionLineup({
       constraints[player.pid] = { max: 1 }
     }
     ints[player.pid] = 1
-    for (const pos of constants.positions) {
+    for (const pos of fantasy_positions) {
       variables[player.pid][pos] = player.pos === pos ? 1 : 0
     }
 

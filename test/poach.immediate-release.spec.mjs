@@ -3,7 +3,12 @@ import * as chai from 'chai'
 import MockDate from 'mockdate'
 
 import knex from '#db'
-import { constants } from '#libs-shared'
+import {
+  roster_slot_types,
+  transaction_types,
+  waiver_types,
+  current_season
+} from '#constants'
 import { addPlayer, selectPlayer, fillRoster } from './utils/index.mjs'
 import league from '#db/seeds/league.mjs'
 import { processPoach } from '#libs-server'
@@ -11,7 +16,7 @@ import { processPoach } from '#libs-server'
 chai.should()
 process.env.NODE_ENV = 'test'
 const expect = chai.expect
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 
 describe('LIBS-SERVER processPoach - immediate release', function () {
   before(async function () {
@@ -38,8 +43,8 @@ describe('LIBS-SERVER processPoach - immediate release', function () {
         leagueId,
         userId,
         player: player1,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.PRACTICE_ADD,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.PRACTICE_ADD,
         value: 0
       })
 
@@ -62,7 +67,7 @@ describe('LIBS-SERVER processPoach - immediate release', function () {
           pid: player1.pid,
           tid: poachingTeamId,
           lid: leagueId,
-          type: constants.transactions.POACHED
+          type: transaction_types.POACHED
         })
         .first()
       expect(poach_transaction).to.not.equal(undefined)
@@ -73,7 +78,7 @@ describe('LIBS-SERVER processPoach - immediate release', function () {
           pid: player1.pid,
           tid: poachingTeamId,
           lid: leagueId,
-          type: constants.transactions.ROSTER_RELEASE
+          type: transaction_types.ROSTER_RELEASE
         })
         .first()
       expect(release_transaction).to.not.equal(undefined)
@@ -97,7 +102,7 @@ describe('LIBS-SERVER processPoach - immediate release', function () {
           pid: player1.pid,
           tid: teamId,
           lid: leagueId,
-          type: constants.waivers.FREE_AGENCY_PRACTICE
+          type: waiver_types.FREE_AGENCY_PRACTICE
         })
         .first()
       expect(waiver).to.not.equal(undefined)
@@ -117,8 +122,8 @@ describe('LIBS-SERVER processPoach - immediate release', function () {
         leagueId,
         userId,
         player: player1,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.PRACTICE_ADD,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.PRACTICE_ADD,
         value: 0
       })
 
@@ -140,7 +145,7 @@ describe('LIBS-SERVER processPoach - immediate release', function () {
           pid: player1.pid,
           tid: poachingTeamId,
           lid: leagueId,
-          type: constants.transactions.POACHED
+          type: transaction_types.POACHED
         })
         .first()
       expect(poach_transaction).to.not.equal(undefined)
@@ -151,7 +156,7 @@ describe('LIBS-SERVER processPoach - immediate release', function () {
           pid: player1.pid,
           tid: poachingTeamId,
           lid: leagueId,
-          type: constants.transactions.ROSTER_RELEASE
+          type: transaction_types.ROSTER_RELEASE
         })
         .first()
       expect(release_transaction).to.equal(undefined)
@@ -162,7 +167,7 @@ describe('LIBS-SERVER processPoach - immediate release', function () {
         .andWhere('pid', player1.pid)
         .first()
       expect(roster_player).to.not.equal(undefined)
-      expect(roster_player.slot).to.equal(constants.slots.BENCH)
+      expect(roster_player.slot).to.equal(roster_slot_types.BENCH)
     })
   })
 })

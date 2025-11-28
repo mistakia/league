@@ -12,7 +12,7 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogTitle from '@mui/material/DialogTitle'
 
 import Button from '@components/button'
-import { constants } from '@libs-shared'
+import { player_tag_types } from '@constants'
 
 export default class RookieConfirmation extends React.Component {
   constructor(props) {
@@ -26,10 +26,10 @@ export default class RookieConfirmation extends React.Component {
 
     const { team } = props
     this._isEligible = team.roster.isEligibleForTag({
-      tag: constants.tags.ROOKIE
+      tag: player_tag_types.ROOKIE
     })
     this._untags = []
-    const tagged_players = team.roster.getPlayersByTag(constants.tags.ROOKIE)
+    const tagged_players = team.roster.getPlayersByTag(player_tag_types.ROOKIE)
     tagged_players.forEach(({ pid }) => {
       const taggedPlayerMap = team.players.find(
         (player_map) => player_map.get('pid') === pid
@@ -54,7 +54,7 @@ export default class RookieConfirmation extends React.Component {
     }
 
     if (!error) {
-      this.props.add({ remove: untag, tag: constants.tags.ROOKIE, pid })
+      this.props.add({ remove: untag, tag: player_tag_types.ROOKIE, pid })
       this.props.onClose()
     }
   }

@@ -1,4 +1,8 @@
-import * as constants from './constants.mjs'
+import {
+  player_nfl_status,
+  player_nfl_injury_status,
+  current_season
+} from '#constants'
 import get_final_practice_day from './get-final-practice-day.mjs'
 import get_most_recent_practice_status from './get-most-recent-practice-status.mjs'
 
@@ -121,9 +125,9 @@ export default function isReserveEligible({
 
   // Original eligibility logic (backward compatible)
   return Boolean(
-    (nfl_status && nfl_status !== constants.player_nfl_status.ACTIVE) ||
-      injury_status === constants.player_nfl_injury_status.OUT ||
-      injury_status === constants.player_nfl_injury_status.DOUBTFUL ||
-      (injury_status && constants.season.week === 0)
+    (nfl_status && nfl_status !== player_nfl_status.ACTIVE) ||
+      injury_status === player_nfl_injury_status.OUT ||
+      injury_status === player_nfl_injury_status.DOUBTFUL ||
+      (injury_status && current_season.week === 0)
   )
 }

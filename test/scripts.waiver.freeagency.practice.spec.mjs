@@ -4,7 +4,8 @@ import MockDate from 'mockdate'
 
 import knex from '#db'
 import league from '#db/seeds/league.mjs'
-import { constants, getDraftDates, Errors } from '#libs-shared'
+import { current_season, transaction_types, waiver_types } from '#constants'
+import { getDraftDates, Errors } from '#libs-shared'
 import { getLeague } from '#libs-server'
 import {
   selectPlayer,
@@ -17,7 +18,7 @@ process.env.NODE_ENV = 'test'
 
 chai.should()
 const expect = chai.expect
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 
 describe('SCRIPTS /waivers - free agency - practice', function () {
   before(async function () {
@@ -55,7 +56,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
-        type: constants.waivers.FREE_AGENCY_PRACTICE
+        type: waiver_types.FREE_AGENCY_PRACTICE
       })
 
       let error
@@ -80,7 +81,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
       // check team waiver order
       const teams = await knex('teams').where({
         lid: 1,
-        year: constants.season.year
+        year: current_season.year
       })
       const team1 = teams.find((t) => t.uid === 1)
       const team2 = teams.find((t) => t.uid === 2)
@@ -105,7 +106,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
         teamId,
         userId: 1,
         value: 0,
-        type: constants.transactions.PRACTICE_ADD
+        type: transaction_types.PRACTICE_ADD
       })
 
       expect(team1.faab).to.equal(200)
@@ -154,7 +155,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
-        type: constants.waivers.FREE_AGENCY_PRACTICE
+        type: waiver_types.FREE_AGENCY_PRACTICE
       })
 
       let error
@@ -179,7 +180,7 @@ describe('SCRIPTS /waivers - free agency - practice', function () {
       // check team waiver order
       const teams = await knex('teams').where({
         lid: 1,
-        year: constants.season.year
+        year: current_season.year
       })
       const team1 = teams.find((t) => t.uid === 1)
       const team2 = teams.find((t) => t.uid === 2)

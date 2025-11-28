@@ -2,12 +2,8 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import {
-  constants,
-  Errors,
-  formatHeight,
-  format_nfl_status
-} from '#libs-shared'
+import { Errors, formatHeight, format_nfl_status } from '#libs-shared'
+import { current_season } from '#constants'
 import {
   is_main,
   nfl,
@@ -26,7 +22,7 @@ const log = debug('import-players-nfl')
 debug.enable('import-players-nfl,nfl,update-player,create-player,get-player')
 
 const importPlayersNFL = async ({
-  year = constants.season.year,
+  year = current_season.year,
   token,
   ignore_cache = false
 }) => {
@@ -166,7 +162,7 @@ const main = async () => {
     if (argv.all) {
       const token = await nfl.getToken()
       let year = argv.start || 1970
-      for (; year < constants.season.year; year++) {
+      for (; year < current_season.year; year++) {
         await importPlayersNFL({ year, token })
       }
     } else if (argv.year) {
@@ -174,12 +170,12 @@ const main = async () => {
 
       log(`processed ${pids.length} players from nfl`)
 
-      // if (argv.year === constants.season.year) {
+      // if (argv.year === current_season.year) {
       //   await setInactive(pids)
       // }
     } else {
       const pids = await importPlayersNFL({
-        year: constants.season.year,
+        year: current_season.year,
         ignore_cache: true
       })
 

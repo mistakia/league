@@ -3,7 +3,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import { Table } from 'console-table-printer'
 
-import { groupBy, constants } from '#libs-shared'
+import { groupBy } from '#libs-shared'
+import { current_season } from '#constants'
 import { getLeague, is_main } from '#libs-server'
 import calculate_points_added from './calculate-points-added.mjs'
 
@@ -13,11 +14,11 @@ const initialize_cli = () => {
 
 const calculateHistoricalPositionalRankingValue = async ({ league }) => {
   const years = 2
-  let year = constants.season.year - years
+  let year = current_season.year - years
 
   const data = {}
 
-  for (; year < constants.season.year; year++) {
+  for (; year < current_season.year; year++) {
     const { players } = await calculate_points_added({ year, league })
     const values = Object.values(players)
     const byPosition = groupBy(values, 'pos')

@@ -3,14 +3,14 @@ import { createSelector } from 'reselect'
 
 import { player_actions } from '@core/players'
 import { getPlayerById, getGameStatusByPlayerId } from '@core/selectors'
-import { constants } from '#libs-shared'
 
 import PlayerNameExpanded from './player-name-expanded'
+import { current_season } from '@constants'
 
 const map_state_to_props = createSelector(
   getPlayerById,
   getGameStatusByPlayerId,
-  (state) => state.getIn(['app', 'year'], constants.year),
+  (state) => state.getIn(['app', 'year'], current_season.year),
   (player_map, status, selected_year) => ({ player_map, status, selected_year })
 )
 

@@ -1,7 +1,7 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import { constants } from '@libs-shared'
+import { current_season } from '@constants'
 import PlayerFilter from '@components/player-filter'
 
 export default class WeekFilter extends React.Component {
@@ -14,8 +14,8 @@ export default class WeekFilter extends React.Component {
     }
 
     for (
-      let week = Math.max(constants.week, 1);
-      week <= constants.season.finalWeek;
+      let week = Math.max(current_season.week, 1);
+      week <= current_season.finalWeek;
       week++
     ) {
       state.values.push({

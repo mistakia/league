@@ -2,7 +2,7 @@ import debug from 'debug'
 
 import db from '#db'
 import * as cache from './cache.mjs'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { fetch_with_retry } from './proxy-manager.mjs'
 
 const log = debug('fantasypros')
@@ -16,7 +16,7 @@ export const get_fantasypros_config = async () => {
 
 export const get_fantasypros_rankings = async ({
   ignore_cache = false,
-  year = constants.season.year,
+  year = current_season.year,
   week = 0,
   fantasypros_scoring_type = 'HALF',
   fantasypros_position_type = 'ALL'

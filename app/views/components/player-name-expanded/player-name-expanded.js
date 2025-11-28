@@ -6,13 +6,19 @@ import dayjs from 'dayjs'
 import { Player, connect } from '@components/player'
 import Position from '@components/position'
 import NFLTeam from '@components/nfl-team'
-import { constants, nth } from '@libs-shared'
+import { nth } from '@libs-shared'
 import IconButton from '@components/icon-button'
 import PlayerLabel from '@components/player-label'
 import PlayerTag from '@components/player-tag'
 import PlayerHeadshot from '@components/player-headshot'
 
 import './player-name-expanded.styl'
+import {
+  current_season,
+  roster_slot_types,
+  nfl_player_status_abbreviations,
+  nfl_player_status_descriptions
+} from '@constants'
 
 function getClock({ desc, game_clock_start, qtr }) {
   switch (desc) {
@@ -34,7 +40,7 @@ function getClock({ desc, game_clock_start, qtr }) {
 }
 
 function GameStatus({ status, player_map }) {
-  if (!constants.isRegularSeason && !status) {
+  if (!current_season.isRegularSeason && !status) {
     return null
   }
 
@@ -111,16 +117,16 @@ class PlayerNameExpanded extends Player {
 
     // game status should supersede nfl status
     const player_status_label =
-      constants.nfl_player_status_abbreviations[player_game_status] ||
-      constants.nfl_player_status_abbreviations[player_nfl_status]
+      nfl_player_status_abbreviations[player_game_status] ||
+      nfl_player_status_abbreviations[player_nfl_status]
     const player_status_description =
-      constants.nfl_player_status_descriptions[player_game_status] ||
-      constants.nfl_player_status_descriptions[player_nfl_status]
+      nfl_player_status_descriptions[player_game_status] ||
+      nfl_player_status_descriptions[player_nfl_status]
     const player_has_non_active_status = Boolean(
-      (constants.nfl_player_status_abbreviations[player_nfl_status] &&
-        player_nfl_status !== constants.player_nfl_status.ACTIVE) ||
-        (constants.nfl_player_status_abbreviations[player_game_status] &&
-          player_game_status !== constants.player_nfl_status.ACTIVE)
+      (nfl_player_status_abbreviations[player_nfl_status] &&
+        player_nfl_status !== player_nfl_status.ACTIVE) ||
+        (nfl_player_status_abbreviations[player_game_status] &&
+          player_game_status !== player_nfl_status.ACTIVE)
     )
 
     return (
@@ -146,11 +152,11 @@ class PlayerNameExpanded extends Player {
             <div className='player__name-expanded-full-name'>
               {playerName || '-'}
             </div>
-            {constants.year === player_map.get('nfl_draft_year') && (
+            {current_season.year === player_map.get('nfl_draft_year') && (
               <PlayerLabel label='R' type='rookie' description='Rookie' />
             )}
-            {(slot === constants.slots.PSP ||
-              slot === constants.slots.PSDP) && (
+            {(slot === roster_slot_types.PSP ||
+              slot === roster_slot_types.PSDP) && (
               <PlayerLabel label='P' description='Protected Practice Squad' />
             )}
             <PlayerTag tag={player_map.get('tag')} />
@@ -158,7 +164,7 @@ class PlayerNameExpanded extends Player {
           <div className='player__name-expanded-row'>
             <Position pos={player_map.get('pos')} />
             <NFLTeam team={player_map.get('team')} />
-            {selected_year === constants.year && (
+            {selected_year === current_season.year && (
               <GameStatus status={status} player_map={player_map} />
             )}
             {player_has_non_active_status && (

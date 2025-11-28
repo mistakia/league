@@ -16,7 +16,7 @@ import {
   api_get_players,
   api_get_draft_pick_details
 } from '@core/api'
-import { constants } from '@libs-shared'
+import { current_season } from '@constants'
 
 dayjs.extend(isBetween)
 
@@ -35,7 +35,7 @@ export function* draft_player() {
 
 export function* init() {
   const league = yield select(get_current_league)
-  if (league.draft_start && constants.fantasy_season_week === 0) {
+  if (league.draft_start && current_season.fantasy_season_week === 0) {
     yield call(api_get_draft, { leagueId: league.uid })
   }
 }

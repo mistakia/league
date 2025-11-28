@@ -1,4 +1,4 @@
-import * as constants from './constants.mjs'
+import { roster_slot_types, player_tag_types } from '#constants'
 
 const getFranchiseAmount = ({ pos, league }) => {
   switch (pos) {
@@ -19,25 +19,25 @@ const getFranchiseAmount = ({ pos, league }) => {
 export default function ({ extensions, tag, pos, league, value, bid, slot }) {
   if (
     slot &&
-    (slot === constants.slots.PS ||
-      slot === constants.slots.PSP ||
-      slot === constants.slots.PSD ||
-      slot === constants.slots.PSDP)
+    (slot === roster_slot_types.PS ||
+      slot === roster_slot_types.PSP ||
+      slot === roster_slot_types.PSD ||
+      slot === roster_slot_types.PSDP)
   ) {
     return value
   }
 
   switch (tag) {
-    case constants.tags.FRANCHISE:
+    case player_tag_types.FRANCHISE:
       return getFranchiseAmount({ pos, league })
 
-    case constants.tags.ROOKIE:
+    case player_tag_types.ROOKIE:
       return value
 
-    case constants.tags.RESTRICTED_FREE_AGENCY:
+    case player_tag_types.RESTRICTED_FREE_AGENCY:
       return bid || value
 
-    case constants.tags.REGULAR:
+    case player_tag_types.REGULAR:
     default:
       return value + (extensions + 1) * 5
   }

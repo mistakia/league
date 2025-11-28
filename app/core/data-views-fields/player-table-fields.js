@@ -5,7 +5,7 @@ import PlayerRowNFLTeam from '@components/player-row-nfl-team'
 import PlayerRowPositionColumn from '@components/player-row-position-column'
 import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
-import { constants } from '@libs-shared'
+import { fantasy_positions, nfl_team_abbreviations } from '@constants'
 
 const contract_field = (props) => ({
   ...props,
@@ -36,7 +36,7 @@ export default function ({ is_logged_in }) {
       header_label: 'Pos',
       size: 50,
       data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-      column_values: ['TEAM', ...constants.positions],
+      column_values: ['TEAM', ...fantasy_positions],
       player_value_path: 'pos',
       component: React.memo(PlayerRowPositionColumn),
       operators: [
@@ -58,7 +58,7 @@ export default function ({ is_logged_in }) {
         table_constants.TABLE_OPERATORS.IS_NULL,
         table_constants.TABLE_OPERATORS.IS_NOT_NULL
       ],
-      column_values: ['INA', ...constants.nflTeams]
+      column_values: ['INA', ...nfl_team_abbreviations]
     },
     player_height: {
       column_title: 'Height',
@@ -254,7 +254,7 @@ export default function ({ is_logged_in }) {
         table_constants.TABLE_OPERATORS.IS_NULL,
         table_constants.TABLE_OPERATORS.IS_NOT_NULL
       ],
-      column_values: ['INA', ...constants.nflTeams]
+      column_values: ['INA', ...nfl_team_abbreviations]
     },
     player_position_depth: {
       column_title: 'Position Depth',

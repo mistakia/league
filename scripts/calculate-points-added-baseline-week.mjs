@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season, fantasy_positions } from '#constants'
 import { is_main, getLeague, get_league_format } from '#libs-server'
 import calculate_points_added from './calculate-points-added.mjs'
 // import { job_types } from '#libs-shared/job-constants.mjs'
@@ -21,12 +21,12 @@ const calculate_points_added_baseline_week = async ({
 }) => {
   const league_format = await get_league_format({ league_format_hash })
   const years = 2
-  let year = constants.season.year - years
+  let year = current_season.year - years
 
   const bTotals = {}
-  constants.positions.forEach((p) => (bTotals[p] = 0))
+  fantasy_positions.forEach((p) => (bTotals[p] = 0))
   let totalWeeks = 0
-  for (; year < constants.season.year; year++) {
+  for (; year < current_season.year; year++) {
     const { baselineTotals, weeks } = await calculate_points_added({
       year,
       league: league_format
@@ -40,7 +40,7 @@ const calculate_points_added_baseline_week = async ({
 
   log(bTotals)
   const update = {}
-  for (const position of constants.positions) {
+  for (const position of fantasy_positions) {
     const totalPoints = bTotals[position]
     const avg = totalPoints / totalWeeks
     update[`pts_base_week_${position.toLowerCase()}`] =

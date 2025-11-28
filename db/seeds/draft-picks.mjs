@@ -4,7 +4,10 @@ import { getLeague } from '#libs-server'
 export default async function (knex) {
   await knex.raw('ALTER SEQUENCE draft_uid_seq RESTART WITH 1')
   const lid = 1
-  const teams = await knex('teams').where({ lid, year: constants.season.year })
+  const teams = await knex('teams').where({
+    lid,
+    year: constants.current_season.year
+  })
   const league = await getLeague({ lid })
   await knex('draft').del()
   for (let i = 0; i < 3 * league.num_teams; i++) {
@@ -16,7 +19,7 @@ export default async function (knex) {
       lid: league.uid,
       pick: i + 1,
       round: Math.ceil((i + 1) / league.num_teams),
-      year: constants.season.year
+      year: constants.current_season.year
     })
   }
 
@@ -27,7 +30,7 @@ export default async function (knex) {
         otid: team.uid,
         lid: league.uid,
         round: i,
-        year: constants.season.year + 1
+        year: constants.current_season.year + 1
       })
     }
   }

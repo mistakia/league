@@ -4,7 +4,7 @@ import { api_get_players_gamelogs } from '@core/api'
 import { get_app, get_request_history } from '@core/selectors'
 import { matchups_actions } from '@core/matchups'
 import { gamelogs_actions } from './actions'
-import { constants } from '@libs-shared'
+import { current_season } from '@constants'
 
 export function* load({ payload }) {
   const { leagueId } = yield select(get_app)
@@ -34,7 +34,7 @@ export function* load({ payload }) {
   }
 
   // TODO this should check against a final_week param for the given season (different seasons have different final weeks)
-  if (week === constants.season.finalWeek) {
+  if (week === current_season.finalWeek) {
     yield call(load, {
       payload: {
         leagueId,

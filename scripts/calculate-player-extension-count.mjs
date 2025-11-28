@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { getPlayerExtensions, is_main } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -17,7 +17,7 @@ debug.enable('calculate-player-extension-count')
 const run = async ({ lid }) => {
   const rosters = await db('rosters')
     .select('*')
-    .where({ lid, year: constants.season.year })
+    .where({ lid, year: current_season.year })
     .orderBy('week', 'desc')
 
   const rows = await db('rosters_players').whereIn(

@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season, create_empty_fantasy_stats } from '#constants'
 import { is_main, batch_insert } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
@@ -16,7 +16,7 @@ const log = debug('process-player-seasonlogs')
 debug.enable('process-player-seasonlogs')
 
 const processPlayerSeasonlogs = async ({
-  year = constants.season.year,
+  year = current_season.year,
   seas_type = 'REG'
 } = {}) => {
   log(`Processing player seasonlogs for ${year}, ${seas_type}`)
@@ -37,7 +37,7 @@ const processPlayerSeasonlogs = async ({
     const player_gamelogs = gamelogs.filter((g) => g.pid === pid)
     const pos = player_gamelogs[0].pos
 
-    const season_stats = constants.createStats()
+    const season_stats = create_empty_fantasy_stats()
     for (const gamelog of player_gamelogs) {
       for (const stat in season_stats) {
         season_stats[stat] += gamelog[stat]

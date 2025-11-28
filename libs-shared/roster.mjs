@@ -1,15 +1,21 @@
 import dayjs from 'dayjs'
-import * as constants from './constants.mjs'
+import {
+  roster_slot_types,
+  starting_lineup_slots,
+  practice_squad_slots,
+  player_tag_types,
+  current_season
+} from '#constants'
 import getExtensionAmount from './get-extension-amount.mjs'
 import getActiveRosterLimit from './get-active-roster-limit.mjs'
 import isSlotActive from './is-slot-active.mjs'
 
 const nonStarterSlots = [
-  constants.slots.RESERVE_SHORT_TERM,
-  constants.slots.RESERVE_LONG_TERM,
-  constants.slots.BENCH,
-  constants.slots.COV,
-  ...constants.ps_slots
+  roster_slot_types.RESERVE_SHORT_TERM,
+  roster_slot_types.RESERVE_LONG_TERM,
+  roster_slot_types.BENCH,
+  roster_slot_types.COV,
+  ...practice_squad_slots
 ]
 
 export default class Roster {
@@ -25,13 +31,12 @@ export default class Roster {
     this.activeRosterLimit = getActiveRosterLimit(league)
 
     const is_before_extension_deadline =
-      (!constants.season.isRegularSeason && !league.ext_date) ||
+      (!current_season.isRegularSeason && !league.ext_date) ||
       (league.ext_date &&
-        constants.season.now.isBefore(dayjs.unix(league.ext_date)))
+        current_season.now.isBefore(dayjs.unix(league.ext_date)))
 
     const is_after_restricted_free_agency_end =
-      league.tran_end &&
-      constants.season.now.isAfter(dayjs.unix(league.tran_end))
+      league.tran_end && current_season.now.isAfter(dayjs.unix(league.tran_end))
     for (const {
       slot,
       pid,
@@ -140,18 +145,19 @@ export default class Roster {
   }
 
   get practice() {
-    return this.players.filter((p) => constants.ps_slots.includes(p.slot))
+    return this.players.filter((p) => practice_squad_slots.includes(p.slot))
   }
 
   get practice_signed() {
     return this.players.filter(
-      (p) => p.slot === constants.slots.PS || p.slot === constants.slots.PSP
+      (p) => p.slot === roster_slot_types.PS || p.slot === roster_slot_types.PSP
     )
   }
 
   get practice_drafted() {
     return this.players.filter(
-      (p) => p.slot === constants.slots.PSD || p.slot === constants.slots.PSDP
+      (p) =>
+        p.slot === roster_slot_types.PSD || p.slot === roster_slot_types.PSDP
     )
   }
 
@@ -165,32 +171,32 @@ export default class Roster {
   }
 
   get bench() {
-    return this.players.filter((p) => p.slot === constants.slots.BENCH)
+    return this.players.filter((p) => p.slot === roster_slot_types.BENCH)
   }
 
   get reserve_short_term_players() {
     return Array.from(this._players.values()).filter(
-      (p) => p.slot === constants.slots.RESERVE_SHORT_TERM
+      (p) => p.slot === roster_slot_types.RESERVE_SHORT_TERM
     )
   }
 
   get reserve_long_term_players() {
     return Array.from(this._players.values()).filter(
-      (p) => p.slot === constants.slots.RESERVE_LONG_TERM
+      (p) => p.slot === roster_slot_types.RESERVE_LONG_TERM
     )
   }
 
   get cov() {
     return Array.from(this._players.values()).filter(
-      (p) => p.slot === constants.slots.COV
+      (p) => p.slot === roster_slot_types.COV
     )
   }
 
   get reserve() {
     const slots = [
-      constants.slots.RESERVE_SHORT_TERM,
-      constants.slots.COV,
-      constants.slots.RESERVE_LONG_TERM
+      roster_slot_types.RESERVE_SHORT_TERM,
+      roster_slot_types.COV,
+      roster_slot_types.RESERVE_LONG_TERM
     ]
     return Array.from(this._players.values()).filter((p) =>
       slots.includes(p.slot)
@@ -274,22 +280,28 @@ export default class Roster {
   }
 
   isEligibleForSlot({ slot, pos }) {
-    if (slot === constants.slots.RESERVE_SHORT_TERM) {
+    if (slot === roster_slot_types.RESERVE_SHORT_TERM) {
       return this.has_open_reserve_short_term_slot()
-    } else if (slot === constants.slots.RESERVE_LONG_TERM) {
+    } else if (slot === roster_slot_types.RESERVE_LONG_TERM) {
       return true
-    } else if (slot === constants.slots.COV) {
+    } else if (slot === roster_slot_types.COV) {
       return true
-    } else if (slot === constants.slots.BENCH) {
+    } else if (slot === roster_slot_types.BENCH) {
       return this.has_bench_space_for_position(pos)
-    } else if (slot === constants.slots.PS || slot === constants.slots.PSP) {
+    } else if (
+      slot === roster_slot_types.PS ||
+      slot === roster_slot_types.PSP
+    ) {
       return this.has_practice_squad_space_for_position(pos)
-    } else if (slot === constants.slots.PSD || slot === constants.slots.PSDP) {
+    } else if (
+      slot === roster_slot_types.PSD ||
+      slot === roster_slot_types.PSDP
+    ) {
       // Drafted practice squad has unlimited space
       return true
     } else {
-      const slotName = Object.keys(constants.slots).find(
-        (key) => constants.slots[key] === slot
+      const slotName = Object.keys(roster_slot_types).find(
+        (key) => roster_slot_types[key] === slot
       )
       if (!slotName.includes(pos)) {
         return false
@@ -301,8 +313,8 @@ export default class Roster {
   }
 
   hasOpenSlot(slot) {
-    const slotName = Object.keys(constants.slots).find(
-      (key) => constants.slots[key] === slot
+    const slotName = Object.keys(roster_slot_types).find(
+      (key) => roster_slot_types[key] === slot
     )
     const count = this.getCountBySlot(slot)
     return count < this._league[`s${slotName.toLowerCase()}`]
@@ -314,13 +326,13 @@ export default class Roster {
   }
 
   isEligibleForTag({ tag }) {
-    if (tag === constants.tags.REGULAR) {
+    if (tag === player_tag_types.REGULAR) {
       return true
     }
 
     // Only count players that are originally from this team for tag limits
     // For restricted free agency (RFA) tags, we only count players who originated from this team
-    if (tag === constants.tags.RESTRICTED_FREE_AGENCY) {
+    if (tag === player_tag_types.RESTRICTED_FREE_AGENCY) {
       const originalTeamTaggedPlayers = this.all.filter(
         (player) =>
           player.tag === tag &&
@@ -361,14 +373,14 @@ export default class Roster {
   hasUnprocessedRestrictedTag() {
     const processed_restricted_free_agency_tags = this.all.filter(
       (player) =>
-        player.tag === constants.tags.RESTRICTED_FREE_AGENCY &&
+        player.tag === player_tag_types.RESTRICTED_FREE_AGENCY &&
         player.restricted_free_agency_tag_processed &&
         (!player.restricted_free_agency_original_team ||
           player.restricted_free_agency_original_team === this.tid)
     ).length
 
     const originalTeamTagLimit =
-      this._league[`tag${constants.tags.RESTRICTED_FREE_AGENCY}`]
+      this._league[`tag${player_tag_types.RESTRICTED_FREE_AGENCY}`]
     return processed_restricted_free_agency_tags !== originalTeamTagLimit
   }
 
@@ -404,41 +416,41 @@ export default class Roster {
   validate_slot_for_player(player, target_slot) {
     // Check if slot is a practice squad slot (unlimited for PSD/PSDP)
     if (
-      target_slot === constants.slots.PSD ||
-      target_slot === constants.slots.PSDP
+      target_slot === roster_slot_types.PSD ||
+      target_slot === roster_slot_types.PSDP
     ) {
       return true
     }
 
     // Check practice squad space for PS/PSP
     if (
-      target_slot === constants.slots.PS ||
-      target_slot === constants.slots.PSP
+      target_slot === roster_slot_types.PS ||
+      target_slot === roster_slot_types.PSP
     ) {
       return this.has_practice_squad_space_for_position(player.pos)
     }
 
     // Check reserve slots
-    if (target_slot === constants.slots.RESERVE_SHORT_TERM) {
+    if (target_slot === roster_slot_types.RESERVE_SHORT_TERM) {
       return this.has_open_reserve_short_term_slot()
     }
 
     if (
-      target_slot === constants.slots.RESERVE_LONG_TERM ||
-      target_slot === constants.slots.COV
+      target_slot === roster_slot_types.RESERVE_LONG_TERM ||
+      target_slot === roster_slot_types.COV
     ) {
       return true
     }
 
     // Check bench slot
-    if (target_slot === constants.slots.BENCH) {
+    if (target_slot === roster_slot_types.BENCH) {
       return this.has_bench_space_for_position(player.pos)
     }
 
     // Check starter slots
-    if (constants.starterSlots.includes(target_slot)) {
-      const slot_name = Object.keys(constants.slots).find(
-        (key) => constants.slots[key] === target_slot
+    if (starting_lineup_slots.includes(target_slot)) {
+      const slot_name = Object.keys(roster_slot_types).find(
+        (key) => roster_slot_types[key] === target_slot
       )
       // Check position eligibility
       if (!slot_name.includes(player.pos)) {
@@ -460,26 +472,26 @@ export default class Roster {
 
     // Always include bench if there's space
     if (this.has_bench_space_for_position(player.pos)) {
-      available_slots.push(constants.slots.BENCH)
+      available_slots.push(roster_slot_types.BENCH)
     }
 
     // Include signed practice squad if space available
     if (this.has_practice_squad_space_for_position(player.pos)) {
-      available_slots.push(constants.slots.PS)
+      available_slots.push(roster_slot_types.PS)
     }
 
     // Always include drafted practice squad (unlimited)
-    available_slots.push(constants.slots.PSD)
+    available_slots.push(roster_slot_types.PSD)
 
     // Include short-term reserve if space available
     if (this.has_open_reserve_short_term_slot()) {
-      available_slots.push(constants.slots.RESERVE_SHORT_TERM)
+      available_slots.push(roster_slot_types.RESERVE_SHORT_TERM)
     }
 
     // Check each starter slot for position eligibility
-    for (const starter_slot of constants.starterSlots) {
-      const slot_name = Object.keys(constants.slots).find(
-        (key) => constants.slots[key] === starter_slot
+    for (const starter_slot of starting_lineup_slots) {
+      const slot_name = Object.keys(roster_slot_types).find(
+        (key) => roster_slot_types[key] === starter_slot
       )
       if (slot_name.includes(player.pos) && this.hasOpenSlot(starter_slot)) {
         available_slots.push(starter_slot)

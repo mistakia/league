@@ -4,7 +4,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main, find_player_row, report_job } from '#libs-server'
 import config from '#config'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -15,7 +15,7 @@ const initialize_cli = () => {
 
 const log = debug('import:projections')
 debug.enable('import:projections,get-player')
-const week = Math.max(constants.season.week, 1)
+const week = Math.max(current_season.week, 1)
 
 const timestamp = new Date()
 const getURL = (position) =>
@@ -55,7 +55,7 @@ const getProjection = (stats) => ({
 
 const run = async ({ dry = false } = {}) => {
   // do not pull in any projections after the season has ended
-  if (constants.season.week > constants.season.nflFinalWeek) {
+  if (current_season.week > current_season.nflFinalWeek) {
     return
   }
 
@@ -90,7 +90,7 @@ const run = async ({ dry = false } = {}) => {
       const proj = getProjection(item)
       inserts.push({
         pid: player_row.pid,
-        year: constants.season.year,
+        year: current_season.year,
         week,
         seas_type: 'REG',
         sourceid: 12,

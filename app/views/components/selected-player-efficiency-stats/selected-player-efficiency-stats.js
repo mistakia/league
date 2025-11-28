@@ -2,8 +2,8 @@ import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import { Map } from 'immutable'
 
-import { constants } from '@libs-shared'
 import PercentileChart from '@components/percentile-chart'
+import { current_season } from '@constants'
 
 // TODO - pass epa per play
 // TODO - use percentile_key and percentile_field
@@ -92,7 +92,8 @@ export default class SelectedPlayerEfficiencyStats extends React.Component {
   render = () => {
     const { player_map } = this.props
     const stats = (
-      player_map.get('stats', new Map()) || new Map(constants.createFullStats())
+      player_map.get('stats', new Map()) ||
+      new Map(current_season.createFullStats())
     ).toJS()
     const pos = player_map.get('pos')
 

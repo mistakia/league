@@ -1,7 +1,8 @@
 import express from 'express'
 import dayjs from 'dayjs'
 
-import { constants, Roster } from '#libs-shared'
+import { Roster } from '#libs-shared'
+import { current_season, roster_slot_types } from '#constants'
 import get_default_trade_slot from '#libs-shared/get-default-trade-slot.mjs'
 import validate_trade_roster_slots from '#libs-server/validate-trade-roster-slots.mjs'
 import {
@@ -178,7 +179,7 @@ router.get('/?', async (req, res) => {
   try {
     const { teamId } = req.query
     const trades = await db('trades')
-      .where('year', constants.season.year)
+      .where('year', current_season.year)
       .where(function () {
         this.where('propose_tid', teamId).orWhere('accept_tid', teamId)
       })
@@ -454,14 +455,14 @@ router.post(
 
       // Validate slot assignment inputs
       const valid_slots = [
-        constants.slots.BENCH,
-        constants.slots.PS,
-        constants.slots.PSP,
-        constants.slots.PSD,
-        constants.slots.PSDP,
-        constants.slots.RESERVE_SHORT_TERM,
-        constants.slots.RESERVE_LONG_TERM,
-        constants.slots.COV
+        roster_slot_types.BENCH,
+        roster_slot_types.PS,
+        roster_slot_types.PSP,
+        roster_slot_types.PSD,
+        roster_slot_types.PSDP,
+        roster_slot_types.RESERVE_SHORT_TERM,
+        roster_slot_types.RESERVE_LONG_TERM,
+        roster_slot_types.COV
       ]
 
       for (const [pid, slot] of Object.entries(proposing_team_slots_input)) {
@@ -530,14 +531,14 @@ router.post(
       const psPlayers = await db('rosters_players')
         .join('poaches', 'rosters_players.pid', 'poaches.pid')
         .where({
-          year: constants.season.year,
-          week: constants.season.week
+          year: current_season.year,
+          week: current_season.week
         })
         .where(function () {
           this.where({
-            slot: constants.slots.PS
+            slot: roster_slot_types.PS
           }).orWhere({
-            slot: constants.slots.PSD
+            slot: roster_slot_types.PSD
           })
         })
         .whereNull('poaches.processed')
@@ -653,12 +654,12 @@ router.post(
             .andOn(
               'rosters_players.year',
               '=',
-              db.raw('?', [constants.season.year])
+              db.raw('?', [current_season.year])
             )
             .andOn(
               'rosters_players.week',
               '=',
-              db.raw('?', [constants.season.week])
+              db.raw('?', [current_season.week])
             )
         })
         .whereIn('player.pid', all_incoming_pids)
@@ -678,8 +679,8 @@ router.post(
             player,
             current_slot: player.slot,
             roster: proposingTeamRoster,
-            week: constants.season.week,
-            is_regular_season: constants.season.isRegularSeason
+            week: current_season.week,
+            is_regular_season: current_season.isRegularSeason
           })
 
         proposing_team_slots[pid] = assigned_slot
@@ -700,8 +701,8 @@ router.post(
             player,
             current_slot: player.slot,
             roster: acceptingTeamRoster,
-            week: constants.season.week,
-            is_regular_season: constants.season.isRegularSeason
+            week: current_season.week,
+            is_regular_season: current_season.isRegularSeason
           })
 
         accepting_team_slots[pid] = assigned_slot
@@ -726,8 +727,8 @@ router.post(
         player_rows: players,
         slot_assignments: proposing_team_slots,
         roster: proposingTeamRoster,
-        week: constants.season.week,
-        is_regular_season: constants.season.isRegularSeason,
+        week: current_season.week,
+        is_regular_season: current_season.isRegularSeason,
         player_extensions: proposingPlayerExtensions
       })
 
@@ -746,7 +747,7 @@ router.post(
             propose_tid,
             accept_tid,
             userid: req.auth.userId,
-            year: constants.season.year,
+            year: current_season.year,
             lid: leagueId,
             offered: Math.round(Date.now() / 1000)
           })

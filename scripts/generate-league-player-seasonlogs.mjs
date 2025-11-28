@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main, getAcquisitionTransaction, getLeague } from '#libs-server'
 import generateSeasonDates from './generate-season-dates.mjs'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
@@ -17,7 +17,7 @@ const log = debug('generate-league-player-seasonlogs')
 debug.enable('generate-league-player-seasonlogs')
 
 const generate_league_player_seasonlogs = async ({
-  year = constants.season.year,
+  year = current_season.year,
   lid,
   league_format_hash
 }) => {

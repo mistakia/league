@@ -1,10 +1,10 @@
 import db from '#db'
 import {
-  constants,
   create_default_league,
   generate_league_format_hash,
   generate_scoring_format_hash
 } from '#libs-shared'
+import { current_season } from '#constants'
 
 export default async function ({ lid, commishid, ...params } = {}) {
   const default_league_params = create_default_league({ commishid })
@@ -40,7 +40,7 @@ export default async function ({ lid, commishid, ...params } = {}) {
 
   await db('seasons').insert({
     lid: leagueId,
-    year: constants.season.year,
+    year: current_season.year,
 
     league_format_hash: league_format.league_format_hash,
     scoring_format_hash: scoring_format.scoring_format_hash,

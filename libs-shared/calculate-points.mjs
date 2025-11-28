@@ -1,8 +1,10 @@
-import { stats, projected_stats } from './constants.mjs'
+import { base_fantasy_stats, projected_base_stats } from '#constants'
 
 const getScoring = ({ league, use_projected_stats = false }) => {
   const result = {}
-  const stats_to_use = use_projected_stats ? projected_stats : stats
+  const stats_to_use = use_projected_stats
+    ? projected_base_stats
+    : base_fantasy_stats
   for (const stat of stats_to_use) {
     result[stat] = league[stat] || 0
   }

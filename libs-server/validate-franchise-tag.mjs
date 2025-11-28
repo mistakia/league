@@ -1,5 +1,5 @@
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season, transaction_types } from '#constants'
 
 /**
  * Validates that a player has not been franchise tagged for three consecutive years
@@ -13,14 +13,14 @@ import { constants } from '#libs-shared'
 export default async function validate_franchise_tag({
   pid,
   tid,
-  year = constants.season.year
+  year = current_season.year
 }) {
   // Check previous two years for franchise tags
   const previous_years_tags = await db('transactions')
     .where({
       tid,
       pid,
-      type: constants.transactions.FRANCHISE_TAG
+      type: transaction_types.FRANCHISE_TAG
     })
     .whereIn('year', [year - 1, year - 2])
     .orderBy('year', 'desc')

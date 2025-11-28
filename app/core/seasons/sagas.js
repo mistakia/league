@@ -4,14 +4,14 @@ import { get_request_history, get_app } from '@core/selectors'
 import { seasons_actions } from './actions'
 import { api_get_season } from '@core/api'
 import { app_actions } from '@core/app'
-import { constants } from '@libs-shared'
+import { current_season } from '@constants'
 
 export function* load_season() {
   const { leagueId, year } = yield select(get_app)
 
   console.log({ leagueId, year })
 
-  if (year === constants.year) {
+  if (year === current_season.year) {
     return
   }
 

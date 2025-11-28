@@ -1,4 +1,5 @@
-import { constants, bookmaker_constants } from '#libs-shared'
+import { bookmaker_constants } from '#libs-shared'
+import { current_season } from '#constants'
 import db from '#db'
 import get_join_func from '#libs-server/get-join-func.mjs'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
@@ -15,10 +16,10 @@ const get_default_params = ({
     : bookmaker_constants.bookmakers.FANDUEL
   const year = Array.isArray(params.year)
     ? params.year[0]
-    : params.year || constants.season.year
+    : params.year || current_season.year
   const seas_type = Array.isArray(params.seas_type)
     ? params.seas_type[0]
-    : params.seas_type || constants.season.nfl_seas_type
+    : params.seas_type || current_season.nfl_seas_type
 
   const hit_type = Array.isArray(params.hit_type)
     ? params.hit_type[0].toLowerCase()
@@ -33,7 +34,7 @@ const get_default_params = ({
   if (is_game_prop) {
     week = Array.isArray(params.week)
       ? params.week[0]
-      : params.week || constants.season.nfl_seas_week
+      : params.week || current_season.nfl_seas_week
   } else {
     week = Array.isArray(params.week) ? params.week[0] : params.week || 0
   }

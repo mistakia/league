@@ -1,8 +1,8 @@
 import {
-  constants,
   DEFAULT_SCORING_FORMAT_HASH,
   DEFAULT_LEAGUE_FORMAT_HASH
 } from '#libs-shared'
+import { current_season, external_data_sources } from '#constants'
 import { CACHE_TTL } from '#libs-server/data-views/cache-info-utils.mjs'
 
 import db from '#db'
@@ -14,7 +14,7 @@ import data_view_join_function from '#libs-server/data-views/data-view-join-func
 const get_default_params = ({ params = {} }) => {
   const year = Array.isArray(params.year)
     ? params.year[0]
-    : params.year || constants.season.year
+    : params.year || current_season.year
   const week = Array.isArray(params.week) ? params.week[0] : params.week || 0
   const seas_type = Array.isArray(params.seas_type)
     ? params.seas_type[0]
@@ -38,8 +38,7 @@ const get_default_params = ({ params = {} }) => {
 const get_cache_info_for_player_projected_stats = ({ params = {} } = {}) => {
   const { year, seas_type } = get_default_params({ params })
   const is_current_year_and_season =
-    year === constants.season.year &&
-    seas_type === constants.season.nfl_seas_type
+    year === current_season.year && seas_type === current_season.nfl_seas_type
 
   return {
     cache_ttl: is_current_year_and_season
@@ -172,7 +171,7 @@ const projections_index_join = (join_arguments) => {
         this.andOn(
           `${join_arguments.table_name}.sourceid`,
           '=',
-          constants.sources.AVERAGE
+          external_data_sources.AVERAGE
         )
         this.andOn(
           `${join_arguments.table_name}.seas_type`,

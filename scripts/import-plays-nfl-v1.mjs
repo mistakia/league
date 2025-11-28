@@ -4,7 +4,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, fixTeam } from '#libs-shared'
+import { fixTeam } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main, wait, nfl, report_job, clean_string } from '#libs-server'
 import player_cache, {
   preload_active_players
@@ -240,19 +241,19 @@ const getPlayStatData = (playStat) => ({
 })
 
 const importPlaysForWeek = async ({
-  year = constants.season.year,
-  week = constants.season.nfl_seas_week,
-  seas_type = constants.season.nfl_seas_type,
+  year = current_season.year,
+  week = current_season.nfl_seas_week,
+  seas_type = current_season.nfl_seas_type,
   ignore_cache = false,
   force_update = false,
   token,
   dry_run = false
 } = {}) => {
-  week = week || constants.season.last_week_with_stats
+  week = week || current_season.last_week_with_stats
   const is_current_week =
     !force_update &&
-    year === constants.season.year &&
-    week === constants.season.last_week_with_stats
+    year === current_season.year &&
+    week === current_season.last_week_with_stats
 
   log(
     `importing plays for week ${week} ${year} ${seas_type} (force_update: ${force_update}, ignore_cache: ${ignore_cache}, is_current_week: ${is_current_week}, dry_run: ${dry_run})`
@@ -544,7 +545,7 @@ const importPlaysForWeek = async ({
 }
 
 const importPlaysForYear = async ({
-  year = constants.season.year,
+  year = current_season.year,
   seas_type = 'REG',
   force_update = false,
   ignore_cache = false,

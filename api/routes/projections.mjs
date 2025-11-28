@@ -1,6 +1,11 @@
 import express from 'express'
 
-import { constants } from '#libs-shared'
+import {
+  current_season,
+  external_data_sources,
+  all_fantasy_stats,
+  fantasy_positions
+} from '#constants'
 import { get_player_projections } from '#libs-server'
 
 const router = express.Router()
@@ -87,12 +92,12 @@ router.get('/?', async (req, res) => {
      * res.set('Surrogate-Control', null)
      */
     let projections = cache.get('projections')
-    const seas_type = constants.season.nfl_seas_type === 'POST' ? 'POST' : 'REG'
+    const seas_type = current_season.nfl_seas_type === 'POST' ? 'POST' : 'REG'
     if (!projections) {
       projections = await db('projections_index')
-        .where('sourceid', constants.sources.AVERAGE)
-        .where('year', constants.season.year)
-        .where('week', '>=', constants.season.week)
+        .where('sourceid', external_data_sources.AVERAGE)
+        .where('year', current_season.year)
+        .where('week', '>=', current_season.week)
         .where('seas_type', seas_type)
       cache.set('projections', projections, 14400) // 4 hours
     }
@@ -102,10 +107,10 @@ router.get('/?', async (req, res) => {
       user_projections = await db('projections_index')
         .select('projections.*')
         .join('player', 'projections.pid', 'player.pid')
-        .whereIn('player.pos', constants.positions)
+        .whereIn('player.pos', fantasy_positions)
         .whereNot('player.current_nfl_team', 'INA')
         .where({
-          year: constants.season.year,
+          year: current_season.year,
           seas_type,
           userid: req.auth.userId
         })
@@ -369,7 +374,7 @@ router.put(
 
       // TODO - validate range
 
-      if (!constants.stats.includes(type)) {
+      if (!all_fantasy_stats.includes(type)) {
         return res.status(400).send({ error: 'invalid type' })
       }
 
@@ -386,7 +391,7 @@ router.put(
           userid: userId,
           pid,
           week,
-          year: constants.season.year,
+          year: current_season.year,
           seas_type
         })
         .first()
@@ -400,7 +405,7 @@ router.put(
             userid: userId,
             pid,
             week,
-            year: constants.season.year,
+            year: current_season.year,
             seas_type
           })
 
@@ -415,7 +420,7 @@ router.put(
           userid: userId,
           pid,
           week,
-          year: constants.season.year,
+          year: current_season.year,
           seas_type
         }
         await db('projections_index').insert(insert_data)
@@ -552,7 +557,7 @@ router.delete(
         userid: userId,
         pid,
         week,
-        year: constants.season.year,
+        year: current_season.year,
         seas_type
       })
 

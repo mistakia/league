@@ -1,5 +1,5 @@
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 export default async function ({ userId, leagueId, teamId, requireLeague }) {
   if (!teamId) {
@@ -29,7 +29,7 @@ export default async function ({ userId, leagueId, teamId, requireLeague }) {
     })
     .join('leagues', 'teams.lid', 'leagues.uid')
     .where('teams.uid', tid)
-    .where('teams.year', constants.season.year)
+    .where('teams.year', current_season.year)
   const team = userTeams.find(
     (p) => p.userid === userId || p.commishid === userId
   )

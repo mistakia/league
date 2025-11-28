@@ -1,6 +1,7 @@
 import express from 'express'
 
-import { constants, uniqBy } from '#libs-shared'
+import { uniqBy } from '#libs-shared'
+import { current_season, fantasy_weeks } from '#constants'
 import { getPlayByPlayQuery } from '#libs-server'
 
 const router = express.Router()
@@ -73,13 +74,13 @@ const router = express.Router()
 router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const week = Number(req.query.week || constants.season.week)
+    const week = Number(req.query.week || current_season.week)
 
     if (isNaN(week)) {
       return res.status(400).send({ error: 'invalid week' })
     }
 
-    if (!constants.fantasyWeeks.includes(week)) {
+    if (!fantasy_weeks.includes(week)) {
       return res.status(400).send({ error: 'invalid week' })
     }
 

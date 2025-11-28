@@ -18,9 +18,9 @@ import Chip from '@mui/material/Chip'
 import Position from '@components/position'
 import NFLTeam from '@components/nfl-team'
 import Button from '@components/button'
-import { constants } from '@libs-shared'
 
 import './restricted-free-agency-confirmation.styl'
+import { player_tag_types } from '@constants'
 
 export default class RestrictedFreeAgencyConfirmation extends React.Component {
   constructor(props) {
@@ -43,7 +43,7 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
 
     this._untags = []
     const tagged_players = team.roster.getPlayersByTag(
-      constants.tags.RESTRICTED_FREE_AGENCY
+      player_tag_types.RESTRICTED_FREE_AGENCY
     )
     const tagged_pids = tagged_players.map((p) => p.pid)
     for (const pid of tagged_pids) {
@@ -69,7 +69,7 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
       this._isUpdate ||
       !this._isOriginalTeam ||
       team.roster.isEligibleForTag({
-        tag: constants.tags.RESTRICTED_FREE_AGENCY
+        tag: player_tag_types.RESTRICTED_FREE_AGENCY
       })
 
     // Check if initial bid exceeds max bid
@@ -200,7 +200,7 @@ export default class RestrictedFreeAgencyConfirmation extends React.Component {
         return
       }
 
-      if (player_map.get('tag') === constants.tags.RESTRICTED_FREE_AGENCY) {
+      if (player_map.get('tag') === player_tag_types.RESTRICTED_FREE_AGENCY) {
         return
       }
 

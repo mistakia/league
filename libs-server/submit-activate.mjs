@@ -1,4 +1,9 @@
-import { constants, Roster } from '#libs-shared'
+import { Roster } from '#libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  transaction_types
+} from '#constants'
 
 import getLeague from './get-league.mjs'
 import getRoster from './get-roster.mjs'
@@ -31,7 +36,7 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
     roster.players.find(
       (p) =>
         p.pid === activate_pid &&
-        (p.slot === constants.slots.PSP || p.slot === constants.slots.PSDP)
+        (p.slot === roster_slot_types.PSP || p.slot === roster_slot_types.PSDP)
     )
   ) {
     throw new Error('player is protected')
@@ -52,7 +57,7 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
     throw new Error('no available space on active roster')
   }
 
-  await db('rosters_players').update({ slot: constants.slots.BENCH }).where({
+  await db('rosters_players').update({ slot: roster_slot_types.BENCH }).where({
     rid: rosterRow.uid,
     pid: activate_pid
   })
@@ -62,10 +67,10 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
     tid,
     lid: leagueId,
     pid: activate_pid,
-    type: constants.transactions.ROSTER_ACTIVATE,
+    type: transaction_types.ROSTER_ACTIVATE,
     value: player_row.value,
-    week: constants.season.week,
-    year: constants.season.year,
+    week: current_season.week,
+    year: current_season.year,
     timestamp
   }
   await db('transactions').insert(transaction)
@@ -86,7 +91,7 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
   const data = {
     pid: activate_pid,
     tid,
-    slot: constants.slots.BENCH,
+    slot: roster_slot_types.BENCH,
     rid: roster.uid,
     pos: player_row.pos,
     transaction
@@ -94,7 +99,7 @@ export default async function ({ tid, activate_pid, leagueId, userId }) {
 
   const teams = await db('teams').where({
     uid: tid,
-    year: constants.season.year
+    year: current_season.year
   })
   const team = teams[0]
 

@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 const router = express.Router({ mergeParams: true })
 
@@ -12,7 +12,7 @@ router.get('/?', async (req, res) => {
       return res.status(400).send({ error: 'missing leagueId' })
     }
 
-    const year = req.query.year || constants.season.year
+    const year = req.query.year || current_season.year
 
     const league_team_seasonlogs = await db('league_team_seasonlogs').where({
       lid: leagueId,

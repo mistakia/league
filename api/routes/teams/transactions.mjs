@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { constants } from '#libs-shared'
+import { current_season, roster_slot_types } from '#constants'
 import { verifyUserTeam, getTransactionsSinceFreeAgent } from '#libs-server'
 
 const router = express.Router({ mergeParams: true })
@@ -103,12 +103,12 @@ router.get('/reserve', async (req, res) => {
 
     const tid = teamId
     const lid = leagueId
-    const { week, year } = constants.season
+    const { week, year } = current_season
 
     const reserve_roster_rows = await db('rosters_players')
       .whereIn('rosters_players.slot', [
-        constants.slots.RESERVE_SHORT_TERM,
-        constants.slots.RESERVE_LONG_TERM
+        roster_slot_types.RESERVE_SHORT_TERM,
+        roster_slot_types.RESERVE_LONG_TERM
       ])
       .where({ tid, year, week })
 

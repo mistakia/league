@@ -2,7 +2,8 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { constants, toStringArray } from '@libs-shared'
+import { toStringArray } from '@libs-shared'
+import { current_season, roster_slot_types } from '@constants'
 import Button from '@components/button'
 import PlayerNameExpanded from '@components/player-name-expanded'
 
@@ -19,14 +20,14 @@ export default class PlayerSlot extends React.Component {
       isLocked
     } = this.props
 
-    const slotPositions = Object.keys(constants.slots).find(
-      (key) => constants.slots[key] === slot
+    const slotPositions = Object.keys(roster_slot_types).find(
+      (key) => roster_slot_types[key] === slot
     )
-    const slotName = constants.slotName[slot]
+    const slotName = roster_slot_types.slotName[slot]
     const pid = player_map.get('pid')
 
     let action
-    if (constants.week > constants.season.finalWeek) {
+    if (current_season.week > current_season.finalWeek) {
       return null
     } else if (!selected_player_slot && pid) {
       action = (
@@ -56,7 +57,7 @@ export default class PlayerSlot extends React.Component {
             Here
           </Button>
         )
-      } else if (!pid && slot === constants.slots.BENCH) {
+      } else if (!pid && slot === roster_slot_types.BENCH) {
         action = (
           <Button onClick={() => handleUpdate({ slot })} small>
             Here
@@ -72,7 +73,7 @@ export default class PlayerSlot extends React.Component {
       classNames.push('selected')
     }
 
-    const week = Math.max(constants.week, 1)
+    const week = Math.max(current_season.week, 1)
 
     const statSuffix = {
       pa: 'pass att',

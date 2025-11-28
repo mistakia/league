@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season, external_data_sources } from '#constants'
 import {
   is_main,
   find_player_row,
@@ -23,11 +23,11 @@ const run = async ({ season = false, dry = false } = {}) => {
   const URL = season
     ? 'https://www.fantasysharks.com/apps/Projections/SeasonProjections.php?pos=ALL&format=json&l=2'
     : 'https://www.fantasysharks.com/apps/Projections/WeeklyProjections.php?pos=ALL&format=json'
-  const week = season ? 0 : Math.max(constants.season.week, 1)
+  const week = season ? 0 : Math.max(current_season.week, 1)
   const year = new Date().getFullYear()
   const timestamp = Math.round(Date.now() / 1000)
   // do not pull in any projections after the season has ended
-  if (constants.season.week > constants.season.nflFinalWeek) {
+  if (current_season.week > current_season.nflFinalWeek) {
     return
   }
 
@@ -81,7 +81,7 @@ const run = async ({ season = false, dry = false } = {}) => {
       pid: player_row.pid,
       year,
       week,
-      sourceid: constants.sources.FANTASY_SHARKS,
+      sourceid: external_data_sources.FANTASY_SHARKS,
       seas_type: 'REG',
       ...entry
     })
@@ -103,7 +103,7 @@ const run = async ({ season = false, dry = false } = {}) => {
       .where({
         year,
         week,
-        sourceid: constants.sources.FANTASY_SHARKS,
+        sourceid: external_data_sources.FANTASY_SHARKS,
         seas_type: 'REG'
       })
       .whereNotIn(

@@ -4,7 +4,8 @@
 
 import debug from 'debug'
 import dayjs from 'dayjs'
-import { constants, bookmaker_constants } from '#libs-shared'
+import { bookmaker_constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { draftkings, clean_string } from '#libs-server'
 import { find_player } from '#libs-server/player-cache.mjs'
 import { normalize_selection_metric_line } from '../normalize-selection-metric-line.mjs'
@@ -26,7 +27,7 @@ const log = debug('import-draft-kings')
  * @returns {Object|null} - Matching NFL game or null
  */
 const find_matching_nfl_game = (draftkings_event, nfl_games) => {
-  const { week, seas_type } = constants.season.calculate_week(
+  const { week, seas_type } = current_season.calculate_week(
     dayjs(draftkings_event.startEventDate)
   )
 
@@ -43,7 +44,7 @@ const find_matching_nfl_game = (draftkings_event, nfl_games) => {
     (game) =>
       game.week === week &&
       game.seas_type === seas_type &&
-      game.year === constants.season.year &&
+      game.year === current_season.year &&
       game.v === visitor_team &&
       game.h === home_team
   )
@@ -54,7 +55,7 @@ const find_matching_nfl_game = (draftkings_event, nfl_games) => {
       (game) =>
         game.week === week &&
         game.seas_type === seas_type &&
-        game.year === constants.season.year &&
+        game.year === current_season.year &&
         game.v === home_team &&
         game.h === visitor_team
     )
@@ -280,7 +281,7 @@ export const format_market = async ({
     ),
 
     esbid: nfl_game ? nfl_game.esbid : null,
-    year: nfl_game ? nfl_game.year : constants.season.year,
+    year: nfl_game ? nfl_game.year : current_season.year,
     source_event_id: draftkings_market.eventId,
     source_event_name: clean_string(draftkings_event?.name) || null,
 

@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 import debug from 'debug'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main, getLeague, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -16,9 +16,7 @@ const run = async () => {
     .leftJoin('seasons', function () {
       this.on('leagues.uid', '=', 'seasons.lid')
       this.on(
-        db.raw(
-          `seasons.year = ${constants.season.year} or seasons.year is null`
-        )
+        db.raw(`seasons.year = ${current_season.year} or seasons.year is null`)
       )
     })
     .whereNotNull('draft_start')
@@ -33,8 +31,8 @@ const run = async () => {
 
     const picks = await db('draft')
       .join('teams', 'draft.tid', 'teams.uid')
-      .where('draft.year', constants.season.year)
-      .where('teams.year', constants.season.year)
+      .where('draft.year', current_season.year)
+      .where('teams.year', current_season.year)
       .where('draft.pick', pick)
       .where('draft.lid', league.uid)
       .whereNull('draft.pid')

@@ -1,14 +1,15 @@
 import dayjs from 'dayjs'
 
 import db from '#db'
-import { constants, getDraftDates } from '#libs-shared'
+import { getDraftDates } from '#libs-shared'
+import { current_season, waiver_types, transaction_types } from '#constants'
 import getLeague from './get-league.mjs'
 
 export default async function (lid) {
   const league = await getLeague({ lid })
   const picks = await db('draft')
     .where({
-      year: constants.season.year,
+      year: current_season.year,
       lid
     })
     .orderBy('pick', 'asc')
@@ -19,7 +20,7 @@ export default async function (lid) {
   const season = await db('seasons')
     .where({
       lid,
-      year: constants.season.year
+      year: current_season.year
     })
     .first()
 
@@ -37,7 +38,7 @@ export default async function (lid) {
     return undefined
   }
 
-  if (constants.season.isRegularSeason && constants.season.isWaiverPeriod) {
+  if (current_season.isRegularSeason && current_season.isWaiverPeriod) {
     return undefined
   }
 
@@ -46,14 +47,14 @@ export default async function (lid) {
     .whereNull('processed')
     .whereNull('cancelled')
     .where('lid', lid)
-    .where('type', constants.waivers.FREE_AGENCY)
+    .where('type', waiver_types.FREE_AGENCY)
     .groupBy('pid')
   const active_waiver_pids = active_waiver_rows.map((w) => w.pid)
 
   // get relevant transactions from last 24 hours
   const cutoff = dayjs().subtract('24', 'hours').unix()
   const recent_transaction_rows = await db('transactions')
-    .where('type', constants.transactions.ROSTER_RELEASE)
+    .where('type', transaction_types.ROSTER_RELEASE)
     .where('timestamp', '>=', cutoff)
     .where('lid', lid)
   const recent_transaction_pids = recent_transaction_rows.map((t) => t.pid)
@@ -69,11 +70,11 @@ export default async function (lid) {
       'waivers.type as waiver_type'
     )
     .join('teams', 'waivers.tid', 'teams.uid')
-    .where('teams.year', constants.season.year)
+    .where('teams.year', current_season.year)
     .whereNull('processed')
     .whereNull('cancelled')
     .where('waivers.lid', lid)
-    .where('waivers.type', constants.waivers.FREE_AGENCY_PRACTICE)
+    .where('waivers.type', waiver_types.FREE_AGENCY_PRACTICE)
     .orderBy([
       {
         column: 'teams.waiver_order',
@@ -89,13 +90,13 @@ export default async function (lid) {
       }
     ])
 
-  if (constants.season.isRegularSeason) {
+  if (current_season.isRegularSeason) {
     query
       .select('nfl_games.date')
       .select('nfl_games.time_est')
       .join('player', 'waivers.pid', 'player.pid')
       .joinRaw(
-        `left join nfl_games on nfl_games.week = ${constants.season.week} and nfl_games.year = ${constants.season.year} and nfl_games.seas_type = 'REG' and (player.current_nfl_team = nfl_games.v or player.current_nfl_team = nfl_games.h)`
+        `left join nfl_games on nfl_games.week = ${current_season.week} and nfl_games.year = ${current_season.year} and nfl_games.seas_type = 'REG' and (player.current_nfl_team = nfl_games.v or player.current_nfl_team = nfl_games.h)`
       )
   }
 
@@ -120,11 +121,11 @@ export default async function (lid) {
       'waivers.super_priority'
     )
     .join('teams', 'waivers.tid', 'teams.uid')
-    .where('teams.year', constants.season.year)
+    .where('teams.year', current_season.year)
     .whereNull('processed')
     .whereNull('cancelled')
     .where('waivers.lid', lid)
-    .where('waivers.type', constants.waivers.FREE_AGENCY_PRACTICE)
+    .where('waivers.type', waiver_types.FREE_AGENCY_PRACTICE)
     .where('waivers.super_priority', 1)
     .orderBy([
       {
@@ -154,7 +155,7 @@ export default async function (lid) {
 
   const waiver_rows = await query
 
-  if (constants.season.isRegularSeason) {
+  if (current_season.isRegularSeason) {
     const now = dayjs()
     const filtered = waiver_rows.filter((waiver_row) => {
       if (!waiver_row.date) return true

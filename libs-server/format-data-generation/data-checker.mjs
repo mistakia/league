@@ -2,7 +2,7 @@
 // Handle data existence and safety checking operations
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { named_scoring_formats } from '#libs-shared/named-scoring-formats-generated.mjs'
 import { named_league_formats } from '#libs-shared/named-league-formats-generated.mjs'
 
@@ -52,7 +52,7 @@ export const build_step_query_conditions = ({ query, step_name }) => {
     return query.limit(1)
   } else if (step_name.includes('projections')) {
     // Check for projections using the last year with stats
-    return query.where('year', constants.season.stats_season_year).limit(1)
+    return query.where('year', current_season.stats_season_year).limit(1)
   } else if (step_name === 'league_format_draft_values') {
     return query.limit(1)
   }

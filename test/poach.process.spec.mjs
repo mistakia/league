@@ -5,7 +5,11 @@ import MockDate from 'mockdate'
 
 import server from '#api'
 import knex from '#db'
-import { constants } from '#libs-shared'
+import {
+  roster_slot_types,
+  transaction_types,
+  current_season
+} from '#constants'
 import { user1 } from './fixtures/token.mjs'
 import { addPlayer, selectPlayer } from './utils/index.mjs'
 import league from '#db/seeds/league.mjs'
@@ -14,7 +18,7 @@ chai.should()
 process.env.NODE_ENV = 'test'
 chai.use(chai_http)
 const expect = chai.expect
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 
 describe('API /poaches - process', function () {
   before(async function () {
@@ -39,8 +43,8 @@ describe('API /poaches - process', function () {
         leagueId,
         userId,
         player: player1,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.PRACTICE_ADD,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.PRACTICE_ADD,
         value: 0
       })
 

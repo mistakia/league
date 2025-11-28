@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { transaction_types, current_year } from '#constants'
 import { get_super_priority_status, is_main } from '#libs-server'
 
 const log = debug('populate:super-priority')
@@ -12,7 +12,7 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 const run = async ({
-  year = constants.year,
+  year = current_year,
   lid = null,
   dry_run = false
 } = {}) => {
@@ -23,7 +23,7 @@ const run = async ({
   // Build query for POACHED transactions
   const query = db('transactions')
     .where({
-      type: constants.transactions.POACHED,
+      type: transaction_types.POACHED,
       year
     })
     .orderBy('timestamp', 'desc')
@@ -181,7 +181,7 @@ const main = async () => {
       .option('year', {
         alias: 'y',
         type: 'number',
-        default: constants.year,
+        default: current_year,
         describe: 'Year to process'
       })
       .option('lid', {

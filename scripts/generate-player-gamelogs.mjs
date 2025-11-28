@@ -28,13 +28,17 @@ import { hideBin } from 'yargs/helpers'
 import { is_main, report_job, batch_insert } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import {
-  constants,
   groupBy,
   fixTeam,
   calculateStatsFromPlayStats,
   calculateDstStatsFromPlays
 } from '#libs-shared'
 import db from '#db'
+import {
+  current_season,
+  all_fantasy_stats,
+  nfl_team_abbreviations
+} from '#constants'
 import { get_play_stats } from '#libs-server/play-stats-utils.mjs'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
 
@@ -47,7 +51,7 @@ debug.enable('generate-player-gamelogs')
 
 const format_base_gamelog = ({ esbid, stats, opp, tm, year }) => {
   const cleaned_stats = Object.keys(stats)
-    .filter((key) => constants.fantasyStats.includes(key))
+    .filter((key) => all_fantasy_stats.includes(key))
     .reduce((obj, key) => {
       obj[key] = stats[key]
       return obj
@@ -291,9 +295,9 @@ const generate_snap_based_gamelogs = async ({
  * @param {boolean} dry_run - If true, shows what would be generated without saving
  */
 const generate_player_gamelogs = async ({
-  week = constants.season.last_week_with_stats,
-  year = constants.season.year,
-  seas_type = constants.season.nfl_seas_type,
+  week = current_season.last_week_with_stats,
+  year = current_season.year,
+  seas_type = current_season.nfl_seas_type,
   dry_run = false
 }) => {
   log(`loading plays for ${year} week ${week}`)
@@ -481,7 +485,7 @@ const generate_player_gamelogs = async ({
   }
 
   // generate defense gamelogs
-  for (const team of constants.nflTeams) {
+  for (const team of nfl_team_abbreviations) {
     const opponentPlays = playStats.filter((p) => {
       if (fixTeam(p.h) !== team && fixTeam(p.v) !== team) {
         return false

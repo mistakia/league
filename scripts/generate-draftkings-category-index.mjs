@@ -6,9 +6,8 @@ import path, { dirname } from 'path'
 // import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-// import { constants } from '#libs-shared'
 import { is_main } from '#libs-server'
-// import { job_types } from '#libs-shared/job-constants.mjs'
+// import { job_types } from '#libs-shared/job-.mjs'
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('generate-draftkings-category-index')

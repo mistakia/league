@@ -1,10 +1,7 @@
 import db from '#db'
 import debug from 'debug'
-import {
-  constants,
-  named_scoring_formats,
-  named_league_formats
-} from '#libs-shared'
+import { named_scoring_formats, named_league_formats } from '#libs-shared'
+import { current_season } from '#constants'
 import data_views_column_definitions from '#libs-server/data-views-column-definitions/index.mjs'
 import * as validators from '#libs-server/validators.mjs'
 
@@ -219,8 +216,8 @@ const process_dynamic_params = (params) => {
 
 const process_dynamic_year_param = (year_param) => {
   let years = Array.isArray(year_param) ? year_param : [year_param]
-  const current_year = constants.season.year
-  const max_year = constants.season.year
+  const current_year = current_season.year
+  const max_year = current_season.year
   const min_year = 2000
 
   years = years.flatMap((year) => {
@@ -255,7 +252,7 @@ const process_dynamic_year_param = (year_param) => {
 
 const process_dynamic_week_param = (week_param) => {
   let weeks = Array.isArray(week_param) ? week_param : [week_param]
-  const current_week = constants.season.week
+  const current_week = current_season.week
   // TODO get max_week from db based on year
   const max_week = 18
   const min_week = 0
@@ -297,7 +294,7 @@ const process_dynamic_single_week_param = (single_week_param) => {
   single_week = single_week.map((week) => {
     if (typeof week === 'object') {
       if (week.dynamic_type === 'current_week') {
-        return constants.season.week
+        return current_season.week
       }
     }
     return week
@@ -335,7 +332,7 @@ const get_year_range = (columns, where) => {
         : [params.year]
       year_array.forEach((year) => {
         const parsed_year = parseInt(year, 10)
-        if (parsed_year <= constants.season.year) {
+        if (parsed_year <= current_season.year) {
           years.add(parsed_year)
         }
       })
@@ -363,7 +360,7 @@ const get_year_range = (columns, where) => {
 
   // If no years are set, use all years from 2000 to the current year
   if (years.size === 0) {
-    for (let year = 2000; year <= constants.season.year; year++) {
+    for (let year = 2000; year <= current_season.year; year++) {
       years.add(year)
     }
   }
@@ -373,7 +370,7 @@ const get_year_range = (columns, where) => {
   years.forEach((year) => {
     for (let i = min_offset; i <= max_offset; i++) {
       const offset_year = year + i
-      if (offset_year <= constants.season.year) {
+      if (offset_year <= current_season.year) {
         all_years.add(offset_year)
       }
     }
@@ -1154,9 +1151,9 @@ export const get_data_view_results_query = async ({
         add_week_opponent_cte_tables({
           players_query,
           table_name: 'current_week_opponents',
-          week: constants.season.nfl_seas_week,
-          year: constants.season.year,
-          seas_type: constants.season.nfl_seas_type
+          week: current_season.nfl_seas_week,
+          year: current_season.year,
+          seas_type: current_season.nfl_seas_type
         })
         players_query.join(
           'current_week_opponents',
@@ -1168,13 +1165,13 @@ export const get_data_view_results_query = async ({
 
       case 'next_week_opponent_total': {
         const { seas_type: next_week_seas_type, week: next_week } =
-          constants.season.calculate_week(constants.season.now.add(1, 'week'))
+          current_season.calculate_week(current_season.now.add(1, 'week'))
 
         add_week_opponent_cte_tables({
           players_query,
           table_name: 'next_week_opponents',
           week: next_week,
-          year: constants.season.year,
+          year: current_season.year,
           seas_type: next_week_seas_type
         })
         players_query.join(

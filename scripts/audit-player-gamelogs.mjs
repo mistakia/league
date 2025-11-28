@@ -4,7 +4,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season, fantasy_positions } from '#constants'
 import { is_main, pfr } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -60,7 +60,7 @@ const format_gamelog = ({
 })
 
 const audit_player_gamelogs = async ({
-  year = constants.season.year,
+  year = current_season.year,
   ignore_cache = false
 } = {}) => {
   // create any missing gamelogs
@@ -80,7 +80,7 @@ const audit_player_gamelogs = async ({
   // compare pfr player gamelogs to our gamelogs
   for (const pfr_player_gamelog of pfr_player_gamelogs_for_season) {
     // TODO temporarily ignore non fantasy positions
-    if (!constants.positions.includes(pfr_player_gamelog.pos)) {
+    if (!fantasy_positions.includes(pfr_player_gamelog.pos)) {
       continue
     }
 

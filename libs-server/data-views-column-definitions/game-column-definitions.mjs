@@ -2,22 +2,22 @@ import db from '#db'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { create_season_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 const get_params = ({ params = {} }) => {
-  let year = params.year || [constants.season.year]
+  let year = params.year || [current_season.year]
   if (!Array.isArray(year)) {
     year = [year]
   }
 
-  let week = params.week || [Math.max(constants.season.week, 1)]
+  let week = params.week || [Math.max(current_season.week, 1)]
   if (!Array.isArray(week)) {
     week = [week]
   }
 
   const seas_type = Array.isArray(params.seas_type)
     ? params.seas_type[0]
-    : params.seas_type || constants.season.nfl_seas_type
+    : params.seas_type || current_season.nfl_seas_type
 
   return {
     year,

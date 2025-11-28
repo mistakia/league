@@ -1,6 +1,7 @@
 import db from '#db'
 import { is_main, getLeague } from '#libs-server'
-import { constants, groupBy, calculatePoints } from '#libs-shared'
+import { groupBy, calculatePoints } from '#libs-shared'
+import { fantasy_positions } from '#constants'
 import chalk from 'chalk'
 import { Table } from 'console-table-printer'
 
@@ -54,7 +55,7 @@ const calculate_points = async ({
     .join('nfl_games', 'nfl_games.esbid', 'player_gamelogs.esbid')
     .where('nfl_games.year', year)
     .where('nfl_games.seas_type', 'REG')
-    .whereIn('player.pos', constants.positions)
+    .whereIn('player.pos', fantasy_positions)
     .join('player', 'player_gamelogs.pid', 'player.pid')
 
   if (week !== 'ALL') {
@@ -93,7 +94,7 @@ const calculate_points = async ({
   }
 
   const points_by_position = {}
-  for (const pos of constants.positions) {
+  for (const pos of fantasy_positions) {
     points_by_position[pos] = []
   }
 
@@ -105,7 +106,7 @@ const calculate_points = async ({
     points_by_position[player.pos].push(player.total_points)
   }
 
-  for (const pos of constants.positions) {
+  for (const pos of fantasy_positions) {
     points_by_position[pos] = points_by_position[pos].sort((a, b) => b - a)
   }
 

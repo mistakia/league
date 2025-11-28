@@ -12,7 +12,8 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogTitle from '@mui/material/DialogTitle'
 
 import Button from '@components/button'
-import { Roster, constants } from '@libs-shared'
+import { Roster } from '@libs-shared'
+import { roster_slot_types } from '@constants'
 
 export default class AddFreeAgentDialog extends React.Component {
   constructor(props) {
@@ -26,7 +27,7 @@ export default class AddFreeAgentDialog extends React.Component {
     if (practice) {
       props.rosterPlayers.practice.forEach((practicePlayerMap) => {
         const slot = practicePlayerMap.get('slot')
-        if (slot === constants.slots.PSP || slot === constants.slots.PSDP)
+        if (slot === roster_slot_types.PSP || slot === roster_slot_types.PSDP)
           return
         const r = new Roster({ roster: props.roster.toJS(), league })
         r.removePlayer(practicePlayerMap.get('pid'))
@@ -67,7 +68,7 @@ export default class AddFreeAgentDialog extends React.Component {
     this.props.add_free_agent({
       pid: player_map.get('pid'),
       release,
-      slot: practice ? constants.slots.PS : constants.slots.BENCH
+      slot: practice ? roster_slot_types.PS : roster_slot_types.BENCH
     })
     this.props.onClose()
   }

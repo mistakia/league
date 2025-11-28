@@ -12,7 +12,8 @@ import {
 } from '@core/selectors'
 import { auction_actions } from './actions'
 import { send } from '@core/ws'
-import { constants, get_eligible_slots } from '@libs-shared'
+import { get_eligible_slots } from '@libs-shared'
+import { current_season, fantasy_positions } from '@constants'
 import { beep } from '@core/audio'
 
 export function* optimize() {
@@ -65,11 +66,12 @@ export function* optimize() {
   })
   let starter_pids = Object.keys(result).filter(
     (r) =>
-      r.match(constants.player_pid_regex) || r.match(constants.team_pid_regex)
+      r.match(current_season.player_pid_regex) ||
+      r.match(current_season.team_pid_regex)
   )
 
   const roster_constraints = {}
-  for (const pos of constants.positions) {
+  for (const pos of fantasy_positions) {
     roster_constraints[pos] = {
       max: get_eligible_slots({ pos, league }).length,
       min: league[`s${pos.toLowerCase()}`]
@@ -109,7 +111,8 @@ export function* optimize() {
   worker.terminate()
   starter_pids = Object.keys(result).filter(
     (r) =>
-      r.match(constants.player_pid_regex) || r.match(constants.team_pid_regex)
+      r.match(current_season.player_pid_regex) ||
+      r.match(current_season.team_pid_regex)
   )
   yield put(
     auction_actions.setOptimalLineup({

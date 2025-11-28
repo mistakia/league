@@ -1,4 +1,10 @@
-import { constants, arrayToSentence, Roster } from '#libs-shared'
+import { arrayToSentence, Roster } from '#libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  player_tag_types,
+  transaction_types
+} from '#constants'
 import db from '#db'
 import getRoster from './get-roster.mjs'
 import getLeague from './get-league.mjs'
@@ -27,12 +33,12 @@ export default async function ({
     throw new Error('player no longer on original team roster')
   }
 
-  if (playerRosterRow.tag !== constants.tags.RESTRICTED_FREE_AGENCY) {
+  if (playerRosterRow.tag !== player_tag_types.RESTRICTED_FREE_AGENCY) {
     throw new Error('player no longer a restricted free agent')
   }
 
   const pos = playerRosterRow.pos
-  const slot = constants.slots.BENCH
+  const slot = roster_slot_types.BENCH
   const league = await getLeague({ lid })
   const rosterRow = await getRoster({ tid })
   const roster = new Roster({ roster: rosterRow, league })
@@ -91,13 +97,13 @@ export default async function ({
       rid: roster.uid,
       pid,
       pos,
-      slot: constants.slots.BENCH,
-      tag: constants.tags.RESTRICTED_FREE_AGENCY,
+      slot: roster_slot_types.BENCH,
+      tag: player_tag_types.RESTRICTED_FREE_AGENCY,
       extensions: 0,
       tid,
       lid,
-      year: constants.season.year,
-      week: constants.season.week
+      year: current_season.year,
+      week: current_season.week
     })
 
     // add conditional pick to original team
@@ -118,10 +124,10 @@ export default async function ({
     tid,
     lid,
     pid,
-    type: constants.transactions.RESTRICTED_FREE_AGENCY_TAG,
+    type: transaction_types.RESTRICTED_FREE_AGENCY_TAG,
     value: bid,
-    week: constants.season.week,
-    year: constants.season.year,
+    week: current_season.week,
+    year: current_season.year,
     timestamp: Math.round(Date.now() / 1000)
   }
   await db('transactions').insert(addTransaction)

@@ -3,7 +3,7 @@ import debug from 'debug'
 // import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -11,10 +11,10 @@ const log = debug('generate-rosters')
 debug.enable('generate-rosters')
 
 const run = async () => {
-  const is_new_season = constants.season.now > constants.season.end
+  const is_new_season = current_season.now > current_season.end
 
   // do not run once season is over unless generating roster for next season
-  if (constants.season.week >= constants.season.finalWeek && !is_new_season) {
+  if (current_season.week >= current_season.finalWeek && !is_new_season) {
     log('season over')
     return
   }
@@ -22,16 +22,16 @@ const run = async () => {
   // get list of hosted leagues
   const leagues = await db('leagues').where('hosted', 1)
 
-  const nextWeek = is_new_season ? 0 : constants.season.week + 1
+  const nextWeek = is_new_season ? 0 : current_season.week + 1
   const previousWeek = is_new_season
-    ? constants.season.finalWeek
-    : constants.season.week
+    ? current_season.finalWeek
+    : current_season.week
   const previousYear = is_new_season
-    ? constants.season.year - 1
-    : constants.season.year
+    ? current_season.year - 1
+    : current_season.year
 
   log(
-    `Generating rosters for ${constants.season.year} Week ${nextWeek} using ${previousYear} Week ${previousWeek}`
+    `Generating rosters for ${current_season.year} Week ${nextWeek} using ${previousYear} Week ${previousWeek}`
   )
 
   for (const league of leagues) {
@@ -53,7 +53,7 @@ const run = async () => {
         tid,
         lid,
         week: nextWeek,
-        year: constants.season.year
+        year: current_season.year
       }
       const rosterRows = await db('rosters').where(rosterData)
       let rid = rosterRows.length ? rosterRows[0].uid : null
@@ -85,7 +85,7 @@ const run = async () => {
         extensions: p.extensions, // Use previous week's value for new roster entries
         tid,
         lid,
-        year: constants.season.year,
+        year: current_season.year,
         week: nextWeek
       }))
 

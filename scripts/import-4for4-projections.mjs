@@ -8,7 +8,7 @@ import {
   report_job,
   four_for_four
 } from '#libs-server'
-import { constants } from '#libs-shared'
+import { current_season, external_data_sources } from '#constants'
 import db from '#db'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -47,17 +47,17 @@ const run = async ({
   dry_run = false
 }) => {
   // do not pull in any projections after the season has ended
-  if (constants.season.now.isAfter(constants.season.end)) {
+  if (current_season.now.isAfter(current_season.end)) {
     log('Season has ended, skipping')
     return
   }
 
-  const year = constants.season.year
-  const week = is_regular_season_projection ? 0 : constants.season.nfl_seas_week
+  const year = current_season.year
+  const week = is_regular_season_projection ? 0 : current_season.nfl_seas_week
   const seas_type =
     week === 0
       ? 'REG'
-      : constants.season.nfl_seas_type === 'POST'
+      : current_season.nfl_seas_type === 'POST'
         ? 'POST'
         : 'REG'
 
@@ -104,7 +104,7 @@ const run = async ({
       year,
       week,
       seas_type,
-      sourceid: constants.sources['4FOR4'],
+      sourceid: external_data_sources['4FOR4'],
       ...proj
     })
   }
@@ -126,7 +126,7 @@ const run = async ({
       .where({
         year,
         week,
-        sourceid: constants.sources['4FOR4'],
+        sourceid: external_data_sources['4FOR4'],
         seas_type
       })
       .whereNotIn(

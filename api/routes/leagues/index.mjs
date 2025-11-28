@@ -2,10 +2,10 @@ import express from 'express'
 
 import { getLeague, validators } from '#libs-server'
 import {
-  constants,
   generate_league_format_hash,
   generate_scoring_format_hash
 } from '#libs-shared'
+import { current_season } from '#constants'
 import {
   league_fields,
   league_format_fields,
@@ -179,7 +179,7 @@ router.put('/:leagueId', async (req, res) => {
     } else if (season_fields.includes(field)) {
       await db('seasons')
         .update({ [field]: value })
-        .where({ lid, year: constants.season.year })
+        .where({ lid, year: current_season.year })
     } else if (league_scoring_format_fields.includes(field)) {
       const scoring_format = generate_scoring_format_hash({
         ...league,
@@ -191,7 +191,7 @@ router.put('/:leagueId', async (req, res) => {
         .ignore()
       await db('seasons')
         .update({ scoring_format_hash: scoring_format.scoring_format_hash })
-        .where({ lid, year: constants.season.year })
+        .where({ lid, year: current_season.year })
     } else if (league_format_fields.includes(field)) {
       const league_format = generate_league_format_hash({
         ...league,
@@ -203,7 +203,7 @@ router.put('/:leagueId', async (req, res) => {
         .ignore()
       await db('seasons')
         .update({ league_format_hash: league_format.league_format_hash })
-        .where({ lid, year: constants.season.year })
+        .where({ lid, year: current_season.year })
     }
 
     // TODO create changelog

@@ -1,4 +1,4 @@
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 const get_default_params = ({ params = {} } = {}) => {
   let year = params.year || []
@@ -19,7 +19,7 @@ export const get_cache_info_for_fields_from_plays = ({ params = {} } = {}) => {
   // TODO factor in week
 
   if (year.length) {
-    if (year.includes(constants.season.year)) {
+    if (year.includes(current_season.year)) {
       return {
         cache_ttl: 1000 * 60 * 60 * 6, // 6 hours
         // TODO should expire before the next game starts

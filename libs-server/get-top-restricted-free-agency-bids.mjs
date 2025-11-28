@@ -1,5 +1,5 @@
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 // Define constants for better readability
 const ORIGINAL_TEAM_BID_BOOST_PERCENT = 0.2
@@ -20,7 +20,7 @@ export default async function get_top_restricted_free_agency_bids(leagueId) {
   const active_rfa_players = await db('restricted_free_agency_bids')
     .where({
       lid: leagueId,
-      year: constants.season.year
+      year: current_season.year
     })
     .whereNotNull('announced')
     .whereNotExists(function () {
@@ -29,7 +29,7 @@ export default async function get_top_restricted_free_agency_bids(leagueId) {
         .whereRaw('successful_bids.pid = restricted_free_agency_bids.pid')
         .where({
           'successful_bids.succ': true,
-          'successful_bids.year': constants.season.year
+          'successful_bids.year': current_season.year
         })
     })
 
@@ -46,7 +46,7 @@ export default async function get_top_restricted_free_agency_bids(leagueId) {
   )
     .where({
       lid: leagueId,
-      year: constants.season.year
+      year: current_season.year
     })
     .whereIn('pid', active_rfa_pids)
     .whereNull('cancelled')

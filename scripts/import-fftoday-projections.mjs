@@ -4,7 +4,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season, external_data_sources } from '#constants'
 import { is_main, find_player_row, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -118,14 +118,14 @@ const run = async ({
   is_regular_season_projection = false
 } = {}) => {
   // do not pull in any projections after the season has ended
-  if (constants.season.week > constants.season.nflFinalWeek) {
+  if (current_season.week > current_season.nflFinalWeek) {
     return
   }
 
-  const year = constants.season.year
+  const year = current_season.year
   const week = is_regular_season_projection
     ? 0
-    : Math.max(constants.season.week, 1)
+    : Math.max(current_season.week, 1)
 
   const missing = []
   const items = []
@@ -184,7 +184,7 @@ const run = async ({
       week,
       year,
       seas_type: 'REG',
-      sourceid: constants.sources.FFTODAY,
+      sourceid: external_data_sources.FFTODAY,
       ...data
     })
   }
@@ -213,7 +213,7 @@ const run = async ({
       .where({
         year,
         week,
-        sourceid: constants.sources.FFTODAY,
+        sourceid: external_data_sources.FFTODAY,
         seas_type: 'REG'
       })
       .whereNotIn(

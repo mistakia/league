@@ -5,7 +5,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import is_main from '#libs-server/is-main.mjs'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { named_scoring_formats } from '#libs-shared/named-scoring-formats-generated.mjs'
 import { named_league_formats } from '#libs-shared/named-league-formats-generated.mjs'
 
@@ -281,7 +281,7 @@ const script = async () => {
         hash: options.hash,
         lid: options.lid,
         format: options.format,
-        year: constants.season.year
+        year: current_season.year
       })
 
       await process_single_format(format_info, options)

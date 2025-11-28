@@ -1,12 +1,12 @@
 import get_eligible_slots from './get-eligible-slots.mjs'
-import * as constants from './constants.mjs'
+import { fantasy_positions } from '#constants'
 
 const getPositionCount = (players) =>
   players.reduce((acc, e) => acc.set(e, (acc.get(e) || 0) + 1), new Map())
 
 export default function ({ positions, league }) {
   const rosterConstraints = {}
-  for (const pos of constants.positions) {
+  for (const pos of fantasy_positions) {
     rosterConstraints[pos] = {
       max: get_eligible_slots({ pos, league }).length,
       min: league[`s${pos.toLowerCase()}`]

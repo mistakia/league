@@ -1,5 +1,5 @@
 import { redis_cache } from './redis_adapter.mjs'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 /**
  * Redis key structure for slow mode auction state
@@ -19,7 +19,7 @@ const REDIS_KEY_PREFIX = 'auction_slow_mode'
  * @param {number} year - Season year (optional, defaults to current)
  * @returns {string} Redis key
  */
-const get_nomination_key = (lid, pid, year = constants.season.year) =>
+const get_nomination_key = (lid, pid, year = current_season.year) =>
   `${REDIS_KEY_PREFIX}:${year}:${lid}:${pid}`
 
 /**
@@ -29,7 +29,7 @@ const get_nomination_key = (lid, pid, year = constants.season.year) =>
  * @param {number} year - Season year (optional, defaults to current)
  * @returns {string} Redis key
  */
-const get_passes_key = (lid, pid, year = constants.season.year) =>
+const get_passes_key = (lid, pid, year = current_season.year) =>
   `${REDIS_KEY_PREFIX}_passes:${year}:${lid}:${pid}`
 
 /**
@@ -39,7 +39,7 @@ const get_passes_key = (lid, pid, year = constants.season.year) =>
  * @param {number} year - Season year (optional, defaults to current)
  * @returns {string} Redis key
  */
-const get_eligible_key = (lid, pid, year = constants.season.year) =>
+const get_eligible_key = (lid, pid, year = current_season.year) =>
   `${REDIS_KEY_PREFIX}_eligible:${year}:${lid}:${pid}`
 
 /**
@@ -324,7 +324,7 @@ export const clear_slow_mode_nomination = async (lid, pid) => {
 export const get_slow_mode_nomination_state = async ({
   lid,
   pid,
-  year = constants.season.year
+  year = current_season.year
 }) => {
   try {
     if (!lid || !pid) {

@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 /**
  * Build a selections index from a filtered list of wagers.
@@ -27,7 +27,7 @@ export const build_selection_index = ({ wagers }) => {
           max_potential_payout: 0,
           week: dayjs(selection.start_time)
             .subtract(2, 'day')
-            .diff(constants.season.regular_season_start, 'weeks')
+            .diff(current_season.regular_season_start, 'weeks')
         }
       }
 
