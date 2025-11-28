@@ -16,6 +16,7 @@ import './player-name-expanded.styl'
 import {
   current_season,
   roster_slot_types,
+  player_nfl_status,
   nfl_player_status_abbreviations,
   nfl_player_status_descriptions
 } from '@constants'
@@ -111,20 +112,20 @@ class PlayerNameExpanded extends Player {
         ? player_map.get('pname')
         : `${player_map.get('fname', '')} ${player_map.get('lname', '')}`
 
-    const player_nfl_status = player_map.get('nfl_status')
+    const player_nfl_status_value = player_map.get('nfl_status')
     const player_game_status = player_map.get('game_status')
     const slot = player_map.get('slot')
 
     // game status should supersede nfl status
     const player_status_label =
       nfl_player_status_abbreviations[player_game_status] ||
-      nfl_player_status_abbreviations[player_nfl_status]
+      nfl_player_status_abbreviations[player_nfl_status_value]
     const player_status_description =
       nfl_player_status_descriptions[player_game_status] ||
-      nfl_player_status_descriptions[player_nfl_status]
+      nfl_player_status_descriptions[player_nfl_status_value]
     const player_has_non_active_status = Boolean(
-      (nfl_player_status_abbreviations[player_nfl_status] &&
-        player_nfl_status !== player_nfl_status.ACTIVE) ||
+      (nfl_player_status_abbreviations[player_nfl_status_value] &&
+        player_nfl_status_value !== player_nfl_status.ACTIVE) ||
         (nfl_player_status_abbreviations[player_game_status] &&
           player_game_status !== player_nfl_status.ACTIVE)
     )
