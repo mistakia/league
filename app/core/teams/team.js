@@ -1,5 +1,5 @@
 import { Record, List, Map } from 'immutable'
-import { current_season } from '@constants'
+import { create_empty_fantasy_team_stats } from '@constants'
 
 export const Team = new Record({
   uid: null,
@@ -18,7 +18,7 @@ export const Team = new Record({
   teamvoice: 0,
   leaguetext: 0,
   picks: new List(),
-  stats: new Map(current_season.createFantasyTeamStats()),
+  stats: new Map(create_empty_fantasy_team_stats()),
 
   playoff_odds: null,
   division_odds: null,
