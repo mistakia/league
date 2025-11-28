@@ -34,7 +34,8 @@ export default class ActivateConfirmation extends React.Component {
     // Check if player being activated is from practice squad (signed slots)
     const player_slot = player_map.get('slot')
     this._isFromPracticeSquad =
-      player_slot === roster_slot_types.PS || player_slot === roster_slot_types.PSP
+      player_slot === roster_slot_types.PS ||
+      player_slot === roster_slot_types.PSP
 
     // Use psquad-eligible active players for deactivation candidates (filtered in index.js)
     this._deactivationCandidates = this._isFromPracticeSquad

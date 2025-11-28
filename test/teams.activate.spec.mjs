@@ -167,9 +167,7 @@ describe('API /teams - activate', function () {
       res.body.tid.should.equal(teamId)
       res.body.pid.should.equal(activate_player.pid)
       res.body.slot.should.equal(roster_slot_types.BENCH)
-      res.body.transaction.type.should.equal(
-        transaction_types.ROSTER_ACTIVATE
-      )
+      res.body.transaction.type.should.equal(transaction_types.ROSTER_ACTIVATE)
       res.body.transaction.value.should.equal(activate_value)
 
       // Verify activated player is now on bench
