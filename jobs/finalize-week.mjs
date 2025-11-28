@@ -1,5 +1,5 @@
 import dayjs from 'dayjs'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import db from '#db'
 import { is_main, report_job } from '#libs-server'
 import debug from 'debug'
@@ -23,9 +23,7 @@ const clear_live_plays = async () => {
 const finalize_week = async () => {
   const day = dayjs().day()
   const week = Math.max(
-    [2, 3].includes(day)
-      ? constants.current_season.week - 1
-      : constants.current_season.week,
+    [2, 3].includes(day) ? current_season.week - 1 : current_season.week,
     1
   )
 
@@ -38,14 +36,14 @@ const finalize_week = async () => {
 
   const lid = 1
   await process_matchups({ lid })
-  await process_playoffs({ lid, year: constants.current_season.year })
+  await process_playoffs({ lid, year: current_season.year })
   await calculate_league_careerlogs({ lid })
   await clear_live_plays()
 
   // Process market results after stats are updated
   log(`processing market results for week ${week}`)
   await process_market_results({
-    year: constants.current_season.year,
+    year: current_season.year,
     week,
     missing_only: false
   })

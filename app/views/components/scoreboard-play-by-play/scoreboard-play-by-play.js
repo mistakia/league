@@ -34,17 +34,20 @@ export default function ScoreboardPlayByPlay({ plays, mid }) {
     }
   }, [mid, ref])
 
-  const PlayRow = ({ index, key, parent, style }) => (
-    <CellMeasurer
-      cache={cell_cache}
-      columnIndex={0}
-      key={key}
-      parent={parent}
-      rowIndex={index}
-    >
-      <ScoreboardPlay {...{ key, play: plays.get(index), style }} />
-    </CellMeasurer>
-  )
+  const PlayRow = ({ index, key, parent, style }) => {
+    const play = plays.get(index)
+    return (
+      <CellMeasurer
+        cache={cell_cache}
+        columnIndex={0}
+        key={key}
+        parent={parent}
+        rowIndex={index}
+      >
+        <ScoreboardPlay play={play} style={style} />
+      </CellMeasurer>
+    )
+  }
 
   PlayRow.propTypes = {
     index: PropTypes.number,

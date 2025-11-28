@@ -15,6 +15,7 @@ import './stats.styl'
 import {
   current_season,
   roster_slot_types,
+  roster_slot_display_names,
   fantasy_positions,
   create_empty_fantasy_team_stats
 } from '@constants'
@@ -196,10 +197,7 @@ const season_fields = {
 }
 
 function SummaryRow({ team, percentiles, year, key }) {
-  const stats = team.get(
-    'stats',
-    new Map(create_empty_fantasy_team_stats())
-  )
+  const stats = team.get('stats', new Map(create_empty_fantasy_team_stats()))
 
   const items = Object.entries(season_fields).map(([key, value]) => {
     const fields = Object.entries(value).map(([field, { fixed }]) => (
@@ -337,7 +335,7 @@ export default function StatsPage({
   for (const slot of slots) {
     slot_headers.push(
       <div key={`slot_${slot}`} className='table__cell metric'>
-        {roster_slot_types.slotName[roster_slot_types[slot]]}
+        {roster_slot_display_names[roster_slot_types[slot]]}
       </div>
     )
     slot_headers.push(

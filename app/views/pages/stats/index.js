@@ -3,10 +3,7 @@ import { createSelector } from 'reselect'
 import { Map } from 'immutable'
 
 import { team_actions } from '@core/teams'
-import {
-  create_empty_fantasy_team_stats,
-  fantasy_team_stats
-} from '@constants'
+import { create_empty_fantasy_team_stats, fantasy_team_stats } from '@constants'
 import {
   get_app,
   get_current_league,

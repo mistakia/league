@@ -15,7 +15,7 @@ import Timestamp from '@components/timestamp'
 import TransactionRow from '@components/transaction-row'
 
 import './selected-player-transactions.styl'
-import { transaction_types } from '@constants'
+import { transaction_type_display_names } from '@constants'
 
 export default function SelectedPlayerTransactions({
   player_map,
@@ -86,7 +86,7 @@ export default function SelectedPlayerTransactions({
           sx={{ padding: '12px 16px', borderBottom: '1px solid #f0f0f0' }}
         >
           <span style={{ fontWeight: '500', color: '#444' }}>
-            {transaction_types.transactionsDetail[transaction.type]}
+            {transaction_type_display_names[transaction.type]}
           </span>
         </TableCell>
         <TableCell

@@ -1,4 +1,5 @@
-import { constants, isReserveEligible, isReserveCovEligible } from './index.mjs'
+import { isReserveEligible, isReserveCovEligible } from './index.mjs'
+import { current_season } from '#constants'
 
 export default function get_reserve_eligibility_from_player_map({
   player_map
@@ -24,8 +25,8 @@ export default function get_reserve_eligibility_from_player_map({
       injury_status,
       prior_week_inactive,
       prior_week_ruled_out,
-      week: constants.current_season.week,
-      is_regular_season: constants.current_season.isRegularSeason,
+      week: current_season.week,
+      is_regular_season: current_season.isRegularSeason,
       game_day,
       practice
     })

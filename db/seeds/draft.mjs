@@ -1,4 +1,10 @@
-import { constants, Roster } from '#libs-shared'
+import { Roster } from '#libs-shared'
+import {
+  current_season,
+  fantasy_positions,
+  roster_slot_types,
+  transaction_types
+} from '#constants'
 import { getRoster, getLeague } from '#libs-server'
 
 export default async function (knex) {
@@ -6,15 +12,15 @@ export default async function (knex) {
   const league = await getLeague({ lid })
   const players = await knex('player')
     .orderByRaw('RANDOM()')
-    .whereIn('pos', constants.fantasy_positions)
+    .whereIn('pos', fantasy_positions)
 
   await knex('rosters_players').del()
 
   let i = 1
   let roster = await getRoster({
     tid: i,
-    week: constants.current_season.week,
-    year: constants.current_season.year
+    week: current_season.week,
+    year: current_season.year
   })
   let r = new Roster({ roster, league })
   while (!r.isFull) {
@@ -30,14 +36,14 @@ export default async function (knex) {
     }
 
     await knex('rosters_players').insert({
-      slot: constants.roster_slot_types.BENCH,
+      slot: roster_slot_types.BENCH,
       pid: player.pid,
       pos: player.pos1,
       rid: roster.uid,
       tid: roster.tid,
       lid: league.uid,
-      year: constants.current_season.year,
-      week: constants.current_season.week
+      year: current_season.year,
+      week: current_season.week
     })
     const value = Math.floor(Math.random() * Math.min(r.availableCap, 60))
     await knex('transactions').insert([
@@ -46,10 +52,10 @@ export default async function (knex) {
         tid: roster.tid,
         lid: league.uid,
         pid: player.pid,
-        type: constants.transaction_types.AUCTION_BID,
+        type: transaction_types.AUCTION_BID,
         value,
-        week: constants.current_season.week,
-        year: constants.current_season.year,
+        week: current_season.week,
+        year: current_season.year,
         timestamp: Math.round(Date.now() / 1000)
       },
       {
@@ -57,10 +63,10 @@ export default async function (knex) {
         tid: roster.tid,
         lid: league.uid,
         pid: player.pid,
-        type: constants.transaction_types.AUCTION_PROCESSED,
+        type: transaction_types.AUCTION_PROCESSED,
         value,
-        week: constants.current_season.week,
-        year: constants.current_season.year,
+        week: current_season.week,
+        year: current_season.year,
         timestamp: Math.round(Date.now() / 1000)
       }
     ])
@@ -72,8 +78,8 @@ export default async function (knex) {
     }
     roster = await getRoster({
       tid: i,
-      week: constants.current_season.week,
-      year: constants.current_season.year
+      week: current_season.week,
+      year: current_season.year
     })
     r = new Roster({ roster, league })
   }

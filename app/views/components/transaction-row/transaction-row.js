@@ -6,7 +6,7 @@ import TeamName from '@components/team-name'
 import Timestamp from '@components/timestamp'
 
 import './transaction-row.styl'
-import { transaction_types } from '@constants'
+import { transaction_types, transaction_type_display_names } from '@constants'
 
 export default function TransactionRow({
   transaction,
@@ -26,7 +26,7 @@ export default function TransactionRow({
 
   const transaction_type_content = (
     <>
-      {transaction_types.transactionsDetail[transaction.type]}
+      {transaction_type_display_names[transaction.type]}
       {is_draft_transaction && (
         <>
           {transaction.pick && (

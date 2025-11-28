@@ -4,7 +4,7 @@ import debug from 'debug'
 
 import db from '#db'
 // import config from '#config'
-import { constants } from '#libs-shared'
+import { nfl_team_abbreviations } from '#constants'
 import { is_main } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -18,7 +18,7 @@ const seed_nfl_teams = async () => {
   // get all tables with pid columns
   const player_rows_teams = await db('player').whereIn(
     'pid',
-    constants.nfl_team_abbreviations
+    nfl_team_abbreviations
   )
 
   log(`loaded ${player_rows_teams.length} player rows`)

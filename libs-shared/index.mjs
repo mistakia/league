@@ -1,5 +1,5 @@
-import * as constants from '#constants'
 import getDraftWindow from './get-draft-window.mjs'
+import { current_season } from '#constants'
 
 export * as common_column_params from './common-column-params.mjs'
 export * as data_views_constants from './data-views-constants.mjs'
@@ -116,7 +116,7 @@ export const debounce = (callback, wait) => {
 }
 
 export const isDraftWindowOpen = (params) =>
-  constants.current_season.now.isAfter(getDraftWindow(params))
+  current_season.now.isAfter(getDraftWindow(params))
 
 export const uuidv4 = () =>
   ([1e7] + -1e3 + -4e3 + -8e3 + -1e11).replace(/[018]/g, (c) =>
@@ -140,4 +140,4 @@ export const get_last_consecutive_pick = (draft_picks = []) => {
   return last_consecutive_pick
 }
 
-export { constants, getDraftWindow }
+export { getDraftWindow }
