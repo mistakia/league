@@ -3,7 +3,7 @@ import debug from 'debug'
 import db from '#db'
 import * as cache from './cache.mjs'
 import { constants } from '#libs-shared'
-import fetch_with_retry from './fetch-with-retry.mjs'
+import { fetch_with_retry } from './proxy-manager.mjs'
 
 const log = debug('fantasypros')
 
@@ -40,11 +40,11 @@ export const get_fantasypros_rankings = async ({
   )
   const url = `${fantasypros_config.api_url}/${year}/consensus-rankings?type=${ranking_type}&scoring=${fantasypros_scoring_type}&position=${fantasypros_position_type}&week=${week}&experts=available`
   log(`Fetching ${url}`)
-  const res = await fetch_with_retry({
+  const data = await fetch_with_retry({
     url,
-    headers: fantasypros_config.headers
+    headers: fantasypros_config.headers,
+    response_type: 'json'
   })
-  const data = await res.json()
 
   if (data && data.players) {
     await cache.set({ key: cache_key, value: data })

@@ -101,8 +101,11 @@ export { default as report_error } from './report-error.mjs'
 export * as selection_result from './selection-result.mjs'
 export { default as format_market_selection_id } from './format-market-selection-id.mjs'
 export * as fanatics from './fanatics.mjs'
-export { default as fetch_with_retry } from './fetch-with-retry.mjs'
-export { default as fetch_with_proxy, proxy_manager } from './proxy-manager.mjs'
+export {
+  fetch_with_retry,
+  fetch_with_proxy,
+  proxy_manager
+} from './proxy-manager.mjs'
 export { default as handle_season_args_for_script } from './handle-season-args-for-script.mjs'
 export {
   load_data_view_test_queries,
