@@ -4,3 +4,4 @@
 [submodule "private"]
 	path = private
 	url = git@github.com:mistakia/league-private.git
+	branch = main
