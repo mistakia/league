@@ -10,17 +10,17 @@ import { get_draftkings_config } from './draftkings-config.mjs'
 const log = debug('draft-kings:api')
 const api_log = debug('draft-kings:api:request')
 
-const draftkings_fetch_with_retry = async (url, options) => {
+const draftkings_fetch_with_retry = async (url, { headers } = {}) => {
   api_log(`DK API REQUEST: ${url}`)
-  const response = await fetch_with_retry(url, options, {
+  return fetch_with_retry({
+    url,
+    headers,
     max_retries: 3,
     use_proxy: true,
-    exponential_backoff: true,
     initial_delay: 1000,
-    max_delay: 10000
+    max_delay: 10000,
+    response_type: 'json'
   })
-
-  return await response.json()
 }
 
 export const get_league_data_v1 = async ({ leagueId = 88808 } = {}) => {
