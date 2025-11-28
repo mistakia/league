@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -35,7 +35,7 @@ const PARTITIONED_TABLES = [
 ]
 
 const create_season_partitions = async ({
-  year = constants.season.year,
+  year = current_season.year,
   dry_run = false
 } = {}) => {
   log(`Checking for missing partitions for year ${year}`)
@@ -219,7 +219,7 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    const year = argv.year ? Number(argv.year) : constants.season.year
+    const year = argv.year ? Number(argv.year) : current_season.year
     const dry_run = argv.dry || false
 
     await create_season_partitions({ year, dry_run })

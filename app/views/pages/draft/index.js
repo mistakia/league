@@ -1,8 +1,8 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
+import { current_season } from '@constants'
 import {
-  constants,
   getDraftWindow,
   getDraftDates,
   get_last_consecutive_pick
@@ -57,7 +57,7 @@ const map_state_to_props = createSelector(
       : null
 
     const isWindowOpen =
-      nextPick && constants.season.now.isAfter(nextPick.draftWindow)
+      nextPick && current_season.now.isAfter(nextPick.draftWindow)
 
     let is_draft_complete = false
     if (last_pick) {
@@ -70,7 +70,7 @@ const map_state_to_props = createSelector(
         last_selection_timestamp: last_pick.selection_timestamp
       })
 
-      is_draft_complete = constants.season.now.isAfter(draftDates.draftEnd)
+      is_draft_complete = current_season.now.isAfter(draftDates.draftEnd)
     }
 
     return {

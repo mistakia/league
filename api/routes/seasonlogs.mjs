@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 const router = express.Router()
 
@@ -51,7 +51,7 @@ const router = express.Router()
 router.get('/teams', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
-    const year = req.query.year || constants.season.year
+    const year = req.query.year || current_season.year
     const { leagueId } = req.query
 
     const query = db('nfl_team_seasonlogs')

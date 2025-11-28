@@ -3,6 +3,7 @@ import { createSelector } from 'reselect'
 import { Map } from 'immutable'
 
 import { team_actions } from '@core/teams'
+import { current_season } from '@constants'
 import {
   get_app,
   get_current_league,
@@ -10,7 +11,7 @@ import {
   get_league_user_historical_ranks
 } from '@core/selectors'
 import { league_careerlogs_actions } from '@core/league-careerlogs'
-import { constants, calculatePercentiles } from '@libs-shared'
+import { calculatePercentiles } from '@libs-shared'
 
 import StatsPage from './stats'
 
@@ -31,7 +32,7 @@ const map_state_to_props = createSelector(
     })
 
     const default_team_stats = new Map({
-      ...constants.createFantasyTeamStats(),
+      ...current_season.createFantasyTeamStats(),
       all_play_win_pct: 0
     })
     const year = app.year
@@ -41,7 +42,7 @@ const map_state_to_props = createSelector(
         .map((t) => t.get('stats', default_team_stats))
         .toList()
         .toJS(),
-      stats: [...constants.fantasyTeamStats, 'all_play_win_pct']
+      stats: [...current_season.fantasyTeamStats, 'all_play_win_pct']
     })
 
     const careerlog_fields = [

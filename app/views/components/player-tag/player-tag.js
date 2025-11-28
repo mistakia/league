@@ -2,7 +2,7 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import PlayerLabel from '@components/player-label'
 
-import { constants } from '@libs-shared'
+import { player_tag_types } from '@constants'
 
 export default class PlayerTag extends React.Component {
   render() {
@@ -16,13 +16,13 @@ export default class PlayerTag extends React.Component {
     }
 
     switch (tag) {
-      case constants.tags.FRANCHISE:
+      case player_tag_types.FRANCHISE:
         return <PlayerLabel label='F' type='tag' description='Franchise Tag' />
 
-      case constants.tags.ROOKIE:
+      case player_tag_types.ROOKIE:
         return <PlayerLabel label='R' type='tag' description='Rookie Tag' />
 
-      case constants.tags.RESTRICTED_FREE_AGENCY:
+      case player_tag_types.RESTRICTED_FREE_AGENCY:
         return (
           <PlayerLabel
             label='RFA'

@@ -1,5 +1,5 @@
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 export default async function (waiver_id) {
   if (!waiver_id) {
@@ -20,7 +20,7 @@ export default async function (waiver_id) {
     )
     .join('teams', 'waivers.tid', 'teams.uid')
     .where('waivers.uid', waiver_id)
-    .where('teams.year', constants.season.year)
+    .where('teams.year', current_season.year)
     .first()
 
   if (!waiver) {

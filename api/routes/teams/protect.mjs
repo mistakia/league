@@ -1,6 +1,11 @@
 import express from 'express'
 
-import { constants, Roster } from '#libs-shared'
+import { Roster } from '#libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  transaction_types
+} from '#constants'
 import {
   getRoster,
   getLeague,
@@ -125,7 +130,7 @@ router.post('/?', async (req, res) => {
     const rosterRow = await getRoster({ tid })
     const roster = new Roster({ roster: rosterRow, league })
 
-    if (!constants.season.isRegularSeason) {
+    if (!current_season.isRegularSeason) {
       return res
         .status(400)
         .send({ error: 'not permitted during the offseason' })
@@ -144,8 +149,8 @@ router.post('/?', async (req, res) => {
 
     // make sure player is not already protected
     if (
-      roster_player.slot === constants.slots.PSP ||
-      roster_player.slot === constants.slots.PSDP
+      roster_player.slot === roster_slot_types.PSP ||
+      roster_player.slot === roster_slot_types.PSDP
     ) {
       return res.status(400).send({ error: 'player is already protected' })
     }
@@ -171,9 +176,9 @@ router.post('/?', async (req, res) => {
     )
 
     const slot =
-      roster_player.slot === constants.slots.PS
-        ? constants.slots.PSP
-        : constants.slots.PSDP
+      roster_player.slot === roster_slot_types.PS
+        ? roster_slot_types.PSP
+        : roster_slot_types.PSDP
     await db('rosters_players').update({ slot }).where({
       rid: rosterRow.uid,
       pid
@@ -184,10 +189,10 @@ router.post('/?', async (req, res) => {
       tid,
       lid: leagueId,
       pid,
-      type: constants.transactions.PRACTICE_PROTECTED,
+      type: transaction_types.PRACTICE_PROTECTED,
       value: lastTransaction.value,
-      week: constants.season.week,
-      year: constants.season.year,
+      week: current_season.week,
+      year: current_season.year,
       timestamp: Math.round(Date.now() / 1000)
     }
     await db('transactions').insert(transaction)
@@ -208,7 +213,7 @@ router.post('/?', async (req, res) => {
 
     const teams = await db('teams').where({
       uid: tid,
-      year: constants.season.year
+      year: current_season.year
     })
     const team = teams[0]
 

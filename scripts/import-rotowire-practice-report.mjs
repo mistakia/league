@@ -1,11 +1,8 @@
 import debug from 'debug'
 
 import db from '#db'
-import {
-  constants,
-  format_nfl_status,
-  format_nfl_injury_status
-} from '#libs-shared'
+import { format_nfl_status, format_nfl_injury_status } from '#libs-shared'
+import { current_season } from '#constants'
 import {
   is_main,
   find_player_row,
@@ -18,7 +15,7 @@ const log = debug('import:practice-report')
 debug.enable('import:practice-report,get-player,fetch')
 
 const url = 'https://www.rotowire.com/football/tables/practice-report.php?team='
-const { week, year } = constants.season
+const { week, year } = current_season
 const getReport = (item) => {
   const data = {
     status: item.status,
@@ -54,9 +51,9 @@ const getReport = (item) => {
 const run = async () => {
   // do not pull in reports outside of the NFL season
   if (
-    !constants.season.now.isBetween(
-      constants.season.regular_season_start,
-      constants.season.end
+    !current_season.now.isBetween(
+      current_season.regular_season_start,
+      current_season.end
     )
   ) {
     return

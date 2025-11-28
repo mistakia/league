@@ -1,4 +1,4 @@
-import { constants } from '#libs-shared'
+import { transaction_types } from '#constants'
 import db from '#db'
 
 export default async function ({ lid, pid, tid, year, week }) {
@@ -25,13 +25,13 @@ export default async function ({ lid, pid, tid, year, week }) {
   const transactions = await query
 
   const types = [
-    constants.transactions.ROSTER_ADD,
-    constants.transactions.TRADE,
-    constants.transactions.POACHED,
-    constants.transactions.AUCTION_PROCESSED,
-    constants.transactions.DRAFT,
-    constants.transactions.PRACTICE_ADD,
-    constants.transactions.RESTRICTED_FREE_AGENCY_TAG
+    transaction_types.ROSTER_ADD,
+    transaction_types.TRADE,
+    transaction_types.POACHED,
+    transaction_types.AUCTION_PROCESSED,
+    transaction_types.DRAFT,
+    transaction_types.PRACTICE_ADD,
+    transaction_types.RESTRICTED_FREE_AGENCY_TAG
   ]
 
   return transactions.find((t) => types.includes(t.type))

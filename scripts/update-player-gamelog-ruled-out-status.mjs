@@ -41,7 +41,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import {
   is_main,
   report_job,
@@ -314,7 +314,7 @@ const apply_updates = async (updates, dry_run) => {
 // ----------------------------
 
 const run = async ({
-  year = constants.season.year,
+  year = current_season.year,
   week = null,
   seas_type = 'REG',
   dry_run = false
@@ -322,7 +322,7 @@ const run = async ({
   // Default to most recent completed week when no week specified
   // This script runs on Tuesday to process the prior week that just completed
   if (week === null) {
-    week = constants.season.last_week_with_stats
+    week = current_season.last_week_with_stats
   }
 
   log(
@@ -405,7 +405,7 @@ const main = async () => {
       script_args: {
         dry_run: argv.dry
       },
-      default_week: constants.season.last_week_with_stats, // Default to most recent completed week
+      default_week: current_season.last_week_with_stats, // Default to most recent completed week
       year_query: ({ seas_type = 'REG' }) =>
         db('nfl_games')
           .select('year')

@@ -3,7 +3,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, groupBy } from '#libs-shared'
+import { groupBy } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -16,7 +17,7 @@ debug.enable('calculate:franchise-tags')
 
 const average = (array) => array.reduce((a, b) => a + b) / array.length
 
-const run = async ({ year = constants.season.year, dry_run = false } = {}) => {
+const run = async ({ year = current_season.year, dry_run = false } = {}) => {
   const seasons = await db('seasons')
     .select('seasons.*')
     .join('leagues', 'leagues.uid', '=', 'seasons.lid')

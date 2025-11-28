@@ -1,18 +1,18 @@
 import dayjs from 'dayjs'
 import isBetween from 'dayjs/plugin/isBetween.js'
-import * as constants from './constants.mjs'
+import { current_season } from '#constants'
 import get_next_tuesday_3pm from './get-next-tuesday-3pm.mjs'
 
 dayjs.extend(isBetween)
 
 export default function (submitted) {
   const submitted_timestamp = dayjs.unix(submitted)
-  if (constants.season.isOffseason) {
+  if (current_season.isOffseason) {
     return submitted_timestamp.add('48', 'hours')
   }
 
   // if submitted between thursday 6pm and sunday 3pm — set to tuesday at 3pm
-  const { now } = constants.season
+  const { now } = current_season
   const is_before_tuesday_cutoff = now.isBefore(
     now.day(2).startOf('day').hour(15)
   )

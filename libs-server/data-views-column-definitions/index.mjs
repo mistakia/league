@@ -1,5 +1,5 @@
-import { constants } from '#libs-shared'
 import { getLeague } from '#libs-server'
+import { current_season, roster_slot_types } from '#constants'
 import { create_static_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 
 import db from '#db'
@@ -33,7 +33,7 @@ import player_pfr_season_value_column_definitions from './player-pfr-season-valu
 import player_seasonlogs_column_definitions from './player-seasonlogs-column-definitions.mjs'
 
 // TODO include RESERVE_LONG_TERM
-const player_league_roster_status_select = `CASE WHEN rosters_players.slot = ${constants.slots.RESERVE_SHORT_TERM} THEN 'injured_reserve' WHEN rosters_players.slot = ${constants.slots.PS} THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END`
+const player_league_roster_status_select = `CASE WHEN rosters_players.slot = ${roster_slot_types.RESERVE_SHORT_TERM} THEN 'injured_reserve' WHEN rosters_players.slot = ${roster_slot_types.PS} THEN 'practice_squad' WHEN rosters_players.slot IS NULL THEN 'free_agent' ELSE 'active_roster' END`
 
 export default {
   ...player_projected_column_definitions,
@@ -80,7 +80,7 @@ export default {
       'rosters_players.tag'
     ],
     join: async ({ query, params = {}, data_view_options = {} }) => {
-      const { year = constants.season.year, lid = 1 } = params
+      const { year = current_season.year, lid = 1 } = params
       let week = params.week
       if (!week) {
         const league = await getLeague({ lid, year })
@@ -89,11 +89,11 @@ export default {
             ? Math.max(...league.championship_round)
             : league.championship_round
           week = Math.min(
-            constants.season.week,
-            championship_round || constants.season.finalWeek
+            current_season.week,
+            championship_round || current_season.finalWeek
           )
         } else {
-          week = Math.min(constants.season.week, constants.season.finalWeek)
+          week = Math.min(current_season.week, current_season.finalWeek)
         }
       }
 

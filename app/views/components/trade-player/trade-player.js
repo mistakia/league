@@ -1,15 +1,15 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { constants } from '@libs-shared'
 import PlayerNameExpanded from '@components/player-name-expanded'
 
 import './trade-player.styl'
+import { current_season } from '@constants'
 
 export default class TradePlayer extends React.Component {
   render = () => {
     const { player_map } = this.props
-    const pts_added_type = constants.isOffseason ? '0' : 'ros'
+    const pts_added_type = current_season.isOffseason ? '0' : 'ros'
     return (
       <div className='trade__player'>
         <div className='trade__player-name'>

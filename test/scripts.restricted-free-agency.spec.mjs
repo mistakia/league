@@ -7,7 +7,8 @@ import timezone from 'dayjs/plugin/timezone.js'
 
 import knex from '#db'
 import league from '#db/seeds/league.mjs'
-import { constants, Roster } from '#libs-shared'
+import { current_season, transaction_types, player_tag_types } from '#constants'
+import { Roster } from '#libs-shared'
 import { getLeague, getRoster } from '#libs-server'
 import {
   selectPlayer,
@@ -26,7 +27,7 @@ process.env.NODE_ENV = 'test'
 
 chai.should()
 const expect = chai.expect
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 
 describe('SCRIPTS - restricted free agency bids', function () {
   const leagueId = 1
@@ -52,7 +53,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
       // Set restricted_free_agency_announcement_hour and processing_hour
       await knex('seasons')
         .update({
-          year: constants.season.year,
+          year: current_season.year,
           tran_start: tran_date,
           tran_end: regular_season_start.subtract('1', 'month').unix(),
           ext_date,
@@ -84,7 +85,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
         player,
         teamId: team_id,
         userId: user_id,
-        tag: constants.tags.RESTRICTED_FREE_AGENCY
+        tag: player_tag_types.RESTRICTED_FREE_AGENCY
       })
 
       // Get the current mocked timestamp
@@ -98,7 +99,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
         userid: user_id,
         bid: value,
         tid: team_id,
-        year: constants.season.year,
+        year: current_season.year,
         player_tid: team_id,
         lid: leagueId,
         submitted: announcement_time,
@@ -138,7 +139,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
         teamId: team_id,
         userId: 1,
         value,
-        type: constants.transactions.RESTRICTED_FREE_AGENCY_TAG
+        type: transaction_types.RESTRICTED_FREE_AGENCY_TAG
       })
     })
 
@@ -165,7 +166,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
         teamId: team_id,
         userId: user_id,
         value: 20,
-        tag: constants.tags.RESTRICTED_FREE_AGENCY
+        tag: player_tag_types.RESTRICTED_FREE_AGENCY
       })
 
       const players = [player2, player3, player4]
@@ -206,7 +207,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
           userid: user_id,
           bid,
           tid: team_id,
-          year: constants.season.year,
+          year: current_season.year,
           player_tid: team_id,
           lid: leagueId,
           submitted: announcement_time,
@@ -259,7 +260,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
         teamId: team_id,
         userId: 1,
         value: bid,
-        type: constants.transactions.RESTRICTED_FREE_AGENCY_TAG
+        type: transaction_types.RESTRICTED_FREE_AGENCY_TAG
       })
 
       // verify released players
@@ -274,7 +275,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
       // verify cutlist
       const transactions = await knex('transactions').where({ lid: leagueId })
       const release_transactions = transactions.filter(
-        (t) => t.type === constants.transactions.ROSTER_RELEASE
+        (t) => t.type === transaction_types.ROSTER_RELEASE
       )
       expect(release_transactions.length).to.equal(3)
     })
@@ -308,7 +309,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
       // Set restricted_free_agency_announcement_hour and processing_hour
       await knex('seasons')
         .update({
-          year: constants.season.year,
+          year: current_season.year,
           tran_start: tran_date,
           tran_end: regular_season_start.subtract('1', 'month').unix(),
           restricted_free_agency_announcement_hour: 10, // 10 AM
@@ -330,7 +331,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
         player,
         teamId: team_id,
         userId: user_id,
-        tag: constants.tags.RESTRICTED_FREE_AGENCY
+        tag: player_tag_types.RESTRICTED_FREE_AGENCY
       })
 
       const timestamp = Math.round(Date.now() / 1000)
@@ -339,7 +340,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
         userid: user_id,
         bid: value,
         tid: team_id,
-        year: constants.season.year,
+        year: current_season.year,
         player_tid: team_id,
         lid: leagueId,
         submitted: timestamp
@@ -376,7 +377,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
         player,
         teamId: team_id,
         userId: user_id,
-        tag: constants.tags.RESTRICTED_FREE_AGENCY
+        tag: player_tag_types.RESTRICTED_FREE_AGENCY
       })
 
       const timestamp = Math.round(Date.now() / 1000)
@@ -388,7 +389,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
         userid: user_id,
         bid: value,
         tid: team_id,
-        year: constants.season.year,
+        year: current_season.year,
         player_tid: team_id,
         lid: leagueId,
         submitted: announcement_time,
@@ -439,7 +440,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
         player,
         teamId: team_id1,
         userId: user_id1,
-        tag: constants.tags.RESTRICTED_FREE_AGENCY
+        tag: player_tag_types.RESTRICTED_FREE_AGENCY
       })
 
       // Set waiver order for teams
@@ -458,7 +459,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
         userid: user_id1,
         bid: value1,
         tid: team_id1,
-        year: constants.season.year,
+        year: current_season.year,
         player_tid: team_id1,
         lid: leagueId,
         submitted: announcement_time,
@@ -472,7 +473,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
         userid: user_id2,
         bid: value2,
         tid: team_id2,
-        year: constants.season.year,
+        year: current_season.year,
         player_tid: team_id1,
         lid: leagueId,
         submitted: announcement_time,
@@ -485,7 +486,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
         userid: user_id3,
         bid: value2,
         tid: team_id3,
-        year: constants.season.year,
+        year: current_season.year,
         player_tid: team_id1,
         lid: leagueId,
         submitted: announcement_time,
@@ -535,7 +536,7 @@ describe('SCRIPTS - restricted free agency bids', function () {
       // Verify waiver order was reset for the winning team (team_id2)
       const final_waiver_orders = await knex('teams')
         .select('uid', 'waiver_order')
-        .where({ lid: leagueId, year: constants.season.year })
+        .where({ lid: leagueId, year: current_season.year })
         .orderBy('waiver_order', 'asc')
 
       // The winning team (team_id2) should have the highest (worst) waiver order number

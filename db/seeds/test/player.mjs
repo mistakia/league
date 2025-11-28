@@ -15,7 +15,8 @@ export async function seed(knex, Promise) {
   // insert test rookies
   const rookies = []
   for (let i = 0; i < 200; i++) {
-    const pos = constants.positions[i % constants.positions.length]
+    const pos =
+      constants.fantasy_positions[i % constants.fantasy_positions.length]
     rookies.push({
       pid: `XR-${i * 5}`,
       pname: `TestRookie${i}`,
@@ -25,8 +26,11 @@ export async function seed(knex, Promise) {
       dob: '0000-00-00',
       pos,
       pos1: pos,
-      current_nfl_team: constants.nflTeams[i % constants.nflTeams.length],
-      nfl_draft_year: constants.season.year
+      current_nfl_team:
+        constants.nfl_team_abbreviations[
+          i % constants.nfl_team_abbreviations.length
+        ],
+      nfl_draft_year: constants.current_season.year
     })
   }
   await knex('player').insert(rookies)
@@ -34,7 +38,8 @@ export async function seed(knex, Promise) {
   // insert test sophmores
   const sophmores = []
   for (let i = 0; i < 50; i++) {
-    const pos = constants.positions[i % constants.positions.length]
+    const pos =
+      constants.fantasy_positions[i % constants.fantasy_positions.length]
     sophmores.push({
       pid: `XS-${i * 5}`,
       pname: `TestSophmore${i}`,
@@ -44,8 +49,11 @@ export async function seed(knex, Promise) {
       dob: '0000-00-00',
       pos,
       pos1: pos,
-      current_nfl_team: constants.nflTeams[i % constants.nflTeams.length],
-      nfl_draft_year: constants.season.year - 1
+      current_nfl_team:
+        constants.nfl_team_abbreviations[
+          i % constants.nfl_team_abbreviations.length
+        ],
+      nfl_draft_year: constants.current_season.year - 1
     })
   }
   await knex('player').insert(sophmores)

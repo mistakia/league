@@ -3,9 +3,10 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, sum, groupBy } from '#libs-shared'
+import { sum, groupBy } from '#libs-shared'
+import { fantasy_positions } from '#constants'
 import { is_main, getLeague } from '#libs-server'
-// import { job_types } from '#libs-shared/job-constants.mjs'
+// import { job_types } from '#libs-shared/job-.mjs'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -33,7 +34,7 @@ const generate_league_format_player_careerlogs = async ({
   const pids = Object.keys(seasons_by_pid)
   const draft_classes_query = await db('player')
     .select('nfl_draft_year', 'pid', 'dpos')
-    .whereIn('pos', constants.positions)
+    .whereIn('pos', fantasy_positions)
     .whereIn('pid', pids)
   const draft_classes = draft_classes_query.map((i) => i.nfl_draft_year)
   const sorted_pids_by_draft_classes = {}

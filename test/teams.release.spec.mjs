@@ -6,7 +6,11 @@ import MockDate from 'mockdate'
 import server from '#api'
 import knex from '#db'
 import league from '#db/seeds/league.mjs'
-import { constants } from '#libs-shared'
+import {
+  roster_slot_types,
+  transaction_types,
+  current_season
+} from '#constants'
 import { getRoster } from '#libs-server'
 import { user1, user2 } from './fixtures/token.mjs'
 import {
@@ -24,7 +28,7 @@ process.env.NODE_ENV = 'test'
 chai.should()
 chai.use(chai_http)
 const expect = chai.expect
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 
 describe('API /teams - release', function () {
   before(async function () {
@@ -51,7 +55,7 @@ describe('API /teams - release', function () {
         leagueId,
         teamId,
         userId,
-        slot: constants.slots.PS
+        slot: roster_slot_types.PS
       })
 
       const res = await chai_request
@@ -76,9 +80,7 @@ describe('API /teams - release', function () {
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.pid.should.equal(player.pid)
-      res.body.transaction.type.should.equal(
-        constants.transactions.ROSTER_RELEASE
-      )
+      res.body.transaction.type.should.equal(transaction_types.ROSTER_RELEASE)
       res.body.transaction.value.should.equal(0)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
 
@@ -87,7 +89,7 @@ describe('API /teams - release', function () {
 
       await checkLastTransaction({
         leagueId,
-        type: constants.transactions.ROSTER_RELEASE,
+        type: transaction_types.ROSTER_RELEASE,
         value: 0,
         pid: player.pid,
         teamId,
@@ -107,7 +109,7 @@ describe('API /teams - release', function () {
         leagueId,
         teamId,
         userId,
-        slot: constants.slots.PS
+        slot: roster_slot_types.PS
       })
 
       const res = await chai_request
@@ -132,9 +134,7 @@ describe('API /teams - release', function () {
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.pid.should.equal(player.pid)
-      res.body.transaction.type.should.equal(
-        constants.transactions.ROSTER_RELEASE
-      )
+      res.body.transaction.type.should.equal(transaction_types.ROSTER_RELEASE)
       res.body.transaction.value.should.equal(0)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
 
@@ -143,7 +143,7 @@ describe('API /teams - release', function () {
 
       await checkLastTransaction({
         leagueId,
-        type: constants.transactions.ROSTER_RELEASE,
+        type: transaction_types.ROSTER_RELEASE,
         value: 0,
         pid: player.pid,
         teamId,
@@ -163,7 +163,7 @@ describe('API /teams - release', function () {
         leagueId,
         teamId,
         userId,
-        slot: constants.slots.BENCH
+        slot: roster_slot_types.BENCH
       })
 
       const res = await chai_request
@@ -188,9 +188,7 @@ describe('API /teams - release', function () {
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.pid.should.equal(player.pid)
-      res.body.transaction.type.should.equal(
-        constants.transactions.ROSTER_RELEASE
-      )
+      res.body.transaction.type.should.equal(transaction_types.ROSTER_RELEASE)
       res.body.transaction.value.should.equal(0)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
 
@@ -199,7 +197,7 @@ describe('API /teams - release', function () {
 
       await checkLastTransaction({
         leagueId,
-        type: constants.transactions.ROSTER_RELEASE,
+        type: transaction_types.ROSTER_RELEASE,
         value: 0,
         pid: player.pid,
         teamId,
@@ -219,7 +217,7 @@ describe('API /teams - release', function () {
         leagueId,
         teamId,
         userId,
-        slot: constants.slots.BENCH
+        slot: roster_slot_types.BENCH
       })
 
       const res = await chai_request
@@ -244,9 +242,7 @@ describe('API /teams - release', function () {
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.pid.should.equal(player.pid)
-      res.body.transaction.type.should.equal(
-        constants.transactions.ROSTER_RELEASE
-      )
+      res.body.transaction.type.should.equal(transaction_types.ROSTER_RELEASE)
       res.body.transaction.value.should.equal(0)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
 
@@ -255,7 +251,7 @@ describe('API /teams - release', function () {
 
       await checkLastTransaction({
         leagueId,
-        type: constants.transactions.ROSTER_RELEASE,
+        type: transaction_types.ROSTER_RELEASE,
         value: 0,
         pid: player.pid,
         teamId,
@@ -275,7 +271,7 @@ describe('API /teams - release', function () {
         leagueId,
         teamId,
         userId,
-        slot: constants.slots.RESERVE_SHORT_TERM
+        slot: roster_slot_types.RESERVE_SHORT_TERM
       })
 
       const res = await chai_request
@@ -300,9 +296,7 @@ describe('API /teams - release', function () {
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.pid.should.equal(player.pid)
-      res.body.transaction.type.should.equal(
-        constants.transactions.ROSTER_RELEASE
-      )
+      res.body.transaction.type.should.equal(transaction_types.ROSTER_RELEASE)
       res.body.transaction.value.should.equal(0)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
 
@@ -311,7 +305,7 @@ describe('API /teams - release', function () {
 
       await checkLastTransaction({
         leagueId,
-        type: constants.transactions.ROSTER_RELEASE,
+        type: transaction_types.ROSTER_RELEASE,
         value: 0,
         pid: player.pid,
         teamId,
@@ -331,7 +325,7 @@ describe('API /teams - release', function () {
         leagueId,
         teamId,
         userId,
-        slot: constants.slots.RESERVE_SHORT_TERM
+        slot: roster_slot_types.RESERVE_SHORT_TERM
       })
 
       const res = await chai_request
@@ -356,9 +350,7 @@ describe('API /teams - release', function () {
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.pid.should.equal(player.pid)
-      res.body.transaction.type.should.equal(
-        constants.transactions.ROSTER_RELEASE
-      )
+      res.body.transaction.type.should.equal(transaction_types.ROSTER_RELEASE)
       res.body.transaction.value.should.equal(0)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
 
@@ -367,7 +359,7 @@ describe('API /teams - release', function () {
 
       await checkLastTransaction({
         leagueId,
-        type: constants.transactions.ROSTER_RELEASE,
+        type: transaction_types.ROSTER_RELEASE,
         value: 0,
         pid: player.pid,
         teamId,
@@ -481,7 +473,7 @@ describe('API /teams - release', function () {
         leagueId,
         teamId,
         userId,
-        slot: constants.slots.PS
+        slot: roster_slot_types.PS
       })
 
       await knex('poaches').insert({
@@ -514,7 +506,7 @@ describe('API /teams - release', function () {
         player,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PSP
+        slot: roster_slot_types.PSP
       })
       const request = chai_request
         .execute(server)

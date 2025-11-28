@@ -2,8 +2,8 @@ import express from 'express'
 import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 
-import { constants } from '#libs-shared'
 import { getLeague, sendEmail, validators } from '#libs-server'
+import { current_season } from '#constants'
 
 const router = express.Router()
 
@@ -214,7 +214,7 @@ router.post('/register', async (req, res) => {
 
       const teams = await db('teams').where({
         lid: league_id,
-        year: constants.season.year
+        year: current_season.year
       })
       if (team_id) {
         if (!teams.find((t) => t.uid === team_id)) {
@@ -250,7 +250,7 @@ router.post('/register', async (req, res) => {
       await db('users_teams').insert({
         userid: user_id,
         tid: team_id,
-        year: constants.season.year
+        year: current_season.year
       })
     }
 

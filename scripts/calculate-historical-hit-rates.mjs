@@ -6,7 +6,8 @@ import * as oddslib from 'oddslib'
 import db from '#db'
 import { is_main, report_job, selection_result } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
-import { groupBy, constants } from '#libs-shared'
+import { groupBy } from '#libs-shared'
+import { current_season } from '#constants'
 import { chunk_array } from '#libs-shared/chunk.mjs'
 import { player_game_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 
@@ -19,7 +20,7 @@ const initialize_cli = () => {
     .option('year', {
       type: 'number',
       describe: 'Season year to process',
-      default: constants.season.year
+      default: current_season.year
     })
     .option('missing_only', {
       type: 'boolean',
@@ -77,7 +78,7 @@ const get_hits = ({
 }
 
 const calculate_historical_hit_rates = async ({
-  year = constants.season.year,
+  year = current_season.year,
   missing_only = false,
   current_week_only = false,
   market_types = null,
@@ -142,8 +143,8 @@ const calculate_historical_hit_rates = async ({
 
   if (current_week_only) {
     prop_selections_query
-      .where('nfl_games.week', constants.season.nfl_seas_week)
-      .where('nfl_games.seas_type', constants.season.nfl_seas_type)
+      .where('nfl_games.week', current_season.nfl_seas_week)
+      .where('nfl_games.seas_type', current_season.nfl_seas_type)
   }
 
   if (market_types && market_types.length > 0) {

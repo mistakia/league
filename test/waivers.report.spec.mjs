@@ -6,11 +6,11 @@ import MockDate from 'mockdate'
 import knex from '#db'
 
 import league from '#db/seeds/league.mjs'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 process.env.NODE_ENV = 'test'
 
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 chai.should()
 // chai.use(chai_http)
 

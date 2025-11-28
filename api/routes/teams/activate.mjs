@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import {
   submitReserve,
   submitActivate,
@@ -139,7 +139,7 @@ router.post('/?', async (req, res) => {
       return res.status(401).send({ error: 'invalid token' })
     }
 
-    if (constants.season.week > constants.season.finalWeek) {
+    if (current_season.week > current_season.finalWeek) {
       return res.status(400).send({ error: 'player locked' })
     }
 

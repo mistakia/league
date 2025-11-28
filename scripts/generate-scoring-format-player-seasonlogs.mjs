@@ -3,7 +3,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, sum, groupBy } from '#libs-shared'
+import { sum, groupBy } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main, getLeague } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -15,7 +16,7 @@ const log = debug('generate-scoring-format-player-seasonlogs')
 debug.enable('generate-scoring-format-player-seasonlogs')
 
 const generate_scoring_format_player_seasonlogs = async ({
-  year = constants.season.year,
+  year = current_season.year,
   scoring_format_hash,
   dry = false
 }) => {

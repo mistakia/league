@@ -4,7 +4,8 @@ import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
 import 'highcharts/highcharts-more'
 
-import { constants, nth } from '@libs-shared'
+import { nth } from '@libs-shared'
+import { fantasy_positions } from '@constants'
 
 export default function DashboardTeamValue({
   summary,
@@ -26,7 +27,7 @@ export default function DashboardTeamValue({
       <td className={allClassNames.join(' ')}>{`${allRank}${nth(allRank)}`}</td>
     </tr>
   )
-  constants.positions.forEach((position, idx) => {
+  fantasy_positions.forEach((position, idx) => {
     // check if this league starts this position
     if (!league || !league[`s${position.toLowerCase()}`]) {
       return
@@ -64,7 +65,7 @@ export default function DashboardTeamValue({
     </tr>
   )
 
-  const starting_positions = constants.positions.filter(
+  const starting_positions = fantasy_positions.filter(
     (p) => league[`s${p.toLowerCase()}`]
   )
 

@@ -1,10 +1,10 @@
 import db from '#db'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { create_exact_year_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 
 const get_default_params = ({ params = {} } = {}) => {
-  let year = params.year || constants.season.stats_season_year
+  let year = params.year || current_season.stats_season_year
   if (Array.isArray(year)) {
     year = year[0]
   }
@@ -13,10 +13,9 @@ const get_default_params = ({ params = {} } = {}) => {
 
 const get_valid_year = (year) => {
   const parsed_year = Number(year)
-  return parsed_year >= 2017 &&
-    parsed_year <= constants.season.stats_season_year
+  return parsed_year >= 2017 && parsed_year <= current_season.stats_season_year
     ? parsed_year
-    : constants.season.stats_season_year
+    : current_season.stats_season_year
 }
 
 const get_cache_info_for_pfr_season_value = create_exact_year_cache_info({

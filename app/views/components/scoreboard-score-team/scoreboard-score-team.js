@@ -2,9 +2,9 @@ import React, { useCallback, useMemo } from 'react'
 import PropTypes from 'prop-types'
 
 import TeamName from '@components/team-name'
-import { constants } from '@libs-shared'
 
 import './scoreboard-score-team.styl'
+import { matchup_types } from '@constants'
 
 export default function ScoreboardScoreTeam({
   tid,
@@ -19,7 +19,7 @@ export default function ScoreboardScoreTeam({
   )
 
   const render_score_diff = useCallback(() => {
-    if (type === constants.matchups.TOURNAMENT) {
+    if (type === matchup_types.TOURNAMENT) {
       return (
         <div className='scoreboard__score-diff metric'>
           {is_advancing
@@ -31,7 +31,7 @@ export default function ScoreboardScoreTeam({
   }, [type, is_advancing, scoreboard.points, challenger, cutoff])
 
   const render_score_minutes = useCallback(() => {
-    if (type === constants.matchups.TOURNAMENT) {
+    if (type === matchup_types.TOURNAMENT) {
       return (
         <div className='scoreboard__score-minutes'>
           {scoreboard.minutes && !isNaN(scoreboard.minutes)

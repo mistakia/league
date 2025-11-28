@@ -8,7 +8,8 @@ import {
   get_matchups_state,
   get_scoreboard
 } from '@core/selectors'
-import { constants, is_league_post_season_week } from '@libs-shared'
+import { is_league_post_season_week } from '@libs-shared'
+import { current_season } from '@constants'
 import { matchups_actions } from './actions'
 import { scoreboard_actions } from '@core/scoreboard'
 
@@ -51,8 +52,8 @@ export function* select_matchup() {
   const is_post_season_week = is_league_post_season_week({ year, week })
   console.log(`is_post_season_week: ${is_post_season_week}`)
 
-  if (year === constants.week && is_post_season_week) {
-    yield put(scoreboard_actions.select_week(constants.week))
+  if (year === current_season.week && is_post_season_week) {
+    yield put(scoreboard_actions.select_week(current_season.week))
     return
   }
 

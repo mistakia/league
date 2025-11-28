@@ -1,8 +1,8 @@
-import * as constants from './constants.mjs'
+import { create_empty_fantasy_stats } from '#constants'
 import fixTeam from './fix-team.mjs'
 
 const calculateDstStatsFromPlays = (plays, team) => {
-  const dstStats = constants.createStats()
+  const dstStats = create_empty_fantasy_stats()
   dstStats.dtno = plays.filter(
     (p) =>
       p.drive_play_count === 3 &&

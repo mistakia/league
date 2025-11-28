@@ -4,7 +4,11 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import {
+  keeptradecut_metric_types,
+  transaction_types,
+  transaction_type_display_names
+} from '#constants'
 import {
   is_main,
   get_trades,
@@ -56,7 +60,7 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
     .select(db.raw("pid, TO_CHAR(TO_TIMESTAMP(d), 'YYYY-MM-DD') AS date, v"))
     .whereIn('pid', transaction_pids)
     .where('qb', 2) // choose based on league settings
-    .where('type', constants.KEEPTRADECUT.VALUE)
+    .where('type', keeptradecut_metric_types.VALUE)
     .orderBy('d', 'asc')
 
   for (const ktc_value of ktc_values) {
@@ -111,16 +115,16 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
     const tran_tid = transaction.tid
     // update team roster based on transaction type
     switch (transaction.type) {
-      case constants.transactions.ROSTER_ADD:
-      case constants.transactions.AUCTION_PROCESSED:
-      case constants.transactions.PRACTICE_ADD:
-      case constants.transactions.DRAFT:
-      case constants.transactions.POACHED:
+      case transaction_types.ROSTER_ADD:
+      case transaction_types.AUCTION_PROCESSED:
+      case transaction_types.PRACTICE_ADD:
+      case transaction_types.DRAFT:
+      case transaction_types.POACHED:
         // add player to roster
         teams_index[tran_tid].players[transaction.pid] = true
         break
 
-      case constants.transactions.RESTRICTED_FREE_AGENCY_TAG: {
+      case transaction_types.RESTRICTED_FREE_AGENCY_TAG: {
         const rfa_sign_key = `${transaction.pid}__${tran_date}`
         const restricted_free_agency_signing =
           restricted_free_agency_index[rfa_sign_key]
@@ -142,7 +146,7 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
         break
       }
 
-      case constants.transactions.ROSTER_RELEASE:
+      case transaction_types.ROSTER_RELEASE:
         // remove player from roster
         // team index may not exist for a decommissioning release if team was decommissioned
         delete teams_index[tran_tid]?.players[transaction.pid]
@@ -150,7 +154,7 @@ const calculate_team_daily_ktc_value = async ({ lid = 1 }) => {
 
       default:
         // do nothing
-        ignored_tran_types.add(constants.transactionsDetail[transaction.type])
+        ignored_tran_types.add(transaction_type_display_names[transaction.type])
     }
 
     // check if transaction is part of a trade

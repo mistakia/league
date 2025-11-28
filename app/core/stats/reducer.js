@@ -2,18 +2,27 @@ import { Record, List, Map } from 'immutable'
 
 import { stat_actions } from './actions'
 import { player_actions } from '@core/players'
-import { constants } from '@libs-shared'
+import {
+  current_season,
+  nfl_weeks,
+  game_days,
+  nfl_quarters,
+  nfl_downs,
+  stat_qualification_thresholds
+} from '@constants'
 
 const initialState = new Record({
   isPending: false,
   plays: new List(),
   teamStats: new List(),
-  qualifiers: new Map(constants.qualifiers),
-  years: new List([constants.week ? constants.year : constants.year - 1]),
-  weeks: new List(constants.nfl_weeks),
-  days: new List(constants.days),
-  quarters: new List(constants.quarters),
-  downs: new List(constants.downs),
+  qualifiers: new Map(stat_qualification_thresholds),
+  years: new List([
+    current_season.week ? current_season.year : current_season.year - 1
+  ]),
+  weeks: new List(nfl_weeks),
+  days: new List(game_days),
+  quarters: new List(nfl_quarters),
+  downs: new List(nfl_downs),
   yardline_start: 0,
   yardline_end: 100,
   teamStatsPercentiles: new Record({})

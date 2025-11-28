@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 
-import { transactions as constantsTransactions } from './constants.mjs'
+import { transaction_types } from '#constants'
 
 export default function isOnReleaseWaivers({ transactions = [] } = {}) {
   // not on waivers without any transactions
@@ -13,7 +13,7 @@ export default function isOnReleaseWaivers({ transactions = [] } = {}) {
   // not on waivers if not dropped within the last 24 hours
   const last = sorted[0]
 
-  if (last.type !== constantsTransactions.ROSTER_RELEASE) {
+  if (last.type !== transaction_types.ROSTER_RELEASE) {
     return false
   }
 
@@ -32,7 +32,7 @@ export default function isOnReleaseWaivers({ transactions = [] } = {}) {
   const diff = dayjs
     .unix(last.timestamp)
     .diff(dayjs.unix(previous.timestamp), 'hour')
-  if (diff < 24 && previous.type !== constantsTransactions.POACHED) {
+  if (diff < 24 && previous.type !== transaction_types.POACHED) {
     return false
   }
 

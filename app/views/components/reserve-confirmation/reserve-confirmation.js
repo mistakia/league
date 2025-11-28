@@ -12,7 +12,7 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogTitle from '@mui/material/DialogTitle'
 
 import Button from '@components/button'
-import { constants } from '@libs-shared'
+import { roster_slot_types } from '@constants'
 
 export default function ReserveConfirmation({
   team,
@@ -49,7 +49,7 @@ export default function ReserveConfirmation({
 
     reserve({
       reserve_pid,
-      slot: constants.slots.RESERVE_SHORT_TERM,
+      slot: roster_slot_types.RESERVE_SHORT_TERM,
       activate_pid
     })
     onClose()

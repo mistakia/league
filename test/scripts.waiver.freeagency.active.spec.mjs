@@ -4,7 +4,8 @@ import MockDate from 'mockdate'
 import knex from '#db'
 
 import league from '#db/seeds/league.mjs'
-import { constants, Errors } from '#libs-shared'
+import { current_season, transaction_types, waiver_types } from '#constants'
+import { Errors } from '#libs-shared'
 import {
   selectPlayer,
   checkLastTransaction,
@@ -16,7 +17,7 @@ process.env.NODE_ENV = 'test'
 
 chai.should()
 const expect = chai.expect
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 
 describe('SCRIPTS /waivers - free agency - active roster', function () {
   before(async function () {
@@ -45,7 +46,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: value,
-        type: constants.waivers.FREE_AGENCY
+        type: waiver_types.FREE_AGENCY
       })
 
       let error
@@ -69,7 +70,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       // check team waiver order
       const teams = await knex('teams').where({
         lid: 1,
-        year: constants.season.year
+        year: current_season.year
       })
       const team1 = teams.find((t) => t.uid === 1)
       const team2 = teams.find((t) => t.uid === 2)
@@ -94,7 +95,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         teamId,
         userId: 1,
         value,
-        type: constants.transactions.ROSTER_ADD
+        type: transaction_types.ROSTER_ADD
       })
 
       // verify team faab budget
@@ -116,7 +117,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: value1,
-        type: constants.waivers.FREE_AGENCY
+        type: waiver_types.FREE_AGENCY
       })
 
       await knex('waivers').insert({
@@ -127,7 +128,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 80,
-        type: constants.waivers.FREE_AGENCY
+        type: waiver_types.FREE_AGENCY
       })
 
       const player2 = await selectPlayer({ exclude_pids })
@@ -141,7 +142,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: value2,
-        type: constants.waivers.FREE_AGENCY
+        type: waiver_types.FREE_AGENCY
       })
 
       const player3 = await selectPlayer({ exclude_pids })
@@ -155,7 +156,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 30,
-        type: constants.waivers.FREE_AGENCY
+        type: waiver_types.FREE_AGENCY
       })
       await knex('waivers').insert({
         tid: 2,
@@ -165,7 +166,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: value3,
-        type: constants.waivers.FREE_AGENCY
+        type: waiver_types.FREE_AGENCY
       })
 
       const player4 = await selectPlayer({ exclude_pids })
@@ -179,7 +180,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: value4,
-        type: constants.waivers.FREE_AGENCY
+        type: waiver_types.FREE_AGENCY
       })
       await knex('waivers').insert({
         tid: 4,
@@ -189,7 +190,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: value4,
-        type: constants.waivers.FREE_AGENCY
+        type: waiver_types.FREE_AGENCY
       })
 
       let error
@@ -239,7 +240,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       // check team waiver order
       const teams = await knex('teams').where({
         lid: 1,
-        year: constants.season.year
+        year: current_season.year
       })
       const team1 = teams.find((t) => t.uid === 1)
       const team2 = teams.find((t) => t.uid === 2)
@@ -283,22 +284,22 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
       expect(transactions[0].pid).to.equal(player1.pid)
       expect(transactions[0].tid).to.equal(1)
       expect(transactions[0].value).to.equal(value1)
-      expect(transactions[0].type).to.equal(constants.transactions.ROSTER_ADD)
+      expect(transactions[0].type).to.equal(transaction_types.ROSTER_ADD)
 
       expect(transactions[1].pid).to.equal(player2.pid)
       expect(transactions[1].tid).to.equal(2)
       expect(transactions[1].value).to.equal(value2)
-      expect(transactions[1].type).to.equal(constants.transactions.ROSTER_ADD)
+      expect(transactions[1].type).to.equal(transaction_types.ROSTER_ADD)
 
       expect(transactions[2].pid).to.equal(player3.pid)
       expect(transactions[2].tid).to.equal(2)
       expect(transactions[2].value).to.equal(value3)
-      expect(transactions[2].type).to.equal(constants.transactions.ROSTER_ADD)
+      expect(transactions[2].type).to.equal(transaction_types.ROSTER_ADD)
 
       expect(transactions[3].pid).to.equal(player4.pid)
       expect(transactions[3].tid).to.equal(1)
       expect(transactions[3].value).to.equal(value4)
-      expect(transactions[3].type).to.equal(constants.transactions.ROSTER_ADD)
+      expect(transactions[3].type).to.equal(transaction_types.ROSTER_ADD)
     })
 
     it('no waivers ready to process', async () => {
@@ -310,10 +311,10 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         tid: 2,
         lid: leagueId,
         pid: player.pid,
-        type: constants.transactions.ROSTER_RELEASE,
+        type: transaction_types.ROSTER_RELEASE,
         value: 0,
-        week: constants.season.week,
-        year: constants.season.year,
+        week: current_season.week,
+        year: current_season.year,
         timestamp: Math.round(Date.now() / 1000)
       })
 
@@ -327,7 +328,7 @@ describe('SCRIPTS /waivers - free agency - active roster', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: value,
-        type: constants.waivers.FREE_AGENCY
+        type: waiver_types.FREE_AGENCY
       })
 
       let error

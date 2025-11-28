@@ -3,7 +3,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, Roster, getExtensionAmount } from '#libs-shared'
+import { Roster, getExtensionAmount } from '#libs-shared'
+import { current_season, player_tag_types, transaction_types } from '#constants'
 import {
   getLeague,
   getRoster,
@@ -24,13 +25,13 @@ debug.enable('process-extensions')
 
 const getTransactionType = (tag) => {
   switch (tag) {
-    case constants.tags.FRANCHISE:
-      return constants.transactions.FRANCHISE_TAG
-    case constants.tags.ROOKIE:
-      return constants.transactions.ROOKIE_TAG
-    case constants.tags.REGULAR:
-    case constants.tags.RESTRICTED_FREE_AGENCY:
-      return constants.transactions.EXTENSION
+    case player_tag_types.FRANCHISE:
+      return transaction_types.FRANCHISE_TAG
+    case player_tag_types.ROOKIE:
+      return transaction_types.ROOKIE_TAG
+    case player_tag_types.REGULAR:
+    case player_tag_types.RESTRICTED_FREE_AGENCY:
+      return transaction_types.EXTENSION
   }
 }
 
@@ -38,7 +39,7 @@ const createTransaction = async ({ roster_player, tid, league }) => {
   const { tag, pid, pos } = roster_player
 
   // Skip creating franchise tag transactions for players who already had franchise tags for two consecutive years
-  if (tag === constants.tags.FRANCHISE) {
+  if (tag === player_tag_types.FRANCHISE) {
     const is_valid_franchise_tag = await validate_franchise_tag({
       pid,
       tid
@@ -59,8 +60,8 @@ const createTransaction = async ({ roster_player, tid, league }) => {
   const extensionValue = getExtensionAmount({
     extensions: extensions.length,
     tag:
-      tag === constants.tags.RESTRICTED_FREE_AGENCY
-        ? constants.tags.REGULAR
+      tag === player_tag_types.RESTRICTED_FREE_AGENCY
+        ? player_tag_types.REGULAR
         : tag,
     pos,
     league,
@@ -74,25 +75,25 @@ const createTransaction = async ({ roster_player, tid, league }) => {
     pid,
     type: getTransactionType(tag),
     value: extensionValue,
-    week: constants.season.week,
-    year: constants.season.year,
+    week: current_season.week,
+    year: current_season.year,
     timestamp: league.ext_date
   }
 }
 
 const run = async ({ lid }) => {
   const league = await getLeague({ lid })
-  const teams = await db('teams').where({ lid, year: constants.season.year })
+  const teams = await db('teams').where({ lid, year: current_season.year })
   await db('transactions')
     .where({
       userid: 0,
       lid,
-      year: constants.season.year
+      year: current_season.year
     })
     .whereIn('type', [
-      constants.transactions.FRANCHISE_TAG,
-      constants.transactions.ROOKIE_TAG,
-      constants.transactions.EXTENSION
+      transaction_types.FRANCHISE_TAG,
+      transaction_types.ROOKIE_TAG,
+      transaction_types.EXTENSION
     ])
     .del()
 

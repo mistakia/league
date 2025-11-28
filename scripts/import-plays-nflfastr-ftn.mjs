@@ -9,7 +9,7 @@ import dayjs from 'dayjs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import {
   is_main,
   readCSV,
@@ -112,7 +112,7 @@ const format_play = (play) => ({
 })
 
 const run = async ({
-  year = constants.season.year,
+  year = current_season.year,
   ignore_conflicts = false,
   force_download = false
 } = {}) => {
@@ -120,11 +120,11 @@ const run = async ({
     throw new Error('FTN Charting data is only available from 2022 onwards')
   }
 
-  if (year === constants.season.year && !constants.season.week) {
+  if (year === current_season.year && !current_season.week) {
     throw new Error('Season has not started yet')
   }
 
-  if (year === constants.season.year && constants.season.week === 1) {
+  if (year === current_season.year && current_season.week === 1) {
     const current_day = dayjs().day()
     if (current_day < 5 && current_day > 1) {
       // 5 is Friday
@@ -192,7 +192,7 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    const year = argv.year || constants.season.year
+    const year = argv.year || current_season.year
     const ignore_conflicts = argv.ignore_conflicts
     const force_download = argv.d
     await run({ year, ignore_conflicts, force_download })

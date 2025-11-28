@@ -23,7 +23,9 @@ const clear_live_plays = async () => {
 const finalize_week = async () => {
   const day = dayjs().day()
   const week = Math.max(
-    [2, 3].includes(day) ? constants.season.week - 1 : constants.season.week,
+    [2, 3].includes(day)
+      ? constants.current_season.week - 1
+      : constants.current_season.week,
     1
   )
 
@@ -36,14 +38,14 @@ const finalize_week = async () => {
 
   const lid = 1
   await process_matchups({ lid })
-  await process_playoffs({ lid, year: constants.season.year })
+  await process_playoffs({ lid, year: constants.current_season.year })
   await calculate_league_careerlogs({ lid })
   await clear_live_plays()
 
   // Process market results after stats are updated
   log(`processing market results for week ${week}`)
   await process_market_results({
-    year: constants.season.year,
+    year: constants.current_season.year,
     week,
     missing_only: false
   })

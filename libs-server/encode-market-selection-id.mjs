@@ -1,4 +1,4 @@
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 export default function encode_market_selection_id({
   market_type,
@@ -71,7 +71,7 @@ export default function encode_market_selection_id({
     }
 
     case 'PLAYER_SEASON_PROPS':
-      if (start_time.isBefore(constants.season.openingDay)) {
+      if (start_time.isBefore(current_season.openingDay)) {
         log_error('start time is before current season')
       }
 
@@ -91,7 +91,7 @@ export default function encode_market_selection_id({
         log_error('selection_type is required for PLAYER_SEASON_PROPS')
       }
 
-      return `/PLAYER_SEASON_PROPS/${constants.season.year}/${pid}/${selection_type}/${metric_name}/${metric_line}`
+      return `/PLAYER_SEASON_PROPS/${current_season.year}/${pid}/${selection_type}/${metric_name}/${metric_line}`
 
     default:
       throw new Error(`Invalid market_type: ${market_type}`)

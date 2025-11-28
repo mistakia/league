@@ -11,7 +11,7 @@ import fs from 'fs/promises'
 import db from '#db'
 import report_job from '#libs-server/report-job.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
-import { season } from '#libs-shared/constants.mjs'
+import { current_season } from '#constants'
 import { get_supported_market_types } from '#libs-server/prop-market-settlement/market-type-mappings.mjs'
 import { preload_game_data } from '#libs-server/prop-market-settlement/data-preloader.mjs'
 import { write_selection_results_to_db } from '#libs-server/prop-market-settlement/selection-result-writer.mjs'
@@ -340,7 +340,7 @@ const main = async () => {
 
   try {
     // Use provided seas_type or default to current season type
-    const seas_type = argv.seas_type || season.nfl_seas_type
+    const seas_type = argv.seas_type || current_season.nfl_seas_type
 
     log(
       `Starting market results processing for year ${argv.year}${argv.week ? ` week ${argv.week}` : ''} ${seas_type}`

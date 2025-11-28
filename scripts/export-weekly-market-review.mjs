@@ -7,7 +7,7 @@ import fs from 'fs-extra'
 import path from 'path'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main } from '#libs-server'
 
 const log = debug('export-weekly-market-review')
@@ -798,7 +798,7 @@ const main = async () => {
     .option('year', {
       type: 'number',
       describe: 'Season year',
-      default: constants.season.year
+      default: current_season.year
     })
     .option('week', {
       type: 'number',

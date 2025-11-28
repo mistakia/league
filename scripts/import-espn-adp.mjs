@@ -11,7 +11,7 @@ import {
   updatePlayer,
   espn
 } from '#libs-server'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -27,7 +27,7 @@ const BATCH_SIZE = 500
 // TODO seperate ADP and draft rankings
 
 const import_espn_adp = async ({
-  year = constants.season.year,
+  year = current_season.year,
   dry_run = false
 } = {}) => {
   const data = await espn.get_espn_adp({ year })

@@ -3,13 +3,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import is_main from './is-main.mjs'
-import {
-  fixTeam,
-  format_player_name,
-  Errors,
-  team_aliases,
-  constants
-} from '#libs-shared'
+import { fixTeam, format_player_name, Errors, team_aliases } from '#libs-shared'
+import { player_nfl_status } from '#constants'
 import db from '#db'
 
 const log = debug('get-player')
@@ -168,7 +163,7 @@ const find_player_row = async ({
     if (ignore_retired) {
       query.where(function () {
         this.whereNot({
-          nfl_status: constants.player_nfl_status.RETIRED
+          nfl_status: player_nfl_status.RETIRED
         }).orWhereNull('nfl_status')
       })
     }

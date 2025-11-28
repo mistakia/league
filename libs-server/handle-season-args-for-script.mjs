@@ -1,5 +1,5 @@
 import debug from 'debug'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 const log = debug('handle-season-args-for-script')
 
@@ -8,8 +8,8 @@ export default async function handle_season_args_for_script({
   script_name,
   script_function,
   year_query,
-  default_year = constants.season.year,
-  default_week = constants.season.week,
+  default_year = current_season.year,
+  default_week = current_season.week,
   script_args = {},
   week_query = null,
   post_year_function = null,

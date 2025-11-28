@@ -13,7 +13,7 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogTitle from '@mui/material/DialogTitle'
 
 import Button from '@components/button'
-import { constants } from '@libs-shared'
+import { current_season, transaction_types } from '@constants'
 
 export default function DeactivateConfirmation({
   onClose,
@@ -49,7 +49,7 @@ export default function DeactivateConfirmation({
   const isDraftedRookie = Boolean(
     player_transactions.filter(
       (t) =>
-        t.type === constants.transactions.DRAFT && t.year === constants.year
+        t.type === transaction_types.DRAFT && t.year === current_season.year
     )
   )
   const hasPracticeSquadSpace =

@@ -1,10 +1,10 @@
 import {
-  constants,
   common_column_params,
   nfl_plays_team_column_params
 } from '@libs-shared'
 import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
+import { current_season } from '@constants'
 
 const { single_year } = common_column_params
 const { matchup_opponent_type } = nfl_plays_team_column_params
@@ -17,8 +17,8 @@ const pff_team_field = (props) => ({
   column_params: {
     year: {
       ...single_year,
-      values: [...Array(constants.season.year - 2006).keys()].map(
-        (i) => constants.season.year - i
+      values: [...Array(current_season.year - 2006).keys()].map(
+        (i) => current_season.year - i
       )
     },
     matchup_opponent_type

@@ -2,7 +2,6 @@ import debug from 'debug'
 
 import db from '#db'
 import {
-  constants,
   groupBy,
   Roster,
   getRosterSize,
@@ -13,6 +12,11 @@ import {
   calculateBaselines,
   calculatePlayerValuesRestOfSeason
 } from '#libs-shared'
+import {
+  current_season,
+  external_data_sources,
+  createProjectedStats
+} from '#constants'
 import {
   get_league_format,
   get_player_projections,
@@ -55,7 +59,7 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
 
     // For POST season, only process the current playoff week
     if (seas_type === 'POST') {
-      const week = constants.season.nfl_seas_week
+      const week = current_season.nfl_seas_week
       player_row.projection[week] = {}
 
       const projection = weightProjections({
@@ -66,9 +70,9 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
       player_row.projection[week] = projection
       projectionInserts.push({
         pid: player_row.pid,
-        sourceid: constants.sources.AVERAGE,
+        sourceid: external_data_sources.AVERAGE,
         seas_type,
-        year: constants.season.year,
+        year: current_season.year,
         week,
         ...projection
       })
@@ -76,8 +80,8 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
     }
 
     // Regular season processing
-    let week = year === constants.season.year ? constants.season.week : 0
-    for (; week <= constants.season.nflFinalWeek; week++) {
+    let week = year === current_season.year ? current_season.week : 0
+    for (; week <= current_season.nflFinalWeek; week++) {
       player_row.projection[week] = {}
 
       // average projection
@@ -89,9 +93,9 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
       player_row.projection[week] = projection
       projectionInserts.push({
         pid: player_row.pid,
-        sourceid: constants.sources.AVERAGE,
+        sourceid: external_data_sources.AVERAGE,
         seas_type,
-        year: constants.season.year,
+        year: current_season.year,
         week,
         ...projection
       })
@@ -100,10 +104,10 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
     // Only calculate ROS projections for regular season
     if (seas_type === 'REG') {
       // calculate ros projection
-      const ros = constants.createProjectedStats()
+      const ros = createProjectedStats()
       let proj_wks = 0
       for (const [week, projection] of Object.entries(player_row.projection)) {
-        if (week && week !== '0' && week >= constants.season.week) {
+        if (week && week !== '0' && week >= current_season.week) {
           proj_wks += 1
           for (const [key, value] of Object.entries(projection)) {
             ros[key] += value
@@ -116,8 +120,8 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
 
       rosProjectionInserts.push({
         pid: player_row.pid,
-        sourceid: constants.sources.AVERAGE,
-        year: constants.season.year,
+        sourceid: external_data_sources.AVERAGE,
+        year: current_season.year,
         timestamp: 0, // must be set at zero for unique key
         ...ros
       })
@@ -192,20 +196,15 @@ const process_scoring_format = async ({
     .first()
 
   const points_inserts = []
-  const current_week =
-    year === constants.season.year ? constants.season.week : 0
+  const current_week = year === current_season.year ? current_season.week : 0
 
   for (const player_row of player_rows) {
-    for (
-      let week = current_week;
-      week <= constants.season.nflFinalWeek;
-      week++
-    ) {
+    for (let week = current_week; week <= current_season.nflFinalWeek; week++) {
       const projection = player_row.projection[week]
 
       points_inserts.push({
         pid: player_row.pid,
-        year: constants.season.year,
+        year: current_season.year,
         scoring_format_hash,
         week,
         ...calculatePoints({
@@ -219,7 +218,7 @@ const process_scoring_format = async ({
 
     points_inserts.push({
       pid: player_row.pid,
-      year: constants.season.year,
+      year: current_season.year,
       scoring_format_hash,
       week: 'ros',
       ...calculatePoints({
@@ -277,8 +276,8 @@ const process_league_format = async ({
   })
 
   const baselines = {}
-  let week = year === constants.season.year ? constants.season.week : 0
-  for (; week <= constants.season.nflFinalWeek; week++) {
+  let week = year === current_season.year ? current_season.week : 0
+  for (; week <= current_season.nflFinalWeek; week++) {
     // baselines
     const baseline = calculateBaselines({
       players: player_rows,
@@ -312,7 +311,7 @@ const process_league_format = async ({
     for (const [week, pts_added] of Object.entries(player_row.pts_added)) {
       const params = {
         pid: player_row.pid,
-        year: constants.season.year,
+        year: current_season.year,
         league_format_hash,
         week,
         pts_added,
@@ -338,7 +337,7 @@ const process_league_format = async ({
 }
 
 const process_league = async ({ year, lid }) => {
-  let week = year === constants.season.year ? constants.season.week : 0
+  let week = year === current_season.year ? current_season.week : 0
 
   const league = await getLeague({ lid })
   const teams = await db('teams').where({ lid, year })
@@ -354,7 +353,7 @@ const process_league = async ({ year, lid }) => {
   const rostered_pids = []
 
   // check to see if it is past the fantasy season
-  if (week <= constants.season.finalWeek) {
+  if (week <= current_season.finalWeek) {
     for (const team of teams) {
       const rosterRow = await getRoster({ tid: team.uid, week })
       rosterRows.push(rosterRow)
@@ -395,10 +394,10 @@ const process_league = async ({ year, lid }) => {
     player_row.value = tran.value
   }
 
-  week = year === constants.season.year ? constants.season.week : 0
+  week = year === current_season.year ? current_season.week : 0
 
   const baselines = {}
-  for (; week <= constants.season.nflFinalWeek; week++) {
+  for (; week <= current_season.nflFinalWeek; week++) {
     // baselines
     const baseline = calculateBaselines({
       players: player_rows,
@@ -460,7 +459,7 @@ const process_league = async ({ year, lid }) => {
     )) {
       const params = {
         pid: player_row.pid,
-        year: constants.season.year,
+        year: current_season.year,
         lid,
         week,
         salary_adj_pts_added
@@ -482,7 +481,7 @@ const process_league = async ({ year, lid }) => {
         baselineInserts.push({
           lid,
           week,
-          year: constants.season.year,
+          year: current_season.year,
           pos: position,
           pid: baseline.pid,
           type
@@ -518,13 +517,13 @@ const process_league = async ({ year, lid }) => {
     log(`processed and saved ${valueInserts.length} player values`)
   }
 
-  if (constants.season.week <= constants.season.finalWeek) {
+  if (current_season.week <= current_season.finalWeek) {
     await project_lineups(lid)
     await calculateMatchupProjection({ lid })
     await calculatePlayoffMatchupProjection({ lid })
   }
 
-  if (constants.season.week <= constants.season.regularSeasonFinalWeek) {
+  if (current_season.week <= current_season.regularSeasonFinalWeek) {
     await simulate_season(lid)
   }
 
@@ -533,13 +532,13 @@ const process_league = async ({ year, lid }) => {
   }
 }
 
-const run = async ({ year = constants.season.year } = {}) => {
+const run = async ({ year = current_season.year } = {}) => {
   const league_formats = {}
   const scoring_formats = {}
   const lids = [0, 1]
   const leagues_cache = {}
 
-  const seas_type = constants.season.nfl_seas_type === 'POST' ? 'POST' : 'REG'
+  const seas_type = current_season.nfl_seas_type === 'POST' ? 'POST' : 'REG'
 
   if (seas_type === 'POST') {
     await process_average_projections({ year, seas_type })

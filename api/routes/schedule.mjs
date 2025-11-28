@@ -1,7 +1,7 @@
 import express from 'express'
 import dayjs from 'dayjs'
 
-import { constants } from '#libs-shared'
+import { current_season, nfl_team_abbreviations } from '#constants'
 
 const router = express.Router()
 
@@ -210,11 +210,11 @@ router.get('/?', async (req, res) => {
     const teams = {}
     const games = await db('nfl_games')
       .select('year', 'week', 'date', 'time_est', 'v', 'h')
-      .where('year', constants.season.year)
+      .where('year', current_season.year)
       .where('seas_type', 'REG')
       .orderBy('week', 'asc')
 
-    for (const team of constants.nflTeams) {
+    for (const team of nfl_team_abbreviations) {
       teams[team] = {
         bye: null,
         games: []
@@ -230,7 +230,7 @@ router.get('/?', async (req, res) => {
 
     const week_keys = Object.keys(weeks).map((x) => Number(x))
 
-    for (const team of constants.nflTeams) {
+    for (const team of nfl_team_abbreviations) {
       const team_weeks = teams[team].games.map((m) => m.week)
       const team_weeks_set = new Set(team_weeks)
       const result = week_keys.filter((x) => !team_weeks_set.has(x))

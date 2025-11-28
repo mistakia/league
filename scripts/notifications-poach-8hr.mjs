@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 import advancedFormat from 'dayjs/plugin/advancedFormat.js'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season, roster_slot_types } from '#constants'
 import { is_main, sendNotifications, getLeague, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -16,9 +16,9 @@ const run = async () => {
     .select('rosters.tid', 'player.*', 'rosters.lid')
     .join('rosters_players', 'poaches.pid', 'rosters_players.pid')
     .join('player', 'poaches.pid', 'player.pid')
-    .where('year', constants.season.year)
-    .where('week', constants.season.week)
-    .where('slot', constants.slots.PS)
+    .where('year', current_season.year)
+    .where('week', current_season.week)
+    .where('slot', roster_slot_types.PS)
     .where('submitted', '<', cutoff)
     .whereNull('processed')
 

@@ -1,14 +1,14 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import { constants } from '@libs-shared'
 import Filter from '@components/filter'
+import { current_season } from '@constants'
 
 export default function SelectedPlayerScheduleWeekFilter({
   selected_weeks_for_schedule = [],
   on_week_selection_change
 }) {
-  const filter_values = constants.nfl_weeks.map((week) => ({
+  const filter_values = current_season.nfl_weeks.map((week) => ({
     label: week.toString(),
     value: week,
     selected: selected_weeks_for_schedule.includes(week)

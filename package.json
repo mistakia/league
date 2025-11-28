@@ -40,6 +40,8 @@
     "#libs-server/*": "./libs-server/*",
     "#libs-shared": "./libs-shared/index.mjs",
     "#libs-shared/*": "./libs-shared/*",
+    "#constants": "./libs-shared/constants/index.mjs",
+    "#constants/*": "./libs-shared/constants/*",
     "#scripts/*": "./scripts/*",
     "#jobs/*": "./jobs/*",
     "#league-import/*": "./league-import/*",

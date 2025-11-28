@@ -1,5 +1,11 @@
 import swaggerJSDoc from 'swagger-jsdoc'
-import { bookmaker_constants, constants } from '#libs-shared'
+import { bookmaker_constants } from '#libs-shared'
+import {
+  nfl_team_abbreviations,
+  fantasy_positions,
+  external_data_sources,
+  nfl_season_types
+} from '#constants'
 import { league_settings_fields } from '#api/routes/leagues/league-settings.mjs'
 
 const options = {
@@ -70,13 +76,13 @@ const options = {
         },
         NFLTeamAbbreviation: {
           type: 'string',
-          enum: [...constants.nflTeams, 'INA'],
+          enum: [...nfl_team_abbreviations, 'INA'],
           description: 'NFL team abbreviation (INA = Inactive)',
           example: 'KC'
         },
         FantasyPosition: {
           type: 'string',
-          enum: [...constants.positions, 'DEF'],
+          enum: [...fantasy_positions, 'DEF'],
           description: 'Fantasy-relevant position',
           example: 'QB'
         },
@@ -498,7 +504,7 @@ const options = {
             },
             sourceid: {
               type: 'integer',
-              enum: Object.values(constants.sources),
+              enum: Object.values(external_data_sources),
               description:
                 'Projection source ID (1=Fantasy Sharks, 2=CBS, 3=ESPN, 4=NFL, 6=PFF, 16=4for4, 18=Average, 28=Sleeper)',
               example: 16
@@ -728,7 +734,7 @@ const options = {
         },
         SeasonTypeEnum: {
           type: 'string',
-          enum: constants.seas_types,
+          enum: nfl_season_types,
           description: 'NFL season type',
           example: 'REG'
         },
@@ -794,7 +800,7 @@ const options = {
             pos: {
               type: 'string',
               maxLength: 4,
-              enum: [...constants.positions, 'DEF'],
+              enum: [...fantasy_positions, 'DEF'],
               description: 'Position for this baseline calculation',
               example: 'WR'
             }
@@ -1465,7 +1471,7 @@ const options = {
             },
             sourceid: {
               type: 'integer',
-              enum: Object.values(constants.sources),
+              enum: Object.values(external_data_sources),
               description: 'Projection source ID',
               example: 16
             },
@@ -3560,7 +3566,7 @@ const options = {
           in: 'query',
           schema: {
             type: 'string',
-            enum: constants.nflTeams
+            enum: nfl_team_abbreviations
           },
           description: 'NFL team abbreviation',
           example: 'KC'
@@ -3572,13 +3578,13 @@ const options = {
             oneOf: [
               {
                 type: 'string',
-                enum: [...constants.positions, 'DEF']
+                enum: [...fantasy_positions, 'DEF']
               },
               {
                 type: 'array',
                 items: {
                   type: 'string',
-                  enum: [...constants.positions, 'DEF']
+                  enum: [...fantasy_positions, 'DEF']
                 }
               }
             ]

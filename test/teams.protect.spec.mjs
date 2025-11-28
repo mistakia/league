@@ -7,7 +7,7 @@ import server from '#api'
 import knex from '#db'
 
 import league from '#db/seeds/league.mjs'
-import { constants } from '#libs-shared'
+import { current_season, roster_slot_types } from '#constants'
 import { user1, user2 } from './fixtures/token.mjs'
 import {
   addPlayer,
@@ -29,7 +29,7 @@ describe('API /teams - protect', function () {
     await knex.seed.run()
 
     MockDate.set(
-      constants.season.regular_season_start.add('1', 'month').toISOString()
+      current_season.regular_season_start.add('1', 'month').toISOString()
     )
   })
 
@@ -112,7 +112,7 @@ describe('API /teams - protect', function () {
         player,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PSP
+        slot: roster_slot_types.PSP
       })
       const request = chai_request
         .execute(server)

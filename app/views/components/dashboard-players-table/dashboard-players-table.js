@@ -9,6 +9,7 @@ import {
   useSensor,
   useSensors
 } from '@dnd-kit/core'
+import { current_season } from '@constants'
 import {
   SortableContext,
   sortableKeyboardCoordinates,
@@ -23,7 +24,6 @@ import {
 import Toolbar from '@mui/material/Toolbar'
 import DragIndicatorIcon from '@mui/icons-material/DragIndicator'
 
-import { constants } from '@libs-shared'
 import PlayerRoster from '@components/player-roster'
 import PlayerRosterHeader from '@components/player-roster-header'
 import PlayerRosterTotal from '@components/player-roster-total'
@@ -88,7 +88,7 @@ export default function DashboardPlayersTable({
   is_team_manager
 }) {
   const ref = React.createRef()
-  const { isOffseason, isRegularSeason } = constants
+  const { isOffseason, isRegularSeason } = current_season
   const isWaiver = Boolean(waiverType)
   const isPoach = Boolean(poaches)
   const isClaim = isWaiver || isPoach
@@ -192,7 +192,7 @@ export default function DashboardPlayersTable({
   if (isClaim) classNames.push('waiver')
   if (cutlist) classNames.push('cutlist')
 
-  const week = Math.max(constants.week, 1)
+  const week = Math.max(current_season.week, 1)
 
   let summary
   if (typeof space !== 'undefined') {
@@ -205,8 +205,8 @@ export default function DashboardPlayersTable({
   }
 
   const baseYear = is_before_extension_deadline
-    ? constants.year - 1
-    : constants.year
+    ? current_season.year - 1
+    : current_season.year
 
   const header_classNames = ['table__row', 'table__head']
   if (isClaim) header_classNames.push('claim')

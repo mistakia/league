@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { constants } from '#libs-shared'
+import { current_season, fantasy_positions } from '#constants'
 import { getLeague } from '#libs-server'
 
 const router = express.Router()
@@ -74,7 +74,7 @@ router.get('/gamelogs/players', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { leagueId } = req.query
-    const year = req.query.year || constants.season.year
+    const year = req.query.year || current_season.year
     const week = req.query.week ? Number(req.query.week) : null
     const nfl_team = req.query.nfl_team
     const opponent = req.query.opponent
@@ -84,7 +84,7 @@ router.get('/gamelogs/players', async (req, res) => {
     const include_receiving = req.query.receiving === 'true'
 
     if (!position) {
-      position = constants.positions
+      position = fantasy_positions
     } else if (!Array.isArray(position)) {
       position = [position]
     }

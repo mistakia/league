@@ -1,14 +1,14 @@
 import { fetch as fetch_http2 } from 'fetch-h2'
 import debug from 'debug'
 
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import * as cache from '../cache.mjs'
 import { get_fanduel_dfs_config } from './fanduel-config.mjs'
 
 const log = debug('fanduel:dfs')
 
 export const get_dfs_fixtures = async ({ ignore_cache = false } = {}) => {
-  const cache_key = `/fanduel/dfs/slates/${constants.season.year}/${constants.season.nfl_seas_type}/${constants.season.nfl_seas_week}.json`
+  const cache_key = `/fanduel/dfs/slates/${current_season.year}/${current_season.nfl_seas_type}/${current_season.nfl_seas_week}.json`
   if (!ignore_cache) {
     const cache_value = await cache.get({ key: cache_key })
     if (cache_value) {

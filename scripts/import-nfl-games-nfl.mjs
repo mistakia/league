@@ -5,7 +5,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, fixTeam, getGameDayAbbreviation } from '#libs-shared'
+import { fixTeam, getGameDayAbbreviation } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main, wait, nfl, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -68,9 +69,9 @@ const format = (item) => {
 }
 
 const run = async ({
-  year = constants.season.year,
-  week = constants.season.nfl_seas_week,
-  seas_type = constants.season.nfl_seas_type,
+  year = current_season.year,
+  week = current_season.nfl_seas_week,
+  seas_type = current_season.nfl_seas_type,
   token,
   ignore_cache = false
 } = {}) => {

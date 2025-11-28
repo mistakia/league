@@ -13,7 +13,8 @@ import Chip from '@mui/material/Chip'
 import Position from '@components/position'
 import NFLTeam from '@components/nfl-team'
 import Button from '@components/button'
-import { Roster, constants, getExtensionAmount } from '@libs-shared'
+import { Roster, getExtensionAmount } from '@libs-shared'
+import { waiver_types } from '@constants'
 
 export default class PoachConfirmation extends React.Component {
   constructor(props) {
@@ -70,7 +71,7 @@ export default class PoachConfirmation extends React.Component {
       this.props.submitWaiverClaim({
         release,
         pid: player_map.get('pid'),
-        type: constants.waivers.POACH
+        type: waiver_types.POACH
       })
     } else if (poach.uid) {
       this.props.updatePoach({ poachId: poach.uid, release })

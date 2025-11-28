@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 import db from '#db'
-import { isOnReleaseWaivers, constants } from '#libs-shared'
+import { isOnReleaseWaivers } from '#libs-shared'
+import { transaction_types } from '#constants'
 
 export default async function ({ pid, leagueId }) {
   // get last two transactions for player
@@ -10,7 +11,7 @@ export default async function ({ pid, leagueId }) {
       lid: leagueId,
       pid
     })
-    .whereNot('type', constants.transactions.ROSTER_ACTIVATE)
+    .whereNot('type', transaction_types.ROSTER_ACTIVATE)
     .where('timestamp', '>', cutoff)
     .orderBy('timestamp', 'desc')
     .orderBy('uid', 'desc')

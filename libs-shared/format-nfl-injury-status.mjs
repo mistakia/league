@@ -1,4 +1,4 @@
-import { player_nfl_injury_status } from './constants.mjs'
+import { player_nfl_injury_status } from '#constants'
 
 export default (status_string) => {
   status_string = status_string ? status_string.toUpperCase().trim() : null

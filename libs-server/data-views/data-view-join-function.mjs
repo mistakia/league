@@ -1,5 +1,5 @@
 import debug from 'debug'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import db from '#db'
 import get_join_func from '#libs-server/get-join-func.mjs'
 
@@ -18,7 +18,7 @@ export default function data_view_join_function(join_arguments) {
     join_year_on_year_split = false,
     join_week = false,
     cast_join_week_to_string = false,
-    default_year = constants.season.year,
+    default_year = current_season.year,
     join_on_team = false,
     join_table_team_field = 'nfl_team',
     data_view_options = {},

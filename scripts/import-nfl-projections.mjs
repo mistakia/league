@@ -4,7 +4,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season, external_data_sources } from '#constants'
 import { is_main, find_player_row, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -16,7 +16,7 @@ const log = debug('import:projections')
 debug.enable('import:projections,get-player')
 
 const timestamp = Math.round(Date.now() / 1000)
-const year = constants.season.year
+const year = current_season.year
 const getURL = (week, offset) =>
   week === 0
     ? `https://fantasy.nfl.com/research/projections?position=O&sort=projectedPts&statCategory=projectedStats&statSeason=${year}&statType=seasonProjectedStats&offset=${
@@ -114,7 +114,7 @@ const runOne = async ({ week = 0, dry = false } = {}) => {
       week,
       seas_type: 'REG',
       year,
-      sourceid: constants.sources.NFL,
+      sourceid: external_data_sources.NFL,
       ...data
     })
   }
@@ -133,7 +133,12 @@ const runOne = async ({ week = 0, dry = false } = {}) => {
   if (inserts.length) {
     // remove any existing projections in index not included in this set
     await db('projections_index')
-      .where({ year, week, sourceid: constants.sources.NFL, seas_type: 'REG' })
+      .where({
+        year,
+        week,
+        sourceid: external_data_sources.NFL,
+        seas_type: 'REG'
+      })
       .whereNotIn(
         'pid',
         inserts.map((i) => i.pid)
@@ -151,7 +156,7 @@ const runOne = async ({ week = 0, dry = false } = {}) => {
 
 const run = async ({ season = false, dry = false } = {}) => {
   // do not pull in any projections after the season has ended
-  if (constants.season.week > constants.season.nflFinalWeek) {
+  if (current_season.week > current_season.nflFinalWeek) {
     return
   }
 
@@ -159,8 +164,8 @@ const run = async ({ season = false, dry = false } = {}) => {
     await runOne({ week: 0, dry })
   }
 
-  let week = Math.max(1, constants.season.week)
-  for (; week <= constants.season.finalWeek; week++) {
+  let week = Math.max(1, current_season.week)
+  for (; week <= current_season.finalWeek; week++) {
     await runOne({ week, dry })
   }
 }

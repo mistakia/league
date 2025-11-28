@@ -5,7 +5,7 @@ import utc from 'dayjs/plugin/utc.js'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -18,7 +18,7 @@ const initialize_cli = () => {
 const log = debug('generate-season-dates')
 debug.enable('generate-season-dates')
 
-const generateSeasonDates = async ({ year = constants.season.year } = {}) => {
+const generateSeasonDates = async ({ year = current_season.year } = {}) => {
   const result = {
     openingDay: null,
     start: null,

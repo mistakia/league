@@ -1,12 +1,12 @@
 import dayjs from 'dayjs'
 
 import db from '#db'
+import { Roster, getDraftDates, get_free_agent_period } from '#libs-shared'
 import {
-  constants,
-  Roster,
-  getDraftDates,
-  get_free_agent_period
-} from '#libs-shared'
+  current_season,
+  roster_slot_types,
+  transaction_types
+} from '#constants'
 import sendNotifications from './send-notifications.mjs'
 import getRoster from './get-roster.mjs'
 import isPlayerOnWaivers from './is-player-on-waivers.mjs'
@@ -21,13 +21,13 @@ export default async function ({
   teamId,
   bid = 0,
   userId,
-  slot = constants.slots.BENCH,
+  slot = roster_slot_types.BENCH,
   waiverId
 }) {
   const type =
-    slot === constants.slots.BENCH
-      ? constants.transactions.ROSTER_ADD
-      : constants.transactions.PRACTICE_ADD
+    slot === roster_slot_types.BENCH
+      ? transaction_types.ROSTER_ADD
+      : transaction_types.PRACTICE_ADD
 
   // verify player and release ids
   const pids = [pid]
@@ -54,7 +54,7 @@ export default async function ({
   }
 
   const teams = await db('teams')
-    .where({ uid: teamId, lid: leagueId, year: constants.season.year })
+    .where({ uid: teamId, lid: leagueId, year: current_season.year })
     .limit(1)
   const team = teams[0]
 
@@ -66,8 +66,8 @@ export default async function ({
   const rosters = await db('rosters_players')
     .where({
       lid: leagueId,
-      week: constants.season.week,
-      year: constants.season.year,
+      week: current_season.week,
+      year: current_season.year,
       pid
     })
     .limit(1)
@@ -82,11 +82,11 @@ export default async function ({
   }
 
   // verify no veterans are signed in the offseason outside of the free agency period and the rookie draft is complete
-  if (!constants.season.isRegularSeason) {
+  if (!current_season.isRegularSeason) {
     // verify rookie draft is complete
     const picks = await db('draft')
       .where({
-        year: constants.season.year,
+        year: current_season.year,
         lid: leagueId
       })
       .orderBy('pick', 'asc')
@@ -96,7 +96,7 @@ export default async function ({
     const season = await db('seasons')
       .where({
         lid: leagueId,
-        year: constants.season.year
+        year: current_season.year
       })
       .first()
 
@@ -119,11 +119,11 @@ export default async function ({
     }
 
     // check if during free agency period for veterans
-    if (player_row.nfl_draft_year !== constants.season.year) {
+    if (player_row.nfl_draft_year !== current_season.year) {
       if (league.free_agency_live_auction_start) {
         const faPeriod = get_free_agent_period(league)
         if (
-          constants.season.now.isBefore(faPeriod.free_agency_live_auction_start)
+          current_season.now.isBefore(faPeriod.free_agency_live_auction_start)
         ) {
           throw new Error('veteran free agency not open')
         }
@@ -145,9 +145,9 @@ export default async function ({
   }
 
   // verify player is practice squad eligible (rookie, not on a team, or on a PS)
-  /* if (type === constants.transactions.PRACTICE_ADD) {
+  /* if (type === transaction_types.PRACTICE_ADD) {
    *   if (
-   *     player_row.nfl_draft_year !== constants.season.year &&
+   *     player_row.nfl_draft_year !== current_season.year &&
    *     player_row.current_nfl_team !== 'INA'
    *   ) {
    *     throw new Error('player is not practice squad eligible')
@@ -168,8 +168,8 @@ export default async function ({
       }
 
       if (
-        releasePlayer.slot === constants.slots.PSP ||
-        releasePlayer.slot === constants.slots.PSDP
+        releasePlayer.slot === roster_slot_types.PSP ||
+        releasePlayer.slot === roster_slot_types.PSDP
       ) {
         throw new Error('invalid release')
       }
@@ -184,7 +184,7 @@ export default async function ({
     throw new Error('exceeds roster limits')
   }
 
-  if (constants.season.isOffseason && roster.availableCap - bid < 0) {
+  if (current_season.isOffseason && roster.availableCap - bid < 0) {
     throw new Error('exceeds salary space')
   }
 
@@ -212,8 +212,8 @@ export default async function ({
     extensions: 0,
     tid: teamId,
     lid: leagueId,
-    year: constants.season.year,
-    week: constants.season.week
+    year: current_season.year,
+    week: current_season.week
   })
 
   // add player transaction
@@ -224,8 +224,8 @@ export default async function ({
     pid,
     type,
     value: bid,
-    week: constants.season.week,
-    year: constants.season.year,
+    week: current_season.week,
+    year: current_season.year,
     waiverid: waiverId,
     timestamp: Math.round(Date.now() / 1000)
   }

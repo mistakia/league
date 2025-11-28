@@ -1,10 +1,11 @@
-import { uniqBy, constants } from '#libs-shared'
+import { uniqBy } from '#libs-shared'
+import { current_season, transaction_types, player_tag_types } from '#constants'
 import db from '#db'
 
 export default async function ({
   tid,
-  week = constants.season.fantasy_season_week,
-  year = constants.season.year
+  week = current_season.fantasy_season_week,
+  year = current_season.year
 }) {
   const rows = await db('rosters').where({ tid, year, week })
   const roster_row = rows[0]
@@ -29,7 +30,7 @@ export default async function ({
     const transactions = await db('transactions')
       .where('tid', tid)
       .whereIn('pid', pids)
-      .where('type', constants.transactions.EXTENSION)
+      .where('type', transaction_types.EXTENSION)
 
     if (transactions.length) {
       for (const roster_player of roster_row.players) {
@@ -40,7 +41,7 @@ export default async function ({
 
     const bids = await db('restricted_free_agency_bids')
       .where('tid', tid)
-      .where('year', constants.season.year)
+      .where('year', current_season.year)
       .whereNull('cancelled')
 
     if (bids.length) {
@@ -72,7 +73,7 @@ export default async function ({
 
     // for RFA tagged players, get if their tag is processed, nominated, or announced
     const restricted_free_agency_tagged_players = roster_row.players.filter(
-      (p) => p.tag === constants.tags.RESTRICTED_FREE_AGENCY
+      (p) => p.tag === player_tag_types.RESTRICTED_FREE_AGENCY
     )
     if (restricted_free_agency_tagged_players.length) {
       const restricted_free_agency_bids = await db(
@@ -81,7 +82,7 @@ export default async function ({
         .select('pid', 'processed', 'nominated', 'announced', 'player_tid')
         .where({
           player_tid: tid,
-          year: constants.season.year
+          year: current_season.year
         })
         .whereIn(
           'pid',

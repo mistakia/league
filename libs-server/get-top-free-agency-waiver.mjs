@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone.js'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season, waiver_types, transaction_types } from '#constants'
 
 dayjs.extend(timezone)
 
@@ -11,7 +11,7 @@ export default async function (leagueId) {
   const cutoff = dayjs().subtract('24', 'hours').unix()
 
   const recent_transaction_rows = await db('transactions')
-    .where('type', constants.transactions.ROSTER_RELEASE)
+    .where('type', transaction_types.ROSTER_RELEASE)
     .where('timestamp', '>=', cutoff)
     .where('lid', leagueId)
 
@@ -31,13 +31,13 @@ export default async function (leagueId) {
     .join('teams', 'waivers.tid', 'teams.uid')
     .join('player', 'waivers.pid', 'player.pid')
     .joinRaw(
-      `left join nfl_games on (player.current_nfl_team = nfl_games.v or player.current_nfl_team = nfl_games.h) and (nfl_games.week = ${constants.season.week} or nfl_games.week is null) and (nfl_games.year = ${constants.season.year} or nfl_games.year is null) and (nfl_games.seas_type = 'REG' or nfl_games.seas_type is null)`
+      `left join nfl_games on (player.current_nfl_team = nfl_games.v or player.current_nfl_team = nfl_games.h) and (nfl_games.week = ${current_season.week} or nfl_games.week is null) and (nfl_games.year = ${current_season.year} or nfl_games.year is null) and (nfl_games.seas_type = 'REG' or nfl_games.seas_type is null)`
     )
-    .where('teams.year', constants.season.year)
+    .where('teams.year', current_season.year)
     .where('waivers.lid', leagueId)
     .whereNull('processed')
     .whereNull('cancelled')
-    .where('waivers.type', constants.waivers.FREE_AGENCY)
+    .where('waivers.type', waiver_types.FREE_AGENCY)
     .orderBy([
       {
         column: 'waivers.bid',

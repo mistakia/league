@@ -6,7 +6,8 @@ import { hideBin } from 'yargs/helpers'
 import timezone from 'dayjs/plugin/timezone.js'
 
 import db from '#db'
-import { constants, fixTeam, getGameDayAbbreviation } from '#libs-shared'
+import { fixTeam, getGameDayAbbreviation } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main, report_job } from '#libs-server'
 import config from '#config'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -95,7 +96,7 @@ const format = (item) => {
   }
 }
 
-const run = async ({ year = constants.season.year }) => {
+const run = async ({ year = current_season.year }) => {
   log(`Importing games for ${year}`)
   const url = `${config.ngs_api_url}/league/schedule?season=${year}`
   const data = await fetch(url, {

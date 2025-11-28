@@ -17,23 +17,23 @@ The fantasy points calculation system is designed to be modular and extensible, 
 
 ### 1. Define the New Statistic in Constants
 
-**File: `/libs-shared/constants.mjs`**
+**File: `/libs-shared/constants/stats-constants.mjs`**
 
-Add your new statistic to the `stats` array and provide a human-readable header:
+Add your new statistic to the `base_fantasy_stats` array and provide a human-readable header:
 
 ```javascript
-export const stats = [
+export const base_fantasy_stats = [
   // existing stats...
   'your_new_stat' // add your new stat
 ]
 
-export const statHeaders = {
+export const fantasy_stat_display_names = {
   // existing headers...
   your_new_stat: 'Human Readable Name'
 }
 ```
 
-The statistic will automatically be included in `fantasyStats` and `createStats()` functions.
+The statistic will automatically be included in `all_fantasy_stats` and `create_empty_fantasy_stats()` functions.
 
 ### 2. Update Scoring Format Hash Generation
 
@@ -75,7 +75,7 @@ Add logic to handle the new statistic in the scoring loop. Most stats can use th
 
 ```javascript
 // For most stats, the default handling works:
-// The loop automatically processes all stats from constants.stats
+// The loop automatically processes all stats from base_fantasy_stats
 
 // For special handling, add conditional logic:
 else if (stat === 'your_new_stat' && some_condition) {
@@ -162,7 +162,7 @@ The pipeline works as follows:
 
 - `generate-player-gamelogs.mjs` uses `calculateStatsFromPlayStats()` to aggregate play-by-play data into game-level statistics
 - `process-player-seasonlogs.mjs` aggregates game-level statistics into season-level statistics
-- Both scripts automatically include any new statistics added to the `constants.stats` array
+- Both scripts automatically include any new statistics added to the `base_fantasy_stats` array
 
 ### 9. Testing and Validation
 
@@ -297,7 +297,7 @@ The data view system automatically:
 
 ### Common Issues
 
-1. **Missing from fantasyStats**: Ensure added to `constants.stats` array
+1. **Missing from all_fantasy_stats**: Ensure added to `base_fantasy_stats` array
 2. **Hash mismatch**: Update `generate-scoring-format-hash.mjs`
 3. **SQL errors**: Check data view SQL generation
 4. **Missing data**: Verify play stats aggregation logic

@@ -5,10 +5,11 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import ExpandLessIcon from '@mui/icons-material/ExpandLess'
 
 import PlayerRosterRow from '@components/player-roster-row'
-import { Roster as RosterBuilder, constants } from '@libs-shared'
+import { Roster as RosterBuilder } from '@libs-shared'
 import TeamName from '@components/team-name'
 
 import './roster.styl'
+import { roster_slot_types } from '@constants'
 
 export default class Roster extends React.Component {
   render = () => {
@@ -35,7 +36,7 @@ export default class Roster extends React.Component {
 
     const rows = []
     if (league.sqb) {
-      const slot = constants.slots.QB
+      const slot = roster_slot_types.QB
       const players = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.sqb; i++) {
         const { pid } = players[i] || {}
@@ -50,7 +51,7 @@ export default class Roster extends React.Component {
     }
 
     if (league.srb) {
-      const slot = constants.slots.RB
+      const slot = roster_slot_types.RB
       const players = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.srb; i++) {
         const { pid } = players[i] || {}
@@ -65,7 +66,7 @@ export default class Roster extends React.Component {
     }
 
     if (league.swr) {
-      const slot = constants.slots.WR
+      const slot = roster_slot_types.WR
       const players = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.swr; i++) {
         const { pid } = players[i] || {}
@@ -80,7 +81,7 @@ export default class Roster extends React.Component {
     }
 
     if (league.ste) {
-      const slot = constants.slots.TE
+      const slot = roster_slot_types.TE
       const players = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.ste; i++) {
         const { pid } = players[i] || {}
@@ -95,7 +96,7 @@ export default class Roster extends React.Component {
     }
 
     if (league.sk) {
-      const slot = constants.slots.K
+      const slot = roster_slot_types.K
       const players = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.sk; i++) {
         const { pid } = players[i] || {}
@@ -110,7 +111,7 @@ export default class Roster extends React.Component {
     }
 
     if (league.sdst) {
-      const slot = constants.slots.DST
+      const slot = roster_slot_types.DST
       const players = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.sdst; i++) {
         const { pid } = players[i] || {}
@@ -125,7 +126,7 @@ export default class Roster extends React.Component {
     }
 
     if (league.srbwr) {
-      const slot = constants.slots.RBWR
+      const slot = roster_slot_types.RBWR
       const players = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.srbwr; i++) {
         const { pid } = players[i] || {}
@@ -140,7 +141,7 @@ export default class Roster extends React.Component {
     }
 
     if (league.srbwrte) {
-      const slot = constants.slots.RBWRTE
+      const slot = roster_slot_types.RBWRTE
       const players = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.srbwrte; i++) {
         const { pid } = players[i] || {}
@@ -155,7 +156,7 @@ export default class Roster extends React.Component {
     }
 
     if (league.sqbrbwrte) {
-      const slot = constants.slots.QBRBWRTE
+      const slot = roster_slot_types.QBRBWRTE
       const players = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.sqbrbwrte; i++) {
         const { pid } = players[i] || {}
@@ -170,7 +171,7 @@ export default class Roster extends React.Component {
     }
 
     if (league.swrte) {
-      const slot = constants.slots.WRTE
+      const slot = roster_slot_types.WRTE
       const players = r.starters.filter((p) => p.slot === slot)
       for (let i = 0; i < league.swrte; i++) {
         const { pid } = players[i] || {}
@@ -191,7 +192,7 @@ export default class Roster extends React.Component {
         rows.push(
           <PlayerRosterRow
             key={`${roster.tid}-bench-${i}`}
-            {...{ pid, slot: constants.slots.BENCH, roster, show_bid }}
+            {...{ pid, slot: roster_slot_types.BENCH, roster, show_bid }}
           />
         )
       }

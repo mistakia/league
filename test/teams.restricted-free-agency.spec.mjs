@@ -7,7 +7,7 @@ import server from '#api'
 import knex from '#db'
 import league from '#db/seeds/league.mjs'
 import { getRoster, getLeague } from '#libs-server'
-import { constants } from '#libs-shared'
+import { current_season, player_tag_types } from '#constants'
 import { user1, user2 } from './fixtures/token.mjs'
 import {
   selectPlayer,
@@ -24,7 +24,7 @@ process.env.NODE_ENV = 'test'
 chai.should()
 chai.use(chai_http)
 const expect = chai.expect
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 
 describe('API /teams - restricted free agency', function () {
   before(async function () {
@@ -86,7 +86,7 @@ describe('API /teams - restricted free agency', function () {
       res.body.pid.should.equal(player.pid)
       res.body.submitted.should.equal(Math.round(Date.now() / 1000))
       res.body.bid.should.equal(bid)
-      res.body.year.should.equal(constants.season.year)
+      res.body.year.should.equal(current_season.year)
       res.body.player_tid.should.equal(teamId)
       res.body.uid.should.be.a('number')
       res.body.uid.should.be.above(0)
@@ -102,7 +102,7 @@ describe('API /teams - restricted free agency', function () {
       query1[0].pid.should.equal(player.pid)
       query1[0].userid.should.equal(userId)
       query1[0].bid.should.equal(bid)
-      query1[0].year.should.equal(constants.season.year)
+      query1[0].year.should.equal(current_season.year)
       query1[0].tid.should.equal(teamId)
       query1[0].player_tid.should.equal(teamId)
       query1[0].lid.should.equal(leagueId)
@@ -125,7 +125,7 @@ describe('API /teams - restricted free agency', function () {
       const roster = await getRoster({ tid: teamId })
 
       const taggedPlayer = roster.players.find((p) => p.pid === player.pid)
-      taggedPlayer.tag.should.equal(constants.tags.RESTRICTED_FREE_AGENCY)
+      taggedPlayer.tag.should.equal(player_tag_types.RESTRICTED_FREE_AGENCY)
     })
 
     it('competing team', async () => {
@@ -175,7 +175,7 @@ describe('API /teams - restricted free agency', function () {
       res2.body.tid.should.equal(1)
       res2.body.userid.should.equal(userId)
       res2.body.pid.should.equal(player.pid)
-      res2.body.year.should.equal(constants.season.year)
+      res2.body.year.should.equal(current_season.year)
       res2.body.submitted.should.equal(Math.round(Date.now() / 1000))
       res2.body.bid.should.equal(bid)
       res2.body.player_tid.should.equal(playerTid)
@@ -258,7 +258,7 @@ describe('API /teams - restricted free agency', function () {
 
       res2.body.tid.should.equal(teamId)
       res2.body.userid.should.equal(userId)
-      res2.body.year.should.equal(constants.season.year)
+      res2.body.year.should.equal(current_season.year)
       res2.body.pid.should.equal(tagPlayer.pid)
       res2.body.submitted.should.equal(Math.round(Date.now() / 1000))
       res2.body.bid.should.equal(bid)
@@ -292,7 +292,7 @@ describe('API /teams - restricted free agency', function () {
 
       // Set league tran_end to a past date
       await knex('seasons')
-        .where({ lid: leagueId, year: constants.season.year })
+        .where({ lid: leagueId, year: current_season.year })
         .update({ tran_end: Math.floor(Date.now() / 1000) - 86400 }) // 1 day ago
 
       const res = await chai_request
@@ -311,7 +311,7 @@ describe('API /teams - restricted free agency', function () {
 
       // Reset the league tran_end
       await knex('seasons')
-        .where({ lid: leagueId, year: constants.season.year })
+        .where({ lid: leagueId, year: current_season.year })
         .update({ tran_end: null })
     })
 
@@ -351,7 +351,7 @@ describe('API /teams - restricted free agency', function () {
           pid: player.pid,
           tid: original_team_id,
           lid: league_id,
-          year: constants.season.year
+          year: current_season.year
         })
         .update({ processed: Math.round(Date.now() / 1000) })
 
@@ -1133,7 +1133,7 @@ describe('API /teams - restricted free agency', function () {
      *   const bid = 10
      *   const player = await selectPlayer()
      *   const reservePlayer = await selectPlayer({
-     *     nfl_status: constants.player_nfl_status.ACTIVE
+     *     nfl_status: player_nfl_status.ACTIVE
      *   })
 
      *   await addPlayer({
@@ -1148,7 +1148,7 @@ describe('API /teams - restricted free agency', function () {
      *     player: reservePlayer,
      *     teamId,
      *     userId,
-     *     slot: constants.slots.RESERVE_SHORT_TERM
+     *     slot: roster_slot_types.RESERVE_SHORT_TERM
      *   })
 
      *   const request = chai
@@ -1205,7 +1205,7 @@ describe('API /teams - restricted free agency', function () {
 
       // Set RFA period end to yesterday
       await knex('seasons')
-        .where({ lid: leagueId, year: constants.season.year })
+        .where({ lid: leagueId, year: current_season.year })
         .update({
           tran_end: Math.floor(Date.now() / 1000) - 86400
         })

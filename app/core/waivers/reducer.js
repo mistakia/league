@@ -1,13 +1,13 @@
 import { Map, List } from 'immutable'
 
-import { constants } from '@libs-shared'
 import { waiver_actions } from './actions'
 import { app_actions } from '@core/app'
 import { createWaiver } from './waiver'
+import { waiver_types } from '@constants'
 
 const initialState = new Map({
   report: new List(),
-  type: new List([Object.values(constants.waivers)[0]]),
+  type: new List([Object.values(waiver_types)[0]]),
   processed: new List(),
   processingTimes: new List(),
   teams: new Map(),

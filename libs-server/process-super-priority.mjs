@@ -1,5 +1,11 @@
 import db from '#db'
-import { constants, Roster } from '#libs-shared'
+import { Roster } from '#libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  player_tag_types,
+  transaction_types
+} from '#constants'
 import getRoster from './get-roster.mjs'
 import getLeague from './get-league.mjs'
 import sendNotifications from './send-notifications.mjs'
@@ -40,10 +46,10 @@ export default async function process_super_priority({
 
   let target_slot
   if (super_priority_record && super_priority_record.requires_waiver) {
-    target_slot = constants.slots.PS
+    target_slot = roster_slot_types.PS
   } else {
     // Player can automatically return (was PSD or PS with open slot)
-    target_slot = constants.slots.PSD
+    target_slot = roster_slot_types.PSD
   }
 
   // Handle waiver releases - validate and simulate before checking space
@@ -57,8 +63,8 @@ export default async function process_super_priority({
 
       // Validate release isn't a protected player
       if (
-        releasePlayer.slot === constants.slots.PSP ||
-        releasePlayer.slot === constants.slots.PSDP
+        releasePlayer.slot === roster_slot_types.PSP ||
+        releasePlayer.slot === roster_slot_types.PSDP
       ) {
         throw new Error('Cannot release protected practice squad players')
       }
@@ -73,7 +79,7 @@ export default async function process_super_priority({
   if (
     super_priority_record &&
     super_priority_record.requires_waiver &&
-    target_slot === constants.slots.PS
+    target_slot === roster_slot_types.PS
   ) {
     if (!roster.has_practice_squad_space_for_position(player_row.pos)) {
       throw new Error(
@@ -96,8 +102,8 @@ export default async function process_super_priority({
 
   // Add player to original team roster for current and future weeks
   const current_week_roster = await db('rosters')
-    .where('week', '>=', constants.week)
-    .where('year', constants.year)
+    .where('week', '>=', current_season.week)
+    .where('year', current_season.year)
     .where('tid', original_tid)
     .first()
 
@@ -110,7 +116,7 @@ export default async function process_super_priority({
     slot: target_slot,
     pid,
     pos: player_row.pos,
-    tag: constants.tags.REGULAR,
+    tag: player_tag_types.REGULAR,
     extensions: 0,
     tid: original_tid,
     lid,
@@ -119,15 +125,15 @@ export default async function process_super_priority({
   })
 
   // Create transaction
-  const transaction_type = constants.transactions.SUPER_PRIORITY
+  const transaction_type = transaction_types.SUPER_PRIORITY
 
   // Get original practice squad salary for the player
   const last_transaction = await db('transactions')
     .where({ pid, tid: original_tid, lid })
     .whereIn('type', [
-      constants.transactions.PRACTICE_ADD,
-      constants.transactions.DRAFT,
-      constants.transactions.ROSTER_DEACTIVATE
+      transaction_types.PRACTICE_ADD,
+      transaction_types.DRAFT,
+      transaction_types.ROSTER_DEACTIVATE
     ])
     .orderBy('timestamp', 'desc')
     .limit(1)
@@ -145,8 +151,8 @@ export default async function process_super_priority({
     pid,
     type: transaction_type,
     value,
-    week: constants.week,
-    year: constants.year,
+    week: current_season.week,
+    year: current_season.year,
     timestamp
   }
 
@@ -164,7 +170,7 @@ export default async function process_super_priority({
 
   // Get team info for notifications
   const team_rows = await db('teams')
-    .where({ uid: original_tid, lid, year: constants.year })
+    .where({ uid: original_tid, lid, year: current_season.year })
     .limit(1)
 
   if (team_rows.length) {

@@ -1,6 +1,6 @@
 import Validator from 'fastest-validator'
 
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 const v = new Validator({ haltOnFirstError: true })
 
@@ -17,7 +17,7 @@ const year_schema = {
   integer: true,
   positive: true,
   min: 1920,
-  max: constants.season.year,
+  max: current_season.year,
   $$root: true
 }
 

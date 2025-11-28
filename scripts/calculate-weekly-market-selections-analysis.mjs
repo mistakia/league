@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 import { is_main, batch_insert, selection_result } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
@@ -305,9 +305,9 @@ const format_prop_row = ({
 
 const calculate_weekly_market_selections_analysis = async ({
   prop_rows,
-  seas_type = constants.season.nfl_seas_type,
-  week = constants.season.nfl_seas_week,
-  year = constants.season.year,
+  seas_type = current_season.nfl_seas_type,
+  week = current_season.nfl_seas_week,
+  year = current_season.year,
   dry_run = false
 } = {}) => {
   log(`calculating analysis for ${prop_rows.length} prop rows`)
@@ -322,7 +322,7 @@ const calculate_weekly_market_selections_analysis = async ({
     seas_type
   })
   log(
-    `loaded ${nfl_games.length} nfl games for week ${week} ${constants.season.year}`
+    `loaded ${nfl_games.length} nfl games for week ${week} ${current_season.year}`
   )
 
   const current_year = year
@@ -446,9 +446,9 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    const week = argv.week || constants.season.nfl_seas_week
-    const year = argv.year || constants.season.year
-    const seas_type = argv.seas_type || constants.season.nfl_seas_type
+    const week = argv.week || current_season.nfl_seas_week
+    const year = argv.year || current_season.year
+    const seas_type = argv.seas_type || current_season.nfl_seas_type
     const source = argv.source || 'FANDUEL'
     const dry_run = argv.dry || false
     log({

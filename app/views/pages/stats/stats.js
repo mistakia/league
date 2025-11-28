@@ -8,10 +8,15 @@ import Tooltip from '@mui/material/Tooltip'
 
 import PageLayout from '@layouts/page'
 import PercentileMetric from '@components/percentile-metric'
-import { constants, get_eligible_slots, toPercent } from '@libs-shared'
+import { get_eligible_slots, toPercent } from '@libs-shared'
 import SelectYear from '@components/select-year'
 
 import './stats.styl'
+import {
+  current_season,
+  roster_slot_types,
+  fantasy_positions
+} from '@constants'
 
 const careerlog_single_fields = {
   num_seasons: 'Seasons',
@@ -190,7 +195,10 @@ const season_fields = {
 }
 
 function SummaryRow({ team, percentiles, year, key }) {
-  const stats = team.get('stats', new Map(constants.createFantasyTeamStats()))
+  const stats = team.get(
+    'stats',
+    new Map(current_season.createFantasyTeamStats())
+  )
 
   const items = Object.entries(season_fields).map(([key, value]) => {
     const fields = Object.entries(value).map(([field, { fixed }]) => (
@@ -228,7 +236,7 @@ SummaryRow.propTypes = {
 }
 
 function PositionRow({ team, percentiles, year, key }) {
-  const position_cells = constants.positions.map((position) => {
+  const position_cells = fantasy_positions.map((position) => {
     const key = `pPos${position}`
     const value = team.getIn(['stats', key], 0)
     const percentile = percentiles[key]
@@ -262,7 +270,7 @@ PositionRow.propTypes = {
 
 function SlotRow({ team, slots, percentiles, key }) {
   const slot_cells = slots.map((s) => {
-    const slot = constants.slots[s]
+    const slot = roster_slot_types[s]
     const key = `pSlot${slot}`
     const value = team.getIn(['stats', key], 0)
     const percentile = percentiles[key]
@@ -328,7 +336,7 @@ export default function StatsPage({
   for (const slot of slots) {
     slot_headers.push(
       <div key={`slot_${slot}`} className='table__cell metric'>
-        {constants.slotName[constants.slots[slot]]}
+        {roster_slot_types.slotName[roster_slot_types[slot]]}
       </div>
     )
     slot_headers.push(
@@ -339,7 +347,7 @@ export default function StatsPage({
   }
 
   const position_headers = []
-  constants.positions.forEach((position) => {
+  fantasy_positions.forEach((position) => {
     position_headers.push(
       <div key={`position_${position}`} className='table__cell metric'>
         {position}
@@ -395,7 +403,7 @@ export default function StatsPage({
   }
 
   let stats_body
-  if (year === constants.year && constants.week === 0) {
+  if (year === current_season.year && current_season.week === 0) {
     stats_body = <div className='section empty' />
   } else {
     const season_stats_header_items = Object.entries(season_fields).map(

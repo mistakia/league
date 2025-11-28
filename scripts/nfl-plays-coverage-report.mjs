@@ -6,7 +6,6 @@ import { fileURLToPath } from 'url'
 // import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-// import { constants } from '#libs-shared'
 import { is_main } from '#libs-server'
 
 // const argv = yargs(hideBin(process.argv)).argv

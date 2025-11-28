@@ -1,7 +1,8 @@
 import { List } from 'immutable'
 import { createSelector } from 'reselect'
 
-import { constants, data_view_fields_index } from '@libs-shared'
+import { data_view_fields_index } from '@libs-shared'
+import { current_season } from '@constants'
 
 import betting_market_table_fields from './betting-market-table-fields'
 import espn_score_table_fields from './espn-score-table-fields'
@@ -51,7 +52,7 @@ import pff_team_grades_table_fields from './pff-team-grades-table-fields'
 
 export const get_data_views_fields = createSelector(
   (state) =>
-    state.getIn(['players', 'week'], new List([constants.week])).get(0),
+    state.getIn(['players', 'week'], new List([current_season.week])).get(0),
   (state) => state.getIn(['app', 'userId']),
   (week, userId) => PlayerTableFields({ week, is_logged_in: Boolean(userId) })
   // (state) => state.get('seasonlogs'),

@@ -5,7 +5,7 @@ import Icon from '@components/icon'
 import Source from '@components/source'
 import SelectedPlayerProjectionRow from '@components/selected-player-projection-row'
 import SelectedPlayerProjectionRowHeader from '@components/selected-player-projection-row-header'
-import { constants } from '@libs-shared'
+import { current_season } from '@constants'
 
 export default function SelectedPlayerProjection({
   pid,
@@ -65,7 +65,7 @@ export default function SelectedPlayerProjection({
       <div className='selected__table-header sticky__column'>
         <div className='row__group-head'>
           {week === 0
-            ? `${constants.year} Regular Season Projections`
+            ? `${current_season.year} Regular Season Projections`
             : `Week ${week} Projections`}
         </div>
       </div>

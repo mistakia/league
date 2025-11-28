@@ -1,4 +1,4 @@
-import { constants } from '#libs-shared'
+import { transaction_types } from '#constants'
 import db from '#db'
 
 export default async function ({ lid, pid, tid }) {
@@ -12,12 +12,12 @@ export default async function ({ lid, pid, tid }) {
     .orderBy('uid', 'desc')
 
   const types = [
-    constants.transactions.ROSTER_ADD,
-    constants.transactions.TRADE,
-    constants.transactions.POACHED,
-    constants.transactions.AUCTION_PROCESSED,
-    constants.transactions.DRAFT,
-    constants.transactions.PRACTICE_ADD
+    transaction_types.ROSTER_ADD,
+    transaction_types.TRADE,
+    transaction_types.POACHED,
+    transaction_types.AUCTION_PROCESSED,
+    transaction_types.DRAFT,
+    transaction_types.PRACTICE_ADD
   ]
   const index = transactions.findIndex((t) => types.includes(t.type))
   return transactions.slice(0, index + 1)

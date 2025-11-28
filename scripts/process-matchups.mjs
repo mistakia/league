@@ -3,7 +3,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, Roster, calculateStandings } from '#libs-shared'
+import { Roster, calculateStandings } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main, getRoster, getLeague, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -14,18 +15,18 @@ const initialize_cli = () => {
 const log = debug('process-matchups')
 debug.enable('process-matchups,calculate-standings')
 
-const run = async ({ lid = 1, year = constants.season.year }) => {
+const run = async ({ lid = 1, year = current_season.year }) => {
   const league = await getLeague({ lid, year })
   const matchups = await db('matchups').where({ lid, year })
   const teams = await db('teams').where({ lid, year })
 
   const finalWeek =
-    year === constants.season.year
+    year === current_season.year
       ? Math.min(
-          Math.max(constants.season.week - 1, 0),
-          constants.season.regularSeasonFinalWeek
+          Math.max(current_season.week - 1, 0),
+          current_season.regularSeasonFinalWeek
         )
-      : constants.season.regularSeasonFinalWeek
+      : current_season.regularSeasonFinalWeek
 
   const starters = {}
   const active = {}

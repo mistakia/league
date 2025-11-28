@@ -7,7 +7,7 @@ import server from '#api'
 import knex from '#db'
 
 import league from '#db/seeds/league.mjs'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { user1, user2 } from './fixtures/token.mjs'
 import { getRoster } from '#libs-server'
 import {
@@ -19,7 +19,7 @@ import {
 } from './utils/index.mjs'
 
 process.env.NODE_ENV = 'test'
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 chai.should()
 chai.use(chai_http)
 const expect = chai.expect

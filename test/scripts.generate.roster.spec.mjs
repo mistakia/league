@@ -5,14 +5,14 @@ import MockDate from 'mockdate'
 import knex from '#db'
 import league from '#db/seeds/league.mjs'
 import draft from '#db/seeds/draft.mjs'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { getRoster } from '#libs-server'
 import run from '#scripts/generate-rosters.mjs'
 
 process.env.NODE_ENV = 'test'
 
 chai.should()
-const { regular_season_start, end } = constants.season
+const { regular_season_start, end } = current_season
 const expect = chai.expect
 
 describe('SCRIPTS /rosters - generate weekly rosters', function () {
@@ -54,7 +54,7 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
       )
       const roster2 = await getRoster({
         tid: teamId,
-        week: constants.season.week + 1
+        week: current_season.week + 1
       })
       const roster2Players = roster2.players.map(
         ({ lid, pid, pos, slot, tid, type }) => ({
@@ -89,7 +89,7 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
       )
       const roster4 = await getRoster({
         tid: teamId,
-        week: constants.season.week + 1
+        week: current_season.week + 1
       })
       const roster4Players = roster4.players.map(
         ({ lid, pid, pos, slot, tid, type }) => ({
@@ -103,8 +103,8 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
       )
       expect(roster3Players).to.eql(roster4Players)
       expect(roster1Players).to.eql(roster3Players)
-      expect(roster4.week).to.equal(constants.season.week + 1)
-      expect(roster4.year).to.equal(constants.season.year)
+      expect(roster4.week).to.equal(current_season.week + 1)
+      expect(roster4.year).to.equal(current_season.year)
     })
 
     it('generate rosters for next year', async () => {
@@ -126,8 +126,8 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
       const teamId = 1
       const roster1 = await getRoster({
         tid: teamId,
-        week: constants.season.finalWeek,
-        year: constants.season.year - 1
+        week: current_season.finalWeek,
+        year: current_season.year - 1
       })
       const roster1Players = roster1.players.map(
         ({ lid, pid, pos, slot, tid, type }) => ({
@@ -152,7 +152,7 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
           type
         })
       )
-      expect(roster1.year).to.equal(constants.season.year - 1)
+      expect(roster1.year).to.equal(current_season.year - 1)
       expect(roster1Players).to.eql(roster2Players)
 
       try {
@@ -165,8 +165,8 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
 
       const roster3 = await getRoster({
         tid: teamId,
-        week: constants.season.finalWeek,
-        year: constants.season.year - 1
+        week: current_season.finalWeek,
+        year: current_season.year - 1
       })
       const roster3Players = roster3.players.map(
         ({ lid, pid, pos, slot, tid, type }) => ({
@@ -194,7 +194,7 @@ describe('SCRIPTS /rosters - generate weekly rosters', function () {
       expect(roster3Players).to.eql(roster4Players)
       expect(roster1Players).to.eql(roster3Players)
       expect(roster4.week).to.equal(0)
-      expect(roster4.year).to.equal(constants.season.year)
+      expect(roster4.year).to.equal(current_season.year)
     })
   })
 

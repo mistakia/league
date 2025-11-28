@@ -4,7 +4,7 @@ import { hideBin } from 'yargs/helpers'
 import fs from 'fs-extra'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import {
   is_main,
   prizepicks,
@@ -102,7 +102,7 @@ const format_market = async ({
     open: true,
     live: false,
     selection_count: 2,
-    year: constants.season.year,
+    year: current_season.year,
 
     timestamp,
     selections
@@ -115,9 +115,9 @@ const import_prizepicks_odds = async ({
 } = {}) => {
   // do not pull in reports outside of the NFL season
   if (
-    !constants.season.now.isBetween(
-      constants.season.regular_season_start,
-      constants.season.end
+    !current_season.now.isBetween(
+      current_season.regular_season_start,
+      current_season.end
     )
   ) {
     return
@@ -131,9 +131,9 @@ const import_prizepicks_odds = async ({
   const missing_market_types = new Set()
 
   const nfl_games = await db('nfl_games').where({
-    week: constants.season.nfl_seas_week,
-    year: constants.season.year,
-    seas_type: constants.season.nfl_seas_type
+    week: current_season.nfl_seas_week,
+    year: current_season.year,
+    seas_type: current_season.nfl_seas_type
   })
 
   let page = 1

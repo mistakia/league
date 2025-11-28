@@ -1,9 +1,10 @@
+import { Roster, isReserveCovEligible, isReserveEligible } from '#libs-shared'
 import {
-  constants,
-  Roster,
-  isReserveCovEligible,
-  isReserveEligible
-} from '#libs-shared'
+  current_season,
+  roster_slot_types,
+  transaction_types,
+  transaction_type_display_names
+} from '#constants'
 import getLeague from './get-league.mjs'
 import getRoster from './get-roster.mjs'
 import db from '#db'
@@ -23,9 +24,9 @@ export default async function ({
   const data = []
 
   const slots = [
-    constants.slots.RESERVE_SHORT_TERM,
-    constants.slots.COV,
-    constants.slots.RESERVE_LONG_TERM
+    roster_slot_types.RESERVE_SHORT_TERM,
+    roster_slot_types.COV,
+    roster_slot_types.RESERVE_LONG_TERM
   ]
   if (!slots.includes(slot)) {
     throw new Error('invalid slot')
@@ -34,8 +35,8 @@ export default async function ({
   const player_query = db('player')
     .leftJoin('practice', function () {
       this.on('player.pid', '=', 'practice.pid')
-        .andOn('practice.week', '=', constants.season.week)
-        .andOn('practice.year', '=', constants.season.year)
+        .andOn('practice.week', '=', current_season.week)
+        .andOn('practice.year', '=', current_season.year)
     })
     .leftJoin('nfl_games', function () {
       this.on(function () {
@@ -45,14 +46,14 @@ export default async function ({
           'player.current_nfl_team'
         )
       })
-        .andOn('nfl_games.week', '=', constants.season.week)
-        .andOn('nfl_games.year', '=', constants.season.year)
+        .andOn('nfl_games.week', '=', current_season.week)
+        .andOn('nfl_games.year', '=', current_season.year)
         .andOn(db.raw("nfl_games.seas_type = 'REG'"))
     })
 
   // Only join prior week gamelog data if week > 1
-  if (constants.season.week > 1) {
-    const prior_week = constants.season.week - 1
+  if (current_season.week > 1) {
+    const prior_week = current_season.week - 1
     // First join to prior week's game (to detect if it was a bye week)
     player_query.leftJoin('nfl_games as prior_week_game', function () {
       this.on(function () {
@@ -63,7 +64,7 @@ export default async function ({
         )
       })
         .andOn('prior_week_game.week', '=', prior_week)
-        .andOn('prior_week_game.year', '=', constants.season.year)
+        .andOn('prior_week_game.year', '=', current_season.year)
         .andOn(db.raw("prior_week_game.seas_type = 'REG'"))
     })
     // Join to reference week game (week - 2 if prior week was bye, else week - 1)
@@ -82,7 +83,7 @@ export default async function ({
             `CASE WHEN prior_week_game.esbid IS NULL THEN ${prior_week - 1} ELSE ${prior_week} END`
           )
         )
-        .andOn('reference_week_game.year', '=', constants.season.year)
+        .andOn('reference_week_game.year', '=', current_season.year)
         .andOn(db.raw("reference_week_game.seas_type = 'REG'"))
     })
     // Then join to player's gamelog for the reference week game
@@ -152,16 +153,16 @@ export default async function ({
 
   // make sure player is not protected
   if (
-    rosterPlayer.slot === constants.slots.PSP ||
-    rosterPlayer.slot === constants.slots.PSDP
+    rosterPlayer.slot === roster_slot_types.PSP ||
+    rosterPlayer.slot === roster_slot_types.PSDP
   ) {
     throw new Error('protected players are not reserve eligible')
   }
 
   // check if practice squad player has active poaching claims
   if (
-    rosterPlayer.slot === constants.slots.PS ||
-    rosterPlayer.slot === constants.slots.PSD
+    rosterPlayer.slot === roster_slot_types.PS ||
+    rosterPlayer.slot === roster_slot_types.PSD
   ) {
     const activePoaches = await db('poaches')
       .where({ pid: reserve_pid })
@@ -175,8 +176,8 @@ export default async function ({
   }
 
   // make sure player is reserve eligible
-  if (slot === constants.slots.COV) {
-    if (constants.season.week === 0) {
+  if (slot === roster_slot_types.COV) {
+    if (current_season.week === 0) {
       throw new Error(
         'player is not eligible for Reserve/COV during the Offseason'
       )
@@ -219,8 +220,8 @@ export default async function ({
         injury_status,
         prior_week_inactive,
         prior_week_ruled_out,
-        week: constants.season.week,
-        is_regular_season: constants.season.isRegularSeason,
+        week: current_season.week,
+        is_regular_season: current_season.isRegularSeason,
         game_day,
         practice: practice_data
       })
@@ -232,8 +233,8 @@ export default async function ({
   // make sure player was on previous week roster, unless acquired via a trade
   const prevRosterRow = await getRoster({
     tid,
-    week: Math.max(constants.season.week - 1, 0),
-    year: constants.season.year
+    week: Math.max(current_season.week - 1, 0),
+    year: current_season.year
   })
   const prevRoster = new Roster({ roster: prevRosterRow, league })
   const acquisitionTransaction = await getAcquisitionTransaction({
@@ -242,7 +243,7 @@ export default async function ({
     tid
   })
   if (
-    acquisitionTransaction.type !== constants.transactions.TRADE &&
+    acquisitionTransaction.type !== transaction_types.TRADE &&
     !prevRoster.has(reserve_pid)
   ) {
     throw new Error('not eligible, not rostered long enough')
@@ -257,7 +258,7 @@ export default async function ({
 
   // can not activate long term Reserve player
   let activate_player_row
-  if (activate_pid && slot !== constants.slots.RESERVE_LONG_TERM) {
+  if (activate_pid && slot !== roster_slot_types.RESERVE_LONG_TERM) {
     const player_rows = await db('player').where('pid', activate_pid)
     activate_player_row = player_rows[0]
 
@@ -276,7 +277,7 @@ export default async function ({
       roster.players.find(
         (p) =>
           p.pid === activate_pid &&
-          p.slot !== constants.slots.RESERVE_SHORT_TERM
+          p.slot !== roster_slot_types.RESERVE_SHORT_TERM
       )
     ) {
       throw new Error('player is not on reserve')
@@ -288,10 +289,12 @@ export default async function ({
     }
 
     // activate player
-    await db('rosters_players').update({ slot: constants.slots.BENCH }).where({
-      rid: rosterRow.uid,
-      pid: activate_pid
-    })
+    await db('rosters_players')
+      .update({ slot: roster_slot_types.BENCH })
+      .where({
+        rid: rosterRow.uid,
+        pid: activate_pid
+      })
 
     const { value } = await getLastTransaction({
       pid: activate_pid,
@@ -303,10 +306,10 @@ export default async function ({
       tid,
       lid: leagueId,
       pid: activate_pid,
-      type: constants.transactions.ROSTER_ACTIVATE,
+      type: transaction_types.ROSTER_ACTIVATE,
       value,
-      week: constants.season.week,
-      year: constants.season.year,
+      week: current_season.week,
+      year: current_season.year,
       timestamp: Math.round(Date.now() / 1000)
     }
     await db('transactions').insert(transaction)
@@ -315,29 +318,29 @@ export default async function ({
     data.push({
       pid: activate_pid,
       tid,
-      slot: constants.slots.BENCH,
+      slot: roster_slot_types.BENCH,
       rid: roster.uid,
       pos: activate_player_row.pos,
       transaction
     })
 
     // update roster
-    roster.updateSlot(activate_pid, constants.slots.BENCH)
+    roster.updateSlot(activate_pid, roster_slot_types.BENCH)
   }
 
   if (
-    slot === constants.slots.RESERVE_SHORT_TERM &&
+    slot === roster_slot_types.RESERVE_SHORT_TERM &&
     !roster.has_open_reserve_short_term_slot()
   ) {
     throw new Error('exceeds roster limits')
   }
 
   const type =
-    slot === constants.slots.RESERVE_SHORT_TERM
-      ? constants.transactions.RESERVE_IR
-      : slot === constants.slots.RESERVE_LONG_TERM
-        ? constants.transactions.RESERVE_LONG_TERM
-        : constants.transactions.RESERVE_COV
+    slot === roster_slot_types.RESERVE_SHORT_TERM
+      ? transaction_types.RESERVE_IR
+      : slot === roster_slot_types.RESERVE_LONG_TERM
+        ? transaction_types.RESERVE_LONG_TERM
+        : transaction_types.RESERVE_COV
   await db('rosters_players').update({ slot }).where({
     rid: rosterRow.uid,
     pid: reserve_pid
@@ -355,8 +358,8 @@ export default async function ({
     pid: reserve_pid,
     type,
     value,
-    week: constants.season.week,
-    year: constants.season.year,
+    week: current_season.week,
+    year: current_season.year,
     timestamp: Math.round(Date.now() / 1000)
   }
   await db('transactions').insert(transaction)
@@ -370,10 +373,10 @@ export default async function ({
 
   const teams = await db('teams').where({
     uid: tid,
-    year: constants.season.year
+    year: current_season.year
   })
   const team = teams[0]
-  let message = `${team.name} (${team.abbrv}) has placed ${player_row.fname} ${player_row.lname} (${player_row.pos}) on ${constants.transactionsDetail[type]}.`
+  let message = `${team.name} (${team.abbrv}) has placed ${player_row.fname} ${player_row.lname} (${player_row.pos}) on ${transaction_type_display_names[type]}.`
 
   if (activate_player_row) {
     message += ` ${activate_player_row.fname} ${activate_player_row.lname} (${activate_player_row.pos}) has been activated`

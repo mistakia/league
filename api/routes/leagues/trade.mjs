@@ -1,7 +1,12 @@
 import dayjs from 'dayjs'
 import express from 'express'
 
-import { constants, Roster, toStringArray, nth } from '#libs-shared'
+import { Roster, toStringArray, nth } from '#libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  transaction_types
+} from '#constants'
 import validate_trade_roster_slots from '#libs-server/validate-trade-roster-slots.mjs'
 import {
   getRoster,
@@ -479,7 +484,7 @@ router.post(
       const trades = await db('trades')
         .join('users_teams', function () {
           this.on('trades.accept_tid', '=', 'users_teams.tid')
-          this.andOn(db.raw('users_teams.year = ?', [constants.season.year]))
+          this.andOn(db.raw('users_teams.year = ?', [current_season.year]))
         })
         .where('trades.uid', tradeId)
         .where('users_teams.userid', req.auth.userId)
@@ -518,14 +523,14 @@ router.post(
 
       // Validate slot assignment inputs
       const valid_slots = [
-        constants.slots.BENCH,
-        constants.slots.PS,
-        constants.slots.PSP,
-        constants.slots.PSD,
-        constants.slots.PSDP,
-        constants.slots.RESERVE_SHORT_TERM,
-        constants.slots.RESERVE_LONG_TERM,
-        constants.slots.COV
+        roster_slot_types.BENCH,
+        roster_slot_types.PS,
+        roster_slot_types.PSP,
+        roster_slot_types.PSD,
+        roster_slot_types.PSDP,
+        roster_slot_types.RESERVE_SHORT_TERM,
+        roster_slot_types.RESERVE_LONG_TERM,
+        roster_slot_types.COV
       ]
 
       for (const [pid, slot] of Object.entries(accepting_team_slot_overrides)) {
@@ -640,12 +645,12 @@ router.post(
             .andOn(
               'rosters_players.year',
               '=',
-              db.raw('?', [constants.season.year])
+              db.raw('?', [current_season.year])
             )
             .andOn(
               'rosters_players.week',
               '=',
-              db.raw('?', [constants.season.week])
+              db.raw('?', [current_season.week])
             )
         })
         .whereIn('player.pid', all_pids)
@@ -718,8 +723,8 @@ router.post(
         player_rows,
         slot_assignments: accepting_team_slots,
         roster: acceptingTeamRoster,
-        week: constants.season.week,
-        is_regular_season: constants.season.isRegularSeason,
+        week: current_season.week,
+        is_regular_season: current_season.isRegularSeason,
         player_extensions: proposingPlayerExtensions
       })
 
@@ -766,8 +771,8 @@ router.post(
         player_rows,
         slot_assignments: proposing_team_slots,
         roster: proposingTeamRoster,
-        week: constants.season.week,
-        is_regular_season: constants.season.isRegularSeason,
+        week: current_season.week,
+        is_regular_season: current_season.isRegularSeason,
         player_extensions: acceptingPlayerExtensions
       })
 
@@ -863,10 +868,10 @@ router.post(
             tid: trade.propose_tid,
             lid: leagueId,
             pid,
-            type: constants.transactions.TRADE,
+            type: transaction_types.TRADE,
             value: transaction_history.find((t) => t.pid === pid).value,
-            week: constants.season.week,
-            year: constants.season.year,
+            week: current_season.week,
+            year: current_season.year,
             timestamp: Math.round(Date.now() / 1000)
           })
         }
@@ -876,10 +881,10 @@ router.post(
             tid: trade.accept_tid,
             lid: leagueId,
             pid,
-            type: constants.transactions.TRADE,
+            type: transaction_types.TRADE,
             value: transaction_history.find((t) => t.pid === pid).value,
-            week: constants.season.week,
-            year: constants.season.year,
+            week: current_season.week,
+            year: current_season.year,
             timestamp: Math.round(Date.now() / 1000)
           })
         }
@@ -902,10 +907,10 @@ router.post(
               tid: trade.propose_tid,
               lid: leagueId,
               pid,
-              type: constants.transactions.ROSTER_RELEASE,
+              type: transaction_types.ROSTER_RELEASE,
               value: 0,
-              week: constants.season.week,
-              year: constants.season.year,
+              week: current_season.week,
+              year: current_season.year,
               timestamp: Math.round(Date.now() / 1000)
             })
           }
@@ -916,10 +921,10 @@ router.post(
               tid: trade.accept_tid,
               lid: leagueId,
               pid,
-              type: constants.transactions.ROSTER_RELEASE,
+              type: transaction_types.ROSTER_RELEASE,
               value: 0,
-              week: constants.season.week,
-              year: constants.season.year,
+              week: current_season.week,
+              year: current_season.year,
               timestamp: Math.round(Date.now() / 1000)
             })
           }
@@ -1003,7 +1008,7 @@ router.post(
           .whereNull('cancelled')
           .whereNull('processed')
           .where('lid', leagueId)
-          .where('year', constants.season.year)
+          .where('year', current_season.year)
 
         if (playerTradeRows.length) {
           // TODO - broadcast on WS
@@ -1017,7 +1022,7 @@ router.post(
 
       const teams = await db('teams').where({
         lid: leagueId,
-        year: constants.season.year
+        year: current_season.year
       })
       const proposingTeam = teams.find((t) => t.uid === trade.propose_tid)
       const acceptingTeam = teams.find((t) => t.uid === trade.accept_tid)
@@ -1178,10 +1183,10 @@ router.post(
         .join('teams', 'trades.accept_tid', 'teams.uid')
         .join('users_teams', function () {
           this.on('trades.accept_tid', '=', 'users_teams.tid')
-          this.andOn(db.raw('users_teams.year = ?', [constants.season.year]))
+          this.andOn(db.raw('users_teams.year = ?', [current_season.year]))
         })
         .where('trades.uid', tradeId)
-        .where('teams.year', constants.season.year)
+        .where('teams.year', current_season.year)
         .where('users_teams.userid', req.auth.userId)
         .whereNull('accepted')
         .whereNull('vetoed')
@@ -1308,11 +1313,11 @@ router.post(
       const trades = await db('trades')
         .join('users_teams', function () {
           this.on('trades.propose_tid', '=', 'users_teams.tid')
-          this.andOn(db.raw('users_teams.year = ?', [constants.season.year]))
+          this.andOn(db.raw('users_teams.year = ?', [current_season.year]))
         })
         .join('teams', 'trades.propose_tid', 'teams.uid')
         .where('trades.uid', tradeId)
-        .where('teams.year', constants.season.year)
+        .where('teams.year', current_season.year)
         .where('users_teams.userid', req.auth.userId)
         .whereNull('accepted')
         .whereNull('vetoed')

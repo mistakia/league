@@ -12,7 +12,8 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogTitle from '@mui/material/DialogTitle'
 
 import Button from '@components/button'
-import { constants, isReserveEligible } from '@libs-shared'
+import { isReserveEligible } from '@libs-shared'
+import { current_season, roster_slot_types } from '@constants'
 
 export default class ActivateConfirmation extends React.Component {
   constructor(props) {
@@ -33,7 +34,7 @@ export default class ActivateConfirmation extends React.Component {
     // Check if player being activated is from practice squad (signed slots)
     const player_slot = player_map.get('slot')
     this._isFromPracticeSquad =
-      player_slot === constants.slots.PS || player_slot === constants.slots.PSP
+      player_slot === roster_slot_types.PS || player_slot === roster_slot_types.PSP
 
     // Use psquad-eligible active players for deactivation candidates (filtered in index.js)
     this._deactivationCandidates = this._isFromPracticeSquad
@@ -56,8 +57,8 @@ export default class ActivateConfirmation extends React.Component {
           injury_status: activePlayerMap.get('injury_status'),
           prior_week_inactive: activePlayerMap.get('prior_week_inactive'),
           prior_week_ruled_out: activePlayerMap.get('prior_week_ruled_out'),
-          week: constants.season.week,
-          is_regular_season: constants.season.isRegularSeason,
+          week: current_season.week,
+          is_regular_season: current_season.isRegularSeason,
           game_day: activePlayerMap.get('game_day'),
           practice: practice_data
         })
@@ -102,7 +103,7 @@ export default class ActivateConfirmation extends React.Component {
       reserve_pid,
       release_pid,
       deactivate_pid,
-      slot: constants.slots.RESERVE_SHORT_TERM
+      slot: roster_slot_types.RESERVE_SHORT_TERM
     })
     this.props.onClose()
   }
@@ -141,7 +142,7 @@ export default class ActivateConfirmation extends React.Component {
     }
 
     const isReservePlayer =
-      player_map.get('slot') === constants.slots.RESERVE_SHORT_TERM
+      player_map.get('slot') === roster_slot_types.RESERVE_SHORT_TERM
     let noBenchSpaceMessage =
       'No active roster space available, make room by releasing a player'
     if (isReservePlayer)

@@ -17,7 +17,8 @@ import {
   api_post_reject_trade,
   api_get_trades
 } from '@core/api'
-import { get_default_trade_slot, constants, Roster } from '@libs-shared'
+import { get_default_trade_slot, Roster } from '@libs-shared'
+import { current_season, roster_slot_types } from '@constants'
 
 /**
  * Ensure all players have slot assignments by calculating defaults for any missing slots
@@ -50,7 +51,7 @@ function ensure_complete_slot_assignments({
     const player_map = player_maps.get(pid)
     if (!player_map) {
       // Player data not loaded, default to BENCH
-      complete_slots[pid] = constants.slots.BENCH
+      complete_slots[pid] = roster_slot_types.BENCH
       continue
     }
 
@@ -71,8 +72,8 @@ function ensure_complete_slot_assignments({
       player,
       current_slot: player_map.get('slot'),
       roster,
-      week: constants.season.week,
-      is_regular_season: constants.season.isRegularSeason
+      week: current_season.week,
+      is_regular_season: current_season.isRegularSeason
     })
 
     complete_slots[pid] = default_slot

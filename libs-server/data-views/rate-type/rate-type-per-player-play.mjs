@@ -1,10 +1,10 @@
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import apply_play_by_play_column_params_to_query from '#libs-server/apply-play-by-play-column-params-to-query.mjs'
 import get_play_by_play_default_params from '#libs-server/data-views/get-play-by-play-default-params.mjs'
 export const get_default_params = ({ params = {} } = {}) => {
-  let year = params.year || [constants.season.stats_season_year]
+  let year = params.year || [current_season.stats_season_year]
   if (!Array.isArray(year)) {
     year = [year]
   }

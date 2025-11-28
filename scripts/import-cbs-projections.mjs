@@ -4,7 +4,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season, external_data_sources } from '#constants'
 import { is_main, find_player_row, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -23,17 +23,14 @@ const getUrl = (pos, type) =>
 const positions = ['QB', 'RB', 'WR', 'TE']
 
 const run = async ({ season = false, dry = false } = {}) => {
-  const week = season ? 0 : Math.max(constants.season.week, 1)
+  const week = season ? 0 : Math.max(current_season.week, 1)
   const type = season ? 'season' : week
   // do not pull in any projections after the season has ended
-  if (
-    type !== 'season' &&
-    constants.season.week > constants.season.nflFinalWeek
-  ) {
+  if (type !== 'season' && current_season.week > current_season.nflFinalWeek) {
     return
   }
 
-  if (type === 'season' && constants.season.week > 0) {
+  if (type === 'season' && current_season.week > 0) {
     return
   }
 
@@ -64,7 +61,7 @@ const run = async ({ season = false, dry = false } = {}) => {
         name,
         teams: [team],
         pos,
-        ignore_retired: year === constants.season.year
+        ignore_retired: year === current_season.year
       }
       const data = {}
 
@@ -133,7 +130,7 @@ const run = async ({ season = false, dry = false } = {}) => {
       week,
       year,
       seas_type: 'REG',
-      sourceid: constants.sources.CBS,
+      sourceid: external_data_sources.CBS,
       ...data
     })
   }
@@ -152,7 +149,12 @@ const run = async ({ season = false, dry = false } = {}) => {
   if (inserts.length) {
     // remove any existing projections in index not included in this set
     await db('projections_index')
-      .where({ year, week, sourceid: constants.sources.CBS, seas_type: 'REG' })
+      .where({
+        year,
+        week,
+        sourceid: external_data_sources.CBS,
+        seas_type: 'REG'
+      })
       .whereNotIn(
         'pid',
         inserts.map((i) => i.pid)

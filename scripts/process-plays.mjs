@@ -8,7 +8,7 @@ import player_cache, {
 } from '#libs-server/player-cache.mjs'
 import { enrich_plays } from '#libs-server/play-enrichment/index.mjs'
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season, nfl_season_types } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import {
   get_play_stats,
@@ -20,9 +20,9 @@ const log = debug('process-plays')
 debug.enable('process-plays,update-play')
 
 const process_plays = async ({
-  week = constants.season.last_week_with_stats,
-  year = constants.season.year,
-  seas_type = constants.season.nfl_seas_type,
+  week = current_season.last_week_with_stats,
+  year = current_season.year,
+  seas_type = current_season.nfl_seas_type,
   ignore_conflicts = false,
   dry_run = false
 } = {}) => {
@@ -252,7 +252,7 @@ const main = async () => {
     const argv = initialize_cli()
     const year = argv.year
     const week = argv.week
-    const seas_type = argv.seas_type || constants.season.nfl_seas_type
+    const seas_type = argv.seas_type || current_season.nfl_seas_type
     const dry_run = argv.dry
     const ignore_conflicts = argv.ignore_conflicts || argv.force
 
@@ -271,7 +271,7 @@ const main = async () => {
       log(`processing plays for ${years.length} years`)
 
       for (const year of years) {
-        for (const seas_type of constants.seas_types) {
+        for (const seas_type of nfl_season_types) {
           const weeks = await db('nfl_plays')
             .select('week')
             .where({ year, seas_type })
@@ -322,7 +322,7 @@ const main = async () => {
     if (!dry_run) {
       log('Refreshing nfl_year_week_timestamp materialized view...')
       try {
-        const refresh_year = year || constants.season.year
+        const refresh_year = year || current_season.year
         await populate_nfl_year_week_timestamp({ year: refresh_year })
         log('Successfully refreshed nfl_year_week_timestamp')
       } catch (refresh_error) {

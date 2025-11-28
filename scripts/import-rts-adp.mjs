@@ -12,7 +12,7 @@ import {
   updatePlayer,
   rts
 } from '#libs-server'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 const initialize_cli = () => {
@@ -40,7 +40,7 @@ const fetch_rts_data = async (url) => {
 }
 
 const import_rts_adp = async ({
-  year = constants.season.year,
+  year = current_season.year,
   dry_run = false
 } = {}) => {
   const rts_config = await rts.get_rts_config()

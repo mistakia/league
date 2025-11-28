@@ -1,6 +1,6 @@
 import db from '#db'
 
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import get_join_func from '#libs-server/get-join-func.mjs'
 import { create_static_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
@@ -10,7 +10,7 @@ import { create_static_cache_info } from '#libs-server/data-views/cache-info-uti
 
 const get_cache_info = create_static_cache_info()
 
-const get_contract_year = (value = constants.season.year) => {
+const get_contract_year = (value = current_season.year) => {
   const year = Array.isArray(value) ? value[0] : value
   if (typeof year === 'string' && year.toLowerCase() === 'total') {
     return 'Total'

@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season, external_data_sources } from '#constants'
 import {
   is_main,
   find_player_row,
@@ -18,7 +18,7 @@ const initialize_cli = () => {
 
 const log = debug('import:projections')
 debug.enable('import:projections,get-player,fetch')
-const week = Math.max(constants.season.week, 1)
+const week = Math.max(current_season.week, 1)
 
 const format_projection = (stats) => ({
   py: stats.pyd,
@@ -42,11 +42,11 @@ const timestamp = Math.floor(Date.now() / 1000)
 
 const run = async ({ dry_run = false } = {}) => {
   // do not pull in any projections after the season has ended
-  if (constants.season.week > constants.season.nflFinalWeek) {
+  if (current_season.week > current_season.nflFinalWeek) {
     return
   }
 
-  if (!constants.season.week) {
+  if (!current_season.week) {
     log('No projections available for current week')
     return
   }
@@ -66,7 +66,7 @@ const run = async ({ dry_run = false } = {}) => {
     response_type: 'json'
   })
 
-  const projections_url = `${fbg_config.data_url}/WeeklyProjections-${constants.season.year}-${constants.season.week}.json`
+  const projections_url = `${fbg_config.data_url}/WeeklyProjections-${current_season.year}-${current_season.week}.json`
   log(`fetching projections from ${projections_url}`)
   const data = await fetch_with_retry({
     url: projections_url,
@@ -75,12 +75,12 @@ const run = async ({ dry_run = false } = {}) => {
 
   // if no projections or 404 exit
   const projectors = {
-    2: constants.sources.FBG_DAVID_DODDS,
-    41: constants.sources.FBG_BOB_HENRY,
-    50: constants.sources.FBG_JASON_WOOD,
-    53: constants.sources.FBG_MAURILE_TREMBLAY,
-    107: constants.sources.FBG_SIGMUND_BLOOM,
-    996: constants.sources.FBG_CONSENSUS
+    2: external_data_sources.FBG_DAVID_DODDS,
+    41: external_data_sources.FBG_BOB_HENRY,
+    50: external_data_sources.FBG_JASON_WOOD,
+    53: external_data_sources.FBG_MAURILE_TREMBLAY,
+    107: external_data_sources.FBG_SIGMUND_BLOOM,
+    996: external_data_sources.FBG_CONSENSUS
   }
 
   const missing = []
@@ -149,7 +149,7 @@ const run = async ({ dry_run = false } = {}) => {
 
       inserts.push({
         pid: player_row.pid,
-        year: constants.season.year,
+        year: current_season.year,
         week,
         seas_type: 'REG',
         sourceid: projector,

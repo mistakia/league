@@ -7,7 +7,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import dayjs from 'dayjs'
 
-import { constants, fixTeam } from '#libs-shared'
+import { fixTeam } from '#libs-shared'
+import { current_season } from '#constants'
 import {
   is_main,
   readCSV,
@@ -497,15 +498,14 @@ const build_match_criteria = (esbid, formatted_play, item) => {
  */
 const is_data_available = (year) => {
   if (
-    year === constants.season.year &&
-    (!constants.season.week ||
-      constants.season.now.isAfter(constants.season.end))
+    year === current_season.year &&
+    (!current_season.week || current_season.now.isAfter(current_season.end))
   ) {
     log(`${year} season has not started yet`)
     return false
   }
 
-  if (year === constants.season.year && constants.season.week === 1) {
+  if (year === current_season.year && current_season.week === 1) {
     const current_day = dayjs().day()
     // Week 1 data not available until Friday (day 5)
     if (current_day < 5 && current_day > 1) {
@@ -615,7 +615,7 @@ const process_play = async ({
 // ============================================================================
 
 const run = async ({
-  year = constants.season.year,
+  year = current_season.year,
   ignore_conflicts = false,
   force_download = false,
   dry_mode = false,
@@ -837,7 +837,7 @@ const main = async () => {
     debug.enable(
       'import-nflfastr-plays,update-play,fetch,play-cache,play-enum-utils'
     )
-    const year = argv.year || constants.season.year
+    const year = argv.year || current_season.year
     const ignore_conflicts = argv.ignore_conflicts
     const force_download = argv.d
     const dry_mode = argv.dry || argv.dry_mode
@@ -871,7 +871,7 @@ const main = async () => {
       // Import all years from 1999 to current season
       for (
         let import_year = 1999;
-        import_year <= constants.season.stats_season_year;
+        import_year <= current_season.stats_season_year;
         import_year++
       ) {
         await run({

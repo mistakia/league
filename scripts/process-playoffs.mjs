@@ -3,7 +3,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, Roster, calculatePoints } from '#libs-shared'
+import { Roster, calculatePoints } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main, getLeague, getRoster, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -16,7 +17,7 @@ debug.enable('process-playoffs')
 
 const process_playoffs = async ({ lid, year }) => {
   // skip if processing current season and it is before the wildcard round
-  if (year === constants.season.year && constants.season.week < 15) {
+  if (year === current_season.year && current_season.week < 15) {
     return
   }
 
@@ -28,7 +29,7 @@ const process_playoffs = async ({ lid, year }) => {
   })
 
   const is_wildcard_round =
-    constants.season.year === year && constants.season.week === 15
+    current_season.year === year && current_season.week === 15
   if (!playoffs.length && is_wildcard_round) {
     log(`creating wildcard round matchups for lid ${lid} year ${year}`)
 
@@ -62,11 +63,11 @@ const process_playoffs = async ({ lid, year }) => {
   }
 
   const weeks =
-    constants.season.year === year
+    current_season.year === year
       ? [
           ...new Set(
             playoffs
-              .filter((p) => p.week < constants.season.week)
+              .filter((p) => p.week < current_season.week)
               .map((p) => p.week)
           )
         ]
@@ -80,10 +81,7 @@ const process_playoffs = async ({ lid, year }) => {
 
   for (const item of playoffs) {
     const { tid, week, year } = item
-    if (
-      item.year === constants.season.year &&
-      item.week >= constants.season.week
-    ) {
+    if (item.year === current_season.year && item.week >= current_season.week) {
       continue
     }
     const rosterRow = await getRoster({ tid, week, year })
@@ -110,7 +108,7 @@ const process_playoffs = async ({ lid, year }) => {
     .merge()
   log(`updated ${playoffs.length} playoff results`)
 
-  if (constants.season.year !== year || constants.season.week > 17) {
+  if (current_season.year !== year || current_season.week > 17) {
     // calculate post season finish
     const playoff_teams = playoffs
       .filter((p) => p.uid === 1)
@@ -199,7 +197,7 @@ const process_playoffs = async ({ lid, year }) => {
   }
 
   const is_championship_round =
-    constants.season.year === year && constants.season.week >= 16
+    current_season.year === year && current_season.week >= 16
   const missing_championship_matchups = !playoffs.some(
     (p) => p.uid === 2 && p.week === 16
   )

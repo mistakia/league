@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main, getRoster, processRelease } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -14,7 +14,7 @@ const initialize_cli = () => {
 const log = debug('decommission-team')
 debug.enable('decommission-team')
 
-const decommission_team = async ({ year = constants.season.year, team_id }) => {
+const decommission_team = async ({ year = current_season.year, team_id }) => {
   if (!team_id) {
     throw new Error('missing team_id')
   }

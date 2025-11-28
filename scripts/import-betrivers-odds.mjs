@@ -5,7 +5,8 @@ import { hideBin } from 'yargs/helpers'
 import fs from 'fs-extra'
 
 import db from '#db'
-import { constants, fixTeam } from '#libs-shared'
+import { fixTeam } from '#libs-shared'
+import { current_season } from '#constants'
 import {
   is_main,
   insert_prop_markets,
@@ -107,7 +108,7 @@ const import_betrivers_odds = async () => {
   const timestamp = Math.round(Date.now() / 1000)
 
   const nfl_games = await db('nfl_games').where({
-    year: constants.season.year
+    year: current_season.year
   })
 
   const market_groups = await betrivers.get_market_groups()
@@ -119,7 +120,7 @@ const import_betrivers_odds = async () => {
       if (event && event.format === 'MATCH') {
         const visitor = fixTeam(event.extendedFormatName[0])
         const home = fixTeam(event.extendedFormatName[2])
-        const { week, seas_type } = constants.season.calculate_week(
+        const { week, seas_type } = current_season.calculate_week(
           dayjs(event.start)
         )
 
@@ -127,7 +128,7 @@ const import_betrivers_odds = async () => {
           (game) =>
             game.week === week &&
             game.seas_type === seas_type &&
-            game.year === constants.season.year &&
+            game.year === current_season.year &&
             game.v === visitor &&
             game.h === home
         )

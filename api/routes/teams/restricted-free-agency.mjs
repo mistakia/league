@@ -1,7 +1,8 @@
 import express from 'express'
 import dayjs from 'dayjs'
 
-import { constants, Roster } from '#libs-shared'
+import { Roster } from '#libs-shared'
+import { current_season, player_tag_types, roster_slot_types } from '#constants'
 import {
   getRoster,
   getLeague,
@@ -98,7 +99,7 @@ router.get('/?', async (req, res) => {
     const restrictedFreeAgencyBids = await db('restricted_free_agency_bids')
       .where({
         tid: teamId,
-        year: constants.season.year
+        year: current_season.year
       })
       .whereNull('processed')
       .whereNull('cancelled')
@@ -351,7 +352,7 @@ router.post('/?', async (req, res) => {
       // make sure restricted free agency period has not passed
       if (
         league.tran_end &&
-        constants.season.now.isAfter(dayjs.unix(league.tran_end))
+        current_season.now.isAfter(dayjs.unix(league.tran_end))
       ) {
         return res
           .status(400)
@@ -366,7 +367,7 @@ router.post('/?', async (req, res) => {
         roster.removeTag(remove)
       }
       const isEligible = roster.isEligibleForTag({
-        tag: constants.tags.RESTRICTED_FREE_AGENCY
+        tag: player_tag_types.RESTRICTED_FREE_AGENCY
       })
       if (!isEligible) {
         return res.status(400).send({ error: 'exceeds tag limit' })
@@ -378,7 +379,7 @@ router.post('/?', async (req, res) => {
         .where({
           pid,
           week: 0,
-          year: constants.season.year,
+          year: current_season.year,
           league_format_hash: league.league_format_hash
         })
         .first()
@@ -403,7 +404,7 @@ router.post('/?', async (req, res) => {
           pid,
           tid: playerTid,
           lid: leagueId,
-          year: constants.season.year
+          year: current_season.year
         })
         .whereNull('processed')
         .whereNull('cancelled')
@@ -428,7 +429,7 @@ router.post('/?', async (req, res) => {
 
       // add to roster
       roster.addPlayer({
-        slot: constants.slots.BENCH,
+        slot: roster_slot_types.BENCH,
         pid,
         pos: player_row.pos,
         value: bid,
@@ -445,7 +446,7 @@ router.post('/?', async (req, res) => {
 
     if (playerTid === tid) {
       await db('rosters_players')
-        .update({ tag: constants.tags.RESTRICTED_FREE_AGENCY })
+        .update({ tag: player_tag_types.RESTRICTED_FREE_AGENCY })
         .where({
           rid: rosterRow.uid,
           pid
@@ -468,7 +469,7 @@ router.post('/?', async (req, res) => {
           .where({
             pid: remove,
             tid,
-            year: constants.season.year
+            year: current_season.year
           })
           .update({
             cancelled: Math.round(Date.now() / 1000)
@@ -483,7 +484,7 @@ router.post('/?', async (req, res) => {
       lid: leagueId,
       pid,
       submitted: Math.round(Date.now() / 1000),
-      year: constants.season.year,
+      year: current_season.year,
       bid,
       player_tid: playerTid
     }
@@ -624,7 +625,7 @@ router.delete('/?', async (req, res) => {
     // make sure restricted free agency deadline has not passed
     if (
       league.tran_end &&
-      constants.season.now.isAfter(dayjs.unix(league.tran_end))
+      current_season.now.isAfter(dayjs.unix(league.tran_end))
     ) {
       return res
         .status(400)
@@ -636,7 +637,7 @@ router.delete('/?', async (req, res) => {
       .where({
         pid,
         tid,
-        year: constants.season.year
+        year: current_season.year
       })
       .whereNull('cancelled')
 
@@ -667,10 +668,12 @@ router.delete('/?', async (req, res) => {
     // TODO cancel any pending competing bids
 
     // update tag
-    await db('rosters_players').update({ tag: constants.tags.REGULAR }).where({
-      rid: rosterRow.uid,
-      pid
-    })
+    await db('rosters_players')
+      .update({ tag: player_tag_types.REGULAR })
+      .where({
+        rid: rosterRow.uid,
+        pid
+      })
 
     res.send({ ...restrictedFreeAgencyBid, cancelled })
   } catch (error) {
@@ -816,7 +819,7 @@ router.put('/?', async (req, res) => {
       .where({
         pid,
         tid,
-        year: constants.season.year
+        year: current_season.year
       })
       .whereNull('cancelled')
 
@@ -877,7 +880,7 @@ router.put('/?', async (req, res) => {
 
       // add to roster
       roster.addPlayer({
-        slot: constants.slots.BENCH,
+        slot: roster_slot_types.BENCH,
         pid,
         pos: player_row.pos,
         value: bid,
@@ -893,7 +896,7 @@ router.put('/?', async (req, res) => {
         .where({
           pid,
           week: 0,
-          year: constants.season.year,
+          year: current_season.year,
           league_format_hash: league.league_format_hash
         })
         .first()
@@ -921,7 +924,7 @@ router.put('/?', async (req, res) => {
      */
     if (restrictedFreeAgencyBid.player_tid === teamId) {
       await db('rosters_players')
-        .update({ tag: constants.tags.RESTRICTED_FREE_AGENCY })
+        .update({ tag: player_tag_types.RESTRICTED_FREE_AGENCY })
         .where({
           rid: rosterRow.uid,
           pid
@@ -1059,7 +1062,7 @@ router.post('/nominate/?', async (req, res) => {
         pid,
         tid,
         player_tid: tid,
-        year: constants.season.year
+        year: current_season.year
       })
       .whereNull('cancelled')
       .first()
@@ -1198,7 +1201,7 @@ router.delete('/nominate/?', async (req, res) => {
         pid,
         tid,
         player_tid: tid,
-        year: constants.season.year
+        year: current_season.year
       })
       .whereNull('cancelled')
       .first()

@@ -1,6 +1,6 @@
 import solver from 'javascript-lp-solver'
 
-import * as constants from './constants.mjs'
+import { fantasy_positions, player_id_regex, team_id_regex } from '#constants'
 import getOptimizerPositionConstraints from './get-optimizer-position-constraints.mjs'
 
 export default function optimizeStandingsLineup({ players, league }) {
@@ -18,7 +18,7 @@ export default function optimizeStandingsLineup({ players, league }) {
     variables[player.pid][player.pid] = 1
     constraints[player.pid] = { max: 1 }
     ints[player.pid] = 1
-    for (const pos of constants.positions) {
+    for (const pos of fantasy_positions) {
       variables[player.pid][pos] = player.pos === pos ? 1 : 0
     }
   }
@@ -33,8 +33,7 @@ export default function optimizeStandingsLineup({ players, league }) {
 
   const result = solver.Solve(model)
   const starters = Object.keys(result).filter(
-    (r) =>
-      r.match(constants.player_pid_regex) || r.match(constants.team_pid_regex)
+    (r) => r.match(player_id_regex) || r.match(team_id_regex)
   )
 
   return {

@@ -3,7 +3,8 @@ import { Map } from 'immutable'
 import debug from 'debug'
 
 import db from '#db'
-import { constants, fixTeam } from '#libs-shared'
+import { fixTeam } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main, wait, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -13,27 +14,27 @@ debug.enable('import:footballoutsiders')
 const urls = [
   {
     type: 'TEAMOFF',
-    url: `https://www.footballoutsiders.com/stats/nfl/team-offense/${constants.season.year}`
+    url: `https://www.footballoutsiders.com/stats/nfl/team-offense/${current_season.year}`
   },
   {
     type: 'TEAMDEF',
-    url: `https://www.footballoutsiders.com/stats/nfl/team-defense/${constants.season.year}`
+    url: `https://www.footballoutsiders.com/stats/nfl/team-defense/${current_season.year}`
   },
   {
     type: 'OL',
-    url: `https://www.footballoutsiders.com/stats/nfl/offensive-line/${constants.season.year}`
+    url: `https://www.footballoutsiders.com/stats/nfl/offensive-line/${current_season.year}`
   },
   {
     type: 'DL',
-    url: `https://www.footballoutsiders.com/stats/nfl/defensive-line/${constants.season.year}`
+    url: `https://www.footballoutsiders.com/stats/nfl/defensive-line/${current_season.year}`
   },
   {
     type: 'DRVOFF',
-    url: `https://www.footballoutsiders.com/stats/nfl/overall-drive-statsoff/${constants.season.year}`
+    url: `https://www.footballoutsiders.com/stats/nfl/overall-drive-statsoff/${current_season.year}`
   },
   {
     type: 'DRVDEF',
-    url: `https://www.footballoutsiders.com/stats/nfl/overall-drive-statsdef/${constants.season.year}`
+    url: `https://www.footballoutsiders.com/stats/nfl/overall-drive-statsdef/${current_season.year}`
   }
 ]
 
@@ -216,7 +217,7 @@ const runOne = async ({ type, url }) => {
 
 const run = async () => {
   // do not fetch outside of the NFL regular season
-  if (constants.season.week > constants.season.nflFinalWeek) {
+  if (current_season.week > current_season.nflFinalWeek) {
     return
   }
 
@@ -230,8 +231,8 @@ const run = async () => {
     await db('footballoutsiders')
       .insert({
         team: fixTeam(team),
-        week: constants.season.week,
-        year: constants.season.year,
+        week: current_season.week,
+        year: current_season.year,
         ...data
       })
       .onConflict(['team', 'week', 'year'])
@@ -241,7 +242,7 @@ const run = async () => {
 
 const main = async () => {
   // do not pull in any data after the season has ended
-  if (constants.season.week > constants.season.nflFinalWeek) {
+  if (current_season.week > current_season.nflFinalWeek) {
     return
   }
 

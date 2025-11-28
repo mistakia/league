@@ -1,6 +1,6 @@
 import ed25519 from '@trashman/ed25519-blake2b'
 
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 // fully random by @BetonMAN
 // random_seed = ethereum_block_timestsamp + ethereum_block_reward
@@ -92,7 +92,7 @@ const has_duplicate_consecutive_weeks = (schedule) => {
 }
 
 const generate_fantasy_league_schedule = (teams, random_seed) => {
-  const num_weeks = constants.season.regularSeasonFinalWeek
+  const num_weeks = current_season.regularSeasonFinalWeek
 
   const divisions = {}
   for (const team of teams) {

@@ -1,6 +1,11 @@
 import dayjs from 'dayjs'
 
-import { constants, Roster } from '#libs-shared'
+import { Roster } from '#libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  transaction_types
+} from '#constants'
 import getLeague from './get-league.mjs'
 import getRoster from './get-roster.mjs'
 import getTransactionsSinceAcquisition from './get-transactions-since-acquisition.mjs'
@@ -67,7 +72,7 @@ export default async function ({
 
   // make sure player has not been poached since the last time they were a free agent
   if (
-    transactionsSinceFA.find((t) => t.type === constants.transactions.POACHED)
+    transactionsSinceFA.find((t) => t.type === transaction_types.POACHED)
   ) {
     throw new Error('player can not be deactivated once poached')
   }
@@ -75,7 +80,7 @@ export default async function ({
   // make sure player has not been previously activated since they were a free agent
   if (
     transactionsSinceFA.find(
-      (t) => t.type === constants.transactions.ROSTER_ACTIVATE
+      (t) => t.type === transaction_types.ROSTER_ACTIVATE
     )
   ) {
     throw new Error('player can not be deactivated once previously activated')
@@ -83,10 +88,10 @@ export default async function ({
 
   // players acquired through market bidding are ineligible
   const acceptable_types = [
-    constants.transactions.ROSTER_ADD,
-    constants.transactions.PRACTICE_ADD,
-    constants.transactions.TRADE,
-    constants.transactions.DRAFT
+    transaction_types.ROSTER_ADD,
+    transaction_types.PRACTICE_ADD,
+    transaction_types.TRADE,
+    transaction_types.DRAFT
   ]
   if (!acceptable_types.includes(firstTransaction.type)) {
     throw new Error('player is not eligible')
@@ -120,7 +125,7 @@ export default async function ({
   }
 
   const isDraftedRookie = transactionsSinceAcquisition.find(
-    (t) => t.type === constants.transactions.DRAFT
+    (t) => t.type === transaction_types.DRAFT
   )
 
   // make sure team has space on practice squad (unless skipped for combined operations)
@@ -130,7 +135,7 @@ export default async function ({
     }
   }
 
-  const slot = isDraftedRookie ? constants.slots.PSD : constants.slots.PS
+  const slot = isDraftedRookie ? roster_slot_types.PSD : roster_slot_types.PS
 
   await db('rosters_players').update({ slot }).where({
     rid: roster.uid,
@@ -144,10 +149,10 @@ export default async function ({
     tid,
     lid: leagueId,
     pid: deactivate_pid,
-    type: constants.transactions.ROSTER_DEACTIVATE,
+    type: transaction_types.ROSTER_DEACTIVATE,
     value: lastTransaction.value,
-    week: constants.season.week,
-    year: constants.season.year,
+    week: current_season.week,
+    year: current_season.year,
     timestamp
   }
   await db('transactions').insert(transaction)
@@ -163,7 +168,7 @@ export default async function ({
 
   const teams = await db('teams').where({
     uid: tid,
-    year: constants.season.year
+    year: current_season.year
   })
   const team = teams[0]
 

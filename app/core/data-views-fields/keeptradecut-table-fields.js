@@ -1,7 +1,8 @@
 import * as table_constants from 'react-table/src/constants.mjs'
 
 import COLUMN_GROUPS from './column-groups'
-import { constants, common_column_params } from '@libs-shared'
+import { common_column_params } from '@libs-shared'
+import { current_season } from '@constants'
 
 const { single_year, single_year_offset } = common_column_params
 
@@ -20,7 +21,7 @@ const shared_properties = {
     },
     year: {
       ...single_year,
-      default_value: constants.year,
+      default_value: current_season.year,
       enable_on_splits: ['year']
     },
     year_offset: single_year_offset

@@ -1,7 +1,8 @@
 import debug from 'debug'
 
 import db from '#db'
-import { fixTeam, constants } from '#libs-shared'
+import { fixTeam } from '#libs-shared'
+import { current_season } from '#constants'
 
 const log = debug('play-cache')
 
@@ -45,7 +46,7 @@ class PlayCache {
    * @throws {Error} If database query fails
    */
   async preload_plays({
-    years = [constants.season.year],
+    years = [current_season.year],
     weeks = [],
     esbids = [],
     all_plays = false,

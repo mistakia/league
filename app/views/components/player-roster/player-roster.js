@@ -1,5 +1,5 @@
 import React from 'react'
-import { constants, getExtensionAmount } from '@libs-shared'
+import { getExtensionAmount } from '@libs-shared'
 import PlayerName from '@components/player-name'
 import IconButton from '@components/icon-button'
 import { Player, connect } from '@components/player'
@@ -7,6 +7,7 @@ import PlayerHeadshotGroup from '@components/player-headshot-group'
 import TeamName from '@components/team-name'
 import PercentileMetric from '@components/percentile-metric'
 import NFLTeamBye from '@components/nfl-team-bye'
+import { current_season, player_tag_types } from '@constants'
 
 class PlayerRoster extends Player {
   render() {
@@ -30,9 +31,10 @@ class PlayerRoster extends Player {
     const isWaiver = Boolean(waiverId)
     const isPoach = Boolean(poachId)
     const isClaim = isWaiver || isPoach
-    const { isRegularSeason, isOffseason } = constants
+    const { isRegularSeason, isOffseason } = current_season
     const tag = player_map.get('tag')
-    const isRestrictedFreeAgent = tag === constants.tags.RESTRICTED_FREE_AGENCY
+    const isRestrictedFreeAgent =
+      tag === player_tag_types.RESTRICTED_FREE_AGENCY
     const is_restricted_free_agent_tag_processed = player_map.get(
       'restricted_free_agency_tag_processed'
     )
@@ -55,7 +57,7 @@ class PlayerRoster extends Player {
       : getExtensionAmount({
           pos,
           slot,
-          tag: is_before_extension_deadline ? tag : constants.tags.REGULAR,
+          tag: is_before_extension_deadline ? tag : player_tag_types.REGULAR,
           extensions,
           league,
           value,
@@ -79,7 +81,7 @@ class PlayerRoster extends Player {
       ['salary_adj_pts_added', projectionType],
       0
     )
-    const week = Math.max(constants.week, 1)
+    const week = Math.max(current_season.week, 1)
     const weekPoints = player_map.getIn(['points', `${week}`, 'total'], 0)
     const projected_starts = player_map.getIn(['lineups', 'starts'], 0)
     const startPoints = player_map.getIn(['lineups', 'sp'], 0)
@@ -98,14 +100,15 @@ class PlayerRoster extends Player {
     const regular_extended_salary = getExtensionAmount({
       pos,
       slot,
-      tag: constants.tags.REGULAR,
+      tag: player_tag_types.REGULAR,
       extensions,
       league,
       value
     })
 
     if (is_before_extension_deadline) {
-      const is_rookie = player_map.get('nfl_draft_year') >= constants.year - 1
+      const is_rookie =
+        player_map.get('nfl_draft_year') >= current_season.year - 1
       if (is_rookie) {
         rookie_tag_savings =
           Math.max(regular_extended_salary - value, 0) || null

@@ -5,7 +5,13 @@ import MockDate from 'mockdate'
 
 import knex from '#db'
 import league from '#db/seeds/league.mjs'
-import { constants, Errors } from '#libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  transaction_types,
+  waiver_types
+} from '#constants'
+import { Errors } from '#libs-shared'
 import { getRoster } from '#libs-server'
 import { addPlayer, selectPlayer } from './utils/index.mjs'
 import run from '#scripts/process-poaching-claims.mjs'
@@ -15,7 +21,7 @@ process.env.NODE_ENV = 'test'
 chai.should()
 // chai.use(chai_http)
 const expect = chai.expect
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 
 describe('SCRIPTS /waivers - poach', function () {
   before(async function () {
@@ -41,8 +47,8 @@ describe('SCRIPTS /waivers - poach', function () {
         player,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.DRAFT,
         value: 1
       })
 
@@ -56,7 +62,7 @@ describe('SCRIPTS /waivers - poach', function () {
         bid: 0,
         succ: 1,
         processed: Math.round(Date.now() / 1000),
-        type: constants.waivers.POACH
+        type: waiver_types.POACH
       })
 
       await knex('poaches').insert({
@@ -95,10 +101,8 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(rosterRow2.tid).to.equal(2)
       expect(rosterRow2.players.length).to.equal(1)
       expect(rosterRow2.players[0].pid).to.equal(player.pid)
-      expect(rosterRow2.players[0].slot).to.equal(constants.slots.BENCH)
-      expect(rosterRow2.players[0].type).to.equal(
-        constants.transactions.POACHED
-      )
+      expect(rosterRow2.players[0].slot).to.equal(roster_slot_types.BENCH)
+      expect(rosterRow2.players[0].type).to.equal(transaction_types.POACHED)
       expect(rosterRow2.players[0].value).to.equal(3)
 
       // check poaching claim
@@ -115,7 +119,7 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(draft[0].round).to.equal(4)
       expect(draft[0].tid).to.equal(1)
       expect(draft[0].otid).to.equal(1)
-      expect(draft[0].year).to.equal(constants.season.year + 1)
+      expect(draft[0].year).to.equal(current_season.year + 1)
     })
 
     it('process single claim, of multiple', async () => {
@@ -126,8 +130,8 @@ describe('SCRIPTS /waivers - poach', function () {
         player: player1,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.DRAFT,
         value: 1
       })
 
@@ -141,7 +145,7 @@ describe('SCRIPTS /waivers - poach', function () {
         bid: 0,
         succ: 1,
         processed: Math.round(Date.now() / 1000),
-        type: constants.waivers.POACH
+        type: waiver_types.POACH
       })
 
       await knex('poaches').insert({
@@ -168,8 +172,8 @@ describe('SCRIPTS /waivers - poach', function () {
         player: player2,
         teamId: 3,
         userId: 3,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.DRAFT,
         value: 1
       })
 
@@ -183,7 +187,7 @@ describe('SCRIPTS /waivers - poach', function () {
         bid: 0,
         succ: 1,
         processed: Math.round(Date.now() / 1000),
-        type: constants.waivers.POACH
+        type: waiver_types.POACH
       })
 
       await knex('poaches').insert({
@@ -224,17 +228,15 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(rosterRow2.tid).to.equal(2)
       expect(rosterRow2.players.length).to.equal(1)
       expect(rosterRow2.players[0].pid).to.equal(player1.pid)
-      expect(rosterRow2.players[0].slot).to.equal(constants.slots.BENCH)
-      expect(rosterRow2.players[0].type).to.equal(
-        constants.transactions.POACHED
-      )
+      expect(rosterRow2.players[0].slot).to.equal(roster_slot_types.BENCH)
+      expect(rosterRow2.players[0].type).to.equal(transaction_types.POACHED)
       expect(rosterRow2.players[0].value).to.equal(3)
 
       expect(rosterRow3.tid).to.equal(3)
       expect(rosterRow3.players.length).to.equal(1)
       expect(rosterRow3.players[0].pid).to.equal(player2.pid)
-      expect(rosterRow3.players[0].slot).to.equal(constants.slots.PS)
-      expect(rosterRow3.players[0].type).to.equal(constants.transactions.DRAFT)
+      expect(rosterRow3.players[0].slot).to.equal(roster_slot_types.PS)
+      expect(rosterRow3.players[0].type).to.equal(transaction_types.DRAFT)
       expect(rosterRow3.players[0].value).to.equal(1)
 
       expect(rosterRow4.tid).to.equal(4)
@@ -264,8 +266,8 @@ describe('SCRIPTS /waivers - poach', function () {
         player,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.DRAFT,
         value: 1
       })
 
@@ -279,7 +281,7 @@ describe('SCRIPTS /waivers - poach', function () {
         bid: 0,
         succ: 1,
         processed: Math.round(Date.now() / 1000),
-        type: constants.waivers.POACH
+        type: waiver_types.POACH
       })
 
       await knex('poaches').insert({
@@ -309,8 +311,8 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(rosterRow1.tid).to.equal(1)
       expect(rosterRow1.players.length).to.equal(1)
       expect(rosterRow1.players[0].pid).to.equal(player.pid)
-      expect(rosterRow1.players[0].slot).to.equal(constants.slots.PS)
-      expect(rosterRow1.players[0].type).to.equal(constants.transactions.DRAFT)
+      expect(rosterRow1.players[0].slot).to.equal(roster_slot_types.PS)
+      expect(rosterRow1.players[0].type).to.equal(transaction_types.DRAFT)
       expect(rosterRow1.players[0].value).to.equal(1)
 
       expect(rosterRow2.tid).to.equal(2)
@@ -341,8 +343,8 @@ describe('SCRIPTS /waivers - poach', function () {
         player,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.DRAFT,
         value: 1
       })
 
@@ -357,7 +359,7 @@ describe('SCRIPTS /waivers - poach', function () {
           bid: 0,
           succ: 1,
           processed: Math.round(Date.now() / 1000),
-          type: constants.waivers.POACH
+          type: waiver_types.POACH
         })
         .returning('uid')
 
@@ -409,10 +411,8 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(rosterRow2.tid).to.equal(2)
       expect(rosterRow2.players.length).to.equal(1)
       expect(rosterRow2.players[0].pid).to.equal(player.pid)
-      expect(rosterRow2.players[0].slot).to.equal(constants.slots.BENCH)
-      expect(rosterRow2.players[0].type).to.equal(
-        constants.transactions.POACHED
-      )
+      expect(rosterRow2.players[0].slot).to.equal(roster_slot_types.BENCH)
+      expect(rosterRow2.players[0].type).to.equal(transaction_types.POACHED)
       expect(rosterRow2.players[0].value).to.equal(3)
 
       // check poaching claim
@@ -440,8 +440,8 @@ describe('SCRIPTS /waivers - poach', function () {
         player,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.DRAFT,
         value: 1
       })
 
@@ -455,7 +455,7 @@ describe('SCRIPTS /waivers - poach', function () {
         bid: 0,
         succ: 1,
         processed: Math.round(Date.now() / 1000),
-        type: constants.waivers.POACH
+        type: waiver_types.POACH
       })
 
       await knex('poaches').insert({
@@ -468,7 +468,7 @@ describe('SCRIPTS /waivers - poach', function () {
       })
 
       await knex('rosters_players')
-        .update({ slot: constants.slots.BENCH })
+        .update({ slot: roster_slot_types.BENCH })
         .where({ pid: player.pid })
 
       await knex('transactions').insert({
@@ -476,10 +476,10 @@ describe('SCRIPTS /waivers - poach', function () {
         tid: 1,
         lid: 1,
         pid: player.pid,
-        type: constants.transactions.ROSTER_ACTIVATE,
+        type: transaction_types.ROSTER_ACTIVATE,
         value: 1,
-        week: constants.season.week,
-        year: constants.season.year,
+        week: current_season.week,
+        year: current_season.year,
         timestamp: Math.round(Date.now() / 1000)
       })
 
@@ -507,9 +507,9 @@ describe('SCRIPTS /waivers - poach', function () {
       expect(rosterRow1.tid).to.equal(1)
       expect(rosterRow1.players.length).to.equal(1)
       expect(rosterRow1.players[0].pid).to.equal(player.pid)
-      expect(rosterRow1.players[0].slot).to.equal(constants.slots.BENCH)
+      expect(rosterRow1.players[0].slot).to.equal(roster_slot_types.BENCH)
       expect(rosterRow1.players[0].type).to.equal(
-        constants.transactions.ROSTER_ACTIVATE
+        transaction_types.ROSTER_ACTIVATE
       )
       expect(rosterRow1.players[0].value).to.equal(1)
 

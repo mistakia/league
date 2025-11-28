@@ -12,7 +12,8 @@ import dayjs from 'dayjs'
 import { is_main, report_job } from '#libs-server'
 import db from '#db'
 import { job_types } from '#libs-shared/job-constants.mjs'
-import { fixTeam, constants } from '#libs-shared'
+import { fixTeam } from '#libs-shared'
+import { current_season } from '#constants'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -999,9 +1000,9 @@ const get_dvoa_config = async () => {
 
 const import_dvoa_sheets = async ({ dry_run = false, filepath } = {}) => {
   if (!filepath) {
-    if (constants.season.nfl_seas_type !== 'REG') {
+    if (current_season.nfl_seas_type !== 'REG') {
       log(
-        `Skipping import of DVOA sheets for ${constants.season.nfl_seas_type} season`
+        `Skipping import of DVOA sheets for ${current_season.nfl_seas_type} season`
       )
       return
     }
@@ -1017,7 +1018,7 @@ const import_dvoa_sheets = async ({ dry_run = false, filepath } = {}) => {
     const month = current_date.format('MM')
 
     // Get NFL week to determine versioning logic
-    const nfl_week = constants.season.nfl_seas_week
+    const nfl_week = current_season.nfl_seas_week
 
     // DVOA sheets are not available until after NFL week 2
     let version_number = 0
@@ -1029,7 +1030,7 @@ const import_dvoa_sheets = async ({ dry_run = false, filepath } = {}) => {
     } else {
       // Calculate which Tuesday of the month we're on
       // NFL weeks start on Tuesday, so we count Tuesdays in the current month
-      const tuesday_of_week = constants.season.regular_season_start.add(
+      const tuesday_of_week = current_season.regular_season_start.add(
         nfl_week,
         'weeks'
       )
@@ -1048,7 +1049,7 @@ const import_dvoa_sheets = async ({ dry_run = false, filepath } = {}) => {
 
       // Calculate months since season start for display
       const months_since_season_start = tuesday_of_week.diff(
-        constants.season.regular_season_start.startOf('month'),
+        current_season.regular_season_start.startOf('month'),
         'months'
       )
 
@@ -1067,7 +1068,7 @@ const import_dvoa_sheets = async ({ dry_run = false, filepath } = {}) => {
       )
     }
 
-    const filename = `dvoa_sheets_${constants.season.year}.xlsx`
+    const filename = `dvoa_sheets_${current_season.year}.xlsx`
     filepath = `${os.tmpdir()}/${filename}`
 
     const stream_pipeline = promisify(pipeline)

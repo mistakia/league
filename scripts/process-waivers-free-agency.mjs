@@ -1,4 +1,5 @@
-import { Errors, constants } from '#libs-shared'
+import { Errors } from '#libs-shared'
+import { waiver_types } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
 import { report_job, get_waiver_by_id } from '#libs-server'
 import yargs from 'yargs'
@@ -73,9 +74,9 @@ const process_specific_waiver = async (waiver_id) => {
   try {
     const waiver = await get_waiver_by_id(waiver_id)
 
-    if (waiver.waiver_type === constants.waivers.FREE_AGENCY) {
+    if (waiver.waiver_type === waiver_types.FREE_AGENCY) {
       await processActiveWaivers({ daily: false, wid: waiver_id })
-    } else if (waiver.waiver_type === constants.waivers.FREE_AGENCY_PRACTICE) {
+    } else if (waiver.waiver_type === waiver_types.FREE_AGENCY_PRACTICE) {
       await processPracticeWaivers({ daily: false, wid: waiver_id })
     } else {
       throw new Error(`Unsupported waiver type: ${waiver.waiver_type}`)

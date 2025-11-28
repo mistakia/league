@@ -2,11 +2,12 @@ import React from 'react'
 import { useNavigate } from 'react-router-dom'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { constants, get_string_from_object } from '@libs-shared'
+import { get_string_from_object } from '@libs-shared'
 import TeamName from '@components/team-name'
 import TeamImage from '@components/team-image'
 
 import './matchup.styl'
+import { current_season } from '@constants'
 
 export default function Matchup({ matchup, teams, scoreboard }) {
   const navigate = useNavigate()
@@ -20,7 +21,7 @@ export default function Matchup({ matchup, teams, scoreboard }) {
     value === 0 ? 'EVEN' : value > 0 ? `+${value}` : value
 
   const is_current_week =
-    matchup.week === constants.week && matchup.year === constants.year
+    matchup.week === current_season.week && matchup.year === current_season.year
   const is_final = Boolean(matchup.ap && matchup.hp)
   const home_score =
     !is_final && is_current_week ? scoreboard.home.points : matchup.hp

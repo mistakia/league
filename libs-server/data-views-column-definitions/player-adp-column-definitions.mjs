@@ -2,7 +2,7 @@ import db from '#db'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { create_season_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 const get_cache_info = create_season_cache_info({
   get_params: ({ params = {} } = {}) => {
@@ -13,7 +13,7 @@ const get_cache_info = create_season_cache_info({
 
 const get_default_params = ({ params = {} } = {}) => {
   const default_params = {
-    year: [constants.season.year],
+    year: [current_season.year],
     adp_source_id: ['SLEEPER'],
     adp_type: ['PPR_REDRAFT']
   }

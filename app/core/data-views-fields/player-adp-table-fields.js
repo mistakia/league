@@ -1,6 +1,7 @@
 import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
-import { constants, common_column_params } from '#libs-shared'
+import { common_column_params } from '#libs-shared'
+import { current_season } from '@constants'
 
 const { single_year } = common_column_params
 
@@ -12,7 +13,7 @@ const create_player_adp_field = (props) => ({
   column_params: {
     year: {
       ...single_year,
-      default_value: constants.year
+      default_value: current_season.year
     },
     adp_source_id: {
       values: [

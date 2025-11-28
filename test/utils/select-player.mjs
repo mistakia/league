@@ -1,5 +1,5 @@
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 export default async function ({
   pos = 'RB',
@@ -29,8 +29,8 @@ export default async function ({
   if (exclude_rostered_players) {
     const rostered_players = await db('rosters_players').where({
       lid,
-      week: constants.season.week,
-      year: constants.season.year
+      week: current_season.week,
+      year: current_season.year
     })
     const rostered_pids = rostered_players.map((p) => p.pid)
     exclude_pids = [...exclude_pids, ...rostered_pids]
@@ -41,9 +41,9 @@ export default async function ({
   }
 
   if (rookie) {
-    query.where('nfl_draft_year', constants.season.year)
+    query.where('nfl_draft_year', current_season.year)
   } else {
-    query.whereNot('nfl_draft_year', constants.season.year)
+    query.whereNot('nfl_draft_year', current_season.year)
   }
 
   if (excludePS) {

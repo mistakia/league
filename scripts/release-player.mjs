@@ -4,7 +4,7 @@ import { hideBin } from 'yargs/helpers'
 import MockDate from 'mockdate'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import format_player_name from '#libs-shared/format-player-name.mjs'
 import { is_main, getLeague } from '#libs-server'
 import process_release from '#libs-server/process-release.mjs'
@@ -158,8 +158,8 @@ const resolve_player = async ({
       .where({
         'rosters.tid': tid,
         'rosters.lid': lid,
-        'rosters.year': constants.season.year,
-        'rosters.week': constants.season.week
+        'rosters.year': current_season.year,
+        'rosters.week': current_season.week
       })
 
     if (!roster_players.length) {
@@ -221,7 +221,7 @@ const main = async () => {
 
     // Validate team exists
     const teams = await db('teams')
-      .where({ uid: tid, lid, year: constants.season.year })
+      .where({ uid: tid, lid, year: current_season.year })
       .limit(1)
     if (!teams.length) {
       throw new Error(`Team not found with ID: ${tid} in league ${lid}`)
@@ -247,8 +247,8 @@ const main = async () => {
         'rosters_players.pid': release_player.pid,
         'rosters.tid': tid,
         'rosters.lid': lid,
-        'rosters.year': constants.season.year,
-        'rosters.week': constants.season.week
+        'rosters.year': current_season.year,
+        'rosters.week': current_season.week
       })
       .limit(1)
 

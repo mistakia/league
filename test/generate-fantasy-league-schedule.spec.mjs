@@ -3,7 +3,7 @@
 import * as chai from 'chai'
 
 import { generate_fantasy_league_schedule } from '#libs-server'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 chai.should()
 
@@ -21,7 +21,7 @@ describe('UTILS generate_fantasy_league_schedule', function () {
 
     const schedule = generate_fantasy_league_schedule(teams)
 
-    schedule.should.have.lengthOf(constants.season.regularSeasonFinalWeek)
+    schedule.should.have.lengthOf(current_season.regularSeasonFinalWeek)
     for (const value of schedule.values()) {
       for (const matchup of value) {
         schedulePerTeam[matchup.home.uid].push(matchup.away.uid)
@@ -59,7 +59,7 @@ describe('UTILS generate_fantasy_league_schedule', function () {
     }
 
     const schedule = generate_fantasy_league_schedule(teams)
-    schedule.should.have.lengthOf(constants.season.regularSeasonFinalWeek)
+    schedule.should.have.lengthOf(current_season.regularSeasonFinalWeek)
 
     for (const value of schedule.values()) {
       for (const matchup of value) {

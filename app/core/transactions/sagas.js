@@ -1,6 +1,6 @@
 import { call, takeLatest, fork, select } from 'redux-saga/effects'
 
-import { constants } from '@libs-shared'
+import { transaction_types } from '@constants'
 import { app_actions } from '@core/app'
 import { get_app, get_transactions, get_player_maps } from '@core/selectors'
 import { transactions_actions } from './actions'
@@ -53,11 +53,11 @@ export function* load_recent_transactions() {
   const params = {
     leagueId,
     types: [
-      constants.transactions.ROSTER_ADD,
-      constants.transactions.ROSTER_RELEASE,
-      constants.transactions.POACHED,
-      constants.transactions.DRAFT,
-      constants.transactions.PRACTICE_ADD
+      transaction_types.ROSTER_ADD,
+      transaction_types.ROSTER_RELEASE,
+      transaction_types.POACHED,
+      transaction_types.DRAFT,
+      transaction_types.PRACTICE_ADD
     ],
     since: Math.round(Date.now() / 1000) - 2592000 // last 30 days
   }

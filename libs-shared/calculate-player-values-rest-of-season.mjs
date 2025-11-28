@@ -1,6 +1,6 @@
 import getRosterSize from './get-roster-size.mjs'
 import calculatePrices from './calculate-prices.mjs'
-import * as constants from './constants.mjs'
+import { current_season } from '#constants'
 
 export default function ({ players, league }) {
   // calculate total available points added
@@ -15,7 +15,7 @@ export default function ({ players, league }) {
     let player_ros_pts_added = 0
     for (const [week, pts_added] of Object.entries(player.pts_added)) {
       const wk = Number(week)
-      if (wk && wk >= constants.season.week) {
+      if (wk && wk >= current_season.week) {
         if (pts_added < 0) {
           continue
         }

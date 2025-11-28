@@ -2,6 +2,7 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { player_actions } from '@core/players'
+import { current_season } from '@constants'
 import {
   getSelectedPlayer,
   get_app,
@@ -9,7 +10,7 @@ import {
   get_auction_info_for_position,
   get_current_league
 } from '@core/selectors'
-import { get_free_agent_period, constants } from '@libs-shared'
+import { get_free_agent_period } from '@libs-shared'
 
 import SelectedPlayer from './selected-player'
 
@@ -31,9 +32,9 @@ const map_state_to_props = createSelector(
 
     const free_agency_period_dates = get_free_agent_period(league)
     const is_before_live_auction_end =
-      constants.season.now.isBefore(free_agency_period_dates.end) &&
+      current_season.now.isBefore(free_agency_period_dates.end) &&
       (free_agency_period_dates.free_agency_live_auction_end
-        ? constants.season.now.isBefore(
+        ? current_season.now.isBefore(
             free_agency_period_dates.free_agency_live_auction_end
           )
         : true)

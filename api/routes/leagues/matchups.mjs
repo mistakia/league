@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { getLeague, generateSchedule } from '#libs-server'
 
 const router = express.Router({ mergeParams: true })
@@ -326,7 +326,7 @@ router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { leagueId } = req.params
-    const { year = constants.season.year } = req.query
+    const { year = current_season.year } = req.query
 
     const matchups = await db('matchups')
       .where({ lid: leagueId, year })
