@@ -71,9 +71,7 @@ export default async function ({
   })
 
   // make sure player has not been poached since the last time they were a free agent
-  if (
-    transactionsSinceFA.find((t) => t.type === transaction_types.POACHED)
-  ) {
+  if (transactionsSinceFA.find((t) => t.type === transaction_types.POACHED)) {
     throw new Error('player can not be deactivated once poached')
   }
 
