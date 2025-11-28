@@ -15,7 +15,7 @@ import {
 import {
   current_season,
   external_data_sources,
-  createProjectedStats
+  create_empty_projected_fantasy_stats
 } from '#constants'
 import {
   get_league_format,
@@ -104,7 +104,7 @@ const process_average_projections = async ({ year, seas_type = 'REG' }) => {
     // Only calculate ROS projections for regular season
     if (seas_type === 'REG') {
       // calculate ros projection
-      const ros = createProjectedStats()
+      const ros = create_empty_projected_fantasy_stats()
       let proj_wks = 0
       for (const [week, projection] of Object.entries(player_row.projection)) {
         if (week && week !== '0' && week >= current_season.week) {

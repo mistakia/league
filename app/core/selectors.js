@@ -35,7 +35,8 @@ import {
   fantasy_positions,
   player_nfl_status,
   all_fantasy_stats,
-  base_fantasy_stats
+  base_fantasy_stats,
+  default_points_added
 } from '@constants'
 import { League } from '@core/leagues'
 import { fuzzy_search } from '@core/utils'
@@ -234,8 +235,8 @@ export const get_auction_target_players = createSelector(
     }
     return filtered.sort(
       (a, b) =>
-        b.getIn(['pts_added', '0'], current_season.default_points_added) -
-        a.getIn(['pts_added', '0'], current_season.default_points_added)
+        b.getIn(['pts_added', '0'], default_points_added) -
+        a.getIn(['pts_added', '0'], default_points_added)
     )
   }
 )

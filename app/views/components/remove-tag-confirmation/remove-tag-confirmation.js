@@ -8,7 +8,7 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogTitle from '@mui/material/DialogTitle'
 
 import Button from '@components/button'
-import { player_tag_types } from '@constants'
+import { player_tag_display_names } from '@constants'
 
 export default class RemoveTagConfirmation extends React.Component {
   handleSubmit = () => {
@@ -20,7 +20,7 @@ export default class RemoveTagConfirmation extends React.Component {
 
   render() {
     const { player_map } = this.props
-    const tagType = player_tag_types.tagsDetail[player_map.get('tag')]
+    const tagType = player_tag_display_names[player_map.get('tag')]
 
     return (
       <Dialog open onClose={this.props.onClose}>
