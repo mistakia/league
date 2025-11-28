@@ -1,5 +1,10 @@
 import db from '#db'
-import { constants } from '#libs-shared'
+import {
+  current_season,
+  transaction_types,
+  starting_lineup_slots,
+  transaction_type_display_names
+} from '#constants'
 import { is_main } from '#libs-server'
 
 export default async function get_super_priority_status({
@@ -86,7 +91,7 @@ async function calculate_super_priority_from_source({
   }
 
   const is_free_agent =
-    most_recent_transaction[0].type === constants.transactions.ROSTER_RELEASE
+    most_recent_transaction[0].type === transaction_types.ROSTER_RELEASE
 
   let poached_transactions
 
@@ -98,7 +103,7 @@ async function calculate_super_priority_from_source({
 
     // Find poaches that happened before or at this release
     let query = db('transactions')
-      .where({ pid, lid, type: constants.transactions.POACHED })
+      .where({ pid, lid, type: transaction_types.POACHED })
       .where('timestamp', '<=', current_release.timestamp)
 
     // Filter by release_tid if provided
@@ -111,14 +116,14 @@ async function calculate_super_priority_from_source({
     // For rostered players: consider poaches that happened AFTER the most recent release
     // Player was: released → poached → still rostered
     const most_recent_release = await db('transactions')
-      .where({ pid, lid, type: constants.transactions.ROSTER_RELEASE })
+      .where({ pid, lid, type: transaction_types.ROSTER_RELEASE })
       .orderBy('timestamp', 'desc')
       .limit(1)
 
     if (most_recent_release.length) {
       // Find poaches after the most recent release
       let query = db('transactions')
-        .where({ pid, lid, type: constants.transactions.POACHED })
+        .where({ pid, lid, type: transaction_types.POACHED })
         .where('timestamp', '>=', most_recent_release[0].timestamp)
 
       // Filter by release_tid if provided
@@ -132,7 +137,7 @@ async function calculate_super_priority_from_source({
       let query = db('transactions').where({
         pid,
         lid,
-        type: constants.transactions.POACHED
+        type: transaction_types.POACHED
       })
 
       // Filter by release_tid if provided
@@ -169,11 +174,11 @@ async function calculate_super_priority_from_source({
     .where('timestamp', '<=', poach_timestamp)
     .whereNot('tid', poaching_tid) // Exclude poaching team's transactions
     .whereIn('type', [
-      constants.transactions.PRACTICE_ADD,
-      constants.transactions.DRAFT,
-      constants.transactions.ROSTER_ADD,
-      constants.transactions.ROSTER_DEACTIVATE,
-      constants.transactions.POACHED
+      transaction_types.PRACTICE_ADD,
+      transaction_types.DRAFT,
+      transaction_types.ROSTER_ADD,
+      transaction_types.ROSTER_DEACTIVATE,
+      transaction_types.POACHED
     ])
     .orderBy('timestamp', 'desc')
     .orderBy('uid', 'desc')
@@ -193,9 +198,9 @@ async function calculate_super_priority_from_source({
   const disqualifying_transactions = await db('transactions')
     .where({ pid, tid: poaching_tid, lid })
     .whereIn('type', [
-      constants.transactions.TRADE,
-      constants.transactions.RESTRICTED_FREE_AGENCY_TAG,
-      constants.transactions.EXTENSION
+      transaction_types.TRADE,
+      transaction_types.RESTRICTED_FREE_AGENCY_TAG,
+      transaction_types.EXTENSION
     ])
     .where('timestamp', '>', poach_timestamp)
     .limit(1)
@@ -204,7 +209,7 @@ async function calculate_super_priority_from_source({
     return {
       eligible: false,
       original_tid,
-      reason: `Player was ${constants.transactionsDetail[disqualifying_transactions[0].type]?.toLowerCase() || 'disqualified'}`
+      reason: `Player was ${transaction_type_display_names[disqualifying_transactions[0].type]?.toLowerCase() || 'disqualified'}`
     }
   }
 
@@ -216,8 +221,8 @@ async function calculate_super_priority_from_source({
       'rosters_players.tid': poaching_tid,
       'rosters_players.lid': lid
     })
-    .where('rosters.year', constants.year)
-    .where('rosters.week', '<=', constants.week) // Only count weeks up to current week
+    .where('rosters.year', current_season.year)
+    .where('rosters.week', '<=', current_season.week) // Only count weeks up to current week
     .count('* as count')
 
   if (weeks_rostered[0].count >= 4) {
@@ -236,8 +241,8 @@ async function calculate_super_priority_from_source({
       'rosters_players.tid': poaching_tid,
       'rosters_players.lid': lid
     })
-    .where('rosters.year', constants.year)
-    .whereIn('rosters_players.slot', constants.starterSlots)
+    .where('rosters.year', current_season.year)
+    .whereIn('rosters_players.slot', starting_lineup_slots)
     .count('* as count')
 
   if (games_started[0].count >= 1) {

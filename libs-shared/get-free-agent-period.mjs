@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 
-import { season } from './constants.mjs'
+import { current_season } from '#constants'
 
 export default function get_free_agent_period({
   free_agency_period_start,
@@ -27,6 +27,8 @@ export default function get_free_agent_period({
     free_agency_live_auction_end: free_agency_live_auction_end_dayjs,
     end: free_agency_period_end
       ? dayjs.unix(free_agency_period_end).tz('America/New_York')
-      : season.regular_season_start.add('1', 'week').subtract('1', 'minute')
+      : current_season.regular_season_start
+          .add('1', 'week')
+          .subtract('1', 'minute')
   }
 }

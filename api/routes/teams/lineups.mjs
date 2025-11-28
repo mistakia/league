@@ -6,7 +6,12 @@ import {
   isPlayerLocked,
   getLeague
 } from '#libs-server'
-import { constants, Roster } from '#libs-shared'
+import { Roster } from '#libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  transaction_types
+} from '#constants'
 
 const router = express.Router({ mergeParams: true })
 
@@ -43,8 +48,8 @@ router.get('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { teamId } = req.params
-    const week = req.query.week || constants.season.week
-    const year = req.query.year || constants.season.year
+    const week = req.query.week || current_season.week
+    const year = req.query.year || current_season.year
 
     if (!req.auth) {
       return res.status(401).send({ error: 'invalid token' })
@@ -54,7 +59,7 @@ router.get('/?', async (req, res) => {
 
     const teams = await db('users_teams').where({
       userid: req.auth.userId,
-      year: constants.season.year
+      year: current_season.year
     })
     const teamIds = teams.map((r) => r.tid)
 
@@ -175,8 +180,8 @@ router.put('/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {
     const { teamId } = req.params
-    const week = req.body.week || constants.season.week
-    const year = req.body.year || constants.season.year
+    const week = req.body.week || current_season.week
+    const year = req.body.year || current_season.year
     const { players, leagueId } = req.body
 
     if (!req.auth) {
@@ -194,11 +199,11 @@ router.put('/?', async (req, res) => {
       return res.status(400).send({ error: 'missing leagueId' })
     }
 
-    if (week < constants.season.week || year < constants.season.year) {
+    if (week < current_season.week || year < current_season.year) {
       return res.status(400).send({ error: 'lineup locked' })
     }
 
-    if (week > constants.season.finalWeek) {
+    if (week > current_season.finalWeek) {
       return res.status(400).send({ error: 'lineup locked' })
     }
 
@@ -245,7 +250,7 @@ router.put('/?', async (req, res) => {
     for (const item of players) {
       const player_row = player_rows.find((p) => p.pid === item.pid)
       // verify player is eligible for slot
-      if (item.slot !== constants.slots.BENCH) {
+      if (item.slot !== roster_slot_types.BENCH) {
         const isEligible = roster.isEligibleForSlot({
           slot: item.slot,
           pos: player_row.pos
@@ -265,16 +270,15 @@ router.put('/?', async (req, res) => {
             })
             .where('timestamp', '<=', league.free_agency_period_start)
             .whereIn('type', [
-              constants.transactions.RESERVE_IR,
-              constants.transactions.ROSTER_ACTIVATE
+              transaction_types.RESERVE_IR,
+              transaction_types.ROSTER_ACTIVATE
             ])
             .orderBy('timestamp', 'desc')
             .first()
 
           const was_reserved =
             transaction_before_auction &&
-            transaction_before_auction.type ===
-              constants.transactions.RESERVE_IR
+            transaction_before_auction.type === transaction_types.RESERVE_IR
 
           if (was_reserved) {
             return res.status(400).send({

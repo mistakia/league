@@ -2,7 +2,8 @@ import dayjs from 'dayjs'
 import debug from 'debug'
 
 import db from '#db'
-import { constants, Errors, should_block_poach_processing } from '#libs-shared'
+import { Errors, should_block_poach_processing } from '#libs-shared'
+import { current_season } from '#constants'
 import {
   processPoach,
   sendNotifications,
@@ -20,7 +21,7 @@ if (process.env.NODE_ENV !== 'test') {
 const run = async () => {
   const timestamp = Math.round(Date.now() / 1000)
 
-  const { now } = constants.season
+  const { now } = current_season
   const cutoff = dayjs().subtract('48', 'hours').unix()
   const claims = await db('poaches')
     .where('submitted', '<', cutoff)
@@ -30,7 +31,7 @@ const run = async () => {
     throw new Errors.EmptyPoachingClaims()
   }
 
-  if (constants.season.isRegularSeason) {
+  if (current_season.isRegularSeason) {
     // check if currently between Saturday 6pm and Tuesday 3pm (EST)
     if (should_block_poach_processing(now)) {
       // do not process any claims during this window

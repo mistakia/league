@@ -6,13 +6,17 @@ import MockDate from 'mockdate'
 import server from '#api'
 import knex from '#db'
 import league from '#db/seeds/league.mjs'
-import { constants } from '#libs-shared'
+import {
+  roster_slot_types,
+  player_nfl_status,
+  current_season
+} from '#constants'
 import { addPlayer, selectPlayer, error } from './utils/index.mjs'
 import { user1 } from './fixtures/token.mjs'
 
 process.env.NODE_ENV = 'test'
 chai.use(chai_http)
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 
 describe('API /poaches', function () {
   before(async function () {
@@ -35,7 +39,7 @@ describe('API /poaches', function () {
     it('reserve player violation', async () => {
       MockDate.set(regular_season_start.add('1', 'week').toISOString())
       const reservePlayer = await selectPlayer({
-        nfl_status: constants.player_nfl_status.ACTIVE
+        nfl_status: player_nfl_status.ACTIVE
       })
       const teamId = 1
       const leagueId = 1
@@ -43,7 +47,7 @@ describe('API /poaches', function () {
         leagueId,
         player: reservePlayer,
         teamId,
-        slot: constants.slots.RESERVE_SHORT_TERM,
+        slot: roster_slot_types.RESERVE_SHORT_TERM,
         userId: 1
       })
 
@@ -55,7 +59,7 @@ describe('API /poaches', function () {
         leagueId,
         player,
         teamId: 2,
-        slot: constants.slots.PS,
+        slot: roster_slot_types.PS,
         userId: 2
       })
 

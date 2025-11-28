@@ -3,7 +3,8 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { constants, fixTeam } from '#libs-shared'
+import { fixTeam } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main, find_player_row, report_job } from '#libs-server'
 import config from '#config'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -18,7 +19,7 @@ debug.enable('league:player:get,import:players:mfl,get-player')
 const run = async ({ dry = false } = {}) => {
   const missing = []
 
-  const URL = `https://api.myfantasyleague.com/${constants.season.year}/export?TYPE=players&DETAILS=1&JSON=1`
+  const URL = `https://api.myfantasyleague.com/${current_season.year}/export?TYPE=players&DETAILS=1&JSON=1`
   const result = await fetch(URL, {
     headers: {
       'User-Agent': config.mflUserAgent

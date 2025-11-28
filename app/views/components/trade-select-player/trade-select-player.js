@@ -5,28 +5,31 @@ import PropTypes from 'prop-types'
 import Position from '@components/position'
 import NFLTeam from '@components/nfl-team'
 import PlayerLabel from '@components/player-label'
-import { constants } from '@libs-shared'
 
 import './trade-select-player.styl'
+import { current_season, roster_slot_types } from '@constants'
 
 const slot_display_config = {
-  [constants.slots.BENCH]: { label: 'Active', className: 'slot-badge-active' },
-  [constants.slots.PS]: { label: 'PS', className: 'slot-badge-ps' },
-  [constants.slots.PSP]: { label: 'PS (P)', className: 'slot-badge-ps' },
-  [constants.slots.PSD]: { label: 'PSD', className: 'slot-badge-psd' },
-  [constants.slots.PSDP]: { label: 'PSD (P)', className: 'slot-badge-psd' },
-  [constants.slots.RESERVE_SHORT_TERM]: {
+  [roster_slot_types.BENCH]: {
+    label: 'Active',
+    className: 'slot-badge-active'
+  },
+  [roster_slot_types.PS]: { label: 'PS', className: 'slot-badge-ps' },
+  [roster_slot_types.PSP]: { label: 'PS (P)', className: 'slot-badge-ps' },
+  [roster_slot_types.PSD]: { label: 'PSD', className: 'slot-badge-psd' },
+  [roster_slot_types.PSDP]: { label: 'PSD (P)', className: 'slot-badge-psd' },
+  [roster_slot_types.RESERVE_SHORT_TERM]: {
     label: 'IR',
     className: 'slot-badge-reserve'
   },
-  [constants.slots.RESERVE_LONG_TERM]: {
+  [roster_slot_types.RESERVE_LONG_TERM]: {
     label: 'IR (LT)',
     className: 'slot-badge-reserve'
   },
-  [constants.slots.COV]: { label: 'COV', className: 'slot-badge-reserve' }
+  [roster_slot_types.COV]: { label: 'COV', className: 'slot-badge-reserve' }
 }
 
-constants.starterSlots.forEach((slot) => {
+roster_slot_types.starterSlots.forEach((slot) => {
   if (!slot_display_config[slot]) {
     slot_display_config[slot] = {
       label: 'Active',
@@ -74,7 +77,7 @@ export default function TradeSelectPlayer({
       </div>
       <div className='player__name-main'>
         <span>{player_map.get('pname')}</span>
-        {constants.year === player_map.get('nfl_draft_year') && (
+        {current_season.year === player_map.get('nfl_draft_year') && (
           <PlayerLabel label='R' type='rookie' description='Rookie' />
         )}
         <NFLTeam team={player_map.get('team')} />

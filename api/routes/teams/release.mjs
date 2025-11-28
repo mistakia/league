@@ -1,11 +1,7 @@
 import express from 'express'
 
-import {
-  constants,
-  isSlotActive,
-  Roster,
-  get_free_agent_period
-} from '#libs-shared'
+import { isSlotActive, Roster, get_free_agent_period } from '#libs-shared'
+import { current_season } from '#constants'
 import {
   verifyUserTeam,
   sendNotifications,
@@ -107,7 +103,7 @@ router.post('/?', async (req, res) => {
       return res.status(401).send({ error: 'invalid token' })
     }
 
-    if (constants.season.week > constants.season.finalWeek) {
+    if (current_season.week > current_season.finalWeek) {
       return res.status(400).send({ error: 'player locked' })
     }
 
@@ -155,8 +151,8 @@ router.post('/?', async (req, res) => {
 
       const faPeriod = get_free_agent_period(league)
       if (
-        constants.season.now.isAfter(faPeriod.start) &&
-        constants.season.now.isBefore(faPeriod.end) &&
+        current_season.now.isAfter(faPeriod.start) &&
+        current_season.now.isBefore(faPeriod.end) &&
         isOnActiveRoster &&
         !is_commish
       ) {

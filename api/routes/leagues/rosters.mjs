@@ -1,6 +1,11 @@
 import express from 'express'
 
-import { constants, Roster } from '#libs-shared'
+import { Roster } from '#libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  transaction_types
+} from '#constants'
 import {
   getLeague,
   getRoster,
@@ -31,7 +36,7 @@ const router = express.Router({ mergeParams: true })
  *           example: "RB"
  *         slot:
  *           type: integer
- *           description: Roster slot type (constants.slots)
+ *           description: Roster slot type (constants.roster_slot_types)
  *           example: 20
  *         extensions:
  *           type: integer
@@ -445,10 +450,10 @@ router.post('/?', async (req, res) => {
       tid: teamId,
       lid: leagueId,
       pid,
-      type: constants.transactions.ROSTER_ADD,
+      type: transaction_types.ROSTER_ADD,
       value: val,
-      week: constants.season.week,
-      year: constants.season.year,
+      week: current_season.week,
+      year: current_season.year,
       timestamp: Math.round(Date.now() / 1000)
     }
     await db('transactions').insert(transaction)
@@ -458,12 +463,12 @@ router.post('/?', async (req, res) => {
       rid: roster.uid,
       pid,
       pos: player_row.pos,
-      slot: constants.slots.BENCH,
+      slot: roster_slot_types.BENCH,
       extensions: 0,
       tid: teamId,
       lid: leagueId,
-      year: constants.season.year,
-      week: constants.season.week
+      year: current_season.year,
+      week: current_season.week
     }
     await db('rosters_players').insert(rosterInsert)
 
@@ -833,8 +838,8 @@ router.delete('/?', async (req, res) => {
     const rosters = await db('rosters').where({
       tid: teamId,
       lid: leagueId,
-      week: constants.season.week,
-      year: constants.season.year
+      week: current_season.week,
+      year: current_season.year
     })
     const roster = rosters[0]
     if (!roster) {

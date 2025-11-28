@@ -5,7 +5,7 @@ import {
   getPlayByPlayQuery,
   redis_cache
 } from '#libs-server'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 const router = express.Router()
 
@@ -50,7 +50,7 @@ router.get('/?', async (req, res) => {
   try {
     const query = getPlayByPlayQuery(db)
     const data = await query
-      .where('nfl_plays_current_week.year', constants.season.year)
+      .where('nfl_plays_current_week.year', current_season.year)
       .where('nfl_plays_current_week.seas_type', 'REG')
     res.send(data)
   } catch (error) {
@@ -101,8 +101,8 @@ router.get('/?', async (req, res) => {
 router.get('/all', async (req, res) => {
   const { db, logger } = req.app.locals
   const {
-    year = constants.season.year,
-    seas_type = constants.season.nfl_seas_type
+    year = current_season.year,
+    seas_type = current_season.nfl_seas_type
   } = req.query
 
   try {
@@ -179,7 +179,7 @@ router.get('/stats', async (req, res) => {
           'nfl_plays_current_week.playId'
         )
       })
-      .where('nfl_plays_current_week.year', constants.season.year)
+      .where('nfl_plays_current_week.year', current_season.year)
       .where('nfl_plays_current_week.seas_type', 'REG')
       .where('nfl_play_stats_current_week.valid', true)
     res.send(data)
@@ -305,11 +305,7 @@ router.get('/charted', async (req, res) => {
       ? Array.isArray(req.query.years)
         ? req.query.years
         : [req.query.years]
-      : [
-          constants.season.week
-            ? constants.season.year
-            : constants.season.year - 1
-        ]
+      : [current_season.week ? current_season.year : current_season.year - 1]
 
     const weeks = req.query.weeks
       ? Array.isArray(req.query.weeks)
@@ -395,7 +391,7 @@ router.get('/charted', async (req, res) => {
 
     const data = await query
 
-    const current_seas_type = constants.season.nfl_seas_type
+    const current_seas_type = current_season.nfl_seas_type
     const cache_ttl_one_day = 24 * 60 * 60
     const cache_ttl_one_week = 7 * 24 * 60 * 60
     const cache_duration =

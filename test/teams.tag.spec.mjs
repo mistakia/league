@@ -6,7 +6,12 @@ import server from '#api'
 import knex from '#db'
 import league from '#db/seeds/league.mjs'
 import { getRoster } from '#libs-server'
-import { constants } from '#libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  player_tag_types,
+  transaction_types
+} from '#constants'
 import { user1, user2 } from './fixtures/token.mjs'
 import {
   selectPlayer,
@@ -75,7 +80,7 @@ describe('API /teams - tag', function () {
         leagueId,
         teamId,
         userId,
-        slot: constants.slots.BENCH
+        slot: roster_slot_types.BENCH
       })
 
       const request = chai_request
@@ -96,7 +101,7 @@ describe('API /teams - tag', function () {
         .post('/api/teams/1/tag')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          tag: constants.tags.REGULAR,
+          tag: player_tag_types.REGULAR,
           leagueId: 1
         })
 
@@ -109,7 +114,7 @@ describe('API /teams - tag', function () {
         .post('/api/teams/1/tag')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          tag: constants.tags.REGULAR,
+          tag: player_tag_types.REGULAR,
           pid: 'x'
         })
 
@@ -122,7 +127,7 @@ describe('API /teams - tag', function () {
         .post('/api/teams/1/tag')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          tag: constants.tags.REGULAR,
+          tag: player_tag_types.REGULAR,
           pid: 'x',
           leagueId: 1
         })
@@ -140,7 +145,7 @@ describe('API /teams - tag', function () {
         leagueId,
         teamId,
         userId,
-        slot: constants.slots.BENCH
+        slot: roster_slot_types.BENCH
       })
 
       const request = chai_request
@@ -162,7 +167,7 @@ describe('API /teams - tag', function () {
         .post('/api/teams/1/tag')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          tag: constants.tags.REGULAR,
+          tag: player_tag_types.REGULAR,
           pid: 'x',
           leagueId: 2
         })
@@ -176,7 +181,7 @@ describe('API /teams - tag', function () {
         .post('/api/teams/1/tag')
         .set('Authorization', `Bearer ${user2}`)
         .send({
-          tag: constants.tags.REGULAR,
+          tag: player_tag_types.REGULAR,
           pid: 'x',
           leagueId: 1
         })
@@ -195,7 +200,7 @@ describe('API /teams - tag', function () {
         .post('/api/teams/1/tag')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          tag: constants.tags.REGULAR,
+          tag: player_tag_types.REGULAR,
           pid: player.pid,
           leagueId: 1
         })
@@ -215,7 +220,7 @@ describe('API /teams - tag', function () {
       const teamId = 1
       const leagueId = 1
       const userId = 1
-      const current_year = constants.season.year
+      const current_year = current_season.year
 
       // Select a player that is not yet on the roster
       const player = await selectPlayer({ exclude_pids })
@@ -227,7 +232,7 @@ describe('API /teams - tag', function () {
         leagueId,
         teamId,
         userId,
-        slot: constants.slots.BENCH
+        slot: roster_slot_types.BENCH
       })
 
       // Insert franchise tag transactions for the two previous years
@@ -240,7 +245,7 @@ describe('API /teams - tag', function () {
         tid: teamId,
         lid: leagueId,
         pid: player.pid,
-        type: constants.transactions.FRANCHISE_TAG,
+        type: transaction_types.FRANCHISE_TAG,
         value: 0,
         week: 0,
         year: two_years_ago,
@@ -253,7 +258,7 @@ describe('API /teams - tag', function () {
         tid: teamId,
         lid: leagueId,
         pid: player.pid,
-        type: constants.transactions.FRANCHISE_TAG,
+        type: transaction_types.FRANCHISE_TAG,
         value: 0,
         week: 0,
         year: one_year_ago,
@@ -266,7 +271,7 @@ describe('API /teams - tag', function () {
         .post('/api/teams/1/tag')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          tag: constants.tags.FRANCHISE,
+          tag: player_tag_types.FRANCHISE,
           pid: player.pid,
           leagueId
         })

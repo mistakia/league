@@ -1,9 +1,8 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import { constants } from '@libs-shared'
-
 import './scoreboard-slots.styl'
+import { roster_slot_types } from '@constants'
 
 export default class ScoreboardSlots extends React.Component {
   render = () => {
@@ -24,10 +23,10 @@ export default class ScoreboardSlots extends React.Component {
     let index = 0
     for (const slot of slots) {
       for (let i = 0; i < league[`s${slot}`]; i++) {
-        const s = constants.slots[`${slot.toUpperCase()}`]
+        const s = roster_slot_types[`${slot.toUpperCase()}`]
         rows.push(
           <div key={index} className='scoreboard__slots-slot'>
-            {constants.slotName[s]}
+            {roster_slot_types.slotName[s]}
           </div>
         )
         index += 1

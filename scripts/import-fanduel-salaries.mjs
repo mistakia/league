@@ -13,7 +13,8 @@ import {
   wait
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
-import { constants, fixTeam } from '#libs-shared'
+import { fixTeam } from '#libs-shared'
+import { current_season } from '#constants'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -47,7 +48,7 @@ const import_fanduel_salaries = async ({
   log(`Found ${filtered_fanduel_slates.length} fanduel slates of interest`)
 
   const nfl_games = await db('nfl_games').where({
-    year: constants.season.year
+    year: current_season.year
   })
 
   await wait(10000)

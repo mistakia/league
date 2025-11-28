@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main } from '#libs-server'
 
 const initialize_cli = () => {
@@ -14,7 +14,7 @@ const log = debug('populate-nfl-year-week-timestamp')
 debug.enable('populate-nfl-year-week-timestamp')
 
 const populate_nfl_year_week_timestamp = async ({
-  year = constants.season.year
+  year = current_season.year
 } = {}) => {
   log(`Refreshing nfl_year_week_timestamp materialized view`)
 

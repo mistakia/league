@@ -3,7 +3,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, calculatePoints, groupBy } from '#libs-shared'
+import { calculatePoints, groupBy } from '#libs-shared'
+import { current_season, external_data_sources } from '#constants'
 import { is_main, batch_insert } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -27,7 +28,7 @@ const process_scoring_format_year = async ({
 
   for (const player_row of player_rows) {
     let week = 0
-    for (; week <= constants.season.nflFinalWeek; week++) {
+    for (; week <= current_season.nflFinalWeek; week++) {
       const projection = player_row.projection[week]
 
       if (!projection) {
@@ -101,7 +102,7 @@ const process_projections_for_scoring_format = async ({
     // Get averaged projections for the given year
     const projections = await db('projections_index').where({
       year: process_year,
-      sourceid: constants.sources.AVERAGE,
+      sourceid: external_data_sources.AVERAGE,
       seas_type: 'REG'
     })
 

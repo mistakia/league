@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import {
   is_main,
   find_player_row,
@@ -128,7 +128,7 @@ const import_fantasypros_weekly_rankings = async ({
   dry_run = false,
   ignore_cache = false
 } = {}) => {
-  if (week < 1 || week > constants.season.nflFinalWeek) {
+  if (week < 1 || week > current_season.nflFinalWeek) {
     return
   }
 
@@ -163,8 +163,8 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    const year = argv.year ? argv.year : constants.season.year
-    const week = argv.week ? argv.week : constants.season.week
+    const year = argv.year ? argv.year : current_season.year
+    const week = argv.week ? argv.week : current_season.week
     await import_fantasypros_weekly_rankings({
       year,
       week,

@@ -2,13 +2,13 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { roster_actions } from '@core/rosters'
+import { current_season, roster_slot_types } from '@constants'
 import {
   get_teams_for_current_league,
   get_rosters_for_current_league,
   get_current_league,
   get_players_state
 } from '@core/selectors'
-import { constants } from '@libs-shared'
 import { player_actions } from '@core/players'
 
 import RostersPage from './rosters'
@@ -25,11 +25,11 @@ const map_state_to_props = createSelector(
     let bench_count_max = 0
     let reserve_short_term_count_max = 0
     let reserve_long_term_count_max = 0
-    const recent_draft_cutoff = constants.year - 2
+    const recent_draft_cutoff = current_season.year - 2
 
     for (const roster of rosters.values()) {
       const ps_drafted_count = roster.players.filter((r) =>
-        constants.ps_drafted_slots.includes(r.slot)
+        roster_slot_types.ps_drafted_slots.includes(r.slot)
       )
       ps_drafted_count_max = Math.max(
         ps_drafted_count.size,
@@ -37,7 +37,7 @@ const map_state_to_props = createSelector(
       )
 
       const ps_drafted_threshold_count = roster.players.filter((r) => {
-        if (!constants.ps_drafted_slots.includes(r.slot)) return false
+        if (!roster_slot_types.ps_drafted_slots.includes(r.slot)) return false
         const player = players.get('items').get(r.pid)
         if (!player) return false
         const draft_year = player.get('nfl_draft_year')
@@ -49,17 +49,17 @@ const map_state_to_props = createSelector(
       )
 
       const ps_signed_count = roster.players.filter((r) =>
-        constants.ps_signed_slots.includes(r.slot)
+        roster_slot_types.ps_signed_slots.includes(r.slot)
       )
       ps_signed_count_max = Math.max(ps_signed_count.size, ps_signed_count_max)
 
       const bench_count = roster.players.filter(
-        (r) => r.slot === constants.slots.BENCH
+        (r) => r.slot === roster_slot_types.BENCH
       )
       bench_count_max = Math.max(bench_count.size, bench_count_max)
 
       const reserve_short_term_count = roster.players.filter(
-        (r) => r.slot === constants.slots.RESERVE_SHORT_TERM
+        (r) => r.slot === roster_slot_types.RESERVE_SHORT_TERM
       )
       reserve_short_term_count_max = Math.max(
         reserve_short_term_count.size,
@@ -67,7 +67,7 @@ const map_state_to_props = createSelector(
       )
 
       const reserve_long_term_count = roster.players.filter(
-        (r) => r.slot === constants.slots.RESERVE_LONG_TERM
+        (r) => r.slot === roster_slot_types.RESERVE_LONG_TERM
       )
       reserve_long_term_count_max = Math.max(
         reserve_long_term_count.size,

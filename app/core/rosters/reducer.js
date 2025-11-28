@@ -3,7 +3,12 @@ import { Map } from 'immutable'
 import { roster_actions } from './actions'
 import { createRoster } from './roster'
 import { app_actions } from '@core/app'
-import { constants } from '@libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  transaction_types,
+  player_tag_types
+} from '@constants'
 import { auction_actions } from '@core/auction'
 import { team_actions } from '@core/teams'
 
@@ -23,11 +28,11 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
       const { tid, pid, rid, pos, userid, value, type, year, timestamp, lid } =
         payload
       return state.updateIn(
-        [payload.tid, constants.year, constants.week, 'players'],
+        [payload.tid, current_season.year, current_season.week, 'players'],
         (players) =>
           players.push({
             rid,
-            slot: constants.slots.BENCH,
+            slot: roster_slot_types.BENCH,
             tag: 1,
             pid,
             pos,
@@ -45,16 +50,16 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
     case roster_actions.POST_RELEASE_FULFILLED: {
       const players = state.getIn([
         payload.data.transaction.tid,
-        constants.year,
-        constants.week,
+        current_season.year,
+        current_season.week,
         'players'
       ])
       if (!players) return state
       const key = players.findKey((p) => p.pid === payload.data.pid)
       return state.deleteIn([
         payload.data.transaction.tid,
-        constants.year,
-        constants.week,
+        current_season.year,
+        current_season.week,
         'players',
         key
       ])
@@ -66,24 +71,24 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
           const t = p.transaction
           const players = state.getIn([
             t.tid,
-            constants.year,
-            constants.week,
+            current_season.year,
+            current_season.week,
             'players'
           ])
           if (!players) return state
 
           const key = players.findKey((p) => p.pid === t.pid)
-          if (t.type === constants.transactions.ROSTER_RELEASE) {
+          if (t.type === transaction_types.ROSTER_RELEASE) {
             return state.deleteIn([
               t.tid,
-              constants.year,
-              constants.week,
+              current_season.year,
+              current_season.week,
               'players',
               key
             ])
           } else {
             return state.updateIn(
-              [t.tid, constants.year, constants.week, 'players'],
+              [t.tid, current_season.year, current_season.week, 'players'],
               (arr) =>
                 arr.push({
                   rid: t.rid,
@@ -110,8 +115,8 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
         const tid = payload.data[0].tid
         const players = state.getIn([
           tid,
-          constants.year,
-          constants.week,
+          current_season.year,
+          current_season.week,
           'players'
         ])
         if (!players) return state
@@ -119,7 +124,14 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
         payload.data.forEach(({ pid, slot }) => {
           const index = players.findIndex((p) => p.pid === pid)
           state.setIn(
-            [tid, constants.year, constants.week, 'players', index, 'slot'],
+            [
+              tid,
+              current_season.year,
+              current_season.week,
+              'players',
+              index,
+              'slot'
+            ],
             slot
           )
         })
@@ -134,8 +146,8 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
       return state.withMutations((state) => {
         const players = state.getIn([
           payload.data.tid,
-          constants.year,
-          constants.week,
+          current_season.year,
+          current_season.week,
           'players'
         ])
         if (!players) return state
@@ -145,8 +157,8 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
           state.setIn(
             [
               payload.data.tid,
-              constants.year,
-              constants.week,
+              current_season.year,
+              current_season.week,
               'players',
               index,
               'slot'
@@ -159,8 +171,8 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
             state.mergeIn(
               [
                 payload.data.tid,
-                constants.year,
-                constants.week,
+                current_season.year,
+                current_season.week,
                 'players',
                 index
               ],
@@ -174,8 +186,8 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
         } else {
           state.deleteIn([
             payload.data.tid,
-            constants.year,
-            constants.week,
+            current_season.year,
+            current_season.week,
             'players',
             index
           ])
@@ -190,7 +202,7 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
           for (const week in lineups) {
             const tid = Number(teamId)
             state.setIn(
-              [tid, constants.year, constants.week, 'lineups', week],
+              [tid, current_season.year, current_season.week, 'lineups', week],
               lineups[week]
             )
           }
@@ -199,7 +211,7 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
 
     case team_actions.POST_TEAMS_FULFILLED:
       return state.setIn(
-        [payload.data.team.uid, constants.year, constants.week],
+        [payload.data.team.uid, current_season.year, current_season.week],
         createRoster(payload.data.roster)
       )
 
@@ -211,7 +223,12 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
       const { userid, tid, lid, type, value, year, timestamp } =
         payload.data.transaction
       return state.updateIn(
-        [payload.opts.teamId, constants.year, constants.week, 'players'],
+        [
+          payload.opts.teamId,
+          current_season.year,
+          current_season.week,
+          'players'
+        ],
         (arr) =>
           arr.push({
             rid,
@@ -234,8 +251,8 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
       return state.withMutations((state) => {
         const players = state.getIn([
           payload.opts.teamId,
-          constants.year,
-          constants.week,
+          current_season.year,
+          current_season.week,
           'players'
         ])
         if (!players) return state
@@ -244,8 +261,8 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
         state.setIn(
           [
             payload.opts.teamId,
-            constants.year,
-            constants.week,
+            current_season.year,
+            current_season.week,
             'players',
             index,
             'tag'
@@ -258,13 +275,13 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
           state.setIn(
             [
               payload.opts.teamId,
-              constants.year,
-              constants.week,
+              current_season.year,
+              current_season.week,
               'players',
               index,
               'tag'
             ],
-            constants.tags.REGULAR
+            player_tag_types.REGULAR
           )
         }
       })
@@ -274,7 +291,12 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
 
     case roster_actions.DELETE_ROSTERS_FULFILLED:
       return state.updateIn(
-        [payload.opts.teamId, constants.year, constants.week, 'players'],
+        [
+          payload.opts.teamId,
+          current_season.year,
+          current_season.week,
+          'players'
+        ],
         (arr) => arr.filter((p) => p.pid !== payload.opts.pid)
       )
 
@@ -283,8 +305,8 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
       return state.withMutations((state) => {
         const players = state.getIn([
           payload.teamId,
-          constants.year,
-          constants.week,
+          current_season.year,
+          current_season.week,
           'players'
         ])
         if (!players) return state
@@ -294,8 +316,8 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
         // Store previous state for potential reversion
         const previous_tag = state.getIn([
           payload.teamId,
-          constants.year,
-          constants.week,
+          current_season.year,
+          current_season.week,
           'players',
           index,
           'tag'
@@ -303,8 +325,8 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
 
         const previous_bid = state.getIn([
           payload.teamId,
-          constants.year,
-          constants.week,
+          current_season.year,
+          current_season.week,
           'players',
           index,
           'bid'
@@ -314,8 +336,8 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
         state.setIn(
           [
             payload.teamId,
-            constants.year,
-            constants.week,
+            current_season.year,
+            current_season.week,
             'players',
             index,
             'previous_state'
@@ -327,20 +349,20 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
         state.setIn(
           [
             payload.teamId,
-            constants.year,
-            constants.week,
+            current_season.year,
+            current_season.week,
             'players',
             index,
             'tag'
           ],
-          constants.tags.RESTRICTED_FREE_AGENCY
+          player_tag_types.RESTRICTED_FREE_AGENCY
         )
 
         state.setIn(
           [
             payload.teamId,
-            constants.year,
-            constants.week,
+            current_season.year,
+            current_season.week,
             'players',
             index,
             'bid'
@@ -356,8 +378,8 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
           // Store the removed player's tag before changing it
           const removed_player_tag = state.getIn([
             payload.teamId,
-            constants.year,
-            constants.week,
+            current_season.year,
+            current_season.week,
             'players',
             remove_index,
             'tag'
@@ -367,8 +389,8 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
           state.setIn(
             [
               payload.teamId,
-              constants.year,
-              constants.week,
+              current_season.year,
+              current_season.week,
               'players',
               index,
               'removed_player_info'
@@ -379,13 +401,13 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
           state.setIn(
             [
               payload.teamId,
-              constants.year,
-              constants.week,
+              current_season.year,
+              current_season.week,
               'players',
               remove_index,
               'tag'
             ],
-            constants.tags.REGULAR
+            player_tag_types.REGULAR
           )
         }
       })
@@ -395,17 +417,23 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
     case roster_actions.REMOVE_TAG: {
       const players = state.getIn([
         payload.teamId,
-        constants.year,
-        constants.week,
+        current_season.year,
+        current_season.week,
         'players'
       ])
       if (!players) return state
 
       const index = players.findIndex((p) => p.pid === payload.pid)
       return state.mergeIn(
-        [payload.teamId, constants.year, constants.week, 'players', index],
+        [
+          payload.teamId,
+          current_season.year,
+          current_season.week,
+          'players',
+          index
+        ],
         {
-          tag: constants.tags.REGULAR,
+          tag: player_tag_types.REGULAR,
           bid: null
         }
       )
@@ -416,8 +444,8 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
       return state.withMutations((state) => {
         const players = state.getIn([
           payload.opts.teamId,
-          constants.year,
-          constants.week,
+          current_season.year,
+          current_season.week,
           'players'
         ])
         if (!players) return state
@@ -427,8 +455,8 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
         // Get previous state if available
         const previous_state = state.getIn([
           payload.opts.teamId,
-          constants.year,
-          constants.week,
+          current_season.year,
+          current_season.week,
           'players',
           index,
           'previous_state'
@@ -437,8 +465,8 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
         // Get removed player info if available
         const removed_player_info = state.getIn([
           payload.opts.teamId,
-          constants.year,
-          constants.week,
+          current_season.year,
+          current_season.week,
           'players',
           index,
           'removed_player_info'
@@ -449,8 +477,8 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
           state.setIn(
             [
               payload.opts.teamId,
-              constants.year,
-              constants.week,
+              current_season.year,
+              current_season.week,
               'players',
               index,
               'tag'
@@ -461,8 +489,8 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
           state.setIn(
             [
               payload.opts.teamId,
-              constants.year,
-              constants.week,
+              current_season.year,
+              current_season.week,
               'players',
               index,
               'bid'
@@ -474,20 +502,20 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
           state.setIn(
             [
               payload.opts.teamId,
-              constants.year,
-              constants.week,
+              current_season.year,
+              current_season.week,
               'players',
               index,
               'tag'
             ],
-            constants.tags.REGULAR
+            player_tag_types.REGULAR
           )
 
           state.setIn(
             [
               payload.opts.teamId,
-              constants.year,
-              constants.week,
+              current_season.year,
+              current_season.week,
               'players',
               index,
               'bid'
@@ -505,8 +533,8 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
             state.setIn(
               [
                 payload.opts.teamId,
-                constants.year,
-                constants.week,
+                current_season.year,
+                current_season.week,
                 'players',
                 removed_index,
                 'tag'
@@ -519,8 +547,8 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
         // Clean up the temporary state fields
         state.deleteIn([
           payload.opts.teamId,
-          constants.year,
-          constants.week,
+          current_season.year,
+          current_season.week,
           'players',
           index,
           'previous_state'
@@ -528,8 +556,8 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
 
         state.deleteIn([
           payload.opts.teamId,
-          constants.year,
-          constants.week,
+          current_season.year,
+          current_season.week,
           'players',
           index,
           'removed_player_info'
@@ -540,7 +568,12 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
     case roster_actions.POST_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED:
       return state
         .updateIn(
-          [payload.opts.teamId, constants.year, constants.week, 'players'],
+          [
+            payload.opts.teamId,
+            current_season.year,
+            current_season.week,
+            'players'
+          ],
           (players) =>
             players.map((player) => ({
               ...player,
@@ -548,7 +581,12 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
             }))
         )
         .updateIn(
-          [payload.opts.teamId, constants.year, constants.week, 'players'],
+          [
+            payload.opts.teamId,
+            current_season.year,
+            current_season.week,
+            'players'
+          ],
           (players) =>
             players.map((player) => {
               if (player.pid === payload.opts.pid) {
@@ -563,7 +601,12 @@ export function rosters_reducer(state = new Map(), { payload, type }) {
 
     case roster_actions.DELETE_RESTRICTED_FREE_AGENT_NOMINATION_FULFILLED:
       return state.updateIn(
-        [payload.opts.team_id, constants.year, constants.week, 'players'],
+        [
+          payload.opts.team_id,
+          current_season.year,
+          current_season.week,
+          'players'
+        ],
         (players) => {
           if (!players) return players
           return players.map((player) => {

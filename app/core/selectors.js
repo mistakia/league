@@ -5,7 +5,6 @@ import { createSelector } from 'reselect'
 import Immutable, { Map, List } from 'immutable'
 
 import {
-  constants,
   bookmaker_constants,
   Roster,
   isSlotActive,
@@ -27,6 +26,17 @@ import {
   get_reserve_eligibility_from_player_map,
   get_default_trade_slot
 } from '@libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  transaction_types,
+  player_tag_types,
+  waiver_types,
+  fantasy_positions,
+  player_nfl_status,
+  all_fantasy_stats,
+  base_fantasy_stats
+} from '@constants'
 import { League } from '@core/leagues'
 import { fuzzy_search } from '@core/utils'
 import { create_matchup } from '@core/matchups'
@@ -54,16 +64,16 @@ export const get_waivers = (state) => state.get('waivers')
 export const get_transactions = (state) => state.get('transactions')
 export const get_trade = (state) => state.get('trade')
 export const get_teams_for_current_year = (state) =>
-  state.getIn(['teams', constants.year], new Map())
+  state.getIn(['teams', current_season.year], new Map())
 export const get_team_by_id_for_year = (
   state,
-  { tid, year = constants.year }
+  { tid, year = current_season.year }
 ) => state.getIn(['teams', year, tid], new Team())
 export const get_team_by_id_for_current_year = (state, { tid }) =>
-  state.getIn(['teams', constants.year, tid], new Team())
+  state.getIn(['teams', current_season.year, tid], new Team())
 export const get_scoreboard = (state) => state.get('scoreboard')
 export const get_props = (state) => state.getIn(['props', 'items'])
-export const get_plays = (state, { week = constants.week } = {}) =>
+export const get_plays = (state, { week = current_season.week } = {}) =>
   state.getIn(['plays', week], new Map())
 export const get_draft_state = (state) => state.get('draft')
 export const get_status = (state) => state.get('status')
@@ -82,7 +92,7 @@ export const get_player_gamelogs = (state) =>
   state.get('gamelogs').get('players').toList()
 export const get_gamelog_by_player_id = (
   state,
-  { pid, week, year = constants.year }
+  { pid, week, year = current_season.year }
 ) => state.getIn(['gamelogs', 'players', `${year}/REG/${week}/${pid}`])
 export const get_poaches_for_current_league = (state) =>
   state.getIn(['poaches', state.getIn(['app', 'leagueId'])], new Map())
@@ -116,7 +126,7 @@ export const isTeamConnected = createSelector(
 export const get_positions_for_current_league = createSelector(
   get_current_league,
   (league) =>
-    constants.positions.filter((pos) =>
+    fantasy_positions.filter((pos) =>
       league_has_starting_position({ pos, league })
     )
 )
@@ -140,7 +150,7 @@ export const get_current_team_roster_record = createSelector(
   (state) => state.getIn(['app', 'teamId']),
   (rosters, teamId) => {
     return rosters.getIn(
-      [teamId, constants.year, constants.fantasy_season_week],
+      [teamId, current_season.year, current_season.fantasy_season_week],
       new RosterRecord()
     )
   }
@@ -175,10 +185,10 @@ export const get_rosters_for_current_league = createSelector(
   (state) => state.getIn(['app', 'leagueId']),
   (rosters, leagueId) => {
     const week = Math.min(
-      constants.fantasy_season_week,
-      constants.season.finalWeek
+      current_season.fantasy_season_week,
+      current_season.finalWeek
     )
-    const year = constants.year
+    const year = current_season.year
     const filtered = rosters.filter((w) => {
       const r = w.getIn([year, week])
       if (!r) return false
@@ -224,8 +234,8 @@ export const get_auction_target_players = createSelector(
     }
     return filtered.sort(
       (a, b) =>
-        b.getIn(['pts_added', '0'], constants.default_points_added) -
-        a.getIn(['pts_added', '0'], constants.default_points_added)
+        b.getIn(['pts_added', '0'], current_season.default_points_added) -
+        a.getIn(['pts_added', '0'], current_season.default_points_added)
     )
   }
 )
@@ -336,7 +346,7 @@ export const is_free_agent_period = createSelector(
     }
 
     const faPeriod = get_free_agent_period(league)
-    return constants.season.now.isBetween(faPeriod.start, faPeriod.end)
+    return current_season.now.isBetween(faPeriod.start, faPeriod.end)
   }
 )
 
@@ -383,7 +393,7 @@ export const getPicks = createSelector(
         }
 
         const isActive =
-          constants.season.now.isAfter(p.draftWindow) || previousSelected
+          current_season.now.isAfter(p.draftWindow) || previousSelected
 
         previousNotActive = !isActive && previousActive
         previousActive = isActive
@@ -470,7 +480,7 @@ export const is_after_rookie_draft = createSelector(
   (state) => state.get('leagues'),
   get_rookie_draft_end,
   (league_id, leagues, rookie_draft_end) => {
-    if (constants.isRegularSeason) {
+    if (current_season.isRegularSeason) {
       return {
         after_rookie_draft: true,
         after_rookie_draft_waivers: true
@@ -509,7 +519,7 @@ export const get_rookie_draft_next_pick = createSelector(
         last_selection_timestamp: lastPick.selection_timestamp
       })
 
-      if (constants.season.now.isAfter(draftDates.draftEnd)) {
+      if (current_season.now.isAfter(draftDates.draftEnd)) {
         return null
       }
     }
@@ -572,7 +582,7 @@ function get_draft_pick_value(values, pick) {
       item.median_career_points_added_per_game) /
     4
   const weeks_remaining =
-    constants.season.finalWeek - constants.fantasy_season_week
+    current_season.finalWeek - current_season.fantasy_season_week
 
   return avg * weeks_remaining
 }
@@ -592,7 +602,7 @@ export const is_before_extension_deadline = createSelector(
     }
 
     const deadline = dayjs.unix(ext_date)
-    return constants.season.now.isBefore(deadline)
+    return current_season.now.isBefore(deadline)
   }
 )
 
@@ -605,7 +615,7 @@ export const is_before_restricted_free_agency_start = createSelector(
     }
 
     const deadline = dayjs.unix(tran_start)
-    return constants.season.now.isBefore(deadline)
+    return current_season.now.isBefore(deadline)
   }
 )
 
@@ -618,7 +628,7 @@ export const is_before_restricted_free_agency_end = createSelector(
     }
 
     const deadline = dayjs.unix(tran_end)
-    return constants.season.now.isBefore(deadline)
+    return current_season.now.isBefore(deadline)
   }
 )
 
@@ -702,7 +712,7 @@ export const get_league_events = createSelector(
       }
     }
 
-    const firstDayOfRegularSeason = constants.season.regular_season_start.add(
+    const firstDayOfRegularSeason = current_season.regular_season_start.add(
       '1',
       'week'
     )
@@ -713,7 +723,7 @@ export const get_league_events = createSelector(
       })
     }
 
-    const firstWaiverDate = constants.season.regular_season_start
+    const firstWaiverDate = current_season.regular_season_start
       .add('1', 'week')
       .day(3)
       .hour(15)
@@ -722,8 +732,8 @@ export const get_league_events = createSelector(
         detail: 'Regular Season Waivers Clear',
         date: firstWaiverDate
       })
-    } else if (constants.isRegularSeason) {
-      const waiverDate = constants.season.now.day(3).hour(15).minute(0)
+    } else if (current_season.isRegularSeason) {
+      const waiverDate = current_season.now.day(3).hour(15).minute(0)
       const nextWaiverDate = now.isBefore(waiverDate)
         ? waiverDate
         : waiverDate.add('1', 'week')
@@ -734,10 +744,10 @@ export const get_league_events = createSelector(
       })
     }
 
-    if (now.isBefore(constants.season.openingDay)) {
+    if (now.isBefore(current_season.openingDay)) {
       events.push({
         detail: 'NFL Opening Day',
-        date: constants.season.openingDay
+        date: current_season.openingDay
       })
     }
 
@@ -799,10 +809,10 @@ export const get_league_events = createSelector(
       }
     }
 
-    if (now.isBefore(constants.season.end)) {
+    if (now.isBefore(current_season.end)) {
       events.push({
         detail: 'Offseason Begins',
-        date: constants.season.end
+        date: current_season.end
       })
     }
 
@@ -812,7 +822,7 @@ export const get_league_events = createSelector(
 
 export const get_regular_season_weeks = createSelector(
   (state) => state.getIn(['matchups', 'matchups_by_id']).toList(),
-  (state) => state.getIn(['app', 'year'], constants.year),
+  (state) => state.getIn(['app', 'year'], current_season.year),
   (matchups, year) =>
     matchups
       .filter((m) => m.year === year)
@@ -822,7 +832,7 @@ export const get_regular_season_weeks = createSelector(
 
 export const get_post_season_weeks = createSelector(
   (state) => state.getIn(['matchups', 'playoffs']),
-  (state) => state.getIn(['app', 'year'], constants.year),
+  (state) => state.getIn(['app', 'year'], current_season.year),
   (playoffs, year) =>
     playoffs
       .filter((m) => m.year === year)
@@ -848,7 +858,7 @@ export function get_filtered_matchups(state) {
   const items = matchups.get('matchups_by_id').toList()
   const teams = matchups.get('teams')
   const weeks = matchups.get('weeks')
-  const year = state.getIn(['app', 'year'], constants.year)
+  const year = state.getIn(['app', 'year'], current_season.year)
   const filtered = items.filter((m) => {
     // Always apply year filter first
     if (m.year !== year) return false
@@ -874,7 +884,7 @@ export function get_selected_matchup(state) {
   if (!matchupId) return create_matchup()
 
   // TODO - fix / derive based on season schedule
-  const year = state.getIn(['app', 'year'], constants.year)
+  const year = state.getIn(['app', 'year'], current_season.year)
   const week = state.getIn(['scoreboard', 'week'])
   if (is_league_post_season_week({ year, week })) {
     const items = matchups.get('playoffs')
@@ -892,8 +902,8 @@ export function get_selected_matchup_teams(state) {
   const teams = matchup.tids.map((tid) =>
     get_team_by_id_for_year(state, { tid, year: matchup.year })
   )
-  if (matchup.week === constants.season.finalWeek) {
-    const prevWeek = constants.season.finalWeek - 1
+  if (matchup.week === current_season.finalWeek) {
+    const prevWeek = current_season.finalWeek - 1
     return teams.map((teamRecord) => {
       const previousWeekScore = getPointsByTeamId(state, {
         tid: teamRecord.uid,
@@ -908,7 +918,7 @@ export function get_selected_matchup_teams(state) {
 export function get_matchups_for_selected_week(state) {
   const matchups = state.getIn(['matchups', 'matchups_by_id']).toList()
   const week = state.getIn(['scoreboard', 'week'])
-  const year = state.getIn(['app', 'year'], constants.year)
+  const year = state.getIn(['app', 'year'], current_season.year)
   return matchups.filter((m) => m.week === week && m.year === year)
 }
 
@@ -957,7 +967,7 @@ export function getBaselines(state) {
   return result.withMutations((b) => {
     for (const [week, positions] of b.entrySeq()) {
       // TODO document this
-      if (constants.positions.includes(week)) continue
+      if (fantasy_positions.includes(week)) continue
       for (const [position, baselines] of positions.entrySeq()) {
         for (const [baseline, pid] of baselines.entrySeq()) {
           b.setIn([week, position, baseline], playerMaps.get(pid))
@@ -971,7 +981,7 @@ export const get_restricted_free_agency_players = createSelector(
   get_player_maps,
   (playerMaps) =>
     playerMaps.filter(
-      (pMap) => pMap.get('tag') === constants.tags.RESTRICTED_FREE_AGENCY
+      (pMap) => pMap.get('tag') === player_tag_types.RESTRICTED_FREE_AGENCY
     )
 )
 
@@ -1023,7 +1033,7 @@ export function getSelectedPlayerGames(state) {
 export function getPlayersByPosition(state, { position }) {
   const playerMaps = get_player_maps(state)
   const filtered = playerMaps.filter((p) => p.pos === position)
-  const period = !constants.week ? '0' : 'ros'
+  const period = !current_season.week ? '0' : 'ros'
   return filtered
     .sort(
       (a, b) =>
@@ -1035,7 +1045,7 @@ export function getPlayersByPosition(state, { position }) {
 
 export const getRookiePlayers = createSelector(get_player_maps, (playerMaps) =>
   playerMaps
-    .filter((pMap) => pMap.get('nfl_draft_year') === constants.year)
+    .filter((pMap) => pMap.get('nfl_draft_year') === current_season.year)
     .toList()
 )
 
@@ -1063,12 +1073,14 @@ export function getGamesByYearForSelectedPlayer(state) {
   const overall = {}
   for (const year in years) {
     const initialValue = {}
-    for (const stat of constants.fantasyStats) {
+    for (const stat of all_fantasy_stats) {
       initialValue[stat] = 0
     }
 
     const sum = years[year].reduce((sums, obj) => {
-      const stats = Object.keys(obj).filter((k) => constants.stats.includes(k))
+      const stats = Object.keys(obj).filter((k) =>
+        base_fantasy_stats.includes(k)
+      )
       stats.forEach((k) => {
         sums[k] += obj[k] || 0
       })
@@ -1096,7 +1108,7 @@ export const isPlayerOnReleaseWaivers = createSelector(
 )
 
 export function isPlayerLocked(state, { player_map = new Map(), pid }) {
-  if (constants.week > constants.season.finalWeek) {
+  if (current_season.week > current_season.finalWeek) {
     return true
   }
 
@@ -1108,7 +1120,7 @@ export function isPlayerLocked(state, { player_map = new Map(), pid }) {
     return false
   }
 
-  if (player_map.get('nfl_status') === constants.player_nfl_status.INACTIVE) {
+  if (player_map.get('nfl_status') === player_nfl_status.INACTIVE) {
     return false
   }
 
@@ -1185,20 +1197,21 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
   const bid = player_map.get('bid')
   status.restricted_free_agent_bid_exists =
     bid !== null && bid !== undefined && Number(bid) >= 0
-  status.tagged.rookie = playerTag === constants.tags.ROOKIE
+  status.tagged.rookie = playerTag === player_tag_types.ROOKIE
   status.tagged.restrictedFreeAgency =
-    playerTag === constants.tags.RESTRICTED_FREE_AGENCY
-  status.tagged.franchise = playerTag === constants.tags.FRANCHISE
+    playerTag === player_tag_types.RESTRICTED_FREE_AGENCY
+  status.tagged.franchise = playerTag === player_tag_types.FRANCHISE
   status.protected =
-    playerSlot === constants.slots.PSP || playerSlot === constants.slots.PSDP
-  status.starter = constants.starterSlots.includes(playerSlot)
+    playerSlot === roster_slot_types.PSP ||
+    playerSlot === roster_slot_types.PSDP
+  status.starter = roster_slot_types.starterSlots.includes(playerSlot)
   status.locked = isPlayerLocked(state, { player_map })
   status.active = isSlotActive(playerSlot)
 
   const isFreeAgent = isPlayerFreeAgent(state, { player_map })
   status.fa = isFreeAgent
   if (isFreeAgent) {
-    const { isWaiverPeriod, isRegularSeason } = constants.season
+    const { isWaiverPeriod, isRegularSeason } = current_season
     if (isRegularSeason && isWaiverPeriod) {
       status.waiver.active = true
       const isPracticeSquadEligible = isPlayerPracticeSquadEligible(state, {
@@ -1261,13 +1274,13 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
       //     otherwise are they a rookie now
       const isBeforeExtension = is_before_extension_deadline(state)
       const draft_year = player_map.get('nfl_draft_year')
-      if (isBeforeExtension && draft_year === constants.year - 1) {
+      if (isBeforeExtension && draft_year === current_season.year - 1) {
         status.eligible.rookieTag = true
-      } else if (draft_year === constants.year) {
+      } else if (draft_year === current_season.year) {
         status.eligible.rookieTag = true
       }
 
-      if (constants.week > 0 || isBeforeExtension) {
+      if (current_season.week > 0 || isBeforeExtension) {
         status.eligible.franchiseTag = true
       }
 
@@ -1285,16 +1298,16 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
       if (!isActive) {
         // can not activate long term reserve player during regular season
         status.eligible.activate = !(
-          constants.isRegularSeason &&
-          playerSlot === constants.slots.RESERVE_LONG_TERM
+          current_season.isRegularSeason &&
+          playerSlot === roster_slot_types.RESERVE_LONG_TERM
         )
 
         // is regular season and is on practice squad && has no poaching claims
         const leaguePoaches = get_poaches_for_current_league(state)
         if (
-          constants.isRegularSeason &&
-          (playerSlot === constants.slots.PS ||
-            playerSlot === constants.slots.PSD) &&
+          current_season.isRegularSeason &&
+          (playerSlot === roster_slot_types.PS ||
+            playerSlot === roster_slot_types.PSD) &&
           !leaguePoaches.has(playerId)
         ) {
           status.eligible.protect = true
@@ -1305,13 +1318,16 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
         status.eligible.ps = true
       }
 
-      if (!status.protected && constants.week <= constants.season.finalWeek) {
+      if (
+        !status.protected &&
+        current_season.week <= current_season.finalWeek
+      ) {
         const reserve = get_reserve_eligibility_from_player_map({ player_map })
 
         // For practice squad players, only allow reserve if they have active poaching claim
         const isPracticeSquad =
-          playerSlot === constants.slots.PS ||
-          playerSlot === constants.slots.PSD
+          playerSlot === roster_slot_types.PS ||
+          playerSlot === roster_slot_types.PSD
         let practiceSquadReserveEligible = true
         if (isPracticeSquad) {
           const leaguePoaches = get_poaches_for_current_league(state)
@@ -1320,8 +1336,8 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
 
         if (
           reserve.reserve_short_term_eligible &&
-          playerSlot !== constants.slots.RESERVE_SHORT_TERM &&
-          playerSlot !== constants.slots.RESERVE_LONG_TERM &&
+          playerSlot !== roster_slot_types.RESERVE_SHORT_TERM &&
+          playerSlot !== roster_slot_types.RESERVE_LONG_TERM &&
           practiceSquadReserveEligible
         ) {
           status.reserve.reserve_short_term_eligible = true
@@ -1329,7 +1345,7 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
 
         if (
           reserve.reserve_short_term_eligible &&
-          playerSlot !== constants.slots.RESERVE_LONG_TERM &&
+          playerSlot !== roster_slot_types.RESERVE_LONG_TERM &&
           practiceSquadReserveEligible
         ) {
           status.reserve.reserve_long_term_eligible = true
@@ -1337,8 +1353,8 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
 
         if (
           reserve.cov &&
-          playerSlot !== constants.slots.COV &&
-          constants.isRegularSeason &&
+          playerSlot !== roster_slot_types.COV &&
+          current_season.isRegularSeason &&
           practiceSquadReserveEligible
         ) {
           status.reserve.cov = true
@@ -1348,8 +1364,8 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
       const is_sanctuary_period = isSantuaryPeriod(league)
       // make sure player is unprotected and it is not a santuary period
       if (
-        playerSlot === constants.slots.PS ||
-        playerSlot === constants.slots.PSD
+        playerSlot === roster_slot_types.PS ||
+        playerSlot === roster_slot_types.PSD
       ) {
         const roster_info = getRosterInfoForPlayerId(state, {
           pid: playerId
@@ -1373,9 +1389,9 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
 
         // waiver period overlaps with sanctuary period (both 24 hours)
         if (
-          ((roster_info.type === constants.transactions.ROSTER_DEACTIVATE ||
-            roster_info.type === constants.transactions.DRAFT ||
-            roster_info.type === constants.transactions.PRACTICE_ADD) &&
+          ((roster_info.type === transaction_types.ROSTER_DEACTIVATE ||
+            roster_info.type === transaction_types.DRAFT ||
+            roster_info.type === transaction_types.PRACTICE_ADD) &&
             dayjs().isBefore(waiver_period_end)) ||
           is_sanctuary_period
         ) {
@@ -1398,11 +1414,11 @@ export function isPlayerPracticeSquadEligible(
   }
 
   const acceptable_types = [
-    constants.transactions.ROSTER_ADD,
-    constants.transactions.TRADE,
-    constants.transactions.DRAFT,
-    constants.transactions.RESERVE_IR,
-    constants.transactions.RESERVE_COV
+    transaction_types.ROSTER_ADD,
+    transaction_types.TRADE,
+    transaction_types.DRAFT,
+    transaction_types.RESERVE_IR,
+    transaction_types.RESERVE_COV
   ]
   const type = player_map.get('type')
   if (type && !acceptable_types.includes(type)) {
@@ -1416,8 +1432,8 @@ export function isPlayerPracticeSquadEligible(
   // - not on a nfl team
   if (
     !rosterInfo.tid && // not on a team
-    !constants.isRegularSeason && // during the offseason
-    player_map.get('nfl_draft_year') !== constants.year && // not a rookie
+    !current_season.isRegularSeason && // during the offseason
+    player_map.get('nfl_draft_year') !== current_season.year && // not a rookie
     player_map.get('team') !== 'INA' // not on a nfl team
   ) {
     return false
@@ -1445,7 +1461,7 @@ export function isPlayerPracticeSquadEligible(
   }
 
   // not eligible if player is on long term reserve
-  if (rosterPlayer.slot === constants.slots.RESERVE_LONG_TERM) {
+  if (rosterPlayer.slot === roster_slot_types.RESERVE_LONG_TERM) {
     return false
   }
 
@@ -1459,7 +1475,7 @@ export function isPlayerPracticeSquadEligible(
 
   // not eligible if activated previously
   const activations = transactions.filter(
-    (t) => t.type === constants.transactions.ROSTER_ACTIVATE
+    (t) => t.type === transaction_types.ROSTER_ACTIVATE
   )
   if (activations.size) {
     return false
@@ -1467,7 +1483,7 @@ export function isPlayerPracticeSquadEligible(
 
   // not eligible if player has been poached
   const poaches = transactions.filter(
-    (t) => t.type === constants.transactions.POACHED
+    (t) => t.type === transaction_types.POACHED
   )
   if (poaches.size) {
     return false
@@ -1475,19 +1491,19 @@ export function isPlayerPracticeSquadEligible(
 
   // if reserve player, must have been on practice squad previously
   const ps_types = [
-    constants.transactions.ROSTER_DEACTIVATE,
-    constants.transactions.PRACTICE_ADD,
-    constants.transactions.DRAFT
+    transaction_types.ROSTER_DEACTIVATE,
+    transaction_types.PRACTICE_ADD,
+    transaction_types.DRAFT
   ]
-  if (rosterInfo.slot === constants.slots.RESERVE_SHORT_TERM) {
+  if (rosterInfo.slot === roster_slot_types.RESERVE_SHORT_TERM) {
     for (const tran of transactions.values()) {
       if (ps_types.includes(tran.type)) {
         break
       }
 
       if (
-        tran.type === constants.transactions.ROSTER_ADD ||
-        tran.type === constants.transactions.TRADE
+        tran.type === transaction_types.ROSTER_ADD ||
+        tran.type === transaction_types.TRADE
       ) {
         return false
       }
@@ -1619,7 +1635,7 @@ export function get_poach_players_for_current_league(state) {
     const player_map = getPlayerById(state, { pid })
 
     const slot = player_map.get('slot')
-    if (slot !== constants.slots.PS && slot !== constants.slots.PSD) {
+    if (slot !== roster_slot_types.PS && slot !== roster_slot_types.PSD) {
       poaches = poaches.delete(pid)
       continue
     }
@@ -1718,10 +1734,13 @@ export const getRosterRecordByTeamId = createSelector(
   (
     state,
     {
-      week = Math.min(constants.fantasy_season_week, constants.season.finalWeek)
+      week = Math.min(
+        current_season.fantasy_season_week,
+        current_season.finalWeek
+      )
     }
   ) => week,
-  (state, { year = constants.year }) => year,
+  (state, { year = current_season.year }) => year,
   (rosters, tid, week, year) =>
     rosters.getIn([tid, year, week]) || new RosterRecord()
 )
@@ -1753,7 +1772,7 @@ export function getStartersByTeamId(state, { tid, week }) {
 
 export function getActivePlayersByTeamId(
   state,
-  { tid, week = constants.fantasy_season_week }
+  { tid, week = current_season.fantasy_season_week }
 ) {
   const roster = getRosterByTeamId(state, { tid, week })
   // Include both active roster players and practice squad players for trades
@@ -1832,7 +1851,7 @@ export const get_practice_squad_player_ids_for_current_league = createSelector(
     const pids = []
     for (const roster of rosters.values()) {
       roster.players.forEach(({ slot, pid }) => {
-        if (constants.ps_slots.includes(slot)) {
+        if (roster_slot_types.ps_slots.includes(slot)) {
           pids.push(pid)
         }
       })
@@ -1846,7 +1865,7 @@ export const get_practice_squad_unprotected_player_ids_for_current_league =
     const pids = []
     for (const roster of rosters.values()) {
       roster.players.forEach(({ slot, pid }) => {
-        if (constants.ps_unprotected_slots.includes(slot)) {
+        if (roster_slot_types.ps_unprotected_slots.includes(slot)) {
           pids.push(pid)
         }
       })
@@ -1859,7 +1878,7 @@ export const get_practice_squad_protected_player_ids_for_current_league =
     const pids = []
     for (const roster of rosters.values()) {
       roster.players.forEach(({ slot, pid }) => {
-        if (constants.ps_protected_slots.includes(slot)) {
+        if (roster_slot_types.ps_protected_slots.includes(slot)) {
           pids.push(pid)
         }
       })
@@ -1874,8 +1893,8 @@ export const get_injured_reserve_player_ids_for_current_league = createSelector(
     for (const roster of rosters.values()) {
       roster.players.forEach(({ slot, pid }) => {
         if (
-          slot === constants.slots.RESERVE_SHORT_TERM ||
-          slot === constants.slots.RESERVE_LONG_TERM
+          slot === roster_slot_types.RESERVE_SHORT_TERM ||
+          slot === roster_slot_types.RESERVE_LONG_TERM
         ) {
           pids.push(pid)
         }
@@ -1950,8 +1969,8 @@ export const getRosterPositionalValueByTeamId = createSelector(
       values.rosters[roster.tid] = {}
     }
 
-    const seasonType = constants.isOffseason ? '0' : 'ros'
-    for (const position of constants.positions) {
+    const seasonType = current_season.isOffseason ? '0' : 'ros'
+    for (const position of fantasy_positions) {
       // skip positions that don't start in the current league
       if (!league[`s${position.toLowerCase()}`]) {
         continue
@@ -2074,10 +2093,10 @@ export const getGroupedPlayersByTeamId = createSelector(
   (state, { tid }) => tid,
   (rosters, league, player_items, tid) => {
     const week = Math.min(
-      constants.fantasy_season_week,
-      constants.season.finalWeek
+      current_season.fantasy_season_week,
+      current_season.finalWeek
     )
-    const roster = rosters.getIn([tid, constants.year, week])
+    const roster = rosters.getIn([tid, current_season.year, week])
     if (!roster) {
       return {
         active: new List(),
@@ -2155,7 +2174,7 @@ export function getByeByTeam(state, { nfl_team }) {
 
 export function get_game_by_team(
   state,
-  { nfl_team, week = Math.max(constants.week, 1) }
+  { nfl_team, week = Math.max(current_season.week, 1) }
 ) {
   const team = state.getIn(['schedule', 'teams', nfl_team])
   if (!team) {
@@ -2177,10 +2196,10 @@ export function getGamesByTeam(state, { nfl_team }) {
 export function getScoreboardRosterByTeamId(state, { tid }) {
   const year = state.getIn(['app', 'year'])
   const week = state.getIn(['scoreboard', 'week'])
-  const isFuture = year === constants.year && week > constants.week
+  const isFuture = year === current_season.year && week > current_season.week
   return getRosterByTeamId(state, {
     tid,
-    week: isFuture ? constants.week : week,
+    week: isFuture ? current_season.week : week,
     year
   })
 }
@@ -2230,10 +2249,10 @@ export function getScoreboardByTeamId(state, { tid, matchupId }) {
 
   const championship_round_final_week =
     Math.max(...season.get('championship_round', [])) ||
-    constants.season.finalWeek
+    current_season.finalWeek
   const championship_round_first_week =
     Math.min(...season.get('championship_round', [])) ||
-    constants.season.finalWeek - 1
+    current_season.finalWeek - 1
   const is_championship_round = matchup.week === championship_round_final_week
 
   // TODO - set flag for processed matchup
@@ -2276,10 +2295,11 @@ export function getScoreboardByTeamId(state, { tid, matchupId }) {
   const previousWeek = points
 
   // TODO - instead use matchup projected value
-  const isFuture = year === constants.year && matchup.week > constants.week
+  const isFuture =
+    year === current_season.year && matchup.week > current_season.week
   const starterMaps = getStartersByTeamId(state, {
     tid,
-    week: isFuture ? constants.week : matchup.week
+    week: isFuture ? current_season.week : matchup.week
   })
   for (const player_map of starterMaps) {
     const gamelog = get_gamelog_for_player(state, {
@@ -2476,7 +2496,10 @@ function getYardline(str, pos_team) {
   return side === pos_team ? number : 100 - number
 }
 
-export function getGameStatusByPlayerId(state, { pid, week = constants.week }) {
+export function getGameStatusByPlayerId(
+  state,
+  { pid, week = current_season.week }
+) {
   const game = getGameByPlayerId(state, { pid, week })
   if (!game) {
     return null
@@ -2588,7 +2611,7 @@ export function get_league_teams_value_deltas(state) {
 
 export function get_gamelog_for_player(
   state,
-  { player_map, week, year = constants.year }
+  { player_map, week, year = current_season.year }
 ) {
   if (!player_map || !player_map.get('pid')) return null
 
@@ -2803,29 +2826,29 @@ export function get_trade_is_valid(state) {
         player,
         current_slot,
         roster,
-        week: constants.season.week,
-        is_regular_season: constants.season.isRegularSeason
+        week: current_season.week,
+        is_regular_season: current_season.isRegularSeason
       })
     }
 
     // Validate slot availability
     let has_space = true
-    if (target_slot === constants.slots.BENCH) {
+    if (target_slot === roster_slot_types.BENCH) {
       has_space = roster.has_bench_space_for_position(player_map.get('pos'))
     } else if (
-      target_slot === constants.slots.PS ||
-      target_slot === constants.slots.PSP
+      target_slot === roster_slot_types.PS ||
+      target_slot === roster_slot_types.PSP
     ) {
       has_space = roster.has_practice_squad_space_for_position(
         player_map.get('pos')
       )
     } else if (
-      target_slot === constants.slots.PSD ||
-      target_slot === constants.slots.PSDP
+      target_slot === roster_slot_types.PSD ||
+      target_slot === roster_slot_types.PSDP
     ) {
       // Drafted practice squad has unlimited space
       has_space = true
-    } else if (target_slot === constants.slots.RESERVE_SHORT_TERM) {
+    } else if (target_slot === roster_slot_types.RESERVE_SHORT_TERM) {
       has_space = roster.has_open_reserve_short_term_slot()
     }
 
@@ -2916,21 +2939,21 @@ export function get_trade_validation_details(state) {
         player,
         current_slot,
         roster,
-        week: constants.season.week,
-        is_regular_season: constants.season.isRegularSeason
+        week: current_season.week,
+        is_regular_season: current_season.isRegularSeason
       })
     }
 
     // Check if this slot needs releases
-    if (target_slot === constants.slots.BENCH) {
+    if (target_slot === roster_slot_types.BENCH) {
       if (!roster.has_bench_space_for_position(player_map.get('pos'))) {
         needs_active_releases.push(pid)
         all_valid = false
         continue
       }
     } else if (
-      target_slot === constants.slots.PS ||
-      target_slot === constants.slots.PSP
+      target_slot === roster_slot_types.PS ||
+      target_slot === roster_slot_types.PSP
     ) {
       if (
         !roster.has_practice_squad_space_for_position(player_map.get('pos'))
@@ -2939,7 +2962,7 @@ export function get_trade_validation_details(state) {
         all_valid = false
         continue
       }
-    } else if (target_slot === constants.slots.RESERVE_SHORT_TERM) {
+    } else if (target_slot === roster_slot_types.RESERVE_SHORT_TERM) {
       if (!roster.has_open_reserve_short_term_slot()) {
         all_valid = false
         continue
@@ -2964,8 +2987,8 @@ export function get_trade_validation_details(state) {
         if (isSlotActive(target_slot)) {
           needs_active_releases.push(pid)
         } else if (
-          target_slot === constants.slots.PS ||
-          target_slot === constants.slots.PSP
+          target_slot === roster_slot_types.PS ||
+          target_slot === roster_slot_types.PSP
         ) {
           needs_ps_releases.push(pid)
         }
@@ -3065,10 +3088,10 @@ export const get_current_trade_players = createSelector(
     const accept_tid = trade.accept_tid || accept_tid_from_state
 
     const week = Math.min(
-      constants.fantasy_season_week,
-      constants.season.finalWeek
+      current_season.fantasy_season_week,
+      current_season.finalWeek
     )
-    const year = constants.year
+    const year = current_season.year
 
     const get_accepting_roster = () => {
       if (!accept_tid) return null
@@ -3224,7 +3247,7 @@ function getTeamTradeSummary(
   draft_pick_values,
   { lineups, playerMaps, picks }
 ) {
-  const pts_added_type = constants.isOffseason ? '0' : 'ros'
+  const pts_added_type = current_season.isOffseason ? '0' : 'ros'
   const get_draft_pick_value = (pick) => {
     if (!pick || !draft_pick_values) return 0
     const rank = get_rookie_draft_pick_rank(pick)
@@ -3235,7 +3258,7 @@ function getTeamTradeSummary(
         item.median_career_points_added_per_game) /
       4
     const weeks_remaining =
-      constants.season.finalWeek - constants.fantasy_season_week
+      current_season.finalWeek - current_season.fantasy_season_week
     return avg * weeks_remaining
   }
   const draft_value = picks.reduce(
@@ -3287,10 +3310,10 @@ export const get_current_trade_analysis = createSelector(
     // Helper to get roster record
     const getRosterRecord = (tid) => {
       const week = Math.min(
-        constants.fantasy_season_week,
-        constants.season.finalWeek
+        current_season.fantasy_season_week,
+        current_season.finalWeek
       )
-      const year = constants.year
+      const year = current_season.year
       return rosters_state.getIn([tid, year, week]) || new RosterRecord()
     }
 
@@ -3524,11 +3547,11 @@ export const get_waiver_players_for_current_team = createSelector(
     let active = new List()
     let practice = new List()
     for (const w of sorted) {
-      if (w.type === constants.waivers.FREE_AGENCY) {
+      if (w.type === waiver_types.FREE_AGENCY) {
         active = active.push(w)
-      } else if (w.type === constants.waivers.FREE_AGENCY_PRACTICE) {
+      } else if (w.type === waiver_types.FREE_AGENCY_PRACTICE) {
         practice = practice.push(w)
-      } else if (w.type === constants.waivers.POACH) {
+      } else if (w.type === waiver_types.POACH) {
         poach = poach.push(w)
       }
     }

@@ -15,9 +15,9 @@ import ScoreboardOverTime from '@components/scoreboard-over-time'
 import ScoreboardPlayByPlay from '@components/scoreboard-play-by-play'
 import ScoreboardSlots from '@components/scoreboard-slots'
 import ScoreboardTeams from '@components/scoreboard-teams'
-import { constants } from '@libs-shared'
 
 import './matchup.styl'
+import { matchup_types } from '@constants'
 
 export default function MatchupPage({
   is_loading,
@@ -32,7 +32,7 @@ export default function MatchupPage({
   select_matchup,
   load_season
 }) {
-  const is_head_to_head = matchup.type === constants.matchups.H2H
+  const is_head_to_head = matchup.type === matchup_types.H2H
   const navigate = useNavigate()
   const [show_bench, set_show_bench] = useState(false)
   const { lid, seas_year, seas_week, matchupId } = useParams()

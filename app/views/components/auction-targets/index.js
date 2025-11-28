@@ -2,6 +2,7 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 import { List } from 'immutable'
 
+import { fantasy_positions } from '@constants'
 import {
   get_app,
   get_auction_state,
@@ -12,7 +13,6 @@ import {
   get_current_league
 } from '@core/selectors'
 import { auction_actions } from '@core/auction'
-import { constants } from '@libs-shared'
 
 import AuctionTargets from './auction-targets'
 
@@ -26,7 +26,7 @@ const map_state_to_props = createSelector(
   get_current_league,
   (auction, players, team, rosteredPlayerIds, playerState, app, league) => {
     const playersByPosition = {}
-    for (const position of constants.positions) {
+    for (const position of fantasy_positions) {
       if (!playersByPosition[position]) playersByPosition[position] = new List()
       playersByPosition[position] = players
         .filter((pMap) => pMap.get('pos') === position)

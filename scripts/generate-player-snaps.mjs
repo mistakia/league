@@ -3,7 +3,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, groupBy } from '#libs-shared'
+import { groupBy } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main, batch_insert } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
@@ -16,9 +17,9 @@ const log = debug('generate-player-snaps')
 debug.enable('generate-player-snaps')
 
 const generate_player_snaps_for_week = async ({
-  year = constants.season.year,
-  week = constants.season.nfl_seas_week,
-  seas_type = constants.season.nfl_seas_type,
+  year = current_season.year,
+  week = current_season.nfl_seas_week,
+  seas_type = current_season.nfl_seas_type,
   dry_run = false
 }) => {
   log(

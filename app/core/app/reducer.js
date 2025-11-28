@@ -3,7 +3,8 @@ import Bugsnag from '@bugsnag/js'
 
 import { app_actions } from './actions'
 import { setting_actions } from '@core/settings'
-import { constants, uuidv4 } from '@libs-shared'
+import { uuidv4 } from '@libs-shared'
+import { current_season, league_defaults } from '@constants'
 import { roster_actions } from '@core/rosters'
 import { team_actions } from '@core/teams'
 import { matchups_actions } from '@core/matchups'
@@ -15,14 +16,14 @@ const initialState = new Record({
   user: new User(),
   userId: 0,
   clientId: uuidv4(),
-  year: constants.year,
+  year: current_season.year,
   teamId: undefined,
-  leagueId: constants.DEFAULTS.LEAGUE_ID,
+  leagueId: league_defaults.LEAGUE_ID,
   isPending: true,
   isUpdating: false,
   authError: null,
   teamIds: new List(),
-  leagueIds: new List([constants.DEFAULTS.LEAGUE_ID]),
+  leagueIds: new List([league_defaults.LEAGUE_ID]),
   selected_data_view_id: default_data_view_view_id,
 
   is_loading_rosters: null,

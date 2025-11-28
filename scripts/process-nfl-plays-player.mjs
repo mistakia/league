@@ -2,7 +2,7 @@ import debug from 'debug'
 
 import db from '#db'
 import { is_main, find_player_row, updatePlayer } from '#libs-server'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 const log = debug('process-nfl-plays-player')
 debug.enable('process-nfl-plays-player,get-player,update-player')
@@ -17,7 +17,7 @@ const process_nfl_plays_player = async () => {
         .andOn('nfl_plays_player.esbid', '=', 'nfl_plays.esbid')
         .andOn('nfl_plays_player.year', '=', 'nfl_plays.year')
     })
-    .where({ 'nfl_plays_player.year': constants.season.year })
+    .where({ 'nfl_plays_player.year': current_season.year })
     .select(
       'nfl_plays_player.gsis_it_id',
       'nfl_plays_player.gsis_id',
@@ -30,7 +30,7 @@ const process_nfl_plays_player = async () => {
     .distinct()
 
   log(
-    `loaded ${nfl_plays_player_rows.length} rows from snaps for ${constants.season.year}`
+    `loaded ${nfl_plays_player_rows.length} rows from snaps for ${current_season.year}`
   )
 
   // get list of gsis_it_id missing from `player` table
@@ -40,12 +40,12 @@ const process_nfl_plays_player = async () => {
         .from('player')
         .whereRaw('player.gsis_it_id = nfl_plays_player.gsis_it_id')
     })
-    .where({ year: constants.season.year })
+    .where({ year: current_season.year })
     .select('gsis_it_id')
     .distinct()
 
   log(
-    `found ${missing_gsis_it_ids.length} missing gsis_it_ids for ${constants.season.year}`
+    `found ${missing_gsis_it_ids.length} missing gsis_it_ids for ${current_season.year}`
   )
 
   // iterate through list and try to match to a player

@@ -7,7 +7,7 @@ import server from '#api'
 import knex from '#db'
 import league from '#db/seeds/league.mjs'
 import draftPicks from '#db/seeds/draft-picks.mjs'
-import { constants } from '#libs-shared'
+import { current_season, transaction_types } from '#constants'
 import {
   selectPlayer,
   checkRoster,
@@ -20,7 +20,7 @@ import {
 import { user1, user2, user3 } from './fixtures/token.mjs'
 
 chai.use(chai_http)
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 const expect = chai.expect
 
 describe('API /draft', function () {
@@ -72,9 +72,9 @@ describe('API /draft', function () {
     await checkRoster({ teamId, pid: player.pid, leagueId })
     await checkLastTransaction({
       leagueId,
-      type: constants.transactions.DRAFT,
+      type: transaction_types.DRAFT,
       value: 12,
-      year: constants.season.year,
+      year: current_season.year,
       pid: player.pid,
       teamId,
       userId: 1
@@ -169,7 +169,7 @@ describe('API /draft', function () {
 
     it('invalid pid - not a rookie', async () => {
       const players = await knex('player')
-        .where('nfl_draft_year', constants.season.year - 1)
+        .where('nfl_draft_year', current_season.year - 1)
         .limit(1)
       const player = players[0]
       const request = chai_request

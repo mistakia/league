@@ -1,7 +1,7 @@
 import dayjs from 'dayjs'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season, waiver_types, transaction_types } from '#constants'
 
 export default async function (league_id) {
   // sanctuary period and waiver period both last 24 hours and overlap
@@ -9,9 +9,9 @@ export default async function (league_id) {
   const sanctuary_period = dayjs().subtract('24', 'hours').unix()
   const transactions = await db('transactions')
     .whereIn('type', [
-      constants.transactions.DRAFT,
-      constants.transactions.PRACTICE_ADD,
-      constants.transactions.ROSTER_DEACTIVATE
+      transaction_types.DRAFT,
+      transaction_types.PRACTICE_ADD,
+      transaction_types.ROSTER_DEACTIVATE
     ])
     .where('timestamp', '>=', sanctuary_period)
     .where('lid', league_id)
@@ -27,10 +27,10 @@ export default async function (league_id) {
       'waivers.type as waiver_type'
     )
     .join('teams', 'waivers.tid', 'teams.uid')
-    .where('teams.year', constants.season.year)
+    .where('teams.year', current_season.year)
     .whereNull('processed')
     .whereNull('cancelled')
-    .where('type', constants.waivers.POACH)
+    .where('type', waiver_types.POACH)
     .orderBy(['teams.waiver_order', 'waivers.po', 'waivers.uid'])
 
   if (exclude_pids.length) {

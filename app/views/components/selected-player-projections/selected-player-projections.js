@@ -4,8 +4,9 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import { List } from 'immutable'
 import LinearProgress from '@mui/material/LinearProgress'
 
-import { groupBy, constants } from '@libs-shared'
+import { groupBy } from '@libs-shared'
 import SelectedPlayerProjection from '@components/selected-player-projection'
+import { current_season, external_data_sources } from '@constants'
 
 export default class SelectedPlayerSeasonProjections extends React.Component {
   componentDidMount() {
@@ -44,13 +45,13 @@ export default class SelectedPlayerSeasonProjections extends React.Component {
 
     // Filter out average projections from the projections array since they get their own row
     const filtered_projections = projections.filter(
-      (p) => p.sourceid !== constants.sources.AVERAGE
+      (p) => p.sourceid !== external_data_sources.AVERAGE
     )
     const projections_by_week = groupBy(filtered_projections, 'week')
 
     for (const week_key in projections_by_week) {
       const week = Number(week_key)
-      if (week !== constants.week) continue
+      if (week !== current_season.week) continue
 
       const average_projections = player_map.getIn(
         ['projection', `${week}`],

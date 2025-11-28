@@ -14,7 +14,7 @@
         "minimum": 1999,
         "maximum": 2030
       },
-      "default": "constants.season.year",
+      "default": "constants.current_season.year",
       "usage_pattern": "Single year for optimal performance (enables partitioned tables), arrays for multi-year analysis",
       "examples": [2024, [2023, 2024], [2020, 2021, 2022, 2023, 2024]]
     },
@@ -27,7 +27,7 @@
         "minimum": 0,
         "maximum": 22
       },
-      "default": "varies (0 for season totals, constants.season.week for current)",
+      "default": "varies (0 for season totals, constants.current_season.week for current)",
       "usage_pattern": "0 for season totals, specific weeks for weekly data, arrays for week ranges",
       "examples": [0, 1, [1, 2, 3, 4], [17, 18]]
     },

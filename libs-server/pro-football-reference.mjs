@@ -1,7 +1,8 @@
 import { JSDOM } from 'jsdom'
 import debug from 'debug'
 
-import { constants, getGameDayAbbreviation, fixTeam } from '#libs-shared'
+import { getGameDayAbbreviation, fixTeam } from '#libs-shared'
+import { current_season } from '#constants'
 import { wait } from '#libs-server'
 import * as cache from './cache.mjs'
 import config from '#config'
@@ -1345,7 +1346,18 @@ const format_player_gamelogs = ({ pfr_game }) => {
     opp: fixTeam(pfr_game.home_team_abbr)
   }
 
-  constants.dstStats.forEach((stat) => {
+  // Initialize all dst stats to 0 for both teams
+  const dst_stats = [
+    'sacks',
+    'def_int',
+    'fumbles_forced',
+    'fumbles_rec',
+    'def_int_td',
+    'fumbles_rec_td',
+    'kick_ret_td',
+    'punt_ret_td'
+  ]
+  dst_stats.forEach((stat) => {
     team_defense_gamelogs[pfr_game.home_team_abbr][stat] = 0
     team_defense_gamelogs[pfr_game.away_team_abbr][stat] = 0
   })
@@ -1447,7 +1459,7 @@ export const get_players = async ({ ignore_cache = false } = {}) => {
 }
 
 export const get_games = async ({
-  year = constants.season.year,
+  year = current_season.year,
   ignore_cache = false
 } = {}) => {
   if (!config.pro_football_reference_url) {
@@ -1663,7 +1675,7 @@ export const get_game = async ({
 }
 
 export const get_player_gamelogs_for_season = async ({
-  year = constants.season.year,
+  year = current_season.year,
   ignore_cache = false
 } = {}) => {
   const cache_key = `/pro-football-reference/player-gamelogs/${year}.json`
@@ -1707,7 +1719,7 @@ export const get_player_gamelogs_for_season = async ({
 }
 
 export const get_draft = async ({
-  year = constants.season.year,
+  year = current_season.year,
   ignore_cache = false
 } = {}) => {
   const cache_key = `/pro-football-reference/draft/${year}.json`

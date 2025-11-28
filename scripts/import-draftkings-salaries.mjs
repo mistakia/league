@@ -12,7 +12,8 @@ import {
   updatePlayer
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
-import { constants, fixTeam } from '#libs-shared'
+import { fixTeam } from '#libs-shared'
+import { current_season } from '#constants'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -27,7 +28,7 @@ const import_draftkings_salaries = async ({ dry_run = false } = {}) => {
   log(`importing ${draft_groups.length} draft groups`)
 
   const nfl_games = await db('nfl_games').where({
-    year: constants.season.year
+    year: current_season.year
   })
 
   const salary_inserts = []

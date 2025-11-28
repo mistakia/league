@@ -6,7 +6,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, fixTeam } from '#libs-shared'
+import { fixTeam } from '#libs-shared'
+import { current_season } from '#constants'
 import {
   is_main,
   gambet,
@@ -128,7 +129,7 @@ const import_gambet_odds = async () => {
   const timestamp = Math.round(Date.now() / 1000)
 
   const nfl_games = await db('nfl_games').where({
-    year: constants.season.year
+    year: current_season.year
   })
 
   const events = await gambet.get_events()
@@ -143,14 +144,14 @@ const import_gambet_odds = async () => {
     if (event && event.homeTeam && event.awayTeam) {
       const home = fixTeam(event.homeTeam.name)
       const visitor = fixTeam(event.awayTeam.name)
-      const { week, seas_type } = constants.season.calculate_week(
+      const { week, seas_type } = current_season.calculate_week(
         dayjs(event.date)
       )
       nfl_game = nfl_games.find(
         (game) =>
           game.week === week &&
           game.seas_type === seas_type &&
-          game.year === constants.season.year &&
+          game.year === current_season.year &&
           game.v === visitor &&
           game.h === home
       )

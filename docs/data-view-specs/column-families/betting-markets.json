@@ -156,8 +156,8 @@
     "market_type": "GAME_PASSING_YARDS",
     "source_id": "FANDUEL",
     "time_type": "CLOSE",
-    "year": "constants.season.year",
-    "week": "constants.season.nfl_seas_week"
+    "year": "constants.current_season.year",
+    "week": "constants.current_season.nfl_seas_week"
   },
 
   "usage_patterns": {

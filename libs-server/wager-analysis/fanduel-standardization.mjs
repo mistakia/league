@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 
-import { constants, format_player_name } from '#libs-shared'
+import { format_player_name } from '#libs-shared'
+import { current_season } from '#constants'
 import { get_market_type } from '#libs-server/fanduel/fanduel-market-types.mjs'
 import { extract_player_name_from_event_market_description } from '#libs-server/fanduel/fanduel-formatters.mjs'
 
@@ -158,7 +159,7 @@ const calculate_fanduel_round_robin_wager = ({ wager }) => {
 export const standardize_fanduel_wager = (wager) => {
   const week = dayjs(wager.settledDate)
     .subtract('2', 'day')
-    .diff(constants.season.regular_season_start, 'weeks')
+    .diff(current_season.regular_season_start, 'weeks')
 
   // check if the wager is a round robin
   if (wager.numLines > 1) {

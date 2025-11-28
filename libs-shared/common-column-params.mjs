@@ -1,4 +1,10 @@
-import * as constants from './constants.mjs'
+import {
+  available_years,
+  current_season,
+  nfl_weeks,
+  fantasy_positions,
+  nfl_season_types
+} from '#constants'
 import * as table_constants from 'react-table/src/constants.mjs'
 
 export const career_year = {
@@ -50,9 +56,9 @@ export const career_game = {
 }
 
 export const year = {
-  values: constants.years,
+  values: available_years,
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
-  default_value: constants.season.stats_season_year,
+  default_value: current_season.stats_season_year,
   dynamic_values: [
     {
       dynamic_type: 'last_n_years',
@@ -70,15 +76,15 @@ export const year = {
 }
 
 export const single_year = {
-  values: constants.years,
+  values: available_years,
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
   single: true,
-  default_value: constants.season.stats_season_year,
+  default_value: current_season.stats_season_year,
   enable_multi_on_split: ['year']
 }
 
 export const week = {
-  values: constants.nfl_weeks,
+  values: nfl_weeks,
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
   dynamic_values: [
     {
@@ -101,10 +107,10 @@ export const week = {
 }
 
 export const single_week = {
-  values: constants.nfl_weeks,
+  values: nfl_weeks,
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
   single: true,
-  default_value: Math.max(constants.season.week, 1),
+  default_value: Math.max(current_season.week, 1),
   enable_multi_on_split: ['week'],
   dynamic_values: [
     {
@@ -135,12 +141,12 @@ export const single_year_offset = {
 export const single_position = {
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
   single: true,
-  values: constants.positions,
+  values: fantasy_positions,
   default_value: 'QB'
 }
 
 export const seas_type = {
-  values: constants.seas_types,
+  values: nfl_season_types,
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
   default_value: 'REG'
 }
@@ -148,6 +154,6 @@ export const seas_type = {
 export const single_seas_type = {
   data_type: table_constants.TABLE_DATA_TYPES.SELECT,
   single: true,
-  values: constants.seas_types,
+  values: nfl_season_types,
   default_value: 'REG'
 }

@@ -4,11 +4,11 @@ import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import {
-  constants,
   fixTeam,
   format_nfl_status,
   format_nfl_injury_status
 } from '#libs-shared'
+import { fantasy_positions } from '#constants'
 import {
   is_main,
   find_player_row,
@@ -128,7 +128,7 @@ const run = async () => {
     }
 
     if (!player_row) {
-      if (!constants.positions.includes(item.position)) continue
+      if (!fantasy_positions.includes(item.position)) continue
       if (item.first_name === 'Duplicate' || item.first_name === 'Player')
         continue
 

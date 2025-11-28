@@ -1,8 +1,8 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { constants } from '@libs-shared'
 import PlayerFilter from '@components/player-filter'
+import { nfl_team_abbreviations } from '@constants'
 
 export default class NFLTeamsFilter extends React.Component {
   render() {
@@ -12,7 +12,7 @@ export default class NFLTeamsFilter extends React.Component {
       values: []
     }
 
-    for (const team of constants.nflTeams) {
+    for (const team of nfl_team_abbreviations) {
       state.values.push({
         label: team,
         value: team,

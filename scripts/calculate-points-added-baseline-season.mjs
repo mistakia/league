@@ -5,12 +5,8 @@ import { Table } from 'console-table-printer'
 import { ckmeans, mean } from 'simple-statistics'
 import debug from 'debug'
 
-import {
-  groupBy,
-  constants,
-  getPlayerCountBySlot,
-  get_eligible_slots
-} from '#libs-shared'
+import { groupBy, getPlayerCountBySlot, get_eligible_slots } from '#libs-shared'
+import { current_season, fantasy_positions } from '#constants'
 import { getLeague, is_main } from '#libs-server'
 import db from '#db'
 import calculate_points_added from './calculate-points-added.mjs'
@@ -45,11 +41,11 @@ function removeOutliers(arr) {
 
 const calculate_points_added_baseline_season = async ({ league }) => {
   const years = 2
-  let year = constants.season.year - years
+  let year = current_season.year - years
 
   const data = {}
 
-  for (; year < constants.season.year; year++) {
+  for (; year < current_season.year; year++) {
     const { players } = await calculate_points_added({ year, league })
     const values = Object.values(players)
     const byPosition = groupBy(values, 'pos')
@@ -133,7 +129,7 @@ if (is_main(import.meta.url)) {
     const league = await getLeague({ lid })
     const result = await calculate_points_added_baseline_season({ league })
     const baselines = {}
-    for (const pos of constants.positions) {
+    for (const pos of fantasy_positions) {
       baselines[pos] = {}
     }
 
@@ -206,7 +202,7 @@ if (is_main(import.meta.url)) {
       }
 
       const update = {}
-      for (const pos of constants.positions) {
+      for (const pos of fantasy_positions) {
         const pos_starters = starters_pool_by_pos[pos] || []
         const pos_starters_baselines = pos_starters
           .map((p) => p.points - p.pts_added)
@@ -214,7 +210,7 @@ if (is_main(import.meta.url)) {
 
         if (pos === 'K' || pos === 'DST') {
           const top_week =
-            pos_starters_baselines[0] / (constants.season.nflFinalWeek - 1)
+            pos_starters_baselines[0] / (current_season.nflFinalWeek - 1)
 
           update[`pts_base_season_${pos.toLowerCase()}`] = top_week || null
           continue
@@ -226,7 +222,7 @@ if (is_main(import.meta.url)) {
 
         if (pos === 'TE') {
           const top_week =
-            filtered_starter_baselines[0] / (constants.season.nflFinalWeek - 1)
+            filtered_starter_baselines[0] / (current_season.nflFinalWeek - 1)
 
           update[`pts_base_season_${pos.toLowerCase()}`] = top_week || null
           continue
@@ -249,7 +245,7 @@ if (is_main(import.meta.url)) {
 
         const filtered_break_mean = mean(filtered_break_joined)
         const filtered_break_mean_week =
-          filtered_break_mean / (constants.season.nflFinalWeek - 1)
+          filtered_break_mean / (current_season.nflFinalWeek - 1)
 
         update[`pts_base_season_${pos.toLowerCase()}`] =
           filtered_break_mean_week || null

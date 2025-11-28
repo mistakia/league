@@ -2,12 +2,12 @@ import React, { useMemo, useCallback } from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 
-import { constants } from '@libs-shared'
 import ScoreboardPlayer from '@components/scoreboard-player'
 import TeamName from '@components/team-name'
 import TeamImage from '@components/team-image'
 
 import './scoreboard-team.styl'
+import { current_season, roster_slot_types } from '@constants'
 
 export default function ScoreboardTeam({
   team,
@@ -28,8 +28,7 @@ export default function ScoreboardTeam({
   )
   const is_final = useMemo(
     () =>
-      matchup.week < constants.season.week ||
-      matchup.year < constants.season.year,
+      matchup.week < current_season.week || matchup.year < current_season.year,
     [matchup.week, matchup.year]
   )
 
@@ -61,7 +60,7 @@ export default function ScoreboardTeam({
     for (const slot of league_slots) {
       if (league[slot]) {
         const slot_key = slot.substring(1).toUpperCase()
-        const slot_id = constants.slots[slot_key]
+        const slot_id = roster_slot_types[slot_key]
         result = result.concat(generateRows(slot_id, league[slot]))
       }
     }

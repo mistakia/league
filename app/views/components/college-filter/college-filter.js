@@ -1,8 +1,8 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { constants } from '@libs-shared'
 import PlayerFilter from '@components/player-filter'
+import { ncaa_college_names } from '@constants'
 
 export default class CollegeFilter extends React.Component {
   render() {
@@ -12,7 +12,7 @@ export default class CollegeFilter extends React.Component {
       values: []
     }
 
-    for (const college of constants.colleges) {
+    for (const college of ncaa_college_names) {
       state.values.push({
         label: college,
         value: college,

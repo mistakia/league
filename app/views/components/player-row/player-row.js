@@ -8,12 +8,12 @@ import NFLTeam from '@components/nfl-team'
 import TeamName from '@components/team-name'
 import { Player, connect } from '@components/player'
 import IconButton from '@components/icon-button'
-import { constants } from '@libs-shared'
 import PlayerLabel from '@components/player-label'
 import PlayerTag from '@components/player-tag'
 import { Team } from '@core/teams'
 
 import './player-row.styl'
+import { current_season } from '@constants'
 
 class PlayerRow extends Player {
   render = () => {
@@ -100,7 +100,7 @@ class PlayerRow extends Player {
           </div>
           <div className='player__row-name cursor' onClick={this.handleClick}>
             <span>{name}</span>
-            {constants.year === player_map.get('nfl_draft_year') && (
+            {current_season.year === player_map.get('nfl_draft_year') && (
               <PlayerLabel label='R' type='rookie' description='Rookie' />
             )}
             <NFLTeam team={nfl_team} />

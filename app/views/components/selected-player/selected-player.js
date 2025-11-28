@@ -15,11 +15,12 @@ import { Map } from 'immutable'
 import ButtonGroup from '@mui/material/ButtonGroup'
 
 import PlayerName from '@components/player-name'
-import { constants, nth } from '@libs-shared'
+import { nth } from '@libs-shared'
 import TeamName from '@components/team-name'
 import PlayerAge from '@components/player-age'
 import SelectedPlayerSeasonStats from '@components/selected-player-season-stats'
 import SelectedPlayerProjections from '@components/selected-player-projections'
+import { current_season, nfl_player_status_display_names } from '@constants'
 /* import SelectedPlayerTeamStats from '@components/selected-player-team-stats'
  * import SelectedPlayerTeamSituationSplits from '@components/selected-player-team-situation-splits'
  * import SelectedPlayerTeamPositionSplits from '@components/selected-player-team-position-splits'
@@ -222,8 +223,8 @@ export default function SelectedPlayer({
             <div className='selected__player-header-item'>
               <label>Status</label>
               {player_nfl_status
-                ? constants.nfl_player_status_full[player_nfl_status]
-                : constants.nfl_player_status_full[
+                ? nfl_player_status_display_names[player_nfl_status]
+                : nfl_player_status_display_names[
                     player_map.get('game_status')
                   ] || 'Active'}
             </div>
@@ -233,7 +234,7 @@ export default function SelectedPlayer({
                 {playerValue ? `$${playerValue}` : '-'}
               </div>
             )}
-            {constants.season.isOffseason && (
+            {current_season.isOffseason && (
               <div className='selected__player-header-item'>
                 <label>Market</label>$
                 {player_map.getIn(['market_salary', '0'], 0)}
@@ -296,7 +297,7 @@ export default function SelectedPlayer({
                 </div>
                 <div className='selected__player-header-item'>
                   <label>Exp.</label>
-                  {constants.year - draftYear || 'Rookie'}
+                  {current_season.year - draftYear || 'Rookie'}
                 </div>
               </>
             )}

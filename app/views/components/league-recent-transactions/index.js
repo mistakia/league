@@ -1,24 +1,24 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
-import { constants } from '@libs-shared'
 import { get_transactions } from '@core/selectors'
 
 import LeagueRecentTransactions from './league-recent-transactions'
+import { transaction_types } from '@constants'
 
 const signing_types = [
-  constants.transactions.ROSTER_ADD,
-  constants.transactions.POACHED,
-  constants.transactions.AUCTION_PROCESSED,
-  constants.transactions.DRAFT,
-  constants.transactions.PRACTICE_ADD
+  transaction_types.ROSTER_ADD,
+  transaction_types.POACHED,
+  transaction_types.AUCTION_PROCESSED,
+  transaction_types.DRAFT,
+  transaction_types.PRACTICE_ADD
 ]
 
 const map_state_to_props = createSelector(get_transactions, (transactions) => {
   const items = transactions.get('items')
   const signings = items.filter((i) => signing_types.includes(i.type))
   const releases = items.filter(
-    (i) => i.type === constants.transactions.ROSTER_RELEASE
+    (i) => i.type === transaction_types.ROSTER_RELEASE
   )
 
   return {

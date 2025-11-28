@@ -7,7 +7,7 @@ import server from '#api'
 import knex from '#db'
 
 import user from '#db/seeds/user.mjs'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { user1, user2 } from './fixtures/token.mjs'
 import { missing, invalid, error, notLoggedIn } from './utils/index.mjs'
 
@@ -15,7 +15,7 @@ process.env.NODE_ENV = 'test'
 chai.should()
 chai.use(chai_http)
 const expect = chai.expect
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 
 describe('API /leagues/teams - delete', function () {
   before(async function () {
@@ -32,7 +32,7 @@ describe('API /leagues/teams - delete', function () {
     it('remove team', async () => {
       const leagueId = 1
       const team = {
-        year: constants.season.year,
+        year: current_season.year,
         name: 'Team1',
         abbrv: 'TM1',
         lid: leagueId
@@ -43,8 +43,8 @@ describe('API /leagues/teams - delete', function () {
       const roster = {
         tid: team.uid,
         lid: leagueId,
-        week: constants.season.week,
-        year: constants.season.year
+        week: current_season.week,
+        year: current_season.year
       }
 
       await knex('rosters').insert(roster)
@@ -67,7 +67,7 @@ describe('API /leagues/teams - delete', function () {
 
       const teams = await knex('teams').where({
         lid: leagueId,
-        year: constants.season.year
+        year: current_season.year
       })
       const rosters = await knex('rosters').where({ lid: leagueId })
       expect(teams.length).to.equal(0)
@@ -140,7 +140,7 @@ describe('API /leagues/teams - delete', function () {
       const rows = await knex('teams')
         .insert({
           lid: 1,
-          year: constants.season.year,
+          year: current_season.year,
           name: 'Team1',
           abbrv: 'TM1',
           cap: 200,
@@ -153,7 +153,7 @@ describe('API /leagues/teams - delete', function () {
       await knex('users_teams').insert({
         userid: 1,
         tid,
-        year: constants.season.year
+        year: current_season.year
       })
 
       const request = chai_request

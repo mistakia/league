@@ -6,7 +6,8 @@ import { fileURLToPath } from 'url'
 // import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, convert_to_csv } from '#libs-shared'
+import { convert_to_csv } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -329,7 +330,7 @@ const nfl_play_fields = [
 ]
 
 const export_data_nfl_plays = async ({
-  year = constants.season.year,
+  year = current_season.year,
   seas_type = 'REG'
 } = {}) => {
   log(`exporting plays for ${year}`)

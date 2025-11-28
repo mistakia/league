@@ -7,7 +7,8 @@ import * as cheerio from 'cheerio'
 import db from '#db'
 import { is_main, report_job, espn, find_player_row } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
-import { constants, fixTeam } from '#libs-shared'
+import { fixTeam } from '#libs-shared'
+import { current_season } from '#constants'
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('import-espn-line-win-rates')
@@ -163,7 +164,7 @@ const import_espn_line_win_rates = async () => {
         double_team_pct: player.double_team_pct,
         espn_win_rate_type: win_rate_type,
         timestamp,
-        year: constants.season.year
+        year: current_season.year
       }
 
       player_history_inserts.push(insert_data)
@@ -186,7 +187,7 @@ const import_espn_line_win_rates = async () => {
     const insert_data = {
       ...team,
       timestamp,
-      year: constants.season.year
+      year: current_season.year
     }
 
     team_history_inserts.push(insert_data)

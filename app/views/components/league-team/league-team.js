@@ -16,11 +16,8 @@ import DashboardTeamSummary from '@components/dashboard-team-summary'
 import DashboardTeamValue from '@components/dashboard-team-value'
 import PoachNotice from '@components/poach-notice'
 import PlayerRoster from '@components/player-roster'
-import {
-  constants,
-  isReserveEligible,
-  isReserveCovEligible
-} from '@libs-shared'
+import { current_season, fantasy_positions } from '@constants'
+import { isReserveEligible, isReserveCovEligible } from '@libs-shared'
 import LeagueTeamValueDeltas from '@components/league-team-value-deltas'
 import Notices from '@components/notices'
 import { get_restricted_free_agency_notices } from '@core/utils/restricted-free-agency-notices'
@@ -57,7 +54,7 @@ export default function LeagueTeam({
   }, [tid, lid, load_team_players, teamId])
 
   const groups = {}
-  for (const position of constants.positions) {
+  for (const position of fantasy_positions) {
     if (!groups[position]) groups[position] = []
     groups[position] = players.active
       .filter((pMap) => pMap.get('pos') === position)
@@ -75,7 +72,7 @@ export default function LeagueTeam({
     for (const player_map of players) {
       if (!player_map.get('pid')) continue
       if (
-        !constants.isRegularSeason &&
+        !current_season.isRegularSeason &&
         cutlist_pids.includes(player_map.get('pid'))
       )
         continue
@@ -101,7 +98,7 @@ export default function LeagueTeam({
     )
   }
 
-  const recent_draft_cutoff = constants.year - 2
+  const recent_draft_cutoff = current_season.year - 2
   const all_practice_squad_drafted_players =
     players.practice_drafted || new List()
 
@@ -243,8 +240,8 @@ export default function LeagueTeam({
         injury_status: player_map.get('injury_status'),
         prior_week_inactive: player_map.get('prior_week_inactive'),
         prior_week_ruled_out: player_map.get('prior_week_ruled_out'),
-        week: constants.season.week,
-        is_regular_season: constants.season.isRegularSeason,
+        week: current_season.week,
+        is_regular_season: current_season.isRegularSeason,
         game_day: player_map.get('game_day'),
         practice: practice_data
       })

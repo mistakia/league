@@ -8,10 +8,10 @@ import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
 import 'highcharts/modules/series-label'
 
-import { constants } from '#libs-shared'
 import { Team } from '@core/teams'
 
 import './league-teams-value-over-time.styl'
+import { ui_color_palette } from '@constants'
 
 export default function LeagueTeamsValueOverTime({
   load_league_team_daily_values,
@@ -35,7 +35,7 @@ export default function LeagueTeamsValueOverTime({
   let color_index = 0
   const next_color = () => {
     color_index += 1
-    return constants.colors[color_index - 1]
+    return ui_color_palette[color_index - 1]
   }
 
   // find team with highest value

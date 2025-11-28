@@ -2,9 +2,9 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { getSelectedPlayer, getBaselines } from '@core/selectors'
-import { constants } from '@libs-shared'
 
 import SelectedPlayerValue from './selected-player-value'
+import { current_season, fantasy_weeks } from '@constants'
 
 const map_state_to_props = createSelector(
   getSelectedPlayer,
@@ -13,8 +13,8 @@ const map_state_to_props = createSelector(
     const baData = []
     const wsData = []
     const position = player_map.get('pos')
-    for (const week of constants.fantasyWeeks) {
-      if (week < constants.week) continue
+    for (const week of fantasy_weeks) {
+      if (week < current_season.week) continue
       baData.push(
         parseFloat(
           (

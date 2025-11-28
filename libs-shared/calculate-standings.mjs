@@ -1,5 +1,5 @@
 import debug from 'debug'
-import * as constants from './constants.mjs'
+import { current_season, create_empty_fantasy_team_stats } from '#constants'
 import calculatePoints from './calculate-points.mjs'
 import optimizeStandingsLineup from './optimize-standings-lineup.mjs'
 
@@ -17,15 +17,15 @@ const calculateStandings = ({
   teams,
   gamelogs,
   matchups,
-  year = constants.season.year
+  year = current_season.year
 }) => {
   const finalWeek =
-    year === constants.season.year
+    year === current_season.year
       ? Math.min(
-          Math.max(constants.season.week - 1, 0),
-          constants.season.regularSeasonFinalWeek
+          Math.max(current_season.week - 1, 0),
+          current_season.regularSeasonFinalWeek
         )
-      : constants.season.regularSeasonFinalWeek
+      : current_season.regularSeasonFinalWeek
   const teamStats = {}
   for (const { uid: tid, div } of teams) {
     teamStats[tid] = {
@@ -36,7 +36,7 @@ const calculateStandings = ({
       points: {
         weeks: {}
       },
-      stats: constants.createFantasyTeamStats(),
+      stats: create_empty_fantasy_team_stats(),
       potentialPoints: {}
     }
 

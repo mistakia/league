@@ -6,7 +6,7 @@ import MockDate from 'mockdate'
 import server from '#api'
 import knex from '#db'
 import league from '#db/seeds/league.mjs'
-import { constants } from '#libs-shared'
+import { roster_slot_types, current_season } from '#constants'
 import { user1, user2 } from './fixtures/token.mjs'
 import {
   selectPlayer,
@@ -21,7 +21,7 @@ process.env.NODE_ENV = 'test'
 chai.should()
 chai.use(chai_http)
 const expect = chai.expect
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 
 describe('API /teams - cutlist', function () {
   before(async function () {
@@ -47,7 +47,7 @@ describe('API /teams - cutlist', function () {
         leagueId,
         teamId,
         userId,
-        slot: constants.slots.BENCH
+        slot: roster_slot_types.BENCH
       })
 
       const res = await chai_request
@@ -83,7 +83,7 @@ describe('API /teams - cutlist', function () {
         leagueId,
         teamId,
         userId,
-        slot: constants.slots.BENCH
+        slot: roster_slot_types.BENCH
       })
 
       const player2 = await selectPlayer({ exclude_pids: [player1.pid] })
@@ -92,7 +92,7 @@ describe('API /teams - cutlist', function () {
         leagueId,
         teamId,
         userId,
-        slot: constants.slots.BENCH
+        slot: roster_slot_types.BENCH
       })
 
       const pids = [player1.pid, player2.pid]
@@ -132,7 +132,7 @@ describe('API /teams - cutlist', function () {
         leagueId,
         teamId,
         userId,
-        slot: constants.slots.BENCH
+        slot: roster_slot_types.BENCH
       })
 
       const player2 = await selectPlayer({ exclude_pids: [player1.pid] })
@@ -141,7 +141,7 @@ describe('API /teams - cutlist', function () {
         leagueId,
         teamId,
         userId,
-        slot: constants.slots.BENCH
+        slot: roster_slot_types.BENCH
       })
 
       const res1 = await chai_request
@@ -190,7 +190,7 @@ describe('API /teams - cutlist', function () {
         leagueId,
         teamId,
         userId,
-        slot: constants.slots.BENCH
+        slot: roster_slot_types.BENCH
       })
 
       const player2 = await selectPlayer({ exclude_pids: [player1.pid] })
@@ -199,7 +199,7 @@ describe('API /teams - cutlist', function () {
         leagueId,
         teamId,
         userId,
-        slot: constants.slots.BENCH
+        slot: roster_slot_types.BENCH
       })
 
       const res1 = await chai_request

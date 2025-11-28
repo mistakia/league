@@ -1,12 +1,12 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import { constants } from '@libs-shared'
 import PlayerName from '@components/player-name'
 import TeamName from '@components/team-name'
 import Timestamp from '@components/timestamp'
 
 import './transaction-row.styl'
+import { transaction_types } from '@constants'
 
 export default function TransactionRow({
   transaction,
@@ -14,7 +14,7 @@ export default function TransactionRow({
   showPlayer,
   layout
 }) {
-  const is_draft_transaction = transaction.type === constants.transactions.DRAFT
+  const is_draft_transaction = transaction.type === transaction_types.DRAFT
 
   // Determine layout version
   let use_wide_layout = false
@@ -26,7 +26,7 @@ export default function TransactionRow({
 
   const transaction_type_content = (
     <>
-      {constants.transactionsDetail[transaction.type]}
+      {transaction_types.transactionsDetail[transaction.type]}
       {is_draft_transaction && (
         <>
           {transaction.pick && (

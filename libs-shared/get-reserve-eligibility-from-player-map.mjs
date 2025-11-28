@@ -24,8 +24,8 @@ export default function get_reserve_eligibility_from_player_map({
       injury_status,
       prior_week_inactive,
       prior_week_ruled_out,
-      week: constants.season.week,
-      is_regular_season: constants.season.isRegularSeason,
+      week: constants.current_season.week,
+      is_regular_season: constants.current_season.isRegularSeason,
       game_day,
       practice
     })

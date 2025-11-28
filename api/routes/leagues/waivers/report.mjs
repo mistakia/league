@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { constants } from '#libs-shared'
+import { waiver_types } from '#constants'
 import { verifyUserTeam } from '#libs-server'
 
 const router = express.Router({ mergeParams: true })
@@ -40,7 +40,7 @@ const router = express.Router({ mergeParams: true })
  *           example: "2041"
  *         type:
  *           type: integer
- *           description: Waiver type (constants.waivers)
+ *           description: Waiver type (constants.waiver_types)
  *           example: 1
  *         succ:
  *           type: integer
@@ -138,7 +138,7 @@ const router = express.Router({ mergeParams: true })
  *         schema:
  *           type: integer
  *         description: |
- *           Waiver type to filter by (constants.waivers).
+ *           Waiver type to filter by (constants.waiver_types).
  *           Different types have different processing rules.
  *         example: 1
  *       - name: teamId
@@ -271,7 +271,7 @@ router.get('/?', async (req, res) => {
     }
 
     // verify type
-    const types = Object.values(constants.waivers)
+    const types = Object.values(waiver_types)
     if (!types.includes(type)) {
       return res.status(400).send({ error: 'invalid type' })
     }

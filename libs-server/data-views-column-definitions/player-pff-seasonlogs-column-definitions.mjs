@@ -1,4 +1,4 @@
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { create_season_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
@@ -9,19 +9,19 @@ const get_cache_info = create_season_cache_info({
   get_params: ({ params = {} } = {}) => {
     const year = Array.isArray(params.year)
       ? params.year[0]
-      : params.year || constants.season.stats_season_year
+      : params.year || current_season.stats_season_year
     return { year: [year] }
   }
 })
 
 const pff_player_seasonlogs_table_alias = ({ params = {} }) => {
-  let year = params.year || [constants.season.stats_season_year]
+  let year = params.year || [current_season.stats_season_year]
   if (!Array.isArray(year)) {
     year = [year]
   }
 
   if (!year.length) {
-    year = [constants.season.stats_season_year]
+    year = [current_season.stats_season_year]
   }
 
   return get_table_hash(`pff_player_seasonlogs_${year.join('_')}`)
@@ -31,7 +31,7 @@ const pff_player_seasonlogs_join = (join_arguments) => {
   data_view_join_function({
     ...join_arguments,
     join_year: true,
-    default_year: constants.season.stats_season_year,
+    default_year: current_season.stats_season_year,
     join_table_clause: `pff_player_seasonlogs as ${join_arguments.table_name}`
   })
 }

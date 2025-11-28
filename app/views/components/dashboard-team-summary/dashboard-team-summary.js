@@ -1,7 +1,6 @@
 import React from 'react'
 import PropTypes from 'prop-types'
 
-import { constants } from '@libs-shared'
 import DashboardTeamSummaryFAAB from '@components/dashboard-team-summary-faab'
 import DashboardTeamSummarySalary from '@components/dashboard-team-summary-salary'
 import DashboardTeamSummaryWaiverOrder from '@components/dashboard-team-summary-waiver-order'
@@ -11,22 +10,27 @@ import DashboardTeamSummaryByeOdds from '@components/dashboard-team-summary-bye-
 import DashboardTeamSummaryDivisionOdds from '@components/dashboard-team-summary-division-odds'
 import DashboardTeamSummaryChampionshipOdds from '@components/dashboard-team-summary-championship-odds'
 import DashboardTeamSummaryFranchiseTags from '@components/dashboard-team-summary-franchise-tags'
+import { current_season } from '@constants'
 
 export default function DashboardTeamSummary({ tid }) {
   return (
     <div className='league-team-section-side'>
-      {constants.isRegularSeason && <DashboardTeamSummaryRecord tid={tid} />}
-      {constants.isRegularSeason && (
+      {current_season.isRegularSeason && (
+        <DashboardTeamSummaryRecord tid={tid} />
+      )}
+      {current_season.isRegularSeason && (
         <DashboardTeamSummaryPlayoffOdds tid={tid} />
       )}
-      {constants.isRegularSeason && (
+      {current_season.isRegularSeason && (
         <DashboardTeamSummaryDivisionOdds tid={tid} />
       )}
-      {constants.isRegularSeason && <DashboardTeamSummaryByeOdds tid={tid} />}
-      {constants.isRegularSeason && (
+      {current_season.isRegularSeason && (
+        <DashboardTeamSummaryByeOdds tid={tid} />
+      )}
+      {current_season.isRegularSeason && (
         <DashboardTeamSummaryChampionshipOdds tid={tid} />
       )}
-      {constants.isRegularSeason && <DashboardTeamSummaryFAAB tid={tid} />}
+      {current_season.isRegularSeason && <DashboardTeamSummaryFAAB tid={tid} />}
       <DashboardTeamSummarySalary tid={tid} />
       <DashboardTeamSummaryWaiverOrder tid={tid} />
       <DashboardTeamSummaryFranchiseTags tid={tid} />

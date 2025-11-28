@@ -4,7 +4,8 @@ import { hideBin } from 'yargs/helpers'
 import { Table } from 'console-table-printer'
 
 import db from '#db'
-import { constants, sum } from '#libs-shared'
+import { sum } from '#libs-shared'
+import { current_season } from '#constants'
 import { chunk_mutating } from '#libs-shared/chunk.mjs'
 import { is_main, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
@@ -22,7 +23,7 @@ const run = async ({ lid, print = true, dry_run = false, num_divisions }) => {
   }
 
   log(`Drawing divisions for leagueId: ${lid}`)
-  const teams = await db('teams').where({ lid, year: constants.season.year })
+  const teams = await db('teams').where({ lid, year: current_season.year })
   if (!teams.length) {
     log(`No teams found for leagueId: ${lid}`)
     return
@@ -31,7 +32,7 @@ const run = async ({ lid, print = true, dry_run = false, num_divisions }) => {
   const tids = teams.map((t) => t.uid)
 
   // get team sesaonlogs for last three years
-  const cutoff = constants.season.year - 2
+  const cutoff = current_season.year - 2
   const league_team_seasonlogs = await db('league_team_seasonlogs')
     .where('year', '>=', cutoff)
     .whereIn('tid', tids)
@@ -100,7 +101,7 @@ const run = async ({ lid, print = true, dry_run = false, num_divisions }) => {
       for (const team of division) {
         await db('teams')
           .update({ div })
-          .where({ uid: team.tid, year: constants.season.year })
+          .where({ uid: team.tid, year: current_season.year })
       }
     }
 

@@ -1,12 +1,8 @@
 import db from '#db'
 import getRoster from './get-roster.mjs'
 import getLeague from './get-league.mjs'
-import {
-  constants,
-  Roster,
-  isReserveEligible,
-  isReserveCovEligible
-} from '#libs-shared'
+import { Roster, isReserveEligible, isReserveCovEligible } from '#libs-shared'
+import { current_season, roster_slot_types } from '#constants'
 
 export default async function ({ teamId, leagueId }) {
   const league = await getLeague({ lid: leagueId })
@@ -17,8 +13,8 @@ export default async function ({ teamId, leagueId }) {
   const player_query = db('player')
     .leftJoin('practice', function () {
       this.on('player.pid', '=', 'practice.pid')
-        .andOn('practice.week', '=', constants.season.week)
-        .andOn('practice.year', '=', constants.season.year)
+        .andOn('practice.week', '=', current_season.week)
+        .andOn('practice.year', '=', current_season.year)
     })
     .leftJoin('nfl_games', function () {
       this.on(function () {
@@ -28,14 +24,14 @@ export default async function ({ teamId, leagueId }) {
           'player.current_nfl_team'
         )
       })
-        .andOn('nfl_games.week', '=', constants.season.week)
-        .andOn('nfl_games.year', '=', constants.season.year)
+        .andOn('nfl_games.week', '=', current_season.week)
+        .andOn('nfl_games.year', '=', current_season.year)
         .andOn(db.raw("nfl_games.seas_type = 'REG'"))
     })
 
   // Only join prior week gamelog data if week > 1
-  if (constants.season.week > 1) {
-    const prior_week = constants.season.week - 1
+  if (current_season.week > 1) {
+    const prior_week = current_season.week - 1
     // First join to prior week's game (to detect if it was a bye week)
     player_query.leftJoin('nfl_games as prior_week_game', function () {
       this.on(function () {
@@ -46,7 +42,7 @@ export default async function ({ teamId, leagueId }) {
         )
       })
         .andOn('prior_week_game.week', '=', prior_week)
-        .andOn('prior_week_game.year', '=', constants.season.year)
+        .andOn('prior_week_game.year', '=', current_season.year)
         .andOn(db.raw("prior_week_game.seas_type = 'REG'"))
     })
     // Join to reference week game (week - 2 if prior week was bye, else week - 1)
@@ -65,7 +61,7 @@ export default async function ({ teamId, leagueId }) {
             `CASE WHEN prior_week_game.esbid IS NULL THEN ${prior_week - 1} ELSE ${prior_week} END`
           )
         )
-        .andOn('reference_week_game.year', '=', constants.season.year)
+        .andOn('reference_week_game.year', '=', current_season.year)
         .andOn(db.raw("reference_week_game.seas_type = 'REG'"))
     })
     // Then join to player's gamelog for the reference week game
@@ -144,22 +140,22 @@ export default async function ({ teamId, leagueId }) {
         : null
 
     if (
-      (roster_player.slot === constants.slots.RESERVE_SHORT_TERM ||
-        roster_player.slot === constants.slots.RESERVE_LONG_TERM) &&
+      (roster_player.slot === roster_slot_types.RESERVE_SHORT_TERM ||
+        roster_player.slot === roster_slot_types.RESERVE_LONG_TERM) &&
       !isReserveEligible({
         nfl_status,
         injury_status,
         prior_week_inactive,
         prior_week_ruled_out,
-        week: constants.season.week,
-        is_regular_season: constants.season.isRegularSeason,
+        week: current_season.week,
+        is_regular_season: current_season.isRegularSeason,
         game_day,
         practice: practice_data
       })
     ) {
       throw new Error('Reserve player violation')
     } else if (
-      roster_player.slot === constants.slots.COV &&
+      roster_player.slot === roster_slot_types.COV &&
       !isReserveCovEligible({ nfl_status })
     ) {
       throw new Error('Reserve player violation')

@@ -8,7 +8,7 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogTitle from '@mui/material/DialogTitle'
 
 import Button from '@components/button'
-import { constants } from '@libs-shared'
+import { roster_slot_types } from '@constants'
 
 export default function ReserveLongTermConfirmation({
   player_map,
@@ -17,7 +17,7 @@ export default function ReserveLongTermConfirmation({
 }) {
   const handle_submit = () => {
     const reserve_pid = player_map.get('pid')
-    reserve({ reserve_pid, slot: constants.slots.RESERVE_LONG_TERM })
+    reserve({ reserve_pid, slot: roster_slot_types.RESERVE_LONG_TERM })
     onClose()
   }
 

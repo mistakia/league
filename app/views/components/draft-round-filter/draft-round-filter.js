@@ -1,8 +1,8 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { constants } from '@libs-shared'
 import PlayerFilter from '@components/player-filter'
+import { nfl_draft_rounds } from '@constants'
 
 export default class PositionFilter extends React.Component {
   render() {
@@ -12,7 +12,7 @@ export default class PositionFilter extends React.Component {
       values: []
     }
 
-    for (const round of constants.nfl_draft_rounds) {
+    for (const round of nfl_draft_rounds) {
       state.values.push({
         label: round === 0 ? 'Undrafted' : round,
         value: round,

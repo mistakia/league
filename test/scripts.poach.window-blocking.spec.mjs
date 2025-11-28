@@ -4,7 +4,11 @@ import MockDate from 'mockdate'
 
 import knex from '#db'
 import league from '#db/seeds/league.mjs'
-import { constants } from '#libs-shared'
+import {
+  roster_slot_types,
+  transaction_types,
+  current_season
+} from '#constants'
 import { addPlayer, selectPlayer } from './utils/index.mjs'
 import run from '#scripts/process-poaching-claims.mjs'
 
@@ -12,7 +16,7 @@ process.env.NODE_ENV = 'test'
 
 chai.should()
 const expect = chai.expect
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 
 describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', function () {
   before(async function () {
@@ -52,8 +56,8 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
         player,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.DRAFT,
         value: 1
       })
 
@@ -94,8 +98,8 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
         player,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.DRAFT,
         value: 1
       })
 
@@ -135,8 +139,8 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
         player,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.DRAFT,
         value: 1
       })
 
@@ -178,8 +182,8 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
         player,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.DRAFT,
         value: 1
       })
 
@@ -220,8 +224,8 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
         player,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.DRAFT,
         value: 1
       })
 
@@ -267,8 +271,8 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
         player,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.DRAFT,
         value: 1
       })
 
@@ -311,8 +315,8 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
         player,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.DRAFT,
         value: 1
       })
 
@@ -352,8 +356,8 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
         player,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.DRAFT,
         value: 1
       })
 
@@ -393,8 +397,8 @@ describe('SCRIPTS /waivers - poach window blocking (bug fix verification)', func
         player,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.DRAFT,
         value: 1
       })
 

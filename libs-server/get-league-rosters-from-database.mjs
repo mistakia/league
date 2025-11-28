@@ -1,10 +1,10 @@
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season, player_tag_types } from '#constants'
 
 export default async function ({
   lid,
   userId,
-  year = constants.season.year,
+  year = current_season.year,
   min_week
 }) {
   const rosters = await db('rosters')
@@ -15,11 +15,11 @@ export default async function ({
   if (min_week === null || min_week === undefined) {
     // for current year, we want to start at the current week (between 0 and final week)
     // for past years we want to start at week 0
-    const is_current_year = year === constants.season.year
+    const is_current_year = year === current_season.year
     if (is_current_year) {
       min_week = Math.min(
-        Math.max(constants.season.fantasy_season_week, 0),
-        constants.season.finalWeek
+        Math.max(current_season.fantasy_season_week, 0),
+        current_season.finalWeek
       )
     } else {
       min_week = 0
@@ -27,7 +27,7 @@ export default async function ({
   }
 
   const lineups = await db('league_team_lineups')
-    .where({ lid, year: constants.season.year })
+    .where({ lid, year: current_season.year })
     .where('week', '>=', min_week)
   const lineupStarters = await db('league_team_lineup_starters')
     .where({
@@ -88,14 +88,14 @@ export default async function ({
       })
       .where('users_teams.userid', userId)
       .where('teams.lid', lid)
-      .where('teams.year', constants.season.year)
+      .where('teams.year', current_season.year)
 
     if (query1.length) {
       const tid = query1[0].uid
       const bids = await db('restricted_free_agency_bids')
         .where('tid', tid)
         .where('player_tid', tid)
-        .where('year', constants.season.year)
+        .where('year', current_season.year)
         .whereNull('cancelled')
         .whereNull('processed')
 
@@ -111,7 +111,10 @@ export default async function ({
         const team_roster = rosters.find((r) => r.tid === tid)
         for (const bid of bids) {
           const player = team_roster.players.find((p) => p.pid === bid.pid)
-          if (player && player.tag === constants.tags.RESTRICTED_FREE_AGENCY) {
+          if (
+            player &&
+            player.tag === player_tag_types.RESTRICTED_FREE_AGENCY
+          ) {
             player.bid = bid.bid
             player.restricted_free_agency_tag_nominated = bid.nominated
             player.restricted_free_agency_original_team = bid.player_tid
@@ -131,11 +134,13 @@ export default async function ({
     }
   }
 
-  if (constants.season.week === 0) {
+  if (current_season.week === 0) {
     const restricted_free_agency_tagged_players = rosters
       .filter((r) => r.week === 0)
       .flatMap((r) =>
-        r.players.filter((p) => p.tag === constants.tags.RESTRICTED_FREE_AGENCY)
+        r.players.filter(
+          (p) => p.tag === player_tag_types.RESTRICTED_FREE_AGENCY
+        )
       )
     if (restricted_free_agency_tagged_players.length) {
       const restricted_free_agency_bids = await db(
@@ -143,7 +148,7 @@ export default async function ({
       )
         .select('pid', 'processed', 'nominated', 'announced', 'player_tid')
         .where({
-          year: constants.season.year
+          year: current_season.year
         })
         .whereRaw('player_tid = tid')
         .whereIn(
@@ -156,7 +161,7 @@ export default async function ({
         if (roster.week !== 0) continue
 
         for (const player of roster.players) {
-          if (player.tag === constants.tags.RESTRICTED_FREE_AGENCY) {
+          if (player.tag === player_tag_types.RESTRICTED_FREE_AGENCY) {
             const bid = restricted_free_agency_bids.find(
               (b) => b.pid === player.pid
             )

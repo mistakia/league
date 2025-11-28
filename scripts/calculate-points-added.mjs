@@ -8,13 +8,13 @@ import db from '#db'
 import { is_main, getLeague } from '#libs-server'
 import {
   sum,
-  constants,
   groupBy,
   getRosterSize,
   calculateValues,
   calculatePrices,
   calculateBaselines
 } from '#libs-shared'
+import { fantasy_positions } from '#constants'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -58,7 +58,7 @@ const calculate_points_added = async ({
     .join('player', 'scoring_format_player_gamelogs.pid', 'player.pid')
     .where('nfl_games.year', year)
     .where('nfl_games.seas_type', 'REG')
-    .whereIn('player.pos', constants.positions) // TODO - filter using player_gamelogs.pos
+    .whereIn('player.pos', fantasy_positions) // TODO - filter using player_gamelogs.pos
     .where(
       'scoring_format_player_gamelogs.scoring_format_hash',
       league.scoring_format_hash
@@ -118,12 +118,12 @@ const calculate_points_added = async ({
 
   const baselines = {}
   const baselineTotals = {}
-  constants.positions.forEach((p) => (baselineTotals[p] = 0))
+  fantasy_positions.forEach((p) => (baselineTotals[p] = 0))
   for (const week of weeks) {
     const baseline = calculateBaselines({ players, league, week })
     baselines[week] = baseline
 
-    for (const position of constants.positions) {
+    for (const position of fantasy_positions) {
       const p = baseline[position].starter
       baselineTotals[position] += p.points[week].total
       log(
@@ -141,7 +141,7 @@ const calculate_points_added = async ({
   }
 
   const points_by_position = {}
-  for (const pos of constants.positions) {
+  for (const pos of fantasy_positions) {
     points_by_position[pos] = []
   }
 
@@ -255,7 +255,7 @@ const main = async () => {
     )
     p.printTable()
 
-    for (const position of constants.positions) {
+    for (const position of fantasy_positions) {
       const total = baselineTotals[position]
       const avg = total / weeks
       log(`${position} baseline per week: ${avg.toFixed(2)}`)

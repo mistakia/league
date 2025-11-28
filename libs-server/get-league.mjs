@@ -1,5 +1,6 @@
 import db from '#db'
-import { constants, create_default_league } from '#libs-shared'
+import { current_season } from '#constants'
+import { create_default_league } from '#libs-shared'
 
 async function get_league_divisions({ lid, year }) {
   const divisions = await db('league_divisions')
@@ -12,7 +13,7 @@ async function get_league_divisions({ lid, year }) {
   }, {})
 }
 
-export default async function ({ lid, year = constants.season.year } = {}) {
+export default async function ({ lid, year = current_season.year } = {}) {
   lid = Number(lid)
 
   if (!lid) {

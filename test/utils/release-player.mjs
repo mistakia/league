@@ -1,12 +1,12 @@
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season, transaction_types } from '#constants'
 
 export default async function ({ leagueId, player, teamId, userId }) {
   const rids = await db('rosters')
     .where({
       tid: teamId,
-      week: constants.season.week,
-      year: constants.season.year
+      week: current_season.week,
+      year: current_season.year
     })
     .limit(1)
 
@@ -24,10 +24,10 @@ export default async function ({ leagueId, player, teamId, userId }) {
     tid: teamId,
     lid: leagueId,
     pid: player.pid,
-    type: constants.transactions.ROSTER_RELEASE,
+    type: transaction_types.ROSTER_RELEASE,
     value: 0,
-    week: constants.season.week,
-    year: constants.season.year,
+    week: current_season.week,
+    year: current_season.year,
     timestamp: Math.round(Date.now() / 1000)
   })
 }

@@ -49,7 +49,11 @@ import {
   get_current_league,
   get_team_by_id_for_current_year
 } from '@core/selectors'
-import { constants } from '@libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  transaction_types
+} from '@constants'
 import { player_actions } from '@core/players'
 import { poach_actions } from '@core/poaches'
 import { waiver_actions } from '@core/waivers'
@@ -121,7 +125,7 @@ export function* setSelectedPlayerLineupContribution({ payload }) {
 
 export function* setPlayerLineupContribution({ pid }) {
   const currentRoster = yield select(get_current_team_roster_record)
-  const week = Math.max(constants.week, 1)
+  const week = Math.max(current_season.week, 1)
   if (!currentRoster.getIn(['lineups', `${week}`])) {
     yield take(roster_actions.SET_LINEUPS)
   }
@@ -467,7 +471,7 @@ export function* export_rosters() {
   const league = yield select(get_current_league)
   const rosters = yield select(get_rosters_for_current_league)
   const playerMaps = yield select(get_player_maps)
-  const projectionType = constants.isRegularSeason ? 'ros' : '0'
+  const projectionType = current_season.isRegularSeason ? 'ros' : '0'
 
   const data = []
   for (const [tid, roster] of rosters.entrySeq()) {
@@ -485,8 +489,9 @@ export function* export_rosters() {
         playerid: player_map.get('pid'),
         pos: player_map.get('pos'),
         last_transaction_timestamp: rosterPlayer.timestamp,
-        last_transaction_type: constants.transactionsDetail[rosterPlayer.type],
-        slot: constants.slotName[rosterPlayer.slot],
+        last_transaction_type:
+          transaction_types.transactionsDetail[rosterPlayer.type],
+        slot: roster_slot_types.slotName[rosterPlayer.slot],
         draft_year: player_map.get('nfl_draft_year'),
         player_team: player_map.get('team')
       })
@@ -509,7 +514,7 @@ export function* export_rosters() {
       player_team: 'NFL Team'
     },
     data,
-    fileName: `${league.name}-LeagueRosters-${constants.year}-Week${constants.week}`
+    fileName: `${league.name}-LeagueRosters-${current_season.year}-Week${current_season.week}`
   })
 }
 

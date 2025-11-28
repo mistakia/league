@@ -9,7 +9,7 @@ import {
   find_player_row,
   batch_insert
 } from '#libs-server'
-import { constants } from '#libs-shared'
+import { current_season, external_data_sources } from '#constants'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
 import db from '#db'
@@ -81,7 +81,7 @@ const create_adp_entries = ({ player_row, adp }) => {
     .map(({ type, adp_key }) => ({
       pid: player_row.pid,
       pos: player_row.pos,
-      year: constants.season.year,
+      year: current_season.year,
       adp: adp[adp_key],
       min_pick: null,
       max_pick: null,
@@ -112,10 +112,10 @@ const process_matched_player = ({
   // Insert into projections_index and projections
   projection_inserts.push({
     pid: player_row.pid,
-    year: constants.season.year,
+    year: current_season.year,
     week: 0,
     seas_type: 'REG',
-    sourceid: constants.sources.SLEEPER,
+    sourceid: external_data_sources.SLEEPER,
     ...proj
   })
 }
@@ -126,7 +126,7 @@ const import_sleeper_adp_and_projections = async ({
 } = {}) => {
   const projections = await sleeper.get_sleeper_projections({
     ignore_cache,
-    year: constants.season.year,
+    year: current_season.year,
     positions: ['DEF', 'K', 'QB', 'RB', 'TE', 'WR'],
     order_by: 'adp_std'
   })

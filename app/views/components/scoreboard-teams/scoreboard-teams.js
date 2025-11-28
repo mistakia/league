@@ -3,10 +3,10 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 
 import ScoreboardScoreTeam from '@components/scoreboard-score-team'
-import { constants } from '@libs-shared'
 import { Scoreboard } from '@core/scoreboard'
 
 import './scoreboard-teams.styl'
+import { current_season, matchup_types } from '@constants'
 
 function Team({ tid, onClick, selected_tid, cutoff, challenger }) {
   const classNames = ['scoreboard__teams-team', 'cursor']
@@ -15,7 +15,7 @@ function Team({ tid, onClick, selected_tid, cutoff, challenger }) {
     <div className={classNames.join(' ')} onClick={() => onClick(tid)}>
       <ScoreboardScoreTeam
         tid={tid}
-        type={constants.matchups.TOURNAMENT}
+        type={matchup_types.TOURNAMENT}
         {...{ cutoff, challenger }}
       />
     </div>
@@ -39,7 +39,7 @@ export default function ScoreboardTeams({
 }) {
   const [show_other_teams, set_show_other_teams] = useState(false)
 
-  const isWC = week === constants.season.wildcardWeek
+  const isWC = week === current_season.wildcardWeek
   const sorted = scoreboards.sort((a, b) => b.points - a.points)
   const cutoff = isWC
     ? sorted.get(1, new Scoreboard()).points

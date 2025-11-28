@@ -3,7 +3,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, Roster } from '#libs-shared'
+import { Roster } from '#libs-shared'
+import { current_season, transaction_types } from '#constants'
 import { is_main, getLeague, getRoster, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -15,10 +16,10 @@ const log = debug('check-restricted-free-agency-salary-cap-violations')
 debug.enable('check-restricted-free-agency-salary-cap-violations')
 
 // Constants for better maintainability
-const CURRENT_YEAR = constants.season.year
+const CURRENT_YEAR = current_season.year
 const OFFSEASON_WEEK = 0
 const RESTRICTED_FREE_AGENCY_TAG_TYPE =
-  constants.transactions.RESTRICTED_FREE_AGENCY_TAG
+  transaction_types.RESTRICTED_FREE_AGENCY_TAG
 
 /**
  * Get leagues that have had restricted free agency transactions this season

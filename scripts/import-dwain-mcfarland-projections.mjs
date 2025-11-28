@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season, external_data_sources } from '#constants'
 import { is_main, fantasylife, find_player_row } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -80,9 +80,9 @@ const import_dwain_mcfarland_projections = async ({
       const data = format_projection(item)
       inserts.push({
         pid: player_row.pid,
-        year: constants.season.year,
+        year: current_season.year,
         week: 0,
-        sourceid: constants.sources.FANTASYLIFE_DWAIN_MCFARLAND,
+        sourceid: external_data_sources.FANTASYLIFE_DWAIN_MCFARLAND,
         seas_type: 'REG',
         ...data
       })

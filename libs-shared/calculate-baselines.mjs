@@ -1,5 +1,9 @@
 import Roster from './roster.mjs'
-import * as constants from './constants.mjs'
+import {
+  roster_slot_types,
+  starting_lineup_slots,
+  fantasy_positions
+} from '#constants'
 import sum from './sum.mjs'
 import get_eligible_slots from './get-eligible-slots.mjs'
 import getPlayerCountBySlot from './get-player-count-by-slot.mjs'
@@ -15,7 +19,7 @@ const getWorseStarterForPosition = ({
 
   const eligibleSlots = get_eligible_slots({ pos: position, league })
   for (const slot of eligibleSlots) {
-    const slotId = constants.slots[slot]
+    const slotId = roster_slot_types[slot]
     const players = groupedStarters[slotId]
     const worst = players[players.length - 1]
     if (worst) {
@@ -40,7 +44,7 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
 
   // group by position
   const grouped = {}
-  for (const position of constants.positions) {
+  for (const position of fantasy_positions) {
     grouped[position] = data.filter((p) => p.pos === position)
   }
 
@@ -67,12 +71,12 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
 
     // move current starters to bench
     for (const slot of Array.from(new Set(eligibleSlots))) {
-      const slotStarters = roster.getPlayersBySlot(constants.slots[slot])
+      const slotStarters = roster.getPlayersBySlot(roster_slot_types[slot])
       for (const p of slotStarters) {
         const player = data.find((ps) => ps.pid === p.pid)
         roster.removePlayer(p.pid)
         roster.addPlayer({
-          slot: constants.slots.BENCH,
+          slot: roster_slot_types.BENCH,
           pid: p.pid,
           pos: player.pos
         })
@@ -82,14 +86,14 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
       for (const player of players) {
         const eligibleSlots = get_eligible_slots({ pos: player.pos, league })
         for (const slot of eligibleSlots) {
-          if (roster.hasOpenSlot(constants.slots[slot])) {
+          if (roster.hasOpenSlot(roster_slot_types[slot])) {
             roster.removePlayer(player.pid)
             roster.addPlayer({
-              slot: constants.slots[slot],
+              slot: roster_slot_types[slot],
               pid: player.pid,
               pos: player.pos
             })
-            starters.push({ slot: constants.slots[slot], ...player })
+            starters.push({ slot: roster_slot_types[slot], ...player })
             continue
           }
         }
@@ -99,8 +103,7 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
 
   // fill remaining roster slots with best available players
   const availablePlayerPool = data.filter(
-    (p) =>
-      !rostered_pids.includes(p.pid) || !constants.positions.includes(p.pos)
+    (p) => !rostered_pids.includes(p.pid) || !fantasy_positions.includes(p.pos)
   )
 
   const playerCountBySlot = getPlayerCountBySlot({ league })
@@ -115,17 +118,17 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
     for (const roster of rosters) {
       const eligibleSlots = get_eligible_slots({ pos: player.pos, league })
       for (const slot of eligibleSlots) {
-        if (roster.hasOpenSlot(constants.slots[slot])) {
+        if (roster.hasOpenSlot(roster_slot_types[slot])) {
           if (!roster.availableSpace) {
             const benchPlayer = roster.bench[0]
             roster.removePlayer(benchPlayer.pid)
           }
           roster.addPlayer({
-            slot: constants.slots[slot],
+            slot: roster_slot_types[slot],
             pid: player.pid,
             pos: player.pos
           })
-          starters.push({ slot: constants.slots[slot], ...player })
+          starters.push({ slot: roster_slot_types[slot], ...player })
           added = true
           break
         }
@@ -137,7 +140,7 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
 
   // group starters by position
   const groupedStarters = {}
-  for (const slot of constants.starterSlots) {
+  for (const slot of starting_lineup_slots) {
     groupedStarters[slot] = starters
       .filter((s) => s.slot === slot)
       .sort(
@@ -151,7 +154,7 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
     (p) => !starter_pids.includes(p.pid)
   )
   const groupedRemainingPlayers = {}
-  for (const position of constants.positions) {
+  for (const position of fantasy_positions) {
     groupedRemainingPlayers[position] = remainingPlayers.filter(
       (s) => s.pos === position
     )
@@ -159,7 +162,7 @@ const calculateBaselines = ({ players, rosterRows = [], league, week }) => {
 
   // set starter baselines
   const result = {}
-  for (const position of constants.positions) {
+  for (const position of fantasy_positions) {
     result[position] = {}
     const worstStarter = getWorseStarterForPosition({
       position,

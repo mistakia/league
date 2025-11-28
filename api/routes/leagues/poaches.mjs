@@ -10,7 +10,8 @@ import {
   processPoach,
   sendNotifications
 } from '#libs-server'
-import { constants, Roster, get_free_agent_period } from '#libs-shared'
+import { Roster, get_free_agent_period } from '#libs-shared'
+import { current_season, transaction_types } from '#constants'
 
 const router = express.Router()
 
@@ -20,7 +21,7 @@ router.post('/?', async (req, res) => {
     const { pid, release, leagueId } = req.body
     const teamId = Number(req.body.teamId)
 
-    if (constants.season.week > constants.season.finalWeek) {
+    if (current_season.week > current_season.finalWeek) {
       return res.status(400).send({ error: 'player is locked' })
     }
 
@@ -54,7 +55,7 @@ router.post('/?', async (req, res) => {
         this.andOn('users_teams.year', '=', 'teams.year')
       })
       .where('userid', req.auth.userId)
-      .where('teams.year', constants.season.year)
+      .where('teams.year', current_season.year)
     const team = userTeams.find((p) => p.tid === teamId)
     if (!team) {
       return res.status(400).send({ error: 'invalid teamId' })
@@ -72,9 +73,9 @@ router.post('/?', async (req, res) => {
 
     // verify player is not in sanctuary period
     if (
-      (tran.type === constants.transactions.ROSTER_DEACTIVATE ||
-        tran.type === constants.transactions.DRAFT ||
-        tran.type === constants.transactions.PRACTICE_ADD) &&
+      (tran.type === transaction_types.ROSTER_DEACTIVATE ||
+        tran.type === transaction_types.DRAFT ||
+        tran.type === transaction_types.PRACTICE_ADD) &&
       dayjs().isBefore(dayjs.unix(tran.timestamp).add('24', 'hours'))
     ) {
       return res.status(400).send({ error: 'Player on Sanctuary Period' })
@@ -82,20 +83,20 @@ router.post('/?', async (req, res) => {
 
     const league = await getLeague({ lid: leagueId })
     if (
-      !constants.season.isRegularSeason &&
+      !current_season.isRegularSeason &&
       league.free_agency_live_auction_start
     ) {
       const faPeriod = get_free_agent_period(league)
-      if (constants.season.now.isBetween(faPeriod.start, faPeriod.end)) {
+      if (current_season.now.isBetween(faPeriod.start, faPeriod.end)) {
         return res.status(400).send({ error: 'Player on Sanctuary Period' })
       }
     }
 
     // verify player is not in 24-hour sanctuary/waiver period
     if (
-      (tran.type === constants.transactions.ROSTER_DEACTIVATE ||
-        tran.type === constants.transactions.DRAFT ||
-        tran.type === constants.transactions.PRACTICE_ADD) &&
+      (tran.type === transaction_types.ROSTER_DEACTIVATE ||
+        tran.type === transaction_types.DRAFT ||
+        tran.type === transaction_types.PRACTICE_ADD) &&
       dayjs().isBefore(dayjs.unix(tran.timestamp).add('24', 'hours'))
     ) {
       return res
@@ -239,7 +240,7 @@ router.put('/:poachId', async (req, res) => {
     const tran = transactions[0]
     const playerPoachValue = tran.value + 2
     if (
-      !constants.season.isRegularSeason &&
+      !current_season.isRegularSeason &&
       roster.availableCap - playerPoachValue < 0
     ) {
       return res.status(400).send({ error: 'not enough available cap' })

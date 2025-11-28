@@ -1,5 +1,10 @@
 import db from '#db'
-import { constants } from '#libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  transaction_types,
+  player_tag_types
+} from '#constants'
 
 export default async function setupSuperPriority({
   player,
@@ -24,10 +29,10 @@ export default async function setupSuperPriority({
       tid: original_team_id,
       lid: league_id,
       pid: player.pid,
-      type: constants.transactions.ROSTER_RELEASE,
+      type: transaction_types.ROSTER_RELEASE,
       value: 0,
-      week: constants.season.week,
-      year: constants.season.year,
+      week: current_season.week,
+      year: current_season.year,
       timestamp: previousReleaseTimestamp
     })
   }
@@ -36,8 +41,8 @@ export default async function setupSuperPriority({
   // First get the roster
   const originalRosters = await db('rosters')
     .where({
-      week: constants.season.week,
-      year: constants.season.year,
+      week: current_season.week,
+      year: current_season.year,
       tid: original_team_id
     })
     .limit(1)
@@ -49,10 +54,10 @@ export default async function setupSuperPriority({
     tid: original_team_id,
     lid: league_id,
     pid: player.pid,
-    type: constants.transactions.PRACTICE_ADD,
+    type: transaction_types.PRACTICE_ADD,
     value: 0,
-    week: constants.season.week,
-    year: constants.season.year,
+    week: current_season.week,
+    year: current_season.year,
     timestamp: originalAddTimestamp
   })
 
@@ -60,13 +65,13 @@ export default async function setupSuperPriority({
   await db('rosters_players').insert({
     rid: originalRosterId,
     pid: player.pid,
-    slot: constants.slots.PS,
+    slot: roster_slot_types.PS,
     pos: player.pos1,
-    tag: constants.tags.REGULAR,
+    tag: player_tag_types.REGULAR,
     tid: original_team_id,
     lid: league_id,
-    year: constants.season.year,
-    week: constants.season.week
+    year: current_season.year,
+    week: current_season.week
   })
 
   // Step 2: Create poach transaction
@@ -75,10 +80,10 @@ export default async function setupSuperPriority({
     tid: poaching_team_id,
     lid: league_id,
     pid: player.pid,
-    type: constants.transactions.POACHED,
+    type: transaction_types.POACHED,
     value: 0,
-    week: constants.season.week,
-    year: constants.season.year,
+    week: current_season.week,
+    year: current_season.year,
     timestamp: poachTimestamp
   })
 
@@ -94,8 +99,8 @@ export default async function setupSuperPriority({
   // Get poaching team roster
   const poachingRosters = await db('rosters')
     .where({
-      week: constants.season.week,
-      year: constants.season.year,
+      week: current_season.week,
+      year: current_season.year,
       tid: poaching_team_id
     })
     .limit(1)
@@ -105,13 +110,13 @@ export default async function setupSuperPriority({
   await db('rosters_players').insert({
     rid: poachingRosterId,
     pid: player.pid,
-    slot: constants.slots.PS,
+    slot: roster_slot_types.PS,
     pos: player.pos1,
-    tag: constants.tags.REGULAR,
+    tag: player_tag_types.REGULAR,
     tid: poaching_team_id,
     lid: league_id,
-    year: constants.season.year,
-    week: constants.season.week
+    year: current_season.year,
+    week: current_season.week
   })
 
   // Step 5: Conditionally release player or keep rostered
@@ -125,10 +130,10 @@ export default async function setupSuperPriority({
       tid: poaching_team_id,
       lid: league_id,
       pid: player.pid,
-      type: constants.transactions.ROSTER_RELEASE,
+      type: transaction_types.ROSTER_RELEASE,
       value: 0,
-      week: constants.season.week,
-      year: constants.season.year,
+      week: current_season.week,
+      year: current_season.year,
       timestamp: releaseTimestamp
     })
 

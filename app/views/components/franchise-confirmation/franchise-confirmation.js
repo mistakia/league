@@ -12,7 +12,7 @@ import DialogActions from '@mui/material/DialogActions'
 import DialogTitle from '@mui/material/DialogTitle'
 
 import Button from '@components/button'
-import { constants } from '@libs-shared'
+import { player_tag_types } from '@constants'
 
 export default class FranchiseConfirmation extends React.Component {
   constructor(props) {
@@ -26,10 +26,12 @@ export default class FranchiseConfirmation extends React.Component {
 
     const { team } = props
     this._isEligible = team.roster.isEligibleForTag({
-      tag: constants.tags.FRANCHISE
+      tag: player_tag_types.FRANCHISE
     })
     this._untags = []
-    const tagged_players = team.roster.getPlayersByTag(constants.tags.FRANCHISE)
+    const tagged_players = team.roster.getPlayersByTag(
+      player_tag_types.FRANCHISE
+    )
     const tagged_pids = tagged_players.map((p) => p.pid)
     for (const pid of tagged_pids) {
       const player_map = team.players.find(
@@ -57,7 +59,7 @@ export default class FranchiseConfirmation extends React.Component {
     if (!error) {
       this.props.add({
         remove: untag,
-        tag: constants.tags.FRANCHISE,
+        tag: player_tag_types.FRANCHISE,
         pid
       })
       this.props.onClose()

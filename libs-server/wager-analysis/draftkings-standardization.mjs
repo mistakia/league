@@ -1,6 +1,7 @@
 import dayjs from 'dayjs'
 
-import { constants, format_player_name } from '#libs-shared'
+import { format_player_name } from '#libs-shared'
+import { current_season } from '#constants'
 
 // Extract player name from DraftKings market display name
 const extract_draftkings_player_name = (market_display_name) => {
@@ -129,7 +130,7 @@ export const standardize_draftkings_wager = (wager) => {
   // Calculate week from settlement date
   const week = dayjs(wager.settlementDate)
     .subtract('2', 'day')
-    .diff(constants.season.regular_season_start, 'weeks')
+    .diff(current_season.regular_season_start, 'weeks')
 
   if (wager.type === 'RoundRobin') {
     return wager.combinations.map((combination) => {

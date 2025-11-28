@@ -4,7 +4,7 @@ import csv from 'csv-parser'
 
 import db from '#db'
 import * as cache from './cache.mjs'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 const log = debug('4for4')
 
@@ -15,9 +15,9 @@ export const get_4for4_config = async () => {
 
 export const get_4for4_projections = async ({
   ignore_cache = false,
-  year = constants.season.year,
+  year = current_season.year,
   week = 0,
-  seas_type = constants.season.nfl_seas_type,
+  seas_type = current_season.nfl_seas_type,
   is_regular_season_projection = true
 } = {}) => {
   const four_for_four_config = await get_4for4_config()

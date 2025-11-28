@@ -1,6 +1,6 @@
 import dayjs from 'dayjs'
 
-import * as constants from './constants.mjs'
+import { league_default_rfa_announcement_hour } from '#constants'
 
 /**
  * Determines which teams should nominate restricted free agents based on league start date and draft order
@@ -34,7 +34,7 @@ const get_restricted_free_agency_nomination_info = ({
   const announcement_hour =
     league.restricted_free_agency_announcement_hour !== undefined
       ? league.restricted_free_agency_announcement_hour
-      : constants.league_default_restricted_free_agency_announcement_hour
+      : league_default_rfa_announcement_hour
 
   // Calculate a default tran_end if it doesn't exist (30 days after tran_start)
   const tran_end = league.tran_end || league.tran_start + 30 * 24 * 60 * 60

@@ -1,8 +1,8 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { constants } from '@libs-shared'
 import PlayerFilter from '@components/player-filter'
+import { player_availability_statuses } from '@constants'
 
 export default class AvailabilityFilter extends React.Component {
   render() {
@@ -12,7 +12,7 @@ export default class AvailabilityFilter extends React.Component {
       values: []
     }
 
-    for (const availability of constants.availability) {
+    for (const availability of player_availability_statuses) {
       state.values.push({
         label: availability,
         value: availability,

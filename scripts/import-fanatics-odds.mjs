@@ -5,7 +5,8 @@ import fs from 'fs-extra'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, fixTeam } from '#libs-shared'
+import { fixTeam } from '#libs-shared'
+import { current_season } from '#constants'
 import {
   is_main,
   find_player_row,
@@ -41,7 +42,7 @@ const format_market = async ({
     const home_team = event.participants.find((p) => p.position === 0)?.name
     const away_team = event.participants.find((p) => p.position === 1)?.name
 
-    const { week, seas_type } = constants.season.calculate_week(
+    const { week, seas_type } = current_season.calculate_week(
       dayjs(event.eventTime)
     )
 
@@ -49,7 +50,7 @@ const format_market = async ({
       (game) =>
         game.week === week &&
         game.seas_type === seas_type &&
-        game.year === constants.season.year &&
+        game.year === current_season.year &&
         game.v === fixTeam(away_team) &&
         game.h === fixTeam(home_team)
     )
@@ -113,7 +114,7 @@ const format_market = async ({
     source_market_id: market.id,
     source_market_name: market.name,
     esbid: nfl_game?.esbid || null,
-    year: nfl_game?.year || constants.season.year,
+    year: nfl_game?.year || current_season.year,
     source_event_id: String(event.id),
     source_event_name: event.name,
     open: market.state === 'OPEN',
@@ -161,7 +162,7 @@ const run = async ({
   const league_info = await fanatics.get_league_info({ ignore_cache })
 
   const nfl_games = await db('nfl_games').where({
-    year: constants.season.year
+    year: current_season.year
   })
 
   const formatted_markets = []

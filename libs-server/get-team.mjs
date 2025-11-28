@@ -1,10 +1,10 @@
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 export default async function (tid) {
   const teams = await db('teams').where({
     uid: tid,
-    year: constants.season.year
+    year: current_season.year
   })
   return teams[0]
 }

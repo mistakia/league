@@ -4,13 +4,13 @@ import PropTypes from 'prop-types'
 import Tabs from '@mui/material/Tabs'
 import Tab from '@mui/material/Tab'
 
-import { constants } from '@libs-shared'
 import SelectedPlayerMatchupTable from '@components/selected-player-matchup-table'
 import PercentileMetric from '@components/percentile-metric'
 import SelectedPlayerScheduleYearFilter from '@components/selected-player-schedule-year-filter'
 import SelectedPlayerScheduleWeekFilter from '@components/selected-player-schedule-week-filter'
 
 import './selected-player-schedule.styl'
+import { current_season } from '@constants'
 
 export default function SelectedPlayerSchedule({
   player_map,
@@ -25,14 +25,16 @@ export default function SelectedPlayerSchedule({
 
   const pos = player_map.get('pos')
   const team = player_map.get('team')
-  const current_week = Math.max(constants.week, 1)
+  const current_week = Math.max(current_season.week, 1)
   const [selected_week, set_selected_week] = useState(current_week)
   const [selected_years_for_schedule, set_selected_years_for_schedule] =
     useState(
-      current_week < 4 ? [constants.year, constants.year - 1] : [constants.year]
+      current_week < 4
+        ? [current_season.year, current_season.year - 1]
+        : [current_season.year]
     )
   const [selected_weeks_for_schedule, set_selected_weeks_for_schedule] =
-    useState(constants.nfl_weeks)
+    useState(current_season.nfl_weeks)
   const [filters_expanded, set_filters_expanded] = useState(false)
 
   const handle_tab_change = (event, value) => set_selected_week(value)

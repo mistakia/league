@@ -2,12 +2,12 @@ import React from 'react'
 import PropTypes from 'prop-types'
 import Popover from '@mui/material/Popover'
 
-import { constants } from '@libs-shared'
 import Position from '@components/position'
 
 import './dashboard-bye-weeks.styl'
+import { current_season } from '@constants'
 
-const weeksRemaining = constants.season.finalWeek - constants.week
+const weeksRemaining = current_season.finalWeek - current_season.week
 
 function ByeWeekPopover({ players, bye }) {
   const [anchorEl, setAnchorEl] = React.useState(null)

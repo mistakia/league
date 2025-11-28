@@ -5,7 +5,13 @@ import MockDate from 'mockdate'
 
 import knex from '#db'
 import league from '#db/seeds/league.mjs'
-import { constants, Errors } from '#libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  transaction_types,
+  waiver_types
+} from '#constants'
+import { Errors } from '#libs-shared'
 import { selectPlayer, addPlayer } from './utils/index.mjs'
 import run from '../scripts/process-poaching-waivers.mjs'
 
@@ -14,7 +20,7 @@ process.env.NODE_ENV = 'test'
 chai.should()
 // chai.use(chai_http)
 const expect = chai.expect
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 
 describe('SCRIPTS /waivers - poach', function () {
   before(async function () {
@@ -74,8 +80,8 @@ describe('SCRIPTS /waivers - poach', function () {
         player,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.DRAFT,
         value: 1
       })
 
@@ -87,7 +93,7 @@ describe('SCRIPTS /waivers - poach', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
-        type: constants.waivers.POACH
+        type: waiver_types.POACH
       })
 
       let error
@@ -118,8 +124,8 @@ describe('SCRIPTS /waivers - poach', function () {
         player,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.PRACTICE_ADD,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.PRACTICE_ADD,
         value: 1
       })
 
@@ -131,7 +137,7 @@ describe('SCRIPTS /waivers - poach', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
-        type: constants.waivers.POACH
+        type: waiver_types.POACH
       })
 
       let error
@@ -164,8 +170,8 @@ describe('SCRIPTS /waivers - poach', function () {
         player,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.DRAFT,
         value: 1
       })
 
@@ -177,7 +183,7 @@ describe('SCRIPTS /waivers - poach', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
-        type: constants.waivers.POACH
+        type: waiver_types.POACH
       })
 
       MockDate.set(
@@ -209,7 +215,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // check team waiver order
       const teams = await knex('teams').where({
         lid: 1,
-        year: constants.season.year
+        year: current_season.year
       })
       const team1 = teams.find((t) => t.uid === 1)
       const team2 = teams.find((t) => t.uid === 2)
@@ -243,8 +249,8 @@ describe('SCRIPTS /waivers - poach', function () {
         player,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.PRACTICE_ADD,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.PRACTICE_ADD,
         value: 1
       })
 
@@ -256,7 +262,7 @@ describe('SCRIPTS /waivers - poach', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
-        type: constants.waivers.POACH
+        type: waiver_types.POACH
       })
 
       MockDate.set(
@@ -288,7 +294,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // check team waiver order
       const teams = await knex('teams').where({
         lid: 1,
-        year: constants.season.year
+        year: current_season.year
       })
       const team1 = teams.find((t) => t.uid === 1)
       const team2 = teams.find((t) => t.uid === 2)
@@ -322,8 +328,8 @@ describe('SCRIPTS /waivers - poach', function () {
         player,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.PRACTICE_ADD,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.PRACTICE_ADD,
         value: 1
       })
 
@@ -336,7 +342,7 @@ describe('SCRIPTS /waivers - poach', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
-        type: constants.waivers.POACH
+        type: waiver_types.POACH
       })
 
       // waiver twaiver_order - user 4
@@ -348,7 +354,7 @@ describe('SCRIPTS /waivers - poach', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
-        type: constants.waivers.POACH
+        type: waiver_types.POACH
       })
 
       MockDate.set(
@@ -388,7 +394,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // check team waiver order
       const teams = await knex('teams').where({
         lid: 1,
-        year: constants.season.year
+        year: current_season.year
       })
       const team1 = teams.find((t) => t.uid === 1)
       const team2 = teams.find((t) => t.uid === 2)
@@ -422,8 +428,8 @@ describe('SCRIPTS /waivers - poach', function () {
         player: player1,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.PRACTICE_ADD,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.PRACTICE_ADD,
         value: 1
       })
 
@@ -436,8 +442,8 @@ describe('SCRIPTS /waivers - poach', function () {
         player: player2,
         teamId: 3,
         userId: 3,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.PRACTICE_ADD,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.PRACTICE_ADD,
         value: 1
       })
 
@@ -450,7 +456,7 @@ describe('SCRIPTS /waivers - poach', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
-        type: constants.waivers.POACH
+        type: waiver_types.POACH
       })
 
       // waiver twaiver_order - user 4
@@ -462,7 +468,7 @@ describe('SCRIPTS /waivers - poach', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
-        type: constants.waivers.POACH
+        type: waiver_types.POACH
       })
 
       MockDate.set(
@@ -502,7 +508,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // check team waiver order
       const teams = await knex('teams').where({
         lid: 1,
-        year: constants.season.year
+        year: current_season.year
       })
       const team1 = teams.find((t) => t.uid === 1)
       const team2 = teams.find((t) => t.uid === 2)
@@ -548,8 +554,8 @@ describe('SCRIPTS /waivers - poach', function () {
         player: player1,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.PRACTICE_ADD,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.PRACTICE_ADD,
         value: 1
       })
 
@@ -562,8 +568,8 @@ describe('SCRIPTS /waivers - poach', function () {
         player: player2,
         teamId: 3,
         userId: 3,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.PRACTICE_ADD,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.PRACTICE_ADD,
         value: 1
       })
 
@@ -576,7 +582,7 @@ describe('SCRIPTS /waivers - poach', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
-        type: constants.waivers.POACH
+        type: waiver_types.POACH
       })
 
       // waiver twaiver_order - user 4
@@ -588,7 +594,7 @@ describe('SCRIPTS /waivers - poach', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
-        type: constants.waivers.POACH
+        type: waiver_types.POACH
       })
 
       // waiver three - user 6
@@ -600,7 +606,7 @@ describe('SCRIPTS /waivers - poach', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
-        type: constants.waivers.POACH
+        type: waiver_types.POACH
       })
 
       MockDate.set(
@@ -647,7 +653,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // check team waiver order
       const teams = await knex('teams').where({
         lid: 1,
-        year: constants.season.year
+        year: current_season.year
       })
       const team1 = teams.find((t) => t.uid === 1)
       const team2 = teams.find((t) => t.uid === 2)
@@ -703,8 +709,8 @@ describe('SCRIPTS /waivers - poach', function () {
         player,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.PRACTICE_ADD,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.PRACTICE_ADD,
         value: 1
       })
 
@@ -716,11 +722,11 @@ describe('SCRIPTS /waivers - poach', function () {
         po: 9999,
         submitted: Math.round(Date.now() / 1000),
         bid: 0,
-        type: constants.waivers.POACH
+        type: waiver_types.POACH
       })
 
       await knex('rosters_players')
-        .update({ slot: constants.slots.BENCH })
+        .update({ slot: roster_slot_types.BENCH })
         .where({ pid: player.pid })
 
       await knex('transactions').insert({
@@ -728,10 +734,10 @@ describe('SCRIPTS /waivers - poach', function () {
         tid: 1,
         lid: 1,
         pid: player.pid,
-        type: constants.transactions.ROSTER_ACTIVATE,
+        type: transaction_types.ROSTER_ACTIVATE,
         value: 1,
-        week: constants.season.week,
-        year: constants.season.year,
+        week: current_season.week,
+        year: current_season.year,
         timestamp: Math.round(Date.now() / 1000)
       })
 
@@ -766,7 +772,7 @@ describe('SCRIPTS /waivers - poach', function () {
       // check team waiver order
       const teams = await knex('teams').where({
         lid: 1,
-        year: constants.season.year
+        year: current_season.year
       })
       const team1 = teams.find((t) => t.uid === 1)
       const team2 = teams.find((t) => t.uid === 2)

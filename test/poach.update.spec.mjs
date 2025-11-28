@@ -5,10 +5,10 @@ import knex from '#db'
 import MockDate from 'mockdate'
 
 import league from '#db/seeds/league.mjs'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 process.env.NODE_ENV = 'test'
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 // chai.use(chai_http)
 
 describe('API /poaches - update', function () {

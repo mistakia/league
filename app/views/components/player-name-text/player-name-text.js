@@ -1,8 +1,8 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { constants } from '@libs-shared'
 import PlayerLabel from '@components/player-label'
+import { current_season } from '@constants'
 
 export default class PlayerNameText extends React.Component {
   render = () => {
@@ -12,7 +12,7 @@ export default class PlayerNameText extends React.Component {
       <div className='player__name'>
         <div className='player__name-main'>
           <span>{player_map.get('pname')}</span>
-          {constants.year === player_map.get('nfl_draft_year') && (
+          {current_season.year === player_map.get('nfl_draft_year') && (
             <PlayerLabel label='R' type='rookie' description='Rookie' />
           )}
         </div>

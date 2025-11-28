@@ -8,7 +8,8 @@ import { hideBin } from 'yargs/helpers'
 import isBetween from 'dayjs/plugin/isBetween.js'
 
 import db from '#db'
-import { constants, fixTeam, Errors } from '#libs-shared'
+import { fixTeam, Errors } from '#libs-shared'
+import { current_season } from '#constants'
 import {
   is_main,
   fanduel,
@@ -188,19 +189,19 @@ const import_fanduel_wagers = async ({
     // check if start_time is not between now and end of current season
     if (
       !start_time.isBetween(
-        constants.season.regular_season_start,
-        constants.season.end
+        current_season.regular_season_start,
+        current_season.end
       )
     ) {
       log(
         `start time ${start_time.format()} is not this season (${
-          constants.season.year
+          current_season.year
         })`
       )
       continue
     }
 
-    const { week } = constants.season.calculate_week(start_time)
+    const { week } = current_season.calculate_week(start_time)
 
     if (!weeks.includes(week)) {
       weeks.push(week)
@@ -209,7 +210,7 @@ const import_fanduel_wagers = async ({
 
   const nfl_games = await db('nfl_games')
     .where({
-      year: constants.season.year,
+      year: current_season.year,
       seas_type: 'REG'
     })
     .whereIn('week', weeks)
@@ -219,7 +220,7 @@ const import_fanduel_wagers = async ({
       const { player_name, event_description, start_time } =
         fanduel.get_market_details_from_wager(part)
 
-      const { week: event_week } = constants.season.calculate_week(start_time)
+      const { week: event_week } = current_season.calculate_week(start_time)
 
       const home_team = fixTeam(event_description.split(' @ ')[1])
       const away_team = fixTeam(event_description.split(' @ ')[0])

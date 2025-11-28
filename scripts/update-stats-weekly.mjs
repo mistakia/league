@@ -4,7 +4,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, create_default_league } from '#libs-shared'
+import { create_default_league } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main, getLeague } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -57,7 +58,7 @@ const update_stats_weekly = async ({ week } = {}) => {
   const day = dayjs().day()
   if (!week) {
     week = Math.max(
-      [2, 3].includes(day) ? constants.season.week - 1 : constants.season.week,
+      [2, 3].includes(day) ? current_season.week - 1 : current_season.week,
       1
     )
   }

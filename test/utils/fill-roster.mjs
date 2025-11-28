@@ -1,5 +1,6 @@
 import db from '#db'
-import { constants, Roster } from '#libs-shared'
+import { current_season, roster_slot_types } from '#constants'
+import { Roster } from '#libs-shared'
 import { getRoster, getLeague } from '#libs-server'
 import selectPlayer from './select-player.mjs'
 import addPlayer from './add-player.mjs'
@@ -18,8 +19,8 @@ export default async function ({
   while (!roster.isFull) {
     const players = await db('rosters_players').where({
       lid: leagueId,
-      week: constants.season.week,
-      year: constants.season.year
+      week: current_season.week,
+      year: current_season.year
     })
     const existing_pids = players.map((p) => p.pid)
     const player = await selectPlayer({
@@ -42,8 +43,8 @@ export default async function ({
   while (roster.hasOpenPracticeSquadSlot()) {
     const players = await db('rosters_players').where({
       lid: leagueId,
-      week: constants.season.week,
-      year: constants.season.year
+      week: current_season.week,
+      year: current_season.year
     })
     const existing_pids = players.map((p) => p.pid)
     const player = await selectPlayer({
@@ -54,7 +55,7 @@ export default async function ({
       leagueId,
       teamId,
       player,
-      slot: constants.slots.PS,
+      slot: roster_slot_types.PS,
       userId
     })
 
@@ -69,8 +70,8 @@ export default async function ({
   while (roster.has_open_reserve_short_term_slot()) {
     const players = await db('rosters_players').where({
       lid: leagueId,
-      week: constants.season.week,
-      year: constants.season.year
+      week: current_season.week,
+      year: current_season.year
     })
     const existing_pids = players.map((p) => p.pid)
     const player = await selectPlayer({
@@ -80,7 +81,7 @@ export default async function ({
       leagueId,
       teamId,
       player,
-      slot: constants.slots.RESERVE_SHORT_TERM,
+      slot: roster_slot_types.RESERVE_SHORT_TERM,
       userId
     })
 

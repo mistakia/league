@@ -1,8 +1,8 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { constants } from '@libs-shared'
 import StatFilter from '@components/stat-filter'
+import { available_years } from '@constants'
 
 export default class StatYearsFilter extends React.Component {
   render = () => {
@@ -13,7 +13,7 @@ export default class StatYearsFilter extends React.Component {
       values: []
     }
 
-    for (const year of constants.years) {
+    for (const year of available_years) {
       state.values.push({
         label: year,
         value: year,

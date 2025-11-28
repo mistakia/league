@@ -3,7 +3,11 @@ import * as chai from 'chai'
 import MockDate from 'mockdate'
 
 import isReserveEligible from '../../libs-shared/is-reserve-eligible.mjs'
-import * as constants from '../../libs-shared/constants.mjs'
+import {
+  current_season,
+  player_nfl_status,
+  player_nfl_injury_status
+} from '#constants'
 
 const expect = chai.expect
 
@@ -11,7 +15,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
   describe('backward compatibility - original logic', function () {
     it('should return true for non-ACTIVE nfl_status', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.INJURED_RESERVE,
+        nfl_status: player_nfl_status.INJURED_RESERVE,
         injury_status: null
       })
       expect(result).to.equal(true)
@@ -19,33 +23,33 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
     it('should return true for OUT injury_status', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.ACTIVE,
-        injury_status: constants.player_nfl_injury_status.OUT
+        nfl_status: player_nfl_status.ACTIVE,
+        injury_status: player_nfl_injury_status.OUT
       })
       expect(result).to.equal(true)
     })
 
     it('should return true for DOUBTFUL injury_status', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.ACTIVE,
-        injury_status: constants.player_nfl_injury_status.DOUBTFUL
+        nfl_status: player_nfl_status.ACTIVE,
+        injury_status: player_nfl_injury_status.DOUBTFUL
       })
       expect(result).to.equal(true)
     })
 
     it('should return true for any injury_status during week 0', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.ACTIVE,
-        injury_status: constants.player_nfl_injury_status.QUESTIONABLE
+        nfl_status: player_nfl_status.ACTIVE,
+        injury_status: player_nfl_injury_status.QUESTIONABLE
       })
-      // This depends on constants.season.week === 0, which is unlikely in tests
+      // This depends on current_season.week === 0, which is unlikely in tests
       // but the logic is in the function
       expect(result).to.be.a('boolean')
     })
 
     it('should return false for ACTIVE status with no injury', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.ACTIVE,
+        nfl_status: player_nfl_status.ACTIVE,
         injury_status: null
       })
       expect(result).to.equal(false)
@@ -53,8 +57,8 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
     it('should return false for QUESTIONABLE injury_status', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.ACTIVE,
-        injury_status: constants.player_nfl_injury_status.QUESTIONABLE
+        nfl_status: player_nfl_status.ACTIVE,
+        injury_status: player_nfl_injury_status.QUESTIONABLE
       })
       expect(result).to.equal(false)
     })
@@ -78,7 +82,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
       it('should return true for prior week ruled out with Sunday game (final practice Friday)', function () {
         const result = isReserveEligible({
-          nfl_status: constants.player_nfl_status.ACTIVE,
+          nfl_status: player_nfl_status.ACTIVE,
           injury_status: null,
           prior_week_ruled_out: true,
           week: 5,
@@ -91,7 +95,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
       it('should return true when both prior_week_inactive and prior_week_ruled_out are false but one is true', function () {
         const result = isReserveEligible({
-          nfl_status: constants.player_nfl_status.ACTIVE,
+          nfl_status: player_nfl_status.ACTIVE,
           injury_status: null,
           prior_week_inactive: false,
           prior_week_ruled_out: true,
@@ -105,7 +109,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
       it('should return true when prior_week_inactive is true regardless of prior_week_ruled_out', function () {
         const result = isReserveEligible({
-          nfl_status: constants.player_nfl_status.ACTIVE,
+          nfl_status: player_nfl_status.ACTIVE,
           injury_status: null,
           prior_week_inactive: true,
           prior_week_ruled_out: false,
@@ -119,7 +123,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
       it('should return false when both prior_week_inactive and prior_week_ruled_out are false', function () {
         const result = isReserveEligible({
-          nfl_status: constants.player_nfl_status.ACTIVE,
+          nfl_status: player_nfl_status.ACTIVE,
           injury_status: null,
           prior_week_inactive: false,
           prior_week_ruled_out: false,
@@ -144,7 +148,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
       it('should return true for prior week inactive with Sunday game (final practice Friday)', function () {
         const result = isReserveEligible({
-          nfl_status: constants.player_nfl_status.ACTIVE,
+          nfl_status: player_nfl_status.ACTIVE,
           injury_status: null,
           prior_week_inactive: true,
           week: 5,
@@ -157,7 +161,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
       it('should return true for prior week inactive with Thursday game (final practice Wednesday)', function () {
         const result = isReserveEligible({
-          nfl_status: constants.player_nfl_status.ACTIVE,
+          nfl_status: player_nfl_status.ACTIVE,
           injury_status: null,
           prior_week_inactive: true,
           week: 5,
@@ -170,7 +174,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
       it('should return true for prior week inactive with Monday game (final practice Saturday)', function () {
         const result = isReserveEligible({
-          nfl_status: constants.player_nfl_status.ACTIVE,
+          nfl_status: player_nfl_status.ACTIVE,
           injury_status: null,
           prior_week_inactive: true,
           week: 5,
@@ -194,7 +198,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
       it('should return false for prior week inactive + cleared injury_status', function () {
         const result = isReserveEligible({
-          nfl_status: constants.player_nfl_status.ACTIVE,
+          nfl_status: player_nfl_status.ACTIVE,
           injury_status: null,
           prior_week_inactive: true,
           week: 5,
@@ -208,24 +212,24 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
       it('should use original logic after final practice day with QUESTIONABLE injury_status', function () {
         const result = isReserveEligible({
-          nfl_status: constants.player_nfl_status.ACTIVE,
-          injury_status: constants.player_nfl_injury_status.QUESTIONABLE,
+          nfl_status: player_nfl_status.ACTIVE,
+          injury_status: player_nfl_injury_status.QUESTIONABLE,
           prior_week_inactive: true,
           week: 5,
           is_regular_season: true,
           game_day: 'SUN'
         })
         // Friday (5) >= Friday (5), falls through to original logic
-        // Original logic: QUESTIONABLE is not eligible UNLESS constants.season.week === 0 (offseason)
-        // In test environment, constants.season.week might be 0, making this true
-        const expected = Boolean(constants.season.week === 0)
+        // Original logic: QUESTIONABLE is not eligible UNLESS current_season.week === 0 (offseason)
+        // In test environment, current_season.week might be 0, making this true
+        const expected = Boolean(current_season.week === 0)
         expect(result).to.equal(expected)
       })
 
       it('should return true for prior week inactive + OUT injury_status', function () {
         const result = isReserveEligible({
-          nfl_status: constants.player_nfl_status.ACTIVE,
-          injury_status: constants.player_nfl_injury_status.OUT,
+          nfl_status: player_nfl_status.ACTIVE,
+          injury_status: player_nfl_injury_status.OUT,
           prior_week_inactive: true,
           week: 5,
           is_regular_season: true,
@@ -238,8 +242,8 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
       it('should return true for prior week inactive + DOUBTFUL injury_status', function () {
         const result = isReserveEligible({
-          nfl_status: constants.player_nfl_status.ACTIVE,
-          injury_status: constants.player_nfl_injury_status.DOUBTFUL,
+          nfl_status: player_nfl_status.ACTIVE,
+          injury_status: player_nfl_injury_status.DOUBTFUL,
           prior_week_inactive: true,
           week: 5,
           is_regular_season: true,
@@ -263,7 +267,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
       it('should NOT grant grace period when prior week was bye and player was active in week - 2', function () {
         const result = isReserveEligible({
-          nfl_status: constants.player_nfl_status.ACTIVE,
+          nfl_status: player_nfl_status.ACTIVE,
           injury_status: null,
           prior_week_inactive: false, // SQL now correctly returns false when week-2 was active
           week: 6,
@@ -277,7 +281,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
       it('should grant grace period when prior week was bye and player was inactive in week - 2', function () {
         const result = isReserveEligible({
-          nfl_status: constants.player_nfl_status.ACTIVE,
+          nfl_status: player_nfl_status.ACTIVE,
           injury_status: null,
           prior_week_inactive: true, // SQL now correctly returns true when week-2 was inactive
           week: 6,
@@ -291,7 +295,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
       it('should handle Week 2 after Week 1 bye (no week 0 reference)', function () {
         const result = isReserveEligible({
-          nfl_status: constants.player_nfl_status.ACTIVE,
+          nfl_status: player_nfl_status.ACTIVE,
           injury_status: null,
           prior_week_inactive: false, // SQL returns false when no reference week exists
           week: 2,
@@ -307,7 +311,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
     describe('edge cases - should not apply historical logic', function () {
       it('should use original logic for week 1', function () {
         const result = isReserveEligible({
-          nfl_status: constants.player_nfl_status.ACTIVE,
+          nfl_status: player_nfl_status.ACTIVE,
           injury_status: null,
           prior_week_inactive: true,
           week: 1,
@@ -320,7 +324,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
       it('should use original logic when not regular season', function () {
         const result = isReserveEligible({
-          nfl_status: constants.player_nfl_status.ACTIVE,
+          nfl_status: player_nfl_status.ACTIVE,
           injury_status: null,
           prior_week_inactive: true,
           week: 5,
@@ -333,7 +337,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
       it('should use original logic when prior week was active', function () {
         const result = isReserveEligible({
-          nfl_status: constants.player_nfl_status.ACTIVE,
+          nfl_status: player_nfl_status.ACTIVE,
           injury_status: null,
           prior_week_inactive: false,
           week: 5,
@@ -346,7 +350,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
       it('should use original logic when prior_week_inactive is not provided', function () {
         const result = isReserveEligible({
-          nfl_status: constants.player_nfl_status.ACTIVE,
+          nfl_status: player_nfl_status.ACTIVE,
           injury_status: null,
           week: 5,
           is_regular_season: true,
@@ -358,7 +362,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
       it('should use original logic when week is not provided', function () {
         const result = isReserveEligible({
-          nfl_status: constants.player_nfl_status.ACTIVE,
+          nfl_status: player_nfl_status.ACTIVE,
           injury_status: null,
           prior_week_inactive: true,
           week: null,
@@ -382,7 +386,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
       it('should handle Thursday game correctly (final practice Wednesday)', function () {
         const result = isReserveEligible({
-          nfl_status: constants.player_nfl_status.ACTIVE,
+          nfl_status: player_nfl_status.ACTIVE,
           injury_status: null,
           prior_week_inactive: true,
           week: 5,
@@ -396,7 +400,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
       it('should handle Monday night game correctly (final practice Saturday)', function () {
         const result = isReserveEligible({
-          nfl_status: constants.player_nfl_status.ACTIVE,
+          nfl_status: player_nfl_status.ACTIVE,
           injury_status: null,
           prior_week_inactive: true,
           week: 5,
@@ -410,7 +414,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
       it('should handle missing game_day gracefully', function () {
         const result = isReserveEligible({
-          nfl_status: constants.player_nfl_status.ACTIVE,
+          nfl_status: player_nfl_status.ACTIVE,
           injury_status: null,
           prior_week_inactive: true,
           week: 5,
@@ -428,7 +432,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
   describe('practice status eligibility', function () {
     it('should return true for DNP practice status', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.ACTIVE,
+        nfl_status: player_nfl_status.ACTIVE,
         injury_status: null,
         practice: {
           m: null,
@@ -446,7 +450,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
     it('should return true for LP practice status', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.ACTIVE,
+        nfl_status: player_nfl_status.ACTIVE,
         injury_status: null,
         practice: {
           m: null,
@@ -464,7 +468,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
     it('should return false for FP practice status', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.ACTIVE,
+        nfl_status: player_nfl_status.ACTIVE,
         injury_status: null,
         practice: {
           m: null,
@@ -482,7 +486,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
     it('should return false for null practice status', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.ACTIVE,
+        nfl_status: player_nfl_status.ACTIVE,
         injury_status: null,
         practice: {
           m: null,
@@ -500,8 +504,8 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
     it('should return true for DNP regardless of QUESTIONABLE injury_status', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.ACTIVE,
-        injury_status: constants.player_nfl_injury_status.QUESTIONABLE,
+        nfl_status: player_nfl_status.ACTIVE,
+        injury_status: player_nfl_injury_status.QUESTIONABLE,
         practice: {
           m: null,
           tu: null,
@@ -518,7 +522,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
     it('should return true for LP with ACTIVE nfl_status', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.ACTIVE,
+        nfl_status: player_nfl_status.ACTIVE,
         injury_status: null,
         practice: {
           m: null,
@@ -536,8 +540,8 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
     it('should use other eligibility logic when practice status is FULL', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.ACTIVE,
-        injury_status: constants.player_nfl_injury_status.OUT,
+        nfl_status: player_nfl_status.ACTIVE,
+        injury_status: player_nfl_injury_status.OUT,
         practice: {
           m: null,
           tu: null,
@@ -555,7 +559,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
     it('should use other eligibility logic when practice is null', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.INJURED_RESERVE,
+        nfl_status: player_nfl_status.INJURED_RESERVE,
         injury_status: null,
         practice: null,
         current_date: new Date('2024-01-10')
@@ -566,7 +570,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
     it('should check most recent practice status walking backward', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.ACTIVE,
+        nfl_status: player_nfl_status.ACTIVE,
         injury_status: null,
         practice: {
           m: 'FP',
@@ -587,7 +591,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
   describe('final practice report detection', function () {
     it('should return true when status field exists', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.ACTIVE,
+        nfl_status: player_nfl_status.ACTIVE,
         injury_status: null,
         practice: {
           m: null,
@@ -609,7 +613,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
     it('should return true when formatted_status field exists', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.ACTIVE,
+        nfl_status: player_nfl_status.ACTIVE,
         injury_status: null,
         practice: {
           m: null,
@@ -631,7 +635,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
     it('should return true when current day > final practice day', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.ACTIVE,
+        nfl_status: player_nfl_status.ACTIVE,
         injury_status: null,
         practice: {
           m: null,
@@ -652,7 +656,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
     it('should return true when final practice day has status', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.ACTIVE,
+        nfl_status: player_nfl_status.ACTIVE,
         injury_status: null,
         practice: {
           m: null,
@@ -673,7 +677,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
     it('should return false when no conditions met', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.ACTIVE,
+        nfl_status: player_nfl_status.ACTIVE,
         injury_status: null,
         practice: {
           m: null,
@@ -694,7 +698,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
     it('should return false when practice is null', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.ACTIVE,
+        nfl_status: player_nfl_status.ACTIVE,
         injury_status: null,
         practice: null,
         game_day: 'SUN',
@@ -708,7 +712,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
   describe('practice status with final report', function () {
     it('should make DNP eligible when no final report', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.ACTIVE,
+        nfl_status: player_nfl_status.ACTIVE,
         injury_status: null,
         practice: {
           m: null,
@@ -729,7 +733,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
     it('should make LP eligible when no final report', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.ACTIVE,
+        nfl_status: player_nfl_status.ACTIVE,
         injury_status: null,
         practice: {
           m: null,
@@ -750,7 +754,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
     it('should NOT make DNP eligible when final report exists', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.ACTIVE,
+        nfl_status: player_nfl_status.ACTIVE,
         injury_status: null,
         practice: {
           m: null,
@@ -772,7 +776,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
     it('should NOT make LP eligible when final report exists', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.ACTIVE,
+        nfl_status: player_nfl_status.ACTIVE,
         injury_status: null,
         practice: {
           m: null,
@@ -794,8 +798,8 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
     it('should fall through to original logic after final report', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.ACTIVE,
-        injury_status: constants.player_nfl_injury_status.QUESTIONABLE,
+        nfl_status: player_nfl_status.ACTIVE,
+        injury_status: player_nfl_injury_status.QUESTIONABLE,
         practice: {
           m: null,
           tu: 'LP',
@@ -811,15 +815,15 @@ describe('LIBS-SHARED isReserveEligible', function () {
       })
       // Final report exists (status field), practice status check is skipped
       // Falls through to original eligibility logic
-      // QUESTIONABLE injury_status is not eligible unless constants.season.week === 0
-      const expected = Boolean(constants.season.week === 0)
+      // QUESTIONABLE injury_status is not eligible unless current_season.week === 0
+      const expected = Boolean(current_season.week === 0)
       expect(result).to.equal(expected)
     })
 
     it('should make OUT injury_status eligible even with final report', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.ACTIVE,
-        injury_status: constants.player_nfl_injury_status.OUT,
+        nfl_status: player_nfl_status.ACTIVE,
+        injury_status: player_nfl_injury_status.OUT,
         practice: {
           m: null,
           tu: 'LP',
@@ -841,7 +845,7 @@ describe('LIBS-SHARED isReserveEligible', function () {
 
     it('should skip practice check when past final practice day', function () {
       const result = isReserveEligible({
-        nfl_status: constants.player_nfl_status.ACTIVE,
+        nfl_status: player_nfl_status.ACTIVE,
         injury_status: null,
         practice: {
           m: null,

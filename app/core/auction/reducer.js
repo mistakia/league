@@ -1,6 +1,6 @@
 import { Record, List } from 'immutable'
 
-import { constants } from '@libs-shared'
+import { transaction_types, fantasy_positions } from '@constants'
 import { auction_actions } from './actions'
 import { app_actions } from '@core/app'
 
@@ -18,7 +18,7 @@ const initialState = new Record({
   lineupBudget: null,
   tids: new List(),
   transactions: new List(),
-  positions: new List(constants.positions),
+  positions: new List(fantasy_positions),
   bidTimer: null,
   nominationTimer: null,
   nominating_team_id: null,
@@ -56,7 +56,7 @@ export function auction_reducer(state = initialState(), { payload, type }) {
       return state.merge({
         isPaused: false,
         timer:
-          latest && latest.type === constants.transactions.AUCTION_BID
+          latest && latest.type === transaction_types.AUCTION_BID
             ? Math.round((Date.now() + state.bidTimer) / 1000)
             : Math.round((Date.now() + state.nominationTimer) / 1000)
       })
@@ -109,11 +109,11 @@ export function auction_reducer(state = initialState(), { payload, type }) {
       const latest = payload.transactions[0]
       return state.merge({
         bid:
-          latest && latest.type === constants.transactions.AUCTION_BID
+          latest && latest.type === transaction_types.AUCTION_BID
             ? latest.value
             : null,
         nominated_pid:
-          latest && latest.type === constants.transactions.AUCTION_BID
+          latest && latest.type === transaction_types.AUCTION_BID
             ? latest.pid
             : null,
         transactions: new List(payload.transactions),

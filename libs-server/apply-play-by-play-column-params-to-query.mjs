@@ -2,7 +2,7 @@ import nfl_plays_column_params, {
   nfl_games_params
 } from '#libs-shared/nfl-plays-column-params.mjs'
 import * as table_constants from 'react-table/src/constants.mjs'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 const nfl_games_param_keys = Object.keys(nfl_games_params)
 
@@ -43,7 +43,7 @@ export default function ({ query, params, table_name = 'nfl_plays' }) {
       })
 
       // Filter out years greater than the current year
-      const current_year = constants.season.year
+      const current_year = current_season.year
       param_value = [...new Set([...param_value, ...adjusted_years])].filter(
         (year) => year <= current_year
       )
