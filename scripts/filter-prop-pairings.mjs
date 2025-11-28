@@ -9,7 +9,8 @@ import { hideBin } from 'yargs/helpers'
 import { Table } from 'console-table-printer'
 
 import db from '#db'
-import { constants, groupBy } from '#libs-shared'
+import { groupBy } from '#libs-shared'
+import { current_season } from '#constants'
 import { chunk_array } from '#libs-shared/chunk.mjs'
 import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 import { is_main } from '#libs-server'
@@ -568,8 +569,8 @@ const build_prop_pairing_query = (opts, week, source) => {
  * @returns {Promise<void>}
  */
 const filter_prop_pairings = async ({
-  week = constants.season.nfl_seas_week,
-  year = constants.season.year,
+  week = current_season.nfl_seas_week,
+  year = current_season.year,
   source = 'FANDUEL',
   filter_by_allowed_over_average = false
 } = {}) => {
@@ -584,7 +585,7 @@ const filter_prop_pairings = async ({
 
   // Load team seasonlogs once before batch processing
   const nfl_team_seasonlogs = await db('nfl_team_seasonlogs').where({
-    year: constants.season.year
+    year: current_season.year
   })
   log(`loaded ${nfl_team_seasonlogs.length} team seasonlogs`)
 

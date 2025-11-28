@@ -1,6 +1,7 @@
 import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
-import { constants, common_column_params } from '#libs-shared'
+import { common_column_params } from '#libs-shared'
+import { current_season } from '@constants'
 
 const { single_year } = common_column_params
 
@@ -13,13 +14,13 @@ const player_contract_field = (props) => ({
     contract_year: {
       ...single_year,
       values: [
-        constants.year,
+        current_season.year,
         'Total',
-        ...[...Array(constants.year - 1983).keys()].map(
-          (i) => constants.year - 1 - i
+        ...[...Array(current_season.year - 1983).keys()].map(
+          (i) => current_season.year - 1 - i
         )
       ],
-      default_value: constants.year
+      default_value: current_season.year
       // TODO enable multi-year
       // enable_multi_on_split: ['year']
     }

@@ -5,9 +5,10 @@ import ImmutablePropTypes from 'react-immutable-proptypes'
 import Toolbar from '@mui/material/Toolbar'
 
 import SelectYear from '@components/select-year'
-import { toPercent, constants } from '@libs-shared'
+import { toPercent } from '@libs-shared'
 import PageLayout from '@layouts/page'
 import ProbabilityLeverageChart from '@components/probability-leverage-chart/probability-leverage-chart'
+import { current_season } from '@constants'
 
 function Divider({ title }) {
   return <div className='table__row table__divider sticky__column'>{title}</div>
@@ -190,7 +191,7 @@ export default function StandingsPage({
     load_league_team_stats(lid)
   }, [year, lid, load_league_team_stats])
 
-  const is_current_year = year === constants.year
+  const is_current_year = year === current_season.year
 
   const divisions = []
   for (const [div, teams] of division_teams_sorted.entries()) {

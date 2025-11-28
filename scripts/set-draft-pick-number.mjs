@@ -1,7 +1,7 @@
 import debug from 'debug'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { getLeague, is_main, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -11,17 +11,17 @@ const calculatePick = ({ round, order, league }) =>
   (round - 1) * league.num_teams + order
 
 const set_draft_pick_number = async ({ lid }) => {
-  log(`setting draft picks for ${constants.season.year}`)
+  log(`setting draft picks for ${current_season.year}`)
 
   const league = await getLeague({ lid })
-  const teams = await db('teams').where({ lid, year: constants.season.year })
+  const teams = await db('teams').where({ lid, year: current_season.year })
   const draftOrder = teams
     .sort((a, b) => a.draft_order - b.draft_order)
     .map((t) => t.uid)
 
   const picks = await db('draft').where({
     lid,
-    year: constants.season.year,
+    year: current_season.year,
     comp: 0
   })
 
@@ -45,7 +45,7 @@ const set_draft_pick_number = async ({ lid }) => {
     .where({
       comp: 0,
       lid,
-      year: constants.season.year
+      year: current_season.year
     })
     .orderBy('pick', 'asc')
 
@@ -60,7 +60,7 @@ const set_draft_pick_number = async ({ lid }) => {
   const query_params = {
     comp: 1,
     lid,
-    year: constants.season.year
+    year: current_season.year
   }
   await db('draft').update({ pick: null }).where(query_params)
   const compensatory_picks = await db('draft').where(query_params)
@@ -90,7 +90,7 @@ const set_draft_pick_number = async ({ lid }) => {
 
   log(
     `set ${inserts.length + sorted_draft_picks.length} draft picks for ${
-      constants.season.year
+      current_season.year
     }`
   )
 }

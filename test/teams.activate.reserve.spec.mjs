@@ -6,7 +6,12 @@ import MockDate from 'mockdate'
 import server from '#api'
 import knex from '#db'
 import league from '#db/seeds/league.mjs'
-import { constants } from '#libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  transaction_types,
+  player_nfl_status
+} from '#constants'
 import { user1 } from './fixtures/token.mjs'
 import {
   addPlayer,
@@ -21,7 +26,7 @@ process.env.NODE_ENV = 'test'
 chai.should()
 chai.use(chai_http)
 const expect = chai.expect
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 
 describe('API /teams - activate', function () {
   before(async function () {
@@ -49,18 +54,18 @@ describe('API /teams - activate', function () {
       const players = await knex('rosters_players').where({
         lid: leagueId,
         tid: teamId,
-        week: constants.season.week,
-        year: constants.season.year
+        week: current_season.week,
+        year: current_season.year
       })
 
       const player1 = players.find(
-        (p) => p.slot === constants.slots.RESERVE_SHORT_TERM
+        (p) => p.slot === roster_slot_types.RESERVE_SHORT_TERM
       )
-      const player2 = players.find((p) => p.slot === constants.slots.BENCH)
+      const player2 = players.find((p) => p.slot === roster_slot_types.BENCH)
 
       await knex('player')
         .update({
-          nfl_status: constants.player_nfl_status.INJURED_RESERVE
+          nfl_status: player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid: player2.pid
@@ -71,7 +76,7 @@ describe('API /teams - activate', function () {
         .post('/api/teams/1/activate')
         .set('Authorization', `Bearer ${user1}`)
         .send({
-          slot: constants.slots.RESERVE_SHORT_TERM,
+          slot: roster_slot_types.RESERVE_SHORT_TERM,
           activate_pid: player1.pid,
           reserve_pid: player2.pid,
           leagueId
@@ -83,36 +88,34 @@ describe('API /teams - activate', function () {
 
       res.body.tid.should.equal(teamId)
       res.body.pid.should.equal(player1.pid)
-      res.body.slot.should.equal(constants.slots.BENCH)
+      res.body.slot.should.equal(roster_slot_types.BENCH)
       res.body.transaction.userid.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.pid.should.equal(player1.pid)
-      res.body.transaction.type.should.equal(
-        constants.transactions.ROSTER_ACTIVATE
-      )
+      res.body.transaction.type.should.equal(transaction_types.ROSTER_ACTIVATE)
       res.body.transaction.value.should.equal(value)
-      res.body.transaction.year.should.equal(constants.season.year)
+      res.body.transaction.year.should.equal(current_season.year)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
 
       const rosterRows = await knex('rosters_players')
         .where({
-          year: constants.season.year,
-          week: constants.season.week,
+          year: current_season.year,
+          week: current_season.week,
           pid: player1.pid
         })
         .limit(1)
 
       const rosterRow = rosterRows[0]
-      expect(rosterRow.slot).to.equal(constants.slots.BENCH)
+      expect(rosterRow.slot).to.equal(roster_slot_types.BENCH)
 
       const transactions = await knex('transactions')
       const activateTransaction = transactions.find(
-        (t) => t.type === constants.transactions.ROSTER_ACTIVATE
+        (t) => t.type === transaction_types.ROSTER_ACTIVATE
       )
       expect(activateTransaction.lid).to.equal(leagueId)
       expect(activateTransaction.type).to.equal(
-        constants.transactions.ROSTER_ACTIVATE
+        transaction_types.ROSTER_ACTIVATE
       )
       expect(activateTransaction.value).to.equal(value)
       expect(activateTransaction.pid).to.equal(player1.pid)
@@ -120,12 +123,10 @@ describe('API /teams - activate', function () {
       expect(activateTransaction.userid).to.equal(userId)
 
       const reserveTransaction = transactions.find(
-        (t) => t.type === constants.transactions.RESERVE_IR
+        (t) => t.type === transaction_types.RESERVE_IR
       )
       expect(reserveTransaction.lid).to.equal(leagueId)
-      expect(reserveTransaction.type).to.equal(
-        constants.transactions.RESERVE_IR
-      )
+      expect(reserveTransaction.type).to.equal(transaction_types.RESERVE_IR)
       expect(reserveTransaction.value).to.equal(value)
       expect(reserveTransaction.pid).to.equal(player2.pid)
       expect(reserveTransaction.tid).to.equal(teamId)
@@ -150,8 +151,8 @@ describe('API /teams - activate', function () {
         leagueId,
         userId,
         player: player1,
-        slot: constants.slots.RESERVE_SHORT_TERM,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.RESERVE_SHORT_TERM,
+        transaction: transaction_types.DRAFT,
         value
       })
 
@@ -162,7 +163,7 @@ describe('API /teams - activate', function () {
         .send({
           leagueId: 1,
           reserve_pid: 'x',
-          slot: constants.slots.RESERVE_SHORT_TERM,
+          slot: roster_slot_types.RESERVE_SHORT_TERM,
           activate_pid: player1.pid
         })
 
@@ -182,8 +183,8 @@ describe('API /teams - activate', function () {
         leagueId,
         userId,
         player: player1,
-        slot: constants.slots.RESERVE_SHORT_TERM,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.RESERVE_SHORT_TERM,
+        transaction: transaction_types.DRAFT,
         value
       })
 
@@ -194,7 +195,7 @@ describe('API /teams - activate', function () {
         .send({
           leagueId: 1,
           reserve_pid: player2.pid,
-          slot: constants.slots.RESERVE_SHORT_TERM,
+          slot: roster_slot_types.RESERVE_SHORT_TERM,
           activate_pid: player1.pid
         })
 
@@ -211,16 +212,17 @@ describe('API /teams - activate', function () {
       const players = await knex('rosters_players').where({
         lid: leagueId,
         tid: teamId,
-        week: constants.season.week,
-        year: constants.season.year
+        week: current_season.week,
+        year: current_season.year
       })
 
       const player1 = players.find(
-        (p) => p.slot === constants.slots.RESERVE_SHORT_TERM
+        (p) => p.slot === roster_slot_types.RESERVE_SHORT_TERM
       )
       const player2 = players.find(
         (p) =>
-          p.slot === constants.slots.RESERVE_SHORT_TERM && p.pid !== player1.pid
+          p.slot === roster_slot_types.RESERVE_SHORT_TERM &&
+          p.pid !== player1.pid
       )
 
       const request = chai_request
@@ -230,7 +232,7 @@ describe('API /teams - activate', function () {
         .send({
           activate_pid: player1.pid,
           reserve_pid: player2.pid,
-          slot: constants.slots.RESERVE_SHORT_TERM,
+          slot: roster_slot_types.RESERVE_SHORT_TERM,
           leagueId
         })
 
@@ -248,13 +250,13 @@ describe('API /teams - activate', function () {
       const players = await knex('rosters_players').where({
         lid: leagueId,
         tid: teamId,
-        week: constants.season.week,
-        year: constants.season.year
+        week: current_season.week,
+        year: current_season.year
       })
 
       const exclude_pids = players.map((p) => p.pid)
       const player1 = players.find(
-        (p) => p.slot === constants.slots.RESERVE_SHORT_TERM
+        (p) => p.slot === roster_slot_types.RESERVE_SHORT_TERM
       )
       const player2 = await selectPlayer({ exclude_pids })
 
@@ -263,13 +265,13 @@ describe('API /teams - activate', function () {
         leagueId,
         userId,
         player: player2,
-        slot: constants.slots.COV,
-        transaction: constants.transactions.DRAFT
+        slot: roster_slot_types.COV,
+        transaction: transaction_types.DRAFT
       })
 
       await knex('player')
         .update({
-          nfl_status: constants.player_nfl_status.INJURED_RESERVE
+          nfl_status: player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid: player2.pid
@@ -282,7 +284,7 @@ describe('API /teams - activate', function () {
         .send({
           activate_pid: player1.pid,
           reserve_pid: player2.pid,
-          slot: constants.slots.RESERVE_SHORT_TERM,
+          slot: roster_slot_types.RESERVE_SHORT_TERM,
           leagueId
         })
 
@@ -302,8 +304,8 @@ describe('API /teams - activate', function () {
         leagueId,
         userId,
         player: player1,
-        slot: constants.slots.BENCH,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.BENCH,
+        transaction: transaction_types.DRAFT,
         value
       })
 
@@ -312,14 +314,14 @@ describe('API /teams - activate', function () {
         leagueId,
         userId,
         player: player2,
-        slot: constants.slots.BENCH,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.BENCH,
+        transaction: transaction_types.DRAFT,
         value
       })
 
       await knex('player')
         .update({
-          nfl_status: constants.player_nfl_status.INJURED_RESERVE
+          nfl_status: player_nfl_status.INJURED_RESERVE
         })
         .where({
           pid: player2.pid
@@ -332,7 +334,7 @@ describe('API /teams - activate', function () {
         .send({
           leagueId: 1,
           reserve_pid: player2.pid,
-          slot: constants.slots.RESERVE_SHORT_TERM,
+          slot: roster_slot_types.RESERVE_SHORT_TERM,
           activate_pid: player1.pid
         })
 

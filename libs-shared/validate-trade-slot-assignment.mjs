@@ -1,4 +1,4 @@
-import * as constants from './constants.mjs'
+import { roster_slot_types } from '#constants'
 import isReserveEligible from './is-reserve-eligible.mjs'
 
 /**
@@ -20,7 +20,7 @@ export default function validate_trade_slot_assignment({
   is_regular_season
 }) {
   // Validate BENCH (active roster) slot
-  if (slot === constants.slots.BENCH) {
+  if (slot === roster_slot_types.BENCH) {
     const has_space = roster.has_bench_space_for_position(player.pos)
     return {
       valid: has_space,
@@ -32,7 +32,7 @@ export default function validate_trade_slot_assignment({
   }
 
   // Validate signed practice squad slots (PS, PSP converted to PS)
-  if (slot === constants.slots.PS || slot === constants.slots.PSP) {
+  if (slot === roster_slot_types.PS || slot === roster_slot_types.PSP) {
     const has_space = roster.has_practice_squad_space_for_position(player.pos)
     return {
       valid: has_space,
@@ -45,7 +45,7 @@ export default function validate_trade_slot_assignment({
 
   // Validate drafted practice squad slots (PSD, PSDP)
   // These have unlimited space, so always valid
-  if (slot === constants.slots.PSD || slot === constants.slots.PSDP) {
+  if (slot === roster_slot_types.PSD || slot === roster_slot_types.PSDP) {
     return {
       valid: true,
       error: null,
@@ -54,7 +54,7 @@ export default function validate_trade_slot_assignment({
   }
 
   // Validate short-term reserve slot
-  if (slot === constants.slots.RESERVE_SHORT_TERM) {
+  if (slot === roster_slot_types.RESERVE_SHORT_TERM) {
     // First check if player is reserve eligible
     const player_is_reserve_eligible = isReserveEligible({
       nfl_status: player.nfl_status,
@@ -85,7 +85,7 @@ export default function validate_trade_slot_assignment({
   }
 
   // Validate long-term reserve slot (unlimited space)
-  if (slot === constants.slots.RESERVE_LONG_TERM) {
+  if (slot === roster_slot_types.RESERVE_LONG_TERM) {
     return {
       valid: true,
       error: null,
@@ -94,7 +94,7 @@ export default function validate_trade_slot_assignment({
   }
 
   // Validate COV slot (COVID reserve)
-  if (slot === constants.slots.COV) {
+  if (slot === roster_slot_types.COV) {
     return {
       valid: true,
       error: null,

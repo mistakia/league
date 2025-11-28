@@ -1,7 +1,13 @@
 import debug from 'debug'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import {
+  current_season,
+  fantasy_positions,
+  external_data_sources,
+  league_defaults,
+  player_nfl_status
+} from '#constants'
 import get_player_transactions from './get-player-transactions.mjs'
 import getLeague from './get-league.mjs'
 
@@ -21,7 +27,7 @@ export default async function ({
   const league_roster_player_ids = []
   const baseline_player_ids = []
 
-  const projectionLeagueId = leagueId || constants.DEFAULTS.LEAGUE_ID
+  const projectionLeagueId = leagueId || league_defaults.LEAGUE_ID
   const league = await getLeague({ lid: projectionLeagueId })
 
   if (!league_format_hash) {
@@ -34,7 +40,7 @@ export default async function ({
 
   if (teamId) {
     const query = db('rosters_players')
-      .where({ tid: teamId, year: constants.season.year })
+      .where({ tid: teamId, year: current_season.year })
       .groupBy(
         'rosters_players.pid',
         'rosters_players.rid',
@@ -56,7 +62,7 @@ export default async function ({
     playerSlots.forEach((s) => league_roster_player_ids.push(s.pid))
   } else if (leagueId) {
     const query = db('rosters_players')
-      .where({ lid: leagueId, year: constants.season.year })
+      .where({ lid: leagueId, year: current_season.year })
       .groupBy(
         'rosters_players.pid',
         'rosters_players.rid',
@@ -89,8 +95,8 @@ export default async function ({
   const query = db('player')
     .leftJoin('practice', function () {
       this.on('player.pid', '=', 'practice.pid')
-        .andOn('practice.week', '=', constants.season.week)
-        .andOn('practice.year', '=', constants.season.year)
+        .andOn('practice.week', '=', current_season.week)
+        .andOn('practice.year', '=', current_season.year)
     })
     .leftJoin('nfl_games', function () {
       this.on(function () {
@@ -100,14 +106,14 @@ export default async function ({
           'player.current_nfl_team'
         )
       })
-        .andOn('nfl_games.week', '=', constants.season.week)
-        .andOn('nfl_games.year', '=', constants.season.year)
+        .andOn('nfl_games.week', '=', current_season.week)
+        .andOn('nfl_games.year', '=', current_season.year)
         .andOn(db.raw("nfl_games.seas_type = 'REG'"))
     })
 
   // Only join prior week gamelog data if week > 1
-  if (constants.season.week > 1) {
-    const prior_week = constants.season.week - 1
+  if (current_season.week > 1) {
+    const prior_week = current_season.week - 1
     // First join to prior week's game (to detect if it was a bye week)
     query.leftJoin('nfl_games as prior_week_game', function () {
       this.on(function () {
@@ -118,7 +124,7 @@ export default async function ({
         )
       })
         .andOn('prior_week_game.week', '=', prior_week)
-        .andOn('prior_week_game.year', '=', constants.season.year)
+        .andOn('prior_week_game.year', '=', current_season.year)
         .andOn(db.raw("prior_week_game.seas_type = 'REG'"))
     })
     // Join to reference week game (week - 2 if prior week was bye, else week - 1)
@@ -137,7 +143,7 @@ export default async function ({
             `CASE WHEN prior_week_game.esbid IS NULL THEN ${prior_week - 1} ELSE ${prior_week} END`
           )
         )
-        .andOn('reference_week_game.year', '=', constants.season.year)
+        .andOn('reference_week_game.year', '=', current_season.year)
         .andOn(db.raw("reference_week_game.seas_type = 'REG'"))
     })
     // Then join to player's gamelog for the reference week game
@@ -215,7 +221,7 @@ export default async function ({
 
     // Calculate prior_week_inactive: true if no gamelog OR gamelog.active is false
     // Calculate prior_week_ruled_out: true if gamelog.ruled_out_in_game is true
-    if (constants.season.week > 1) {
+    if (current_season.week > 1) {
       query.select(
         db.raw(
           'CASE WHEN prior_week_gamelog.pid IS NULL OR prior_week_gamelog.active = false THEN true ELSE false END as prior_week_inactive'
@@ -238,26 +244,26 @@ export default async function ({
         "name_search_vector @@ plainto_tsquery('english', ?)",
         textSearch
       )
-      .whereIn('player.pos', constants.positions)
+      .whereIn('player.pos', fantasy_positions)
   } else if (pids.length) {
     query.whereIn('player.pid', pids)
   } else if (include_all_active_players) {
     query.orWhere(function () {
-      this.whereIn('player.pos', constants.positions)
+      this.whereIn('player.pos', fantasy_positions)
         .whereNot('player.current_nfl_team', 'INA')
         .where(function () {
           this.whereNotIn('player.nfl_status', [
-            constants.player_nfl_status.RETIRED
+            player_nfl_status.RETIRED
           ]).orWhereNull('player.nfl_status')
         })
     })
 
     // include rookies during offseason
-    if (constants.season.week === 0) {
+    if (current_season.week === 0) {
       query.orWhere(function () {
-        this.where('player.nfl_draft_year', constants.season.year).whereIn(
+        this.where('player.nfl_draft_year', current_season.year).whereIn(
           'player.pos',
-          constants.positions
+          fantasy_positions
         )
       })
     }
@@ -277,10 +283,7 @@ export default async function ({
     query
       .leftJoin('league_format_player_seasonlogs', function () {
         this.on('league_format_player_seasonlogs.pid', 'player.pid')
-        this.andOn(
-          'league_format_player_seasonlogs.year',
-          constants.season.year
-        )
+        this.andOn('league_format_player_seasonlogs.year', current_season.year)
         this.andOn(
           db.raw(
             `league_format_player_seasonlogs.league_format_hash = '${league_format_hash}'`
@@ -302,10 +305,7 @@ export default async function ({
     query
       .leftJoin('scoring_format_player_seasonlogs', function () {
         this.on('scoring_format_player_seasonlogs.pid', 'player.pid')
-        this.andOn(
-          'scoring_format_player_seasonlogs.year',
-          constants.season.year
-        )
+        this.andOn('scoring_format_player_seasonlogs.year', current_season.year)
         this.andOn(
           db.raw(
             `scoring_format_player_seasonlogs.scoring_format_hash = '${scoring_format_hash}'`
@@ -357,7 +357,7 @@ export default async function ({
     const leaguePointsProj = await db('scoring_format_player_projection_points')
       .where({
         scoring_format_hash,
-        year: constants.season.year
+        year: current_season.year
       })
       .whereIn('pid', returnedPlayerIds)
 
@@ -374,7 +374,7 @@ export default async function ({
     )
       .where({
         league_format_hash,
-        year: constants.season.year
+        year: current_season.year
       })
       .whereIn('pid', returnedPlayerIds)
 
@@ -390,7 +390,7 @@ export default async function ({
     const leagueValuesProj = await db('league_player_projection_values')
       .where({
         lid: leagueId,
-        year: constants.season.year
+        year: current_season.year
       })
       .whereIn('pid', returnedPlayerIds)
 
@@ -407,14 +407,14 @@ export default async function ({
 
   // include player season, week and ros projections
   const projections = await db('projections_index')
-    .where('sourceid', constants.sources.AVERAGE)
-    .where('year', constants.season.year)
-    .where('week', '>=', constants.season.week)
+    .where('sourceid', external_data_sources.AVERAGE)
+    .where('year', current_season.year)
+    .where('week', '>=', current_season.week)
     .whereIn('pid', returnedPlayerIds)
     .where('seas_type', 'REG')
   const rosProjections = await db('ros_projections')
-    .where('sourceid', constants.sources.AVERAGE)
-    .where('year', constants.season.year)
+    .where('sourceid', external_data_sources.AVERAGE)
+    .where('year', current_season.year)
     .whereIn('pid', returnedPlayerIds)
 
   for (const projection of projections) {

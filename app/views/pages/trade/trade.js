@@ -6,7 +6,6 @@ import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import Grid from '@mui/material/Grid'
 
-import { constants } from '@libs-shared'
 import TeamName from '@components/team-name'
 import PageLayout from '@layouts/page'
 import TradePlayer from '@components/trade-player'
@@ -18,6 +17,7 @@ import TradeSelectItems from '@components/trade-select-items'
 import TradeTeamSummary from '@components/trade-team-summary'
 import TradeSlotSelector from '@components/trade-slot-selector'
 
+import { current_season, roster_slot_types } from '@constants'
 import {
   get_app,
   get_current_trade,
@@ -45,8 +45,8 @@ import './trade.styl'
 function should_show_slot_selector(player_slot) {
   // Only show slot selector for non-active roster players
   if (
-    player_slot === constants.slots.BENCH ||
-    constants.starterSlots.includes(player_slot)
+    player_slot === roster_slot_types.BENCH ||
+    roster_slot_types.starterSlots.includes(player_slot)
   ) {
     return false
   }
@@ -248,7 +248,7 @@ export default function TradePage() {
   const action_section = (
     <Grid item xs={12}>
       <div className='trade__action'>
-        {is_valid && constants.week < constants.season.finalWeek && (
+        {is_valid && current_season.week < current_season.finalWeek && (
           <TradeAction />
         )}
         {is_open && !is_valid && invalid_notice}

@@ -13,9 +13,9 @@ import DraftPlayer from '@components/draft-player'
 import PlayerAge from '@components/player-age'
 import DraftPick from '@components/draft-pick'
 import Position from '@components/position'
-import { constants } from '@libs-shared'
 
 import './draft.styl'
+import { current_season, fantasy_positions } from '@constants'
 
 dayjs.extend(relativeTime)
 
@@ -64,11 +64,11 @@ export default function DraftPage({
         'fname'
       )} ${selectedPlayerMap.get('lname')} (${selectedPlayerMap.get(
         'pos'
-      )}) with the #${nextPick.pick} pick in the ${constants.year} draft.`,
+      )}) with the #${nextPick.pick} pick in the ${current_season.year} draft.`,
       on_confirm_func: draft_player
     })
   }
-  const { positions } = constants
+  const positions = fantasy_positions
 
   const draftActive =
     league.draft_start &&
@@ -132,8 +132,8 @@ export default function DraftPage({
 
   const sorted = players.sort(
     (a, b) =>
-      b.getIn(['pts_added', '0'], constants.default_points_added) -
-      a.getIn(['pts_added', '0'], constants.default_points_added)
+      b.getIn(['pts_added', '0'], current_season.default_points_added) -
+      a.getIn(['pts_added', '0'], current_season.default_points_added)
   )
   const allRow = ({ index, key, ...params }) => {
     const player_map = sorted.get(index)
@@ -188,8 +188,7 @@ export default function DraftPage({
       !is_draft_complete &&
       !pick.pid &&
       Boolean(pick.pick) &&
-      (constants.season.now.isAfter(pick.draftWindow) ||
-        isPreviousSelectionMade)
+      (current_season.now.isAfter(pick.draftWindow) || isPreviousSelectionMade)
 
     const trade_count = pick.trade_count || 0
 

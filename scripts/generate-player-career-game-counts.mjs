@@ -3,9 +3,8 @@ import debug from 'debug'
 // import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-// import { constants } from '#libs-shared'
 import { is_main, batch_insert } from '#libs-server'
-// import { job_types } from '#libs-shared/job-constants.mjs'
+// import { job_types } from '#libs-shared/job-.mjs'
 
 // const argv = yargs(hideBin(process.argv)).argv
 const log = debug('generate-player-career-game-counts')

@@ -18,9 +18,10 @@ import Chip from '@mui/material/Chip'
 import Position from '@components/position'
 import NFLTeam from '@components/nfl-team'
 import Button from '@components/button'
-import { Roster, constants } from '@libs-shared'
+import { Roster } from '@libs-shared'
 
 import './waiver-confirmation.styl'
+import { current_season, roster_slot_types, waiver_types } from '@constants'
 
 export default function WaiverConfirmation({
   waiver,
@@ -43,7 +44,7 @@ export default function WaiverConfirmation({
     for (const releasePlayerMap of players) {
       const r = new Roster({ roster: roster.toJS(), league })
       const slot = releasePlayerMap.get('slot')
-      if (slot === constants.slots.PSP || slot === constants.slots.PSDP)
+      if (slot === roster_slot_types.PSP || slot === roster_slot_types.PSDP)
         continue
       r.removePlayer(releasePlayerMap.get('pid'))
       if (isActiveRoster) {
@@ -64,17 +65,13 @@ export default function WaiverConfirmation({
       : ros.has_practice_squad_space_for_position(player_map.get('pos'))
 
   const [waiver_max_bid, set_waiver_max_bid] = useState(
-    constants.season.isRegularSeason ? team.faab : ros.availableCap
+    current_season.isRegularSeason ? team.faab : ros.availableCap
   )
   const [isEligible, set_isEligible] = useState(
-    waiver
-      ? has_bench_space(waiver.type === constants.waivers.FREE_AGENCY)
-      : false
+    waiver ? has_bench_space(waiver.type === waiver_types.FREE_AGENCY) : false
   )
   const [release_options, set_release_options] = useState(
-    waiver
-      ? get_release_options(waiver.type === constants.waivers.FREE_AGENCY)
-      : []
+    waiver ? get_release_options(waiver.type === waiver_types.FREE_AGENCY) : []
   )
   const [waiver_release, set_waiver_release] = useState(
     waiver ? waiver.release.toJS() : []
@@ -86,7 +83,7 @@ export default function WaiverConfirmation({
   const [missing_release, set_missing_release] = useState(false)
 
   const setType = (type) => {
-    const isActiveRoster = type === constants.waivers.FREE_AGENCY
+    const isActiveRoster = type === waiver_types.FREE_AGENCY
     const eligible = has_bench_space(isActiveRoster)
     set_isEligible(eligible)
     set_missing_release(!eligible)
@@ -97,7 +94,7 @@ export default function WaiverConfirmation({
     const release = value.map((p) => p.id)
     set_waiver_release(release)
     set_missing_release(!isEligible && !release.length)
-    if (!constants.season.isRegularSeason) {
+    if (!current_season.isRegularSeason) {
       const r = new Roster({ roster: roster.toJS(), league })
       release.forEach((pid) => r.removePlayer(pid))
       set_waiver_max_bid(r.availableCap)
@@ -109,7 +106,7 @@ export default function WaiverConfirmation({
     set_waiver_type(value)
     set_waiver_release([])
     set_missing_type(false)
-    if (!constants.season.isRegularSeason) set_waiver_max_bid(ros.availableCap)
+    if (!current_season.isRegularSeason) set_waiver_max_bid(ros.availableCap)
     setType(value)
   }
 
@@ -190,22 +187,22 @@ export default function WaiverConfirmation({
 
   const typeItems = []
   if (
-    (waiver && waiver.type === constants.waivers.FREE_AGENCY_PRACTICE) ||
+    (waiver && waiver.type === waiver_types.FREE_AGENCY_PRACTICE) ||
     status.waiver.practice
   ) {
     typeItems.push(
-      <MenuItem key='practice' value={constants.waivers.FREE_AGENCY_PRACTICE}>
+      <MenuItem key='practice' value={waiver_types.FREE_AGENCY_PRACTICE}>
         Practice Squad
       </MenuItem>
     )
   }
 
   if (
-    (waiver && waiver.type === constants.waivers.FREE_AGENCY) ||
+    (waiver && waiver.type === waiver_types.FREE_AGENCY) ||
     status.waiver.active
   ) {
     typeItems.push(
-      <MenuItem key='active' value={constants.waivers.FREE_AGENCY}>
+      <MenuItem key='active' value={waiver_types.FREE_AGENCY}>
         Active Roster
       </MenuItem>
     )
@@ -252,7 +249,7 @@ export default function WaiverConfirmation({
           {`Add ${player_map.get('name')} (${player_map.get('pos')})`}
         </DialogContentText>
         <div className='confirmation__inputs'>
-          {waiver_type === constants.waivers.FREE_AGENCY && (
+          {waiver_type === waiver_types.FREE_AGENCY && (
             <TextField
               label='Bid'
               helperText={`Max Bid: ${waiver_max_bid}`}

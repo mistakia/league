@@ -1,5 +1,3 @@
-// import db from '#db'
-
 import sendVoiceNotifications from './send-voice-notifications.mjs'
 import sendTextNotifications from './send-text-notifications.mjs'
 import sendGroupmeMessage from './send-groupme-message.mjs'
@@ -26,7 +24,7 @@ export default async function ({
    *   })
    *   .join('users', 'users_teams.userid', 'users.id')
    *   .where('teams.lid', league.uid)
-   *   .where('teams.year', constants.season.year)
+   *   .where('teams.year', constants.current_season.year)
    */
   if (notifyLeague) {
     // send league text messages

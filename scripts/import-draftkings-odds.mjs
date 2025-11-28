@@ -4,7 +4,7 @@ import { hideBin } from 'yargs/helpers'
 import fs from 'fs-extra'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main, insert_prop_markets, report_job } from '#libs-server'
 import {
   preload_active_players,
@@ -135,7 +135,7 @@ const run = async () => {
 
   const timestamp = Math.round(Date.now() / 1000)
   const nfl_games = await db('nfl_games').where({
-    year: constants.season.year
+    year: current_season.year
   })
 
   log(`Running in ${argv.mode} mode`)

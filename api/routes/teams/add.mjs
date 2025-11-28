@@ -1,6 +1,6 @@
 import express from 'express'
 
-import { constants } from '#libs-shared'
+import { current_season, roster_slot_types } from '#constants'
 import {
   submitAcquisition,
   verifyUserTeam,
@@ -182,7 +182,7 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'missing teamId' })
     }
 
-    const validSlots = [constants.slots.BENCH, constants.slots.PS]
+    const validSlots = [roster_slot_types.BENCH, roster_slot_types.PS]
 
     if (!validSlots.includes(slot)) {
       return res.status(400).send({ error: 'invalid slot' })
@@ -201,7 +201,7 @@ router.post('/?', async (req, res) => {
     }
     const tid = Number(teamId)
 
-    if (constants.season.week > constants.season.finalWeek) {
+    if (current_season.week > current_season.finalWeek) {
       return res.status(400).send({ error: 'player is locked' })
     }
 
@@ -216,7 +216,7 @@ router.post('/?', async (req, res) => {
     }
 
     // verify not in waiver period during the regular season
-    if (constants.season.isRegularSeason && constants.season.isWaiverPeriod) {
+    if (current_season.isRegularSeason && current_season.isWaiverPeriod) {
       return res.status(400).send({ error: 'player is on waivers' })
     }
 

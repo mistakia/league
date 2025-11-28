@@ -8,8 +8,8 @@ import { Table } from 'console-table-printer'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { constants } from '#libs-shared'
 import { is_main } from '#libs-server'
+import { current_season } from '#constants'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -149,7 +149,7 @@ const analyze_draftkings_wagers = async ({
   for (const wager of wagers) {
     wager.week = dayjs(wager.settlementDate)
       .subtract('2', 'day')
-      .diff(constants.season.regular_season_start, 'weeks')
+      .diff(current_season.regular_season_start, 'weeks')
   }
 
   const filtered = wagers.filter((wager) => {

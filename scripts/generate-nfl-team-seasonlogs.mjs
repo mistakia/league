@@ -4,12 +4,17 @@ import debug from 'debug'
 
 import db from '#db'
 import {
-  constants,
   groupBy,
   uniqBy,
   calculatePercentiles,
   calculatePoints
 } from '#libs-shared'
+import {
+  current_season,
+  fantasy_positions,
+  all_fantasy_stats,
+  nfl_team_abbreviations
+} from '#constants'
 import { is_main, getLeague, batch_insert } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -219,7 +224,7 @@ const adj = (actual, average, props) => {
 }
 
 const all_stats = [
-  ...constants.fantasyStats,
+  ...all_fantasy_stats,
   ...passing_stats,
   ...rushing_stats,
   ...receiving_stats
@@ -265,7 +270,7 @@ const get_stat_key = (base, { seasonlogs_type } = {}) =>
   (seasonlogs_type ? `${base}_${seasonlogs_type}` : base).toUpperCase()
 
 const generate_seasonlogs = async ({
-  year = constants.season.year,
+  year = current_season.year,
   seasonlogs_type
 } = {}) => {
   const gamelogs_query = db('player_gamelogs')
@@ -278,17 +283,17 @@ const generate_seasonlogs = async ({
 
   if (seasonlogs_type === 'LAST_THREE') {
     for (let i = 1; i <= 3; i++) {
-      const week = constants.season.week - i
+      const week = current_season.week - i
       if (week > 0) query_weeks.push(week)
     }
   } else if (seasonlogs_type === 'LAST_FOUR') {
     for (let i = 1; i <= 4; i++) {
-      const week = constants.season.week - i
+      const week = current_season.week - i
       if (week > 0) query_weeks.push(week)
     }
   } else if (seasonlogs_type === 'LAST_EIGHT') {
     for (let i = 1; i <= 8; i++) {
-      const week = constants.season.week - i
+      const week = current_season.week - i
       if (week > 0) query_weeks.push(week)
     }
   }
@@ -339,7 +344,7 @@ const generate_seasonlogs = async ({
 
   // remove non fantasy relevant position gamelogs
   for (const position in positions) {
-    if (!constants.positions.includes(position)) {
+    if (!fantasy_positions.includes(position)) {
       delete positions[position]
     }
   }
@@ -364,7 +369,7 @@ const generate_seasonlogs = async ({
 
     const adjusted = []
     // calculate defenase allowed over average
-    for (const nfl_team of constants.nflTeams) {
+    for (const nfl_team of nfl_team_abbreviations) {
       // get gamelogs for players facing this team
       const opponent_gamelogs = gamelogs_by_opponent[nfl_team] || []
 
@@ -592,15 +597,15 @@ const main = async () => {
   try {
     await generate_seasonlogs()
 
-    if (constants.season.week > 3) {
+    if (current_season.week > 3) {
       await generate_seasonlogs({ seasonlogs_type: 'LAST_THREE' })
     }
 
-    if (constants.season.week > 4) {
+    if (current_season.week > 4) {
       await generate_seasonlogs({ seasonlogs_type: 'LAST_FOUR' })
     }
 
-    if (constants.season.week > 8) {
+    if (current_season.week > 8) {
       await generate_seasonlogs({ seasonlogs_type: 'LAST_EIGHT' })
     }
   } catch (err) {

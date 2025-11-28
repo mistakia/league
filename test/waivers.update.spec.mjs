@@ -7,7 +7,7 @@ import server from '#api'
 import knex from '#db'
 
 import league from '#db/seeds/league.mjs'
-import { constants } from '#libs-shared'
+import { waiver_types, current_season } from '#constants'
 import { user1, user2 } from './fixtures/token.mjs'
 import {
   notLoggedIn,
@@ -22,7 +22,7 @@ process.env.NODE_ENV = 'test'
 chai.should()
 chai.use(chai_http)
 const expect = chai.expect
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 
 describe('API /waivers - update', function () {
   before(async function () {
@@ -55,7 +55,7 @@ describe('API /waivers - update', function () {
         .send({
           teamId,
           pid,
-          type: constants.waivers.FREE_AGENCY,
+          type: waiver_types.FREE_AGENCY,
           leagueId
         })
 
@@ -99,7 +99,7 @@ describe('API /waivers - update', function () {
         .send({
           teamId,
           pid: pid1,
-          type: constants.waivers.FREE_AGENCY,
+          type: waiver_types.FREE_AGENCY,
           leagueId
         })
 
@@ -113,7 +113,7 @@ describe('API /waivers - update', function () {
         .send({
           teamId,
           pid: pid2,
-          type: constants.waivers.FREE_AGENCY,
+          type: waiver_types.FREE_AGENCY,
           leagueId
         })
 
@@ -159,7 +159,7 @@ describe('API /waivers - update', function () {
         .send({
           teamId,
           pid: pid1,
-          type: constants.waivers.FREE_AGENCY,
+          type: waiver_types.FREE_AGENCY,
           leagueId
         })
 
@@ -173,7 +173,7 @@ describe('API /waivers - update', function () {
         .send({
           teamId,
           pid: pid2,
-          type: constants.waivers.FREE_AGENCY,
+          type: waiver_types.FREE_AGENCY,
           leagueId
         })
 
@@ -187,7 +187,7 @@ describe('API /waivers - update', function () {
         .send({
           teamId,
           pid: pid3,
-          type: constants.waivers.FREE_AGENCY,
+          type: waiver_types.FREE_AGENCY,
           leagueId
         })
 
@@ -232,7 +232,7 @@ describe('API /waivers - update', function () {
         .send({
           teamId,
           pid,
-          type: constants.waivers.FREE_AGENCY,
+          type: waiver_types.FREE_AGENCY,
           leagueId
         })
 
@@ -282,7 +282,7 @@ describe('API /waivers - update', function () {
         .send({
           teamId,
           pid,
-          type: constants.waivers.FREE_AGENCY,
+          type: waiver_types.FREE_AGENCY,
           leagueId
         })
 
@@ -339,7 +339,7 @@ describe('API /waivers - update', function () {
         .send({
           teamId,
           pid,
-          type: constants.waivers.FREE_AGENCY,
+          type: waiver_types.FREE_AGENCY,
           leagueId
         })
 
@@ -537,7 +537,7 @@ describe('API /waivers - update', function () {
         .send({
           teamId,
           pid,
-          type: constants.waivers.FREE_AGENCY,
+          type: waiver_types.FREE_AGENCY,
           leagueId
         })
 

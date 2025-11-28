@@ -1,5 +1,5 @@
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season, keeptradecut_metric_types } from '#constants'
 import get_join_func from '#libs-server/get-join-func.mjs'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import {
@@ -13,7 +13,7 @@ const get_default_params = ({ params = {} } = {}) => {
   const date = params.date || null
   const year = Array.isArray(params.year)
     ? params.year[0]
-    : params.year || constants.season.year
+    : params.year || current_season.year
 
   const year_offset_single = Array.isArray(params.year_offset)
     ? params.year_offset[0]
@@ -27,7 +27,7 @@ const get_cache_info_for_keeptradecut = create_date_based_cache_info({
     if (date) {
       return CACHE_TTL.THIRTY_DAYS
     }
-    return year === constants.season.year
+    return year === current_season.year
       ? CACHE_TTL.SIX_HOURS
       : CACHE_TTL.THIRTY_DAYS
   }
@@ -142,7 +142,7 @@ const create_keeptradecut_definition = (type) => ({
   main_where: ({ table_name }) => `${table_name}.v`,
   join: ({ ...args }) =>
     keeptradecut_join({
-      type: constants.KEEPTRADECUT[type.toUpperCase()],
+      type: keeptradecut_metric_types[type.toUpperCase()],
       ...args
     }),
   year_select: ({ splits, table_name, column_params = {} }) => {

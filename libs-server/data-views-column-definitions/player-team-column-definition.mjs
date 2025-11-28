@@ -3,7 +3,7 @@ import {
   add_per_game_cte,
   join_per_game_cte
 } from '#libs-server/data-views/rate-type/rate-type-per-game.mjs'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { create_static_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 
 const get_default_params = ({ params = {} } = {}) => {
@@ -26,7 +26,7 @@ export default {
     is_where_column_array: ({ params = {}, splits = [] } = {}) => {
       const { year } = get_default_params({ params })
       if (
-        (year.length === 1 && year[0] !== constants.season.year) ||
+        (year.length === 1 && year[0] !== current_season.year) ||
         splits.length
       ) {
         return true
@@ -37,7 +37,7 @@ export default {
     table_alias: ({ params = {}, splits = [] } = {}) => {
       const { year } = get_default_params({ params })
       if (
-        (year.length === 1 && year[0] !== constants.season.year) ||
+        (year.length === 1 && year[0] !== current_season.year) ||
         splits.length
       ) {
         return get_per_game_cte_table_name({ params })
@@ -47,7 +47,7 @@ export default {
     main_select: ({ table_name, params, column_index, splits }) => {
       const { year } = get_default_params({ params })
       if (
-        (year.length === 1 && year[0] !== constants.season.year) ||
+        (year.length === 1 && year[0] !== current_season.year) ||
         splits.length
       ) {
         return [`${table_name}.teams as player_nfl_teams_${column_index}`]
@@ -57,7 +57,7 @@ export default {
     main_where: ({ table_name, params, column_index, splits }) => {
       const { year } = get_default_params({ params })
       if (
-        (year.length === 1 && year[0] !== constants.season.year) ||
+        (year.length === 1 && year[0] !== current_season.year) ||
         splits.length
       ) {
         return `${table_name}.teams`
@@ -67,7 +67,7 @@ export default {
     main_group_by: ({ table_name, params, column_index, splits }) => {
       const { year } = get_default_params({ params })
       if (
-        (year.length === 1 && year[0] !== constants.season.year) ||
+        (year.length === 1 && year[0] !== current_season.year) ||
         splits.length
       ) {
         return [`${table_name}.teams`]
@@ -82,7 +82,7 @@ export default {
       }
       const { year } = get_default_params({ params })
       if (
-        (year.length === 1 && year[0] !== constants.season.year) ||
+        (year.length === 1 && year[0] !== current_season.year) ||
         splits.length
       ) {
         add_per_game_cte({

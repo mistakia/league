@@ -20,7 +20,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main } from '#libs-server'
 
 import update_stats_weekly from './update-stats-weekly.mjs'
@@ -44,7 +44,7 @@ debug.enable('update-stats-and-process-matchups')
 const get_target_week = () => {
   const day = dayjs().day()
   return Math.max(
-    [2, 3].includes(day) ? constants.season.week - 1 : constants.season.week,
+    [2, 3].includes(day) ? current_season.week - 1 : current_season.week,
     1
   )
 }
@@ -128,7 +128,7 @@ const process_all_league_matchups = async ({ year }) => {
  */
 const update_stats_and_process_matchups = async ({
   week: target_week,
-  year = constants.season.year
+  year = current_season.year
 } = {}) => {
   const start_time = Date.now()
 
@@ -138,12 +138,9 @@ const update_stats_and_process_matchups = async ({
   }
 
   // Validate week range
-  if (
-    target_week < 1 ||
-    target_week > constants.season.regularSeasonFinalWeek
-  ) {
+  if (target_week < 1 || target_week > current_season.regularSeasonFinalWeek) {
     throw new Error(
-      `Invalid week: ${target_week}. Must be between 1 and ${constants.season.regularSeasonFinalWeek}`
+      `Invalid week: ${target_week}. Must be between 1 and ${current_season.regularSeasonFinalWeek}`
     )
   }
 

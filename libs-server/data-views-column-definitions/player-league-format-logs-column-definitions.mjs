@@ -1,5 +1,6 @@
 import db from '#db'
-import { constants, DEFAULT_LEAGUE_FORMAT_HASH } from '#libs-shared'
+import { DEFAULT_LEAGUE_FORMAT_HASH } from '#libs-shared'
+import { current_season } from '#constants'
 import get_join_func from '#libs-server/get-join-func.mjs'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
@@ -12,7 +13,7 @@ import {
 // TODO career_year
 
 const get_default_params = ({ params = {} } = {}) => {
-  let year = params.year || constants.season.stats_season_year
+  let year = params.year || current_season.stats_season_year
   if (Array.isArray(year)) {
     year = year[0]
   }
@@ -30,7 +31,7 @@ const get_cache_info_for_league_format_careerlogs = create_static_cache_info({
 
 const league_format_player_seasonlogs_table_alias = ({ params = {} }) => {
   const { league_format_hash = DEFAULT_LEAGUE_FORMAT_HASH } = params
-  let year = params.year || [constants.season.stats_season_year]
+  let year = params.year || [current_season.stats_season_year]
   if (!Array.isArray(year)) {
     year = [year]
   }
@@ -49,7 +50,7 @@ const league_format_player_seasonlogs_join = (join_arguments) => {
   const additional_conditions = function ({ params, table_name, splits }) {
     const { league_format_hash = DEFAULT_LEAGUE_FORMAT_HASH } = params
 
-    let year = params.year || [constants.season.stats_season_year]
+    let year = params.year || [current_season.stats_season_year]
     if (!Array.isArray(year)) {
       year = [year]
     }

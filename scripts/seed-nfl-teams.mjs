@@ -18,7 +18,7 @@ const seed_nfl_teams = async () => {
   // get all tables with pid columns
   const player_rows_teams = await db('player').whereIn(
     'pid',
-    constants.nflTeams
+    constants.nfl_team_abbreviations
   )
 
   log(`loaded ${player_rows_teams.length} player rows`)

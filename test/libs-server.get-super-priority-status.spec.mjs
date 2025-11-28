@@ -4,14 +4,18 @@ import MockDate from 'mockdate'
 
 import knex from '#db'
 import league from '#db/seeds/league.mjs'
-import { constants } from '#libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  transaction_types
+} from '#constants'
 import get_super_priority_status from '#libs-server/get-super-priority-status.mjs'
 import { selectPlayer } from './utils/index.mjs'
 
 process.env.NODE_ENV = 'test'
 const expect = chai.expect
 chai.should()
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 
 describe('LIB - get_super_priority_status', function () {
   before(async function () {
@@ -49,11 +53,11 @@ describe('LIB - get_super_priority_status', function () {
         pid: player.pid,
         tid: 2,
         lid: 1,
-        type: constants.transactions.POACHED,
+        type: transaction_types.POACHED,
         value: 0,
-        year: constants.year,
+        year: current_season.year,
         timestamp: Math.round(Date.now() / 1000) - 7 * 24 * 60 * 60, // 1 week ago
-        week: constants.week - 1,
+        week: current_season.week - 1,
         userid: 2
       })
 
@@ -80,11 +84,11 @@ describe('LIB - get_super_priority_status', function () {
         pid: player.pid,
         tid: 1, // Original team
         lid: 1,
-        type: constants.transactions.PRACTICE_ADD,
+        type: transaction_types.PRACTICE_ADD,
         value: 0,
-        year: constants.year,
+        year: current_season.year,
         timestamp: poach_timestamp - 24 * 60 * 60, // 1 day before poach
-        week: constants.week - 1,
+        week: current_season.week - 1,
         userid: 1
       })
 
@@ -93,11 +97,11 @@ describe('LIB - get_super_priority_status', function () {
         pid: player.pid,
         tid: 2, // Poaching team
         lid: 1,
-        type: constants.transactions.POACHED,
+        type: transaction_types.POACHED,
         value: 0,
-        year: constants.year,
+        year: current_season.year,
         timestamp: poach_timestamp,
-        week: constants.week - 1,
+        week: current_season.week - 1,
         userid: 2
       })
     })
@@ -120,8 +124,8 @@ describe('LIB - get_super_priority_status', function () {
       const [roster] = await knex('rosters')
         .insert({
           tid: 1, // Original team
-          week: constants.week - 2,
-          year: constants.year,
+          week: current_season.week - 2,
+          year: current_season.year,
           lid: 1
         })
         .returning('uid')
@@ -132,10 +136,10 @@ describe('LIB - get_super_priority_status', function () {
         pid: player.pid,
         tid: 1, // Original team
         lid: 1,
-        slot: constants.slots.PSD, // PS drafted slot
+        slot: roster_slot_types.PSD, // PS drafted slot
         pos: player.pos,
-        week: constants.week - 2,
-        year: constants.year
+        week: current_season.week - 2,
+        year: current_season.year
       })
 
       const status = await get_super_priority_status({
@@ -162,22 +166,22 @@ describe('LIB - get_super_priority_status', function () {
           pid: player.pid,
           tid: 1,
           lid: 1,
-          type: constants.transactions.PRACTICE_ADD,
+          type: transaction_types.PRACTICE_ADD,
           value: 0,
-          year: constants.year,
+          year: current_season.year,
           timestamp: poach_timestamp - 24 * 60 * 60,
-          week: constants.week - 1,
+          week: current_season.week - 1,
           userid: 1
         },
         {
           pid: player.pid,
           tid: 2,
           lid: 1,
-          type: constants.transactions.POACHED,
+          type: transaction_types.POACHED,
           value: 0,
-          year: constants.year,
+          year: current_season.year,
           timestamp: poach_timestamp,
-          week: constants.week - 1,
+          week: current_season.week - 1,
           userid: 2
         }
       ])
@@ -189,11 +193,11 @@ describe('LIB - get_super_priority_status', function () {
         pid: player.pid,
         tid: 2,
         lid: 1,
-        type: constants.transactions.TRADE,
+        type: transaction_types.TRADE,
         value: 0,
-        year: constants.year,
+        year: current_season.year,
         timestamp: poach_timestamp + 24 * 60 * 60, // 1 day after poach
-        week: constants.week,
+        week: current_season.week,
         userid: 2
       })
 
@@ -213,11 +217,11 @@ describe('LIB - get_super_priority_status', function () {
         pid: player.pid,
         tid: 2,
         lid: 1,
-        type: constants.transactions.EXTENSION,
+        type: transaction_types.EXTENSION,
         value: 0,
-        year: constants.year,
+        year: current_season.year,
         timestamp: poach_timestamp + 24 * 60 * 60,
-        week: constants.week,
+        week: current_season.week,
         userid: 2
       })
 
@@ -237,11 +241,11 @@ describe('LIB - get_super_priority_status', function () {
         pid: player.pid,
         tid: 2,
         lid: 1,
-        type: constants.transactions.RESTRICTED_FREE_AGENCY_TAG,
+        type: transaction_types.RESTRICTED_FREE_AGENCY_TAG,
         value: 0,
-        year: constants.year,
+        year: current_season.year,
         timestamp: poach_timestamp + 24 * 60 * 60,
-        week: constants.week,
+        week: current_season.week,
         userid: 2
       })
 
@@ -269,22 +273,22 @@ describe('LIB - get_super_priority_status', function () {
           pid: player.pid,
           tid: 1,
           lid: 1,
-          type: constants.transactions.PRACTICE_ADD,
+          type: transaction_types.PRACTICE_ADD,
           value: 0,
-          year: constants.year,
+          year: current_season.year,
           timestamp: poach_timestamp - 24 * 60 * 60,
-          week: constants.week - 5,
+          week: current_season.week - 5,
           userid: 1
         },
         {
           pid: player.pid,
           tid: 2,
           lid: 1,
-          type: constants.transactions.POACHED,
+          type: transaction_types.POACHED,
           value: 0,
-          year: constants.year,
+          year: current_season.year,
           timestamp: poach_timestamp,
-          week: constants.week - 5,
+          week: current_season.week - 5,
           userid: 2
         }
       ])
@@ -294,12 +298,12 @@ describe('LIB - get_super_priority_status', function () {
       // First create the rosters for the weeks we need
       const rosterIds = []
       for (let i = 0; i < 4; i++) {
-        const weekNum = constants.week - 4 + i
+        const weekNum = current_season.week - 4 + i
         const [roster] = await knex('rosters')
           .insert({
             tid: 2, // Poaching team
             week: weekNum,
-            year: constants.year,
+            year: current_season.year,
             lid: 1
           })
           .returning('uid')
@@ -314,10 +318,10 @@ describe('LIB - get_super_priority_status', function () {
           pid: player.pid,
           tid: 2, // Poaching team
           lid: 1,
-          slot: constants.slots.PS,
+          slot: roster_slot_types.PS,
           pos: player.pos,
-          week: constants.week - 4 + i,
-          year: constants.year
+          week: current_season.week - 4 + i,
+          year: current_season.year
         })
       }
       await knex('rosters_players').insert(rosterEntries)
@@ -337,8 +341,8 @@ describe('LIB - get_super_priority_status', function () {
       const [roster] = await knex('rosters')
         .insert({
           tid: 2, // Poaching team
-          week: constants.week - 1,
-          year: constants.year,
+          week: current_season.week - 1,
+          year: current_season.year,
           lid: 1
         })
         .returning('uid')
@@ -349,10 +353,10 @@ describe('LIB - get_super_priority_status', function () {
         pid: player.pid,
         tid: 2, // Poaching team
         lid: 1,
-        slot: constants.slots.QB, // Starting slot
+        slot: roster_slot_types.QB, // Starting slot
         pos: player.pos,
-        week: constants.week - 1,
-        year: constants.year
+        week: current_season.week - 1,
+        year: current_season.year
       })
 
       const status = await get_super_priority_status({
@@ -384,22 +388,22 @@ describe('LIB - get_super_priority_status', function () {
           pid: player1.pid,
           tid: 1,
           lid: 1,
-          type: constants.transactions.PRACTICE_ADD,
+          type: transaction_types.PRACTICE_ADD,
           value: 0,
-          year: constants.year,
+          year: current_season.year,
           timestamp: poach_timestamp - 24 * 60 * 60,
-          week: constants.week - 1,
+          week: current_season.week - 1,
           userid: 1
         },
         {
           pid: player1.pid,
           tid: 2,
           lid: 1,
-          type: constants.transactions.POACHED,
+          type: transaction_types.POACHED,
           value: 0,
-          year: constants.year,
+          year: current_season.year,
           timestamp: poach_timestamp,
-          week: constants.week - 1,
+          week: current_season.week - 1,
           userid: 2
         },
         // Player 2 poached from team 3 to team 2
@@ -407,22 +411,22 @@ describe('LIB - get_super_priority_status', function () {
           pid: player2.pid,
           tid: 3,
           lid: 1,
-          type: constants.transactions.PRACTICE_ADD,
+          type: transaction_types.PRACTICE_ADD,
           value: 0,
-          year: constants.year,
+          year: current_season.year,
           timestamp: poach_timestamp - 24 * 60 * 60,
-          week: constants.week - 1,
+          week: current_season.week - 1,
           userid: 3
         },
         {
           pid: player2.pid,
           tid: 2,
           lid: 1,
-          type: constants.transactions.POACHED,
+          type: transaction_types.POACHED,
           value: 0,
-          year: constants.year,
+          year: current_season.year,
           timestamp: poach_timestamp,
-          week: constants.week - 1,
+          week: current_season.week - 1,
           userid: 2
         }
       ])
@@ -465,22 +469,22 @@ describe('LIB - get_super_priority_status', function () {
           pid: player.pid,
           tid: 1,
           lid: 1,
-          type: constants.transactions.PRACTICE_ADD,
+          type: transaction_types.PRACTICE_ADD,
           value: 0,
-          year: constants.year,
+          year: current_season.year,
           timestamp: poach_timestamp - 24 * 60 * 60,
-          week: constants.week - 1,
+          week: current_season.week - 1,
           userid: 1
         },
         {
           pid: player.pid,
           tid: 2,
           lid: 1,
-          type: constants.transactions.POACHED,
+          type: transaction_types.POACHED,
           value: 0,
-          year: constants.year,
+          year: current_season.year,
           timestamp: poach_timestamp,
-          week: constants.week - 1,
+          week: current_season.week - 1,
           userid: 2
         }
       ])

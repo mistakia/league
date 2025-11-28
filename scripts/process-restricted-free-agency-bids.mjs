@@ -3,7 +3,11 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc.js'
 import timezone from 'dayjs/plugin/timezone.js'
 import db from '#db'
-import { constants } from '#libs-shared'
+import {
+  current_season,
+  league_default_rfa_announcement_hour,
+  league_default_rfa_processing_hour
+} from '#constants'
 import {
   get_top_restricted_free_agency_bids,
   processRestrictedFreeAgencyBid,
@@ -36,7 +40,7 @@ async function sort_bids_by_waiver_order(bids) {
 
   const teams = await db('teams').select('uid', 'waiver_order').where({
     lid: bids[0].lid,
-    year: constants.season.year
+    year: current_season.year
   })
 
   const team_waiver_order = {}
@@ -63,13 +67,13 @@ function check_league_eligibility(league, current_date_est) {
   const processing_hour =
     league.restricted_free_agency_processing_hour !== undefined
       ? league.restricted_free_agency_processing_hour
-      : constants.league_default_restricted_free_agency_processing_hour
+      : league_default_rfa_processing_hour
 
   // Get the configured announcement hour or use default
   const announcement_hour =
     league.restricted_free_agency_announcement_hour !== undefined
       ? league.restricted_free_agency_announcement_hour
-      : constants.league_default_restricted_free_agency_announcement_hour
+      : league_default_rfa_announcement_hour
 
   // Calculate time difference needed between announcement and processing
   // Processing always happens on the following day
@@ -149,7 +153,7 @@ const run = async ({ dry_run = false } = {}) => {
       )
     })
     .where({
-      'seasons.year': constants.season.year
+      'seasons.year': current_season.year
     })
     .whereNotNull('tran_start')
     .where('tran_start', '<=', timestamp)
@@ -381,7 +385,7 @@ const run = async ({ dry_run = false } = {}) => {
               .where({
                 pid,
                 lid,
-                year: constants.season.year
+                year: current_season.year
               })
               .whereNull('cancelled')
               .whereNull('processed')
@@ -417,7 +421,7 @@ const run = async ({ dry_run = false } = {}) => {
               .where({
                 pid: winning_bid.pid,
                 lid,
-                year: constants.season.year
+                year: current_season.year
               })
               .whereNull('cancelled')
               .whereNull('processed')

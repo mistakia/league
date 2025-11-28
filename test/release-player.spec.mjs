@@ -8,7 +8,11 @@ import { fileURLToPath } from 'url'
 import knex from '#db'
 import league from '#db/seeds/league.mjs'
 import draft from '#db/seeds/draft.mjs'
-import { constants } from '#libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  transaction_types
+} from '#constants'
 import { getRoster } from '#libs-server'
 import { selectPlayer, addPlayer } from './utils/index.mjs'
 
@@ -17,7 +21,7 @@ chai.should()
 const expect = chai.expect
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
 const script_path = path.join(__dirname, '../scripts/release-player.mjs')
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 
 // Track players used in tests to avoid duplicates
 const used_pids = new Set()
@@ -145,7 +149,7 @@ describe('CLI release-player script', function () {
         leagueId: 1,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.BENCH
+        slot: roster_slot_types.BENCH
       })
 
       const result = await run_script([
@@ -181,7 +185,7 @@ describe('CLI release-player script', function () {
         leagueId: 1,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.BENCH
+        slot: roster_slot_types.BENCH
       })
 
       const result = await run_script([
@@ -212,7 +216,7 @@ describe('CLI release-player script', function () {
         leagueId: 1,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.BENCH
+        slot: roster_slot_types.BENCH
       })
 
       const full_name = `${player.fname} ${player.lname}`
@@ -240,8 +244,8 @@ describe('CLI release-player script', function () {
         .where({
           'rosters.tid': 1,
           'rosters.lid': 1,
-          'rosters.year': constants.season.year,
-          'rosters.week': constants.season.week
+          'rosters.year': current_season.year,
+          'rosters.week': current_season.week
         })
         .del()
 
@@ -282,7 +286,7 @@ describe('CLI release-player script', function () {
         leagueId: 1,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.BENCH
+        slot: roster_slot_types.BENCH
       })
 
       // Use just first name for matching
@@ -395,8 +399,8 @@ describe('CLI release-player script', function () {
       const player_to_release = roster_before.players.find(
         (p) =>
           p.pos !== 'DEF' &&
-          p.slot !== constants.slots.PSP &&
-          p.slot !== constants.slots.PSDP
+          p.slot !== roster_slot_types.PSP &&
+          p.slot !== roster_slot_types.PSDP
       )
 
       if (!player_to_release) {
@@ -435,7 +439,7 @@ describe('CLI release-player script', function () {
           pid: player_to_release.pid,
           tid: 1,
           lid: 1,
-          type: constants.transactions.ROSTER_RELEASE
+          type: transaction_types.ROSTER_RELEASE
         })
         .orderBy('timestamp', 'desc')
         .first()
@@ -457,7 +461,7 @@ describe('CLI release-player script', function () {
         leagueId: 1,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PS
+        slot: roster_slot_types.PS
       })
 
       const roster_before = await getRoster({ tid: 1 })
@@ -466,9 +470,9 @@ describe('CLI release-player script', function () {
       const bench_player = roster_before.players.find(
         (p) =>
           p.pos !== 'DEF' &&
-          p.slot === constants.slots.BENCH &&
-          p.slot !== constants.slots.PSP &&
-          p.slot !== constants.slots.PSDP
+          p.slot === roster_slot_types.BENCH &&
+          p.slot !== roster_slot_types.PSP &&
+          p.slot !== roster_slot_types.PSDP
       )
 
       const result = await run_script([
@@ -501,7 +505,7 @@ describe('CLI release-player script', function () {
         (p) => p.pid === practice_player.pid
       )
       expect(activated_player_on_roster).to.exist
-      activated_player_on_roster.slot.should.equal(constants.slots.BENCH)
+      activated_player_on_roster.slot.should.equal(roster_slot_types.BENCH)
     })
   })
 

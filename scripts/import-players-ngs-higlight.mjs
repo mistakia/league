@@ -11,7 +11,8 @@ import {
 } from '#libs-server'
 import { ngs } from '#private/libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
-import { fixTeam, constants } from '#libs-shared'
+import { fixTeam } from '#libs-shared'
+import { current_season } from '#constants'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -79,7 +80,7 @@ const import_players_ngs_highlight = async ({ ignore_cache = false }) => {
         pos: ngs_player.position,
         nfl_draft_year: ngs_player.entryYear || ngs_player.rookieYear
       }
-      if (ngs_player.season === constants.season.year) {
+      if (ngs_player.season === current_season.year) {
         params.team = ngs_player.teamAbbr
       }
       try {

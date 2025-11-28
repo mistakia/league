@@ -1,6 +1,7 @@
 import COLUMN_GROUPS from './column-groups'
 import * as table_constants from 'react-table/src/constants.mjs'
-import { constants, common_column_params } from '#libs-shared'
+import { common_column_params } from '#libs-shared'
+import { current_season } from '@constants'
 
 const { single_year, single_week } = common_column_params
 
@@ -12,11 +13,11 @@ const create_player_rankings_field = (props) => ({
   column_params: {
     year: {
       ...single_year,
-      default_value: constants.year
+      default_value: current_season.year
     },
     week: {
       ...single_week,
-      default_value: constants.season.week,
+      default_value: current_season.week,
       values: [
         {
           value: 0,

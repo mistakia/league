@@ -3,7 +3,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 import * as oddslib from 'oddslib'
 import db from '#db'
-import { constants, groupBy, get_blake2b_hash } from '#libs-shared'
+import { groupBy, get_blake2b_hash } from '#libs-shared'
+import { current_season } from '#constants'
 import { chunk_array } from '#libs-shared/chunk.mjs'
 import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 import { is_main } from '#libs-server'
@@ -231,9 +232,9 @@ const format_prop_pairing = ({ props, prop_stats, week, team, source }) => {
 }
 
 const generate_prop_pairings = async ({
-  week = constants.season.nfl_seas_week,
-  year = constants.season.year,
-  seas_type = constants.season.nfl_seas_type,
+  week = current_season.nfl_seas_week,
+  year = current_season.year,
+  seas_type = current_season.nfl_seas_type,
   source = 'FANDUEL',
   dry_run = false
 } = {}) => {

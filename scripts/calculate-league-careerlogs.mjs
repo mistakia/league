@@ -3,7 +3,7 @@ import debug from 'debug'
 // import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -110,8 +110,8 @@ const calculate_league_careerlogs = async ({ lid }) => {
         league_team_seasonlog.weekly_high_scores || 0
 
       if (
-        league_team_seasonlog.year === constants.season.year &&
-        constants.season.week < constants.season.finalWeek
+        league_team_seasonlog.year === current_season.year &&
+        current_season.week < current_season.finalWeek
       ) {
         continue
       }

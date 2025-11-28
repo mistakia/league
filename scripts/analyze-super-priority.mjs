@@ -12,7 +12,7 @@ if (process.env.NODE_ENV !== 'test') {
 }
 
 const run = async ({
-  year = constants.year,
+  year = constants.current_year,
   lid = null,
   pid = null,
   validate = false
@@ -215,7 +215,7 @@ const main = async () => {
       .option('year', {
         alias: 'y',
         type: 'number',
-        default: constants.year,
+        default: constants.current_year,
         describe: 'Year to analyze'
       })
       .option('lid', {

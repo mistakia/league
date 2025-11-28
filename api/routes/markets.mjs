@@ -1,7 +1,8 @@
 import express from 'express'
 import Validator from 'fastest-validator'
 
-import { constants, bookmaker_constants } from '#libs-shared'
+import { bookmaker_constants } from '#libs-shared'
+import { current_season, nfl_season_types } from '#constants'
 import cache from '#api/cache.mjs'
 
 const router = express.Router()
@@ -68,9 +69,9 @@ const prop_markets_base_query_schema = {
     optional: true,
     integer: true,
     min: 1920,
-    max: constants.season.year
+    max: current_season.year
   },
-  seas_type: { type: 'string', optional: true, enum: constants.seas_types },
+  seas_type: { type: 'string', optional: true, enum: nfl_season_types },
   bookmaker: bookmaker_schema,
   limit: limit_schema,
   offset: offset_schema

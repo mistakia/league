@@ -6,7 +6,12 @@ import MockDate from 'mockdate'
 import server from '#api'
 import knex from '#db'
 import league from '#db/seeds/league.mjs'
-import { constants } from '#libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  transaction_types,
+  player_tag_types
+} from '#constants'
 import { user1, user2 } from './fixtures/token.mjs'
 import {
   addPlayer,
@@ -23,7 +28,7 @@ process.env.NODE_ENV = 'test'
 chai.should()
 chai.use(chai_http)
 const expect = chai.expect
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 
 describe('API /teams - activate', function () {
   before(async function () {
@@ -48,8 +53,8 @@ describe('API /teams - activate', function () {
         leagueId,
         userId,
         player,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.DRAFT,
         value
       })
 
@@ -68,34 +73,32 @@ describe('API /teams - activate', function () {
 
       res.body.tid.should.equal(teamId)
       res.body.pid.should.equal(player.pid)
-      res.body.slot.should.equal(constants.slots.BENCH)
+      res.body.slot.should.equal(roster_slot_types.BENCH)
       res.body.transaction.userid.should.equal(userId)
       res.body.transaction.tid.should.equal(teamId)
       res.body.transaction.lid.should.equal(leagueId)
       res.body.transaction.pid.should.equal(player.pid)
-      res.body.transaction.type.should.equal(
-        constants.transactions.ROSTER_ACTIVATE
-      )
+      res.body.transaction.type.should.equal(transaction_types.ROSTER_ACTIVATE)
       res.body.transaction.value.should.equal(value)
-      res.body.transaction.year.should.equal(constants.season.year)
+      res.body.transaction.year.should.equal(current_season.year)
       res.body.transaction.timestamp.should.equal(Math.round(Date.now() / 1000))
 
       const rosterRows = await knex('rosters_players')
         .where({
-          year: constants.season.year,
-          week: constants.season.week,
+          year: current_season.year,
+          week: current_season.week,
           pid: player.pid
         })
         .limit(1)
 
       const rosterRow = rosterRows[0]
-      expect(rosterRow.slot).to.equal(constants.slots.BENCH)
+      expect(rosterRow.slot).to.equal(roster_slot_types.BENCH)
 
       await checkLastTransaction({
         leagueId,
-        type: constants.transactions.ROSTER_ACTIVATE,
+        type: transaction_types.ROSTER_ACTIVATE,
         value,
-        year: constants.season.year,
+        year: current_season.year,
         pid: player.pid,
         teamId,
         userId
@@ -131,8 +134,8 @@ describe('API /teams - activate', function () {
         leagueId,
         userId,
         player: activate_player,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.PRACTICE_ADD,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.PRACTICE_ADD,
         value: activate_value
       })
 
@@ -142,8 +145,8 @@ describe('API /teams - activate', function () {
         leagueId,
         userId,
         player: deactivate_player,
-        slot: constants.slots.BENCH,
-        transaction: constants.transactions.ROSTER_ADD,
+        slot: roster_slot_types.BENCH,
+        transaction: transaction_types.ROSTER_ADD,
         value: deactivate_value
       })
 
@@ -163,37 +166,37 @@ describe('API /teams - activate', function () {
       // Response should be activate transaction data
       res.body.tid.should.equal(teamId)
       res.body.pid.should.equal(activate_player.pid)
-      res.body.slot.should.equal(constants.slots.BENCH)
+      res.body.slot.should.equal(roster_slot_types.BENCH)
       res.body.transaction.type.should.equal(
-        constants.transactions.ROSTER_ACTIVATE
+        transaction_types.ROSTER_ACTIVATE
       )
       res.body.transaction.value.should.equal(activate_value)
 
       // Verify activated player is now on bench
       const activateRosterRows = await knex('rosters_players')
         .where({
-          year: constants.season.year,
-          week: constants.season.week,
+          year: current_season.year,
+          week: current_season.week,
           pid: activate_player.pid
         })
         .limit(1)
-      expect(activateRosterRows[0].slot).to.equal(constants.slots.BENCH)
+      expect(activateRosterRows[0].slot).to.equal(roster_slot_types.BENCH)
 
       // Verify deactivated player is now on practice squad
       const deactivateRosterRows = await knex('rosters_players')
         .where({
-          year: constants.season.year,
-          week: constants.season.week,
+          year: current_season.year,
+          week: current_season.week,
           pid: deactivate_player.pid
         })
         .limit(1)
-      expect(deactivateRosterRows[0].slot).to.equal(constants.slots.PS)
+      expect(deactivateRosterRows[0].slot).to.equal(roster_slot_types.PS)
 
       // Verify both transactions were created
       const transactions = await knex('transactions')
         .where({
           lid: leagueId,
-          year: constants.season.year
+          year: current_season.year
         })
         .whereIn('pid', [activate_player.pid, deactivate_player.pid])
         .orderBy('timestamp', 'desc')
@@ -201,12 +204,12 @@ describe('API /teams - activate', function () {
       const activate_transaction = transactions.find(
         (t) =>
           t.pid === activate_player.pid &&
-          t.type === constants.transactions.ROSTER_ACTIVATE
+          t.type === transaction_types.ROSTER_ACTIVATE
       )
       const deactivate_transaction = transactions.find(
         (t) =>
           t.pid === deactivate_player.pid &&
-          t.type === constants.transactions.ROSTER_DEACTIVATE
+          t.type === transaction_types.ROSTER_DEACTIVATE
       )
 
       expect(activate_transaction).to.exist
@@ -328,7 +331,7 @@ describe('API /teams - activate', function () {
         player,
         teamId: 1,
         userId: 1,
-        slot: constants.slots.PSP
+        slot: roster_slot_types.PSP
       })
       const request = chai_request
         .execute(server)
@@ -359,8 +362,8 @@ describe('API /teams - activate', function () {
         leagueId: 1,
         userId: 1,
         player: activate_player,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.PRACTICE_ADD,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.PRACTICE_ADD,
         value: 1
       })
 
@@ -370,8 +373,8 @@ describe('API /teams - activate', function () {
         leagueId: 1,
         userId: 1,
         player: deactivate_player,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.PRACTICE_ADD,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.PRACTICE_ADD,
         value: 1
       })
 
@@ -401,8 +404,8 @@ describe('API /teams - activate', function () {
         leagueId: 1,
         userId: 1,
         player: activate_player,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.PRACTICE_ADD,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.PRACTICE_ADD,
         value: 1
       })
 
@@ -412,10 +415,10 @@ describe('API /teams - activate', function () {
         tid: 1,
         lid: 1,
         pid: deactivate_player.pid,
-        type: constants.transactions.PRACTICE_ADD,
+        type: transaction_types.PRACTICE_ADD,
         value: 2,
-        week: constants.season.week,
-        year: constants.season.year,
+        week: current_season.week,
+        year: current_season.year,
         timestamp: Math.round(Date.now() / 1000) - 10
       })
 
@@ -424,8 +427,8 @@ describe('API /teams - activate', function () {
         leagueId: 1,
         userId: 1,
         player: deactivate_player,
-        slot: constants.slots.BENCH,
-        transaction: constants.transactions.ROSTER_ACTIVATE,
+        slot: roster_slot_types.BENCH,
+        transaction: transaction_types.ROSTER_ACTIVATE,
         value: 2
       })
 
@@ -462,16 +465,16 @@ describe('API /teams - activate', function () {
         leagueId,
         userId,
         player: activate_player,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.PRACTICE_ADD,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.PRACTICE_ADD,
         value: 1
       })
 
       // Add player to deactivate roster entry
       const rosters = await knex('rosters')
         .where({
-          week: constants.season.week,
-          year: constants.season.year,
+          week: current_season.week,
+          year: current_season.year,
           tid: teamId
         })
         .limit(1)
@@ -483,23 +486,23 @@ describe('API /teams - activate', function () {
         tid: teamId,
         lid: leagueId,
         pid: deactivate_player.pid,
-        type: constants.transactions.ROSTER_ADD,
+        type: transaction_types.ROSTER_ADD,
         value: 1,
-        week: constants.season.week,
-        year: constants.season.year,
+        week: current_season.week,
+        year: current_season.year,
         timestamp: Math.round(Date.now() / 1000) - 60 * 60 * 49 // 49 hours ago
       })
 
       await knex('rosters_players').insert({
         rid: rosterId,
         pid: deactivate_player.pid,
-        slot: constants.slots.BENCH,
+        slot: roster_slot_types.BENCH,
         pos: deactivate_player.pos1,
-        tag: constants.tags.REGULAR,
+        tag: player_tag_types.REGULAR,
         tid: teamId,
         lid: leagueId,
-        year: constants.season.year,
-        week: constants.season.week
+        year: current_season.year,
+        week: current_season.week
       })
 
       const request = chai_request

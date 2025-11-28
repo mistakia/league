@@ -2,12 +2,13 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 import { List } from 'immutable'
 
+import { current_season, transaction_types } from '@constants'
 import {
   getSelectedPlayer,
   get_current_league,
   is_before_extension_deadline
 } from '@core/selectors'
-import { constants, getExtensionAmount } from '@libs-shared'
+import { getExtensionAmount } from '@libs-shared'
 import { player_actions } from '@core/players'
 
 import SelectedPlayerTransactions from './selected-player-transactions'
@@ -39,7 +40,7 @@ const map_state_to_props = createSelector(
 
     // Find draft transaction
     const draft_transaction = transactions.find(
-      (t) => t.type === constants.transactions.DRAFT
+      (t) => t.type === transaction_types.DRAFT
     )
 
     // Calculate extension salaries
@@ -56,12 +57,12 @@ const map_state_to_props = createSelector(
         })
       : value
     extension_salaries.push({
-      year: constants.year,
+      year: current_season.year,
       extended_salary
     })
 
     let salary = extended_salary
-    let year = constants.year
+    let year = current_season.year
     for (let i = extensions; extension_salaries.length < 4; i++) {
       salary = getExtensionAmount({
         pos: player_map.get('pos'),

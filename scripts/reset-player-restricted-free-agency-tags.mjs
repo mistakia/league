@@ -1,7 +1,7 @@
 import debug from 'debug'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season, player_tag_types } from '#constants'
 import { is_main } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -13,7 +13,7 @@ const run = async () => {
   // Get all restricted free agency bids for the current year
   const restricted_free_agency_bids = await db('restricted_free_agency_bids')
     .where({
-      year: constants.season.year,
+      year: current_season.year,
       lid
     })
     .whereNull('cancelled')
@@ -21,7 +21,7 @@ const run = async () => {
   // Get all teams for the league for the current year
   const teams = await db('teams')
     .where({
-      year: constants.season.year,
+      year: current_season.year,
       lid
     })
     .orderBy('uid')
@@ -34,11 +34,11 @@ const run = async () => {
   for (const team of teams) {
     // Reset tags for this team's roster, excluding players with bids for the current year
     const query = db('rosters_players')
-      .update({ tag: constants.tags.REGULAR })
+      .update({ tag: player_tag_types.REGULAR })
       .where({
-        tag: constants.tags.RESTRICTED_FREE_AGENCY,
+        tag: player_tag_types.RESTRICTED_FREE_AGENCY,
         week: 0,
-        year: constants.season.year,
+        year: current_season.year,
         tid: team.uid
       })
 

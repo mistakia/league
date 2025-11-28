@@ -1,12 +1,12 @@
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import get_table_hash from '#libs-server/data-views/get-table-hash.mjs'
 import data_view_join_function from '#libs-server/data-views/data-view-join-function.mjs'
 import { create_exact_year_cache_info } from '#libs-server/data-views/cache-info-utils.mjs'
 import { single_year, seas_type } from '#libs-shared/common-column-params.mjs'
 
 const get_default_params = ({ params = {} } = {}) => {
-  const year = params.single_year || constants.season.stats_season_year
+  const year = params.single_year || current_season.stats_season_year
   const seas_type_param = params.seas_type || 'REG'
   return { single_year: Number(year), seas_type: seas_type_param }
 }

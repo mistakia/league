@@ -1,5 +1,5 @@
 import * as table_constants from 'react-table/src/constants.mjs'
-import * as constants from './constants.mjs'
+import { nfl_downs, nfl_quarters, nfl_team_abbreviations } from '#constants'
 import { COLUMN_PARAM_GROUPS } from './column-param-groups.mjs'
 
 import {
@@ -252,7 +252,7 @@ export default {
   ...nfl_games_params,
 
   dwn: {
-    values: constants.downs,
+    values: nfl_downs,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.PLAY_SITUATION],
     preset_values: [
@@ -267,7 +267,7 @@ export default {
     ]
   },
   qtr: {
-    values: constants.quarters,
+    values: nfl_quarters,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.PLAY_SITUATION],
     preset_values: [
@@ -307,7 +307,7 @@ export default {
   },
   // TODO
   // ydl_side: {
-  //   values: constants.nflTeams,
+  //   values: nfl_team_abbreviations,
   //   data_type: table_constants.TABLE_DATA_TYPES.SELECT
   // },
   // TODO : eneds to be updating to ydl_100_start and ydl_100_end
@@ -1235,12 +1235,12 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.DRIVE]
   },
   drive_start_qtr: {
-    values: constants.quarters,
+    values: nfl_quarters,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.DRIVE]
   },
   drive_end_qtr: {
-    values: constants.quarters,
+    values: nfl_quarters,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.DRIVE]
   },
@@ -1354,7 +1354,7 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
   score_team: {
-    values: constants.nflTeams,
+    values: nfl_team_abbreviations,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.PLAY_OUTCOME]
   },
@@ -1393,16 +1393,16 @@ export default {
   },
 
   pos_team: {
-    values: constants.nflTeams,
+    values: nfl_team_abbreviations,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT
   },
 
   off: {
-    values: constants.nflTeams,
+    values: nfl_team_abbreviations,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT
   },
   def: {
-    values: constants.nflTeams,
+    values: nfl_team_abbreviations,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT
   },
 
@@ -1498,7 +1498,7 @@ export default {
   // },
 
   pen_team: {
-    values: constants.nflTeams,
+    values: nfl_team_abbreviations,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.PENALTY]
   },
@@ -2411,7 +2411,7 @@ export default {
     groups: [COLUMN_PARAM_GROUPS.PLAY_TIMEOUT]
   },
   to_team: {
-    values: constants.nflTeams,
+    values: nfl_team_abbreviations,
     data_type: table_constants.TABLE_DATA_TYPES.SELECT,
     groups: [COLUMN_PARAM_GROUPS.PLAY_TIMEOUT]
   },

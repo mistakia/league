@@ -1,8 +1,8 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { constants } from '@libs-shared'
 import ScheduleFilter from '@components/schedule-filter'
+import { regular_fantasy_weeks } from '@constants'
 
 export default class ScheduleWeeksFilter extends React.Component {
   render = () => {
@@ -12,7 +12,7 @@ export default class ScheduleWeeksFilter extends React.Component {
       values: []
     }
 
-    for (const week of constants.weeks) {
+    for (const week of regular_fantasy_weeks) {
       state.values.push({
         value: week,
         label: week,

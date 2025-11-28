@@ -5,7 +5,7 @@ import { fetch as fetch_http2 } from 'fetch-h2'
 import db from '#db'
 import { wait } from './wait.mjs'
 import * as cache from './cache.mjs'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 const log = debug('espn')
 debug.enable('espn')
@@ -135,7 +135,7 @@ export const getPlayers = async ({ page = 1 }) => {
 
 // format: PPR, STANDARD
 export const get_espn_adp = async ({
-  year = constants.season.year,
+  year = current_season.year,
   format = 'PPR'
 }) => {
   const espn_config = await get_espn_config()

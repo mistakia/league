@@ -1,32 +1,32 @@
-import { constants } from '@libs-shared'
+import { current_season } from '@constants'
 
 const is_regular_season_finished =
-  constants.season.week > constants.season.finalWeek
+  current_season.week > current_season.finalWeek
 
 const season_projections_view = {
-  name: constants.season.isOffseason
+  name: current_season.isOffseason
     ? 'Season Projections'
     : 'Rest of Season Projections',
-  order_by: constants.season.isOffseason ? 'pts_added.0' : 'pts_added.ros',
+  order_by: current_season.isOffseason ? 'pts_added.0' : 'pts_added.ros',
   fields: [
     // TODO player salary
     // TODO player points+
     // TODO player market salary
     // TODO player market adjusted salary
-    constants.season.isOffseason ? 'pts_added.0' : 'pts_added.ros',
-    constants.season.isOffseason ? 'points.0.total' : 'points.ros.total',
-    constants.season.isOffseason ? 'projection.0.pa' : 'projection.ros.pa',
-    constants.season.isOffseason ? 'projection.0.py' : 'projection.ros.py',
-    constants.season.isOffseason ? 'projection.0.tdp' : 'projection.ros.tdp',
-    constants.season.isOffseason ? 'projection.0.ints' : 'projection.ros.ints',
-    constants.season.isOffseason ? 'projection.0.ra' : 'projection.ros.ra',
-    constants.season.isOffseason ? 'projection.0.ry' : 'projection.ros.ry',
-    constants.season.isOffseason ? 'projection.0.tdr' : 'projection.ros.tdr',
-    constants.season.isOffseason ? 'projection.0.fuml' : 'projection.ros.fuml',
-    constants.season.isOffseason ? 'projection.0.trg' : 'projection.ros.trg',
-    constants.season.isOffseason ? 'projection.0.rec' : 'projection.ros.rec',
-    constants.season.isOffseason ? 'projection.0.recy' : 'projection.ros.recy',
-    constants.season.isOffseason ? 'projection.0.tdrec' : 'projection.ros.tdrec'
+    current_season.isOffseason ? 'pts_added.0' : 'pts_added.ros',
+    current_season.isOffseason ? 'points.0.total' : 'points.ros.total',
+    current_season.isOffseason ? 'projection.0.pa' : 'projection.ros.pa',
+    current_season.isOffseason ? 'projection.0.py' : 'projection.ros.py',
+    current_season.isOffseason ? 'projection.0.tdp' : 'projection.ros.tdp',
+    current_season.isOffseason ? 'projection.0.ints' : 'projection.ros.ints',
+    current_season.isOffseason ? 'projection.0.ra' : 'projection.ros.ra',
+    current_season.isOffseason ? 'projection.0.ry' : 'projection.ros.ry',
+    current_season.isOffseason ? 'projection.0.tdr' : 'projection.ros.tdr',
+    current_season.isOffseason ? 'projection.0.fuml' : 'projection.ros.fuml',
+    current_season.isOffseason ? 'projection.0.trg' : 'projection.ros.trg',
+    current_season.isOffseason ? 'projection.0.rec' : 'projection.ros.rec',
+    current_season.isOffseason ? 'projection.0.recy' : 'projection.ros.recy',
+    current_season.isOffseason ? 'projection.0.tdrec' : 'projection.ros.tdrec'
   ]
 }
 

@@ -1,8 +1,8 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { constants } from '@libs-shared'
 import TransactionsFilter from '@components/transactions-filter'
+import { transaction_types } from '@constants'
 
 export default class TransactionTypeFilter extends React.Component {
   render = () => {
@@ -12,9 +12,9 @@ export default class TransactionTypeFilter extends React.Component {
       values: []
     }
 
-    for (const tran in constants.transactions) {
-      const value = constants.transactions[tran]
-      const label = constants.transactionsDetail[value]
+    for (const tran in transaction_types) {
+      const value = transaction_types[tran]
+      const label = transaction_types.transactionsDetail[value]
       state.values.push({
         value,
         label,

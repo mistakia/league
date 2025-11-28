@@ -6,28 +6,27 @@ import Select from '@mui/material/Select'
 import MenuItem from '@mui/material/MenuItem'
 import FormControl from '@mui/material/FormControl'
 
-import { constants } from '@libs-shared'
-
 import './trade-slot-selector.styl'
+import { roster_slot_types } from '@constants'
 
 const slot_options = [
   {
-    value: constants.slots.BENCH,
+    value: roster_slot_types.BENCH,
     label: 'Active Roster',
     description: 'active roster (bench)'
   },
   {
-    value: constants.slots.PS,
+    value: roster_slot_types.PS,
     label: 'Practice Squad',
     description: 'practice squad (signed)'
   },
   {
-    value: constants.slots.PSD,
+    value: roster_slot_types.PSD,
     label: 'Drafted Practice Squad',
     description: 'drafted practice squad'
   },
   {
-    value: constants.slots.RESERVE_SHORT_TERM,
+    value: roster_slot_types.RESERVE_SHORT_TERM,
     label: 'Short-Term Reserve',
     description: 'short-term reserve (IR)'
   }
@@ -37,47 +36,47 @@ function get_available_slots_and_default({ player_map }) {
   const current_slot = player_map.get('slot')
 
   if (
-    current_slot === constants.slots.BENCH ||
-    constants.starterSlots.includes(current_slot)
+    current_slot === roster_slot_types.BENCH ||
+    roster_slot_types.starterSlots.includes(current_slot)
   ) {
-    return { available_slots: [], default_slot: constants.slots.BENCH }
+    return { available_slots: [], default_slot: roster_slot_types.BENCH }
   }
 
   if (
-    current_slot === constants.slots.PSD ||
-    current_slot === constants.slots.PSDP
+    current_slot === roster_slot_types.PSD ||
+    current_slot === roster_slot_types.PSDP
   ) {
     return {
-      available_slots: [constants.slots.PSD, constants.slots.BENCH],
-      default_slot: constants.slots.PSD
+      available_slots: [roster_slot_types.PSD, roster_slot_types.BENCH],
+      default_slot: roster_slot_types.PSD
     }
   }
 
   if (
-    current_slot === constants.slots.PS ||
-    current_slot === constants.slots.PSP
+    current_slot === roster_slot_types.PS ||
+    current_slot === roster_slot_types.PSP
   ) {
     return {
-      available_slots: [constants.slots.PS, constants.slots.BENCH],
-      default_slot: constants.slots.PS
+      available_slots: [roster_slot_types.PS, roster_slot_types.BENCH],
+      default_slot: roster_slot_types.PS
     }
   }
 
   if (
-    current_slot === constants.slots.RESERVE_SHORT_TERM ||
-    current_slot === constants.slots.RESERVE_LONG_TERM ||
-    current_slot === constants.slots.COV
+    current_slot === roster_slot_types.RESERVE_SHORT_TERM ||
+    current_slot === roster_slot_types.RESERVE_LONG_TERM ||
+    current_slot === roster_slot_types.COV
   ) {
     return {
       available_slots: [
-        constants.slots.RESERVE_SHORT_TERM,
-        constants.slots.BENCH
+        roster_slot_types.RESERVE_SHORT_TERM,
+        roster_slot_types.BENCH
       ],
-      default_slot: constants.slots.RESERVE_SHORT_TERM
+      default_slot: roster_slot_types.RESERVE_SHORT_TERM
     }
   }
 
-  return { available_slots: [], default_slot: constants.slots.BENCH }
+  return { available_slots: [], default_slot: roster_slot_types.BENCH }
 }
 
 function initialize_slot_if_needed({

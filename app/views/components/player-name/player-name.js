@@ -5,10 +5,8 @@ import NotInterestedIcon from '@mui/icons-material/NotInterested'
 
 import Position from '@components/position'
 import NFLTeam from '@components/nfl-team'
-import {
-  constants,
-  get_reserve_eligibility_from_player_map
-} from '@libs-shared'
+import { current_season, roster_slot_types } from '@constants'
+import { get_reserve_eligibility_from_player_map } from '@libs-shared'
 import PlayerLabel from '@components/player-label'
 import PlayerTag from '@components/player-tag'
 import PlayerStatus from '@components/player-status'
@@ -111,7 +109,7 @@ export default function PlayerName({
         <div className='player__name-main'>
           <div className='player__name-top'>
             <span>{player_map.get('pname')}</span>
-            {constants.year === player_map.get('nfl_draft_year') && (
+            {current_season.year === player_map.get('nfl_draft_year') && (
               <PlayerLabel label='R' type='rookie' description='Rookie' />
             )}
           </div>
@@ -119,7 +117,8 @@ export default function PlayerName({
         </div>
       </div>
       <div className='player__name-label'>
-        {(slot === constants.slots.PSP || slot === constants.slots.PSDP) && (
+        {(slot === roster_slot_types.PSP ||
+          slot === roster_slot_types.PSDP) && (
           <PlayerLabel label='P' description='Protected Practice Squad' />
         )}
         {isOnCutlist && (

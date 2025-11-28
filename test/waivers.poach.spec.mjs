@@ -8,7 +8,7 @@ import knex from '#db'
 
 import league from '#db/seeds/league.mjs'
 import draftPicks from '#db/seeds/draft-picks.mjs'
-import { constants } from '#libs-shared'
+import { current_season, waiver_types } from '#constants'
 import { user1, user2, user3 } from './fixtures/token.mjs'
 import { notLoggedIn, missing, invalid, error } from './utils/index.mjs'
 
@@ -17,7 +17,7 @@ process.env.NODE_ENV = 'test'
 const expect = chai.expect
 chai.should()
 chai.use(chai_http)
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 
 // Track used player IDs to avoid duplicate waiver claims
 const team_id_2_used_player_ids = []
@@ -57,7 +57,7 @@ describe('API /waivers - poach', function () {
     // make draft selection
     const leagueId = 1
     const players = await knex('player')
-      .where('nfl_draft_year', constants.season.year)
+      .where('nfl_draft_year', current_season.year)
       .limit(1)
 
     const player = players[0]
@@ -89,7 +89,7 @@ describe('API /waivers - poach', function () {
       .send({
         teamId,
         pid: drafted_player_id,
-        type: constants.waivers.POACH,
+        type: waiver_types.POACH,
         leagueId
       })
 
@@ -106,7 +106,7 @@ describe('API /waivers - poach', function () {
     res.body.po.should.equal(9999)
     const submitted = Math.round(Date.now() / 1000)
     res.body.submitted.should.equal(submitted)
-    res.body.type.should.equal(constants.waivers.POACH)
+    res.body.type.should.equal(waiver_types.POACH)
     res.body.uid.should.be.a('number')
     res.body.uid.should.be.above(0)
 
@@ -124,7 +124,7 @@ describe('API /waivers - poach', function () {
     expect(waiver.submitted).to.equal(submitted)
     expect(waiver.bid).to.equal(0)
     expect(waiver.po).to.equal(9999)
-    expect(waiver.type).to.equal(constants.waivers.POACH)
+    expect(waiver.type).to.equal(waiver_types.POACH)
     expect(waiver.succ).to.equal(null)
     expect(waiver.reason).to.equal(null)
     expect(waiver.processed).to.equal(null)
@@ -153,7 +153,7 @@ describe('API /waivers - poach', function () {
         .set('Authorization', `Bearer ${user2}`)
         .send({
           teamId: 2,
-          type: constants.waivers.POACH,
+          type: waiver_types.POACH,
           leagueId: 1
         })
 
@@ -167,7 +167,7 @@ describe('API /waivers - poach', function () {
         .set('Authorization', `Bearer ${user2}`)
         .send({
           pid: drafted_player_id,
-          type: constants.waivers.POACH,
+          type: waiver_types.POACH,
           leagueId: 1
         })
 
@@ -182,7 +182,7 @@ describe('API /waivers - poach', function () {
         .send({
           teamId: 2,
           pid: drafted_player_id,
-          type: constants.waivers.POACH
+          type: waiver_types.POACH
         })
 
       await missing(request, 'leagueId')
@@ -209,7 +209,7 @@ describe('API /waivers - poach', function () {
         .set('Authorization', `Bearer ${user2}`)
         .send({
           teamId: 2,
-          type: constants.waivers.POACH,
+          type: waiver_types.POACH,
           pid: 'x',
           leagueId: 1
         })
@@ -224,7 +224,7 @@ describe('API /waivers - poach', function () {
         .set('Authorization', `Bearer ${user2}`)
         .send({
           teamId: 2,
-          type: constants.waivers.POACH,
+          type: waiver_types.POACH,
           pid: drafted_player_id,
           release: 'x',
           leagueId: 1
@@ -240,7 +240,7 @@ describe('API /waivers - poach', function () {
         .set('Authorization', `Bearer ${user2}`)
         .send({
           teamId: 2,
-          type: constants.waivers.POACH,
+          type: waiver_types.POACH,
           pid: drafted_player_id,
           leagueId: 2
         })
@@ -255,7 +255,7 @@ describe('API /waivers - poach', function () {
         .set('Authorization', `Bearer ${user2}`)
         .send({
           teamId: 2,
-          type: constants.waivers.POACH,
+          type: waiver_types.POACH,
           bid: 'x',
           pid: drafted_player_id,
           leagueId: 1
@@ -286,7 +286,7 @@ describe('API /waivers - poach', function () {
         .set('Authorization', `Bearer ${user2}`)
         .send({
           teamId: 'x',
-          type: constants.waivers.POACH,
+          type: waiver_types.POACH,
           pid: drafted_player_id,
           leagueId: 1
         })
@@ -301,7 +301,7 @@ describe('API /waivers - poach', function () {
         .set('Authorization', `Bearer ${user2}`)
         .send({
           teamId: 1,
-          type: constants.waivers.POACH,
+          type: waiver_types.POACH,
           pid: drafted_player_id,
           leagueId: 1
         })
@@ -311,7 +311,7 @@ describe('API /waivers - poach', function () {
 
     it('release player not on team', async () => {
       const players = await knex('player')
-        .where('nfl_draft_year', constants.season.year)
+        .where('nfl_draft_year', current_season.year)
         .whereNotIn('pid', [...team_id_2_used_player_ids, drafted_player_id])
         .limit(1)
 
@@ -324,7 +324,7 @@ describe('API /waivers - poach', function () {
         .send({
           teamId: 3,
           release: invalid_release_player_id,
-          type: constants.waivers.POACH,
+          type: waiver_types.POACH,
           pid: drafted_player_id,
           leagueId: 1
         })
@@ -339,7 +339,7 @@ describe('API /waivers - poach', function () {
         .set('Authorization', `Bearer ${user2}`)
         .send({
           teamId: 2,
-          type: constants.waivers.POACH,
+          type: waiver_types.POACH,
           pid: drafted_player_id,
           leagueId: 1
         })
@@ -362,7 +362,7 @@ describe('API /waivers - poach', function () {
         .set('Authorization', `Bearer ${user2}`)
         .send({
           teamId: 2,
-          type: constants.waivers.POACH,
+          type: waiver_types.POACH,
           pid: random_player_id,
           leagueId: 1
         })
@@ -383,7 +383,7 @@ describe('API /waivers - poach', function () {
         .set('Authorization', `Bearer ${user3}`)
         .send({
           teamId: 3,
-          type: constants.waivers.POACH,
+          type: waiver_types.POACH,
           pid: drafted_player_id,
           leagueId: 1
         })

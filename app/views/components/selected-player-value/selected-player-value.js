@@ -3,7 +3,7 @@ import PropTypes from 'prop-types'
 import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
 
-import { constants } from '@libs-shared'
+import { current_season, fantasy_weeks } from '@constants'
 
 export default class SelectedPlayerValue extends React.Component {
   render = () => {
@@ -18,7 +18,7 @@ export default class SelectedPlayerValue extends React.Component {
         text: ''
       },
       xAxis: {
-        categories: constants.fantasyWeeks.filter((w) => w >= constants.week),
+        categories: fantasy_weeks.filter((w) => w >= current_season.week),
         title: {
           text: 'Week'
         },

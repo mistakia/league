@@ -1,8 +1,8 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { constants } from '@libs-shared'
 import StatFilter from '@components/stat-filter'
+import { nfl_downs } from '@constants'
 
 export default class StatDownsFilter extends React.Component {
   render = () => {
@@ -12,7 +12,7 @@ export default class StatDownsFilter extends React.Component {
       values: []
     }
 
-    for (const down of constants.downs) {
+    for (const down of nfl_downs) {
       state.values.push({
         label: down,
         value: down,

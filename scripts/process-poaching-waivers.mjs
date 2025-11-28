@@ -2,7 +2,8 @@ import debug from 'debug'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { constants, Errors, get_free_agent_period } from '#libs-shared'
+import { Errors, get_free_agent_period } from '#libs-shared'
+import { current_season, waiver_types } from '#constants'
 import {
   sendNotifications,
   submitPoach,
@@ -28,9 +29,9 @@ const run = async ({ daily = false } = {}) => {
   const timestamp = Math.round(Date.now() / 1000)
 
   // Check if it's the first 24 hours of the regular season
-  const is_first_24_hours_of_regular_season = constants.season.now.isBetween(
-    constants.season.regular_season_start.add(7, 'days'),
-    constants.season.regular_season_start.add(8, 'days')
+  const is_first_24_hours_of_regular_season = current_season.now.isBetween(
+    current_season.regular_season_start.add(7, 'days'),
+    current_season.regular_season_start.add(8, 'days')
   )
 
   if (is_first_24_hours_of_regular_season) {
@@ -45,7 +46,7 @@ const run = async ({ daily = false } = {}) => {
     .select('lid')
     .whereNull('processed')
     .whereNull('cancelled')
-    .where('type', constants.waivers.POACH)
+    .where('type', waiver_types.POACH)
     .groupBy('lid')
 
   const leagueIds = results.map((w) => w.lid)
@@ -58,8 +59,8 @@ const run = async ({ daily = false } = {}) => {
     const league = await getLeague({ lid })
     const free_agency_period = get_free_agent_period(league)
     if (
-      !constants.season.isRegularSeason &&
-      constants.season.now.isAfter(free_agency_period.start) &&
+      !current_season.isRegularSeason &&
+      current_season.now.isAfter(free_agency_period.start) &&
       !daily
     ) {
       log(

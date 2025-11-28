@@ -2,7 +2,7 @@ import express from 'express'
 
 import cache from '#api/cache.mjs'
 import { getPlayers, getRestrictedFreeAgencyBids } from '#libs-server'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 const router = express.Router({ mergeParams: true })
 
@@ -68,7 +68,7 @@ router.get('/?', async (req, res) => {
         const rows = await db('users_teams').where({
           userid: userId,
           tid: teamId,
-          year: constants.season.year
+          year: current_season.year
         })
 
         if (!rows.length) {
@@ -108,7 +108,7 @@ router.get('/?', async (req, res) => {
       const rows = await db('users_teams').where({
         userid: userId,
         tid: teamId,
-        year: constants.season.year
+        year: current_season.year
       })
 
       if (!rows.length) {

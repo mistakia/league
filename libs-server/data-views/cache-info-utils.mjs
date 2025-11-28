@@ -1,4 +1,4 @@
-import * as constants from '#libs-shared/constants.mjs'
+import { current_season } from '#constants'
 
 // Common cache TTL values in milliseconds
 const CACHE_TTL = {
@@ -51,7 +51,7 @@ export const create_season_cache_info = ({
     }
 
     // Historical data (previous seasons)
-    if (!year.includes(constants.season.year)) {
+    if (!year.includes(current_season.year)) {
       return {
         cache_ttl: historical_ttl,
         cache_expire_at: null
@@ -77,7 +77,7 @@ export const create_season_cache_info = ({
     }
 
     // If specific weeks are requested and they're all in the past, treat as historical
-    if (week.every((w) => w < constants.season.week)) {
+    if (week.every((w) => w < current_season.week)) {
       return {
         cache_ttl: historical_ttl,
         cache_expire_at: null
@@ -140,7 +140,7 @@ export const create_exact_year_cache_info = ({
     const year = get_year(params)
 
     // If no year specified, treat as current year data
-    if (year === undefined || year === null || year === constants.season.year) {
+    if (year === undefined || year === null || year === current_season.year) {
       return {
         cache_ttl: current_year_ttl,
         cache_expire_at: null

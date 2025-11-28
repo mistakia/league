@@ -4,7 +4,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season, external_data_sources } from '#constants'
 import { is_main, find_player_row, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -17,13 +17,13 @@ debug.enable('import:projections,get-player')
 
 const run = async ({ dry = false } = {}) => {
   // do not pull in any projections after the season has ended
-  if (constants.season.week > constants.season.nflFinalWeek) {
+  if (current_season.week > current_season.nflFinalWeek) {
     return
   }
 
   const timestamp = Math.floor(Date.now() / 1000)
-  const week = Math.max(constants.season.week, 1)
-  const year = constants.season.year
+  const week = Math.max(current_season.week, 1)
+  const year = current_season.year
 
   const $ = await fetchCheerioObject(
     'https://www.numberfire.com/nfl/fantasy/fantasy-football-projections'
@@ -81,7 +81,7 @@ const run = async ({ dry = false } = {}) => {
       year,
       week,
       seas_type: 'REG',
-      sourceid: constants.sources.NUMBERFIRE,
+      sourceid: external_data_sources.NUMBERFIRE,
       ...data
     })
   }
@@ -103,7 +103,7 @@ const run = async ({ dry = false } = {}) => {
       .where({
         year,
         week,
-        sourceid: constants.sources.NUMBERFIRE,
+        sourceid: external_data_sources.NUMBERFIRE,
         seas_type: 'REG'
       })
       .whereNotIn(

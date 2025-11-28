@@ -21,8 +21,10 @@ export default async function (knex, league_params = {}) {
     commishid: userId,
     draft_start: Math.round(Date.now() / 1000),
     free_agency_live_auction_start: null,
-    tddate: constants.season.regular_season_start.add('12', 'weeks').unix(),
-    ext_date: constants.season.now.subtract('1', 'week').unix(),
+    tddate: constants.current_season.regular_season_start
+      .add('12', 'weeks')
+      .unix(),
+    ext_date: constants.current_season.now.subtract('1', 'week').unix(),
     ...league_params
   })
   const league = await getLeague({ lid: leagueId })
@@ -37,7 +39,7 @@ export default async function (knex, league_params = {}) {
   for (let i = 1; i <= 12; i++) {
     await knex('teams').insert({
       uid: i,
-      year: constants.season.year,
+      year: constants.current_season.year,
       lid: 1,
       waiver_order: i,
       draft_order: i,
@@ -48,12 +50,12 @@ export default async function (knex, league_params = {}) {
       abbrv: `TM${i}`
     })
 
-    for (let week = 0; week <= constants.season.finalWeek; week++) {
+    for (let week = 0; week <= constants.current_season.finalWeek; week++) {
       await knex('rosters').insert({
         tid: i,
         lid: 1,
         week,
-        year: constants.season.year,
+        year: constants.current_season.year,
         last_updated: Math.round(Date.now() / 1000)
       })
     }
@@ -61,7 +63,7 @@ export default async function (knex, league_params = {}) {
     await knex('users_teams').insert({
       userid: i,
       tid: i,
-      year: constants.season.year
+      year: constants.current_season.year
     })
   }
 

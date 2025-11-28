@@ -1,7 +1,7 @@
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { constants } from '#libs-shared'
+import { transaction_types } from '#constants'
 import db from '#db'
 
 import is_main from './is-main.mjs'
@@ -20,12 +20,12 @@ async function getTransactionsSinceFreeAgent({
     .orderBy('uid', 'desc')
 
   const types = [
-    constants.transactions.ROSTER_ADD,
-    constants.transactions.AUCTION_PROCESSED,
-    constants.transactions.PRACTICE_ADD
+    transaction_types.ROSTER_ADD,
+    transaction_types.AUCTION_PROCESSED,
+    transaction_types.PRACTICE_ADD
   ]
   if (include_restricted)
-    types.push(constants.transactions.RESTRICTED_FREE_AGENCY_TAG)
+    types.push(transaction_types.RESTRICTED_FREE_AGENCY_TAG)
   const index = transactions.findIndex((t) => types.includes(t.type))
   if (index === -1) return transactions
   return transactions.slice(0, index + 1)

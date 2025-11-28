@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season, external_data_sources } from '#constants'
 import {
   is_main,
   find_player_row,
@@ -25,11 +25,11 @@ const timestamp = Math.round(Date.now() / 1000)
 const run = async ({
   week,
   season_totals = false,
-  year = constants.season.year,
+  year = current_season.year,
   dry_run = false
 }) => {
   // do not pull in any projections after the season has ended
-  if (constants.season.week > constants.season.nflFinalWeek) {
+  if (current_season.week > current_season.nflFinalWeek) {
     return
   }
 
@@ -60,7 +60,7 @@ const run = async ({
       name,
       teams: [team],
       pos,
-      ignore_retired: year === constants.season.year
+      ignore_retired: year === current_season.year
     }
     let player_row
 
@@ -97,7 +97,7 @@ const run = async ({
       year,
       week,
       seas_type: 'REG',
-      sourceid: constants.sources.ESPN,
+      sourceid: external_data_sources.ESPN,
       ...data
     })
   }
@@ -115,7 +115,12 @@ const run = async ({
   if (inserts.length) {
     // remove any existing projections in index not included in this set
     await db('projections_index')
-      .where({ year, week, sourceid: constants.sources.ESPN, seas_type: 'REG' })
+      .where({
+        year,
+        week,
+        sourceid: external_data_sources.ESPN,
+        seas_type: 'REG'
+      })
       .whereNotIn(
         'pid',
         inserts.map((i) => i.pid)
@@ -135,7 +140,7 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    const week = argv.season ? 0 : Math.max(constants.season.week, 1)
+    const week = argv.season ? 0 : Math.max(current_season.week, 1)
     await run({
       week,
       season_totals: argv.season,

@@ -1,7 +1,13 @@
 import dayjs from 'dayjs'
 
 import db from '#db'
-import { constants, Roster } from '#libs-shared'
+import { Roster } from '#libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  transaction_types,
+  waiver_types
+} from '#constants'
 import isPlayerLocked from './is-player-locked.mjs'
 import getRoster from './get-roster.mjs'
 import getLastTransaction from './get-last-transaction.mjs'
@@ -16,7 +22,7 @@ async function handle_super_priority_on_release({ pid, releasing_tid, lid }) {
     .where({
       pid,
       lid,
-      type: constants.transactions.POACHED,
+      type: transaction_types.POACHED,
       tid: releasing_tid
     })
     .limit(1)
@@ -56,8 +62,11 @@ async function handle_super_priority_on_release({ pid, releasing_tid, lid }) {
       'rosters_players.tid': super_priority_status.original_tid,
       'rosters_players.lid': lid
     })
-    .where('rosters.year', constants.year)
-    .whereIn('rosters_players.slot', constants.ps_signed_slots) // PS or PSP
+    .where('rosters.year', current_season.year)
+    .whereIn('rosters_players.slot', [
+      roster_slot_types.PS,
+      roster_slot_types.PSP
+    ]) // PS or PSP
     .orderBy('rosters.week', 'desc')
     .first()
 
@@ -114,7 +123,7 @@ async function handle_super_priority_on_release({ pid, releasing_tid, lid }) {
     submitted: Math.round(Date.now() / 1000),
     bid: 0,
     po: 0,
-    type: constants.waivers.FREE_AGENCY_PRACTICE,
+    type: waiver_types.FREE_AGENCY_PRACTICE,
     super_priority: 1
   })
 }
@@ -153,7 +162,7 @@ export default async function ({
     roster.players.find(
       (p) =>
         p.pid === release_pid &&
-        (p.slot === constants.slots.PSP || p.slot === constants.slots.PSDP)
+        (p.slot === roster_slot_types.PSP || p.slot === roster_slot_types.PSDP)
     )
   ) {
     throw new Error('player is protected')
@@ -181,14 +190,14 @@ export default async function ({
   }
 
   // verify player was not poached this offseason
-  if (!constants.season.isRegularSeason) {
+  if (!current_season.isRegularSeason) {
     const poaches = await db('poaches')
       .where({ pid: release_pid, lid, tid, succ: 1 })
       .orderBy('processed', 'desc')
 
     if (poaches.length) {
       const poach = poaches[0]
-      if (dayjs.unix(poach.processed).isAfter(constants.season.offseason)) {
+      if (dayjs.unix(poach.processed).isAfter(current_season.offseason)) {
         throw new Error('player was poached')
       }
     }
@@ -214,7 +223,8 @@ export default async function ({
       roster.players.find(
         (p) =>
           p.pid === activate_pid &&
-          (p.slot === constants.slots.PSP || p.slot === constants.slots.PSDP)
+          (p.slot === roster_slot_types.PSP ||
+            p.slot === roster_slot_types.PSDP)
       )
     ) {
       throw new Error('player is protected')
@@ -227,10 +237,12 @@ export default async function ({
     }
 
     // activate player
-    await db('rosters_players').update({ slot: constants.slots.BENCH }).where({
-      rid: rosterRow.uid,
-      pid: activate_pid
-    })
+    await db('rosters_players')
+      .update({ slot: roster_slot_types.BENCH })
+      .where({
+        rid: rosterRow.uid,
+        pid: activate_pid
+      })
 
     const { value } = await getLastTransaction({
       pid: activate_pid,
@@ -242,10 +254,10 @@ export default async function ({
       tid,
       lid,
       pid: activate_pid,
-      type: constants.transactions.ROSTER_ACTIVATE,
+      type: transaction_types.ROSTER_ACTIVATE,
       value,
-      week: constants.season.week,
-      year: constants.season.year,
+      week: current_season.week,
+      year: current_season.year,
       timestamp
     }
     const [inserted_transaction] = await db('transactions')
@@ -270,7 +282,7 @@ export default async function ({
     data.push({
       pid: activate_pid,
       tid,
-      slot: constants.slots.BENCH,
+      slot: roster_slot_types.BENCH,
       rid: roster.uid,
       pos: activate_player_row.pos,
       transaction
@@ -283,10 +295,10 @@ export default async function ({
     tid,
     lid,
     pid: release_pid,
-    type: constants.transactions.ROSTER_RELEASE,
+    type: transaction_types.ROSTER_RELEASE,
     value: 0,
-    week: constants.season.week,
-    year: constants.season.year,
+    week: current_season.week,
+    year: current_season.year,
     timestamp
   }
   const [inserted_transaction] = await db('transactions')
@@ -296,8 +308,8 @@ export default async function ({
 
   // remove release player from rosters
   const teamRosters = await db('rosters')
-    .where('week', '>=', constants.season.week)
-    .where('year', constants.season.year)
+    .where('week', '>=', current_season.week)
+    .where('year', current_season.year)
     .where('tid', tid)
   const rosterIds = teamRosters.map((r) => r.uid)
   await db('rosters_players')
@@ -332,7 +344,7 @@ export default async function ({
     const teams = await db('teams').where({
       uid: tid,
       lid,
-      year: constants.season.year
+      year: current_season.year
     })
     const team = teams[0]
 

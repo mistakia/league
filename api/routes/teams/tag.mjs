@@ -2,7 +2,8 @@ import express from 'express'
 import dayjs from 'dayjs'
 
 import restricted_free_agency from './restricted-free-agency.mjs'
-import { constants, Roster } from '#libs-shared'
+import { Roster } from '#libs-shared'
+import { current_season, player_tag_types } from '#constants'
 import {
   getRoster,
   getLeague,
@@ -44,7 +45,7 @@ const router = express.Router({ mergeParams: true })
  *                 example: 2
  *               tag:
  *                 type: integer
- *                 description: Tag type (see constants.tags)
+ *                 description: Tag type (see constants.player_tag_types)
  *                 example: 3
  *               remove:
  *                 type: string
@@ -115,7 +116,7 @@ router.post('/?', async (req, res) => {
       return res.status(400).send({ error: 'missing tag' })
     }
 
-    const validTags = Object.values(constants.tags)
+    const validTags = Object.values(player_tag_types)
     tag = Number(tag)
     if (!validTags.includes(tag)) {
       return res.status(400).send({ error: 'invalid tag' })
@@ -164,7 +165,7 @@ router.post('/?', async (req, res) => {
     }
 
     // Check if player has been franchise tagged for the past two consecutive years
-    if (tag === constants.tags.FRANCHISE) {
+    if (tag === player_tag_types.FRANCHISE) {
       const is_valid_franchise_tag = await validate_franchise_tag({
         pid,
         tid
@@ -179,9 +180,9 @@ router.post('/?', async (req, res) => {
 
     // make sure extension has not passed
     if (
-      constants.season.week === 0 &&
+      current_season.week === 0 &&
       league.ext_date &&
-      constants.season.now.isAfter(dayjs.unix(league.ext_date))
+      current_season.now.isAfter(dayjs.unix(league.ext_date))
     ) {
       return res.status(400).send({ error: 'extension deadline has passed' })
     }
@@ -207,7 +208,7 @@ router.post('/?', async (req, res) => {
     await db('restricted_free_agency_bids')
       .update('cancelled', timestamp)
       .where({
-        year: constants.season.year,
+        year: current_season.year,
         pid,
         tid
       })
@@ -336,9 +337,9 @@ router.delete('/?', async (req, res) => {
 
     // make sure extension has not passed
     if (
-      constants.season.week === 0 &&
+      current_season.week === 0 &&
       league.ext_date &&
-      constants.season.now.isAfter(dayjs.unix(league.ext_date))
+      current_season.now.isAfter(dayjs.unix(league.ext_date))
     ) {
       return res.status(400).send({ error: 'extension deadline has passed' })
     }

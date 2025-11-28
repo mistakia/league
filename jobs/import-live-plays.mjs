@@ -11,7 +11,7 @@ const log = debug('import-live-plays')
 let live_plays_job_is_running = false
 
 export default async function () {
-  if (constants.season.nfl_seas_type !== 'REG') {
+  if (constants.current_season.nfl_seas_type !== 'REG') {
     return
   }
 

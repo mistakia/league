@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main, pfr, updatePlayer, find_player_row } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -17,7 +17,7 @@ debug.enable(
 )
 
 const import_player_draft_position_pfr = async ({
-  year = constants.season.year,
+  year = current_season.year,
   ignore_cache = false,
   dry = false
 } = {}) => {

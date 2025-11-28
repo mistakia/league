@@ -1,11 +1,11 @@
 import express from 'express'
 import dayjs from 'dayjs'
 
-import { constants } from '#libs-shared'
 import {
   getTransactionsSinceAcquisition,
   getTransactionsSinceFreeAgent
 } from '#libs-server'
+import { transaction_types } from '#constants'
 
 const router = express.Router({ mergeParams: true })
 
@@ -35,7 +35,7 @@ const router = express.Router({ mergeParams: true })
  *           example: "4017"
  *         type:
  *           type: integer
- *           description: Transaction type (constants.transactions)
+ *           description: Transaction type (constants.transaction_types)
  *           enum: [1, 2, 3, 4, 5, 6, 7, 8, 9]
  *           example: 1
  *         userid:
@@ -246,7 +246,7 @@ router.get('/?', async (req, res) => {
           .andOn(
             'transactions.type',
             '=',
-            db.raw('?', [constants.transactions.DRAFT])
+            db.raw('?', [transaction_types.DRAFT])
           )
       })
       .select('transactions.*', 'draft.pick', 'draft.pick_str')
@@ -361,9 +361,9 @@ router.get('/release', async (req, res) => {
     const { leagueId } = req.params
     const cutoff = dayjs().subtract('48', 'hours').unix()
     const types = [
-      constants.transactions.ROSTER_ADD,
-      constants.transactions.ROSTER_RELEASE,
-      constants.transactions.PRACTICE_ADD
+      transaction_types.ROSTER_ADD,
+      transaction_types.ROSTER_RELEASE,
+      transaction_types.PRACTICE_ADD
     ]
     const transactions = await db('transactions')
       .where({

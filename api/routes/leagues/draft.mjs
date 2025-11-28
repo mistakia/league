@@ -2,12 +2,16 @@ import express from 'express'
 import dayjs from 'dayjs'
 
 import {
-  constants,
   Roster,
   isDraftWindowOpen,
   getDraftDates,
   get_last_consecutive_pick
 } from '#libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  transaction_types
+} from '#constants'
 import {
   getRoster,
   sendNotifications,
@@ -229,7 +233,7 @@ router.get('/?', async (req, res) => {
   const { logger, db } = req.app.locals
   try {
     const { leagueId } = req.params
-    const year = req.query.year || constants.season.year
+    const year = req.query.year || current_season.year
 
     const picks = await db('draft').where({ lid: leagueId, year })
 
@@ -532,14 +536,14 @@ router.post('/?', async (req, res) => {
     }
 
     const draft_start = dayjs.unix(league.draft_start)
-    if (constants.season.now.isBefore(draft_start)) {
+    if (current_season.now.isBefore(draft_start)) {
       return res.status(400).send({ error: 'draft has not started' })
     }
 
     // make sure draft has not ended
     const last_pick = await db('draft')
       .where({
-        year: constants.season.year,
+        year: current_season.year,
         lid: leagueId
       })
       .orderBy('pick', 'desc')
@@ -549,7 +553,7 @@ router.post('/?', async (req, res) => {
     const season = await db('seasons')
       .where({
         lid: leagueId,
-        year: constants.season.year
+        year: current_season.year
       })
       .first()
 
@@ -567,7 +571,7 @@ router.post('/?', async (req, res) => {
         : null
     })
 
-    if (constants.season.now.isAfter(draft_dates.draftEnd)) {
+    if (current_season.now.isAfter(draft_dates.draftEnd)) {
       return res.status(400).send({ error: 'draft has ended' })
     }
 
@@ -585,7 +589,7 @@ router.post('/?', async (req, res) => {
     const prev_pick = await db('draft')
       .where({
         lid,
-        year: constants.season.year
+        year: current_season.year
       })
       .where('pick', '<', pick.pick)
       .orderBy('pick', 'desc')
@@ -595,7 +599,7 @@ router.post('/?', async (req, res) => {
 
     // locate the last consecutive pick going back to the first pick
     const draft_picks = await db('draft')
-      .where({ lid, year: constants.season.year })
+      .where({ lid, year: current_season.year })
       .orderBy('pick', 'asc')
     const last_consective_pick = get_last_consecutive_pick(draft_picks)
 
@@ -623,14 +627,14 @@ router.post('/?', async (req, res) => {
     // make sure player is a rookie
     const player_rows = await db('player').where({ pid })
     const player_row = player_rows[0]
-    if (!player_row || player_row.nfl_draft_year !== constants.season.year) {
+    if (!player_row || player_row.nfl_draft_year !== current_season.year) {
       return res.status(400).send({ error: 'invalid pid' })
     }
 
     // make sure player is available/undrafted
     const rosterPlayers = await db('rosters_players').where({
       lid,
-      year: constants.season.year,
+      year: current_season.year,
       week: 0,
       pid
     })
@@ -641,7 +645,7 @@ router.post('/?', async (req, res) => {
     // make sure team has an open slot
     const rosterRow = await getRoster({
       tid: teamId,
-      year: constants.season.year,
+      year: current_season.year,
       week: 0
     })
     const roster = new Roster({ roster: rosterRow, league })
@@ -654,11 +658,11 @@ router.post('/?', async (req, res) => {
       rid: roster.uid,
       pid,
       pos: player_row.pos,
-      slot: constants.slots.PSD,
+      slot: roster_slot_types.PSD,
       extensions: 0,
       tid: teamId,
       lid,
-      year: constants.season.year,
+      year: current_season.year,
       week: 0
     })
 
@@ -667,9 +671,9 @@ router.post('/?', async (req, res) => {
       tid: teamId,
       lid,
       pid,
-      type: constants.transactions.DRAFT,
-      week: constants.season.week,
-      year: constants.season.year,
+      type: transaction_types.DRAFT,
+      week: current_season.week,
+      year: current_season.year,
       timestamp: Math.round(Date.now() / 1000),
       value
     })
@@ -685,7 +689,7 @@ router.post('/?', async (req, res) => {
     const remaining_picks = await db('draft')
       .where({
         lid,
-        year: constants.season.year
+        year: current_season.year
       })
       .whereNull('pid')
       .count('* as count')
@@ -696,7 +700,7 @@ router.post('/?', async (req, res) => {
       await db('seasons')
         .where({
           lid,
-          year: constants.season.year
+          year: current_season.year
         })
         .update({
           rookie_draft_completed_at: selection_timestamp
@@ -733,7 +737,7 @@ router.post('/?', async (req, res) => {
 
     const teams = await db('teams').where({
       uid: teamId,
-      year: constants.season.year
+      year: current_season.year
     })
     const team = teams[0]
 
@@ -743,7 +747,7 @@ router.post('/?', async (req, res) => {
     } else {
       message += `pick #${pick.pick} (${pick.pick_str}) `
     }
-    message += `in the ${constants.season.year} draft`
+    message += `in the ${current_season.year} draft`
 
     await sendNotifications({
       league,

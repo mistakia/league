@@ -6,7 +6,11 @@ import MockDate from 'mockdate'
 import server from '#api'
 import knex from '#db'
 import league from '#db/seeds/league.mjs'
-import { constants } from '#libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  transaction_types
+} from '#constants'
 import { user1, user2 } from './fixtures/token.mjs'
 import {
   selectPlayer,
@@ -22,7 +26,7 @@ process.env.NODE_ENV = 'test'
 chai.should()
 chai.use(chai_http)
 const expect = chai.expect
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 
 describe('API /teams - lineups', function () {
   before(async function () {
@@ -53,7 +57,7 @@ describe('API /teams - lineups', function () {
           players: [
             {
               pid: player.pid,
-              slot: constants.slots.RB
+              slot: roster_slot_types.RB
             }
           ],
           leagueId
@@ -64,26 +68,26 @@ describe('API /teams - lineups', function () {
       res.should.be.json
 
       expect(res.body.length).to.equal(1)
-      res.body[0].slot.should.equal(constants.slots.RB)
+      res.body[0].slot.should.equal(roster_slot_types.RB)
       res.body[0].pid.should.equal(player.pid)
-      res.body[0].week.should.equal(constants.season.week)
-      res.body[0].year.should.equal(constants.season.year)
+      res.body[0].week.should.equal(current_season.week)
+      res.body[0].year.should.equal(current_season.year)
       res.body[0].tid.should.equal(teamId)
 
       const rosterRows = await knex('rosters_players').where({
         pid: player.pid,
         tid: teamId,
-        week: constants.season.week,
-        year: constants.season.year
+        week: current_season.week,
+        year: current_season.year
       })
 
-      expect(rosterRows[0].slot).to.equal(constants.slots.RB)
+      expect(rosterRows[0].slot).to.equal(roster_slot_types.RB)
       expect(rosterRows[0].pid).to.equal(player.pid)
       expect(rosterRows[0].pos).to.equal(player.pos1)
       expect(rosterRows[0].tid).to.equal(teamId)
       expect(rosterRows[0].lid).to.equal(leagueId)
-      expect(rosterRows[0].week).to.equal(constants.season.week)
-      expect(rosterRows[0].year).to.equal(constants.season.year)
+      expect(rosterRows[0].week).to.equal(current_season.week)
+      expect(rosterRows[0].year).to.equal(current_season.year)
     })
 
     it('future week', function () {
@@ -140,7 +144,7 @@ describe('API /teams - lineups', function () {
           leagueId: 1,
           players: [
             {
-              slot: constants.slots.RB
+              slot: roster_slot_types.RB
             }
           ]
         })
@@ -157,7 +161,7 @@ describe('API /teams - lineups', function () {
           players: [
             {
               pid: 'x',
-              slot: constants.slots.RB
+              slot: roster_slot_types.RB
             }
           ]
         })
@@ -175,7 +179,7 @@ describe('API /teams - lineups', function () {
           players: [
             {
               pid: 'x',
-              slot: constants.slots.RB
+              slot: roster_slot_types.RB
             }
           ]
         })
@@ -193,7 +197,7 @@ describe('API /teams - lineups', function () {
           players: [
             {
               pid: 'x',
-              slot: constants.slots.RB
+              slot: roster_slot_types.RB
             }
           ]
         })
@@ -219,7 +223,7 @@ describe('API /teams - lineups', function () {
           players: [
             {
               pid: player.pid,
-              slot: constants.slots.RB
+              slot: roster_slot_types.RB
             }
           ]
         })
@@ -235,7 +239,7 @@ describe('API /teams - lineups', function () {
         teamId: 1,
         player,
         userId: 1,
-        slot: constants.slots.PS
+        slot: roster_slot_types.PS
       })
       const request = chai_request
         .execute(server)
@@ -245,7 +249,7 @@ describe('API /teams - lineups', function () {
           leagueId: 1,
           players: [
             {
-              slot: constants.slots.RB,
+              slot: roster_slot_types.RB,
               pid: player.pid
             }
           ]
@@ -265,7 +269,7 @@ describe('API /teams - lineups', function () {
           players: [
             {
               pid: player.pid,
-              slot: constants.slots.RB
+              slot: roster_slot_types.RB
             }
           ]
         })
@@ -300,7 +304,7 @@ describe('API /teams - lineups', function () {
           players: [
             {
               pid: player.pid,
-              slot: constants.slots.WR
+              slot: roster_slot_types.WR
             }
           ],
           week: 1
@@ -321,13 +325,13 @@ describe('API /teams - lineups', function () {
         teamId: 1,
         player,
         userId: 1,
-        slot: constants.slots.RESERVE_SHORT_TERM,
-        transaction: constants.transactions.RESERVE_IR
+        slot: roster_slot_types.RESERVE_SHORT_TERM,
+        transaction: transaction_types.RESERVE_IR
       })
 
       await knex('seasons')
         .where({
-          year: constants.season.year,
+          year: current_season.year,
           lid: 1
         })
         .update({
@@ -353,7 +357,7 @@ describe('API /teams - lineups', function () {
           players: [
             {
               pid: player.pid,
-              slot: constants.slots.WR
+              slot: roster_slot_types.WR
             }
           ],
           week: 6

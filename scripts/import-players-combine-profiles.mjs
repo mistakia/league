@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import {
   is_main,
   find_player_row,
@@ -55,7 +55,7 @@ const update_ngs_prospect_scores = async ({ pid, ngs_data, timestamp }) => {
 }
 
 const import_players_from_combine_profiles_for_year = async ({
-  year = constants.season.year,
+  year = current_season.year,
   token,
   ignore_cache = false,
   current_timestamp = Math.floor(Date.now() / 1000)
@@ -171,7 +171,7 @@ const import_all_players_from_combine_profiles = async ({
 }) => {
   const token = await nfl.get_session_token_v3()
   const min_year = 2006
-  const max_year = constants.season.year
+  const max_year = current_season.year
 
   start = start ? Math.max(start, min_year) : min_year
   end = end ? Math.min(end, max_year) : max_year

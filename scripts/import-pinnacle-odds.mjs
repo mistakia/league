@@ -6,7 +6,8 @@ import dayjs from 'dayjs'
 import oddslib from 'oddslib'
 
 import db from '#db'
-import { constants, fixTeam } from '#libs-shared'
+import { fixTeam } from '#libs-shared'
+import { current_season } from '#constants'
 import { chunk_array } from '#libs-shared/chunk.mjs'
 import {
   is_main,
@@ -114,7 +115,7 @@ const find_nfl_game = (team_info, pinnacle_matchup, nfl_games) => {
     return null
   }
 
-  const { week, seas_type } = constants.season.calculate_week(
+  const { week, seas_type } = current_season.calculate_week(
     dayjs(pinnacle_matchup.startTime)
   )
 
@@ -122,7 +123,7 @@ const find_nfl_game = (team_info, pinnacle_matchup, nfl_games) => {
     (game) =>
       game.week === week &&
       game.seas_type === seas_type &&
-      game.year === constants.season.year &&
+      game.year === current_season.year &&
       game.v === fixTeam(team_info.away_team) &&
       game.h === fixTeam(team_info.home_team)
   )
@@ -408,7 +409,7 @@ const format_market = async ({
     source_market_id,
     source_market_name: `type: ${pinnacle_matchup.type} / units: ${pinnacle_matchup.units} / category: ${special_category} / description: ${special_description}`,
     esbid: nfl_game ? nfl_game.esbid : null,
-    year: nfl_game ? nfl_game.year : constants.season.year,
+    year: nfl_game ? nfl_game.year : current_season.year,
     source_event_id: pinnacle_matchup.id,
     source_event_name: format_source_event_name({
       is_valid_matchup: team_info.is_valid_matchup,
@@ -708,7 +709,7 @@ const import_pinnacle_odds = async ({
   }
 
   const timestamp = Math.round(Date.now() / 1000)
-  const nfl_games = await db('nfl_games').where({ year: constants.season.year })
+  const nfl_games = await db('nfl_games').where({ year: current_season.year })
   const pinnacle_matchups = await pinnacle.get_nfl_matchups({ ignore_cache })
 
   // Collect unique values for analysis

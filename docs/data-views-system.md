@@ -133,7 +133,7 @@ Each stage makes key decisions that affect query performance:
 
   // Cache optimization
   get_cache_info: ({ params }) => ({
-    cache_ttl: params.year?.includes(constants.season.year)
+    cache_ttl: params.year?.includes(constants.current_season.year)
       ? 60 * 60 * 1000          // 1 hour for current year
       : 24 * 60 * 60 * 1000     // 24 hours for historical
   }),

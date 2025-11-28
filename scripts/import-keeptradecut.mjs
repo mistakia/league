@@ -6,7 +6,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { keeptradecut_metric_types } from '#constants'
 import {
   is_main,
   find_player_row,
@@ -127,7 +127,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
           pid,
           d: dayjs(i.d, 'YYYY-MM-DD').unix(),
           v: i.v,
-          type: constants.KEEPTRADECUT.VALUE
+          type: keeptradecut_metric_types.VALUE
         })
       })
 
@@ -137,7 +137,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
           pid,
           d: dayjs(i.d, 'YYYY-MM-DD').unix(),
           v: i.v,
-          type: constants.KEEPTRADECUT.OVERALL_RANK
+          type: keeptradecut_metric_types.OVERALL_RANK
         })
       })
 
@@ -147,7 +147,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
           pid,
           d: dayjs(i.d, 'YYYY-MM-DD').unix(),
           v: i.v,
-          type: constants.KEEPTRADECUT.POSITION_RANK
+          type: keeptradecut_metric_types.POSITION_RANK
         })
       })
 
@@ -157,7 +157,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
           pid,
           d: dayjs(i.d, 'YYYY-MM-DD').unix(),
           v: i.v,
-          type: constants.KEEPTRADECUT.VALUE
+          type: keeptradecut_metric_types.VALUE
         })
       })
 
@@ -167,7 +167,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
           pid,
           d: dayjs(i.d, 'YYYY-MM-DD').unix(),
           v: i.v,
-          type: constants.KEEPTRADECUT.OVERALL_RANK
+          type: keeptradecut_metric_types.OVERALL_RANK
         })
       })
 
@@ -177,7 +177,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
           pid,
           d: dayjs(i.d, 'YYYY-MM-DD').unix(),
           v: i.v,
-          type: constants.KEEPTRADECUT.POSITION_RANK
+          type: keeptradecut_metric_types.POSITION_RANK
         })
       })
     } else {
@@ -188,7 +188,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
           pid,
           d,
           v,
-          type: constants.KEEPTRADECUT.VALUE
+          type: keeptradecut_metric_types.VALUE
         })
       })
 
@@ -199,7 +199,7 @@ const importKeepTradeCut = async ({ full = false, dry = false } = {}) => {
           pid,
           d,
           v,
-          type: constants.KEEPTRADECUT.VALUE
+          type: keeptradecut_metric_types.VALUE
         })
       })
     }

@@ -146,7 +146,7 @@
   },
 
   "parameter_defaults": {
-    "year": "constants.season.year",
+    "year": "constants.current_season.year",
     "week": 0,
     "seas_type": "REG"
   },

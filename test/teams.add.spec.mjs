@@ -6,7 +6,13 @@ import MockDate from 'mockdate'
 import server from '#api'
 import knex from '#db'
 import league from '#db/seeds/league.mjs'
-import { constants } from '#libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  transaction_types,
+  waiver_types,
+  player_nfl_status
+} from '#constants'
 import { user1, user2 } from './fixtures/token.mjs'
 import {
   addPlayer,
@@ -23,7 +29,7 @@ process.env.NODE_ENV = 'test'
 chai.should()
 chai.use(chai_http)
 const expect = chai.expect
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 
 describe('API /teams - add', function () {
   before(async function () {
@@ -52,7 +58,7 @@ describe('API /teams - add', function () {
           teamId,
           pid: player.pid,
           leagueId,
-          slot: constants.slots.BENCH
+          slot: roster_slot_types.BENCH
         })
 
       res.should.have.status(200)
@@ -61,7 +67,7 @@ describe('API /teams - add', function () {
 
       res.body.length.should.equal(1)
       res.body[0].pid.should.equal(player.pid)
-      res.body[0].slot.should.equal(constants.slots.BENCH)
+      res.body[0].slot.should.equal(roster_slot_types.BENCH)
 
       res.body[0].rid.should.exist
       res.body[0].pos.should.equal(player.pos1)
@@ -69,33 +75,31 @@ describe('API /teams - add', function () {
       res.body[0].transaction.tid.should.equal(teamId)
       res.body[0].transaction.lid.should.equal(leagueId)
       res.body[0].transaction.pid.should.equal(player.pid)
-      res.body[0].transaction.type.should.equal(
-        constants.transactions.ROSTER_ADD
-      )
+      res.body[0].transaction.type.should.equal(transaction_types.ROSTER_ADD)
       res.body[0].transaction.value.should.equal(0)
-      res.body[0].transaction.year.should.equal(constants.season.year)
+      res.body[0].transaction.year.should.equal(current_season.year)
 
       const rosters = await knex('rosters_players').where({
         pid: player.pid,
         tid: teamId,
-        week: constants.season.week,
-        year: constants.season.year
+        week: current_season.week,
+        year: current_season.year
       })
 
       expect(rosters.length).to.equal(1)
-      expect(rosters[0].slot).to.equal(constants.slots.BENCH)
+      expect(rosters[0].slot).to.equal(roster_slot_types.BENCH)
       expect(rosters[0].pid).to.equal(player.pid)
       expect(rosters[0].pos).to.equal(player.pos1)
       expect(rosters[0].tid).to.equal(teamId)
       expect(rosters[0].lid).to.equal(leagueId)
-      expect(rosters[0].week).to.equal(constants.season.week)
-      expect(rosters[0].year).to.equal(constants.season.year)
+      expect(rosters[0].week).to.equal(current_season.week)
+      expect(rosters[0].year).to.equal(current_season.year)
 
       await checkLastTransaction({
         leagueId,
-        type: constants.transactions.ROSTER_ADD,
+        type: transaction_types.ROSTER_ADD,
         value: 0,
-        year: constants.season.year,
+        year: current_season.year,
         pid: player.pid,
         teamId,
         userId
@@ -122,7 +126,7 @@ describe('API /teams - add', function () {
           teamId,
           pid: player.pid,
           leagueId,
-          slot: constants.slots.PS
+          slot: roster_slot_types.PS
         })
 
       res.should.have.status(200)
@@ -131,7 +135,7 @@ describe('API /teams - add', function () {
 
       res.body.length.should.equal(1)
       res.body[0].pid.should.equal(player.pid)
-      res.body[0].slot.should.equal(constants.slots.PS)
+      res.body[0].slot.should.equal(roster_slot_types.PS)
 
       res.body[0].rid.should.exist
       res.body[0].pos.should.equal(player.pos1)
@@ -139,33 +143,31 @@ describe('API /teams - add', function () {
       res.body[0].transaction.tid.should.equal(teamId)
       res.body[0].transaction.lid.should.equal(leagueId)
       res.body[0].transaction.pid.should.equal(player.pid)
-      res.body[0].transaction.type.should.equal(
-        constants.transactions.PRACTICE_ADD
-      )
+      res.body[0].transaction.type.should.equal(transaction_types.PRACTICE_ADD)
       res.body[0].transaction.value.should.equal(0)
-      res.body[0].transaction.year.should.equal(constants.season.year)
+      res.body[0].transaction.year.should.equal(current_season.year)
 
       const rosters = await knex('rosters_players').where({
         pid: player.pid,
         tid: teamId,
-        week: constants.season.week,
-        year: constants.season.year
+        week: current_season.week,
+        year: current_season.year
       })
 
       expect(rosters.length).to.equal(1)
-      expect(rosters[0].slot).to.equal(constants.slots.PS)
+      expect(rosters[0].slot).to.equal(roster_slot_types.PS)
       expect(rosters[0].pid).to.equal(player.pid)
       expect(rosters[0].pos).to.equal(player.pos1)
       expect(rosters[0].tid).to.equal(teamId)
       expect(rosters[0].lid).to.equal(leagueId)
-      expect(rosters[0].week).to.equal(constants.season.week)
-      expect(rosters[0].year).to.equal(constants.season.year)
+      expect(rosters[0].week).to.equal(current_season.week)
+      expect(rosters[0].year).to.equal(current_season.year)
 
       await checkLastTransaction({
         leagueId,
-        type: constants.transactions.PRACTICE_ADD,
+        type: transaction_types.PRACTICE_ADD,
         value: 0,
-        year: constants.season.year,
+        year: current_season.year,
         pid: player.pid,
         teamId,
         userId
@@ -192,7 +194,7 @@ describe('API /teams - add', function () {
         .send({
           teamId: 1,
           leagueId: 1,
-          slot: constants.slots.PS
+          slot: roster_slot_types.PS
         })
 
       await missing(request, 'pid')
@@ -206,7 +208,7 @@ describe('API /teams - add', function () {
         .send({
           teamId: 1,
           pid: 'x',
-          slot: constants.slots.PS
+          slot: roster_slot_types.PS
         })
 
       await missing(request, 'leagueId')
@@ -234,7 +236,7 @@ describe('API /teams - add', function () {
         .send({
           pid: 'x',
           leagueId: 1,
-          slot: constants.slots.PS
+          slot: roster_slot_types.PS
         })
 
       await missing(request, 'teamId')
@@ -264,7 +266,7 @@ describe('API /teams - add', function () {
           teamId: 1,
           pid: 'x',
           leagueId: 1,
-          slot: constants.slots.PS
+          slot: roster_slot_types.PS
         })
 
       await invalid(request, 'teamId')
@@ -282,7 +284,7 @@ describe('API /teams - add', function () {
           teamId: 1,
           pid: player.pid,
           leagueId: 1,
-          slot: constants.slots.BENCH
+          slot: roster_slot_types.BENCH
         })
 
       await error(request, 'player is not a free agent')
@@ -299,7 +301,7 @@ describe('API /teams - add', function () {
           teamId: 1,
           pid: player.pid,
           leagueId: 1,
-          slot: constants.slots.BENCH
+          slot: roster_slot_types.BENCH
         })
 
       await error(request, 'veteran free agency not open')
@@ -322,7 +324,7 @@ describe('API /teams - add', function () {
         lid: 1,
         submitted: Math.round(Date.now() / 1000),
         po: 9999,
-        type: constants.waivers.FREE_AGENCY
+        type: waiver_types.FREE_AGENCY
       })
 
       const request = chai_request
@@ -333,7 +335,7 @@ describe('API /teams - add', function () {
           teamId: 1,
           pid: player.pid,
           leagueId: 1,
-          slot: constants.slots.BENCH
+          slot: roster_slot_types.BENCH
         })
 
       await error(request, 'player has pending waiver claim')
@@ -354,7 +356,7 @@ describe('API /teams - add', function () {
         leagueId,
         player: player1,
         userId: 1,
-        slot: constants.slots.BENCH
+        slot: roster_slot_types.BENCH
       })
 
       // Add 2 RB to signed practice squad
@@ -367,7 +369,7 @@ describe('API /teams - add', function () {
         leagueId,
         player: player2,
         userId: 1,
-        slot: constants.slots.PS
+        slot: roster_slot_types.PS
       })
 
       const player3 = await selectPlayer({
@@ -379,21 +381,21 @@ describe('API /teams - add', function () {
         leagueId,
         player: player3,
         userId: 1,
-        slot: constants.slots.PSP
+        slot: roster_slot_types.PSP
       })
 
       // Verify we have 3 RB (1 bench + 2 signed PS)
       const rosters = await knex('rosters_players')
         .where({
           tid: teamId,
-          week: constants.season.week,
-          year: constants.season.year,
+          week: current_season.week,
+          year: current_season.year,
           pos: 'RB'
         })
         .whereIn('slot', [
-          constants.slots.BENCH,
-          constants.slots.PS,
-          constants.slots.PSP
+          roster_slot_types.BENCH,
+          roster_slot_types.PS,
+          roster_slot_types.PSP
         ])
       rosters.length.should.equal(3)
 
@@ -410,7 +412,7 @@ describe('API /teams - add', function () {
           teamId,
           pid: player4.pid,
           leagueId,
-          slot: constants.slots.BENCH
+          slot: roster_slot_types.BENCH
         })
 
       await error(request, 'exceeds roster limits')
@@ -431,7 +433,7 @@ describe('API /teams - add', function () {
         leagueId,
         player: player1,
         userId: 1,
-        slot: constants.slots.BENCH
+        slot: roster_slot_types.BENCH
       })
 
       // Add 2 RB to signed practice squad
@@ -444,7 +446,7 @@ describe('API /teams - add', function () {
         leagueId,
         player: player2,
         userId: 1,
-        slot: constants.slots.PS
+        slot: roster_slot_types.PS
       })
 
       const player3 = await selectPlayer({
@@ -456,15 +458,15 @@ describe('API /teams - add', function () {
         leagueId,
         player: player3,
         userId: 1,
-        slot: constants.slots.PSP
+        slot: roster_slot_types.PSP
       })
 
       // Release one of the signed PS players
       await knex('rosters_players')
         .where({
           tid: teamId,
-          week: constants.season.week,
-          year: constants.season.year,
+          week: current_season.week,
+          year: current_season.year,
           pid: player2.pid
         })
         .del()
@@ -482,7 +484,7 @@ describe('API /teams - add', function () {
           teamId,
           pid: player4.pid,
           leagueId,
-          slot: constants.slots.BENCH
+          slot: roster_slot_types.BENCH
         })
 
       res.should.have.status(200)
@@ -491,7 +493,7 @@ describe('API /teams - add', function () {
 
     it('reserve player violation', async () => {
       const reservePlayer = await selectPlayer({
-        nfl_status: constants.player_nfl_status.ACTIVE
+        nfl_status: player_nfl_status.ACTIVE
       })
       const teamId = 1
       const leagueId = 1
@@ -499,7 +501,7 @@ describe('API /teams - add', function () {
         leagueId,
         player: reservePlayer,
         teamId,
-        slot: constants.slots.RESERVE_SHORT_TERM,
+        slot: roster_slot_types.RESERVE_SHORT_TERM,
         userId: 1
       })
 
@@ -512,7 +514,7 @@ describe('API /teams - add', function () {
           teamId: 1,
           pid: player.pid,
           leagueId: 1,
-          slot: constants.slots.BENCH
+          slot: roster_slot_types.BENCH
         })
 
       await error(request, 'Reserve player violation')

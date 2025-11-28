@@ -1,23 +1,16 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { constants } from '@libs-shared'
 import PlayerLabel from '@components/player-label'
+import { player_nfl_status } from '@constants'
 
 export default function PlayerStatus({ player_map }) {
   const label =
-    constants.nfl_player_status_abbreviations[
-      player_map.get('injury_status')
-    ] ||
-    constants.nfl_player_status_abbreviations[player_map.get('game_status')] ||
-    constants.nfl_player_status_abbreviations[player_map.get('nfl_status')]
+    player_nfl_status.abbreviations[player_map.get('injury_status')] ||
+    player_nfl_status.abbreviations[player_map.get('game_status')] ||
+    player_nfl_status.abbreviations[player_map.get('nfl_status')]
 
-  if (
-    label ===
-    constants.nfl_player_status_abbreviations[
-      constants.player_nfl_status.ACTIVE
-    ]
-  ) {
+  if (label === player_nfl_status.abbreviations[player_nfl_status.ACTIVE]) {
     return null
   }
 
@@ -29,7 +22,7 @@ export default function PlayerStatus({ player_map }) {
     <PlayerLabel
       type='status'
       label={label}
-      description={constants.nfl_player_status_descriptions[label]}
+      description={player_nfl_status.descriptions[label]}
     />
   )
 }

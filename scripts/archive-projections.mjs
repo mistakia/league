@@ -3,7 +3,7 @@ import debug from 'debug'
 // import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -13,7 +13,7 @@ debug.enable('archive-projections')
 
 const archiveProjections = async () => {
   const insert_result = await db.raw(
-    `INSERT IGNORE INTO projections_archive SELECT * FROM projections where year != ${constants.season.year};`
+    `INSERT IGNORE INTO projections_archive SELECT * FROM projections where year != ${current_season.year};`
   )
   log(insert_result)
 

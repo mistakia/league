@@ -3,7 +3,8 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants, Roster, optimizeLineup } from '#libs-shared'
+import { Roster, optimizeLineup } from '#libs-shared'
+import { current_season, roster_slot_types } from '#constants'
 import { getLeague, getRoster, getPlayers, is_main } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -18,11 +19,11 @@ const project_lineups = async (lid) => {
     throw new Error(`Missing lid param: ${lid}`)
   }
 
-  const { year } = constants.season
+  const { year } = current_season
   const league = await getLeague({ lid })
   const teams = await db('teams').where({
     lid,
-    year: constants.season.year
+    year: current_season.year
   })
   const team_lineup_inserts = []
   const team_lineup_starter_inserts = []
@@ -37,7 +38,7 @@ const project_lineups = async (lid) => {
     const rosterRows = await getRoster({ tid })
     const roster = new Roster({ roster: rosterRows, league })
     const player_pids = roster.players.map((p) => p.pid)
-    const ineligible_slots = [constants.slots.PSP, constants.slots.PSDP]
+    const ineligible_slots = [roster_slot_types.PSP, roster_slot_types.PSDP]
     const eligible_starters_pids = roster.players
       .filter((p) => !ineligible_slots.includes(p.slot))
       .map((p) => p.pid)

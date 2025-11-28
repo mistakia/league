@@ -4,7 +4,7 @@ import PropTypes from 'prop-types'
 import Highcharts from 'highcharts'
 import HighchartsReact from 'highcharts-react-official'
 
-import { constants } from '@libs-shared'
+import { current_season, fantasy_weeks } from '@constants'
 
 export default class SelectedPlayerLineupImpact extends React.Component {
   render = () => {
@@ -17,7 +17,7 @@ export default class SelectedPlayerLineupImpact extends React.Component {
     const spData = []
     const bpData = []
     for (const week in player_map.getIn(['lineups', 'weeks'], {})) {
-      if (week >= constants.week) {
+      if (week >= current_season.week) {
         spData.push(
           parseFloat(
             player_map.getIn(['lineups', 'weeks', week, 'sp'], 0).toFixed(1)
@@ -40,7 +40,7 @@ export default class SelectedPlayerLineupImpact extends React.Component {
         text: ''
       },
       xAxis: {
-        categories: constants.fantasyWeeks.filter((w) => w >= constants.week),
+        categories: fantasy_weeks.filter((w) => w >= current_season.week),
         title: {
           text: 'Week'
         },

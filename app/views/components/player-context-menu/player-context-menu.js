@@ -6,7 +6,7 @@ import MenuList from '@mui/material/MenuList'
 import Button from '@mui/material/Button'
 import ButtonGroup from '@mui/material/ButtonGroup'
 
-import { constants } from '@libs-shared'
+import { current_season, roster_slot_types } from '@constants'
 
 export default function PlayerContextMenu({
   player_map,
@@ -147,7 +147,7 @@ export default function PlayerContextMenu({
       on_confirm_func: () =>
         reserve({
           reserve_pid: player_map.get('pid'),
-          slot: constants.slots.COV
+          slot: roster_slot_types.COV
         })
     })
     hide()
@@ -291,7 +291,7 @@ export default function PlayerContextMenu({
       label: 'Designate Protected'
     })
 
-    if (constants.season.isOffseason && status.eligible.franchiseTag) {
+    if (current_season.isOffseason && status.eligible.franchiseTag) {
       add({
         key: 'franchise',
         onClick: status.tagged.franchise ? handleRemoveTag : handleFranchiseTag,
@@ -299,10 +299,7 @@ export default function PlayerContextMenu({
       })
     }
 
-    if (
-      constants.season.isOffseason &&
-      status.eligible.restrictedFreeAgencyTag
-    ) {
+    if (current_season.isOffseason && status.eligible.restrictedFreeAgencyTag) {
       add({
         key: 'restricted-free-agency',
         onClick: handleRestrictedFreeAgencyTag,
@@ -341,7 +338,7 @@ export default function PlayerContextMenu({
       })
     }
 
-    if (constants.season.isOffseason && status.eligible.rookieTag) {
+    if (current_season.isOffseason && status.eligible.rookieTag) {
       add({
         key: 'rookie',
         onClick: status.tagged.rookie ? handleRemoveTag : handleRookieTag,
@@ -350,7 +347,7 @@ export default function PlayerContextMenu({
     }
 
     if (
-      constants.season.isOffseason &&
+      current_season.isOffseason &&
       status.active &&
       !status.tagged.restrictedFreeAgency
     ) {

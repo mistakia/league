@@ -7,11 +7,11 @@ import { fileURLToPath } from 'url'
 import { Table } from 'console-table-printer'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
-// import { job_types } from '#libs-shared/job-constants.mjs'
+// import { job_types } from '#libs-shared/job-.mjs'
 
 // import db from '#db'
-import { constants } from '#libs-shared'
 import { is_main } from '#libs-server'
+import { current_season } from '#constants'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -161,7 +161,7 @@ const analyze_fanduel_wagers = async ({
   for (const wager of wagers) {
     wager.week = dayjs(wager.settledDate)
       .subtract('2', 'day')
-      .diff(constants.season.regular_season_start, 'weeks')
+      .diff(current_season.regular_season_start, 'weeks')
   }
 
   const filtered = wagers.filter((wager) => {
@@ -201,7 +201,7 @@ const analyze_fanduel_wagers = async ({
     .map((leg) => {
       const week = dayjs(leg.startTime)
         .subtract('2', 'day')
-        .diff(constants.season.regular_season_start, 'weeks')
+        .diff(current_season.regular_season_start, 'weeks')
 
       let max_potential_payout = 0
       let open_potential_payout = 0

@@ -1,8 +1,8 @@
 import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { constants } from '@libs-shared'
 import AuctionFilter from '@components/auction-filter'
+import { fantasy_positions } from '@constants'
 
 export default class AuctionPositionFilter extends React.Component {
   render = () => {
@@ -12,7 +12,7 @@ export default class AuctionPositionFilter extends React.Component {
       values: []
     }
 
-    for (const position of constants.positions) {
+    for (const position of fantasy_positions) {
       state.values.push({
         label: position,
         value: position,

@@ -1,6 +1,7 @@
 import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
+import { current_season, player_tag_types } from '@constants'
 import {
   get_team_by_id_for_current_year,
   get_current_league,
@@ -14,11 +15,7 @@ import {
   get_teams_for_current_league,
   get_restricted_free_agency_players
 } from '@core/selectors'
-import {
-  constants,
-  calculatePercentiles,
-  getExtensionAmount
-} from '@libs-shared'
+import { calculatePercentiles, getExtensionAmount } from '@libs-shared'
 import { player_actions } from '@core/players'
 
 import LeagueTeam from './league-team'
@@ -48,13 +45,13 @@ const map_state_to_props = createSelector(
     teams,
     restricted_free_agency_players
   ) => {
-    const projectionType = constants.season.isRegularSeason ? 'ros' : '0'
+    const projectionType = current_season.isRegularSeason ? 'ros' : '0'
     const items = []
     players.players.forEach((p) => {
       const value = p.get('value', 0)
       const tag = p.get('tag')
       const isRestrictedFreeAgent =
-        tag === constants.tags.RESTRICTED_FREE_AGENCY
+        tag === player_tag_types.RESTRICTED_FREE_AGENCY
       const bid = p.get('bid', 0)
       const extensions = p.get('extensions', 0)
       const pos = p.get('pos')
@@ -63,7 +60,7 @@ const map_state_to_props = createSelector(
       const extendedSalary = getExtensionAmount({
         pos,
         slot,
-        tag: is_before_extension_deadline ? tag : constants.tags.REGULAR,
+        tag: is_before_extension_deadline ? tag : player_tag_types.REGULAR,
         extensions,
         league,
         value,
@@ -82,13 +79,13 @@ const map_state_to_props = createSelector(
         const regular_extended_salary = getExtensionAmount({
           pos,
           slot,
-          tag: constants.tags.REGULAR,
+          tag: player_tag_types.REGULAR,
           extensions,
           league,
           value
         })
 
-        const is_rookie = p.get('nfl_draft_year') >= constants.year - 1
+        const is_rookie = p.get('nfl_draft_year') >= current_season.year - 1
         if (is_rookie) {
           rookie_tag_savings =
             Math.max(regular_extended_salary - value, 0) || null

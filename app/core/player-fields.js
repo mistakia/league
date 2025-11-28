@@ -2,7 +2,7 @@ import { createSelector } from 'reselect'
 import { List } from 'immutable'
 
 import { percentile_actions } from '@core/percentiles'
-import { constants } from '@libs-shared'
+import { current_season } from '@constants'
 import { store } from '@core/store.js'
 import { get_game_by_team, get_seasonlogs } from '@core/selectors'
 import PlayerRowOpponent from '@components/player-row-opponent'
@@ -10,7 +10,7 @@ import { seasonlogs_actions } from '@core/seasonlogs/actions'
 
 export const get_player_fields = createSelector(
   (state) =>
-    state.getIn(['players', 'week'], new List([constants.week])).get(0),
+    state.getIn(['players', 'week'], new List([current_season.week])).get(0),
   (state) => state,
   (week, state) => PlayerFields({ week, state })
 )

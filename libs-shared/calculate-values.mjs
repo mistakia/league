@@ -1,4 +1,8 @@
-import { default_points_added, season, positions } from './constants.mjs'
+import {
+  default_points_added,
+  current_season,
+  fantasy_positions
+} from '#constants'
 
 const calculateValues = ({ players, baselines, week, league = {} }) => {
   let total_pts_added = 0
@@ -15,7 +19,7 @@ const calculateValues = ({ players, baselines, week, league = {} }) => {
       continue
     }
 
-    if (!positions.includes(pos)) {
+    if (!fantasy_positions.includes(pos)) {
       continue
     }
 
@@ -27,7 +31,8 @@ const calculateValues = ({ players, baselines, week, league = {} }) => {
       const historic_baseline_season =
         league[`pts_base_season_${pos.toLowerCase()}`]
       if (isSeasonProjection && historic_baseline_season) {
-        const baseline = historic_baseline_season * (season.nflFinalWeek - 1)
+        const baseline =
+          historic_baseline_season * (current_season.nflFinalWeek - 1)
         player.pts_added[week] = player_week_points - baseline
       } else if (historic_baseline_week) {
         player.pts_added[week] = player_week_points - historic_baseline_week

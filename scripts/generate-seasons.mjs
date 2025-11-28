@@ -1,7 +1,7 @@
 import debug from 'debug'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main, report_job } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -31,7 +31,7 @@ const generate_seasons = async () => {
     }
 
     // if the latest season is not the current season, create a new season
-    if (season.year !== constants.season.year) {
+    if (season.year !== current_season.year) {
       const new_season = {
         ...season,
 
@@ -50,9 +50,9 @@ const generate_seasons = async () => {
       await db('seasons').insert({
         ...new_season,
         lid,
-        year: constants.season.year
+        year: current_season.year
       })
-      log(`Created new season for league ${lid} (${constants.season.year})`)
+      log(`Created new season for league ${lid} (${current_season.year})`)
     }
   }
 }

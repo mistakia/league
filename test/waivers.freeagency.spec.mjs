@@ -7,7 +7,14 @@ import server from '#api'
 import knex from '#db'
 
 import league from '#db/seeds/league.mjs'
-import { constants, getDraftDates } from '#libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  transaction_types,
+  waiver_types,
+  player_nfl_status
+} from '#constants'
+import { getDraftDates } from '#libs-shared'
 import { user1 } from './fixtures/token.mjs'
 import { getRoster } from '#libs-server'
 import {
@@ -22,7 +29,7 @@ process.env.NODE_ENV = 'test'
 
 chai.should()
 chai.use(chai_http)
-const { regular_season_start } = constants.season
+const { regular_season_start } = current_season
 
 describe('API /waivers - free agency', function () {
   before(async function () {
@@ -53,7 +60,7 @@ describe('API /waivers - free agency', function () {
         .send({
           teamId,
           pid: player.pid,
-          type: constants.waivers.FREE_AGENCY,
+          type: waiver_types.FREE_AGENCY,
           leagueId
         })
 
@@ -68,7 +75,7 @@ describe('API /waivers - free agency', function () {
       res.body.po.should.equal(9999)
       res.body.submitted.should.equal(Math.round(Date.now() / 1000))
       res.body.bid.should.equal(0)
-      res.body.type.should.equal(constants.waivers.FREE_AGENCY)
+      res.body.type.should.equal(waiver_types.FREE_AGENCY)
 
       res.body.uid.should.exist
     })
@@ -82,8 +89,8 @@ describe('API /waivers - free agency', function () {
         player,
         teamId: 2,
         userId: 2,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.DRAFT,
         value: 3
       })
 
@@ -111,7 +118,7 @@ describe('API /waivers - free agency', function () {
         .send({
           teamId,
           pid: player.pid,
-          type: constants.waivers.FREE_AGENCY_PRACTICE,
+          type: waiver_types.FREE_AGENCY_PRACTICE,
           leagueId
         })
 
@@ -126,7 +133,7 @@ describe('API /waivers - free agency', function () {
       res.body.po.should.equal(9999)
       res.body.submitted.should.equal(Math.round(Date.now() / 1000))
       res.body.bid.should.equal(0)
-      res.body.type.should.equal(constants.waivers.FREE_AGENCY_PRACTICE)
+      res.body.type.should.equal(waiver_types.FREE_AGENCY_PRACTICE)
 
       res.body.uid.should.exist
     })
@@ -156,8 +163,8 @@ describe('API /waivers - free agency', function () {
         player,
         teamId: 2,
         userId: 2,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.DRAFT,
         value: 3
       })
 
@@ -183,7 +190,7 @@ describe('API /waivers - free agency', function () {
         .send({
           teamId,
           pid: player.pid,
-          type: constants.waivers.FREE_AGENCY_PRACTICE,
+          type: waiver_types.FREE_AGENCY_PRACTICE,
           leagueId
         })
 
@@ -194,7 +201,7 @@ describe('API /waivers - free agency', function () {
         .send({
           teamId,
           pid: player.pid,
-          type: constants.waivers.FREE_AGENCY_PRACTICE,
+          type: waiver_types.FREE_AGENCY_PRACTICE,
           leagueId
         })
 
@@ -218,7 +225,7 @@ describe('API /waivers - free agency', function () {
         .send({
           teamId,
           pid: players[0].pid,
-          type: constants.waivers.FREE_AGENCY,
+          type: waiver_types.FREE_AGENCY,
           leagueId
         })
 
@@ -241,14 +248,14 @@ describe('API /waivers - free agency', function () {
       await addPlayer({ leagueId: 1, player, teamId: 2, userId: 2 })
 
       // set time to 5 mins later
-      MockDate.set(constants.season.now.add('5', 'minute').toISOString())
+      MockDate.set(current_season.now.add('5', 'minute').toISOString())
 
       // release player
       await releasePlayer({ leagueId: 1, player, teamId: 2, userId: 2 })
 
       // set time to 24 hours and 1 minute later
       MockDate.set(
-        constants.season.now.add('24', 'hour').add('1', 'minute').toISOString()
+        current_season.now.add('24', 'hour').add('1', 'minute').toISOString()
       )
 
       // submit waiver
@@ -261,7 +268,7 @@ describe('API /waivers - free agency', function () {
         .send({
           teamId,
           pid: player.pid,
-          type: constants.waivers.FREE_AGENCY,
+          type: waiver_types.FREE_AGENCY,
           leagueId
         })
 
@@ -282,7 +289,7 @@ describe('API /waivers - free agency', function () {
         .send({
           teamId,
           pid: player.pid,
-          type: constants.waivers.FREE_AGENCY_PRACTICE,
+          type: waiver_types.FREE_AGENCY_PRACTICE,
           leagueId
         })
 
@@ -304,7 +311,7 @@ describe('API /waivers - free agency', function () {
         .send({
           teamId,
           pid: player.pid,
-          type: constants.waivers.FREE_AGENCY,
+          type: waiver_types.FREE_AGENCY,
           leagueId
         })
 
@@ -320,8 +327,8 @@ describe('API /waivers - free agency', function () {
         player,
         teamId: 2,
         userId: 2,
-        slot: constants.slots.PS,
-        transaction: constants.transactions.DRAFT,
+        slot: roster_slot_types.PS,
+        transaction: transaction_types.DRAFT,
         value: 3
       })
 
@@ -349,7 +356,7 @@ describe('API /waivers - free agency', function () {
         .send({
           teamId,
           pid: player.pid,
-          type: constants.waivers.FREE_AGENCY_PRACTICE,
+          type: waiver_types.FREE_AGENCY_PRACTICE,
           leagueId
         })
 
@@ -371,7 +378,7 @@ describe('API /waivers - free agency', function () {
         .send({
           teamId,
           pid: player.pid,
-          type: constants.waivers.FREE_AGENCY,
+          type: waiver_types.FREE_AGENCY,
           leagueId
         })
 
@@ -381,7 +388,7 @@ describe('API /waivers - free agency', function () {
     it('reserve player violation', async () => {
       MockDate.set(regular_season_start.add('1', 'week').toISOString())
       const reservePlayer = await selectPlayer({
-        nfl_status: constants.player_nfl_status.ACTIVE
+        nfl_status: player_nfl_status.ACTIVE
       })
       const teamId = 1
       const leagueId = 1
@@ -389,7 +396,7 @@ describe('API /waivers - free agency', function () {
         leagueId,
         player: reservePlayer,
         teamId,
-        slot: constants.slots.RESERVE_SHORT_TERM,
+        slot: roster_slot_types.RESERVE_SHORT_TERM,
         userId: 1
       })
 
@@ -401,7 +408,7 @@ describe('API /waivers - free agency', function () {
         .send({
           teamId,
           pid: player.pid,
-          type: constants.waivers.FREE_AGENCY,
+          type: waiver_types.FREE_AGENCY,
           leagueId
         })
 
@@ -427,7 +434,7 @@ describe('API /waivers - free agency', function () {
     it('rookie free agent waiver w/ full practice squad and no release', async () => {
       const picks = await knex('draft')
       const draftDates = getDraftDates({
-        start: constants.season.now.unix(),
+        start: current_season.now.unix(),
         picks: picks.length
       })
       MockDate.set(draftDates.draftEnd.toISOString())
@@ -444,7 +451,7 @@ describe('API /waivers - free agency', function () {
         .send({
           teamId,
           pid: player.pid,
-          type: constants.waivers.FREE_AGENCY_PRACTICE,
+          type: waiver_types.FREE_AGENCY_PRACTICE,
           leagueId
         })
 

@@ -1,6 +1,6 @@
 import { Record, List } from 'immutable'
 
-import { constants } from '@libs-shared'
+import { current_season } from '@constants'
 
 export const League = new Record({
   uid: null,
@@ -343,7 +343,7 @@ export function createLeague({
     processed_at,
 
     teams: new List(teams),
-    years: years ? new List(years) : new List([constants.year]),
+    years: years ? new List(years) : new List([current_season.year]),
 
     espn_id,
     sleeper_id,

@@ -4,7 +4,8 @@ import { matchups_actions } from './actions'
 import { team_actions } from '@core/teams'
 import { app_actions } from '@core/app'
 import { scoreboard_actions } from '@core/scoreboard'
-import { constants, groupBy } from '@libs-shared'
+import { groupBy } from '@libs-shared'
+import { regular_fantasy_weeks, matchup_types } from '@constants'
 import { create_matchup } from './matchup'
 
 const initialState = new Map({
@@ -12,7 +13,7 @@ const initialState = new Map({
   selected: null,
   matchups_by_id: new Map(),
   teams: new List(),
-  weeks: new List(constants.weeks),
+  weeks: new List(regular_fantasy_weeks),
   playoffs: new List()
 })
 
@@ -44,7 +45,7 @@ export function matchups_reducer(state = initialState, { payload, type }) {
           const matchup = create_matchup({
             ...m,
             tids: [m.hid, m.aid],
-            type: constants.matchups.H2H,
+            type: matchup_types.H2H,
             points: [m.hp, m.ap],
             projections: [m.home_projection, m.away_projection]
           })
@@ -66,7 +67,7 @@ export function matchups_reducer(state = initialState, { payload, type }) {
               create_matchup({
                 ...playoffs[gid][0],
                 tids,
-                type: constants.matchups.TOURNAMENT,
+                type: matchup_types.TOURNAMENT,
                 points,
                 points_manual,
                 projections

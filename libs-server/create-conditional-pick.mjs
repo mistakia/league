@@ -2,7 +2,7 @@ import dayjs from 'dayjs'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { getLeague } from '#libs-server'
 import db from '#db'
 import is_main from './is-main.mjs'
@@ -10,16 +10,14 @@ import set_draft_pick_number from '#scripts/set-draft-pick-number.mjs'
 
 const create_conditional_pick = async function ({ tid, league }) {
   const is_before_draft = league.draft_start
-    ? constants.season.now.isBefore(dayjs.unix(league.draft_start))
+    ? current_season.now.isBefore(dayjs.unix(league.draft_start))
     : true
-  const year = is_before_draft
-    ? constants.season.year
-    : constants.season.year + 1
+  const year = is_before_draft ? current_season.year : current_season.year + 1
 
   let pick
   if (is_before_draft) {
     const last_pick = await db('draft')
-      .where({ year: constants.season.year, lid: league.uid })
+      .where({ year: current_season.year, lid: league.uid })
       .max('pick as max_pick')
     pick = last_pick[0].max_pick ? last_pick[0].max_pick + 1 : null
   } else {
@@ -37,7 +35,7 @@ const create_conditional_pick = async function ({ tid, league }) {
   })
 
   // Call set-draft-pick-number when year is current year and before draft
-  if (year === constants.season.year && is_before_draft) {
+  if (year === current_season.year && is_before_draft) {
     await set_draft_pick_number({ lid: league.uid })
   }
 }

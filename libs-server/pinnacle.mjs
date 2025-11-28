@@ -2,7 +2,8 @@ import debug from 'debug'
 
 import db from '#db'
 import * as cache from './cache.mjs'
-import { constants, bookmaker_constants } from '#libs-shared'
+import { bookmaker_constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { fetch_with_retry } from './proxy-manager.mjs'
 
 const log = debug('pinnacle')
@@ -213,7 +214,7 @@ export const get_market_type = ({
 }
 
 export const get_nfl_matchups = async ({ ignore_cache = false } = {}) => {
-  const cache_key = `/pinnacle/nfl_matchups/${constants.season.year}/${constants.season.week}.json`
+  const cache_key = `/pinnacle/nfl_matchups/${current_season.year}/${current_season.week}.json`
   if (!ignore_cache) {
     const cache_value = await cache.get({ key: cache_key })
     if (cache_value) {

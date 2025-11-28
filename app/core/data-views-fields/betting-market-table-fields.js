@@ -2,7 +2,8 @@ import * as table_constants from 'react-table/src/constants.mjs'
 
 import { bookmaker_constants } from '#libs-shared'
 import COLUMN_GROUPS from './column-groups'
-import { constants, common_column_params } from '@libs-shared'
+import { common_column_params } from '@libs-shared'
+import { current_year } from '@constants'
 
 const { career_year, career_game, single_year, single_week, single_seas_type } =
   common_column_params
@@ -40,11 +41,8 @@ const create_base_column_params = () => ({
   },
   year: {
     ...single_year,
-    default_value: constants.year,
-    values: Array.from(
-      { length: constants.year - 2023 + 1 },
-      (_, i) => 2023 + i
-    )
+    default_value: current_year,
+    values: Array.from({ length: current_year - 2023 + 1 }, (_, i) => 2023 + i)
   },
   week: single_week
 })
@@ -156,7 +154,7 @@ export default {
       },
       year: {
         ...single_year,
-        default_value: constants.year,
+        default_value: current_year,
         values: [2023, 2024]
       },
       career_year

@@ -1,4 +1,4 @@
-import * as constants from './constants.mjs'
+import { create_empty_extended_stats } from '#constants'
 
 const round = (value, precision) => {
   const multiplier = Math.pow(10, precision || 0)
@@ -19,7 +19,7 @@ const calculateStatsFromPlays = (plays) => {
 
   const addTeamStat = (team, stat, value) => {
     value = Number(value)
-    teams[team] = teams[team] || constants.createFullStats()
+    teams[team] = teams[team] || create_empty_extended_stats()
     teams[team][stat] += value
   }
 
@@ -35,7 +35,7 @@ const calculateStatsFromPlays = (plays) => {
     // TODO record longest rushing, receiving, passing play
     // TODO count big plays
     // TODO situational splits (i.e. # of defenders in box)
-    players[pid] = players[pid] || constants.createFullStats()
+    players[pid] = players[pid] || create_empty_extended_stats()
     players[pid][stat] += value
   }
 

@@ -1,5 +1,5 @@
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 export default async function ({ userId, leagueId }) {
   const query1 = await db('teams')
@@ -13,13 +13,13 @@ export default async function ({ userId, leagueId }) {
     })
     .where('users_teams.userid', userId)
     .where('teams.lid', leagueId)
-    .where('teams.year', constants.season.year)
+    .where('teams.year', current_season.year)
 
   if (query1.length) {
     const tid = query1[0].uid
     const bids = await db('restricted_free_agency_bids')
       .where('tid', tid)
-      .where('year', constants.season.year)
+      .where('year', current_season.year)
       .whereNull('cancelled')
       .whereNull('processed')
 

@@ -1,4 +1,4 @@
-import { constants } from '#libs-shared'
+import { transaction_types } from '#constants'
 import getTransactionsSinceFreeAgent from './get-transactions-since-free-agent.mjs'
 
 export default async function ({ lid, pid }) {
@@ -8,7 +8,7 @@ export default async function ({ lid, pid }) {
     include_restricted: true
   })
   const extensions = transactions.filter(
-    (t) => t.type === constants.transactions.EXTENSION
+    (t) => t.type === transaction_types.EXTENSION
   )
   return extensions
 }

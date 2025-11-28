@@ -16,8 +16,8 @@ import LeagueRecentTransactions from '@components/league-recent-transactions'
 import PoachNotice from '@components/poach-notice'
 import PageLayout from '@layouts/page'
 import Notices from '@components/notices'
+import { current_season, fantasy_positions, league_defaults } from '@constants'
 import {
-  constants,
   isReserveEligible,
   isReserveCovEligible,
   get_free_agent_period
@@ -53,7 +53,7 @@ export default function LeagueHomePage({
       return navigate('/', { replace: true })
     }
 
-    if (Number(lid) === constants.DEFAULTS.LEAGUE_ID) {
+    if (Number(lid) === league_defaults.LEAGUE_ID) {
       return navigate(`/leagues/${lid}/players`, { replace: true })
     }
   }, [lid, navigate])
@@ -89,7 +89,7 @@ export default function LeagueHomePage({
 
   if (league.free_agency_live_auction_start) {
     const fa_period = get_free_agent_period(league)
-    if (constants.season.now.isBefore(fa_period.start)) {
+    if (current_season.now.isBefore(fa_period.start)) {
       notice_items.push(
         <Alert key='fa-period' severity='info'>
           <AlertTitle>
@@ -108,7 +108,7 @@ export default function LeagueHomePage({
   }
 
   const groups = {}
-  for (const position of constants.positions) {
+  for (const position of fantasy_positions) {
     if (!groups[position]) groups[position] = []
     groups[position] = players.active
       .filter((pMap) => pMap.get('pos') === position)
@@ -176,8 +176,8 @@ export default function LeagueHomePage({
         injury_status: player_map.get('injury_status'),
         prior_week_inactive: player_map.get('prior_week_inactive'),
         prior_week_ruled_out: player_map.get('prior_week_ruled_out'),
-        week: constants.season.week,
-        is_regular_season: constants.season.isRegularSeason,
+        week: current_season.week,
+        is_regular_season: current_season.isRegularSeason,
         game_day: player_map.get('game_day'),
         practice: practice_data
       })

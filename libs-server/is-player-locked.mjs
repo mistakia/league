@@ -1,12 +1,12 @@
 import dayjs from 'dayjs'
 import timezone from 'dayjs/plugin/timezone.js'
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season, player_nfl_status } from '#constants'
 
 dayjs.extend(timezone)
 
 export default async function (pid) {
-  if (constants.season.week === 0) {
+  if (current_season.week === 0) {
     return false
   }
 
@@ -16,8 +16,8 @@ export default async function (pid) {
     .joinRaw(
       'left join nfl_games on player.current_nfl_team = nfl_games.v or player.current_nfl_team = nfl_games.h'
     )
-    .where('nfl_games.week', constants.season.week)
-    .where('nfl_games.year', constants.season.year)
+    .where('nfl_games.week', current_season.week)
+    .where('nfl_games.year', current_season.year)
     .where('nfl_games.seas_type', 'REG')
     .limit(1)
 
@@ -34,7 +34,7 @@ export default async function (pid) {
   )
 
   if (dayjs().isAfter(gameStart)) {
-    if (player_row.nfl_status === constants.player_nfl_status.INACTIVE) {
+    if (player_row.nfl_status === player_nfl_status.INACTIVE) {
       // check player statuses leading up to the game
       const players_status_rows = await db('players_status')
         .select('players_status.*')
@@ -48,9 +48,7 @@ export default async function (pid) {
       const player_formatted_statuses = players_status_rows.map(
         (row) => row.formatted_status
       )
-      if (
-        player_formatted_statuses.includes(constants.player_nfl_status.INACTIVE)
-      ) {
+      if (player_formatted_statuses.includes(player_nfl_status.INACTIVE)) {
         return false
       }
     }

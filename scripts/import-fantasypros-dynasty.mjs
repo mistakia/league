@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import {
   is_main,
   find_player_row,
@@ -147,7 +147,7 @@ const main = async () => {
   let error
   try {
     const argv = initialize_cli()
-    const year = argv.year ? argv.year : constants.season.year
+    const year = argv.year ? argv.year : current_season.year
     await import_fantasypros_dynasty_rankings({
       year,
       dry_run: argv.dry,

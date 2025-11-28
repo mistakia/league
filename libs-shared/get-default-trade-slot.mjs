@@ -1,4 +1,4 @@
-import * as constants from './constants.mjs'
+import { roster_slot_types } from '#constants'
 import isReserveEligible from './is-reserve-eligible.mjs'
 
 /**
@@ -28,10 +28,10 @@ export default function get_default_trade_slot({
   // Priority 1: Drafted practice squad players default to unprotected drafted PS
   // Convert protected PSDP to unprotected PSD, or keep PSD as PSD
   if (
-    current_slot === constants.slots.PSD ||
-    current_slot === constants.slots.PSDP
+    current_slot === roster_slot_types.PSD ||
+    current_slot === roster_slot_types.PSDP
   ) {
-    return constants.slots.PSD
+    return roster_slot_types.PSD
   }
 
   // Priority 2: Reserve-eligible players default to short-term IR (if space available)
@@ -48,19 +48,19 @@ export default function get_default_trade_slot({
   })
 
   if (player_is_reserve_eligible && roster.has_open_reserve_short_term_slot()) {
-    return constants.slots.RESERVE_SHORT_TERM
+    return roster_slot_types.RESERVE_SHORT_TERM
   }
 
   // Priority 3: Signed practice squad players default to unprotected signed PS (if space available)
   // Convert protected PSP to unprotected PS, or keep PS as PS
   if (
-    (current_slot === constants.slots.PS ||
-      current_slot === constants.slots.PSP) &&
+    (current_slot === roster_slot_types.PS ||
+      current_slot === roster_slot_types.PSP) &&
     roster.has_practice_squad_space_for_position(player.pos)
   ) {
-    return constants.slots.PS
+    return roster_slot_types.PS
   }
 
   // Priority 4: Default to active roster bench for all other cases
-  return constants.slots.BENCH
+  return roster_slot_types.BENCH
 }

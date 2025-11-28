@@ -9,7 +9,8 @@ import {
   nfl,
   report_job
 } from '#libs-server'
-import { constants, fixTeam } from '#libs-shared'
+import { fixTeam } from '#libs-shared'
+import { current_season } from '#constants'
 import config from '#config'
 import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -37,7 +38,7 @@ const run = async () => {
     const { id } = team
 
     const s = encodeURIComponent(
-      `{"$query":{"season":${constants.season.year}, "week": ${constants.season.week}}}`
+      `{"$query":{"season":${current_season.year}, "week": ${current_season.week}}}`
     )
     const fs = encodeURIComponent(
       '{id,season,fullName,nickName,abbr,teamType,roster{ week, id,firstName,lastName,displayName,birthDate,gsisId,esbId},depthChart{person{id,firstName,lastName},unit,depthOrder,positionAbbr},injuries{id,type,person{firstName,lastName,id},injury,injuryStatus,practice,practiceStatus,status}}'

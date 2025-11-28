@@ -3,7 +3,7 @@ import { Map } from 'immutable'
 import PropTypes from 'prop-types'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
-import { constants, get_string_from_object } from '@libs-shared'
+import { get_string_from_object } from '@libs-shared'
 import PlayerWatchlistAction from '@components/player-watchlist-action'
 import PlayerLabel from '@components/player-label'
 import PlayerTag from '@components/player-tag'
@@ -12,6 +12,7 @@ import NFLTeam from '@components/nfl-team'
 import IconButton from '@components/icon-button'
 
 import './player-row-name-column.styl'
+import { current_season } from '@constants'
 
 export default function PlayerRowNameColumn({
   row,
@@ -56,7 +57,7 @@ export default function PlayerRowNameColumn({
         onClick={handle_click}
       >
         <span>{name}</span>
-        {constants.year === player_map.get('nfl_draft_year') && (
+        {current_season.year === player_map.get('nfl_draft_year') && (
           <PlayerLabel label='R' type='rookie' description='Rookie' />
         )}
         <NFLTeam team={nfl_team} />

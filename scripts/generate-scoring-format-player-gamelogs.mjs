@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main, getLeague } from '#libs-server'
 import handle_season_args_for_script from '#libs-server/handle-season-args-for-script.mjs'
 import calculate_points from './calculate-points.mjs'
@@ -18,8 +18,8 @@ debug.enable('generate-scoring-format-player-gamelogs')
 
 const generate_scoring_format_player_gamelogs = async ({
   scoring_format_hash,
-  year = constants.season.year,
-  week = constants.season.week,
+  year = current_season.year,
+  week = current_season.week,
   dry = false
 } = {}) => {
   if (!scoring_format_hash) {

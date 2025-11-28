@@ -1,12 +1,13 @@
 import React from 'react'
 import dayjs from 'dayjs'
 
-import { getExtensionAmount, constants } from '@libs-shared'
+import { getExtensionAmount } from '@libs-shared'
 import { Player, connect } from '@components/player'
 import IconButton from '@components/icon-button'
 import PlayerName from '@components/player-name'
 
 import './player-roster-row.styl'
+import { current_season } from '@constants'
 
 class PlayerRosterRow extends Player {
   render = () => {
@@ -35,7 +36,7 @@ class PlayerRosterRow extends Player {
     const calculate_extension =
       !practice_signed &&
       !practice_drafted &&
-      constants.season.now.isBefore(deadline)
+      current_season.now.isBefore(deadline)
     const extensions = player_map.get('extensions', 0)
     const value = player_map.get('value')
     const bid = player_map.get('bid')

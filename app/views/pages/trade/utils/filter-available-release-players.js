@@ -1,4 +1,5 @@
-import { constants, isSlotActive } from '@libs-shared'
+import { isSlotActive } from '@libs-shared'
+import { roster_slot_types } from '@constants'
 
 /**
  * Filter available players to show only those that can resolve roster limit issues
@@ -21,7 +22,8 @@ export function filter_available_release_players({
     const player_slot = player.get('slot')
     const is_active_roster_player = isSlotActive(player_slot)
     const is_signed_practice_squad_player =
-      player_slot === constants.slots.PS || player_slot === constants.slots.PSP
+      player_slot === roster_slot_types.PS ||
+      player_slot === roster_slot_types.PSP
 
     const needs_active_release =
       validation_details.needs_active_releases && is_active_roster_player

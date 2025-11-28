@@ -1,10 +1,10 @@
 import { List, Record } from 'immutable'
 
-import { constants } from '@libs-shared'
 import { transactions_actions } from './actions'
 import { team_actions } from '@core/teams'
 import { roster_actions } from '@core/rosters'
 import { TRANSACTIONS_PER_LOAD } from '@core/constants'
+import { transaction_types } from '@constants'
 
 const initialState = new Record({
   isPending: false,
@@ -12,7 +12,7 @@ const initialState = new Record({
   release: new List(),
   reserve: new List(),
   items: new List(),
-  types: new List(Object.values(constants.transactions)),
+  types: new List(Object.values(transaction_types)),
   teams: new List()
 })
 

@@ -1,21 +1,26 @@
 import db from '#db'
-import { constants } from '#libs-shared'
+import {
+  current_season,
+  roster_slot_types,
+  transaction_types,
+  player_tag_types
+} from '#constants'
 
 export default async function ({
   leagueId,
   player,
   teamId,
   userId,
-  slot = constants.slots.BENCH,
-  transaction = constants.transactions.ROSTER_ADD,
+  slot = roster_slot_types.BENCH,
+  transaction = transaction_types.ROSTER_ADD,
   value = 0,
-  tag = constants.tags.REGULAR,
+  tag = player_tag_types.REGULAR,
   waiverid
 }) {
   const rosters = await db('rosters')
     .where({
-      week: constants.season.week,
-      year: constants.season.year,
+      week: current_season.week,
+      year: current_season.year,
       tid: teamId
     })
     .limit(1)
@@ -28,8 +33,8 @@ export default async function ({
     pid: player.pid,
     type: transaction,
     value,
-    week: constants.season.week,
-    year: constants.season.year,
+    week: current_season.week,
+    year: current_season.year,
     timestamp: Math.round(Date.now() / 1000),
     waiverid
   })
@@ -42,7 +47,7 @@ export default async function ({
     tag,
     tid: teamId,
     lid: leagueId,
-    year: constants.season.year,
-    week: constants.season.week
+    year: current_season.year,
+    week: current_season.week
   })
 }

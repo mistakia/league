@@ -5,7 +5,8 @@ import dayjs from 'dayjs'
 import dayOfYear from 'dayjs/plugin/dayOfYear.js'
 
 import db from '#db'
-import { constants, simulate } from '#libs-shared'
+import { simulate } from '#libs-shared'
+import { current_season, create_empty_fantasy_team_stats } from '#constants'
 import { get_laegue_rosters_from_database, is_main } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -22,18 +23,18 @@ const simulate_season = async (lid) => {
   if (isNaN(lid)) {
     throw new Error(`missing lid param: ${lid}`)
   }
-  const currentWeek = Math.max(constants.season.week, 1)
+  const currentWeek = Math.max(current_season.week, 1)
   const teamRows = await db('teams').where({
     lid,
-    year: constants.season.year
+    year: current_season.year
   })
   const matchups = await db('matchups')
-    .where({ lid, year: constants.season.year })
+    .where({ lid, year: current_season.year })
     .where('week', '>=', currentWeek)
 
   if (!matchups.length) {
     log(
-      `No matchups found for year ${constants.season.year} from week ${currentWeek} on`
+      `No matchups found for year ${current_season.year} from week ${currentWeek} on`
     )
     return
   }
@@ -41,7 +42,7 @@ const simulate_season = async (lid) => {
   const rosterRows = await get_laegue_rosters_from_database({ lid })
   const tids = teamRows.map((t) => t.uid)
   const teamStats = await db('league_team_seasonlogs')
-    .where('year', constants.season.year)
+    .where('year', current_season.year)
     .whereIn('tid', tids)
 
   const rosters = {}
@@ -54,7 +55,7 @@ const simulate_season = async (lid) => {
     teams[row.uid] = row
     teams[row.uid].stats =
       teamStats.find((t) => t.tid === row.uid) ||
-      constants.createFantasyTeamStats()
+      create_empty_fantasy_team_stats()
   }
 
   const base_result = simulate({
@@ -86,8 +87,8 @@ const simulate_season = async (lid) => {
       tid,
       lid,
 
-      week: constants.season.week,
-      year: constants.season.year,
+      week: current_season.week,
+      year: current_season.year,
       day: dayjs().dayOfYear(),
 
       playoff_odds,

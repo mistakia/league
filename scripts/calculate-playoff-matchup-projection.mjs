@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 import { is_main } from '#libs-server'
 
 const initialize_cli = () => {
@@ -14,7 +14,7 @@ const log = debug('calculate-playoff-matchup-projection')
 debug.enable('calculate-playoff-matchup-projection')
 
 const calculate_playoff_matchup_projection = async ({
-  year = constants.season.year,
+  year = current_season.year,
   lid = 1,
   dry = false
 } = {}) => {

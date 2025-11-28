@@ -3,7 +3,7 @@ import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { constants } from '#libs-shared'
+import { current_season, external_data_sources } from '#constants'
 import { is_main, fantasylife, find_player_row } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -37,12 +37,12 @@ const import_fantasylife_projections = async ({
     throw new Error('table_id is required')
   }
 
-  if (constants.season.week > constants.season.nflFinalWeek) {
+  if (current_season.week > current_season.nflFinalWeek) {
     return
   }
 
-  const year = constants.season.year
-  const week = constants.season.week
+  const year = current_season.year
+  const week = current_season.week
   const timestamp = new Date()
   const inserts = []
   const missing = []
@@ -89,7 +89,7 @@ const import_fantasylife_projections = async ({
         year,
         week,
         seas_type: 'REG',
-        sourceid: constants.sources.FANTASYLIFE,
+        sourceid: external_data_sources.FANTASYLIFE,
         ...data
       })
     }
@@ -111,7 +111,7 @@ const import_fantasylife_projections = async ({
       .where({
         year,
         week,
-        sourceid: constants.sources.FANTASYLIFE,
+        sourceid: external_data_sources.FANTASYLIFE,
         seas_type: 'REG'
       })
       .whereNotIn(

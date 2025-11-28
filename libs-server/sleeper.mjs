@@ -3,7 +3,7 @@ import debug from 'debug'
 
 import db from '#db'
 import * as cache from './cache.mjs'
-import { constants } from '#libs-shared'
+import { current_season } from '#constants'
 
 const log = debug('sleeper')
 
@@ -15,7 +15,7 @@ export const get_sleeper_config = async () => {
 export const get_sleeper_projections = async ({
   ignore_cache = false,
   positions = ['DEF', 'K', 'QB', 'RB', 'TE', 'WR'],
-  year = constants.season.year,
+  year = current_season.year,
   order_by = 'adp_std'
 } = {}) => {
   const sleeper_config = await get_sleeper_config()

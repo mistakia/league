@@ -7,10 +7,10 @@ import {
   calculateBaselines,
   calculateValues,
   calculatePrices,
-  constants,
   getRosterSize,
   groupBy
 } from '#libs-shared'
+import { current_season, external_data_sources } from '#constants'
 import { is_main, batch_insert, get_league_format } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -45,7 +45,7 @@ const process_league_format_year = async ({
 
   const final_week = final_week_result
     ? final_week_result.final_week
-    : constants.season.nflFinalWeek
+    : current_season.nflFinalWeek
 
   for (; week <= final_week; week++) {
     // baselines
@@ -118,8 +118,8 @@ const process_projections_for_league_format = async ({
     years = projection_years.map((row) => row.year)
   }
 
-  // Remove constants.season.year from years if present
-  years = years.filter((year) => year !== constants.season.year)
+  // Remove current_season.year from years if present
+  years = years.filter((year) => year !== current_season.year)
 
   if (!years.length) {
     throw new Error('No years to process')
@@ -134,7 +134,7 @@ const process_projections_for_league_format = async ({
     // Get averaged projections for the given year
     const projections = await db('projections_index').where({
       year: process_year,
-      sourceid: constants.sources.AVERAGE,
+      sourceid: external_data_sources.AVERAGE,
       seas_type: 'REG'
     })
 

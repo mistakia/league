@@ -1,7 +1,18 @@
 import { createSelector } from 'reselect'
 
 import { get_player_fields } from '@core/player-fields'
-import { constants } from '@libs-shared'
+import {
+  current_season,
+  fantasy_positions,
+  player_nfl_status,
+  player_tag_types,
+  roster_slot_types,
+  nfl_draft_rounds,
+  nfl_team_abbreviations,
+  ncaa_college_names,
+  ncaa_conference_names,
+  player_availability_statuses
+} from '@constants'
 import {
   get_stats_state,
   get_active_roster_player_ids_for_current_league,
@@ -58,16 +69,16 @@ export function getFilteredPlayers(state) {
   }
 
   const positions = pState.get('positions')
-  if (positions.size !== constants.positions.length) {
+  if (positions.size !== fantasy_positions.length) {
     filtered = filtered.filter((player_map) =>
       positions.includes(player_map.get('pos'))
     )
   }
 
-  const nfl_draft_rounds = pState.get('nfl_draft_rounds')
-  if (nfl_draft_rounds.size !== constants.nfl_draft_rounds.length) {
+  const nfl_draft_rounds_filter = pState.get('nfl_draft_rounds')
+  if (nfl_draft_rounds_filter.size !== nfl_draft_rounds.length) {
     filtered = filtered.filter((player_map) =>
-      nfl_draft_rounds.includes(player_map.get('round'))
+      nfl_draft_rounds_filter.includes(player_map.get('round'))
     )
   }
 
@@ -81,7 +92,7 @@ export function getFilteredPlayers(state) {
         return false
       }
 
-      const exp = constants.year - draft_year
+      const exp = current_season.year - draft_year
       if (veterans && exp > 1) {
         return true
       }
@@ -91,21 +102,21 @@ export function getFilteredPlayers(state) {
   }
 
   const nflTeams = pState.get('nflTeams')
-  if (nflTeams.size !== constants.nflTeams.length) {
+  if (nflTeams.size !== nfl_team_abbreviations.length) {
     filtered = filtered.filter((player_map) =>
       nflTeams.includes(player_map.get('team'))
     )
   }
 
   const colleges = pState.get('colleges')
-  if (colleges.size !== constants.colleges.length) {
+  if (colleges.size !== ncaa_college_names.length) {
     filtered = filtered.filter((player_map) =>
       colleges.includes(player_map.get('col'))
     )
   }
 
   const collegeDivisions = pState.get('collegeDivisions')
-  if (collegeDivisions.size !== constants.collegeDivisions.length) {
+  if (collegeDivisions.size !== ncaa_conference_names.length) {
     filtered = filtered.filter((player_map) =>
       collegeDivisions.includes(player_map.get('dv'))
     )
@@ -127,7 +138,7 @@ export function getFilteredPlayers(state) {
   }
 
   const availability = pState.get('availability')
-  if (availability.size !== constants.availability.length) {
+  if (availability.size !== player_availability_statuses.length) {
     const activeRosterPlayerIds =
       get_active_roster_player_ids_for_current_league(state)
     const rosteredPlayerIds = get_rostered_player_ids_for_current_league(state)
@@ -184,7 +195,7 @@ export function getFilteredPlayers(state) {
 
       if (
         availability.includes('RESTRICTED FREE AGENT') &&
-        player_map.get('tag') === constants.tags.RESTRICTED_FREE_AGENCY
+        player_map.get('tag') === player_tag_types.RESTRICTED_FREE_AGENCY
       ) {
         return true
       }
@@ -198,10 +209,10 @@ export function getFilteredPlayers(state) {
         const tag = player_map.get('tag')
         const slot = player_map.get('slot')
         const isRestrictedOrFranchised =
-          tag === constants.tags.RESTRICTED_FREE_AGENCY ||
-          tag === constants.tags.FRANCHISE
+          tag === player_tag_types.RESTRICTED_FREE_AGENCY ||
+          tag === player_tag_types.FRANCHISE
         if (
-          !constants.ps_slots.includes(slot) &&
+          !roster_slot_types.ps_slots.includes(slot) &&
           !isRestrictedOrFranchised &&
           salary - market_salary_adj * 0.85 > 0
         ) {
@@ -215,8 +226,7 @@ export function getFilteredPlayers(state) {
 
   const selected_player_nfl_statuses = pState.get('selected_nfl_statuses')
   if (
-    selected_player_nfl_statuses.size !==
-    Object.keys(constants.player_nfl_status).length
+    selected_player_nfl_statuses.size !== Object.keys(player_nfl_status).length
   ) {
     filtered = filtered.filter((player_map) =>
       selected_player_nfl_statuses.includes(player_map.get('nfl_status'))

@@ -2,7 +2,8 @@ import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 
-import { constants, getExtensionAmount } from '@libs-shared'
+import { getExtensionAmount } from '@libs-shared'
+import { current_season, player_tag_types } from '@constants'
 
 export default class PlayerRosterTotal extends React.Component {
   render() {
@@ -15,8 +16,8 @@ export default class PlayerRosterTotal extends React.Component {
       is_team_manager
     } = this.props
 
-    const { isOffseason, isRegularSeason } = constants
-    const week = Math.max(constants.week, 1)
+    const { isOffseason, isRegularSeason } = current_season
+    const week = Math.max(current_season.week, 1)
     const projectionType = isRegularSeason ? 'ros' : '0'
 
     let baseSalaryTotal = 0
@@ -34,10 +35,10 @@ export default class PlayerRosterTotal extends React.Component {
       const bid = player_map.get('bid', 0)
       const tag = player_map.get('tag')
       const isRestrictedFreeAgent =
-        tag === constants.tags.RESTRICTED_FREE_AGENCY
+        tag === player_tag_types.RESTRICTED_FREE_AGENCY
       const extendedSalary = getExtensionAmount({
         pos: player_map.get('pos'),
-        tag: is_before_extension_deadline ? tag : constants.tags.REGULAR,
+        tag: is_before_extension_deadline ? tag : player_tag_types.REGULAR,
         extensions,
         league,
         value,
