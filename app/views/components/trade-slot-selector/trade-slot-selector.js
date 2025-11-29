@@ -7,7 +7,7 @@ import MenuItem from '@mui/material/MenuItem'
 import FormControl from '@mui/material/FormControl'
 
 import './trade-slot-selector.styl'
-import { roster_slot_types } from '@constants'
+import { roster_slot_types, starting_lineup_slots } from '@constants'
 
 const slot_options = [
   {
@@ -37,7 +37,7 @@ function get_available_slots_and_default({ player_map }) {
 
   if (
     current_slot === roster_slot_types.BENCH ||
-    roster_slot_types.starterSlots.includes(current_slot)
+    starting_lineup_slots.includes(current_slot)
   ) {
     return { available_slots: [], default_slot: roster_slot_types.BENCH }
   }

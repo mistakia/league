@@ -7,6 +7,7 @@ import {
   player_nfl_status,
   player_tag_types,
   roster_slot_types,
+  practice_squad_slots,
   nfl_draft_rounds,
   nfl_team_abbreviations,
   ncaa_college_names,
@@ -212,7 +213,7 @@ export function getFilteredPlayers(state) {
           tag === player_tag_types.RESTRICTED_FREE_AGENCY ||
           tag === player_tag_types.FRANCHISE
         if (
-          !roster_slot_types.ps_slots.includes(slot) &&
+          !practice_squad_slots.includes(slot) &&
           !isRestrictedOrFranchised &&
           salary - market_salary_adj * 0.85 > 0
         ) {
