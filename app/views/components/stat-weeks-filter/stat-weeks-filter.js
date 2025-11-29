@@ -2,7 +2,7 @@ import React from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 
 import StatFilter from '@components/stat-filter'
-import { current_season } from '@constants'
+import { nfl_weeks } from '@constants'
 
 export default class StatWeeksFilter extends React.Component {
   render = () => {
@@ -12,7 +12,7 @@ export default class StatWeeksFilter extends React.Component {
       values: []
     }
 
-    for (const week of current_season.nfl_weeks) {
+    for (const week of nfl_weeks) {
       state.values.push({
         label: week,
         value: week,

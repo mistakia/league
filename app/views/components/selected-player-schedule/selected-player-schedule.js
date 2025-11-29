@@ -10,7 +10,7 @@ import SelectedPlayerScheduleYearFilter from '@components/selected-player-schedu
 import SelectedPlayerScheduleWeekFilter from '@components/selected-player-schedule-week-filter'
 
 import './selected-player-schedule.styl'
-import { current_season } from '@constants'
+import { current_season, nfl_weeks } from '@constants'
 
 export default function SelectedPlayerSchedule({
   player_map,
@@ -34,7 +34,7 @@ export default function SelectedPlayerSchedule({
         : [current_season.year]
     )
   const [selected_weeks_for_schedule, set_selected_weeks_for_schedule] =
-    useState(current_season.nfl_weeks)
+    useState(nfl_weeks)
   const [filters_expanded, set_filters_expanded] = useState(false)
 
   const handle_tab_change = (event, value) => set_selected_week(value)
