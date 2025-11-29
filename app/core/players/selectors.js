@@ -6,7 +6,6 @@ import {
   fantasy_positions,
   player_nfl_status,
   player_tag_types,
-  roster_slot_types,
   practice_squad_slots,
   nfl_draft_rounds,
   nfl_team_abbreviations,

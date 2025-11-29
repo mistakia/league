@@ -30,13 +30,17 @@ const calculatePoints = ({
       statValue = stats[stat] || 0
     }
     // Handle QB kneel exclusion for rushing yards
+    // Only use ry_excluding_kneels if it has been explicitly calculated (not just initialized to 0)
+    // We check if it differs from ry OR if ry is also 0 (meaning no rushing yards at all)
     else if (
       stat === 'ry' &&
       league.exclude_qb_kneels &&
-      stats.ry_excluding_kneels !== undefined
+      stats.ry_excluding_kneels !== undefined &&
+      stats.ry_excluding_kneels !== null &&
+      (stats.ry_excluding_kneels !== 0 || stats.ry === 0)
     ) {
       factor = scoring[stat]
-      statValue = stats.ry_excluding_kneels || 0
+      statValue = stats.ry_excluding_kneels
     }
     // Handle all other stats normally
     else {
