@@ -29,6 +29,10 @@ import {
 import {
   current_season,
   roster_slot_types,
+  starting_lineup_slots,
+  practice_squad_slots,
+  practice_squad_protected_slots,
+  practice_squad_unprotected_slots,
   transaction_types,
   player_tag_types,
   waiver_types,
@@ -1205,7 +1209,7 @@ export function getPlayerStatus(state, { player_map = new Map(), pid }) {
   status.protected =
     playerSlot === roster_slot_types.PSP ||
     playerSlot === roster_slot_types.PSDP
-  status.starter = roster_slot_types.starterSlots.includes(playerSlot)
+  status.starter = starting_lineup_slots.includes(playerSlot)
   status.locked = isPlayerLocked(state, { player_map })
   status.active = isSlotActive(playerSlot)
 
@@ -1852,7 +1856,7 @@ export const get_practice_squad_player_ids_for_current_league = createSelector(
     const pids = []
     for (const roster of rosters.values()) {
       roster.players.forEach(({ slot, pid }) => {
-        if (roster_slot_types.ps_slots.includes(slot)) {
+        if (practice_squad_slots.includes(slot)) {
           pids.push(pid)
         }
       })
@@ -1866,7 +1870,7 @@ export const get_practice_squad_unprotected_player_ids_for_current_league =
     const pids = []
     for (const roster of rosters.values()) {
       roster.players.forEach(({ slot, pid }) => {
-        if (roster_slot_types.ps_unprotected_slots.includes(slot)) {
+        if (practice_squad_unprotected_slots.includes(slot)) {
           pids.push(pid)
         }
       })
@@ -1879,7 +1883,7 @@ export const get_practice_squad_protected_player_ids_for_current_league =
     const pids = []
     for (const roster of rosters.values()) {
       roster.players.forEach(({ slot, pid }) => {
-        if (roster_slot_types.ps_protected_slots.includes(slot)) {
+        if (practice_squad_protected_slots.includes(slot)) {
           pids.push(pid)
         }
       })

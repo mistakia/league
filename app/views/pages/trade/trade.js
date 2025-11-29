@@ -17,7 +17,11 @@ import TradeSelectItems from '@components/trade-select-items'
 import TradeTeamSummary from '@components/trade-team-summary'
 import TradeSlotSelector from '@components/trade-slot-selector'
 
-import { current_season, roster_slot_types } from '@constants'
+import {
+  current_season,
+  roster_slot_types,
+  starting_lineup_slots
+} from '@constants'
 import {
   get_app,
   get_current_trade,
@@ -46,7 +50,7 @@ function should_show_slot_selector(player_slot) {
   // Only show slot selector for non-active roster players
   if (
     player_slot === roster_slot_types.BENCH ||
-    roster_slot_types.starterSlots.includes(player_slot)
+    starting_lineup_slots.includes(player_slot)
   ) {
     return false
   }

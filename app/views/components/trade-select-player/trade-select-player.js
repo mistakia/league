@@ -7,7 +7,11 @@ import NFLTeam from '@components/nfl-team'
 import PlayerLabel from '@components/player-label'
 
 import './trade-select-player.styl'
-import { current_season, roster_slot_types } from '@constants'
+import {
+  current_season,
+  roster_slot_types,
+  starting_lineup_slots
+} from '@constants'
 
 const slot_display_config = {
   [roster_slot_types.BENCH]: {
@@ -29,7 +33,7 @@ const slot_display_config = {
   [roster_slot_types.COV]: { label: 'COV', className: 'slot-badge-reserve' }
 }
 
-roster_slot_types.starterSlots.forEach((slot) => {
+starting_lineup_slots.forEach((slot) => {
   if (!slot_display_config[slot]) {
     slot_display_config[slot] = {
       label: 'Active',

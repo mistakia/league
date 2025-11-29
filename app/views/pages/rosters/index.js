@@ -2,7 +2,12 @@ import { connect } from 'react-redux'
 import { createSelector } from 'reselect'
 
 import { roster_actions } from '@core/rosters'
-import { current_season, roster_slot_types } from '@constants'
+import {
+  current_season,
+  roster_slot_types,
+  practice_squad_drafted_slots,
+  practice_squad_signed_slots
+} from '@constants'
 import {
   get_teams_for_current_league,
   get_rosters_for_current_league,
@@ -29,7 +34,7 @@ const map_state_to_props = createSelector(
 
     for (const roster of rosters.values()) {
       const ps_drafted_count = roster.players.filter((r) =>
-        roster_slot_types.ps_drafted_slots.includes(r.slot)
+        practice_squad_drafted_slots.includes(r.slot)
       )
       ps_drafted_count_max = Math.max(
         ps_drafted_count.size,
@@ -37,7 +42,7 @@ const map_state_to_props = createSelector(
       )
 
       const ps_drafted_threshold_count = roster.players.filter((r) => {
-        if (!roster_slot_types.ps_drafted_slots.includes(r.slot)) return false
+        if (!practice_squad_drafted_slots.includes(r.slot)) return false
         const player = players.get('items').get(r.pid)
         if (!player) return false
         const draft_year = player.get('nfl_draft_year')
@@ -49,7 +54,7 @@ const map_state_to_props = createSelector(
       )
 
       const ps_signed_count = roster.players.filter((r) =>
-        roster_slot_types.ps_signed_slots.includes(r.slot)
+        practice_squad_signed_slots.includes(r.slot)
       )
       ps_signed_count_max = Math.max(ps_signed_count.size, ps_signed_count_max)
 
