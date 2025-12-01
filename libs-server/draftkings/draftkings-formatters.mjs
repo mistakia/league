@@ -77,13 +77,15 @@ const find_matching_nfl_game = (draftkings_event, nfl_games) => {
  * @param {Object} market - The DraftKings market
  * @param {Object} event - The DraftKings event
  * @param {Array} nfl_team_abbreviations - Array of NFL team abbreviations
+ * @param {string} market_type - The determined market type for this selection
  * @returns {Object} - Formatted selection object
  */
 const process_selection = (
   selection,
   market,
   event,
-  nfl_team_abbreviations
+  nfl_team_abbreviations,
+  market_type
 ) => {
   let player_row = null
   let draftkings_team = null
@@ -191,7 +193,10 @@ const process_selection = (
 
     selection_pid: formatted_selection_pid,
     selection_name: clean_string(selection.label),
-    selection_type: draftkings.format_selection_type(selection.label),
+    selection_type: draftkings.format_selection_type(
+      selection.label,
+      market_type
+    ),
     selection_metric_line: formatted_selection_metric_line,
     odds_decimal: selection.trueOdds,
     odds_american: odds_american_value
@@ -267,7 +272,8 @@ export const format_market = async ({
       selection,
       draftkings_market,
       draftkings_event,
-      nfl_team_abbreviations
+      nfl_team_abbreviations,
+      draftkings_market_type
     )
   )
 

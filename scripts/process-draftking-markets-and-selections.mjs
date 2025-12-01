@@ -153,7 +153,8 @@ const process_selection = async ({
   missing_selection_pids
 }) => {
   const selection_type = draftkings.format_selection_type(
-    selection.selection_name
+    selection.selection_name,
+    market_type
   )
   if (selection_type) {
     await db('prop_market_selections_index')
