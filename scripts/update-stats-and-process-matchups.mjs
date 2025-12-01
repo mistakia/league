@@ -15,13 +15,13 @@
  */
 
 import debug from 'debug'
-import dayjs from 'dayjs'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import { current_season } from '#constants'
 import { is_main } from '#libs-server'
+import { get_target_week } from '#libs-shared'
 
 import update_stats_weekly from './update-stats-weekly.mjs'
 import process_matchups from './process-matchups.mjs'
@@ -36,18 +36,6 @@ debug.enable('update-stats-and-process-matchups')
 // ----------------------------
 // Helper Functions
 // ----------------------------
-
-/**
- * Determines the target week based on current day of week
- * On Tuesday/Wednesday, process previous week; otherwise process current week
- */
-const get_target_week = () => {
-  const day = dayjs().day()
-  return Math.max(
-    [2, 3].includes(day) ? current_season.week - 1 : current_season.week,
-    1
-  )
-}
 
 /**
  * Gets all hosted, non-archived league IDs

@@ -1,11 +1,9 @@
 import debug from 'debug'
-import dayjs from 'dayjs'
 import yargs from 'yargs'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { create_default_league } from '#libs-shared'
-import { current_season } from '#constants'
+import { create_default_league, get_target_week } from '#libs-shared'
 import { is_main, getLeague } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
@@ -55,12 +53,8 @@ const update_scoring_format_stats = async ({ week, scoring_format_hash }) => {
 }
 
 const update_stats_weekly = async ({ week } = {}) => {
-  const day = dayjs().day()
   if (!week) {
-    week = Math.max(
-      [2, 3].includes(day) ? current_season.week - 1 : current_season.week,
-      1
-    )
+    week = get_target_week()
   }
 
   log(`updating stats for week ${week}`)
