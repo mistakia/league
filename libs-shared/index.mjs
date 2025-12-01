@@ -46,6 +46,7 @@ export { default as getGameDayAbbreviation } from './get-game-day-abbreviation.m
 export { default as getPoachProcessingTime } from './get-poach-processing-time.mjs'
 export { default as should_block_poach_processing } from './should-block-poach-processing.mjs'
 export { default as get_next_tuesday_3pm } from './get-next-tuesday-3pm.mjs'
+export { default as get_target_week } from './get-target-week.mjs'
 export { default as formatHeight } from './format-height.mjs'
 export { default as format_player_name } from './format-player-name.mjs'
 export { default as sum } from './sum.mjs'

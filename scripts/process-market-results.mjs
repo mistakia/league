@@ -11,6 +11,7 @@ import fs from 'fs/promises'
 import db from '#db'
 import report_job from '#libs-server/report-job.mjs'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { get_target_week } from '#libs-shared'
 import { current_season } from '#constants'
 import { get_supported_market_types } from '#libs-server/prop-market-settlement/market-type-mappings.mjs'
 import { preload_game_data } from '#libs-server/prop-market-settlement/data-preloader.mjs'
@@ -39,7 +40,8 @@ const initialize_cli = () => {
     })
     .option('week', {
       type: 'number',
-      describe: 'Specific week to process'
+      describe:
+        'Specific week to process (default: most relevant week based on day of week)'
     })
     .option('seas_type', {
       type: 'string',
@@ -342,8 +344,11 @@ const main = async () => {
     // Use provided seas_type or default to current season type
     const seas_type = argv.seas_type || current_season.nfl_seas_type
 
+    // Determine week: use provided week or default to most relevant week
+    const week = argv.week || get_target_week()
+
     log(
-      `Starting market results processing for year ${argv.year}${argv.week ? ` week ${argv.week}` : ''} ${seas_type}`
+      `Starting market results processing for year ${argv.year} week ${week} ${seas_type}`
     )
 
     // Get games to process
@@ -351,9 +356,7 @@ const main = async () => {
       .select('esbid')
       .where('year', argv.year)
       .andWhere('seas_type', seas_type)
-    if (argv.week) {
-      query.andWhere('week', argv.week)
-    }
+      .andWhere('week', week)
     log(`Query: ${query.toString()}`)
     const games = await query
     log(`Raw games result: ${games.length} games`)

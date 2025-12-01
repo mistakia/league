@@ -1,9 +1,9 @@
-import dayjs from 'dayjs'
 import { current_season } from '#constants'
 import db from '#db'
 import { is_main, report_job } from '#libs-server'
 import debug from 'debug'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { get_target_week } from '#libs-shared'
 
 import import_plays_nfl_v1 from '#scripts/import-plays-nfl-v1.mjs'
 
@@ -21,11 +21,7 @@ const clear_live_plays = async () => {
 }
 
 const finalize_week = async () => {
-  const day = dayjs().day()
-  const week = Math.max(
-    [2, 3].includes(day) ? current_season.week - 1 : current_season.week,
-    1
-  )
+  const week = get_target_week()
 
   log(`finalizing week ${week}`)
 

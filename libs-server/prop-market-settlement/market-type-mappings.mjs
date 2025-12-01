@@ -147,7 +147,7 @@ export const market_type_mappings = {
   [player_game_prop_types.ANYTIME_TOUCHDOWN]: {
     handler: HANDLER_TYPES.PLAYER_GAMELOG,
     metric_columns: ['tdr', 'tdrec'], // Only rushing and receiving TDs like reference
-    has_metric_value: false, // Just YES/NO
+    has_metric_value: true, // Store TD count for display in wager analysis
     selection_types: ['YES', 'NO'],
     special_logic: 'anytime_touchdown'
   },
@@ -166,7 +166,7 @@ export const market_type_mappings = {
   [player_game_prop_types.GAME_TWO_PLUS_TOUCHDOWNS]: {
     handler: HANDLER_TYPES.PLAYER_GAMELOG,
     metric_columns: ['tdr', 'tdrec'], // rushing and receiving TDs
-    has_metric_value: false, // Just YES/NO
+    has_metric_value: true, // Store TD count for display in wager analysis
     selection_types: ['YES', 'NO'],
     special_logic: 'two_plus_touchdowns'
   },
