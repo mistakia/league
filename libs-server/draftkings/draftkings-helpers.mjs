@@ -258,17 +258,39 @@ export const extract_player_name_from_event = (event_name) => {
 }
 
 /**
- * Formats selection type from selection name
+ * Market types that use YES/NO selection types (player achieves milestone or not)
+ * These markets don't typically have explicit YES/NO in the selection name
+ */
+const YES_NO_MARKET_TYPES = new Set([
+  'ANYTIME_TOUCHDOWN',
+  'GAME_TWO_PLUS_TOUCHDOWNS',
+  'GAME_FIRST_TOUCHDOWN_SCORER',
+  'GAME_FIRST_TEAM_TOUCHDOWN_SCORER'
+])
+
+/**
+ * Checks if a market type uses YES/NO selection types
+ * @param {string} market_type - The market type
+ * @returns {boolean} - Whether the market type uses YES/NO selections
+ */
+export const is_yes_no_market_type = (market_type) => {
+  return YES_NO_MARKET_TYPES.has(market_type)
+}
+
+/**
+ * Formats selection type from selection name, optionally considering market type
  * @param {string} selection_name - The selection name
+ * @param {string} [market_type] - Optional market type for context-aware parsing
  * @returns {string|null} - Formatted selection type (OVER, UNDER, YES, NO) or null
  */
-export const format_selection_type = (selection_name) => {
+export const format_selection_type = (selection_name, market_type = null) => {
   if (!selection_name) {
     return null
   }
 
   const words = selection_name.toLowerCase().split(/\s+/)
 
+  // Check for explicit keywords first
   if (words.includes('over')) {
     return 'OVER'
   } else if (words.includes('under')) {
@@ -279,6 +301,18 @@ export const format_selection_type = (selection_name) => {
     return 'NO'
   } else if (/^\d+\+$/.test(selection_name)) {
     return 'OVER'
+  }
+
+  // For YES/NO market types, determine selection type from selection name pattern
+  // These markets have selections like "Player Name" (YES) or "No Player Name" (NO)
+  if (market_type && is_yes_no_market_type(market_type)) {
+    const lower_name = selection_name.toLowerCase()
+    // Check if selection name starts with "no " (indicating NO selection)
+    if (lower_name.startsWith('no ')) {
+      return 'NO'
+    }
+    // Default to YES for these market types (betting player will achieve milestone)
+    return 'YES'
   }
 
   return null

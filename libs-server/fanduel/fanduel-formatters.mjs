@@ -1,6 +1,26 @@
 import { player_game_alt_prop_types } from '#libs-shared/bookmaker-constants.mjs'
 import { normalize_selection_metric_line } from '../normalize-selection-metric-line.mjs'
 
+/**
+ * Market types that use YES/NO selection types (player achieves milestone or not)
+ * These markets don't typically have explicit YES/NO in the selection name
+ */
+const YES_NO_MARKET_TYPES = new Set([
+  'ANYTIME_TOUCHDOWN',
+  'GAME_TWO_PLUS_TOUCHDOWNS',
+  'GAME_FIRST_TOUCHDOWN_SCORER',
+  'GAME_FIRST_TEAM_TOUCHDOWN_SCORER'
+])
+
+/**
+ * Checks if a market type uses YES/NO selection types
+ * @param {string} market_type - The market type
+ * @returns {boolean} - Whether the market type uses YES/NO selections
+ */
+export const is_yes_no_market_type = (market_type) => {
+  return YES_NO_MARKET_TYPES.has(market_type)
+}
+
 const format_selection_player_name = (str = '') => {
   str = str.split(' - ')[0].replace('Over', '').replace('Under', '')
   str = str.split('(')[0] // remove anything in paranthesis
@@ -59,6 +79,7 @@ export const format_selection_type = ({ market_type, selection_name }) => {
 
   const words = selection_name.toLowerCase().split(/\s+/)
 
+  // Check for explicit keywords first
   if (words.includes('over')) {
     return 'OVER'
   } else if (words.includes('under')) {
@@ -67,6 +88,18 @@ export const format_selection_type = ({ market_type, selection_name }) => {
     return 'YES'
   } else if (words.includes('no')) {
     return 'NO'
+  }
+
+  // For YES/NO market types, determine selection type from selection name pattern
+  // These markets have selections like "Player Name" (YES) or "No Player Name" (NO)
+  if (market_type && is_yes_no_market_type(market_type)) {
+    const lower_name = selection_name.toLowerCase()
+    // Check if selection name starts with "no " (indicating NO selection)
+    if (lower_name.startsWith('no ')) {
+      return 'NO'
+    }
+    // Default to YES for these market types (betting player will achieve milestone)
+    return 'YES'
   }
 
   return null
