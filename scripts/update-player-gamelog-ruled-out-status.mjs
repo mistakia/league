@@ -23,14 +23,14 @@
  * - nfl_games: Game timing information
  *
  * Usage Examples:
- * - node scripts/update-player-gamelog-ruled-out-status.mjs (processes prior week by default)
+ * - node scripts/update-player-gamelog-ruled-out-status.mjs (processes target week by default)
  * - node scripts/update-player-gamelog-ruled-out-status.mjs --year 2025 --week 11
  * - node scripts/update-player-gamelog-ruled-out-status.mjs --year 2025 --week 10 --dry
  * - node scripts/update-player-gamelog-ruled-out-status.mjs --all (process all weeks)
  *
  * Options:
  * --year <number>        Season year (default: current)
- * --week <number>        Week number (default: prior week - most recent completed week)
+ * --week <number>        Week number (default: target week)
  * --seas_type <string>   Season type: PRE | REG | POST (default: REG)
  * --all                  Process all weeks for the season
  * --dry                  Dry run (no database writes)
@@ -48,6 +48,7 @@ import {
   handle_season_args_for_script
 } from '#libs-server'
 import { job_types } from '#libs-shared/job-constants.mjs'
+import { get_target_week } from '#libs-shared'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -319,10 +320,9 @@ const run = async ({
   seas_type = 'REG',
   dry_run = false
 } = {}) => {
-  // Default to most recent completed week when no week specified
-  // This script runs on Tuesday to process the prior week that just completed
+  // Default to target week when no week specified
   if (week === null) {
-    week = current_season.last_week_with_stats
+    week = get_target_week()
   }
 
   log(
@@ -405,7 +405,7 @@ const main = async () => {
       script_args: {
         dry_run: argv.dry
       },
-      default_week: current_season.last_week_with_stats, // Default to most recent completed week
+      default_week: get_target_week(), // Default to target week
       year_query: ({ seas_type = 'REG' }) =>
         db('nfl_games')
           .select('year')
