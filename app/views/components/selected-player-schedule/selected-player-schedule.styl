@@ -1,6 +1,8 @@
 .selected-player-schedule-wrapper
-  max-width fit-content
-  margin 0 auto
+  width 100%
+  height 100%
+  display flex
+  flex-direction column
 
 .selected-player-schedule-tabs-row
   display flex
@@ -54,3 +56,38 @@
   width 60px
   flex 1 0 60px
   padding 4px 8px
+
+.selected__table
+  flex 1
+  min-height 0
+  width 100%
+  max-width none
+  overflow scroll
+
+  .selected__table-header.sticky__column
+    position sticky
+    top 0
+    z-index 2
+
+  .player__selected-row.header
+    position sticky
+    z-index 2
+    background rgb(239, 239, 239)
+    
+    &:nth-child(3)
+      top 49px
+    
+    &:nth-child(4)
+      top 73px
+    
+    &:nth-child(5)
+      top 97px
+    
+    &:nth-child(6)
+      top 121px
+    
+    &:nth-child(n+7)
+      top 145px
+    
+    .sticky__column
+      z-index 3
