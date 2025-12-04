@@ -112,6 +112,64 @@ export const get_websocket_connection = ({ authorization } = {}) =>
       })
   })
 
+/**
+ * Calculate combined parlay odds for multiple selections using DraftKings calculateBets API
+ *
+ * @param {Object} params
+ * @param {string[]} params.selection_ids - Array of selection IDs from prop_market_selections_index.source_selection_id
+ * @param {string} [params.odds_style='american'] - Odds format: 'american' or 'decimal'
+ * @returns {Promise<Object>} API response with selections, bets (including YourBet parlay), and returnRoundingMode
+ *
+ * @example
+ * const result = await calculate_parlay_odds({
+ *   selection_ids: ['0QA294887351#422561126_13L88808Q149411363Q20', '0QA294887040#422560115_13L88808Q11757535264Q20']
+ * })
+ * const parlay = result.bets.find(bet => bet.type === 'YourBet')
+ * console.log(parlay.displayOdds) // "+224"
+ */
+export const calculate_parlay_odds = async ({
+  selection_ids,
+  odds_style = 'american'
+} = {}) => {
+  if (
+    !selection_ids ||
+    !Array.isArray(selection_ids) ||
+    selection_ids.length === 0
+  ) {
+    throw new Error('selection_ids must be a non-empty array')
+  }
+
+  const draftkings_config = await get_draftkings_config()
+  const { draftkings_gaming_api_url } = draftkings_config
+
+  if (!draftkings_gaming_api_url) {
+    throw new Error('draftkings_gaming_api_url not configured')
+  }
+
+  const url = `${draftkings_gaming_api_url}/api/wager/v1/calculateBets`
+  const selections = selection_ids.map((id) => ({ id }))
+
+  api_log(`DK GAMING API REQUEST: ${url}`)
+
+  return fetch_with_retry({
+    url,
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({
+      selections,
+      selectionsForYourBet: selections,
+      oddsStyle: odds_style
+    }),
+    max_retries: 3,
+    use_proxy: true,
+    initial_delay: 1000,
+    max_delay: 10000,
+    response_type: 'json'
+  })
+}
+
 export const get_wagers = ({
   wss,
   placed_after = null,
