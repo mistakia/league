@@ -110,6 +110,7 @@ api.use('/api/seasonlogs', routes.seasonlogs)
 api.use('/api/cache', routes.cache)
 api.use('/api/data-views', routes.data_views)
 api.use('/api/wagers', routes.wagers)
+api.use('/api/selection-combinations', routes.selection_combinations)
 
 api.use('/api/*', (req, res, next) => {
   if (req.method !== 'OPTIONS' && !req.auth) {
