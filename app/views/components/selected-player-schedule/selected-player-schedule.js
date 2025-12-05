@@ -8,6 +8,7 @@ import SelectedPlayerMatchupTable from '@components/selected-player-matchup-tabl
 import PercentileMetric from '@components/percentile-metric'
 import SelectedPlayerScheduleYearFilter from '@components/selected-player-schedule-year-filter'
 import SelectedPlayerScheduleWeekFilter from '@components/selected-player-schedule-week-filter'
+import SelectedPlayerScheduleTimePeriodFilter from '@components/selected-player-schedule-time-period-filter'
 
 import './selected-player-schedule.styl'
 import { current_season, nfl_weeks } from '@constants'
@@ -17,7 +18,8 @@ export default function SelectedPlayerSchedule({
   games,
   seasonlogs,
   schedule,
-  load_nfl_team_seasonlogs
+  load_nfl_team_seasonlogs,
+  load_percentiles
 }) {
   useEffect(() => {
     load_nfl_team_seasonlogs()
@@ -36,6 +38,7 @@ export default function SelectedPlayerSchedule({
   const [selected_weeks_for_schedule, set_selected_weeks_for_schedule] =
     useState(nfl_weeks)
   const [filters_expanded, set_filters_expanded] = useState(false)
+  const [selected_time_period, set_selected_time_period] = useState('')
 
   const handle_tab_change = (event, value) => set_selected_week(value)
   const handle_year_selection_change = (years) =>
@@ -43,23 +46,28 @@ export default function SelectedPlayerSchedule({
   const handle_week_selection_change = (weeks) =>
     set_selected_weeks_for_schedule(weeks)
   const handle_filters_toggle = () => set_filters_expanded(!filters_expanded)
+  const handle_time_period_change = (value) => set_selected_time_period(value)
+
+  const time_period_suffix = selected_time_period
+    ? `_${selected_time_period}`
+    : ''
+  const percentile_key = `${pos}_AGAINST_ADJ${time_period_suffix}`
+  const stat_key = `${pos}_AGAINST_ADJ${time_period_suffix}`
+
+  useEffect(() => {
+    if (percentile_key) {
+      load_percentiles(percentile_key)
+    }
+  }, [percentile_key, load_percentiles])
 
   if (!games.length) {
     return null
   }
-
-  const percentile_key = `${pos}_AGAINST_ADJ`
   const labels = []
   games.forEach((game, index) => {
     const opp = team === game.h ? game.v : game.h
-    const pts = seasonlogs.getIn(
-      ['nfl_teams', opp, `${pos}_AGAINST_ADJ`, 'pts'],
-      '-'
-    )
-    const rnk = seasonlogs.getIn(
-      ['nfl_teams', opp, `${pos}_AGAINST_ADJ`, 'rnk'],
-      '-'
-    )
+    const pts = seasonlogs.getIn(['nfl_teams', opp, stat_key, 'pts'], '-')
+    const rnk = seasonlogs.getIn(['nfl_teams', opp, stat_key, 'rnk'], '-')
     const isHome = opp === game.v
     const label = (
       <PercentileMetric
@@ -115,6 +123,10 @@ export default function SelectedPlayerSchedule({
             selected_weeks_for_schedule={selected_weeks_for_schedule}
             on_week_selection_change={handle_week_selection_change}
           />
+          <SelectedPlayerScheduleTimePeriodFilter
+            selected_time_period={selected_time_period}
+            on_time_period_change={handle_time_period_change}
+          />
         </div>
       )}
       <div className='selected__table'>
@@ -122,6 +134,7 @@ export default function SelectedPlayerSchedule({
           week={selected_week}
           selected_years={selected_years_for_schedule}
           selected_weeks={selected_weeks_for_schedule}
+          selected_time_period={selected_time_period}
         />
       </div>
     </div>
@@ -133,5 +146,6 @@ SelectedPlayerSchedule.propTypes = {
   games: PropTypes.array,
   seasonlogs: ImmutablePropTypes.map,
   schedule: ImmutablePropTypes.map,
-  load_nfl_team_seasonlogs: PropTypes.func
+  load_nfl_team_seasonlogs: PropTypes.func,
+  load_percentiles: PropTypes.func
 }

@@ -15,6 +15,13 @@ import { percentile_actions } from '@core/percentiles'
 
 import SelectedPlayerMatchupTable from './selected-player-matchup-table'
 
+const TIME_PERIODS = [
+  { value: '', label: 'Season' },
+  { value: 'LAST_THREE', label: 'Last 3' },
+  { value: 'LAST_FOUR', label: 'Last 4' },
+  { value: 'LAST_EIGHT', label: 'Last 8' }
+]
+
 const get_filtered_gamelogs_for_schedule = createSelector(
   [
     get_player_gamelogs,
@@ -90,7 +97,15 @@ const map_state_to_props = createSelector(
   get_seasonlogs,
   get_app,
   get_filtered_gamelogs_for_schedule,
-  (player_map, game, seasonlogs, app, filtered_gamelogs) => {
+  (_, props) => props.selected_time_period,
+  (
+    player_map,
+    game,
+    seasonlogs,
+    app,
+    filtered_gamelogs,
+    selected_time_period
+  ) => {
     if (!game) {
       return {}
     }
@@ -98,16 +113,34 @@ const map_state_to_props = createSelector(
     const position = player_map.get('pos')
 
     const nfl_team_against_seasonlogs = []
-    const types = { avg: 'Average', adj: 'Over Average' }
-    for (const [type, title] of Object.entries(types)) {
-      const stat_key = `${position}_against_${type}`.toUpperCase()
+
+    // Group all averages first, then all over averages
+    // First: all Average rows for each time period
+    for (const period of TIME_PERIODS) {
+      const period_suffix = period.value ? `_${period.value}` : ''
+      const stat_key = `${position}_AGAINST_AVG${period_suffix}`
       const stats = seasonlogs.getIn(['nfl_teams', opponent, stat_key])
       if (stats) {
         nfl_team_against_seasonlogs.push({
-          type,
+          type: 'avg',
           percentile_key: stat_key,
           stats,
-          title
+          title: `${period.label} Average`
+        })
+      }
+    }
+
+    // Second: all Over Average rows for each time period
+    for (const period of TIME_PERIODS) {
+      const period_suffix = period.value ? `_${period.value}` : ''
+      const stat_key = `${position}_AGAINST_ADJ${period_suffix}`
+      const stats = seasonlogs.getIn(['nfl_teams', opponent, stat_key])
+      if (stats) {
+        nfl_team_against_seasonlogs.push({
+          type: 'adj',
+          percentile_key: stat_key,
+          stats,
+          title: `${period.label} Over Average`
         })
       }
     }

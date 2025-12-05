@@ -135,6 +135,12 @@ export const player_actions = {
     payload: { view_key }
   }),
 
+  SET_OPPONENT_TIME_PERIOD: 'SET_OPPONENT_TIME_PERIOD',
+  set_opponent_time_period: (time_period) => ({
+    type: player_actions.SET_OPPONENT_TIME_PERIOD,
+    payload: { time_period }
+  }),
+
   ...create_api_action_types('GET_CUTLIST'),
   TOGGLE_CUTLIST: 'TOGGLE_CUTLIST',
   toggle_cutlist: (pid) => ({

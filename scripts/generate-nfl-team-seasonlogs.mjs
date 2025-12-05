@@ -1,6 +1,4 @@
 import debug from 'debug'
-// import yargs from 'yargs'
-// import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
 import {
@@ -18,7 +16,6 @@ import {
 import { is_main, getLeague, batch_insert } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
-// const argv = yargs(hideBin(process.argv)).argv
 const log = debug('generate-nfl-team-seasonlogs')
 debug.enable('generate-nfl-team-seasonlogs')
 
@@ -193,10 +190,12 @@ const sum = (items = [], keys = [], fixed_weight) => {
 
   // Calculate weighted average for rate stats
   for (const key of rate_stats) {
-    if (fixed_weight) {
+    if (fixed_weight && fixed_weight > 0) {
       r[key] = r[key] / fixed_weight
     } else if (counts[key] > 0) {
       r[key] = r[key] / counts[key]
+    } else {
+      r[key] = null
     }
   }
 
@@ -208,8 +207,10 @@ const avg = (item, props, num) => {
   for (const prop of props) {
     if (rate_stats.includes(prop)) {
       obj[prop] = item[prop]
-    } else {
+    } else if (num > 0) {
       obj[prop] = item[prop] / num
+    } else {
+      obj[prop] = null
     }
   }
   return obj
@@ -248,13 +249,13 @@ const rollup = (group) => {
   return stats
 }
 
+const is_valid_numeric = (v) =>
+  v !== null && v !== undefined && Number.isFinite(v)
+
 const format_percentile_inserts = (percentiles, percentile_key) => {
   const inserts = []
   for (const [field, value] of Object.entries(percentiles)) {
-    if (
-      value &&
-      Object.values(value).every((v) => v !== null && v !== undefined)
-    ) {
+    if (value && Object.values(value).every(is_valid_numeric)) {
       inserts.push({
         percentile_key,
         field,
@@ -514,62 +515,60 @@ const generate_seasonlogs = async ({
 
   // calculate league specific team stats
   // TODO add a lid column to the percentiles table
-  const leagueIds = [1]
+  // lid=0 is the default league configuration used when no specific league is selected
+  const leagueId = 1
   const league_team_seasonlog_inserts = []
+  const league = await getLeague({ lid: leagueId })
 
-  for (const leagueId of leagueIds) {
-    const league = await getLeague({ lid: leagueId })
+  for (const position of Object.keys(defense)) {
+    const stat_types = ['adj', 'total', 'avg']
+    for (const stat_type of stat_types) {
+      const stat_key = get_stat_key(`${position}_against_${stat_type}`, {
+        seasonlogs_type
+      })
+      const teams = defense[position][stat_type]
 
-    for (const position of Object.keys(defense)) {
-      const stat_types = ['adj', 'total', 'avg']
-      for (const stat_type of stat_types) {
-        const stat_key = get_stat_key(`${position}_against_${stat_type}`, {
-          seasonlogs_type
-        })
-        const teams = defense[position][stat_type]
-
-        if (!teams.length) {
-          log(`no teams for ${stat_key}`)
-          continue
-        }
-
-        const items = []
-
-        // calculate points
-        for (const { opp, tm, ...stats } of teams) {
-          const points = calculatePoints({
-            stats,
-            position,
-            league
-          })
-
-          items.push({
-            tm: opp,
-            stat_key,
-            pts: points.total
-          })
-        }
-
-        // calculate rank
-        const sorted = items.sort((a, b) => a.pts - b.pts)
-        sorted.forEach((item, index) => {
-          const rnk = index + 1
-          league_team_seasonlog_inserts.push({
-            lid: leagueId,
-            year,
-            rnk,
-            ...item
-          })
-        })
-
-        const percentiles = calculatePercentiles({
-          items,
-          stats: ['pts']
-        })
-        percentile_inserts = percentile_inserts.concat(
-          format_percentile_inserts(percentiles, stat_key)
-        )
+      if (!teams.length) {
+        log(`no teams for ${stat_key}`)
+        continue
       }
+
+      const items = []
+
+      // calculate points
+      for (const { opp, tm, ...stats } of teams) {
+        const points = calculatePoints({
+          stats,
+          position,
+          league
+        })
+
+        items.push({
+          tm: opp,
+          stat_key,
+          pts: points.total
+        })
+      }
+
+      // calculate rank
+      const sorted = items.sort((a, b) => a.pts - b.pts)
+      sorted.forEach((item, index) => {
+        const rnk = index + 1
+        league_team_seasonlog_inserts.push({
+          lid: leagueId,
+          year,
+          rnk,
+          ...item
+        })
+      })
+
+      const percentiles = calculatePercentiles({
+        items,
+        stats: ['pts']
+      })
+      percentile_inserts = percentile_inserts.concat(
+        format_percentile_inserts(percentiles, stat_key)
+      )
     }
   }
 
@@ -584,9 +583,14 @@ const generate_seasonlogs = async ({
   }
 
   if (percentile_inserts.length) {
-    log(`inserting ${percentile_inserts.length} percentiles`)
+    // Deduplicate percentile inserts - since percentiles table doesn't have a lid column
+    const unique_percentile_inserts = uniqBy(
+      percentile_inserts,
+      (p) => `${p.percentile_key}_${p.field}`
+    )
+    log(`inserting ${unique_percentile_inserts.length} percentiles`)
     await db('percentiles')
-      .insert(percentile_inserts)
+      .insert(unique_percentile_inserts)
       .onConflict(['percentile_key', 'field'])
       .merge()
   }
@@ -595,18 +599,21 @@ const generate_seasonlogs = async ({
 const main = async () => {
   let error
   try {
-    await generate_seasonlogs()
+    const year = current_season.year
+    const week = current_season.week
 
-    if (current_season.week > 3) {
-      await generate_seasonlogs({ seasonlogs_type: 'LAST_THREE' })
+    await generate_seasonlogs({ year })
+
+    if (week > 3) {
+      await generate_seasonlogs({ year, seasonlogs_type: 'LAST_THREE' })
     }
 
-    if (current_season.week > 4) {
-      await generate_seasonlogs({ seasonlogs_type: 'LAST_FOUR' })
+    if (week > 4) {
+      await generate_seasonlogs({ year, seasonlogs_type: 'LAST_FOUR' })
     }
 
-    if (current_season.week > 8) {
-      await generate_seasonlogs({ seasonlogs_type: 'LAST_EIGHT' })
+    if (week > 8) {
+      await generate_seasonlogs({ year, seasonlogs_type: 'LAST_EIGHT' })
     }
   } catch (err) {
     error = err
