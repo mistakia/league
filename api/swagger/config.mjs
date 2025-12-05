@@ -1203,233 +1203,47 @@ const options = {
               description: 'Whether the wager is publicly visible',
               example: true
             },
-            selection_1_id: {
-              type: 'string',
-              nullable: true,
-              description: 'First selection ID',
-              example: 'sel_123'
-            },
-            selection_1_odds: {
-              type: 'integer',
-              nullable: true,
-              description: 'American odds for first selection',
-              example: -110
-            },
-            selection_1_status: {
-              type: 'string',
-              enum: ['OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED'],
-              nullable: true,
-              description: 'Status of first selection',
-              example: 'WON'
-            },
-            selection_2_id: {
-              type: 'string',
-              nullable: true,
-              description: 'Second selection ID',
-              example: 'sel_456'
-            },
-            selection_2_odds: {
-              type: 'integer',
-              nullable: true,
-              description: 'American odds for second selection',
-              example: 120
-            },
-            selection_2_status: {
-              type: 'string',
-              enum: ['OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED'],
-              nullable: true,
-              description: 'Status of second selection',
-              example: 'WON'
-            },
-            selection_3_id: {
-              type: 'string',
-              nullable: true,
-              description: 'Third selection ID',
-              example: 'sel_789'
-            },
-            selection_3_odds: {
-              type: 'integer',
-              nullable: true,
-              description: 'American odds for third selection',
-              example: -105
-            },
-            selection_3_status: {
-              type: 'string',
-              enum: ['OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED'],
-              nullable: true,
-              description: 'Status of third selection',
-              example: 'WON'
-            },
-            selection_4_id: {
-              type: 'string',
-              nullable: true,
-              description: 'Fourth selection ID',
-              example: 'sel_abc'
-            },
-            selection_4_odds: {
-              type: 'integer',
-              nullable: true,
-              description: 'American odds for fourth selection',
-              example: -115
-            },
-            selection_4_status: {
-              type: 'string',
-              enum: ['OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED'],
-              nullable: true,
-              description: 'Status of fourth selection',
-              example: 'OPEN'
-            },
-            selection_5_id: {
-              type: 'string',
-              nullable: true,
-              description: 'Fifth selection ID',
-              example: null
-            },
-            selection_5_odds: {
-              type: 'integer',
-              nullable: true,
-              description: 'American odds for fifth selection',
-              example: null
-            },
-            selection_5_status: {
-              type: 'string',
-              enum: ['OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED'],
-              nullable: true,
-              description: 'Status of fifth selection',
-              example: null
-            },
-            selection_6_id: {
-              type: 'string',
-              nullable: true,
-              description: 'Sixth selection ID',
-              example: null
-            },
-            selection_6_odds: {
-              type: 'integer',
-              nullable: true,
-              description: 'American odds for sixth selection',
-              example: null
-            },
-            selection_6_status: {
-              type: 'string',
-              enum: ['OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED'],
-              nullable: true,
-              description: 'Status of sixth selection',
-              example: null
-            },
-            selection_7_id: {
-              type: 'string',
-              nullable: true,
-              description: 'Seventh selection ID',
-              example: null
-            },
-            selection_7_odds: {
-              type: 'integer',
-              nullable: true,
-              description: 'American odds for seventh selection',
-              example: null
-            },
-            selection_7_status: {
-              type: 'string',
-              enum: ['OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED'],
-              nullable: true,
-              description: 'Status of seventh selection',
-              example: null
-            },
-            selection_8_id: {
-              type: 'string',
-              nullable: true,
-              description: 'Eighth selection ID',
-              example: null
-            },
-            selection_8_odds: {
-              type: 'integer',
-              nullable: true,
-              description: 'American odds for eighth selection',
-              example: null
-            },
-            selection_8_status: {
-              type: 'string',
-              enum: ['OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED'],
-              nullable: true,
-              description: 'Status of eighth selection',
-              example: null
-            },
-            selection_9_id: {
-              type: 'string',
-              nullable: true,
-              description: 'Ninth selection ID',
-              example: null
-            },
-            selection_9_odds: {
-              type: 'integer',
-              nullable: true,
-              description: 'American odds for ninth selection',
-              example: null
-            },
-            selection_9_status: {
-              type: 'string',
-              enum: ['OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED'],
-              nullable: true,
-              description: 'Status of ninth selection',
-              example: null
-            },
-            selection_10_id: {
-              type: 'string',
-              nullable: true,
-              description: 'Tenth selection ID',
-              example: null
-            },
-            selection_10_odds: {
-              type: 'integer',
-              nullable: true,
-              description: 'American odds for tenth selection',
-              example: null
-            },
-            selection_10_status: {
-              type: 'string',
-              enum: ['OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED'],
-              nullable: true,
-              description: 'Status of tenth selection',
-              example: null
-            },
-            selection_11_id: {
-              type: 'string',
-              nullable: true,
-              description: 'Eleventh selection ID',
-              example: null
-            },
-            selection_11_odds: {
-              type: 'integer',
-              nullable: true,
-              description: 'American odds for eleventh selection',
-              example: null
-            },
-            selection_11_status: {
-              type: 'string',
-              enum: ['OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED'],
-              nullable: true,
-              description: 'Status of eleventh selection',
-              example: null
-            },
-            selection_12_id: {
-              type: 'string',
-              nullable: true,
-              description: 'Twelfth selection ID',
-              example: null
-            },
-            selection_12_odds: {
-              type: 'integer',
-              nullable: true,
-              description: 'American odds for twelfth selection',
-              example: null
-            },
-            selection_12_status: {
-              type: 'string',
-              enum: ['OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED'],
-              nullable: true,
-              description: 'Status of twelfth selection',
-              example: null
+            selections: {
+              type: 'array',
+              description:
+                'Array of selections in this wager (preferred over individual selection_N columns)',
+              items: {
+                type: 'object',
+                properties: {
+                  id: {
+                    type: 'string',
+                    description:
+                      'Standard selection ID in format: ESBID:{esbid}|MARKET:{type}|PID:{pid}|SEL:{type}|LINE:{line}',
+                    example:
+                      'ESBID:2024111011|MARKET:GAME_PASSING_YARDS|PID:JARE-GOFF-2016-1994-10-14|SEL:OVER|LINE:249.5'
+                  },
+                  odds: {
+                    type: 'integer',
+                    nullable: true,
+                    description: 'American odds for this selection',
+                    example: -110
+                  },
+                  status: {
+                    type: 'string',
+                    enum: ['OPEN', 'WON', 'LOST', 'PUSH', 'CANCELLED'],
+                    nullable: true,
+                    description: 'Status of this selection',
+                    example: 'WON'
+                  }
+                }
+              },
+              example: [
+                {
+                  id: 'ESBID:2024111011|MARKET:GAME_PASSING_YARDS|PID:JARE-GOFF-2016-1994-10-14|SEL:OVER|LINE:249.5',
+                  odds: -110,
+                  status: 'WON'
+                },
+                {
+                  id: 'ESBID:2024111011|MARKET:GAME_RUSHING_YARDS|PID:DAVI-MONT-2021-1999-01-25|SEL:OVER|LINE:75.5',
+                  odds: -115,
+                  status: 'WON'
+                }
+              ]
             }
           },
           required: [

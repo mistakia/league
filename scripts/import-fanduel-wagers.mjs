@@ -8,15 +8,9 @@ import { hideBin } from 'yargs/helpers'
 import isBetween from 'dayjs/plugin/isBetween.js'
 
 import db from '#db'
-import { fixTeam, Errors } from '#libs-shared'
+import { fixTeam, Errors, format_standard_selection_id } from '#libs-shared'
 import { current_season } from '#constants'
-import {
-  is_main,
-  fanduel,
-  find_player_row,
-  encode_market_selection_id,
-  batch_insert
-} from '#libs-server'
+import { is_main, fanduel, find_player_row, batch_insert } from '#libs-server'
 // import { job_types } from '#libs-shared/job-constants.mjs'
 
 dayjs.extend(isBetween)
@@ -93,6 +87,61 @@ const format_bet_count = ({ wager_type, wager }) => {
 
     default:
       throw new Error(`unknown wager type ${wager_type}`)
+  }
+}
+
+/**
+ * Maps FanDuel metric_name to standard market_type for format_standard_selection_id
+ * FanDuel returns generic market_type (PLAYER_GAME_PROPS, etc.) with separate metric_name
+ * The new format requires specific market types like GAME_PASSING_YARDS
+ */
+const get_standard_market_type = ({ metric_name, market_type }) => {
+  // For game-level markets
+  if (market_type === 'GAME_PROPS') {
+    switch (metric_name) {
+      case 'TOTAL_POINTS':
+        return 'GAME_TOTAL'
+      case 'MONEYLINE':
+        return 'GAME_MONEYLINE'
+      case 'SPREAD':
+        return 'GAME_SPREAD'
+      default:
+        return `GAME_${metric_name}`
+    }
+  }
+
+  // For team-level markets
+  if (market_type === 'TEAM_GAME_PROPS') {
+    switch (metric_name) {
+      case 'FIRST_HALF_TEAM_TOTAL_POINTS':
+        return 'FIRST_HALF_TEAM_TOTAL'
+      case 'SPREAD':
+        return 'GAME_SPREAD'
+      case 'FIRST_HALF_SPREAD':
+        return 'FIRST_HALF_SPREAD'
+      default:
+        return `GAME_${metric_name}`
+    }
+  }
+
+  // For player-level markets - prefix with GAME_ for game props
+  switch (metric_name) {
+    case 'PASSING_YARDS':
+      return 'GAME_PASSING_YARDS'
+    case 'PASSING_TOUCHDOWNS':
+      return 'GAME_PASSING_TOUCHDOWNS'
+    case 'RUSHING_YARDS':
+      return 'GAME_RUSHING_YARDS'
+    case 'RECEIVING_YARDS':
+      return 'GAME_RECEIVING_YARDS'
+    case 'RUSHING_RECEIVING_YARDS':
+      return 'GAME_RUSHING_RECEIVING_YARDS'
+    case 'RECEPTIONS':
+      return 'GAME_RECEPTIONS'
+    case 'ANYTIME_TOUCHDOWN':
+      return 'ANYTIME_TOUCHDOWN'
+    default:
+      return `GAME_${metric_name}`
   }
 }
 
@@ -280,10 +329,6 @@ const import_fanduel_wagers = async ({
     let wager_item
 
     try {
-      if (wager.legs.length > 12) {
-        throw new Error(`wager ${wager.betId} has more than 12 selections`)
-      }
-
       const wager_type = format_wager_type(wager.betType)
       const bet_count = format_bet_count({ wager_type, wager })
       wager_item = {
@@ -302,6 +347,8 @@ const import_fanduel_wagers = async ({
         book_wager_id: wager.betId
       }
 
+      const selections = []
+
       for (let index = 0; index < wager.legs.length; index++) {
         const leg = wager.legs[index]
 
@@ -314,9 +361,7 @@ const import_fanduel_wagers = async ({
           nfl_team,
           metric_name,
           metric_line,
-          selection_name,
           selection_type,
-          start_time,
           market_type
         } = fanduel.get_market_details_from_wager(leg.parts[0])
 
@@ -333,30 +378,40 @@ const import_fanduel_wagers = async ({
             `${leg.parts[0].eventId}/${leg.parts[0].marketId}/${leg.parts[0].selectionId}`
           ]
 
-        const selection_id = encode_market_selection_id({
-          market_type,
-          esbid: nfl_game.esbid,
-          pid: player_row?.pid,
-          nfl_team,
+        const standard_market_type = get_standard_market_type({
           metric_name,
-          metric_line,
-          selection_type,
-          selection_name,
-          start_time
+          market_type
         })
-        wager_item[`selection_${index + 1}_id`] = selection_id
+
+        const selection_id = format_standard_selection_id({
+          esbid: nfl_game.esbid,
+          market_type: standard_market_type,
+          pid: player_row?.pid,
+          team: nfl_team,
+          selection_type,
+          line: metric_line,
+          safe: true,
+          source_id: 'FANDUEL',
+          raw_data: {
+            event_id: leg.parts[0].eventId,
+            market_id: leg.parts[0].marketId,
+            selection_id: leg.parts[0].selectionId,
+            metric_name
+          }
+        })
 
         if (!leg.parts[0].americanPrice) {
           throw new Error('missing american price')
         }
 
-        wager_item[`selection_${index + 1}_odds`] = Number(
-          leg.parts[0].americanPrice
-        )
-        wager_item[`selection_${index + 1}_status`] = format_wager_status(
-          leg.result
-        )
+        selections.push({
+          id: selection_id,
+          odds: Number(leg.parts[0].americanPrice),
+          status: format_wager_status(leg.result)
+        })
       }
+
+      wager_item.selections = JSON.stringify(selections)
 
       if (book_wager_id_set.has(wager_item.book_wager_id)) {
         log(`skipping duplicate book_wager_id: ${wager_item.book_wager_id}`)

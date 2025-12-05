@@ -7,7 +7,7 @@ import { fileURLToPath } from 'url'
 import { hideBin } from 'yargs/helpers'
 
 import db from '#db'
-import { is_main, fanatics, format_market_selection_id } from '#libs-server'
+import { is_main, fanatics, get_selection_id_from_source } from '#libs-server'
 
 const initialize_cli = () => {
   return yargs(hideBin(process.argv)).argv
@@ -135,11 +135,6 @@ const import_fanatics_wagers = async ({
 
     try {
       const parlay_legs = wager.parlayLegs || []
-      if (parlay_legs.length > 12) {
-        throw new Error(
-          `wager ${wager.betMetaData.betId} has more than 12 selections`
-        )
-      }
 
       const wager_type = format_wager_type(wager.header.betType)
       const wager_amount = Number(wager.header.wager.replace('$', ''))
@@ -159,25 +154,29 @@ const import_fanatics_wagers = async ({
         book_wager_id: wager.betMetaData.betId
       }
 
+      const selections = []
+
       for (let index = 0; index < parlay_legs.length; index++) {
         const leg = parlay_legs[index]
         const { metaData } = leg
 
-        const selection_id = await format_market_selection_id({
+        const selection_id = await get_selection_id_from_source({
           source_id: 'FANATICS',
           source_market_id: metaData.marketId,
           source_selection_id: metaData.selectionId
         })
 
-        wager_item[`selection_${index + 1}_id`] = selection_id
-        wager_item[`selection_${index + 1}_odds`] = Math.round(
-          (Number(leg.oddsData.americanDisplay) < 0 ? -100 : 100) /
-            Number(leg.oddsData.decimal - 1)
-        )
-        wager_item[`selection_${index + 1}_status`] = format_wager_status(
-          leg.betStatus
-        )
+        selections.push({
+          id: selection_id,
+          odds: Math.round(
+            (Number(leg.oddsData.americanDisplay) < 0 ? -100 : 100) /
+              Number(leg.oddsData.decimal - 1)
+          ),
+          status: format_wager_status(leg.betStatus)
+        })
       }
+
+      wager_item.selections = JSON.stringify(selections)
 
       if (book_wager_id_set.has(wager_item.book_wager_id)) {
         log(`skipping duplicate book_wager_id: ${wager_item.book_wager_id}`)
