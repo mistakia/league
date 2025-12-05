@@ -132,6 +132,41 @@ function PlayerFields({ week, opponent_time_period, state }) {
         return pts
       }
     },
+    opponent_strength_avg: {
+      category: 'matchup',
+      column_header: 'Avg',
+      csv_header: 'Opponent Average Fantasy Points',
+      get_percentile_key: (player_map) => {
+        const pos = player_map.get('pos')
+        return `${pos}_AGAINST_AVG${time_period_suffix}`
+      },
+      percentile_field: 'pts',
+      fixed: 1,
+      load: () => {
+        const positions = state.getIn(['players', 'positions'])
+        positions.forEach((pos) => {
+          const percentile_key = `${pos}_AGAINST_AVG${time_period_suffix}`
+          store.dispatch(percentile_actions.load_percentiles(percentile_key))
+        })
+        store.dispatch(seasonlogs_actions.load_nfl_team_seasonlogs())
+      },
+      get_player_field_value: (player_map) => {
+        const nfl_team = player_map.get('team')
+        const pos = player_map.get('pos')
+        const game = get_game_by_team(state, { nfl_team, week })
+        const seasonlogs = get_seasonlogs(state)
+        if (!game) {
+          return null
+        }
+
+        const isHome = game.h === nfl_team
+        const opp = isHome ? game.v : game.h
+        const stat_key = `${pos}_AGAINST_AVG${time_period_suffix}`
+        const pts = seasonlogs.getIn(['nfl_teams', opp, stat_key, 'pts'], 0)
+
+        return pts
+      }
+    },
     value: {
       category: 'management',
       column_header: 'Salary',

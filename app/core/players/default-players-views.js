@@ -36,6 +36,7 @@ const week_projections_view = {
   fields: [
     'opponent',
     'opponent_strength',
+    'opponent_strength_avg',
     'pts_added.week',
     'points.week.total',
     'projection.week.pa',
