@@ -3288,6 +3288,329 @@ const options = {
               description: 'Player IDs to be released by accepting team'
             }
           }
+        },
+        CombinationOddsSelection: {
+          type: 'object',
+          description:
+            'Fields for a single selection within a combination (repeated for selection_1 through selection_4)',
+          properties: {
+            player_pff_id: {
+              type: 'integer',
+              nullable: true,
+              description: 'PFF player ID'
+            },
+            player_gsis_it_id: {
+              type: 'string',
+              nullable: true,
+              description: 'GSIS IT player ID'
+            },
+            player_gsisid: {
+              type: 'string',
+              nullable: true,
+              description: 'GSIS player ID'
+            },
+            player_position: {
+              type: 'string',
+              nullable: true,
+              description: 'Player position',
+              example: 'QB'
+            },
+            nfl_team: {
+              type: 'string',
+              nullable: true,
+              description: 'NFL team abbreviation',
+              example: 'KC'
+            },
+            first_name: {
+              type: 'string',
+              nullable: true,
+              description: 'Player first name',
+              example: 'Patrick'
+            },
+            last_name: {
+              type: 'string',
+              nullable: true,
+              description: 'Player last name',
+              example: 'Mahomes'
+            },
+            market_type: {
+              type: 'string',
+              nullable: true,
+              description: 'Market type for this selection',
+              example: 'GAME_ALT_PASSING_YARDS'
+            },
+            line: {
+              type: 'number',
+              nullable: true,
+              description: 'Line value for this selection',
+              example: 299.5
+            },
+            selection_type: {
+              type: 'string',
+              nullable: true,
+              description: 'Selection type (OVER/UNDER/YES/NO)',
+              example: 'OVER'
+            }
+          }
+        },
+        CombinationOdds: {
+          type: 'object',
+          description:
+            'Parlay/SGP odds for a predefined selection combination. Includes up to 4 selections, each with player details and market info. Selection fields are prefixed with selection_1_, selection_2_, selection_3_, selection_4_.',
+          properties: {
+            combination_name: {
+              type: 'string',
+              description: 'Combination definition name',
+              example: 'QB1_300_WR1_100'
+            },
+            source_id: {
+              type: 'string',
+              description: 'Sportsbook source',
+              example: 'FANDUEL'
+            },
+            year: {
+              type: 'integer',
+              description: 'Season year',
+              example: 2024
+            },
+            week: {
+              type: 'integer',
+              description: 'NFL week',
+              example: 14
+            },
+            esbid: {
+              type: 'string',
+              description: 'Game ID',
+              example: '2024120800'
+            },
+            decimal_odds: {
+              type: 'number',
+              description: 'Decimal odds for the combination',
+              example: 4.5
+            },
+            american_odds: {
+              type: 'integer',
+              description: 'American odds for the combination',
+              example: 350
+            },
+            timestamp: {
+              type: 'integer',
+              description: 'Unix timestamp when odds were collected',
+              example: 1733443200
+            },
+            selection_1_player_pff_id: {
+              type: 'integer',
+              nullable: true,
+              description: 'PFF ID for selection 1 player'
+            },
+            selection_1_player_gsis_it_id: {
+              type: 'string',
+              nullable: true,
+              description: 'GSIS IT ID for selection 1 player'
+            },
+            selection_1_player_gsisid: {
+              type: 'string',
+              nullable: true,
+              description: 'GSIS ID for selection 1 player'
+            },
+            selection_1_player_position: {
+              type: 'string',
+              nullable: true,
+              description: 'Position for selection 1 player',
+              example: 'QB'
+            },
+            selection_1_nfl_team: {
+              type: 'string',
+              nullable: true,
+              description: 'NFL team for selection 1 player',
+              example: 'KC'
+            },
+            selection_1_first_name: {
+              type: 'string',
+              nullable: true,
+              description: 'First name for selection 1 player',
+              example: 'Patrick'
+            },
+            selection_1_last_name: {
+              type: 'string',
+              nullable: true,
+              description: 'Last name for selection 1 player',
+              example: 'Mahomes'
+            },
+            selection_1_market_type: {
+              type: 'string',
+              nullable: true,
+              description: 'Market type for selection 1',
+              example: 'GAME_ALT_PASSING_YARDS'
+            },
+            selection_1_line: {
+              type: 'number',
+              nullable: true,
+              description: 'Line for selection 1',
+              example: 299.5
+            },
+            selection_1_selection_type: {
+              type: 'string',
+              nullable: true,
+              description: 'Selection type for selection 1 (OVER/UNDER)',
+              example: 'OVER'
+            },
+            selection_2_player_pff_id: {
+              type: 'integer',
+              nullable: true,
+              description: 'PFF ID for selection 2 player'
+            },
+            selection_2_player_gsis_it_id: {
+              type: 'string',
+              nullable: true,
+              description: 'GSIS IT ID for selection 2 player'
+            },
+            selection_2_player_gsisid: {
+              type: 'string',
+              nullable: true,
+              description: 'GSIS ID for selection 2 player'
+            },
+            selection_2_player_position: {
+              type: 'string',
+              nullable: true,
+              description: 'Position for selection 2 player',
+              example: 'WR'
+            },
+            selection_2_nfl_team: {
+              type: 'string',
+              nullable: true,
+              description: 'NFL team for selection 2 player',
+              example: 'KC'
+            },
+            selection_2_first_name: {
+              type: 'string',
+              nullable: true,
+              description: 'First name for selection 2 player'
+            },
+            selection_2_last_name: {
+              type: 'string',
+              nullable: true,
+              description: 'Last name for selection 2 player'
+            },
+            selection_2_market_type: {
+              type: 'string',
+              nullable: true,
+              description: 'Market type for selection 2',
+              example: 'GAME_ALT_RECEIVING_YARDS'
+            },
+            selection_2_line: {
+              type: 'number',
+              nullable: true,
+              description: 'Line for selection 2',
+              example: 99.5
+            },
+            selection_2_selection_type: {
+              type: 'string',
+              nullable: true,
+              description: 'Selection type for selection 2 (OVER/UNDER)',
+              example: 'OVER'
+            },
+            selection_3_player_pff_id: {
+              type: 'integer',
+              nullable: true,
+              description: 'PFF ID for selection 3 player'
+            },
+            selection_3_player_gsis_it_id: {
+              type: 'string',
+              nullable: true,
+              description: 'GSIS IT ID for selection 3 player'
+            },
+            selection_3_player_gsisid: {
+              type: 'string',
+              nullable: true,
+              description: 'GSIS ID for selection 3 player'
+            },
+            selection_3_player_position: {
+              type: 'string',
+              nullable: true,
+              description: 'Position for selection 3 player'
+            },
+            selection_3_nfl_team: {
+              type: 'string',
+              nullable: true,
+              description: 'NFL team for selection 3 player'
+            },
+            selection_3_first_name: {
+              type: 'string',
+              nullable: true,
+              description: 'First name for selection 3 player'
+            },
+            selection_3_last_name: {
+              type: 'string',
+              nullable: true,
+              description: 'Last name for selection 3 player'
+            },
+            selection_3_market_type: {
+              type: 'string',
+              nullable: true,
+              description: 'Market type for selection 3'
+            },
+            selection_3_line: {
+              type: 'number',
+              nullable: true,
+              description: 'Line for selection 3'
+            },
+            selection_3_selection_type: {
+              type: 'string',
+              nullable: true,
+              description: 'Selection type for selection 3 (OVER/UNDER)'
+            },
+            selection_4_player_pff_id: {
+              type: 'integer',
+              nullable: true,
+              description: 'PFF ID for selection 4 player'
+            },
+            selection_4_player_gsis_it_id: {
+              type: 'string',
+              nullable: true,
+              description: 'GSIS IT ID for selection 4 player'
+            },
+            selection_4_player_gsisid: {
+              type: 'string',
+              nullable: true,
+              description: 'GSIS ID for selection 4 player'
+            },
+            selection_4_player_position: {
+              type: 'string',
+              nullable: true,
+              description: 'Position for selection 4 player'
+            },
+            selection_4_nfl_team: {
+              type: 'string',
+              nullable: true,
+              description: 'NFL team for selection 4 player'
+            },
+            selection_4_first_name: {
+              type: 'string',
+              nullable: true,
+              description: 'First name for selection 4 player'
+            },
+            selection_4_last_name: {
+              type: 'string',
+              nullable: true,
+              description: 'Last name for selection 4 player'
+            },
+            selection_4_market_type: {
+              type: 'string',
+              nullable: true,
+              description: 'Market type for selection 4'
+            },
+            selection_4_line: {
+              type: 'number',
+              nullable: true,
+              description: 'Line for selection 4'
+            },
+            selection_4_selection_type: {
+              type: 'string',
+              nullable: true,
+              description: 'Selection type for selection 4 (OVER/UNDER)'
+            }
+          }
         }
       },
       responses: {

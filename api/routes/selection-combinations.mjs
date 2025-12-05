@@ -52,6 +52,67 @@ function set_selection_fields({ result, selection_num, values = {} }) {
   result[`${prefix}selection_type`] = values.selection_type ?? null
 }
 
+/**
+ * @swagger
+ * /selection-combinations:
+ *   get:
+ *     tags:
+ *       - Selection Combinations
+ *     summary: Get combination odds
+ *     description: Retrieve parlay/SGP odds for predefined selection combinations. Each combination defines a set of selections (player props, game lines) that form a parlay bet.
+ *     parameters:
+ *       - $ref: '#/components/parameters/week'
+ *       - $ref: '#/components/parameters/year'
+ *       - name: source_id
+ *         in: query
+ *         schema:
+ *           type: string
+ *         description: Filter by sportsbook source
+ *         example: FANDUEL
+ *       - name: combination_id
+ *         in: query
+ *         schema:
+ *           type: integer
+ *         description: Filter by specific combination definition ID
+ *       - name: format
+ *         in: query
+ *         schema:
+ *           type: string
+ *           enum: [json, csv]
+ *           default: json
+ *         description: Response format
+ *       - name: limit
+ *         in: query
+ *         schema:
+ *           type: integer
+ *           minimum: 1
+ *           maximum: 10000
+ *           default: 1000
+ *         description: Number of records to return
+ *       - name: offset
+ *         in: query
+ *         schema:
+ *           type: integer
+ *           minimum: 0
+ *           default: 0
+ *         description: Number of records to skip
+ *     responses:
+ *       200:
+ *         description: List of combination odds with player and selection details
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items:
+ *                 $ref: '#/components/schemas/CombinationOdds'
+ *           text/csv:
+ *             schema:
+ *               type: string
+ *               description: CSV formatted data
+ *       500:
+ *         $ref: '#/components/responses/InternalServerError'
+ */
+
 function transform_combination_odds_row({ row, player_lookup_map }) {
   const result = {
     combination_name: row.combination_name,
