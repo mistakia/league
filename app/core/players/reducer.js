@@ -51,6 +51,7 @@ const initialState = new Map({
   leaguePlayersLoaded: false,
   leaguePlayersPending: false,
   week: new List([current_season.fantasy_season_week]),
+  opponent_time_period: '',
   items: new Map(),
   order: 'desc',
   selected_players_page_view: default_players_view_key,
@@ -89,6 +90,9 @@ export function players_reducer(state = initialState, { payload, type }) {
         week: new List([Math.max(current_season.fantasy_season_week, 1)])
       })
     }
+
+    case player_actions.SET_OPPONENT_TIME_PERIOD:
+      return state.merge({ opponent_time_period: payload.time_period })
 
     case player_actions.SEARCH_PLAYERS:
       return state.merge({ search: payload.value })

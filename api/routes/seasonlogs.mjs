@@ -72,6 +72,7 @@ router.get('/teams', async (req, res) => {
           )
           this.andOn('nfl_team_seasonlogs.tm', 'league_nfl_team_seasonlogs.tm')
         })
+        .where('league_nfl_team_seasonlogs.lid', leagueId)
     }
 
     const data = await query

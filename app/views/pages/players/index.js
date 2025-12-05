@@ -56,6 +56,8 @@ const map_state_to_props = createSelector(
     show_week_filter: Boolean(
       selected_players_page_view.fields.find((f) => f.includes('.week'))
     ),
+    show_time_period_filter:
+      selected_players_page_view.key === 'week_projections',
     show_play_filters: Boolean(
       selected_players_page_view.fields.find((f) => f.includes('stats.'))
     ),

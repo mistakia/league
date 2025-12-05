@@ -69,25 +69,25 @@
     top 0
     z-index 2
 
+  // Only first Average (row 3) and first Over Average (row 7) are sticky
+  // Row ordering: header (1), column headers (2), 4 avg rows (3-6), 4 adj rows (7-10), gamelogs (11+)
   .player__selected-row.header
-    position sticky
-    z-index 2
     background rgb(239, 239, 239)
-    
+
+    // First Average row (Season Average) - sticky
     &:nth-child(3)
+      position sticky
       top 49px
-    
-    &:nth-child(4)
+      z-index 2
+
+      .sticky__column
+        z-index 3
+
+    // First Over Average row (Season Over Average) - sticky
+    &:nth-child(7)
+      position sticky
       top 73px
-    
-    &:nth-child(5)
-      top 97px
-    
-    &:nth-child(6)
-      top 121px
-    
-    &:nth-child(n+7)
-      top 145px
-    
-    .sticky__column
-      z-index 3
+      z-index 2
+
+      .sticky__column
+        z-index 3

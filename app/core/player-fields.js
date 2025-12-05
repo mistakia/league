@@ -11,8 +11,10 @@ import { seasonlogs_actions } from '@core/seasonlogs/actions'
 export const get_player_fields = createSelector(
   (state) =>
     state.getIn(['players', 'week'], new List([current_season.week])).get(0),
+  (state) => state.getIn(['players', 'opponent_time_period'], ''),
   (state) => state,
-  (week, state) => PlayerFields({ week, state })
+  (week, opponent_time_period, state) =>
+    PlayerFields({ week, opponent_time_period, state })
 )
 
 // category - required
@@ -32,19 +34,23 @@ export const get_player_fields = createSelector(
 // percentile_field - optional
 
 // fixed - optional
-function PlayerFields({ week, state }) {
+function PlayerFields({ week, opponent_time_period, state }) {
+  const time_period_suffix = opponent_time_period
+    ? `_${opponent_time_period}`
+    : ''
+
   const opponent_field = (stat_field) => {
     return {
       get_percentile_key: (player_map) => {
         const pos = player_map.get('pos')
-        return `${pos}_AGAINST_ADJ`
+        return `${pos}_AGAINST_ADJ${time_period_suffix}`
       },
       fixed: 1,
       show_positivity: true,
       load: () => {
         const positions = state.getIn(['players', 'positions'])
         positions.forEach((pos) => {
-          const percentile_key = `${pos}_AGAINST_ADJ`
+          const percentile_key = `${pos}_AGAINST_ADJ${time_period_suffix}`
           store.dispatch(percentile_actions.load_percentiles(percentile_key))
         })
         store.dispatch(seasonlogs_actions.load_nfl_team_seasonlogs())
@@ -60,8 +66,9 @@ function PlayerFields({ week, state }) {
 
         const isHome = game.h === nfl_team
         const opp = isHome ? game.v : game.h
+        const stat_key = `${pos}_AGAINST_ADJ${time_period_suffix}`
         const value = seasonlogs.getIn(
-          ['nfl_teams', opp, `${pos}_AGAINST_ADJ`, stat_field],
+          ['nfl_teams', opp, stat_key, stat_field],
           0
         )
 
@@ -95,7 +102,7 @@ function PlayerFields({ week, state }) {
       csv_header: 'Opponent Strength',
       get_percentile_key: (player_map) => {
         const pos = player_map.get('pos')
-        return `${pos}_AGAINST_ADJ`
+        return `${pos}_AGAINST_ADJ${time_period_suffix}`
       },
       percentile_field: 'pts',
       fixed: 1,
@@ -103,7 +110,7 @@ function PlayerFields({ week, state }) {
       load: () => {
         const positions = state.getIn(['players', 'positions'])
         positions.forEach((pos) => {
-          const percentile_key = `${pos}_AGAINST_ADJ`
+          const percentile_key = `${pos}_AGAINST_ADJ${time_period_suffix}`
           store.dispatch(percentile_actions.load_percentiles(percentile_key))
         })
         store.dispatch(seasonlogs_actions.load_nfl_team_seasonlogs())
@@ -119,10 +126,8 @@ function PlayerFields({ week, state }) {
 
         const isHome = game.h === nfl_team
         const opp = isHome ? game.v : game.h
-        const pts = seasonlogs.getIn(
-          ['nfl_teams', opp, `${pos}_AGAINST_ADJ`, 'pts'],
-          0
-        )
+        const stat_key = `${pos}_AGAINST_ADJ${time_period_suffix}`
+        const pts = seasonlogs.getIn(['nfl_teams', opp, stat_key, 'pts'], 0)
 
         return pts
       }

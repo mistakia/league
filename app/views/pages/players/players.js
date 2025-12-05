@@ -16,6 +16,7 @@ import PositionFilter from '@components/position-filter'
 import DraftRoundFilter from '@components/draft-round-filter'
 import ExperienceFilter from '@components/experience-filter'
 import WeekFilter from '@components/week-filter'
+import PlayersTimePeriodFilter from '@components/players-time-period-filter'
 // import AgeFilter from '@components/age-filter' TODO — fix
 import WatchlistFilter from '@components/watchlist-filter'
 import PageLayout from '@layouts/page'
@@ -46,6 +47,7 @@ export default function PlayersPage({
   is_logged_in,
   selected_view_grouped_fields,
   show_week_filter,
+  show_time_period_filter,
   show_play_filters,
   show_qualifier_filter,
   reset_player_filter_options,
@@ -215,6 +217,7 @@ export default function PlayersPage({
           <PositionFilter />
           {is_logged_in && <AvailabilityFilter />}
           {show_week_filter && <WeekFilter />}
+          {show_time_period_filter && <PlayersTimePeriodFilter />}
           <Button
             variant='outlined'
             onClick={handleExport}
@@ -315,6 +318,7 @@ PlayersPage.propTypes = {
   searchValue: PropTypes.string,
   selected_view_grouped_fields: PropTypes.array,
   show_week_filter: PropTypes.bool,
+  show_time_period_filter: PropTypes.bool,
   show_play_filters: PropTypes.bool,
   show_qualifier_filter: PropTypes.bool,
   player_fields: PropTypes.object,
