@@ -158,12 +158,62 @@ describe('LIBS-SERVER normalize_selection_metric_line', function () {
       expect(result).to.equal(1.5)
     })
 
-    it('should not modify "200+ Passing Yards" with line 199.5', function () {
+    it('should not modify "200+ Passing Yards" with line 199.5 (already normalized)', function () {
       const result = normalize_selection_metric_line({
         raw_value: 199.5,
         selection_name: '200+ Passing Yards'
       })
       expect(result).to.equal(199.5)
+    })
+  })
+
+  describe('Embedded N+ format (FanDuel style) - normalization required', function () {
+    it('should normalize "Player Name 100+ Yards" with line 100.0 to 99.5', function () {
+      const result = normalize_selection_metric_line({
+        raw_value: 100.0,
+        selection_name: 'Adam Thielen 100+ Yards'
+      })
+      expect(result).to.equal(99.5)
+    })
+
+    it('should normalize "3+ Passing Touchdowns" with line 3.0 to 2.5', function () {
+      const result = normalize_selection_metric_line({
+        raw_value: 3.0,
+        selection_name: '3+ Passing Touchdowns'
+      })
+      expect(result).to.equal(2.5)
+    })
+
+    it('should normalize "200+ Passing Yards" with line 200.0 to 199.5', function () {
+      const result = normalize_selection_metric_line({
+        raw_value: 200.0,
+        selection_name: '200+ Passing Yards'
+      })
+      expect(result).to.equal(199.5)
+    })
+
+    it('should normalize "50+ Receiving Yards" with line 50.0 to 49.5', function () {
+      const result = normalize_selection_metric_line({
+        raw_value: 50.0,
+        selection_name: "Ja'Marr Chase 50+ Receiving Yards"
+      })
+      expect(result).to.equal(49.5)
+    })
+
+    it('should not normalize embedded format when line does not match', function () {
+      const result = normalize_selection_metric_line({
+        raw_value: 75.0,
+        selection_name: 'Player 100+ Yards'
+      })
+      expect(result).to.equal(75.0)
+    })
+
+    it('should not normalize embedded format when line is already .5', function () {
+      const result = normalize_selection_metric_line({
+        raw_value: 99.5,
+        selection_name: 'Player 100+ Yards'
+      })
+      expect(result).to.equal(99.5)
     })
   })
 
