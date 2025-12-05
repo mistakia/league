@@ -5,6 +5,10 @@
  * the line needs to be stored as N-0.5 to work correctly with the strict inequality
  * comparison logic (>) used in hit rate calculations.
  *
+ * Handles two formats:
+ * 1. Pure "N+" format (DraftKings): "100+", "250+"
+ * 2. Embedded "N+" format (FanDuel): "Player Name 100+ Yards", "3+ Passing Touchdowns"
+ *
  * @param {Object} params - Named parameters
  * @param {number|string|null|undefined} params.raw_value - The raw line value from the sportsbook API
  * @param {string} params.selection_name - The selection name/label (e.g., "3+", "Aaron Jones Over")
@@ -14,6 +18,8 @@
  * // N+ discrete stat markets - subtract 0.5
  * normalize_selection_metric_line({ raw_value: 3.0, selection_name: "3+" }) // Returns 2.5
  * normalize_selection_metric_line({ raw_value: "250", selection_name: "250+" }) // Returns 249.5
+ * normalize_selection_metric_line({ raw_value: 100.0, selection_name: "Player Name 100+ Yards" }) // Returns 99.5
+ * normalize_selection_metric_line({ raw_value: 3.0, selection_name: "3+ Passing Touchdowns" }) // Returns 2.5
  *
  * @example
  * // Already normalized markets - no change
@@ -67,36 +73,46 @@ export function normalize_selection_metric_line({ raw_value, selection_name }) {
     return line_value
   }
 
-  // Detect "N+" discrete stat markets using three-layer safety check:
+  // Check if line is already normalized (has .5)
+  const is_integer_line = line_value === Math.floor(line_value)
+  if (!is_integer_line) {
+    // Already normalized - return unchanged
+    return line_value
+  }
+
+  // Detect "N+" discrete stat markets using two patterns:
   //
-  // Layer 1: Pure pattern - selection_name matches "N+" format exactly (e.g., "3+", "250+", "1000+")
-  // This pattern will NEVER match traditional over/under names like "Aaron Jones Over" or "Over 249.5"
+  // Pattern 1: Pure "N+" format exactly (e.g., "3+", "250+", "1000+")
+  // Used by DraftKings
   const pure_plus_pattern = /^\d+\+$/
   const is_pure_plus_market = pure_plus_pattern.test(selection_name.trim())
 
-  if (!is_pure_plus_market) {
-    // Not a pure N+ market - return unchanged
+  if (is_pure_plus_market) {
+    // Extract the N value from the selection name (e.g., "3+" → 3)
+    const n_value = parseInt(selection_name.replace('+', ''), 10)
+
+    // Verify line matches the N value in name
+    if (line_value === n_value) {
+      return line_value - 0.5
+    }
     return line_value
   }
 
-  // Layer 2: Verify line is an integer matching the N value in the name
-  const is_integer_line = line_value === Math.floor(line_value)
+  // Pattern 2: Embedded "N+" format (e.g., "Player Name 100+ Yards", "3+ Passing Touchdowns")
+  // Used by FanDuel: look for "N+" followed by space or end of string
+  // Must be a whole number (not "99.5+")
+  const embedded_plus_pattern = /(\d+)\+(?:\s|$)/
+  const embedded_match = selection_name.match(embedded_plus_pattern)
 
-  if (!is_integer_line) {
-    // Already normalized (has .5) - return unchanged
-    return line_value
+  if (embedded_match) {
+    const n_value = parseInt(embedded_match[1], 10)
+
+    // Verify line matches the N value found in name
+    if (line_value === n_value) {
+      return line_value - 0.5
+    }
   }
 
-  // Extract the N value from the selection name (e.g., "3+" → 3, "250+" → 250)
-  const n_value = parseInt(selection_name.replace('+', ''), 10)
-
-  if (line_value !== n_value) {
-    // Line doesn't match the N value in name - return unchanged
-    // This protects against edge cases
-    return line_value
-  }
-
-  // Layer 3 passed: This is a pure "N+" market with integer line matching N
-  // Normalize by subtracting 0.5
-  return line_value - 0.5
+  // Not a N+ market - return unchanged
+  return line_value
 }
