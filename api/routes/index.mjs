@@ -20,6 +20,7 @@ import wagers from './wagers.mjs'
 import markets from './markets.mjs'
 import shorten_url from './shorten-url.mjs'
 import docs from './docs.mjs'
+import selection_combinations from './selection-combinations.mjs'
 
 export default {
   auth,
@@ -43,5 +44,6 @@ export default {
   wagers,
   markets,
   shorten_url,
-  docs
+  docs,
+  selection_combinations
 }
