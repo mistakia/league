@@ -20,7 +20,10 @@ SET row_security = off;
 ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_index DROP CONSTRAINT IF EXISTS ngs_prospect_scores_index_pid_fkey;
 ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_history DROP CONSTRAINT IF EXISTS ngs_prospect_scores_history_pid_fkey;
 ALTER TABLE IF EXISTS ONLY public.invite_codes DROP CONSTRAINT IF EXISTS invite_codes_created_by_fkey;
+ALTER TABLE IF EXISTS ONLY public.selection_combination_odds_index DROP CONSTRAINT IF EXISTS fk_combination_odds_index_combination;
+ALTER TABLE IF EXISTS ONLY public.selection_combination_odds_history DROP CONSTRAINT IF EXISTS fk_combination_odds_history_combination;
 DROP TRIGGER IF EXISTS update_config_modtime ON public.config;
+DROP TRIGGER IF EXISTS trigger_update_selection_combination_definitions_updated_at ON public.selection_combination_definitions;
 DROP TRIGGER IF EXISTS player_name_search_vector_update ON public.player;
 DROP INDEX IF EXISTS public.trades_slots_trade_uid_idx;
 DROP INDEX IF EXISTS public.projections_index_y2026_sourceid_pid_userid_week_year_seas__idx;
@@ -1586,6 +1589,12 @@ DROP INDEX IF EXISTS public.idx_super_priority_pid;
 DROP INDEX IF EXISTS public.idx_super_priority_lid;
 DROP INDEX IF EXISTS public.idx_super_priority_eligible;
 DROP INDEX IF EXISTS public.idx_super_priority_claimed;
+DROP INDEX IF EXISTS public.idx_selection_combination_odds_index_year_week;
+DROP INDEX IF EXISTS public.idx_selection_combination_odds_index_esbid;
+DROP INDEX IF EXISTS public.idx_selection_combination_odds_index_combination;
+DROP INDEX IF EXISTS public.idx_selection_combination_odds_history_lookup;
+DROP INDEX IF EXISTS public.idx_selection_combination_odds_history_esbid;
+DROP INDEX IF EXISTS public.idx_selection_combination_definitions_active;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_seasonlogs_pid_year_hash;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_projection_points_pid;
 DROP INDEX IF EXISTS public.idx_scoring_format_player_gamelogs_pid_esbid_hash;
@@ -1820,6 +1829,10 @@ ALTER TABLE IF EXISTS ONLY public.transactions DROP CONSTRAINT IF EXISTS transac
 ALTER TABLE IF EXISTS ONLY public.trades_slots DROP CONSTRAINT IF EXISTS trades_slots_pkey;
 ALTER TABLE IF EXISTS ONLY public.teams DROP CONSTRAINT IF EXISTS teams_pkey;
 ALTER TABLE IF EXISTS ONLY public.super_priority DROP CONSTRAINT IF EXISTS super_priority_pkey;
+ALTER TABLE IF EXISTS ONLY public.selection_combination_odds_index DROP CONSTRAINT IF EXISTS selection_combination_odds_index_pkey;
+ALTER TABLE IF EXISTS ONLY public.selection_combination_odds_history DROP CONSTRAINT IF EXISTS selection_combination_odds_history_pkey;
+ALTER TABLE IF EXISTS ONLY public.selection_combination_definitions DROP CONSTRAINT IF EXISTS selection_combination_definitions_pkey;
+ALTER TABLE IF EXISTS ONLY public.selection_combination_definitions DROP CONSTRAINT IF EXISTS selection_combination_definitions_combination_name_key;
 ALTER TABLE IF EXISTS ONLY public.seasons DROP CONSTRAINT IF EXISTS seasons_pkey;
 ALTER TABLE IF EXISTS ONLY public.rosters_players DROP CONSTRAINT IF EXISTS rosters_players_pkey;
 ALTER TABLE IF EXISTS ONLY public.prop_pairing_props DROP CONSTRAINT IF EXISTS prop_pairing_props_unique;
@@ -1930,6 +1943,8 @@ ALTER TABLE IF EXISTS public.trades ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.teams ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.super_priority ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.sources ALTER COLUMN uid DROP DEFAULT;
+ALTER TABLE IF EXISTS public.selection_combination_odds_history ALTER COLUMN history_id DROP DEFAULT;
+ALTER TABLE IF EXISTS public.selection_combination_definitions ALTER COLUMN combination_id DROP DEFAULT;
 ALTER TABLE IF EXISTS public.rosters ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.restricted_free_agency_bids ALTER COLUMN uid DROP DEFAULT;
 ALTER TABLE IF EXISTS public.props_index_new ALTER COLUMN prop_id DROP DEFAULT;
@@ -1968,6 +1983,11 @@ DROP SEQUENCE IF EXISTS public.super_priority_uid_seq;
 DROP TABLE IF EXISTS public.super_priority;
 DROP SEQUENCE IF EXISTS public.sources_uid_seq;
 DROP TABLE IF EXISTS public.sources;
+DROP TABLE IF EXISTS public.selection_combination_odds_index;
+DROP SEQUENCE IF EXISTS public.selection_combination_odds_history_history_id_seq;
+DROP TABLE IF EXISTS public.selection_combination_odds_history;
+DROP SEQUENCE IF EXISTS public.selection_combination_definitions_combination_id_seq;
+DROP TABLE IF EXISTS public.selection_combination_definitions;
 DROP TABLE IF EXISTS public.seasons;
 DROP TABLE IF EXISTS public.scoring_format_player_seasonlogs;
 DROP TABLE IF EXISTS public.scoring_format_player_projection_points;
@@ -2190,6 +2210,7 @@ DROP TABLE IF EXISTS public.draftkings_category_activity;
 DROP SEQUENCE IF EXISTS public.draft_uid_seq;
 DROP TABLE IF EXISTS public.draft;
 DROP TABLE IF EXISTS public.config;
+DROP FUNCTION IF EXISTS public.update_selection_combination_definitions_updated_at();
 DROP FUNCTION IF EXISTS public.update_modified_column();
 DROP FUNCTION IF EXISTS public.player_name_search_vector_update();
 DROP FUNCTION IF EXISTS public.needs_line_normalization(line numeric, name text);
@@ -2816,6 +2837,20 @@ CREATE FUNCTION public.update_modified_column() RETURNS trigger
     AS $$
 BEGIN
     NEW.updated_at = CURRENT_TIMESTAMP;
+    RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: update_selection_combination_definitions_updated_at(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.update_selection_combination_definitions_updated_at() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+    NEW.updated_at = NOW();
     RETURN NEW;
 END;
 $$;
@@ -23297,6 +23332,100 @@ CREATE TABLE public.seasons (
 
 
 --
+-- Name: selection_combination_definitions; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.selection_combination_definitions (
+    combination_id integer NOT NULL,
+    combination_name character varying(255) NOT NULL,
+    combination_description text,
+    selections jsonb NOT NULL,
+    active boolean DEFAULT true,
+    created_at timestamp without time zone DEFAULT now(),
+    updated_at timestamp without time zone DEFAULT now()
+);
+
+
+--
+-- Name: selection_combination_definitions_combination_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.selection_combination_definitions_combination_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: selection_combination_definitions_combination_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.selection_combination_definitions_combination_id_seq OWNED BY public.selection_combination_definitions.combination_id;
+
+
+--
+-- Name: selection_combination_odds_history; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.selection_combination_odds_history (
+    history_id integer NOT NULL,
+    combination_id integer NOT NULL,
+    source_id public.market_source_id NOT NULL,
+    selection_ids text[] NOT NULL,
+    esbid integer NOT NULL,
+    year smallint,
+    week smallint,
+    decimal_odds numeric(15,3),
+    american_odds integer,
+    is_sgp boolean,
+    "timestamp" integer NOT NULL,
+    previous_decimal_odds numeric(15,3),
+    previous_american_odds integer
+);
+
+
+--
+-- Name: selection_combination_odds_history_history_id_seq; Type: SEQUENCE; Schema: public; Owner: -
+--
+
+CREATE SEQUENCE public.selection_combination_odds_history_history_id_seq
+    AS integer
+    START WITH 1
+    INCREMENT BY 1
+    NO MINVALUE
+    NO MAXVALUE
+    CACHE 1;
+
+
+--
+-- Name: selection_combination_odds_history_history_id_seq; Type: SEQUENCE OWNED BY; Schema: public; Owner: -
+--
+
+ALTER SEQUENCE public.selection_combination_odds_history_history_id_seq OWNED BY public.selection_combination_odds_history.history_id;
+
+
+--
+-- Name: selection_combination_odds_index; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.selection_combination_odds_index (
+    combination_id integer NOT NULL,
+    source_id public.market_source_id NOT NULL,
+    selection_ids text[] NOT NULL,
+    esbid integer NOT NULL,
+    year smallint,
+    week smallint,
+    decimal_odds numeric(15,3),
+    american_odds integer,
+    is_sgp boolean,
+    "timestamp" integer NOT NULL
+);
+
+
+--
 -- Name: sources; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -24457,6 +24586,20 @@ ALTER TABLE ONLY public.rosters ALTER COLUMN uid SET DEFAULT nextval('public.ros
 
 
 --
+-- Name: selection_combination_definitions combination_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.selection_combination_definitions ALTER COLUMN combination_id SET DEFAULT nextval('public.selection_combination_definitions_combination_id_seq'::regclass);
+
+
+--
+-- Name: selection_combination_odds_history history_id; Type: DEFAULT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.selection_combination_odds_history ALTER COLUMN history_id SET DEFAULT nextval('public.selection_combination_odds_history_history_id_seq'::regclass);
+
+
+--
 -- Name: sources uid; Type: DEFAULT; Schema: public; Owner: -
 --
 
@@ -25327,6 +25470,38 @@ ALTER TABLE ONLY public.rosters_players
 
 ALTER TABLE ONLY public.seasons
     ADD CONSTRAINT seasons_pkey PRIMARY KEY (lid, year);
+
+
+--
+-- Name: selection_combination_definitions selection_combination_definitions_combination_name_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.selection_combination_definitions
+    ADD CONSTRAINT selection_combination_definitions_combination_name_key UNIQUE (combination_name);
+
+
+--
+-- Name: selection_combination_definitions selection_combination_definitions_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.selection_combination_definitions
+    ADD CONSTRAINT selection_combination_definitions_pkey PRIMARY KEY (combination_id);
+
+
+--
+-- Name: selection_combination_odds_history selection_combination_odds_history_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.selection_combination_odds_history
+    ADD CONSTRAINT selection_combination_odds_history_pkey PRIMARY KEY (history_id);
+
+
+--
+-- Name: selection_combination_odds_index selection_combination_odds_index_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.selection_combination_odds_index
+    ADD CONSTRAINT selection_combination_odds_index_pkey PRIMARY KEY (combination_id, source_id, selection_ids);
 
 
 --
@@ -26975,6 +27150,48 @@ CREATE INDEX idx_scoring_format_player_projection_points_pid ON public.scoring_f
 --
 
 CREATE UNIQUE INDEX idx_scoring_format_player_seasonlogs_pid_year_hash ON public.scoring_format_player_seasonlogs USING btree (pid, year, scoring_format_hash);
+
+
+--
+-- Name: idx_selection_combination_definitions_active; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_selection_combination_definitions_active ON public.selection_combination_definitions USING btree (active);
+
+
+--
+-- Name: idx_selection_combination_odds_history_esbid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_selection_combination_odds_history_esbid ON public.selection_combination_odds_history USING btree (esbid);
+
+
+--
+-- Name: idx_selection_combination_odds_history_lookup; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_selection_combination_odds_history_lookup ON public.selection_combination_odds_history USING btree (combination_id, source_id, selection_ids, "timestamp");
+
+
+--
+-- Name: idx_selection_combination_odds_index_combination; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_selection_combination_odds_index_combination ON public.selection_combination_odds_index USING btree (combination_id);
+
+
+--
+-- Name: idx_selection_combination_odds_index_esbid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_selection_combination_odds_index_esbid ON public.selection_combination_odds_index USING btree (esbid);
+
+
+--
+-- Name: idx_selection_combination_odds_index_year_week; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_selection_combination_odds_index_year_week ON public.selection_combination_odds_index USING btree (year, week);
 
 
 --
@@ -48881,10 +49098,33 @@ CREATE TRIGGER player_name_search_vector_update BEFORE INSERT OR UPDATE ON publi
 
 
 --
+-- Name: selection_combination_definitions trigger_update_selection_combination_definitions_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trigger_update_selection_combination_definitions_updated_at BEFORE UPDATE ON public.selection_combination_definitions FOR EACH ROW EXECUTE FUNCTION public.update_selection_combination_definitions_updated_at();
+
+
+--
 -- Name: config update_config_modtime; Type: TRIGGER; Schema: public; Owner: -
 --
 
 CREATE TRIGGER update_config_modtime BEFORE UPDATE ON public.config FOR EACH ROW EXECUTE FUNCTION public.update_modified_column();
+
+
+--
+-- Name: selection_combination_odds_history fk_combination_odds_history_combination; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.selection_combination_odds_history
+    ADD CONSTRAINT fk_combination_odds_history_combination FOREIGN KEY (combination_id) REFERENCES public.selection_combination_definitions(combination_id) ON DELETE CASCADE;
+
+
+--
+-- Name: selection_combination_odds_index fk_combination_odds_index_combination; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.selection_combination_odds_index
+    ADD CONSTRAINT fk_combination_odds_index_combination FOREIGN KEY (combination_id) REFERENCES public.selection_combination_definitions(combination_id) ON DELETE CASCADE;
 
 
 --
