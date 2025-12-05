@@ -1652,6 +1652,7 @@ DROP INDEX IF EXISTS public.idx_player_adp_history_timestamp;
 DROP INDEX IF EXISTS public.idx_player_adp_history_source_type;
 DROP INDEX IF EXISTS public.idx_player_adp_history_pid;
 DROP INDEX IF EXISTS public.idx_placed_wagers_userid;
+DROP INDEX IF EXISTS public.idx_placed_wagers_selections;
 DROP INDEX IF EXISTS public.idx_placed_wagers_placed_at;
 DROP INDEX IF EXISTS public.idx_pff_team_seasonlogs_year;
 DROP INDEX IF EXISTS public.idx_pff_team_seasonlogs_team_year;
@@ -17540,43 +17541,8 @@ CREATE TABLE public.placed_wagers (
     wager_returned_amount numeric(12,2) NOT NULL,
     book_id public.placed_wagers_book_id NOT NULL,
     book_wager_id character varying(255) NOT NULL,
-    selection_1_id character varying(255),
-    selection_1_odds integer,
-    selection_1_status public.wager_status,
-    selection_2_id character varying(255),
-    selection_2_odds integer,
-    selection_2_status public.wager_status,
-    selection_3_id character varying(255),
-    selection_3_odds integer,
-    selection_3_status public.wager_status,
-    selection_4_id character varying(255),
-    selection_4_odds integer,
-    selection_4_status public.wager_status,
-    selection_5_id character varying(255),
-    selection_5_odds integer,
-    selection_5_status public.wager_status,
-    selection_6_id character varying(255),
-    selection_6_odds integer,
-    selection_7_id character varying(255),
-    selection_7_odds integer,
-    selection_8_id character varying(255),
-    selection_8_odds integer,
-    selection_9_id character varying(255),
-    selection_9_odds integer,
-    selection_10_id character varying(255),
-    selection_10_odds integer,
     selection_lost smallint DEFAULT '0'::smallint,
-    selection_6_status public.wager_status,
-    selection_7_status public.wager_status,
-    selection_8_status public.wager_status,
-    selection_9_status public.wager_status,
-    selection_10_status public.wager_status,
-    selection_11_id character varying(255),
-    selection_11_status public.wager_status,
-    selection_11_odds integer,
-    selection_12_id character varying(255),
-    selection_12_status public.wager_status,
-    selection_12_odds integer
+    selections jsonb
 );
 
 
@@ -26540,6 +26506,13 @@ CREATE INDEX idx_pff_team_seasonlogs_year ON public.pff_team_seasonlogs USING bt
 --
 
 CREATE INDEX idx_placed_wagers_placed_at ON public.placed_wagers USING btree (placed_at);
+
+
+--
+-- Name: idx_placed_wagers_selections; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_placed_wagers_selections ON public.placed_wagers USING gin (selections jsonb_path_ops);
 
 
 --
