@@ -1,4 +1,7 @@
-import { player_prop_types } from '#libs-shared/bookmaker-constants.mjs'
+import {
+  player_prop_types,
+  team_game_market_types
+} from '#libs-shared/bookmaker-constants.mjs'
 
 const create_player_regex = (suffix) =>
   new RegExp(`^PLAYER_[A-Z](_-_|_)${suffix}$`)
@@ -124,10 +127,17 @@ const player_game_markets = [
   ...quarter_markets
 ]
 
+// Team game market mappings (non-player markets)
+const team_game_markets = [
+  [/^ALTERNATE_HANDICAP$/, team_game_market_types.GAME_ALT_SPREAD],
+  [/^ALTERNATE_TOTAL$/, team_game_market_types.GAME_ALT_TOTAL]
+]
+
 // Combine alt_line_markets and markets
 const combined_markets = [
   ...player_game_alt_line_markets,
-  ...player_game_markets
+  ...player_game_markets,
+  ...team_game_markets
 ]
 
 export const get_market_type_for_quarterback_season_props = ({

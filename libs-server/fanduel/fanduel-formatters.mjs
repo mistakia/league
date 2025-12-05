@@ -1,4 +1,7 @@
-import { player_game_alt_prop_types } from '#libs-shared/bookmaker-constants.mjs'
+import {
+  player_game_alt_prop_types,
+  team_game_market_types
+} from '#libs-shared/bookmaker-constants.mjs'
 import { normalize_selection_metric_line } from '../normalize-selection-metric-line.mjs'
 
 /**
@@ -135,4 +138,49 @@ export const get_selection_metric_from_selection_name = (selection_name) => {
   }
 
   return null
+}
+
+/**
+ * Team spread market types that use team name + spread format
+ */
+const TEAM_SPREAD_MARKET_TYPES = new Set([
+  team_game_market_types.GAME_ALT_SPREAD,
+  team_game_market_types.GAME_SPREAD
+])
+
+/**
+ * Checks if a market type is a team spread market
+ * @param {string} market_type - The market type
+ * @returns {boolean} - Whether the market type is a team spread market
+ */
+export const is_team_spread_market = (market_type) => {
+  return TEAM_SPREAD_MARKET_TYPES.has(market_type)
+}
+
+/**
+ * Parses a team spread selection name to extract team name and spread line
+ * Format: "Team Name (+/-X.X)" e.g. "Miami Dolphins (+23.5)" or "New York Jets (-3.5)"
+ * @param {string} selection_name - The selection name from FanDuel
+ * @returns {object|null} - { team_name, spread_line, selection_type } or null if not a valid spread format
+ */
+export const parse_team_spread_selection = (selection_name) => {
+  // Match pattern: "Team Name (+ or - number)" with optional .5
+  const match = selection_name.match(/^(.+?)\s*\(([+-])(\d+(?:\.\d+)?)\)$/)
+  if (!match) {
+    return null
+  }
+
+  const team_name = match[1].trim()
+  const sign = match[2]
+  const spread_value = parseFloat(match[3])
+
+  // Convert to spread line (positive value for underdogs, negative for favorites)
+  const spread_line = sign === '+' ? spread_value : -spread_value
+
+  return {
+    team_name,
+    spread_line,
+    // For spreads, use the team name as the selection type identifier
+    selection_type: team_name
+  }
 }
