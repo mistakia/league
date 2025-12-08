@@ -22766,7 +22766,8 @@ CREATE TABLE public.prop_market_selections_index (
     overall_hit_rate_soft numeric(5,4),
     overall_edge_hard numeric(6,5),
     overall_edge_soft numeric(6,5),
-    selection_type public.selection_type
+    selection_type public.selection_type,
+    metric_result_value numeric(6,1)
 );
 
 
@@ -22800,7 +22801,6 @@ CREATE TABLE public.prop_markets_index (
     open boolean,
     live boolean,
     selection_count integer NOT NULL,
-    metric_result_value numeric(6,1),
     time_type public.time_type NOT NULL,
     "timestamp" integer NOT NULL,
     year smallint,

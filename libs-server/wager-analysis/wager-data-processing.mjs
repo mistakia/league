@@ -95,7 +95,7 @@ export const enrich_selections_from_db = async ({
       .select(
         'pms.source_selection_id',
         'pm.source_event_id',
-        'pm.metric_result_value',
+        'pms.metric_result_value',
         'pm.market_type',
         'pms.selection_metric_line',
         'pms.selection_type'
