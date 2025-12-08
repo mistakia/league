@@ -38,7 +38,12 @@ export const CONFIG = {
   // Player name patterns
   PLAYER_PATTERNS: {
     TEAM_ABBREVIATION: /\s*\(([A-Z]{2,4})\)\s*$/,
-    METRIC_LINE: /(\d+\.?\d*)+/,
+    // Match numbers in betting contexts:
+    // - "N+" format (e.g., "3+", "250+")
+    // - Numbers preceded by Over/Under
+    // - Numbers at word boundaries NOT embedded in team names like "49ers"
+    // The pattern requires either a + suffix, Over/Under prefix, or decimal point
+    METRIC_LINE: /(?:(?:over|under)\s*)?(\d+\.\d+|\d+\+)|\b(\d+)\+/i,
     UNICODE_MINUS: /\u2212/g
   },
 

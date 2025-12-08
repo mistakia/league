@@ -230,7 +230,16 @@ export const extract_metric_line = (label) => {
   if (!label) return null
 
   const parsed_line = label.match(CONFIG.PLAYER_PATTERNS.METRIC_LINE)
-  return parsed_line ? Number(parsed_line[0]) : null
+  if (!parsed_line) return null
+
+  // The regex has multiple capture groups - find the first non-undefined match
+  // Group 1: decimal numbers or N+ format from over/under context
+  // Group 2: N+ format standalone
+  const matched_value = parsed_line[1] || parsed_line[2]
+  if (!matched_value) return null
+
+  // Remove + suffix if present before converting to number
+  return Number(matched_value.replace('+', ''))
 }
 
 /**
@@ -265,8 +274,39 @@ const YES_NO_MARKET_TYPES = new Set([
   'ANYTIME_TOUCHDOWN',
   'GAME_TWO_PLUS_TOUCHDOWNS',
   'GAME_FIRST_TOUCHDOWN_SCORER',
-  'GAME_FIRST_TEAM_TOUCHDOWN_SCORER'
+  'GAME_FIRST_TEAM_TOUCHDOWN_SCORER',
+  'GAME_LAST_TOUCHDOWN_SCORER'
 ])
+
+/**
+ * Implicit thresholds for market types where the threshold is determined by
+ * market type rather than provided in the data.
+ *
+ * Values are normalized (N-0.5) to work with strict inequality (>) comparison:
+ * - 0.5 means 1+ (> 0.5 equals >= 1)
+ * - 1.5 means 2+ (> 1.5 equals >= 2)
+ */
+const IMPLICIT_THRESHOLD_MARKET_TYPES = {
+  ANYTIME_TOUCHDOWN: 0.5, // Player scores 1+ TDs
+  GAME_TWO_PLUS_TOUCHDOWNS: 1.5, // Player scores 2+ TDs
+  GAME_FIRST_TOUCHDOWN_SCORER: 0.5, // Player scores first TD (1+ in context)
+  GAME_LAST_TOUCHDOWN_SCORER: 0.5, // Player scores last TD (1+ in context)
+  GAME_FIRST_TEAM_TOUCHDOWN_SCORER: 0.5 // Player scores first team TD (1+ in context)
+}
+
+/**
+ * Returns the implicit threshold for a market type that doesn't have an explicit
+ * handicap/line value in the data.
+ *
+ * @param {string} market_type - The market type
+ * @returns {number|null} - The implicit threshold (normalized) or null if not applicable
+ */
+export const get_implicit_threshold_for_market_type = (market_type) => {
+  if (!market_type) {
+    return null
+  }
+  return IMPLICIT_THRESHOLD_MARKET_TYPES[market_type] ?? null
+}
 
 /**
  * Checks if a market type uses YES/NO selection types

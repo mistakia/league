@@ -15,7 +15,8 @@ import {
   determine_teams,
   extract_player_info,
   process_american_odds,
-  extract_metric_line
+  extract_metric_line,
+  get_implicit_threshold_for_market_type
 } from './draftkings-helpers.mjs'
 
 const log = debug('import-draft-kings')
@@ -180,6 +181,13 @@ const process_selection = (
     raw_value: formatted_selection_metric_line,
     selection_name: clean_string(selection.label)
   })
+
+  // Apply implicit threshold for market types where threshold is determined by
+  // market type rather than provided in the data (e.g., touchdown markets)
+  if (formatted_selection_metric_line === null && market_type) {
+    formatted_selection_metric_line =
+      get_implicit_threshold_for_market_type(market_type)
+  }
 
   // Process American odds
   const odds_american_value = process_american_odds(
