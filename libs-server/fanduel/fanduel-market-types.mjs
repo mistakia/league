@@ -120,6 +120,9 @@ const player_game_markets = [
     player_prop_types.GAME_TACKLES_ASSISTS
   ],
   [/^ANY_TIME_TOUCHDOWN_SCORER$/, player_prop_types.ANYTIME_TOUCHDOWN],
+  [/^TO_SCORE_2\+_TOUCHDOWNS$/, player_prop_types.GAME_TWO_PLUS_TOUCHDOWNS],
+  [/^FIRST_TOUCHDOWN_SCORER$/, player_prop_types.GAME_FIRST_TOUCHDOWN_SCORER],
+  [/^LAST_TOUCHDOWN_SCORER$/, player_prop_types.GAME_LAST_TOUCHDOWN_SCORER],
   [
     /^1ST_TEAM_TOUCHDOWN_SCORER$/,
     player_prop_types.GAME_FIRST_TEAM_TOUCHDOWN_SCORER
