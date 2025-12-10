@@ -148,36 +148,51 @@ const handle_super_priority_claim = async (waiver, lid, timestamp) => {
       .select('pid')
       .where('waiverid', waiver.wid)
 
-    // Process super priority claim
-    await process_super_priority({
-      pid: waiver.pid,
-      original_tid: waiver.tid,
-      lid,
-      super_priority_uid: super_priority_status.super_priority_uid,
-      userid: waiver.userid,
-      release: release.map((r) => r.pid)
-    })
-
-    // Mark waiver as successful
-    await db('waivers')
-      .update({
-        succ: 1,
-        processed: timestamp
+    try {
+      // Process super priority claim
+      await process_super_priority({
+        pid: waiver.pid,
+        original_tid: waiver.tid,
+        lid,
+        super_priority_uid: super_priority_status.super_priority_uid,
+        userid: waiver.userid,
+        release: release.map((r) => r.pid)
       })
-      .where('uid', waiver.wid)
 
-    log(
-      `super priority claim processed for pid: ${waiver.pid}, tid: ${waiver.tid}`
-    )
+      // Mark waiver as successful
+      await db('waivers')
+        .update({
+          succ: 1,
+          processed: timestamp
+        })
+        .where('uid', waiver.wid)
 
-    // Cancel all other pending waivers for this player
-    await cancel_other_pending_waivers(
-      lid,
-      waiver.pid,
-      waiver.wid,
-      timestamp,
-      'Player already claimed by super priority'
-    )
+      log(
+        `super priority claim processed for pid: ${waiver.pid}, tid: ${waiver.tid}`
+      )
+
+      // Cancel all other pending waivers for this player
+      await cancel_other_pending_waivers(
+        lid,
+        waiver.pid,
+        waiver.wid,
+        timestamp,
+        'Player already claimed by super priority'
+      )
+    } catch (err) {
+      // Mark waiver as failed with the actual error reason
+      await db('waivers')
+        .update({
+          succ: 0,
+          reason: err.message,
+          processed: timestamp
+        })
+        .where('uid', waiver.wid)
+
+      log(
+        `super priority claim failed for pid: ${waiver.pid}, tid: ${waiver.tid} - ${err.message}`
+      )
+    }
   } else {
     // Super priority not eligible, mark as failed
     await db('waivers')
