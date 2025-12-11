@@ -7,6 +7,35 @@ import PlayerSelectedRowHeader from '@components/player-selected-row-header'
 
 import './selected-player-gamelogs.styl'
 
+const get_snaps_config = (pos) => {
+  switch (pos) {
+    case 'DST':
+    case 'K':
+      return {
+        types: ['DEF', 'ST'],
+        fields: ['snaps_def', 'snaps_st']
+      }
+    case 'QB':
+      return {
+        types: ['OFF', 'PASS', 'RUSH'],
+        fields: ['snaps_off', 'snaps_pass', 'snaps_rush']
+      }
+    case 'RB':
+      return {
+        types: ['OFF', 'PASS', 'RUSH', 'ST'],
+        fields: ['snaps_off', 'snaps_pass', 'snaps_rush', 'snaps_st']
+      }
+    case 'WR':
+    case 'TE':
+      return {
+        types: ['OFF', 'REC', 'RUSH', 'ST'],
+        fields: ['snaps_off', 'snaps_pass', 'snaps_rush', 'snaps_st']
+      }
+    default:
+      return { types: [], fields: [] }
+  }
+}
+
 export default function SelectedPlayerGamelogs({ player_map, load, years }) {
   const pid = player_map.get('pid')
   const position = player_map.get('pos')
@@ -14,6 +43,8 @@ export default function SelectedPlayerGamelogs({ player_map, load, years }) {
   useEffect(() => {
     load({ pid, position })
   }, [pid, position, load])
+
+  const snaps_config = get_snaps_config(position)
 
   const rows = []
   const sorted_years = Object.keys(years).sort((a, b) => b - a)
@@ -28,6 +59,7 @@ export default function SelectedPlayerGamelogs({ player_map, load, years }) {
     )
     const gamelogs = years[year]
     gamelogs.forEach((game, gameIndex) => {
+      const snaps_off_pct = game.snaps_off_pct
       const lead = (
         <>
           <div className='table__cell metric sticky__column game__day'>
@@ -44,6 +76,16 @@ export default function SelectedPlayerGamelogs({ player_map, load, years }) {
             {game.points_added ? game.points_added.toFixed(1) : '-'}
           </div>
           <div className='table__cell metric'>{game.pos_rnk || '-'}</div>
+          <div className='table__cell metric'>
+            {snaps_off_pct != null
+              ? `${(snaps_off_pct * 100).toFixed(0)}%`
+              : '-'}
+          </div>
+          {snaps_config.fields.map((field) => (
+            <div key={field} className='table__cell metric'>
+              {game[field] ?? '-'}
+            </div>
+          ))}
         </>
       )
 
@@ -54,7 +96,6 @@ export default function SelectedPlayerGamelogs({ player_map, load, years }) {
           stats={game}
           lead={lead}
           pos={position}
-          snaps
         />
       )
     })
@@ -79,7 +120,18 @@ export default function SelectedPlayerGamelogs({ player_map, load, years }) {
             <div className='table__cell'>Rnk</div>
           </div>
         </div>
-        <PlayerSelectedRowHeader pos={position} snaps />
+        <div className='row__group'>
+          <div className='row__group-head'>Snaps</div>
+          <div className='row__group-body'>
+            <div className='table__cell'>OFF%</div>
+            {snaps_config.types.map((type) => (
+              <div key={type} className='table__cell'>
+                {type}
+              </div>
+            ))}
+          </div>
+        </div>
+        <PlayerSelectedRowHeader pos={position} />
       </div>
       {rows}
     </div>
