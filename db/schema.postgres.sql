@@ -22,8 +22,15 @@ ALTER TABLE IF EXISTS ONLY public.ngs_prospect_scores_history DROP CONSTRAINT IF
 ALTER TABLE IF EXISTS ONLY public.invite_codes DROP CONSTRAINT IF EXISTS invite_codes_created_by_fkey;
 ALTER TABLE IF EXISTS ONLY public.selection_combination_odds_index DROP CONSTRAINT IF EXISTS fk_combination_odds_index_combination;
 ALTER TABLE IF EXISTS ONLY public.selection_combination_odds_history DROP CONSTRAINT IF EXISTS fk_combination_odds_history_combination;
+ALTER TABLE IF EXISTS ONLY public.external_league_import_jobs DROP CONSTRAINT IF EXISTS external_league_import_jobs_lid_fkey;
+ALTER TABLE IF EXISTS ONLY public.external_league_import_jobs DROP CONSTRAINT IF EXISTS external_league_import_jobs_initiated_by_fkey;
+ALTER TABLE IF EXISTS ONLY public.external_league_import_jobs DROP CONSTRAINT IF EXISTS external_league_import_jobs_connection_id_fkey;
+ALTER TABLE IF EXISTS ONLY public.external_league_connections DROP CONSTRAINT IF EXISTS external_league_connections_lid_fkey;
+ALTER TABLE IF EXISTS ONLY public.external_league_connections DROP CONSTRAINT IF EXISTS external_league_connections_created_by_fkey;
 DROP TRIGGER IF EXISTS update_config_modtime ON public.config;
 DROP TRIGGER IF EXISTS trigger_update_selection_combination_definitions_updated_at ON public.selection_combination_definitions;
+DROP TRIGGER IF EXISTS trigger_external_league_import_jobs_updated_at ON public.external_league_import_jobs;
+DROP TRIGGER IF EXISTS trigger_external_league_connections_updated_at ON public.external_league_connections;
 DROP TRIGGER IF EXISTS player_name_search_vector_update ON public.player;
 DROP INDEX IF EXISTS public.trades_slots_trade_uid_idx;
 DROP INDEX IF EXISTS public.projections_index_y2026_sourceid_pid_userid_week_year_seas__idx;
@@ -1637,10 +1644,12 @@ DROP INDEX IF EXISTS public.idx_players_status_pid;
 DROP INDEX IF EXISTS public.idx_player_sis_id;
 DROP INDEX IF EXISTS public.idx_player_seasonlogs_year_seas_type_career_year_pid;
 DROP INDEX IF EXISTS public.idx_player_salaries_source_id_pid_salary_esbid;
+DROP INDEX IF EXISTS public.idx_player_rtsports_id;
 DROP INDEX IF EXISTS public.idx_player_prospect_profile_sis_id;
 DROP INDEX IF EXISTS public.idx_player_pid_pos;
 DROP INDEX IF EXISTS public.idx_player_pid_incl_pos_fname_lname;
 DROP INDEX IF EXISTS public.idx_player_pff_id;
+DROP INDEX IF EXISTS public.idx_player_nffc_id;
 DROP INDEX IF EXISTS public.idx_player_lname;
 DROP INDEX IF EXISTS public.idx_player_gamelogs_year_esbid_pid;
 DROP INDEX IF EXISTS public.idx_player_gamelogs_ruled_out;
@@ -1651,6 +1660,8 @@ DROP INDEX IF EXISTS public.idx_player_gamelogs_esbid_active_pid;
 DROP INDEX IF EXISTS public.idx_player_gamelogs_active_pid_year;
 DROP INDEX IF EXISTS public.idx_player_fname_lname;
 DROP INDEX IF EXISTS public.idx_player_fname;
+DROP INDEX IF EXISTS public.idx_player_ffpc_id;
+DROP INDEX IF EXISTS public.idx_player_fantrax_id;
 DROP INDEX IF EXISTS public.idx_player_college_seasonlogs_season;
 DROP INDEX IF EXISTS public.idx_player_college_seasonlogs_pid;
 DROP INDEX IF EXISTS public.idx_player_college_careerlogs_pid;
@@ -1732,6 +1743,19 @@ DROP INDEX IF EXISTS public.idx_keeptradecut_rankings_pid_qb_type_d;
 DROP INDEX IF EXISTS public.idx_invite_codes_used_by;
 DROP INDEX IF EXISTS public.idx_invite_codes_is_active;
 DROP INDEX IF EXISTS public.idx_invite_codes_created_by;
+DROP INDEX IF EXISTS public.idx_external_league_import_jobs_status;
+DROP INDEX IF EXISTS public.idx_external_league_import_jobs_queued_at;
+DROP INDEX IF EXISTS public.idx_external_league_import_jobs_lid;
+DROP INDEX IF EXISTS public.idx_external_league_import_jobs_connection_id;
+DROP INDEX IF EXISTS public.idx_external_league_import_jobs_active;
+DROP INDEX IF EXISTS public.idx_external_league_import_job_history_lid;
+DROP INDEX IF EXISTS public.idx_external_league_import_job_history_connection_id;
+DROP INDEX IF EXISTS public.idx_external_league_import_job_history_archived_at;
+DROP INDEX IF EXISTS public.idx_external_league_connections_status;
+DROP INDEX IF EXISTS public.idx_external_league_connections_platform;
+DROP INDEX IF EXISTS public.idx_external_league_connections_lid;
+DROP INDEX IF EXISTS public.idx_external_league_connections_last_sync;
+DROP INDEX IF EXISTS public.idx_external_league_connections_auto_sync;
 DROP INDEX IF EXISTS public.idx_espn_team_win_rates_history_year;
 DROP INDEX IF EXISTS public.idx_espn_receiving_metrics_history;
 DROP INDEX IF EXISTS public.idx_espn_player_win_rates_history_year;
@@ -1840,6 +1864,7 @@ ALTER TABLE IF EXISTS ONLY public.playoffs DROP CONSTRAINT IF EXISTS playoffs_pk
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_swish_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_salaries DROP CONSTRAINT IF EXISTS player_salaries_pid_esbid_source_contest_id_key;
 ALTER TABLE IF EXISTS ONLY public.player_rushing_gamelogs DROP CONSTRAINT IF EXISTS player_rushing_gamelogs_esbid_pid_year_unique;
+ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_rtsports_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_rts_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_receiving_gamelogs DROP CONSTRAINT IF EXISTS player_receiving_gamelogs_esbid_pid_year_unique;
 ALTER TABLE IF EXISTS ONLY public.player_rankings_index DROP CONSTRAINT IF EXISTS player_rankings_index_unique;
@@ -1848,6 +1873,7 @@ ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_pff_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_passing_gamelogs DROP CONSTRAINT IF EXISTS player_passing_gamelogs_esbid_pid_year_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_otc_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_nffc_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_mfl_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2026 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2026_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2025 DROP CONSTRAINT IF EXISTS player_gamelogs_year_2025_pkey;
@@ -1879,6 +1905,8 @@ ALTER TABLE IF EXISTS ONLY public.player_gamelogs_year_2000 DROP CONSTRAINT IF E
 ALTER TABLE IF EXISTS ONLY public.player_gamelogs_default DROP CONSTRAINT IF EXISTS player_gamelogs_default_pkey;
 ALTER TABLE IF EXISTS ONLY public.player_gamelogs DROP CONSTRAINT IF EXISTS player_gamelogs_pkey;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_fleaflicker_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_ffpc_id_unique;
+ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_fantrax_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_fanduel_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player DROP CONSTRAINT IF EXISTS player_draftkings_id_unique;
 ALTER TABLE IF EXISTS ONLY public.player_defender_gamelogs DROP CONSTRAINT IF EXISTS player_defender_gamelogs_esbid_pid_year_unique;
@@ -1924,6 +1952,10 @@ ALTER TABLE IF EXISTS ONLY public.matchups DROP CONSTRAINT IF EXISTS "idx_24699_
 ALTER TABLE IF EXISTS ONLY public.league_migrations_lock DROP CONSTRAINT IF EXISTS "idx_24658_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.league_migrations DROP CONSTRAINT IF EXISTS "idx_24652_PRIMARY";
 ALTER TABLE IF EXISTS ONLY public.draft DROP CONSTRAINT IF EXISTS "idx_24608_PRIMARY";
+ALTER TABLE IF EXISTS ONLY public.external_league_import_jobs DROP CONSTRAINT IF EXISTS external_league_import_jobs_pkey;
+ALTER TABLE IF EXISTS ONLY public.external_league_import_job_history DROP CONSTRAINT IF EXISTS external_league_import_job_history_pkey;
+ALTER TABLE IF EXISTS ONLY public.external_league_connections DROP CONSTRAINT IF EXISTS external_league_connections_pkey;
+ALTER TABLE IF EXISTS ONLY public.external_league_connections DROP CONSTRAINT IF EXISTS external_league_connections_lid_platform_external_league_id_key;
 ALTER TABLE IF EXISTS ONLY public.espn_team_win_rates_index DROP CONSTRAINT IF EXISTS espn_team_win_rates_index_pkey;
 ALTER TABLE IF EXISTS ONLY public.espn_team_win_rates_history DROP CONSTRAINT IF EXISTS espn_team_win_rates_history_pkey;
 ALTER TABLE IF EXISTS ONLY public.espn_player_win_rates_index DROP CONSTRAINT IF EXISTS espn_player_win_rates_index_pkey;
@@ -2196,6 +2228,9 @@ DROP SEQUENCE IF EXISTS public.jobs_uid_seq;
 DROP TABLE IF EXISTS public.jobs;
 DROP TABLE IF EXISTS public.invite_codes;
 DROP TABLE IF EXISTS public.footballoutsiders;
+DROP TABLE IF EXISTS public.external_league_import_jobs;
+DROP TABLE IF EXISTS public.external_league_import_job_history;
+DROP TABLE IF EXISTS public.external_league_connections;
 DROP TABLE IF EXISTS public.espn_team_win_rates_index;
 DROP TABLE IF EXISTS public.espn_team_win_rates_history;
 DROP TABLE IF EXISTS public.espn_receiving_metrics_history;
@@ -2212,8 +2247,14 @@ DROP TABLE IF EXISTS public.draft;
 DROP TABLE IF EXISTS public.config;
 DROP FUNCTION IF EXISTS public.update_selection_combination_definitions_updated_at();
 DROP FUNCTION IF EXISTS public.update_modified_column();
+DROP FUNCTION IF EXISTS public.update_job_progress(p_job_id uuid, p_progress integer, p_current_step character varying);
+DROP FUNCTION IF EXISTS public.update_external_league_import_jobs_updated_at();
+DROP FUNCTION IF EXISTS public.update_external_league_connections_updated_at();
 DROP FUNCTION IF EXISTS public.player_name_search_vector_update();
 DROP FUNCTION IF EXISTS public.needs_line_normalization(line numeric, name text);
+DROP FUNCTION IF EXISTS public.get_next_queued_job();
+DROP FUNCTION IF EXISTS public.complete_job(p_job_id uuid, p_success boolean, p_results jsonb, p_error_message text, p_error_context jsonb, p_stats_players_mapped integer, p_stats_players_failed integer, p_stats_rosters_updated integer, p_stats_transactions_imported integer, p_stats_transactions_failed integer);
+DROP FUNCTION IF EXISTS public.archive_completed_import_jobs();
 DROP TYPE IF EXISTS public.wager_status;
 DROP TYPE IF EXISTS public.time_type;
 DROP TYPE IF EXISTS public.team_unit;
@@ -2795,6 +2836,134 @@ CREATE TYPE public.wager_status AS ENUM (
 
 
 --
+-- Name: archive_completed_import_jobs(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.archive_completed_import_jobs() RETURNS integer
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  archived_count INTEGER := 0;
+  job_record RECORD;
+BEGIN
+  -- Archive jobs older than 30 days that are completed or failed
+  FOR job_record IN 
+    SELECT * FROM external_league_import_jobs 
+    WHERE status IN ('completed', 'failed', 'cancelled')
+      AND completed_at < NOW() - INTERVAL '30 days'
+  LOOP
+    -- Insert into history table
+    INSERT INTO external_league_import_job_history (
+      job_id, connection_id, lid, job_type, status,
+      queued_at, started_at, completed_at,
+      duration_seconds,
+      success, players_mapped, rosters_updated, transactions_imported,
+      error_summary, initiated_by
+    ) VALUES (
+      job_record.job_id, job_record.connection_id, job_record.lid,
+      job_record.job_type, job_record.status,
+      job_record.queued_at, job_record.started_at, job_record.completed_at,
+      CASE 
+        WHEN job_record.started_at IS NOT NULL AND job_record.completed_at IS NOT NULL 
+        THEN EXTRACT(EPOCH FROM (job_record.completed_at - job_record.started_at))::INTEGER
+        ELSE NULL
+      END,
+      job_record.status = 'completed',
+      job_record.players_mapped, job_record.rosters_updated, job_record.transactions_imported,
+      job_record.error_message, job_record.initiated_by
+    );
+    
+    -- Delete from main table
+    DELETE FROM external_league_import_jobs WHERE job_id = job_record.job_id;
+    archived_count := archived_count + 1;
+  END LOOP;
+  
+  RETURN archived_count;
+END;
+$$;
+
+
+--
+-- Name: FUNCTION archive_completed_import_jobs(); Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON FUNCTION public.archive_completed_import_jobs() IS 'Archives completed jobs older than 30 days to history table';
+
+
+--
+-- Name: complete_job(uuid, boolean, jsonb, text, jsonb, integer, integer, integer, integer, integer); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.complete_job(p_job_id uuid, p_success boolean, p_results jsonb DEFAULT NULL::jsonb, p_error_message text DEFAULT NULL::text, p_error_context jsonb DEFAULT NULL::jsonb, p_stats_players_mapped integer DEFAULT NULL::integer, p_stats_players_failed integer DEFAULT NULL::integer, p_stats_rosters_updated integer DEFAULT NULL::integer, p_stats_transactions_imported integer DEFAULT NULL::integer, p_stats_transactions_failed integer DEFAULT NULL::integer) RETURNS boolean
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  UPDATE external_league_import_jobs 
+  SET status = CASE WHEN p_success THEN 'completed' ELSE 'failed' END,
+      progress_percentage = 100,
+      completed_at = NOW(),
+      results = p_results,
+      error_message = p_error_message,
+      error_context = p_error_context,
+      players_mapped = COALESCE(p_stats_players_mapped, players_mapped),
+      players_failed = COALESCE(p_stats_players_failed, players_failed),
+      rosters_updated = COALESCE(p_stats_rosters_updated, rosters_updated),
+      transactions_imported = COALESCE(p_stats_transactions_imported, transactions_imported),
+      transactions_failed = COALESCE(p_stats_transactions_failed, transactions_failed),
+      updated_at = NOW()
+  WHERE job_id = p_job_id 
+    AND status = 'running';
+  
+  RETURN FOUND;
+END;
+$$;
+
+
+--
+-- Name: FUNCTION complete_job(p_job_id uuid, p_success boolean, p_results jsonb, p_error_message text, p_error_context jsonb, p_stats_players_mapped integer, p_stats_players_failed integer, p_stats_rosters_updated integer, p_stats_transactions_imported integer, p_stats_transactions_failed integer); Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON FUNCTION public.complete_job(p_job_id uuid, p_success boolean, p_results jsonb, p_error_message text, p_error_context jsonb, p_stats_players_mapped integer, p_stats_players_failed integer, p_stats_rosters_updated integer, p_stats_transactions_imported integer, p_stats_transactions_failed integer) IS 'Marks job as completed or failed with results';
+
+
+--
+-- Name: get_next_queued_job(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.get_next_queued_job() RETURNS uuid
+    LANGUAGE plpgsql
+    AS $$
+DECLARE
+  next_job_id UUID;
+BEGIN
+  -- Get the oldest queued job and mark it as running
+  UPDATE external_league_import_jobs 
+  SET status = 'running', 
+      started_at = NOW(),
+      current_step = 'Initializing'
+  WHERE job_id = (
+    SELECT job_id 
+    FROM external_league_import_jobs 
+    WHERE status = 'queued' 
+    ORDER BY queued_at ASC 
+    LIMIT 1
+    FOR UPDATE SKIP LOCKED
+  )
+  RETURNING job_id INTO next_job_id;
+  
+  RETURN next_job_id;
+END;
+$$;
+
+
+--
+-- Name: FUNCTION get_next_queued_job(); Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON FUNCTION public.get_next_queued_job() IS 'Gets next queued job and marks it as running (thread-safe)';
+
+
+--
 -- Name: needs_line_normalization(numeric, text); Type: FUNCTION; Schema: public; Owner: -
 --
 
@@ -2826,6 +2995,61 @@ BEGIN
   RETURN NEW;
 END
 $$;
+
+
+--
+-- Name: update_external_league_connections_updated_at(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.update_external_league_connections_updated_at() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: update_external_league_import_jobs_updated_at(); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.update_external_league_import_jobs_updated_at() RETURNS trigger
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  NEW.updated_at = NOW();
+  RETURN NEW;
+END;
+$$;
+
+
+--
+-- Name: update_job_progress(uuid, integer, character varying); Type: FUNCTION; Schema: public; Owner: -
+--
+
+CREATE FUNCTION public.update_job_progress(p_job_id uuid, p_progress integer, p_current_step character varying DEFAULT NULL::character varying) RETURNS boolean
+    LANGUAGE plpgsql
+    AS $$
+BEGIN
+  UPDATE external_league_import_jobs 
+  SET progress_percentage = p_progress,
+      current_step = COALESCE(p_current_step, current_step),
+      updated_at = NOW()
+  WHERE job_id = p_job_id 
+    AND status = 'running';
+  
+  RETURN FOUND;
+END;
+$$;
+
+
+--
+-- Name: FUNCTION update_job_progress(p_job_id uuid, p_progress integer, p_current_step character varying); Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON FUNCTION public.update_job_progress(p_job_id uuid, p_progress integer, p_current_step character varying) IS 'Updates job progress and current step';
 
 
 --
@@ -3562,6 +3786,250 @@ CREATE TABLE public.espn_team_win_rates_index (
 
 
 --
+-- Name: external_league_connections; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.external_league_connections (
+    connection_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    lid bigint NOT NULL,
+    platform character varying(50) NOT NULL,
+    external_league_id character varying(255) NOT NULL,
+    connection_name character varying(255) NOT NULL,
+    connection_description text,
+    credentials_encrypted text,
+    status character varying(50) DEFAULT 'active'::character varying NOT NULL,
+    last_validated timestamp with time zone,
+    last_sync timestamp with time zone,
+    auto_sync_enabled boolean DEFAULT false NOT NULL,
+    sync_components jsonb DEFAULT '{"rosters": true, "transactions": true, "league_config": true}'::jsonb NOT NULL,
+    created_by bigint,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT external_league_connections_platform_check CHECK (((platform)::text = ANY ((ARRAY['sleeper'::character varying, 'espn'::character varying, 'yahoo'::character varying, 'mfl'::character varying, 'cbs'::character varying, 'ffpc'::character varying, 'nffc'::character varying, 'fantrax'::character varying, 'fleaflicker'::character varying, 'nfl'::character varying, 'rtsports'::character varying])::text[]))),
+    CONSTRAINT external_league_connections_status_check CHECK (((status)::text = ANY ((ARRAY['active'::character varying, 'inactive'::character varying, 'error'::character varying, 'validation_required'::character varying])::text[])))
+);
+
+
+--
+-- Name: TABLE external_league_connections; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.external_league_connections IS 'Stores persistent connection configurations for external fantasy platforms';
+
+
+--
+-- Name: COLUMN external_league_connections.connection_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.external_league_connections.connection_id IS 'Unique identifier for the connection';
+
+
+--
+-- Name: COLUMN external_league_connections.lid; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.external_league_connections.lid IS 'Internal league ID this connection belongs to';
+
+
+--
+-- Name: COLUMN external_league_connections.platform; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.external_league_connections.platform IS 'External platform identifier (sleeper, espn, etc.)';
+
+
+--
+-- Name: COLUMN external_league_connections.external_league_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.external_league_connections.external_league_id IS 'League identifier on the external platform';
+
+
+--
+-- Name: COLUMN external_league_connections.connection_name; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.external_league_connections.connection_name IS 'User-friendly name for this connection';
+
+
+--
+-- Name: COLUMN external_league_connections.credentials_encrypted; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.external_league_connections.credentials_encrypted IS 'Encrypted JSON containing platform credentials';
+
+
+--
+-- Name: COLUMN external_league_connections.status; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.external_league_connections.status IS 'Connection status: active, inactive, error, validation_required';
+
+
+--
+-- Name: COLUMN external_league_connections.auto_sync_enabled; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.external_league_connections.auto_sync_enabled IS 'Whether automatic syncing is enabled';
+
+
+--
+-- Name: COLUMN external_league_connections.sync_components; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.external_league_connections.sync_components IS 'JSON configuration of which components to sync';
+
+
+--
+-- Name: external_league_import_job_history; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.external_league_import_job_history (
+    job_id uuid NOT NULL,
+    connection_id uuid NOT NULL,
+    lid bigint NOT NULL,
+    job_type character varying(50) NOT NULL,
+    status character varying(50) NOT NULL,
+    queued_at timestamp with time zone NOT NULL,
+    started_at timestamp with time zone,
+    completed_at timestamp with time zone,
+    duration_seconds integer,
+    success boolean NOT NULL,
+    players_mapped integer DEFAULT 0,
+    rosters_updated integer DEFAULT 0,
+    transactions_imported integer DEFAULT 0,
+    error_summary text,
+    initiated_by bigint,
+    archived_at timestamp with time zone DEFAULT now() NOT NULL
+);
+
+
+--
+-- Name: TABLE external_league_import_job_history; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.external_league_import_job_history IS 'Historical records of completed import jobs';
+
+
+--
+-- Name: external_league_import_jobs; Type: TABLE; Schema: public; Owner: -
+--
+
+CREATE TABLE public.external_league_import_jobs (
+    job_id uuid DEFAULT gen_random_uuid() NOT NULL,
+    connection_id uuid NOT NULL,
+    lid bigint NOT NULL,
+    job_type character varying(50) DEFAULT 'full_sync'::character varying NOT NULL,
+    sync_components jsonb DEFAULT '{"rosters": true, "transactions": true, "league_config": true}'::jsonb NOT NULL,
+    dry_run boolean DEFAULT false NOT NULL,
+    status character varying(50) DEFAULT 'queued'::character varying NOT NULL,
+    progress_percentage integer DEFAULT 0 NOT NULL,
+    current_step character varying(100),
+    queued_at timestamp with time zone DEFAULT now() NOT NULL,
+    started_at timestamp with time zone,
+    completed_at timestamp with time zone,
+    results jsonb,
+    error_message text,
+    error_context jsonb,
+    players_mapped integer DEFAULT 0,
+    players_failed integer DEFAULT 0,
+    rosters_updated integer DEFAULT 0,
+    transactions_imported integer DEFAULT 0,
+    transactions_failed integer DEFAULT 0,
+    raw_data jsonb,
+    mapped_data jsonb,
+    initiated_by bigint,
+    created_at timestamp with time zone DEFAULT now() NOT NULL,
+    updated_at timestamp with time zone DEFAULT now() NOT NULL,
+    CONSTRAINT external_league_import_jobs_job_type_check CHECK (((job_type)::text = ANY ((ARRAY['full_sync'::character varying, 'rosters_only'::character varying, 'transactions_only'::character varying, 'league_config_only'::character varying, 'validation_only'::character varying])::text[]))),
+    CONSTRAINT external_league_import_jobs_players_failed_check CHECK ((players_failed >= 0)),
+    CONSTRAINT external_league_import_jobs_players_mapped_check CHECK ((players_mapped >= 0)),
+    CONSTRAINT external_league_import_jobs_progress_percentage_check CHECK (((progress_percentage >= 0) AND (progress_percentage <= 100))),
+    CONSTRAINT external_league_import_jobs_rosters_updated_check CHECK ((rosters_updated >= 0)),
+    CONSTRAINT external_league_import_jobs_status_check CHECK (((status)::text = ANY ((ARRAY['queued'::character varying, 'running'::character varying, 'completed'::character varying, 'failed'::character varying, 'cancelled'::character varying])::text[]))),
+    CONSTRAINT external_league_import_jobs_transactions_failed_check CHECK ((transactions_failed >= 0)),
+    CONSTRAINT external_league_import_jobs_transactions_imported_check CHECK ((transactions_imported >= 0))
+);
+
+
+--
+-- Name: TABLE external_league_import_jobs; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON TABLE public.external_league_import_jobs IS 'Tracks import job status, progress, and results';
+
+
+--
+-- Name: COLUMN external_league_import_jobs.job_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.external_league_import_jobs.job_id IS 'Unique identifier for the import job';
+
+
+--
+-- Name: COLUMN external_league_import_jobs.connection_id; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.external_league_import_jobs.connection_id IS 'Reference to the external league connection';
+
+
+--
+-- Name: COLUMN external_league_import_jobs.job_type; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.external_league_import_jobs.job_type IS 'Type of sync operation to perform';
+
+
+--
+-- Name: COLUMN external_league_import_jobs.sync_components; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.external_league_import_jobs.sync_components IS 'JSON configuration of which components to sync';
+
+
+--
+-- Name: COLUMN external_league_import_jobs.status; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.external_league_import_jobs.status IS 'Current job status: queued, running, completed, failed, cancelled';
+
+
+--
+-- Name: COLUMN external_league_import_jobs.progress_percentage; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.external_league_import_jobs.progress_percentage IS 'Job completion percentage (0-100)';
+
+
+--
+-- Name: COLUMN external_league_import_jobs.current_step; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.external_league_import_jobs.current_step IS 'Human-readable description of current processing step';
+
+
+--
+-- Name: COLUMN external_league_import_jobs.results; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.external_league_import_jobs.results IS 'JSON containing detailed job results';
+
+
+--
+-- Name: COLUMN external_league_import_jobs.raw_data; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.external_league_import_jobs.raw_data IS 'Raw data from external platform (for debugging)';
+
+
+--
+-- Name: COLUMN external_league_import_jobs.mapped_data; Type: COMMENT; Schema: public; Owner: -
+--
+
+COMMENT ON COLUMN public.external_league_import_jobs.mapped_data IS 'Processed/mapped data (for debugging)';
+
+
+--
 -- Name: footballoutsiders; Type: TABLE; Schema: public; Owner: -
 --
 
@@ -3824,7 +4292,9 @@ CREATE TABLE public.league_format_player_seasonlogs (
     points_added_per_game numeric(3,1),
     points_added_rnk smallint,
     points_added_pos_rnk smallint,
-    earned_salary numeric(6,2)
+    earned_salary numeric(6,2),
+    points_added_per_game_rnk smallint,
+    points_added_per_game_pos_rnk smallint
 );
 
 
@@ -17701,7 +18171,11 @@ CREATE TABLE public.player (
     pro_bowls_selections smallint DEFAULT 0,
     pfr_years_as_primary_starter smallint DEFAULT 0,
     pfr_weighted_career_approximate_value smallint DEFAULT 0,
-    pfr_weighted_career_approximate_value_drafted_team smallint DEFAULT 0
+    pfr_weighted_career_approximate_value_drafted_team smallint DEFAULT 0,
+    ffpc_id integer,
+    nffc_id integer,
+    fantrax_id character varying(50),
+    rtsports_id integer
 );
 
 
@@ -23277,7 +23751,9 @@ CREATE TABLE public.scoring_format_player_seasonlogs (
     points_per_game numeric(3,1),
     games smallint,
     points_rnk smallint,
-    points_pos_rnk smallint
+    points_pos_rnk smallint,
+    points_per_game_rnk smallint,
+    points_per_game_pos_rnk smallint
 );
 
 
@@ -24745,6 +25221,38 @@ ALTER TABLE ONLY public.espn_team_win_rates_index
 
 
 --
+-- Name: external_league_connections external_league_connections_lid_platform_external_league_id_key; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.external_league_connections
+    ADD CONSTRAINT external_league_connections_lid_platform_external_league_id_key UNIQUE (lid, platform, external_league_id);
+
+
+--
+-- Name: external_league_connections external_league_connections_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.external_league_connections
+    ADD CONSTRAINT external_league_connections_pkey PRIMARY KEY (connection_id);
+
+
+--
+-- Name: external_league_import_job_history external_league_import_job_history_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.external_league_import_job_history
+    ADD CONSTRAINT external_league_import_job_history_pkey PRIMARY KEY (job_id);
+
+
+--
+-- Name: external_league_import_jobs external_league_import_jobs_pkey; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.external_league_import_jobs
+    ADD CONSTRAINT external_league_import_jobs_pkey PRIMARY KEY (job_id);
+
+
+--
 -- Name: draft idx_24608_PRIMARY; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -25105,6 +25613,22 @@ ALTER TABLE ONLY public.player
 
 
 --
+-- Name: player player_fantrax_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player
+    ADD CONSTRAINT player_fantrax_id_unique UNIQUE (fantrax_id);
+
+
+--
+-- Name: player player_ffpc_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player
+    ADD CONSTRAINT player_ffpc_id_unique UNIQUE (ffpc_id);
+
+
+--
 -- Name: player player_fleaflicker_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -25353,6 +25877,14 @@ ALTER TABLE ONLY public.player
 
 
 --
+-- Name: player player_nffc_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player
+    ADD CONSTRAINT player_nffc_id_unique UNIQUE (nffc_id);
+
+
+--
 -- Name: player player_otc_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
 --
 
@@ -25414,6 +25946,14 @@ ALTER TABLE ONLY public.player_receiving_gamelogs
 
 ALTER TABLE ONLY public.player
     ADD CONSTRAINT player_rts_id_unique UNIQUE (rts_id);
+
+
+--
+-- Name: player player_rtsports_id_unique; Type: CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.player
+    ADD CONSTRAINT player_rtsports_id_unique UNIQUE (rtsports_id);
 
 
 --
@@ -26194,6 +26734,97 @@ CREATE INDEX idx_espn_team_win_rates_history_year ON public.espn_team_win_rates_
 
 
 --
+-- Name: idx_external_league_connections_auto_sync; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_external_league_connections_auto_sync ON public.external_league_connections USING btree (auto_sync_enabled) WHERE (auto_sync_enabled = true);
+
+
+--
+-- Name: idx_external_league_connections_last_sync; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_external_league_connections_last_sync ON public.external_league_connections USING btree (last_sync);
+
+
+--
+-- Name: idx_external_league_connections_lid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_external_league_connections_lid ON public.external_league_connections USING btree (lid);
+
+
+--
+-- Name: idx_external_league_connections_platform; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_external_league_connections_platform ON public.external_league_connections USING btree (platform);
+
+
+--
+-- Name: idx_external_league_connections_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_external_league_connections_status ON public.external_league_connections USING btree (status);
+
+
+--
+-- Name: idx_external_league_import_job_history_archived_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_external_league_import_job_history_archived_at ON public.external_league_import_job_history USING btree (archived_at);
+
+
+--
+-- Name: idx_external_league_import_job_history_connection_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_external_league_import_job_history_connection_id ON public.external_league_import_job_history USING btree (connection_id);
+
+
+--
+-- Name: idx_external_league_import_job_history_lid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_external_league_import_job_history_lid ON public.external_league_import_job_history USING btree (lid);
+
+
+--
+-- Name: idx_external_league_import_jobs_active; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_external_league_import_jobs_active ON public.external_league_import_jobs USING btree (status, queued_at) WHERE ((status)::text = ANY ((ARRAY['queued'::character varying, 'running'::character varying])::text[]));
+
+
+--
+-- Name: idx_external_league_import_jobs_connection_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_external_league_import_jobs_connection_id ON public.external_league_import_jobs USING btree (connection_id);
+
+
+--
+-- Name: idx_external_league_import_jobs_lid; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_external_league_import_jobs_lid ON public.external_league_import_jobs USING btree (lid);
+
+
+--
+-- Name: idx_external_league_import_jobs_queued_at; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_external_league_import_jobs_queued_at ON public.external_league_import_jobs USING btree (queued_at);
+
+
+--
+-- Name: idx_external_league_import_jobs_status; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_external_league_import_jobs_status ON public.external_league_import_jobs USING btree (status);
+
+
+--
 -- Name: idx_invite_codes_created_by; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -26761,6 +27392,20 @@ CREATE INDEX idx_player_college_seasonlogs_season ON public.player_college_seaso
 
 
 --
+-- Name: idx_player_fantrax_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_fantrax_id ON public.player USING btree (fantrax_id);
+
+
+--
+-- Name: idx_player_ffpc_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_ffpc_id ON public.player USING btree (ffpc_id);
+
+
+--
 -- Name: idx_player_fname; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -26831,6 +27476,13 @@ CREATE INDEX idx_player_lname ON public.player USING btree (lname);
 
 
 --
+-- Name: idx_player_nffc_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_nffc_id ON public.player USING btree (nffc_id);
+
+
+--
 -- Name: idx_player_pff_id; Type: INDEX; Schema: public; Owner: -
 --
 
@@ -26856,6 +27508,13 @@ CREATE INDEX idx_player_pid_pos ON public.player USING btree (pid, pos);
 --
 
 CREATE INDEX idx_player_prospect_profile_sis_id ON public.player_prospect_profile USING btree (sis_id);
+
+
+--
+-- Name: idx_player_rtsports_id; Type: INDEX; Schema: public; Owner: -
+--
+
+CREATE INDEX idx_player_rtsports_id ON public.player USING btree (rtsports_id);
 
 
 --
@@ -49098,6 +49757,20 @@ CREATE TRIGGER player_name_search_vector_update BEFORE INSERT OR UPDATE ON publi
 
 
 --
+-- Name: external_league_connections trigger_external_league_connections_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trigger_external_league_connections_updated_at BEFORE UPDATE ON public.external_league_connections FOR EACH ROW EXECUTE FUNCTION public.update_external_league_connections_updated_at();
+
+
+--
+-- Name: external_league_import_jobs trigger_external_league_import_jobs_updated_at; Type: TRIGGER; Schema: public; Owner: -
+--
+
+CREATE TRIGGER trigger_external_league_import_jobs_updated_at BEFORE UPDATE ON public.external_league_import_jobs FOR EACH ROW EXECUTE FUNCTION public.update_external_league_import_jobs_updated_at();
+
+
+--
 -- Name: selection_combination_definitions trigger_update_selection_combination_definitions_updated_at; Type: TRIGGER; Schema: public; Owner: -
 --
 
@@ -49109,6 +49782,46 @@ CREATE TRIGGER trigger_update_selection_combination_definitions_updated_at BEFOR
 --
 
 CREATE TRIGGER update_config_modtime BEFORE UPDATE ON public.config FOR EACH ROW EXECUTE FUNCTION public.update_modified_column();
+
+
+--
+-- Name: external_league_connections external_league_connections_created_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.external_league_connections
+    ADD CONSTRAINT external_league_connections_created_by_fkey FOREIGN KEY (created_by) REFERENCES public.users(id) ON DELETE SET NULL;
+
+
+--
+-- Name: external_league_connections external_league_connections_lid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.external_league_connections
+    ADD CONSTRAINT external_league_connections_lid_fkey FOREIGN KEY (lid) REFERENCES public.leagues(uid) ON DELETE CASCADE;
+
+
+--
+-- Name: external_league_import_jobs external_league_import_jobs_connection_id_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.external_league_import_jobs
+    ADD CONSTRAINT external_league_import_jobs_connection_id_fkey FOREIGN KEY (connection_id) REFERENCES public.external_league_connections(connection_id) ON DELETE CASCADE;
+
+
+--
+-- Name: external_league_import_jobs external_league_import_jobs_initiated_by_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.external_league_import_jobs
+    ADD CONSTRAINT external_league_import_jobs_initiated_by_fkey FOREIGN KEY (initiated_by) REFERENCES public.users(id) ON DELETE SET NULL;
+
+
+--
+-- Name: external_league_import_jobs external_league_import_jobs_lid_fkey; Type: FK CONSTRAINT; Schema: public; Owner: -
+--
+
+ALTER TABLE ONLY public.external_league_import_jobs
+    ADD CONSTRAINT external_league_import_jobs_lid_fkey FOREIGN KEY (lid) REFERENCES public.leagues(uid) ON DELETE CASCADE;
 
 
 --

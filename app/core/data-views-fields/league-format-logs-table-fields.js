@@ -80,6 +80,20 @@ export default {
       player_value_path: 'points_added_pos_rnk_from_seasonlogs',
       reverse_percentiles: true
     }),
+  player_points_added_per_game_rank_from_seasonlogs:
+    from_league_format_seasonlogs({
+      column_title: 'Points Added Per Game Rank (Season)',
+      header_label: 'Pts+/G Rnk',
+      player_value_path: 'points_added_per_game_rnk_from_seasonlogs',
+      reverse_percentiles: true
+    }),
+  player_points_added_per_game_position_rank_from_seasonlogs:
+    from_league_format_seasonlogs({
+      column_title: 'Points Added Per Game Position Rank (Season)',
+      header_label: 'Pts+/G Pos Rnk',
+      player_value_path: 'points_added_per_game_pos_rnk_from_seasonlogs',
+      reverse_percentiles: true
+    }),
 
   player_startable_games_from_careerlogs: from_league_format_careerlogs({
     column_title: 'Startable Games (Career)',

@@ -68,14 +68,21 @@ const generate_league_format_player_seasonlogs = async ({
 
   const seasons_by_pos = groupBy(inserts, 'pos')
   const sorted_by_points_added_by_pos = {}
+  const sorted_by_points_added_per_game_by_pos = {}
   for (const pos in seasons_by_pos) {
     sorted_by_points_added_by_pos[pos] = seasons_by_pos[pos]
       .map((i) => i.points_added)
+      .sort((a, b) => b - a)
+    sorted_by_points_added_per_game_by_pos[pos] = seasons_by_pos[pos]
+      .map((i) => i.points_added_per_game)
       .sort((a, b) => b - a)
   }
 
   const sorted_by_points_added = inserts
     .map((i) => i.points_added)
+    .sort((a, b) => b - a)
+  const sorted_by_points_added_per_game = inserts
+    .map((i) => i.points_added_per_game)
     .sort((a, b) => b - a)
 
   // Calculate total points added for the season
@@ -90,6 +97,12 @@ const generate_league_format_player_seasonlogs = async ({
       sorted_by_points_added.indexOf(insert.points_added) + 1
     insert.points_added_pos_rnk =
       sorted_by_points_added_by_pos[insert.pos].indexOf(insert.points_added) + 1
+    insert.points_added_per_game_rnk =
+      sorted_by_points_added_per_game.indexOf(insert.points_added_per_game) + 1
+    insert.points_added_per_game_pos_rnk =
+      sorted_by_points_added_per_game_by_pos[insert.pos].indexOf(
+        insert.points_added_per_game
+      ) + 1
 
     // Calculate earned salary
     insert.earned_salary = Number(

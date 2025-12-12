@@ -54,6 +54,20 @@ export default {
       player_value_path: 'points_pos_rnk_from_seasonlogs',
       reverse_percentiles: true
     }),
+  player_fantasy_points_per_game_rank_from_seasonlogs:
+    from_scoring_format_seasonlogs({
+      column_title: 'Fantasy Points Per Game Rank (By Season)',
+      header_label: 'PPG RNK',
+      player_value_path: 'points_per_game_rnk_from_seasonlogs',
+      reverse_percentiles: true
+    }),
+  player_fantasy_points_per_game_position_rank_from_seasonlogs:
+    from_scoring_format_seasonlogs({
+      column_title: 'Fantasy Points Per Game Position Rank (By Season)',
+      header_label: 'PPG POS RNK',
+      player_value_path: 'points_per_game_pos_rnk_from_seasonlogs',
+      reverse_percentiles: true
+    }),
 
   player_fantasy_top_1_seasons_from_careerlogs: from_scoring_format_careerlogs({
     column_title: 'Top 1 Season (Career)',

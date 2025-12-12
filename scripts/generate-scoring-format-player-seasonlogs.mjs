@@ -65,18 +65,31 @@ const generate_scoring_format_player_seasonlogs = async ({
 
   const seasons_by_pos = groupBy(inserts, 'pos')
   const sorted_by_points_by_pos = {}
+  const sorted_by_points_per_game_by_pos = {}
   for (const pos in seasons_by_pos) {
     sorted_by_points_by_pos[pos] = seasons_by_pos[pos]
       .map((i) => i.points)
       .sort((a, b) => b - a)
+    sorted_by_points_per_game_by_pos[pos] = seasons_by_pos[pos]
+      .map((i) => i.points_per_game)
+      .sort((a, b) => b - a)
   }
 
   const sorted_by_points = inserts.map((i) => i.points).sort((a, b) => b - a)
+  const sorted_by_points_per_game = inserts
+    .map((i) => i.points_per_game)
+    .sort((a, b) => b - a)
 
   for (const insert of inserts) {
     insert.points_rnk = sorted_by_points.indexOf(insert.points) + 1
     insert.points_pos_rnk =
       sorted_by_points_by_pos[insert.pos].indexOf(insert.points) + 1
+    insert.points_per_game_rnk =
+      sorted_by_points_per_game.indexOf(insert.points_per_game) + 1
+    insert.points_per_game_pos_rnk =
+      sorted_by_points_per_game_by_pos[insert.pos].indexOf(
+        insert.points_per_game
+      ) + 1
 
     delete insert.pos
   }

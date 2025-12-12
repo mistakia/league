@@ -144,6 +144,12 @@ export default {
     create_field_from_scoring_format_player_seasonlogs('points_rnk'),
   player_fantasy_points_position_rank_from_seasonlogs:
     create_field_from_scoring_format_player_seasonlogs('points_pos_rnk'),
+  player_fantasy_points_per_game_rank_from_seasonlogs:
+    create_field_from_scoring_format_player_seasonlogs('points_per_game_rnk'),
+  player_fantasy_points_per_game_position_rank_from_seasonlogs:
+    create_field_from_scoring_format_player_seasonlogs(
+      'points_per_game_pos_rnk'
+    ),
 
   player_fantasy_points_from_careerlogs:
     create_field_from_scoring_format_player_careerlogs('points'),

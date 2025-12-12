@@ -133,6 +133,14 @@ export default {
     create_field_from_league_format_player_seasonlogs('points_added_rnk'),
   player_points_added_position_rank_from_seasonlogs:
     create_field_from_league_format_player_seasonlogs('points_added_pos_rnk'),
+  player_points_added_per_game_rank_from_seasonlogs:
+    create_field_from_league_format_player_seasonlogs(
+      'points_added_per_game_rnk'
+    ),
+  player_points_added_per_game_position_rank_from_seasonlogs:
+    create_field_from_league_format_player_seasonlogs(
+      'points_added_per_game_pos_rnk'
+    ),
 
   player_startable_games_from_careerlogs:
     create_field_from_league_format_player_careerlogs('startable_games'),
