@@ -221,6 +221,9 @@
 ## Process restricted free agency bids at 6pm
 0 18 * * * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/process-restricted-free-agency-bids.mjs &>> /var/log/league/process-restricted-free-agency-bids.log
 
+## Announce free agency period start (check every 30 minutes in August and September)
+*/30 * * 8,9 * NODE_ENV=production /root/.nvm/versions/node/v17.4.0/bin/node /root/league/scripts/announce-free-agency-period-start.mjs &>> /var/log/league/announce-free-agency-period-start.log
+
 
 
 # League Each Season Week

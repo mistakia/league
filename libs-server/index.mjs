@@ -85,6 +85,10 @@ export * as betonline from './betonline.mjs'
 export { default as format_starting_hash } from './format-starting-hash.mjs'
 export { default as report_job } from './report-job.mjs'
 export {
+  has_league_notification_been_sent,
+  record_league_notification_sent
+} from './league-notifications.mjs'
+export {
   redis_client,
   RedisCacheAdapter,
   redis_cache
