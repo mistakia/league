@@ -330,6 +330,12 @@ export const api = {
     )}`
     return { url }
   },
+  get_player_seasonlogs({ pid, params }) {
+    const url = `${API_URL}/players/${pid}/seasonlogs?${queryString.stringify(
+      params
+    )}`
+    return { url }
+  },
   get_player_practices({ pid }) {
     const url = `${API_URL}/players/${pid}/practices`
     return { url }

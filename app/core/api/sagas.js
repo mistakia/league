@@ -52,6 +52,7 @@ import {
   get_baselines_actions,
   get_player_projections_actions,
   get_player_gamelogs_actions,
+  get_player_seasonlogs_actions,
   get_player_practices_actions,
   get_player_betting_markets_actions
 } from '@core/players/actions'
@@ -510,6 +511,12 @@ export const api_get_player_gamelogs = fetch.bind(
   null,
   api.get_player_gamelogs,
   get_player_gamelogs_actions
+)
+
+export const api_get_player_seasonlogs = fetch.bind(
+  null,
+  api.get_player_seasonlogs,
+  get_player_seasonlogs_actions
 )
 
 export const api_get_player_practices = fetch.bind(

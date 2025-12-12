@@ -171,6 +171,9 @@ export const player_actions = {
   LOAD_PLAYER_GAMELOGS: 'LOAD_PLAYER_GAMELOGS',
   load_player_gamelogs: create_load_action('LOAD_PLAYER_GAMELOGS'),
   ...create_api_action_types('GET_PLAYER_GAMELOGS'),
+  LOAD_PLAYER_SEASONLOGS: 'LOAD_PLAYER_SEASONLOGS',
+  load_player_seasonlogs: create_load_action('LOAD_PLAYER_SEASONLOGS'),
+  ...create_api_action_types('GET_PLAYER_SEASONLOGS'),
   ...create_api_action_types('GET_PLAYER_PRACTICES'),
 
   RESET_PLAYER_FILTER_OPTIONS: 'RESET_PLAYER_FILTER_OPTIONS',
@@ -209,6 +212,9 @@ export const get_player_projections_actions = create_api_actions(
 )
 export const get_player_gamelogs_actions = create_api_actions(
   'GET_PLAYER_GAMELOGS'
+)
+export const get_player_seasonlogs_actions = create_api_actions(
+  'GET_PLAYER_SEASONLOGS'
 )
 export const get_player_practices_actions = create_api_actions(
   'GET_PLAYER_PRACTICES'

@@ -1,57 +1,56 @@
-import React from 'react'
+import React, { useEffect } from 'react'
 import ImmutablePropTypes from 'react-immutable-proptypes'
 import PropTypes from 'prop-types'
 
 import PlayerSelectedRow from '@components/player-selected-row'
 import PlayerSelectedRowHeader from '@components/player-selected-row-header'
 
-export default class SelectedPlayerSeasonStats extends React.Component {
-  componentDidMount = () => {
-    const pid = this.props.player_map.get('pid')
-    const position = this.props.player_map.get('pos')
-    this.props.load({ pid, position })
-  }
+function SelectedPlayerSeasonStats({
+  player_map,
+  player_seasonlogs,
+  pos,
+  load,
+  load_seasonlogs
+}) {
+  useEffect(() => {
+    const pid = player_map.get('pid')
+    const position = player_map.get('pos')
+    load({ pid, position })
+    load_seasonlogs({ pid })
+  }, [player_map, load, load_seasonlogs])
 
-  render = () => {
-    const { stats, pos } = this.props
-    const items = []
+  const seasonlogs = player_seasonlogs.toJS()
+  const items = seasonlogs.map((seasonlog, index) => (
+    <PlayerSelectedRow
+      key={index}
+      games={seasonlog.games}
+      title={seasonlog.year}
+      stats={seasonlog}
+      pos={pos}
+    />
+  ))
 
-    const years = Object.keys(stats.overall).sort((a, b) => b - a)
-    years.forEach((year, index) => {
-      const games = Object.keys(stats.years[year]).length
-      const p = stats.overall[year]
-      const item = (
-        <PlayerSelectedRow
-          games={games}
-          key={index}
-          title={year}
-          stats={p}
-          pos={pos}
-        />
-      )
-      items.push(item)
-      // TODO year average
-    })
-
-    return (
-      <div className='selected__section'>
-        <div className='selected__table-header sticky__column'>
-          <div className='row__group-head'>Regular Seasons</div>
-        </div>
-        <div className='selected__table-header'>
-          <div className='table__cell text'>Year</div>
-          <div className='table__cell metric'>G</div>
-          <PlayerSelectedRowHeader pos={pos} />
-        </div>
-        {items}
+  return (
+    <div className='selected__section'>
+      <div className='selected__table-header sticky__column'>
+        <div className='row__group-head'>Regular Seasons</div>
       </div>
-    )
-  }
+      <div className='selected__table-header'>
+        <div className='table__cell text'>Year</div>
+        <div className='table__cell metric'>G</div>
+        <PlayerSelectedRowHeader pos={pos} />
+      </div>
+      {items}
+    </div>
+  )
 }
 
 SelectedPlayerSeasonStats.propTypes = {
-  stats: PropTypes.object,
   pos: PropTypes.string,
   player_map: ImmutablePropTypes.map,
-  load: PropTypes.func
+  player_seasonlogs: ImmutablePropTypes.list,
+  load: PropTypes.func,
+  load_seasonlogs: PropTypes.func
 }
+
+export default SelectedPlayerSeasonStats

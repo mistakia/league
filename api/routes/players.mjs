@@ -1115,6 +1115,87 @@ router.get('/:pid/gamelogs/?', async (req, res) => {
  *       500:
  *         $ref: '#/components/responses/InternalServerError'
  */
+router.get('/:pid/seasonlogs/?', async (req, res) => {
+  const { db, logger } = req.app.locals
+  try {
+    const { pid } = req.params
+    const league_id = Number(req.query.leagueId || 0) || 0
+
+    if (!pid) {
+      return res.status(400).send({ error: 'missing pid' })
+    }
+
+    const league = await getLeague({ lid: league_id })
+
+    if (!league) {
+      return res.status(400).send({ error: 'invalid leagueId' })
+    }
+
+    const query = db('player_seasonlogs')
+      .where('player_seasonlogs.pid', pid)
+      .where('player_seasonlogs.seas_type', 'REG')
+      .leftJoin('scoring_format_player_seasonlogs', function () {
+        this.on(
+          'scoring_format_player_seasonlogs.pid',
+          '=',
+          'player_seasonlogs.pid'
+        )
+          .andOn(
+            'scoring_format_player_seasonlogs.year',
+            '=',
+            'player_seasonlogs.year'
+          )
+          .andOn(
+            'scoring_format_player_seasonlogs.scoring_format_hash',
+            '=',
+            db.raw('?', [league.scoring_format_hash])
+          )
+      })
+      .leftJoin('league_format_player_seasonlogs', function () {
+        this.on(
+          'league_format_player_seasonlogs.pid',
+          '=',
+          'player_seasonlogs.pid'
+        )
+          .andOn(
+            'league_format_player_seasonlogs.year',
+            '=',
+            'player_seasonlogs.year'
+          )
+          .andOn(
+            'league_format_player_seasonlogs.league_format_hash',
+            '=',
+            db.raw('?', [league.league_format_hash])
+          )
+      })
+      .select(
+        'player_seasonlogs.*',
+        'scoring_format_player_seasonlogs.points',
+        'scoring_format_player_seasonlogs.points_per_game',
+        'scoring_format_player_seasonlogs.games',
+        'scoring_format_player_seasonlogs.points_rnk',
+        'scoring_format_player_seasonlogs.points_pos_rnk',
+        'scoring_format_player_seasonlogs.points_per_game_rnk',
+        'scoring_format_player_seasonlogs.points_per_game_pos_rnk',
+        'league_format_player_seasonlogs.points_added',
+        'league_format_player_seasonlogs.points_added_per_game',
+        'league_format_player_seasonlogs.points_added_rnk',
+        'league_format_player_seasonlogs.points_added_pos_rnk',
+        'league_format_player_seasonlogs.points_added_per_game_rnk',
+        'league_format_player_seasonlogs.points_added_per_game_pos_rnk',
+        'league_format_player_seasonlogs.startable_games',
+        'league_format_player_seasonlogs.earned_salary'
+      )
+      .orderBy('player_seasonlogs.year', 'desc')
+
+    const data = await query
+    res.send(data)
+  } catch (error) {
+    logger(error)
+    res.status(500).send({ error: error.toString() })
+  }
+})
+
 router.get('/:pid/markets/?', async (req, res) => {
   const { db, logger } = req.app.locals
   try {

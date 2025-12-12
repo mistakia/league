@@ -38,6 +38,7 @@ import {
   api_get_baselines,
   api_get_player_projections,
   api_get_player_gamelogs,
+  api_get_player_seasonlogs,
   api_get_player_practices,
   api_get_player_betting_markets
 } from '@core/api'
@@ -290,6 +291,13 @@ export function* load_player_gamelogs({ payload }) {
   yield call(api_get_player_gamelogs, { pid, params })
 }
 
+export function* load_player_seasonlogs({ payload }) {
+  const { pid } = payload
+  const { leagueId } = yield select(get_app)
+  const params = { leagueId }
+  yield call(api_get_player_seasonlogs, { pid, params })
+}
+
 export function* load_player_practices({ payload }) {
   const { pid } = payload
   yield call(api_get_player_practices, { pid })
@@ -427,6 +435,13 @@ export function* watch_load_player_gamelogs() {
   yield takeLatest(player_actions.LOAD_PLAYER_GAMELOGS, load_player_gamelogs)
 }
 
+export function* watch_load_player_seasonlogs() {
+  yield takeLatest(
+    player_actions.LOAD_PLAYER_SEASONLOGS,
+    load_player_seasonlogs
+  )
+}
+
 export function* watch_load_player_practices() {
   yield takeLatest(player_actions.LOAD_PLAYER_PRACTICES, load_player_practices)
 }
@@ -494,6 +509,7 @@ export const player_sagas = [
   fork(watch_load_player_projections),
 
   fork(watch_load_player_gamelogs),
+  fork(watch_load_player_seasonlogs),
   fork(watch_load_player_practices),
   fork(watch_load_player_betting_markets),
   fork(watch_load_all_players),

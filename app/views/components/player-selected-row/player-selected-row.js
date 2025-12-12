@@ -3,7 +3,21 @@ import PropTypes from 'prop-types'
 
 import PercentileMetric from '@components/percentile-metric'
 
-const defense_stats = [
+// Stat field groupings by category
+const FANTASY_STATS = [
+  'points',
+  'points_pos_rnk',
+  'points_per_game',
+  'points_per_game_pos_rnk',
+  'points_added',
+  'points_added_rnk',
+  'points_added_pos_rnk',
+  'points_added_per_game',
+  'points_added_per_game_rnk',
+  'points_added_per_game_pos_rnk'
+]
+
+const DEFENSE_STATS = [
   'dpa',
   'dya',
   'dsk',
@@ -19,8 +33,10 @@ const defense_stats = [
   'prtd',
   'krtd'
 ]
-const kicker_stats = ['xpm', 'fgm', 'fg19', 'fg29', 'fg39', 'fg49', 'fg50']
-const passing_production = [
+
+const KICKER_STATS = ['xpm', 'fgm', 'fg19', 'fg29', 'fg39', 'fg49', 'fg50']
+
+const PASSING_PRODUCTION = [
   'pa',
   'py',
   'tdp',
@@ -29,7 +45,8 @@ const passing_production = [
   'pass_completed_air_yards',
   'pass_yards_after_catch'
 ]
-const passing_efficiency = [
+
+const PASSING_EFFICIENCY = [
   'pass_rating',
   'pass_yards_per_attempt',
   'pass_comp_pct',
@@ -37,7 +54,8 @@ const passing_efficiency = [
   'cpoe',
   'pass_epa_per_db'
 ]
-const passing_usage = [
+
+const PASSING_USAGE = [
   'avg_time_to_throw',
   'avg_time_to_pressure',
   'avg_time_to_sack',
@@ -52,28 +70,35 @@ const passing_usage = [
   'tight_window_pct',
   'play_action_pct'
 ]
-const rushing_production = ['ra', 'ry', 'tdr', 'fuml', 'rush_epa']
-const rushing_opportunities = [
+
+const RUSHING_PRODUCTION = ['ra', 'ry', 'tdr', 'fuml', 'rush_epa']
+
+const RUSHING_OPPORTUNITIES = [
   'expected_rush_yards',
   'rush_share',
   'weighted_opportunity'
 ]
-const rushing_efficiency = [
+
+const RUSHING_EFFICIENCY = [
   'rush_yards_over_expected',
   'rush_yards_over_expected_per_attempt',
   'rush_yards_after_contact_per_attempt',
   'rush_success_rate',
   'rush_yards_per_attempt'
 ]
-const rushing_explosiveness = [
+
+const RUSHING_EXPLOSIVENESS = [
   'longest_rush',
   'rush_attempts_yards_10_plus',
   'rush_attempts_speed_15_plus_mph',
   'rush_attempts_speed_20_plus_mph'
 ]
-const rushing_redzone = ['rush_attempts_redzone', 'rush_attempts_goaline']
-const receiving_production = ['trg', 'rec', 'recy', 'tdrec', 'recv_epa']
-const receiving_efficiency = [
+
+const RUSHING_REDZONE = ['rush_attempts_redzone', 'rush_attempts_goaline']
+
+const RECEIVING_PRODUCTION = ['trg', 'rec', 'recy', 'tdrec', 'recv_epa']
+
+const RECEIVING_EFFICIENCY = [
   'receiving_passer_rating',
   'catch_rate',
   'expected_catch_rate',
@@ -84,27 +109,39 @@ const receiving_efficiency = [
   'recv_epa_per_route',
   'recv_yards_after_catch_over_expected'
 ]
-const receiving_explosiveness = [
+
+const RECEIVING_EXPLOSIVENESS = [
   'longest_reception',
   'recv_yards_15_plus_count'
 ]
-const receiving_opportunities = [
+
+const RECEIVING_OPPORTUNITIES = [
   'routes',
   'route_share',
   'team_target_share',
   'team_air_yard_share',
   'weighted_opportunity_rating'
 ]
-const receiving_usage = [
+
+const RECEIVING_USAGE = [
   'recv_air_yards',
   'recv_air_yards_per_target',
   'avg_route_depth',
   'recv_deep_target_pct',
   'recv_tight_window_pct'
 ]
-const receiving_redzone = ['redzone_targets', 'endzone_targets']
 
-const percentage_fields = [
+const RECEIVING_REDZONE = ['redzone_targets', 'endzone_targets']
+
+// Field configuration
+const POSITION_RANK_FIELDS = [
+  'points_pos_rnk',
+  'points_per_game_pos_rnk',
+  'points_added_pos_rnk',
+  'points_added_per_game_pos_rnk'
+]
+
+const PERCENTAGE_FIELDS = [
   'expected_catch_rate',
   'catch_rate',
   'rush_share',
@@ -126,67 +163,11 @@ const percentage_fields = [
   'recv_tight_window_pct'
 ]
 
-const get_stat_fields = (pos) => {
-  switch (pos) {
-    case 'DST':
-      return defense_stats
-    case 'K':
-      return kicker_stats
-    case 'QB':
-      return [
-        passing_production,
-        passing_efficiency,
-        passing_usage,
-        rushing_production,
-        rushing_efficiency,
-        rushing_explosiveness,
-        rushing_redzone
-      ]
-    case 'RB':
-      return [
-        rushing_production,
-        rushing_opportunities,
-        rushing_efficiency,
-        rushing_explosiveness,
-        rushing_redzone,
-        receiving_production,
-        receiving_opportunities,
-        receiving_efficiency,
-        receiving_explosiveness,
-        receiving_redzone
-      ]
-    case 'WR':
-    case 'TE':
-      return [
-        receiving_production,
-        receiving_opportunities,
-        receiving_efficiency,
-        receiving_explosiveness,
-        receiving_usage,
-        receiving_redzone
-      ]
-    default:
-      return []
-  }
-}
-
-const get_snaps_fields = (pos) => {
-  switch (pos) {
-    case 'DST':
-    case 'K':
-      return ['snaps_def', 'snaps_st']
-    case 'QB':
-      return ['snaps_off', 'snaps_pass', 'snaps_rush']
-    case 'RB':
-    case 'WR':
-    case 'TE':
-      return ['snaps_off', 'snaps_pass', 'snaps_rush', 'snaps_st']
-    default:
-      return []
-  }
-}
-
-const field_fixed_values = {
+const FIELD_FIXED_VALUES = {
+  points: 1,
+  points_per_game: 1,
+  points_added: 1,
+  points_added_per_game: 1,
   pass_epa_per_db: 2,
   pass_rating: 1,
   pass_yards_per_attempt: 1,
@@ -217,6 +198,163 @@ const field_fixed_values = {
   recv_tight_window_pct: 2
 }
 
+// Position-based stat field configuration
+const get_stat_fields = (pos) => {
+  const position_configs = {
+    DST: [FANTASY_STATS, DEFENSE_STATS],
+    K: [FANTASY_STATS, KICKER_STATS],
+    QB: [
+      FANTASY_STATS,
+      PASSING_PRODUCTION,
+      PASSING_EFFICIENCY,
+      PASSING_USAGE,
+      RUSHING_PRODUCTION,
+      RUSHING_EFFICIENCY,
+      RUSHING_EXPLOSIVENESS,
+      RUSHING_REDZONE
+    ],
+    RB: [
+      FANTASY_STATS,
+      RUSHING_PRODUCTION,
+      RUSHING_OPPORTUNITIES,
+      RUSHING_EFFICIENCY,
+      RUSHING_EXPLOSIVENESS,
+      RUSHING_REDZONE,
+      RECEIVING_PRODUCTION,
+      RECEIVING_OPPORTUNITIES,
+      RECEIVING_EFFICIENCY,
+      RECEIVING_EXPLOSIVENESS,
+      RECEIVING_REDZONE
+    ],
+    WR: [
+      FANTASY_STATS,
+      RECEIVING_PRODUCTION,
+      RECEIVING_OPPORTUNITIES,
+      RECEIVING_EFFICIENCY,
+      RECEIVING_EXPLOSIVENESS,
+      RECEIVING_USAGE,
+      RECEIVING_REDZONE
+    ],
+    TE: [
+      FANTASY_STATS,
+      RECEIVING_PRODUCTION,
+      RECEIVING_OPPORTUNITIES,
+      RECEIVING_EFFICIENCY,
+      RECEIVING_EXPLOSIVENESS,
+      RECEIVING_USAGE,
+      RECEIVING_REDZONE
+    ]
+  }
+
+  return position_configs[pos] || []
+}
+
+const get_snaps_fields = (pos) => {
+  const snaps_configs = {
+    DST: ['snaps_def', 'snaps_st'],
+    K: ['snaps_def', 'snaps_st'],
+    QB: ['snaps_off', 'snaps_pass', 'snaps_rush'],
+    RB: ['snaps_off', 'snaps_pass', 'snaps_rush', 'snaps_st'],
+    WR: ['snaps_off', 'snaps_pass', 'snaps_rush', 'snaps_st'],
+    TE: ['snaps_off', 'snaps_pass', 'snaps_rush', 'snaps_st']
+  }
+
+  return snaps_configs[pos] || []
+}
+
+// Helper function to build CSS class names
+const build_class_names = (base_class, additional_classes = []) => {
+  const classes = [base_class, ...additional_classes.filter(Boolean)]
+  return classes.join(' ')
+}
+
+// Render a single metric field
+const render_metric = ({
+  field,
+  value,
+  pos,
+  percentile_key,
+  percentiles,
+  fixed,
+  stats
+}) => {
+  const is_pos_rank = POSITION_RANK_FIELDS.includes(field)
+
+  if (is_pos_rank) {
+    const display_value = value != null ? `${pos}${value}` : '-'
+    return (
+      <PercentileMetric
+        key={field}
+        percentile_key={percentile_key}
+        value={value}
+        percentile={percentiles[field]}
+        field={field}
+      >
+        {display_value}
+      </PercentileMetric>
+    )
+  }
+
+  const fixed_value =
+    FIELD_FIXED_VALUES[field] !== undefined ? FIELD_FIXED_VALUES[field] : fixed
+  const is_percentage = PERCENTAGE_FIELDS.includes(field)
+
+  return (
+    <PercentileMetric
+      key={field}
+      percentile_key={percentile_key}
+      value={value}
+      percentile={percentiles[field]}
+      fixed={fixed_value}
+      field={field}
+      is_percentage={is_percentage}
+    />
+  )
+}
+
+// Render a group of stat fields
+const render_stat_group = (group_fields, group_index, render_params) => {
+  const group_items = group_fields.map((field) =>
+    render_metric({
+      ...render_params,
+      field,
+      value: render_params.stats[field]
+    })
+  )
+
+  return (
+    <div className='row__group' key={group_index}>
+      <div className='row__group-body'>{group_items}</div>
+    </div>
+  )
+}
+
+// Render all stat fields for a position
+const render_stat_fields = (fields, render_params) => {
+  return fields.map((field, index) => {
+    const is_group = Array.isArray(field)
+
+    if (is_group) {
+      return render_stat_group(field, index, render_params)
+    }
+
+    return render_metric({
+      ...render_params,
+      field,
+      value: render_params.stats[field]
+    })
+  })
+}
+
+// Render snaps fields
+const render_snaps_fields = (snaps_fields, stats) => {
+  return snaps_fields.map((field) => (
+    <div key={field} className='table__cell metric'>
+      {stats[field]}
+    </div>
+  ))
+}
+
 export default function PlayerSelectedRow({
   title,
   stats,
@@ -233,81 +371,39 @@ export default function PlayerSelectedRow({
   snaps
 }) {
   useEffect(() => {
-    if (percentile_key) {
+    if (percentile_key && load_percentiles) {
       load_percentiles(percentile_key)
     }
   }, [percentile_key, load_percentiles])
 
-  const class_names = ['player__selected-row']
-  if (className) class_names.push(className)
-  if (header) class_names.push('header')
-  const fields = get_stat_fields(pos)
-  const items = []
+  const class_names = build_class_names('player__selected-row', [
+    className,
+    header && 'header'
+  ])
 
-  fields.forEach((field, index) => {
-    const is_group = Array.isArray(field)
-    if (is_group) {
-      const group_items = []
-      for (const group_field of field) {
-        group_items.push(
-          <PercentileMetric
-            key={group_field}
-            percentile_key={percentile_key}
-            value={stats[group_field]}
-            percentile={percentiles[group_field]}
-            fixed={
-              field_fixed_values[group_field] !== undefined
-                ? field_fixed_values[group_field]
-                : fixed
-            }
-            field={group_field}
-            is_percentage={percentage_fields.includes(group_field)}
-          />
-        )
-      }
-
-      items.push(
-        <div className='row__group' key={index}>
-          <div className='row__group-body'>{group_items}</div>
-        </div>
-      )
-    } else {
-      items.push(
-        <PercentileMetric
-          key={field}
-          percentile_key={percentile_key}
-          value={stats[field]}
-          percentile={percentiles[field]}
-          fixed={
-            field_fixed_values[field] !== undefined
-              ? field_fixed_values[field]
-              : fixed
-          }
-          field={field}
-          is_percentage={percentage_fields.includes(field)}
-        />
-      )
-    }
-  })
-
-  const snaps_items = []
-  if (snaps) {
-    const snaps_fields = get_snaps_fields(pos)
-    snaps_fields.forEach((field) => {
-      snaps_items.push(
-        <div key={field} className='table__cell metric'>
-          {stats[field]}
-        </div>
-      )
-    })
+  const stat_fields = get_stat_fields(pos)
+  const render_params = {
+    pos,
+    percentile_key,
+    percentiles,
+    fixed,
+    stats
   }
 
+  const stat_items = render_stat_fields(stat_fields, render_params)
+
+  const snaps_fields = snaps ? get_snaps_fields(pos) : []
+  const snaps_items =
+    snaps && snaps_fields.length > 0
+      ? render_snaps_fields(snaps_fields, stats)
+      : null
+
   return (
-    <div className={class_names.join(' ')}>
+    <div className={class_names}>
       {lead || <div className='table__cell text'>{title}</div>}
-      {games && <div className='table__cell metric'>{games}</div>}
-      {items}
-      {snaps && (
+      {games != null && <div className='table__cell metric'>{games}</div>}
+      {stat_items}
+      {snaps_items && (
         <div className='row__group'>
           <div className='row__group-body'>{snaps_items}</div>
         </div>

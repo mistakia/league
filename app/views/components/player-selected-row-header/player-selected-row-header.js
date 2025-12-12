@@ -18,6 +18,18 @@ const snaps_header = (snaps_types) =>
   create_row_group('snaps', 'Snaps', snaps_types)
 
 const categories = {
+  fantasy_stats: [
+    'FP',
+    'Rnk',
+    'FP/G',
+    'Rnk',
+    'Pts+',
+    'Ovr',
+    'Rnk',
+    'Pts+/G',
+    'Ovr',
+    'Rnk'
+  ],
   passing_production: ['ATT', 'YDS', 'TD', 'INT', 'DB', 'CAY', 'YAC'],
   passing_efficiency: ['RTG', 'Y/A', 'CMP%', 'xCMP%', 'CPOE', 'EPA/DB'],
   passing_usage: [
@@ -76,12 +88,17 @@ const categories = {
 }
 
 const position_config = {
-  DST: [{ key: 'defense', head: null }],
+  DST: [
+    { key: 'fantasy_stats', head: 'Fantasy' },
+    { key: 'defense', head: null }
+  ],
   K: [
+    { key: 'fantasy_stats', head: 'Fantasy' },
     { key: 'kicker', head: null },
     { key: 'snaps', types: ['DEF', 'ST'] }
   ],
   QB: [
+    { key: 'fantasy_stats', head: 'Fantasy' },
     { key: 'passing_production', head: 'Passing Production' },
     { key: 'passing_efficiency', head: 'Passing Efficiency' },
     { key: 'passing_usage', head: 'Passing Usage' },
@@ -92,6 +109,7 @@ const position_config = {
     { key: 'snaps', types: ['OFF', 'PASS', 'RUSH'] }
   ],
   RB: [
+    { key: 'fantasy_stats', head: 'Fantasy' },
     { key: 'rushing_production', head: 'Rushing Production' },
     { key: 'rushing_opportunities', head: 'Rushing Opportunities' },
     { key: 'rushing_efficiency', head: 'Rushing Efficiency' },
@@ -105,6 +123,7 @@ const position_config = {
     { key: 'snaps', types: ['OFF', 'PASS', 'RUSH', 'ST'] }
   ],
   WR: [
+    { key: 'fantasy_stats', head: 'Fantasy' },
     { key: 'receiving_production', head: 'Receiving Production' },
     { key: 'receiving_opportunities', head: 'Receiving Opportunities' },
     { key: 'receiving_efficiency', head: 'Receiving Efficiency' },
@@ -114,6 +133,7 @@ const position_config = {
     { key: 'snaps', types: ['OFF', 'REC', 'RUSH', 'ST'] }
   ],
   TE: [
+    { key: 'fantasy_stats', head: 'Fantasy' },
     { key: 'receiving_production', head: 'Receiving Production' },
     { key: 'receiving_opportunities', head: 'Receiving Opportunities' },
     { key: 'receiving_efficiency', head: 'Receiving Efficiency' },

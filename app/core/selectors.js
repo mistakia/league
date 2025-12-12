@@ -95,6 +95,8 @@ export const get_matchups_state = (state) => state.get('matchups')
 export const get_gamelogs_state = (state) => state.get('gamelogs')
 export const get_player_gamelogs = (state) =>
   state.get('gamelogs').get('players').toList()
+export const get_player_seasonlogs = (state) =>
+  state.getIn(['players', 'player_seasonlogs'], new Map())
 export const get_gamelog_by_player_id = (
   state,
   { pid, week, year = current_season.year }
@@ -1101,6 +1103,12 @@ export function getGamesByYearForSelectedPlayer(state) {
   }
 
   return { years, overall }
+}
+
+export function get_player_seasonlogs_for_selected_player(state) {
+  const pid = state.getIn(['players', 'selected'])
+  if (!pid) return new List()
+  return state.getIn(['players', 'player_seasonlogs', pid], new List())
 }
 
 export const isPlayerOnReleaseWaivers = createSelector(

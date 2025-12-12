@@ -53,6 +53,7 @@ const initialState = new Map({
   week: new List([current_season.fantasy_season_week]),
   opponent_time_period: '',
   items: new Map(),
+  player_seasonlogs: new Map(),
   order: 'desc',
   selected_players_page_view: default_players_view_key,
   players_page_views: new Map(DefaultPlayersViews),
@@ -623,6 +624,12 @@ export function players_reducer(state = initialState, { payload, type }) {
           new List(payload.data)
         )
       })
+
+    case player_actions.GET_PLAYER_SEASONLOGS_FULFILLED:
+      return state.setIn(
+        ['player_seasonlogs', payload.opts.pid],
+        new List(payload.data)
+      )
 
     default:
       return state

@@ -72,6 +72,7 @@ export {
   api_get_player_projections,
   api_get_league_team_stats,
   api_get_player_gamelogs,
+  api_get_player_seasonlogs,
   api_get_player_practices,
   api_get_draft_pick_value,
   api_get_percentiles,
